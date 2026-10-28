@@ -13,18 +13,18 @@ export var SelectionEntry =  __class__ ('SelectionEntry', [PropertyGroup], {
 	__module__: __name__,
 	__slots__: tuple ([])
 });
-SelectionEntry.__annotations__ = dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Bone Name', override: new set (['LIBRARY_OVERRIDABLE'])}))});
+SelectionEntry.__annotations__ = dict ({'name': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Bone Name', override: new set (['LIBRARY_OVERRIDABLE'])}))});
 export var SelectionSet =  __class__ ('SelectionSet', [PropertyGroup], {
 	__module__: __name__,
 	__slots__: tuple ([])
 });
-SelectionSet.__annotations__ = dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Set Name', override: new set (['LIBRARY_OVERRIDABLE'])})), 'bone_ids': CollectionProperty (__kwargtrans__ ({py_metatype: SelectionEntry, override: new set (['LIBRARY_OVERRIDABLE', 'USE_INSERTION'])})), 'is_selected': BoolProperty (__kwargtrans__ ({py_name: 'Include this selection set when copying to the clipboard. If none are specified, all sets will be copied.', override: new set (['LIBRARY_OVERRIDABLE'])}))});
+SelectionSet.__annotations__ = dict ({'name': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Set Name', override: new set (['LIBRARY_OVERRIDABLE'])})), 'bone_ids': __call__ (CollectionProperty, null, __kwargtrans__ ({py_metatype: SelectionEntry, override: new set (['LIBRARY_OVERRIDABLE', 'USE_INSERTION'])})), 'is_selected': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Include this selection set when copying to the clipboard. If none are specified, all sets will be copied.', override: new set (['LIBRARY_OVERRIDABLE'])}))});
 export var _PoseModeOnlyMixin =  __class__ ('_PoseModeOnlyMixin', [object], {
 	__module__: __name__,
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -36,7 +36,7 @@ export var _PoseModeOnlyMixin =  __class__ ('_PoseModeOnlyMixin', [object], {
 		}
 		else {
 		}
-		return context.object && context.object.py_metatype == 'ARMATURE' && context.mode == 'POSE';
+		return context.object && __eq__ (context.object.py_metatype, 'ARMATURE') && __eq__ (context.mode, 'POSE');
 	});}
 });
 export var _NeedSelSetMixin =  __class__ ('_NeedSelSetMixin', [_PoseModeOnlyMixin], {
@@ -44,7 +44,7 @@ export var _NeedSelSetMixin =  __class__ ('_NeedSelSetMixin', [_PoseModeOnlyMixi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -56,11 +56,11 @@ export var _NeedSelSetMixin =  __class__ ('_NeedSelSetMixin', [_PoseModeOnlyMixi
 		}
 		else {
 		}
-		if (!(__super__ (_NeedSelSetMixin, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (__super__, null, _NeedSelSetMixin, 'poll'), null, self, context))) {
 			return false;
 		}
 		var arm = context.object;
-		return (0 <= arm.active_selection_set && arm.active_selection_set < len (arm.selection_sets));
+		return (__le__ (0, arm.active_selection_set) && __lt__ (arm.active_selection_set, __call__ (len, null, arm.selection_sets)));
 	});}
 });
 export var POSE_OT_selection_set_delete_all =  __class__ ('POSE_OT_selection_set_delete_all', [_PoseModeOnlyMixin, Operator], {
@@ -72,7 +72,7 @@ export var POSE_OT_selection_set_delete_all =  __class__ ('POSE_OT_selection_set
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -85,7 +85,10 @@ export var POSE_OT_selection_set_delete_all =  __class__ ('POSE_OT_selection_set
 		else {
 		}
 		var arm = context.object;
-		arm.selection_sets.py_clear ();
+		(function () {
+			var __accu0__ = arm.selection_sets;
+			return __call__ (__accu0__.py_clear, __accu0__);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -98,7 +101,7 @@ export var POSE_OT_selection_set_remove_bones =  __class__ ('POSE_OT_selection_s
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -111,11 +114,23 @@ export var POSE_OT_selection_set_remove_bones =  __class__ ('POSE_OT_selection_s
 		else {
 		}
 		var arm = context.object;
-		for (var bone of context.selected_pose_bones) {
-			for (var selset of arm.selection_sets) {
+		var __iterable0__ = context.selected_pose_bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = arm.selection_sets;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var selset = __getitem__ (__iterable1__, __index1__);
 				if (__in__ (bone.py_name, selset.bone_ids)) {
-					var idx = selset.bone_ids.find (bone.py_name);
-					selset.bone_ids.remove (idx);
+					var idx = (function () {
+						var __accu0__ = selset.bone_ids;
+						return __call__ (__accu0__.find, __accu0__, bone.py_name);
+					}) ();
+					(function () {
+						var __accu0__ = selset.bone_ids;
+						return __call__ (__accu0__.remove, __accu0__, idx);
+					}) ();
 				}
 			}
 		}
@@ -131,7 +146,7 @@ export var POSE_OT_selection_set_move =  __class__ ('POSE_OT_selection_set_move'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,16 +158,16 @@ export var POSE_OT_selection_set_move =  __class__ ('POSE_OT_selection_set_move'
 		}
 		else {
 		}
-		if (!(__super__ (POSE_OT_selection_set_move, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (__super__, null, POSE_OT_selection_set_move, 'poll'), null, self, context))) {
 			return false;
 		}
 		var arm = context.object;
-		return len (arm.selection_sets) > 1;
+		return __gt__ (__call__ (len, null, arm.selection_sets), 1);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -166,16 +181,19 @@ export var POSE_OT_selection_set_move =  __class__ ('POSE_OT_selection_set_move'
 		}
 		var arm = context.object;
 		var active_idx = arm.active_selection_set;
-		var new_idx = active_idx + (self.direction == 'UP' ? -(1) : 1);
-		if (new_idx < 0 || new_idx >= len (arm.selection_sets)) {
+		var new_idx = __add__ (active_idx, (__eq__ (self.direction, 'UP') ? __neg__ (1) : 1));
+		if (__lt__ (new_idx, 0) || __ge__ (new_idx, __call__ (len, null, arm.selection_sets))) {
 			return new set (['FINISHED']);
 		}
-		arm.selection_sets.move (active_idx, new_idx);
+		(function () {
+			var __accu0__ = arm.selection_sets;
+			return __call__ (__accu0__.move, __accu0__, active_idx, new_idx);
+		}) ();
 		arm.active_selection_set = new_idx;
 		return new set (['FINISHED']);
 	});}
 });
-POSE_OT_selection_set_move.__annotations__ = dict ({'direction': EnumProperty (__kwargtrans__ ({py_name: 'Move Direction', description: 'Direction to move the active Selection Set: UP (default) or DOWN', py_items: [tuple (['UP', 'Up', '', -(1)]), tuple (['DOWN', 'Down', '', 1])], py_default: 'UP', options: new set (['HIDDEN'])}))});
+POSE_OT_selection_set_move.__annotations__ = dict ({'direction': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Move Direction', description: 'Direction to move the active Selection Set: UP (default) or DOWN', py_items: [tuple (['UP', 'Up', '', __neg__ (1)]), tuple (['DOWN', 'Down', '', 1])], py_default: 'UP', options: new set (['HIDDEN'])}))});
 export var POSE_OT_selection_set_add =  __class__ ('POSE_OT_selection_set_add', [_PoseModeOnlyMixin, Operator], {
 	__module__: __name__,
 	bl_idname: 'pose.selection_set_add',
@@ -185,7 +203,7 @@ export var POSE_OT_selection_set_add =  __class__ ('POSE_OT_selection_set_add', 
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -199,9 +217,15 @@ export var POSE_OT_selection_set_add =  __class__ ('POSE_OT_selection_set_add', 
 		}
 		var arm = context.object;
 		var sel_sets = arm.selection_sets;
-		var new_sel_set = sel_sets.add ();
-		new_sel_set.py_name = _uniqify ('SelectionSet', sel_sets.py_keys ());
-		arm.active_selection_set = len (sel_sets) - 1;
+		var new_sel_set = (function () {
+			var __accu0__ = sel_sets;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
+		new_sel_set.py_name = __call__ (_uniqify, null, 'SelectionSet', (function () {
+			var __accu0__ = sel_sets;
+			return __call__ (__accu0__.py_keys, __accu0__);
+		}) ());
+		arm.active_selection_set = __sub__ (__call__ (len, null, sel_sets), 1);
 		return new set (['FINISHED']);
 	});}
 });
@@ -214,7 +238,7 @@ export var POSE_OT_selection_set_remove =  __class__ ('POSE_OT_selection_set_rem
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -227,10 +251,13 @@ export var POSE_OT_selection_set_remove =  __class__ ('POSE_OT_selection_set_rem
 		else {
 		}
 		var arm = context.object;
-		arm.selection_sets.remove (arm.active_selection_set);
-		var numsets = len (arm.selection_sets);
-		if (arm.active_selection_set > numsets - 1 && numsets > 0) {
-			arm.active_selection_set = len (arm.selection_sets) - 1;
+		(function () {
+			var __accu0__ = arm.selection_sets;
+			return __call__ (__accu0__.remove, __accu0__, arm.active_selection_set);
+		}) ();
+		var numsets = __call__ (len, null, arm.selection_sets);
+		if (__gt__ (arm.active_selection_set, __sub__ (numsets, 1)) && __gt__ (numsets, 0)) {
+			arm.active_selection_set = __sub__ (__call__ (len, null, arm.selection_sets), 1);
 		}
 		return new set (['FINISHED']);
 	});}
@@ -244,7 +271,7 @@ export var POSE_OT_selection_set_assign =  __class__ ('POSE_OT_selection_set_ass
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -258,18 +285,24 @@ export var POSE_OT_selection_set_assign =  __class__ ('POSE_OT_selection_set_ass
 		else {
 		}
 		var arm = context.object;
-		if (!(arm.active_selection_set < len (arm.selection_sets))) {
-			bpy.ops.wm.call_menu ('INVOKE_DEFAULT', __kwargtrans__ ({py_name: 'POSE_MT_selection_set_create'}));
+		if (!(__lt__ (arm.active_selection_set, __call__ (len, null, arm.selection_sets)))) {
+			(function () {
+				var __accu0__ = bpy.ops.wm;
+				return __call__ (__accu0__.call_menu, __accu0__, 'INVOKE_DEFAULT', __kwargtrans__ ({py_name: 'POSE_MT_selection_set_create'}));
+			}) ();
 		}
 		else {
-			bpy.ops.pose.selection_set_assign ('EXEC_DEFAULT');
+			(function () {
+				var __accu0__ = bpy.ops.pose;
+				return __call__ (__accu0__.selection_set_assign, __accu0__, 'EXEC_DEFAULT');
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -282,10 +315,16 @@ export var POSE_OT_selection_set_assign =  __class__ ('POSE_OT_selection_set_ass
 		else {
 		}
 		var arm = context.object;
-		var act_sel_set = arm.selection_sets [arm.active_selection_set];
-		for (var bone of context.selected_pose_bones) {
+		var act_sel_set = __getitem__ (arm.selection_sets, arm.active_selection_set);
+		var __iterable0__ = context.selected_pose_bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
 			if (!__in__ (bone.py_name, act_sel_set.bone_ids)) {
-				var bone_id = act_sel_set.bone_ids.add ();
+				var bone_id = (function () {
+					var __accu0__ = act_sel_set.bone_ids;
+					return __call__ (__accu0__.add, __accu0__);
+				}) ();
 				bone_id.py_name = bone.py_name;
 			}
 		}
@@ -301,7 +340,7 @@ export var POSE_OT_selection_set_unassign =  __class__ ('POSE_OT_selection_set_u
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -314,11 +353,20 @@ export var POSE_OT_selection_set_unassign =  __class__ ('POSE_OT_selection_set_u
 		else {
 		}
 		var arm = context.object;
-		var act_sel_set = arm.selection_sets [arm.active_selection_set];
-		for (var bone of context.selected_pose_bones) {
+		var act_sel_set = __getitem__ (arm.selection_sets, arm.active_selection_set);
+		var __iterable0__ = context.selected_pose_bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (bone.py_name, act_sel_set.bone_ids)) {
-				var idx = act_sel_set.bone_ids.find (bone.py_name);
-				act_sel_set.bone_ids.remove (idx);
+				var idx = (function () {
+					var __accu0__ = act_sel_set.bone_ids;
+					return __call__ (__accu0__.find, __accu0__, bone.py_name);
+				}) ();
+				(function () {
+					var __accu0__ = act_sel_set.bone_ids;
+					return __call__ (__accu0__.remove, __accu0__, idx);
+				}) ();
 			}
 		}
 		return new set (['FINISHED']);
@@ -333,7 +381,7 @@ export var POSE_OT_selection_set_select =  __class__ ('POSE_OT_selection_set_sel
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -346,14 +394,17 @@ export var POSE_OT_selection_set_select =  __class__ ('POSE_OT_selection_set_sel
 		else {
 		}
 		var arm = context.object;
-		if (self.selection_set_index == -(1)) {
+		if (__eq__ (self.selection_set_index, __neg__ (1))) {
 			var idx = arm.active_selection_set;
 		}
 		else {
 			var idx = self.selection_set_index;
 		}
-		var sel_set = arm.selection_sets [idx];
-		for (var bone of context.visible_pose_bones) {
+		var sel_set = __getitem__ (arm.selection_sets, idx);
+		var __iterable0__ = context.visible_pose_bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (bone.py_name, sel_set.bone_ids)) {
 				bone.select = true;
 			}
@@ -361,7 +412,7 @@ export var POSE_OT_selection_set_select =  __class__ ('POSE_OT_selection_set_sel
 		return new set (['FINISHED']);
 	});}
 });
-POSE_OT_selection_set_select.__annotations__ = dict ({'selection_set_index': IntProperty (__kwargtrans__ ({py_name: 'Selection Set Index', py_default: -(1), description: 'Which Selection Set to select; -1 uses the active Selection Set', options: new set (['HIDDEN'])}))});
+POSE_OT_selection_set_select.__annotations__ = dict ({'selection_set_index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Selection Set Index', py_default: __neg__ (1), description: 'Which Selection Set to select; -1 uses the active Selection Set', options: new set (['HIDDEN'])}))});
 export var POSE_OT_selection_set_deselect =  __class__ ('POSE_OT_selection_set_deselect', [_NeedSelSetMixin, Operator], {
 	__module__: __name__,
 	bl_idname: 'pose.selection_set_deselect',
@@ -371,7 +422,7 @@ export var POSE_OT_selection_set_deselect =  __class__ ('POSE_OT_selection_set_d
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -384,8 +435,11 @@ export var POSE_OT_selection_set_deselect =  __class__ ('POSE_OT_selection_set_d
 		else {
 		}
 		var arm = context.object;
-		var act_sel_set = arm.selection_sets [arm.active_selection_set];
-		for (var bone of context.selected_pose_bones) {
+		var act_sel_set = __getitem__ (arm.selection_sets, arm.active_selection_set);
+		var __iterable0__ = context.selected_pose_bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (bone.py_name, act_sel_set.bone_ids)) {
 				bone.select = false;
 			}
@@ -402,7 +456,7 @@ export var POSE_OT_selection_set_add_and_assign =  __class__ ('POSE_OT_selection
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -414,8 +468,14 @@ export var POSE_OT_selection_set_add_and_assign =  __class__ ('POSE_OT_selection
 		}
 		else {
 		}
-		bpy.ops.pose.selection_set_add ('EXEC_DEFAULT');
-		bpy.ops.pose.selection_set_assign ('EXEC_DEFAULT');
+		(function () {
+			var __accu0__ = bpy.ops.pose;
+			return __call__ (__accu0__.selection_set_add, __accu0__, 'EXEC_DEFAULT');
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.pose;
+			return __call__ (__accu0__.selection_set_assign, __accu0__, 'EXEC_DEFAULT');
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -428,7 +488,7 @@ export var POSE_OT_selection_set_copy =  __class__ ('POSE_OT_selection_set_copy'
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -440,8 +500,11 @@ export var POSE_OT_selection_set_copy =  __class__ ('POSE_OT_selection_set_copy'
 		}
 		else {
 		}
-		context.window_manager.clipboard = _to_json (context);
-		self.report (new set (['INFO']), 'Copied Selection Set(s) to clipboard');
+		context.window_manager.clipboard = __call__ (_to_json, null, context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'Copied Selection Set(s) to clipboard');
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -454,7 +517,7 @@ export var POSE_OT_selection_set_paste =  __class__ ('POSE_OT_selection_set_past
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -466,18 +529,21 @@ export var POSE_OT_selection_set_paste =  __class__ ('POSE_OT_selection_set_past
 		}
 		else {
 		}
-		var json = _module ('json');
+		var json = __call__ (_module, null, 'json');
 		try {
-			_from_json (context, context.window_manager.clipboard);
+			__call__ (_from_json, null, context, context.window_manager.clipboard);
 			try {
-				context.object.active_selection_set = len (context.object.selection_sets) - 1;
+				context.object.active_selection_set = __sub__ (__call__ (len, null, context.object.selection_sets), 1);
 			}
 			catch (__except0__) {
 			}
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, tuple ([json.JSONDecodeError, KeyError]))) {
-				self.report (new set (['ERROR']), 'The clipboard does not contain a Selection Set');
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'The clipboard does not contain a Selection Set');
+				}) ();
 			}
 			else {
 				throw __except0__;
@@ -489,7 +555,7 @@ export var POSE_OT_selection_set_paste =  __class__ ('POSE_OT_selection_set_past
 export var _uniqify = function (py_name, other_names) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -504,38 +570,62 @@ export var _uniqify = function (py_name, other_names) {
 	if (!__in__ (py_name, other_names)) {
 		return py_name;
 	}
-	var offset = len (py_name) + 1;
+	var offset = __add__ (__call__ (len, null, py_name), 1);
 	var others = (function () {
 		var __accu0__ = [];
-		for (var n of other_names) {
-			if (n.startswith (py_name + '.')) {
-				__accu0__.append (n.__getslice__ (offset, null, 1));
+		var __iterable0__ = other_names;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var n = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu1__ = n;
+				return __call__ (__accu1__.startswith, __accu1__, __add__ (py_name, '.'));
+			}) ()) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getslice__ (n, offset, null, 1));
+				}) ();
 			}
 		}
 		return __accu0__;
 	}) ();
-	var numbers = sorted ((function () {
+	var numbers = __call__ (sorted, null, (function () {
 		var __accu0__ = [];
-		for (var suffix of others) {
-			if (suffix.isdigit ()) {
-				__accu0__.append (int (suffix));
+		var __iterable0__ = others;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var suffix = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu1__ = suffix;
+				return __call__ (__accu1__.isdigit, __accu1__);
+			}) ()) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (int, null, suffix));
+				}) ();
 			}
 		}
 		return __accu0__;
 	}) ());
 	var min_index = 1;
-	for (var num of numbers) {
-		if (min_index < num) {
+	var __iterable0__ = numbers;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var num = __getitem__ (__iterable0__, __index0__);
+		if (__lt__ (min_index, num)) {
 			break;
 		}
-		var min_index = num + 1;
+		var min_index = __add__ (num, 1);
 	}
-	return '{:s}.{:03d}'.format (py_name, min_index);
+	return (function () {
+		var __accu0__ = '{:s}.{:03d}';
+		return __call__ (__accu0__.format, __accu0__, py_name, min_index);
+	}) ();
 };
 export var _to_json = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -546,28 +636,42 @@ export var _to_json = function (context) {
 	}
 	else {
 	}
-	var json = _module ('json');
+	var json = __call__ (_module, null, 'json');
 	var arm = context.object;
 	var active_idx = arm.active_selection_set;
 	var json_obj = dict ({});
-	for (var [idx, sel_set] of py_enumerate (context.object.selection_sets)) {
-		if (idx == active_idx || sel_set.is_selected) {
+	var __iterable0__ = __call__ (py_enumerate, null, context.object.selection_sets);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var idx = __left0__ [0];
+		var sel_set = __left0__ [1];
+		if (__eq__ (idx, active_idx) || sel_set.is_selected) {
 			var bones = (function () {
 				var __accu0__ = [];
-				for (var bone_id of sel_set.bone_ids) {
-					__accu0__.append (bone_id.py_name);
+				var __iterable1__ = sel_set.bone_ids;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var bone_id = __getitem__ (__iterable1__, __index1__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, bone_id.py_name);
+					}) ();
 				}
 				return __accu0__;
 			}) ();
-			json_obj [sel_set.py_name] = bones;
+			__setitem__ (json_obj, sel_set.py_name, bones);
 		}
 	}
-	return json.dumps (json_obj);
+	return (function () {
+		var __accu0__ = json;
+		return __call__ (__accu0__.dumps, __accu0__, json_obj);
+	}) ();
 };
 export var _from_json = function (context, as_json) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -579,14 +683,37 @@ export var _from_json = function (context, as_json) {
 	}
 	else {
 	}
-	var json = _module ('json');
-	var json_obj = json.loads (as_json);
+	var json = __call__ (_module, null, 'json');
+	var json_obj = (function () {
+		var __accu0__ = json;
+		return __call__ (__accu0__.loads, __accu0__, as_json);
+	}) ();
 	var arm_sel_sets = context.object.selection_sets;
-	for (var [py_name, bones] of json_obj.py_items ()) {
-		var new_sel_set = arm_sel_sets.add ();
-		new_sel_set.py_name = _uniqify (py_name, arm_sel_sets.py_keys ());
-		for (var bone_name of bones) {
-			var bone_id = new_sel_set.bone_ids.add ();
+	var __iterable0__ = (function () {
+		var __accu0__ = json_obj;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var py_name = __left0__ [0];
+		var bones = __left0__ [1];
+		var new_sel_set = (function () {
+			var __accu0__ = arm_sel_sets;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
+		new_sel_set.py_name = __call__ (_uniqify, null, py_name, (function () {
+			var __accu0__ = arm_sel_sets;
+			return __call__ (__accu0__.py_keys, __accu0__);
+		}) ());
+		var __iterable1__ = bones;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var bone_name = __getitem__ (__iterable1__, __index1__);
+			var bone_id = (function () {
+				var __accu0__ = new_sel_set.bone_ids;
+				return __call__ (__accu0__.add, __accu0__);
+			}) ();
 			bone_id.py_name = bone_name;
 		}
 	}
@@ -595,7 +722,7 @@ export var classes = tuple ([SelectionEntry, SelectionSet, POSE_OT_selection_set
 export var register = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -603,13 +730,13 @@ export var register = function () {
 	}
 	else {
 	}
-	bpy.types.Object.selection_sets = CollectionProperty (__kwargtrans__ ({py_metatype: SelectionSet, py_name: 'Selection Sets', description: 'List of groups of bones for easy selection', override: new set (['LIBRARY_OVERRIDABLE', 'USE_INSERTION'])}));
-	bpy.types.Object.active_selection_set = IntProperty (__kwargtrans__ ({py_name: 'Active Selection Set', description: 'Index of the currently active selection set', py_default: 0, override: new set (['LIBRARY_OVERRIDABLE'])}));
+	bpy.types.Object.selection_sets = __call__ (CollectionProperty, null, __kwargtrans__ ({py_metatype: SelectionSet, py_name: 'Selection Sets', description: 'List of groups of bones for easy selection', override: new set (['LIBRARY_OVERRIDABLE', 'USE_INSERTION'])}));
+	bpy.types.Object.active_selection_set = __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Active Selection Set', description: 'Index of the currently active selection set', py_default: 0, override: new set (['LIBRARY_OVERRIDABLE'])}));
 };
 export var unregister = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -623,3 +750,31 @@ export var unregister = function () {
 
 //# sourceMappingURL=bl_operators.bone_selection_sets.map
 export {BoolProperty, CollectionProperty, EnumProperty, IntProperty, Operator, PropertyGroup, StringProperty, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'SelectionEntry': SelectionEntry = value; break;
+		case 'SelectionSet': SelectionSet = value; break;
+		case '_PoseModeOnlyMixin': _PoseModeOnlyMixin = value; break;
+		case '_NeedSelSetMixin': _NeedSelSetMixin = value; break;
+		case 'POSE_OT_selection_set_delete_all': POSE_OT_selection_set_delete_all = value; break;
+		case 'POSE_OT_selection_set_remove_bones': POSE_OT_selection_set_remove_bones = value; break;
+		case 'POSE_OT_selection_set_move': POSE_OT_selection_set_move = value; break;
+		case 'POSE_OT_selection_set_add': POSE_OT_selection_set_add = value; break;
+		case 'POSE_OT_selection_set_remove': POSE_OT_selection_set_remove = value; break;
+		case 'POSE_OT_selection_set_assign': POSE_OT_selection_set_assign = value; break;
+		case 'POSE_OT_selection_set_unassign': POSE_OT_selection_set_unassign = value; break;
+		case 'POSE_OT_selection_set_select': POSE_OT_selection_set_select = value; break;
+		case 'POSE_OT_selection_set_deselect': POSE_OT_selection_set_deselect = value; break;
+		case 'POSE_OT_selection_set_add_and_assign': POSE_OT_selection_set_add_and_assign = value; break;
+		case 'POSE_OT_selection_set_copy': POSE_OT_selection_set_copy = value; break;
+		case 'POSE_OT_selection_set_paste': POSE_OT_selection_set_paste = value; break;
+		case '_uniqify': _uniqify = value; break;
+		case '_to_json': _to_json = value; break;
+		case '_from_json': _from_json = value; break;
+		case 'classes': classes = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

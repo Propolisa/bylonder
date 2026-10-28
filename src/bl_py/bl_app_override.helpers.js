@@ -19,7 +19,7 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 	get __init__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -37,7 +37,7 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 	get _setup_classes () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -48,16 +48,22 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		}
 		else {
 		}
-		self._class_store = self.class_ignore ();
-		var unregister_class = _member ('bpy.utils', 'unregister_class');
-		for (var cls of self._class_store) {
-			unregister_class (cls);
+		self._class_store = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.class_ignore, __accu0__);
+		}) ();
+		var unregister_class = __call__ (_member, null, 'bpy.utils', 'unregister_class');
+		var __iterable0__ = self._class_store;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var cls = __getitem__ (__iterable0__, __index0__);
+			__call__ (unregister_class, null, cls);
 		}
 	});},
 	get _teardown_classes () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -68,16 +74,19 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		}
 		else {
 		}
-		var register_class = _member ('bpy.utils', 'register_class');
-		for (var cls of self._class_store) {
-			register_class (cls);
+		var register_class = __call__ (_member, null, 'bpy.utils', 'register_class');
+		var __iterable0__ = self._class_store;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var cls = __getitem__ (__iterable0__, __index0__);
+			__call__ (register_class, null, cls);
 		}
 		self._class_store = null;
 	});},
 	get _setup_ui_ignore () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -88,13 +97,19 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		}
 		else {
 		}
-		var bl_app_override = _module ('bl_app_override');
-		self._ui_ignore_store = bl_app_override.ui_draw_filter_register (__kwargtrans__ ({ui_ignore_classes: (self.ui_ignore_classes === null ? null : self.ui_ignore_classes ()), ui_ignore_operator: self.ui_ignore_operator, ui_ignore_property: self.ui_ignore_property, ui_ignore_menu: self.ui_ignore_menu, ui_ignore_label: self.ui_ignore_label}));
+		var bl_app_override = __call__ (_module, null, 'bl_app_override');
+		self._ui_ignore_store = (function () {
+			var __accu0__ = bl_app_override;
+			return __call__ (__accu0__.ui_draw_filter_register, __accu0__, __kwargtrans__ ({ui_ignore_classes: (self.ui_ignore_classes === null ? null : (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__.ui_ignore_classes, __accu1__);
+			}) ()), ui_ignore_operator: self.ui_ignore_operator, ui_ignore_property: self.ui_ignore_property, ui_ignore_menu: self.ui_ignore_menu, ui_ignore_label: self.ui_ignore_label}));
+		}) ();
 	});},
 	get _teardown_ui_ignore () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -105,14 +120,17 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		}
 		else {
 		}
-		var bl_app_override = _module ('bl_app_override');
-		bl_app_override.ui_draw_filter_unregister (self._ui_ignore_store);
+		var bl_app_override = __call__ (_module, null, 'bl_app_override');
+		(function () {
+			var __accu0__ = bl_app_override;
+			return __call__ (__accu0__.ui_draw_filter_unregister, __accu0__, self._ui_ignore_store);
+		}) ();
 		self._ui_ignore_store = null;
 	});},
 	get _setup_addons () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -123,21 +141,42 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		}
 		else {
 		}
-		var sys = _module ('sys');
+		var sys = __call__ (_module, null, 'sys');
 		var sys_path = [];
 		if (self.addon_paths !== null) {
-			for (var path of self.addon_paths ()) {
+			var __iterable0__ = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.addon_paths, __accu0__);
+			}) ();
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var path = __getitem__ (__iterable0__, __index0__);
 				if (!__in__ (path, sys.path)) {
-					sys.path.append (path);
+					(function () {
+						var __accu0__ = sys.path;
+						return __call__ (__accu0__.append, __accu0__, path);
+					}) ();
 				}
 			}
 		}
-		var addon_utils = _module ('addon_utils');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var addons = [];
 		if (self.addons !== null) {
-			addons.extend (self.addons ());
-			for (var addon of addons) {
-				addon_utils.enable (addon);
+			(function () {
+				var __accu0__ = addons;
+				return __call__ (__accu0__.extend, __accu0__, (function () {
+					var __accu1__ = self;
+					return __call__ (__accu1__.addons, __accu1__);
+				}) ());
+			}) ();
+			var __iterable0__ = addons;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var addon = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = addon_utils;
+					return __call__ (__accu0__.enable, __accu0__, addon);
+				}) ();
 			}
 		}
 		self._addon_store = dict ({'sys_path': sys_path, 'addons': addons});
@@ -145,7 +184,7 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 	get _teardown_addons () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -156,11 +195,17 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		}
 		else {
 		}
-		var sys = _module ('sys');
-		var sys_path = self._addon_store ['sys_path'];
-		for (var path of sys_path) {
+		var sys = __call__ (_module, null, 'sys');
+		var sys_path = __getitem__ (self._addon_store, 'sys_path');
+		var __iterable0__ = sys_path;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
 			try {
-				sys.path.remove (path);
+				(function () {
+					var __accu0__ = sys.path;
+					return __call__ (__accu0__.remove, __accu0__, path);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -171,18 +216,27 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 				}
 			}
 		}
-		var addons = self._addon_store ['addons'];
-		var addon_utils = _module ('addon_utils');
-		for (var addon of addons) {
-			addon_utils.disable (addon);
+		var addons = __getitem__ (self._addon_store, 'addons');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
+		var __iterable0__ = addons;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var addon = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.disable, __accu0__, addon);
+			}) ();
 		}
-		self._addon_store.py_clear ();
+		(function () {
+			var __accu0__ = self._addon_store;
+			return __call__ (__accu0__.py_clear, __accu0__);
+		}) ();
 		self._addon_store = null;
 	});},
 	get setup () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -194,19 +248,28 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		else {
 		}
 		if (self.class_ignore !== null) {
-			self._setup_classes ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._setup_classes, __accu0__);
+			}) ();
 		}
-		if (any (tuple ([self.addon_paths, self.addons]))) {
-			self._setup_addons ();
+		if (__call__ (any, null, tuple ([self.addon_paths, self.addons]))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._setup_addons, __accu0__);
+			}) ();
 		}
-		if (any (tuple ([self.ui_ignore_operator, self.ui_ignore_property, self.ui_ignore_menu, self.ui_ignore_label]))) {
-			self._setup_ui_ignore ();
+		if (__call__ (any, null, tuple ([self.ui_ignore_operator, self.ui_ignore_property, self.ui_ignore_menu, self.ui_ignore_label]))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._setup_ui_ignore, __accu0__);
+			}) ();
 		}
 	});},
 	get teardown () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -218,16 +281,33 @@ export var AppOverrideState =  __class__ ('AppOverrideState', [object], {
 		else {
 		}
 		if (self._class_store !== null) {
-			self._teardown_classes ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._teardown_classes, __accu0__);
+			}) ();
 		}
 		if (self._addon_store !== null) {
-			self._teardown_addons ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._teardown_addons, __accu0__);
+			}) ();
 		}
 		if (self._ui_ignore_store !== null) {
-			self._teardown_ui_ignore ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._teardown_ui_ignore, __accu0__);
+			}) ();
 		}
 	});}
 });
 
 //# sourceMappingURL=bl_app_override.helpers.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'AppOverrideState': AppOverrideState = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -17,7 +17,7 @@ export var compat_str = function (text, line_length) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -31,17 +31,32 @@ export var compat_str = function (text, line_length) {
 	}
 	if (line_length) {
 		var text_ls = [];
-		while (len (text) > line_length) {
-			text_ls.append (text.__getslice__ (null, line_length, 1));
-			var text = text.__getslice__ (line_length, null, 1);
+		while (__gt__ (__call__ (len, null, text), line_length)) {
+			(function () {
+				var __accu0__ = text_ls;
+				return __call__ (__accu0__.append, __accu0__, __getslice__ (text, null, line_length, 1));
+			}) ();
+			var text = __getslice__ (text, line_length, null, 1);
 		}
 		if (text) {
-			text_ls.append (text);
+			(function () {
+				var __accu0__ = text_ls;
+				return __call__ (__accu0__.append, __accu0__, text);
+			}) ();
 		}
-		var text = '\n  '.join (text_ls);
+		var text = (function () {
+			var __accu0__ = '\n  ';
+			return __call__ (__accu0__.join, __accu0__, text_ls);
+		}) ();
 	}
-	var text = text.py_replace ('\n', '\\n');
-	var text = text.py_replace ('"', '\\"');
+	var text = (function () {
+		var __accu0__ = text;
+		return __call__ (__accu0__.py_replace, __accu0__, '\n', '\\n');
+	}) ();
+	var text = (function () {
+		var __accu0__ = text;
+		return __call__ (__accu0__.py_replace, __accu0__, '"', '\\"');
+	}) ();
 	return text;
 };
 export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, DRIVERS, XTRA_INFO) {
@@ -59,7 +74,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -78,60 +93,131 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 	var __left0__ = true;
 	var CONSTRAINTS = __left0__;
 	var DRIVERS = __left0__;
-	var fileobject = open (filepath, 'w');
+	var fileobject = __call__ (open, null, filepath, 'w');
 	var fw = fileobject.write;
-	fw (header);
-	fw ('label = "{:s}::{:s}" ;'.format (bpy.data.filepath.py_split ('/') [-(1)].py_split ('\\') [-(1)], obj.py_name));
+	__call__ (fw, null, header);
+	__call__ (fw, null, (function () {
+		var __accu0__ = 'label = "{:s}::{:s}" ;';
+		return __call__ (__accu0__.format, __accu0__, __getitem__ ((function () {
+			var __accu1__ = __getitem__ ((function () {
+				var __accu2__ = bpy.data.filepath;
+				return __call__ (__accu2__.py_split, __accu2__, '/');
+			}) (), __neg__ (1));
+			return __call__ (__accu1__.py_split, __accu1__, '\\');
+		}) (), __neg__ (1)), obj.py_name);
+	}) ());
 	var arm = obj.data;
 	var bones = (function () {
 		var __accu0__ = [];
-		for (var bone of arm.bones) {
-			__accu0__.append (bone.py_name);
+		var __iterable0__ = arm.bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, bone.py_name);
+			}) ();
 		}
 		return __accu0__;
 	}) ();
-	bones.py_sort ();
-	print ('');
-	for (var bone of bones) {
-		var b = arm.bones [bone];
-		print ('>>', bone, ['*>', '->'] [b.use_connect], getattr (getattr (b, 'parent', ''), 'name', ''));
+	(function () {
+		var __accu0__ = bones;
+		return __call__ (__accu0__.py_sort, __accu0__);
+	}) ();
+	__call__ (print, null, '');
+	var __iterable0__ = bones;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var bone = __getitem__ (__iterable0__, __index0__);
+		var b = __getitem__ (arm.bones, bone);
+		__call__ (print, null, '>>', bone, __getitem__ (['*>', '->'], b.use_connect), __call__ (getattr, null, __call__ (getattr, null, b, 'parent', ''), 'name', ''));
 		var label = [bone];
-		var bone = arm.bones [bone];
-		for (var [key, value] of obj.pose.bones [bone.py_name].py_items ()) {
-			if (key.startswith ('_')) {
+		var bone = __getitem__ (arm.bones, bone);
+		var __iterable1__ = (function () {
+			var __accu0__ = __getitem__ (obj.pose.bones, bone.py_name);
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var key = __left0__ [0];
+			var value = __left0__ [1];
+			if ((function () {
+				var __accu0__ = key;
+				return __call__ (__accu0__.startswith, __accu0__, '_');
+			}) ()) {
 				continue;
 			}
 			var value_type = py_typeof (value);
 			if (value_type === float) {
-				var value = '{:.3f}'.format (value);
+				var value = (function () {
+					var __accu0__ = '{:.3f}';
+					return __call__ (__accu0__.format, __accu0__, value);
+				}) ();
 			}
 			else if (value_type === str) {
-				var value = compat_str (value);
+				var value = __call__ (compat_str, null, value);
 			}
-			label.append ('{:s} = {:s}'.format (key, value));
+			(function () {
+				var __accu0__ = label;
+				return __call__ (__accu0__.append, __accu0__, (function () {
+					var __accu1__ = '{:s} = {:s}';
+					return __call__ (__accu1__.format, __accu1__, key, value);
+				}) ());
+			}) ();
 		}
-		var opts = ['shape=box', 'regular=1', 'style=filled', 'fixedsize=false', 'label="{:s}"'.format (compat_str ('\n'.join (label)))];
-		if (bone.py_name.startswith ('ORG')) {
-			opts.append ('fillcolor=yellow');
+		var opts = ['shape=box', 'regular=1', 'style=filled', 'fixedsize=false', (function () {
+			var __accu0__ = 'label="{:s}"';
+			return __call__ (__accu0__.format, __accu0__, __call__ (compat_str, null, (function () {
+				var __accu1__ = '\n';
+				return __call__ (__accu1__.join, __accu1__, label);
+			}) ()));
+		}) ()];
+		if ((function () {
+			var __accu0__ = bone.py_name;
+			return __call__ (__accu0__.startswith, __accu0__, 'ORG');
+		}) ()) {
+			(function () {
+				var __accu0__ = opts;
+				return __call__ (__accu0__.append, __accu0__, 'fillcolor=yellow');
+			}) ();
 		}
 		else {
-			opts.append ('fillcolor=white');
+			(function () {
+				var __accu0__ = opts;
+				return __call__ (__accu0__.append, __accu0__, 'fillcolor=white');
+			}) ();
 		}
-		fw ('"{:s}" [{:s}];\n'.format (bone.py_name, ','.join (opts)));
+		__call__ (fw, null, (function () {
+			var __accu0__ = '"{:s}" [{:s}];\n';
+			return __call__ (__accu0__.format, __accu0__, bone.py_name, (function () {
+				var __accu1__ = ',';
+				return __call__ (__accu1__.join, __accu1__, opts);
+			}) ());
+		}) ());
 	}
-	fw ('\n\n# Hierarchy:\n');
+	__call__ (fw, null, '\n\n# Hierarchy:\n');
 	if (FAKE_PARENT) {
-		fw ('"Object::{:s}" [];\n'.format (obj.py_name));
+		__call__ (fw, null, (function () {
+			var __accu0__ = '"Object::{:s}" [];\n';
+			return __call__ (__accu0__.format, __accu0__, obj.py_name);
+		}) ());
 	}
-	for (var bone of bones) {
-		var bone = arm.bones [bone];
+	var __iterable0__ = bones;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var bone = __getitem__ (__iterable0__, __index0__);
+		var bone = __getitem__ (arm.bones, bone);
 		var parent = bone.parent;
 		if (parent) {
 			var parent_name = parent.py_name;
 			var connected = bone.use_connect;
 		}
 		else if (FAKE_PARENT) {
-			var parent_name = 'Object::{:s}'.format (obj.py_name);
+			var parent_name = (function () {
+				var __accu0__ = 'Object::{:s}';
+				return __call__ (__accu0__.format, __accu0__, obj.py_name);
+			}) ();
 			var connected = false;
 		}
 		else {
@@ -139,33 +225,64 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 		}
 		var opts = ['dir=forward', 'weight=2', 'arrowhead=normal'];
 		if (!(connected)) {
-			opts.append ('style=dotted');
+			(function () {
+				var __accu0__ = opts;
+				return __call__ (__accu0__.append, __accu0__, 'style=dotted');
+			}) ();
 		}
-		fw ('"{:s}" -> "{:s}" [{:s}] ;\n'.format (bone.py_name, parent_name, ','.join (opts)));
+		__call__ (fw, null, (function () {
+			var __accu0__ = '"{:s}" -> "{:s}" [{:s}] ;\n';
+			return __call__ (__accu0__.format, __accu0__, bone.py_name, parent_name, (function () {
+				var __accu1__ = ',';
+				return __call__ (__accu1__.join, __accu1__, opts);
+			}) ());
+		}) ());
 	}
+	// pass;
 	if (CONSTRAINTS) {
-		fw ('\n\n# Constraints:\n');
-		for (var bone of bones) {
-			var pbone = obj.pose.bones [bone];
-			for (var constraint of pbone.constraints) {
-				var subtarget = getattr (constraint, 'subtarget', '');
+		__call__ (fw, null, '\n\n# Constraints:\n');
+		var __iterable0__ = bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
+			var pbone = __getitem__ (obj.pose.bones, bone);
+			var __iterable1__ = pbone.constraints;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var constraint = __getitem__ (__iterable1__, __index1__);
+				var subtarget = __call__ (getattr, null, constraint, 'subtarget', '');
 				if (subtarget) {
 					var opts = ['dir=forward', 'weight=1', 'arrowhead=normal', 'arrowtail=none', 'constraint=false', 'color="red"', 'labelfontsize=4'];
 					if (XTRA_INFO) {
-						var label = '{:s}\n{:s}'.format (constraint.py_metatype, constraint.py_name);
-						opts.append ('label="{:s}"'.format (compat_str (label)));
+						var label = (function () {
+							var __accu0__ = '{:s}\n{:s}';
+							return __call__ (__accu0__.format, __accu0__, constraint.py_metatype, constraint.py_name);
+						}) ();
+						(function () {
+							var __accu0__ = opts;
+							return __call__ (__accu0__.append, __accu0__, (function () {
+								var __accu1__ = 'label="{:s}"';
+								return __call__ (__accu1__.format, __accu1__, __call__ (compat_str, null, label));
+							}) ());
+						}) ();
 					}
-					fw ('"{:s}" -> "{:s}" [{:s}] ;\n'.format (pbone.py_name, subtarget, ','.join (opts)));
+					__call__ (fw, null, (function () {
+						var __accu0__ = '"{:s}" -> "{:s}" [{:s}] ;\n';
+						return __call__ (__accu0__.format, __accu0__, pbone.py_name, subtarget, (function () {
+							var __accu1__ = ',';
+							return __call__ (__accu1__.join, __accu1__, opts);
+						}) ());
+					}) ());
 				}
 			}
 		}
 	}
 	if (DRIVERS) {
-		fw ('\n\n# Drivers:\n');
+		__call__ (fw, null, '\n\n# Drivers:\n');
 		var rna_path_as_pbone = function (rna_path) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -176,54 +293,102 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			}
 			else {
 			}
-			if (!(rna_path.startswith ('pose.bones['))) {
+			if (!((function () {
+				var __accu0__ = rna_path;
+				return __call__ (__accu0__.startswith, __accu0__, 'pose.bones[');
+			}) ())) {
 				return null;
 			}
-			var bone_name = rna_path.py_split ('[') [1].py_split (']') [0];
-			return obj.pose.bones [bone_name.__getslice__ (1, -(1), 1)];
+			var bone_name = __getitem__ ((function () {
+				var __accu0__ = __getitem__ ((function () {
+					var __accu1__ = rna_path;
+					return __call__ (__accu1__.py_split, __accu1__, '[');
+				}) (), 1);
+				return __call__ (__accu0__.py_split, __accu0__, ']');
+			}) (), 0);
+			return __getitem__ (obj.pose.bones, __getslice__ (bone_name, 1, __neg__ (1), 1));
 		};
 		var animation_data = obj.animation_data;
 		if (animation_data) {
 			var fcurve_drivers = (function () {
 				var __accu0__ = [];
-				for (var fcurve_driver of animation_data.drivers) {
-					__accu0__.append (fcurve_driver);
+				var __iterable0__ = animation_data.drivers;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var fcurve_driver = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, fcurve_driver);
+					}) ();
 				}
 				return __accu0__;
 			}) ();
-			fcurve_drivers.py_sort (__kwargtrans__ ({key: (function __lambda__ (fcurve_driver) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'fcurve_driver': var fcurve_driver = __allkwargs0__ [__attrib0__]; break;
+			(function () {
+				var __accu0__ = fcurve_drivers;
+				return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (fcurve_driver) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'fcurve_driver': var fcurve_driver = __allkwargs0__ [__attrib0__]; break;
+								}
 							}
 						}
 					}
-				}
-				else {
-				}
-				return fcurve_driver.data_path;
-			})}));
-			for (var fcurve_driver of fcurve_drivers) {
+					else {
+					}
+					return fcurve_driver.data_path;
+				})}));
+			}) ();
+			var __iterable0__ = fcurve_drivers;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var fcurve_driver = __getitem__ (__iterable0__, __index0__);
 				var rna_path = fcurve_driver.data_path;
-				var pbone = rna_path_as_pbone (rna_path);
+				var pbone = __call__ (rna_path_as_pbone, null, rna_path);
 				if (pbone) {
-					for (var var_ of fcurve_driver.driver.variables) {
-						for (var target of var_.targets) {
-							var pbone_target = rna_path_as_pbone (target.data_path);
+					var __iterable1__ = fcurve_driver.driver.variables;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var var_ = __getitem__ (__iterable1__, __index1__);
+						var __iterable2__ = var_.targets;
+						__iterable2__ = __i__ (__iterable2__);
+						for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+							var target = __getitem__ (__iterable2__, __index2__);
+							var pbone_target = __call__ (rna_path_as_pbone, null, target.data_path);
 							var rna_path_target = target.data_path;
 							if (pbone_target) {
 								var opts = ['dir=forward', 'weight=1', 'arrowhead=normal', 'arrowtail=none', 'constraint=false', 'color="blue"', 'labelfontsize=4'];
-								var display_source = rna_path.py_replace ('pose.bones', '');
-								var display_target = rna_path_target.py_replace ('pose.bones', '');
+								var display_source = (function () {
+									var __accu0__ = rna_path;
+									return __call__ (__accu0__.py_replace, __accu0__, 'pose.bones', '');
+								}) ();
+								var display_target = (function () {
+									var __accu0__ = rna_path_target;
+									return __call__ (__accu0__.py_replace, __accu0__, 'pose.bones', '');
+								}) ();
 								if (XTRA_INFO) {
-									var label = '{:s}\\n{:s}'.format (display_source, display_target);
-									opts.append ('label="{:s}"'.format (compat_str (label)));
+									var label = (function () {
+										var __accu0__ = '{:s}\\n{:s}';
+										return __call__ (__accu0__.format, __accu0__, display_source, display_target);
+									}) ();
+									(function () {
+										var __accu0__ = opts;
+										return __call__ (__accu0__.append, __accu0__, (function () {
+											var __accu1__ = 'label="{:s}"';
+											return __call__ (__accu1__.format, __accu1__, __call__ (compat_str, null, label));
+										}) ());
+									}) ();
 								}
-								fw ('"{:s}" -> "{:s}" [{:s}] ;\n'.format (pbone_target.py_name, pbone.py_name, ','.join (opts)));
+								__call__ (fw, null, (function () {
+									var __accu0__ = '"{:s}" -> "{:s}" [{:s}] ;\n';
+									return __call__ (__accu0__.format, __accu0__, pbone_target.py_name, pbone.py_name, (function () {
+										var __accu1__ = ',';
+										return __call__ (__accu1__.join, __accu1__, opts);
+									}) ());
+								}) ());
 							}
 						}
 					}
@@ -231,15 +396,33 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			}
 		}
 	}
-	fw (footer);
-	fileobject.close ();
-	print ('\nSaved:', filepath);
+	__call__ (fw, null, footer);
+	(function () {
+		var __accu0__ = fileobject;
+		return __call__ (__accu0__.close, __accu0__);
+	}) ();
+	__call__ (print, null, '\nSaved:', filepath);
 	return true;
 };
-if (__name__ == '__main__') {
+if (__eq__ (__name__, '__main__')) {
 	var tmppath = '/tmp/test.dot';
-	graph_armature (bpy.context.object, tmppath, __kwargtrans__ ({CONSTRAINTS: true, DRIVERS: true}));
-	os.system ('dot -Tpng {:s} > {:s}; eog {:s} &'.format (tmppath, tmppath + '.png', tmppath + '.png'));
+	__call__ (graph_armature, null, bpy.context.object, tmppath, __kwargtrans__ ({CONSTRAINTS: true, DRIVERS: true}));
+	(function () {
+		var __accu0__ = os;
+		return __call__ (__accu0__.system, __accu0__, (function () {
+			var __accu1__ = 'dot -Tpng {:s} > {:s}; eog {:s} &';
+			return __call__ (__accu1__.format, __accu1__, tmppath, __add__ (tmppath, '.png'), __add__ (tmppath, '.png'));
+		}) ());
+	}) ();
 }
 
 //# sourceMappingURL=_graphviz_export.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'header': header = value; break;
+		case 'footer': footer = value; break;
+		case 'compat_str': compat_str = value; break;
+		case 'graph_armature': graph_armature = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

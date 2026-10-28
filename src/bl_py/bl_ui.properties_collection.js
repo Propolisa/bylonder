@@ -14,7 +14,7 @@ export var CollectionButtonsPanel =  __class__ ('CollectionButtonsPanel', [objec
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -26,13 +26,13 @@ export var CollectionButtonsPanel =  __class__ ('CollectionButtonsPanel', [objec
 		}
 		else {
 		}
-		return context.collection != context.scene.collection;
+		return __ne__ (context.collection, context.scene.collection);
 	});}
 });
 export var lineart_make_line_type_entry = function (col, line_type, text_disp, expand, search_from) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -47,10 +47,19 @@ export var lineart_make_line_type_entry = function (col, line_type, text_disp, e
 	}
 	else {
 	}
-	col.prop (line_type, 'use', __kwargtrans__ ({text: text_disp}));
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, line_type, 'use', __kwargtrans__ ({text: text_disp}));
+	}) ();
 	if (line_type.use && expand) {
-		col.prop_search (line_type, 'layer', search_from, 'layers', __kwargtrans__ ({icon: 'GREASEPENCIL'}));
-		col.prop_search (line_type, 'material', search_from, 'materials', __kwargtrans__ ({icon: 'SHADING_TEXTURE'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_search, __accu0__, line_type, 'layer', search_from, 'layers', __kwargtrans__ ({icon: 'GREASEPENCIL'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_search, __accu0__, line_type, 'material', search_from, 'materials', __kwargtrans__ ({icon: 'SHADING_TEXTURE'}));
+		}) ();
 	}
 };
 export var COLLECTION_PT_collection_flags =  __class__ ('COLLECTION_PT_collection_flags', [CollectionButtonsPanel, Panel], {
@@ -59,7 +68,7 @@ export var COLLECTION_PT_collection_flags =  __class__ ('COLLECTION_PT_collectio
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -75,9 +84,18 @@ export var COLLECTION_PT_collection_flags =  __class__ ('COLLECTION_PT_collectio
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var collection = context.collection;
-		layout.prop (collection, 'hide_select', __kwargtrans__ ({text: 'Selectable', toggle: false, invert_checkbox: true}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Show In', align: true}));
-		col.prop (collection, 'hide_render', __kwargtrans__ ({text: 'Renders', toggle: false, invert_checkbox: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'hide_select', __kwargtrans__ ({text: 'Selectable', toggle: false, invert_checkbox: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show In', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'hide_render', __kwargtrans__ ({text: 'Renders', toggle: false, invert_checkbox: true}));
+		}) ();
 	});}
 });
 export var COLLECTION_PT_viewlayer_flags =  __class__ ('COLLECTION_PT_viewlayer_flags', [CollectionButtonsPanel, Panel], {
@@ -87,7 +105,7 @@ export var COLLECTION_PT_viewlayer_flags =  __class__ ('COLLECTION_PT_viewlayer_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -104,10 +122,22 @@ export var COLLECTION_PT_viewlayer_flags =  __class__ ('COLLECTION_PT_viewlayer_
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (vlc, 'exclude', __kwargtrans__ ({text: 'Include', toggle: false, invert_checkbox: true}));
-		col.prop (vlc, 'holdout', __kwargtrans__ ({toggle: false}));
-		col.prop (vlc, 'indirect_only', __kwargtrans__ ({toggle: false}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, vlc, 'exclude', __kwargtrans__ ({text: 'Include', toggle: false, invert_checkbox: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, vlc, 'holdout', __kwargtrans__ ({toggle: false}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, vlc, 'indirect_only', __kwargtrans__ ({toggle: false}));
+		}) ();
 	});}
 });
 export var COLLECTION_PT_importer =  __class__ ('COLLECTION_PT_importer', [CollectionButtonsPanel, Panel], {
@@ -116,7 +146,7 @@ export var COLLECTION_PT_importer =  __class__ ('COLLECTION_PT_importer', [Colle
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -134,7 +164,7 @@ export var COLLECTION_PT_importer =  __class__ ('COLLECTION_PT_importer', [Colle
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -146,8 +176,12 @@ export var COLLECTION_PT_importer =  __class__ ('COLLECTION_PT_importer', [Colle
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
-		layout.template_collection_importer ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_collection_importer, __accu0__);
+		}) ();
 	});}
 });
 export var COLLECTION_PT_exporters =  __class__ ('COLLECTION_PT_exporters', [CollectionButtonsPanel, Panel], {
@@ -156,7 +190,7 @@ export var COLLECTION_PT_exporters =  __class__ ('COLLECTION_PT_exporters', [Col
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -169,7 +203,10 @@ export var COLLECTION_PT_exporters =  __class__ ('COLLECTION_PT_exporters', [Col
 		else {
 		}
 		var layout = self.layout;
-		layout.template_collection_exporters ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_collection_exporters, __accu0__);
+		}) ();
 	});}
 });
 export var COLLECTION_MT_context_menu_instance_offset =  __class__ ('COLLECTION_MT_context_menu_instance_offset', [Menu], {
@@ -178,7 +215,7 @@ export var COLLECTION_MT_context_menu_instance_offset =  __class__ ('COLLECTION_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -191,9 +228,18 @@ export var COLLECTION_MT_context_menu_instance_offset =  __class__ ('COLLECTION_
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('object.instance_offset_from_cursor');
-		layout.operator ('object.instance_offset_from_object');
-		layout.operator ('object.instance_offset_to_cursor');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.instance_offset_from_cursor');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.instance_offset_from_object');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.instance_offset_to_cursor');
+		}) ();
 	});}
 });
 export var COLLECTION_PT_instancing =  __class__ ('COLLECTION_PT_instancing', [CollectionButtonsPanel, Panel], {
@@ -202,7 +248,7 @@ export var COLLECTION_PT_instancing =  __class__ ('COLLECTION_PT_instancing', [C
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -218,9 +264,18 @@ export var COLLECTION_PT_instancing =  __class__ ('COLLECTION_PT_instancing', [C
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var collection = context.collection;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (collection, 'instance_offset');
-		row.menu ('COLLECTION_MT_context_menu_instance_offset', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'instance_offset');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.menu, __accu0__, 'COLLECTION_MT_context_menu_instance_offset', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 	});}
 });
 export var COLLECTION_PT_lineart_collection =  __class__ ('COLLECTION_PT_lineart_collection', [CollectionButtonsPanel, Panel], {
@@ -230,7 +285,7 @@ export var COLLECTION_PT_lineart_collection =  __class__ ('COLLECTION_PT_lineart
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -246,23 +301,56 @@ export var COLLECTION_PT_lineart_collection =  __class__ ('COLLECTION_PT_lineart
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var collection = context.collection;
-		var row = layout.row ();
-		row.prop (collection, 'lineart_usage');
-		layout.prop (collection, 'lineart_use_intersection_mask', __kwargtrans__ ({text: 'Collection Mask'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'lineart_usage');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'lineart_use_intersection_mask', __kwargtrans__ ({text: 'Collection Mask'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.active = collection.lineart_use_intersection_mask;
-		var row = col.row (__kwargtrans__ ({align: true, heading: 'Masks'}));
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Masks'}));
+		}) ();
 		for (var i = 0; i < 8; i++) {
-			row.prop (collection, 'lineart_intersection_mask', __kwargtrans__ ({index: i, text: ' ', toggle: true}));
-			if (i == 3) {
-				var row = col.row (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, collection, 'lineart_intersection_mask', __kwargtrans__ ({index: i, text: ' ', toggle: true}));
+			}) ();
+			if (__eq__ (i, 3)) {
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
 			}
 		}
-		var row = layout.row (__kwargtrans__ ({heading: 'Intersection Priority'}));
-		row.prop (collection, 'use_lineart_intersection_priority', __kwargtrans__ ({text: ''}));
-		var subrow = row.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Intersection Priority'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'use_lineart_intersection_priority', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subrow = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		subrow.active = collection.use_lineart_intersection_priority;
-		subrow.prop (collection, 'lineart_intersection_priority', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = subrow;
+			return __call__ (__accu0__.prop, __accu0__, collection, 'lineart_intersection_priority', __kwargtrans__ ({text: ''}));
+		}) ();
 	});}
 });
 export var COLLECTION_PT_collection_custom_props =  __class__ ('COLLECTION_PT_collection_custom_props', [CollectionButtonsPanel, PropertyPanel, Panel], {
@@ -271,11 +359,31 @@ export var COLLECTION_PT_collection_custom_props =  __class__ ('COLLECTION_PT_co
 	_property_type: Collection
 });
 export var classes = tuple ([COLLECTION_MT_context_menu_instance_offset, COLLECTION_PT_collection_flags, COLLECTION_PT_viewlayer_flags, COLLECTION_PT_instancing, COLLECTION_PT_lineart_collection, COLLECTION_PT_collection_custom_props, COLLECTION_PT_importer, COLLECTION_PT_exporters]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_collection.map
 export {Collection, Menu, Panel, PropertyPanel, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'CollectionButtonsPanel': CollectionButtonsPanel = value; break;
+		case 'lineart_make_line_type_entry': lineart_make_line_type_entry = value; break;
+		case 'COLLECTION_PT_collection_flags': COLLECTION_PT_collection_flags = value; break;
+		case 'COLLECTION_PT_viewlayer_flags': COLLECTION_PT_viewlayer_flags = value; break;
+		case 'COLLECTION_PT_importer': COLLECTION_PT_importer = value; break;
+		case 'COLLECTION_PT_exporters': COLLECTION_PT_exporters = value; break;
+		case 'COLLECTION_MT_context_menu_instance_offset': COLLECTION_MT_context_menu_instance_offset = value; break;
+		case 'COLLECTION_PT_instancing': COLLECTION_PT_instancing = value; break;
+		case 'COLLECTION_PT_lineart_collection': COLLECTION_PT_lineart_collection = value; break;
+		case 'COLLECTION_PT_collection_custom_props': COLLECTION_PT_collection_custom_props = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

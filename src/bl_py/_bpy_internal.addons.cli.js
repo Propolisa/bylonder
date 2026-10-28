@@ -8,7 +8,7 @@ export var __all__ = tuple (['set_from_cli']);
 export var set_from_cli = function (addons_as_string) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -19,37 +19,57 @@ export var set_from_cli = function (addons_as_string) {
 	}
 	else {
 	}
-	var check = _member ('addon_utils', 'check');
-	var check_extension = _member ('addon_utils', 'check_extension');
-	var enable = _member ('addon_utils', 'enable');
-	var extensions_refresh = _member ('addon_utils', 'extensions_refresh');
-	var addon_modules = addons_as_string.py_split (',');
+	var check = __call__ (_member, null, 'addon_utils', 'check');
+	var check_extension = __call__ (_member, null, 'addon_utils', 'check_extension');
+	var enable = __call__ (_member, null, 'addon_utils', 'enable');
+	var extensions_refresh = __call__ (_member, null, 'addon_utils', 'extensions_refresh');
+	var addon_modules = (function () {
+		var __accu0__ = addons_as_string;
+		return __call__ (__accu0__.py_split, __accu0__, ',');
+	}) ();
 	var addon_modules_extensions = (function () {
 		var __accu0__ = [];
-		for (var m of addon_modules) {
-			if (check_extension (m)) {
-				__accu0__.append (m);
+		var __iterable0__ = addon_modules;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var m = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (check_extension, null, m)) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, m);
+				}) ();
 			}
 		}
 		return __accu0__;
 	}) ();
 	var addon_modules_extensions_has_failure = false;
 	if (addon_modules_extensions) {
-		extensions_refresh (__kwargtrans__ ({ensure_wheels: true, addon_modules_pending: addon_modules_extensions}));
+		__call__ (extensions_refresh, null, __kwargtrans__ ({ensure_wheels: true, addon_modules_pending: addon_modules_extensions}));
 	}
-	for (var m of addon_modules) {
-		if (check (m) [1] === false) {
-			if (enable (m, __kwargtrans__ ({persistent: true, refresh_handled: true})) === null) {
-				if (check_extension (m)) {
+	var __iterable0__ = addon_modules;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var m = __getitem__ (__iterable0__, __index0__);
+		if (__getitem__ (__call__ (check, null, m), 1) === false) {
+			if (__call__ (enable, null, m, __kwargtrans__ ({persistent: true, refresh_handled: true})) === null) {
+				if (__call__ (check_extension, null, m)) {
 					var addon_modules_extensions_has_failure = true;
 				}
 			}
 		}
 	}
 	if (addon_modules_extensions_has_failure) {
-		extensions_refresh (__kwargtrans__ ({ensure_wheels: true}));
+		__call__ (extensions_refresh, null, __kwargtrans__ ({ensure_wheels: true}));
 	}
 };
 
 //# sourceMappingURL=_bpy_internal.addons.cli.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'set_from_cli': set_from_cli = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

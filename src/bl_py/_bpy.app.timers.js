@@ -5,3 +5,8 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 var __name__ = '_bpy.app.timers';
 
 //# sourceMappingURL=_bpy.app.timers.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

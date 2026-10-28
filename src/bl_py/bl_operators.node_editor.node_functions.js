@@ -7,7 +7,7 @@ var __name__ = 'bl_operators.node_editor.node_functions';
 export var node_editor_poll = function (cls, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -20,20 +20,32 @@ export var node_editor_poll = function (cls, context) {
 	else {
 	}
 	var space = context.space_data;
-	if (space === null || space.py_metatype != 'NODE_EDITOR') {
-		cls.poll_message_set ('Active editor is not a node editor.');
+	if (space === null || __ne__ (space.py_metatype, 'NODE_EDITOR')) {
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.poll_message_set, __accu0__, 'Active editor is not a node editor.');
+		}) ();
 		return false;
 	}
 	if (space.node_tree === null) {
-		cls.poll_message_set ('Node tree was not found in the active node editor.');
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.poll_message_set, __accu0__, 'Node tree was not found in the active node editor.');
+		}) ();
 		return false;
 	}
 	if (space.node_tree.library !== null) {
-		cls.poll_message_set ('Active node tree is linked from another .blend file.');
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.poll_message_set, __accu0__, 'Active node tree is linked from another .blend file.');
+		}) ();
 		return false;
 	}
 	if (!(space.edit_tree.nodes)) {
-		cls.poll_message_set ('Active node tree does not contain any nodes.');
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.poll_message_set, __accu0__, 'Active node tree does not contain any nodes.');
+		}) ();
 		return false;
 	}
 	return true;
@@ -41,7 +53,7 @@ export var node_editor_poll = function (cls, context) {
 export var node_space_type_poll = function (cls, context, types) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -55,15 +67,36 @@ export var node_space_type_poll = function (cls, context, types) {
 	else {
 	}
 	if (!__in__ (context.space_data.tree_type, types)) {
-		var tree_types_str = ', '.join ((function () {
-			var __accu0__ = [];
-			for (var t of list (sorted (types))) {
-				__accu0__.append (t.py_split ('NodeTree') [0].lower ());
-			}
-			return __accu0__;
-		}) ());
-		var poll_message = tip_ ('Current node tree type not supported.\nShould be one of {:s}.').format (tree_types_str);
-		cls.poll_message_set (poll_message);
+		var tree_types_str = (function () {
+			var __accu0__ = ', ';
+			return __call__ (__accu0__.join, __accu0__, (function () {
+				var __accu1__ = [];
+				var __iterable0__ = __call__ (list, null, __call__ (sorted, null, types));
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var t = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu2__ = __accu1__;
+						return __call__ (__accu2__.append, __accu2__, (function () {
+							var __accu3__ = __getitem__ ((function () {
+								var __accu4__ = t;
+								return __call__ (__accu4__.py_split, __accu4__, 'NodeTree');
+							}) (), 0);
+							return __call__ (__accu3__.lower, __accu3__);
+						}) ());
+					}) ();
+				}
+				return __accu1__;
+			}) ());
+		}) ();
+		var poll_message = (function () {
+			var __accu0__ = __call__ (tip_, null, 'Current node tree type not supported.\nShould be one of {:s}.');
+			return __call__ (__accu0__.format, __accu0__, tree_types_str);
+		}) ();
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.poll_message_set, __accu0__, poll_message);
+		}) ();
 		return false;
 	}
 	return true;
@@ -74,7 +107,7 @@ export var get_group_output_node = function (tree, output_node_idname) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -86,8 +119,11 @@ export var get_group_output_node = function (tree, output_node_idname) {
 	}
 	else {
 	}
-	for (var node of tree.nodes) {
-		if (node.bl_idname == output_node_idname && node.is_active_output) {
+	var __iterable0__ = tree.nodes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var node = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (node.bl_idname, output_node_idname) && node.is_active_output) {
 			return node;
 		}
 	}
@@ -95,7 +131,7 @@ export var get_group_output_node = function (tree, output_node_idname) {
 export var get_output_location = function (tree) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -106,10 +142,10 @@ export var get_output_location = function (tree) {
 	}
 	else {
 	}
-	var sorted_by_xloc = sorted (tree.nodes, __kwargtrans__ ({key: (function __lambda__ (x) {
+	var sorted_by_xloc = __call__ (sorted, null, tree.nodes, __kwargtrans__ ({key: (function __lambda__ (x) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -122,19 +158,22 @@ export var get_output_location = function (tree) {
 		}
 		return x.location.x;
 	})}));
-	var max_xloc_node = sorted_by_xloc [-(1)];
+	var max_xloc_node = __getitem__ (sorted_by_xloc, __neg__ (1));
 	var sum_yloc = 0;
-	for (var node of tree.nodes) {
-		sum_yloc += node.location.y;
+	var __iterable0__ = tree.nodes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var node = __getitem__ (__iterable0__, __index0__);
+		var sum_yloc = __call__ (__iadd__, null, sum_yloc, node.location.y);
 	}
-	var loc_x = (max_xloc_node.location.x + max_xloc_node.dimensions.x) + 80;
-	var loc_y = sum_yloc / len (tree.nodes);
+	var loc_x = __add__ (__add__ (max_xloc_node.location.x, max_xloc_node.dimensions.x), 80);
+	var loc_y = __truediv__ (sum_yloc, __call__ (len, null, tree.nodes));
 	return tuple ([loc_x, loc_y]);
 };
 export var get_internal_socket = function (socket) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -146,29 +185,32 @@ export var get_internal_socket = function (socket) {
 	else {
 	}
 	var node = socket.node;
-	if (node.py_metatype == 'GROUP_OUTPUT') {
+	if (__eq__ (node.py_metatype, 'GROUP_OUTPUT')) {
 		var iterator = node.id_data.interface.items_tree;
 	}
-	else if (node.py_metatype == 'GROUP_INPUT') {
+	else if (__eq__ (node.py_metatype, 'GROUP_INPUT')) {
 		var iterator = node.id_data.interface.items_tree;
 	}
-	else if (hasattr (node, 'node_tree')) {
+	else if (__call__ (hasattr, null, node, 'node_tree')) {
 		var iterator = node.node_tree.interface.items_tree;
 	}
 	else {
 		return null;
 	}
-	for (var s of iterator) {
-		if (s.identifier == socket.identifier) {
+	var __iterable0__ = iterator;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var s = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (s.identifier, socket.identifier)) {
 			return s;
 		}
 	}
-	return iterator [0];
+	return __getitem__ (iterator, 0);
 };
 export var is_visible_socket = function (socket) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -179,12 +221,12 @@ export var is_visible_socket = function (socket) {
 	}
 	else {
 	}
-	return socket.is_icon_visible && socket.py_metatype != 'CUSTOM';
+	return socket.is_icon_visible && __ne__ (socket.py_metatype, 'CUSTOM');
 };
 export var is_viewer_link = function (link, output_node) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -196,11 +238,11 @@ export var is_viewer_link = function (link, output_node) {
 	}
 	else {
 	}
-	if (link.to_node == output_node && link.to_socket == output_node.inputs [0]) {
+	if (__eq__ (link.to_node, output_node) && __eq__ (link.to_socket, __getitem__ (output_node.inputs, 0))) {
 		return true;
 	}
-	if (link.to_node.py_metatype == 'GROUP_OUTPUT') {
-		var socket = get_internal_socket (link.to_socket);
+	if (__eq__ (link.to_node.py_metatype, 'GROUP_OUTPUT')) {
+		var socket = __call__ (get_internal_socket, null, link.to_socket);
 		if (socket.is_inspect_output) {
 			return true;
 		}
@@ -210,7 +252,7 @@ export var is_viewer_link = function (link, output_node) {
 export var force_update = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -221,14 +263,17 @@ export var force_update = function (context) {
 	}
 	else {
 	}
-	context.space_data.node_tree.update_tag ();
+	(function () {
+		var __accu0__ = context.space_data.node_tree;
+		return __call__ (__accu0__.update_tag, __accu0__);
+	}) ();
 };
 export var NodeEditorBase =  __class__ ('NodeEditorBase', [object], {
 	__module__: __name__,
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -240,9 +285,24 @@ export var NodeEditorBase =  __class__ ('NodeEditorBase', [object], {
 		}
 		else {
 		}
-		return node_editor_poll (cls, context);
+		return __call__ (node_editor_poll, null, cls, context);
 	});}
 });
 
 //# sourceMappingURL=bl_operators.node_editor.node_functions.map
 export {tip_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'node_editor_poll': node_editor_poll = value; break;
+		case 'node_space_type_poll': node_space_type_poll = value; break;
+		case 'get_group_output_node': get_group_output_node = value; break;
+		case 'get_output_location': get_output_location = value; break;
+		case 'get_internal_socket': get_internal_socket = value; break;
+		case 'is_visible_socket': is_visible_socket = value; break;
+		case 'is_viewer_link': is_viewer_link = value; break;
+		case 'force_update': force_update = value; break;
+		case 'NodeEditorBase': NodeEditorBase = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

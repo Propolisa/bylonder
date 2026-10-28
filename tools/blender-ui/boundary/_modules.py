@@ -11,7 +11,7 @@ def _member(module_id, member_id):
 
 
 def _lazy(module_id):
-    return __pragma__('js', '{}', 'new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id]})')
+    return __pragma__('js', '{}', 'new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id], set: (target, key, value) => { globalThis.__py_modules[module_id].__py_setattr__(key, value); return true; }})')
 
 
 def _import(name, globals=None, locals=None, fromlist=(), level=0):

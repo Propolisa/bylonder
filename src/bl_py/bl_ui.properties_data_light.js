@@ -19,7 +19,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -43,7 +43,7 @@ export var DATA_PT_context_light =  __class__ ('DATA_PT_context_light', [DataBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -60,10 +60,16 @@ export var DATA_PT_context_light =  __class__ ('DATA_PT_context_light', [DataBut
 		var light = context.light;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (light) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -75,7 +81,7 @@ export var DATA_PT_preview =  __class__ ('DATA_PT_preview', [DataButtonsPanel, P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -87,7 +93,10 @@ export var DATA_PT_preview =  __class__ ('DATA_PT_preview', [DataButtonsPanel, P
 		}
 		else {
 		}
-		self.layout.template_preview (context.light);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.template_preview, __accu0__, context.light);
+		}) ();
 	});}
 });
 export var DATA_PT_light =  __class__ ('DATA_PT_light', [DataButtonsPanel, Panel], {
@@ -97,7 +106,7 @@ export var DATA_PT_light =  __class__ ('DATA_PT_light', [DataButtonsPanel, Panel
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -111,13 +120,25 @@ export var DATA_PT_light =  __class__ ('DATA_PT_light', [DataButtonsPanel, Panel
 		}
 		var layout = self.layout;
 		var light = context.light;
-		if (self.bl_space_type == 'PROPERTIES') {
-			layout.row ().prop (light, 'type', __kwargtrans__ ({expand: true}));
+		if (__eq__ (self.bl_space_type, 'PROPERTIES')) {
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, light, 'type', __kwargtrans__ ({expand: true}));
+			}) ();
 			layout.use_property_split = true;
 		}
 		else {
 			layout.use_property_split = true;
-			layout.row ().prop (light, 'type');
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, light, 'type');
+			}) ();
 		}
 	});}
 });
@@ -128,7 +149,7 @@ export var DATA_PT_EEVEE_light =  __class__ ('DATA_PT_EEVEE_light', [DataButtons
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -142,60 +163,156 @@ export var DATA_PT_EEVEE_light =  __class__ ('DATA_PT_EEVEE_light', [DataButtons
 		}
 		var layout = self.layout;
 		var light = context.light;
-		if (self.bl_space_type == 'PROPERTIES') {
-			layout.row ().prop (light, 'type', __kwargtrans__ ({expand: true}));
+		if (__eq__ (self.bl_space_type, 'PROPERTIES')) {
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, light, 'type', __kwargtrans__ ({expand: true}));
+			}) ();
 			layout.use_property_split = true;
 		}
 		else {
 			layout.use_property_split = true;
-			layout.row ().prop (light, 'type');
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, light, 'type');
+			}) ();
 		}
-		var col = layout.column ();
-		var heading = col.column (__kwargtrans__ ({align: true, heading: 'Temperature'}));
-		var row = heading.column (__kwargtrans__ ({align: true})).row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var heading = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true, heading: 'Temperature'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = (function () {
+				var __accu1__ = heading;
+				return __call__ (__accu1__.column, __accu1__, __kwargtrans__ ({align: true}));
+			}) ();
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (light, 'use_temperature', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, light, 'use_temperature', __kwargtrans__ ({text: ''}));
+		}) ();
 		if (false) {
-			var sub = row.py_split (__kwargtrans__ ({factor: 0.7, align: true}));
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.7, align: true}));
+			}) ();
 			sub.active = light.use_temperature;
-			sub.prop (light, 'temperature', __kwargtrans__ ({text: ''}));
-			sub.prop (light, 'temperature_color', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, light, 'temperature', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, light, 'temperature_color', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		else {
-			var sub = row.row ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			sub.active = light.use_temperature;
-			sub.prop (light, 'temperature', __kwargtrans__ ({text: ''}));
-			row.prop_decorator (light, 'temperature');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, light, 'temperature', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_decorator, __accu0__, light, 'temperature');
+			}) ();
 		}
 		if (light.use_temperature) {
-			col.prop (light, 'color', __kwargtrans__ ({text: 'Tint'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, light, 'color', __kwargtrans__ ({text: 'Tint'}));
+			}) ();
 		}
 		else {
-			col.prop (light, 'color', __kwargtrans__ ({text: 'Color'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, light, 'color', __kwargtrans__ ({text: 'Color'}));
+			}) ();
 		}
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (light, 'energy');
-		col.prop (light, 'exposure');
-		col.prop (light, 'normalize');
-		layout.separator ();
-		var col = layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'energy');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'exposure');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'normalize');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		if (__in__ (light.py_metatype, new set (['POINT', 'SPOT']))) {
-			col.prop (light, 'shadow_soft_size', __kwargtrans__ ({text: 'Radius'}));
-			col.prop (light, 'use_soft_falloff');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, light, 'shadow_soft_size', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, light, 'use_soft_falloff');
+			}) ();
 		}
-		else if (light.py_metatype == 'SUN') {
-			col.prop (light, 'angle');
+		else if (__eq__ (light.py_metatype, 'SUN')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, light, 'angle');
+			}) ();
 		}
-		else if (light.py_metatype == 'AREA') {
-			col.prop (light, 'shape');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+		else if (__eq__ (light.py_metatype, 'AREA')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, light, 'shape');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			if (__in__ (light.shape, new set (['SQUARE', 'DISK']))) {
-				sub.prop (light, 'size');
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, light, 'size');
+				}) ();
 			}
 			else if (__in__ (light.shape, new set (['RECTANGLE', 'ELLIPSE']))) {
-				sub.prop (light, 'size', __kwargtrans__ ({text: 'Size X'}));
-				sub.prop (light, 'size_y', __kwargtrans__ ({text: 'Y'}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, light, 'size', __kwargtrans__ ({text: 'Size X'}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, light, 'size_y', __kwargtrans__ ({text: 'Y'}));
+				}) ();
 			}
 		}
 	});}
@@ -209,7 +326,7 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -223,12 +340,12 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 		}
 		var light = context.light;
 		var engine = context.engine;
-		return (light && light.py_metatype != 'SUN') && __in__ (engine, cls.COMPAT_ENGINES);
+		return (light && __ne__ (light.py_metatype, 'SUN')) && __in__ (engine, cls.COMPAT_ENGINES);
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -242,12 +359,15 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 		}
 		var light = context.light;
 		var layout = self.layout;
-		layout.prop (light, 'use_custom_distance', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, light, 'use_custom_distance', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -263,7 +383,10 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 		var light = context.light;
 		layout.active = light.use_custom_distance;
 		layout.use_property_split = true;
-		layout.prop (light, 'cutoff_distance', __kwargtrans__ ({text: 'Distance'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, light, 'cutoff_distance', __kwargtrans__ ({text: 'Distance'}));
+		}) ();
 	});}
 });
 export var DATA_PT_EEVEE_light_shadow =  __class__ ('DATA_PT_EEVEE_light_shadow', [DataButtonsPanel, Panel], {
@@ -275,7 +398,7 @@ export var DATA_PT_EEVEE_light_shadow =  __class__ ('DATA_PT_EEVEE_light_shadow'
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -288,12 +411,15 @@ export var DATA_PT_EEVEE_light_shadow =  __class__ ('DATA_PT_EEVEE_light_shadow'
 		else {
 		}
 		var light = context.light;
-		self.layout.prop (light, 'use_shadow', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, light, 'use_shadow', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -309,20 +435,56 @@ export var DATA_PT_EEVEE_light_shadow =  __class__ ('DATA_PT_EEVEE_light_shadow'
 		var light = context.light;
 		layout.use_property_split = true;
 		layout.active = context.scene.eevee.use_shadows && light.use_shadow;
-		var col = layout.column (__kwargtrans__ ({align: false, heading: 'Jitter'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (light, 'use_shadow_jitter', __kwargtrans__ ({text: ''}));
-		var sub = sub.row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Jitter'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, light, 'use_shadow_jitter', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = light.use_shadow_jitter;
-		sub.prop (light, 'shadow_jitter_overblur', __kwargtrans__ ({text: 'Overblur'}));
-		var col = layout.column ();
-		col.prop (light, 'shadow_filter_radius', __kwargtrans__ ({text: 'Filter'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		var row = sub.row (__kwargtrans__ ({align: true}));
-		row.prop (light, 'shadow_maximum_resolution', __kwargtrans__ ({text: 'Resolution Limit'}));
-		if (light.py_metatype != 'SUN') {
-			row.prop (light, 'use_absolute_resolution', __kwargtrans__ ({text: '', icon: 'DRIVER_DISTANCE'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, light, 'shadow_jitter_overblur', __kwargtrans__ ({text: 'Overblur'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'shadow_filter_radius', __kwargtrans__ ({text: 'Filter'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, light, 'shadow_maximum_resolution', __kwargtrans__ ({text: 'Resolution Limit'}));
+		}) ();
+		if (__ne__ (light.py_metatype, 'SUN')) {
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, light, 'use_absolute_resolution', __kwargtrans__ ({text: '', icon: 'DRIVER_DISTANCE'}));
+			}) ();
 		}
 	});}
 });
@@ -335,7 +497,7 @@ export var DATA_PT_EEVEE_light_influence =  __class__ ('DATA_PT_EEVEE_light_infl
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -351,19 +513,46 @@ export var DATA_PT_EEVEE_light_influence =  __class__ ('DATA_PT_EEVEE_light_infl
 		var ob = context.object;
 		var light = context.light;
 		layout.use_property_split = true;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = ob === null || ob.visible_diffuse;
-		sub.prop (light, 'diffuse_factor', __kwargtrans__ ({text: 'Diffuse'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, light, 'diffuse_factor', __kwargtrans__ ({text: 'Diffuse'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = ob === null || ob.visible_glossy;
-		sub.prop (light, 'specular_factor', __kwargtrans__ ({text: 'Glossy'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, light, 'specular_factor', __kwargtrans__ ({text: 'Glossy'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = ob === null || ob.visible_transmission;
-		sub.prop (light, 'transmission_factor', __kwargtrans__ ({text: 'Transmission'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, light, 'transmission_factor', __kwargtrans__ ({text: 'Transmission'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = ob === null || ob.visible_volume_scatter;
-		sub.prop (light, 'volume_factor', __kwargtrans__ ({text: 'Volume Scatter', text_ctxt: i18n_contexts.id_id}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, light, 'volume_factor', __kwargtrans__ ({text: 'Volume Scatter', text_ctxt: i18n_contexts.id_id}));
+		}) ();
 	});}
 });
 export var DATA_PT_spot =  __class__ ('DATA_PT_spot', [DataButtonsPanel, Panel], {
@@ -374,7 +563,7 @@ export var DATA_PT_spot =  __class__ ('DATA_PT_spot', [DataButtonsPanel, Panel],
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -388,12 +577,12 @@ export var DATA_PT_spot =  __class__ ('DATA_PT_spot', [DataButtonsPanel, Panel],
 		}
 		var light = context.light;
 		var engine = context.engine;
-		return (light && light.py_metatype == 'SPOT') && __in__ (engine, cls.COMPAT_ENGINES);
+		return (light && __eq__ (light.py_metatype, 'SPOT')) && __in__ (engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -408,10 +597,22 @@ export var DATA_PT_spot =  __class__ ('DATA_PT_spot', [DataButtonsPanel, Panel],
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var light = context.light;
-		var col = layout.column ();
-		col.prop (light, 'spot_size', __kwargtrans__ ({text: 'Angle'}));
-		col.prop (light, 'spot_blend', __kwargtrans__ ({text: 'Blend', slider: true}));
-		col.prop (light, 'show_cone');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'spot_size', __kwargtrans__ ({text: 'Angle'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'spot_blend', __kwargtrans__ ({text: 'Blend', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, light, 'show_cone');
+		}) ();
 	});}
 });
 export var DATA_PT_light_animation =  __class__ ('DATA_PT_light_animation', [DataButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -420,7 +621,7 @@ export var DATA_PT_light_animation =  __class__ ('DATA_PT_light_animation', [Dat
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -436,14 +637,32 @@ export var DATA_PT_light_animation =  __class__ ('DATA_PT_light_animation', [Dat
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var light = context.light;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Light'}));
-		self.draw_action_and_slot_selector (context, col, light);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, light);
+		}) ();
 		var node_tree = light.node_tree;
 		if (node_tree) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.label (__kwargtrans__ ({text: 'Shader Node Tree'}));
-			self.draw_action_and_slot_selector (context, col, node_tree);
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Shader Node Tree'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, node_tree);
+			}) ();
 		}
 	});}
 });
@@ -454,11 +673,32 @@ export var DATA_PT_custom_props_light =  __class__ ('DATA_PT_custom_props_light'
 	_property_type: bpy.types.Light
 });
 export var classes = tuple ([DATA_PT_context_light, DATA_PT_preview, DATA_PT_light, DATA_PT_EEVEE_light, DATA_PT_spot, DATA_PT_EEVEE_light_shadow, DATA_PT_EEVEE_light_influence, DATA_PT_EEVEE_light_distance, DATA_PT_light_animation, DATA_PT_custom_props_light]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_light.map
 export {Panel, PropertiesAnimationMixin, PropertyPanel, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_light': DATA_PT_context_light = value; break;
+		case 'DATA_PT_preview': DATA_PT_preview = value; break;
+		case 'DATA_PT_light': DATA_PT_light = value; break;
+		case 'DATA_PT_EEVEE_light': DATA_PT_EEVEE_light = value; break;
+		case 'DATA_PT_EEVEE_light_distance': DATA_PT_EEVEE_light_distance = value; break;
+		case 'DATA_PT_EEVEE_light_shadow': DATA_PT_EEVEE_light_shadow = value; break;
+		case 'DATA_PT_EEVEE_light_influence': DATA_PT_EEVEE_light_influence = value; break;
+		case 'DATA_PT_spot': DATA_PT_spot = value; break;
+		case 'DATA_PT_light_animation': DATA_PT_light_animation = value; break;
+		case 'DATA_PT_custom_props_light': DATA_PT_custom_props_light = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

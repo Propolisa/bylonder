@@ -14,7 +14,7 @@ export var __all__ = tuple (['set_math_node_default_props', 'set_int_math_node_d
 export var set_socket_default_value = function (settings, socket_identifier, socket_default_value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -27,15 +27,21 @@ export var set_socket_default_value = function (settings, socket_identifier, soc
 	}
 	else {
 	}
-	var prop = settings.add ();
-	prop.py_name = 'inputs["{:s}"].default_value'.format (socket_identifier);
+	var prop = (function () {
+		var __accu0__ = settings;
+		return __call__ (__accu0__.add, __accu0__);
+	}) ();
+	prop.py_name = (function () {
+		var __accu0__ = 'inputs["{:s}"].default_value';
+		return __call__ (__accu0__.format, __accu0__, socket_identifier);
+	}) ();
 	prop.value = socket_default_value;
 	return prop;
 };
 export var color_mix_node_defaults = function (enum_identifier, props) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -47,14 +53,14 @@ export var color_mix_node_defaults = function (enum_identifier, props) {
 	}
 	else {
 	}
-	if (enum_identifier == 'MIX') {
-		set_socket_default_value (props.settings, 'Factor', '0.5');
+	if (__eq__ (enum_identifier, 'MIX')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Factor', '0.5');
 	}
 };
 export var set_math_node_default_props = function (enum_identifier, props) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -67,26 +73,26 @@ export var set_math_node_default_props = function (enum_identifier, props) {
 	else {
 	}
 	if (__in__ (enum_identifier, tuple (['MULTIPLY', 'POWER', 'MODULO', 'FLOORED_MODULO', 'ARCTAN2']))) {
-		set_socket_default_value (props.settings, 'Value', '1.0');
-		set_socket_default_value (props.settings, 'Value_001', '1.0');
+		__call__ (set_socket_default_value, null, props.settings, 'Value', '1.0');
+		__call__ (set_socket_default_value, null, props.settings, 'Value_001', '1.0');
 	}
-	else if (enum_identifier == 'ADD') {
-		set_socket_default_value (props.settings, 'Value', '0.0');
-		set_socket_default_value (props.settings, 'Value_001', '0.0');
+	else if (__eq__ (enum_identifier, 'ADD')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Value', '0.0');
+		__call__ (set_socket_default_value, null, props.settings, 'Value_001', '0.0');
 	}
-	else if (enum_identifier == 'SUBTRACT') {
-		set_socket_default_value (props.settings, 'Value', '1.0');
-		set_socket_default_value (props.settings, 'Value_001', '0.0');
+	else if (__eq__ (enum_identifier, 'SUBTRACT')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Value', '1.0');
+		__call__ (set_socket_default_value, null, props.settings, 'Value_001', '0.0');
 	}
-	else if (enum_identifier == 'MULTIPLY_ADD') {
-		set_socket_default_value (props.settings, 'Value_001', '1.0');
-		set_socket_default_value (props.settings, 'Value_002', '0.0');
+	else if (__eq__ (enum_identifier, 'MULTIPLY_ADD')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Value_001', '1.0');
+		__call__ (set_socket_default_value, null, props.settings, 'Value_002', '0.0');
 	}
 };
 export var set_int_math_node_default_props = function (enum_identifier, props) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -99,18 +105,18 @@ export var set_int_math_node_default_props = function (enum_identifier, props) {
 	else {
 	}
 	if (__in__ (enum_identifier, tuple (['MULTIPLY', 'DIVIDE', 'DIVIDE_ROUND', 'DIVIDE_FLOOR', 'DIVIDE_CEIL', 'FLOORED_MODULO', 'MODULO']))) {
-		set_socket_default_value (props.settings, 'Value', '1');
-		set_socket_default_value (props.settings, 'Value_001', '1');
+		__call__ (set_socket_default_value, null, props.settings, 'Value', '1');
+		__call__ (set_socket_default_value, null, props.settings, 'Value_001', '1');
 	}
-	else if (enum_identifier == 'MULTIPLY_ADD') {
-		set_socket_default_value (props.settings, 'Value', '1');
-		set_socket_default_value (props.settings, 'Value_001', '0');
+	else if (__eq__ (enum_identifier, 'MULTIPLY_ADD')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Value', '1');
+		__call__ (set_socket_default_value, null, props.settings, 'Value_001', '0');
 	}
 };
 export var set_vector_math_node_defaults = function (enum_identifier, props) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -123,16 +129,16 @@ export var set_vector_math_node_defaults = function (enum_identifier, props) {
 	else {
 	}
 	if (__in__ (enum_identifier, tuple (['MULTIPLY', 'DIVIDE', 'POWER', 'MODULO']))) {
-		set_socket_default_value (props.settings, 'Vector', '(1.0, 1.0, 1.0)');
-		set_socket_default_value (props.settings, 'Vector_001', '(1.0, 1.0, 1.0)');
+		__call__ (set_socket_default_value, null, props.settings, 'Vector', '(1.0, 1.0, 1.0)');
+		__call__ (set_socket_default_value, null, props.settings, 'Vector_001', '(1.0, 1.0, 1.0)');
 	}
-	else if (enum_identifier == 'SUBTRACT') {
-		set_socket_default_value (props.settings, 'Vector', '(1.0, 1.0, 1.0)');
-		set_socket_default_value (props.settings, 'Vector_001', '(0.0, 0.0, 0.0)');
+	else if (__eq__ (enum_identifier, 'SUBTRACT')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Vector', '(1.0, 1.0, 1.0)');
+		__call__ (set_socket_default_value, null, props.settings, 'Vector_001', '(0.0, 0.0, 0.0)');
 	}
-	else if (enum_identifier == 'MULTIPLY_ADD') {
-		set_socket_default_value (props.settings, 'Vector_001', '(1.0, 1.0, 1.0)');
-		set_socket_default_value (props.settings, 'Vector_002', '(0.0, 0.0, 0.0)');
+	else if (__eq__ (enum_identifier, 'MULTIPLY_ADD')) {
+		__call__ (set_socket_default_value, null, props.settings, 'Vector_001', '(1.0, 1.0, 1.0)');
+		__call__ (set_socket_default_value, null, props.settings, 'Vector_002', '(0.0, 0.0, 0.0)');
 	}
 };
 export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
@@ -140,7 +146,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -152,7 +158,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		return context.space_data.py_metatype == 'NODE_EDITOR';
+		return __eq__ (context.space_data.py_metatype, 'NODE_EDITOR');
 	});},
 	get node_operator () {return __getcm__ (this, function (cls, layout, node_type) {
 		var label = null;
@@ -161,7 +167,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		var translate = true;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -178,16 +184,22 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var bl_rna = bpy.types.Node.bl_rna_get_subclass (node_type);
+		var bl_rna = (function () {
+			var __accu0__ = bpy.types.Node;
+			return __call__ (__accu0__.bl_rna_get_subclass, __accu0__, node_type);
+		}) ();
 		if (!(label)) {
-			var label = (bl_rna ? bl_rna.py_name : n_ ('Unknown'));
+			var label = (bl_rna ? bl_rna.py_name : __call__ (n_, null, 'Unknown'));
 			var translate = true;
 		}
 		if (poll === true || poll === null) {
 			var translation_context = (bl_rna ? bl_rna.translation_context : i18n_contexts.py_default);
-			var props = layout.operator (cls.main_operator_id, __kwargtrans__ ({text: label, text_ctxt: translation_context, translate: translate, search_weight: search_weight}));
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, cls.main_operator_id, __kwargtrans__ ({text: label, text_ctxt: translation_context, translate: translate, search_weight: search_weight}));
+			}) ();
 			props.py_metatype = node_type;
-			if (hasattr (props, 'use_transform')) {
+			if (__call__ (hasattr, null, props, 'use_transform')) {
 				props.use_transform = cls.use_transform;
 			}
 			return props;
@@ -203,7 +215,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -221,23 +233,47 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		else {
 		}
 		var operators = [];
-		operators.append (cls.node_operator (layout, node_idname, __kwargtrans__ ({search_weight: search_weight})));
-		if (getattr (context, 'is_menu_search', false)) {
-			var node_type = getattr (bpy.types, node_idname);
-			var translation_context = node_type.bl_rna.properties [property_name].translation_context;
-			for (var item of node_type.bl_rna.properties [property_name].enum_items_static) {
-				var props = cls.node_operator (layout, node_idname, __kwargtrans__ ({label: '{:s} ▸ {:s}'.format (iface_ (node_type.bl_rna.py_name), iface_ (item.py_name, translation_context)), translate: false, search_weight: search_weight}));
-				var prop = props.settings.add ();
+		(function () {
+			var __accu0__ = operators;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = cls;
+				return __call__ (__accu1__.node_operator, __accu1__, layout, node_idname, __kwargtrans__ ({search_weight: search_weight}));
+			}) ());
+		}) ();
+		if (__call__ (getattr, null, context, 'is_menu_search', false)) {
+			var node_type = __call__ (getattr, null, bpy.types, node_idname);
+			var translation_context = __getitem__ (node_type.bl_rna.properties, property_name).translation_context;
+			var __iterable0__ = __getitem__ (node_type.bl_rna.properties, property_name).enum_items_static;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var item = __getitem__ (__iterable0__, __index0__);
+				var props = (function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.node_operator, __accu0__, layout, node_idname, __kwargtrans__ ({label: (function () {
+						var __accu1__ = '{:s} ▸ {:s}';
+						return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, node_type.bl_rna.py_name), __call__ (iface_, null, item.py_name, translation_context));
+					}) (), translate: false, search_weight: search_weight}));
+				}) ();
+				var prop = (function () {
+					var __accu0__ = props.settings;
+					return __call__ (__accu0__.add, __accu0__);
+				}) ();
 				prop.py_name = property_name;
-				prop.value = repr (item.identifier);
+				prop.value = __call__ (repr, null, item.identifier);
 				if (defaults_callback !== null) {
-					defaults_callback (item.identifier, props);
+					__call__ (defaults_callback, null, item.identifier, props);
 				}
-				operators.append (props);
+				(function () {
+					var __accu0__ = operators;
+					return __call__ (__accu0__.append, __accu0__, props);
+				}) ();
 			}
 		}
-		for (var props of operators) {
-			if (hasattr (props, 'use_transform')) {
+		var __iterable0__ = operators;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var props = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (hasattr, null, props, 'use_transform')) {
 				props.use_transform = cls.use_transform;
 			}
 		}
@@ -249,7 +285,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -267,19 +303,49 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		else {
 		}
 		var operators = [];
-		operators.append (cls.node_operator (layout, node_idname, __kwargtrans__ ({search_weight: search_weight})));
-		if (getattr (context, 'is_menu_search', false)) {
-			var node_type = getattr (bpy.types, node_idname);
-			for (var enum_name of enum_names) {
-				var props = cls.node_operator (layout, node_idname, __kwargtrans__ ({label: '{:s} ▸ {:s}'.format (iface_ (node_type.bl_rna.py_name), iface_ (enum_name)), translate: false, search_weight: search_weight}));
-				var prop = props.settings.add ();
-				prop.py_name = 'inputs["{:s}"].default_value'.format (bpy.utils.escape_identifier (socket_identifier));
-				prop.value = repr (enum_name);
-				operators.append (props);
+		(function () {
+			var __accu0__ = operators;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = cls;
+				return __call__ (__accu1__.node_operator, __accu1__, layout, node_idname, __kwargtrans__ ({search_weight: search_weight}));
+			}) ());
+		}) ();
+		if (__call__ (getattr, null, context, 'is_menu_search', false)) {
+			var node_type = __call__ (getattr, null, bpy.types, node_idname);
+			var __iterable0__ = enum_names;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var enum_name = __getitem__ (__iterable0__, __index0__);
+				var props = (function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.node_operator, __accu0__, layout, node_idname, __kwargtrans__ ({label: (function () {
+						var __accu1__ = '{:s} ▸ {:s}';
+						return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, node_type.bl_rna.py_name), __call__ (iface_, null, enum_name));
+					}) (), translate: false, search_weight: search_weight}));
+				}) ();
+				var prop = (function () {
+					var __accu0__ = props.settings;
+					return __call__ (__accu0__.add, __accu0__);
+				}) ();
+				prop.py_name = (function () {
+					var __accu0__ = 'inputs["{:s}"].default_value';
+					return __call__ (__accu0__.format, __accu0__, (function () {
+						var __accu1__ = bpy.utils;
+						return __call__ (__accu1__.escape_identifier, __accu1__, socket_identifier);
+					}) ());
+				}) ();
+				prop.value = __call__ (repr, null, enum_name);
+				(function () {
+					var __accu0__ = operators;
+					return __call__ (__accu0__.append, __accu0__, props);
+				}) ();
 			}
 		}
-		for (var props of operators) {
-			if (hasattr (props, 'use_transform')) {
+		var __iterable0__ = operators;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var props = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (hasattr, null, props, 'use_transform')) {
 				props.use_transform = cls.use_transform;
 			}
 		}
@@ -291,7 +357,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		var search_weight = 0.0;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -309,7 +375,10 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var bl_rna = bpy.types.Node.bl_rna_get_subclass (node_type);
+		var bl_rna = (function () {
+			var __accu0__ = bpy.types.Node;
+			return __call__ (__accu0__.bl_rna_get_subclass, __accu0__, node_type);
+		}) ();
 		if (!(label)) {
 			var label = (bl_rna ? bl_rna.py_name : 'Unknown');
 		}
@@ -317,16 +386,37 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 			return null;
 		}
 		var operators = [];
-		operators.append (cls.node_operator (layout, node_type, __kwargtrans__ ({label: label, search_weight: search_weight})));
-		if (getattr (context, 'is_menu_search', false)) {
-			for (var subname of subnames) {
-				var item_props = cls.node_operator (layout, node_type, __kwargtrans__ ({label: '{:s} ▸ {:s}'.format (iface_ (label), iface_ (subname)), search_weight: search_weight, translate: false}));
+		(function () {
+			var __accu0__ = operators;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = cls;
+				return __call__ (__accu1__.node_operator, __accu1__, layout, node_type, __kwargtrans__ ({label: label, search_weight: search_weight}));
+			}) ());
+		}) ();
+		if (__call__ (getattr, null, context, 'is_menu_search', false)) {
+			var __iterable0__ = subnames;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var subname = __getitem__ (__iterable0__, __index0__);
+				var item_props = (function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.node_operator, __accu0__, layout, node_type, __kwargtrans__ ({label: (function () {
+						var __accu1__ = '{:s} ▸ {:s}';
+						return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, label), __call__ (iface_, null, subname));
+					}) (), search_weight: search_weight, translate: false}));
+				}) ();
 				item_props.visible_output = subname;
-				operators.append (item_props);
+				(function () {
+					var __accu0__ = operators;
+					return __call__ (__accu0__.append, __accu0__, item_props);
+				}) ();
 			}
 		}
-		for (var props of operators) {
-			if (hasattr (props, 'use_transform')) {
+		var __iterable0__ = operators;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var props = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (hasattr, null, props, 'use_transform')) {
 				props.use_transform = cls.use_transform;
 			}
 		}
@@ -338,7 +428,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -352,29 +442,59 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var label = iface_ ('Mix Color');
+		var label = __call__ (iface_, null, 'Mix Color');
 		var operators = [];
-		var props = cls.node_operator (layout, 'ShaderNodeMix', __kwargtrans__ ({label: label, translate: false, search_weight: search_weight}));
-		var ops = props.settings.add ();
+		var props = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMix', __kwargtrans__ ({label: label, translate: false, search_weight: search_weight}));
+		}) ();
+		var ops = (function () {
+			var __accu0__ = props.settings;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
 		ops.py_name = 'data_type';
 		ops.value = "'RGBA'";
-		operators.append (props);
-		if (getattr (context, 'is_menu_search', false)) {
-			var translation_context = bpy.types.ShaderNodeMix.bl_rna.properties ['blend_type'].translation_context;
-			for (var item of bpy.types.ShaderNodeMix.bl_rna.properties ['blend_type'].enum_items_static) {
-				var props = cls.node_operator (layout, 'ShaderNodeMix', __kwargtrans__ ({label: '{:s} ▸ {:s}'.format (label, iface_ (item.py_name, translation_context)), translate: false, search_weight: search_weight}));
-				var prop = props.settings.add ();
+		(function () {
+			var __accu0__ = operators;
+			return __call__ (__accu0__.append, __accu0__, props);
+		}) ();
+		if (__call__ (getattr, null, context, 'is_menu_search', false)) {
+			var translation_context = __getitem__ (bpy.types.ShaderNodeMix.bl_rna.properties, 'blend_type').translation_context;
+			var __iterable0__ = __getitem__ (bpy.types.ShaderNodeMix.bl_rna.properties, 'blend_type').enum_items_static;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var item = __getitem__ (__iterable0__, __index0__);
+				var props = (function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMix', __kwargtrans__ ({label: (function () {
+						var __accu1__ = '{:s} ▸ {:s}';
+						return __call__ (__accu1__.format, __accu1__, label, __call__ (iface_, null, item.py_name, translation_context));
+					}) (), translate: false, search_weight: search_weight}));
+				}) ();
+				var prop = (function () {
+					var __accu0__ = props.settings;
+					return __call__ (__accu0__.add, __accu0__);
+				}) ();
 				prop.py_name = 'data_type';
 				prop.value = "'RGBA'";
-				var prop = props.settings.add ();
+				var prop = (function () {
+					var __accu0__ = props.settings;
+					return __call__ (__accu0__.add, __accu0__);
+				}) ();
 				prop.py_name = 'blend_type';
-				prop.value = repr (item.identifier);
-				color_mix_node_defaults (item.identifier, props);
-				operators.append (props);
+				prop.value = __call__ (repr, null, item.identifier);
+				__call__ (color_mix_node_defaults, null, item.identifier, props);
+				(function () {
+					var __accu0__ = operators;
+					return __call__ (__accu0__.append, __accu0__, props);
+				}) ();
 			}
 		}
-		for (var props of operators) {
-			if (hasattr (props, 'use_transform')) {
+		var __iterable0__ = operators;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var props = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (hasattr, null, props, 'use_transform')) {
 				props.use_transform = cls.use_transform;
 			}
 		}
@@ -383,7 +503,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get typed_bundle () {return __getcm__ (this, function (cls, layout, label) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -396,8 +516,11 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var props = layout.operator (cls.typed_bundle_operator_id, __kwargtrans__ ({text: label, text_ctxt: i18n_contexts.py_default}));
-		if (hasattr (props, 'use_transform')) {
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, cls.typed_bundle_operator_id, __kwargtrans__ ({text: label, text_ctxt: i18n_contexts.py_default}));
+		}) ();
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 		return props;
@@ -405,7 +528,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get new_empty_group () {return __getcm__ (this, function (cls, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -417,8 +540,11 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var props = layout.operator (cls.new_empty_group_operator_id, __kwargtrans__ ({text: 'New Group', text_ctxt: i18n_contexts.py_default, icon: 'ADD'}));
-		if (hasattr (props, 'use_transform')) {
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, cls.new_empty_group_operator_id, __kwargtrans__ ({text: 'New Group', text_ctxt: i18n_contexts.py_default, icon: 'ADD'}));
+		}) ();
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 		return props;
@@ -426,7 +552,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get draw_group_menu () {return __getcm__ (this, function (cls, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -442,26 +568,50 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		var space_node = context.space_data;
 		var node_tree = space_node.edit_tree;
 		var all_node_groups = context.blend_data.node_groups;
-		cls.new_empty_group (layout);
-		if (__in__ (node_tree, all_node_groups.py_values ())) {
-			layout.separator ();
-			cls.node_operator (layout, 'NodeGroupInput');
-			cls.node_operator (layout, 'NodeGroupOutput');
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.new_empty_group, __accu0__, layout);
+		}) ();
+		if (__in__ (node_tree, (function () {
+			var __accu0__ = all_node_groups;
+			return __call__ (__accu0__.py_values, __accu0__);
+		}) ())) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeGroupInput');
+			}) ();
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeGroupOutput');
+			}) ();
 		}
 		if (node_tree) {
 			var prefs = bpy.context.preferences;
 			var show_hidden = prefs.show_hidden_ids;
 			var local_groups = [];
 			var has_non_local_groups = false;
-			for (var group of context.blend_data.node_groups) {
-				if (group.bl_idname != node_tree.bl_idname) {
+			var __iterable0__ = context.blend_data.node_groups;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var group = __getitem__ (__iterable0__, __index0__);
+				if (__ne__ (group.bl_idname, node_tree.bl_idname)) {
 					continue;
 				}
-				if (group.contains_tree (node_tree)) {
+				if ((function () {
+					var __accu0__ = group;
+					return __call__ (__accu0__.contains_tree, __accu0__, node_tree);
+				}) ()) {
 					continue;
 				}
 				if (!(show_hidden)) {
-					if (group.py_name.startswith ('.')) {
+					if ((function () {
+						var __accu0__ = group.py_name;
+						return __call__ (__accu0__.startswith, __accu0__, '.');
+					}) ()) {
 						continue;
 					}
 				}
@@ -469,16 +619,34 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 					var has_non_local_groups = true;
 					continue;
 				}
-				local_groups.append (group);
+				(function () {
+					var __accu0__ = local_groups;
+					return __call__ (__accu0__.append, __accu0__, group);
+				}) ();
 			}
 			if (has_non_local_groups) {
-				layout.separator ();
-				cls.draw_menu (layout, __kwargtrans__ ({path: 'Group/Linked'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.draw_menu, __accu0__, layout, __kwargtrans__ ({path: 'Group/Linked'}));
+				}) ();
 			}
 			if (local_groups) {
-				layout.separator ();
-				for (var group of local_groups) {
-					cls.draw_group (context, layout, group);
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var __iterable0__ = local_groups;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var group = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu0__ = cls;
+						return __call__ (__accu0__.draw_group, __accu0__, context, layout, group);
+					}) ();
 				}
 			}
 		}
@@ -486,7 +654,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get draw_linked_groups () {return __getcm__ (this, function (cls, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -503,28 +671,37 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		var node_tree = space_node.edit_tree;
 		var prefs = bpy.context.preferences;
 		var show_hidden = prefs.show_hidden_ids;
-		for (var group of context.blend_data.node_groups) {
+		var __iterable0__ = context.blend_data.node_groups;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var group = __getitem__ (__iterable0__, __index0__);
 			if (group.library === null) {
 				continue;
 			}
-			if (group.bl_idname != node_tree.bl_idname) {
+			if (__ne__ (group.bl_idname, node_tree.bl_idname)) {
 				continue;
 			}
 			if (group.is_library_indirect) {
 				continue;
 			}
 			if (!(show_hidden)) {
-				if (group.py_name.startswith ('.')) {
+				if ((function () {
+					var __accu0__ = group.py_name;
+					return __call__ (__accu0__.startswith, __accu0__, '.');
+				}) ()) {
 					continue;
 				}
 			}
-			cls.draw_group (context, layout, group);
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.draw_group, __accu0__, context, layout, group);
+			}) ();
 		}
 	});},
 	get draw_group () {return __getcm__ (this, function (cls, context, layout, group) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -538,26 +715,41 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var node_tree_group_type = _member ('nodeitems_builtins', 'node_tree_group_type');
-		var search_weight = (group.is_linked_packed ? -(1.0) : 0.0);
-		var props = cls.node_operator (layout, node_tree_group_type [group.bl_idname], __kwargtrans__ ({label: group.py_name, search_weight: search_weight}));
-		var ops = props.settings.add ();
+		var node_tree_group_type = __call__ (_member, null, 'nodeitems_builtins', 'node_tree_group_type');
+		var search_weight = (group.is_linked_packed ? __neg__ (1.0) : 0.0);
+		var props = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, __getitem__ (node_tree_group_type, group.bl_idname), __kwargtrans__ ({label: group.py_name, search_weight: search_weight}));
+		}) ();
+		var ops = (function () {
+			var __accu0__ = props.settings;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
 		ops.py_name = 'node_tree';
-		ops.value = 'bpy.data.node_groups[{!r}]'.format (group.py_name);
-		var ops = props.settings.add ();
+		ops.value = (function () {
+			var __accu0__ = 'bpy.data.node_groups[{!r}]';
+			return __call__ (__accu0__.format, __accu0__, group.py_name);
+		}) ();
+		var ops = (function () {
+			var __accu0__ = props.settings;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
 		ops.py_name = 'width';
-		ops.value = repr (group.default_group_node_width);
-		var ops = props.settings.add ();
+		ops.value = __call__ (repr, null, group.default_group_node_width);
+		var ops = (function () {
+			var __accu0__ = props.settings;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
 		ops.py_name = 'name';
-		ops.value = repr (group.py_name);
-		if (hasattr (props, 'use_transform')) {
+		ops.value = __call__ (repr, null, group.py_name);
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 	});},
 	get draw_menu () {return __getcm__ (this, function (cls, layout, path) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -571,16 +763,22 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		else {
 		}
 		if (cls.pathing_dict === null) {
-			var __except0__ = ValueError ('`pathing_dict` was not set for {!s}'.format (cls));
+			var __except0__ = __call__ (ValueError, null, (function () {
+				var __accu0__ = '`pathing_dict` was not set for {!s}';
+				return __call__ (__accu0__.format, __accu0__, cls);
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		layout.menu (cls.pathing_dict [path]);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, __getitem__ (cls.pathing_dict, path));
+		}) ();
 	});},
 	get simulation_zone () {return __getcm__ (this, function (cls, layout, label) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -593,11 +791,14 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var props = layout.operator (cls.zone_operator_id, __kwargtrans__ ({text: iface_ (label), translate: false}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, cls.zone_operator_id, __kwargtrans__ ({text: __call__ (iface_, null, label), translate: false}));
+		}) ();
 		props.input_node_type = 'GeometryNodeSimulationInput';
 		props.output_node_type = 'GeometryNodeSimulationOutput';
 		props.add_default_geometry_link = true;
-		if (hasattr (props, 'use_transform')) {
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 		return props;
@@ -605,7 +806,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get repeat_zone () {return __getcm__ (this, function (cls, layout, label) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -618,11 +819,14 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var props = layout.operator (cls.zone_operator_id, __kwargtrans__ ({text: iface_ (label), translate: false}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, cls.zone_operator_id, __kwargtrans__ ({text: __call__ (iface_, null, label), translate: false}));
+		}) ();
 		props.input_node_type = 'GeometryNodeRepeatInput';
 		props.output_node_type = 'GeometryNodeRepeatOutput';
 		props.add_default_geometry_link = true;
-		if (hasattr (props, 'use_transform')) {
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 		return props;
@@ -630,7 +834,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get for_each_element_zone () {return __getcm__ (this, function (cls, layout, label) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -643,11 +847,14 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var props = layout.operator (cls.zone_operator_id, __kwargtrans__ ({text: iface_ (label), translate: false}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, cls.zone_operator_id, __kwargtrans__ ({text: __call__ (iface_, null, label), translate: false}));
+		}) ();
 		props.input_node_type = 'GeometryNodeForeachGeometryElementInput';
 		props.output_node_type = 'GeometryNodeForeachGeometryElementOutput';
 		props.add_default_geometry_link = false;
-		if (hasattr (props, 'use_transform')) {
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 		return props;
@@ -655,7 +862,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get closure_zone () {return __getcm__ (this, function (cls, layout, label) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -668,11 +875,14 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		}
 		else {
 		}
-		var props = layout.operator (cls.zone_operator_id, __kwargtrans__ ({text: iface_ (label), translate: false}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, cls.zone_operator_id, __kwargtrans__ ({text: __call__ (iface_, null, label), translate: false}));
+		}) ();
 		props.input_node_type = 'NodeClosureInput';
 		props.output_node_type = 'NodeClosureOutput';
 		props.add_default_geometry_link = false;
-		if (hasattr (props, 'use_transform')) {
+		if (__call__ (hasattr, null, props, 'use_transform')) {
 			props.use_transform = cls.use_transform;
 		}
 		return props;
@@ -680,7 +890,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 	get draw_root_assets () {return __getcm__ (this, function (cls, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -693,7 +903,10 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		else {
 		}
 		if (cls.draw_assets) {
-			layout.menu_contents (cls.root_asset_menu);
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, cls.root_asset_menu);
+			}) ();
 		}
 	});}
 });
@@ -709,7 +922,7 @@ export var AddNodeMenu =  __class__ ('AddNodeMenu', [NodeMenu], {
 	get draw_assets_for_catalog () {return __getcm__ (this, function (cls, layout, catalog_path) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -723,7 +936,10 @@ export var AddNodeMenu =  __class__ ('AddNodeMenu', [NodeMenu], {
 		else {
 		}
 		if (cls.draw_assets) {
-			layout.template_node_asset_menu_items (__kwargtrans__ ({catalog_path: catalog_path, operator: 'ADD'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_node_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: catalog_path, operator: 'ADD'}));
+			}) ();
 		}
 	});}
 });
@@ -738,7 +954,7 @@ export var SwapNodeMenu =  __class__ ('SwapNodeMenu', [NodeMenu], {
 	get draw_assets_for_catalog () {return __getcm__ (this, function (cls, layout, catalog_path) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -752,7 +968,10 @@ export var SwapNodeMenu =  __class__ ('SwapNodeMenu', [NodeMenu], {
 		else {
 		}
 		if (cls.draw_assets) {
-			layout.template_node_asset_menu_items (__kwargtrans__ ({catalog_path: catalog_path, operator: 'SWAP'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_node_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: catalog_path, operator: 'SWAP'}));
+			}) ();
 		}
 	});}
 });
@@ -762,7 +981,7 @@ export var NODE_MT_group_base =  __class__ ('NODE_MT_group_base', [NodeMenu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -775,8 +994,14 @@ export var NODE_MT_group_base =  __class__ ('NODE_MT_group_base', [NodeMenu], {
 		else {
 		}
 		var layout = self.layout;
-		self.draw_group_menu (context, layout);
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_group_menu, __accu0__, context, layout);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_linked_group_base =  __class__ ('NODE_MT_linked_group_base', [NodeMenu], {
@@ -785,7 +1010,7 @@ export var NODE_MT_linked_group_base =  __class__ ('NODE_MT_linked_group_base', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -798,7 +1023,10 @@ export var NODE_MT_linked_group_base =  __class__ ('NODE_MT_linked_group_base', 
 		else {
 		}
 		var layout = self.layout;
-		self.draw_linked_groups (context, layout);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_linked_groups, __accu0__, context, layout);
+		}) ();
 	});}
 });
 export var NODE_MT_layout_base =  __class__ ('NODE_MT_layout_base', [NodeMenu], {
@@ -807,7 +1035,7 @@ export var NODE_MT_layout_base =  __class__ ('NODE_MT_layout_base', [NodeMenu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -820,9 +1048,18 @@ export var NODE_MT_layout_base =  __class__ ('NODE_MT_layout_base', [NodeMenu], 
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'NodeFrame', __kwargtrans__ ({search_weight: -(1)}));
-		self.node_operator (layout, 'NodeReroute');
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeFrame', __kwargtrans__ ({search_weight: __neg__ (1)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeReroute');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var add_base_pathing_dict = dict ({'Group': 'NODE_MT_group_add', 'Group/Linked': 'NODE_MT_linked_group_add', 'Layout': 'NODE_MT_category_layout'});
@@ -833,7 +1070,7 @@ export var generate_menu = function (bl_idname, template, layout_base, pathing_d
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -847,12 +1084,15 @@ export var generate_menu = function (bl_idname, template, layout_base, pathing_d
 	}
 	else {
 	}
-	return py_metatype.__new__ (py_metatype, bl_idname, tuple ([template, layout_base]), dict ({'bl_idname': bl_idname, 'pathing_dict': pathing_dict}));
+	return (function () {
+		var __accu0__ = py_metatype;
+		return __call__ (__accu0__.__new__, __accu0__, py_metatype, bl_idname, tuple ([template, layout_base]), dict ({'bl_idname': bl_idname, 'pathing_dict': pathing_dict}));
+	}) ();
 };
 export var generate_menus = function (menus, template, base_dict) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -865,22 +1105,36 @@ export var generate_menus = function (menus, template, base_dict) {
 	}
 	else {
 	}
-	var py_copy = _module ('copy');
-	var pathing_dict = py_copy.py_copy (base_dict);
-	var menus = tuple ((function () {
+	var py_copy = __call__ (_module, null, 'copy');
+	var pathing_dict = (function () {
+		var __accu0__ = py_copy;
+		return __call__ (__accu0__.py_copy, __accu0__, base_dict);
+	}) ();
+	var menus = __call__ (tuple, null, (function () {
 		var __accu0__ = [];
-		for (var [bl_idname, layout_base] of list (menus.py_items ())) {
-			__accu0__.append (generate_menu (bl_idname, template, layout_base, pathing_dict));
+		var __iterable0__ = __call__ (list, null, (function () {
+			var __accu1__ = menus;
+			return __call__ (__accu1__.py_items, __accu1__);
+		}) ());
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var bl_idname = __left0__ [0];
+			var layout_base = __left0__ [1];
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, __call__ (generate_menu, null, bl_idname, template, layout_base, pathing_dict));
+			}) ();
 		}
 		return __accu0__;
 	}) ());
-	generate_pathing_dict (pathing_dict, menus);
+	__call__ (generate_pathing_dict, null, pathing_dict, menus);
 	return menus;
 };
 export var generate_pathing_dict = function (pathing_dict, menus) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -892,22 +1146,52 @@ export var generate_pathing_dict = function (pathing_dict, menus) {
 	}
 	else {
 	}
-	for (var menu of menus) {
-		if (hasattr (menu, 'menu_path')) {
+	var __iterable0__ = menus;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var menu = __getitem__ (__iterable0__, __index0__);
+		if (__call__ (hasattr, null, menu, 'menu_path')) {
 			var menu_path = menu.menu_path;
 		}
 		else {
 			var menu_path = menu.bl_label;
 		}
-		pathing_dict [menu_path] = menu.bl_idname;
+		__setitem__ (pathing_dict, menu_path, menu.bl_idname);
 	}
 };
-export var classes = tuple ([generate_menu ('NODE_MT_group_add', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_group_base, pathing_dict: add_base_pathing_dict})), generate_menu ('NODE_MT_group_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_group_base, pathing_dict: swap_base_pathing_dict})), generate_menu ('NODE_MT_linked_group_add', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_linked_group_base, pathing_dict: add_base_pathing_dict})), generate_menu ('NODE_MT_linked_group_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_linked_group_base, pathing_dict: swap_base_pathing_dict})), generate_menu ('NODE_MT_category_layout', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_layout_base, pathing_dict: add_base_pathing_dict})), generate_menu ('NODE_MT_layout_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_layout_base, pathing_dict: swap_base_pathing_dict}))]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+export var classes = tuple ([__call__ (generate_menu, null, 'NODE_MT_group_add', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_group_base, pathing_dict: add_base_pathing_dict})), __call__ (generate_menu, null, 'NODE_MT_group_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_group_base, pathing_dict: swap_base_pathing_dict})), __call__ (generate_menu, null, 'NODE_MT_linked_group_add', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_linked_group_base, pathing_dict: add_base_pathing_dict})), __call__ (generate_menu, null, 'NODE_MT_linked_group_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_linked_group_base, pathing_dict: swap_base_pathing_dict})), __call__ (generate_menu, null, 'NODE_MT_category_layout', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_layout_base, pathing_dict: add_base_pathing_dict})), __call__ (generate_menu, null, 'NODE_MT_layout_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_layout_base, pathing_dict: swap_base_pathing_dict}))]);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.node_add_menu.map
 export {Menu, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, n_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'set_socket_default_value': set_socket_default_value = value; break;
+		case 'color_mix_node_defaults': color_mix_node_defaults = value; break;
+		case 'set_math_node_default_props': set_math_node_default_props = value; break;
+		case 'set_int_math_node_default_props': set_int_math_node_default_props = value; break;
+		case 'set_vector_math_node_defaults': set_vector_math_node_defaults = value; break;
+		case 'NodeMenu': NodeMenu = value; break;
+		case 'AddNodeMenu': AddNodeMenu = value; break;
+		case 'SwapNodeMenu': SwapNodeMenu = value; break;
+		case 'NODE_MT_group_base': NODE_MT_group_base = value; break;
+		case 'NODE_MT_linked_group_base': NODE_MT_linked_group_base = value; break;
+		case 'NODE_MT_layout_base': NODE_MT_layout_base = value; break;
+		case 'add_base_pathing_dict': add_base_pathing_dict = value; break;
+		case 'swap_base_pathing_dict': swap_base_pathing_dict = value; break;
+		case 'generate_menu': generate_menu = value; break;
+		case 'generate_menus': generate_menus = value; break;
+		case 'generate_pathing_dict': generate_pathing_dict = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

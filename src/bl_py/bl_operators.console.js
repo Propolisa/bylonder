@@ -13,7 +13,7 @@ var __name__ = 'bl_operators.console';
 export var _lang_module_get = function (sc) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -24,7 +24,7 @@ export var _lang_module_get = function (sc) {
 	}
 	else {
 	}
-	return _import ('_console_' + sc.language, __kwargtrans__ ({level: 0}));
+	return __call__ (_import, null, __add__ ('_console_', sc.language), __kwargtrans__ ({level: 0}));
 };
 export var ConsoleExec =  __class__ ('ConsoleExec', [Operator], {
 	__module__: __name__,
@@ -34,7 +34,7 @@ export var ConsoleExec =  __class__ ('ConsoleExec', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -46,12 +46,12 @@ export var ConsoleExec =  __class__ ('ConsoleExec', [Operator], {
 		}
 		else {
 		}
-		return context.area && context.area.py_metatype == 'CONSOLE';
+		return context.area && __eq__ (context.area.py_metatype, 'CONSOLE');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -64,18 +64,21 @@ export var ConsoleExec =  __class__ ('ConsoleExec', [Operator], {
 		else {
 		}
 		var sc = context.space_data;
-		var module = _lang_module_get (sc);
-		var execute = getattr (module, 'execute', null);
+		var module = __call__ (_lang_module_get, null, sc);
+		var execute = __call__ (getattr, null, module, 'execute', null);
 		if (execute !== null) {
-			return execute (context, self.interactive);
+			return __call__ (execute, null, context, self.interactive);
 		}
 		else {
-			print ('Error: bpy.ops.console.execute_{:s} - not found'.format (sc.language));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Error: bpy.ops.console.execute_{:s} - not found';
+				return __call__ (__accu0__.format, __accu0__, sc.language);
+			}) ());
 			return new set (['FINISHED']);
 		}
 	});}
 });
-ConsoleExec.__annotations__ = dict ({'interactive': BoolProperty (__kwargtrans__ ({options: new set (['SKIP_SAVE'])}))});
+ConsoleExec.__annotations__ = dict ({'interactive': __call__ (BoolProperty, null, __kwargtrans__ ({options: new set (['SKIP_SAVE'])}))});
 export var ConsoleAutocomplete =  __class__ ('ConsoleAutocomplete', [Operator], {
 	__module__: __name__,
 	bl_idname: 'console.autocomplete',
@@ -83,7 +86,7 @@ export var ConsoleAutocomplete =  __class__ ('ConsoleAutocomplete', [Operator], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -95,12 +98,12 @@ export var ConsoleAutocomplete =  __class__ ('ConsoleAutocomplete', [Operator], 
 		}
 		else {
 		}
-		return context.area && context.area.py_metatype == 'CONSOLE';
+		return context.area && __eq__ (context.area.py_metatype, 'CONSOLE');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -113,13 +116,16 @@ export var ConsoleAutocomplete =  __class__ ('ConsoleAutocomplete', [Operator], 
 		else {
 		}
 		var sc = context.space_data;
-		var module = _lang_module_get (sc);
-		var autocomplete = getattr (module, 'autocomplete', null);
+		var module = __call__ (_lang_module_get, null, sc);
+		var autocomplete = __call__ (getattr, null, module, 'autocomplete', null);
 		if (autocomplete) {
-			return autocomplete (context);
+			return __call__ (autocomplete, null, context);
 		}
 		else {
-			print ('Error: bpy.ops.console.autocomplete_{:s} - not found'.format (sc.language));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Error: bpy.ops.console.autocomplete_{:s} - not found';
+				return __call__ (__accu0__.format, __accu0__, sc.language);
+			}) ());
 			return new set (['FINISHED']);
 		}
 	});}
@@ -131,7 +137,7 @@ export var ConsoleCopyAsScript =  __class__ ('ConsoleCopyAsScript', [Operator], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,12 +149,12 @@ export var ConsoleCopyAsScript =  __class__ ('ConsoleCopyAsScript', [Operator], 
 		}
 		else {
 		}
-		return context.area && context.area.py_metatype == 'CONSOLE';
+		return context.area && __eq__ (context.area.py_metatype, 'CONSOLE');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -161,13 +167,16 @@ export var ConsoleCopyAsScript =  __class__ ('ConsoleCopyAsScript', [Operator], 
 		else {
 		}
 		var sc = context.space_data;
-		var module = _lang_module_get (sc);
-		var copy_as_script = getattr (module, 'copy_as_script', null);
+		var module = __call__ (_lang_module_get, null, sc);
+		var copy_as_script = __call__ (getattr, null, module, 'copy_as_script', null);
 		if (copy_as_script) {
-			return copy_as_script (context);
+			return __call__ (copy_as_script, null, context);
 		}
 		else {
-			print ('Error: copy_as_script - not found for {!r}'.format (sc.language));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Error: copy_as_script - not found for {!r}';
+				return __call__ (__accu0__.format, __accu0__, sc.language);
+			}) ());
 			return new set (['FINISHED']);
 		}
 	});}
@@ -179,7 +188,7 @@ export var ConsoleBanner =  __class__ ('ConsoleBanner', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -191,12 +200,12 @@ export var ConsoleBanner =  __class__ ('ConsoleBanner', [Operator], {
 		}
 		else {
 		}
-		return context.area && context.area.py_metatype == 'CONSOLE';
+		return context.area && __eq__ (context.area.py_metatype, 'CONSOLE');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -212,13 +221,16 @@ export var ConsoleBanner =  __class__ ('ConsoleBanner', [Operator], {
 		if (!(sc.language)) {
 			sc.language = 'python';
 		}
-		var module = _lang_module_get (sc);
-		var banner = getattr (module, 'banner', null);
+		var module = __call__ (_lang_module_get, null, sc);
+		var banner = __call__ (getattr, null, module, 'banner', null);
 		if (banner) {
-			return banner (context);
+			return __call__ (banner, null, context);
 		}
 		else {
-			print ('Error: bpy.ops.console.banner_{:s} - not found'.format (sc.language));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Error: bpy.ops.console.banner_{:s} - not found';
+				return __call__ (__accu0__.format, __accu0__, sc.language);
+			}) ());
 			return new set (['FINISHED']);
 		}
 	});}
@@ -230,7 +242,7 @@ export var ConsoleLanguage =  __class__ ('ConsoleLanguage', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -242,12 +254,12 @@ export var ConsoleLanguage =  __class__ ('ConsoleLanguage', [Operator], {
 		}
 		else {
 		}
-		return context.area && context.area.py_metatype == 'CONSOLE';
+		return context.area && __eq__ (context.area.py_metatype, 'CONSOLE');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -261,13 +273,32 @@ export var ConsoleLanguage =  __class__ ('ConsoleLanguage', [Operator], {
 		}
 		var sc = context.space_data;
 		sc.language = self.language;
-		bpy.ops.console.banner ();
-		bpy.ops.console.history_append (__kwargtrans__ ({text: '', current_character: 0, remove_duplicates: true}));
+		(function () {
+			var __accu0__ = bpy.ops.console;
+			return __call__ (__accu0__.banner, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.console;
+			return __call__ (__accu0__.history_append, __accu0__, __kwargtrans__ ({text: '', current_character: 0, remove_duplicates: true}));
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
-ConsoleLanguage.__annotations__ = dict ({'language': StringProperty (__kwargtrans__ ({py_name: 'Language', translation_context: i18n_contexts.editor_python_console, maxlen: 32}))});
+ConsoleLanguage.__annotations__ = dict ({'language': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Language', translation_context: i18n_contexts.editor_python_console, maxlen: 32}))});
 export var classes = tuple ([ConsoleAutocomplete, ConsoleBanner, ConsoleCopyAsScript, ConsoleExec, ConsoleLanguage]);
 
 //# sourceMappingURL=bl_operators.console.map
 export {BoolProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_lang_module_get': _lang_module_get = value; break;
+		case 'ConsoleExec': ConsoleExec = value; break;
+		case 'ConsoleAutocomplete': ConsoleAutocomplete = value; break;
+		case 'ConsoleCopyAsScript': ConsoleCopyAsScript = value; break;
+		case 'ConsoleBanner': ConsoleBanner = value; break;
+		case 'ConsoleLanguage': ConsoleLanguage = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

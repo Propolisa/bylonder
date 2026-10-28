@@ -15,7 +15,7 @@ export var CONSOLE_HT_header =  __class__ ('CONSOLE_HT_header', [Header], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -28,8 +28,14 @@ export var CONSOLE_HT_header =  __class__ ('CONSOLE_HT_header', [Header], {
 		else {
 		}
 		var layout = self.layout;
-		layout.template_header ();
-		CONSOLE_MT_editor_menus.draw_collapsible (context, layout);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_header, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = CONSOLE_MT_editor_menus;
+			return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+		}) ();
 	});}
 });
 export var CONSOLE_MT_editor_menus =  __class__ ('CONSOLE_MT_editor_menus', [Menu], {
@@ -39,7 +45,7 @@ export var CONSOLE_MT_editor_menus =  __class__ ('CONSOLE_MT_editor_menus', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -52,8 +58,14 @@ export var CONSOLE_MT_editor_menus =  __class__ ('CONSOLE_MT_editor_menus', [Men
 		else {
 		}
 		var layout = self.layout;
-		layout.menu ('CONSOLE_MT_view');
-		layout.menu ('CONSOLE_MT_console');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'CONSOLE_MT_view');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'CONSOLE_MT_console');
+		}) ();
 	});}
 });
 export var CONSOLE_MT_view =  __class__ ('CONSOLE_MT_view', [Menu], {
@@ -62,7 +74,7 @@ export var CONSOLE_MT_view =  __class__ ('CONSOLE_MT_view', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -75,21 +87,54 @@ export var CONSOLE_MT_view =  __class__ ('CONSOLE_MT_view', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		var props = layout.operator ('wm.context_cycle_int', __kwargtrans__ ({text: 'Zoom In'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.context_cycle_int', __kwargtrans__ ({text: 'Zoom In'}));
+		}) ();
 		props.data_path = 'space_data.font_size';
 		props.reverse = false;
-		var props = layout.operator ('wm.context_cycle_int', __kwargtrans__ ({text: 'Zoom Out'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.context_cycle_int', __kwargtrans__ ({text: 'Zoom Out'}));
+		}) ();
 		props.data_path = 'space_data.font_size';
 		props.reverse = true;
-		layout.separator ();
-		layout.operator ('console.move', __kwargtrans__ ({text: 'Move to Previous Word'})).py_metatype = 'PREVIOUS_WORD';
-		layout.operator ('console.move', __kwargtrans__ ({text: 'Move to Next Word'})).py_metatype = 'NEXT_WORD';
-		layout.operator ('console.move', __kwargtrans__ ({text: 'Move to Line Begin'})).py_metatype = 'LINE_BEGIN';
-		layout.operator ('console.move', __kwargtrans__ ({text: 'Move to Line End'})).py_metatype = 'LINE_END';
-		layout.separator ();
-		layout.menu ('CONSOLE_MT_language');
-		layout.separator ();
-		layout.menu ('INFO_MT_area');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.move', __kwargtrans__ ({text: 'Move to Previous Word'}));
+		}) ().py_metatype = 'PREVIOUS_WORD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.move', __kwargtrans__ ({text: 'Move to Next Word'}));
+		}) ().py_metatype = 'NEXT_WORD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.move', __kwargtrans__ ({text: 'Move to Line Begin'}));
+		}) ().py_metatype = 'LINE_BEGIN';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.move', __kwargtrans__ ({text: 'Move to Line End'}));
+		}) ().py_metatype = 'LINE_END';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'CONSOLE_MT_language');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_area');
+		}) ();
 	});}
 });
 export var CONSOLE_MT_language =  __class__ ('CONSOLE_MT_language', [Menu], {
@@ -98,7 +143,7 @@ export var CONSOLE_MT_language =  __class__ ('CONSOLE_MT_language', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -110,18 +155,50 @@ export var CONSOLE_MT_language =  __class__ ('CONSOLE_MT_language', [Menu], {
 		}
 		else {
 		}
-		var sys = _module ('sys');
+		var sys = __call__ (_module, null, 'sys');
 		var layout = self.layout;
-		layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		var languages = [];
-		for (var [modname, mod] of sys.modules.py_items ()) {
-			if (modname.startswith ('_console_') && hasattr (mod, 'execute')) {
-				languages.append (modname.py_split ('_', 2) [-(1)]);
+		var __iterable0__ = (function () {
+			var __accu0__ = sys.modules;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var modname = __left0__ [0];
+			var mod = __left0__ [1];
+			if ((function () {
+				var __accu0__ = modname;
+				return __call__ (__accu0__.startswith, __accu0__, '_console_');
+			}) () && __call__ (hasattr, null, mod, 'execute')) {
+				(function () {
+					var __accu0__ = languages;
+					return __call__ (__accu0__.append, __accu0__, __getitem__ ((function () {
+						var __accu1__ = modname;
+						return __call__ (__accu1__.py_split, __accu1__, '_', 2);
+					}) (), __neg__ (1)));
+				}) ();
 			}
 		}
-		languages.py_sort ();
-		for (var language of languages) {
-			layout.operator ('console.language', __kwargtrans__ ({text: language.title (), translate: false})).language = language;
+		(function () {
+			var __accu0__ = languages;
+			return __call__ (__accu0__.py_sort, __accu0__);
+		}) ();
+		var __iterable0__ = languages;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var language = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'console.language', __kwargtrans__ ({text: (function () {
+					var __accu1__ = language;
+					return __call__ (__accu1__.title, __accu1__);
+				}) (), translate: false}));
+			}) ().language = language;
 		}
 	});}
 });
@@ -131,7 +208,7 @@ export var CONSOLE_MT_console =  __class__ ('CONSOLE_MT_console', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -144,23 +221,74 @@ export var CONSOLE_MT_console =  __class__ ('CONSOLE_MT_console', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('console.clear');
-		layout.operator ('console.clear_line');
-		layout.operator ('console.delete', __kwargtrans__ ({text: 'Delete Previous Word'})).py_metatype = 'PREVIOUS_WORD';
-		layout.operator ('console.delete', __kwargtrans__ ({text: 'Delete Next Word'})).py_metatype = 'NEXT_WORD';
-		layout.separator ();
-		layout.operator ('console.copy_as_script', __kwargtrans__ ({text: 'Copy as Script'}));
-		layout.operator ('console.copy', __kwargtrans__ ({text: 'Cut'})).delete = true;
-		layout.operator ('console.copy', __kwargtrans__ ({text: 'Copy'}));
-		layout.operator ('console.paste', __kwargtrans__ ({text: 'Paste'}));
-		layout.separator ();
-		layout.operator ('console.indent');
-		layout.operator ('console.unindent');
-		layout.separator ();
-		layout.operator ('console.history_cycle', __kwargtrans__ ({text: 'Backward in History'})).reverse = true;
-		layout.operator ('console.history_cycle', __kwargtrans__ ({text: 'Forward in History'})).reverse = false;
-		layout.separator ();
-		layout.operator ('console.autocomplete', __kwargtrans__ ({text: 'Autocomplete'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.clear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.clear_line');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.delete', __kwargtrans__ ({text: 'Delete Previous Word'}));
+		}) ().py_metatype = 'PREVIOUS_WORD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.delete', __kwargtrans__ ({text: 'Delete Next Word'}));
+		}) ().py_metatype = 'NEXT_WORD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.copy_as_script', __kwargtrans__ ({text: 'Copy as Script'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.copy', __kwargtrans__ ({text: 'Cut'}));
+		}) ().delete = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.copy', __kwargtrans__ ({text: 'Copy'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.paste', __kwargtrans__ ({text: 'Paste'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.indent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.unindent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.history_cycle', __kwargtrans__ ({text: 'Backward in History'}));
+		}) ().reverse = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.history_cycle', __kwargtrans__ ({text: 'Forward in History'}));
+		}) ().reverse = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.autocomplete', __kwargtrans__ ({text: 'Autocomplete'}));
+		}) ();
 	});}
 });
 export var CONSOLE_MT_context_menu =  __class__ ('CONSOLE_MT_context_menu', [Menu], {
@@ -169,7 +297,7 @@ export var CONSOLE_MT_context_menu =  __class__ ('CONSOLE_MT_context_menu', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -182,31 +310,98 @@ export var CONSOLE_MT_context_menu =  __class__ ('CONSOLE_MT_context_menu', [Men
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('console.clear');
-		layout.operator ('console.clear_line');
-		layout.operator ('console.delete', __kwargtrans__ ({text: 'Delete Previous Word'})).py_metatype = 'PREVIOUS_WORD';
-		layout.operator ('console.delete', __kwargtrans__ ({text: 'Delete Next Word'})).py_metatype = 'NEXT_WORD';
-		layout.separator ();
-		layout.operator ('console.copy_as_script', __kwargtrans__ ({text: 'Copy as Script'}));
-		layout.operator ('console.copy', __kwargtrans__ ({text: 'Cut'})).delete = true;
-		layout.operator ('console.copy', __kwargtrans__ ({text: 'Copy'}));
-		layout.operator ('console.paste', __kwargtrans__ ({text: 'Paste'}));
-		layout.separator ();
-		layout.operator ('console.indent');
-		layout.operator ('console.unindent');
-		layout.separator ();
-		layout.operator ('console.history_cycle', __kwargtrans__ ({text: 'Backward in History'})).reverse = true;
-		layout.operator ('console.history_cycle', __kwargtrans__ ({text: 'Forward in History'})).reverse = false;
-		layout.separator ();
-		layout.operator ('console.autocomplete', __kwargtrans__ ({text: 'Autocomplete'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.clear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.clear_line');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.delete', __kwargtrans__ ({text: 'Delete Previous Word'}));
+		}) ().py_metatype = 'PREVIOUS_WORD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.delete', __kwargtrans__ ({text: 'Delete Next Word'}));
+		}) ().py_metatype = 'NEXT_WORD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.copy_as_script', __kwargtrans__ ({text: 'Copy as Script'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.copy', __kwargtrans__ ({text: 'Cut'}));
+		}) ().delete = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.copy', __kwargtrans__ ({text: 'Copy'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.paste', __kwargtrans__ ({text: 'Paste'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.indent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.unindent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.history_cycle', __kwargtrans__ ({text: 'Backward in History'}));
+		}) ().reverse = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.history_cycle', __kwargtrans__ ({text: 'Forward in History'}));
+		}) ().reverse = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'console.autocomplete', __kwargtrans__ ({text: 'Autocomplete'}));
+		}) ();
 	});}
 });
 export var classes = tuple ([CONSOLE_HT_header, CONSOLE_MT_editor_menus, CONSOLE_MT_view, CONSOLE_MT_language, CONSOLE_MT_console, CONSOLE_MT_context_menu]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_console.map
 export {Header, Menu, _globals, _import, _lazy, _member, _module, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'CONSOLE_HT_header': CONSOLE_HT_header = value; break;
+		case 'CONSOLE_MT_editor_menus': CONSOLE_MT_editor_menus = value; break;
+		case 'CONSOLE_MT_view': CONSOLE_MT_view = value; break;
+		case 'CONSOLE_MT_language': CONSOLE_MT_language = value; break;
+		case 'CONSOLE_MT_console': CONSOLE_MT_console = value; break;
+		case 'CONSOLE_MT_context_menu': CONSOLE_MT_context_menu = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

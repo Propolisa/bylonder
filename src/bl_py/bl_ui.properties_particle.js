@@ -16,7 +16,7 @@ var __name__ = 'bl_ui.properties_particle';
 export var particle_panel_enabled = function (context, psys) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -42,7 +42,7 @@ export var particle_panel_enabled = function (context, psys) {
 export var particle_panel_poll = function (cls, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -60,7 +60,7 @@ export var particle_panel_poll = function (cls, context) {
 	if (psys) {
 		var settings = psys.settings;
 	}
-	else if (isinstance (context.space_data.pin_id, bpy.types.ParticleSettings)) {
+	else if (__call__ (isinstance, null, context.space_data.pin_id, bpy.types.ParticleSettings)) {
 		var settings = context.space_data.pin_id;
 	}
 	if (!(settings)) {
@@ -71,7 +71,7 @@ export var particle_panel_poll = function (cls, context) {
 export var particle_get_settings = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,7 +85,7 @@ export var particle_get_settings = function (context) {
 	if (context.particle_system) {
 		return context.particle_system.settings;
 	}
-	else if (isinstance (context.space_data.pin_id, bpy.types.ParticleSettings)) {
+	else if (__call__ (isinstance, null, context.space_data.pin_id, bpy.types.ParticleSettings)) {
 		return context.space_data.pin_id;
 	}
 	return null;
@@ -97,7 +97,7 @@ export var PARTICLE_MT_context_menu =  __class__ ('PARTICLE_MT_context_menu', [M
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -111,18 +111,36 @@ export var PARTICLE_MT_context_menu =  __class__ ('PARTICLE_MT_context_menu', [M
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		var props = layout.operator ('particle.copy_particle_systems', __kwargtrans__ ({text: 'Copy Active to Selected Objects', icon: 'COPYDOWN'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.copy_particle_systems', __kwargtrans__ ({text: 'Copy Active to Selected Objects', icon: 'COPYDOWN'}));
+		}) ();
 		props.use_active = true;
 		props.remove_target_particles = false;
-		var props = layout.operator ('particle.copy_particle_systems', __kwargtrans__ ({text: 'Copy All to Selected Objects'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.copy_particle_systems', __kwargtrans__ ({text: 'Copy All to Selected Objects'}));
+		}) ();
 		props.use_active = false;
 		props.remove_target_particles = true;
-		if (psys !== null && psys.settings.py_metatype == 'HAIR') {
-			layout.operator ('curves.convert_from_particle_system', __kwargtrans__ ({text: 'Convert to Curves'}));
+		if (psys !== null && __eq__ (psys.settings.py_metatype, 'HAIR')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'curves.convert_from_particle_system', __kwargtrans__ ({text: 'Convert to Curves'}));
+			}) ();
 		}
-		layout.separator ();
-		layout.operator ('particle.duplicate_particle_system', __kwargtrans__ ({icon: 'DUPLICATE'}));
-		layout.operator ('particle.particle_system_remove_all', __kwargtrans__ ({text: 'Remove All Particle Systems'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.duplicate_particle_system', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.particle_system_remove_all', __kwargtrans__ ({text: 'Remove All Particle Systems'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_hair_dynamics_presets =  __class__ ('PARTICLE_PT_hair_dynamics_presets', [PresetPanel, Panel], {
@@ -141,7 +159,7 @@ export var ParticleButtonsPanel =  __class__ ('ParticleButtonsPanel', [object], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -153,13 +171,13 @@ export var ParticleButtonsPanel =  __class__ ('ParticleButtonsPanel', [object], 
 		}
 		else {
 		}
-		return particle_panel_poll (cls, context);
+		return __call__ (particle_panel_poll, null, cls, context);
 	});}
 });
 export var find_modifier = function (ob, psys) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -171,9 +189,12 @@ export var find_modifier = function (ob, psys) {
 	}
 	else {
 	}
-	for (var md of ob.modifiers) {
-		if (md.py_metatype == 'PARTICLE_SYSTEM') {
-			if (md.particle_system == psys) {
+	var __iterable0__ = ob.modifiers;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var md = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (md.py_metatype, 'PARTICLE_SYSTEM')) {
+			if (__eq__ (md.particle_system, psys)) {
 				return md;
 			}
 		}
@@ -185,7 +206,7 @@ export var PARTICLE_UL_particle_systems =  __class__ ('PARTICLE_UL_particle_syst
 	get draw_item () {return __get__ (this, function (self, _context, layout, data, item, icon, _active_data, _active_propname, _index, _flt_flag) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -207,12 +228,24 @@ export var PARTICLE_UL_particle_systems =  __class__ ('PARTICLE_UL_particle_syst
 		}
 		var ob = data;
 		var psys = item;
-		var md = find_modifier (ob, psys);
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (psys, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+		var md = __call__ (find_modifier, null, ob, psys);
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+		}) ();
 		if (md) {
-			row.prop (md, 'show_viewport', __kwargtrans__ ({emboss: false, icon_only: true}));
-			row.prop (md, 'show_render', __kwargtrans__ ({emboss: false, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, md, 'show_viewport', __kwargtrans__ ({emboss: false, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, md, 'show_render', __kwargtrans__ ({emboss: false, icon_only: true}));
+			}) ();
 		}
 	});}
 });
@@ -224,7 +257,7 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -242,7 +275,7 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -259,74 +292,167 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 		var psys = context.particle_system;
 		var part = 0;
 		if (ob) {
-			var row = layout.row ();
-			row.template_list ('PARTICLE_UL_particle_systems', 'particle_systems', ob, 'particle_systems', ob.particle_systems, 'active_index', __kwargtrans__ ({rows: 3}));
-			var col = row.column (__kwargtrans__ ({align: true}));
-			col.operator ('object.particle_system_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-			col.operator ('object.particle_system_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-			col.separator ();
-			col.menu ('PARTICLE_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.template_list, __accu0__, 'PARTICLE_UL_particle_systems', 'particle_systems', ob, 'particle_systems', ob.particle_systems, 'active_index', __kwargtrans__ ({rows: 3}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.particle_system_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.particle_system_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.menu, __accu0__, 'PARTICLE_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+			}) ();
 		}
 		if (psys === null) {
-			var part = particle_get_settings (context);
+			var part = __call__ (particle_get_settings, null, context);
 			if (part === null) {
 				return ;
 			}
-			layout.template_ID (context.space_data, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, context.space_data, 'pin_id');
+			}) ();
 			if (part.is_fluid) {
-				layout.label (__kwargtrans__ ({text: 'Settings used for fluid'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Settings used for fluid'}));
+				}) ();
 				return ;
 			}
-			layout.prop (part, 'type', __kwargtrans__ ({text: 'Type'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, part, 'type', __kwargtrans__ ({text: 'Type'}));
+			}) ();
 		}
 		else if (!(psys.settings)) {
-			col.template_ID (psys, 'settings', __kwargtrans__ ({py_new: 'particle.new'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_ID, __accu0__, psys, 'settings', __kwargtrans__ ({py_new: 'particle.new'}));
+			}) ();
 		}
 		else {
 			var part = psys.settings;
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			if (part.is_fluid === false) {
-				var row = col.row ();
-				row.enabled = particle_panel_enabled (context, psys);
-				row.template_ID (psys, 'settings', __kwargtrans__ ({py_new: 'particle.new'}));
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				row.enabled = __call__ (particle_panel_enabled, null, context, psys);
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.template_ID, __accu0__, psys, 'settings', __kwargtrans__ ({py_new: 'particle.new'}));
+				}) ();
 			}
 			if (part.is_fluid) {
-				layout.label (__kwargtrans__ ({text: rpt_ ('{:d} fluid particles for this frame').format (part.count), translate: false}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+						var __accu1__ = __call__ (rpt_, null, '{:d} fluid particles for this frame');
+						return __call__ (__accu1__.format, __accu1__, part.count);
+					}) (), translate: false}));
+				}) ();
 				return ;
 			}
-			var row = layout.row ();
-			row.enabled = particle_panel_enabled (context, psys);
-			row.prop (part, 'type', __kwargtrans__ ({expand: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			row.enabled = __call__ (particle_panel_enabled, null, context, psys);
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, part, 'type', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 		if (part) {
-			var py_split = layout.py_split ();
-			if (part.py_metatype == 'HAIR') {
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			if (__eq__ (part.py_metatype, 'HAIR')) {
 				if (psys !== null && psys.is_edited) {
-					py_split.operator ('particle.edited_clear', __kwargtrans__ ({text: 'Delete Edit'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'particle.edited_clear', __kwargtrans__ ({text: 'Delete Edit'}));
+					}) ();
 				}
 				else {
-					var row = py_split.row ();
-					row.enabled = particle_panel_enabled (context, psys);
-					row.prop (part, 'use_regrow_hair');
-					row.prop (part, 'use_advanced_hair');
+					var row = (function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
+					row.enabled = __call__ (particle_panel_enabled, null, context, psys);
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, part, 'use_regrow_hair');
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, part, 'use_advanced_hair');
+					}) ();
 				}
 				if (psys !== null && psys.is_edited) {
 					if (psys.is_global_hair) {
-						var row = layout.row (__kwargtrans__ ({align: true}));
-						row.operator ('particle.connect_hair').all = false;
-						row.operator ('particle.connect_hair', __kwargtrans__ ({text: 'Connect All'})).all = true;
+						var row = (function () {
+							var __accu0__ = layout;
+							return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+						}) ();
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.operator, __accu0__, 'particle.connect_hair');
+						}) ().all = false;
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.operator, __accu0__, 'particle.connect_hair', __kwargtrans__ ({text: 'Connect All'}));
+						}) ().all = true;
 					}
 					else {
-						var row = layout.row (__kwargtrans__ ({align: true}));
-						row.operator ('particle.disconnect_hair').all = false;
-						row.operator ('particle.disconnect_hair', __kwargtrans__ ({text: 'Disconnect All'})).all = true;
+						var row = (function () {
+							var __accu0__ = layout;
+							return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+						}) ();
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.operator, __accu0__, 'particle.disconnect_hair');
+						}) ().all = false;
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.operator, __accu0__, 'particle.disconnect_hair', __kwargtrans__ ({text: 'Disconnect All'}));
+						}) ().all = true;
 					}
 				}
 			}
-			else if (psys !== null && part.py_metatype == 'REACTOR') {
-				py_split.enabled = particle_panel_enabled (context, psys);
-				py_split.prop (psys, 'reactor_target_object');
-				py_split.prop (psys, 'reactor_target_particle_system', __kwargtrans__ ({text: 'Particle System'}));
+			else if (psys !== null && __eq__ (part.py_metatype, 'REACTOR')) {
+				py_split.enabled = __call__ (particle_panel_enabled, null, context, psys);
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.prop, __accu0__, psys, 'reactor_target_object');
+				}) ();
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.prop, __accu0__, psys, 'reactor_target_particle_system', __kwargtrans__ ({text: 'Particle System'}));
+				}) ();
 			}
 		}
 	});}
@@ -339,7 +465,7 @@ export var PARTICLE_PT_emission =  __class__ ('PARTICLE_PT_emission', [ParticleB
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -352,14 +478,14 @@ export var PARTICLE_PT_emission =  __class__ ('PARTICLE_PT_emission', [ParticleB
 		else {
 		}
 		var psys = context.particle_system;
-		var settings = particle_get_settings (context);
+		var settings = __call__ (particle_get_settings, null, context);
 		if (settings === null) {
 			return false;
 		}
 		if (settings.is_fluid) {
 			return false;
 		}
-		if (particle_panel_poll (PARTICLE_PT_emission, context)) {
+		if (__call__ (particle_panel_poll, null, PARTICLE_PT_emission, context)) {
 			return psys === null || !(context.particle_system.point_cache.use_external);
 		}
 		return false;
@@ -367,7 +493,7 @@ export var PARTICLE_PT_emission =  __class__ ('PARTICLE_PT_emission', [ParticleB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -381,26 +507,59 @@ export var PARTICLE_PT_emission =  __class__ ('PARTICLE_PT_emission', [ParticleB
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
-		layout.enabled = particle_panel_enabled (context, psys) && (psys === null || !(psys.has_multiple_caches));
-		var col = layout.column ();
-		col.active = part.emit_from == 'VERT' || part.distribution != 'GRID';
-		col.prop (part, 'count');
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys) && (psys === null || !(psys.has_multiple_caches));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		col.active = __eq__ (part.emit_from, 'VERT') || __ne__ (part.distribution, 'GRID');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'count');
+		}) ();
 		if (psys !== null) {
-			col.prop (psys, 'seed');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, psys, 'seed');
+			}) ();
 		}
-		if (part.py_metatype == 'HAIR') {
-			col.prop (part, 'hair_length');
-			col.prop (part, 'hair_step');
+		if (__eq__ (part.py_metatype, 'HAIR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'hair_length');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'hair_step');
+			}) ();
 		}
-		if (part.py_metatype != 'HAIR') {
-			var col = layout.column ();
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (part, 'frame_start', __kwargtrans__ ({text: 'Frame Start'}));
-			sub.prop (part, 'frame_end', __kwargtrans__ ({text: 'End'}));
-			col.prop (part, 'lifetime');
-			col.prop (part, 'lifetime_random', __kwargtrans__ ({slider: true, text: 'Lifetime Randomness'}));
+		if (__ne__ (part.py_metatype, 'HAIR')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'frame_start', __kwargtrans__ ({text: 'Frame Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'frame_end', __kwargtrans__ ({text: 'End'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'lifetime');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'lifetime_random', __kwargtrans__ ({slider: true, text: 'Lifetime Randomness'}));
+			}) ();
 		}
 	});}
 });
@@ -413,7 +572,7 @@ export var PARTICLE_PT_emission_source =  __class__ ('PARTICLE_PT_emission_sourc
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -426,33 +585,72 @@ export var PARTICLE_PT_emission_source =  __class__ ('PARTICLE_PT_emission_sourc
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (part, 'emit_from');
-		col.prop (part, 'use_modifier_stack');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'emit_from');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_modifier_stack');
+		}) ();
 		if (__in__ (part.emit_from, new set (['FACE', 'VOLUME']))) {
-			col.prop (part, 'distribution');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'distribution');
+			}) ();
 		}
-		if (part.emit_from == 'VERT') {
-			col.prop (part, 'use_emit_random', __kwargtrans__ ({text: 'Random Order'}));
+		if (__eq__ (part.emit_from, 'VERT')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_emit_random', __kwargtrans__ ({text: 'Random Order'}));
+			}) ();
 		}
-		else if (part.distribution == 'GRID') {
-			col.prop (part, 'invert_grid');
-			col.prop (part, 'hexagonal_grid');
+		else if (__eq__ (part.distribution, 'GRID')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'invert_grid');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'hexagonal_grid');
+			}) ();
 		}
 		else {
-			col.prop (part, 'use_emit_random', __kwargtrans__ ({text: 'Random Order'}));
-			col.prop (part, 'use_even_distribution');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_emit_random', __kwargtrans__ ({text: 'Random Order'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_even_distribution');
+			}) ();
 		}
 		if (__in__ (part.emit_from, new set (['FACE', 'VOLUME']))) {
-			if (part.distribution == 'JIT') {
-				col.prop (part, 'userjit', __kwargtrans__ ({text: 'Particles/Face'}));
-				col.prop (part, 'jitter_factor', __kwargtrans__ ({text: 'Jittering Amount', slider: true}));
+			if (__eq__ (part.distribution, 'JIT')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'userjit', __kwargtrans__ ({text: 'Particles/Face'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'jitter_factor', __kwargtrans__ ({text: 'Jittering Amount', slider: true}));
+				}) ();
 			}
-			else if (part.distribution == 'GRID') {
-				col.prop (part, 'grid_resolution');
-				col.prop (part, 'grid_random', __kwargtrans__ ({text: 'Random', slider: true}));
+			else if (__eq__ (part.distribution, 'GRID')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'grid_resolution');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'grid_random', __kwargtrans__ ({text: 'Random', slider: true}));
+				}) ();
 			}
 		}
 	});}
@@ -465,7 +663,7 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -485,12 +683,12 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		if (psys.settings === null) {
 			return false;
 		}
-		return psys.settings.py_metatype == 'HAIR' && __in__ (engine, cls.COMPAT_ENGINES);
+		return __eq__ (psys.settings.py_metatype, 'HAIR') && __in__ (engine, cls.COMPAT_ENGINES);
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -503,12 +701,15 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		else {
 		}
 		var psys = context.particle_system;
-		self.layout.prop (psys, 'use_hair_dynamics', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'use_hair_dynamics', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_header_preset () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -526,12 +727,15 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		}
 		var layout = self.layout;
 		layout.enabled = psys.use_hair_dynamics && psys.point_cache.is_baked === false;
-		PARTICLE_PT_hair_dynamics_presets.draw_panel_header (layout);
+		(function () {
+			var __accu0__ = PARTICLE_PT_hair_dynamics_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -546,7 +750,10 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		var layout = self.layout;
 		var psys = context.particle_system;
 		if (!(psys.cloth)) {
-			layout.label (__kwargtrans__ ({text: 'Hair dynamics disabled'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Hair dynamics disabled'}));
+			}) ();
 			return ;
 		}
 		var cloth_md = psys.cloth;
@@ -554,24 +761,48 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		var result = cloth_md.solver_result;
 		layout.enabled = psys.use_hair_dynamics && psys.point_cache.is_baked === false;
 		layout.use_property_split = true;
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (cloth, 'quality', __kwargtrans__ ({text: 'Quality Steps', slider: true}));
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (cloth, 'pin_stiffness', __kwargtrans__ ({text: 'Pin Goal Strength'}));
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'quality', __kwargtrans__ ({text: 'Quality Steps', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'pin_stiffness', __kwargtrans__ ({text: 'Pin Goal Strength'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (result) {
-			var box = layout.box ();
+			var box = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.box, __accu0__);
+			}) ();
 			if (!(result.status)) {
 				var label = ' ';
 				var icon = 'NONE';
 			}
-			else if (result.status == new set (['SUCCESS'])) {
+			else if (__eq__ (result.status, new set (['SUCCESS']))) {
 				var label = 'Success';
 				var icon = 'NONE';
 			}
-			else if (result.status - new set (['SUCCESS']) == new set (['NO_CONVERGENCE'])) {
+			else if (__eq__ (__sub__ (result.status, new set (['SUCCESS'])), new set (['NO_CONVERGENCE']))) {
 				var label = 'No Convergence';
 				var icon = 'ERROR';
 			}
@@ -579,9 +810,24 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 				var label = 'ERROR';
 				var icon = 'ERROR';
 			}
-			box.label (__kwargtrans__ ({text: label, icon: icon}));
-			box.label (__kwargtrans__ ({text: rpt_ ('Iterations: {:d} .. {:d} (avg. {:d})').format (result.min_iterations, result.max_iterations, result.avg_iterations), translate: false}));
-			box.label (__kwargtrans__ ({text: rpt_ ('Error: {:.5f} .. {:.5f} (avg. {:.5f})').format (result.min_error, result.max_error, result.avg_error), translate: false}));
+			(function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: label, icon: icon}));
+			}) ();
+			(function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Iterations: {:d} .. {:d} (avg. {:d})');
+					return __call__ (__accu1__.format, __accu1__, result.min_iterations, result.max_iterations, result.avg_iterations);
+				}) (), translate: false}));
+			}) ();
+			(function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Error: {:.5f} .. {:.5f} (avg. {:.5f})');
+					return __call__ (__accu1__.format, __accu1__, result.min_error, result.max_error, result.avg_error);
+				}) (), translate: false}));
+			}) ();
 		}
 	});}
 });
@@ -594,7 +840,7 @@ export var PARTICLE_PT_hair_dynamics_collision =  __class__ ('PARTICLE_PT_hair_d
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -611,7 +857,7 @@ export var PARTICLE_PT_hair_dynamics_collision =  __class__ ('PARTICLE_PT_hair_d
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -629,13 +875,34 @@ export var PARTICLE_PT_hair_dynamics_collision =  __class__ ('PARTICLE_PT_hair_d
 		var cloth_collision = cloth_md.collision_settings;
 		layout.enabled = psys.use_hair_dynamics && psys.point_cache.is_baked === false;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (cloth_collision, 'collision_quality', __kwargtrans__ ({text: 'Quality'}));
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (cloth_collision, 'distance_min', __kwargtrans__ ({slider: true, text: 'Distance'}));
-		col.prop (cloth_collision, 'impulse_clamp');
-		col.prop (cloth_collision, 'collection');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth_collision, 'collision_quality', __kwargtrans__ ({text: 'Quality'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth_collision, 'distance_min', __kwargtrans__ ({slider: true, text: 'Distance'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth_collision, 'impulse_clamp');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth_collision, 'collection');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_hair_dynamics_structure =  __class__ ('PARTICLE_PT_hair_dynamics_structure', [ParticleButtonsPanel, Panel], {
@@ -647,7 +914,7 @@ export var PARTICLE_PT_hair_dynamics_structure =  __class__ ('PARTICLE_PT_hair_d
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -664,7 +931,7 @@ export var PARTICLE_PT_hair_dynamics_structure =  __class__ ('PARTICLE_PT_hair_d
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -682,12 +949,30 @@ export var PARTICLE_PT_hair_dynamics_structure =  __class__ ('PARTICLE_PT_hair_d
 		var cloth = cloth_md.settings;
 		layout.enabled = psys.use_hair_dynamics && psys.point_cache.is_baked === false;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (cloth, 'mass');
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (cloth, 'bending_stiffness', __kwargtrans__ ({text: 'Stiffness'}));
-		sub.prop (psys.settings, 'bending_random', __kwargtrans__ ({text: 'Random'}));
-		col.prop (cloth, 'bending_damping', __kwargtrans__ ({text: 'Damping'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'mass');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'bending_stiffness', __kwargtrans__ ({text: 'Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, psys.settings, 'bending_random', __kwargtrans__ ({text: 'Random'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'bending_damping', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_hair_dynamics_volume =  __class__ ('PARTICLE_PT_hair_dynamics_volume', [ParticleButtonsPanel, Panel], {
@@ -699,7 +984,7 @@ export var PARTICLE_PT_hair_dynamics_volume =  __class__ ('PARTICLE_PT_hair_dyna
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -716,7 +1001,7 @@ export var PARTICLE_PT_hair_dynamics_volume =  __class__ ('PARTICLE_PT_hair_dyna
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -734,13 +1019,34 @@ export var PARTICLE_PT_hair_dynamics_volume =  __class__ ('PARTICLE_PT_hair_dyna
 		var cloth = cloth_md.settings;
 		layout.enabled = psys.use_hair_dynamics && psys.point_cache.is_baked === false;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (cloth, 'air_damping', __kwargtrans__ ({text: 'Air Drag'}));
-		col.prop (cloth, 'internal_friction', __kwargtrans__ ({slider: true}));
-		col.prop (cloth, 'voxel_cell_size');
-		col.separator ();
-		col.prop (cloth, 'density_target', __kwargtrans__ ({text: 'Density Target'}));
-		col.prop (cloth, 'density_strength', __kwargtrans__ ({slider: true, text: 'Density Strength'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'air_damping', __kwargtrans__ ({text: 'Air Drag'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'internal_friction', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'voxel_cell_size');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'density_target', __kwargtrans__ ({text: 'Density Target'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cloth, 'density_strength', __kwargtrans__ ({slider: true, text: 'Density Strength'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_cache =  __class__ ('PARTICLE_PT_cache', [ParticleButtonsPanel, Panel], {
@@ -751,7 +1057,7 @@ export var PARTICLE_PT_cache =  __class__ ('PARTICLE_PT_cache', [ParticleButtons
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -781,12 +1087,12 @@ export var PARTICLE_PT_cache =  __class__ ('PARTICLE_PT_cache', [ParticleButtons
 		if (__in__ (phystype, new set (['NO', 'KEYED']))) {
 			return false;
 		}
-		return __in__ (psys.settings.py_metatype, new set (['EMITTER', 'REACTOR'])) || psys.settings.py_metatype == 'HAIR' && (psys.use_hair_dynamics || psys.point_cache.is_baked);
+		return __in__ (psys.settings.py_metatype, new set (['EMITTER', 'REACTOR'])) || __eq__ (psys.settings.py_metatype, 'HAIR') && (psys.use_hair_dynamics || psys.point_cache.is_baked);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -799,7 +1105,7 @@ export var PARTICLE_PT_cache =  __class__ ('PARTICLE_PT_cache', [ParticleButtons
 		else {
 		}
 		var psys = context.particle_system;
-		point_cache_ui (self, psys.point_cache, true, (psys.settings.py_metatype == 'HAIR' ? 'HAIR' : 'PSYS'));
+		__call__ (point_cache_ui, null, self, psys.point_cache, true, (__eq__ (psys.settings.py_metatype, 'HAIR') ? 'HAIR' : 'PSYS'));
 	});}
 });
 export var PARTICLE_PT_velocity =  __class__ ('PARTICLE_PT_velocity', [ParticleButtonsPanel, Panel], {
@@ -810,7 +1116,7 @@ export var PARTICLE_PT_velocity =  __class__ ('PARTICLE_PT_velocity', [ParticleB
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -822,13 +1128,13 @@ export var PARTICLE_PT_velocity =  __class__ ('PARTICLE_PT_velocity', [ParticleB
 		}
 		else {
 		}
-		if (particle_panel_poll (PARTICLE_PT_velocity, context)) {
+		if (__call__ (particle_panel_poll, null, PARTICLE_PT_velocity, context)) {
 			var psys = context.particle_system;
-			var settings = particle_get_settings (context);
-			if (settings.py_metatype == 'HAIR' && !(settings.use_advanced_hair)) {
+			var settings = __call__ (particle_get_settings, null, context);
+			if (__eq__ (settings.py_metatype, 'HAIR') && !(settings.use_advanced_hair)) {
 				return false;
 			}
-			return settings.physics_type != 'BOIDS' && (psys === null || !(psys.point_cache.use_external));
+			return __ne__ (settings.physics_type, 'BOIDS') && (psys === null || !(psys.point_cache.use_external));
 		}
 		else {
 			return false;
@@ -837,7 +1143,7 @@ export var PARTICLE_PT_velocity =  __class__ ('PARTICLE_PT_velocity', [ParticleB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -851,24 +1157,57 @@ export var PARTICLE_PT_velocity =  __class__ ('PARTICLE_PT_velocity', [ParticleB
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.enabled = particle_panel_enabled (context, psys);
+		var part = __call__ (particle_get_settings, null, context);
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys);
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (part, 'normal_factor');
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (part, 'tangent_factor', __kwargtrans__ ({text: 'Tangent'}));
-		sub.prop (part, 'tangent_phase', __kwargtrans__ ({slider: true, text: 'Tangent Phase'}));
-		col.separator ();
-		col.prop (part, 'object_align_factor');
-		col.separator ();
-		if (part.emit_from == 'PARTICLE') {
-			col.prop (part, 'particle_factor');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'normal_factor');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'tangent_factor', __kwargtrans__ ({text: 'Tangent'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'tangent_phase', __kwargtrans__ ({slider: true, text: 'Tangent Phase'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'object_align_factor');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (__eq__ (part.emit_from, 'PARTICLE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'particle_factor');
+			}) ();
 		}
 		else {
-			col.prop (part, 'object_factor', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'object_factor', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
-		col.prop (part, 'factor_random', __kwargtrans__ ({text: 'Randomize'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'factor_random', __kwargtrans__ ({text: 'Randomize'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleButtonsPanel, Panel], {
@@ -879,7 +1218,7 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -891,13 +1230,13 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 		}
 		else {
 		}
-		if (particle_panel_poll (PARTICLE_PT_rotation, context)) {
+		if (__call__ (particle_panel_poll, null, PARTICLE_PT_rotation, context)) {
 			var psys = context.particle_system;
-			var settings = particle_get_settings (context);
-			if (settings.py_metatype == 'HAIR' && !(settings.use_advanced_hair)) {
+			var settings = __call__ (particle_get_settings, null, context);
+			if (__eq__ (settings.py_metatype, 'HAIR') && !(settings.use_advanced_hair)) {
 				return false;
 			}
-			return settings.physics_type != 'BOIDS' && (psys === null || !(psys.point_cache.use_external));
+			return __ne__ (settings.physics_type, 'BOIDS') && (psys === null || !(psys.point_cache.use_external));
 		}
 		else {
 			return false;
@@ -906,7 +1245,7 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -926,13 +1265,16 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 			var part = context.space_data.pin_id;
 		}
 		var layout = self.layout;
-		layout.prop (part, 'use_rotations', __kwargtrans__ ({text: ''}));
-		layout.enabled = particle_panel_enabled (context, psys);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_rotations', __kwargtrans__ ({text: ''}));
+		}) ();
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -952,16 +1294,37 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 		else {
 			var part = context.space_data.pin_id;
 		}
-		layout.enabled = particle_panel_enabled (context, psys) && part.use_rotations;
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys) && part.use_rotations;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (part, 'rotation_mode');
-		col.prop (part, 'rotation_factor_random', __kwargtrans__ ({slider: true, text: 'Randomize'}));
-		col.separator ();
-		col.prop (part, 'phase_factor', __kwargtrans__ ({slider: true}));
-		col.prop (part, 'phase_factor_random', __kwargtrans__ ({text: 'Randomize Phase', slider: true}));
-		if (part.py_metatype != 'HAIR') {
-			col.prop (part, 'use_dynamic_rotation');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'rotation_mode');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'rotation_factor_random', __kwargtrans__ ({slider: true, text: 'Randomize'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'phase_factor', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'phase_factor_random', __kwargtrans__ ({text: 'Randomize Phase', slider: true}));
+		}) ();
+		if (__ne__ (part.py_metatype, 'HAIR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_dynamic_rotation');
+			}) ();
 		}
 	});}
 });
@@ -974,7 +1337,7 @@ export var PARTICLE_PT_rotation_angular_velocity =  __class__ ('PARTICLE_PT_rota
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -994,13 +1357,25 @@ export var PARTICLE_PT_rotation_angular_velocity =  __class__ ('PARTICLE_PT_rota
 		else {
 			var part = context.space_data.pin_id;
 		}
-		layout.enabled = particle_panel_enabled (context, psys) && part.use_rotations;
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys) && part.use_rotations;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (part, 'angular_velocity_mode', __kwargtrans__ ({text: 'Axis'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.active = part.angular_velocity_mode != 'NONE';
-		sub.prop (part, 'angular_velocity_factor', __kwargtrans__ ({text: 'Amount'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'angular_velocity_mode', __kwargtrans__ ({text: 'Axis'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		sub.active = __ne__ (part.angular_velocity_mode, 'NONE');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'angular_velocity_factor', __kwargtrans__ ({text: 'Amount'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleButtonsPanel, Panel], {
@@ -1011,7 +1386,7 @@ export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1023,10 +1398,10 @@ export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleBut
 		}
 		else {
 		}
-		if (particle_panel_poll (PARTICLE_PT_physics, context)) {
+		if (__call__ (particle_panel_poll, null, PARTICLE_PT_physics, context)) {
 			var psys = context.particle_system;
-			var settings = particle_get_settings (context);
-			if (settings.py_metatype == 'HAIR' && !(settings.use_advanced_hair)) {
+			var settings = __call__ (particle_get_settings, null, context);
+			if (__eq__ (settings.py_metatype, 'HAIR') && !(settings.use_advanced_hair)) {
 				return false;
 			}
 			return psys === null || !(psys.point_cache.use_external);
@@ -1038,7 +1413,7 @@ export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1053,29 +1428,68 @@ export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleBut
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.enabled = particle_panel_enabled (context, psys);
-		layout.prop (part, 'physics_type');
-		var col = layout.column ();
-		if (part.physics_type != 'NO') {
-			var col = col.column ();
-			col.prop (part, 'mass');
-			col.prop (part, 'use_multiply_size_mass', __kwargtrans__ ({text: 'Multiply Mass with Size'}));
+		var part = __call__ (particle_get_settings, null, context);
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'physics_type');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__ne__ (part.physics_type, 'NO')) {
+			var col = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'mass');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_multiply_size_mass', __kwargtrans__ ({text: 'Multiply Mass with Size'}));
+			}) ();
 		}
-		if (part.physics_type == 'FLUID') {
+		if (__eq__ (part.physics_type, 'FLUID')) {
 			var fluid = part.fluid;
-			col.separator ();
-			col.prop (fluid, 'solver');
-			col.prop (fluid, 'stiffness', __kwargtrans__ ({text: 'Stiffness'}));
-			col.prop (fluid, 'linear_viscosity', __kwargtrans__ ({text: 'Viscosity'}));
-			col.prop (fluid, 'buoyancy', __kwargtrans__ ({text: 'Buoyancy', slider: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'solver');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'stiffness', __kwargtrans__ ({text: 'Stiffness'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'linear_viscosity', __kwargtrans__ ({text: 'Viscosity'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'buoyancy', __kwargtrans__ ({text: 'Buoyancy', slider: true}));
+			}) ();
 		}
-		else if (part.physics_type == 'KEYED') {
-			var sub = col.column ();
+		else if (__eq__ (part.physics_type, 'KEYED')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			sub.active = !(psys) || !(psys.use_keyed_timing);
-			sub.prop (part, 'keyed_loops', __kwargtrans__ ({text: 'Loops'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'keyed_loops', __kwargtrans__ ({text: 'Loops'}));
+			}) ();
 			if (psys) {
-				col.prop (psys, 'use_keyed_timing', __kwargtrans__ ({text: 'Use Timing'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, psys, 'use_keyed_timing', __kwargtrans__ ({text: 'Use Timing'}));
+				}) ();
 			}
 		}
 	});}
@@ -1089,7 +1503,7 @@ export var PARTICLE_PT_physics_fluid_advanced =  __class__ ('PARTICLE_PT_physics
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1101,13 +1515,13 @@ export var PARTICLE_PT_physics_fluid_advanced =  __class__ ('PARTICLE_PT_physics
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.physics_type == 'FLUID';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.physics_type, 'FLUID');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1121,25 +1535,64 @@ export var PARTICLE_PT_physics_fluid_advanced =  __class__ ('PARTICLE_PT_physics
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		var col = layout.column ();
-		if (fluid.solver == 'DDR') {
-			var sub = col.column ();
-			sub.prop (fluid, 'repulsion', __kwargtrans__ ({slider: fluid.use_factor_repulsion}));
-			sub.prop (fluid, 'use_factor_repulsion');
-			sub.prop (fluid, 'stiff_viscosity', __kwargtrans__ ({slider: fluid.use_factor_stiff_viscosity}));
-			sub.prop (fluid, 'use_factor_stiff_viscosity');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (fluid.solver, 'DDR')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'repulsion', __kwargtrans__ ({slider: fluid.use_factor_repulsion}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'use_factor_repulsion');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'stiff_viscosity', __kwargtrans__ ({slider: fluid.use_factor_stiff_viscosity}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, fluid, 'use_factor_stiff_viscosity');
+			}) ();
 		}
-		var sub = col.column ();
-		sub.prop (fluid, 'fluid_radius', __kwargtrans__ ({slider: fluid.use_factor_radius}));
-		sub.prop (fluid, 'use_factor_radius');
-		sub.prop (fluid, 'rest_density', __kwargtrans__ ({slider: fluid.use_factor_density}));
-		sub.prop (fluid, 'use_factor_density');
-		if (fluid.solver == 'CLASSICAL') {
-			var particle_volume = part.mass / fluid.rest_density;
-			var spacing = pow (particle_volume, 1.0 / 3.0);
-			sub.label (__kwargtrans__ ({text: iface_ ('Spacing: {:g}').format (spacing), translate: false}));
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'fluid_radius', __kwargtrans__ ({slider: fluid.use_factor_radius}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'use_factor_radius');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'rest_density', __kwargtrans__ ({slider: fluid.use_factor_density}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'use_factor_density');
+		}) ();
+		if (__eq__ (fluid.solver, 'CLASSICAL')) {
+			var particle_volume = __truediv__ (part.mass, fluid.rest_density);
+			var spacing = __call__ (pow, null, particle_volume, __truediv__ (1.0, 3.0));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Spacing: {:g}');
+					return __call__ (__accu1__.format, __accu1__, spacing);
+				}) (), translate: false}));
+			}) ();
 		}
 	});}
 });
@@ -1152,7 +1605,7 @@ export var PARTICLE_PT_physics_fluid_springs =  __class__ ('PARTICLE_PT_physics_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1164,14 +1617,14 @@ export var PARTICLE_PT_physics_fluid_springs =  __class__ ('PARTICLE_PT_physics_
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		return part.physics_type == 'FLUID' && fluid.solver == 'DDR';
+		return __eq__ (part.physics_type, 'FLUID') && __eq__ (fluid.solver, 'DDR');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1185,10 +1638,16 @@ export var PARTICLE_PT_physics_fluid_springs =  __class__ ('PARTICLE_PT_physics_
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		var col = layout.column ();
-		col.prop (fluid, 'spring_force', __kwargtrans__ ({text: 'Force'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'spring_force', __kwargtrans__ ({text: 'Force'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_fluid_springs_viscoelastic =  __class__ ('PARTICLE_PT_physics_fluid_springs_viscoelastic', [ParticleButtonsPanel, Panel], {
@@ -1200,7 +1659,7 @@ export var PARTICLE_PT_physics_fluid_springs_viscoelastic =  __class__ ('PARTICL
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1212,14 +1671,14 @@ export var PARTICLE_PT_physics_fluid_springs_viscoelastic =  __class__ ('PARTICL
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		return part.physics_type == 'FLUID' && fluid.solver == 'DDR';
+		return __eq__ (part.physics_type, 'FLUID') && __eq__ (fluid.solver, 'DDR');
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1231,14 +1690,17 @@ export var PARTICLE_PT_physics_fluid_springs_viscoelastic =  __class__ ('PARTICL
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		self.layout.prop (fluid, 'use_viscoelastic_springs', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'use_viscoelastic_springs', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1252,15 +1714,33 @@ export var PARTICLE_PT_physics_fluid_springs_viscoelastic =  __class__ ('PARTICL
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = fluid.use_viscoelastic_springs;
-		col.prop (fluid, 'yield_ratio', __kwargtrans__ ({slider: true}));
-		col.prop (fluid, 'plasticity', __kwargtrans__ ({slider: true}));
-		col.separator ();
-		col.prop (fluid, 'use_initial_rest_length');
-		col.prop (fluid, 'spring_frames', __kwargtrans__ ({text: 'Frames'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'yield_ratio', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'plasticity', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'use_initial_rest_length');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'spring_frames', __kwargtrans__ ({text: 'Frames'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_fluid_springs_advanced =  __class__ ('PARTICLE_PT_physics_fluid_springs_advanced', [ParticleButtonsPanel, Panel], {
@@ -1272,7 +1752,7 @@ export var PARTICLE_PT_physics_fluid_springs_advanced =  __class__ ('PARTICLE_PT
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1284,14 +1764,14 @@ export var PARTICLE_PT_physics_fluid_springs_advanced =  __class__ ('PARTICLE_PT
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		return part.physics_type == 'FLUID' && fluid.solver == 'DDR';
+		return __eq__ (part.physics_type, 'FLUID') && __eq__ (fluid.solver, 'DDR');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1305,11 +1785,20 @@ export var PARTICLE_PT_physics_fluid_springs_advanced =  __class__ ('PARTICLE_PT
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var fluid = part.fluid;
-		var sub = layout.column ();
-		sub.prop (fluid, 'rest_length', __kwargtrans__ ({slider: fluid.use_factor_rest_length}));
-		sub.prop (fluid, 'use_factor_rest_length');
+		var sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'rest_length', __kwargtrans__ ({slider: fluid.use_factor_rest_length}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, fluid, 'use_factor_rest_length');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_boids_movement =  __class__ ('PARTICLE_PT_physics_boids_movement', [ParticleButtonsPanel, Panel], {
@@ -1321,7 +1810,7 @@ export var PARTICLE_PT_physics_boids_movement =  __class__ ('PARTICLE_PT_physics
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1333,13 +1822,13 @@ export var PARTICLE_PT_physics_boids_movement =  __class__ ('PARTICLE_PT_physics
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.physics_type == 'BOIDS';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.physics_type, 'BOIDS');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1353,34 +1842,103 @@ export var PARTICLE_PT_physics_boids_movement =  __class__ ('PARTICLE_PT_physics
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var boids = part.boids;
-		var col = layout.column ();
-		col.prop (boids, 'use_flight');
-		col.prop (boids, 'use_land');
-		col.prop (boids, 'use_climb');
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'use_flight');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'use_land');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'use_climb');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = boids.use_flight;
-		var sub = col.column ();
-		sub.prop (boids, 'air_speed_max');
-		sub.prop (boids, 'air_speed_min', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'air_acc_max', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'air_ave_max', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'air_personal_space');
-		var row = col.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'air_speed_max');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'air_speed_min', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'air_acc_max', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'air_ave_max', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'air_personal_space');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.active = (boids.use_land || boids.use_climb) && boids.use_flight;
-		row.prop (boids, 'land_smooth');
-		layout.separator ();
-		var col = layout.column ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_smooth');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = boids.use_land || boids.use_climb;
-		col.prop (boids, 'land_speed_max');
-		col.prop (boids, 'land_jump_speed');
-		col.prop (boids, 'land_acc_max', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'land_ave_max', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'land_personal_space');
-		col.prop (boids, 'land_stick_force');
-		layout.separator ();
-		layout.prop (part, 'collision_collection');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_speed_max');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_jump_speed');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_acc_max', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_ave_max', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_personal_space');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'land_stick_force');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'collision_collection');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_boids_battle =  __class__ ('PARTICLE_PT_physics_boids_battle', [ParticleButtonsPanel, Panel], {
@@ -1392,7 +1950,7 @@ export var PARTICLE_PT_physics_boids_battle =  __class__ ('PARTICLE_PT_physics_b
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1404,13 +1962,13 @@ export var PARTICLE_PT_physics_boids_battle =  __class__ ('PARTICLE_PT_physics_b
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.physics_type == 'BOIDS';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.physics_type, 'BOIDS');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1424,14 +1982,32 @@ export var PARTICLE_PT_physics_boids_battle =  __class__ ('PARTICLE_PT_physics_b
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var boids = part.boids;
-		var col = layout.column ();
-		col.prop (boids, 'health');
-		col.prop (boids, 'strength');
-		col.prop (boids, 'aggression');
-		col.prop (boids, 'accuracy');
-		col.prop (boids, 'range');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'health');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'strength');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'aggression');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'accuracy');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'range');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_boids_misc =  __class__ ('PARTICLE_PT_physics_boids_misc', [ParticleButtonsPanel, Panel], {
@@ -1443,7 +2019,7 @@ export var PARTICLE_PT_physics_boids_misc =  __class__ ('PARTICLE_PT_physics_boi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1455,13 +2031,13 @@ export var PARTICLE_PT_physics_boids_misc =  __class__ ('PARTICLE_PT_physics_boi
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.physics_type == 'BOIDS';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.physics_type, 'BOIDS');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1475,12 +2051,24 @@ export var PARTICLE_PT_physics_boids_misc =  __class__ ('PARTICLE_PT_physics_boi
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		var boids = part.boids;
-		var col = layout.column ();
-		col.prop (boids, 'bank', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'pitch', __kwargtrans__ ({slider: true}));
-		col.prop (boids, 'height', __kwargtrans__ ({slider: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'bank', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'pitch', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, boids, 'height', __kwargtrans__ ({slider: true}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_relations =  __class__ ('PARTICLE_PT_physics_relations', [ParticleButtonsPanel, Panel], {
@@ -1492,7 +2080,7 @@ export var PARTICLE_PT_physics_relations =  __class__ ('PARTICLE_PT_physics_rela
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1505,13 +2093,13 @@ export var PARTICLE_PT_physics_relations =  __class__ ('PARTICLE_PT_physics_rela
 		else {
 		}
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		return psys && __in__ (part.physics_type, new set (['KEYED', 'BOIDS']));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1526,34 +2114,97 @@ export var PARTICLE_PT_physics_relations =  __class__ ('PARTICLE_PT_physics_rela
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		var row = layout.row ();
-		row.template_list ('UI_UL_list', 'particle_targets', psys, 'targets', psys, 'active_particle_target_index', __kwargtrans__ ({rows: 4}));
-		var col = row.column ();
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator ('particle.new_target', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		subsub.operator ('particle.target_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator ('particle.target_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
-		subsub.operator ('particle.target_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		var part = __call__ (particle_get_settings, null, context);
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'particle_targets', psys, 'targets', psys, 'active_particle_target_index', __kwargtrans__ ({rows: 4}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.new_target', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.target_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.target_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.target_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		}) ();
 		var key = psys.active_particle_target;
 		if (key) {
-			if (part.physics_type == 'KEYED') {
-				var col = layout.column ();
-				col.prop (key, 'object');
-				col.prop (key, 'system', __kwargtrans__ ({text: 'System'}));
-				var sub = col.column (__kwargtrans__ ({align: true}));
+			if (__eq__ (part.physics_type, 'KEYED')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, key, 'object');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, key, 'system', __kwargtrans__ ({text: 'System'}));
+				}) ();
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
 				sub.active = psys.use_keyed_timing;
-				sub.prop (key, 'time');
-				sub.prop (key, 'duration');
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, key, 'time');
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, key, 'duration');
+				}) ();
 			}
-			else if (part.physics_type == 'BOIDS') {
-				var sub = layout.column ();
-				sub.prop (key, 'object');
-				sub.prop (key, 'system', __kwargtrans__ ({text: 'System'}));
-				layout.prop (key, 'alliance');
+			else if (__eq__ (part.physics_type, 'BOIDS')) {
+				var sub = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, key, 'object');
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, key, 'system', __kwargtrans__ ({text: 'System'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, key, 'alliance');
+				}) ();
 			}
 		}
 	});}
@@ -1567,7 +2218,7 @@ export var PARTICLE_PT_physics_fluid_interaction =  __class__ ('PARTICLE_PT_phys
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1579,13 +2230,13 @@ export var PARTICLE_PT_physics_fluid_interaction =  __class__ ('PARTICLE_PT_phys
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.physics_type == 'FLUID';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.physics_type, 'FLUID');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1600,22 +2251,64 @@ export var PARTICLE_PT_physics_fluid_interaction =  __class__ ('PARTICLE_PT_phys
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var row = layout.row ();
-		row.template_list ('UI_UL_list', 'particle_targets', psys, 'targets', psys, 'active_particle_target_index', __kwargtrans__ ({rows: 4}));
-		var col = row.column ();
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator ('particle.new_target', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		subsub.operator ('particle.target_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator ('particle.target_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
-		subsub.operator ('particle.target_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'particle_targets', psys, 'targets', psys, 'active_particle_target_index', __kwargtrans__ ({rows: 4}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.new_target', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.target_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.target_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.target_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		}) ();
 		var key = psys.active_particle_target;
 		if (key) {
-			var sub = layout.column ();
-			sub.prop (key, 'object');
-			sub.prop (key, 'system', __kwargtrans__ ({text: 'System'}));
+			var sub = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, key, 'object');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, key, 'system', __kwargtrans__ ({text: 'System'}));
+			}) ();
 		}
 	});}
 });
@@ -1628,7 +2321,7 @@ export var PARTICLE_PT_physics_deflection =  __class__ ('PARTICLE_PT_physics_def
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1640,13 +2333,13 @@ export var PARTICLE_PT_physics_deflection =  __class__ ('PARTICLE_PT_physics_def
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		return __in__ (part.physics_type, new set (['NEWTON', 'FLUID']));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1661,12 +2354,24 @@ export var PARTICLE_PT_physics_deflection =  __class__ ('PARTICLE_PT_physics_def
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.enabled = particle_panel_enabled (context, psys);
-		var col = layout.column ();
-		col.prop (part, 'use_size_deflect');
-		col.prop (part, 'use_die_on_collision');
-		col.prop (part, 'collision_collection');
+		var part = __call__ (particle_get_settings, null, context);
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_size_deflect');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_die_on_collision');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'collision_collection');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_forces =  __class__ ('PARTICLE_PT_physics_forces', [ParticleButtonsPanel, Panel], {
@@ -1677,7 +2382,7 @@ export var PARTICLE_PT_physics_forces =  __class__ ('PARTICLE_PT_physics_forces'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1689,13 +2394,13 @@ export var PARTICLE_PT_physics_forces =  __class__ ('PARTICLE_PT_physics_forces'
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		return __in__ (part.physics_type, new set (['NEWTON', 'FLUID']));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1710,12 +2415,24 @@ export var PARTICLE_PT_physics_forces =  __class__ ('PARTICLE_PT_physics_forces'
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.enabled = particle_panel_enabled (context, psys);
-		var col = layout.column ();
-		col.prop (part, 'brownian_factor');
-		col.prop (part, 'drag_factor', __kwargtrans__ ({slider: true}));
-		col.prop (part, 'damping', __kwargtrans__ ({slider: true}));
+		var part = __call__ (particle_get_settings, null, context);
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'brownian_factor');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'drag_factor', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'damping', __kwargtrans__ ({slider: true}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_physics_integration =  __class__ ('PARTICLE_PT_physics_integration', [ParticleButtonsPanel, Panel], {
@@ -1727,7 +2444,7 @@ export var PARTICLE_PT_physics_integration =  __class__ ('PARTICLE_PT_physics_in
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1739,13 +2456,13 @@ export var PARTICLE_PT_physics_integration =  __class__ ('PARTICLE_PT_physics_in
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		return __in__ (part.physics_type, new set (['NEWTON', 'FLUID']));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1760,17 +2477,38 @@ export var PARTICLE_PT_physics_integration =  __class__ ('PARTICLE_PT_physics_in
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.enabled = particle_panel_enabled (context, psys);
-		var col = layout.column ();
-		col.prop (part, 'integrator');
-		col.prop (part, 'timestep');
-		col.prop (part, 'subframes');
-		if (part.physics_type == 'FLUID') {
-			col.prop (part, 'use_adaptive_subframes', __kwargtrans__ ({text: 'Adaptive'}));
-			var sub = col.row ();
+		var part = __call__ (particle_get_settings, null, context);
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'integrator');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'timestep');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'subframes');
+		}) ();
+		if (__eq__ (part.physics_type, 'FLUID')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_adaptive_subframes', __kwargtrans__ ({text: 'Adaptive'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			sub.enabled = part.use_adaptive_subframes;
-			sub.prop (part, 'courant_target', __kwargtrans__ ({text: 'Threshold'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'courant_target', __kwargtrans__ ({text: 'Threshold'}));
+			}) ();
 		}
 	});}
 });
@@ -1783,7 +2521,7 @@ export var PARTICLE_PT_boidbrain =  __class__ ('PARTICLE_PT_boidbrain', [Particl
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1796,7 +2534,7 @@ export var PARTICLE_PT_boidbrain =  __class__ ('PARTICLE_PT_boidbrain', [Particl
 		else {
 		}
 		var psys = context.particle_system;
-		var settings = particle_get_settings (context);
+		var settings = __call__ (particle_get_settings, null, context);
 		var engine = context.engine;
 		if (settings === null) {
 			return false;
@@ -1804,12 +2542,12 @@ export var PARTICLE_PT_boidbrain =  __class__ ('PARTICLE_PT_boidbrain', [Particl
 		if (psys !== null && psys.point_cache.use_external) {
 			return false;
 		}
-		return settings.physics_type == 'BOIDS' && __in__ (engine, cls.COMPAT_ENGINES);
+		return __eq__ (settings.physics_type, 'BOIDS') && __in__ (engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1824,63 +2562,171 @@ export var PARTICLE_PT_boidbrain =  __class__ ('PARTICLE_PT_boidbrain', [Particl
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var boids = particle_get_settings (context).boids;
-		layout.enabled = particle_panel_enabled (context, context.particle_system);
+		var boids = __call__ (particle_get_settings, null, context).boids;
+		layout.enabled = __call__ (particle_panel_enabled, null, context, context.particle_system);
 		var state = boids.active_boid_state;
-		var row = layout.row ();
-		row.template_list ('UI_UL_list', 'particle_boids_rules', state, 'rules', state, 'active_boid_rule_index', __kwargtrans__ ({rows: 4}));
-		var col = row.column ();
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator_menu_enum ('boid.rule_add', 'type', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		subsub.operator ('boid.rule_del', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator ('boid.rule_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
-		subsub.operator ('boid.rule_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
-		layout.prop (state, 'ruleset_type');
-		if (state.ruleset_type == 'FUZZY') {
-			layout.prop (state, 'rule_fuzzy', __kwargtrans__ ({slider: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'particle_boids_rules', state, 'rules', state, 'active_boid_rule_index', __kwargtrans__ ({rows: 4}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'boid.rule_add', 'type', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'boid.rule_del', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'boid.rule_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'boid.rule_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, state, 'ruleset_type');
+		}) ();
+		if (__eq__ (state.ruleset_type, 'FUZZY')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, state, 'rule_fuzzy', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 		var rule = state.active_boid_rule;
 		if (rule) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.prop (rule, 'use_in_air');
-			col.prop (rule, 'use_on_land');
-			var col = layout.column ();
-			if (rule.py_metatype == 'GOAL') {
-				col.prop (rule, 'object');
-				col.prop (rule, 'use_predict');
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rule, 'use_in_air');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rule, 'use_on_land');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			if (__eq__ (rule.py_metatype, 'GOAL')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'object');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'use_predict');
+				}) ();
 			}
-			else if (rule.py_metatype == 'AVOID') {
-				col.prop (rule, 'object');
-				col.prop (rule, 'use_predict');
-				col.prop (rule, 'fear_factor');
+			else if (__eq__ (rule.py_metatype, 'AVOID')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'object');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'use_predict');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'fear_factor');
+				}) ();
 			}
-			else if (rule.py_metatype == 'FOLLOW_PATH') {
-				col.label (__kwargtrans__ ({text: 'Not yet functional'}));
+			else if (__eq__ (rule.py_metatype, 'FOLLOW_PATH')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Not yet functional'}));
+				}) ();
 			}
-			else if (rule.py_metatype == 'AVOID_COLLISION') {
-				col.prop (rule, 'use_avoid');
-				col.prop (rule, 'use_avoid_collision');
-				col.prop (rule, 'look_ahead');
+			else if (__eq__ (rule.py_metatype, 'AVOID_COLLISION')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'use_avoid');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'use_avoid_collision');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'look_ahead');
+				}) ();
 			}
-			else if (rule.py_metatype == 'FOLLOW_LEADER') {
-				col.prop (rule, 'object');
-				col.prop (rule, 'distance');
-				col.prop (rule, 'use_line');
-				var sub = col.row ();
+			else if (__eq__ (rule.py_metatype, 'FOLLOW_LEADER')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'object');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'distance');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'use_line');
+				}) ();
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				sub.active = rule.use_line;
-				sub.prop (rule, 'queue_count');
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'queue_count');
+				}) ();
 			}
-			else if (rule.py_metatype == 'AVERAGE_SPEED') {
-				col.prop (rule, 'speed', __kwargtrans__ ({slider: true}));
-				col.prop (rule, 'wander', __kwargtrans__ ({slider: true}));
-				col.prop (rule, 'level', __kwargtrans__ ({slider: true}));
+			else if (__eq__ (rule.py_metatype, 'AVERAGE_SPEED')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'speed', __kwargtrans__ ({slider: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'wander', __kwargtrans__ ({slider: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'level', __kwargtrans__ ({slider: true}));
+				}) ();
 			}
-			else if (rule.py_metatype == 'FIGHT') {
-				col.prop (rule, 'distance');
-				col.prop (rule, 'flee_distance');
+			else if (__eq__ (rule.py_metatype, 'FIGHT')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'distance');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, rule, 'flee_distance');
+				}) ();
 			}
 		}
 	});}
@@ -1893,7 +2739,7 @@ export var PARTICLE_PT_render =  __class__ ('PARTICLE_PT_render', [ParticleButto
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1905,7 +2751,7 @@ export var PARTICLE_PT_render =  __class__ ('PARTICLE_PT_render', [ParticleButto
 		}
 		else {
 		}
-		var settings = particle_get_settings (context);
+		var settings = __call__ (particle_get_settings, null, context);
 		var engine = context.engine;
 		if (settings === null) {
 			return false;
@@ -1915,7 +2761,7 @@ export var PARTICLE_PT_render =  __class__ ('PARTICLE_PT_render', [ParticleButto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1930,25 +2776,52 @@ export var PARTICLE_PT_render =  __class__ ('PARTICLE_PT_render', [ParticleButto
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.prop (part, 'render_type', __kwargtrans__ ({text: 'Render As'}));
-		if (part.py_metatype == 'EMITTER' || __in__ (part.py_metatype, new set (['FLIP', 'SPRAY', 'BUBBLE', 'FOAM', 'TRACER', 'SPRAYFOAM', 'SPRAYBUBBLE', 'FOAMBUBBLE', 'SPRAYFOAMBUBBLE'])) || __in__ (part.render_type, new set (['OBJECT', 'COLLECTION'])) && part.py_metatype == 'HAIR') {
-			if (part.render_type != 'NONE') {
-				var col = layout.column (__kwargtrans__ ({align: true}));
-				col.prop (part, 'particle_size', __kwargtrans__ ({text: 'Scale'}));
-				col.prop (part, 'size_random', __kwargtrans__ ({slider: true, text: 'Scale Randomness'}));
+		var part = __call__ (particle_get_settings, null, context);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'render_type', __kwargtrans__ ({text: 'Render As'}));
+		}) ();
+		if (__eq__ (part.py_metatype, 'EMITTER') || __in__ (part.py_metatype, new set (['FLIP', 'SPRAY', 'BUBBLE', 'FOAM', 'TRACER', 'SPRAYFOAM', 'SPRAYBUBBLE', 'FOAMBUBBLE', 'SPRAYFOAMBUBBLE'])) || __in__ (part.render_type, new set (['OBJECT', 'COLLECTION'])) && __eq__ (part.py_metatype, 'HAIR')) {
+			if (__ne__ (part.render_type, 'NONE')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'particle_size', __kwargtrans__ ({text: 'Scale'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'size_random', __kwargtrans__ ({slider: true, text: 'Scale Randomness'}));
+				}) ();
 			}
 		}
 		if (psys) {
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			if (!__in__ (part.render_type, new set (['OBJECT', 'COLLECTION', 'NONE']))) {
-				col.prop (part, 'material_slot', __kwargtrans__ ({text: 'Material'}));
-				col.prop (psys, 'parent', __kwargtrans__ ({text: 'Coordinate System'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, part, 'material_slot', __kwargtrans__ ({text: 'Material'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, psys, 'parent', __kwargtrans__ ({text: 'Coordinate System'}));
+				}) ();
 			}
 		}
 		if (context.object) {
-			layout.separator ();
-			layout.prop (context.object, 'show_instancer_for_render', __kwargtrans__ ({text: 'Show Emitter'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, context.object, 'show_instancer_for_render', __kwargtrans__ ({text: 'Show Emitter'}));
+			}) ();
 		}
 	});}
 });
@@ -1961,7 +2834,7 @@ export var PARTICLE_PT_render_extra =  __class__ ('PARTICLE_PT_render_extra', [P
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1973,13 +2846,13 @@ export var PARTICLE_PT_render_extra =  __class__ ('PARTICLE_PT_render_extra', [P
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.render_type != 'NONE';
+		var part = __call__ (particle_get_settings, null, context);
+		return __ne__ (part.render_type, 'NONE');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1993,12 +2866,27 @@ export var PARTICLE_PT_render_extra =  __class__ ('PARTICLE_PT_render_extra', [P
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
-		var col = layout.column ();
-		col.prop (part, 'use_parent_particles', __kwargtrans__ ({text: 'Parent Particles'}));
-		col.prop (part, 'show_unborn', __kwargtrans__ ({text: 'Unborn'}));
-		col.prop (part, 'use_dead', __kwargtrans__ ({text: 'Dead'}));
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_parent_particles', __kwargtrans__ ({text: 'Parent Particles'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'show_unborn', __kwargtrans__ ({text: 'Unborn'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_dead', __kwargtrans__ ({text: 'Dead'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_render_path =  __class__ ('PARTICLE_PT_render_path', [ParticleButtonsPanel, Panel], {
@@ -2009,7 +2897,7 @@ export var PARTICLE_PT_render_path =  __class__ ('PARTICLE_PT_render_path', [Par
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2021,13 +2909,13 @@ export var PARTICLE_PT_render_path =  __class__ ('PARTICLE_PT_render_path', [Par
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.render_type == 'PATH';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.render_type, 'PATH');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2041,10 +2929,19 @@ export var PARTICLE_PT_render_path =  __class__ ('PARTICLE_PT_render_path', [Par
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
-		col.prop (part, 'use_hair_bspline');
-		col.prop (part, 'render_step', __kwargtrans__ ({text: 'Steps'}));
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_hair_bspline');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'render_step', __kwargtrans__ ({text: 'Steps'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_render_path_timing =  __class__ ('PARTICLE_PT_render_path_timing', [ParticleButtonsPanel, Panel], {
@@ -2056,7 +2953,7 @@ export var PARTICLE_PT_render_path_timing =  __class__ ('PARTICLE_PT_render_path
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2068,13 +2965,13 @@ export var PARTICLE_PT_render_path_timing =  __class__ ('PARTICLE_PT_render_path
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.render_type == 'PATH';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.render_type, 'PATH');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2089,14 +2986,29 @@ export var PARTICLE_PT_render_path_timing =  __class__ ('PARTICLE_PT_render_path
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
-		col.prop (part, 'use_absolute_path_time');
-		if (part.py_metatype == 'HAIR' || psys.point_cache.is_baked) {
-			col.prop (part, 'path_start', __kwargtrans__ ({text: 'Start', slider: !(part.use_absolute_path_time)}));
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_absolute_path_time');
+		}) ();
+		if (__eq__ (part.py_metatype, 'HAIR') || psys.point_cache.is_baked) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'path_start', __kwargtrans__ ({text: 'Start', slider: !(part.use_absolute_path_time)}));
+			}) ();
 		}
-		col.prop (part, 'path_end', __kwargtrans__ ({text: 'End', slider: !(part.use_absolute_path_time)}));
-		col.prop (part, 'length_random', __kwargtrans__ ({text: 'Random', slider: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'path_end', __kwargtrans__ ({text: 'End', slider: !(part.use_absolute_path_time)}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'length_random', __kwargtrans__ ({text: 'Random', slider: true}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_render_object =  __class__ ('PARTICLE_PT_render_object', [ParticleButtonsPanel, Panel], {
@@ -2107,7 +3019,7 @@ export var PARTICLE_PT_render_object =  __class__ ('PARTICLE_PT_render_object', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2119,13 +3031,13 @@ export var PARTICLE_PT_render_object =  __class__ ('PARTICLE_PT_render_object', 
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.render_type == 'OBJECT';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.render_type, 'OBJECT');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2139,13 +3051,31 @@ export var PARTICLE_PT_render_object =  __class__ ('PARTICLE_PT_render_object', 
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
-		col.prop (part, 'instance_object', __kwargtrans__ ({text: 'Instance Object'}));
-		var sub = col.column ();
-		sub.prop (part, 'use_global_instance', __kwargtrans__ ({text: 'Global Coordinates'}));
-		sub.prop (part, 'use_rotation_instance', __kwargtrans__ ({text: 'Object Rotation'}));
-		sub.prop (part, 'use_scale_instance', __kwargtrans__ ({text: 'Object Scale'}));
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'instance_object', __kwargtrans__ ({text: 'Instance Object'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_global_instance', __kwargtrans__ ({text: 'Global Coordinates'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_rotation_instance', __kwargtrans__ ({text: 'Object Rotation'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_scale_instance', __kwargtrans__ ({text: 'Object Scale'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_render_collection =  __class__ ('PARTICLE_PT_render_collection', [ParticleButtonsPanel, Panel], {
@@ -2156,7 +3086,7 @@ export var PARTICLE_PT_render_collection =  __class__ ('PARTICLE_PT_render_colle
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2168,13 +3098,13 @@ export var PARTICLE_PT_render_collection =  __class__ ('PARTICLE_PT_render_colle
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.render_type == 'COLLECTION';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.render_type, 'COLLECTION');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2188,16 +3118,40 @@ export var PARTICLE_PT_render_collection =  __class__ ('PARTICLE_PT_render_colle
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
-		col.prop (part, 'instance_collection', __kwargtrans__ ({text: 'Instance Collection'}));
-		col.prop (part, 'use_whole_collection');
-		var sub = col.column ();
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'instance_collection', __kwargtrans__ ({text: 'Instance Collection'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_whole_collection');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = part.use_whole_collection === false;
-		sub.prop (part, 'use_collection_pick_random');
-		sub.prop (part, 'use_global_instance', __kwargtrans__ ({text: 'Global Coordinates'}));
-		sub.prop (part, 'use_rotation_instance', __kwargtrans__ ({text: 'Object Rotation'}));
-		sub.prop (part, 'use_scale_instance', __kwargtrans__ ({text: 'Object Scale'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_collection_pick_random');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_global_instance', __kwargtrans__ ({text: 'Global Coordinates'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_rotation_instance', __kwargtrans__ ({text: 'Object Rotation'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_scale_instance', __kwargtrans__ ({text: 'Object Scale'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_render_collection_use_count', [ParticleButtonsPanel, Panel], {
@@ -2209,7 +3163,7 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2221,13 +3175,13 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.render_type == 'COLLECTION';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.render_type, 'COLLECTION');
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2240,14 +3194,17 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.active = !(part.use_whole_collection);
-		layout.prop (part, 'use_collection_count', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_collection_count', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2261,24 +3218,66 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		layout.active = part.use_collection_count && !(part.use_whole_collection);
-		var row = layout.row ();
-		row.template_list ('UI_UL_list', 'particle_instance_weights', part, 'instance_weights', part, 'active_instanceweight_index');
-		var col = row.column ();
-		var sub = col.row ();
-		var subsub = sub.column (__kwargtrans__ ({align: true}));
-		subsub.operator ('particle.dupliob_copy', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		subsub.operator ('particle.dupliob_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		subsub.operator ('particle.dupliob_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
-		subsub.operator ('particle.dupliob_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
-		subsub.separator ();
-		subsub.operator ('particle.dupliob_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'particle_instance_weights', part, 'instance_weights', part, 'active_instanceweight_index');
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.dupliob_copy', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.dupliob_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.dupliob_move_up', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.dupliob_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.operator, __accu0__, 'particle.dupliob_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
+		}) ();
 		var weight = part.active_instanceweight;
 		if (weight) {
-			var row = layout.row ();
-			row.prop (weight, 'count');
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, weight, 'count');
+			}) ();
 		}
 	});}
 });
@@ -2290,7 +3289,7 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2302,7 +3301,7 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 		}
 		else {
 		}
-		var settings = particle_get_settings (context);
+		var settings = __call__ (particle_get_settings, null, context);
 		var engine = context.engine;
 		if (settings === null) {
 			return false;
@@ -2312,7 +3311,7 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2327,45 +3326,93 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.prop (part, 'display_method', __kwargtrans__ ({text: 'Display As'}));
-		if (part.display_method == 'NONE' || part.render_type == 'NONE' && part.display_method == 'RENDER') {
+		var part = __call__ (particle_get_settings, null, context);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'display_method', __kwargtrans__ ({text: 'Display As'}));
+		}) ();
+		if (__eq__ (part.display_method, 'NONE') || __eq__ (part.render_type, 'NONE') && __eq__ (part.display_method, 'RENDER')) {
 			return ;
 		}
-		var path = part.render_type == 'PATH' && part.display_method == 'RENDER' || part.display_method == 'PATH';
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (part, 'display_color', __kwargtrans__ ({text: 'Color'}));
+		var path = __eq__ (part.render_type, 'PATH') && __eq__ (part.display_method, 'RENDER') || __eq__ (part.display_method, 'PATH');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'display_color', __kwargtrans__ ({text: 'Color'}));
+		}) ();
 		if (__in__ (part.display_color, new set (['VELOCITY', 'ACCELERATION']))) {
-			col.prop (part, 'color_maximum', __kwargtrans__ ({text: 'Fade Distance'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'color_maximum', __kwargtrans__ ({text: 'Fade Distance'}));
+			}) ();
 		}
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		if (path) {
-			col.prop (part, 'display_step', __kwargtrans__ ({text: 'Strand Steps'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'display_step', __kwargtrans__ ({text: 'Strand Steps'}));
+			}) ();
 		}
-		col.prop (part, 'display_percentage', __kwargtrans__ ({slider: true, text: 'Amount', text_ctxt: i18n_contexts.countable}));
-		if (part.display_method != 'RENDER' || part.render_type == 'HALO') {
-			col.prop (part, 'display_size', __kwargtrans__ ({text: 'Size'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'display_percentage', __kwargtrans__ ({slider: true, text: 'Amount', text_ctxt: i18n_contexts.countable}));
+		}) ();
+		if (__ne__ (part.display_method, 'RENDER') || __eq__ (part.render_type, 'HALO')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'display_size', __kwargtrans__ ({text: 'Size'}));
+			}) ();
 		}
-		if (part.display_percentage != 100 && psys !== null) {
-			if (part.py_metatype == 'HAIR') {
+		if (__ne__ (part.display_percentage, 100) && psys !== null) {
+			if (__eq__ (part.py_metatype, 'HAIR')) {
 				if (psys.use_hair_dynamics && psys.point_cache.is_baked === false) {
-					layout.row ().label (__kwargtrans__ ({text: 'Display percentage makes dynamics inaccurate without baking'}));
+					(function () {
+						var __accu0__ = (function () {
+							var __accu1__ = layout;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Display percentage makes dynamics inaccurate without baking'}));
+					}) ();
 				}
 			}
 			else {
 				var phystype = part.physics_type;
-				if (phystype != 'NO' && phystype != 'KEYED' && psys.point_cache.is_baked === false) {
-					layout.row ().label (__kwargtrans__ ({text: 'Display percentage makes dynamics inaccurate without baking'}));
+				if (__ne__ (phystype, 'NO') && __ne__ (phystype, 'KEYED') && psys.point_cache.is_baked === false) {
+					(function () {
+						var __accu0__ = (function () {
+							var __accu1__ = layout;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Display percentage makes dynamics inaccurate without baking'}));
+					}) ();
 				}
 			}
 		}
 		else {
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		if (context.object) {
-			layout.separator ();
-			layout.prop (context.object, 'show_instancer_for_viewport', __kwargtrans__ ({text: 'Show Emitter'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, context.object, 'show_instancer_for_viewport', __kwargtrans__ ({text: 'Show Emitter'}));
+			}) ();
 		}
 	});}
 });
@@ -2378,7 +3425,7 @@ export var PARTICLE_PT_children =  __class__ ('PARTICLE_PT_children', [ParticleB
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2390,12 +3437,12 @@ export var PARTICLE_PT_children =  __class__ ('PARTICLE_PT_children', [ParticleB
 		}
 		else {
 		}
-		return particle_panel_poll (cls, context);
+		return __call__ (particle_panel_poll, null, cls, context);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2409,37 +3456,97 @@ export var PARTICLE_PT_children =  __class__ ('PARTICLE_PT_children', [ParticleB
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		var part = particle_get_settings (context);
-		layout.row ().prop (part, 'child_type', __kwargtrans__ ({expand: true}));
+		var part = __call__ (particle_get_settings, null, context);
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_type', __kwargtrans__ ({expand: true}));
+		}) ();
 		layout.use_property_split = true;
-		if (part.child_type == 'NONE') {
+		if (__eq__ (part.child_type, 'NONE')) {
 			return ;
 		}
-		var col = layout.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (part, 'child_percent', __kwargtrans__ ({text: 'Display Amount'}));
-		sub.prop (part, 'rendered_child_count', __kwargtrans__ ({text: 'Render Amount'}));
-		col.separator ();
-		col.prop (part, 'child_length', __kwargtrans__ ({slider: true}));
-		col.prop (part, 'child_length_threshold', __kwargtrans__ ({slider: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_percent', __kwargtrans__ ({text: 'Display Amount'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'rendered_child_count', __kwargtrans__ ({text: 'Render Amount'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_length', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_length_threshold', __kwargtrans__ ({slider: true}));
+		}) ();
 		if (psys) {
-			col.prop (psys, 'child_seed', __kwargtrans__ ({text: 'Seed'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, psys, 'child_seed', __kwargtrans__ ({text: 'Seed'}));
+			}) ();
 		}
-		col.separator ();
-		if (part.child_type == 'INTERPOLATED') {
-			col.prop (part, 'virtual_parents', __kwargtrans__ ({slider: true}));
-			col.prop (part, 'create_long_hair_children');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (__eq__ (part.child_type, 'INTERPOLATED')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'virtual_parents', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'create_long_hair_children');
+			}) ();
 		}
 		else {
-			col.separator ();
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (part, 'child_size', __kwargtrans__ ({text: 'Size'}));
-			sub.prop (part, 'child_size_random', __kwargtrans__ ({text: 'Randomize Size', slider: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'child_size', __kwargtrans__ ({text: 'Size'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'child_size_random', __kwargtrans__ ({text: 'Randomize Size', slider: true}));
+			}) ();
 		}
-		if (part.child_type == 'SIMPLE') {
-			col.separator ();
-			col.prop (part, 'child_radius', __kwargtrans__ ({text: 'Radius'}));
-			col.prop (part, 'child_roundness', __kwargtrans__ ({text: 'Roundness', slider: true}));
+		if (__eq__ (part.child_type, 'SIMPLE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'child_radius', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'child_roundness', __kwargtrans__ ({text: 'Roundness', slider: true}));
+			}) ();
 		}
 	});}
 });
@@ -2452,7 +3559,7 @@ export var PARTICLE_PT_children_parting =  __class__ ('PARTICLE_PT_children_part
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2464,13 +3571,13 @@ export var PARTICLE_PT_children_parting =  __class__ ('PARTICLE_PT_children_part
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.child_type == 'INTERPOLATED';
+		var part = __call__ (particle_get_settings, null, context);
+		return __eq__ (part.child_type, 'INTERPOLATED');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2483,18 +3590,36 @@ export var PARTICLE_PT_children_parting =  __class__ ('PARTICLE_PT_children_part
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
-		var is_virtual = part.virtual_parents > 0.0;
+		var part = __call__ (particle_get_settings, null, context);
+		var is_virtual = __gt__ (part.virtual_parents, 0.0);
 		layout.use_property_split = true;
 		if (is_virtual) {
-			layout.label (__kwargtrans__ ({text: 'Parting not available with virtual parents'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Parting not available with virtual parents'}));
+			}) ();
 		}
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = !(is_virtual);
-		col.prop (part, 'child_parting_factor', __kwargtrans__ ({text: 'Parting', slider: true}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (part, 'child_parting_min', __kwargtrans__ ({text: 'Min'}));
-		sub.prop (part, 'child_parting_max', __kwargtrans__ ({text: 'Max'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_parting_factor', __kwargtrans__ ({text: 'Parting', slider: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_parting_min', __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'child_parting_max', __kwargtrans__ ({text: 'Max'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_children_clumping =  __class__ ('PARTICLE_PT_children_clumping', [ParticleButtonsPanel, Panel], {
@@ -2506,7 +3631,7 @@ export var PARTICLE_PT_children_clumping =  __class__ ('PARTICLE_PT_children_clu
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2518,13 +3643,13 @@ export var PARTICLE_PT_children_clumping =  __class__ ('PARTICLE_PT_children_clu
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.child_type != 'NONE';
+		var part = __call__ (particle_get_settings, null, context);
+		return __ne__ (part.child_type, 'NONE');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2537,23 +3662,50 @@ export var PARTICLE_PT_children_clumping =  __class__ ('PARTICLE_PT_children_clu
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
-		var col = layout.column ();
-		var sub = col.column ();
-		sub.prop (part, 'use_clump_curve');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_clump_curve');
+		}) ();
 		if (part.use_clump_curve) {
-			sub.template_curve_mapping (part, 'clump_curve');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.template_curve_mapping, __accu0__, part, 'clump_curve');
+			}) ();
 		}
 		else {
-			sub.prop (part, 'clump_factor', __kwargtrans__ ({slider: true}));
-			sub.prop (part, 'clump_shape', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'clump_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'clump_shape', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
-		if (part.child_type == 'SIMPLE') {
-			col.prop (part, 'twist');
-			col.prop (part, 'use_twist_curve');
+		if (__eq__ (part.child_type, 'SIMPLE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'twist');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'use_twist_curve');
+			}) ();
 			if (part.use_twist_curve) {
-				col.template_curve_mapping (part, 'twist_curve');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_curve_mapping, __accu0__, part, 'twist_curve');
+				}) ();
 			}
 		}
 	});}
@@ -2567,7 +3719,7 @@ export var PARTICLE_PT_children_clumping_noise =  __class__ ('PARTICLE_PT_childr
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2579,13 +3731,16 @@ export var PARTICLE_PT_children_clumping_noise =  __class__ ('PARTICLE_PT_childr
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		self.layout.prop (part, 'use_clump_noise', __kwargtrans__ ({text: ''}));
+		var part = __call__ (particle_get_settings, null, context);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_clump_noise', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2598,10 +3753,13 @@ export var PARTICLE_PT_children_clumping_noise =  __class__ ('PARTICLE_PT_childr
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
 		layout.enabled = part.use_clump_noise;
-		layout.prop (part, 'clump_noise_size');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'clump_noise_size');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_children_roughness =  __class__ ('PARTICLE_PT_children_roughness', [ParticleButtonsPanel, Panel], {
@@ -2614,7 +3772,7 @@ export var PARTICLE_PT_children_roughness =  __class__ ('PARTICLE_PT_children_ro
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2626,13 +3784,13 @@ export var PARTICLE_PT_children_roughness =  __class__ ('PARTICLE_PT_children_ro
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.child_type != 'NONE';
+		var part = __call__ (particle_get_settings, null, context);
+		return __ne__ (part.child_type, 'NONE');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2645,27 +3803,75 @@ export var PARTICLE_PT_children_roughness =  __class__ ('PARTICLE_PT_children_ro
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (part, 'use_roughness_curve');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_roughness_curve');
+		}) ();
 		if (part.use_roughness_curve) {
-			var sub = col.column ();
-			sub.template_curve_mapping (part, 'roughness_curve');
-			sub.prop (part, 'roughness_1', __kwargtrans__ ({text: 'Roughness', text_ctxt: i18n_contexts.id_particlesettings}));
-			sub.prop (part, 'roughness_1_size', __kwargtrans__ ({text: 'Size'}));
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.template_curve_mapping, __accu0__, part, 'roughness_curve');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_1', __kwargtrans__ ({text: 'Roughness', text_ctxt: i18n_contexts.id_particlesettings}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_1_size', __kwargtrans__ ({text: 'Size'}));
+			}) ();
 		}
 		else {
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (part, 'roughness_1', __kwargtrans__ ({text: 'Uniform'}));
-			sub.prop (part, 'roughness_1_size', __kwargtrans__ ({text: 'Size'}));
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (part, 'roughness_endpoint', __kwargtrans__ ({text: 'Endpoint'}));
-			sub.prop (part, 'roughness_end_shape');
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (part, 'roughness_2', __kwargtrans__ ({text: 'Random'}));
-			sub.prop (part, 'roughness_2_size', __kwargtrans__ ({text: 'Size'}));
-			sub.prop (part, 'roughness_2_threshold', __kwargtrans__ ({slider: true}));
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_1', __kwargtrans__ ({text: 'Uniform'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_1_size', __kwargtrans__ ({text: 'Size'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_endpoint', __kwargtrans__ ({text: 'Endpoint'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_end_shape');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_2', __kwargtrans__ ({text: 'Random'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_2_size', __kwargtrans__ ({text: 'Size'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'roughness_2_threshold', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 	});}
 });
@@ -2678,7 +3884,7 @@ export var PARTICLE_PT_children_kink =  __class__ ('PARTICLE_PT_children_kink', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2690,13 +3896,13 @@ export var PARTICLE_PT_children_kink =  __class__ ('PARTICLE_PT_children_kink', 
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		return part.child_type != 'NONE';
+		var part = __call__ (particle_get_settings, null, context);
+		return __ne__ (part.child_type, 'NONE');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2709,32 +3915,92 @@ export var PARTICLE_PT_children_kink =  __class__ ('PARTICLE_PT_children_kink', 
 		else {
 		}
 		var layout = self.layout;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (part, 'kink', __kwargtrans__ ({text: 'Kink Type'}));
-		var col = layout.column ();
-		col.active = part.kink != 'NO';
-		if (part.kink == 'SPIRAL') {
-			var sub = col.column ();
-			sub.prop (part, 'kink_amplitude', __kwargtrans__ ({text: 'Amplitude'}));
-			sub.prop (part, 'kink_amplitude_random', __kwargtrans__ ({text: 'Randomize Amplitude', slider: true}));
-			col.separator ();
-			var sub = col.column ();
-			sub.prop (part, 'kink_axis');
-			sub.prop (part, 'kink_axis_random', __kwargtrans__ ({text: 'Randomize Axis', slider: true}));
-			col.separator ();
-			col.prop (part, 'kink_frequency', __kwargtrans__ ({text: 'Frequency'}));
-			col.prop (part, 'kink_shape', __kwargtrans__ ({text: 'Shape', slider: true}));
-			col.prop (part, 'kink_extra_steps', __kwargtrans__ ({text: 'Steps'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'kink', __kwargtrans__ ({text: 'Kink Type'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		col.active = __ne__ (part.kink, 'NO');
+		if (__eq__ (part.kink, 'SPIRAL')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_amplitude', __kwargtrans__ ({text: 'Amplitude'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_amplitude_random', __kwargtrans__ ({text: 'Randomize Amplitude', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_axis');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_axis_random', __kwargtrans__ ({text: 'Randomize Axis', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_frequency', __kwargtrans__ ({text: 'Frequency'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_shape', __kwargtrans__ ({text: 'Shape', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_extra_steps', __kwargtrans__ ({text: 'Steps'}));
+			}) ();
 		}
 		else if (__in__ (part.kink, new set (['CURL', 'RADIAL', 'WAVE', 'BRAID', 'WAVE']))) {
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (part, 'kink_amplitude');
-			sub.prop (part, 'kink_amplitude_clump', __kwargtrans__ ({text: 'Clump', slider: true}));
-			col.prop (part, 'kink_flat', __kwargtrans__ ({slider: true}));
-			col.prop (part, 'kink_frequency');
-			col.prop (part, 'kink_shape', __kwargtrans__ ({slider: true}));
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_amplitude');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_amplitude_clump', __kwargtrans__ ({text: 'Clump', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_flat', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_frequency');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part, 'kink_shape', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 	});}
 });
@@ -2746,7 +4012,7 @@ export var PARTICLE_PT_field_weights =  __class__ ('PARTICLE_PT_field_weights', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2758,12 +4024,12 @@ export var PARTICLE_PT_field_weights =  __class__ ('PARTICLE_PT_field_weights', 
 		}
 		else {
 		}
-		return particle_panel_poll (cls, context);
+		return __call__ (particle_panel_poll, null, cls, context);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2775,14 +4041,29 @@ export var PARTICLE_PT_field_weights =  __class__ ('PARTICLE_PT_field_weights', 
 		}
 		else {
 		}
-		var part = particle_get_settings (context);
-		effector_weights_ui (self, part.effector_weights, 'PSYS');
-		if (part.py_metatype == 'HAIR') {
-			var row = self.layout.row ();
-			row.prop (part.effector_weights, 'apply_to_hair_growing');
-			row.prop (part, 'apply_effector_to_children');
-			var row = self.layout.row ();
-			row.prop (part, 'effect_hair', __kwargtrans__ ({slider: true}));
+		var part = __call__ (particle_get_settings, null, context);
+		__call__ (effector_weights_ui, null, self, part.effector_weights, 'PSYS');
+		if (__eq__ (part.py_metatype, 'HAIR')) {
+			var row = (function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, part.effector_weights, 'apply_to_hair_growing');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, part, 'apply_effector_to_children');
+			}) ();
+			var row = (function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, part, 'effect_hair', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 	});}
 });
@@ -2794,7 +4075,7 @@ export var PARTICLE_PT_force_fields =  __class__ ('PARTICLE_PT_force_fields', [P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2808,10 +4089,19 @@ export var PARTICLE_PT_force_fields =  __class__ ('PARTICLE_PT_force_fields', [P
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
-		var col = layout.column ();
-		col.prop (part, 'use_self_effect');
-		col.prop (part, 'effector_amount', __kwargtrans__ ({text: 'Effector Amount'}));
+		var part = __call__ (particle_get_settings, null, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_self_effect');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'effector_amount', __kwargtrans__ ({text: 'Effector Amount'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_force_fields_type1 =  __class__ ('PARTICLE_PT_force_fields_type1', [ParticleButtonsPanel, Panel], {
@@ -2822,7 +4112,7 @@ export var PARTICLE_PT_force_fields_type1 =  __class__ ('PARTICLE_PT_force_field
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2836,11 +4126,17 @@ export var PARTICLE_PT_force_fields_type1 =  __class__ ('PARTICLE_PT_force_field
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		if (part.force_field_1) {
-			var col = layout.column ();
-			col.prop (part.force_field_1, 'type', __kwargtrans__ ({text: 'Type 1'}));
-			basic_force_field_settings_ui (self, part.force_field_1);
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part.force_field_1, 'type', __kwargtrans__ ({text: 'Type 1'}));
+			}) ();
+			__call__ (basic_force_field_settings_ui, null, self, part.force_field_1);
 		}
 	});}
 });
@@ -2852,7 +4148,7 @@ export var PARTICLE_PT_force_fields_type2 =  __class__ ('PARTICLE_PT_force_field
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2866,11 +4162,17 @@ export var PARTICLE_PT_force_fields_type2 =  __class__ ('PARTICLE_PT_force_field
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		if (part.force_field_2) {
-			var col = layout.column ();
-			col.prop (part.force_field_2, 'type', __kwargtrans__ ({text: 'Type 2'}));
-			basic_force_field_settings_ui (self, part.force_field_2);
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, part.force_field_2, 'type', __kwargtrans__ ({text: 'Type 2'}));
+			}) ();
+			__call__ (basic_force_field_settings_ui, null, self, part.force_field_2);
 		}
 	});}
 });
@@ -2883,7 +4185,7 @@ export var PARTICLE_PT_force_fields_type1_falloff =  __class__ ('PARTICLE_PT_for
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2897,9 +4199,9 @@ export var PARTICLE_PT_force_fields_type1_falloff =  __class__ ('PARTICLE_PT_for
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		if (part.force_field_1) {
-			basic_force_field_falloff_ui (self, part.force_field_1);
+			__call__ (basic_force_field_falloff_ui, null, self, part.force_field_1);
 		}
 	});}
 });
@@ -2912,7 +4214,7 @@ export var PARTICLE_PT_force_fields_type2_falloff =  __class__ ('PARTICLE_PT_for
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2926,9 +4228,9 @@ export var PARTICLE_PT_force_fields_type2_falloff =  __class__ ('PARTICLE_PT_for
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var part = particle_get_settings (context);
+		var part = __call__ (particle_get_settings, null, context);
 		if (part.force_field_2) {
-			basic_force_field_falloff_ui (self, part.force_field_2);
+			__call__ (basic_force_field_falloff_ui, null, self, part.force_field_2);
 		}
 	});}
 });
@@ -2940,7 +4242,7 @@ export var PARTICLE_PT_vertexgroups =  __class__ ('PARTICLE_PT_vertexgroups', [P
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2955,12 +4257,12 @@ export var PARTICLE_PT_vertexgroups =  __class__ ('PARTICLE_PT_vertexgroups', [P
 		if (context.particle_system === null) {
 			return false;
 		}
-		return particle_panel_poll (cls, context);
+		return __call__ (particle_panel_poll, null, cls, context);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2976,47 +4278,146 @@ export var PARTICLE_PT_vertexgroups =  __class__ ('PARTICLE_PT_vertexgroups', [P
 		layout.use_property_split = true;
 		var ob = context.object;
 		var psys = context.particle_system;
-		var col = layout.column ();
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_density', ob, 'vertex_groups', __kwargtrans__ ({text: 'Density'}));
-		row.prop (psys, 'invert_vertex_group_density', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_density', ob, 'vertex_groups', __kwargtrans__ ({text: 'Density'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_density', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_length', ob, 'vertex_groups', __kwargtrans__ ({text: 'Length'}));
-		row.prop (psys, 'invert_vertex_group_length', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_length', ob, 'vertex_groups', __kwargtrans__ ({text: 'Length'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_length', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_clump', ob, 'vertex_groups', __kwargtrans__ ({text: 'Clump'}));
-		row.prop (psys, 'invert_vertex_group_clump', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_clump', ob, 'vertex_groups', __kwargtrans__ ({text: 'Clump'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_clump', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_kink', ob, 'vertex_groups', __kwargtrans__ ({text: 'Kink'}));
-		row.prop (psys, 'invert_vertex_group_kink', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_kink', ob, 'vertex_groups', __kwargtrans__ ({text: 'Kink'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_kink', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_roughness_1', ob, 'vertex_groups', __kwargtrans__ ({text: 'Roughness 1'}));
-		row.prop (psys, 'invert_vertex_group_roughness_1', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_roughness_1', ob, 'vertex_groups', __kwargtrans__ ({text: 'Roughness 1'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_roughness_1', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_roughness_2', ob, 'vertex_groups', __kwargtrans__ ({text: 'Roughness 2'}));
-		row.prop (psys, 'invert_vertex_group_roughness_2', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_roughness_2', ob, 'vertex_groups', __kwargtrans__ ({text: 'Roughness 2'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_roughness_2', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_roughness_end', ob, 'vertex_groups', __kwargtrans__ ({text: 'Roughness End'}));
-		row.prop (psys, 'invert_vertex_group_roughness_end', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_roughness_end', ob, 'vertex_groups', __kwargtrans__ ({text: 'Roughness End'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_roughness_end', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.use_property_decorate = false;
-		sub.prop_search (psys, 'vertex_group_twist', ob, 'vertex_groups', __kwargtrans__ ({text: 'Twist'}));
-		row.prop (psys, 'invert_vertex_group_twist', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop_search, __accu0__, psys, 'vertex_group_twist', ob, 'vertex_groups', __kwargtrans__ ({text: 'Twist'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, psys, 'invert_vertex_group_twist', __kwargtrans__ ({text: '', toggle: true, icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
 	});}
 });
 export var PARTICLE_PT_textures =  __class__ ('PARTICLE_PT_textures', [ParticleButtonsPanel, Panel], {
@@ -3027,7 +4428,7 @@ export var PARTICLE_PT_textures =  __class__ ('PARTICLE_PT_textures', [ParticleB
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3042,12 +4443,12 @@ export var PARTICLE_PT_textures =  __class__ ('PARTICLE_PT_textures', [ParticleB
 		if (context.particle_system === null) {
 			return false;
 		}
-		return particle_panel_poll (cls, context);
+		return __call__ (particle_panel_poll, null, cls, context);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3062,18 +4463,42 @@ export var PARTICLE_PT_textures =  __class__ ('PARTICLE_PT_textures', [ParticleB
 		var layout = self.layout;
 		var psys = context.particle_system;
 		var part = psys.settings;
-		var row = layout.row ();
-		row.template_list ('TEXTURE_UL_texslots', '', part, 'texture_slots', part, 'active_texture_index', __kwargtrans__ ({rows: 2}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('texture.slot_move', __kwargtrans__ ({text: '', icon: 'TRIA_UP'})).py_metatype = 'UP';
-		col.operator ('texture.slot_move', __kwargtrans__ ({text: '', icon: 'TRIA_DOWN'})).py_metatype = 'DOWN';
-		col.menu ('TEXTURE_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'TEXTURE_UL_texslots', '', part, 'texture_slots', part, 'active_texture_index', __kwargtrans__ ({rows: 2}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'texture.slot_move', __kwargtrans__ ({text: '', icon: 'TRIA_UP'}));
+		}) ().py_metatype = 'UP';
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'texture.slot_move', __kwargtrans__ ({text: '', icon: 'TRIA_DOWN'}));
+		}) ().py_metatype = 'DOWN';
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'TEXTURE_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 		if (!(part.active_texture)) {
-			layout.template_ID (part, 'active_texture', __kwargtrans__ ({py_new: 'texture.new'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, part, 'active_texture', __kwargtrans__ ({py_new: 'texture.new'}));
+			}) ();
 		}
 		else {
-			var slot = part.texture_slots [part.active_texture_index];
-			layout.template_ID (slot, 'texture', __kwargtrans__ ({py_new: 'texture.new'}));
+			var slot = __getitem__ (part.texture_slots, part.active_texture_index);
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, slot, 'texture', __kwargtrans__ ({py_new: 'texture.new'}));
+			}) ();
 		}
 	});}
 });
@@ -3085,7 +4510,7 @@ export var PARTICLE_PT_hair_shape =  __class__ ('PARTICLE_PT_hair_shape', [Parti
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3101,12 +4526,12 @@ export var PARTICLE_PT_hair_shape =  __class__ ('PARTICLE_PT_hair_shape', [Parti
 		if (psys === null) {
 			return false;
 		}
-		return particle_panel_poll (cls, context) && psys.settings.py_metatype == 'HAIR';
+		return __call__ (particle_panel_poll, null, cls, context) && __eq__ (psys.settings.py_metatype, 'HAIR');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3122,13 +4547,34 @@ export var PARTICLE_PT_hair_shape =  __class__ ('PARTICLE_PT_hair_shape', [Parti
 		layout.use_property_split = true;
 		var psys = context.particle_system;
 		var part = psys.settings;
-		layout.prop (part, 'shape', __kwargtrans__ ({text: 'Strand Shape'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (part, 'root_radius', __kwargtrans__ ({text: 'Diameter Root'}));
-		col.prop (part, 'tip_radius', __kwargtrans__ ({text: 'Tip'}));
-		var col = layout.column ();
-		col.prop (part, 'radius_scale');
-		col.prop (part, 'use_close_tip');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, part, 'shape', __kwargtrans__ ({text: 'Strand Shape'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'root_radius', __kwargtrans__ ({text: 'Diameter Root'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'tip_radius', __kwargtrans__ ({text: 'Tip'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'radius_scale');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, part, 'use_close_tip');
+		}) ();
 	});}
 });
 export var PARTICLE_PT_animation =  __class__ ('PARTICLE_PT_animation', [ParticleButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -3137,7 +4583,7 @@ export var PARTICLE_PT_animation =  __class__ ('PARTICLE_PT_animation', [Particl
 	get _animated_id () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3149,7 +4595,7 @@ export var PARTICLE_PT_animation =  __class__ ('PARTICLE_PT_animation', [Particl
 		}
 		else {
 		}
-		var psys = getattr (context, 'particle_system', null);
+		var psys = __call__ (getattr, null, context, 'particle_system', null);
 		return psys && psys.settings;
 	});}
 });
@@ -3160,11 +4606,79 @@ export var PARTICLE_PT_custom_props =  __class__ ('PARTICLE_PT_custom_props', [P
 	_property_type: bpy.types.ParticleSettings
 });
 export var classes = tuple ([PARTICLE_MT_context_menu, PARTICLE_PT_hair_dynamics_presets, PARTICLE_UL_particle_systems, PARTICLE_PT_context_particles, PARTICLE_PT_emission, PARTICLE_PT_emission_source, PARTICLE_PT_hair_dynamics, PARTICLE_PT_hair_dynamics_collision, PARTICLE_PT_hair_dynamics_structure, PARTICLE_PT_hair_dynamics_volume, PARTICLE_PT_cache, PARTICLE_PT_velocity, PARTICLE_PT_rotation, PARTICLE_PT_rotation_angular_velocity, PARTICLE_PT_physics, PARTICLE_PT_physics_boids_movement, PARTICLE_PT_physics_boids_battle, PARTICLE_PT_physics_boids_misc, PARTICLE_PT_physics_forces, PARTICLE_PT_physics_deflection, PARTICLE_PT_physics_integration, PARTICLE_PT_physics_relations, PARTICLE_PT_physics_fluid_springs, PARTICLE_PT_physics_fluid_springs_viscoelastic, PARTICLE_PT_physics_fluid_springs_advanced, PARTICLE_PT_physics_fluid_advanced, PARTICLE_PT_physics_fluid_interaction, PARTICLE_PT_boidbrain, PARTICLE_PT_render, PARTICLE_PT_render_path, PARTICLE_PT_render_path_timing, PARTICLE_PT_render_object, PARTICLE_PT_render_collection, PARTICLE_PT_render_collection_use_count, PARTICLE_PT_render_extra, PARTICLE_PT_draw, PARTICLE_PT_children, PARTICLE_PT_children_parting, PARTICLE_PT_children_clumping, PARTICLE_PT_children_clumping_noise, PARTICLE_PT_children_roughness, PARTICLE_PT_children_kink, PARTICLE_PT_hair_shape, PARTICLE_PT_field_weights, PARTICLE_PT_force_fields, PARTICLE_PT_force_fields_type1, PARTICLE_PT_force_fields_type1_falloff, PARTICLE_PT_force_fields_type2, PARTICLE_PT_force_fields_type2_falloff, PARTICLE_PT_vertexgroups, PARTICLE_PT_textures, PARTICLE_PT_animation, PARTICLE_PT_custom_props]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_particle.map
 export {Menu, Panel, PresetPanel, PropertiesAnimationMixin, PropertyPanel, UIList, basic_force_field_falloff_ui, basic_force_field_settings_ui, effector_weights_ui, i18n_contexts, iface_, point_cache_ui, register_class, rpt_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'particle_panel_enabled': particle_panel_enabled = value; break;
+		case 'particle_panel_poll': particle_panel_poll = value; break;
+		case 'particle_get_settings': particle_get_settings = value; break;
+		case 'PARTICLE_MT_context_menu': PARTICLE_MT_context_menu = value; break;
+		case 'PARTICLE_PT_hair_dynamics_presets': PARTICLE_PT_hair_dynamics_presets = value; break;
+		case 'ParticleButtonsPanel': ParticleButtonsPanel = value; break;
+		case 'find_modifier': find_modifier = value; break;
+		case 'PARTICLE_UL_particle_systems': PARTICLE_UL_particle_systems = value; break;
+		case 'PARTICLE_PT_context_particles': PARTICLE_PT_context_particles = value; break;
+		case 'PARTICLE_PT_emission': PARTICLE_PT_emission = value; break;
+		case 'PARTICLE_PT_emission_source': PARTICLE_PT_emission_source = value; break;
+		case 'PARTICLE_PT_hair_dynamics': PARTICLE_PT_hair_dynamics = value; break;
+		case 'PARTICLE_PT_hair_dynamics_collision': PARTICLE_PT_hair_dynamics_collision = value; break;
+		case 'PARTICLE_PT_hair_dynamics_structure': PARTICLE_PT_hair_dynamics_structure = value; break;
+		case 'PARTICLE_PT_hair_dynamics_volume': PARTICLE_PT_hair_dynamics_volume = value; break;
+		case 'PARTICLE_PT_cache': PARTICLE_PT_cache = value; break;
+		case 'PARTICLE_PT_velocity': PARTICLE_PT_velocity = value; break;
+		case 'PARTICLE_PT_rotation': PARTICLE_PT_rotation = value; break;
+		case 'PARTICLE_PT_rotation_angular_velocity': PARTICLE_PT_rotation_angular_velocity = value; break;
+		case 'PARTICLE_PT_physics': PARTICLE_PT_physics = value; break;
+		case 'PARTICLE_PT_physics_fluid_advanced': PARTICLE_PT_physics_fluid_advanced = value; break;
+		case 'PARTICLE_PT_physics_fluid_springs': PARTICLE_PT_physics_fluid_springs = value; break;
+		case 'PARTICLE_PT_physics_fluid_springs_viscoelastic': PARTICLE_PT_physics_fluid_springs_viscoelastic = value; break;
+		case 'PARTICLE_PT_physics_fluid_springs_advanced': PARTICLE_PT_physics_fluid_springs_advanced = value; break;
+		case 'PARTICLE_PT_physics_boids_movement': PARTICLE_PT_physics_boids_movement = value; break;
+		case 'PARTICLE_PT_physics_boids_battle': PARTICLE_PT_physics_boids_battle = value; break;
+		case 'PARTICLE_PT_physics_boids_misc': PARTICLE_PT_physics_boids_misc = value; break;
+		case 'PARTICLE_PT_physics_relations': PARTICLE_PT_physics_relations = value; break;
+		case 'PARTICLE_PT_physics_fluid_interaction': PARTICLE_PT_physics_fluid_interaction = value; break;
+		case 'PARTICLE_PT_physics_deflection': PARTICLE_PT_physics_deflection = value; break;
+		case 'PARTICLE_PT_physics_forces': PARTICLE_PT_physics_forces = value; break;
+		case 'PARTICLE_PT_physics_integration': PARTICLE_PT_physics_integration = value; break;
+		case 'PARTICLE_PT_boidbrain': PARTICLE_PT_boidbrain = value; break;
+		case 'PARTICLE_PT_render': PARTICLE_PT_render = value; break;
+		case 'PARTICLE_PT_render_extra': PARTICLE_PT_render_extra = value; break;
+		case 'PARTICLE_PT_render_path': PARTICLE_PT_render_path = value; break;
+		case 'PARTICLE_PT_render_path_timing': PARTICLE_PT_render_path_timing = value; break;
+		case 'PARTICLE_PT_render_object': PARTICLE_PT_render_object = value; break;
+		case 'PARTICLE_PT_render_collection': PARTICLE_PT_render_collection = value; break;
+		case 'PARTICLE_PT_render_collection_use_count': PARTICLE_PT_render_collection_use_count = value; break;
+		case 'PARTICLE_PT_draw': PARTICLE_PT_draw = value; break;
+		case 'PARTICLE_PT_children': PARTICLE_PT_children = value; break;
+		case 'PARTICLE_PT_children_parting': PARTICLE_PT_children_parting = value; break;
+		case 'PARTICLE_PT_children_clumping': PARTICLE_PT_children_clumping = value; break;
+		case 'PARTICLE_PT_children_clumping_noise': PARTICLE_PT_children_clumping_noise = value; break;
+		case 'PARTICLE_PT_children_roughness': PARTICLE_PT_children_roughness = value; break;
+		case 'PARTICLE_PT_children_kink': PARTICLE_PT_children_kink = value; break;
+		case 'PARTICLE_PT_field_weights': PARTICLE_PT_field_weights = value; break;
+		case 'PARTICLE_PT_force_fields': PARTICLE_PT_force_fields = value; break;
+		case 'PARTICLE_PT_force_fields_type1': PARTICLE_PT_force_fields_type1 = value; break;
+		case 'PARTICLE_PT_force_fields_type2': PARTICLE_PT_force_fields_type2 = value; break;
+		case 'PARTICLE_PT_force_fields_type1_falloff': PARTICLE_PT_force_fields_type1_falloff = value; break;
+		case 'PARTICLE_PT_force_fields_type2_falloff': PARTICLE_PT_force_fields_type2_falloff = value; break;
+		case 'PARTICLE_PT_vertexgroups': PARTICLE_PT_vertexgroups = value; break;
+		case 'PARTICLE_PT_textures': PARTICLE_PT_textures = value; break;
+		case 'PARTICLE_PT_hair_shape': PARTICLE_PT_hair_shape = value; break;
+		case 'PARTICLE_PT_animation': PARTICLE_PT_animation = value; break;
+		case 'PARTICLE_PT_custom_props': PARTICLE_PT_custom_props = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

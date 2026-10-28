@@ -10,7 +10,7 @@ var __name__ = 'bl_operators.object_randomize_transform';
 export var randomize_selected = function (context, seed, delta, loc, rot, scale, scale_even, _scale_min) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -28,13 +28,16 @@ export var randomize_selected = function (context, seed, delta, loc, rot, scale,
 	}
 	else {
 	}
-	var random = _module ('random');
-	var uniform = _member ('random', 'uniform');
-	random.seed (seed);
+	var random = __call__ (_module, null, 'random');
+	var uniform = __call__ (_member, null, 'random', 'uniform');
+	(function () {
+		var __accu0__ = random;
+		return __call__ (__accu0__.seed, __accu0__, seed);
+	}) ();
 	var rand_vec = function (vec_range) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -45,48 +48,57 @@ export var randomize_selected = function (context, seed, delta, loc, rot, scale,
 		}
 		else {
 		}
-		return Vector ((function () {
+		return __call__ (Vector, null, (function () {
 			var __accu0__ = [];
-			for (var val of vec_range) {
-				__accu0__.append (uniform (-(val), val));
+			var __iterable0__ = vec_range;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var val = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (uniform, null, __neg__ (val), val));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
 	};
-	for (var obj of context.selected_objects) {
+	var __iterable0__ = context.selected_objects;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var obj = __getitem__ (__iterable0__, __index0__);
 		if (loc) {
 			if (delta) {
-				obj.delta_location += rand_vec (loc);
+				obj.delta_location = __call__ (__iadd__, null, obj.delta_location, __call__ (rand_vec, null, loc));
 			}
 			else {
-				obj.location += rand_vec (loc);
+				obj.location = __call__ (__iadd__, null, obj.location, __call__ (rand_vec, null, loc));
 			}
 		}
 		else {
-			uniform (0.0, 0.0);
-			uniform (0.0, 0.0);
-			uniform (0.0, 0.0);
+			__call__ (uniform, null, 0.0, 0.0);
+			__call__ (uniform, null, 0.0, 0.0);
+			__call__ (uniform, null, 0.0, 0.0);
 		}
 		if (rot) {
-			var vec = rand_vec (rot);
+			var vec = __call__ (rand_vec, null, rot);
 			var rotation_mode = obj.rotation_mode;
 			if (__in__ (rotation_mode, new set (['QUATERNION', 'AXIS_ANGLE']))) {
 				obj.rotation_mode = 'XYZ';
 			}
 			if (delta) {
-				obj.delta_rotation_euler [0] += vec [0];
-				obj.delta_rotation_euler [1] += vec [1];
-				obj.delta_rotation_euler [2] += vec [2];
+				__setitem__ (obj.delta_rotation_euler, 0, __call__ (__iadd__, null, __getitem__ (obj.delta_rotation_euler, 0), __getitem__ (vec, 0)));
+				__setitem__ (obj.delta_rotation_euler, 1, __call__ (__iadd__, null, __getitem__ (obj.delta_rotation_euler, 1), __getitem__ (vec, 1)));
+				__setitem__ (obj.delta_rotation_euler, 2, __call__ (__iadd__, null, __getitem__ (obj.delta_rotation_euler, 2), __getitem__ (vec, 2)));
 			}
 			else {
-				obj.rotation_euler [0] += vec [0];
-				obj.rotation_euler [1] += vec [1];
-				obj.rotation_euler [2] += vec [2];
+				__setitem__ (obj.rotation_euler, 0, __call__ (__iadd__, null, __getitem__ (obj.rotation_euler, 0), __getitem__ (vec, 0)));
+				__setitem__ (obj.rotation_euler, 1, __call__ (__iadd__, null, __getitem__ (obj.rotation_euler, 1), __getitem__ (vec, 1)));
+				__setitem__ (obj.rotation_euler, 2, __call__ (__iadd__, null, __getitem__ (obj.rotation_euler, 2), __getitem__ (vec, 2)));
 			}
 			obj.rotation_mode = rotation_mode;
 		}
 		else {
-			tuple ([uniform (0.0, 0.0), uniform (0.0, 0.0), uniform (0.0, 0.0)]);
+			tuple ([__call__ (uniform, null, 0.0, 0.0), __call__ (uniform, null, 0.0, 0.0), __call__ (uniform, null, 0.0, 0.0)]);
 		}
 		if (scale) {
 			if (delta) {
@@ -101,19 +113,19 @@ export var randomize_selected = function (context, seed, delta, loc, rot, scale,
 				var org_sca_y = __left0__ [1];
 				var org_sca_z = __left0__ [2];
 			}
-			var __left0__ = tuple ([uniform (-(scale [0]) + 2.0, scale [0]), uniform (-(scale [1]) + 2.0, scale [1]), uniform (-(scale [2]) + 2.0, scale [2])]);
+			var __left0__ = tuple ([__call__ (uniform, null, __add__ (__neg__ (__getitem__ (scale, 0)), 2.0), __getitem__ (scale, 0)), __call__ (uniform, null, __add__ (__neg__ (__getitem__ (scale, 1)), 2.0), __getitem__ (scale, 1)), __call__ (uniform, null, __add__ (__neg__ (__getitem__ (scale, 2)), 2.0), __getitem__ (scale, 2))]);
 			var sca_x = __left0__ [0];
 			var sca_y = __left0__ [1];
 			var sca_z = __left0__ [2];
 			if (scale_even) {
-				var aX = sca_x * org_sca_x;
-				var aY = sca_x * org_sca_y;
-				var aZ = sca_x * org_sca_z;
+				var aX = __mul__ (sca_x, org_sca_x);
+				var aY = __mul__ (sca_x, org_sca_y);
+				var aZ = __mul__ (sca_x, org_sca_z);
 			}
 			else {
-				var aX = sca_x * org_sca_x;
-				var aY = sca_y * org_sca_y;
-				var aZ = sca_z * org_sca_z;
+				var aX = __mul__ (sca_x, org_sca_x);
+				var aY = __mul__ (sca_y, org_sca_y);
+				var aZ = __mul__ (sca_z, org_sca_z);
 			}
 			if (delta) {
 				obj.delta_scale = tuple ([aX, aY, aZ]);
@@ -123,9 +135,9 @@ export var randomize_selected = function (context, seed, delta, loc, rot, scale,
 			}
 		}
 		else {
-			uniform (0.0, 0.0);
-			uniform (0.0, 0.0);
-			uniform (0.0, 0.0);
+			__call__ (uniform, null, 0.0, 0.0);
+			__call__ (uniform, null, 0.0, 0.0);
+			__call__ (uniform, null, 0.0, 0.0);
 		}
 	}
 };
@@ -137,7 +149,7 @@ export var RandomizeLocRotSize =  __class__ ('RandomizeLocRotSize', [Operator], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -149,12 +161,12 @@ export var RandomizeLocRotSize =  __class__ ('RandomizeLocRotSize', [Operator], 
 		}
 		else {
 		}
-		return context.mode == 'OBJECT';
+		return __eq__ (context.mode, 'OBJECT');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -169,16 +181,25 @@ export var RandomizeLocRotSize =  __class__ ('RandomizeLocRotSize', [Operator], 
 		var seed = self.random_seed;
 		var delta = self.use_delta;
 		var loc = (!(self.use_loc) ? null : self.loc);
-		var rot = (!(self.use_rot) ? null : Vector (self.rot));
+		var rot = (!(self.use_rot) ? null : __call__ (Vector, null, self.rot));
 		var scale = (!(self.use_scale) ? null : self.scale);
 		var scale_even = self.scale_even;
 		var scale_min = 0;
-		randomize_selected (context, seed, delta, loc, rot, scale, scale_even, scale_min);
+		__call__ (randomize_selected, null, context, seed, delta, loc, rot, scale, scale_even, scale_min);
 		return new set (['FINISHED']);
 	});}
 });
-RandomizeLocRotSize.__annotations__ = dict ({'random_seed': IntProperty (__kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_delta': BoolProperty (__kwargtrans__ ({py_name: 'Transform Delta', description: 'Randomize delta transform values instead of regular transform', py_default: false})), 'use_loc': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: -(100.0), max: 100.0, py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'TRANSLATION'})), 'use_rot': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation values', py_default: true})), 'rot': FloatVectorProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation over each axis', min: -(3.141592), max: +(3.141592), py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'EULER'})), 'use_scale': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': BoolProperty (__kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for all axis', py_default: false})), 'scale': FloatVectorProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: -(100.0), max: 100.0, py_default: tuple ([1.0, 1.0, 1.0])}))});
+RandomizeLocRotSize.__annotations__ = dict ({'random_seed': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_delta': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Transform Delta', description: 'Randomize delta transform values instead of regular transform', py_default: false})), 'use_loc': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: __neg__ (100.0), max: 100.0, py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'TRANSLATION'})), 'use_rot': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation values', py_default: true})), 'rot': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation over each axis', min: __neg__ (3.141592), max: +(3.141592), py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'EULER'})), 'use_scale': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for all axis', py_default: false})), 'scale': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: __neg__ (100.0), max: 100.0, py_default: tuple ([1.0, 1.0, 1.0])}))});
 export var classes = tuple ([RandomizeLocRotSize]);
 
 //# sourceMappingURL=bl_operators.object_randomize_transform.map
 export {BoolProperty, FloatVectorProperty, IntProperty, Operator, Vector, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'randomize_selected': randomize_selected = value; break;
+		case 'RandomizeLocRotSize': RandomizeLocRotSize = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

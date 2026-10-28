@@ -9,13 +9,16 @@ __nest__ (rlcompleter, '', __module_rlcompleter__);
 import * as __module_re__ from './re.js';
 __nest__ (re, '', __module_re__);
 var __name__ = '_bl_console_utils.autocomplete.complete_namespace';
-export var RE_INCOMPLETE_INDEX = re.compile ('(.*?)\\[[^\\]]+$');
+export var RE_INCOMPLETE_INDEX = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '(.*?)\\[[^\\]]+$');
+}) ();
 export var TEMP = '__tEmP__';
-export var TEMP_N = len (TEMP);
+export var TEMP_N = __call__ (len, null, TEMP);
 export var is_dict = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -26,12 +29,12 @@ export var is_dict = function (obj) {
 	}
 	else {
 	}
-	return hasattr (obj, 'keys') && hasattr (getattr (obj, 'keys'), '__call__');
+	return __call__ (hasattr, null, obj, 'keys') && __call__ (hasattr, null, __call__ (getattr, null, obj, 'keys'), '__call__');
 };
 export var is_struct_seq = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -42,12 +45,12 @@ export var is_struct_seq = function (obj) {
 	}
 	else {
 	}
-	return isinstance (obj, tuple) && hasattr (obj, 'n_fields');
+	return __call__ (isinstance, null, obj, tuple) && __call__ (hasattr, null, obj, 'n_fields');
 };
 export var complete_names = function (word, namespace) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -59,16 +62,22 @@ export var complete_names = function (word, namespace) {
 	}
 	else {
 	}
-	var completer = rlcompleter.Completer (namespace);
-	completer.complete (word, 0);
-	return sorted (set (completer.matches));
+	var completer = (function () {
+		var __accu0__ = rlcompleter;
+		return __call__ (__accu0__.Completer, __accu0__, namespace);
+	}) ();
+	(function () {
+		var __accu0__ = completer;
+		return __call__ (__accu0__.complete, __accu0__, word, 0);
+	}) ();
+	return __call__ (sorted, null, __call__ (set, null, completer.matches));
 };
 export var complete_indices = function (word, namespace) {
 	var obj = null;
 	var base = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -87,7 +96,7 @@ export var complete_indices = function (word, namespace) {
 	}
 	if (obj === null) {
 		try {
-			var obj = eval (base, namespace);
+			var obj = __call__ (eval, null, base, namespace);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -98,13 +107,13 @@ export var complete_indices = function (word, namespace) {
 			}
 		}
 	}
-	if (!(hasattr (obj, '__getitem__'))) {
+	if (!(__call__ (hasattr, null, obj, '__getitem__'))) {
 		return [];
 	}
-	var obj_is_dict = is_dict (obj);
+	var obj_is_dict = __call__ (is_dict, null, obj);
 	if (!(obj_is_dict)) {
 		try {
-			var obj_len = len (obj);
+			var obj_len = __call__ (len, null, obj);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, py_TypeError)) {
@@ -118,8 +127,20 @@ export var complete_indices = function (word, namespace) {
 	if (obj_is_dict) {
 		var matches = (function () {
 			var __accu0__ = [];
-			for (var key of list (sorted (obj.py_keys ()))) {
-				__accu0__.append ('{:s}[{!r}]'.format (base, key));
+			var __iterable0__ = __call__ (list, null, __call__ (sorted, null, (function () {
+				var __accu1__ = obj;
+				return __call__ (__accu1__.py_keys, __accu1__);
+			}) ()));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var key = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, (function () {
+						var __accu2__ = '{:s}[{!r}]';
+						return __call__ (__accu2__.format, __accu2__, base, key);
+					}) ());
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -127,18 +148,36 @@ export var complete_indices = function (word, namespace) {
 	else {
 		var matches = (function () {
 			var __accu0__ = [];
-			for (var idx of list (range (obj_len))) {
-				__accu0__.append ('{:s}[{:d}]'.format (base, idx));
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, obj_len));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var idx = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, (function () {
+						var __accu2__ = '{:s}[{:d}]';
+						return __call__ (__accu2__.format, __accu2__, base, idx);
+					}) ());
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 	}
-	if (word != base) {
+	if (__ne__ (word, base)) {
 		var matches = (function () {
 			var __accu0__ = [];
-			for (var match of matches) {
-				if (match.startswith (word)) {
-					__accu0__.append (match);
+			var __iterable0__ = matches;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var match = __getitem__ (__iterable0__, __index0__);
+				if ((function () {
+					var __accu1__ = match;
+					return __call__ (__accu1__.startswith, __accu1__, word);
+				}) ()) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, match);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -150,7 +189,7 @@ export var complete = function (word, namespace) {
 	var private_ = true;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -166,22 +205,31 @@ export var complete = function (word, namespace) {
 	if (!(word)) {
 		return [];
 	}
-	var re_incomplete_index = RE_INCOMPLETE_INDEX.search (word);
+	var re_incomplete_index = (function () {
+		var __accu0__ = RE_INCOMPLETE_INDEX;
+		return __call__ (__accu0__.search, __accu0__, word);
+	}) ();
 	if (re_incomplete_index) {
-		var matches = complete_indices (word, namespace, __kwargtrans__ ({base: re_incomplete_index.group (1)}));
+		var matches = __call__ (complete_indices, null, word, namespace, __kwargtrans__ ({base: (function () {
+			var __accu0__ = re_incomplete_index;
+			return __call__ (__accu0__.group, __accu0__, 1);
+		}) ()}));
 	}
 	else if (!(__in__ ('[', word))) {
-		var matches = complete_names (word, namespace);
+		var matches = __call__ (complete_names, null, word, namespace);
 	}
-	else if (word [-(1)] == ']') {
+	else if (__eq__ (__getitem__ (word, __neg__ (1)), ']')) {
 		var matches = [word];
 	}
 	else if (__in__ ('.', word)) {
-		var __left0__ = word.rsplit ('.', 1);
+		var __left0__ = (function () {
+			var __accu0__ = word;
+			return __call__ (__accu0__.rsplit, __accu0__, '.', 1);
+		}) ();
 		var obj = __left0__ [0];
 		var attr = __left0__ [1];
 		try {
-			namespace [TEMP] = eval (obj, namespace);
+			__setitem__ (namespace, TEMP, __call__ (eval, null, obj, namespace));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -191,15 +239,24 @@ export var complete = function (word, namespace) {
 				throw __except0__;
 			}
 		}
-		var matches = complete_names ((TEMP + '.') + attr, namespace);
+		var matches = __call__ (complete_names, null, __add__ (__add__ (TEMP, '.'), attr), namespace);
 		var matches = (function () {
 			var __accu0__ = [];
-			for (var match of matches) {
-				__accu0__.append (obj + match.__getslice__ (TEMP_N, null, 1));
+			var __iterable0__ = matches;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var match = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __add__ (obj, __getslice__ (match, TEMP_N, null, 1)));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
-		namespace.py_pop (TEMP);
+		(function () {
+			var __accu0__ = namespace;
+			return __call__ (__accu0__.py_pop, __accu0__, TEMP);
+		}) ();
 	}
 	else {
 		return [];
@@ -207,9 +264,9 @@ export var complete = function (word, namespace) {
 	if (!(matches)) {
 		return [];
 	}
-	else if (len (matches) == 1 && matches [0] == word) {
+	else if (__eq__ (__call__ (len, null, matches), 1) && __eq__ (__getitem__ (matches, 0), word)) {
 		try {
-			var obj = eval (word, namespace);
+			var obj = __call__ (eval, null, word, namespace);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -222,21 +279,27 @@ export var complete = function (word, namespace) {
 		if (__in__ (py_typeof (obj), new set ([bool, float, int, str]))) {
 			return [];
 		}
-		if (hasattr (obj, '__getitem__') && !(is_struct_seq (obj))) {
-			var matches = complete_indices (word, namespace, __kwargtrans__ ({obj: obj}));
+		if (__call__ (hasattr, null, obj, '__getitem__') && !(__call__ (is_struct_seq, null, obj))) {
+			var matches = __call__ (complete_indices, null, word, namespace, __kwargtrans__ ({obj: obj}));
 		}
-		else if (hasattr (obj, '__call__')) {
-			var matches = [word + '('];
+		else if (__call__ (hasattr, null, obj, '__call__')) {
+			var matches = [__add__ (word, '(')];
 		}
 		else {
-			var matches = [word + '.'];
+			var matches = [__add__ (word, '.')];
 		}
 	}
 	var public_matches = (function () {
 		var __accu0__ = [];
-		for (var match of matches) {
+		var __iterable0__ = matches;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var match = __getitem__ (__iterable0__, __index0__);
 			if (!(__in__ ('._', match))) {
-				__accu0__.append (match);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, match);
+				}) ();
 			}
 		}
 		return __accu0__;
@@ -244,14 +307,20 @@ export var complete = function (word, namespace) {
 	if (private_) {
 		var private_matches = (function () {
 			var __accu0__ = [];
-			for (var match of matches) {
+			var __iterable0__ = matches;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var match = __getitem__ (__iterable0__, __index0__);
 				if (__in__ ('._', match)) {
-					__accu0__.append (match);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, match);
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ();
-		return public_matches + private_matches;
+		return __add__ (public_matches, private_matches);
 	}
 	else {
 		return public_matches;
@@ -259,3 +328,16 @@ export var complete = function (word, namespace) {
 };
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.complete_namespace.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'RE_INCOMPLETE_INDEX': RE_INCOMPLETE_INDEX = value; break;
+		case 'TEMP': TEMP = value; break;
+		case 'TEMP_N': TEMP_N = value; break;
+		case 'is_dict': is_dict = value; break;
+		case 'is_struct_seq': is_struct_seq = value; break;
+		case 'complete_names': complete_names = value; break;
+		case 'complete_indices': complete_indices = value; break;
+		case 'complete': complete = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

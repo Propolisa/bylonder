@@ -16,7 +16,7 @@ export var PHYSICS_PT_geometry_nodes =  __class__ ('PHYSICS_PT_geometry_nodes', 
 	get geometry_nodes_objects () {return __getcm__ (this, function* (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -28,11 +28,20 @@ export var PHYSICS_PT_geometry_nodes =  __class__ ('PHYSICS_PT_geometry_nodes', 
 		}
 		else {
 		}
-		for (var ob of context.selected_editable_objects) {
-			if (any ((function () {
+		var __iterable0__ = context.selected_editable_objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ob = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (any, null, (function () {
 				var __accu0__ = [];
-				for (var modifier of ob.modifiers) {
-					__accu0__.append (modifier.py_metatype == 'NODES');
+				var __iterable1__ = ob.modifiers;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var modifier = __getitem__ (__iterable1__, __index1__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __eq__ (modifier.py_metatype, 'NODES'));
+					}) ();
 				}
 				return __accu0__;
 			}) ())) {
@@ -43,7 +52,7 @@ export var PHYSICS_PT_geometry_nodes =  __class__ ('PHYSICS_PT_geometry_nodes', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -55,12 +64,15 @@ export var PHYSICS_PT_geometry_nodes =  __class__ ('PHYSICS_PT_geometry_nodes', 
 		}
 		else {
 		}
-		return any (cls.geometry_nodes_objects (context));
+		return __call__ (any, null, (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.geometry_nodes_objects, __accu0__, context);
+		}) ());
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -73,30 +85,56 @@ export var PHYSICS_PT_geometry_nodes =  __class__ ('PHYSICS_PT_geometry_nodes', 
 		else {
 		}
 		var layout = self.layout;
-		if (len (context.selected_editable_objects) > 1) {
-			var calc_text = iface_ ('Calculate Selected to Frame');
-			var bake_text = iface_ ('Bake Selected');
+		if (__gt__ (__call__ (len, null, context.selected_editable_objects), 1)) {
+			var calc_text = __call__ (iface_, null, 'Calculate Selected to Frame');
+			var bake_text = __call__ (iface_, null, 'Bake Selected');
 		}
 		else {
-			var calc_text = iface_ ('Calculate to Frame');
-			var bake_text = iface_ ('Bake');
+			var calc_text = __call__ (iface_, null, 'Calculate to Frame');
+			var bake_text = __call__ (iface_, null, 'Bake');
 		}
-		layout.operator ('object.simulation_nodes_cache_calculate_to_frame', __kwargtrans__ ({text: calc_text, translate: false})).selected = true;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.operator ('object.simulation_nodes_cache_bake', __kwargtrans__ ({text: bake_text, translate: false})).selected = true;
-		row.operator ('object.simulation_nodes_cache_delete', __kwargtrans__ ({text: '', icon: 'TRASH'})).selected = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.simulation_nodes_cache_calculate_to_frame', __kwargtrans__ ({text: calc_text, translate: false}));
+		}) ().selected = true;
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.simulation_nodes_cache_bake', __kwargtrans__ ({text: bake_text, translate: false}));
+		}) ().selected = true;
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.simulation_nodes_cache_delete', __kwargtrans__ ({text: '', icon: 'TRASH'}));
+		}) ().selected = true;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var ob = context.object;
-		layout.prop (ob, 'use_simulation_cache', __kwargtrans__ ({text: 'Cache', text_ctxt: i18n_contexts.id_simulation}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, ob, 'use_simulation_cache', __kwargtrans__ ({text: 'Cache', text_ctxt: i18n_contexts.id_simulation}));
+		}) ();
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_geometry_nodes]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_geometry_nodes.map
 export {Panel, i18n_contexts, iface_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'PHYSICS_PT_geometry_nodes': PHYSICS_PT_geometry_nodes = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

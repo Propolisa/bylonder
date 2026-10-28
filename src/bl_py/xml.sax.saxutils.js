@@ -6,3 +6,9 @@ var __name__ = 'xml.sax.saxutils';
 export var quoteattr = null;
 
 //# sourceMappingURL=xml.sax.saxutils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'quoteattr': quoteattr = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -16,7 +16,7 @@ export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -29,17 +29,23 @@ export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 		else {
 		}
 		var region = context.region;
-		if (region.alignment == 'RIGHT') {
-			self.draw_right (context);
+		if (__eq__ (region.alignment, 'RIGHT')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_right, __accu0__, context);
+			}) ();
 		}
 		else {
-			self.draw_left (context);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_left, __accu0__, context);
+			}) ();
 		}
 	});},
 	get draw_left () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -54,19 +60,31 @@ export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 		var layout = self.layout;
 		var window = context.window;
 		var screen = context.screen;
-		TOPBAR_MT_editor_menus.draw_collapsible (context, layout);
-		layout.separator (__kwargtrans__ ({py_metatype: 'LINE'}));
+		(function () {
+			var __accu0__ = TOPBAR_MT_editor_menus;
+			return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({py_metatype: 'LINE'}));
+		}) ();
 		if (!(screen.show_fullscreen)) {
-			layout.template_ID_tabs (window, 'workspace', __kwargtrans__ ({py_new: 'workspace.add', menu: 'TOPBAR_MT_workspace_menu'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID_tabs, __accu0__, window, 'workspace', __kwargtrans__ ({py_new: 'workspace.add', menu: 'TOPBAR_MT_workspace_menu'}));
+			}) ();
 		}
 		else {
-			layout.operator ('screen.back_to_previous', __kwargtrans__ ({icon: 'SCREEN_BACK', text: 'Back to Previous'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.back_to_previous', __kwargtrans__ ({icon: 'SCREEN_BACK', text: 'Back to Previous'}));
+			}) ();
 		}
 	});},
 	get draw_right () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -83,12 +101,27 @@ export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 		var screen = context.screen;
 		var scene = window.scene;
 		if (!(screen.show_statusbar)) {
-			layout.template_reports_banner ();
-			layout.template_running_jobs ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_reports_banner, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_running_jobs, __accu0__);
+			}) ();
 		}
-		layout.template_ID (window, 'scene', __kwargtrans__ ({py_new: 'scene.new', unlink: 'scene.delete'}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.template_search (window, 'view_layer', scene, 'view_layers', __kwargtrans__ ({py_new: 'scene.view_layer_add', unlink: 'scene.view_layer_remove'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_ID, __accu0__, window, 'scene', __kwargtrans__ ({py_new: 'scene.new', unlink: 'scene.delete'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_search, __accu0__, window, 'view_layer', scene, 'view_layers', __kwargtrans__ ({py_new: 'scene.view_layer_add', unlink: 'scene.view_layer_remove'}));
+		}) ();
 	});}
 });
 export var TOPBAR_PT_tool_settings_extra =  __class__ ('TOPBAR_PT_tool_settings_extra', [Panel], {
@@ -101,7 +134,7 @@ export var TOPBAR_PT_tool_settings_extra =  __class__ ('TOPBAR_PT_tool_settings_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -113,20 +146,32 @@ export var TOPBAR_PT_tool_settings_extra =  __class__ ('TOPBAR_PT_tool_settings_
 		}
 		else {
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
 		var layout = self.layout;
-		var __left0__ = ToolSelectPanelHelper._tool_key_from_context (context);
+		var __left0__ = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__._tool_key_from_context, __accu0__, context);
+		}) ();
 		var space_type = __left0__ [0];
 		var mode = __left0__ [1];
-		var cls = ToolSelectPanelHelper._tool_class_from_space_type (space_type);
-		var __left0__ = cls._tool_get_active (context, space_type, mode, __kwargtrans__ ({with_icon: true}));
+		var cls = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__._tool_class_from_space_type, __accu0__, space_type);
+		}) ();
+		var __left0__ = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._tool_get_active, __accu0__, context, space_type, mode, __kwargtrans__ ({with_icon: true}));
+		}) ();
 		var item = __left0__ [0];
 		var tool = __left0__ [1];
 		var _ = __left0__ [2];
 		if (item === null) {
 			return ;
 		}
-		item.draw_settings (context, layout, tool, __kwargtrans__ ({extra: true}));
+		(function () {
+			var __accu0__ = item;
+			return __call__ (__accu0__.draw_settings, __accu0__, context, layout, tool, __kwargtrans__ ({extra: true}));
+		}) ();
 	});}
 });
 export var TOPBAR_PT_tool_fallback =  __class__ ('TOPBAR_PT_tool_fallback', [Panel], {
@@ -138,7 +183,7 @@ export var TOPBAR_PT_tool_fallback =  __class__ ('TOPBAR_PT_tool_fallback', [Pan
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -150,13 +195,19 @@ export var TOPBAR_PT_tool_fallback =  __class__ ('TOPBAR_PT_tool_fallback', [Pan
 		}
 		else {
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
 		var layout = self.layout;
 		var tool_settings = context.tool_settings;
-		ToolSelectPanelHelper.draw_fallback_tool_items (layout, context);
-		if (tool_settings.workspace_tool_type == 'FALLBACK') {
+		(function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__.draw_fallback_tool_items, __accu0__, layout, context);
+		}) ();
+		if (__eq__ (tool_settings.workspace_tool_type, 'FALLBACK')) {
 			var tool = context.tool;
-			ToolSelectPanelHelper.draw_active_tool_fallback (context, layout, tool);
+			(function () {
+				var __accu0__ = ToolSelectPanelHelper;
+				return __call__ (__accu0__.draw_active_tool_fallback, __accu0__, context, layout, tool);
+			}) ();
 		}
 	});}
 });
@@ -167,7 +218,7 @@ export var TOPBAR_MT_editor_menus =  __class__ ('TOPBAR_MT_editor_menus', [Menu]
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -180,17 +231,38 @@ export var TOPBAR_MT_editor_menus =  __class__ ('TOPBAR_MT_editor_menus', [Menu]
 		else {
 		}
 		var layout = self.layout;
-		if (getattr (context.area, 'show_menus', false)) {
-			layout.menu ('TOPBAR_MT_blender', __kwargtrans__ ({text: '', icon: 'BLENDER'}));
+		if (__call__ (getattr, null, context.area, 'show_menus', false)) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_blender', __kwargtrans__ ({text: '', icon: 'BLENDER'}));
+			}) ();
 		}
 		else {
-			layout.menu ('TOPBAR_MT_blender', __kwargtrans__ ({text: 'Blender'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_blender', __kwargtrans__ ({text: 'Blender'}));
+			}) ();
 		}
-		layout.menu ('TOPBAR_MT_file');
-		layout.menu ('TOPBAR_MT_edit');
-		layout.menu ('TOPBAR_MT_render');
-		layout.menu ('TOPBAR_MT_window');
-		layout.menu ('TOPBAR_MT_help');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_edit');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_render');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_window');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_help');
+		}) ();
 	});}
 });
 export var TOPBAR_MT_blender =  __class__ ('TOPBAR_MT_blender', [Menu], {
@@ -199,7 +271,7 @@ export var TOPBAR_MT_blender =  __class__ ('TOPBAR_MT_blender', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -212,12 +284,30 @@ export var TOPBAR_MT_blender =  __class__ ('TOPBAR_MT_blender', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('wm.splash');
-		layout.operator ('wm.splash_about');
-		layout.separator ();
-		layout.operator ('preferences.app_template_install', __kwargtrans__ ({text: 'Install Application Template...'}));
-		layout.separator ();
-		layout.menu ('TOPBAR_MT_blender_system');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.splash');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.splash_about');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.app_template_install', __kwargtrans__ ({text: 'Install Application Template...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_blender_system');
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_cleanup =  __class__ ('TOPBAR_MT_file_cleanup', [Menu], {
@@ -226,7 +316,7 @@ export var TOPBAR_MT_file_cleanup =  __class__ ('TOPBAR_MT_file_cleanup', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -239,9 +329,18 @@ export var TOPBAR_MT_file_cleanup =  __class__ ('TOPBAR_MT_file_cleanup', [Menu]
 		else {
 		}
 		var layout = self.layout;
-		layout.separator ();
-		layout.operator ('outliner.orphans_purge', __kwargtrans__ ({text: 'Purge Unused Data...'}));
-		layout.operator ('outliner.orphans_manage', __kwargtrans__ ({text: 'Manage Unused Data...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'outliner.orphans_purge', __kwargtrans__ ({text: 'Purge Unused Data...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'outliner.orphans_manage', __kwargtrans__ ({text: 'Manage Unused Data...'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file =  __class__ ('TOPBAR_MT_file', [Menu], {
@@ -250,7 +349,7 @@ export var TOPBAR_MT_file =  __class__ ('TOPBAR_MT_file', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -264,44 +363,125 @@ export var TOPBAR_MT_file =  __class__ ('TOPBAR_MT_file', [Menu], {
 		}
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_AREA';
-		layout.menu ('TOPBAR_MT_file_new', __kwargtrans__ ({text: 'New', text_ctxt: i18n_contexts.id_windowmanager, icon: 'FILE_NEW'}));
-		layout.operator ('wm.open_mainfile', __kwargtrans__ ({text: 'Open...', icon: 'FILE_FOLDER'}));
-		layout.menu ('TOPBAR_MT_file_open_recent');
-		layout.operator ('wm.revert_mainfile');
-		layout.menu ('TOPBAR_MT_file_recover');
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_new', __kwargtrans__ ({text: 'New', text_ctxt: i18n_contexts.id_windowmanager, icon: 'FILE_NEW'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.open_mainfile', __kwargtrans__ ({text: 'Open...', icon: 'FILE_FOLDER'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_open_recent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.revert_mainfile');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_recover');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.operator_context = (context.blend_data.is_saved ? 'EXEC_AREA' : 'INVOKE_AREA');
-		layout.operator ('wm.save_mainfile', __kwargtrans__ ({text: 'Save', icon: 'FILE_TICK'})).show_save_modified_images_dialog = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.save_mainfile', __kwargtrans__ ({text: 'Save', icon: 'FILE_TICK'}));
+		}) ().show_save_modified_images_dialog = true;
 		layout.operator_context = 'INVOKE_AREA';
-		layout.operator ('wm.save_as_mainfile', __kwargtrans__ ({text: 'Save As...'})).show_save_modified_images_dialog = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.save_as_mainfile', __kwargtrans__ ({text: 'Save As...'}));
+		}) ().show_save_modified_images_dialog = true;
 		layout.operator_context = 'INVOKE_AREA';
-		var save_copy = layout.operator ('wm.save_as_mainfile', __kwargtrans__ ({text: 'Save Copy...'}));
+		var save_copy = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.save_as_mainfile', __kwargtrans__ ({text: 'Save Copy...'}));
+		}) ();
 		save_copy.py_copy = true;
 		save_copy.show_save_modified_images_dialog = true;
-		var sub = layout.row ();
+		var sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.enabled = context.blend_data.is_saved;
 		sub.operator_context = 'EXEC_AREA';
-		var save_incremental = sub.operator ('wm.save_mainfile', __kwargtrans__ ({text: 'Save Incremental'}));
+		var save_incremental = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.save_mainfile', __kwargtrans__ ({text: 'Save Incremental'}));
+		}) ();
 		save_incremental.incremental = true;
 		save_incremental.show_save_modified_images_dialog = true;
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.operator_context = 'INVOKE_AREA';
-		layout.operator ('wm.link', __kwargtrans__ ({text: 'Link...', icon: 'LINK_BLEND'}));
-		layout.operator ('wm.append', __kwargtrans__ ({text: 'Append...', icon: 'APPEND_BLEND'}));
-		layout.menu ('TOPBAR_MT_file_previews');
-		layout.separator ();
-		layout.menu ('TOPBAR_MT_file_import', __kwargtrans__ ({icon: 'IMPORT'}));
-		layout.menu ('TOPBAR_MT_file_export', __kwargtrans__ ({icon: 'EXPORT'}));
-		var row = layout.row ();
-		row.operator ('wm.collection_export_all');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.link', __kwargtrans__ ({text: 'Link...', icon: 'LINK_BLEND'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.append', __kwargtrans__ ({text: 'Append...', icon: 'APPEND_BLEND'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_previews');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_import', __kwargtrans__ ({icon: 'IMPORT'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_export', __kwargtrans__ ({icon: 'EXPORT'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.collection_export_all');
+		}) ();
 		row.enabled = context.view_layer.has_export_collections;
-		layout.separator ();
-		layout.menu ('TOPBAR_MT_file_external_data');
-		layout.menu ('TOPBAR_MT_file_cleanup');
-		layout.separator ();
-		layout.menu ('TOPBAR_MT_file_defaults');
-		layout.separator ();
-		layout.operator ('wm.quit_blender', __kwargtrans__ ({text: 'Quit', icon: 'QUIT'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_external_data');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_cleanup');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_defaults');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.quit_blender', __kwargtrans__ ({text: 'Quit', icon: 'QUIT'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
@@ -310,7 +490,7 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 	get app_template_paths () {return function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -318,28 +498,52 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 		}
 		else {
 		}
-		var os = _module ('os');
-		var template_paths = bpy.utils.app_template_paths ();
-		var app_templates = set ();
-		for (var path of template_paths) {
-			for (var d of os.listdir (path)) {
-				if (d.startswith (tuple (['__', '.']))) {
+		var os = __call__ (_module, null, 'os');
+		var template_paths = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.app_template_paths, __accu0__);
+		}) ();
+		var app_templates = __call__ (set, null);
+		var __iterable0__ = template_paths;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = (function () {
+				var __accu0__ = os;
+				return __call__ (__accu0__.listdir, __accu0__, path);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var d = __getitem__ (__iterable1__, __index1__);
+				if ((function () {
+					var __accu0__ = d;
+					return __call__ (__accu0__.startswith, __accu0__, tuple (['__', '.']));
+				}) ()) {
 					continue;
 				}
-				var template = os.path.join (path, d);
-				if (os.path.isdir (template)) {
-					app_templates.add (d);
+				var template = (function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.join, __accu0__, path, d);
+				}) ();
+				if ((function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.isdir, __accu0__, template);
+				}) ()) {
+					(function () {
+						var __accu0__ = app_templates;
+						return __call__ (__accu0__.add, __accu0__, d);
+					}) ();
 				}
 			}
 		}
-		return sorted (app_templates);
+		return __call__ (sorted, null, app_templates);
 	};},
 	get draw_ex () {return function (layout, _context) {
 		var use_splash = false;
 		var use_more = false;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -354,54 +558,72 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 		else {
 		}
 		layout.operator_context = 'INVOKE_DEFAULT';
-		var paths = TOPBAR_MT_file_new.app_template_paths ();
+		var paths = (function () {
+			var __accu0__ = TOPBAR_MT_file_new;
+			return __call__ (__accu0__.app_template_paths, __accu0__);
+		}) ();
 		var splash_limit = 6;
 		if (use_splash) {
-			var show_more = len (paths) > splash_limit - 1;
+			var show_more = __gt__ (__call__ (len, null, paths), __sub__ (splash_limit, 1));
 			if (show_more) {
-				var paths = paths.__getslice__ (null, splash_limit - 2, 1);
+				var paths = __getslice__ (paths, null, __sub__ (splash_limit, 2), 1);
 			}
 		}
 		else if (use_more) {
-			var paths = paths.__getslice__ (splash_limit - 2, null, 1);
+			var paths = __getslice__ (paths, __sub__ (splash_limit, 2), null, 1);
 			var show_more = false;
 		}
 		else {
 			var show_more = false;
 		}
 		if (!(use_more)) {
-			var props = layout.operator ('wm.read_homefile', __kwargtrans__ ({text: 'General', icon: 'FILE_NEW'}));
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_homefile', __kwargtrans__ ({text: 'General', icon: 'FILE_NEW'}));
+			}) ();
 			props.app_template = '';
 		}
-		for (var d of paths) {
+		var __iterable0__ = paths;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var d = __getitem__ (__iterable0__, __index0__);
 			var icon = 'FILE_NEW';
-			if (d == '2D_Animation') {
+			if (__eq__ (d, '2D_Animation')) {
 				var icon = 'GREASEPENCIL_LAYER_GROUP';
 			}
-			else if (d == 'Sculpting') {
+			else if (__eq__ (d, 'Sculpting')) {
 				var icon = 'SCULPTMODE_HLT';
 			}
-			else if (d == 'Storyboarding') {
+			else if (__eq__ (d, 'Storyboarding')) {
 				var icon = 'GREASEPENCIL';
 			}
-			else if (d == 'VFX') {
+			else if (__eq__ (d, 'VFX')) {
 				var icon = 'TRACKER';
 			}
-			else if (d == 'Video_Editing') {
+			else if (__eq__ (d, 'Video_Editing')) {
 				var icon = 'SEQUENCE';
 			}
-			var props = layout.operator ('wm.read_homefile', __kwargtrans__ ({text: bpy.path.display_name (iface_ (d)), icon: icon}));
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_homefile', __kwargtrans__ ({text: (function () {
+					var __accu1__ = bpy.path;
+					return __call__ (__accu1__.display_name, __accu1__, __call__ (iface_, null, d));
+				}) (), icon: icon}));
+			}) ();
 			props.app_template = d;
 		}
 		layout.operator_context = 'EXEC_DEFAULT';
 		if (show_more) {
-			layout.menu ('TOPBAR_MT_templates_more', __kwargtrans__ ({text: 'More...'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_templates_more', __kwargtrans__ ({text: 'More...'}));
+			}) ();
 		}
 	};},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -413,7 +635,10 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 		}
 		else {
 		}
-		TOPBAR_MT_file_new.draw_ex (self.layout, context);
+		(function () {
+			var __accu0__ = TOPBAR_MT_file_new;
+			return __call__ (__accu0__.draw_ex, __accu0__, self.layout, context);
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_recover =  __class__ ('TOPBAR_MT_file_recover', [Menu], {
@@ -422,7 +647,7 @@ export var TOPBAR_MT_file_recover =  __class__ ('TOPBAR_MT_file_recover', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -435,8 +660,14 @@ export var TOPBAR_MT_file_recover =  __class__ ('TOPBAR_MT_file_recover', [Menu]
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('wm.recover_last_session', __kwargtrans__ ({text: 'Last Session'}));
-		layout.operator ('wm.recover_auto_save', __kwargtrans__ ({text: 'Auto Save...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.recover_last_session', __kwargtrans__ ({text: 'Last Session'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.recover_auto_save', __kwargtrans__ ({text: 'Auto Save...'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Menu], {
@@ -445,7 +676,7 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -460,26 +691,54 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 		var layout = self.layout;
 		var prefs = context.preferences;
 		layout.operator_context = 'INVOKE_AREA';
-		if (any (bpy.utils.app_template_paths ())) {
+		if (__call__ (any, null, (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.app_template_paths, __accu0__);
+		}) ())) {
 			var app_template = prefs.app_template;
 		}
 		else {
 			var app_template = null;
 		}
 		if (app_template) {
-			layout.label (__kwargtrans__ ({text: iface_ (bpy.path.display_name (app_template, __kwargtrans__ ({has_ext: false})), i18n_contexts.id_workspace), translate: false}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __call__ (iface_, null, (function () {
+					var __accu1__ = bpy.path;
+					return __call__ (__accu1__.display_name, __accu1__, app_template, __kwargtrans__ ({has_ext: false}));
+				}) (), i18n_contexts.id_workspace), translate: false}));
+			}) ();
 		}
-		layout.operator ('wm.save_homefile');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.save_homefile');
+		}) ();
 		if (app_template) {
-			var display_name = bpy.path.display_name (iface_ (app_template));
-			var props = layout.operator ('wm.read_factory_settings', __kwargtrans__ ({text: 'Load Factory Blender Settings'}));
+			var display_name = (function () {
+				var __accu0__ = bpy.path;
+				return __call__ (__accu0__.display_name, __accu0__, __call__ (iface_, null, app_template));
+			}) ();
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_factory_settings', __kwargtrans__ ({text: 'Load Factory Blender Settings'}));
+			}) ();
 			props.app_template = app_template;
-			var props = layout.operator ('wm.read_factory_settings', __kwargtrans__ ({text: iface_ ('Load Factory {:s} Settings', i18n_contexts.operator_default).format (display_name), translate: false}));
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_factory_settings', __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Load Factory {:s} Settings', i18n_contexts.operator_default);
+					return __call__ (__accu1__.format, __accu1__, display_name);
+				}) (), translate: false}));
+			}) ();
 			props.app_template = app_template;
 			props.use_factory_startup_app_template_only = true;
+			// pass;
 		}
 		else {
-			layout.operator ('wm.read_factory_settings');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_factory_settings');
+			}) ();
 		}
 	});}
 });
@@ -489,7 +748,7 @@ export var TOPBAR_MT_blender_system =  __class__ ('TOPBAR_MT_blender_system', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -502,14 +761,38 @@ export var TOPBAR_MT_blender_system =  __class__ ('TOPBAR_MT_blender_system', [M
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('script.reload');
-		layout.separator ();
-		layout.operator ('wm.memory_statistics');
-		layout.operator ('wm.debug_menu');
-		layout.operator_menu_enum ('wm.redraw_timer', 'type');
-		layout.separator ();
-		layout.operator ('screen.spacedata_cleanup');
-		layout.operator ('wm.operator_presets_cleanup');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'script.reload');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.memory_statistics');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.debug_menu');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'wm.redraw_timer', 'type');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.spacedata_cleanup');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.operator_presets_cleanup');
+		}) ();
 	});}
 });
 export var TOPBAR_MT_templates_more =  __class__ ('TOPBAR_MT_templates_more', [Menu], {
@@ -518,7 +801,7 @@ export var TOPBAR_MT_templates_more =  __class__ ('TOPBAR_MT_templates_more', [M
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -530,7 +813,10 @@ export var TOPBAR_MT_templates_more =  __class__ ('TOPBAR_MT_templates_more', [M
 		}
 		else {
 		}
-		bpy.types.TOPBAR_MT_file_new.draw_ex (self.layout, context, __kwargtrans__ ({use_more: true}));
+		(function () {
+			var __accu0__ = bpy.types.TOPBAR_MT_file_new;
+			return __call__ (__accu0__.draw_ex, __accu0__, self.layout, context, __kwargtrans__ ({use_more: true}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_import =  __class__ ('TOPBAR_MT_file_import', [Menu], {
@@ -541,7 +827,7 @@ export var TOPBAR_MT_file_import =  __class__ ('TOPBAR_MT_file_import', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -554,25 +840,46 @@ export var TOPBAR_MT_file_import =  __class__ ('TOPBAR_MT_file_import', [Menu], 
 		else {
 		}
 		if (bpy.app.build_options.alembic) {
-			self.layout.operator ('wm.alembic_import', __kwargtrans__ ({text: 'Alembic (.abc)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.alembic_import', __kwargtrans__ ({text: 'Alembic (.abc)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.usd) {
-			self.layout.operator ('wm.usd_import', __kwargtrans__ ({text: 'Universal Scene Description (.usd*)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.usd_import', __kwargtrans__ ({text: 'Universal Scene Description (.usd*)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_gpencil) {
-			self.layout.operator ('wm.grease_pencil_import_svg', __kwargtrans__ ({text: 'SVG as Grease Pencil'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.grease_pencil_import_svg', __kwargtrans__ ({text: 'SVG as Grease Pencil'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_wavefront_obj) {
-			self.layout.operator ('wm.obj_import', __kwargtrans__ ({text: 'Wavefront (.obj)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.obj_import', __kwargtrans__ ({text: 'Wavefront (.obj)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_ply) {
-			self.layout.operator ('wm.ply_import', __kwargtrans__ ({text: 'Stanford PLY (.ply)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.ply_import', __kwargtrans__ ({text: 'Stanford PLY (.ply)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_stl) {
-			self.layout.operator ('wm.stl_import', __kwargtrans__ ({text: 'STL (.stl)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.stl_import', __kwargtrans__ ({text: 'STL (.stl)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_fbx) {
-			self.layout.operator ('wm.fbx_import', __kwargtrans__ ({text: 'FBX (.fbx)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.fbx_import', __kwargtrans__ ({text: 'FBX (.fbx)'}));
+			}) ();
 		}
 	});}
 });
@@ -584,7 +891,7 @@ export var TOPBAR_MT_file_export =  __class__ ('TOPBAR_MT_file_export', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -597,27 +904,48 @@ export var TOPBAR_MT_file_export =  __class__ ('TOPBAR_MT_file_export', [Menu], 
 		else {
 		}
 		if (bpy.app.build_options.alembic) {
-			self.layout.operator ('wm.alembic_export', __kwargtrans__ ({text: 'Alembic (.abc)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.alembic_export', __kwargtrans__ ({text: 'Alembic (.abc)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.usd) {
-			self.layout.operator ('wm.usd_export', __kwargtrans__ ({text: 'Universal Scene Description (.usd*)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.usd_export', __kwargtrans__ ({text: 'Universal Scene Description (.usd*)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_gpencil) {
 			if (bpy.app.build_options.pugixml) {
-				self.layout.operator ('wm.grease_pencil_export_svg', __kwargtrans__ ({text: 'Grease Pencil as SVG'}));
+				(function () {
+					var __accu0__ = self.layout;
+					return __call__ (__accu0__.operator, __accu0__, 'wm.grease_pencil_export_svg', __kwargtrans__ ({text: 'Grease Pencil as SVG'}));
+				}) ();
 			}
 			if (bpy.app.build_options.haru) {
-				self.layout.operator ('wm.grease_pencil_export_pdf', __kwargtrans__ ({text: 'Grease Pencil as PDF'}));
+				(function () {
+					var __accu0__ = self.layout;
+					return __call__ (__accu0__.operator, __accu0__, 'wm.grease_pencil_export_pdf', __kwargtrans__ ({text: 'Grease Pencil as PDF'}));
+				}) ();
 			}
 		}
 		if (bpy.app.build_options.io_wavefront_obj) {
-			self.layout.operator ('wm.obj_export', __kwargtrans__ ({text: 'Wavefront (.obj)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.obj_export', __kwargtrans__ ({text: 'Wavefront (.obj)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_ply) {
-			self.layout.operator ('wm.ply_export', __kwargtrans__ ({text: 'Stanford PLY (.ply)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.ply_export', __kwargtrans__ ({text: 'Stanford PLY (.ply)'}));
+			}) ();
 		}
 		if (bpy.app.build_options.io_stl) {
-			self.layout.operator ('wm.stl_export', __kwargtrans__ ({text: 'STL (.stl)'}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.stl_export', __kwargtrans__ ({text: 'STL (.stl)'}));
+			}) ();
 		}
 	});}
 });
@@ -627,7 +955,7 @@ export var TOPBAR_MT_file_external_data =  __class__ ('TOPBAR_MT_file_external_d
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -641,22 +969,64 @@ export var TOPBAR_MT_file_external_data =  __class__ ('TOPBAR_MT_file_external_d
 		}
 		var layout = self.layout;
 		var icon = (bpy.data.use_autopack ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT');
-		layout.operator ('file.autopack_toggle', __kwargtrans__ ({icon: icon}));
-		var pack_all = layout.row ();
-		pack_all.operator ('file.pack_all');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.autopack_toggle', __kwargtrans__ ({icon: icon}));
+		}) ();
+		var pack_all = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = pack_all;
+			return __call__ (__accu0__.operator, __accu0__, 'file.pack_all');
+		}) ();
 		pack_all.active = !(bpy.data.use_autopack);
-		var unpack_all = layout.row ();
-		unpack_all.operator ('file.unpack_all');
+		var unpack_all = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = unpack_all;
+			return __call__ (__accu0__.operator, __accu0__, 'file.unpack_all');
+		}) ();
 		unpack_all.active = !(bpy.data.use_autopack);
-		layout.separator ();
-		layout.operator ('file.pack_libraries');
-		layout.operator ('file.unpack_libraries');
-		layout.separator ();
-		layout.operator ('file.make_paths_relative');
-		layout.operator ('file.make_paths_absolute');
-		layout.separator ();
-		layout.operator ('file.report_missing_files');
-		layout.operator ('file.find_missing_files', __kwargtrans__ ({text: 'Find Missing Files...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.pack_libraries');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.unpack_libraries');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.make_paths_relative');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.make_paths_absolute');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.report_missing_files');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'file.find_missing_files', __kwargtrans__ ({text: 'Find Missing Files...'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_previews =  __class__ ('TOPBAR_MT_file_previews', [Menu], {
@@ -665,7 +1035,7 @@ export var TOPBAR_MT_file_previews =  __class__ ('TOPBAR_MT_file_previews', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -678,11 +1048,26 @@ export var TOPBAR_MT_file_previews =  __class__ ('TOPBAR_MT_file_previews', [Men
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('wm.previews_ensure');
-		layout.operator ('wm.previews_batch_generate', __kwargtrans__ ({text: 'Batch-Generate Previews...'}));
-		layout.separator ();
-		layout.operator ('wm.previews_clear', __kwargtrans__ ({text: 'Clear Data-Block Previews...'}));
-		layout.operator ('wm.previews_batch_clear', __kwargtrans__ ({text: 'Batch-Clear Previews...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.previews_ensure');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.previews_batch_generate', __kwargtrans__ ({text: 'Batch-Generate Previews...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.previews_clear', __kwargtrans__ ({text: 'Clear Data-Block Previews...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.previews_batch_clear', __kwargtrans__ ({text: 'Batch-Clear Previews...'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_render =  __class__ ('TOPBAR_MT_render', [Menu], {
@@ -691,7 +1076,7 @@ export var TOPBAR_MT_render =  __class__ ('TOPBAR_MT_render', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -707,29 +1092,65 @@ export var TOPBAR_MT_render =  __class__ ('TOPBAR_MT_render', [Menu], {
 		var rd = context.scene.render;
 		var scene = context.scene;
 		var seq_scene = context.sequencer_scene;
-		var strips = getattr (context, 'strips', tuple ([]));
+		var strips = __call__ (getattr, null, context, 'strips', tuple ([]));
 		var can_render_seq = seq_scene && seq_scene.render.use_sequencer && strips;
-		layout.operator ('render.render', __kwargtrans__ ({text: 'Render Image', icon: 'RENDER_STILL'})).use_viewport = true;
-		var props = layout.operator ('render.render', __kwargtrans__ ({text: 'Render Animation', icon: 'RENDER_ANIMATION'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'render.render', __kwargtrans__ ({text: 'Render Image', icon: 'RENDER_STILL'}));
+		}) ().use_viewport = true;
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'render.render', __kwargtrans__ ({text: 'Render Animation', icon: 'RENDER_ANIMATION'}));
+		}) ();
 		props.animation = true;
 		props.use_viewport = true;
-		layout.separator ();
-		if (can_render_seq && seq_scene != scene) {
-			var props = layout.operator ('render.render', __kwargtrans__ ({text: 'Render Sequencer Image', icon: 'RENDER_STILL'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (can_render_seq && __ne__ (seq_scene, scene)) {
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'render.render', __kwargtrans__ ({text: 'Render Sequencer Image', icon: 'RENDER_STILL'}));
+			}) ();
 			props.use_viewport = true;
 			props.use_sequencer_scene = true;
-			var props = layout.operator ('render.render', __kwargtrans__ ({text: 'Render Sequencer Animation', icon: 'RENDER_ANIMATION'}));
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'render.render', __kwargtrans__ ({text: 'Render Sequencer Animation', icon: 'RENDER_ANIMATION'}));
+			}) ();
 			props.animation = true;
 			props.use_viewport = true;
 			props.use_sequencer_scene = true;
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		layout.operator ('sound.mixdown', __kwargtrans__ ({text: 'Render Audio...'}));
-		layout.separator ();
-		layout.operator ('render.view_show', __kwargtrans__ ({text: 'View Render'}));
-		layout.operator ('render.play_rendered_anim', __kwargtrans__ ({text: 'View Animation'}));
-		layout.separator ();
-		layout.prop (rd, 'use_lock_interface', __kwargtrans__ ({text: 'Lock Interface'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'sound.mixdown', __kwargtrans__ ({text: 'Render Audio...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'render.view_show', __kwargtrans__ ({text: 'View Render'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'render.play_rendered_anim', __kwargtrans__ ({text: 'View Animation'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'use_lock_interface', __kwargtrans__ ({text: 'Lock Interface'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_edit =  __class__ ('TOPBAR_MT_edit', [Menu], {
@@ -738,7 +1159,7 @@ export var TOPBAR_MT_edit =  __class__ ('TOPBAR_MT_edit', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -752,28 +1173,79 @@ export var TOPBAR_MT_edit =  __class__ ('TOPBAR_MT_edit', [Menu], {
 		}
 		var layout = self.layout;
 		var show_developer = context.preferences.view.show_developer_ui;
-		layout.operator ('ed.undo', __kwargtrans__ ({icon: 'LOOP_BACK'}));
-		layout.operator ('ed.redo', __kwargtrans__ ({icon: 'LOOP_FORWARDS'}));
-		layout.menu ('TOPBAR_MT_undo_history');
-		layout.separator ();
-		layout.operator ('screen.redo_last', __kwargtrans__ ({text: 'Adjust Last Operation...'}));
-		layout.operator ('screen.repeat_last');
-		layout.operator ('screen.repeat_history', __kwargtrans__ ({text: 'Repeat History...'}));
-		layout.separator ();
-		layout.operator ('wm.search_menu', __kwargtrans__ ({text: 'Menu Search...', icon: 'VIEWZOOM'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'ed.undo', __kwargtrans__ ({icon: 'LOOP_BACK'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'ed.redo', __kwargtrans__ ({icon: 'LOOP_FORWARDS'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_undo_history');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.redo_last', __kwargtrans__ ({text: 'Adjust Last Operation...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.repeat_last');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.repeat_history', __kwargtrans__ ({text: 'Repeat History...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.search_menu', __kwargtrans__ ({text: 'Menu Search...', icon: 'VIEWZOOM'}));
+		}) ();
 		if (show_developer) {
-			layout.operator ('wm.search_operator', __kwargtrans__ ({text: 'Operator Search...'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.search_operator', __kwargtrans__ ({text: 'Operator Search...'}));
+			}) ();
 		}
-		layout.separator ();
-		var props = layout.operator ('wm.call_panel', __kwargtrans__ ({text: 'Rename Active Item...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.call_panel', __kwargtrans__ ({text: 'Rename Active Item...'}));
+		}) ();
 		props.py_name = 'TOPBAR_PT_name';
 		props.keep_open = false;
-		layout.operator ('wm.batch_rename', __kwargtrans__ ({text: 'Batch Rename...'}));
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.batch_rename', __kwargtrans__ ({text: 'Batch Rename...'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		var tool_settings = context.tool_settings;
-		layout.prop (tool_settings, 'lock_object_mode');
-		layout.separator ();
-		layout.operator ('screen.userpref_show', __kwargtrans__ ({text: 'Preferences...', icon: 'PREFERENCES'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'lock_object_mode');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.userpref_show', __kwargtrans__ ({text: 'Preferences...', icon: 'PREFERENCES'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_window =  __class__ ('TOPBAR_MT_window', [Menu], {
@@ -782,7 +1254,7 @@ export var TOPBAR_MT_window =  __class__ ('TOPBAR_MT_window', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -794,24 +1266,60 @@ export var TOPBAR_MT_window =  __class__ ('TOPBAR_MT_window', [Menu], {
 		}
 		else {
 		}
-		var sys = _module ('sys');
-		var operator_context = _member ('_bl_ui_utils.layout', 'operator_context');
+		var sys = __call__ (_module, null, 'sys');
+		var operator_context = __call__ (_member, null, '_bl_ui_utils.layout', 'operator_context');
 		var layout = self.layout;
-		layout.operator ('wm.window_new');
-		layout.operator ('wm.window_new_main');
-		layout.separator ();
-		layout.operator ('wm.window_fullscreen_toggle', __kwargtrans__ ({icon: 'FULLSCREEN_ENTER'}));
-		layout.separator ();
-		layout.operator ('screen.workspace_cycle', __kwargtrans__ ({text: 'Next Workspace'})).direction = 'NEXT';
-		layout.operator ('screen.workspace_cycle', __kwargtrans__ ({text: 'Previous Workspace'})).direction = 'PREV';
-		layout.separator ();
-		layout.prop (context.screen, 'show_statusbar');
-		layout.separator ();
-		layout.operator ('screen.screenshot', __kwargtrans__ ({text: 'Save Screenshot...'}));
-		var __withid0__ = operator_context (layout, 'INVOKE_SCREEN');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.window_new');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.window_new_main');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.window_fullscreen_toggle', __kwargtrans__ ({icon: 'FULLSCREEN_ENTER'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.workspace_cycle', __kwargtrans__ ({text: 'Next Workspace'}));
+		}) ().direction = 'NEXT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.workspace_cycle', __kwargtrans__ ({text: 'Previous Workspace'}));
+		}) ().direction = 'PREV';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, context.screen, 'show_statusbar');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.screenshot', __kwargtrans__ ({text: 'Save Screenshot...'}));
+		}) ();
+		var __withid0__ = __call__ (operator_context, null, layout, 'INVOKE_SCREEN');
 		try {
 			__withid0__.__enter__ ();
-			layout.operator ('screen.screenshot_area', __kwargtrans__ ({text: 'Save Screenshot (Editor)...'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.screenshot_area', __kwargtrans__ ({text: 'Save Screenshot (Editor)...'}));
+			}) ();
 			__withid0__.__exit__ ();
 		}
 		catch (__except0__) {
@@ -819,13 +1327,25 @@ export var TOPBAR_MT_window =  __class__ ('TOPBAR_MT_window', [Menu], {
 				throw __except0__;
 			}
 		}
-		if (sys.platform.__getslice__ (null, 3, 1) == 'win') {
-			layout.separator ();
-			layout.operator ('wm.console_toggle', __kwargtrans__ ({icon: 'CONSOLE'}));
+		if (__eq__ (__getslice__ (sys.platform, null, 3, 1), 'win')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.console_toggle', __kwargtrans__ ({icon: 'CONSOLE'}));
+			}) ();
 		}
 		if (context.scene.render.use_multiview) {
-			layout.separator ();
-			layout.operator ('wm.set_stereo_3d');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.set_stereo_3d');
+			}) ();
 		}
 	});}
 });
@@ -835,7 +1355,7 @@ export var TOPBAR_MT_help =  __class__ ('TOPBAR_MT_help', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -849,21 +1369,60 @@ export var TOPBAR_MT_help =  __class__ ('TOPBAR_MT_help', [Menu], {
 		}
 		var layout = self.layout;
 		var show_developer = context.preferences.view.show_developer_ui;
-		layout.operator ('wm.url_open_preset', __kwargtrans__ ({text: 'Manual', icon: 'URL'})).py_metatype = 'MANUAL';
-		layout.operator ('wm.url_open', __kwargtrans__ ({text: 'Support'})).url = 'https://www.blender.org/support';
-		layout.operator ('wm.url_open', __kwargtrans__ ({text: 'User Communities'})).url = 'https://www.blender.org/community/';
-		layout.operator ('wm.url_open', __kwargtrans__ ({text: 'Get Involved'})).url = 'https://www.blender.org/get-involved/';
-		layout.operator ('wm.url_open_preset', __kwargtrans__ ({text: 'Release Notes'})).py_metatype = 'RELEASE_NOTES';
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.url_open_preset', __kwargtrans__ ({text: 'Manual', icon: 'URL'}));
+		}) ().py_metatype = 'MANUAL';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Support'}));
+		}) ().url = 'https://www.blender.org/support';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'User Communities'}));
+		}) ().url = 'https://www.blender.org/community/';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Get Involved'}));
+		}) ().url = 'https://www.blender.org/get-involved/';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.url_open_preset', __kwargtrans__ ({text: 'Release Notes'}));
+		}) ().py_metatype = 'RELEASE_NOTES';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (show_developer) {
-			layout.operator ('wm.url_open', __kwargtrans__ ({text: 'Developer Documentation', icon: 'URL'})).url = 'https://developer.blender.org/docs/';
-			layout.operator ('wm.url_open', __kwargtrans__ ({text: 'Developer Community'})).url = 'https://devtalk.blender.org';
-			layout.operator ('wm.url_open_preset', __kwargtrans__ ({text: 'Python API Reference'})).py_metatype = 'API';
-			layout.operator ('wm.operator_cheat_sheet', __kwargtrans__ ({icon: 'TEXT'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Developer Documentation', icon: 'URL'}));
+			}) ().url = 'https://developer.blender.org/docs/';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Developer Community'}));
+			}) ().url = 'https://devtalk.blender.org';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.url_open_preset', __kwargtrans__ ({text: 'Python API Reference'}));
+			}) ().py_metatype = 'API';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.operator_cheat_sheet', __kwargtrans__ ({icon: 'TEXT'}));
+			}) ();
 		}
-		layout.separator ();
-		layout.operator ('wm.url_open_preset', __kwargtrans__ ({text: 'Report a Bug', icon: 'URL'})).py_metatype = 'BUG';
-		layout.operator ('wm.sysinfo');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.url_open_preset', __kwargtrans__ ({text: 'Report a Bug', icon: 'URL'}));
+		}) ().py_metatype = 'BUG';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.sysinfo');
+		}) ();
 	});}
 });
 export var TOPBAR_MT_file_context_menu =  __class__ ('TOPBAR_MT_file_context_menu', [Menu], {
@@ -872,7 +1431,7 @@ export var TOPBAR_MT_file_context_menu =  __class__ ('TOPBAR_MT_file_context_men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -886,17 +1445,50 @@ export var TOPBAR_MT_file_context_menu =  __class__ ('TOPBAR_MT_file_context_men
 		}
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_AREA';
-		layout.menu ('TOPBAR_MT_file_new', __kwargtrans__ ({text: 'New', text_ctxt: i18n_contexts.id_windowmanager, icon: 'FILE_NEW'}));
-		layout.operator ('wm.open_mainfile', __kwargtrans__ ({text: 'Open...', icon: 'FILE_FOLDER'}));
-		layout.menu ('TOPBAR_MT_file_open_recent');
-		layout.separator ();
-		layout.operator ('wm.link', __kwargtrans__ ({text: 'Link...', icon: 'LINK_BLEND'}));
-		layout.operator ('wm.append', __kwargtrans__ ({text: 'Append...', icon: 'APPEND_BLEND'}));
-		layout.separator ();
-		layout.menu ('TOPBAR_MT_file_import', __kwargtrans__ ({icon: 'IMPORT'}));
-		layout.menu ('TOPBAR_MT_file_export', __kwargtrans__ ({icon: 'EXPORT'}));
-		layout.separator ();
-		layout.operator ('screen.userpref_show', __kwargtrans__ ({text: 'Preferences...', icon: 'PREFERENCES'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_new', __kwargtrans__ ({text: 'New', text_ctxt: i18n_contexts.id_windowmanager, icon: 'FILE_NEW'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.open_mainfile', __kwargtrans__ ({text: 'Open...', icon: 'FILE_FOLDER'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_open_recent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.link', __kwargtrans__ ({text: 'Link...', icon: 'LINK_BLEND'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.append', __kwargtrans__ ({text: 'Append...', icon: 'APPEND_BLEND'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_import', __kwargtrans__ ({icon: 'IMPORT'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_file_export', __kwargtrans__ ({icon: 'EXPORT'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.userpref_show', __kwargtrans__ ({text: 'Preferences...', icon: 'PREFERENCES'}));
+		}) ();
 	});}
 });
 export var TOPBAR_MT_workspace_menu =  __class__ ('TOPBAR_MT_workspace_menu', [Menu], {
@@ -905,7 +1497,7 @@ export var TOPBAR_MT_workspace_menu =  __class__ ('TOPBAR_MT_workspace_menu', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -918,21 +1510,51 @@ export var TOPBAR_MT_workspace_menu =  __class__ ('TOPBAR_MT_workspace_menu', [M
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('workspace.duplicate', __kwargtrans__ ({text: 'Duplicate', icon: 'DUPLICATE'}));
-		if (len (bpy.data.workspaces) <= 1) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'workspace.duplicate', __kwargtrans__ ({text: 'Duplicate', icon: 'DUPLICATE'}));
+		}) ();
+		if (__le__ (__call__ (len, null, bpy.data.workspaces), 1)) {
 			return ;
 		}
-		layout.operator ('workspace.delete', __kwargtrans__ ({text: 'Delete', icon: 'REMOVE'}));
-		layout.separator ();
-		layout.operator ('workspace.reorder_to_front', __kwargtrans__ ({text: 'Reorder to Front', icon: 'TRIA_LEFT_BAR'}));
-		layout.operator ('workspace.reorder_to_back', __kwargtrans__ ({text: 'Reorder to Back', icon: 'TRIA_RIGHT_BAR'}));
-		layout.separator ();
-		var props = layout.operator ('screen.workspace_cycle', __kwargtrans__ ({text: 'Previous Workspace'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'workspace.delete', __kwargtrans__ ({text: 'Delete', icon: 'REMOVE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'workspace.reorder_to_front', __kwargtrans__ ({text: 'Reorder to Front', icon: 'TRIA_LEFT_BAR'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'workspace.reorder_to_back', __kwargtrans__ ({text: 'Reorder to Back', icon: 'TRIA_RIGHT_BAR'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.workspace_cycle', __kwargtrans__ ({text: 'Previous Workspace'}));
+		}) ();
 		props.direction = 'PREV';
-		var props = layout.operator ('screen.workspace_cycle', __kwargtrans__ ({text: 'Next Workspace'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.workspace_cycle', __kwargtrans__ ({text: 'Next Workspace'}));
+		}) ();
 		props.direction = 'NEXT';
-		layout.separator ();
-		layout.operator ('workspace.delete_all_others');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'workspace.delete_all_others');
+		}) ();
 	});}
 });
 export var TOPBAR_PT_gpencil_primitive =  __class__ ('TOPBAR_PT_gpencil_primitive', [Panel], {
@@ -943,7 +1565,7 @@ export var TOPBAR_PT_gpencil_primitive =  __class__ ('TOPBAR_PT_gpencil_primitiv
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -957,7 +1579,10 @@ export var TOPBAR_PT_gpencil_primitive =  __class__ ('TOPBAR_PT_gpencil_primitiv
 		}
 		var settings = context.tool_settings.gpencil_sculpt;
 		var layout = self.layout;
-		layout.template_curve_mapping (settings, 'thickness_primitive_curve', __kwargtrans__ ({brush: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_curve_mapping, __accu0__, settings, 'thickness_primitive_curve', __kwargtrans__ ({brush: true}));
+		}) ();
 	});}
 });
 export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
@@ -969,7 +1594,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -985,7 +1610,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 		var row_with_icon = function (layout, icon) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -997,80 +1622,131 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 			}
 			else {
 			}
-			var row = layout.row ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.activate_init = true;
-			row.label (__kwargtrans__ ({icon: icon}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: icon}));
+			}) ();
 			return row;
 		};
 		var mode = context.mode;
 		var space = context.space_data;
 		var space_type = (space === null ? null : space.py_metatype);
 		var found = false;
-		if (space_type == 'SEQUENCE_EDITOR') {
-			layout.label (__kwargtrans__ ({text: 'Sequence Strip Name'}));
+		if (__eq__ (space_type, 'SEQUENCE_EDITOR')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Sequence Strip Name'}));
+			}) ();
 			var item = context.active_strip;
 			if (item) {
-				var row = row_with_icon (layout, 'SEQUENCE');
-				row.prop (item, 'name', __kwargtrans__ ({text: ''}));
+				var row = __call__ (row_with_icon, null, layout, 'SEQUENCE');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: ''}));
+				}) ();
 				var found = true;
 			}
 		}
-		else if (space_type == 'NODE_EDITOR') {
-			layout.label (__kwargtrans__ ({text: 'Node Label'}));
+		else if (__eq__ (space_type, 'NODE_EDITOR')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Node Label'}));
+			}) ();
 			var item = context.active_node;
 			if (item) {
-				var row = row_with_icon (layout, 'NODE');
-				row.prop (item, 'label', __kwargtrans__ ({text: ''}));
+				var row = __call__ (row_with_icon, null, layout, 'NODE');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, item, 'label', __kwargtrans__ ({text: ''}));
+				}) ();
 				var found = true;
 			}
 		}
-		else if (space_type == 'NLA_EDITOR') {
-			layout.label (__kwargtrans__ ({text: 'NLA Strip Name'}));
-			var item = py_next ((function () {
+		else if (__eq__ (space_type, 'NLA_EDITOR')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'NLA Strip Name'}));
+			}) ();
+			var item = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 				var __accu0__ = [];
-				for (var strip of context.selected_nla_strips) {
+				var __iterable0__ = context.selected_nla_strips;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var strip = __getitem__ (__iterable0__, __index0__);
 					if (strip.active) {
-						__accu0__.append (strip);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, strip);
+						}) ();
 					}
 				}
 				return __accu0__;
-			}) (), null);
+			}) ()), null);
 			if (item) {
-				var row = row_with_icon (layout, 'NLA');
-				row.prop (item, 'name', __kwargtrans__ ({text: ''}));
+				var row = __call__ (row_with_icon, null, layout, 'NLA');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: ''}));
+				}) ();
 				var found = true;
 			}
 		}
-		else if (mode == 'POSE' || mode == 'WEIGHT_PAINT' && context.pose_object) {
-			layout.label (__kwargtrans__ ({text: 'Bone Name'}));
+		else if (__eq__ (mode, 'POSE') || __eq__ (mode, 'WEIGHT_PAINT') && context.pose_object) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Bone Name'}));
+			}) ();
 			var item = context.active_pose_bone;
 			if (item) {
-				var row = row_with_icon (layout, 'BONE_DATA');
-				row.prop (item, 'name', __kwargtrans__ ({text: ''}));
+				var row = __call__ (row_with_icon, null, layout, 'BONE_DATA');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: ''}));
+				}) ();
 				var found = true;
 			}
 		}
-		else if (mode == 'EDIT_ARMATURE') {
-			layout.label (__kwargtrans__ ({text: 'Bone Name'}));
+		else if (__eq__ (mode, 'EDIT_ARMATURE')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Bone Name'}));
+			}) ();
 			var item = context.active_bone;
 			if (item) {
-				var row = row_with_icon (layout, 'BONE_DATA');
-				row.prop (item, 'name', __kwargtrans__ ({text: ''}));
+				var row = __call__ (row_with_icon, null, layout, 'BONE_DATA');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: ''}));
+				}) ();
 				var found = true;
 			}
 		}
 		else {
-			layout.label (__kwargtrans__ ({text: 'Object Name'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Object Name'}));
+			}) ();
 			var item = context.object;
 			if (item) {
-				var row = row_with_icon (layout, 'OBJECT_DATA');
-				row.prop (item, 'name', __kwargtrans__ ({text: ''}));
+				var row = __call__ (row_with_icon, null, layout, 'OBJECT_DATA');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: ''}));
+				}) ();
 				var found = true;
 			}
 		}
 		if (!(found)) {
-			var row = row_with_icon (layout, 'ERROR');
-			row.label (__kwargtrans__ ({text: 'No active item'}));
+			var row = __call__ (row_with_icon, null, layout, 'ERROR');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No active item'}));
+			}) ();
 		}
 	});}
 });
@@ -1083,7 +1759,7 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 	get is_using_pose_markers () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1095,12 +1771,12 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		else {
 		}
 		var sd = context.space_data;
-		return sd.py_metatype == 'DOPESHEET_EDITOR' && __in__ (sd.mode, new set (['ACTION', 'SHAPEKEY'])) && sd.show_pose_markers && context.active_action;
+		return __eq__ (sd.py_metatype, 'DOPESHEET_EDITOR') && __in__ (sd.mode, new set (['ACTION', 'SHAPEKEY'])) && sd.show_pose_markers && context.active_action;
 	};},
 	get is_using_sequencer () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1112,12 +1788,12 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		else {
 		}
 		var sd = context.space_data;
-		return sd.py_metatype == 'SEQUENCE_EDITOR';
+		return __eq__ (sd.py_metatype, 'SEQUENCE_EDITOR');
 	};},
 	get get_selected_marker () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1128,16 +1804,25 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		}
 		else {
 		}
-		if (TOPBAR_PT_name_marker.is_using_pose_markers (context)) {
+		if ((function () {
+			var __accu0__ = TOPBAR_PT_name_marker;
+			return __call__ (__accu0__.is_using_pose_markers, __accu0__, context);
+		}) ()) {
 			var markers = context.active_action.pose_markers;
 		}
-		else if (TOPBAR_PT_name_marker.is_using_sequencer (context)) {
+		else if ((function () {
+			var __accu0__ = TOPBAR_PT_name_marker;
+			return __call__ (__accu0__.is_using_sequencer, __accu0__, context);
+		}) ()) {
 			var markers = context.sequencer_scene.timeline_markers;
 		}
 		else {
 			var markers = context.scene.timeline_markers;
 		}
-		for (var marker of markers) {
+		var __iterable0__ = markers;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var marker = __getitem__ (__iterable0__, __index0__);
 			if (marker.select) {
 				return marker;
 			}
@@ -1147,7 +1832,7 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 	get row_with_icon () {return function (layout, icon) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1159,15 +1844,21 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		}
 		else {
 		}
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.activate_init = true;
-		row.label (__kwargtrans__ ({icon: icon}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: icon}));
+		}) ();
 		return row;
 	};},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1180,29 +1871,56 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		else {
 		}
 		var layout = self.layout;
-		layout.label (__kwargtrans__ ({text: 'Marker Name'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Marker Name'}));
+		}) ();
 		var scene = context.scene;
 		if (scene.tool_settings.lock_markers) {
-			var row = self.row_with_icon (layout, 'ERROR');
+			var row = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.row_with_icon, __accu0__, layout, 'ERROR');
+			}) ();
 			var label = 'Markers are locked';
-			row.label (__kwargtrans__ ({text: label}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: label}));
+			}) ();
 			return ;
 		}
-		var marker = self.get_selected_marker (context);
+		var marker = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_selected_marker, __accu0__, context);
+		}) ();
 		if (marker === null) {
-			var row = self.row_with_icon (layout, 'ERROR');
-			row.label (__kwargtrans__ ({text: 'No active marker'}));
+			var row = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.row_with_icon, __accu0__, layout, 'ERROR');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No active marker'}));
+			}) ();
 			return ;
 		}
 		var icon = 'TIME';
 		if (marker.camera !== null) {
 			var icon = 'CAMERA_DATA';
 		}
-		else if (self.is_using_pose_markers (context)) {
+		else if ((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.is_using_pose_markers, __accu0__, context);
+		}) ()) {
 			var icon = 'ARMATURE_DATA';
 		}
-		var row = self.row_with_icon (layout, icon);
-		row.prop (marker, 'name', __kwargtrans__ ({text: ''}));
+		var row = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.row_with_icon, __accu0__, layout, icon);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, marker, 'name', __kwargtrans__ ({text: ''}));
+		}) ();
 	});}
 });
 export var TOPBAR_PT_grease_pencil_layers =  __class__ ('TOPBAR_PT_grease_pencil_layers', [Panel], {
@@ -1214,7 +1932,7 @@ export var TOPBAR_PT_grease_pencil_layers =  __class__ ('TOPBAR_PT_grease_pencil
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1230,7 +1948,7 @@ export var TOPBAR_PT_grease_pencil_layers =  __class__ ('TOPBAR_PT_grease_pencil
 		if (object === null) {
 			return false;
 		}
-		if (object.py_metatype != 'GREASEPENCIL') {
+		if (__ne__ (object.py_metatype, 'GREASEPENCIL')) {
 			return false;
 		}
 		return true;
@@ -1238,7 +1956,7 @@ export var TOPBAR_PT_grease_pencil_layers =  __class__ ('TOPBAR_PT_grease_pencil
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1250,18 +1968,57 @@ export var TOPBAR_PT_grease_pencil_layers =  __class__ ('TOPBAR_PT_grease_pencil
 		}
 		else {
 		}
-		var DATA_PT_grease_pencil_layers = _member ('bl_ui.properties_data_grease_pencil', 'DATA_PT_grease_pencil_layers');
+		var DATA_PT_grease_pencil_layers = __call__ (_member, null, 'bl_ui.properties_data_grease_pencil', 'DATA_PT_grease_pencil_layers');
 		var layout = self.layout;
 		var grease_pencil = context.object.data;
-		DATA_PT_grease_pencil_layers.draw_settings (layout, grease_pencil);
+		(function () {
+			var __accu0__ = DATA_PT_grease_pencil_layers;
+			return __call__ (__accu0__.draw_settings, __accu0__, layout, grease_pencil);
+		}) ();
 	});}
 });
 export var classes = tuple ([TOPBAR_HT_upper_bar, TOPBAR_MT_file_context_menu, TOPBAR_MT_workspace_menu, TOPBAR_MT_editor_menus, TOPBAR_MT_blender, TOPBAR_MT_blender_system, TOPBAR_MT_file, TOPBAR_MT_file_new, TOPBAR_MT_file_recover, TOPBAR_MT_file_defaults, TOPBAR_MT_templates_more, TOPBAR_MT_file_import, TOPBAR_MT_file_export, TOPBAR_MT_file_external_data, TOPBAR_MT_file_cleanup, TOPBAR_MT_file_previews, TOPBAR_MT_edit, TOPBAR_MT_render, TOPBAR_MT_window, TOPBAR_MT_help, TOPBAR_PT_tool_fallback, TOPBAR_PT_tool_settings_extra, TOPBAR_PT_gpencil_primitive, TOPBAR_PT_name, TOPBAR_PT_name_marker, TOPBAR_PT_grease_pencil_layers]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_topbar.map
 export {Header, Menu, Panel, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'TOPBAR_HT_upper_bar': TOPBAR_HT_upper_bar = value; break;
+		case 'TOPBAR_PT_tool_settings_extra': TOPBAR_PT_tool_settings_extra = value; break;
+		case 'TOPBAR_PT_tool_fallback': TOPBAR_PT_tool_fallback = value; break;
+		case 'TOPBAR_MT_editor_menus': TOPBAR_MT_editor_menus = value; break;
+		case 'TOPBAR_MT_blender': TOPBAR_MT_blender = value; break;
+		case 'TOPBAR_MT_file_cleanup': TOPBAR_MT_file_cleanup = value; break;
+		case 'TOPBAR_MT_file': TOPBAR_MT_file = value; break;
+		case 'TOPBAR_MT_file_new': TOPBAR_MT_file_new = value; break;
+		case 'TOPBAR_MT_file_recover': TOPBAR_MT_file_recover = value; break;
+		case 'TOPBAR_MT_file_defaults': TOPBAR_MT_file_defaults = value; break;
+		case 'TOPBAR_MT_blender_system': TOPBAR_MT_blender_system = value; break;
+		case 'TOPBAR_MT_templates_more': TOPBAR_MT_templates_more = value; break;
+		case 'TOPBAR_MT_file_import': TOPBAR_MT_file_import = value; break;
+		case 'TOPBAR_MT_file_export': TOPBAR_MT_file_export = value; break;
+		case 'TOPBAR_MT_file_external_data': TOPBAR_MT_file_external_data = value; break;
+		case 'TOPBAR_MT_file_previews': TOPBAR_MT_file_previews = value; break;
+		case 'TOPBAR_MT_render': TOPBAR_MT_render = value; break;
+		case 'TOPBAR_MT_edit': TOPBAR_MT_edit = value; break;
+		case 'TOPBAR_MT_window': TOPBAR_MT_window = value; break;
+		case 'TOPBAR_MT_help': TOPBAR_MT_help = value; break;
+		case 'TOPBAR_MT_file_context_menu': TOPBAR_MT_file_context_menu = value; break;
+		case 'TOPBAR_MT_workspace_menu': TOPBAR_MT_workspace_menu = value; break;
+		case 'TOPBAR_PT_gpencil_primitive': TOPBAR_PT_gpencil_primitive = value; break;
+		case 'TOPBAR_PT_name': TOPBAR_PT_name = value; break;
+		case 'TOPBAR_PT_name_marker': TOPBAR_PT_name_marker = value; break;
+		case 'TOPBAR_PT_grease_pencil_layers': TOPBAR_PT_grease_pencil_layers = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

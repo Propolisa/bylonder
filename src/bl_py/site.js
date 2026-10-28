@@ -6,3 +6,9 @@ var __name__ = 'site';
 export var getsitepackages = null;
 
 //# sourceMappingURL=site.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'getsitepackages': getsitepackages = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -7,3 +7,10 @@ export var pack = null;
 export var unpack = null;
 
 //# sourceMappingURL=struct.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'pack': pack = value; break;
+		case 'unpack': unpack = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -6,10 +6,10 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as __module_contextlib__ from './contextlib.js';
 __nest__ (contextlib, '', __module_contextlib__);
 var __name__ = '_bl_ui_utils.layout';
-export var operator_context = contextlib.contextmanager (function* (layout, op_context) {
+export var operator_context = __call__ (contextlib.contextmanager, null, function* (layout, op_context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -32,3 +32,9 @@ export var operator_context = contextlib.contextmanager (function* (layout, op_c
 	});
 
 //# sourceMappingURL=_bl_ui_utils.layout.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'operator_context': operator_context = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

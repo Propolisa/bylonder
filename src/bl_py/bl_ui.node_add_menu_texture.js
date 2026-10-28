@@ -10,7 +10,7 @@ var __name__ = 'bl_ui.node_add_menu_texture';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -21,8 +21,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -30,7 +36,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -55,7 +61,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -74,7 +80,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -87,18 +93,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -109,8 +118,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -120,7 +135,7 @@ export var NODE_MT_texture_node_input_base =  __class__ ('NODE_MT_texture_node_i
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -133,10 +148,22 @@ export var NODE_MT_texture_node_input_base =  __class__ ('NODE_MT_texture_node_i
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeCoordinates');
-		self.node_operator (layout, 'TextureNodeCurveTime');
-		self.node_operator (layout, 'TextureNodeImage');
-		self.node_operator (layout, 'TextureNodeTexture');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeCoordinates');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeCurveTime');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeImage');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexture');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_output_base =  __class__ ('NODE_MT_texture_node_output_base', [Menu], {
@@ -145,7 +172,7 @@ export var NODE_MT_texture_node_output_base =  __class__ ('NODE_MT_texture_node_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -158,8 +185,14 @@ export var NODE_MT_texture_node_output_base =  __class__ ('NODE_MT_texture_node_
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeOutput');
-		self.node_operator (layout, 'TextureNodeViewer');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeOutput');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeViewer');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_color_base =  __class__ ('NODE_MT_texture_node_color_base', [Menu], {
@@ -168,7 +201,7 @@ export var NODE_MT_texture_node_color_base =  __class__ ('NODE_MT_texture_node_c
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -181,13 +214,34 @@ export var NODE_MT_texture_node_color_base =  __class__ ('NODE_MT_texture_node_c
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeHueSaturation');
-		self.node_operator (layout, 'TextureNodeInvert');
-		self.node_operator (layout, 'TextureNodeMixRGB');
-		self.node_operator (layout, 'TextureNodeCurveRGB');
-		layout.separator ();
-		self.node_operator (layout, 'TextureNodeCombineColor');
-		self.node_operator (layout, 'TextureNodeSeparateColor');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeHueSaturation');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeInvert');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeMixRGB');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeCurveRGB');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeCombineColor');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeSeparateColor');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_converter_base =  __class__ ('NODE_MT_texture_node_converter_base', [Menu], {
@@ -196,7 +250,7 @@ export var NODE_MT_texture_node_converter_base =  __class__ ('NODE_MT_texture_no
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -209,11 +263,26 @@ export var NODE_MT_texture_node_converter_base =  __class__ ('NODE_MT_texture_no
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeValToRGB');
-		self.node_operator (layout, 'TextureNodeDistance');
-		self.node_operator (layout, 'TextureNodeMath');
-		self.node_operator (layout, 'TextureNodeRGBToBW');
-		self.node_operator (layout, 'TextureNodeValToNor');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeValToRGB');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeDistance');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeMath');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeRGBToBW');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeValToNor');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_distort_base =  __class__ ('NODE_MT_texture_node_distort_base', [Menu], {
@@ -222,7 +291,7 @@ export var NODE_MT_texture_node_distort_base =  __class__ ('NODE_MT_texture_node
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -235,10 +304,22 @@ export var NODE_MT_texture_node_distort_base =  __class__ ('NODE_MT_texture_node
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeAt');
-		self.node_operator (layout, 'TextureNodeRotate');
-		self.node_operator (layout, 'TextureNodeScale');
-		self.node_operator (layout, 'TextureNodeTranslate');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeAt');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeRotate');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeScale');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTranslate');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_pattern_base =  __class__ ('NODE_MT_texture_node_pattern_base', [Menu], {
@@ -248,7 +329,7 @@ export var NODE_MT_texture_node_pattern_base =  __class__ ('NODE_MT_texture_node
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -261,8 +342,14 @@ export var NODE_MT_texture_node_pattern_base =  __class__ ('NODE_MT_texture_node
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeBricks');
-		self.node_operator (layout, 'TextureNodeChecker');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeBricks');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeChecker');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_texture_base =  __class__ ('NODE_MT_texture_node_texture_base', [Menu], {
@@ -271,7 +358,7 @@ export var NODE_MT_texture_node_texture_base =  __class__ ('NODE_MT_texture_node
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -284,16 +371,46 @@ export var NODE_MT_texture_node_texture_base =  __class__ ('NODE_MT_texture_node
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'TextureNodeTexBlend');
-		self.node_operator (layout, 'TextureNodeTexClouds');
-		self.node_operator (layout, 'TextureNodeTexDistNoise');
-		self.node_operator (layout, 'TextureNodeTexMagic');
-		self.node_operator (layout, 'TextureNodeTexMarble');
-		self.node_operator (layout, 'TextureNodeTexMusgrave');
-		self.node_operator (layout, 'TextureNodeTexNoise');
-		self.node_operator (layout, 'TextureNodeTexStucci');
-		self.node_operator (layout, 'TextureNodeTexVoronoi');
-		self.node_operator (layout, 'TextureNodeTexWood');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexBlend');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexClouds');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexDistNoise');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexMagic');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexMarble');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexMusgrave');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexNoise');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexStucci');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexVoronoi');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'TextureNodeTexWood');
+		}) ();
 	});}
 });
 export var NODE_MT_texture_node_all_base =  __class__ ('NODE_MT_texture_node_all_base', [node_add_menu.NodeMenu], {
@@ -304,7 +421,7 @@ export var NODE_MT_texture_node_all_base =  __class__ ('NODE_MT_texture_node_all
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -316,31 +433,100 @@ export var NODE_MT_texture_node_all_base =  __class__ ('NODE_MT_texture_node_all
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
-		self.draw_menu (layout, 'Input');
-		self.draw_menu (layout, 'Output');
-		layout.separator ();
-		self.draw_menu (layout, 'Color');
-		self.draw_menu (layout, 'Converter');
-		self.draw_menu (layout, 'Distort');
-		self.draw_menu (layout, 'Pattern');
-		self.draw_menu (layout, 'Texture');
-		layout.separator ();
-		self.draw_menu (layout, 'Group');
-		self.draw_menu (layout, 'Layout');
-		self.draw_root_assets (layout);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Input');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Output');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Color');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Converter');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Distort');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Pattern');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Texture');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Group');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Layout');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_root_assets, __accu0__, layout);
+		}) ();
 	});}
 });
 export var add_menus = dict ({'NODE_MT_category_texture_input': NODE_MT_texture_node_input_base, 'NODE_MT_category_texture_output': NODE_MT_texture_node_output_base, 'NODE_MT_category_texture_color': NODE_MT_texture_node_color_base, 'NODE_MT_category_texture_converter': NODE_MT_texture_node_converter_base, 'NODE_MT_category_texture_distort': NODE_MT_texture_node_distort_base, 'NODE_MT_category_texture_pattern': NODE_MT_texture_node_pattern_base, 'NODE_MT_category_texture_texture': NODE_MT_texture_node_texture_base, 'NODE_MT_texture_node_add_all': NODE_MT_texture_node_all_base});
-var add_menus = node_add_menu.generate_menus (add_menus, __kwargtrans__ ({template: node_add_menu.AddNodeMenu, base_dict: node_add_menu.add_base_pathing_dict}));
+var add_menus = (function () {
+	var __accu0__ = node_add_menu;
+	return __call__ (__accu0__.generate_menus, __accu0__, add_menus, __kwargtrans__ ({template: node_add_menu.AddNodeMenu, base_dict: node_add_menu.add_base_pathing_dict}));
+}) ();
 export var swap_menus = dict ({'NODE_MT_texture_node_input_swap': NODE_MT_texture_node_input_base, 'NODE_MT_texture_node_output_swap': NODE_MT_texture_node_output_base, 'NODE_MT_texture_node_color_swap': NODE_MT_texture_node_color_base, 'NODE_MT_texture_node_converter_swap': NODE_MT_texture_node_converter_base, 'NODE_MT_texture_node_distort_swap': NODE_MT_texture_node_distort_base, 'NODE_MT_texture_node_pattern_swap': NODE_MT_texture_node_pattern_base, 'NODE_MT_texture_node_texture_swap': NODE_MT_texture_node_texture_base, 'NODE_MT_texture_node_swap_all': NODE_MT_texture_node_all_base});
-var swap_menus = node_add_menu.generate_menus (swap_menus, __kwargtrans__ ({template: node_add_menu.SwapNodeMenu, base_dict: node_add_menu.swap_base_pathing_dict}));
-export var classes = _joined (add_menus, swap_menus);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+var swap_menus = (function () {
+	var __accu0__ = node_add_menu;
+	return __call__ (__accu0__.generate_menus, __accu0__, swap_menus, __kwargtrans__ ({template: node_add_menu.SwapNodeMenu, base_dict: node_add_menu.swap_base_pathing_dict}));
+}) ();
+export var classes = __call__ (_joined, null, add_menus, swap_menus);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.node_add_menu_texture.map
 export {Menu, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'NODE_MT_texture_node_input_base': NODE_MT_texture_node_input_base = value; break;
+		case 'NODE_MT_texture_node_output_base': NODE_MT_texture_node_output_base = value; break;
+		case 'NODE_MT_texture_node_color_base': NODE_MT_texture_node_color_base = value; break;
+		case 'NODE_MT_texture_node_converter_base': NODE_MT_texture_node_converter_base = value; break;
+		case 'NODE_MT_texture_node_distort_base': NODE_MT_texture_node_distort_base = value; break;
+		case 'NODE_MT_texture_node_pattern_base': NODE_MT_texture_node_pattern_base = value; break;
+		case 'NODE_MT_texture_node_texture_base': NODE_MT_texture_node_texture_base = value; break;
+		case 'NODE_MT_texture_node_all_base': NODE_MT_texture_node_all_base = value; break;
+		case 'add_menus': add_menus = value; break;
+		case 'swap_menus': swap_menus = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

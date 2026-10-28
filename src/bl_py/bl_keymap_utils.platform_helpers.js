@@ -8,7 +8,7 @@ export var keyconfig_data_oskey_from_ctrl = function (keyconfig_data_src) {
 	var filter_fn = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -21,33 +21,60 @@ export var keyconfig_data_oskey_from_ctrl = function (keyconfig_data_src) {
 	else {
 	}
 	var keyconfig_data_dst = [];
-	for (var [km_name, km_parms, km_items_data_src] of keyconfig_data_src) {
-		var km_items_data_dst = km_items_data_src.py_copy ();
+	var __iterable0__ = keyconfig_data_src;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var km_name = __left0__ [0];
+		var km_parms = __left0__ [1];
+		var km_items_data_src = __left0__ [2];
+		var km_items_data_dst = (function () {
+			var __accu0__ = km_items_data_src;
+			return __call__ (__accu0__.py_copy, __accu0__);
+		}) ();
 		var items_dst = [];
-		km_items_data_dst ['items'] = items_dst;
-		for (var item_src of km_items_data_src ['items']) {
+		__setitem__ (km_items_data_dst, 'items', items_dst);
+		var __iterable1__ = __getitem__ (km_items_data_src, 'items');
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var item_src = __getitem__ (__iterable1__, __index1__);
 			var __left0__ = item_src;
 			var item_op = __left0__ [0];
 			var item_event = __left0__ [1];
 			var item_prop = __left0__ [2];
 			if (__in__ ('ctrl', item_event)) {
-				if (filter_fn === null || filter_fn (item_event)) {
-					var item_event = item_event.py_copy ();
-					item_event ['oskey'] = item_event ['ctrl'];
-					item_event.py_pop ('ctrl');
-					items_dst.append (tuple ([item_op, item_event, item_prop]));
+				if (filter_fn === null || __call__ (filter_fn, null, item_event)) {
+					var item_event = (function () {
+						var __accu0__ = item_event;
+						return __call__ (__accu0__.py_copy, __accu0__);
+					}) ();
+					__setitem__ (item_event, 'oskey', __getitem__ (item_event, 'ctrl'));
+					(function () {
+						var __accu0__ = item_event;
+						return __call__ (__accu0__.py_pop, __accu0__, 'ctrl');
+					}) ();
+					(function () {
+						var __accu0__ = items_dst;
+						return __call__ (__accu0__.append, __accu0__, tuple ([item_op, item_event, item_prop]));
+					}) ();
 				}
 			}
-			items_dst.append (item_src);
+			(function () {
+				var __accu0__ = items_dst;
+				return __call__ (__accu0__.append, __accu0__, item_src);
+			}) ();
 		}
-		keyconfig_data_dst.append (tuple ([km_name, km_parms, km_items_data_dst]));
+		(function () {
+			var __accu0__ = keyconfig_data_dst;
+			return __call__ (__accu0__.append, __accu0__, tuple ([km_name, km_parms, km_items_data_dst]));
+		}) ();
 	}
 	return keyconfig_data_dst;
 };
 export var keyconfig_data_oskey_from_ctrl_for_macos = function (keyconfig_data_src) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -61,7 +88,7 @@ export var keyconfig_data_oskey_from_ctrl_for_macos = function (keyconfig_data_s
 	var filter_fn = function (item_event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -72,22 +99,45 @@ export var keyconfig_data_oskey_from_ctrl_for_macos = function (keyconfig_data_s
 		}
 		else {
 		}
-		if (item_event.py_get ('ctrl')) {
-			var event_type = item_event ['type'];
+		if ((function () {
+			var __accu0__ = item_event;
+			return __call__ (__accu0__.py_get, __accu0__, 'ctrl');
+		}) ()) {
+			var event_type = __getitem__ (item_event, 'type');
 			if (__in__ (event_type, new set (['H', 'M', 'SPACE', 'W', 'ACCENT_GRAVE', 'PERIOD', 'TAB']))) {
-				if (!(item_event.py_get ('alt')) && !(item_event.py_get ('shift'))) {
+				if (!((function () {
+					var __accu0__ = item_event;
+					return __call__ (__accu0__.py_get, __accu0__, 'alt');
+				}) ()) && !((function () {
+					var __accu0__ = item_event;
+					return __call__ (__accu0__.py_get, __accu0__, 'shift');
+				}) ())) {
 					return false;
 				}
 			}
 			if (__in__ (event_type, new set (['Q']))) {
-				if (item_event.py_get ('alt') && !(item_event.py_get ('shift'))) {
+				if ((function () {
+					var __accu0__ = item_event;
+					return __call__ (__accu0__.py_get, __accu0__, 'alt');
+				}) () && !((function () {
+					var __accu0__ = item_event;
+					return __call__ (__accu0__.py_get, __accu0__, 'shift');
+				}) ())) {
 					return false;
 				}
 			}
 		}
 		return true;
 	};
-	return keyconfig_data_oskey_from_ctrl (keyconfig_data_src, __kwargtrans__ ({filter_fn: filter_fn}));
+	return __call__ (keyconfig_data_oskey_from_ctrl, null, keyconfig_data_src, __kwargtrans__ ({filter_fn: filter_fn}));
 };
 
 //# sourceMappingURL=bl_keymap_utils.platform_helpers.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'keyconfig_data_oskey_from_ctrl': keyconfig_data_oskey_from_ctrl = value; break;
+		case 'keyconfig_data_oskey_from_ctrl_for_macos': keyconfig_data_oskey_from_ctrl_for_macos = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

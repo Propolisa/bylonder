@@ -15,7 +15,7 @@ var __name__ = 'bl_operators.uvcalc_lightmap';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -26,8 +26,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -35,7 +41,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -60,7 +66,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -79,7 +85,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -92,18 +98,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -114,8 +123,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -125,7 +140,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 	get __init__ () {return __get__ (this, function (self, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -141,45 +156,48 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		self.rot = false;
 		self.xoff = 0;
 		self.yoff = 0;
-		if (py_typeof (data) == list) {
+		if (__eq__ (py_typeof (data), list)) {
 			self.uv = null;
-			if (len (data) == 2) {
-				data [1].xoff = data [0].width;
-				self.width = data [0].width * 2;
-				self.height = data [0].height;
+			if (__eq__ (__call__ (len, null, data), 2)) {
+				__getitem__ (data, 1).xoff = __getitem__ (data, 0).width;
+				self.width = __mul__ (__getitem__ (data, 0).width, 2);
+				self.height = __getitem__ (data, 0).height;
 			}
-			else if (len (data) == 4) {
-				var d = data [0].width;
-				data [1].xoff += d;
-				data [2].yoff += d;
-				data [3].xoff += d;
-				data [3].yoff += d;
-				var __left0__ = d * 2;
+			else if (__eq__ (__call__ (len, null, data), 4)) {
+				var d = __getitem__ (data, 0).width;
+				__getitem__ (data, 1).xoff = __call__ (__iadd__, null, __getitem__ (data, 1).xoff, d);
+				__getitem__ (data, 2).yoff = __call__ (__iadd__, null, __getitem__ (data, 2).yoff, d);
+				__getitem__ (data, 3).xoff = __call__ (__iadd__, null, __getitem__ (data, 3).xoff, d);
+				__getitem__ (data, 3).yoff = __call__ (__iadd__, null, __getitem__ (data, 3).yoff, d);
+				var __left0__ = __mul__ (d, 2);
 				self.width = __left0__;
 				self.height = __left0__;
 			}
-			for (var pf of data) {
+			var __iterable0__ = data;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var pf = __getitem__ (__iterable0__, __index0__);
 				pf.has_parent = true;
 			}
 			self.children = data;
 		}
-		else if (py_typeof (data) == tuple) {
+		else if (__eq__ (py_typeof (data), tuple)) {
 			self.uv = data;
-			var __left0__ = data [0];
+			var __left0__ = __getitem__ (data, 0);
 			var _f1 = __left0__ [0];
 			var lens1 = __left0__ [1];
 			var lens1ord = __left0__ [2];
-			if (data [1]) {
-				var __left0__ = data [1];
+			if (__getitem__ (data, 1)) {
+				var __left0__ = __getitem__ (data, 1);
 				var _f2 = __left0__ [0];
 				var lens2 = __left0__ [1];
 				var lens2ord = __left0__ [2];
-				self.width = (lens1 [lens1ord [0]] + lens2 [lens2ord [0]]) / 2.0;
-				self.height = (lens1 [lens1ord [1]] + lens2 [lens2ord [1]]) / 2.0;
+				self.width = __truediv__ (__add__ (__getitem__ (lens1, __getitem__ (lens1ord, 0)), __getitem__ (lens2, __getitem__ (lens2ord, 0))), 2.0);
+				self.height = __truediv__ (__add__ (__getitem__ (lens1, __getitem__ (lens1ord, 1)), __getitem__ (lens2, __getitem__ (lens2ord, 1))), 2.0);
 			}
 			else {
-				self.width = lens1 [0];
-				self.height = lens1 [1];
+				self.width = __getitem__ (lens1, 0);
+				self.height = __getitem__ (lens1, 1);
 			}
 			self.children = [];
 		}
@@ -187,71 +205,124 @@ export var prettyface =  __class__ ('prettyface', [object], {
 			var uv_layer = data.id_data.uv_layers.active.data;
 			self.uv = (function () {
 				var __accu0__ = [];
-				for (var i of data.loop_indices) {
-					__accu0__.append (uv_layer [i].uv);
+				var __iterable0__ = data.loop_indices;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var i = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __getitem__ (uv_layer, i).uv);
+					}) ();
 				}
 				return __accu0__;
 			}) ();
 			var cos = (function () {
 				var __accu0__ = [];
-				for (var v of data.vertices) {
-					__accu0__.append (data.id_data.vertices [v].co);
+				var __iterable0__ = data.vertices;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var v = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __getitem__ (data.id_data.vertices, v).co);
+					}) ();
 				}
 				return __accu0__;
 			}) ();
-			if (len (self.uv) == 4) {
-				self.width = ((cos [0] - cos [1]).length + (cos [2] - cos [3]).length) / 2.0;
-				self.height = ((cos [1] - cos [2]).length + (cos [0] - cos [3]).length) / 2.0;
+			if (__eq__ (__call__ (len, null, self.uv), 4)) {
+				self.width = __truediv__ (__add__ ((__sub__ (__getitem__ (cos, 0), __getitem__ (cos, 1))).length, (__sub__ (__getitem__ (cos, 2), __getitem__ (cos, 3))).length), 2.0);
+				self.height = __truediv__ (__add__ ((__sub__ (__getitem__ (cos, 1), __getitem__ (cos, 2))).length, (__sub__ (__getitem__ (cos, 0), __getitem__ (cos, 3))).length), 2.0);
 			}
 			else {
 				var no = data.normal;
-				var r = no.rotation_difference (mathutils.Vector (tuple ([0.0, 0.0, 1.0])));
+				var r = (function () {
+					var __accu0__ = no;
+					return __call__ (__accu0__.rotation_difference, __accu0__, (function () {
+						var __accu1__ = mathutils;
+						return __call__ (__accu1__.Vector, __accu1__, tuple ([0.0, 0.0, 1.0]));
+					}) ());
+				}) ();
 				var cos_2d = (function () {
 					var __accu0__ = [];
-					for (var co of cos) {
-						__accu0__.append ((__matmul__ (r, co)).xy);
+					var __iterable0__ = cos;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var co = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, (__matmul__ (r, co)).xy);
+						}) ();
 					}
 					return __accu0__;
 				}) ();
-				var angle = mathutils.geometry.box_fit_2d (cos_2d);
-				var mat = mathutils.Matrix.Rotation (angle, 2);
+				var angle = (function () {
+					var __accu0__ = mathutils.geometry;
+					return __call__ (__accu0__.box_fit_2d, __accu0__, cos_2d);
+				}) ();
+				var mat = (function () {
+					var __accu0__ = mathutils.Matrix;
+					return __call__ (__accu0__.Rotation, __accu0__, angle, 2);
+				}) ();
 				var cos_2d = (function () {
 					var __accu0__ = [];
-					for (var co of cos_2d) {
-						__accu0__.append (__matmul__ (mat, co));
+					var __iterable0__ = cos_2d;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var co = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __matmul__ (mat, co));
+						}) ();
 					}
 					return __accu0__;
 				}) ();
 				var xs = (function () {
 					var __accu0__ = [];
-					for (var co of cos_2d) {
-						__accu0__.append (co.x);
+					var __iterable0__ = cos_2d;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var co = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, co.x);
+						}) ();
 					}
 					return __accu0__;
 				}) ();
 				var ys = (function () {
 					var __accu0__ = [];
-					for (var co of cos_2d) {
-						__accu0__.append (co.y);
+					var __iterable0__ = cos_2d;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var co = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, co.y);
+						}) ();
 					}
 					return __accu0__;
 				}) ();
-				var xmin = min (xs);
-				var ymin = min (ys);
-				var xmax = max (xs);
-				var ymax = max (ys);
-				var xspan = xmax - xmin;
-				var yspan = ymax - ymin;
+				var xmin = __call__ (min, null, xs);
+				var ymin = __call__ (min, null, ys);
+				var xmax = __call__ (max, null, xs);
+				var ymax = __call__ (max, null, ys);
+				var xspan = __sub__ (xmax, xmin);
+				var yspan = __sub__ (ymax, ymin);
 				self.width = xspan;
 				self.height = yspan;
-				if (xspan < 1e-07 || yspan < 1e-07) {
-					for (var i = 0; i < len (cos_2d); i++) {
-						self.uv [i].__setslice__ (0, null, null, tuple ([0.0, 0.0]));
+				if (__lt__ (xspan, 1e-07) || __lt__ (yspan, 1e-07)) {
+					for (var i = 0; i < __call__ (len, null, cos_2d); i++) {
+						__setslice__ (__getitem__ (self.uv, i), 0, null, null, tuple ([0.0, 0.0]));
 					}
 				}
 				else {
-					for (var [i, co] of py_enumerate (cos_2d)) {
-						self.uv [i].__setslice__ (0, null, null, tuple ([(co.x - xmin) / xspan, (co.y - ymin) / yspan]));
+					var __iterable0__ = __call__ (py_enumerate, null, cos_2d);
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var __left0__ = __getitem__ (__iterable0__, __index0__);
+						var i = __left0__ [0];
+						var co = __left0__ [1];
+						__setslice__ (__getitem__ (self.uv, i), 0, null, null, tuple ([__truediv__ (__sub__ (co.x, xmin), xspan), __truediv__ (__sub__ (co.y, ymin), yspan)]));
 					}
 				}
 			}
@@ -261,7 +332,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 	get spin () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -272,8 +343,8 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		}
 		else {
 		}
-		if (self.uv && len (self.uv) == 4) {
-			self.uv = tuple ([self.uv [1], self.uv [2], self.uv [3], self.uv [0]]);
+		if (self.uv && __eq__ (__call__ (len, null, self.uv), 4)) {
+			self.uv = tuple ([__getitem__ (self.uv, 1), __getitem__ (self.uv, 2), __getitem__ (self.uv, 3), __getitem__ (self.uv, 0)]);
 		}
 		var __left0__ = tuple ([self.height, self.width]);
 		self.width = __left0__ [0];
@@ -282,14 +353,20 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		self.xoff = __left0__ [0];
 		self.yoff = __left0__ [1];
 		self.rot = !(self.rot);
-		for (var pf of self.children) {
-			pf.spin ();
+		var __iterable0__ = self.children;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var pf = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = pf;
+				return __call__ (__accu0__.spin, __accu0__);
+			}) ();
 		}
 	});},
 	get place () {return __get__ (this, function (self, xoff, yoff, xfac, yfac, margin_w, margin_h) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -306,11 +383,17 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		}
 		else {
 		}
-		var pi = _member ('math', 'pi');
-		xoff += self.xoff;
-		yoff += self.yoff;
-		for (var pf of self.children) {
-			pf.place (xoff, yoff, xfac, yfac, margin_w, margin_h);
+		var pi = __call__ (_member, null, 'math', 'pi');
+		var xoff = __call__ (__iadd__, null, xoff, self.xoff);
+		var yoff = __call__ (__iadd__, null, yoff, self.yoff);
+		var __iterable0__ = self.children;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var pf = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = pf;
+				return __call__ (__accu0__.place, __accu0__, xoff, yoff, xfac, yfac, margin_w, margin_h);
+			}) ();
 		}
 		var uv = self.uv;
 		if (!(uv)) {
@@ -318,17 +401,17 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		}
 		var x1 = xoff;
 		var y1 = yoff;
-		var x2 = xoff + self.width;
-		var y2 = yoff + self.height;
-		var x1 = x1 / xfac + margin_w;
-		var x2 = x2 / xfac - margin_w;
-		var y1 = y1 / yfac + margin_h;
-		var y2 = y2 / yfac - margin_h;
-		if (len (uv) == 2) {
+		var x2 = __add__ (xoff, self.width);
+		var y2 = __add__ (yoff, self.height);
+		var x1 = __add__ (__truediv__ (x1, xfac), margin_w);
+		var x2 = __sub__ (__truediv__ (x2, xfac), margin_w);
+		var y1 = __add__ (__truediv__ (y1, yfac), margin_h);
+		var y2 = __sub__ (__truediv__ (y2, yfac), margin_h);
+		if (__eq__ (__call__ (len, null, uv), 2)) {
 			var get_tri_angles = function (v1, v2, v3) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -341,15 +424,21 @@ export var prettyface =  __class__ ('prettyface', [object], {
 				}
 				else {
 				}
-				var a1 = (v2 - v1).angle (v3 - v1, pi);
-				var a2 = (v1 - v2).angle (v3 - v2, pi);
-				var a3 = pi - (a1 + a2);
+				var a1 = (function () {
+					var __accu0__ = __sub__ (v2, v1);
+					return __call__ (__accu0__.angle, __accu0__, __sub__ (v3, v1), pi);
+				}) ();
+				var a2 = (function () {
+					var __accu0__ = __sub__ (v1, v2);
+					return __call__ (__accu0__.angle, __accu0__, __sub__ (v3, v2), pi);
+				}) ();
+				var a3 = __sub__ (pi, __add__ (a1, a2));
 				return [tuple ([a1, 0]), tuple ([a2, 1]), tuple ([a3, 2])];
 			};
 			var set_uv = function (f, p1, p2, p3) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -363,68 +452,94 @@ export var prettyface =  __class__ ('prettyface', [object], {
 				}
 				else {
 				}
-				var angles_co = get_tri_angles (...(function () {
+				var angles_co = __call__ (get_tri_angles, null, ...(function () {
 					var __accu0__ = [];
-					for (var v of f.vertices) {
-						__accu0__.append (f.id_data.vertices [v].co);
+					var __iterable0__ = f.vertices;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var v = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __getitem__ (f.id_data.vertices, v).co);
+						}) ();
 					}
 					return __accu0__;
 				}) ());
-				angles_co.py_sort ();
+				(function () {
+					var __accu0__ = angles_co;
+					return __call__ (__accu0__.py_sort, __accu0__);
+				}) ();
 				var I = (function () {
 					var __accu0__ = [];
-					for (var [a, i] of angles_co) {
-						__accu0__.append (i);
+					var __iterable0__ = angles_co;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var __left0__ = __getitem__ (__iterable0__, __index0__);
+						var a = __left0__ [0];
+						var i = __left0__ [1];
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, i);
+						}) ();
 					}
 					return __accu0__;
 				}) ();
 				var uv_layer = f.id_data.uv_layers.active.data;
 				var fuv = (function () {
 					var __accu0__ = [];
-					for (var i of f.loop_indices) {
-						__accu0__.append (uv_layer [i].uv);
+					var __iterable0__ = f.loop_indices;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var i = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __getitem__ (uv_layer, i).uv);
+						}) ();
 					}
 					return __accu0__;
 				}) ();
 				if (self.rot) {
-					fuv [I [2]].__setslice__ (0, null, null, p1);
-					fuv [I [1]].__setslice__ (0, null, null, p2);
-					fuv [I [0]].__setslice__ (0, null, null, p3);
+					__setslice__ (__getitem__ (fuv, __getitem__ (I, 2)), 0, null, null, p1);
+					__setslice__ (__getitem__ (fuv, __getitem__ (I, 1)), 0, null, null, p2);
+					__setslice__ (__getitem__ (fuv, __getitem__ (I, 0)), 0, null, null, p3);
 				}
 				else {
-					fuv [I [2]].__setslice__ (0, null, null, p1);
-					fuv [I [0]].__setslice__ (0, null, null, p2);
-					fuv [I [1]].__setslice__ (0, null, null, p3);
+					__setslice__ (__getitem__ (fuv, __getitem__ (I, 2)), 0, null, null, p1);
+					__setslice__ (__getitem__ (fuv, __getitem__ (I, 0)), 0, null, null, p2);
+					__setslice__ (__getitem__ (fuv, __getitem__ (I, 1)), 0, null, null, p3);
 				}
 			};
-			var f = uv [0] [0];
-			set_uv (f, tuple ([x1, y1]), tuple ([x1, y2 - margin_h]), tuple ([x2 - margin_w, y1]));
-			if (uv [1]) {
-				var f = uv [1] [0];
-				set_uv (f, tuple ([x2, y2]), tuple ([x2, y1 + margin_h]), tuple ([x1 + margin_w, y2]));
+			var f = __getitem__ (__getitem__ (uv, 0), 0);
+			__call__ (set_uv, null, f, tuple ([x1, y1]), tuple ([x1, __sub__ (y2, margin_h)]), tuple ([__sub__ (x2, margin_w), y1]));
+			if (__getitem__ (uv, 1)) {
+				var f = __getitem__ (__getitem__ (uv, 1), 0);
+				__call__ (set_uv, null, f, tuple ([x2, y2]), tuple ([x2, __add__ (y1, margin_h)]), tuple ([__add__ (x1, margin_w), y2]));
 			}
 		}
-		else if (len (uv) == 4) {
-			uv [1].__setslice__ (0, null, null, tuple ([x1, y1]));
-			uv [2].__setslice__ (0, null, null, tuple ([x1, y2]));
-			uv [3].__setslice__ (0, null, null, tuple ([x2, y2]));
-			uv [0].__setslice__ (0, null, null, tuple ([x2, y1]));
+		else if (__eq__ (__call__ (len, null, uv), 4)) {
+			__setslice__ (__getitem__ (uv, 1), 0, null, null, tuple ([x1, y1]));
+			__setslice__ (__getitem__ (uv, 2), 0, null, null, tuple ([x1, y2]));
+			__setslice__ (__getitem__ (uv, 3), 0, null, null, tuple ([x2, y2]));
+			__setslice__ (__getitem__ (uv, 0), 0, null, null, tuple ([x2, y1]));
 		}
 		else {
-			var xspan = x2 - x1;
-			var yspan = y2 - y1;
-			for (var uvco of uv) {
+			var xspan = __sub__ (x2, x1);
+			var yspan = __sub__ (y2, y1);
+			var __iterable0__ = uv;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var uvco = __getitem__ (__iterable0__, __index0__);
 				var __left0__ = uvco;
 				var x = __left0__ [0];
 				var y = __left0__ [1];
-				uvco.__setslice__ (0, null, null, tuple ([x1 + x * xspan, y1 + y * yspan]));
+				__setslice__ (uvco, 0, null, null, tuple ([__add__ (x1, __mul__ (x, xspan)), __add__ (y1, __mul__ (y, yspan))]));
 			}
 		}
 	});},
 	get __hash__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -456,7 +571,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -472,65 +587,98 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 	}
 	else {
 	}
-	var time = _module ('time');
-	var sqrt = _member ('math', 'sqrt');
+	var time = __call__ (_module, null, 'time');
+	var sqrt = __call__ (_member, null, 'math', 'sqrt');
 	if (!(meshes)) {
 		return ;
 	}
-	var t = time.time ();
+	var t = (function () {
+		var __accu0__ = time;
+		return __call__ (__accu0__.time, __accu0__);
+	}) ();
 	if (PREF_PACK_IN_ONE) {
 		var face_groups = [[]];
 	}
 	else {
 		var face_groups = [];
 	}
-	for (var me of meshes) {
+	var __iterable0__ = meshes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var me = __getitem__ (__iterable0__, __index0__);
 		if (PREF_SEL_ONLY) {
 			var faces = (function () {
 				var __accu0__ = [];
-				for (var f of me.polygons) {
+				var __iterable1__ = me.polygons;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var f = __getitem__ (__iterable1__, __index1__);
 					if (f.select) {
-						__accu0__.append (f);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, f);
+						}) ();
 					}
 				}
 				return __accu0__;
 			}) ();
 		}
 		else {
-			var faces = me.polygons.__getslice__ (null, null, 1);
+			var faces = __getslice__ (me.polygons, null, null, 1);
 		}
 		if (PREF_PACK_IN_ONE) {
-			face_groups [0].extend (faces);
+			(function () {
+				var __accu0__ = __getitem__ (face_groups, 0);
+				return __call__ (__accu0__.extend, __accu0__, faces);
+			}) ();
 		}
 		else {
-			face_groups.append (faces);
+			(function () {
+				var __accu0__ = face_groups;
+				return __call__ (__accu0__.append, __accu0__, faces);
+			}) ();
 		}
 		if (PREF_NEW_UVLAYER) {
-			me.uv_layers.py_new ();
+			(function () {
+				var __accu0__ = me.uv_layers;
+				return __call__ (__accu0__.py_new, __accu0__);
+			}) ();
 		}
 		if (!(me.uv_layers)) {
-			me.uv_layers.py_new ();
+			(function () {
+				var __accu0__ = me.uv_layers;
+				return __call__ (__accu0__.py_new, __accu0__);
+			}) ();
 		}
 	}
-	for (var face_sel of face_groups) {
-		print ('\nStarting unwrap');
+	var __iterable0__ = face_groups;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face_sel = __getitem__ (__iterable0__, __index0__);
+		__call__ (print, null, '\nStarting unwrap');
 		if (!(face_sel)) {
 			continue;
 		}
 		var pretty_faces = (function () {
 			var __accu0__ = [];
-			for (var f of face_sel) {
-				if (f.loop_total >= 4) {
-					__accu0__.append (prettyface (f));
+			var __iterable1__ = face_sel;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var f = __getitem__ (__iterable1__, __index1__);
+				if (__ge__ (f.loop_total, 4)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __call__ (prettyface, null, f));
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ();
-		if (len (pretty_faces) != len (face_sel)) {
+		if (__ne__ (__call__ (len, null, pretty_faces), __call__ (len, null, face_sel))) {
 			var trylens = function (f) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -543,16 +691,28 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 				}
 				var cos = (function () {
 					var __accu0__ = [];
-					for (var v of f.vertices) {
-						__accu0__.append (f.id_data.vertices [v].co);
+					var __iterable1__ = f.vertices;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var v = __getitem__ (__iterable1__, __index1__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __getitem__ (f.id_data.vertices, v).co);
+						}) ();
 					}
 					return __accu0__;
 				}) ();
-				var lens = [(cos [0] - cos [1]).length, (cos [1] - cos [2]).length, (cos [2] - cos [0]).length];
-				var lens_min = lens.index (min (lens));
-				var lens_max = lens.index (max (lens));
+				var lens = [(__sub__ (__getitem__ (cos, 0), __getitem__ (cos, 1))).length, (__sub__ (__getitem__ (cos, 1), __getitem__ (cos, 2))).length, (__sub__ (__getitem__ (cos, 2), __getitem__ (cos, 0))).length];
+				var lens_min = (function () {
+					var __accu0__ = lens;
+					return __call__ (__accu0__.index, __accu0__, __call__ (min, null, lens));
+				}) ();
+				var lens_max = (function () {
+					var __accu0__ = lens;
+					return __call__ (__accu0__.index, __accu0__, __call__ (max, null, lens));
+				}) ();
 				for (var i = 0; i < 3; i++) {
-					if (i != lens_min && i != lens_max) {
+					if (__ne__ (i, lens_min) && __ne__ (i, lens_max)) {
 						var lens_mid = i;
 						break;
 					}
@@ -562,77 +722,124 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 			};
 			var tri_lengths = (function () {
 				var __accu0__ = [];
-				for (var f of face_sel) {
-					if (f.loop_total == 3) {
-						__accu0__.append (trylens (f));
+				var __iterable1__ = face_sel;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var f = __getitem__ (__iterable1__, __index1__);
+					if (__eq__ (f.loop_total, 3)) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __call__ (trylens, null, f));
+						}) ();
 					}
 				}
 				return __accu0__;
 			}) ();
-			var kd = mathutils.kdtree.KDTree (len (tri_lengths));
-			for (var [i, [f, lens, o]] of py_enumerate (tri_lengths)) {
-				var vector = tuple ([lens [o [0]], lens [o [1]], lens [o [2]]]);
-				kd.insert (vector, i);
+			// pass;
+			var kd = (function () {
+				var __accu0__ = mathutils.kdtree;
+				return __call__ (__accu0__.KDTree, __accu0__, __call__ (len, null, tri_lengths));
+			}) ();
+			var __iterable1__ = __call__ (py_enumerate, null, tri_lengths);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var i = __left0__ [0];
+				var f = __left0__ [1][0];
+				var lens = __left0__ [1][1];
+				var o = __left0__ [1][2];
+				var vector = tuple ([__getitem__ (lens, __getitem__ (o, 0)), __getitem__ (lens, __getitem__ (o, 1)), __getitem__ (lens, __getitem__ (o, 2))]);
+				(function () {
+					var __accu0__ = kd;
+					return __call__ (__accu0__.insert, __accu0__, vector, i);
+				}) ();
 			}
-			kd.balance ();
-			var added_ids = [false] * len (tri_lengths);
+			(function () {
+				var __accu0__ = kd;
+				return __call__ (__accu0__.balance, __accu0__);
+			}) ();
+			var added_ids = __mul__ ([false], __call__ (len, null, tri_lengths));
 			var pairs_added = 0;
 			var tri_equality_threshold = 1e-05;
-			for (var i = 0; i < len (tri_lengths); i++) {
-				if (added_ids [i]) {
+			for (var i = 0; i < __call__ (len, null, tri_lengths); i++) {
+				if (__getitem__ (added_ids, i)) {
 					continue;
 				}
-				var tri1 = tri_lengths [i];
+				var tri1 = __getitem__ (tri_lengths, i);
 				var __left0__ = tri1;
 				var _f1 = __left0__ [0];
 				var lens1 = __left0__ [1];
 				var lo1 = __left0__ [2];
-				var sorted_l = tuple ([lens1 [lo1 [0]], lens1 [lo1 [1]], lens1 [lo1 [2]]]);
-				added_ids [i] = true;
-				var __left0__ = kd.find (sorted_l, __kwargtrans__ ({filter: (function __lambda__ (idx) {
-					if (arguments.length) {
-						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-							var __allkwargs0__ = arguments [__ilastarg0__--];
-							for (var __attrib0__ in __allkwargs0__) {
-								switch (__attrib0__) {
-									case 'idx': var idx = __allkwargs0__ [__attrib0__]; break;
+				var sorted_l = tuple ([__getitem__ (lens1, __getitem__ (lo1, 0)), __getitem__ (lens1, __getitem__ (lo1, 1)), __getitem__ (lens1, __getitem__ (lo1, 2))]);
+				__setitem__ (added_ids, i, true);
+				var __left0__ = (function () {
+					var __accu0__ = kd;
+					return __call__ (__accu0__.find, __accu0__, sorted_l, __kwargtrans__ ({filter: (function __lambda__ (idx) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case 'idx': var idx = __allkwargs0__ [__attrib0__]; break;
+									}
 								}
 							}
 						}
-					}
-					else {
-					}
-					return !(added_ids [idx]);
-				})}));
+						else {
+						}
+						return !(__getitem__ (added_ids, idx));
+					})}));
+				}) ();
 				var _vec = __left0__ [0];
 				var nearest = __left0__ [1];
 				var dist = __left0__ [2];
-				if (!(nearest) || nearest < 0) {
-					pretty_faces.append (prettyface (tuple ([tri1, null])));
+				if (!(nearest) || __lt__ (nearest, 0)) {
+					(function () {
+						var __accu0__ = pretty_faces;
+						return __call__ (__accu0__.append, __accu0__, __call__ (prettyface, null, tuple ([tri1, null])));
+					}) ();
 					break;
 				}
-				var tri2 = tri_lengths [nearest];
-				pretty_faces.append (prettyface (tuple ([tri1, tri2])));
-				var pairs_added = pairs_added + 1;
-				added_ids [nearest] = true;
-				if (dist < tri_equality_threshold) {
+				var tri2 = __getitem__ (tri_lengths, nearest);
+				(function () {
+					var __accu0__ = pretty_faces;
+					return __call__ (__accu0__.append, __accu0__, __call__ (prettyface, null, tuple ([tri1, tri2])));
+				}) ();
+				var pairs_added = __add__ (pairs_added, 1);
+				__setitem__ (added_ids, nearest, true);
+				if (__lt__ (dist, tri_equality_threshold)) {
 					var cluster_tri_ids = (function () {
 						var __accu0__ = [];
-						for (var [_, idx, _] of list (kd.find_range (sorted_l, tri_equality_threshold))) {
-							if (!(added_ids [idx])) {
-								__accu0__.append (idx);
+						var __iterable1__ = __call__ (list, null, (function () {
+							var __accu1__ = kd;
+							return __call__ (__accu1__.find_range, __accu1__, sorted_l, tri_equality_threshold);
+						}) ());
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+							var __left0__ = __getitem__ (__iterable1__, __index1__);
+							var _ = __left0__ [0];
+							var idx = __left0__ [1];
+							var _ = __left0__ [2];
+							if (!(__getitem__ (added_ids, idx))) {
+								(function () {
+									var __accu1__ = __accu0__;
+									return __call__ (__accu1__.append, __accu1__, idx);
+								}) ();
 							}
 						}
 						return __accu0__;
 					}) ();
-					if (len (cluster_tri_ids) > 1) {
-						for (var ci = 0; ci < len (cluster_tri_ids) - __mod__ (len (cluster_tri_ids), 2); ci += 2) {
-							pretty_faces.append (prettyface (tuple ([tri_lengths [cluster_tri_ids [ci]], tri_lengths [cluster_tri_ids [ci + 1]]])));
+					if (__gt__ (__call__ (len, null, cluster_tri_ids), 1)) {
+						for (var ci = 0; ci < __sub__ (__call__ (len, null, cluster_tri_ids), __mod__ (__call__ (len, null, cluster_tri_ids), 2)); ci += 2) {
+							(function () {
+								var __accu0__ = pretty_faces;
+								return __call__ (__accu0__.append, __accu0__, __call__ (prettyface, null, tuple ([__getitem__ (tri_lengths, __getitem__ (cluster_tri_ids, ci)), __getitem__ (tri_lengths, __getitem__ (cluster_tri_ids, __add__ (ci, 1)))])));
+							}) ();
 							var __left0__ = true;
-							added_ids [cluster_tri_ids [ci]] = __left0__;
-							added_ids [cluster_tri_ids [ci + 1]] = __left0__;
-							var pairs_added = pairs_added + 1;
+							__setitem__ (added_ids, __getitem__ (cluster_tri_ids, ci), __left0__);
+							__setitem__ (added_ids, __getitem__ (cluster_tri_ids, __add__ (ci, 1)), __left0__);
+							var pairs_added = __add__ (pairs_added, 1);
 						}
 					}
 				}
@@ -641,85 +848,129 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 		var max_area = 0.0;
 		var min_area = 100000000.0;
 		var tot_area = 0;
-		for (var f of face_sel) {
+		var __iterable1__ = face_sel;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var f = __getitem__ (__iterable1__, __index1__);
 			var area = f.area;
-			if (area > max_area) {
+			if (__gt__ (area, max_area)) {
 				var max_area = area;
 			}
-			if (area < min_area) {
+			if (__lt__ (area, min_area)) {
 				var min_area = area;
 			}
-			tot_area += area;
+			var tot_area = __call__ (__iadd__, null, tot_area, area);
 		}
-		var max_len = sqrt (max_area);
-		var min_len = sqrt (min_area);
-		var side_len = sqrt (tot_area);
+		var max_len = __call__ (sqrt, null, max_area);
+		var min_len = __call__ (sqrt, null, min_area);
+		var side_len = __call__ (sqrt, null, tot_area);
 		var curr_len = max_len;
-		print ('\tGenerating lengths...', __kwargtrans__ ({end: ''}));
+		__call__ (print, null, '\tGenerating lengths...', __kwargtrans__ ({end: ''}));
 		var lengths = [];
-		while (curr_len > min_len) {
-			lengths.append (curr_len);
-			var curr_len = curr_len / 2.0;
-			if (curr_len / 4.0 < side_len / PREF_MARGIN_DIV) {
+		while (__gt__ (curr_len, min_len)) {
+			(function () {
+				var __accu0__ = lengths;
+				return __call__ (__accu0__.append, __accu0__, curr_len);
+			}) ();
+			var curr_len = __truediv__ (curr_len, 2.0);
+			if (__lt__ (__truediv__ (curr_len, 4.0), __truediv__ (side_len, PREF_MARGIN_DIV))) {
 				break;
 			}
 		}
 		if (!(lengths)) {
-			lengths.append (curr_len);
+			(function () {
+				var __accu0__ = lengths;
+				return __call__ (__accu0__.append, __accu0__, curr_len);
+			}) ();
 		}
 		var lengths_to_ints = dict ({});
 		var l_int = 1;
-		for (var l of py_reversed (lengths)) {
-			lengths_to_ints [l] = l_int;
-			l_int *= 2;
+		var __iterable1__ = __call__ (py_reversed, null, lengths);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var l = __getitem__ (__iterable1__, __index1__);
+			__setitem__ (lengths_to_ints, l, l_int);
+			var l_int = __call__ (__imul__, null, l_int, 2);
 		}
-		var lengths_to_ints = list (lengths_to_ints.py_items ());
-		lengths_to_ints.py_sort ();
-		print ('done');
-		for (var pf of pretty_faces) {
+		var lengths_to_ints = __call__ (list, null, (function () {
+			var __accu0__ = lengths_to_ints;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ());
+		(function () {
+			var __accu0__ = lengths_to_ints;
+			return __call__ (__accu0__.py_sort, __accu0__);
+		}) ();
+		__call__ (print, null, 'done');
+		var __iterable1__ = pretty_faces;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var pf = __getitem__ (__iterable1__, __index1__);
 			var w = pf.width;
 			var h = pf.height;
 			var bestw_diff = 1000000000.0;
 			var besth_diff = 1000000000.0;
 			var new_w = 0.0;
 			var new_h = 0.0;
-			for (var [l, i] of lengths_to_ints) {
-				var d = abs (l - w);
-				if (d < bestw_diff) {
+			var __iterable2__ = lengths_to_ints;
+			__iterable2__ = __i__ (__iterable2__);
+			for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+				var __left0__ = __getitem__ (__iterable2__, __index2__);
+				var l = __left0__ [0];
+				var i = __left0__ [1];
+				var d = __call__ (abs, null, __sub__ (l, w));
+				if (__lt__ (d, bestw_diff)) {
 					var bestw_diff = d;
 					var new_w = i;
 				}
-				var d = abs (l - h);
-				if (d < besth_diff) {
+				var d = __call__ (abs, null, __sub__ (l, h));
+				if (__lt__ (d, besth_diff)) {
 					var besth_diff = d;
 					var new_h = i;
 				}
 			}
 			pf.width = new_w;
 			pf.height = new_h;
-			if (new_w > new_h) {
-				pf.spin ();
+			if (__gt__ (new_w, new_h)) {
+				(function () {
+					var __accu0__ = pf;
+					return __call__ (__accu0__.spin, __accu0__);
+				}) ();
 			}
 		}
-		print ('...done');
-		print ('\tConsolidating Boxes...', __kwargtrans__ ({end: ''}));
+		__call__ (print, null, '...done');
+		__call__ (print, null, '\tConsolidating Boxes...', __kwargtrans__ ({end: ''}));
 		var even_dict = dict ({});
 		var odd_dict = dict ({});
-		for (var pf of pretty_faces) {
+		var __iterable1__ = pretty_faces;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var pf = __getitem__ (__iterable1__, __index1__);
 			var __left0__ = tuple ([pf.width, pf.height]);
 			var w = __left0__ [0];
 			var h = __left0__ [1];
-			if (w == h) {
-				even_dict.py_setdefault (w, []).append (pf);
+			if (__eq__ (w, h)) {
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = even_dict;
+						return __call__ (__accu1__.py_setdefault, __accu1__, w, []);
+					}) ();
+					return __call__ (__accu0__.append, __accu0__, pf);
+				}) ();
 			}
 			else {
-				odd_dict.py_setdefault (tuple ([w, h]), []).append (pf);
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = odd_dict;
+						return __call__ (__accu1__.py_setdefault, __accu1__, tuple ([w, h]), []);
+					}) ();
+					return __call__ (__accu0__.append, __accu0__, pf);
+				}) ();
 			}
 		}
 		var c = 0;
-		var float_to_int_factor = lengths_to_ints [0] [0];
-		if (float_to_int_factor > 0) {
-			var max_int_dimension = int ((side_len / float_to_int_factor) / PREF_BOX_DIV);
+		var float_to_int_factor = __getitem__ (__getitem__ (lengths_to_ints, 0), 0);
+		if (__gt__ (float_to_int_factor, 0)) {
+			var max_int_dimension = __call__ (int, null, __truediv__ (__truediv__ (side_len, float_to_int_factor), PREF_BOX_DIV));
 			var ok = true;
 		}
 		else {
@@ -728,108 +979,211 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 		}
 		while (ok) {
 			var ok = false;
-			for (var [d, boxes] of list (odd_dict.py_items ())) {
-				if (d [1] < max_int_dimension) {
-					while (len (boxes) >= 2) {
+			var __iterable1__ = __call__ (list, null, (function () {
+				var __accu0__ = odd_dict;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ());
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var d = __left0__ [0];
+				var boxes = __left0__ [1];
+				if (__lt__ (__getitem__ (d, 1), max_int_dimension)) {
+					while (__ge__ (__call__ (len, null, boxes), 2)) {
 						var ok = true;
-						c++;
-						var pf_parent = prettyface ([boxes.py_pop (), boxes.py_pop ()]);
-						pretty_faces.append (pf_parent);
+						var c = __call__ (__iadd__, null, c, 1);
+						var pf_parent = __call__ (prettyface, null, [(function () {
+							var __accu0__ = boxes;
+							return __call__ (__accu0__.py_pop, __accu0__);
+						}) (), (function () {
+							var __accu0__ = boxes;
+							return __call__ (__accu0__.py_pop, __accu0__);
+						}) ()]);
+						(function () {
+							var __accu0__ = pretty_faces;
+							return __call__ (__accu0__.append, __accu0__, pf_parent);
+						}) ();
 						var __left0__ = tuple ([pf_parent.width, pf_parent.height]);
 						var w = __left0__ [0];
 						var h = __left0__ [1];
-						if (w == h) {
-							even_dict.py_setdefault (w, []).append (pf_parent);
+						if (__eq__ (w, h)) {
+							(function () {
+								var __accu0__ = (function () {
+									var __accu1__ = even_dict;
+									return __call__ (__accu1__.py_setdefault, __accu1__, w, []);
+								}) ();
+								return __call__ (__accu0__.append, __accu0__, pf_parent);
+							}) ();
 						}
 						else {
-							odd_dict.py_setdefault (tuple ([w, h]), []).append (pf_parent);
+							(function () {
+								var __accu0__ = (function () {
+									var __accu1__ = odd_dict;
+									return __call__ (__accu1__.py_setdefault, __accu1__, tuple ([w, h]), []);
+								}) ();
+								return __call__ (__accu0__.append, __accu0__, pf_parent);
+							}) ();
 						}
 					}
 				}
 			}
-			for (var [d, boxes] of list (even_dict.py_items ())) {
-				if (d < max_int_dimension) {
-					boxes.py_sort (__kwargtrans__ ({key: (function __lambda__ (a) {
-						if (arguments.length) {
-							var __ilastarg0__ = arguments.length - 1;
-							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-								var __allkwargs0__ = arguments [__ilastarg0__--];
-								for (var __attrib0__ in __allkwargs0__) {
-									switch (__attrib0__) {
-										case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+			var __iterable1__ = __call__ (list, null, (function () {
+				var __accu0__ = even_dict;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ());
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var d = __left0__ [0];
+				var boxes = __left0__ [1];
+				if (__lt__ (d, max_int_dimension)) {
+					(function () {
+						var __accu0__ = boxes;
+						return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (a) {
+							if (arguments.length) {
+								var __ilastarg0__ = arguments.length - 1;
+								if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+									var __allkwargs0__ = arguments [__ilastarg0__--];
+									for (var __attrib0__ in __allkwargs0__) {
+										switch (__attrib0__) {
+											case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+										}
 									}
 								}
 							}
-						}
-						else {
-						}
-						return len (a.children);
-					})}));
-					while (len (boxes) >= 4) {
+							else {
+							}
+							return __call__ (len, null, a.children);
+						})}));
+					}) ();
+					while (__ge__ (__call__ (len, null, boxes), 4)) {
 						var ok = true;
-						c++;
-						var pf_parent = prettyface ([boxes.py_pop (), boxes.py_pop (), boxes.py_pop (), boxes.py_pop ()]);
-						pretty_faces.append (pf_parent);
+						var c = __call__ (__iadd__, null, c, 1);
+						var pf_parent = __call__ (prettyface, null, [(function () {
+							var __accu0__ = boxes;
+							return __call__ (__accu0__.py_pop, __accu0__);
+						}) (), (function () {
+							var __accu0__ = boxes;
+							return __call__ (__accu0__.py_pop, __accu0__);
+						}) (), (function () {
+							var __accu0__ = boxes;
+							return __call__ (__accu0__.py_pop, __accu0__);
+						}) (), (function () {
+							var __accu0__ = boxes;
+							return __call__ (__accu0__.py_pop, __accu0__);
+						}) ()]);
+						(function () {
+							var __accu0__ = pretty_faces;
+							return __call__ (__accu0__.append, __accu0__, pf_parent);
+						}) ();
 						var w = pf_parent.width;
-						even_dict.py_setdefault (w, []).append (pf_parent);
+						(function () {
+							var __accu0__ = (function () {
+								var __accu1__ = even_dict;
+								return __call__ (__accu1__.py_setdefault, __accu1__, w, []);
+							}) ();
+							return __call__ (__accu0__.append, __accu0__, pf_parent);
+						}) ();
 					}
 				}
 			}
 		}
+		// pass;
+		// pass;
 		var pretty_faces = (function () {
 			var __accu0__ = [];
-			for (var pf of pretty_faces) {
+			var __iterable1__ = pretty_faces;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var pf = __getitem__ (__iterable1__, __index1__);
 				if (!(pf.has_parent)) {
-					__accu0__.append (pf);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, pf);
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ();
-		var i = len (pretty_faces);
+		var i = __call__ (len, null, pretty_faces);
 		var d = 0;
 		while (i) {
-			i--;
-			var pf = pretty_faces [i];
-			if (pf.width != pf.height) {
-				d++;
+			var i = __call__ (__isub__, null, i, 1);
+			var pf = __getitem__ (pretty_faces, i);
+			if (__ne__ (pf.width, pf.height)) {
+				var d = __call__ (__iadd__, null, d, 1);
 				if (__mod__ (d, 2)) {
-					pf.spin ();
+					(function () {
+						var __accu0__ = pf;
+						return __call__ (__accu0__.spin, __accu0__);
+					}) ();
 				}
 			}
 		}
-		print ('Consolidated', c, 'boxes, done');
-		print ('\tPacking Boxes', len (pretty_faces), __kwargtrans__ ({end: '...'}));
+		__call__ (print, null, 'Consolidated', c, 'boxes, done');
+		__call__ (print, null, '\tPacking Boxes', __call__ (len, null, pretty_faces), __kwargtrans__ ({end: '...'}));
 		var boxes2Pack = (function () {
 			var __accu0__ = [];
-			for (var [i, pf] of list (py_enumerate (pretty_faces))) {
-				__accu0__.append ([0.0, 0.0, pf.width, pf.height, i]);
+			var __iterable1__ = __call__ (list, null, __call__ (py_enumerate, null, pretty_faces));
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var i = __left0__ [0];
+				var pf = __left0__ [1];
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, [0.0, 0.0, pf.width, pf.height, i]);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
-		var __left0__ = mathutils.geometry.box_pack_2d (boxes2Pack);
+		var __left0__ = (function () {
+			var __accu0__ = mathutils.geometry;
+			return __call__ (__accu0__.box_pack_2d, __accu0__, boxes2Pack);
+		}) ();
 		var packWidth = __left0__ [0];
 		var packHeight = __left0__ [1];
-		var packWidth = float (packWidth);
-		var packHeight = float (packHeight);
-		var margin_w = (packWidth / PREF_MARGIN_DIV) / packWidth;
-		var margin_h = (packHeight / PREF_MARGIN_DIV) / packHeight;
-		print ('done');
-		print ('\twriting back UVs', __kwargtrans__ ({end: ''}));
-		for (var [i, box] of py_enumerate (boxes2Pack)) {
-			pretty_faces [i].place (box [0], box [1], packWidth, packHeight, margin_w, margin_h);
+		var packWidth = __call__ (float, null, packWidth);
+		var packHeight = __call__ (float, null, packHeight);
+		var margin_w = __truediv__ (__truediv__ (packWidth, PREF_MARGIN_DIV), packWidth);
+		var margin_h = __truediv__ (__truediv__ (packHeight, PREF_MARGIN_DIV), packHeight);
+		__call__ (print, null, 'done');
+		__call__ (print, null, '\twriting back UVs', __kwargtrans__ ({end: ''}));
+		var __iterable1__ = __call__ (py_enumerate, null, boxes2Pack);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var i = __left0__ [0];
+			var box = __left0__ [1];
+			(function () {
+				var __accu0__ = __getitem__ (pretty_faces, i);
+				return __call__ (__accu0__.place, __accu0__, __getitem__ (box, 0), __getitem__ (box, 1), packWidth, packHeight, margin_w, margin_h);
+			}) ();
 		}
-		print ('done');
+		__call__ (print, null, 'done');
 	}
-	for (var me of meshes) {
-		me.py_update ();
+	var __iterable0__ = meshes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var me = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = me;
+			return __call__ (__accu0__.py_update, __accu0__);
+		}) ();
 	}
-	print ('finished all {:.2f} '.format (time.time () - t));
+	__call__ (print, null, (function () {
+		var __accu0__ = 'finished all {:.2f} ';
+		return __call__ (__accu0__.format, __accu0__, __sub__ ((function () {
+			var __accu1__ = time;
+			return __call__ (__accu1__.time, __accu1__);
+		}) (), t));
+	}) ());
 };
 export var unwrap = function (operator, context) {
 	var kwargs = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -843,21 +1197,33 @@ export var unwrap = function (operator, context) {
 	}
 	else {
 	}
-	var is_editmode = context.object && context.object.mode == 'EDIT';
+	var is_editmode = context.object && __eq__ (context.object.mode, 'EDIT');
 	if (is_editmode) {
 		var objects = context.objects_in_mode_unique_data;
-		bpy.ops.object.mode_set (__kwargtrans__ ({mode: 'OBJECT', toggle: false}));
+		(function () {
+			var __accu0__ = bpy.ops.object;
+			return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'OBJECT', toggle: false}));
+		}) ();
 	}
 	else {
 		var objects = context.selected_objects;
 	}
-	var meshes = list ((function () {
+	var meshes = __call__ (list, null, (function () {
 		var __accu0__ = [];
-		for (var obj of objects) {
-			if (obj.py_metatype == 'MESH') {
-				for (var me of [obj.data]) {
+		var __iterable0__ = objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var obj = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (obj.py_metatype, 'MESH')) {
+				var __iterable1__ = [obj.data];
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var me = __getitem__ (__iterable1__, __index1__);
 					if (me.polygons && me.is_editable) {
-						__accu0__.append (me);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, me);
+						}) ();
 					}
 				}
 			}
@@ -865,12 +1231,18 @@ export var unwrap = function (operator, context) {
 		return set (__accu0__);
 	}) ());
 	if (!(meshes)) {
-		operator.report (new set (['ERROR']), 'No mesh object');
+		(function () {
+			var __accu0__ = operator;
+			return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No mesh object');
+		}) ();
 		return new set (['CANCELLED']);
 	}
-	lightmap_uvpack (meshes, __kwargtrans__ (_merged (kwargs)));
+	__call__ (lightmap_uvpack, null, meshes, __kwargtrans__ (__call__ (_merged, null, kwargs)));
 	if (is_editmode) {
-		bpy.ops.object.mode_set (__kwargtrans__ ({mode: 'EDIT', toggle: false}));
+		(function () {
+			var __accu0__ = bpy.ops.object;
+			return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'EDIT', toggle: false}));
+		}) ();
 	}
 	return new set (['FINISHED']);
 };
@@ -882,7 +1254,7 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -897,19 +1269,34 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var is_editmode = context.active_object.mode == 'EDIT';
+		var is_editmode = __eq__ (context.active_object.mode, 'EDIT');
 		if (is_editmode) {
-			layout.prop (self, 'PREF_CONTEXT');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'PREF_CONTEXT');
+			}) ();
 		}
-		layout.prop (self, 'PREF_PACK_IN_ONE');
-		layout.prop (self, 'PREF_NEW_UVLAYER');
-		layout.prop (self, 'PREF_BOX_DIV');
-		layout.prop (self, 'PREF_MARGIN_DIV');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'PREF_PACK_IN_ONE');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'PREF_NEW_UVLAYER');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'PREF_BOX_DIV');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'PREF_MARGIN_DIV');
+		}) ();
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -922,12 +1309,12 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 		else {
 		}
 		var ob = context.active_object;
-		return ob && ob.py_metatype == 'MESH';
+		return ob && __eq__ (ob.py_metatype, 'MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -939,30 +1326,36 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 		}
 		else {
 		}
-		var kwargs = self.as_keywords ();
-		var PREF_CONTEXT = kwargs.py_pop ('PREF_CONTEXT');
-		var is_editmode = context.active_object.mode == 'EDIT';
+		var kwargs = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.as_keywords, __accu0__);
+		}) ();
+		var PREF_CONTEXT = (function () {
+			var __accu0__ = kwargs;
+			return __call__ (__accu0__.py_pop, __accu0__, 'PREF_CONTEXT');
+		}) ();
+		var is_editmode = __eq__ (context.active_object.mode, 'EDIT');
 		if (!(is_editmode)) {
-			kwargs ['PREF_SEL_ONLY'] = false;
+			__setitem__ (kwargs, 'PREF_SEL_ONLY', false);
 		}
-		else if (PREF_CONTEXT == 'SEL_FACES') {
-			kwargs ['PREF_SEL_ONLY'] = true;
+		else if (__eq__ (PREF_CONTEXT, 'SEL_FACES')) {
+			__setitem__ (kwargs, 'PREF_SEL_ONLY', true);
 		}
-		else if (PREF_CONTEXT == 'ALL_FACES') {
-			kwargs ['PREF_SEL_ONLY'] = false;
+		else if (__eq__ (PREF_CONTEXT, 'ALL_FACES')) {
+			__setitem__ (kwargs, 'PREF_SEL_ONLY', false);
 		}
 		else {
-			var __except0__ = Exception ('invalid context');
+			var __except0__ = __call__ (Exception, null, 'invalid context');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		kwargs ['PREF_MARGIN_DIV'] = int (1.0 / (kwargs ['PREF_MARGIN_DIV'] / 100.0));
-		return unwrap (self, context, __kwargtrans__ (_merged (kwargs)));
+		__setitem__ (kwargs, 'PREF_MARGIN_DIV', __call__ (int, null, __truediv__ (1.0, __truediv__ (__getitem__ (kwargs, 'PREF_MARGIN_DIV'), 100.0))));
+		return __call__ (unwrap, null, self, context, __kwargtrans__ (__call__ (_merged, null, kwargs)));
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -976,11 +1369,34 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 		else {
 		}
 		var wm = context.window_manager;
-		return wm.invoke_props_dialog (self);
+		return (function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.invoke_props_dialog, __accu0__, self);
+		}) ();
 	});}
 });
-LightMapPack.__annotations__ = dict ({'PREF_CONTEXT': bpy.props.EnumProperty (__kwargtrans__ ({py_name: 'Selection', py_items: tuple ([tuple (['SEL_FACES', 'Selected Faces', 'Pack only selected faces']), tuple (['ALL_FACES', 'All Faces', 'Pack all faces in the mesh'])])})), 'PREF_PACK_IN_ONE': BoolProperty (__kwargtrans__ ({py_name: 'Share Texture Space', description: 'Objects share texture space, map all objects into a single UV map', py_default: true})), 'PREF_NEW_UVLAYER': BoolProperty (__kwargtrans__ ({py_name: 'New UV Map', description: 'Create a new UV map for every mesh packed', py_default: false})), 'PREF_BOX_DIV': IntProperty (__kwargtrans__ ({py_name: 'Pack Quality', description: 'Quality of the packing. Higher values will be slower but waste less space', min: 1, max: 48, py_default: 12})), 'PREF_MARGIN_DIV': FloatProperty (__kwargtrans__ ({py_name: 'Margin', description: 'Size of the margin as a division of the UV', min: 0.001, max: 1.0, py_default: 0.1}))});
+LightMapPack.__annotations__ = dict ({'PREF_CONTEXT': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.EnumProperty, __accu0__, __kwargtrans__ ({py_name: 'Selection', py_items: tuple ([tuple (['SEL_FACES', 'Selected Faces', 'Pack only selected faces']), tuple (['ALL_FACES', 'All Faces', 'Pack all faces in the mesh'])])}));
+}) (), 'PREF_PACK_IN_ONE': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Share Texture Space', description: 'Objects share texture space, map all objects into a single UV map', py_default: true})), 'PREF_NEW_UVLAYER': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'New UV Map', description: 'Create a new UV map for every mesh packed', py_default: false})), 'PREF_BOX_DIV': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Pack Quality', description: 'Quality of the packing. Higher values will be slower but waste less space', min: 1, max: 48, py_default: 12})), 'PREF_MARGIN_DIV': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Margin', description: 'Size of the margin as a division of the UV', min: 0.001, max: 1.0, py_default: 0.1}))});
 export var classes = tuple ([LightMapPack]);
 
 //# sourceMappingURL=bl_operators.uvcalc_lightmap.map
 export {BoolProperty, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'prettyface': prettyface = value; break;
+		case 'lightmap_uvpack': lightmap_uvpack = value; break;
+		case 'unwrap': unwrap = value; break;
+		case 'LightMapPack': LightMapPack = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

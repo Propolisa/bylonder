@@ -14,7 +14,7 @@ var __name__ = 'bl_ui.space_userpref';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -25,8 +25,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -34,7 +40,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -59,7 +65,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -78,7 +84,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -91,18 +97,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -113,8 +122,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -124,7 +139,7 @@ export var USERPREF_HT_header =  __class__ ('USERPREF_HT_header', [Header], {
 	get draw_buttons () {return function (layout, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -142,13 +157,16 @@ export var USERPREF_HT_header =  __class__ ('USERPREF_HT_header', [Header], {
 			// pass;
 		}
 		else {
-			layout.operator ('wm.save_userpref', __kwargtrans__ ({text: (prefs.is_dirty ? '* ' : '') + iface_ ('Save Preferences'), translate: false}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.save_userpref', __kwargtrans__ ({text: __add__ ((prefs.is_dirty ? '* ' : ''), __call__ (iface_, null, 'Save Preferences')), translate: false}));
+			}) ();
 		}
 	};},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -162,10 +180,22 @@ export var USERPREF_HT_header =  __class__ ('USERPREF_HT_header', [Header], {
 		}
 		var layout = self.layout;
 		layout.operator_context = 'EXEC_AREA';
-		layout.template_header ();
-		USERPREF_MT_editor_menus.draw_collapsible (context, layout);
-		layout.separator_spacer ();
-		self.draw_buttons (layout, context);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_header, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = USERPREF_MT_editor_menus;
+			return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_buttons, __accu0__, layout, context);
+		}) ();
 	});}
 });
 export var USERPREF_PT_navigation_bar =  __class__ ('USERPREF_PT_navigation_bar', [Panel], {
@@ -178,7 +208,7 @@ export var USERPREF_PT_navigation_bar =  __class__ ('USERPREF_PT_navigation_bar'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -193,16 +223,31 @@ export var USERPREF_PT_navigation_bar =  __class__ ('USERPREF_PT_navigation_bar'
 		var layout = self.layout;
 		var view = context.space_data;
 		var prefs = context.preferences;
-		layout.prop (view, 'search_filter', __kwargtrans__ ({icon: 'VIEWZOOM', text: ''}));
-		layout.separator (__kwargtrans__ ({factor: 0.1}));
-		var col = layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'search_filter', __kwargtrans__ ({icon: 'VIEWZOOM', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({factor: 0.1}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.scale_x = 1.3;
 		col.scale_y = 1.3;
 		if (view.search_filter) {
-			col.prop_tabs_enum (prefs, 'active_section', __kwargtrans__ ({data_highlight: view, property_highlight: 'tab_search_results', expand_as: 'ROW'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop_tabs_enum, __accu0__, prefs, 'active_section', __kwargtrans__ ({data_highlight: view, property_highlight: 'tab_search_results', expand_as: 'ROW'}));
+			}) ();
 		}
 		else {
-			col.prop (prefs, 'active_section', __kwargtrans__ ({expand: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, prefs, 'active_section', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 	});}
 });
@@ -213,7 +258,7 @@ export var USERPREF_MT_editor_menus =  __class__ ('USERPREF_MT_editor_menus', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -226,8 +271,14 @@ export var USERPREF_MT_editor_menus =  __class__ ('USERPREF_MT_editor_menus', [M
 		else {
 		}
 		var layout = self.layout;
-		layout.menu ('USERPREF_MT_view');
-		layout.menu ('USERPREF_MT_save_load', __kwargtrans__ ({text: 'Preferences'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'USERPREF_MT_view');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'USERPREF_MT_save_load', __kwargtrans__ ({text: 'Preferences'}));
+		}) ();
 	});}
 });
 export var USERPREF_MT_view =  __class__ ('USERPREF_MT_view', [Menu], {
@@ -236,7 +287,7 @@ export var USERPREF_MT_view =  __class__ ('USERPREF_MT_view', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -250,9 +301,18 @@ export var USERPREF_MT_view =  __class__ ('USERPREF_MT_view', [Menu], {
 		}
 		var layout = self.layout;
 		var view = context.space_data;
-		layout.prop (view, 'show_region_ui');
-		layout.separator ();
-		layout.menu ('INFO_MT_area');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_region_ui');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_area');
+		}) ();
 	});}
 });
 export var USERPREF_MT_save_load =  __class__ ('USERPREF_MT_save_load', [Menu], {
@@ -261,7 +321,7 @@ export var USERPREF_MT_save_load =  __class__ ('USERPREF_MT_save_load', [Menu], 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -275,27 +335,61 @@ export var USERPREF_MT_save_load =  __class__ ('USERPREF_MT_save_load', [Menu], 
 		}
 		var layout = self.layout;
 		var prefs = context.preferences;
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = !(bpy.app.use_userpref_skip_save_on_exit);
-		row.prop (prefs, 'use_preferences_save', __kwargtrans__ ({text: 'Auto-Save Preferences'}));
-		layout.separator ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prefs, 'use_preferences_save', __kwargtrans__ ({text: 'Auto-Save Preferences'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.operator_context = 'EXEC_AREA';
 		if (prefs.use_preferences_save) {
-			layout.operator ('wm.save_userpref', __kwargtrans__ ({text: 'Save Preferences'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.save_userpref', __kwargtrans__ ({text: 'Save Preferences'}));
+			}) ();
 		}
 		layout.operator_context = 'INVOKE_AREA';
-		var sub_revert = layout.column (__kwargtrans__ ({align: true}));
+		var sub_revert = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub_revert.active = prefs.is_dirty || bpy.app.factory_startup;
-		sub_revert.operator ('wm.read_userpref', __kwargtrans__ ({text: 'Revert to Saved Preferences'}));
+		(function () {
+			var __accu0__ = sub_revert;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.read_userpref', __kwargtrans__ ({text: 'Revert to Saved Preferences'}));
+		}) ();
 		var app_template = prefs.app_template;
 		if (app_template) {
-			var display_name = bpy.path.display_name (iface_ (app_template));
-			layout.operator ('wm.read_factory_userpref', __kwargtrans__ ({text: 'Load Factory Blender Preferences'}));
-			var props = layout.operator ('wm.read_factory_userpref', __kwargtrans__ ({text: iface_ ('Load Factory {:s} Preferences').format (display_name), translate: false}));
+			var display_name = (function () {
+				var __accu0__ = bpy.path;
+				return __call__ (__accu0__.display_name, __accu0__, __call__ (iface_, null, app_template));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_factory_userpref', __kwargtrans__ ({text: 'Load Factory Blender Preferences'}));
+			}) ();
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_factory_userpref', __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Load Factory {:s} Preferences');
+					return __call__ (__accu1__.format, __accu1__, display_name);
+				}) (), translate: false}));
+			}) ();
 			props.use_factory_startup_app_template_only = true;
+			// pass;
 		}
 		else {
-			layout.operator ('wm.read_factory_userpref', __kwargtrans__ ({text: 'Load Factory Preferences'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.read_factory_userpref', __kwargtrans__ ({text: 'Load Factory Preferences'}));
+			}) ();
 		}
 	});}
 });
@@ -308,7 +402,7 @@ export var USERPREF_PT_save_preferences =  __class__ ('USERPREF_PT_save_preferen
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -320,8 +414,11 @@ export var USERPREF_PT_save_preferences =  __class__ ('USERPREF_PT_save_preferen
 		}
 		else {
 		}
-		for (var region of context.area.regions) {
-			if (region.py_metatype == 'HEADER' && region.height <= 1) {
+		var __iterable0__ = context.area.regions;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var region = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (region.py_metatype, 'HEADER') && __le__ (region.height, 1)) {
 				return true;
 			}
 		}
@@ -330,7 +427,7 @@ export var USERPREF_PT_save_preferences =  __class__ ('USERPREF_PT_save_preferen
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -342,10 +439,19 @@ export var USERPREF_PT_save_preferences =  __class__ ('USERPREF_PT_save_preferen
 		}
 		else {
 		}
-		var layout = self.layout.row ();
+		var layout = (function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		layout.operator_context = 'EXEC_AREA';
-		layout.menu ('USERPREF_MT_save_load', __kwargtrans__ ({text: '', icon: 'COLLAPSEMENU'}));
-		USERPREF_HT_header.draw_buttons (layout, context);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'USERPREF_MT_save_load', __kwargtrans__ ({text: '', icon: 'COLLAPSEMENU'}));
+		}) ();
+		(function () {
+			var __accu0__ = USERPREF_HT_header;
+			return __call__ (__accu0__.draw_buttons, __accu0__, layout, context);
+		}) ();
 	});}
 });
 export var CenterAlignMixIn =  __class__ ('CenterAlignMixIn', [object], {
@@ -353,7 +459,7 @@ export var CenterAlignMixIn =  __class__ ('CenterAlignMixIn', [object], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -368,18 +474,33 @@ export var CenterAlignMixIn =  __class__ ('CenterAlignMixIn', [object], {
 		var layout = self.layout;
 		var width = context.region.width;
 		var ui_scale = context.preferences.system.ui_scale;
-		var is_wide = width > 350 * ui_scale;
+		var is_wide = __gt__ (width, __mul__ (350, ui_scale));
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		if (is_wide) {
-			row.label ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__);
+			}) ();
 		}
-		var col = row.column ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.ui_units_x = 50;
-		self.draw_centered (context, col);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_centered, __accu0__, context, col);
+		}) ();
 		if (is_wide) {
-			row.label ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__);
+			}) ();
 		}
 	});}
 });
@@ -395,7 +516,7 @@ export var USERPREF_PT_interface_display =  __class__ ('USERPREF_PT_interface_di
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -410,21 +531,63 @@ export var USERPREF_PT_interface_display =  __class__ ('USERPREF_PT_interface_di
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var col = layout.column ();
-		col.prop (view, 'ui_scale', __kwargtrans__ ({text: 'Resolution Scale'}));
-		col.prop (view, 'ui_line_width', __kwargtrans__ ({text: 'Line Width'}));
-		col.prop (view, 'show_splash', __kwargtrans__ ({text: 'Splash Screen'}));
-		col.prop (view, 'show_developer_ui');
-		col.separator ();
-		var col = layout.column (__kwargtrans__ ({heading: 'Tooltips', align: true}));
-		col.prop (view, 'show_tooltips', __kwargtrans__ ({text: 'User Tooltips'}));
-		var sub = col.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'ui_scale', __kwargtrans__ ({text: 'Resolution Scale'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'ui_line_width', __kwargtrans__ ({text: 'Line Width'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_splash', __kwargtrans__ ({text: 'Splash Screen'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_developer_ui');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Tooltips', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_tooltips', __kwargtrans__ ({text: 'User Tooltips'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = view.show_tooltips;
-		sub.prop (view, 'show_tooltips_python');
-		col.separator ();
-		var col = layout.column (__kwargtrans__ ({heading: 'Search', align: true}));
-		col.prop (prefs, 'use_recent_searches', __kwargtrans__ ({text: 'Sort by Most Recent'}));
-		col.prop (prefs, 'show_hidden_ids', __kwargtrans__ ({text: 'Show Hidden'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_tooltips_python');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Search', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, prefs, 'use_recent_searches', __kwargtrans__ ({text: 'Sort by Most Recent'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, prefs, 'show_hidden_ids', __kwargtrans__ ({text: 'Show Hidden'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_text =  __class__ ('USERPREF_PT_interface_text', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -434,7 +597,7 @@ export var USERPREF_PT_interface_text =  __class__ ('USERPREF_PT_interface_text'
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -449,14 +612,35 @@ export var USERPREF_PT_interface_text =  __class__ ('USERPREF_PT_interface_text'
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (view, 'use_text_antialiasing', __kwargtrans__ ({text: 'Anti-Aliasing'}));
-		var sub = flow.column ();
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_text_antialiasing', __kwargtrans__ ({text: 'Anti-Aliasing'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = view.use_text_antialiasing;
-		sub.prop (view, 'use_text_render_subpixelaa', __kwargtrans__ ({text: 'Subpixel Anti-Aliasing'}));
-		sub.prop (view, 'text_hinting', __kwargtrans__ ({text: 'Hinting'}));
-		flow.prop (view, 'font_path_ui');
-		flow.prop (view, 'font_path_ui_mono');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_text_render_subpixelaa', __kwargtrans__ ({text: 'Subpixel Anti-Aliasing'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, view, 'text_hinting', __kwargtrans__ ({text: 'Hinting'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'font_path_ui');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'font_path_ui_mono');
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_translation =  __class__ ('USERPREF_PT_interface_translation', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -466,7 +650,7 @@ export var USERPREF_PT_interface_translation =  __class__ ('USERPREF_PT_interfac
 	get poll () {return __getcm__ (this, function (cls, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -483,7 +667,7 @@ export var USERPREF_PT_interface_translation =  __class__ ('USERPREF_PT_interfac
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -498,15 +682,39 @@ export var USERPREF_PT_interface_translation =  __class__ ('USERPREF_PT_interfac
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		layout.prop (view, 'language');
-		var col = layout.column (__kwargtrans__ ({heading: 'Translate', heading_ctxt: i18n_contexts.editor_preferences}));
-		col.active = bpy.app.translations.locale != 'en_US';
-		col.prop (view, 'use_translate_tooltips', __kwargtrans__ ({text: 'Tooltips'}));
-		col.prop (view, 'use_translate_interface', __kwargtrans__ ({text: 'Interface'}));
-		col.prop (view, 'use_translate_reports', __kwargtrans__ ({text: 'Reports'}));
-		col.prop (view, 'use_translate_new_dataname', __kwargtrans__ ({text: 'New Data'}));
-		layout.prop (view, 'date_format');
-		layout.prop (view, 'time_format', __kwargtrans__ ({text: 'Time', text_ctxt: i18n_contexts.editor_preferences}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'language');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Translate', heading_ctxt: i18n_contexts.editor_preferences}));
+		}) ();
+		col.active = __ne__ (bpy.app.translations.locale, 'en_US');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_translate_tooltips', __kwargtrans__ ({text: 'Tooltips'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_translate_interface', __kwargtrans__ ({text: 'Interface'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_translate_reports', __kwargtrans__ ({text: 'Reports'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_translate_new_dataname', __kwargtrans__ ({text: 'New Data'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'date_format');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'time_format', __kwargtrans__ ({text: 'Time', text_ctxt: i18n_contexts.editor_preferences}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_accessibility =  __class__ ('USERPREF_PT_interface_accessibility', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -516,7 +724,7 @@ export var USERPREF_PT_interface_accessibility =  __class__ ('USERPREF_PT_interf
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -531,8 +739,14 @@ export var USERPREF_PT_interface_accessibility =  __class__ ('USERPREF_PT_interf
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (view, 'use_reduce_motion');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_reduce_motion');
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_editors =  __class__ ('USERPREF_PT_interface_editors', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -541,7 +755,7 @@ export var USERPREF_PT_interface_editors =  __class__ ('USERPREF_PT_interface_ed
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -557,17 +771,53 @@ export var USERPREF_PT_interface_editors =  __class__ ('USERPREF_PT_interface_ed
 		var prefs = context.preferences;
 		var view = prefs.view;
 		var system = prefs.system;
-		var col = layout.column ();
-		col.prop (system, 'use_region_overlap');
-		var col = layout.column (__kwargtrans__ ({heading: 'Show', align: true}));
-		col.prop (view, 'show_area_handle');
-		col.prop (view, 'show_number_arrows', __kwargtrans__ ({text: 'Numeric Input Arrows'}));
-		col.prop (view, 'show_navigate_ui');
-		var col = layout.column ();
-		col.prop (view, 'border_width');
-		col.prop (view, 'color_picker_type');
-		col.row ().prop (view, 'header_align');
-		col.prop (view, 'factor_display_type');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'use_region_overlap');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_area_handle');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_number_arrows', __kwargtrans__ ({text: 'Numeric Input Arrows'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_navigate_ui');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'border_width');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'color_picker_type');
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = col;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, view, 'header_align');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'factor_display_type');
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_temporary_windows =  __class__ ('USERPREF_PT_interface_temporary_windows', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -578,7 +828,7 @@ export var USERPREF_PT_interface_temporary_windows =  __class__ ('USERPREF_PT_in
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -593,10 +843,22 @@ export var USERPREF_PT_interface_temporary_windows =  __class__ ('USERPREF_PT_in
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var col = layout.column ();
-		col.prop (view, 'render_display_type', __kwargtrans__ ({text: 'Render In'}));
-		col.prop (view, 'filebrowser_display_type', __kwargtrans__ ({text: 'File Browser'}));
-		col.prop (view, 'preferences_display_type', __kwargtrans__ ({text: 'Preferences'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'render_display_type', __kwargtrans__ ({text: 'Render In'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'filebrowser_display_type', __kwargtrans__ ({text: 'File Browser'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'preferences_display_type', __kwargtrans__ ({text: 'Preferences'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_statusbar =  __class__ ('USERPREF_PT_interface_statusbar', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -607,7 +869,7 @@ export var USERPREF_PT_interface_statusbar =  __class__ ('USERPREF_PT_interface_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -622,13 +884,34 @@ export var USERPREF_PT_interface_statusbar =  __class__ ('USERPREF_PT_interface_
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var col = layout.column (__kwargtrans__ ({heading: 'Show'}));
-		col.prop (view, 'show_statusbar_stats', __kwargtrans__ ({text: 'Scene Statistics'}));
-		col.prop (view, 'show_statusbar_scene_duration', __kwargtrans__ ({text: 'Scene Duration'}));
-		col.prop (view, 'show_statusbar_memory', __kwargtrans__ ({text: 'System Memory'}));
-		col.prop (view, 'show_statusbar_vram', __kwargtrans__ ({text: 'Video Memory'}));
-		col.prop (view, 'show_extensions_updates', __kwargtrans__ ({text: 'Extensions Updates'}));
-		col.prop (view, 'show_statusbar_version', __kwargtrans__ ({text: 'Blender Version'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_statusbar_stats', __kwargtrans__ ({text: 'Scene Statistics'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_statusbar_scene_duration', __kwargtrans__ ({text: 'Scene Duration'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_statusbar_memory', __kwargtrans__ ({text: 'System Memory'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_statusbar_vram', __kwargtrans__ ({text: 'Video Memory'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_extensions_updates', __kwargtrans__ ({text: 'Extensions Updates'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_statusbar_version', __kwargtrans__ ({text: 'Blender Version'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_menus =  __class__ ('USERPREF_PT_interface_menus', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -638,7 +921,7 @@ export var USERPREF_PT_interface_menus =  __class__ ('USERPREF_PT_interface_menu
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -653,8 +936,14 @@ export var USERPREF_PT_interface_menus =  __class__ ('USERPREF_PT_interface_menu
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var col = layout.column ();
-		col.prop (view, 'menu_close_leave');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'menu_close_leave');
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_menus_mouse_over =  __class__ ('USERPREF_PT_interface_menus_mouse_over', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -664,7 +953,7 @@ export var USERPREF_PT_interface_menus_mouse_over =  __class__ ('USERPREF_PT_int
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -678,12 +967,15 @@ export var USERPREF_PT_interface_menus_mouse_over =  __class__ ('USERPREF_PT_int
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		self.layout.prop (view, 'use_mouse_over_open', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_mouse_over_open', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -699,9 +991,18 @@ export var USERPREF_PT_interface_menus_mouse_over =  __class__ ('USERPREF_PT_int
 		var prefs = context.preferences;
 		var view = prefs.view;
 		layout.active = view.use_mouse_over_open;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (view, 'open_toplevel_delay', __kwargtrans__ ({text: 'Top Level'}));
-		flow.prop (view, 'open_sublevel_delay', __kwargtrans__ ({text: 'Sub Level'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'open_toplevel_delay', __kwargtrans__ ({text: 'Top Level'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'open_sublevel_delay', __kwargtrans__ ({text: 'Sub Level'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_interface_menus_pie =  __class__ ('USERPREF_PT_interface_menus_pie', [InterfacePanel, CenterAlignMixIn, Panel], {
@@ -711,7 +1012,7 @@ export var USERPREF_PT_interface_menus_pie =  __class__ ('USERPREF_PT_interface_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -726,13 +1027,34 @@ export var USERPREF_PT_interface_menus_pie =  __class__ ('USERPREF_PT_interface_
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (view, 'pie_animation_timeout');
-		flow.prop (view, 'pie_tap_timeout');
-		flow.prop (view, 'pie_initial_timeout');
-		flow.prop (view, 'pie_menu_radius');
-		flow.prop (view, 'pie_menu_threshold');
-		flow.prop (view, 'pie_menu_confirm');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'pie_animation_timeout');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'pie_tap_timeout');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'pie_initial_timeout');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'pie_menu_radius');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'pie_menu_threshold');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'pie_menu_confirm');
+		}) ();
 	});}
 });
 export var EditingPanel =  __class__ ('EditingPanel', [object], {
@@ -747,7 +1069,7 @@ export var USERPREF_PT_edit_objects =  __class__ ('USERPREF_PT_edit_objects', [E
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -769,7 +1091,7 @@ export var USERPREF_PT_edit_objects_new =  __class__ ('USERPREF_PT_edit_objects_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -784,11 +1106,26 @@ export var USERPREF_PT_edit_objects_new =  __class__ ('USERPREF_PT_edit_objects_
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (edit, 'material_link', __kwargtrans__ ({text: 'Link Materials To'}));
-		flow.prop (edit, 'object_align', __kwargtrans__ ({text: 'Align To'}));
-		flow.prop (edit, 'use_enter_edit_mode', __kwargtrans__ ({text: 'Enter Edit Mode'}));
-		flow.prop (edit, 'collection_instance_empty_size', __kwargtrans__ ({text: 'Instance Empty Size'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'material_link', __kwargtrans__ ({text: 'Link Materials To'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'object_align', __kwargtrans__ ({text: 'Align To'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_enter_edit_mode', __kwargtrans__ ({text: 'Enter Edit Mode'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'collection_instance_empty_size', __kwargtrans__ ({text: 'Instance Empty Size'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_objects_duplicate_data =  __class__ ('USERPREF_PT_edit_objects_duplicate_data', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -799,7 +1136,7 @@ export var USERPREF_PT_edit_objects_duplicate_data =  __class__ ('USERPREF_PT_ed
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -815,19 +1152,50 @@ export var USERPREF_PT_edit_objects_duplicate_data =  __class__ ('USERPREF_PT_ed
 		var prefs = context.preferences;
 		var edit = prefs.edit;
 		layout.use_property_split = false;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var datablock_types = tuple ([tuple (['use_duplicate_action', 'Action', 'ACTION', '']), tuple (['use_duplicate_armature', 'Armature', 'OUTLINER_DATA_ARMATURE', '']), tuple (['use_duplicate_camera', 'Camera', 'OUTLINER_DATA_CAMERA', '']), tuple (['use_duplicate_curve', 'Curve', 'OUTLINER_DATA_CURVE', '']), tuple (['use_duplicate_curves', 'Curves', 'OUTLINER_DATA_CURVES', '']), tuple (['use_duplicate_grease_pencil', 'Grease Pencil', 'OUTLINER_OB_GREASEPENCIL', '']), tuple (['use_duplicate_lattice', 'Lattice', 'OUTLINER_DATA_LATTICE', '']), tuple ([null, null, null, null]), tuple (['use_duplicate_light', 'Light', 'OUTLINER_DATA_LIGHT', '']), tuple (['use_duplicate_lightprobe', 'Light Probe', 'OUTLINER_DATA_LIGHTPROBE', '']), tuple (['use_duplicate_material', 'Material', 'MATERIAL_DATA', '']), tuple (['use_duplicate_mesh', 'Mesh', 'OUTLINER_DATA_MESH', '']), tuple (['use_duplicate_metaball', 'Metaball', 'OUTLINER_DATA_META', '']), tuple (['use_duplicate_node_tree', 'Node Tree', 'NODETREE', '']), tuple (['use_duplicate_particle', 'Particle', 'PARTICLES', '']), tuple ([null, null, null, null]), tuple (['use_duplicate_pointcloud', 'Point Cloud', 'OUTLINER_DATA_POINTCLOUD', '']), tuple (['use_duplicate_speaker', 'Speaker', 'OUTLINER_DATA_SPEAKER', '']), tuple (['use_duplicate_surface', 'Surface', 'OUTLINER_DATA_SURFACE', '']), tuple (['use_duplicate_text', 'Text', 'OUTLINER_DATA_FONT', '']), tuple (['use_duplicate_volume', 'Volume', 'OUTLINER_DATA_VOLUME', 'i18n_contexts.id_id'])]);
-		var col = flow.column ();
-		for (var [prop, type_name, type_icon, type_ctx] of datablock_types) {
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var __iterable0__ = datablock_types;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop = __left0__ [0];
+			var type_name = __left0__ [1];
+			var type_icon = __left0__ [2];
+			var type_ctx = __left0__ [3];
 			if (prop === null) {
-				var col = flow.column ();
+				var col = (function () {
+					var __accu0__ = flow;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				continue;
 			}
-			var row = col.row ();
-			var row_checkbox = row.row ();
-			row_checkbox.prop (edit, prop, __kwargtrans__ ({text: '', text_ctxt: type_ctx}));
-			var row_label = row.row ();
-			row_label.label (__kwargtrans__ ({text: type_name, icon: type_icon}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			var row_checkbox = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row_checkbox;
+				return __call__ (__accu0__.prop, __accu0__, edit, prop, __kwargtrans__ ({text: '', text_ctxt: type_ctx}));
+			}) ();
+			var row_label = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row_label;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: type_name, icon: type_icon}));
+			}) ();
 		}
 	});}
 });
@@ -837,7 +1205,7 @@ export var USERPREF_PT_edit_cursor =  __class__ ('USERPREF_PT_edit_cursor', [Edi
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -852,9 +1220,18 @@ export var USERPREF_PT_edit_cursor =  __class__ ('USERPREF_PT_edit_cursor', [Edi
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var col = layout.column (__kwargtrans__ ({heading: 'Cursor'}));
-		col.prop (edit, 'use_mouse_depth_cursor', __kwargtrans__ ({text: 'Surface Project'}));
-		col.prop (edit, 'use_cursor_lock_adjust', __kwargtrans__ ({text: 'Lock Adjust'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Cursor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_mouse_depth_cursor', __kwargtrans__ ({text: 'Surface Project'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_cursor_lock_adjust', __kwargtrans__ ({text: 'Lock Adjust'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_gpencil =  __class__ ('USERPREF_PT_edit_gpencil', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -864,7 +1241,7 @@ export var USERPREF_PT_edit_gpencil =  __class__ ('USERPREF_PT_edit_gpencil', [E
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -879,9 +1256,18 @@ export var USERPREF_PT_edit_gpencil =  __class__ ('USERPREF_PT_edit_gpencil', [E
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var col = layout.column (__kwargtrans__ ({heading: 'Distance'}));
-		col.prop (edit, 'grease_pencil_manhattan_distance', __kwargtrans__ ({text: 'Manhattan'}));
-		col.prop (edit, 'grease_pencil_euclidean_distance', __kwargtrans__ ({text: 'Euclidean'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Distance'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'grease_pencil_manhattan_distance', __kwargtrans__ ({text: 'Manhattan'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'grease_pencil_euclidean_distance', __kwargtrans__ ({text: 'Euclidean'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_annotations =  __class__ ('USERPREF_PT_edit_annotations', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -890,7 +1276,7 @@ export var USERPREF_PT_edit_annotations =  __class__ ('USERPREF_PT_edit_annotati
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -905,9 +1291,18 @@ export var USERPREF_PT_edit_annotations =  __class__ ('USERPREF_PT_edit_annotati
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var col = layout.column ();
-		col.prop (edit, 'grease_pencil_default_color', __kwargtrans__ ({text: 'Default Color'}));
-		col.prop (edit, 'grease_pencil_eraser_radius', __kwargtrans__ ({text: 'Eraser Radius'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'grease_pencil_default_color', __kwargtrans__ ({text: 'Default Color'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'grease_pencil_eraser_radius', __kwargtrans__ ({text: 'Eraser Radius'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_weight_paint =  __class__ ('USERPREF_PT_edit_weight_paint', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -917,7 +1312,7 @@ export var USERPREF_PT_edit_weight_paint =  __class__ ('USERPREF_PT_edit_weight_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -933,10 +1328,19 @@ export var USERPREF_PT_edit_weight_paint =  __class__ ('USERPREF_PT_edit_weight_
 		var prefs = context.preferences;
 		var view = prefs.view;
 		layout.use_property_split = false;
-		layout.prop (view, 'use_weight_color_range', __kwargtrans__ ({text: 'Custom Gradient'}));
-		var col = layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_weight_color_range', __kwargtrans__ ({text: 'Custom Gradient'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = view.use_weight_color_range;
-		col.template_color_ramp (view, 'weight_color_range', __kwargtrans__ ({expand: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_color_ramp, __accu0__, view, 'weight_color_range', __kwargtrans__ ({expand: true}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_text_editor =  __class__ ('USERPREF_PT_edit_text_editor', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -946,7 +1350,7 @@ export var USERPREF_PT_edit_text_editor =  __class__ ('USERPREF_PT_edit_text_edi
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -961,7 +1365,10 @@ export var USERPREF_PT_edit_text_editor =  __class__ ('USERPREF_PT_edit_text_edi
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		layout.prop (edit, 'use_text_edit_auto_close');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_text_edit_auto_close');
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_node_editor =  __class__ ('USERPREF_PT_edit_node_editor', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -971,7 +1378,7 @@ export var USERPREF_PT_edit_node_editor =  __class__ ('USERPREF_PT_edit_node_edi
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -986,13 +1393,31 @@ export var USERPREF_PT_edit_node_editor =  __class__ ('USERPREF_PT_edit_node_edi
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var col = layout.column (__kwargtrans__ ({heading: 'Auto-Offset'}));
-		var row = col.row ();
-		row.prop (edit, 'node_use_insert_offset', __kwargtrans__ ({text: ''}));
-		var subrow = row.row ();
-		subrow.prop (edit, 'node_margin', __kwargtrans__ ({text: ''}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Auto-Offset'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'node_use_insert_offset', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subrow = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = subrow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'node_margin', __kwargtrans__ ({text: ''}));
+		}) ();
 		subrow.active = edit.node_use_insert_offset;
-		layout.prop (edit, 'node_preview_resolution', __kwargtrans__ ({text: 'Preview Resolution'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'node_preview_resolution', __kwargtrans__ ({text: 'Preview Resolution'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_sequence_editor =  __class__ ('USERPREF_PT_edit_sequence_editor', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -1002,7 +1427,7 @@ export var USERPREF_PT_edit_sequence_editor =  __class__ ('USERPREF_PT_edit_sequ
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1017,7 +1442,10 @@ export var USERPREF_PT_edit_sequence_editor =  __class__ ('USERPREF_PT_edit_sequ
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		layout.prop (edit, 'connect_strips_by_default');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'connect_strips_by_default');
+		}) ();
 	});}
 });
 export var USERPREF_PT_edit_misc =  __class__ ('USERPREF_PT_edit_misc', [EditingPanel, CenterAlignMixIn, Panel], {
@@ -1027,7 +1455,7 @@ export var USERPREF_PT_edit_misc =  __class__ ('USERPREF_PT_edit_misc', [Editing
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1042,8 +1470,14 @@ export var USERPREF_PT_edit_misc =  __class__ ('USERPREF_PT_edit_misc', [Editing
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var col = layout.column ();
-		col.prop (edit, 'sculpt_paint_overlay_color', __kwargtrans__ ({text: 'Sculpt Overlay Color'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'sculpt_paint_overlay_color', __kwargtrans__ ({text: 'Sculpt Overlay Color'}));
+		}) ();
 	});}
 });
 export var AnimationPanel =  __class__ ('AnimationPanel', [object], {
@@ -1058,7 +1492,7 @@ export var USERPREF_PT_animation_timeline =  __class__ ('USERPREF_PT_animation_t
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1073,15 +1507,33 @@ export var USERPREF_PT_animation_timeline =  __class__ ('USERPREF_PT_animation_t
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var col = layout.column ();
-		col.prop (view, 'view2d_grid_spacing_min', __kwargtrans__ ({text: 'Minimum Grid Spacing'}));
-		col.prop (view, 'timecode_style');
-		col.prop (view, 'view_frame_type');
-		if (view.view_frame_type == 'SECONDS') {
-			col.prop (view, 'view_frame_seconds');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'view2d_grid_spacing_min', __kwargtrans__ ({text: 'Minimum Grid Spacing'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'timecode_style');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'view_frame_type');
+		}) ();
+		if (__eq__ (view.view_frame_type, 'SECONDS')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, view, 'view_frame_seconds');
+			}) ();
 		}
-		else if (view.view_frame_type == 'KEYFRAMES') {
-			col.prop (view, 'view_frame_keyframes');
+		else if (__eq__ (view.view_frame_type, 'KEYFRAMES')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, view, 'view_frame_keyframes');
+			}) ();
 		}
 	});}
 });
@@ -1091,7 +1543,7 @@ export var USERPREF_PT_animation_keyframes =  __class__ ('USERPREF_PT_animation_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1106,16 +1558,46 @@ export var USERPREF_PT_animation_keyframes =  __class__ ('USERPREF_PT_animation_
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		layout.prop (edit, 'key_insert_channels', __kwargtrans__ ({expand: true}));
-		var row = layout.row (__kwargtrans__ ({align: true, heading: 'Only Insert Needed'}));
-		row.prop (edit, 'use_keyframe_insert_needed', __kwargtrans__ ({text: 'Manual', toggle: 1}));
-		row.prop (edit, 'use_auto_keyframe_insert_needed', __kwargtrans__ ({text: 'Auto', toggle: 1}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Keyframing'}));
-		col.prop (edit, 'use_visual_keying');
-		var col = layout.column (__kwargtrans__ ({heading: 'Auto-Keyframing'}));
-		col.prop (edit, 'use_auto_keying', __kwargtrans__ ({text: 'Enable in New Scenes'}));
-		col.prop (edit, 'use_auto_keying_warning', __kwargtrans__ ({text: 'Show Warning'}));
-		col.prop (edit, 'use_keyframe_insert_available', __kwargtrans__ ({text: 'Only Insert Available'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'key_insert_channels', __kwargtrans__ ({expand: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Only Insert Needed'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_keyframe_insert_needed', __kwargtrans__ ({text: 'Manual', toggle: 1}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_auto_keyframe_insert_needed', __kwargtrans__ ({text: 'Auto', toggle: 1}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Keyframing'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_visual_keying');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Auto-Keyframing'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_auto_keying', __kwargtrans__ ({text: 'Enable in New Scenes'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_auto_keying_warning', __kwargtrans__ ({text: 'Show Warning'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_keyframe_insert_available', __kwargtrans__ ({text: 'Only Insert Available'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_animation_fcurves =  __class__ ('USERPREF_PT_animation_fcurves', [AnimationPanel, CenterAlignMixIn, Panel], {
@@ -1124,7 +1606,7 @@ export var USERPREF_PT_animation_fcurves =  __class__ ('USERPREF_PT_animation_fc
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1139,15 +1621,42 @@ export var USERPREF_PT_animation_fcurves =  __class__ ('USERPREF_PT_animation_fc
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (edit, 'fcurve_unselected_alpha', __kwargtrans__ ({text: 'Unselected Opacity'}));
-		flow.prop (edit, 'fcurve_new_auto_smoothing', __kwargtrans__ ({text: 'Default Smoothing Mode'}));
-		flow.prop (edit, 'keyframe_new_interpolation_type', __kwargtrans__ ({text: 'Default Interpolation'}));
-		flow.prop (edit, 'keyframe_new_handle_type', __kwargtrans__ ({text: 'Default Handles'}));
-		flow.prop (edit, 'use_insertkey_xyz_to_rgb', __kwargtrans__ ({text: 'XYZ to RGB'}));
-		flow.prop (edit, 'use_anim_channel_group_colors');
-		flow.prop (edit, 'show_only_selected_curve_keyframes');
-		flow.prop (edit, 'use_fcurve_high_quality_drawing');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'fcurve_unselected_alpha', __kwargtrans__ ({text: 'Unselected Opacity'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'fcurve_new_auto_smoothing', __kwargtrans__ ({text: 'Default Smoothing Mode'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'keyframe_new_interpolation_type', __kwargtrans__ ({text: 'Default Interpolation'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'keyframe_new_handle_type', __kwargtrans__ ({text: 'Default Handles'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_insertkey_xyz_to_rgb', __kwargtrans__ ({text: 'XYZ to RGB'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_anim_channel_group_colors');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'show_only_selected_curve_keyframes');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_fcurve_high_quality_drawing');
+		}) ();
 	});}
 });
 export var USERPREF_PT_animation_timeline_advanced =  __class__ ('USERPREF_PT_animation_timeline_advanced', [AnimationPanel, CenterAlignMixIn, Panel], {
@@ -1158,7 +1667,7 @@ export var USERPREF_PT_animation_timeline_advanced =  __class__ ('USERPREF_PT_an
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1173,11 +1682,20 @@ export var USERPREF_PT_animation_timeline_advanced =  __class__ ('USERPREF_PT_an
 		}
 		var prefs = context.preferences;
 		var edit = prefs.edit;
-		layout.prop (edit, 'use_negative_frames');
-		var row = layout.row (__kwargtrans__ ({align: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_negative_frames');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: false}));
+		}) ();
 		row.active = edit.use_negative_frames;
 		row.alignment = 'RIGHT';
-		row.label (__kwargtrans__ ({icon: 'ERROR', text: 'Negative frames can cause issues with audio playback and exporters.'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'ERROR', text: 'Negative frames can cause issues with audio playback and exporters.'}));
+		}) ();
 	});}
 });
 export var SystemPanel =  __class__ ('SystemPanel', [object], {
@@ -1193,7 +1711,7 @@ export var USERPREF_PT_system_sound =  __class__ ('USERPREF_PT_system_sound', [S
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1208,13 +1726,31 @@ export var USERPREF_PT_system_sound =  __class__ ('USERPREF_PT_system_sound', [S
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		layout.prop (system, 'audio_device', __kwargtrans__ ({expand: false}));
-		var sub = layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, system, 'audio_device', __kwargtrans__ ({expand: false}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = !__in__ (system.audio_device, new set (['SOUND_NONE', 'NONE', 'None', '']));
-		sub.prop (system, 'audio_channels', __kwargtrans__ ({text: 'Channels'}));
-		sub.prop (system, 'audio_mixing_buffer', __kwargtrans__ ({text: 'Mixing Buffer'}));
-		sub.prop (system, 'audio_sample_rate', __kwargtrans__ ({text: 'Sample Rate'}));
-		sub.prop (system, 'audio_sample_format', __kwargtrans__ ({text: 'Sample Format'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, system, 'audio_channels', __kwargtrans__ ({text: 'Channels'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, system, 'audio_mixing_buffer', __kwargtrans__ ({text: 'Mixing Buffer'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, system, 'audio_sample_rate', __kwargtrans__ ({text: 'Sample Rate'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, system, 'audio_sample_format', __kwargtrans__ ({text: 'Sample Format'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_system_cycles_devices =  __class__ ('USERPREF_PT_system_cycles_devices', [SystemPanel, CenterAlignMixIn, Panel], {
@@ -1223,7 +1759,7 @@ export var USERPREF_PT_system_cycles_devices =  __class__ ('USERPREF_PT_system_c
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1237,19 +1773,35 @@ export var USERPREF_PT_system_cycles_devices =  __class__ ('USERPREF_PT_system_c
 		else {
 		}
 		var prefs = context.preferences;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.use_property_split = false;
 		if (bpy.app.build_options.cycles) {
-			var addon = prefs.addons.py_get ('cycles');
+			var addon = (function () {
+				var __accu0__ = prefs.addons;
+				return __call__ (__accu0__.py_get, __accu0__, 'cycles');
+			}) ();
 			if (addon === null) {
-				layout.label (__kwargtrans__ ({text: 'Enable Cycles Render Engine add-on to use Cycles', icon: 'INFO'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Enable Cycles Render Engine add-on to use Cycles', icon: 'INFO'}));
+				}) ();
 			}
 			else {
-				addon.preferences.draw_impl (col, context);
+				(function () {
+					var __accu0__ = addon.preferences;
+					return __call__ (__accu0__.draw_impl, __accu0__, col, context);
+				}) ();
 			}
+			// pass;
 		}
 		else {
-			layout.label (__kwargtrans__ ({text: 'Cycles is disabled in this build', icon: 'INFO'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Cycles is disabled in this build', icon: 'INFO'}));
+			}) ();
 		}
 	});}
 });
@@ -1259,7 +1811,7 @@ export var USERPREF_PT_system_display_graphics =  __class__ ('USERPREF_PT_system
 	get poll () {return __getcm__ (this, function (cls, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1271,13 +1823,16 @@ export var USERPREF_PT_system_display_graphics =  __class__ ('USERPREF_PT_system
 		}
 		else {
 		}
-		var platform = _module ('platform');
-		return platform.system () != 'Darwin';
+		var platform = __call__ (_module, null, 'platform');
+		return __ne__ ((function () {
+			var __accu0__ = platform;
+			return __call__ (__accu0__.system, __accu0__);
+		}) (), 'Darwin');
 	});},
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1292,23 +1847,56 @@ export var USERPREF_PT_system_display_graphics =  __class__ ('USERPREF_PT_system
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		var gpu = _module ('gpu');
-		var sys = _module ('sys');
-		var col = layout.column ();
-		col.prop (system, 'gpu_backend', __kwargtrans__ ({text: 'Backend'}));
-		if (system.gpu_backend == 'VULKAN') {
-			var col = layout.column ();
-			col.enabled = gpu.platform.backend_type_get () == 'VULKAN';
-			col.prop (system, 'gpu_preferred_device');
+		var gpu = __call__ (_module, null, 'gpu');
+		var sys = __call__ (_module, null, 'sys');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'gpu_backend', __kwargtrans__ ({text: 'Backend'}));
+		}) ();
+		if (__eq__ (system.gpu_backend, 'VULKAN')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			col.enabled = __eq__ ((function () {
+				var __accu0__ = gpu.platform;
+				return __call__ (__accu0__.backend_type_get, __accu0__);
+			}) (), 'VULKAN');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, system, 'gpu_preferred_device');
+			}) ();
 		}
-		if (system.gpu_backend != gpu.platform.backend_type_get ()) {
-			layout.label (__kwargtrans__ ({text: 'A restart of Blender is required', icon: 'INFO'}));
+		if (__ne__ (system.gpu_backend, (function () {
+			var __accu0__ = gpu.platform;
+			return __call__ (__accu0__.backend_type_get, __accu0__);
+		}) ())) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'A restart of Blender is required', icon: 'INFO'}));
+			}) ();
 		}
-		if (system.gpu_backend == 'VULKAN') {
-			if (sys.platform == 'win32' && gpu.platform.device_type_get () == 'QUALCOMM') {
-				var col = layout.column ();
-				col.label (__kwargtrans__ ({text: 'Current Vulkan backend limitations:', icon: 'INFO'}));
-				col.label (__kwargtrans__ ({text: '• Windows on ARM requires driver 31.0.112.0 or higher', icon: 'BLANK1'}));
+		if (__eq__ (system.gpu_backend, 'VULKAN')) {
+			if (__eq__ (sys.platform, 'win32') && __eq__ ((function () {
+				var __accu0__ = gpu.platform;
+				return __call__ (__accu0__.device_type_get, __accu0__);
+			}) (), 'QUALCOMM')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Current Vulkan backend limitations:', icon: 'INFO'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '• Windows on ARM requires driver 31.0.112.0 or higher', icon: 'BLANK1'}));
+				}) ();
 			}
 		}
 	});}
@@ -1319,7 +1907,7 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 	get poll () {return __getcm__ (this, function (cls, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1331,8 +1919,8 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 		}
 		else {
 		}
-		var platform = _member ('sys', 'platform');
-		if (platform == 'darwin') {
+		var platform = __call__ (_member, null, 'sys', 'platform');
+		if (__eq__ (platform, 'darwin')) {
 			return false;
 		}
 		return true;
@@ -1340,7 +1928,7 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 	get _draw_associate_supported_or_label () {return function (context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1352,24 +1940,45 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 		}
 		else {
 		}
-		var platform = _member ('sys', 'platform');
-		if (platform.__getslice__ (null, 3, 1) == 'win') {
+		var platform = __call__ (_member, null, 'sys', 'platform');
+		if (__eq__ (__getslice__ (platform, null, 3, 1), 'win')) {
 			if (context.preferences.system.is_microsoft_store_install) {
-				layout.label (__kwargtrans__ ({text: 'Microsoft Store installation'}));
-				layout.label (__kwargtrans__ ({text: "Use Windows 'Default Apps' to associate with blend files"}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Microsoft Store installation'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: "Use Windows 'Default Apps' to associate with blend files"}));
+				}) ();
 				return false;
 			}
 		}
 		else {
 			if (!(bpy.app.portable)) {
-				layout.label (__kwargtrans__ ({text: 'System Installation'}));
-				layout.label (__kwargtrans__ ({text: 'File association is handled by the package manager'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'System Installation'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'File association is handled by the package manager'}));
+				}) ();
 				return false;
 			}
-			var os = _module ('os');
-			if (os.environ.py_get ('SNAP')) {
-				layout.label (__kwargtrans__ ({text: 'Snap Package Installation'}));
-				layout.label (__kwargtrans__ ({text: 'File association is handled by the package manager'}));
+			var os = __call__ (_module, null, 'os');
+			if ((function () {
+				var __accu0__ = os.environ;
+				return __call__ (__accu0__.py_get, __accu0__, 'SNAP');
+			}) ()) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Snap Package Installation'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'File association is handled by the package manager'}));
+				}) ();
 				return false;
 			}
 		}
@@ -1378,7 +1987,7 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1391,13 +2000,31 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 		}
 		else {
 		}
-		if (self._draw_associate_supported_or_label (context, layout)) {
-			layout.label (__kwargtrans__ ({text: 'Open blend files with this Blender version'}));
-			var py_split = layout.py_split (__kwargtrans__ ({factor: 0.5}));
+		if ((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._draw_associate_supported_or_label, __accu0__, context, layout);
+		}) ()) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Open blend files with this Blender version'}));
+			}) ();
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5}));
+			}) ();
 			py_split.alignment = 'LEFT';
-			py_split.operator ('preferences.associate_blend', __kwargtrans__ ({text: 'Register'}));
-			py_split.operator ('preferences.unassociate_blend', __kwargtrans__ ({text: 'Unregister'}));
-			layout.prop (bpy.context.preferences.system, 'register_all_users', __kwargtrans__ ({text: 'For All Users'}));
+			(function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.associate_blend', __kwargtrans__ ({text: 'Register'}));
+			}) ();
+			(function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.unassociate_blend', __kwargtrans__ ({text: 'Unregister'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, bpy.context.preferences.system, 'register_all_users', __kwargtrans__ ({text: 'For All Users'}));
+			}) ();
 		}
 	});}
 });
@@ -1407,7 +2034,7 @@ export var USERPREF_PT_system_network =  __class__ ('USERPREF_PT_system_network'
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1422,22 +2049,49 @@ export var USERPREF_PT_system_network =  __class__ ('USERPREF_PT_system_network'
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		var row = layout.row ();
-		row.prop (system, 'use_online_access', __kwargtrans__ ({text: 'Allow Online Access'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, system, 'use_online_access', __kwargtrans__ ({text: 'Allow Online Access'}));
+		}) ();
 		var runtime_online_access = bpy.app.online_access;
-		if (system.use_online_access != runtime_online_access) {
-			var row = layout.py_split (__kwargtrans__ ({factor: 0.4}));
-			row.label (__kwargtrans__ ({text: ''}));
+		if (__ne__ (system.use_online_access, runtime_online_access)) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.4}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: ''}));
+			}) ();
 			if (runtime_online_access) {
-				var text = iface_ ('Enabled on startup, overriding the preference.');
+				var text = __call__ (iface_, null, 'Enabled on startup, overriding the preference.');
 			}
 			else {
-				var text = iface_ ('Disabled on startup, overriding the preference.');
+				var text = __call__ (iface_, null, 'Disabled on startup, overriding the preference.');
 			}
-			row.label (__kwargtrans__ ({text: text, translate: false}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: text, translate: false}));
+			}) ();
 		}
-		layout.row ().prop (system, 'network_timeout', __kwargtrans__ ({text: 'Time Out'}));
-		layout.row ().prop (system, 'network_connection_limit', __kwargtrans__ ({text: 'Connection Limit'}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, system, 'network_timeout', __kwargtrans__ ({text: 'Time Out'}));
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, system, 'network_connection_limit', __kwargtrans__ ({text: 'Connection Limit'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_system_memory =  __class__ ('USERPREF_PT_system_memory', [SystemPanel, CenterAlignMixIn, Panel], {
@@ -1446,7 +2100,7 @@ export var USERPREF_PT_system_memory =  __class__ ('USERPREF_PT_system_memory', 
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1459,36 +2113,105 @@ export var USERPREF_PT_system_memory =  __class__ ('USERPREF_PT_system_memory', 
 		}
 		else {
 		}
-		var sys = _module ('sys');
+		var sys = __call__ (_module, null, 'sys');
 		var prefs = context.preferences;
 		var system = prefs.system;
 		var edit = prefs.edit;
-		var col = layout.column ();
-		col.prop (edit, 'undo_steps', __kwargtrans__ ({text: 'Undo Steps'}));
-		col.prop (edit, 'undo_memory_limit', __kwargtrans__ ({text: 'Undo Memory Limit'}));
-		col.prop (edit, 'use_global_undo');
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (system, 'scrollback', __kwargtrans__ ({text: 'Console Scrollback Lines'}));
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (system, 'texture_time_out', __kwargtrans__ ({text: 'Texture Time Out'}));
-		col.prop (system, 'texture_collection_rate', __kwargtrans__ ({text: 'Garbage Collection Rate'}));
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (system, 'vbo_time_out', __kwargtrans__ ({text: 'VBO Time Out'}));
-		col.prop (system, 'vbo_collection_rate', __kwargtrans__ ({text: 'Garbage Collection Rate'}));
-		if (sys.platform != 'darwin') {
-			layout.separator ();
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.active = system.gpu_backend != 'VULKAN';
-			col.row ().prop (system, 'shader_compilation_method', __kwargtrans__ ({expand: true}));
-			var label = (system.shader_compilation_method == 'THREAD' ? iface_ ('Threads') : iface_ ('Subprocesses'));
-			col.prop (system, 'gpu_shader_workers', __kwargtrans__ ({text: label, translate: false}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'undo_steps', __kwargtrans__ ({text: 'Undo Steps'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'undo_memory_limit', __kwargtrans__ ({text: 'Undo Memory Limit'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, edit, 'use_global_undo');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'scrollback', __kwargtrans__ ({text: 'Console Scrollback Lines'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'texture_time_out', __kwargtrans__ ({text: 'Texture Time Out'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'texture_collection_rate', __kwargtrans__ ({text: 'Garbage Collection Rate'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'vbo_time_out', __kwargtrans__ ({text: 'VBO Time Out'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'vbo_collection_rate', __kwargtrans__ ({text: 'Garbage Collection Rate'}));
+		}) ();
+		if (__ne__ (sys.platform, 'darwin')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			col.active = __ne__ (system.gpu_backend, 'VULKAN');
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, system, 'shader_compilation_method', __kwargtrans__ ({expand: true}));
+			}) ();
+			var label = (__eq__ (system.shader_compilation_method, 'THREAD') ? __call__ (iface_, null, 'Threads') : __call__ (iface_, null, 'Subprocesses'));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, system, 'gpu_shader_workers', __kwargtrans__ ({text: label, translate: false}));
+			}) ();
 		}
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (system, 'geometry_nodes_stack_limit');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'geometry_nodes_stack_limit');
+		}) ();
 	});}
 });
 export var USERPREF_PT_system_video_sequencer =  __class__ ('USERPREF_PT_system_video_sequencer', [SystemPanel, CenterAlignMixIn, Panel], {
@@ -1497,7 +2220,7 @@ export var USERPREF_PT_system_video_sequencer =  __class__ ('USERPREF_PT_system_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1512,9 +2235,18 @@ export var USERPREF_PT_system_video_sequencer =  __class__ ('USERPREF_PT_system_
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		layout.prop (system, 'memory_cache_limit');
-		layout.separator ();
-		layout.prop (system, 'sequencer_proxy_setup');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, system, 'memory_cache_limit');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, system, 'sequencer_proxy_setup');
+		}) ();
 	});}
 });
 export var ViewportPanel =  __class__ ('ViewportPanel', [object], {
@@ -1529,7 +2261,7 @@ export var USERPREF_PT_viewport_display =  __class__ ('USERPREF_PT_viewport_disp
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1544,31 +2276,91 @@ export var USERPREF_PT_viewport_display =  __class__ ('USERPREF_PT_viewport_disp
 		}
 		var prefs = context.preferences;
 		var view = prefs.view;
-		var col = layout.column (__kwargtrans__ ({heading: 'Text Info Overlay'}));
-		col.prop (view, 'show_object_info', __kwargtrans__ ({text: 'Object Info'}));
-		col.prop (view, 'show_view_name', __kwargtrans__ ({text: 'View Name'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Playback Frame Rate (FPS)'}));
-		var row = col.row ();
-		row.prop (view, 'show_playback_fps', __kwargtrans__ ({text: ''}));
-		var subrow = row.row ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Text Info Overlay'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_object_info', __kwargtrans__ ({text: 'Object Info'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_view_name', __kwargtrans__ ({text: 'View Name'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Playback Frame Rate (FPS)'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, view, 'show_playback_fps', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subrow = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		subrow.active = view.show_playback_fps;
-		subrow.prop (view, 'playback_fps_samples', __kwargtrans__ ({text: 'Samples'}));
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (view, 'gizmo_size');
-		col.prop (view, 'lookdev_sphere_size');
-		col.separator ();
-		col.prop (view, 'mini_axis_type', __kwargtrans__ ({text: '3D Viewport Axes'}));
-		if (view.mini_axis_type == 'MINIMAL') {
-			col.prop (view, 'mini_axis_size', __kwargtrans__ ({text: 'Size'}));
-			col.prop (view, 'mini_axis_brightness', __kwargtrans__ ({text: 'Brightness'}));
+		(function () {
+			var __accu0__ = subrow;
+			return __call__ (__accu0__.prop, __accu0__, view, 'playback_fps_samples', __kwargtrans__ ({text: 'Samples'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'gizmo_size');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'lookdev_sphere_size');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'mini_axis_type', __kwargtrans__ ({text: '3D Viewport Axes'}));
+		}) ();
+		if (__eq__ (view.mini_axis_type, 'MINIMAL')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, view, 'mini_axis_size', __kwargtrans__ ({text: 'Size'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, view, 'mini_axis_brightness', __kwargtrans__ ({text: 'Brightness'}));
+			}) ();
 		}
-		if (view.mini_axis_type == 'GIZMO') {
-			col.prop (view, 'gizmo_size_navigate_v3d', __kwargtrans__ ({text: 'Size'}));
+		if (__eq__ (view.mini_axis_type, 'GIZMO')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, view, 'gizmo_size_navigate_v3d', __kwargtrans__ ({text: 'Size'}));
+			}) ();
 		}
-		layout.separator ();
-		var col = layout.column (__kwargtrans__ ({heading: 'Fresnel'}));
-		col.prop (view, 'use_fresnel_edit');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Fresnel'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_fresnel_edit');
+		}) ();
 	});}
 });
 export var USERPREF_PT_viewport_quality =  __class__ ('USERPREF_PT_viewport_quality', [ViewportPanel, CenterAlignMixIn, Panel], {
@@ -1577,7 +2369,7 @@ export var USERPREF_PT_viewport_quality =  __class__ ('USERPREF_PT_viewport_qual
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1592,11 +2384,26 @@ export var USERPREF_PT_viewport_quality =  __class__ ('USERPREF_PT_viewport_qual
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		var col = layout.column ();
-		col.prop (system, 'viewport_aa');
-		var col = layout.column (__kwargtrans__ ({heading: 'Smooth Wires'}));
-		col.prop (system, 'use_overlay_smooth_wire', __kwargtrans__ ({text: 'Overlay'}));
-		col.prop (system, 'use_edit_mode_smooth_wire', __kwargtrans__ ({text: 'Edit Mode'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'viewport_aa');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Smooth Wires'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'use_overlay_smooth_wire', __kwargtrans__ ({text: 'Overlay'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'use_edit_mode_smooth_wire', __kwargtrans__ ({text: 'Edit Mode'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_viewport_textures =  __class__ ('USERPREF_PT_viewport_textures', [ViewportPanel, CenterAlignMixIn, Panel], {
@@ -1605,7 +2412,7 @@ export var USERPREF_PT_viewport_textures =  __class__ ('USERPREF_PT_viewport_tex
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1620,10 +2427,22 @@ export var USERPREF_PT_viewport_textures =  __class__ ('USERPREF_PT_viewport_tex
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		var col = layout.column ();
-		col.prop (system, 'gl_texture_limit', __kwargtrans__ ({text: 'Limit Size'}));
-		col.prop (system, 'anisotropic_filter');
-		col.prop (system, 'gl_clip_alpha', __kwargtrans__ ({slider: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'gl_texture_limit', __kwargtrans__ ({text: 'Limit Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'anisotropic_filter');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, system, 'gl_clip_alpha', __kwargtrans__ ({slider: true}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_viewport_subdivision =  __class__ ('USERPREF_PT_viewport_subdivision', [ViewportPanel, CenterAlignMixIn, Panel], {
@@ -1633,7 +2452,7 @@ export var USERPREF_PT_viewport_subdivision =  __class__ ('USERPREF_PT_viewport_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1648,7 +2467,10 @@ export var USERPREF_PT_viewport_subdivision =  __class__ ('USERPREF_PT_viewport_
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		layout.prop (system, 'use_gpu_subdivision');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, system, 'use_gpu_subdivision');
+		}) ();
 	});}
 });
 export var ThemePanel =  __class__ ('ThemePanel', [object], {
@@ -1669,7 +2491,7 @@ export var USERPREF_MT_interface_theme_presets =  __class__ ('USERPREF_MT_interf
 	get reset_cb () {return function (_context, _filepath) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1681,12 +2503,15 @@ export var USERPREF_MT_interface_theme_presets =  __class__ ('USERPREF_MT_interf
 		}
 		else {
 		}
-		bpy.ops.preferences.reset_default_theme ();
+		(function () {
+			var __accu0__ = bpy.ops.preferences;
+			return __call__ (__accu0__.reset_default_theme, __accu0__);
+		}) ();
 	};},
 	get post_cb () {return function (context, filepath) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1698,7 +2523,7 @@ export var USERPREF_MT_interface_theme_presets =  __class__ ('USERPREF_MT_interf
 		}
 		else {
 		}
-		context.preferences.themes [0].filepath = filepath;
+		__getitem__ (context.preferences.themes, 0).filepath = filepath;
 	};}
 });
 export var USERPREF_PT_theme =  __class__ ('USERPREF_PT_theme', [ThemePanel, Panel], {
@@ -1708,7 +2533,7 @@ export var USERPREF_PT_theme =  __class__ ('USERPREF_PT_theme', [ThemePanel, Pan
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1720,24 +2545,58 @@ export var USERPREF_PT_theme =  __class__ ('USERPREF_PT_theme', [ThemePanel, Pan
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		var layout = self.layout;
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.6}));
-		var row = py_split.row (__kwargtrans__ ({align: true}));
-		var filepath = context.preferences.themes [0].filepath;
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.6}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var filepath = __getitem__ (context.preferences.themes, 0).filepath;
 		if (filepath) {
-			var preset_label = bpy.path.display_name (os.path.basename (filepath));
+			var preset_label = (function () {
+				var __accu0__ = bpy.path;
+				return __call__ (__accu0__.display_name, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.basename, __accu1__, filepath);
+				}) ());
+			}) ();
 		}
 		else {
 			var preset_label = 'Presets';
 		}
-		row.menu ('USERPREF_MT_interface_theme_presets', __kwargtrans__ ({text: preset_label}));
-		row.operator ('wm.interface_theme_preset_add', __kwargtrans__ ({text: '', icon: 'ADD'}));
-		row.operator ('wm.interface_theme_preset_remove', __kwargtrans__ ({text: '', icon: 'REMOVE'}));
-		row.operator ('wm.interface_theme_preset_save', __kwargtrans__ ({text: '', icon: 'FILE_TICK'}));
-		var row = py_split.row (__kwargtrans__ ({align: true}));
-		row.operator ('preferences.theme_install', __kwargtrans__ ({text: 'Install...', icon: 'IMPORT'}));
-		row.operator ('preferences.reset_default_theme', __kwargtrans__ ({text: 'Reset', icon: 'LOOP_BACK'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.menu, __accu0__, 'USERPREF_MT_interface_theme_presets', __kwargtrans__ ({text: preset_label}));
+		}) ();
+		// pass;
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.interface_theme_preset_add', __kwargtrans__ ({text: '', icon: 'ADD'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.interface_theme_preset_remove', __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.interface_theme_preset_save', __kwargtrans__ ({text: '', icon: 'FILE_TICK'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.theme_install', __kwargtrans__ ({text: 'Install...', icon: 'IMPORT'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.reset_default_theme', __kwargtrans__ ({text: 'Reset', icon: 'LOOP_BACK'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_user_interface =  __class__ ('USERPREF_PT_theme_user_interface', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -1747,7 +2606,7 @@ export var USERPREF_PT_theme_user_interface =  __class__ ('USERPREF_PT_theme_use
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1768,7 +2627,7 @@ export var PreferenceThemeWidgetColorPanel =  __class__ ('PreferenceThemeWidgetC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1780,24 +2639,63 @@ export var PreferenceThemeWidgetColorPanel =  __class__ ('PreferenceThemeWidgetC
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var widget_style = getattr (ui, self.wcol);
+		var widget_style = __call__ (getattr, null, ui, self.wcol);
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (widget_style, 'text');
-		col.prop (widget_style, 'text_sel', __kwargtrans__ ({text: 'Selected'}));
-		col.prop (widget_style, 'item', __kwargtrans__ ({slider: true}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (widget_style, 'inner', __kwargtrans__ ({slider: true}));
-		col.prop (widget_style, 'inner_sel', __kwargtrans__ ({text: 'Selected', slider: true}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (widget_style, 'outline');
-		col.prop (widget_style, 'outline_sel', __kwargtrans__ ({text: 'Selected', slider: true}));
-		col.separator ();
-		col.prop (widget_style, 'roundness');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'text');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'text_sel', __kwargtrans__ ({text: 'Selected'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'item', __kwargtrans__ ({slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'inner', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'inner_sel', __kwargtrans__ ({text: 'Selected', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'outline');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'outline_sel', __kwargtrans__ ({text: 'Selected', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'roundness');
+		}) ();
 	});}
 });
 export var PreferenceThemeWidgetShadePanel =  __class__ ('PreferenceThemeWidgetShadePanel', [object], {
@@ -1805,7 +2703,7 @@ export var PreferenceThemeWidgetShadePanel =  __class__ ('PreferenceThemeWidgetS
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1817,20 +2715,29 @@ export var PreferenceThemeWidgetShadePanel =  __class__ ('PreferenceThemeWidgetS
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var widget_style = getattr (ui, self.wcol);
+		var widget_style = __call__ (getattr, null, ui, self.wcol);
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.active = widget_style.show_shaded;
-		col.prop (widget_style, 'shadetop', __kwargtrans__ ({text: 'Shade Top'}));
-		col.prop (widget_style, 'shadedown', __kwargtrans__ ({text: 'Down'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'shadetop', __kwargtrans__ ({text: 'Shade Top'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'shadedown', __kwargtrans__ ({text: 'Down'}));
+		}) ();
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1842,10 +2749,13 @@ export var PreferenceThemeWidgetShadePanel =  __class__ ('PreferenceThemeWidgetS
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var widget_style = getattr (ui, self.wcol);
-		self.layout.prop (widget_style, 'show_shaded', __kwargtrans__ ({text: ''}));
+		var widget_style = __call__ (getattr, null, ui, self.wcol);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, widget_style, 'show_shaded', __kwargtrans__ ({text: ''}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_interface_panel =  __class__ ('USERPREF_PT_theme_interface_panel', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -1856,7 +2766,7 @@ export var USERPREF_PT_theme_interface_panel =  __class__ ('USERPREF_PT_theme_in
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1869,22 +2779,64 @@ export var USERPREF_PT_theme_interface_panel =  __class__ ('USERPREF_PT_theme_in
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 2, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
-		col.prop (ui, 'panel_header', __kwargtrans__ ({text: 'Header'}));
-		var col = col.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'panel_back', __kwargtrans__ ({text: 'Background'}));
-		col.prop (ui, 'panel_sub_back', __kwargtrans__ ({text: 'Sub-Panel'}));
-		var col = col.column ();
-		col.prop (ui, 'panel_active', __kwargtrans__ ({text: 'Active'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'panel_title', __kwargtrans__ ({text: 'Title'}));
-		col.prop (ui, 'panel_text', __kwargtrans__ ({text: 'Text'}));
-		var col = col.column ();
-		col.prop (ui, 'panel_outline', __kwargtrans__ ({text: 'Outline'}));
-		col.prop (ui, 'panel_roundness', __kwargtrans__ ({text: 'Roundness'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 2, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_header', __kwargtrans__ ({text: 'Header'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_back', __kwargtrans__ ({text: 'Background'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_sub_back', __kwargtrans__ ({text: 'Sub-Panel'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_active', __kwargtrans__ ({text: 'Active'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_title', __kwargtrans__ ({text: 'Title'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_text', __kwargtrans__ ({text: 'Text'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_outline', __kwargtrans__ ({text: 'Outline'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'panel_roundness', __kwargtrans__ ({text: 'Roundness'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_interface_state =  __class__ ('USERPREF_PT_theme_interface_state', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -1895,7 +2847,7 @@ export var USERPREF_PT_theme_interface_state =  __class__ ('USERPREF_PT_theme_in
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1908,31 +2860,100 @@ export var USERPREF_PT_theme_interface_state =  __class__ ('USERPREF_PT_theme_in
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui_state = theme.user_interface.wcol_state;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'error');
-		col.prop (ui_state, 'warning');
-		col.prop (ui_state, 'info');
-		col.prop (ui_state, 'success');
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'inner_anim');
-		col.prop (ui_state, 'inner_anim_sel', __kwargtrans__ ({text: 'Selected'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'inner_driven');
-		col.prop (ui_state, 'inner_driven_sel', __kwargtrans__ ({text: 'Selected'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'inner_key');
-		col.prop (ui_state, 'inner_key_sel', __kwargtrans__ ({text: 'Selected'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'inner_overridden');
-		col.prop (ui_state, 'inner_overridden_sel', __kwargtrans__ ({text: 'Selected'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'inner_changed');
-		col.prop (ui_state, 'inner_changed_sel', __kwargtrans__ ({text: 'Selected'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui_state, 'blend');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'error');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'warning');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'info');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'success');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_anim');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_anim_sel', __kwargtrans__ ({text: 'Selected'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_driven');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_driven_sel', __kwargtrans__ ({text: 'Selected'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_key');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_key_sel', __kwargtrans__ ({text: 'Selected'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_overridden');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_overridden_sel', __kwargtrans__ ({text: 'Selected'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_changed');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'inner_changed_sel', __kwargtrans__ ({text: 'Selected'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui_state, 'blend');
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_interface_styles =  __class__ ('USERPREF_PT_theme_interface_styles', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -1943,7 +2964,7 @@ export var USERPREF_PT_theme_interface_styles =  __class__ ('USERPREF_PT_theme_i
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1956,20 +2977,56 @@ export var USERPREF_PT_theme_interface_styles =  __class__ ('USERPREF_PT_theme_i
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'editor_border');
-		col.prop (ui, 'editor_outline');
-		col.prop (ui, 'editor_outline_active');
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'menu_shadow_fac', __kwargtrans__ ({text: 'Panel/Menu Shadow'}));
-		col.prop (ui, 'menu_shadow_width', __kwargtrans__ ({text: 'Shadow Width'}));
-		var col = flow.column ();
-		col.prop (ui, 'widget_emboss');
-		var col = flow.column ();
-		col.prop (ui, 'widget_text_cursor');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'editor_border');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'editor_outline');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'editor_outline_active');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'menu_shadow_fac', __kwargtrans__ ({text: 'Panel/Menu Shadow'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'menu_shadow_width', __kwargtrans__ ({text: 'Shadow Width'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'widget_emboss');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'widget_text_cursor');
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_interface_transparent_checker =  __class__ ('USERPREF_PT_theme_interface_transparent_checker', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -1980,7 +3037,7 @@ export var USERPREF_PT_theme_interface_transparent_checker =  __class__ ('USERPR
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1993,14 +3050,32 @@ export var USERPREF_PT_theme_interface_transparent_checker =  __class__ ('USERPR
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'transparent_checker_primary');
-		col.prop (ui, 'transparent_checker_secondary');
-		var col = flow.column ();
-		col.prop (ui, 'transparent_checker_size');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'transparent_checker_primary');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'transparent_checker_secondary');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'transparent_checker_size');
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_interface_gizmos =  __class__ ('USERPREF_PT_theme_interface_gizmos', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -2011,7 +3086,7 @@ export var USERPREF_PT_theme_interface_gizmos =  __class__ ('USERPREF_PT_theme_i
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2024,22 +3099,64 @@ export var USERPREF_PT_theme_interface_gizmos =  __class__ ('USERPREF_PT_theme_i
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'axis_x', __kwargtrans__ ({text: 'Axis X'}));
-		col.prop (ui, 'axis_y', __kwargtrans__ ({text: 'Y'}));
-		col.prop (ui, 'axis_z', __kwargtrans__ ({text: 'Z'}));
-		col.prop (ui, 'axis_w', __kwargtrans__ ({text: 'W'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'gizmo_primary');
-		col.prop (ui, 'gizmo_secondary', __kwargtrans__ ({text: 'Secondary'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (ui, 'gizmo_a');
-		col.prop (ui, 'gizmo_b', __kwargtrans__ ({text: 'B'}));
-		var col = flow.column ();
-		col.prop (ui, 'gizmo_view_align', __kwargtrans__ ({text: 'View Align'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'axis_x', __kwargtrans__ ({text: 'Axis X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'axis_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'axis_z', __kwargtrans__ ({text: 'Z'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'axis_w', __kwargtrans__ ({text: 'W'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'gizmo_primary');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'gizmo_secondary', __kwargtrans__ ({text: 'Secondary'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'gizmo_a');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'gizmo_b', __kwargtrans__ ({text: 'B'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'gizmo_view_align', __kwargtrans__ ({text: 'View Align'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_interface_icons =  __class__ ('USERPREF_PT_theme_interface_icons', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -2050,7 +3167,7 @@ export var USERPREF_PT_theme_interface_icons =  __class__ ('USERPREF_PT_theme_in
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2063,20 +3180,56 @@ export var USERPREF_PT_theme_interface_icons =  __class__ ('USERPREF_PT_theme_in
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		var ui = theme.user_interface;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		flow.prop (ui, 'icon_scene');
-		flow.prop (ui, 'icon_collection');
-		flow.prop (ui, 'icon_object');
-		flow.prop (ui, 'icon_object_data');
-		flow.prop (ui, 'icon_modifier');
-		flow.prop (ui, 'icon_shading');
-		flow.prop (ui, 'icon_folder');
-		flow.prop (ui, 'icon_autokey');
-		flow.prop (ui, 'icon_border_intensity');
-		flow.prop (ui, 'icon_alpha');
-		flow.prop (ui, 'icon_saturation', __kwargtrans__ ({text: 'Toolbar Saturation'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_scene');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_collection');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_object');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_object_data');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_modifier');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_shading');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_folder');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_autokey');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_border_intensity');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_alpha');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, ui, 'icon_saturation', __kwargtrans__ ({text: 'Toolbar Saturation'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_text_style =  __class__ ('USERPREF_PT_theme_text_style', [ThemePanel, CenterAlignMixIn, Panel], {
@@ -2087,7 +3240,7 @@ export var USERPREF_PT_theme_text_style =  __class__ ('USERPREF_PT_theme_text_st
 	get _ui_font_style () {return function (layout, font_style) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2100,22 +3253,55 @@ export var USERPREF_PT_theme_text_style =  __class__ ('USERPREF_PT_theme_text_st
 		else {
 		}
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
-		col.prop (font_style, 'points');
-		col.prop (font_style, 'character_weight', __kwargtrans__ ({text: 'Weight', text_ctxt: i18n_contexts.id_text}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (font_style, 'shadow_offset_x', __kwargtrans__ ({text: 'Shadow Offset X'}));
-		col.prop (font_style, 'shadow_offset_y', __kwargtrans__ ({text: 'Y'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (font_style, 'shadow');
-		col.prop (font_style, 'shadow_alpha', __kwargtrans__ ({text: 'Alpha'}));
-		col.prop (font_style, 'shadow_value', __kwargtrans__ ({text: 'Brightness'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'points');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'character_weight', __kwargtrans__ ({text: 'Weight', text_ctxt: i18n_contexts.id_text}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'shadow_offset_x', __kwargtrans__ ({text: 'Shadow Offset X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'shadow_offset_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'shadow');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'shadow_alpha', __kwargtrans__ ({text: 'Alpha'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, font_style, 'shadow_value', __kwargtrans__ ({text: 'Brightness'}));
+		}) ();
 	};},
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2128,15 +3314,39 @@ export var USERPREF_PT_theme_text_style =  __class__ ('USERPREF_PT_theme_text_st
 		}
 		else {
 		}
-		var style = context.preferences.ui_styles [0];
-		layout.label (__kwargtrans__ ({text: 'Panel Title'}));
-		self._ui_font_style (layout, style.panel_title);
-		layout.separator ();
-		layout.label (__kwargtrans__ ({text: 'Widget'}));
-		self._ui_font_style (layout, style.widget);
-		layout.separator ();
-		layout.label (__kwargtrans__ ({text: 'Tooltip'}));
-		self._ui_font_style (layout, style.tooltip);
+		var style = __getitem__ (context.preferences.ui_styles, 0);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Panel Title'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._ui_font_style, __accu0__, layout, style.panel_title);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Widget'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._ui_font_style, __accu0__, layout, style.widget);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Tooltip'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._ui_font_style, __accu0__, layout, style.tooltip);
+		}) ();
 	});}
 });
 export var USERPREF_PT_theme_color_sets =  __class__ ('USERPREF_PT_theme_color_sets', [ThemePanel, Panel], {
@@ -2146,7 +3356,7 @@ export var USERPREF_PT_theme_color_sets =  __class__ ('USERPREF_PT_theme_color_s
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2169,7 +3379,7 @@ export var USERPREF_PT_theme_bone_color_sets =  __class__ ('USERPREF_PT_theme_bo
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2182,15 +3392,41 @@ export var USERPREF_PT_theme_bone_color_sets =  __class__ ('USERPREF_PT_theme_bo
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		layout.use_property_split = true;
-		for (var [i, ui] of py_enumerate (theme.bone_color_sets, 1)) {
-			layout.label (__kwargtrans__ ({text: iface_ ('Color Set {:d}').format (i), translate: false}));
-			var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
-			flow.prop (ui, 'normal');
-			flow.prop (ui, 'select', __kwargtrans__ ({text: 'Selected'}));
-			flow.prop (ui, 'active');
-			flow.prop (ui, 'show_colored_constraints');
+		var __iterable0__ = __call__ (py_enumerate, null, theme.bone_color_sets, 1);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var ui = __left0__ [1];
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Color Set {:d}');
+					return __call__ (__accu1__.format, __accu1__, i);
+				}) (), translate: false}));
+			}) ();
+			var flow = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, ui, 'normal');
+			}) ();
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, ui, 'select', __kwargtrans__ ({text: 'Selected'}));
+			}) ();
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, ui, 'active');
+			}) ();
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, ui, 'show_colored_constraints');
+			}) ();
 		}
 	});}
 });
@@ -2202,7 +3438,7 @@ export var USERPREF_PT_theme_collection_colors =  __class__ ('USERPREF_PT_theme_
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2215,11 +3451,25 @@ export var USERPREF_PT_theme_collection_colors =  __class__ ('USERPREF_PT_theme_
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 2, even_columns: true, even_rows: false, align: false}));
-		for (var [i, ui] of py_enumerate (theme.collection_color, 1)) {
-			flow.prop (ui, 'color', __kwargtrans__ ({text: iface_ ('Color {:d}').format (i), translate: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 2, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var __iterable0__ = __call__ (py_enumerate, null, theme.collection_color, 1);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var ui = __left0__ [1];
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, ui, 'color', __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Color {:d}');
+					return __call__ (__accu1__.format, __accu1__, i);
+				}) (), translate: false}));
+			}) ();
 		}
 	});}
 });
@@ -2231,7 +3481,7 @@ export var USERPREF_PT_theme_strip_colors =  __class__ ('USERPREF_PT_theme_strip
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2244,11 +3494,25 @@ export var USERPREF_PT_theme_strip_colors =  __class__ ('USERPREF_PT_theme_strip
 		}
 		else {
 		}
-		var theme = context.preferences.themes [0];
+		var theme = __getitem__ (context.preferences.themes, 0);
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 2, even_columns: true, even_rows: false, align: false}));
-		for (var [i, ui] of py_enumerate (theme.strip_color, 1)) {
-			flow.prop (ui, 'color', __kwargtrans__ ({text: iface_ ('Color {:d}').format (i), translate: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 2, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var __iterable0__ = __call__ (py_enumerate, null, theme.strip_color, 1);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var ui = __left0__ [1];
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, ui, 'color', __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Color {:d}');
+					return __call__ (__accu1__.format, __accu1__, i);
+				}) (), translate: false}));
+			}) ();
 		}
 	});}
 });
@@ -2257,7 +3521,7 @@ export var PreferenceThemeSpacePanel =  __class__ ('PreferenceThemeSpacePanel', 
 	get _theme_generic () {return function (layout, themedata) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2270,27 +3534,53 @@ export var PreferenceThemeSpacePanel =  __class__ ('PreferenceThemeSpacePanel', 
 		else {
 		}
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var props_type = dict ({});
-		for (var prop of themedata.rna_type.properties) {
-			if (prop.identifier == 'rna_type') {
+		var __iterable0__ = themedata.rna_type.properties;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var prop = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (prop.identifier, 'rna_type')) {
 				continue;
 			}
-			props_type.py_setdefault (tuple ([prop.py_metatype, prop.subtype]), []).append (prop);
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = props_type;
+					return __call__ (__accu1__.py_setdefault, __accu1__, tuple ([prop.py_metatype, prop.subtype]), []);
+				}) ();
+				return __call__ (__accu0__.append, __accu0__, prop);
+			}) ();
 		}
-		for (var [props_type, props_ls] of sorted (props_type.py_items ())) {
-			if (props_type [0] == 'POINTER') {
+		var __iterable0__ = __call__ (sorted, null, (function () {
+			var __accu0__ = props_type;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ());
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var props_type = __left0__ [0];
+			var props_ls = __left0__ [1];
+			if (__eq__ (__getitem__ (props_type, 0), 'POINTER')) {
 				continue;
 			}
-			for (var prop of props_ls) {
-				flow.prop (themedata, prop.identifier);
+			var __iterable1__ = props_ls;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var prop = __getitem__ (__iterable1__, __index1__);
+				(function () {
+					var __accu0__ = flow;
+					return __call__ (__accu0__.prop, __accu0__, themedata, prop.identifier);
+				}) ();
 			}
 		}
 	};},
 	get draw_header () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2302,16 +3592,19 @@ export var PreferenceThemeSpacePanel =  __class__ ('PreferenceThemeSpacePanel', 
 		}
 		else {
 		}
-		var icon = getattr (self, 'icon', 'NONE');
-		if (icon != 'NONE') {
+		var icon = __call__ (getattr, null, self, 'icon', 'NONE');
+		if (__ne__ (icon, 'NONE')) {
 			var layout = self.layout;
-			layout.label (__kwargtrans__ ({icon: icon}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: icon}));
+			}) ();
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2324,13 +3617,22 @@ export var PreferenceThemeSpacePanel =  __class__ ('PreferenceThemeSpacePanel', 
 		else {
 		}
 		var layout = self.layout;
-		var theme = context.preferences.themes [0];
-		var datapath_list = self.datapath.py_split ('.');
+		var theme = __getitem__ (context.preferences.themes, 0);
+		var datapath_list = (function () {
+			var __accu0__ = self.datapath;
+			return __call__ (__accu0__.py_split, __accu0__, '.');
+		}) ();
 		var data = theme;
-		for (var datapath_item of datapath_list) {
-			var data = getattr (data, datapath_item);
+		var __iterable0__ = datapath_list;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var datapath_item = __getitem__ (__iterable0__, __index0__);
+			var data = __call__ (getattr, null, data, datapath_item);
 		}
-		PreferenceThemeSpacePanel._theme_generic (layout, data);
+		(function () {
+			var __accu0__ = PreferenceThemeSpacePanel;
+			return __call__ (__accu0__._theme_generic, __accu0__, layout, data);
+		}) ();
 	});}
 });
 export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator', [object], {
@@ -2338,7 +3640,7 @@ export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator'
 	get generate_panel_classes_for_wcols () {return function* () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2347,17 +3649,28 @@ export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator'
 		else {
 		}
 		var wcols = [tuple (['Box', 'wcol_box']), tuple (['Curve', 'wcol_curve']), tuple (['List Item', 'wcol_list_item']), tuple (['Menu', 'wcol_menu']), tuple (['Menu Background', 'wcol_menu_back']), tuple (['Menu Item', 'wcol_menu_item']), tuple (['Number Field', 'wcol_num']), tuple (['Option', 'wcol_option']), tuple (['Pie Menu', 'wcol_pie_menu']), tuple (['Progress Bar', 'wcol_progress']), tuple (['Pulldown', 'wcol_pulldown']), tuple (['Radio Buttons', 'wcol_radio']), tuple (['Regular', 'wcol_regular']), tuple (['Scroll Bar', 'wcol_scroll']), tuple (['Tab', 'wcol_tab']), tuple (['Text', 'wcol_text']), tuple (['Toggle', 'wcol_toggle']), tuple (['Tool', 'wcol_tool']), tuple (['Toolbar Item', 'wcol_toolbar_item']), tuple (['Tooltip', 'wcol_tooltip']), tuple (['Value Slider', 'wcol_numslider'])];
-		for (var [py_name, wcol] of wcols) {
-			var panel_id = 'USERPREF_PT_theme_interface_' + wcol;
-			yield py_metatype.__new__ (py_metatype, panel_id, tuple ([PreferenceThemeWidgetColorPanel, ThemePanel, Panel]), dict ({'bl_label': py_name, 'bl_options': new set (['DEFAULT_CLOSED']), 'draw': PreferenceThemeWidgetColorPanel.draw, 'wcol': wcol}));
-			var panel_shade_id = 'USERPREF_PT_theme_interface_shade_' + wcol;
-			yield py_metatype.__new__ (py_metatype, panel_shade_id, tuple ([PreferenceThemeWidgetShadePanel, ThemePanel, Panel]), dict ({'bl_label': 'Shaded', 'bl_options': new set (['DEFAULT_CLOSED']), 'bl_parent_id': panel_id, 'draw': PreferenceThemeWidgetShadePanel.draw, 'wcol': wcol}));
+		var __iterable0__ = wcols;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var py_name = __left0__ [0];
+			var wcol = __left0__ [1];
+			var panel_id = __add__ ('USERPREF_PT_theme_interface_', wcol);
+			yield (function () {
+				var __accu0__ = py_metatype;
+				return __call__ (__accu0__.__new__, __accu0__, py_metatype, panel_id, tuple ([PreferenceThemeWidgetColorPanel, ThemePanel, Panel]), dict ({'bl_label': py_name, 'bl_options': new set (['DEFAULT_CLOSED']), 'draw': PreferenceThemeWidgetColorPanel.draw, 'wcol': wcol}));
+			}) ();
+			var panel_shade_id = __add__ ('USERPREF_PT_theme_interface_shade_', wcol);
+			yield (function () {
+				var __accu0__ = py_metatype;
+				return __call__ (__accu0__.__new__, __accu0__, py_metatype, panel_shade_id, tuple ([PreferenceThemeWidgetShadePanel, ThemePanel, Panel]), dict ({'bl_label': 'Shaded', 'bl_options': new set (['DEFAULT_CLOSED']), 'bl_parent_id': panel_id, 'draw': PreferenceThemeWidgetShadePanel.draw, 'wcol': wcol}));
+			}) ();
 		}
 		};},
 	get generate_theme_area_child_panel_classes () {return function* (parent_id, rna_type, theme_area, datapath) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2374,7 +3687,7 @@ export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator'
 		var generate_child_panel_classes_recurse = function* (parent_id, rna_type, theme_area, datapath) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2389,28 +3702,51 @@ export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator'
 			else {
 			}
 			var props_type = dict ({});
-			for (var prop of rna_type.properties) {
-				if (prop.identifier == 'rna_type') {
+			var __iterable0__ = rna_type.properties;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var prop = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (prop.identifier, 'rna_type')) {
 					continue;
 				}
-				props_type.py_setdefault (tuple ([prop.py_metatype, prop.subtype]), []).append (prop);
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = props_type;
+						return __call__ (__accu1__.py_setdefault, __accu1__, tuple ([prop.py_metatype, prop.subtype]), []);
+					}) ();
+					return __call__ (__accu0__.append, __accu0__, prop);
+				}) ();
 			}
-			for (var [props_type, props_ls] of sorted (props_type.py_items ())) {
-				if (props_type [0] == 'POINTER') {
-					for (var prop of props_ls) {
-						var new_datapath = (datapath ? (datapath + '.') + prop.identifier : prop.identifier);
-						var panel_id = (parent_id + '_') + prop.identifier;
-						yield py_metatype.__new__ (py_metatype, panel_id, tuple ([PreferenceThemeSpacePanel, ThemePanel, Panel]), dict ({'bl_label': rna_type.properties [prop.identifier].py_name, 'bl_parent_id': parent_id, 'bl_options': new set (['DEFAULT_CLOSED']), 'draw': PreferenceThemeSpacePanel.draw, 'theme_area': theme_area.identifier, 'datapath': new_datapath}));
-						yield* generate_child_panel_classes_recurse (panel_id, prop.fixed_type, theme_area, new_datapath);
+			var __iterable0__ = __call__ (sorted, null, (function () {
+				var __accu0__ = props_type;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var props_type = __left0__ [0];
+				var props_ls = __left0__ [1];
+				if (__eq__ (__getitem__ (props_type, 0), 'POINTER')) {
+					var __iterable1__ = props_ls;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var prop = __getitem__ (__iterable1__, __index1__);
+						var new_datapath = (datapath ? __add__ (__add__ (datapath, '.'), prop.identifier) : prop.identifier);
+						var panel_id = __add__ (__add__ (parent_id, '_'), prop.identifier);
+						yield (function () {
+							var __accu0__ = py_metatype;
+							return __call__ (__accu0__.__new__, __accu0__, py_metatype, panel_id, tuple ([PreferenceThemeSpacePanel, ThemePanel, Panel]), dict ({'bl_label': __getitem__ (rna_type.properties, prop.identifier).py_name, 'bl_parent_id': parent_id, 'bl_options': new set (['DEFAULT_CLOSED']), 'draw': PreferenceThemeSpacePanel.draw, 'theme_area': theme_area.identifier, 'datapath': new_datapath}));
+						}) ();
+						yield* __call__ (generate_child_panel_classes_recurse, null, panel_id, prop.fixed_type, theme_area, new_datapath);
 					}
 				}
 			}
 			};
-		yield* generate_child_panel_classes_recurse (parent_id, rna_type, theme_area, datapath)};},
+		yield* __call__ (generate_child_panel_classes_recurse, null, parent_id, rna_type, theme_area, datapath)};},
 	get generate_panel_classes_from_theme_areas () {return function* () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2418,14 +3754,35 @@ export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator'
 		}
 		else {
 		}
-		var Theme = _member ('_bpy.types', 'Theme');
-		for (var theme_area of Theme.bl_rna.properties ['theme_area'].enum_items_static) {
+		var Theme = __call__ (_member, null, '_bpy.types', 'Theme');
+		var __iterable0__ = __getitem__ (Theme.bl_rna.properties, 'theme_area').enum_items_static;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var theme_area = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (theme_area.identifier, new set (['USER_INTERFACE', 'STYLE', 'BONE_COLOR_SETS']))) {
 				continue;
 			}
-			var panel_id = 'USERPREF_PT_theme_' + theme_area.identifier.lower ();
-			yield py_metatype.__new__ (py_metatype, panel_id, tuple ([PreferenceThemeSpacePanel, ThemePanel, Panel]), dict ({'bl_label': theme_area.py_name, 'bl_options': new set (['DEFAULT_CLOSED']), 'draw_header': PreferenceThemeSpacePanel.draw_header, 'draw': PreferenceThemeSpacePanel.draw, 'theme_area': theme_area.identifier, 'icon': theme_area.icon, 'datapath': theme_area.identifier.lower ()}));
-			yield* ThemeGenericClassGenerator.generate_theme_area_child_panel_classes (panel_id, Theme.bl_rna.properties [theme_area.identifier.lower ()].fixed_type, theme_area, theme_area.identifier.lower ());
+			var panel_id = __add__ ('USERPREF_PT_theme_', (function () {
+				var __accu0__ = theme_area.identifier;
+				return __call__ (__accu0__.lower, __accu0__);
+			}) ());
+			yield (function () {
+				var __accu0__ = py_metatype;
+				return __call__ (__accu0__.__new__, __accu0__, py_metatype, panel_id, tuple ([PreferenceThemeSpacePanel, ThemePanel, Panel]), dict ({'bl_label': theme_area.py_name, 'bl_options': new set (['DEFAULT_CLOSED']), 'draw_header': PreferenceThemeSpacePanel.draw_header, 'draw': PreferenceThemeSpacePanel.draw, 'theme_area': theme_area.identifier, 'icon': theme_area.icon, 'datapath': (function () {
+					var __accu1__ = theme_area.identifier;
+					return __call__ (__accu1__.lower, __accu1__);
+				}) ()}));
+			}) ();
+			yield* (function () {
+				var __accu0__ = ThemeGenericClassGenerator;
+				return __call__ (__accu0__.generate_theme_area_child_panel_classes, __accu0__, panel_id, __getitem__ (Theme.bl_rna.properties, (function () {
+					var __accu1__ = theme_area.identifier;
+					return __call__ (__accu1__.lower, __accu1__);
+				}) ()).fixed_type, theme_area, (function () {
+					var __accu1__ = theme_area.identifier;
+					return __call__ (__accu1__.lower, __accu1__);
+				}) ());
+			}) ();
 		}
 		};}
 });
@@ -2441,7 +3798,7 @@ export var USERPREF_PT_file_paths_data =  __class__ ('USERPREF_PT_file_paths_dat
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2457,11 +3814,26 @@ export var USERPREF_PT_file_paths_data =  __class__ ('USERPREF_PT_file_paths_dat
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var paths = context.preferences.filepaths;
-		var col = self.layout.column ();
-		col.prop (paths, 'font_directory', __kwargtrans__ ({text: 'Fonts'}));
-		col.prop (paths, 'texture_directory', __kwargtrans__ ({text: 'Textures'}));
-		col.prop (paths, 'sound_directory', __kwargtrans__ ({text: 'Sounds'}));
-		col.prop (paths, 'temporary_directory', __kwargtrans__ ({text: 'Temporary Files'}));
+		var col = (function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'font_directory', __kwargtrans__ ({text: 'Fonts'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'texture_directory', __kwargtrans__ ({text: 'Textures'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'sound_directory', __kwargtrans__ ({text: 'Sounds'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'temporary_directory', __kwargtrans__ ({text: 'Temporary Files'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_file_paths_script_directories =  __class__ ('USERPREF_PT_file_paths_script_directories', [FilePathsPanel, Panel], {
@@ -2470,7 +3842,7 @@ export var USERPREF_PT_file_paths_script_directories =  __class__ ('USERPREF_PT_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2484,32 +3856,91 @@ export var USERPREF_PT_file_paths_script_directories =  __class__ ('USERPREF_PT_
 		}
 		var layout = self.layout;
 		var paths = context.preferences.filepaths;
-		if (len (paths.script_directories) == 0) {
-			layout.operator ('preferences.script_directory_add', __kwargtrans__ ({text: 'Add', icon: 'ADD'}));
+		if (__eq__ (__call__ (len, null, paths.script_directories), 0)) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.script_directory_add', __kwargtrans__ ({text: 'Add', icon: 'ADD'}));
+			}) ();
 			return ;
 		}
 		layout.use_property_split = false;
 		layout.use_property_decorate = false;
-		var box = layout.box ();
-		var py_split = box.py_split (__kwargtrans__ ({factor: 0.35}));
-		var name_col = py_split.column ();
-		var path_col = py_split.column ();
-		var row = name_col.row (__kwargtrans__ ({align: true}));
-		row.separator ();
-		row.label (__kwargtrans__ ({text: 'Name'}));
-		var row = path_col.row (__kwargtrans__ ({align: true}));
-		row.separator ();
-		row.label (__kwargtrans__ ({text: 'Path', text_ctxt: i18n_contexts.editor_filebrowser}));
-		row.operator ('preferences.script_directory_add', __kwargtrans__ ({text: '', icon: 'ADD', emboss: false}));
-		for (var [i, script_directory] of py_enumerate (paths.script_directories)) {
-			var row = name_col.row ();
+		var box = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
+		var py_split = (function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.35}));
+		}) ();
+		var name_col = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var path_col = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = name_col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Name'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = path_col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Path', text_ctxt: i18n_contexts.editor_filebrowser}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.script_directory_add', __kwargtrans__ ({text: '', icon: 'ADD', emboss: false}));
+		}) ();
+		var __iterable0__ = __call__ (py_enumerate, null, paths.script_directories);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var script_directory = __left0__ [1];
+			var row = (function () {
+				var __accu0__ = name_col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.alert = !(script_directory.py_name);
-			row.prop (script_directory, 'name', __kwargtrans__ ({text: ''}));
-			var row = path_col.row ();
-			var subrow = row.row ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, script_directory, 'name', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = path_col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			var subrow = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			subrow.alert = !(script_directory.directory);
-			subrow.prop (script_directory, 'directory', __kwargtrans__ ({text: ''}));
-			row.operator ('preferences.script_directory_remove', __kwargtrans__ ({text: '', icon: 'X', emboss: false})).index = i;
+			(function () {
+				var __accu0__ = subrow;
+				return __call__ (__accu0__.prop, __accu0__, script_directory, 'directory', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.script_directory_remove', __kwargtrans__ ({text: '', icon: 'X', emboss: false}));
+			}) ().index = i;
 		}
 	});}
 });
@@ -2520,7 +3951,7 @@ export var USERPREF_PT_file_paths_render =  __class__ ('USERPREF_PT_file_paths_r
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2536,10 +3967,22 @@ export var USERPREF_PT_file_paths_render =  __class__ ('USERPREF_PT_file_paths_r
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var paths = context.preferences.filepaths;
-		var col = self.layout.column ();
-		col.prop (paths, 'texture_cache_directory', __kwargtrans__ ({text: 'Texture Cache'}));
-		col.prop (paths, 'render_output_directory', __kwargtrans__ ({text: 'Render Output'}));
-		col.prop (paths, 'render_cache_directory', __kwargtrans__ ({text: 'Render Cache'}));
+		var col = (function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'texture_cache_directory', __kwargtrans__ ({text: 'Texture Cache'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'render_output_directory', __kwargtrans__ ({text: 'Render Output'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'render_cache_directory', __kwargtrans__ ({text: 'Render Cache'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_text_editor_presets =  __class__ ('USERPREF_PT_text_editor_presets', [PresetPanel, Panel], {
@@ -2556,7 +3999,7 @@ export var USERPREF_PT_file_paths_applications =  __class__ ('USERPREF_PT_file_p
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2572,11 +4015,23 @@ export var USERPREF_PT_file_paths_applications =  __class__ ('USERPREF_PT_file_p
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var paths = context.preferences.filepaths;
-		var col = layout.column ();
-		col.prop (paths, 'image_editor', __kwargtrans__ ({text: 'Image Editor'}));
-		col.prop (paths, 'animation_player_preset', __kwargtrans__ ({text: 'Animation Player'}));
-		if (paths.animation_player_preset == 'CUSTOM') {
-			col.prop (paths, 'animation_player', __kwargtrans__ ({text: 'Player'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'image_editor', __kwargtrans__ ({text: 'Image Editor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'animation_player_preset', __kwargtrans__ ({text: 'Animation Player'}));
+		}) ();
+		if (__eq__ (paths.animation_player_preset, 'CUSTOM')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, paths, 'animation_player', __kwargtrans__ ({text: 'Player'}));
+			}) ();
 		}
 	});}
 });
@@ -2587,7 +4042,7 @@ export var USERPREF_PT_text_editor =  __class__ ('USERPREF_PT_text_editor', [Fil
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2599,12 +4054,15 @@ export var USERPREF_PT_text_editor =  __class__ ('USERPREF_PT_text_editor', [Fil
 		}
 		else {
 		}
-		USERPREF_PT_text_editor_presets.draw_panel_header (self.layout);
+		(function () {
+			var __accu0__ = USERPREF_PT_text_editor_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, self.layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2620,9 +4078,18 @@ export var USERPREF_PT_text_editor =  __class__ ('USERPREF_PT_text_editor', [Fil
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var paths = context.preferences.filepaths;
-		var col = layout.column ();
-		col.prop (paths, 'text_editor', __kwargtrans__ ({text: 'Program'}));
-		col.prop (paths, 'text_editor_args', __kwargtrans__ ({text: 'Arguments'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'text_editor', __kwargtrans__ ({text: 'Program'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'text_editor_args', __kwargtrans__ ({text: 'Arguments'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_file_paths_development =  __class__ ('USERPREF_PT_file_paths_development', [FilePathsPanel, Panel], {
@@ -2632,7 +4099,7 @@ export var USERPREF_PT_file_paths_development =  __class__ ('USERPREF_PT_file_pa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2650,7 +4117,7 @@ export var USERPREF_PT_file_paths_development =  __class__ ('USERPREF_PT_file_pa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2666,7 +4133,10 @@ export var USERPREF_PT_file_paths_development =  __class__ ('USERPREF_PT_file_pa
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var paths = context.preferences.filepaths;
-		layout.prop (paths, 'i18n_branches_directory', __kwargtrans__ ({text: 'I18n Branches'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'i18n_branches_directory', __kwargtrans__ ({text: 'I18n Branches'}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_autorun', [FilePathsPanel, Panel], {
@@ -2676,7 +4146,7 @@ export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_auto
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2691,23 +4161,29 @@ export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_auto
 		var layout = self.layout;
 		var prefs = context.preferences;
 		var paths = prefs.filepaths;
-		var text = iface_ ('Auto Run Python Scripts');
+		var text = __call__ (iface_, null, 'Auto Run Python Scripts');
 		var autoexec_override = bpy.app.autoexec_override;
 		if (autoexec_override !== null) {
 			if (autoexec_override) {
-				var text_warn = iface_ ('enabled on startup, overriding the preference');
+				var text_warn = __call__ (iface_, null, 'enabled on startup, overriding the preference');
 			}
 			else {
-				var text_warn = iface_ ('disabled on startup, overriding the preference');
+				var text_warn = __call__ (iface_, null, 'disabled on startup, overriding the preference');
 			}
-			var text = '{:s} ({:s})'.format (text, text_warn);
+			var text = (function () {
+				var __accu0__ = '{:s} ({:s})';
+				return __call__ (__accu0__.format, __accu0__, text, text_warn);
+			}) ();
 		}
-		layout.prop (paths, 'use_scripts_auto_execute', __kwargtrans__ ({text: text, translate: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_scripts_auto_execute', __kwargtrans__ ({text: text, translate: false}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2726,19 +4202,57 @@ export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_auto
 		layout.use_property_decorate = false;
 		layout.active = paths.use_scripts_auto_execute;
 		if (paths.use_scripts_auto_execute) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.label (__kwargtrans__ ({text: 'Opening blend files from the internet and other untrusted sources', icon: 'STATUS_WARNING'}));
-			col.label (__kwargtrans__ ({text: 'is unsafe with Auto-Run. Use with caution.', icon: 'BLANK1'}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Opening blend files from the internet and other untrusted sources', icon: 'STATUS_WARNING'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'is unsafe with Auto-Run. Use with caution.', icon: 'BLANK1'}));
+			}) ();
 		}
-		var box = layout.box ();
-		var row = box.row ();
-		row.label (__kwargtrans__ ({text: 'Excluded Paths'}));
-		row.operator ('preferences.autoexec_path_add', __kwargtrans__ ({text: '', icon: 'ADD', emboss: false}));
-		for (var [i, path_cmp] of py_enumerate (prefs.autoexec_paths)) {
-			var row = box.row ();
-			row.prop (path_cmp, 'path', __kwargtrans__ ({text: ''}));
-			row.prop (path_cmp, 'use_glob', __kwargtrans__ ({text: '', icon: 'FILTER'}));
-			row.operator ('preferences.autoexec_path_remove', __kwargtrans__ ({text: '', icon: 'X', emboss: false})).index = i;
+		var box = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Excluded Paths'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.autoexec_path_add', __kwargtrans__ ({text: '', icon: 'ADD', emboss: false}));
+		}) ();
+		var __iterable0__ = __call__ (py_enumerate, null, prefs.autoexec_paths);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var path_cmp = __left0__ [1];
+			var row = (function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, path_cmp, 'path', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, path_cmp, 'use_glob', __kwargtrans__ ({text: '', icon: 'FILTER'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.autoexec_path_remove', __kwargtrans__ ({text: '', icon: 'X', emboss: false}));
+			}) ().index = i;
 		}
 	});}
 });
@@ -2747,7 +4261,7 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2768,18 +4282,27 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 		}
 		var repo = item;
 		var icon = (repo.use_remote_url ? 'INTERNET' : 'DISK_DRIVE');
-		layout.prop (repo, 'name', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, repo, 'name', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		}) ();
 		if (repo.enabled) {
-			if (repo.use_custom_directory && repo.custom_directory == '' || repo.use_remote_url && repo.remote_url == '') {
-				layout.label (__kwargtrans__ ({text: '', icon: 'ERROR'}));
+			if (repo.use_custom_directory && __eq__ (repo.custom_directory, '') || repo.use_remote_url && __eq__ (repo.remote_url, '')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon: 'ERROR'}));
+				}) ();
 			}
 		}
-		layout.prop (repo, 'enabled', __kwargtrans__ ({text: '', emboss: false, icon: (repo.enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT')}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, repo, 'enabled', __kwargtrans__ ({text: '', emboss: false, icon: (repo.enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT')}));
+		}) ();
 	});},
 	get filter_items () {return __get__ (this, function (self, _context, data, propname) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2793,13 +4316,13 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 		}
 		else {
 		}
-		var py_items = list (getattr (data, propname));
-		var flags = [self.bitflag_filter_item] * len (py_items);
-		var indices = [null] * len (py_items);
-		for (var [index, orig_index] of py_enumerate (sorted (range (len (py_items)), __kwargtrans__ ({key: (function __lambda__ (i) {
+		var py_items = __call__ (list, null, __call__ (getattr, null, data, propname));
+		var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, py_items));
+		var indices = __mul__ ([null], __call__ (len, null, py_items));
+		var __iterable0__ = __call__ (py_enumerate, null, __call__ (sorted, null, __call__ (range, null, __call__ (len, null, py_items)), __kwargtrans__ ({key: (function __lambda__ (i) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2810,9 +4333,17 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 			}
 			else {
 			}
-			return tuple ([(repopy_items [i].use_remote_url ? 0 : (repo.source != 'SYSTEM' ? 1 : 2)), repo.py_name.casefold ()]);
-		})})))) {
-			indices [orig_index] = index;
+			return tuple ([(repo__getitem__ (py_items, i).use_remote_url ? 0 : (__ne__ (repo.source, 'SYSTEM') ? 1 : 2)), (function () {
+				var __accu0__ = repo.py_name;
+				return __call__ (__accu0__.casefold, __accu0__);
+			}) ()]);
+		})})));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var index = __left0__ [0];
+			var orig_index = __left0__ [1];
+			__setitem__ (indices, orig_index, index);
 		}
 		return tuple ([flags, indices]);
 	});}
@@ -2829,7 +4360,7 @@ export var USERPREF_PT_saveload_blend =  __class__ ('USERPREF_PT_saveload_blend'
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2845,29 +4376,95 @@ export var USERPREF_PT_saveload_blend =  __class__ ('USERPREF_PT_saveload_blend'
 		var prefs = context.preferences;
 		var paths = prefs.filepaths;
 		var view = prefs.view;
-		var col = layout.column (__kwargtrans__ ({heading: 'Save'}));
-		col.prop (view, 'use_save_prompt');
-		layout.prop (paths, 'save_modified_images');
-		var col = layout.column ();
-		col.prop (paths, 'save_version');
-		col.prop (paths, 'recent_files');
-		layout.separator ();
-		var col = layout.column (__kwargtrans__ ({heading: 'Auto-Save'}));
-		var row = col.row ();
-		row.prop (paths, 'use_auto_save_temporary_files', __kwargtrans__ ({text: ''}));
-		var subrow = row.row ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Save'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_save_prompt');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'save_modified_images');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'save_version');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'recent_files');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Auto-Save'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_auto_save_temporary_files', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subrow = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		subrow.active = paths.use_auto_save_temporary_files;
-		subrow.prop (paths, 'auto_save_time', __kwargtrans__ ({text: 'Timer (Minutes)'}));
-		layout.separator ();
-		layout.prop (paths, 'file_preview_type');
-		layout.separator ();
-		layout.separator ();
-		var col = layout.column (__kwargtrans__ ({heading: 'Default To'}));
-		col.prop (paths, 'use_relative_paths');
-		col.prop (paths, 'use_file_compression');
-		col.prop (paths, 'use_load_ui');
-		var col = layout.column (__kwargtrans__ ({heading: 'Text Files'}));
-		col.prop (paths, 'use_tabs_as_spaces');
+		(function () {
+			var __accu0__ = subrow;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'auto_save_time', __kwargtrans__ ({text: 'Timer (Minutes)'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'file_preview_type');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Default To'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_relative_paths');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_file_compression');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_load_ui');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Text Files'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_tabs_as_spaces');
+		}) ();
 	});}
 });
 export var USERPREF_PT_saveload_file_browser =  __class__ ('USERPREF_PT_saveload_file_browser', [SaveLoadPanel, CenterAlignMixIn, Panel], {
@@ -2876,7 +4473,7 @@ export var USERPREF_PT_saveload_file_browser =  __class__ ('USERPREF_PT_saveload
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2891,12 +4488,30 @@ export var USERPREF_PT_saveload_file_browser =  __class__ ('USERPREF_PT_saveload
 		}
 		var prefs = context.preferences;
 		var paths = prefs.filepaths;
-		var col = layout.column (__kwargtrans__ ({heading: 'Show Locations'}));
-		col.prop (paths, 'show_recent_locations', __kwargtrans__ ({text: 'Recent'}));
-		col.prop (paths, 'show_system_bookmarks', __kwargtrans__ ({text: 'System'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Defaults'}));
-		col.prop (paths, 'use_filter_files');
-		col.prop (paths, 'show_hidden_files_datablocks');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show Locations'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'show_recent_locations', __kwargtrans__ ({text: 'Recent'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'show_system_bookmarks', __kwargtrans__ ({text: 'System'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Defaults'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'use_filter_files');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, paths, 'show_hidden_files_datablocks');
+		}) ();
 	});}
 });
 export var InputPanel =  __class__ ('InputPanel', [object], {
@@ -2911,7 +4526,7 @@ export var USERPREF_PT_input_keyboard =  __class__ ('USERPREF_PT_input_keyboard'
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2926,8 +4541,14 @@ export var USERPREF_PT_input_keyboard =  __class__ ('USERPREF_PT_input_keyboard'
 		}
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		layout.prop (inputs, 'use_emulate_numpad');
-		layout.prop (inputs, 'use_numeric_input_advanced');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_emulate_numpad');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_numeric_input_advanced');
+		}) ();
 	});}
 });
 export var USERPREF_PT_input_mouse =  __class__ ('USERPREF_PT_input_mouse', [InputPanel, CenterAlignMixIn, Panel], {
@@ -2936,7 +4557,7 @@ export var USERPREF_PT_input_mouse =  __class__ ('USERPREF_PT_input_mouse', [Inp
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2949,28 +4570,70 @@ export var USERPREF_PT_input_mouse =  __class__ ('USERPREF_PT_input_mouse', [Inp
 		}
 		else {
 		}
-		var sys = _module ('sys');
+		var sys = __call__ (_module, null, 'sys');
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
-		if (sys.platform.__getslice__ (null, 3, 1) == 'win') {
-			flow.prop (inputs, 'use_mouse_emulate_3_button');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		if (__eq__ (__getslice__ (sys.platform, null, 3, 1), 'win')) {
+			(function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'use_mouse_emulate_3_button');
+			}) ();
 		}
 		else {
-			var col = flow.column (__kwargtrans__ ({heading: 'Emulate 3 Button Mouse'}));
-			var row = col.row ();
-			row.prop (inputs, 'use_mouse_emulate_3_button', __kwargtrans__ ({text: ''}));
-			var subrow = row.row ();
-			subrow.prop (inputs, 'mouse_emulate_3_button_modifier', __kwargtrans__ ({text: ''}));
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Emulate 3 Button Mouse'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'use_mouse_emulate_3_button', __kwargtrans__ ({text: ''}));
+			}) ();
+			var subrow = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = subrow;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'mouse_emulate_3_button_modifier', __kwargtrans__ ({text: ''}));
+			}) ();
 			subrow.active = inputs.use_mouse_emulate_3_button;
 		}
-		flow.prop (inputs, 'use_mouse_continuous');
-		flow.prop (inputs, 'use_drag_immediately');
-		flow.prop (inputs, 'mouse_double_click_time', __kwargtrans__ ({text: 'Double Click Speed'}));
-		flow.prop (inputs, 'drag_threshold_mouse');
-		flow.prop (inputs, 'drag_threshold_tablet');
-		flow.prop (inputs, 'drag_threshold');
-		flow.prop (inputs, 'move_threshold');
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_mouse_continuous');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_drag_immediately');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'mouse_double_click_time', __kwargtrans__ ({text: 'Double Click Speed'}));
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'drag_threshold_mouse');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'drag_threshold_tablet');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'drag_threshold');
+		}) ();
+		(function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'move_threshold');
+		}) ();
 	});}
 });
 export var USERPREF_PT_input_touchpad =  __class__ ('USERPREF_PT_input_touchpad', [InputPanel, CenterAlignMixIn, Panel], {
@@ -2980,7 +4643,7 @@ export var USERPREF_PT_input_touchpad =  __class__ ('USERPREF_PT_input_touchpad'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2992,12 +4655,12 @@ export var USERPREF_PT_input_touchpad =  __class__ ('USERPREF_PT_input_touchpad'
 		}
 		else {
 		}
-		var sys = _module ('sys');
-		if (sys.platform.__getslice__ (null, 3, 1) == 'win' || sys.platform == 'darwin') {
+		var sys = __call__ (_module, null, 'sys');
+		if (__eq__ (__getslice__ (sys.platform, null, 3, 1), 'win') || __eq__ (sys.platform, 'darwin')) {
 			return true;
 		}
-		var _ghost_backend = _member ('_bpy', '_ghost_backend');
-		if (_ghost_backend () == 'WAYLAND') {
+		var _ghost_backend = __call__ (_member, null, '_bpy', '_ghost_backend');
+		if (__eq__ (__call__ (_ghost_backend, null), 'WAYLAND')) {
 			return true;
 		}
 		return false;
@@ -3005,7 +4668,7 @@ export var USERPREF_PT_input_touchpad =  __class__ ('USERPREF_PT_input_touchpad'
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3020,14 +4683,26 @@ export var USERPREF_PT_input_touchpad =  __class__ ('USERPREF_PT_input_touchpad'
 		}
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		var col = layout.column ();
-		col.prop (inputs, 'use_multitouch_gestures');
-		var _wm_capabilities = _member ('_bpy', '_wm_capabilities');
-		var capabilities = _wm_capabilities ();
-		if (!(capabilities ['TRACKPAD_PHYSICAL_DIRECTION'])) {
-			var row = col.row ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_multitouch_gestures');
+		}) ();
+		var _wm_capabilities = __call__ (_member, null, '_bpy', '_wm_capabilities');
+		var capabilities = __call__ (_wm_capabilities, null);
+		if (!(__getitem__ (capabilities, 'TRACKPAD_PHYSICAL_DIRECTION'))) {
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.active = inputs.use_multitouch_gestures;
-			row.prop (inputs, 'touchpad_scroll_direction', __kwargtrans__ ({text: 'Scroll Direction'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'touchpad_scroll_direction', __kwargtrans__ ({text: 'Scroll Direction'}));
+			}) ();
 		}
 	});}
 });
@@ -3037,7 +4712,7 @@ export var USERPREF_PT_input_tablet =  __class__ ('USERPREF_PT_input_tablet', [I
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3052,17 +4727,35 @@ export var USERPREF_PT_input_tablet =  __class__ ('USERPREF_PT_input_tablet', [I
 		}
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		var sys = _module ('sys');
-		if (sys.platform.__getslice__ (null, 3, 1) == 'win') {
-			layout.prop (inputs, 'tablet_api');
-			layout.separator ();
+		var sys = __call__ (_module, null, 'sys');
+		if (__eq__ (__getslice__ (sys.platform, null, 3, 1), 'win')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'tablet_api');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		var col = layout.column ();
-		col.prop (inputs, 'pressure_threshold_max');
-		col.prop (inputs, 'pressure_softness');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'pressure_threshold_max');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'pressure_softness');
+		}) ();
 		var use_debug = prefs.experimental.use_paint_debug && prefs.view.show_developer_ui;
 		if (use_debug) {
-			col.prop (inputs, 'show_tablet_debug_values');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'show_tablet_debug_values');
+			}) ();
 		}
 	});}
 });
@@ -3073,7 +4766,7 @@ export var USERPREF_PT_input_ndof =  __class__ ('USERPREF_PT_input_ndof', [Input
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3090,7 +4783,7 @@ export var USERPREF_PT_input_ndof =  __class__ ('USERPREF_PT_input_ndof', [Input
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3105,7 +4798,10 @@ export var USERPREF_PT_input_ndof =  __class__ ('USERPREF_PT_input_ndof', [Input
 		}
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		USERPREF_PT_ndof_settings.draw_settings (layout, inputs);
+		(function () {
+			var __accu0__ = USERPREF_PT_ndof_settings;
+			return __call__ (__accu0__.draw_settings, __accu0__, layout, inputs);
+		}) ();
 	});}
 });
 export var NavigationPanel =  __class__ ('NavigationPanel', [object], {
@@ -3120,7 +4816,7 @@ export var USERPREF_PT_navigation_orbit =  __class__ ('USERPREF_PT_navigation_or
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3136,22 +4832,61 @@ export var USERPREF_PT_navigation_orbit =  __class__ ('USERPREF_PT_navigation_or
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
 		var view = prefs.view;
-		var col = layout.column ();
-		col.row ().prop (inputs, 'view_rotate_method', __kwargtrans__ ({expand: true}));
-		if (inputs.view_rotate_method == 'TURNTABLE') {
-			col.prop (inputs, 'view_rotate_sensitivity_turntable');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = col;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'view_rotate_method', __kwargtrans__ ({expand: true}));
+		}) ();
+		if (__eq__ (inputs.view_rotate_method, 'TURNTABLE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'view_rotate_sensitivity_turntable');
+			}) ();
 		}
 		else {
-			col.prop (inputs, 'view_rotate_sensitivity_trackball');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'view_rotate_sensitivity_trackball');
+			}) ();
 		}
-		col.prop (inputs, 'use_rotate_around_active');
-		col.separator ();
-		var col = layout.column (__kwargtrans__ ({heading: 'Auto'}));
-		col.prop (inputs, 'use_auto_perspective', __kwargtrans__ ({text: 'Perspective'}));
-		col.prop (inputs, 'use_mouse_depth_navigate', __kwargtrans__ ({text: 'Depth'}));
-		var col = layout.column ();
-		col.prop (view, 'smooth_view');
-		col.prop (view, 'rotation_angle');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_rotate_around_active');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Auto'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_auto_perspective', __kwargtrans__ ({text: 'Perspective'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'use_mouse_depth_navigate', __kwargtrans__ ({text: 'Depth'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'smooth_view');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'rotation_angle');
+		}) ();
 	});}
 });
 export var USERPREF_PT_navigation_zoom =  __class__ ('USERPREF_PT_navigation_zoom', [NavigationPanel, CenterAlignMixIn, Panel], {
@@ -3160,7 +4895,7 @@ export var USERPREF_PT_navigation_zoom =  __class__ ('USERPREF_PT_navigation_zoo
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3175,18 +4910,51 @@ export var USERPREF_PT_navigation_zoom =  __class__ ('USERPREF_PT_navigation_zoo
 		}
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		var col = layout.column ();
-		col.row ().prop (inputs, 'view_zoom_method', __kwargtrans__ ({text: 'Zoom Method'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = col;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'view_zoom_method', __kwargtrans__ ({text: 'Zoom Method'}));
+		}) ();
 		if (__in__ (inputs.view_zoom_method, new set (['DOLLY', 'CONTINUE']))) {
-			col.row ().prop (inputs, 'view_zoom_axis');
-			col.prop (inputs, 'use_zoom_to_mouse');
-			var col = layout.column (__kwargtrans__ ({heading: 'Invert Zoom Direction', align: true}));
-			col.prop (inputs, 'invert_mouse_zoom', __kwargtrans__ ({text: 'Mouse'}));
-			col.prop (inputs, 'invert_zoom_wheel', __kwargtrans__ ({text: 'Wheel'}));
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'view_zoom_axis');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'use_zoom_to_mouse');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Invert Zoom Direction', align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'invert_mouse_zoom', __kwargtrans__ ({text: 'Mouse'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'invert_zoom_wheel', __kwargtrans__ ({text: 'Wheel'}));
+			}) ();
 		}
 		else {
-			col.prop (inputs, 'use_zoom_to_mouse');
-			col.prop (inputs, 'invert_zoom_wheel', __kwargtrans__ ({text: 'Invert Wheel Zoom Direction'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'use_zoom_to_mouse');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, inputs, 'invert_zoom_wheel', __kwargtrans__ ({text: 'Invert Wheel Zoom Direction'}));
+			}) ();
 		}
 	});}
 });
@@ -3196,7 +4964,7 @@ export var USERPREF_PT_navigation_fly_walk =  __class__ ('USERPREF_PT_navigation
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3211,7 +4979,13 @@ export var USERPREF_PT_navigation_fly_walk =  __class__ ('USERPREF_PT_navigation
 		}
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
-		layout.row ().prop (inputs, 'navigation_mode', __kwargtrans__ ({expand: true}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, inputs, 'navigation_mode', __kwargtrans__ ({expand: true}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_navigation_fly_walk_navigation =  __class__ ('USERPREF_PT_navigation_fly_walk_navigation', [NavigationPanel, CenterAlignMixIn, Panel], {
@@ -3222,7 +4996,7 @@ export var USERPREF_PT_navigation_fly_walk_navigation =  __class__ ('USERPREF_PT
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3235,12 +5009,12 @@ export var USERPREF_PT_navigation_fly_walk_navigation =  __class__ ('USERPREF_PT
 		else {
 		}
 		var prefs = context.preferences;
-		return prefs.inputs.navigation_mode == 'WALK';
+		return __eq__ (prefs.inputs.navigation_mode, 'WALK');
 	});},
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3256,13 +5030,34 @@ export var USERPREF_PT_navigation_fly_walk_navigation =  __class__ ('USERPREF_PT
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
 		var walk = inputs.walk_navigation;
-		var col = layout.column ();
-		col.prop (walk, 'use_mouse_reverse');
-		col.prop (walk, 'mouse_speed');
-		col.prop (walk, 'teleport_time');
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (walk, 'walk_speed');
-		col.prop (walk, 'walk_speed_factor');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'use_mouse_reverse');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'mouse_speed');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'teleport_time');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'walk_speed');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'walk_speed_factor');
+		}) ();
 	});}
 });
 export var USERPREF_PT_navigation_fly_walk_gravity =  __class__ ('USERPREF_PT_navigation_fly_walk_gravity', [NavigationPanel, CenterAlignMixIn, Panel], {
@@ -3273,7 +5068,7 @@ export var USERPREF_PT_navigation_fly_walk_gravity =  __class__ ('USERPREF_PT_na
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3286,12 +5081,12 @@ export var USERPREF_PT_navigation_fly_walk_gravity =  __class__ ('USERPREF_PT_na
 		else {
 		}
 		var prefs = context.preferences;
-		return prefs.inputs.navigation_mode == 'WALK';
+		return __eq__ (prefs.inputs.navigation_mode, 'WALK');
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3306,12 +5101,15 @@ export var USERPREF_PT_navigation_fly_walk_gravity =  __class__ ('USERPREF_PT_na
 		var prefs = context.preferences;
 		var inputs = prefs.inputs;
 		var walk = inputs.walk_navigation;
-		self.layout.prop (walk, 'use_gravity', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'use_gravity', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_centered () {return __get__ (this, function (self, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3328,9 +5126,18 @@ export var USERPREF_PT_navigation_fly_walk_gravity =  __class__ ('USERPREF_PT_na
 		var inputs = prefs.inputs;
 		var walk = inputs.walk_navigation;
 		layout.active = walk.use_gravity;
-		var col = layout.column ();
-		col.prop (walk, 'view_height');
-		col.prop (walk, 'jump_height');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'view_height');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, walk, 'jump_height');
+		}) ();
 	});}
 });
 export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', [Panel], {
@@ -3345,7 +5152,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3358,63 +5165,176 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 		}
 		else {
 		}
-		var col = layout.column ();
-		col.row ().prop (props, 'ndof_navigation_mode', __kwargtrans__ ({text: 'Navigation Mode'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = col;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, props, 'ndof_navigation_mode', __kwargtrans__ ({text: 'Navigation Mode'}));
+		}) ();
 		if (show_3dview_settings) {
-			var colsub = col.column ();
+			var colsub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			colsub.active = __in__ (props.ndof_navigation_mode, new set (['FLY', 'OBJECT']));
-			colsub.prop (props, 'ndof_lock_horizon', __kwargtrans__ ({text: 'Lock Horizon'}));
-			var colsub = col.column ();
+			(function () {
+				var __accu0__ = colsub;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_lock_horizon', __kwargtrans__ ({text: 'Lock Horizon'}));
+			}) ();
+			// pass;
+			var colsub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			colsub.active = __in__ (props.ndof_navigation_mode, new set (['FLY', 'DRONE']));
-			colsub.prop (props, 'ndof_fly_speed_auto', __kwargtrans__ ({text: 'Auto Fly Speed'}));
-			layout.separator ();
+			(function () {
+				var __accu0__ = colsub;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_fly_speed_auto', __kwargtrans__ ({text: 'Auto Fly Speed'}));
+			}) ();
+			// pass;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		if (show_3dview_settings) {
-			var col = layout.column (__kwargtrans__ ({heading: 'Orbit Center'}));
-			col.active = props.ndof_navigation_mode == 'OBJECT';
-			col.prop (props, 'ndof_orbit_center_auto');
-			var colsub = col.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Orbit Center'}));
+			}) ();
+			col.active = __eq__ (props.ndof_navigation_mode, 'OBJECT');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_orbit_center_auto');
+			}) ();
+			var colsub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			colsub.active = props.ndof_orbit_center_auto;
-			colsub.prop (props, 'ndof_orbit_center_selected');
-			col.separator ();
-			var col = layout.column (__kwargtrans__ ({heading: 'Show'}));
-			col.prop (props, 'ndof_show_guide_orbit_axis', __kwargtrans__ ({text: 'Orbit Axis'}));
-			var colsub = col.column ();
-			colsub.active = props.ndof_navigation_mode == 'OBJECT';
-			colsub.prop (props, 'ndof_show_guide_orbit_center', __kwargtrans__ ({text: 'Orbit Center'}));
+			(function () {
+				var __accu0__ = colsub;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_orbit_center_selected');
+			}) ();
+			// pass;
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_show_guide_orbit_axis', __kwargtrans__ ({text: 'Orbit Axis'}));
+			}) ();
+			var colsub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			colsub.active = __eq__ (props.ndof_navigation_mode, 'OBJECT');
+			(function () {
+				var __accu0__ = colsub;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_show_guide_orbit_center', __kwargtrans__ ({text: 'Orbit Center'}));
+			}) ();
+			// pass;
 		}
-		layout.separator ();
-		var __left0__ = layout.panel ('NDOF_advanced', __kwargtrans__ ({default_closed: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'NDOF_advanced', __kwargtrans__ ({default_closed: true}));
+		}) ();
 		var layout_header = __left0__ [0];
 		var layout_advanced = __left0__ [1];
-		layout_header.label (__kwargtrans__ ({text: 'Advanced'}));
+		(function () {
+			var __accu0__ = layout_header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Advanced'}));
+		}) ();
 		if (layout_advanced) {
-			var col = layout_advanced.column ();
-			col.prop (props, 'ndof_translation_sensitivity');
-			col.prop (props, 'ndof_rotation_sensitivity');
-			col.prop (props, 'ndof_deadzone');
-			col.separator ();
-			col.row ().prop (props, 'ndof_zoom_direction', __kwargtrans__ ({expand: true}));
-			col.separator ();
-			var row = col.row (__kwargtrans__ ({heading: (show_3dview_settings ? 'Invert Pan' : 'Invert Pan Axis')}));
-			for (var [text, attr] of tuple ([tuple (['X', 'ndof_panx_invert_axis']), tuple (['Y', 'ndof_pany_invert_axis']), tuple (['Z', 'ndof_panz_invert_axis'])])) {
-				row.prop (props, attr, __kwargtrans__ ({text: text, toggle: true}));
+			var col = (function () {
+				var __accu0__ = layout_advanced;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_translation_sensitivity');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_rotation_sensitivity');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_deadzone');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, props, 'ndof_zoom_direction', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: (show_3dview_settings ? 'Invert Pan' : 'Invert Pan Axis')}));
+			}) ();
+			var __iterable0__ = tuple ([tuple (['X', 'ndof_panx_invert_axis']), tuple (['Y', 'ndof_pany_invert_axis']), tuple (['Z', 'ndof_panz_invert_axis'])]);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var text = __left0__ [0];
+				var attr = __left0__ [1];
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, props, attr, __kwargtrans__ ({text: text, toggle: true}));
+				}) ();
 			}
 			if (show_3dview_settings) {
-				var row = col.row (__kwargtrans__ ({heading: 'Invert Rotate'}));
-				for (var [text, attr] of tuple ([tuple (['X', 'ndof_rotx_invert_axis']), tuple (['Y', 'ndof_roty_invert_axis']), tuple (['Z', 'ndof_rotz_invert_axis'])])) {
-					row.prop (props, attr, __kwargtrans__ ({text: text, toggle: true}));
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Invert Rotate'}));
+				}) ();
+				var __iterable0__ = tuple ([tuple (['X', 'ndof_rotx_invert_axis']), tuple (['Y', 'ndof_roty_invert_axis']), tuple (['Z', 'ndof_rotz_invert_axis'])]);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var __left0__ = __getitem__ (__iterable0__, __index0__);
+					var text = __left0__ [0];
+					var attr = __left0__ [1];
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, props, attr, __kwargtrans__ ({text: text, toggle: true}));
+					}) ();
 				}
 			}
 			if (show_3dview_settings) {
-				col.prop (props, 'ndof_lock_camera_pan_zoom');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'ndof_lock_camera_pan_zoom');
+				}) ();
 			}
 		}
 	};},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3430,8 +5350,11 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var input_prefs = context.preferences.inputs;
-		var is_view3d = context.space_data.py_metatype == 'VIEW_3D';
-		self.draw_settings (layout, input_prefs, is_view3d);
+		var is_view3d = __eq__ (context.space_data.py_metatype, 'VIEW_3D');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_settings, __accu0__, layout, input_prefs, is_view3d);
+		}) ();
 	});}
 });
 export var KeymapPanel =  __class__ ('KeymapPanel', [object], {
@@ -3448,7 +5371,7 @@ export var USERPREF_MT_keyconfigs =  __class__ ('USERPREF_MT_keyconfigs', [Menu]
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3460,7 +5383,10 @@ export var USERPREF_MT_keyconfigs =  __class__ ('USERPREF_MT_keyconfigs', [Menu]
 		}
 		else {
 		}
-		Menu.draw_preset (self, context);
+		(function () {
+			var __accu0__ = Menu;
+			return __call__ (__accu0__.draw_preset, __accu0__, self, context);
+		}) ();
 	});}
 });
 export var USERPREF_PT_keymap =  __class__ ('USERPREF_PT_keymap', [KeymapPanel, Panel], {
@@ -3470,7 +5396,7 @@ export var USERPREF_PT_keymap =  __class__ ('USERPREF_PT_keymap', [KeymapPanel, 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3482,9 +5408,9 @@ export var USERPREF_PT_keymap =  __class__ ('USERPREF_PT_keymap', [KeymapPanel, 
 		}
 		else {
 		}
-		var draw_keymaps = _member ('rna_keymap_ui', 'draw_keymaps');
+		var draw_keymaps = __call__ (_member, null, 'rna_keymap_ui', 'draw_keymaps');
 		var layout = self.layout;
-		draw_keymaps (context, layout);
+		__call__ (draw_keymaps, null, context, layout);
 	});}
 });
 export var USERPREF_MT_extensions_active_repo =  __class__ ('USERPREF_MT_extensions_active_repo', [Menu], {
@@ -3493,7 +5419,7 @@ export var USERPREF_MT_extensions_active_repo =  __class__ ('USERPREF_MT_extensi
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3514,7 +5440,7 @@ export var USERPREF_MT_extensions_active_repo_remove =  __class__ ('USERPREF_MT_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3530,7 +5456,7 @@ export var USERPREF_MT_extensions_active_repo_remove =  __class__ ('USERPREF_MT_
 		var extensions = context.preferences.extensions;
 		var active_repo_index = extensions.active_repo;
 		try {
-			var active_repo = (active_repo_index < 0 ? null : extensions.repos [active_repo_index]);
+			var active_repo = (__lt__ (active_repo_index, 0) ? null : __getitem__ (extensions.repos, active_repo_index));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, IndexError)) {
@@ -3540,11 +5466,17 @@ export var USERPREF_MT_extensions_active_repo_remove =  __class__ ('USERPREF_MT_
 				throw __except0__;
 			}
 		}
-		var is_system_repo = active_repo.use_remote_url === false && active_repo.source == 'SYSTEM';
-		var props = layout.operator ('preferences.extension_repo_remove', __kwargtrans__ ({text: 'Remove Repository'}));
+		var is_system_repo = active_repo.use_remote_url === false && __eq__ (active_repo.source, 'SYSTEM');
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.extension_repo_remove', __kwargtrans__ ({text: 'Remove Repository'}));
+		}) ();
 		props.index = active_repo_index;
 		if (!(is_system_repo)) {
-			var props = layout.operator ('preferences.extension_repo_remove', __kwargtrans__ ({text: 'Remove Repository & Files'}));
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.extension_repo_remove', __kwargtrans__ ({text: 'Remove Repository & Files'}));
+			}) ();
 			props.index = active_repo_index;
 			props.remove_files = true;
 		}
@@ -3560,7 +5492,7 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3577,15 +5509,36 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 		layout.use_property_decorate = false;
 		var extensions = context.preferences.extensions;
 		var active_repo_index = extensions.active_repo;
-		var row = layout.row ();
-		row.template_list ('USERPREF_UL_extension_repos', 'user_extension_repos', extensions, 'repos', extensions, 'active_repo');
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator_menu_enum ('preferences.extension_repo_add', 'type', __kwargtrans__ ({text: '', icon: 'ADD'}));
-		col.menu ('USERPREF_MT_extensions_active_repo_remove', __kwargtrans__ ({text: '', icon: 'REMOVE'}));
-		col.separator ();
-		col.menu_contents ('USERPREF_MT_extensions_active_repo');
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'USERPREF_UL_extension_repos', 'user_extension_repos', extensions, 'repos', extensions, 'active_repo');
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'preferences.extension_repo_add', 'type', __kwargtrans__ ({text: '', icon: 'ADD'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'USERPREF_MT_extensions_active_repo_remove', __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu_contents, __accu0__, 'USERPREF_MT_extensions_active_repo');
+		}) ();
 		try {
-			var active_repo = (active_repo_index < 0 ? null : extensions.repos [active_repo_index]);
+			var active_repo = (__lt__ (active_repo_index, 0) ? null : __getitem__ (extensions.repos, active_repo_index));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, IndexError)) {
@@ -3600,54 +5553,126 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 		}
 		var use_remote_url = active_repo.use_remote_url;
 		if (use_remote_url) {
-			var row = layout.row ();
-			var py_split = row.py_split (__kwargtrans__ ({factor: 0.936}));
-			if (active_repo.remote_url == '') {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			var py_split = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.936}));
+			}) ();
+			if (__eq__ (active_repo.remote_url, '')) {
 				py_split.alert = true;
 			}
-			py_split.prop (active_repo, 'remote_url', __kwargtrans__ ({text: '', icon: 'INTERNET', placeholder: 'Repository URL'}));
-			var py_split = row.py_split ();
+			(function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.prop, __accu0__, active_repo, 'remote_url', __kwargtrans__ ({text: '', icon: 'INTERNET', placeholder: 'Repository URL'}));
+			}) ();
+			var py_split = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
 			if (active_repo.use_access_token) {
 				var access_token_icon = (active_repo.access_token ? 'LOCKED' : 'UNLOCKED');
-				var row = layout.row ();
-				var py_split = row.py_split (__kwargtrans__ ({factor: 0.936}));
-				py_split.prop (active_repo, 'access_token', __kwargtrans__ ({icon: access_token_icon}));
-				var py_split = row.py_split ();
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				var py_split = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.936}));
+				}) ();
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.prop, __accu0__, active_repo, 'access_token', __kwargtrans__ ({icon: access_token_icon}));
+				}) ();
+				var py_split = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.py_split, __accu0__);
+				}) ();
 			}
-			layout.prop (active_repo, 'use_sync_on_startup');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, active_repo, 'use_sync_on_startup');
+			}) ();
 		}
-		var __left0__ = layout.panel ('advanced', __kwargtrans__ ({default_closed: true}));
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'advanced', __kwargtrans__ ({default_closed: true}));
+		}) ();
 		var layout_header = __left0__ [0];
 		var layout_panel = __left0__ [1];
-		layout_header.label (__kwargtrans__ ({text: 'Advanced'}));
+		(function () {
+			var __accu0__ = layout_header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Advanced'}));
+		}) ();
 		if (layout_panel) {
 			layout_panel.use_property_split = true;
 			var use_custom_directory = active_repo.use_custom_directory;
-			var col = layout_panel.column (__kwargtrans__ ({align: false, heading: 'Custom Directory'}));
-			var row = col.row (__kwargtrans__ ({align: true}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.prop (active_repo, 'use_custom_directory', __kwargtrans__ ({text: ''}));
-			var sub = sub.row (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = layout_panel;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Custom Directory'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, active_repo, 'use_custom_directory', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = use_custom_directory;
 			if (use_custom_directory) {
-				if (active_repo.custom_directory == '') {
+				if (__eq__ (active_repo.custom_directory, '')) {
 					sub.alert = true;
 				}
-				sub.prop (active_repo, 'custom_directory', __kwargtrans__ ({text: ''}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, active_repo, 'custom_directory', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
 			else {
-				sub.prop (active_repo, 'directory', __kwargtrans__ ({text: ''}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, active_repo, 'directory', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
 			if (use_remote_url) {
-				var row = layout_panel.row (__kwargtrans__ ({align: true, heading: 'Authentication'}));
-				row.prop (active_repo, 'use_access_token');
-				layout_panel.prop (active_repo, 'use_cache');
+				var row = (function () {
+					var __accu0__ = layout_panel;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Authentication'}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, active_repo, 'use_access_token');
+				}) ();
+				(function () {
+					var __accu0__ = layout_panel;
+					return __call__ (__accu0__.prop, __accu0__, active_repo, 'use_cache');
+				}) ();
 			}
 			else {
-				layout_panel.prop (active_repo, 'source');
+				(function () {
+					var __accu0__ = layout_panel;
+					return __call__ (__accu0__.prop, __accu0__, active_repo, 'source');
+				}) ();
 			}
-			layout_panel.separator ();
-			layout_panel.prop (active_repo, 'module');
+			(function () {
+				var __accu0__ = layout_panel;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout_panel;
+				return __call__ (__accu0__.prop, __accu0__, active_repo, 'module');
+			}) ();
 		}
 	});}
 });
@@ -3664,7 +5689,7 @@ export var USERPREF_PT_extensions =  __class__ ('USERPREF_PT_extensions', [Exten
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3688,7 +5713,7 @@ export var USERPREF_PT_addons_filter =  __class__ ('USERPREF_PT_addons_filter', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3700,7 +5725,10 @@ export var USERPREF_PT_addons_filter =  __class__ ('USERPREF_PT_addons_filter', 
 		}
 		else {
 		}
-		USERPREF_PT_addons._draw_addon_header_for_extensions_popover (self.layout, context);
+		(function () {
+			var __accu0__ = USERPREF_PT_addons;
+			return __call__ (__accu0__._draw_addon_header_for_extensions_popover, __accu0__, self.layout, context);
+		}) ();
 	});}
 });
 export var AddOnPanel =  __class__ ('AddOnPanel', [object], {
@@ -3717,7 +5745,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 	get is_user_addon () {return function (mod, user_addon_paths) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3729,16 +5757,37 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		if (!(user_addon_paths)) {
-			for (var path of _joined ([bpy.utils.script_path_user ()], bpy.utils.script_paths_pref ())) {
+			var __iterable0__ = __call__ (_joined, null, [(function () {
+				var __accu0__ = bpy.utils;
+				return __call__ (__accu0__.script_path_user, __accu0__);
+			}) ()], (function () {
+				var __accu0__ = bpy.utils;
+				return __call__ (__accu0__.script_paths_pref, __accu0__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var path = __getitem__ (__iterable0__, __index0__);
 				if (path !== null) {
-					user_addon_paths.append (os.path.join (path, 'addons'));
+					(function () {
+						var __accu0__ = user_addon_paths;
+						return __call__ (__accu0__.append, __accu0__, (function () {
+							var __accu1__ = os.path;
+							return __call__ (__accu1__.join, __accu1__, path, 'addons');
+						}) ());
+					}) ();
 				}
 			}
 		}
-		for (var path of user_addon_paths) {
-			if (bpy.path.is_subdir (mod.__file__, path)) {
+		var __iterable0__ = user_addon_paths;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = bpy.path;
+				return __call__ (__accu0__.is_subdir, __accu0__, mod.__file__, path);
+			}) ()) {
 				return true;
 			}
 		}
@@ -3747,7 +5796,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 	get draw_addon_preferences () {return function (layout, context, addon_preferences) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3760,22 +5809,34 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		else {
 		}
-		var draw = getattr (addon_preferences, 'draw', null);
+		var draw = __call__ (getattr, null, addon_preferences, 'draw', null);
 		if (draw === null) {
 			return ;
 		}
 		var addon_preferences_class = py_typeof (addon_preferences);
-		layout.label (__kwargtrans__ ({text: ' Preferences'}));
-		var box_prefs = layout.box ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: ' Preferences'}));
+		}) ();
+		var box_prefs = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
 		addon_preferences_class.layout = box_prefs;
 		try {
-			draw (context);
+			__call__ (draw, null, context);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
-				var traceback = _module ('traceback');
-				traceback.print_exc ();
-				box_prefs.label (__kwargtrans__ ({text: 'Error (see console)', icon: 'ERROR'}));
+				var traceback = __call__ (_module, null, 'traceback');
+				(function () {
+					var __accu0__ = traceback;
+					return __call__ (__accu0__.print_exc, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = box_prefs;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Error (see console)', icon: 'ERROR'}));
+				}) ();
 			}
 			else {
 				throw __except0__;
@@ -3786,7 +5847,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 	get draw_error () {return function (layout, message) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3798,19 +5859,40 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		else {
 		}
-		var lines = message.py_split ('\n');
-		var box = layout.box ();
-		var sub = box.row ();
-		sub.label (__kwargtrans__ ({text: lines [0]}));
-		sub.label (__kwargtrans__ ({icon: 'ERROR'}));
-		for (var line of lines.__getslice__ (1, null, 1)) {
-			box.label (__kwargtrans__ ({text: line}));
+		var lines = (function () {
+			var __accu0__ = message;
+			return __call__ (__accu0__.py_split, __accu0__, '\n');
+		}) ();
+		var box = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __getitem__ (lines, 0)}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'ERROR'}));
+		}) ();
+		var __iterable0__ = __getslice__ (lines, 1, null, 1);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var line = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: line}));
+			}) ();
 		}
 	};},
 	get _draw_addon_header () {return function (layout, prefs, wm) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3823,21 +5905,51 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		else {
 		}
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.6}));
-		var row = py_split.row ();
-		row.prop (wm, 'addon_support', __kwargtrans__ ({expand: true}));
-		var row = py_split.row (__kwargtrans__ ({align: true}));
-		row.operator ('preferences.addon_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
-		row.operator ('preferences.addon_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: 'Refresh'}));
-		var row = layout.row ();
-		row.prop (prefs.view, 'show_addons_enabled_only');
-		row.prop (wm, 'addon_filter', __kwargtrans__ ({text: ''}));
-		row.prop (wm, 'addon_search', __kwargtrans__ ({text: '', icon: 'VIEWZOOM'}));
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.6}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, wm, 'addon_support', __kwargtrans__ ({expand: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: 'Refresh'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prefs.view, 'show_addons_enabled_only');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, wm, 'addon_filter', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, wm, 'addon_search', __kwargtrans__ ({text: '', icon: 'VIEWZOOM'}));
+		}) ();
 	};},
 	get _draw_addon_header_for_extensions_popover () {return function (layout, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3851,18 +5963,39 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		var wm = context.window_manager;
 		var prefs = context.preferences;
-		var row = layout.row ();
-		row.prop (wm, 'addon_support', __kwargtrans__ ({expand: true}));
-		var row = layout.row ();
-		row.prop (prefs.view, 'show_addons_enabled_only');
-		var row = layout.row ();
-		row.operator ('preferences.addon_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
-		row.operator ('preferences.addon_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: 'Refresh'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, wm, 'addon_support', __kwargtrans__ ({expand: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prefs.view, 'show_addons_enabled_only');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: 'Refresh'}));
+		}) ();
 	};},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3874,160 +6007,449 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		else {
 		}
-		var os = _module ('os');
-		var addon_utils = _module ('addon_utils');
+		var os = __call__ (_module, null, 'os');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var prefs = context.preferences;
-		if (self.is_extended ()) {
+		if ((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.is_extended, __accu0__);
+		}) ()) {
 			return ;
 		}
 		var layout = self.layout;
 		var wm = context.window_manager;
 		var used_addon_module_name_map = (function () {
 			var __accu0__ = [];
-			for (var addon of prefs.addons) {
-				__accu0__.append ([addon.module, addon]);
+			var __iterable0__ = prefs.addons;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var addon = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, [addon.module, addon]);
+				}) ();
 			}
 			return dict (__accu0__);
 		}) ();
-		var addon_user_dirs = tuple ((function () {
+		var addon_user_dirs = __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var p of list (_joined ((function () {
+			var __iterable0__ = __call__ (list, null, __call__ (_joined, null, (function () {
 				var __accu1__ = [];
-				for (var pref_p of list (bpy.utils.script_paths_pref ())) {
-					__accu1__.append (os.path.join (pref_p, 'addons'));
+				var __iterable1__ = __call__ (list, null, (function () {
+					var __accu2__ = bpy.utils;
+					return __call__ (__accu2__.script_paths_pref, __accu2__);
+				}) ());
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index0__ = 0; __index0__ < len (__iterable1__); __index0__++) {
+					var pref_p = __getitem__ (__iterable1__, __index0__);
+					(function () {
+						var __accu2__ = __accu1__;
+						return __call__ (__accu2__.append, __accu2__, (function () {
+							var __accu3__ = os.path;
+							return __call__ (__accu3__.join, __accu3__, pref_p, 'addons');
+						}) ());
+					}) ();
 				}
 				return __accu1__;
-			}) (), [bpy.utils.user_resource ('SCRIPTS', __kwargtrans__ ({path: 'addons'}))]))) {
+			}) (), [(function () {
+				var __accu1__ = bpy.utils;
+				return __call__ (__accu1__.user_resource, __accu1__, 'SCRIPTS', __kwargtrans__ ({path: 'addons'}));
+			}) ()]));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var p = __getitem__ (__iterable0__, __index0__);
 				if (p) {
-					__accu0__.append (p);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, p);
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ());
-		self._draw_addon_header (layout, prefs, wm);
-		var layout_topmost = layout.column ();
-		var col = layout.column ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._draw_addon_header, __accu0__, layout, prefs, wm);
+		}) ();
+		var layout_topmost = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		if (addon_utils.error_duplicates) {
-			var box = col.box ();
-			var row = box.row ();
-			row.label (__kwargtrans__ ({text: 'Multiple add-ons with the same name found!'}));
-			row.label (__kwargtrans__ ({icon: 'ERROR'}));
-			box.label (__kwargtrans__ ({text: 'Delete one of each pair to resolve:'}));
-			for (var [addon_name, addon_file, addon_path] of addon_utils.error_duplicates) {
-				box.separator ();
-				var sub_col = box.column (__kwargtrans__ ({align: true}));
-				sub_col.label (__kwargtrans__ ({text: addon_name + ':'}));
-				var sub_row = sub_col.row ();
-				sub_row.label (__kwargtrans__ ({text: '    ' + addon_file}));
-				sub_row.operator ('wm.path_open', __kwargtrans__ ({text: '', icon: 'FILE_FOLDER'})).filepath = os.path.dirname (addon_file);
-				var sub_row = sub_col.row ();
-				sub_row.label (__kwargtrans__ ({text: '    ' + addon_path}));
-				sub_row.operator ('wm.path_open', __kwargtrans__ ({text: '', icon: 'FILE_FOLDER'})).filepath = os.path.dirname (addon_path);
+			var box = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.box, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Multiple add-ons with the same name found!'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'ERROR'}));
+			}) ();
+			(function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Delete one of each pair to resolve:'}));
+			}) ();
+			var __iterable0__ = addon_utils.error_duplicates;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var addon_name = __left0__ [0];
+				var addon_file = __left0__ [1];
+				var addon_path = __left0__ [2];
+				(function () {
+					var __accu0__ = box;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var sub_col = (function () {
+					var __accu0__ = box;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub_col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __add__ (addon_name, ':')}));
+				}) ();
+				var sub_row = (function () {
+					var __accu0__ = sub_col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = sub_row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __add__ ('    ', addon_file)}));
+				}) ();
+				(function () {
+					var __accu0__ = sub_row;
+					return __call__ (__accu0__.operator, __accu0__, 'wm.path_open', __kwargtrans__ ({text: '', icon: 'FILE_FOLDER'}));
+				}) ().filepath = (function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.dirname, __accu0__, addon_file);
+				}) ();
+				var sub_row = (function () {
+					var __accu0__ = sub_col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = sub_row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __add__ ('    ', addon_path)}));
+				}) ();
+				(function () {
+					var __accu0__ = sub_row;
+					return __call__ (__accu0__.operator, __accu0__, 'wm.path_open', __kwargtrans__ ({text: '', icon: 'FILE_FOLDER'}));
+				}) ().filepath = (function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.dirname, __accu0__, addon_path);
+				}) ();
 			}
 		}
 		if (addon_utils.error_encoding) {
-			self.draw_error (col, 'One or more addons do not have UTF-8 encoding\n(see console for details)');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_error, __accu0__, col, 'One or more addons do not have UTF-8 encoding\n(see console for details)');
+			}) ();
 		}
 		var show_enabled_only = prefs.view.show_addons_enabled_only;
 		var filter = wm.addon_filter;
-		var search = wm.addon_search.casefold ();
+		var search = (function () {
+			var __accu0__ = wm.addon_search;
+			return __call__ (__accu0__.casefold, __accu0__);
+		}) ();
 		var support = wm.addon_support;
-		var module_names = set ();
+		var module_names = __call__ (set, null);
 		var user_addon_paths = [];
-		for (var mod of addon_utils.modules (__kwargtrans__ ({refresh: false}))) {
+		var __iterable0__ = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules, __accu0__, __kwargtrans__ ({refresh: false}));
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var mod = __getitem__ (__iterable0__, __index0__);
 			var addon_module_name = mod.__name__;
-			module_names.add (addon_module_name);
-			var bl_info = addon_utils.module_bl_info (mod);
+			(function () {
+				var __accu0__ = module_names;
+				return __call__ (__accu0__.add, __accu0__, addon_module_name);
+			}) ();
+			var bl_info = (function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.module_bl_info, __accu0__, mod);
+			}) ();
 			var is_enabled = __in__ (addon_module_name, used_addon_module_name_map);
-			if (!__in__ (bl_info ['support'], support)) {
+			if (!__in__ (__getitem__ (bl_info, 'support'), support)) {
 				continue;
 			}
-			var is_visible = filter == 'All' || filter == bl_info ['category'] || filter == 'User' && mod.__file__.startswith (addon_user_dirs);
+			var is_visible = __eq__ (filter, 'All') || __eq__ (filter, __getitem__ (bl_info, 'category')) || __eq__ (filter, 'User') && (function () {
+				var __accu0__ = mod.__file__;
+				return __call__ (__accu0__.startswith, __accu0__, addon_user_dirs);
+			}) ();
 			if (show_enabled_only) {
 				var is_visible = is_visible && is_enabled;
 			}
 			if (!(is_visible)) {
 				continue;
 			}
-			if (search && !((__in__ (search, bl_info ['name'].casefold ()) || __in__ (search, iface_ (bl_info ['name']).casefold ())) || bl_info ['author'] && __in__ (search, bl_info ['author'].casefold ()) || filter == 'All' && (__in__ (search, bl_info ['category'].casefold ()) || __in__ (search, iface_ (bl_info ['category']).casefold ())))) {
+			if (search && !((__in__ (search, (function () {
+				var __accu0__ = __getitem__ (bl_info, 'name');
+				return __call__ (__accu0__.casefold, __accu0__);
+			}) ()) || __in__ (search, (function () {
+				var __accu0__ = __call__ (iface_, null, __getitem__ (bl_info, 'name'));
+				return __call__ (__accu0__.casefold, __accu0__);
+			}) ())) || __getitem__ (bl_info, 'author') && __in__ (search, (function () {
+				var __accu0__ = __getitem__ (bl_info, 'author');
+				return __call__ (__accu0__.casefold, __accu0__);
+			}) ()) || __eq__ (filter, 'All') && (__in__ (search, (function () {
+				var __accu0__ = __getitem__ (bl_info, 'category');
+				return __call__ (__accu0__.casefold, __accu0__);
+			}) ()) || __in__ (search, (function () {
+				var __accu0__ = __call__ (iface_, null, __getitem__ (bl_info, 'category'));
+				return __call__ (__accu0__.casefold, __accu0__);
+			}) ())))) {
 				continue;
 			}
-			var col_box = col.column ();
-			var box = col_box.box ();
-			var colsub = box.column ();
-			var row = colsub.row (__kwargtrans__ ({align: true}));
-			row.operator ('preferences.addon_expand', __kwargtrans__ ({icon: (bl_info ['show_expanded'] ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT'), emboss: false})).module = addon_module_name;
-			row.operator ((is_enabled ? 'preferences.addon_disable' : 'preferences.addon_enable'), __kwargtrans__ ({icon: (is_enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: '', emboss: false})).module = addon_module_name;
-			var sub = row.row ();
+			var col_box = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var box = (function () {
+				var __accu0__ = col_box;
+				return __call__ (__accu0__.box, __accu0__);
+			}) ();
+			var colsub = (function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = colsub;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_expand', __kwargtrans__ ({icon: (__getitem__ (bl_info, 'show_expanded') ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT'), emboss: false}));
+			}) ().module = addon_module_name;
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, (is_enabled ? 'preferences.addon_disable' : 'preferences.addon_enable'), __kwargtrans__ ({icon: (is_enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: '', emboss: false}));
+			}) ().module = addon_module_name;
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			sub.active = is_enabled;
-			sub.label (__kwargtrans__ ({text: '{:s}: {:s}'.format (iface_ (bl_info ['category']), iface_ (bl_info ['name']))}));
-			if (bl_info ['warning']) {
-				sub.label (__kwargtrans__ ({icon: 'ERROR'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = '{:s}: {:s}';
+					return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, __getitem__ (bl_info, 'category')), __call__ (iface_, null, __getitem__ (bl_info, 'name')));
+				}) ()}));
+			}) ();
+			if (__getitem__ (bl_info, 'warning')) {
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'ERROR'}));
+				}) ();
 			}
-			sub.label (__kwargtrans__ ({icon: self._support_icon_mapping.py_get (bl_info ['support'], 'QUESTION')}));
-			if (bl_info ['show_expanded']) {
-				var value = bl_info ['description'];
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: (function () {
+					var __accu1__ = self._support_icon_mapping;
+					return __call__ (__accu1__.py_get, __accu1__, __getitem__ (bl_info, 'support'), 'QUESTION');
+				}) ()}));
+			}) ();
+			if (__getitem__ (bl_info, 'show_expanded')) {
+				var value = __getitem__ (bl_info, 'description');
 				if (value) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'Description:'}));
-					py_split.label (__kwargtrans__ ({text: iface_ (value)}));
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Description:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __call__ (iface_, null, value)}));
+					}) ();
 				}
-				var value = bl_info ['location'];
+				var value = __getitem__ (bl_info, 'location');
 				if (value) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'Location:'}));
-					py_split.label (__kwargtrans__ ({text: iface_ (value)}));
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Location:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __call__ (iface_, null, value)}));
+					}) ();
 				}
 				if (mod) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'File:'}));
-					py_split.label (__kwargtrans__ ({text: mod.__file__, translate: false}));
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'File:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: mod.__file__, translate: false}));
+					}) ();
 				}
-				var value = bl_info ['author'];
+				var value = __getitem__ (bl_info, 'author');
 				if (value) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'Author:'}));
-					py_split.label (__kwargtrans__ ({text: value, translate: false}));
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Author:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: value, translate: false}));
+					}) ();
 				}
-				var value = bl_info ['version'];
+				var value = __getitem__ (bl_info, 'version');
 				if (value) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'Version:'}));
-					py_split.label (__kwargtrans__ ({text: '.'.join ((function () {
-						var __accu0__ = [];
-						for (var x of value) {
-							__accu0__.append (str (x));
-						}
-						return __accu0__;
-					}) ()), translate: false}));
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Version:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+							var __accu1__ = '.';
+							return __call__ (__accu1__.join, __accu1__, (function () {
+								var __accu2__ = [];
+								var __iterable1__ = value;
+								__iterable1__ = __i__ (__iterable1__);
+								for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+									var x = __getitem__ (__iterable1__, __index1__);
+									(function () {
+										var __accu3__ = __accu2__;
+										return __call__ (__accu3__.append, __accu3__, __call__ (str, null, x));
+									}) ();
+								}
+								return __accu2__;
+							}) ());
+						}) (), translate: false}));
+					}) ();
 				}
-				var value = bl_info ['warning'];
+				var value = __getitem__ (bl_info, 'warning');
 				if (value) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'Warning:'}));
-					py_split.label (__kwargtrans__ ({text: '  ' + iface_ (value), icon: 'ERROR'}));
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Warning:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __add__ ('  ', __call__ (iface_, null, value)), icon: 'ERROR'}));
+					}) ();
 				}
-				var user_addon = USERPREF_PT_addons.is_user_addon (mod, user_addon_paths);
-				if (bl_info ['doc_url'] || bl_info.py_get ('tracker_url')) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'Internet:'}));
-					var sub = py_split.row ();
-					if (bl_info ['doc_url']) {
-						sub.operator ('wm.url_open', __kwargtrans__ ({text: 'Documentation', icon: 'HELP'})).url = bl_info ['doc_url'];
+				// pass;
+				var user_addon = (function () {
+					var __accu0__ = USERPREF_PT_addons;
+					return __call__ (__accu0__.is_user_addon, __accu0__, mod, user_addon_paths);
+				}) ();
+				if (__getitem__ (bl_info, 'doc_url') || (function () {
+					var __accu0__ = bl_info;
+					return __call__ (__accu0__.py_get, __accu0__, 'tracker_url');
+				}) ()) {
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Internet:'}));
+					}) ();
+					var sub = (function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
+					if (__getitem__ (bl_info, 'doc_url')) {
+						(function () {
+							var __accu0__ = sub;
+							return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Documentation', icon: 'HELP'}));
+						}) ().url = __getitem__ (bl_info, 'doc_url');
 					}
-					if (bl_info.py_get ('tracker_url')) {
-						sub.operator ('wm.url_open', __kwargtrans__ ({text: 'Report a Bug', icon: 'URL'})).url = bl_info ['tracker_url'];
+					if ((function () {
+						var __accu0__ = bl_info;
+						return __call__ (__accu0__.py_get, __accu0__, 'tracker_url');
+					}) ()) {
+						(function () {
+							var __accu0__ = sub;
+							return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Report a Bug', icon: 'URL'}));
+						}) ().url = __getitem__ (bl_info, 'tracker_url');
 					}
 				}
 				if (user_addon) {
-					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
-					py_split.label (__kwargtrans__ ({text: 'User:'}));
-					py_split.operator ('preferences.addon_remove', __kwargtrans__ ({text: 'Remove', icon: 'CANCEL'})).module = mod.__name__;
+					var py_split = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = colsub;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.15}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'User:'}));
+					}) ();
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_remove', __kwargtrans__ ({text: 'Remove', icon: 'CANCEL'}));
+					}) ().module = mod.__name__;
 				}
 				if (is_enabled) {
-					var addon_preferences = used_addon_module_name_map [addon_module_name].preferences;
+					var addon_preferences = __getitem__ (used_addon_module_name_map, addon_module_name).preferences;
 					if (addon_preferences !== null) {
-						self.draw_addon_preferences (col_box, context, addon_preferences);
+						(function () {
+							var __accu0__ = self;
+							return __call__ (__accu0__.draw_addon_preferences, __accu0__, col_box, context, addon_preferences);
+						}) ();
 					}
 				}
 			}
@@ -4035,26 +6457,68 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		if (__in__ (filter, new set (['All', 'Enabled']))) {
 			var missing_modules = (function () {
 				var __accu0__ = [];
-				for (var addon_module_name of used_addon_module_name_map) {
+				var __iterable0__ = used_addon_module_name_map;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var addon_module_name = __getitem__ (__iterable0__, __index0__);
 					if (!__in__ (addon_module_name, module_names)) {
-						__accu0__.append (addon_module_name);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, addon_module_name);
+						}) ();
 					}
 				}
 				return set (__accu0__);
 			}) ();
 			if (missing_modules) {
-				layout_topmost.column ().separator ();
-				layout_topmost.column ().label (__kwargtrans__ ({text: 'Missing script files'}));
-				for (var addon_module_name of sorted (missing_modules)) {
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = layout_topmost;
+						return __call__ (__accu1__.column, __accu1__);
+					}) ();
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = layout_topmost;
+						return __call__ (__accu1__.column, __accu1__);
+					}) ();
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Missing script files'}));
+				}) ();
+				var __iterable0__ = __call__ (sorted, null, missing_modules);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var addon_module_name = __getitem__ (__iterable0__, __index0__);
 					var is_enabled = __in__ (addon_module_name, used_addon_module_name_map);
-					var box = layout_topmost.column ().box ();
-					var colsub = box.column ();
-					var row = colsub.row (__kwargtrans__ ({align: true}));
-					row.label (__kwargtrans__ ({text: '', icon: 'ERROR'}));
+					var box = (function () {
+						var __accu0__ = (function () {
+							var __accu1__ = layout_topmost;
+							return __call__ (__accu1__.column, __accu1__);
+						}) ();
+						return __call__ (__accu0__.box, __accu0__);
+					}) ();
+					var colsub = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
+					var row = (function () {
+						var __accu0__ = colsub;
+						return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon: 'ERROR'}));
+					}) ();
 					if (is_enabled) {
-						row.operator ('preferences.addon_disable', __kwargtrans__ ({icon: 'CHECKBOX_HLT', text: '', emboss: false})).module = addon_module_name;
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_disable', __kwargtrans__ ({icon: 'CHECKBOX_HLT', text: '', emboss: false}));
+						}) ().module = addon_module_name;
 					}
-					row.label (__kwargtrans__ ({text: addon_module_name, translate: false}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: addon_module_name, translate: false}));
+					}) ();
 				}
 			}
 		}
@@ -4073,7 +6537,7 @@ export var USERPREF_PT_assets =  __class__ ('USERPREF_PT_assets', [AssetsPanel, 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4090,10 +6554,16 @@ export var USERPREF_PT_assets =  __class__ ('USERPREF_PT_assets', [AssetsPanel, 
 			return ;
 		}
 		var has_online_essentials = prefs.asset_libraries.use_online_essentials;
-		var has_online_library = has_online_essentials || any ((function () {
+		var has_online_library = has_online_essentials || __call__ (any, null, (function () {
 			var __accu0__ = [];
-			for (var library of prefs.filepaths.asset_libraries) {
-				__accu0__.append (library.enabled && library.use_remote_url);
+			var __iterable0__ = prefs.filepaths.asset_libraries;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var library = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, library.enabled && library.use_remote_url);
+				}) ();
 			}
 			return __accu0__;
 		}) ());
@@ -4101,22 +6571,46 @@ export var USERPREF_PT_assets =  __class__ ('USERPREF_PT_assets', [AssetsPanel, 
 			return ;
 		}
 		var layout = self.layout;
-		var __left0__ = layout.panel ('advanced', __kwargtrans__ ({default_closed: false}));
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'advanced', __kwargtrans__ ({default_closed: false}));
+		}) ();
 		var layout_header = __left0__ [0];
 		var layout_panel = __left0__ [1];
-		layout_header.label (__kwargtrans__ ({text: 'Internet Access Required', icon: 'INTERNET_OFFLINE'}));
+		(function () {
+			var __accu0__ = layout_header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Internet Access Required', icon: 'INTERNET_OFFLINE'}));
+		}) ();
 		if (layout_panel === null) {
 			return ;
 		}
-		var box = layout_panel.box ();
-		for (var line of tuple ([rpt_ ('Internet access is required to browse and download online assets.'), rpt_ ('You can adjust this later from "System" preferences.')])) {
-			box.label (__kwargtrans__ ({text: line, translate: false}));
+		var box = (function () {
+			var __accu0__ = layout_panel;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
+		var __iterable0__ = tuple ([__call__ (rpt_, null, 'Internet access is required to browse and download online assets.'), __call__ (rpt_, null, 'You can adjust this later from "System" preferences.')]);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var line = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: line, translate: false}));
+			}) ();
 		}
-		var row = box.row ();
-		var props = row.operator ('wm.context_set_boolean', __kwargtrans__ ({text: 'Continue Offline', icon: 'X'}));
+		var row = (function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.context_set_boolean', __kwargtrans__ ({text: 'Continue Offline', icon: 'X'}));
+		}) ();
 		props.data_path = 'preferences.extensions.use_online_access_handled';
 		props.value = true;
-		row.operator ('extensions.userpref_allow_online', __kwargtrans__ ({text: 'Allow Online Access', icon: 'CHECKMARK'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'extensions.userpref_allow_online', __kwargtrans__ ({text: 'Allow Online Access', icon: 'CHECKMARK'}));
+		}) ();
 	});}
 });
 export var StudioLightPanel =  __class__ ('StudioLightPanel', [object], {
@@ -4130,7 +6624,7 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 	get _get_lights () {return __get__ (this, function (self, prefs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4144,9 +6638,15 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 		}
 		return (function () {
 			var __accu0__ = [];
-			for (var light of prefs.studio_lights) {
-				if (light.is_user_defined && light.py_metatype == self.sl_type) {
-					__accu0__.append (light);
+			var __iterable0__ = prefs.studio_lights;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var light = __getitem__ (__iterable0__, __index0__);
+				if (light.is_user_defined && __eq__ (light.py_metatype, self.sl_type)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, light);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -4155,7 +6655,7 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4169,13 +6669,19 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 		}
 		var layout = self.layout;
 		var prefs = context.preferences;
-		var lights = self._get_lights (prefs);
-		self.draw_light_list (layout, lights);
+		var lights = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._get_lights, __accu0__, prefs);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_light_list, __accu0__, layout, lights);
+		}) ();
 	});},
 	get draw_light_list () {return __get__ (this, function (self, layout, lights) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4189,19 +6695,34 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 		else {
 		}
 		if (lights) {
-			var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 4, even_columns: true, even_rows: true, align: false}));
-			for (var studio_light of lights) {
-				self.draw_studio_light (flow, studio_light);
+			var flow = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 4, even_columns: true, even_rows: true, align: false}));
+			}) ();
+			var __iterable0__ = lights;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var studio_light = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.draw_studio_light, __accu0__, flow, studio_light);
+				}) ();
 			}
 		}
 		else {
-			layout.label (__kwargtrans__ ({text: self.get_error_message ()}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = self;
+					return __call__ (__accu1__.get_error_message, __accu1__);
+				}) ()}));
+			}) ();
 		}
 	});},
 	get get_error_message () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4212,12 +6733,15 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 		}
 		else {
 		}
-		return rpt_ ('No custom {:s} configured').format (self.bl_label);
+		return (function () {
+			var __accu0__ = __call__ (rpt_, null, 'No custom {:s} configured');
+			return __call__ (__accu0__.format, __accu0__, self.bl_label);
+		}) ();
 	});},
 	get draw_studio_light () {return __get__ (this, function (self, layout, studio_light) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4230,17 +6754,41 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 		}
 		else {
 		}
-		var box = layout.box ();
-		var row = box.row ();
-		row.template_icon (layout.icon (studio_light), __kwargtrans__ ({scale: 3.0}));
-		var col = row.column ();
-		var props = col.operator ('preferences.studiolight_uninstall', __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+		var box = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_icon, __accu0__, (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.icon, __accu1__, studio_light);
+			}) (), __kwargtrans__ ({scale: 3.0}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.studiolight_uninstall', __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+		}) ();
 		props.index = studio_light.index;
-		if (studio_light.py_metatype == 'STUDIO') {
-			var props = col.operator ('preferences.studiolight_copy_settings', __kwargtrans__ ({text: '', icon: 'IMPORT'}));
+		if (__eq__ (studio_light.py_metatype, 'STUDIO')) {
+			var props = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.studiolight_copy_settings', __kwargtrans__ ({text: '', icon: 'IMPORT'}));
+			}) ();
 			props.index = studio_light.index;
 		}
-		box.label (__kwargtrans__ ({text: studio_light.py_name}));
+		(function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: studio_light.py_name}));
+		}) ();
 	});}
 });
 export var USERPREF_PT_studiolight_matcaps =  __class__ ('USERPREF_PT_studiolight_matcaps', [StudioLightPanel, StudioLightPanelMixin, Panel], {
@@ -4250,7 +6798,7 @@ export var USERPREF_PT_studiolight_matcaps =  __class__ ('USERPREF_PT_studioligh
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4263,13 +6811,19 @@ export var USERPREF_PT_studiolight_matcaps =  __class__ ('USERPREF_PT_studioligh
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('preferences.studiolight_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'})).py_metatype = 'MATCAP';
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.studiolight_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
+		}) ().py_metatype = 'MATCAP';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	});},
 	get get_error_message () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4280,7 +6834,7 @@ export var USERPREF_PT_studiolight_matcaps =  __class__ ('USERPREF_PT_studioligh
 		}
 		else {
 		}
-		return rpt_ ('No custom MatCaps configured');
+		return __call__ (rpt_, null, 'No custom MatCaps configured');
 	});}
 });
 export var USERPREF_PT_studiolight_world =  __class__ ('USERPREF_PT_studiolight_world', [StudioLightPanel, StudioLightPanelMixin, Panel], {
@@ -4290,7 +6844,7 @@ export var USERPREF_PT_studiolight_world =  __class__ ('USERPREF_PT_studiolight_
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4303,13 +6857,19 @@ export var USERPREF_PT_studiolight_world =  __class__ ('USERPREF_PT_studiolight_
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('preferences.studiolight_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'})).py_metatype = 'WORLD';
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.studiolight_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
+		}) ().py_metatype = 'WORLD';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	});},
 	get get_error_message () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4320,7 +6880,7 @@ export var USERPREF_PT_studiolight_world =  __class__ ('USERPREF_PT_studiolight_
 		}
 		else {
 		}
-		return rpt_ ('No custom HDRIs configured');
+		return __call__ (rpt_, null, 'No custom HDRIs configured');
 	});}
 });
 export var USERPREF_PT_studiolight_lights =  __class__ ('USERPREF_PT_studiolight_lights', [StudioLightPanel, StudioLightPanelMixin, Panel], {
@@ -4330,7 +6890,7 @@ export var USERPREF_PT_studiolight_lights =  __class__ ('USERPREF_PT_studiolight
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4343,15 +6903,21 @@ export var USERPREF_PT_studiolight_lights =  __class__ ('USERPREF_PT_studiolight
 		else {
 		}
 		var layout = self.layout;
-		var props = layout.operator ('preferences.studiolight_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.studiolight_install', __kwargtrans__ ({icon: 'IMPORT', text: 'Install...'}));
+		}) ();
 		props.py_metatype = 'STUDIO';
 		props.filter_glob = '.sl';
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	});},
 	get get_error_message () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4362,7 +6928,7 @@ export var USERPREF_PT_studiolight_lights =  __class__ ('USERPREF_PT_studiolight
 		}
 		else {
 		}
-		return rpt_ ('No custom Studio Lights configured');
+		return __call__ (rpt_, null, 'No custom Studio Lights configured');
 	});}
 });
 export var USERPREF_PT_studiolight_light_editor =  __class__ ('USERPREF_PT_studiolight_light_editor', [StudioLightPanel, Panel], {
@@ -4373,7 +6939,7 @@ export var USERPREF_PT_studiolight_light_editor =  __class__ ('USERPREF_PT_studi
 	get opengl_light_buttons () {return function (layout, light) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4385,20 +6951,44 @@ export var USERPREF_PT_studiolight_light_editor =  __class__ ('USERPREF_PT_studi
 		}
 		else {
 		}
-		var col = layout.column ();
-		var box = col.box ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var box = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.box, __accu0__);
+		}) ();
 		box.active = light.use;
-		box.prop (light, 'use', __kwargtrans__ ({text: 'Use Light'}));
-		box.prop (light, 'diffuse_color', __kwargtrans__ ({text: 'Diffuse'}));
-		box.prop (light, 'specular_color', __kwargtrans__ ({text: 'Specular'}));
-		box.prop (light, 'smooth');
-		box.prop (light, 'direction');
-		col.separator ();
+		(function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.prop, __accu0__, light, 'use', __kwargtrans__ ({text: 'Use Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.prop, __accu0__, light, 'diffuse_color', __kwargtrans__ ({text: 'Diffuse'}));
+		}) ();
+		(function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.prop, __accu0__, light, 'specular_color', __kwargtrans__ ({text: 'Specular'}));
+		}) ();
+		(function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.prop, __accu0__, light, 'smooth');
+		}) ();
+		(function () {
+			var __accu0__ = box;
+			return __call__ (__accu0__.prop, __accu0__, light, 'direction');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	};},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4413,17 +7003,41 @@ export var USERPREF_PT_studiolight_light_editor =  __class__ ('USERPREF_PT_studi
 		var layout = self.layout;
 		var prefs = context.preferences;
 		var system = prefs.system;
-		var row = layout.row ();
-		row.prop (system, 'use_studio_light_edit', __kwargtrans__ ({toggle: true}));
-		row.operator ('preferences.studiolight_new', __kwargtrans__ ({text: 'Save as Studio light', icon: 'FILE_TICK'}));
-		layout.separator ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, system, 'use_studio_light_edit', __kwargtrans__ ({toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.studiolight_new', __kwargtrans__ ({text: 'Save as Studio light', icon: 'FILE_TICK'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 2, even_rows: true, even_columns: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 2, even_rows: true, even_columns: true}));
+		}) ();
 		flow.active = system.use_studio_light_edit;
-		for (var light of system.solid_lights) {
-			self.opengl_light_buttons (flow, light);
+		var __iterable0__ = system.solid_lights;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var light = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.opengl_light_buttons, __accu0__, flow, light);
+			}) ();
 		}
-		layout.prop (system, 'light_ambient');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, system, 'light_ambient');
+		}) ();
 	});}
 });
 export var _draw_experimental_items = function (layout, preferences, py_items, url_prefix) {
@@ -4432,7 +7046,7 @@ export var _draw_experimental_items = function (layout, preferences, py_items, u
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -4449,21 +7063,41 @@ export var _draw_experimental_items = function (layout, preferences, py_items, u
 	var experimental = preferences.experimental;
 	layout.use_property_split = false;
 	layout.use_property_decorate = false;
-	for (var [prop_keywords, reference] of py_items) {
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.66}));
-		var col = py_split.py_split ();
-		col.prop (experimental, __kwargtrans__ (_merged (prop_keywords)));
+	var __iterable0__ = py_items;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var prop_keywords = __left0__ [0];
+		var reference = __left0__ [1];
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.66}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.py_split, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, experimental, __kwargtrans__ (__call__ (_merged, null, prop_keywords)));
+		}) ();
 		if (reference) {
 			if (py_typeof (reference) === tuple) {
-				var url_ext = reference [0];
-				var text = reference [1];
+				var url_ext = __getitem__ (reference, 0);
+				var text = __getitem__ (reference, 1);
 			}
 			else {
 				var url_ext = reference;
 				var text = reference;
 			}
-			var col = py_split.py_split ();
-			col.operator ('wm.url_open', __kwargtrans__ ({text: text, icon: 'URL'})).url = url_prefix + url_ext;
+			var col = (function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: text, icon: 'URL'}));
+			}) ().url = __add__ (url_prefix, url_ext);
 		}
 	}
 };
@@ -4476,7 +7110,7 @@ export var USERPREF_PT_developer_tools =  __class__ ('USERPREF_PT_developer_tool
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4493,7 +7127,7 @@ export var USERPREF_PT_developer_tools =  __class__ ('USERPREF_PT_developer_tool
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4505,7 +7139,7 @@ export var USERPREF_PT_developer_tools =  __class__ ('USERPREF_PT_developer_tool
 		}
 		else {
 		}
-		_draw_experimental_items (self.layout, context.preferences, tuple ([tuple ([dict ({'property': 'use_undo_legacy'}), tuple (['blender/blender/issues/60695', '#60695'])]), tuple ([dict ({'property': 'override_auto_resync'}), tuple (['blender/blender/issues/83811', '#83811'])]), tuple ([dict ({'property': 'use_all_linked_data_direct'}), null]), tuple ([dict ({'property': 'use_recompute_usercount_on_save_debug'}), null]), tuple ([dict ({'property': 'use_cycles_debug'}), null]), tuple ([dict ({'property': 'show_asset_debug_info'}), null]), tuple ([dict ({'property': 'use_asset_indexing'}), null]), tuple ([dict ({'property': 'use_viewport_debug'}), null]), tuple ([dict ({'property': 'use_eevee_debug'}), null]), tuple ([dict ({'property': 'use_paint_debug'}), null]), tuple ([dict ({'property': 'use_extensions_debug'}), tuple (['/blender/blender/issues/119521', '#119521'])]), tuple ([dict ({'property': 'write_legacy_blend_file_format'}), tuple (['/blender/blender/issues/129309', '#129309'])]), tuple ([dict ({'property': 'no_data_block_packing'}), tuple (['/blender/blender/issues/132167', '#132167'])])]));
+		__call__ (_draw_experimental_items, null, self.layout, context.preferences, tuple ([tuple ([dict ({'property': 'use_undo_legacy'}), tuple (['blender/blender/issues/60695', '#60695'])]), tuple ([dict ({'property': 'override_auto_resync'}), tuple (['blender/blender/issues/83811', '#83811'])]), tuple ([dict ({'property': 'use_all_linked_data_direct'}), null]), tuple ([dict ({'property': 'use_recompute_usercount_on_save_debug'}), null]), tuple ([dict ({'property': 'use_cycles_debug'}), null]), tuple ([dict ({'property': 'show_asset_debug_info'}), null]), tuple ([dict ({'property': 'use_asset_indexing'}), null]), tuple ([dict ({'property': 'use_viewport_debug'}), null]), tuple ([dict ({'property': 'use_eevee_debug'}), null]), tuple ([dict ({'property': 'use_paint_debug'}), null]), tuple ([dict ({'property': 'use_extensions_debug'}), tuple (['/blender/blender/issues/119521', '#119521'])]), tuple ([dict ({'property': 'write_legacy_blend_file_format'}), tuple (['/blender/blender/issues/129309', '#129309'])]), tuple ([dict ({'property': 'no_data_block_packing'}), tuple (['/blender/blender/issues/132167', '#132167'])])]));
 	});}
 });
 export var ExperimentalPanel =  __class__ ('ExperimentalPanel', [object], {
@@ -4516,7 +7150,7 @@ export var ExperimentalPanel =  __class__ ('ExperimentalPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4528,7 +7162,7 @@ export var ExperimentalPanel =  __class__ ('ExperimentalPanel', [object], {
 		}
 		else {
 		}
-		return bpy.app.version_cycle == 'alpha';
+		return __eq__ (bpy.app.version_cycle, 'alpha');
 	});}
 });
 export var USERPREF_PT_experimental_new_features =  __class__ ('USERPREF_PT_experimental_new_features', [ExperimentalPanel, Panel], {
@@ -4537,7 +7171,7 @@ export var USERPREF_PT_experimental_new_features =  __class__ ('USERPREF_PT_expe
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4549,7 +7183,7 @@ export var USERPREF_PT_experimental_new_features =  __class__ ('USERPREF_PT_expe
 		}
 		else {
 		}
-		_draw_experimental_items (self.layout, context.preferences, tuple ([tuple ([dict ({'property': 'use_extended_asset_browser'}), tuple (['blender/blender/projects/10', 'Pipeline, Assets & IO Project Page'])]), tuple ([dict ({'property': 'use_shader_node_previews'}), tuple (['blender/blender/issues/110353', '#110353'])]), tuple ([dict ({'property': 'use_collection_importer'}), tuple (['blender/blender/issues/132171', '#132171'])])]));
+		__call__ (_draw_experimental_items, null, self.layout, context.preferences, tuple ([tuple ([dict ({'property': 'use_extended_asset_browser'}), tuple (['blender/blender/projects/10', 'Pipeline, Assets & IO Project Page'])]), tuple ([dict ({'property': 'use_shader_node_previews'}), tuple (['blender/blender/issues/110353', '#110353'])]), tuple ([dict ({'property': 'use_collection_importer'}), tuple (['blender/blender/issues/132171', '#132171'])])]));
 	});}
 });
 export var USERPREF_PT_experimental_prototypes =  __class__ ('USERPREF_PT_experimental_prototypes', [ExperimentalPanel, Panel], {
@@ -4558,7 +7192,7 @@ export var USERPREF_PT_experimental_prototypes =  __class__ ('USERPREF_PT_experi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4570,15 +7204,154 @@ export var USERPREF_PT_experimental_prototypes =  __class__ ('USERPREF_PT_experi
 		}
 		else {
 		}
-		_draw_experimental_items (self.layout, context.preferences, tuple ([tuple ([dict ({'property': 'use_new_curves_tools'}), tuple (['blender/blender/issues/68981', '#68981'])]), tuple ([dict ({'property': 'use_sculpt_texture_paint'}), tuple (['blender/blender/issues/96225', '#96225'])])]));
+		__call__ (_draw_experimental_items, null, self.layout, context.preferences, tuple ([tuple ([dict ({'property': 'use_new_curves_tools'}), tuple (['blender/blender/issues/68981', '#68981'])]), tuple ([dict ({'property': 'use_sculpt_texture_paint'}), tuple (['blender/blender/issues/96225', '#96225'])])]));
 	});}
 });
-export var classes = _joined ([USERPREF_PT_theme_user_interface], ThemeGenericClassGenerator.generate_panel_classes_for_wcols (), [USERPREF_HT_header, USERPREF_PT_navigation_bar, USERPREF_PT_save_preferences, USERPREF_MT_editor_menus, USERPREF_MT_view, USERPREF_MT_save_load, USERPREF_PT_interface_display, USERPREF_PT_interface_editors, USERPREF_PT_interface_temporary_windows, USERPREF_PT_interface_statusbar, USERPREF_PT_interface_translation, USERPREF_PT_interface_accessibility, USERPREF_PT_interface_text, USERPREF_PT_interface_menus, USERPREF_PT_interface_menus_mouse_over, USERPREF_PT_interface_menus_pie, USERPREF_PT_viewport_display, USERPREF_PT_viewport_quality, USERPREF_PT_viewport_textures, USERPREF_PT_viewport_subdivision, USERPREF_PT_edit_objects, USERPREF_PT_edit_objects_new, USERPREF_PT_edit_objects_duplicate_data, USERPREF_PT_edit_cursor, USERPREF_PT_edit_annotations, USERPREF_PT_edit_weight_paint, USERPREF_PT_edit_gpencil, USERPREF_PT_edit_text_editor, USERPREF_PT_edit_node_editor, USERPREF_PT_edit_sequence_editor, USERPREF_PT_edit_misc, USERPREF_PT_animation_timeline, USERPREF_PT_animation_keyframes, USERPREF_PT_animation_fcurves, USERPREF_PT_animation_timeline_advanced, USERPREF_PT_system_cycles_devices, USERPREF_PT_system_display_graphics, USERPREF_PT_system_os_settings, USERPREF_PT_system_network, USERPREF_PT_system_memory, USERPREF_PT_system_video_sequencer, USERPREF_PT_system_sound, USERPREF_MT_interface_theme_presets, USERPREF_PT_theme, USERPREF_PT_theme_interface_panel, USERPREF_PT_theme_interface_state, USERPREF_PT_theme_interface_icons, USERPREF_PT_theme_text_style, USERPREF_PT_theme_interface_gizmos, USERPREF_PT_theme_interface_styles, USERPREF_PT_theme_interface_transparent_checker, USERPREF_PT_theme_color_sets, USERPREF_PT_theme_bone_color_sets, USERPREF_PT_theme_collection_colors, USERPREF_PT_theme_strip_colors, USERPREF_PT_file_paths_data, USERPREF_PT_file_paths_render, USERPREF_PT_file_paths_script_directories, USERPREF_PT_file_paths_applications, USERPREF_PT_text_editor, USERPREF_PT_text_editor_presets, USERPREF_PT_file_paths_development, USERPREF_PT_saveload_blend, USERPREF_PT_saveload_autorun, USERPREF_PT_saveload_file_browser, USERPREF_MT_keyconfigs, USERPREF_PT_input_keyboard, USERPREF_PT_input_mouse, USERPREF_PT_input_tablet, USERPREF_PT_input_touchpad, USERPREF_PT_input_ndof, USERPREF_PT_navigation_orbit, USERPREF_PT_navigation_zoom, USERPREF_PT_navigation_fly_walk, USERPREF_PT_navigation_fly_walk_navigation, USERPREF_PT_navigation_fly_walk_gravity, USERPREF_PT_keymap, USERPREF_PT_extensions, USERPREF_PT_addons, USERPREF_PT_assets, USERPREF_MT_extensions_active_repo, USERPREF_MT_extensions_active_repo_remove, USERPREF_PT_extensions_repos, USERPREF_PT_studiolight_lights, USERPREF_PT_studiolight_light_editor, USERPREF_PT_studiolight_matcaps, USERPREF_PT_studiolight_world, USERPREF_PT_ndof_settings, USERPREF_PT_addons_filter, USERPREF_PT_experimental_new_features, USERPREF_PT_experimental_prototypes, USERPREF_PT_developer_tools, USERPREF_UL_extension_repos], ThemeGenericClassGenerator.generate_panel_classes_from_theme_areas ());
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+export var classes = __call__ (_joined, null, [USERPREF_PT_theme_user_interface], (function () {
+	var __accu0__ = ThemeGenericClassGenerator;
+	return __call__ (__accu0__.generate_panel_classes_for_wcols, __accu0__);
+}) (), [USERPREF_HT_header, USERPREF_PT_navigation_bar, USERPREF_PT_save_preferences, USERPREF_MT_editor_menus, USERPREF_MT_view, USERPREF_MT_save_load, USERPREF_PT_interface_display, USERPREF_PT_interface_editors, USERPREF_PT_interface_temporary_windows, USERPREF_PT_interface_statusbar, USERPREF_PT_interface_translation, USERPREF_PT_interface_accessibility, USERPREF_PT_interface_text, USERPREF_PT_interface_menus, USERPREF_PT_interface_menus_mouse_over, USERPREF_PT_interface_menus_pie, USERPREF_PT_viewport_display, USERPREF_PT_viewport_quality, USERPREF_PT_viewport_textures, USERPREF_PT_viewport_subdivision, USERPREF_PT_edit_objects, USERPREF_PT_edit_objects_new, USERPREF_PT_edit_objects_duplicate_data, USERPREF_PT_edit_cursor, USERPREF_PT_edit_annotations, USERPREF_PT_edit_weight_paint, USERPREF_PT_edit_gpencil, USERPREF_PT_edit_text_editor, USERPREF_PT_edit_node_editor, USERPREF_PT_edit_sequence_editor, USERPREF_PT_edit_misc, USERPREF_PT_animation_timeline, USERPREF_PT_animation_keyframes, USERPREF_PT_animation_fcurves, USERPREF_PT_animation_timeline_advanced, USERPREF_PT_system_cycles_devices, USERPREF_PT_system_display_graphics, USERPREF_PT_system_os_settings, USERPREF_PT_system_network, USERPREF_PT_system_memory, USERPREF_PT_system_video_sequencer, USERPREF_PT_system_sound, USERPREF_MT_interface_theme_presets, USERPREF_PT_theme, USERPREF_PT_theme_interface_panel, USERPREF_PT_theme_interface_state, USERPREF_PT_theme_interface_icons, USERPREF_PT_theme_text_style, USERPREF_PT_theme_interface_gizmos, USERPREF_PT_theme_interface_styles, USERPREF_PT_theme_interface_transparent_checker, USERPREF_PT_theme_color_sets, USERPREF_PT_theme_bone_color_sets, USERPREF_PT_theme_collection_colors, USERPREF_PT_theme_strip_colors, USERPREF_PT_file_paths_data, USERPREF_PT_file_paths_render, USERPREF_PT_file_paths_script_directories, USERPREF_PT_file_paths_applications, USERPREF_PT_text_editor, USERPREF_PT_text_editor_presets, USERPREF_PT_file_paths_development, USERPREF_PT_saveload_blend, USERPREF_PT_saveload_autorun, USERPREF_PT_saveload_file_browser, USERPREF_MT_keyconfigs, USERPREF_PT_input_keyboard, USERPREF_PT_input_mouse, USERPREF_PT_input_tablet, USERPREF_PT_input_touchpad, USERPREF_PT_input_ndof, USERPREF_PT_navigation_orbit, USERPREF_PT_navigation_zoom, USERPREF_PT_navigation_fly_walk, USERPREF_PT_navigation_fly_walk_navigation, USERPREF_PT_navigation_fly_walk_gravity, USERPREF_PT_keymap, USERPREF_PT_extensions, USERPREF_PT_addons, USERPREF_PT_assets, USERPREF_MT_extensions_active_repo, USERPREF_MT_extensions_active_repo_remove, USERPREF_PT_extensions_repos, USERPREF_PT_studiolight_lights, USERPREF_PT_studiolight_light_editor, USERPREF_PT_studiolight_matcaps, USERPREF_PT_studiolight_world, USERPREF_PT_ndof_settings, USERPREF_PT_addons_filter, USERPREF_PT_experimental_new_features, USERPREF_PT_experimental_prototypes, USERPREF_PT_developer_tools, USERPREF_UL_extension_repos], (function () {
+	var __accu0__ = ThemeGenericClassGenerator;
+	return __call__ (__accu0__.generate_panel_classes_from_theme_areas, __accu0__);
+}) ());
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_userpref.map
 export {Header, Menu, Panel, PresetPanel, UIList, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, register_class, rpt_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'USERPREF_HT_header': USERPREF_HT_header = value; break;
+		case 'USERPREF_PT_navigation_bar': USERPREF_PT_navigation_bar = value; break;
+		case 'USERPREF_MT_editor_menus': USERPREF_MT_editor_menus = value; break;
+		case 'USERPREF_MT_view': USERPREF_MT_view = value; break;
+		case 'USERPREF_MT_save_load': USERPREF_MT_save_load = value; break;
+		case 'USERPREF_PT_save_preferences': USERPREF_PT_save_preferences = value; break;
+		case 'CenterAlignMixIn': CenterAlignMixIn = value; break;
+		case 'InterfacePanel': InterfacePanel = value; break;
+		case 'USERPREF_PT_interface_display': USERPREF_PT_interface_display = value; break;
+		case 'USERPREF_PT_interface_text': USERPREF_PT_interface_text = value; break;
+		case 'USERPREF_PT_interface_translation': USERPREF_PT_interface_translation = value; break;
+		case 'USERPREF_PT_interface_accessibility': USERPREF_PT_interface_accessibility = value; break;
+		case 'USERPREF_PT_interface_editors': USERPREF_PT_interface_editors = value; break;
+		case 'USERPREF_PT_interface_temporary_windows': USERPREF_PT_interface_temporary_windows = value; break;
+		case 'USERPREF_PT_interface_statusbar': USERPREF_PT_interface_statusbar = value; break;
+		case 'USERPREF_PT_interface_menus': USERPREF_PT_interface_menus = value; break;
+		case 'USERPREF_PT_interface_menus_mouse_over': USERPREF_PT_interface_menus_mouse_over = value; break;
+		case 'USERPREF_PT_interface_menus_pie': USERPREF_PT_interface_menus_pie = value; break;
+		case 'EditingPanel': EditingPanel = value; break;
+		case 'USERPREF_PT_edit_objects': USERPREF_PT_edit_objects = value; break;
+		case 'USERPREF_PT_edit_objects_new': USERPREF_PT_edit_objects_new = value; break;
+		case 'USERPREF_PT_edit_objects_duplicate_data': USERPREF_PT_edit_objects_duplicate_data = value; break;
+		case 'USERPREF_PT_edit_cursor': USERPREF_PT_edit_cursor = value; break;
+		case 'USERPREF_PT_edit_gpencil': USERPREF_PT_edit_gpencil = value; break;
+		case 'USERPREF_PT_edit_annotations': USERPREF_PT_edit_annotations = value; break;
+		case 'USERPREF_PT_edit_weight_paint': USERPREF_PT_edit_weight_paint = value; break;
+		case 'USERPREF_PT_edit_text_editor': USERPREF_PT_edit_text_editor = value; break;
+		case 'USERPREF_PT_edit_node_editor': USERPREF_PT_edit_node_editor = value; break;
+		case 'USERPREF_PT_edit_sequence_editor': USERPREF_PT_edit_sequence_editor = value; break;
+		case 'USERPREF_PT_edit_misc': USERPREF_PT_edit_misc = value; break;
+		case 'AnimationPanel': AnimationPanel = value; break;
+		case 'USERPREF_PT_animation_timeline': USERPREF_PT_animation_timeline = value; break;
+		case 'USERPREF_PT_animation_keyframes': USERPREF_PT_animation_keyframes = value; break;
+		case 'USERPREF_PT_animation_fcurves': USERPREF_PT_animation_fcurves = value; break;
+		case 'USERPREF_PT_animation_timeline_advanced': USERPREF_PT_animation_timeline_advanced = value; break;
+		case 'SystemPanel': SystemPanel = value; break;
+		case 'USERPREF_PT_system_sound': USERPREF_PT_system_sound = value; break;
+		case 'USERPREF_PT_system_cycles_devices': USERPREF_PT_system_cycles_devices = value; break;
+		case 'USERPREF_PT_system_display_graphics': USERPREF_PT_system_display_graphics = value; break;
+		case 'USERPREF_PT_system_os_settings': USERPREF_PT_system_os_settings = value; break;
+		case 'USERPREF_PT_system_network': USERPREF_PT_system_network = value; break;
+		case 'USERPREF_PT_system_memory': USERPREF_PT_system_memory = value; break;
+		case 'USERPREF_PT_system_video_sequencer': USERPREF_PT_system_video_sequencer = value; break;
+		case 'ViewportPanel': ViewportPanel = value; break;
+		case 'USERPREF_PT_viewport_display': USERPREF_PT_viewport_display = value; break;
+		case 'USERPREF_PT_viewport_quality': USERPREF_PT_viewport_quality = value; break;
+		case 'USERPREF_PT_viewport_textures': USERPREF_PT_viewport_textures = value; break;
+		case 'USERPREF_PT_viewport_subdivision': USERPREF_PT_viewport_subdivision = value; break;
+		case 'ThemePanel': ThemePanel = value; break;
+		case 'USERPREF_MT_interface_theme_presets': USERPREF_MT_interface_theme_presets = value; break;
+		case 'USERPREF_PT_theme': USERPREF_PT_theme = value; break;
+		case 'USERPREF_PT_theme_user_interface': USERPREF_PT_theme_user_interface = value; break;
+		case 'PreferenceThemeWidgetColorPanel': PreferenceThemeWidgetColorPanel = value; break;
+		case 'PreferenceThemeWidgetShadePanel': PreferenceThemeWidgetShadePanel = value; break;
+		case 'USERPREF_PT_theme_interface_panel': USERPREF_PT_theme_interface_panel = value; break;
+		case 'USERPREF_PT_theme_interface_state': USERPREF_PT_theme_interface_state = value; break;
+		case 'USERPREF_PT_theme_interface_styles': USERPREF_PT_theme_interface_styles = value; break;
+		case 'USERPREF_PT_theme_interface_transparent_checker': USERPREF_PT_theme_interface_transparent_checker = value; break;
+		case 'USERPREF_PT_theme_interface_gizmos': USERPREF_PT_theme_interface_gizmos = value; break;
+		case 'USERPREF_PT_theme_interface_icons': USERPREF_PT_theme_interface_icons = value; break;
+		case 'USERPREF_PT_theme_text_style': USERPREF_PT_theme_text_style = value; break;
+		case 'USERPREF_PT_theme_color_sets': USERPREF_PT_theme_color_sets = value; break;
+		case 'USERPREF_PT_theme_bone_color_sets': USERPREF_PT_theme_bone_color_sets = value; break;
+		case 'USERPREF_PT_theme_collection_colors': USERPREF_PT_theme_collection_colors = value; break;
+		case 'USERPREF_PT_theme_strip_colors': USERPREF_PT_theme_strip_colors = value; break;
+		case 'PreferenceThemeSpacePanel': PreferenceThemeSpacePanel = value; break;
+		case 'ThemeGenericClassGenerator': ThemeGenericClassGenerator = value; break;
+		case 'FilePathsPanel': FilePathsPanel = value; break;
+		case 'USERPREF_PT_file_paths_data': USERPREF_PT_file_paths_data = value; break;
+		case 'USERPREF_PT_file_paths_script_directories': USERPREF_PT_file_paths_script_directories = value; break;
+		case 'USERPREF_PT_file_paths_render': USERPREF_PT_file_paths_render = value; break;
+		case 'USERPREF_PT_text_editor_presets': USERPREF_PT_text_editor_presets = value; break;
+		case 'USERPREF_PT_file_paths_applications': USERPREF_PT_file_paths_applications = value; break;
+		case 'USERPREF_PT_text_editor': USERPREF_PT_text_editor = value; break;
+		case 'USERPREF_PT_file_paths_development': USERPREF_PT_file_paths_development = value; break;
+		case 'USERPREF_PT_saveload_autorun': USERPREF_PT_saveload_autorun = value; break;
+		case 'USERPREF_UL_extension_repos': USERPREF_UL_extension_repos = value; break;
+		case 'SaveLoadPanel': SaveLoadPanel = value; break;
+		case 'USERPREF_PT_saveload_blend': USERPREF_PT_saveload_blend = value; break;
+		case 'USERPREF_PT_saveload_file_browser': USERPREF_PT_saveload_file_browser = value; break;
+		case 'InputPanel': InputPanel = value; break;
+		case 'USERPREF_PT_input_keyboard': USERPREF_PT_input_keyboard = value; break;
+		case 'USERPREF_PT_input_mouse': USERPREF_PT_input_mouse = value; break;
+		case 'USERPREF_PT_input_touchpad': USERPREF_PT_input_touchpad = value; break;
+		case 'USERPREF_PT_input_tablet': USERPREF_PT_input_tablet = value; break;
+		case 'USERPREF_PT_input_ndof': USERPREF_PT_input_ndof = value; break;
+		case 'NavigationPanel': NavigationPanel = value; break;
+		case 'USERPREF_PT_navigation_orbit': USERPREF_PT_navigation_orbit = value; break;
+		case 'USERPREF_PT_navigation_zoom': USERPREF_PT_navigation_zoom = value; break;
+		case 'USERPREF_PT_navigation_fly_walk': USERPREF_PT_navigation_fly_walk = value; break;
+		case 'USERPREF_PT_navigation_fly_walk_navigation': USERPREF_PT_navigation_fly_walk_navigation = value; break;
+		case 'USERPREF_PT_navigation_fly_walk_gravity': USERPREF_PT_navigation_fly_walk_gravity = value; break;
+		case 'USERPREF_PT_ndof_settings': USERPREF_PT_ndof_settings = value; break;
+		case 'KeymapPanel': KeymapPanel = value; break;
+		case 'USERPREF_MT_keyconfigs': USERPREF_MT_keyconfigs = value; break;
+		case 'USERPREF_PT_keymap': USERPREF_PT_keymap = value; break;
+		case 'USERPREF_MT_extensions_active_repo': USERPREF_MT_extensions_active_repo = value; break;
+		case 'USERPREF_MT_extensions_active_repo_remove': USERPREF_MT_extensions_active_repo_remove = value; break;
+		case 'USERPREF_PT_extensions_repos': USERPREF_PT_extensions_repos = value; break;
+		case 'ExtensionsPanel': ExtensionsPanel = value; break;
+		case 'USERPREF_PT_extensions': USERPREF_PT_extensions = value; break;
+		case 'USERPREF_PT_addons_filter': USERPREF_PT_addons_filter = value; break;
+		case 'AddOnPanel': AddOnPanel = value; break;
+		case 'USERPREF_PT_addons': USERPREF_PT_addons = value; break;
+		case 'AssetsPanel': AssetsPanel = value; break;
+		case 'USERPREF_PT_assets': USERPREF_PT_assets = value; break;
+		case 'StudioLightPanel': StudioLightPanel = value; break;
+		case 'StudioLightPanelMixin': StudioLightPanelMixin = value; break;
+		case 'USERPREF_PT_studiolight_matcaps': USERPREF_PT_studiolight_matcaps = value; break;
+		case 'USERPREF_PT_studiolight_world': USERPREF_PT_studiolight_world = value; break;
+		case 'USERPREF_PT_studiolight_lights': USERPREF_PT_studiolight_lights = value; break;
+		case 'USERPREF_PT_studiolight_light_editor': USERPREF_PT_studiolight_light_editor = value; break;
+		case '_draw_experimental_items': _draw_experimental_items = value; break;
+		case 'USERPREF_PT_developer_tools': USERPREF_PT_developer_tools = value; break;
+		case 'ExperimentalPanel': ExperimentalPanel = value; break;
+		case 'USERPREF_PT_experimental_new_features': USERPREF_PT_experimental_new_features = value; break;
+		case 'USERPREF_PT_experimental_prototypes': USERPREF_PT_experimental_prototypes = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

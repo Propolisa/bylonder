@@ -20,19 +20,31 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 	__module__: __name__,
 	MODIFIER_TYPES_TO_LABELS: (function () {
 		var __accu0__ = [];
-		for (var enum_it of bpy.types.Modifier.bl_rna.properties ['type'].enum_items_static) {
-			__accu0__.append ([enum_it.identifier, enum_it.py_name]);
+		var __iterable0__ = __getitem__ (bpy.types.Modifier.bl_rna.properties, 'type').enum_items_static;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var enum_it = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, [enum_it.identifier, enum_it.py_name]);
+			}) ();
 		}
 		return dict (__accu0__);
 	}) (),
 	MODIFIER_TYPES_TO_ICONS: (function () {
 		var __accu0__ = [];
-		for (var enum_it of bpy.types.Modifier.bl_rna.properties ['type'].enum_items_static) {
-			__accu0__.append ([enum_it.identifier, enum_it.icon]);
+		var __iterable0__ = __getitem__ (bpy.types.Modifier.bl_rna.properties, 'type').enum_items_static;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var enum_it = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, [enum_it.identifier, enum_it.icon]);
+			}) ();
 		}
 		return dict (__accu0__);
 	}) (),
-	MODIFIER_TYPES_I18N_CONTEXT: bpy.types.Modifier.bl_rna.properties ['type'].translation_context,
+	MODIFIER_TYPES_I18N_CONTEXT: __getitem__ (bpy.types.Modifier.bl_rna.properties, 'type').translation_context,
 	get operator_modifier_add () {return __getcm__ (this, function (cls, layout, mod_type, text, no_icon) {
 		if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
 			var text = null;
@@ -42,7 +54,7 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -57,8 +69,11 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 		}
 		else {
 		}
-		var label = (text ? text : cls.MODIFIER_TYPES_TO_LABELS [mod_type]);
-		layout.operator ('object.modifier_add', __kwargtrans__ ({text: label, text_ctxt: cls.MODIFIER_TYPES_I18N_CONTEXT, icon: (no_icon ? 'NONE' : cls.MODIFIER_TYPES_TO_ICONS [mod_type])})).py_metatype = mod_type;
+		var label = (text ? text : __getitem__ (cls.MODIFIER_TYPES_TO_LABELS, mod_type));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.modifier_add', __kwargtrans__ ({text: label, text_ctxt: cls.MODIFIER_TYPES_I18N_CONTEXT, icon: (no_icon ? 'NONE' : __getitem__ (cls.MODIFIER_TYPES_TO_ICONS, mod_type))}));
+		}) ().py_metatype = mod_type;
 	});},
 	get operator_modifier_add_asset () {return __getcm__ (this, function (cls, layout, py_name, icon) {
 		if (typeof icon == 'undefined' || (icon != null && icon.hasOwnProperty ("__kwargtrans__"))) {;
@@ -66,7 +81,7 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -80,10 +95,13 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 		}
 		else {
 		}
-		var props = layout.operator ('object.modifier_add_node_group', __kwargtrans__ ({text: py_name, text_ctxt: cls.MODIFIER_TYPES_I18N_CONTEXT, icon: icon}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.modifier_add_node_group', __kwargtrans__ ({text: py_name, text_ctxt: cls.MODIFIER_TYPES_I18N_CONTEXT, icon: icon}));
+		}) ();
 		props.asset_library_type = 'ESSENTIALS';
 		props.asset_library_identifier = '';
-		props.relative_asset_identifier = 'nodes/geometry_nodes_essentials.blend/NodeTree/' + py_name;
+		props.relative_asset_identifier = __add__ ('nodes/geometry_nodes_essentials.blend/NodeTree/', py_name);
 	});}
 });
 export var DATA_PT_modifiers =  __class__ ('DATA_PT_modifiers', [ModifierButtonsPanel, Panel], {
@@ -92,7 +110,7 @@ export var DATA_PT_modifiers =  __class__ ('DATA_PT_modifiers', [ModifierButtons
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -110,7 +128,7 @@ export var DATA_PT_modifiers =  __class__ ('DATA_PT_modifiers', [ModifierButtons
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -123,8 +141,14 @@ export var DATA_PT_modifiers =  __class__ ('DATA_PT_modifiers', [ModifierButtons
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('wm.call_menu', __kwargtrans__ ({text: 'Add Modifier', icon: 'ADD'})).py_name = 'OBJECT_MT_modifier_add';
-		layout.template_modifiers ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.call_menu', __kwargtrans__ ({text: 'Add Modifier', icon: 'ADD'}));
+		}) ().py_name = 'OBJECT_MT_modifier_add';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifiers, __accu0__);
+		}) ();
 	});}
 });
 export var OBJECT_MT_modifier_add =  __class__ ('OBJECT_MT_modifier_add', [ModifierAddMenu, Menu], {
@@ -134,7 +158,7 @@ export var OBJECT_MT_modifier_add =  __class__ ('OBJECT_MT_modifier_add', [Modif
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -153,36 +177,69 @@ export var OBJECT_MT_modifier_add =  __class__ ('OBJECT_MT_modifier_add', [Modif
 		}
 		var ob_type = ob.py_metatype;
 		var geometry_nodes_supported = __in__ (ob_type, new set (['EMPTY', 'MESH', 'CURVE', 'CURVES', 'FONT', 'VOLUME', 'POINTCLOUD', 'GREASEPENCIL']));
-		if (layout.operator_context == 'EXEC_REGION_WIN') {
+		if (__eq__ (layout.operator_context, 'EXEC_REGION_WIN')) {
 			layout.operator_context = 'INVOKE_REGION_WIN';
-			layout.operator ('WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'})).menu_idname = 'OBJECT_MT_modifier_add';
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'}));
+			}) ().menu_idname = 'OBJECT_MT_modifier_add';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'CURVES', 'FONT', 'SURFACE', 'LATTICE', 'GREASEPENCIL', 'POINTCLOUD']))) {
-			layout.menu ('OBJECT_MT_modifier_add_edit');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'OBJECT_MT_modifier_add_edit');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'VOLUME', 'GREASEPENCIL']))) {
-			layout.menu ('OBJECT_MT_modifier_add_generate');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'OBJECT_MT_modifier_add_generate');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE', 'VOLUME', 'GREASEPENCIL']))) {
-			layout.menu ('OBJECT_MT_modifier_add_deform');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'OBJECT_MT_modifier_add_deform');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH']))) {
-			layout.menu ('OBJECT_MT_modifier_add_normals');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'OBJECT_MT_modifier_add_normals');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			layout.menu ('OBJECT_MT_modifier_add_physics');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'OBJECT_MT_modifier_add_physics');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['GREASEPENCIL']))) {
-			layout.menu ('OBJECT_MT_modifier_add_color');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'OBJECT_MT_modifier_add_color');
+			}) ();
 		}
 		if (geometry_nodes_supported) {
-			layout.menu_contents ('OBJECT_MT_modifier_add_root_catalogs');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'OBJECT_MT_modifier_add_root_catalogs');
+			}) ();
 		}
 		if (geometry_nodes_supported) {
-			layout.separator ();
-			self.operator_modifier_add (layout, 'NODES');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'NODES');
+			}) ();
 		}
 	});}
 });
@@ -193,7 +250,7 @@ export var OBJECT_MT_modifier_add_edit =  __class__ ('OBJECT_MT_modifier_add_edi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -207,29 +264,68 @@ export var OBJECT_MT_modifier_add_edit =  __class__ ('OBJECT_MT_modifier_add_edi
 		}
 		var layout = self.layout;
 		var ob_type = context.object.py_metatype;
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'DATA_TRANSFER');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'DATA_TRANSFER');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			self.operator_modifier_add (layout, 'MESH_CACHE');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MESH_CACHE');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'CURVES', 'FONT', 'POINTCLOUD']))) {
-			self.operator_modifier_add (layout, 'MESH_SEQUENCE_CACHE');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MESH_SEQUENCE_CACHE');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'UV_PROJECT');
-			self.operator_modifier_add (layout, 'UV_WARP');
-			self.operator_modifier_add (layout, 'VERTEX_WEIGHT_EDIT');
-			self.operator_modifier_add (layout, 'VERTEX_WEIGHT_MIX');
-			self.operator_modifier_add (layout, 'VERTEX_WEIGHT_PROXIMITY');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'UV_PROJECT');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'UV_WARP');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'VERTEX_WEIGHT_EDIT');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'VERTEX_WEIGHT_MIX');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'VERTEX_WEIGHT_PROXIMITY');
+			}) ();
 		}
-		if (ob_type == 'GREASEPENCIL') {
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_TEXTURE');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_TIME');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_VERTEX_WEIGHT_PROXIMITY');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_VERTEX_WEIGHT_ANGLE');
+		if (__eq__ (ob_type, 'GREASEPENCIL')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_TEXTURE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_TIME');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_VERTEX_WEIGHT_PROXIMITY');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_VERTEX_WEIGHT_ANGLE');
+			}) ();
 		}
-		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifier_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: self.bl_label}));
+		}) ();
 	});}
 });
 export var OBJECT_MT_modifier_add_generate =  __class__ ('OBJECT_MT_modifier_add_generate', [ModifierAddMenu, Menu], {
@@ -239,7 +335,7 @@ export var OBJECT_MT_modifier_add_generate =  __class__ ('OBJECT_MT_modifier_add
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -254,67 +350,169 @@ export var OBJECT_MT_modifier_add_generate =  __class__ ('OBJECT_MT_modifier_add
 		var layout = self.layout;
 		var ob_type = context.object.py_metatype;
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add_asset (layout, 'Array', __kwargtrans__ ({icon: 'MOD_ARRAY'}));
-			self.operator_modifier_add (layout, 'ARRAY', __kwargtrans__ ({text: n_ ('Array (Legacy)'), no_icon: true}));
-			self.operator_modifier_add (layout, 'BEVEL');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add_asset, __accu0__, layout, 'Array', __kwargtrans__ ({icon: 'MOD_ARRAY'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'ARRAY', __kwargtrans__ ({text: __call__ (n_, null, 'Array (Legacy)'), no_icon: true}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'BEVEL');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'BOOLEAN');
-		}
-		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add (layout, 'BUILD');
-			self.operator_modifier_add_asset (layout, n_ ('Curve to Tube'), __kwargtrans__ ({icon: 'MOD_CURVE_TO_TUBE'}));
-			self.operator_modifier_add (layout, 'DECIMATE');
-			self.operator_modifier_add (layout, 'EDGE_SPLIT');
-		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'MASK');
-		}
-		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add (layout, 'MIRROR');
-		}
-		if (ob_type == 'VOLUME') {
-			self.operator_modifier_add (layout, 'MESH_TO_VOLUME');
-		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'MULTIRES');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'BOOLEAN');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add (layout, 'REMESH');
-			self.operator_modifier_add_asset (layout, n_ ('Scatter on Surface'), __kwargtrans__ ({icon: 'MOD_SCATTER_ON_SURFACE'}));
-			self.operator_modifier_add (layout, 'SCREW');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'BUILD');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add_asset, __accu0__, layout, __call__ (n_, null, 'Curve to Tube'), __kwargtrans__ ({icon: 'MOD_CURVE_TO_TUBE'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'DECIMATE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'EDGE_SPLIT');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'SKIN');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MASK');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add (layout, 'SOLIDIFY');
-			self.operator_modifier_add (layout, 'SUBSURF');
-			self.operator_modifier_add (layout, 'TRIANGULATE');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MIRROR');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'VOLUME_TO_MESH');
+		if (__eq__ (ob_type, 'VOLUME')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MESH_TO_VOLUME');
+			}) ();
+		}
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MULTIRES');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add (layout, 'WELD');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'REMESH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add_asset, __accu0__, layout, __call__ (n_, null, 'Scatter on Surface'), __kwargtrans__ ({icon: 'MOD_SCATTER_ON_SURFACE'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SCREW');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'WIREFRAME');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SKIN');
+			}) ();
 		}
-		if (ob_type == 'GREASEPENCIL') {
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_ARRAY');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_BUILD');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_DASH');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_ENVELOPE');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_LENGTH');
-			self.operator_modifier_add (layout, 'LINEART');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_MIRROR');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_MULTIPLY');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_OUTLINE');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_SIMPLIFY');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_SUBDIV');
+		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SOLIDIFY');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SUBSURF');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'TRIANGULATE');
+			}) ();
 		}
-		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label, skip_essentials: true}));
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'VOLUME_TO_MESH');
+			}) ();
+		}
+		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'WELD');
+			}) ();
+		}
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'WIREFRAME');
+			}) ();
+		}
+		if (__eq__ (ob_type, 'GREASEPENCIL')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_ARRAY');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_BUILD');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_DASH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_ENVELOPE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_LENGTH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'LINEART');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_MIRROR');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_MULTIPLY');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_OUTLINE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_SIMPLIFY');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_SUBDIV');
+			}) ();
+		}
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifier_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: self.bl_label, skip_essentials: true}));
+		}) ();
 	});}
 });
 export var OBJECT_MT_modifier_add_deform =  __class__ ('OBJECT_MT_modifier_add_deform', [ModifierAddMenu, Menu], {
@@ -324,7 +522,7 @@ export var OBJECT_MT_modifier_add_deform =  __class__ ('OBJECT_MT_modifier_add_d
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -339,51 +537,129 @@ export var OBJECT_MT_modifier_add_deform =  __class__ ('OBJECT_MT_modifier_add_d
 		var layout = self.layout;
 		var ob_type = context.object.py_metatype;
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			self.operator_modifier_add (layout, 'ARMATURE');
-			self.operator_modifier_add (layout, 'CAST');
-			self.operator_modifier_add (layout, 'CURVE');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'ARMATURE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'CAST');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'CURVE');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'DISPLACE');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'DISPLACE');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			self.operator_modifier_add (layout, 'HOOK');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'HOOK');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'LAPLACIANDEFORM');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'LAPLACIANDEFORM');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			self.operator_modifier_add (layout, 'LATTICE');
-			self.operator_modifier_add (layout, 'MESH_DEFORM');
-			self.operator_modifier_add (layout, 'SHRINKWRAP');
-			self.operator_modifier_add (layout, 'SIMPLE_DEFORM');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'LATTICE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'MESH_DEFORM');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SHRINKWRAP');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SIMPLE_DEFORM');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE']))) {
-			self.operator_modifier_add (layout, 'SMOOTH');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SMOOTH');
+			}) ();
 		}
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'CORRECTIVE_SMOOTH');
-			self.operator_modifier_add (layout, 'LAPLACIANSMOOTH');
-			self.operator_modifier_add (layout, 'SURFACE_DEFORM');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'CORRECTIVE_SMOOTH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'LAPLACIANSMOOTH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SURFACE_DEFORM');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			self.operator_modifier_add (layout, 'WARP');
-			self.operator_modifier_add (layout, 'WAVE');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'WARP');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'WAVE');
+			}) ();
 		}
-		if (ob_type == 'VOLUME') {
-			self.operator_modifier_add (layout, 'VOLUME_DISPLACE');
+		if (__eq__ (ob_type, 'VOLUME')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'VOLUME_DISPLACE');
+			}) ();
 		}
-		if (ob_type == 'GREASEPENCIL') {
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_ARMATURE');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_HOOK');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_LATTICE');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_NOISE');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_OFFSET');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_SHRINKWRAP');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_SMOOTH');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_THICKNESS');
+		if (__eq__ (ob_type, 'GREASEPENCIL')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_ARMATURE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_HOOK');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_LATTICE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_NOISE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_OFFSET');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_SHRINKWRAP');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_SMOOTH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_THICKNESS');
+			}) ();
 		}
-		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifier_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: self.bl_label}));
+		}) ();
 	});}
 });
 export var OBJECT_MT_modifier_add_normals =  __class__ ('OBJECT_MT_modifier_add_normals', [ModifierAddMenu, Menu], {
@@ -393,7 +669,7 @@ export var OBJECT_MT_modifier_add_normals =  __class__ ('OBJECT_MT_modifier_add_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -407,11 +683,20 @@ export var OBJECT_MT_modifier_add_normals =  __class__ ('OBJECT_MT_modifier_add_
 		}
 		var layout = self.layout;
 		var ob_type = context.object.py_metatype;
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'NORMAL_EDIT');
-			self.operator_modifier_add (layout, 'WEIGHTED_NORMAL');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'NORMAL_EDIT');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'WEIGHTED_NORMAL');
+			}) ();
 		}
-		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifier_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: self.bl_label}));
+		}) ();
 	});}
 });
 export var OBJECT_MT_modifier_add_physics =  __class__ ('OBJECT_MT_modifier_add_physics', [ModifierAddMenu, Menu], {
@@ -421,7 +706,7 @@ export var OBJECT_MT_modifier_add_physics =  __class__ ('OBJECT_MT_modifier_add_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -435,20 +720,50 @@ export var OBJECT_MT_modifier_add_physics =  __class__ ('OBJECT_MT_modifier_add_
 		}
 		var layout = self.layout;
 		var ob_type = context.object.py_metatype;
-		if (ob_type == 'MESH') {
-			self.operator_modifier_add (layout, 'CLOTH');
-			self.operator_modifier_add (layout, 'COLLISION');
-			self.operator_modifier_add (layout, 'DYNAMIC_PAINT');
-			self.operator_modifier_add (layout, 'EXPLODE');
-			self.operator_modifier_add (layout, 'FLUID');
-			self.operator_modifier_add (layout, 'OCEAN');
-			self.operator_modifier_add (layout, 'PARTICLE_INSTANCE');
-			self.operator_modifier_add (layout, 'PARTICLE_SYSTEM');
+		if (__eq__ (ob_type, 'MESH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'CLOTH');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'COLLISION');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'DYNAMIC_PAINT');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'EXPLODE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'FLUID');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'OCEAN');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'PARTICLE_INSTANCE');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'PARTICLE_SYSTEM');
+			}) ();
 		}
 		if (__in__ (ob_type, new set (['MESH', 'CURVE', 'FONT', 'SURFACE', 'LATTICE']))) {
-			self.operator_modifier_add (layout, 'SOFT_BODY');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'SOFT_BODY');
+			}) ();
 		}
-		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifier_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: self.bl_label}));
+		}) ();
 	});}
 });
 export var OBJECT_MT_modifier_add_color =  __class__ ('OBJECT_MT_modifier_add_color', [ModifierAddMenu, Menu], {
@@ -458,7 +773,7 @@ export var OBJECT_MT_modifier_add_color =  __class__ ('OBJECT_MT_modifier_add_co
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -472,12 +787,24 @@ export var OBJECT_MT_modifier_add_color =  __class__ ('OBJECT_MT_modifier_add_co
 		}
 		var layout = self.layout;
 		var ob_type = context.object.py_metatype;
-		if (ob_type == 'GREASEPENCIL') {
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_COLOR');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_OPACITY');
-			self.operator_modifier_add (layout, 'GREASE_PENCIL_TINT');
+		if (__eq__ (ob_type, 'GREASEPENCIL')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_COLOR');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_OPACITY');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.operator_modifier_add, __accu0__, layout, 'GREASE_PENCIL_TINT');
+			}) ();
 		}
-		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_modifier_asset_menu_items, __accu0__, __kwargtrans__ ({catalog_path: self.bl_label}));
+		}) ();
 	});}
 });
 export var AddModifierMenu =  __class__ ('AddModifierMenu', [Operator], {
@@ -487,7 +814,7 @@ export var AddModifierMenu =  __class__ ('AddModifierMenu', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -500,12 +827,12 @@ export var AddModifierMenu =  __class__ ('AddModifierMenu', [Operator], {
 		else {
 		}
 		var space = context.space_data;
-		return space && space.py_metatype == 'PROPERTIES' && space.context == 'MODIFIER';
+		return space && __eq__ (space.py_metatype, 'PROPERTIES') && __eq__ (space.context, 'MODIFIER');
 	});},
 	get invoke () {return __get__ (this, function (self, _context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -518,15 +845,39 @@ export var AddModifierMenu =  __class__ ('AddModifierMenu', [Operator], {
 		}
 		else {
 		}
-		return bpy.ops.wm.call_menu (__kwargtrans__ ({py_name: 'OBJECT_MT_modifier_add'}));
+		return (function () {
+			var __accu0__ = bpy.ops.wm;
+			return __call__ (__accu0__.call_menu, __accu0__, __kwargtrans__ ({py_name: 'OBJECT_MT_modifier_add'}));
+		}) ();
 	});}
 });
 export var classes = tuple ([DATA_PT_modifiers, OBJECT_MT_modifier_add, OBJECT_MT_modifier_add_edit, OBJECT_MT_modifier_add_generate, OBJECT_MT_modifier_add_deform, OBJECT_MT_modifier_add_normals, OBJECT_MT_modifier_add_physics, OBJECT_MT_modifier_add_color, AddModifierMenu]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_modifier.map
 export {Menu, Operator, Panel, n_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'ModifierButtonsPanel': ModifierButtonsPanel = value; break;
+		case 'ModifierAddMenu': ModifierAddMenu = value; break;
+		case 'DATA_PT_modifiers': DATA_PT_modifiers = value; break;
+		case 'OBJECT_MT_modifier_add': OBJECT_MT_modifier_add = value; break;
+		case 'OBJECT_MT_modifier_add_edit': OBJECT_MT_modifier_add_edit = value; break;
+		case 'OBJECT_MT_modifier_add_generate': OBJECT_MT_modifier_add_generate = value; break;
+		case 'OBJECT_MT_modifier_add_deform': OBJECT_MT_modifier_add_deform = value; break;
+		case 'OBJECT_MT_modifier_add_normals': OBJECT_MT_modifier_add_normals = value; break;
+		case 'OBJECT_MT_modifier_add_physics': OBJECT_MT_modifier_add_physics = value; break;
+		case 'OBJECT_MT_modifier_add_color': OBJECT_MT_modifier_add_color = value; break;
+		case 'AddModifierMenu': AddModifierMenu = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

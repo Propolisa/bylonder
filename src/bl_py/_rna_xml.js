@@ -11,7 +11,7 @@ export var __all__ = tuple (['xml_file_run', 'xml_file_write']);
 export var build_property_typemap = function (skip_classes, skip_typemap) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -24,38 +24,78 @@ export var build_property_typemap = function (skip_classes, skip_typemap) {
 	else {
 	}
 	var property_typemap = dict ({});
-	for (var attr of dir (bpy.types)) {
-		if (attr.startswith ('_')) {
+	var __iterable0__ = __call__ (dir, null, bpy.types);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var attr = __getitem__ (__iterable0__, __index0__);
+		if ((function () {
+			var __accu0__ = attr;
+			return __call__ (__accu0__.startswith, __accu0__, '_');
+		}) ()) {
 			continue;
 		}
-		var cls = getattr (bpy.types, attr);
-		if (issubclass (cls, skip_classes)) {
+		var cls = __call__ (getattr, null, bpy.types, attr);
+		if (__call__ (issubclass, null, cls, skip_classes)) {
 			continue;
 		}
-		var bl_rna = getattr (cls, 'bl_rna', null);
+		var bl_rna = __call__ (getattr, null, cls, 'bl_rna', null);
 		if (bl_rna === null) {
 			continue;
 		}
 		var properties = [];
-		for (var [prop_id, prop] of bl_rna.properties.py_items ()) {
+		var __iterable1__ = (function () {
+			var __accu0__ = bl_rna.properties;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var prop_id = __left0__ [0];
+			var prop = __left0__ [1];
 			if (!(prop.is_skip_save)) {
-				properties.append (prop_id);
+				(function () {
+					var __accu0__ = properties;
+					return __call__ (__accu0__.append, __accu0__, prop_id);
+				}) ();
 			}
 		}
-		properties.remove ('rna_type');
-		property_typemap [attr] = properties;
+		(function () {
+			var __accu0__ = properties;
+			return __call__ (__accu0__.remove, __accu0__, 'rna_type');
+		}) ();
+		__setitem__ (property_typemap, attr, properties);
 	}
 	if (skip_typemap) {
-		for (var [cls_name, properties_blacklist] of skip_typemap.py_items ()) {
-			var properties = property_typemap.py_get (cls_name);
+		var __iterable0__ = (function () {
+			var __accu0__ = skip_typemap;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var cls_name = __left0__ [0];
+			var properties_blacklist = __left0__ [1];
+			var properties = (function () {
+				var __accu0__ = property_typemap;
+				return __call__ (__accu0__.py_get, __accu0__, cls_name);
+			}) ();
 			if (properties !== null) {
-				for (var prop_id of properties_blacklist) {
+				var __iterable1__ = properties_blacklist;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var prop_id = __getitem__ (__iterable1__, __index1__);
 					try {
-						properties.remove (prop_id);
+						(function () {
+							var __accu0__ = properties;
+							return __call__ (__accu0__.remove, __accu0__, prop_id);
+						}) ();
 					}
 					catch (__except0__) {
 						if (isinstance (__except0__, Exception)) {
-							print ("skip_typemap unknown prop_id '{:s}.{:s}'".format (cls_name, prop_id));
+							__call__ (print, null, (function () {
+								var __accu0__ = "skip_typemap unknown prop_id '{:s}.{:s}'";
+								return __call__ (__accu0__.format, __accu0__, cls_name, prop_id);
+							}) ());
 						}
 						else {
 							throw __except0__;
@@ -64,7 +104,10 @@ export var build_property_typemap = function (skip_classes, skip_typemap) {
 				}
 			}
 			else {
-				print ("skip_typemap unknown class '{:s}'".format (cls_name));
+				__call__ (print, null, (function () {
+					var __accu0__ = "skip_typemap unknown class '{:s}'";
+					return __call__ (__accu0__.format, __accu0__, cls_name);
+				}) ());
 			}
 		}
 	}
@@ -73,7 +116,7 @@ export var build_property_typemap = function (skip_classes, skip_typemap) {
 export var print_ln = function (data) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,7 +127,7 @@ export var print_ln = function (data) {
 	}
 	else {
 	}
-	print (data, __kwargtrans__ ({end: ''}));
+	__call__ (print, null, data, __kwargtrans__ ({end: ''}));
 };
 export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_ident, ident_val, skip_classes, skip_typemap, pretty_format, method) {
 	if (typeof fw == 'undefined' || (fw != null && fw.hasOwnProperty ("__kwargtrans__"))) {;
@@ -97,7 +140,7 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 		var root_rna = null;
 	};
 	if (typeof root_rna_skip == 'undefined' || (root_rna_skip != null && root_rna_skip.hasOwnProperty ("__kwargtrans__"))) {;
-		var root_rna_skip = set ();
+		var root_rna_skip = __call__ (set, null);
 	};
 	if (typeof root_ident == 'undefined' || (root_ident != null && root_ident.hasOwnProperty ("__kwargtrans__"))) {;
 		var root_ident = '';
@@ -119,7 +162,7 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -139,13 +182,13 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 	}
 	else {
 	}
-	var quoteattr = _member ('xml.sax.saxutils', 'quoteattr');
-	var property_typemap = build_property_typemap (skip_classes, skip_typemap);
+	var quoteattr = __call__ (_member, null, 'xml.sax.saxutils', 'quoteattr');
+	var property_typemap = __call__ (build_property_typemap, null, skip_classes, skip_typemap);
 	var referenced_classes = tuple ([bpy.types.ID, bpy.types.Bone, bpy.types.ActionGroup, bpy.types.PoseBone, bpy.types.Node, bpy.types.Strip]);
 	var number_to_str = function (val, val_type) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -157,17 +200,26 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 		}
 		else {
 		}
-		if (val_type == int) {
-			return '{:d}'.format (val);
+		if (__eq__ (val_type, int)) {
+			return (function () {
+				var __accu0__ = '{:d}';
+				return __call__ (__accu0__.format, __accu0__, val);
+			}) ();
 		}
-		else if (val_type == float) {
-			return '{:.6g}'.format (val);
+		else if (__eq__ (val_type, float)) {
+			return (function () {
+				var __accu0__ = '{:.6g}';
+				return __call__ (__accu0__.format, __accu0__, val);
+			}) ();
 		}
-		else if (val_type == bool) {
+		else if (__eq__ (val_type, bool)) {
 			return (val ? 'TRUE' : 'FALSE');
 		}
 		else {
-			var __except0__ = NotImplementedError ('this type is not a number {:s}'.format (val_type));
+			var __except0__ = __call__ (NotImplementedError, null, (function () {
+				var __accu0__ = 'this type is not a number {:s}';
+				return __call__ (__accu0__.format, __accu0__, val_type);
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -175,7 +227,7 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 	var rna2xml_node = function (ident, value, parent) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -188,39 +240,75 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 		}
 		else {
 		}
-		var ident_next = ident + ident_val;
+		var ident_next = __add__ (ident, ident_val);
 		var node_attrs = [];
 		var nodes_items = [];
 		var nodes_lists = [];
 		var value_type = py_typeof (value);
-		if (issubclass (value_type, skip_classes)) {
+		if (__call__ (issubclass, null, value_type, skip_classes)) {
 			return ;
 		}
-		if (value == parent) {
+		if (__eq__ (value, parent)) {
 			return ;
 		}
 		var value_type_name = value_type.__name__;
-		for (var prop of property_typemap [value_type_name]) {
-			var subvalue = getattr (value, prop);
+		var __iterable0__ = __getitem__ (property_typemap, value_type_name);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var prop = __getitem__ (__iterable0__, __index0__);
+			var subvalue = __call__ (getattr, null, value, prop);
 			var subvalue_type = py_typeof (subvalue);
 			if (__in__ (subvalue_type, new set ([int, bool, float]))) {
-				node_attrs.append ('{:s}="{:s}"'.format (prop, number_to_str (subvalue, subvalue_type)));
+				(function () {
+					var __accu0__ = node_attrs;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = '{:s}="{:s}"';
+						return __call__ (__accu1__.format, __accu1__, prop, __call__ (number_to_str, null, subvalue, subvalue_type));
+					}) ());
+				}) ();
 			}
 			else if (subvalue_type === str) {
-				node_attrs.append ('{:s}={:s}'.format (prop, quoteattr (subvalue)));
+				(function () {
+					var __accu0__ = node_attrs;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = '{:s}={:s}';
+						return __call__ (__accu1__.format, __accu1__, prop, __call__ (quoteattr, null, subvalue));
+					}) ());
+				}) ();
 			}
 			else if (subvalue_type === set) {
-				node_attrs.append ('{:s}={:s}'.format (prop, quoteattr (('{' + ','.join (list (subvalue))) + '}')));
+				(function () {
+					var __accu0__ = node_attrs;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = '{:s}={:s}';
+						return __call__ (__accu1__.format, __accu1__, prop, __call__ (quoteattr, null, __add__ (__add__ ('{', (function () {
+							var __accu2__ = ',';
+							return __call__ (__accu2__.join, __accu2__, __call__ (list, null, subvalue));
+						}) ()), '}')));
+					}) ());
+				}) ();
 			}
 			else if (subvalue === null) {
-				node_attrs.append ('{:s}="NONE"'.format (prop));
+				(function () {
+					var __accu0__ = node_attrs;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = '{:s}="NONE"';
+						return __call__ (__accu1__.format, __accu1__, prop);
+					}) ());
+				}) ();
 			}
-			else if (issubclass (subvalue_type, referenced_classes)) {
-				node_attrs.append ('{:s}={:s}'.format (prop, quoteattr ((subvalue_type.__name__ + '::') + subvalue.py_name)));
+			else if (__call__ (issubclass, null, subvalue_type, referenced_classes)) {
+				(function () {
+					var __accu0__ = node_attrs;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = '{:s}={:s}';
+						return __call__ (__accu1__.format, __accu1__, prop, __call__ (quoteattr, null, __add__ (__add__ (subvalue_type.__name__, '::'), subvalue.py_name)));
+					}) ());
+				}) ();
 			}
 			else {
 				try {
-					var subvalue_ls = list (subvalue);
+					var subvalue_ls = __call__ (list, null, subvalue);
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, Exception)) {
@@ -231,26 +319,44 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 					}
 				}
 				if (subvalue_ls === null) {
-					nodes_items.append (tuple ([prop, subvalue, subvalue_type]));
+					(function () {
+						var __accu0__ = nodes_items;
+						return __call__ (__accu0__.append, __accu0__, tuple ([prop, subvalue, subvalue_type]));
+					}) ();
 				}
 				else {
-					var subvalue_rna = value.path_resolve (prop, false);
-					if (py_typeof (subvalue_rna).__name__ == 'bpy_prop_array') {
-						var prop_rna = value.bl_rna.properties [prop];
-						if (prop_rna.subtype == 'COLOR_GAMMA' && prop_rna.hard_min == 0.0 && prop_rna.hard_max == 1.0 && __in__ (prop_rna.array_length, new set ([3, 4]))) {
-							var array_value = '#' + ''.join ((function () {
-								var __accu0__ = [];
-								for (var v of subvalue_rna) {
-									__accu0__.append ('{:02x}'.format (int (v * 255)));
-								}
-								return __accu0__;
+					var subvalue_rna = (function () {
+						var __accu0__ = value;
+						return __call__ (__accu0__.path_resolve, __accu0__, prop, false);
+					}) ();
+					if (__eq__ (py_typeof (subvalue_rna).__name__, 'bpy_prop_array')) {
+						var prop_rna = __getitem__ (value.bl_rna.properties, prop);
+						if (__eq__ (prop_rna.subtype, 'COLOR_GAMMA') && __eq__ (prop_rna.hard_min, 0.0) && __eq__ (prop_rna.hard_max, 1.0) && __in__ (prop_rna.array_length, new set ([3, 4]))) {
+							var array_value = __add__ ('#', (function () {
+								var __accu0__ = '';
+								return __call__ (__accu0__.join, __accu0__, (function () {
+									var __accu1__ = [];
+									var __iterable1__ = subvalue_rna;
+									__iterable1__ = __i__ (__iterable1__);
+									for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+										var v = __getitem__ (__iterable1__, __index1__);
+										(function () {
+											var __accu2__ = __accu1__;
+											return __call__ (__accu2__.append, __accu2__, (function () {
+												var __accu3__ = '{:02x}';
+												return __call__ (__accu3__.format, __accu3__, __call__ (int, null, __mul__ (v, 255)));
+											}) ());
+										}) ();
+									}
+									return __accu1__;
+								}) ());
 							}) ());
 						}
 						else {
 							var str_recursive = function (s) {
 								if (arguments.length) {
 									var __ilastarg0__ = arguments.length - 1;
-									if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+									if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 										var __allkwargs0__ = arguments [__ilastarg0__--];
 										for (var __attrib0__ in __allkwargs0__) {
 											switch (__attrib0__) {
@@ -263,80 +369,167 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 								}
 								var subsubvalue_type = py_typeof (s);
 								if (__in__ (subsubvalue_type, new set ([int, float, bool]))) {
-									return number_to_str (s, subsubvalue_type);
+									return __call__ (number_to_str, null, s, subsubvalue_type);
 								}
 								else {
-									return ' '.join ((function () {
-										var __accu0__ = [];
-										for (var si of s) {
-											__accu0__.append (str_recursive (si));
-										}
-										return __accu0__;
-									}) ());
+									return (function () {
+										var __accu0__ = ' ';
+										return __call__ (__accu0__.join, __accu0__, (function () {
+											var __accu1__ = [];
+											var __iterable1__ = s;
+											__iterable1__ = __i__ (__iterable1__);
+											for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+												var si = __getitem__ (__iterable1__, __index1__);
+												(function () {
+													var __accu2__ = __accu1__;
+													return __call__ (__accu2__.append, __accu2__, __call__ (str_recursive, null, si));
+												}) ();
+											}
+											return __accu1__;
+										}) ());
+									}) ();
 								}
 							};
-							var array_value = ' '.join ((function () {
-								var __accu0__ = [];
-								for (var v of subvalue_rna) {
-									__accu0__.append (str_recursive (v));
-								}
-								return __accu0__;
-							}) ());
+							var array_value = (function () {
+								var __accu0__ = ' ';
+								return __call__ (__accu0__.join, __accu0__, (function () {
+									var __accu1__ = [];
+									var __iterable1__ = subvalue_rna;
+									__iterable1__ = __i__ (__iterable1__);
+									for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+										var v = __getitem__ (__iterable1__, __index1__);
+										(function () {
+											var __accu2__ = __accu1__;
+											return __call__ (__accu2__.append, __accu2__, __call__ (str_recursive, null, v));
+										}) ();
+									}
+									return __accu1__;
+								}) ());
+							}) ();
 						}
-						node_attrs.append ('{:s}="{:s}"'.format (prop, array_value));
+						(function () {
+							var __accu0__ = node_attrs;
+							return __call__ (__accu0__.append, __accu0__, (function () {
+								var __accu1__ = '{:s}="{:s}"';
+								return __call__ (__accu1__.format, __accu1__, prop, array_value);
+							}) ());
+						}) ();
 					}
 					else {
-						nodes_lists.append (tuple ([prop, subvalue_ls, subvalue_type]));
+						(function () {
+							var __accu0__ = nodes_lists;
+							return __call__ (__accu0__.append, __accu0__, tuple ([prop, subvalue_ls, subvalue_type]));
+						}) ();
 					}
 				}
 			}
 		}
 		if (pretty_format) {
 			if (node_attrs) {
-				fw ('{:s}<{:s}\n'.format (ident, value_type_name));
-				for (var node_attr of node_attrs) {
-					fw ('{:s}{:s}\n'.format (ident_next, node_attr));
+				__call__ (fw, null, (function () {
+					var __accu0__ = '{:s}<{:s}\n';
+					return __call__ (__accu0__.format, __accu0__, ident, value_type_name);
+				}) ());
+				var __iterable0__ = node_attrs;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var node_attr = __getitem__ (__iterable0__, __index0__);
+					__call__ (fw, null, (function () {
+						var __accu0__ = '{:s}{:s}\n';
+						return __call__ (__accu0__.format, __accu0__, ident_next, node_attr);
+					}) ());
 				}
-				fw ('{:s}>\n'.format (ident_next));
+				__call__ (fw, null, (function () {
+					var __accu0__ = '{:s}>\n';
+					return __call__ (__accu0__.format, __accu0__, ident_next);
+				}) ());
 			}
 			else {
-				fw ('{:s}<{:s}>\n'.format (ident, value_type_name));
+				__call__ (fw, null, (function () {
+					var __accu0__ = '{:s}<{:s}>\n';
+					return __call__ (__accu0__.format, __accu0__, ident, value_type_name);
+				}) ());
 			}
 		}
 		else {
-			fw ('{:s}<{:s} {:s}>\n'.format (ident, value_type_name, ' '.join (node_attrs)));
+			__call__ (fw, null, (function () {
+				var __accu0__ = '{:s}<{:s} {:s}>\n';
+				return __call__ (__accu0__.format, __accu0__, ident, value_type_name, (function () {
+					var __accu1__ = ' ';
+					return __call__ (__accu1__.join, __accu1__, node_attrs);
+				}) ());
+			}) ());
 		}
-		for (var [prop, subvalue, subvalue_type] of nodes_items) {
-			fw ('{:s}<{:s}>\n'.format (ident_next, prop));
-			rna2xml_node (ident_next + ident_val, subvalue, value);
-			fw ('{:s}</{:s}>\n'.format (ident_next, prop));
+		var __iterable0__ = nodes_items;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop = __left0__ [0];
+			var subvalue = __left0__ [1];
+			var subvalue_type = __left0__ [2];
+			__call__ (fw, null, (function () {
+				var __accu0__ = '{:s}<{:s}>\n';
+				return __call__ (__accu0__.format, __accu0__, ident_next, prop);
+			}) ());
+			__call__ (rna2xml_node, null, __add__ (ident_next, ident_val), subvalue, value);
+			__call__ (fw, null, (function () {
+				var __accu0__ = '{:s}</{:s}>\n';
+				return __call__ (__accu0__.format, __accu0__, ident_next, prop);
+			}) ());
 		}
-		for (var [prop, subvalue, subvalue_type] of nodes_lists) {
-			fw ('{:s}<{:s}>\n'.format (ident_next, prop));
-			for (var subvalue_item of subvalue) {
+		var __iterable0__ = nodes_lists;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop = __left0__ [0];
+			var subvalue = __left0__ [1];
+			var subvalue_type = __left0__ [2];
+			__call__ (fw, null, (function () {
+				var __accu0__ = '{:s}<{:s}>\n';
+				return __call__ (__accu0__.format, __accu0__, ident_next, prop);
+			}) ());
+			var __iterable1__ = subvalue;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var subvalue_item = __getitem__ (__iterable1__, __index1__);
 				if (subvalue_item !== null) {
-					rna2xml_node (ident_next + ident_val, subvalue_item, value);
+					__call__ (rna2xml_node, null, __add__ (ident_next, ident_val), subvalue_item, value);
 				}
 			}
-			fw ('{:s}</{:s}>\n'.format (ident_next, prop));
+			__call__ (fw, null, (function () {
+				var __accu0__ = '{:s}</{:s}>\n';
+				return __call__ (__accu0__.format, __accu0__, ident_next, prop);
+			}) ());
 		}
-		fw ('{:s}</{:s}>\n'.format (ident, value_type_name));
+		__call__ (fw, null, (function () {
+			var __accu0__ = '{:s}</{:s}>\n';
+			return __call__ (__accu0__.format, __accu0__, ident, value_type_name);
+		}) ());
 	};
 	if (root_node) {
-		fw ('{:s}<{:s}>\n'.format (root_ident, root_node));
+		__call__ (fw, null, (function () {
+			var __accu0__ = '{:s}<{:s}>\n';
+			return __call__ (__accu0__.format, __accu0__, root_ident, root_node);
+		}) ());
 	}
-	if (method == 'DATA') {
-		var ident = root_ident + ident_val;
-		for (var attr of dir (root_rna)) {
-			if (attr.startswith ('_')) {
+	if (__eq__ (method, 'DATA')) {
+		var ident = __add__ (root_ident, ident_val);
+		var __iterable0__ = __call__ (dir, null, root_rna);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var attr = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = attr;
+				return __call__ (__accu0__.startswith, __accu0__, '_');
+			}) ()) {
 				continue;
 			}
 			else if (__in__ (attr, root_rna_skip)) {
 				continue;
 			}
-			var value = getattr (root_rna, attr);
+			var value = __call__ (getattr, null, root_rna, attr);
 			try {
-				var ls = value.__getslice__ (null, null, 1);
+				var ls = __getslice__ (value, null, null, 1);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -346,20 +539,32 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 					throw __except0__;
 				}
 			}
-			if (py_typeof (ls) == list) {
-				fw ('{:s}<{:s}>\n'.format (ident, attr));
-				for (var blend_id of ls) {
-					rna2xml_node (ident + ident_val, blend_id, null);
+			if (__eq__ (py_typeof (ls), list)) {
+				__call__ (fw, null, (function () {
+					var __accu0__ = '{:s}<{:s}>\n';
+					return __call__ (__accu0__.format, __accu0__, ident, attr);
+				}) ());
+				var __iterable1__ = ls;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var blend_id = __getitem__ (__iterable1__, __index1__);
+					__call__ (rna2xml_node, null, __add__ (ident, ident_val), blend_id, null);
 				}
-				fw ('{:s}</{:s}>\n'.format (ident_val, attr));
+				__call__ (fw, null, (function () {
+					var __accu0__ = '{:s}</{:s}>\n';
+					return __call__ (__accu0__.format, __accu0__, ident_val, attr);
+				}) ());
 			}
 		}
 	}
-	else if (method == 'ATTR') {
-		rna2xml_node (root_ident, root_rna, null);
+	else if (__eq__ (method, 'ATTR')) {
+		__call__ (rna2xml_node, null, root_ident, root_rna, null);
 	}
 	if (root_node) {
-		fw ('{:s}</{:s}>\n'.format (root_ident, root_node));
+		__call__ (fw, null, (function () {
+			var __accu0__ = '{:s}</{:s}>\n';
+			return __call__ (__accu0__.format, __accu0__, root_ident, root_node);
+		}) ());
 	}
 };
 export var xml2rna = function (root_xml) {
@@ -367,7 +572,7 @@ export var xml2rna = function (root_xml) {
 	var secure_types = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -383,7 +588,7 @@ export var xml2rna = function (root_xml) {
 	var xml2rna_node = function (xml_node, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -396,47 +601,78 @@ export var xml2rna = function (root_xml) {
 		else {
 		}
 		if (secure_types !== null && !__in__ (xml_node.nodeName, secure_types)) {
-			print ('Loading the XML with type restrictions, skipping "{:s}"'.format (xml_node.nodeName));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Loading the XML with type restrictions, skipping "{:s}"';
+				return __call__ (__accu0__.format, __accu0__, xml_node.nodeName);
+			}) ());
 			return ;
 		}
-		for (var attr of xml_node.attributes.py_keys ()) {
-			var subvalue = getattr (value, attr, Ellipsis);
+		var __iterable0__ = (function () {
+			var __accu0__ = xml_node.attributes;
+			return __call__ (__accu0__.py_keys, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var attr = __getitem__ (__iterable0__, __index0__);
+			var subvalue = __call__ (getattr, null, value, attr, Ellipsis);
 			if (subvalue === Ellipsis) {
-				print ('{:s}.{:s} not found'.format (py_typeof (value).__name__, attr));
+				__call__ (print, null, (function () {
+					var __accu0__ = '{:s}.{:s} not found';
+					return __call__ (__accu0__.format, __accu0__, py_typeof (value).__name__, attr);
+				}) ());
 			}
 			else {
-				var value_xml = xml_node.attributes [attr].value;
+				var value_xml = __getitem__ (xml_node.attributes, attr).value;
 				var subvalue_type = py_typeof (subvalue);
-				if (subvalue_type == float) {
-					var value_xml_coerce = float (value_xml);
+				if (__eq__ (subvalue_type, float)) {
+					var value_xml_coerce = __call__ (float, null, value_xml);
 				}
-				else if (subvalue_type == int) {
-					var value_xml_coerce = int (value_xml);
+				else if (__eq__ (subvalue_type, int)) {
+					var value_xml_coerce = __call__ (int, null, value_xml);
 				}
-				else if (subvalue_type == bool) {
-					var value_xml_coerce = dict ({'TRUE': true, 'FALSE': false}) [value_xml];
+				else if (__eq__ (subvalue_type, bool)) {
+					var value_xml_coerce = __getitem__ (dict ({'TRUE': true, 'FALSE': false}), value_xml);
 				}
-				else if (subvalue_type == str) {
+				else if (__eq__ (subvalue_type, str)) {
 					var value_xml_coerce = value_xml;
 				}
-				else if (hasattr (subvalue, '__len__')) {
-					if (value_xml.startswith ('#')) {
-						var value_xml_split = value_xml.__getslice__ (1, null, 1);
+				else if (__call__ (hasattr, null, subvalue, '__len__')) {
+					if ((function () {
+						var __accu0__ = value_xml;
+						return __call__ (__accu0__.startswith, __accu0__, '#');
+					}) ()) {
+						var value_xml_split = __getslice__ (value_xml, 1, null, 1);
 						var value_xml_coerce = (function () {
 							var __accu0__ = [];
-							for (var i of list (range (0, len (value_xml_split), 2))) {
-								__accu0__.append (int (value_xml_split.__getslice__ (i, i + 2, 1), 16) / 255);
+							var __iterable1__ = __call__ (list, null, __call__ (range, null, 0, __call__ (len, null, value_xml_split), 2));
+							__iterable1__ = __i__ (__iterable1__);
+							for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+								var i = __getitem__ (__iterable1__, __index1__);
+								(function () {
+									var __accu1__ = __accu0__;
+									return __call__ (__accu1__.append, __accu1__, __truediv__ (__call__ (int, null, __getslice__ (value_xml_split, i, __add__ (i, 2), 1), 16), 255));
+								}) ();
 							}
 							return __accu0__;
 						}) ();
+						// pass;
 					}
 					else {
-						var value_xml_split = value_xml.py_split ();
+						var value_xml_split = (function () {
+							var __accu0__ = value_xml;
+							return __call__ (__accu0__.py_split, __accu0__);
+						}) ();
 						try {
 							var value_xml_coerce = (function () {
 								var __accu0__ = [];
-								for (var v of value_xml_split) {
-									__accu0__.append (int (v));
+								var __iterable1__ = value_xml_split;
+								__iterable1__ = __i__ (__iterable1__);
+								for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+									var v = __getitem__ (__iterable1__, __index1__);
+									(function () {
+										var __accu1__ = __accu0__;
+										return __call__ (__accu1__.append, __accu1__, __call__ (int, null, v));
+									}) ();
 								}
 								return __accu0__;
 							}) ();
@@ -446,8 +682,14 @@ export var xml2rna = function (root_xml) {
 								try {
 									var value_xml_coerce = (function () {
 										var __accu0__ = [];
-										for (var v of value_xml_split) {
-											__accu0__.append (float (v));
+										var __iterable1__ = value_xml_split;
+										__iterable1__ = __i__ (__iterable1__);
+										for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+											var v = __getitem__ (__iterable1__, __index1__);
+											(function () {
+												var __accu1__ = __accu0__;
+												return __call__ (__accu1__.append, __accu1__, __call__ (float, null, v));
+											}) ();
 										}
 										return __accu0__;
 									}) ();
@@ -456,8 +698,14 @@ export var xml2rna = function (root_xml) {
 									if (isinstance (__except1__, ValueError)) {
 										var value_xml_coerce = (function () {
 											var __accu0__ = [];
-											for (var v of value_xml_split) {
-												__accu0__.append (dict ({'TRUE': true, 'FALSE': false}) [v]);
+											var __iterable1__ = value_xml_split;
+											__iterable1__ = __i__ (__iterable1__);
+											for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+												var v = __getitem__ (__iterable1__, __index1__);
+												(function () {
+													var __accu1__ = __accu0__;
+													return __call__ (__accu1__.append, __accu1__, __getitem__ (dict ({'TRUE': true, 'FALSE': false}), v));
+												}) ();
 											}
 											return __accu0__;
 										}) ();
@@ -471,19 +719,20 @@ export var xml2rna = function (root_xml) {
 								throw __except0__;
 							}
 						}
+						// pass;
 					}
 				}
 				try {
-					setattr (value, attr, value_xml_coerce);
+					__call__ (setattr, null, value, attr, value_xml_coerce);
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, ValueError)) {
-						var val = getattr (value, attr);
-						if (len (val) < len (value_xml_coerce)) {
-							setattr (value, attr, value_xml_coerce.__getslice__ (null, len (val), 1));
+						var val = __call__ (getattr, null, value, attr);
+						if (__lt__ (__call__ (len, null, val), __call__ (len, null, value_xml_coerce))) {
+							__call__ (setattr, null, value, attr, __getslice__ (value_xml_coerce, null, __call__ (len, null, val), 1));
 						}
 						else {
-							setattr (value, attr, list (value_xml_coerce) + list (val).__getslice__ (len (value_xml_coerce), null, 1));
+							__call__ (setattr, null, value, attr, __add__ (__call__ (list, null, value_xml_coerce), __getslice__ (__call__ (list, null, val), __call__ (len, null, value_xml_coerce), null, 1)));
 						}
 					}
 					else {
@@ -492,36 +741,49 @@ export var xml2rna = function (root_xml) {
 				}
 			}
 		}
-		for (var child_xml of xml_node.childNodes) {
-			if (child_xml.nodeType == child_xml.ELEMENT_NODE) {
-				var subvalue = getattr (value, child_xml.nodeName, null);
+		var __iterable0__ = xml_node.childNodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var child_xml = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (child_xml.nodeType, child_xml.ELEMENT_NODE)) {
+				var subvalue = __call__ (getattr, null, value, child_xml.nodeName, null);
 				if (subvalue !== null) {
 					var elems = [];
-					for (var child_xml_real of child_xml.childNodes) {
-						if (child_xml_real.nodeType == child_xml_real.ELEMENT_NODE) {
-							elems.append (child_xml_real);
+					var __iterable1__ = child_xml.childNodes;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var child_xml_real = __getitem__ (__iterable1__, __index1__);
+						if (__eq__ (child_xml_real.nodeType, child_xml_real.ELEMENT_NODE)) {
+							(function () {
+								var __accu0__ = elems;
+								return __call__ (__accu0__.append, __accu0__, child_xml_real);
+							}) ();
 						}
 					}
-					if (hasattr (subvalue, '__len__')) {
-						if (len (elems) != len (subvalue)) {
-							print ('Size Mismatch! collection:', child_xml.nodeName);
+					// pass;
+					if (__call__ (hasattr, null, subvalue, '__len__')) {
+						if (__ne__ (__call__ (len, null, elems), __call__ (len, null, subvalue))) {
+							__call__ (print, null, 'Size Mismatch! collection:', child_xml.nodeName);
 						}
 						else {
-							for (var i = 0; i < len (elems); i++) {
-								var child_xml_real = elems [i];
-								var subsubvalue = subvalue [i];
+							for (var i = 0; i < __call__ (len, null, elems); i++) {
+								var child_xml_real = __getitem__ (elems, i);
+								var subsubvalue = __getitem__ (subvalue, i);
 								if (child_xml_real === null || subsubvalue === null) {
-									print ('None found {:s} - {:d} collection:'.format (child_xml.nodeName, i));
+									__call__ (print, null, (function () {
+										var __accu0__ = 'None found {:s} - {:d} collection:';
+										return __call__ (__accu0__.format, __accu0__, child_xml.nodeName, i);
+									}) ());
 								}
 								else {
-									xml2rna_node (child_xml_real, subsubvalue);
+									__call__ (xml2rna_node, null, child_xml_real, subsubvalue);
 								}
 							}
 						}
 					}
-					else if (len (elems) == 1) {
-						var child_xml_real = elems [0];
-						xml2rna_node (child_xml_real, subvalue);
+					else if (__eq__ (__call__ (len, null, elems), 1)) {
+						var child_xml_real = __getitem__ (elems, 0);
+						__call__ (xml2rna_node, null, child_xml_real, subvalue);
 					}
 					else {
 						// pass;
@@ -530,12 +792,12 @@ export var xml2rna = function (root_xml) {
 			}
 		}
 	};
-	xml2rna_node (root_xml, root_rna);
+	__call__ (xml2rna_node, null, root_xml, root_rna);
 };
 export var _get_context_val = function (context, path) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -548,12 +810,18 @@ export var _get_context_val = function (context, path) {
 	else {
 	}
 	try {
-		var value = context.path_resolve (path);
+		var value = (function () {
+			var __accu0__ = context;
+			return __call__ (__accu0__.path_resolve, __accu0__, path);
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			print ('Error: {!r}, path {!r} not found'.format (ex, path));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Error: {!r}, path {!r} not found';
+				return __call__ (__accu0__.format, __accu0__, ex, path);
+			}) ());
 			var value = Ellipsis;
 		}
 		else {
@@ -568,7 +836,7 @@ export var xml_file_run = function (context, filepath, rna_map, secure_types) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -582,14 +850,28 @@ export var xml_file_run = function (context, filepath, rna_map, secure_types) {
 	}
 	else {
 	}
-	var xml = _module ('xml');
-	var xml_nodes = xml.dom.minidom.parse (filepath);
-	var bpy_xml = xml_nodes.getElementsByTagName ('bpy') [0];
-	for (var [rna_path, xml_tag] of rna_map) {
-		var xml_node = bpy_xml.getElementsByTagName (xml_tag) [0];
-		var value = _get_context_val (context, rna_path);
+	var xml = __call__ (_module, null, 'xml');
+	var xml_nodes = (function () {
+		var __accu0__ = xml.dom.minidom;
+		return __call__ (__accu0__.parse, __accu0__, filepath);
+	}) ();
+	var bpy_xml = __getitem__ ((function () {
+		var __accu0__ = xml_nodes;
+		return __call__ (__accu0__.getElementsByTagName, __accu0__, 'bpy');
+	}) (), 0);
+	var __iterable0__ = rna_map;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var rna_path = __left0__ [0];
+		var xml_tag = __left0__ [1];
+		var xml_node = __getitem__ ((function () {
+			var __accu0__ = bpy_xml;
+			return __call__ (__accu0__.getElementsByTagName, __accu0__, xml_tag);
+		}) (), 0);
+		var value = __call__ (_get_context_val, null, context, rna_path);
 		if (value !== Ellipsis && value !== null) {
-			xml2rna (xml_node, __kwargtrans__ ({root_rna: value, secure_types: secure_types}));
+			__call__ (xml2rna, null, xml_node, __kwargtrans__ ({root_rna: value, secure_types: secure_types}));
 		}
 	}
 };
@@ -597,7 +879,7 @@ export var xml_file_write = function (context, filepath, rna_map) {
 	var skip_typemap = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -611,16 +893,21 @@ export var xml_file_write = function (context, filepath, rna_map) {
 	}
 	else {
 	}
-	var file = open (filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+	var file = __call__ (open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
 	try {
 		file.__enter__ ();
 		var fw = file.write;
-		fw ('<bpy>\n');
-		for (var [rna_path, _xml_tag] of rna_map) {
-			var value = _get_context_val (context, rna_path);
-			rna2xml (__kwargtrans__ ({fw: fw, root_rna: value, method: 'ATTR', root_ident: '  ', ident_val: '  ', skip_typemap: skip_typemap}));
+		__call__ (fw, null, '<bpy>\n');
+		var __iterable0__ = rna_map;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var rna_path = __left0__ [0];
+			var _xml_tag = __left0__ [1];
+			var value = __call__ (_get_context_val, null, context, rna_path);
+			__call__ (rna2xml, null, __kwargtrans__ ({fw: fw, root_rna: value, method: 'ATTR', root_ident: '  ', ident_val: '  ', skip_typemap: skip_typemap}));
 		}
-		fw ('</bpy>\n');
+		__call__ (fw, null, '</bpy>\n');
 		file.__exit__ ();
 	}
 	catch (__except0__) {
@@ -632,3 +919,17 @@ export var xml_file_write = function (context, filepath, rna_map) {
 
 //# sourceMappingURL=_rna_xml.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'build_property_typemap': build_property_typemap = value; break;
+		case 'print_ln': print_ln = value; break;
+		case 'rna2xml': rna2xml = value; break;
+		case 'xml2rna': xml2rna = value; break;
+		case '_get_context_val': _get_context_val = value; break;
+		case 'xml_file_run': xml_file_run = value; break;
+		case 'xml_file_write': xml_file_write = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

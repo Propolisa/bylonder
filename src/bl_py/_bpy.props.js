@@ -8,7 +8,7 @@ export var _PropertyDeferred =  __class__ ('_PropertyDeferred', [object], {
 	get __init__ () {return __get__ (this, function (self, function_, keywords) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -29,7 +29,7 @@ export var BoolProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -41,13 +41,13 @@ export var BoolProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (BoolProperty, keywords);
+	return __call__ (_PropertyDeferred, null, BoolProperty, keywords);
 };
 export var BoolVectorProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -59,13 +59,13 @@ export var BoolVectorProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (BoolVectorProperty, keywords);
+	return __call__ (_PropertyDeferred, null, BoolVectorProperty, keywords);
 };
 export var IntProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -77,13 +77,13 @@ export var IntProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (IntProperty, keywords);
+	return __call__ (_PropertyDeferred, null, IntProperty, keywords);
 };
 export var IntVectorProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -95,13 +95,13 @@ export var IntVectorProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (IntVectorProperty, keywords);
+	return __call__ (_PropertyDeferred, null, IntVectorProperty, keywords);
 };
 export var FloatProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -113,13 +113,13 @@ export var FloatProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (FloatProperty, keywords);
+	return __call__ (_PropertyDeferred, null, FloatProperty, keywords);
 };
 export var FloatVectorProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -131,13 +131,13 @@ export var FloatVectorProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (FloatVectorProperty, keywords);
+	return __call__ (_PropertyDeferred, null, FloatVectorProperty, keywords);
 };
 export var StringProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -149,13 +149,13 @@ export var StringProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (StringProperty, keywords);
+	return __call__ (_PropertyDeferred, null, StringProperty, keywords);
 };
 export var EnumProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -167,13 +167,13 @@ export var EnumProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (EnumProperty, keywords);
+	return __call__ (_PropertyDeferred, null, EnumProperty, keywords);
 };
 export var PointerProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -185,13 +185,13 @@ export var PointerProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (PointerProperty, keywords);
+	return __call__ (_PropertyDeferred, null, PointerProperty, keywords);
 };
 export var CollectionProperty = function () {
 	var keywords = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -203,7 +203,7 @@ export var CollectionProperty = function () {
 	}
 	else {
 	}
-	return _PropertyDeferred (CollectionProperty, keywords);
+	return __call__ (_PropertyDeferred, null, CollectionProperty, keywords);
 };
 export var RemoveProperty = function (cls, attr) {
 	if (typeof attr == 'undefined' || (attr != null && attr.hasOwnProperty ("__kwargtrans__"))) {;
@@ -211,7 +211,7 @@ export var RemoveProperty = function (cls, attr) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -227,3 +227,20 @@ export var RemoveProperty = function (cls, attr) {
 };
 
 //# sourceMappingURL=_bpy.props.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_PropertyDeferred': _PropertyDeferred = value; break;
+		case 'BoolProperty': BoolProperty = value; break;
+		case 'BoolVectorProperty': BoolVectorProperty = value; break;
+		case 'IntProperty': IntProperty = value; break;
+		case 'IntVectorProperty': IntVectorProperty = value; break;
+		case 'FloatProperty': FloatProperty = value; break;
+		case 'FloatVectorProperty': FloatVectorProperty = value; break;
+		case 'StringProperty': StringProperty = value; break;
+		case 'EnumProperty': EnumProperty = value; break;
+		case 'PointerProperty': PointerProperty = value; break;
+		case 'CollectionProperty': CollectionProperty = value; break;
+		case 'RemoveProperty': RemoveProperty = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

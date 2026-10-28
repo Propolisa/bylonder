@@ -16,11 +16,11 @@ import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.image_as_planes';
 export var __all__ = tuple (['classes']);
 export var COMPATIBLE_ENGINES = new set (['CYCLES', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH']);
-export var ImageSpec = namedtuple ('ImageSpec', tuple (['image', 'size', 'frame_start', 'frame_offset', 'frame_duration']));
+export var ImageSpec = __call__ (namedtuple, null, 'ImageSpec', tuple (['image', 'size', 'frame_start', 'frame_offset', 'frame_duration']));
 export var find_image_sequences = function* (files) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -31,46 +31,73 @@ export var find_image_sequences = function* (files) {
 	}
 	else {
 	}
-	var count = _member ('itertools', 'count');
-	var re = _module ('re');
-	var num_regex = re.compile ('[0-9]');
-	var nums_regex = re.compile ('[0-9]+');
-	var files = py_iter (sorted (files));
+	var count = __call__ (_member, null, 'itertools', 'count');
+	var re = __call__ (_module, null, 're');
+	var num_regex = (function () {
+		var __accu0__ = re;
+		return __call__ (__accu0__.compile, __accu0__, '[0-9]');
+	}) ();
+	var nums_regex = (function () {
+		var __accu0__ = re;
+		return __call__ (__accu0__.compile, __accu0__, '[0-9]+');
+	}) ();
+	var files = __call__ (py_iter, null, __call__ (sorted, null, files));
 	var prev_file = null;
 	var pattern = '';
 	var matches = [];
 	var segment = null;
 	var length = 1;
-	for (var filename of files) {
-		var new_pattern = num_regex.sub ('#', filename);
-		var new_matches = list (map (int, nums_regex.findall (filename)));
-		if (new_pattern == pattern) {
+	var __iterable0__ = files;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var filename = __getitem__ (__iterable0__, __index0__);
+		var new_pattern = (function () {
+			var __accu0__ = num_regex;
+			return __call__ (__accu0__.sub, __accu0__, '#', filename);
+		}) ();
+		var new_matches = __call__ (list, null, __call__ (map, null, int, (function () {
+			var __accu0__ = nums_regex;
+			return __call__ (__accu0__.findall, __accu0__, filename);
+		}) ()));
+		if (__eq__ (new_pattern, pattern)) {
 			if (segment === null) {
-				for (var [i, prev, cur] of zip (count (), matches, new_matches)) {
-					if (prev != cur) {
+				var __iterable1__ = __call__ (zip, null, __call__ (count, null), matches, new_matches);
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var __left0__ = __getitem__ (__iterable1__, __index1__);
+					var i = __left0__ [0];
+					var prev = __left0__ [1];
+					var cur = __left0__ [2];
+					if (__ne__ (prev, cur)) {
 						var segment = i;
 						break;
 					}
 				}
 			}
 			var __break1__ = false;
-			for (var [i, prev, cur] of zip (count (), matches, new_matches)) {
-				if (i == segment) {
-					var prev = prev + length;
+			var __iterable1__ = __call__ (zip, null, __call__ (count, null), matches, new_matches);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var i = __left0__ [0];
+				var prev = __left0__ [1];
+				var cur = __left0__ [2];
+				if (__eq__ (i, segment)) {
+					var prev = __add__ (prev, length);
 				}
-				if (prev != cur) {
+				if (__ne__ (prev, cur)) {
 					__break1__ = true;
 					break;
 				}
 			}
 			if (!__break1__) {
-				length++;
+				var length = __call__ (__iadd__, null, length, 1);
 				continue;
 			}
 		}
 		if (prev_file) {
-			if (length > 1) {
-				yield tuple ([prev_file, matches [segment], length]);
+			if (__gt__ (length, 1)) {
+				yield tuple ([prev_file, __getitem__ (matches, segment), length]);
 			}
 			else {
 				yield tuple ([prev_file, 1, 1]);
@@ -83,8 +110,8 @@ export var find_image_sequences = function* (files) {
 		var length = 1;
 	}
 	if (prev_file) {
-		if (length > 1) {
-			yield tuple ([prev_file, matches [segment], length]);
+		if (__gt__ (length, 1)) {
+			yield tuple ([prev_file, __getitem__ (matches, segment), length]);
 		}
 		else {
 			yield tuple ([prev_file, 1, 1]);
@@ -103,7 +130,7 @@ export var load_images = function* (filenames, directory, force_reload, frame_st
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -118,35 +145,50 @@ export var load_images = function* (filenames, directory, force_reload, frame_st
 	}
 	else {
 	}
-	var os = _module ('os');
-	var repeat = _member ('itertools', 'repeat');
-	var load_image = _member ('bpy_extras.image_utils', 'load_image');
+	var os = __call__ (_module, null, 'os');
+	var repeat = __call__ (_member, null, 'itertools', 'repeat');
+	var load_image = __call__ (_member, null, 'bpy_extras.image_utils', 'load_image');
 	if (find_sequences) {
-		var file_iter = find_image_sequences (filenames);
+		var file_iter = __call__ (find_image_sequences, null, filenames);
 	}
 	else {
-		var file_iter = zip (filenames, repeat (1), repeat (1));
+		var file_iter = __call__ (zip, null, filenames, __call__ (repeat, null, 1), __call__ (repeat, null, 1));
 	}
-	for (var [filename, offset, frames] of file_iter) {
-		if (!(os.path.isfile (bpy.path.abspath (os.path.join (directory, filename))))) {
+	var __iterable0__ = file_iter;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var filename = __left0__ [0];
+		var offset = __left0__ [1];
+		var frames = __left0__ [2];
+		if (!((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isfile, __accu0__, (function () {
+				var __accu1__ = bpy.path;
+				return __call__ (__accu1__.abspath, __accu1__, (function () {
+					var __accu2__ = os.path;
+					return __call__ (__accu2__.join, __accu2__, directory, filename);
+				}) ());
+			}) ());
+		}) ())) {
 			continue;
 		}
-		var image = load_image (filename, directory, __kwargtrans__ ({check_existing: true, force_reload: force_reload}));
-		var size = tuple (image.size);
-		if (image.source == 'MOVIE') {
+		var image = __call__ (load_image, null, filename, directory, __kwargtrans__ ({check_existing: true, force_reload: force_reload}));
+		var size = __call__ (tuple, null, image.size);
+		if (__eq__ (image.source, 'MOVIE')) {
 			var frames = image.frame_duration;
 			var frames = image.frame_duration;
 		}
-		else if (frames > 1) {
+		else if (__gt__ (frames, 1)) {
 			image.source = 'SEQUENCE';
 		}
-		yield ImageSpec (image, size, frame_start, offset - 1, frames);
+		yield __call__ (ImageSpec, null, image, size, frame_start, __sub__ (offset, 1), frames);
 	}
 	};
 export var offset_planes = function (planes, gap, axis) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -159,11 +201,17 @@ export var offset_planes = function (planes, gap, axis) {
 	}
 	else {
 	}
-	var prior = planes [0];
-	var offset = Vector ();
-	for (var current of planes.__getslice__ (1, null, 1)) {
-		var local_offset = abs ((prior.dimensions + current.dimensions).dot (axis)) / 2.0 + gap;
-		offset += local_offset * axis;
+	var prior = __getitem__ (planes, 0);
+	var offset = __call__ (Vector, null);
+	var __iterable0__ = __getslice__ (planes, 1, null, 1);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var current = __getitem__ (__iterable0__, __index0__);
+		var local_offset = __add__ (__truediv__ (__call__ (abs, null, (function () {
+			var __accu0__ = __add__ (prior.dimensions, current.dimensions);
+			return __call__ (__accu0__.dot, __accu0__, axis);
+		}) ()), 2.0), gap);
+		var offset = __call__ (__iadd__, null, offset, __mul__ (local_offset, axis));
 		current.location = __matmul__ (current.matrix_world, offset);
 		var prior = current;
 	}
@@ -171,7 +219,7 @@ export var offset_planes = function (planes, gap, axis) {
 export var compute_camera_size = function (context, center, fill_mode, aspect) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -187,47 +235,74 @@ export var compute_camera_size = function (context, center, fill_mode, aspect) {
 	}
 	var scene = context.scene;
 	var camera = scene.camera;
-	var view_frame = camera.data.view_frame (__kwargtrans__ ({scene: scene}));
-	var frame_size = Vector ((function () {
+	var view_frame = (function () {
+		var __accu0__ = camera.data;
+		return __call__ (__accu0__.view_frame, __accu0__, __kwargtrans__ ({scene: scene}));
+	}) ();
+	var frame_size = __sub__ (__call__ (Vector, null, (function () {
 		var __accu0__ = [];
-		for (var i of list (range (3))) {
-			__accu0__.append (max ((function () {
-				var __accu1__ = [];
-				for (var v of view_frame) {
-					__accu1__.append (v [i]);
-				}
-				return __accu1__;
-			}) ()));
+		var __iterable0__ = __call__ (list, null, __call__ (range, null, 3));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var i = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, __call__ (max, null, (function () {
+					var __accu2__ = [];
+					var __iterable1__ = view_frame;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var v = __getitem__ (__iterable1__, __index1__);
+						(function () {
+							var __accu3__ = __accu2__;
+							return __call__ (__accu3__.append, __accu3__, __getitem__ (v, i));
+						}) ();
+					}
+					return __accu2__;
+				}) ()));
+			}) ();
 		}
 		return __accu0__;
-	}) ()) - Vector ((function () {
+	}) ()), __call__ (Vector, null, (function () {
 		var __accu0__ = [];
-		for (var i of list (range (3))) {
-			__accu0__.append (min ((function () {
-				var __accu1__ = [];
-				for (var v of view_frame) {
-					__accu1__.append (v [i]);
-				}
-				return __accu1__;
-			}) ()));
+		var __iterable0__ = __call__ (list, null, __call__ (range, null, 3));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var i = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, __call__ (min, null, (function () {
+					var __accu2__ = [];
+					var __iterable1__ = view_frame;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var v = __getitem__ (__iterable1__, __index1__);
+						(function () {
+							var __accu3__ = __accu2__;
+							return __call__ (__accu3__.append, __accu3__, __getitem__ (v, i));
+						}) ();
+					}
+					return __accu2__;
+				}) ()));
+			}) ();
 		}
 		return __accu0__;
-	}) ());
-	var camera_aspect = frame_size.x / frame_size.y;
-	if (camera.py_metatype == 'ORTHO') {
+	}) ()));
+	var camera_aspect = __truediv__ (frame_size.x, frame_size.y);
+	if (__eq__ (camera.py_metatype, 'ORTHO')) {
 		var frame_size = frame_size.xy;
 	}
 	else {
-		var distance = world_to_camera_view (scene, camera, center).z;
-		var frame_size = (distance * frame_size.xy) / -(view_frame [0].z);
+		var distance = __call__ (world_to_camera_view, null, scene, camera, center).z;
+		var frame_size = __truediv__ (__mul__ (distance, frame_size.xy), __neg__ (__getitem__ (view_frame, 0).z));
 	}
 	var match_axis = 0;
 	var match_aspect = aspect;
-	if (fill_mode == 'FILL' && aspect > camera_aspect || fill_mode == 'FIT' && aspect < camera_aspect) {
+	if (__eq__ (fill_mode, 'FILL') && __gt__ (aspect, camera_aspect) || __eq__ (fill_mode, 'FIT') && __lt__ (aspect, camera_aspect)) {
 		var match_axis = 1;
-		var match_aspect = 1.0 / aspect;
+		var match_aspect = __truediv__ (1.0, aspect);
 	}
-	frame_size [1 - match_axis] = frame_size [match_axis] / match_aspect;
+	__setitem__ (frame_size, __sub__ (1, match_axis), __truediv__ (__getitem__ (frame_size, match_axis), match_aspect));
 	return frame_size;
 };
 export var center_in_camera = function (camera, ob, axis) {
@@ -236,7 +311,7 @@ export var center_in_camera = function (camera, ob, axis) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -251,16 +326,22 @@ export var center_in_camera = function (camera, ob, axis) {
 	}
 	var camera_matrix_col = camera.matrix_world.col;
 	var location = ob.location;
-	var delta = camera_matrix_col [3].xyz - location;
-	var camera_x_mag = delta.dot (camera_matrix_col [0].xyz) * axis [0];
-	var camera_y_mag = delta.dot (camera_matrix_col [1].xyz) * axis [1];
-	var offset = camera_matrix_col [0].xyz * camera_x_mag + camera_matrix_col [1].xyz * camera_y_mag;
-	ob.location = location + offset;
+	var delta = __sub__ (__getitem__ (camera_matrix_col, 3).xyz, location);
+	var camera_x_mag = __mul__ ((function () {
+		var __accu0__ = delta;
+		return __call__ (__accu0__.dot, __accu0__, __getitem__ (camera_matrix_col, 0).xyz);
+	}) (), __getitem__ (axis, 0));
+	var camera_y_mag = __mul__ ((function () {
+		var __accu0__ = delta;
+		return __call__ (__accu0__.dot, __accu0__, __getitem__ (camera_matrix_col, 1).xyz);
+	}) (), __getitem__ (axis, 1));
+	var offset = __add__ (__mul__ (__getitem__ (camera_matrix_col, 0).xyz, camera_x_mag), __mul__ (__getitem__ (camera_matrix_col, 1).xyz, camera_y_mag));
+	ob.location = __add__ (location, offset);
 };
 export var get_ref_object_space_coord = function (ob) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -279,13 +360,19 @@ export var get_ref_object_space_coord = function (ob) {
 	var __left0__ = img.size;
 	var res_x = __left0__ [0];
 	var res_y = __left0__ [1];
-	var scaling = 1.0 / max (res_x, res_y);
+	var scaling = __truediv__ (1.0, __call__ (max, null, res_x, res_y));
 	var corners = [tuple ([0.0, 0.0]), tuple ([res_x, 0.0]), tuple ([0.0, res_y]), tuple ([res_x, res_y])];
 	var obj_space_corners = [];
-	for (var co of corners) {
-		var nco_x = ((co [0] + x * res_x) * size) * scaling;
-		var nco_y = ((co [1] + y * res_y) * size) * scaling;
-		obj_space_corners.append (tuple ([nco_x, nco_y, 0]));
+	var __iterable0__ = corners;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var co = __getitem__ (__iterable0__, __index0__);
+		var nco_x = __mul__ (__mul__ (__add__ (__getitem__ (co, 0), __mul__ (x, res_x)), size), scaling);
+		var nco_y = __mul__ (__mul__ (__add__ (__getitem__ (co, 1), __mul__ (y, res_y)), size), scaling);
+		(function () {
+			var __accu0__ = obj_space_corners;
+			return __call__ (__accu0__.append, __accu0__, tuple ([nco_x, nco_y, 0]));
+		}) ();
 	}
 	return obj_space_corners;
 };
@@ -294,7 +381,7 @@ export var MaterialProperties_MixIn =  __class__ ('MaterialProperties_MixIn', [o
 	get draw_material_config () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -307,36 +394,67 @@ export var MaterialProperties_MixIn =  __class__ ('MaterialProperties_MixIn', [o
 		else {
 		}
 		var layout = self.layout;
-		var __left0__ = layout.panel ('import_image_plane_material', __kwargtrans__ ({default_closed: false}));
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'import_image_plane_material', __kwargtrans__ ({default_closed: false}));
+		}) ();
 		var header = __left0__ [0];
 		var body = __left0__ [1];
-		header.label (__kwargtrans__ ({text: 'Material'}));
+		(function () {
+			var __accu0__ = header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Material'}));
+		}) ();
 		if (body) {
-			body.prop (self, 'shader');
-			if (self.shader == 'EMISSION') {
-				body.prop (self, 'emit_strength');
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'shader');
+			}) ();
+			if (__eq__ (self.shader, 'EMISSION')) {
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.prop, __accu0__, self, 'emit_strength');
+				}) ();
 			}
-			body.prop (self, 'render_method');
-			if (self.render_method == 'BLENDED') {
-				body.prop (self, 'show_transparent_back');
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'render_method');
+			}) ();
+			if (__eq__ (self.render_method, 'BLENDED')) {
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.prop, __accu0__, self, 'show_transparent_back');
+				}) ();
 			}
-			body.prop (self, 'use_backface_culling');
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'use_backface_culling');
+			}) ();
 			var engine = context.scene.render.engine;
 			if (!__in__ (engine, COMPATIBLE_ENGINES)) {
-				body.label (__kwargtrans__ ({text: rpt_ ('{:s} is not supported').format (engine), icon: 'ERROR'}));
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+						var __accu1__ = __call__ (rpt_, null, '{:s} is not supported');
+						return __call__ (__accu1__.format, __accu1__, engine);
+					}) (), icon: 'ERROR'}));
+				}) ();
 			}
-			body.prop (self, 'overwrite_material');
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'overwrite_material');
+			}) ();
 		}
 	});}
 });
-MaterialProperties_MixIn.__annotations__ = dict ({'shader': EnumProperty (__kwargtrans__ ({py_name: 'Shader', py_items: tuple ([tuple (['PRINCIPLED', 'Principled', 'Principled shader']), tuple (['SHADELESS', 'Shadeless', 'Only visible to camera and reflections']), tuple (['EMISSION', 'Emission', 'Emission shader'])]), py_default: 'PRINCIPLED', description: 'Node shader to use'})), 'emit_strength': FloatProperty (__kwargtrans__ ({py_name: 'Emission Strength', min: 0.0, py_default: 1.0, soft_max: 10.0, step: 100, description: 'Strength of emission'})), 'use_transparency': BoolProperty (__kwargtrans__ ({py_name: 'Use Alpha', py_default: true, description: 'Use alpha channel for transparency'})), 'render_method': EnumProperty (__kwargtrans__ ({py_name: 'Render Method', py_items: tuple ([tuple (['DITHERED', 'Dithered', 'Allows for grayscale hashed transparency, and compatible with render passes and ray-tracing. Also known as deferred rendering.']), tuple (['BLENDED', 'Blended', 'Allows for colored transparency, but incompatible with render passes and ray-tracing. Also known as forward rendering.'])])})), 'use_backface_culling': BoolProperty (__kwargtrans__ ({py_name: 'Backface Culling', py_default: false, description: 'Use backface culling to hide the back side of faces'})), 'show_transparent_back': BoolProperty (__kwargtrans__ ({py_name: 'Show Backface', py_default: true, description: 'Render multiple transparent layers (may introduce transparency sorting problems)'})), 'overwrite_material': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite Material', py_default: true, description: 'Overwrite existing material with the same name'}))});
+MaterialProperties_MixIn.__annotations__ = dict ({'shader': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Shader', py_items: tuple ([tuple (['PRINCIPLED', 'Principled', 'Principled shader']), tuple (['SHADELESS', 'Shadeless', 'Only visible to camera and reflections']), tuple (['EMISSION', 'Emission', 'Emission shader'])]), py_default: 'PRINCIPLED', description: 'Node shader to use'})), 'emit_strength': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Emission Strength', min: 0.0, py_default: 1.0, soft_max: 10.0, step: 100, description: 'Strength of emission'})), 'use_transparency': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Use Alpha', py_default: true, description: 'Use alpha channel for transparency'})), 'render_method': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Render Method', py_items: tuple ([tuple (['DITHERED', 'Dithered', 'Allows for grayscale hashed transparency, and compatible with render passes and ray-tracing. Also known as deferred rendering.']), tuple (['BLENDED', 'Blended', 'Allows for colored transparency, but incompatible with render passes and ray-tracing. Also known as forward rendering.'])])})), 'use_backface_culling': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Backface Culling', py_default: false, description: 'Use backface culling to hide the back side of faces'})), 'show_transparent_back': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Show Backface', py_default: true, description: 'Render multiple transparent layers (may introduce transparency sorting problems)'})), 'overwrite_material': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Overwrite Material', py_default: true, description: 'Overwrite existing material with the same name'}))});
+export var _TextureProperties_MixIn__ImageUser_use_auto_refresh = __getitem__ (bpy.types.ImageUser.bl_rna.properties, 'use_auto_refresh');
 export var TextureProperties_MixIn =  __class__ ('TextureProperties_MixIn', [object], {
 	__module__: __name__,
-	_ImageUser_use_auto_refresh: bpy.types.ImageUser.bl_rna.properties ['use_auto_refresh'],
+	_ImageUser_use_auto_refresh: _TextureProperties_MixIn__ImageUser_use_auto_refresh,
 	get draw_texture_config () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -349,24 +467,45 @@ export var TextureProperties_MixIn =  __class__ ('TextureProperties_MixIn', [obj
 		else {
 		}
 		var layout = self.layout;
-		var __left0__ = layout.panel ('import_image_plane_texture', __kwargtrans__ ({default_closed: false}));
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'import_image_plane_texture', __kwargtrans__ ({default_closed: false}));
+		}) ();
 		var header = __left0__ [0];
 		var body = __left0__ [1];
-		header.label (__kwargtrans__ ({text: 'Texture'}));
+		(function () {
+			var __accu0__ = header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Texture'}));
+		}) ();
 		if (body) {
-			body.prop (self, 'interpolation');
-			body.prop (self, 'extension');
-			var row = body.row (__kwargtrans__ ({align: false, heading: 'Alpha'}));
-			row.prop (self, 'use_transparency', __kwargtrans__ ({text: ''}));
-			body.prop (self, 'use_auto_refresh');
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'interpolation');
+			}) ();
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'extension');
+			}) ();
+			var row = (function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: false, heading: 'Alpha'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, self, 'use_transparency', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'use_auto_refresh');
+			}) ();
 		}
 	});}
 });
-TextureProperties_MixIn.__annotations__ = dict ({'interpolation': EnumProperty (__kwargtrans__ ({py_name: 'Interpolation', py_items: tuple ([tuple (['Linear', 'Linear', 'Linear interpolation']), tuple (['Closest', 'Closest', 'No interpolation (sample closest texel)']), tuple (['Cubic', 'Cubic', 'Cubic interpolation']), tuple (['Smart', 'Smart', 'Bicubic when magnifying, else bilinear (OSL only)'])]), py_default: 'Linear', description: 'Texture interpolation'})), 'extension': EnumProperty (__kwargtrans__ ({py_name: 'Extension', translation_context: i18n_contexts.id_image, py_items: tuple ([tuple (['CLIP', 'Clip', 'Clip to image size and set exterior pixels as transparent']), tuple (['EXTEND', 'Extend', 'Extend by repeating edge pixels of the image']), tuple (['REPEAT', 'Repeat', 'Cause the image to repeat horizontally and vertically'])]), py_default: 'CLIP', description: 'How the image is extrapolated past its original bounds'})), 'use_auto_refresh': BoolProperty (__kwargtrans__ ({py_name: TextureProperties_MixIn._ImageUser_use_auto_refresh.py_name, py_default: true, description: TextureProperties_MixIn._ImageUser_use_auto_refresh.description})), 'relative': BoolProperty (__kwargtrans__ ({py_name: 'Relative Paths', py_default: true, description: 'Use relative file paths'}))});
+TextureProperties_MixIn.__annotations__ = dict ({'interpolation': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Interpolation', py_items: tuple ([tuple (['Linear', 'Linear', 'Linear interpolation']), tuple (['Closest', 'Closest', 'No interpolation (sample closest texel)']), tuple (['Cubic', 'Cubic', 'Cubic interpolation']), tuple (['Smart', 'Smart', 'Bicubic when magnifying, else bilinear (OSL only)'])]), py_default: 'Linear', description: 'Texture interpolation'})), 'extension': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Extension', translation_context: i18n_contexts.id_image, py_items: tuple ([tuple (['CLIP', 'Clip', 'Clip to image size and set exterior pixels as transparent']), tuple (['EXTEND', 'Extend', 'Extend by repeating edge pixels of the image']), tuple (['REPEAT', 'Repeat', 'Cause the image to repeat horizontally and vertically'])]), py_default: 'CLIP', description: 'How the image is extrapolated past its original bounds'})), 'use_auto_refresh': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: _TextureProperties_MixIn__ImageUser_use_auto_refresh.py_name, py_default: true, description: _TextureProperties_MixIn__ImageUser_use_auto_refresh.description})), 'relative': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Relative Paths', py_default: true, description: 'Use relative file paths'}))});
 export var apply_texture_options = function (self, texture, img_spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -384,14 +523,14 @@ export var apply_texture_options = function (self, texture, img_spec) {
 	image_user.frame_start = img_spec.frame_start;
 	image_user.frame_offset = img_spec.frame_offset;
 	image_user.frame_duration = img_spec.frame_duration;
-	if (img_spec.image.source == 'SEQUENCE') {
+	if (__eq__ (img_spec.image.source, 'SEQUENCE')) {
 		image_user.use_auto_refresh = true;
 	}
 };
 export var create_cycles_texnode = function (self, node_tree, img_spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -404,18 +543,21 @@ export var create_cycles_texnode = function (self, node_tree, img_spec) {
 	}
 	else {
 	}
-	var tex_image = node_tree.nodes.py_new ('ShaderNodeTexImage');
+	var tex_image = (function () {
+		var __accu0__ = node_tree.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeTexImage');
+	}) ();
 	tex_image.image = img_spec.image;
 	tex_image.show_texture = true;
 	tex_image.interpolation = self.interpolation;
 	tex_image.extension = self.extension;
-	apply_texture_options (self, tex_image, img_spec);
+	__call__ (apply_texture_options, null, self, tex_image, img_spec);
 	return tex_image;
 };
 export var create_cycles_material = function (self, context, img_spec, py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -431,57 +573,102 @@ export var create_cycles_material = function (self, context, img_spec, py_name) 
 	}
 	var material = null;
 	if (self.overwrite_material) {
-		var material = bpy.data.materials.py_get (tuple ([py_name, null]));
+		var material = (function () {
+			var __accu0__ = bpy.data.materials;
+			return __call__ (__accu0__.py_get, __accu0__, tuple ([py_name, null]));
+		}) ();
 	}
 	if (material === null) {
-		var material = bpy.data.materials.py_new (__kwargtrans__ ({py_name: py_name}));
+		var material = (function () {
+			var __accu0__ = bpy.data.materials;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: py_name}));
+		}) ();
 	}
-	material.node_tree.nodes.py_clear ();
+	(function () {
+		var __accu0__ = material.node_tree.nodes;
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
 	material.surface_render_method = self.render_method;
 	material.use_backface_culling = self.use_backface_culling;
 	material.use_transparency_overlap = self.show_transparent_back;
 	var node_tree = material.node_tree;
-	var out_node = node_tree.nodes.py_new ('ShaderNodeOutputMaterial');
-	var tex_image = create_cycles_texnode (self, node_tree, img_spec);
-	if (self.shader == 'PRINCIPLED') {
-		var core_shader = node_tree.nodes.py_new ('ShaderNodeBsdfPrincipled');
+	var out_node = (function () {
+		var __accu0__ = node_tree.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeOutputMaterial');
+	}) ();
+	var tex_image = __call__ (create_cycles_texnode, null, self, node_tree, img_spec);
+	if (__eq__ (self.shader, 'PRINCIPLED')) {
+		var core_shader = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeBsdfPrincipled');
+		}) ();
 	}
-	else if (self.shader == 'SHADELESS') {
-		var core_shader = get_shadeless_node (node_tree);
+	else if (__eq__ (self.shader, 'SHADELESS')) {
+		var core_shader = __call__ (get_shadeless_node, null, node_tree);
 	}
-	else if (self.shader == 'EMISSION') {
-		var core_shader = node_tree.nodes.py_new ('ShaderNodeBsdfPrincipled');
-		core_shader.inputs ['Emission Strength'].default_value = self.emit_strength;
-		core_shader.inputs ['Base Color'].default_value = tuple ([0.0, 0.0, 0.0, 1.0]);
-		core_shader.inputs ['Specular IOR Level'].default_value = 0.0;
+	else if (__eq__ (self.shader, 'EMISSION')) {
+		var core_shader = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeBsdfPrincipled');
+		}) ();
+		__getitem__ (core_shader.inputs, 'Emission Strength').default_value = self.emit_strength;
+		__getitem__ (core_shader.inputs, 'Base Color').default_value = tuple ([0.0, 0.0, 0.0, 1.0]);
+		__getitem__ (core_shader.inputs, 'Specular IOR Level').default_value = 0.0;
 	}
 	if (__in__ (self.shader, new set (['PRINCIPLED', 'SHADELESS']))) {
-		node_tree.links.py_new (core_shader.inputs [0], tex_image.outputs ['Color']);
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (core_shader.inputs, 0), __getitem__ (tex_image.outputs, 'Color'));
+		}) ();
 	}
-	else if (self.shader == 'EMISSION') {
-		node_tree.links.py_new (core_shader.inputs ['Emission Color'], tex_image.outputs ['Color']);
+	else if (__eq__ (self.shader, 'EMISSION')) {
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (core_shader.inputs, 'Emission Color'), __getitem__ (tex_image.outputs, 'Color'));
+		}) ();
 	}
 	if (self.use_transparency) {
 		if (__in__ (self.shader, new set (['PRINCIPLED', 'EMISSION']))) {
-			node_tree.links.py_new (core_shader.inputs ['Alpha'], tex_image.outputs ['Alpha']);
+			(function () {
+				var __accu0__ = node_tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (core_shader.inputs, 'Alpha'), __getitem__ (tex_image.outputs, 'Alpha'));
+			}) ();
 		}
 		else {
-			var bsdf_transparent = node_tree.nodes.py_new ('ShaderNodeBsdfTransparent');
-			var mix_shader = node_tree.nodes.py_new ('ShaderNodeMixShader');
-			node_tree.links.py_new (mix_shader.inputs ['Fac'], tex_image.outputs ['Alpha']);
-			node_tree.links.py_new (mix_shader.inputs [1], bsdf_transparent.outputs ['BSDF']);
-			node_tree.links.py_new (mix_shader.inputs [2], core_shader.outputs [0]);
+			var bsdf_transparent = (function () {
+				var __accu0__ = node_tree.nodes;
+				return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeBsdfTransparent');
+			}) ();
+			var mix_shader = (function () {
+				var __accu0__ = node_tree.nodes;
+				return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMixShader');
+			}) ();
+			(function () {
+				var __accu0__ = node_tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (mix_shader.inputs, 'Fac'), __getitem__ (tex_image.outputs, 'Alpha'));
+			}) ();
+			(function () {
+				var __accu0__ = node_tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (mix_shader.inputs, 1), __getitem__ (bsdf_transparent.outputs, 'BSDF'));
+			}) ();
+			(function () {
+				var __accu0__ = node_tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (mix_shader.inputs, 2), __getitem__ (core_shader.outputs, 0));
+			}) ();
 			var core_shader = mix_shader;
 		}
 	}
-	node_tree.links.py_new (out_node.inputs ['Surface'], core_shader.outputs [0]);
-	auto_align_nodes (node_tree);
+	(function () {
+		var __accu0__ = node_tree.links;
+		return __call__ (__accu0__.py_new, __accu0__, __getitem__ (out_node.inputs, 'Surface'), __getitem__ (core_shader.outputs, 0));
+	}) ();
+	__call__ (auto_align_nodes, null, node_tree);
 	return material;
 };
 export var get_input_nodes = function (node, links) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -495,36 +682,60 @@ export var get_input_nodes = function (node, links) {
 	}
 	var input_links = (function () {
 		var __accu0__ = [];
-		for (var lnk of links) {
-			if (lnk.to_node == node) {
-				__accu0__.append (lnk);
+		var __iterable0__ = links;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var lnk = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (lnk.to_node, node)) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, lnk);
+				}) ();
 			}
 		}
 		return set (__accu0__);
 	}) ();
 	var sorted_nodes = [];
-	var done_nodes = set ();
-	for (var socket of node.inputs) {
-		var done_links = set ();
-		for (var link of input_links) {
+	var done_nodes = __call__ (set, null);
+	var __iterable0__ = node.inputs;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var socket = __getitem__ (__iterable0__, __index0__);
+		var done_links = __call__ (set, null);
+		var __iterable1__ = input_links;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var link = __getitem__ (__iterable1__, __index1__);
 			var nd = link.from_node;
 			if (__in__ (nd, done_nodes)) {
-				done_links.add (link);
+				(function () {
+					var __accu0__ = done_links;
+					return __call__ (__accu0__.add, __accu0__, link);
+				}) ();
 			}
-			else if (link.to_socket == socket) {
-				sorted_nodes.append (nd);
-				done_links.add (link);
-				done_nodes.add (nd);
+			else if (__eq__ (link.to_socket, socket)) {
+				(function () {
+					var __accu0__ = sorted_nodes;
+					return __call__ (__accu0__.append, __accu0__, nd);
+				}) ();
+				(function () {
+					var __accu0__ = done_links;
+					return __call__ (__accu0__.add, __accu0__, link);
+				}) ();
+				(function () {
+					var __accu0__ = done_nodes;
+					return __call__ (__accu0__.add, __accu0__, nd);
+				}) ();
 			}
 		}
-		input_links -= done_links;
+		var input_links = __call__ (__isub__, null, input_links, done_links);
 	}
 	return sorted_nodes;
 };
 export var auto_align_nodes = function (node_tree) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -541,7 +752,10 @@ export var auto_align_nodes = function (node_tree) {
 	var links = node_tree.links;
 	var output_node = null;
 	var __break0__ = false;
-	for (var node of nodes) {
+	var __iterable0__ = nodes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var node = __getitem__ (__iterable0__, __index0__);
 		if (__in__ (node.py_metatype, new set (['OUTPUT_MATERIAL', 'GROUP_OUTPUT']))) {
 			var output_node = node;
 			__break0__ = true;
@@ -554,7 +768,7 @@ export var auto_align_nodes = function (node_tree) {
 	var align = function (to_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -565,21 +779,26 @@ export var auto_align_nodes = function (node_tree) {
 		}
 		else {
 		}
-		var from_nodes = get_input_nodes (to_node, links);
-		for (var [i, node] of py_enumerate (from_nodes)) {
-			node.location.x = min (node.location.x, to_node.location.x - x_gap);
+		var from_nodes = __call__ (get_input_nodes, null, to_node, links);
+		var __iterable0__ = __call__ (py_enumerate, null, from_nodes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var node = __left0__ [1];
+			node.location.x = __call__ (min, null, node.location.x, __sub__ (to_node.location.x, x_gap));
 			node.location.y = to_node.location.y;
-			node.location.y -= i * y_gap;
-			node.location.y += ((len (from_nodes) - 1) * y_gap) / len (from_nodes);
-			align (node);
+			node.location.y = __call__ (__isub__, null, node.location.y, __mul__ (i, y_gap));
+			node.location.y = __call__ (__iadd__, null, node.location.y, __truediv__ (__mul__ (__sub__ (__call__ (len, null, from_nodes), 1), y_gap), __call__ (len, null, from_nodes)));
+			__call__ (align, null, node);
 		}
 	};
-	align (output_node);
+	__call__ (align, null, output_node);
 };
 export var clean_node_tree = function (node_tree) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -591,17 +810,23 @@ export var clean_node_tree = function (node_tree) {
 	else {
 	}
 	var nodes = node_tree.nodes;
-	for (var node of list (nodes)) {
-		if (!(node.py_metatype == 'OUTPUT_MATERIAL')) {
-			nodes.remove (node);
+	var __iterable0__ = __call__ (list, null, nodes);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var node = __getitem__ (__iterable0__, __index0__);
+		if (!(__eq__ (node.py_metatype, 'OUTPUT_MATERIAL'))) {
+			(function () {
+				var __accu0__ = nodes;
+				return __call__ (__accu0__.remove, __accu0__, node);
+			}) ();
 		}
 	}
-	return node_tree.nodes [0];
+	return __getitem__ (node_tree.nodes, 0);
 };
 export var get_shadeless_node = function (dest_node_tree) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -613,98 +838,199 @@ export var get_shadeless_node = function (dest_node_tree) {
 	else {
 	}
 	var node_group_name = 'IAP_SHADELESS';
-	var node_tree = bpy.data.node_groups.py_get (tuple ([node_group_name, null]));
+	var node_tree = (function () {
+		var __accu0__ = bpy.data.node_groups;
+		return __call__ (__accu0__.py_get, __accu0__, tuple ([node_group_name, null]));
+	}) ();
 	if (node_tree === null) {
-		var node_tree = bpy.data.node_groups.py_new (node_group_name, 'ShaderNodeTree');
-		var output_node = node_tree.nodes.py_new ('NodeGroupOutput');
-		var input_node = node_tree.nodes.py_new ('NodeGroupInput');
-		node_tree.interface.new_socket ('Shader', __kwargtrans__ ({in_out: 'OUTPUT', socket_type: 'NodeSocketShader'}));
-		node_tree.interface.new_socket ('Color', __kwargtrans__ ({in_out: 'INPUT', socket_type: 'NodeSocketColor'}));
-		var diffuse_shader = node_tree.nodes.py_new ('ShaderNodeBsdfDiffuse');
-		node_tree.links.py_new (diffuse_shader.inputs [0], input_node.outputs [0]);
-		var emission_shader = node_tree.nodes.py_new ('ShaderNodeEmission');
-		node_tree.links.py_new (emission_shader.inputs [0], input_node.outputs [0]);
-		var light_path = node_tree.nodes.py_new ('ShaderNodeLightPath');
-		var is_glossy_ray = light_path.outputs ['Is Glossy Ray'];
-		var is_shadow_ray = light_path.outputs ['Is Shadow Ray'];
-		var ray_depth = light_path.outputs ['Ray Depth'];
-		var transmission_depth = light_path.outputs ['Transmission Depth'];
-		var unrefracted_depth = node_tree.nodes.py_new ('ShaderNodeMath');
+		var node_tree = (function () {
+			var __accu0__ = bpy.data.node_groups;
+			return __call__ (__accu0__.py_new, __accu0__, node_group_name, 'ShaderNodeTree');
+		}) ();
+		var output_node = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupOutput');
+		}) ();
+		var input_node = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupInput');
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.interface;
+			return __call__ (__accu0__.new_socket, __accu0__, 'Shader', __kwargtrans__ ({in_out: 'OUTPUT', socket_type: 'NodeSocketShader'}));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.interface;
+			return __call__ (__accu0__.new_socket, __accu0__, 'Color', __kwargtrans__ ({in_out: 'INPUT', socket_type: 'NodeSocketColor'}));
+		}) ();
+		var diffuse_shader = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeBsdfDiffuse');
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (diffuse_shader.inputs, 0), __getitem__ (input_node.outputs, 0));
+		}) ();
+		var emission_shader = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeEmission');
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (emission_shader.inputs, 0), __getitem__ (input_node.outputs, 0));
+		}) ();
+		var light_path = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeLightPath');
+		}) ();
+		var is_glossy_ray = __getitem__ (light_path.outputs, 'Is Glossy Ray');
+		var is_shadow_ray = __getitem__ (light_path.outputs, 'Is Shadow Ray');
+		var ray_depth = __getitem__ (light_path.outputs, 'Ray Depth');
+		var transmission_depth = __getitem__ (light_path.outputs, 'Transmission Depth');
+		var unrefracted_depth = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMath');
+		}) ();
 		unrefracted_depth.operation = 'SUBTRACT';
 		unrefracted_depth.label = 'Bounce Count';
-		node_tree.links.py_new (unrefracted_depth.inputs [0], ray_depth);
-		node_tree.links.py_new (unrefracted_depth.inputs [1], transmission_depth);
-		var refracted = node_tree.nodes.py_new ('ShaderNodeMath');
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (unrefracted_depth.inputs, 0), ray_depth);
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (unrefracted_depth.inputs, 1), transmission_depth);
+		}) ();
+		var refracted = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMath');
+		}) ();
 		refracted.operation = 'SUBTRACT';
 		refracted.label = 'Camera or Refracted';
-		refracted.inputs [0].default_value = 1.0;
-		node_tree.links.py_new (refracted.inputs [1], unrefracted_depth.outputs [0]);
-		var reflection_limit = node_tree.nodes.py_new ('ShaderNodeMath');
+		__getitem__ (refracted.inputs, 0).default_value = 1.0;
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (refracted.inputs, 1), __getitem__ (unrefracted_depth.outputs, 0));
+		}) ();
+		var reflection_limit = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMath');
+		}) ();
 		reflection_limit.operation = 'SUBTRACT';
 		reflection_limit.label = 'Limit Reflections';
-		reflection_limit.inputs [0].default_value = 2.0;
-		node_tree.links.py_new (reflection_limit.inputs [1], ray_depth);
-		var camera_reflected = node_tree.nodes.py_new ('ShaderNodeMath');
+		__getitem__ (reflection_limit.inputs, 0).default_value = 2.0;
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (reflection_limit.inputs, 1), ray_depth);
+		}) ();
+		var camera_reflected = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMath');
+		}) ();
 		camera_reflected.operation = 'MULTIPLY';
 		camera_reflected.label = 'Camera Ray to Glossy';
-		node_tree.links.py_new (camera_reflected.inputs [0], reflection_limit.outputs [0]);
-		node_tree.links.py_new (camera_reflected.inputs [1], is_glossy_ray);
-		var shadow_or_reflect = node_tree.nodes.py_new ('ShaderNodeMath');
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (camera_reflected.inputs, 0), __getitem__ (reflection_limit.outputs, 0));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (camera_reflected.inputs, 1), is_glossy_ray);
+		}) ();
+		var shadow_or_reflect = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMath');
+		}) ();
 		shadow_or_reflect.operation = 'MAXIMUM';
 		shadow_or_reflect.label = 'Shadow or Reflection?';
-		node_tree.links.py_new (shadow_or_reflect.inputs [0], camera_reflected.outputs [0]);
-		node_tree.links.py_new (shadow_or_reflect.inputs [1], is_shadow_ray);
-		var shadow_or_reflect_or_refract = node_tree.nodes.py_new ('ShaderNodeMath');
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (shadow_or_reflect.inputs, 0), __getitem__ (camera_reflected.outputs, 0));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (shadow_or_reflect.inputs, 1), is_shadow_ray);
+		}) ();
+		var shadow_or_reflect_or_refract = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMath');
+		}) ();
 		shadow_or_reflect_or_refract.operation = 'MAXIMUM';
 		shadow_or_reflect_or_refract.label = 'Shadow, Reflect or Refract?';
-		node_tree.links.py_new (shadow_or_reflect_or_refract.inputs [0], shadow_or_reflect.outputs [0]);
-		node_tree.links.py_new (shadow_or_reflect_or_refract.inputs [1], refracted.outputs [0]);
-		var mix_shader = node_tree.nodes.py_new ('ShaderNodeMixShader');
-		node_tree.links.py_new (mix_shader.inputs [0], shadow_or_reflect_or_refract.outputs [0]);
-		node_tree.links.py_new (mix_shader.inputs [1], diffuse_shader.outputs [0]);
-		node_tree.links.py_new (mix_shader.inputs [2], emission_shader.outputs [0]);
-		node_tree.links.py_new (output_node.inputs [0], mix_shader.outputs [0]);
-		auto_align_nodes (node_tree);
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (shadow_or_reflect_or_refract.inputs, 0), __getitem__ (shadow_or_reflect.outputs, 0));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (shadow_or_reflect_or_refract.inputs, 1), __getitem__ (refracted.outputs, 0));
+		}) ();
+		var mix_shader = (function () {
+			var __accu0__ = node_tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeMixShader');
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (mix_shader.inputs, 0), __getitem__ (shadow_or_reflect_or_refract.outputs, 0));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (mix_shader.inputs, 1), __getitem__ (diffuse_shader.outputs, 0));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (mix_shader.inputs, 2), __getitem__ (emission_shader.outputs, 0));
+		}) ();
+		(function () {
+			var __accu0__ = node_tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (output_node.inputs, 0), __getitem__ (mix_shader.outputs, 0));
+		}) ();
+		__call__ (auto_align_nodes, null, node_tree);
 	}
-	var group_node = dest_node_tree.nodes.py_new ('ShaderNodeGroup');
+	var group_node = (function () {
+		var __accu0__ = dest_node_tree.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'ShaderNodeGroup');
+	}) ();
 	group_node.node_tree = node_tree;
 	return group_node;
+};
+export var _IMAGE_OT_import_as_mesh_planes_AXIS_MODES = tuple ([tuple (['+X', '+X', 'Facing positive X']), tuple (['+Y', '+Y', 'Facing positive Y']), tuple (['+Z', '+Z', 'Facing positive Z']), tuple (['-X', '-X', 'Facing negative X']), tuple (['-Y', '-Y', 'Facing negative Y']), tuple (['-Z', '-Z', 'Facing negative Z']), tuple (['CAM', 'Face Camera', 'Facing camera']), tuple (['CAM_AX', "Camera's Main Axis", "Facing the camera's dominant axis"])]);
+export var _IMAGE_OT_import_as_mesh_planes_update_size_mode = function (self, _context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case '_context': var _context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (self.size_mode, 'CAMERA')) {
+		self.prev_align_axis = self.align_axis;
+		self.align_axis = 'CAM';
+	}
+	else if (__ne__ (self.prev_align_axis, 'NONE')) {
+		self.align_axis = self.prev_align_axis;
+		self.prev_align_axis = 'NONE';
+	}
 };
 export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh_planes', [AddObjectHelper, ImportHelper, MaterialProperties_MixIn, TextureProperties_MixIn, Operator], {
 	__module__: __name__,
 	bl_idname: 'image.import_as_mesh_planes',
 	bl_label: 'Import Images as Planes',
 	bl_options: new set (['REGISTER', 'PRESET', 'UNDO']),
-	axis_id_to_vector: dict ({'+X': Vector (tuple ([1.0, 0.0, 0.0])), '+Y': Vector (tuple ([0.0, 1.0, 0.0])), '+Z': Vector (tuple ([0.0, 0.0, 1.0])), '-X': Vector (tuple ([-(1.0), 0.0, 0.0])), '-Y': Vector (tuple ([0.0, -(1.0), 0.0])), '-Z': Vector (tuple ([0.0, 0.0, -(1.0)]))}),
-	AXIS_MODES: tuple ([tuple (['+X', '+X', 'Facing positive X']), tuple (['+Y', '+Y', 'Facing positive Y']), tuple (['+Z', '+Z', 'Facing positive Z']), tuple (['-X', '-X', 'Facing negative X']), tuple (['-Y', '-Y', 'Facing negative Y']), tuple (['-Z', '-Z', 'Facing negative Z']), tuple (['CAM', 'Face Camera', 'Facing camera']), tuple (['CAM_AX', "Camera's Main Axis", "Facing the camera's dominant axis"])]),
-	get update_size_mode () {return __get__ (this, function (self, _context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case '_context': var _context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.size_mode == 'CAMERA') {
-			self.prev_align_axis = self.align_axis;
-			self.align_axis = 'CAM';
-		}
-		else if (self.prev_align_axis != 'NONE') {
-			self.align_axis = self.prev_align_axis;
-			self.prev_align_axis = 'NONE';
-		}
-	});},
+	axis_id_to_vector: dict ({'+X': __call__ (Vector, null, tuple ([1.0, 0.0, 0.0])), '+Y': __call__ (Vector, null, tuple ([0.0, 1.0, 0.0])), '+Z': __call__ (Vector, null, tuple ([0.0, 0.0, 1.0])), '-X': __call__ (Vector, null, tuple ([__neg__ (1.0), 0.0, 0.0])), '-Y': __call__ (Vector, null, tuple ([0.0, __neg__ (1.0), 0.0])), '-Z': __call__ (Vector, null, tuple ([0.0, 0.0, __neg__ (1.0)]))}),
+	AXIS_MODES: _IMAGE_OT_import_as_mesh_planes_AXIS_MODES,
+	update_size_mode: _IMAGE_OT_import_as_mesh_planes_update_size_mode,
 	get draw_import_config () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -717,22 +1043,40 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		else {
 		}
 		var layout = self.layout;
-		var __left0__ = layout.panel ('import_image_plane_options', __kwargtrans__ ({default_closed: false}));
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'import_image_plane_options', __kwargtrans__ ({default_closed: false}));
+		}) ();
 		var header = __left0__ [0];
 		var body = __left0__ [1];
-		header.label (__kwargtrans__ ({text: 'Options'}));
+		(function () {
+			var __accu0__ = header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Options'}));
+		}) ();
 		if (body) {
-			var row = body.row ();
+			var row = (function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.active = bpy.data.is_saved;
-			row.prop (self, 'relative');
-			body.prop (self, 'force_reload');
-			body.prop (self, 'image_sequence');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, self, 'relative');
+			}) ();
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'force_reload');
+			}) ();
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'image_sequence');
+			}) ();
 		}
 	});},
 	get draw_spatial_config () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -745,38 +1089,77 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		else {
 		}
 		var layout = self.layout;
-		var __left0__ = layout.panel ('import_image_plane_transform', __kwargtrans__ ({default_closed: false}));
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'import_image_plane_transform', __kwargtrans__ ({default_closed: false}));
+		}) ();
 		var header = __left0__ [0];
 		var body = __left0__ [1];
-		header.label (__kwargtrans__ ({text: 'Transform'}));
+		(function () {
+			var __accu0__ = header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Transform'}));
+		}) ();
 		if (body) {
-			body.prop (self, 'size_mode');
-			if (self.size_mode == 'ABSOLUTE') {
-				body.prop (self, 'height');
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'size_mode');
+			}) ();
+			if (__eq__ (self.size_mode, 'ABSOLUTE')) {
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.prop, __accu0__, self, 'height');
+				}) ();
 			}
-			else if (self.size_mode == 'CAMERA') {
-				body.prop (self, 'fill_mode');
+			else if (__eq__ (self.size_mode, 'CAMERA')) {
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.prop, __accu0__, self, 'fill_mode');
+				}) ();
 			}
 			else {
-				body.prop (self, 'factor');
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.prop, __accu0__, self, 'factor');
+				}) ();
 			}
-			var row = body.row ();
+			var row = (function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.enabled = !__in__ ('CAM', self.size_mode);
-			row.prop (self, 'align_axis');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, self, 'align_axis');
+			}) ();
 			if (__in__ ('CAM', self.align_axis)) {
-				body.prop (self, 'align_track');
+				(function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.prop, __accu0__, self, 'align_track');
+				}) ();
 			}
-			body.prop (self, 'offset');
-			var col = body.column ();
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.prop, __accu0__, self, 'offset');
+			}) ();
+			var col = (function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.enabled = self.offset;
-			col.prop (self, 'offset_axis');
-			col.prop (self, 'offset_amount', __kwargtrans__ ({text: 'Distance'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, self, 'offset_axis');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, self, 'offset_amount', __kwargtrans__ ({text: 'Distance'}));
+			}) ();
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -790,15 +1173,27 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		self.draw_import_config (context);
-		MaterialProperties_MixIn.draw_material_config (self, context);
-		TextureProperties_MixIn.draw_texture_config (self, context);
-		self.draw_spatial_config (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_import_config, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = MaterialProperties_MixIn;
+			return __call__ (__accu0__.draw_material_config, __accu0__, self, context);
+		}) ();
+		(function () {
+			var __accu0__ = TextureProperties_MixIn;
+			return __call__ (__accu0__.draw_texture_config, __accu0__, self, context);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_spatial_config, __accu0__, context);
+		}) ();
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -813,18 +1208,33 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		var engine = context.scene.render.engine;
 		if (!__in__ (engine, COMPATIBLE_ENGINES)) {
-			self.report (new set (['ERROR']), rpt_ ('Cannot generate materials for unknown {:s} render engine').format (engine));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Cannot generate materials for unknown {:s} render engine');
+					return __call__ (__accu1__.format, __accu1__, engine);
+				}) ());
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (engine == 'BLENDER_WORKBENCH') {
-			self.report (new set (['WARNING']), rpt_ ("Generating Cycles/EEVEE compatible material, but won't be visible with {:s} engine").format (engine));
+		if (__eq__ (engine, 'BLENDER_WORKBENCH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+					var __accu1__ = __call__ (rpt_, null, "Generating Cycles/EEVEE compatible material, but won't be visible with {:s} engine");
+					return __call__ (__accu1__.format, __accu1__, engine);
+				}) ());
+			}) ();
 		}
-		return self.invoke_popup (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.invoke_popup, __accu0__, context);
+		}) ();
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -841,17 +1251,23 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		var editmode = context.preferences.edit.use_enter_edit_mode;
 		context.preferences.edit.use_enter_edit_mode = false;
-		if (context.active_object && context.active_object.mode != 'OBJECT') {
-			bpy.ops.object.mode_set (__kwargtrans__ ({mode: 'OBJECT'}));
+		if (context.active_object && __ne__ (context.active_object.mode, 'OBJECT')) {
+			(function () {
+				var __accu0__ = bpy.ops.object;
+				return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'OBJECT'}));
+			}) ();
 		}
-		var ret_code = self.import_images (context);
+		var ret_code = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.import_images, __accu0__, context);
+		}) ();
 		context.preferences.edit.use_enter_edit_mode = editmode;
 		return ret_code;
 	});},
 	get import_images () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -863,47 +1279,83 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		else {
 		}
-		var images = tuple (load_images ((function () {
+		var images = __call__ (tuple, null, __call__ (load_images, null, (function () {
 			var __accu0__ = [];
-			for (var fn of self.files) {
-				__accu0__.append (fn.py_name);
+			var __iterable0__ = self.files;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var fn = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, fn.py_name);
+				}) ();
 			}
 			return __accu0__;
 		}) (), self.directory, __kwargtrans__ ({force_reload: self.force_reload, find_sequences: self.image_sequence})));
 		if (!(images)) {
-			self.report (new set (['WARNING']), 'Please select at least one image');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Please select at least one image');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		var planes = (function () {
 			var __accu0__ = [];
-			for (var img_spec of images) {
-				__accu0__.append (self.single_image_spec_to_plane (context, img_spec));
+			var __iterable0__ = images;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var img_spec = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, (function () {
+						var __accu2__ = self;
+						return __call__ (__accu2__.single_image_spec_to_plane, __accu2__, context, img_spec);
+					}) ());
+				}) ();
 			}
 			return __accu0__;
 		}) ();
-		context.view_layer.py_update ();
+		(function () {
+			var __accu0__ = context.view_layer;
+			return __call__ (__accu0__.py_update, __accu0__);
+		}) ();
 		if (self.offset) {
-			var offset_axis = self.axis_id_to_vector [self.offset_axis];
-			offset_planes (planes, self.offset_amount, offset_axis);
-			if (self.size_mode == 'CAMERA' && offset_axis.z) {
-				for (var plane of planes) {
-					var __left0__ = compute_camera_size (context, plane.location, self.fill_mode, plane.dimensions.x / plane.dimensions.y);
+			var offset_axis = __getitem__ (self.axis_id_to_vector, self.offset_axis);
+			__call__ (offset_planes, null, planes, self.offset_amount, offset_axis);
+			if (__eq__ (self.size_mode, 'CAMERA') && offset_axis.z) {
+				var __iterable0__ = planes;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var plane = __getitem__ (__iterable0__, __index0__);
+					var __left0__ = __call__ (compute_camera_size, null, context, plane.location, self.fill_mode, __truediv__ (plane.dimensions.x, plane.dimensions.y));
 					var x = __left0__ [0];
 					var y = __left0__ [1];
 					plane.dimensions = tuple ([x, y, 0.0]);
 				}
 			}
 		}
-		for (var plane of planes) {
-			plane.select_set (true);
+		var __iterable0__ = planes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var plane = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = plane;
+				return __call__ (__accu0__.select_set, __accu0__, true);
+			}) ();
 		}
-		self.report (new set (['INFO']), rpt_ ('Added {:d} Image Plane(s)').format (len (planes)));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
+				var __accu1__ = __call__ (rpt_, null, 'Added {:d} Image Plane(s)');
+				return __call__ (__accu1__.format, __accu1__, __call__ (len, null, planes));
+			}) ());
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get single_image_spec_to_plane () {return __get__ (this, function (self, context, img_spec) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -916,17 +1368,29 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		else {
 		}
-		var py_name = bpy.path.display_name_from_filepath (img_spec.image.filepath);
-		self.apply_image_options (img_spec.image);
-		var material = create_cycles_material (self, context, img_spec, py_name);
-		var plane = self.create_image_plane (context, py_name, img_spec);
-		plane.data.materials.append (material);
+		var py_name = (function () {
+			var __accu0__ = bpy.path;
+			return __call__ (__accu0__.display_name_from_filepath, __accu0__, img_spec.image.filepath);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.apply_image_options, __accu0__, img_spec.image);
+		}) ();
+		var material = __call__ (create_cycles_material, null, self, context, img_spec, py_name);
+		var plane = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_image_plane, __accu0__, context, py_name, img_spec);
+		}) ();
+		(function () {
+			var __accu0__ = plane.data.materials;
+			return __call__ (__accu0__.append, __accu0__, material);
+		}) ();
 		return plane;
 	});},
 	get apply_image_options () {return __get__ (this, function (self, image) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -943,7 +1407,10 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		if (self.relative) {
 			try {
-				image.filepath = bpy.path.relpath (image.filepath);
+				image.filepath = (function () {
+					var __accu0__ = bpy.path;
+					return __call__ (__accu0__.relpath, __accu0__, image.filepath);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, ValueError)) {
@@ -958,7 +1425,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 	get apply_material_options () {return __get__ (this, function (self, material, slot) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -986,14 +1453,14 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		material.diffuse_intensity = 1.0;
 		material.use_transparency = self.use_transparency;
 		material.transparency_method = 'Z_TRANSPARENCY';
-		material.use_shadeless = shader == 'SHADELESS';
-		material.use_transparent_shadows = shader == 'DIFFUSE';
-		material.emit = (shader == 'EMISSION' ? self.emit_strength : 0.0);
+		material.use_shadeless = __eq__ (shader, 'SHADELESS');
+		material.use_transparent_shadows = __eq__ (shader, 'DIFFUSE');
+		material.emit = (__eq__ (shader, 'EMISSION') ? self.emit_strength : 0.0);
 	});},
 	get create_image_plane () {return __get__ (this, function (self, context, py_name, img_spec) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1007,37 +1474,58 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		else {
 		}
-		var __left0__ = self.compute_plane_size (context, img_spec);
+		var __left0__ = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.compute_plane_size, __accu0__, context, img_spec);
+		}) ();
 		var width = __left0__ [0];
 		var height = __left0__ [1];
-		bpy.ops.mesh.primitive_plane_add ('INVOKE_REGION_WIN');
+		(function () {
+			var __accu0__ = bpy.ops.mesh;
+			return __call__ (__accu0__.primitive_plane_add, __accu0__, 'INVOKE_REGION_WIN');
+		}) ();
 		var plane = context.active_object;
-		if (plane.mode != 'OBJECT') {
-			bpy.ops.object.mode_set (__kwargtrans__ ({mode: 'OBJECT'}));
+		if (__ne__ (plane.mode, 'OBJECT')) {
+			(function () {
+				var __accu0__ = bpy.ops.object;
+				return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'OBJECT'}));
+			}) ();
 		}
 		plane.dimensions = tuple ([width, height, 0.0]);
 		var __left0__ = py_name;
 		plane.data.py_name = __left0__;
 		plane.py_name = __left0__;
-		bpy.ops.object.transform_apply (__kwargtrans__ ({location: false, rotation: false, scale: true}));
-		if (self.size_mode == 'CAMERA') {
-			var offset_axis = self.axis_id_to_vector [self.offset_axis];
+		(function () {
+			var __accu0__ = bpy.ops.object;
+			return __call__ (__accu0__.transform_apply, __accu0__, __kwargtrans__ ({location: false, rotation: false, scale: true}));
+		}) ();
+		if (__eq__ (self.size_mode, 'CAMERA')) {
+			var offset_axis = __getitem__ (self.axis_id_to_vector, self.offset_axis);
 			var translate_axis = (function () {
 				var __accu0__ = [];
-				for (var i of tuple ([0, 1])) {
-					__accu0__.append ((offset_axis [i] ? 0 : 1));
+				var __iterable0__ = tuple ([0, 1]);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var i = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, (__getitem__ (offset_axis, i) ? 0 : 1));
+					}) ();
 				}
 				return __accu0__;
 			}) ();
-			center_in_camera (context.scene.camera, plane, translate_axis);
+			__call__ (center_in_camera, null, context.scene.camera, plane, translate_axis);
 		}
-		self.align_plane (context, plane);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.align_plane, __accu0__, context, plane);
+		}) ();
 		return plane;
 	});},
 	get compute_plane_size () {return __get__ (this, function (self, context, img_spec) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1053,36 +1541,36 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		var __left0__ = img_spec.size;
 		var px = __left0__ [0];
 		var py = __left0__ [1];
-		if (px == 0 || py == 0) {
+		if (__eq__ (px, 0) || __eq__ (py, 0)) {
 			var __left0__ = 1;
 			var px = __left0__;
 			var py = __left0__;
 		}
-		if (self.size_mode == 'ABSOLUTE') {
+		if (__eq__ (self.size_mode, 'ABSOLUTE')) {
 			var y = self.height;
-			var x = (px / py) * y;
+			var x = __mul__ (__truediv__ (px, py), y);
 		}
-		else if (self.size_mode == 'CAMERA') {
-			var __left0__ = compute_camera_size (context, context.scene.cursor.location, self.fill_mode, px / py);
+		else if (__eq__ (self.size_mode, 'CAMERA')) {
+			var __left0__ = __call__ (compute_camera_size, null, context, context.scene.cursor.location, self.fill_mode, __truediv__ (px, py));
 			var x = __left0__ [0];
 			var y = __left0__ [1];
 		}
-		else if (self.size_mode == 'DPI') {
-			var fact = ((1 / self.factor) / context.scene.unit_settings.scale_length) * 0.0254;
-			var x = px * fact;
-			var y = py * fact;
+		else if (__eq__ (self.size_mode, 'DPI')) {
+			var fact = __mul__ (__truediv__ (__truediv__ (1, self.factor), context.scene.unit_settings.scale_length), 0.0254);
+			var x = __mul__ (px, fact);
+			var y = __mul__ (py, fact);
 		}
 		else {
-			var fact = 1 / self.factor;
-			var x = px * fact;
-			var y = py * fact;
+			var fact = __truediv__ (1, self.factor);
+			var x = __mul__ (px, fact);
+			var y = __mul__ (py, fact);
 		}
 		return tuple ([x, y]);
 	});},
 	get align_plane () {return __get__ (this, function (self, context, plane) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1095,67 +1583,85 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		else {
 		}
-		var pi = _member ('math', 'pi');
+		var pi = __call__ (_member, null, 'math', 'pi');
 		if (__in__ ('CAM', self.align_axis)) {
 			var camera = context.scene.camera;
 			if (camera !== null) {
-				var axis = __matmul__ (camera.matrix_world, Vector (tuple ([0.0, 0.0, 1.0]))) - camera.matrix_world.col [3].xyz;
-				var mag = max (map (abs, axis));
-				var axis = Vector ((function () {
+				var axis = __sub__ (__matmul__ (camera.matrix_world, __call__ (Vector, null, tuple ([0.0, 0.0, 1.0]))), __getitem__ (camera.matrix_world.col, 3).xyz);
+				var mag = __call__ (max, null, __call__ (map, null, abs, axis));
+				var axis = __call__ (Vector, null, (function () {
 					var __accu0__ = [];
-					for (var n of axis) {
-						__accu0__.append ((abs (n) == mag ? n / mag : 0.0));
+					var __iterable0__ = axis;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var n = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, (__eq__ (__call__ (abs, null, n), mag) ? __truediv__ (n, mag) : 0.0));
+						}) ();
 					}
 					return __accu0__;
 				}) ());
 			}
 			else {
-				var axis = Vector (tuple ([0.0, 0.0, 1.0]));
+				var axis = __call__ (Vector, null, tuple ([0.0, 0.0, 1.0]));
 				self.align_axis = '+Z';
 			}
 		}
 		else {
-			var axis = self.axis_id_to_vector [self.align_axis];
+			var axis = __getitem__ (self.axis_id_to_vector, self.align_axis);
 		}
 		if (!(axis.z)) {
-			plane.rotation_euler.x = pi / 2;
-			if (axis.y > 0) {
+			plane.rotation_euler.x = __truediv__ (pi, 2);
+			if (__gt__ (axis.y, 0)) {
 				plane.rotation_euler.z = pi;
 			}
-			else if (axis.y < 0) {
+			else if (__lt__ (axis.y, 0)) {
 				plane.rotation_euler.z = 0;
 			}
-			else if (axis.x > 0) {
-				plane.rotation_euler.z = pi / 2;
+			else if (__gt__ (axis.x, 0)) {
+				plane.rotation_euler.z = __truediv__ (pi, 2);
 			}
-			else if (axis.x < 0) {
-				plane.rotation_euler.z = -(pi) / 2;
+			else if (__lt__ (axis.x, 0)) {
+				plane.rotation_euler.z = __truediv__ (__neg__ (pi), 2);
 			}
 		}
-		else if (axis.z < 0) {
+		else if (__lt__ (axis.z, 0)) {
 			plane.rotation_euler.y = pi;
 		}
-		if (self.align_axis == 'CAM') {
-			var constraint = plane.constraints.py_new ('COPY_ROTATION');
+		if (__eq__ (self.align_axis, 'CAM')) {
+			var constraint = (function () {
+				var __accu0__ = plane.constraints;
+				return __call__ (__accu0__.py_new, __accu0__, 'COPY_ROTATION');
+			}) ();
 			constraint.target = camera;
 			var __left0__ = true;
 			constraint.use_x = __left0__;
 			constraint.use_y = __left0__;
 			constraint.use_z = __left0__;
 			if (!(self.align_track)) {
-				bpy.ops.object.visual_transform_apply ();
-				plane.constraints.py_clear ();
+				(function () {
+					var __accu0__ = bpy.ops.object;
+					return __call__ (__accu0__.visual_transform_apply, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = plane.constraints;
+					return __call__ (__accu0__.py_clear, __accu0__);
+				}) ();
 			}
 		}
-		if (self.align_axis == 'CAM_AX' && self.align_track) {
-			var constraint = plane.constraints.py_new ('LOCKED_TRACK');
+		if (__eq__ (self.align_axis, 'CAM_AX') && self.align_track) {
+			var constraint = (function () {
+				var __accu0__ = plane.constraints;
+				return __call__ (__accu0__.py_new, __accu0__, 'LOCKED_TRACK');
+			}) ();
 			constraint.target = camera;
 			constraint.track_axis = 'TRACK_Z';
 			constraint.lock_axis = 'LOCK_Y';
 		}
 	});}
 });
-IMAGE_OT_import_as_mesh_planes.__annotations__ = dict ({'files': CollectionProperty (__kwargtrans__ ({py_metatype: bpy.types.OperatorFileListElement, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'directory': StringProperty (__kwargtrans__ ({maxlen: 1024, subtype: 'FILE_PATH', options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'filter_image': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'filter_movie': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'force_reload': BoolProperty (__kwargtrans__ ({py_name: 'Force Reload', py_default: false, description: 'Force reload the image if it is already opened elsewhere in Blender'})), 'image_sequence': BoolProperty (__kwargtrans__ ({py_name: 'Detect Image Sequences', py_default: false, description: 'Import sequentially numbered images as an animated image sequence instead of separate planes'})), 'offset': BoolProperty (__kwargtrans__ ({py_name: 'Offset Planes', py_default: true, description: 'Offset planes from each other. If disabled, multiple planes will be created at the same location'})), 'offset_axis': EnumProperty (__kwargtrans__ ({py_name: 'Offset Direction', py_default: '+X', py_items: tuple ([tuple (['+X', '+X', 'Side by Side to the Left']), tuple (['+Y', '+Y', 'Side by Side, Downward']), tuple (['+Z', '+Z', 'Stacked Above']), tuple (['-X', '-X', 'Side by Side to the Right']), tuple (['-Y', '-Y', 'Side by Side, Upward']), tuple (['-Z', '-Z', 'Stacked Below'])]), description: "How planes are oriented relative to each others' local axis"})), 'offset_amount': FloatProperty (__kwargtrans__ ({py_name: 'Offset Distance', soft_min: 0, py_default: 0.1, description: 'Set distance between each plane', subtype: 'DISTANCE', unit: 'LENGTH'})), 'align_axis': EnumProperty (__kwargtrans__ ({py_name: 'Align', py_default: 'CAM_AX', py_items: IMAGE_OT_import_as_mesh_planes.AXIS_MODES, description: 'How to align the planes'})), 'prev_align_axis': EnumProperty (__kwargtrans__ ({py_items: IMAGE_OT_import_as_mesh_planes.AXIS_MODES + tuple ([tuple (['NONE', '', ''])]), py_default: 'NONE', options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'align_track': BoolProperty (__kwargtrans__ ({py_name: 'Track Camera', py_default: false, description: 'Add a constraint to make the planes track the camera'})), 'size_mode': EnumProperty (__kwargtrans__ ({py_name: 'Size Mode', py_default: 'ABSOLUTE', py_items: tuple ([tuple (['ABSOLUTE', 'Absolute', 'Use absolute size']), tuple (['CAMERA', 'Scale to Camera Frame', 'Scale to fit or fill the camera frame']), tuple (['DPI', 'Pixels per Inch', 'Scale based on pixels per inch']), tuple (['DPBU', 'Pixels per Blender Unit', 'Scale based on pixels per Blender Unit'])]), py_update: IMAGE_OT_import_as_mesh_planes.update_size_mode, description: 'Method for computing the plane size'})), 'fill_mode': EnumProperty (__kwargtrans__ ({py_name: 'Scale', py_default: 'FILL', py_items: tuple ([tuple (['FILL', 'Fill', 'Fill camera frame, spilling outside the frame']), tuple (['FIT', 'Fit', 'Fit entire image within the camera frame'])]), description: 'Method to scale the plane with the camera frame'})), 'height': FloatProperty (__kwargtrans__ ({py_name: 'Height', description: 'Height of the created plane', py_default: 1.0, min: 0.001, soft_min: 0.001, subtype: 'DISTANCE', unit: 'LENGTH'})), 'factor': FloatProperty (__kwargtrans__ ({py_name: 'Definition', min: 1.0, py_default: 600.0, description: 'Number of pixels per inch or Blender Unit'}))});
+IMAGE_OT_import_as_mesh_planes.__annotations__ = dict ({'files': __call__ (CollectionProperty, null, __kwargtrans__ ({py_metatype: bpy.types.OperatorFileListElement, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'directory': __call__ (StringProperty, null, __kwargtrans__ ({maxlen: 1024, subtype: 'FILE_PATH', options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'filter_image': __call__ (BoolProperty, null, __kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'filter_movie': __call__ (BoolProperty, null, __kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'force_reload': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Force Reload', py_default: false, description: 'Force reload the image if it is already opened elsewhere in Blender'})), 'image_sequence': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Detect Image Sequences', py_default: false, description: 'Import sequentially numbered images as an animated image sequence instead of separate planes'})), 'offset': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Offset Planes', py_default: true, description: 'Offset planes from each other. If disabled, multiple planes will be created at the same location'})), 'offset_axis': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Offset Direction', py_default: '+X', py_items: tuple ([tuple (['+X', '+X', 'Side by Side to the Left']), tuple (['+Y', '+Y', 'Side by Side, Downward']), tuple (['+Z', '+Z', 'Stacked Above']), tuple (['-X', '-X', 'Side by Side to the Right']), tuple (['-Y', '-Y', 'Side by Side, Upward']), tuple (['-Z', '-Z', 'Stacked Below'])]), description: "How planes are oriented relative to each others' local axis"})), 'offset_amount': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Offset Distance', soft_min: 0, py_default: 0.1, description: 'Set distance between each plane', subtype: 'DISTANCE', unit: 'LENGTH'})), 'align_axis': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Align', py_default: 'CAM_AX', py_items: _IMAGE_OT_import_as_mesh_planes_AXIS_MODES, description: 'How to align the planes'})), 'prev_align_axis': __call__ (EnumProperty, null, __kwargtrans__ ({py_items: __add__ (_IMAGE_OT_import_as_mesh_planes_AXIS_MODES, tuple ([tuple (['NONE', '', ''])])), py_default: 'NONE', options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'align_track': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Track Camera', py_default: false, description: 'Add a constraint to make the planes track the camera'})), 'size_mode': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Size Mode', py_default: 'ABSOLUTE', py_items: tuple ([tuple (['ABSOLUTE', 'Absolute', 'Use absolute size']), tuple (['CAMERA', 'Scale to Camera Frame', 'Scale to fit or fill the camera frame']), tuple (['DPI', 'Pixels per Inch', 'Scale based on pixels per inch']), tuple (['DPBU', 'Pixels per Blender Unit', 'Scale based on pixels per Blender Unit'])]), py_update: _IMAGE_OT_import_as_mesh_planes_update_size_mode, description: 'Method for computing the plane size'})), 'fill_mode': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Scale', py_default: 'FILL', py_items: tuple ([tuple (['FILL', 'Fill', 'Fill camera frame, spilling outside the frame']), tuple (['FIT', 'Fit', 'Fit entire image within the camera frame'])]), description: 'Method to scale the plane with the camera frame'})), 'height': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Height', description: 'Height of the created plane', py_default: 1.0, min: 0.001, soft_min: 0.001, subtype: 'DISTANCE', unit: 'LENGTH'})), 'factor': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Definition', min: 1.0, py_default: 600.0, description: 'Number of pixels per inch or Blender Unit'}))});
 export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mesh_plane', [MaterialProperties_MixIn, TextureProperties_MixIn, Operator], {
 	__module__: __name__,
 	bl_idname: 'image.convert_to_mesh_plane',
@@ -1164,7 +1670,7 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1177,12 +1683,18 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 		else {
 		}
 		var ob = context.object;
-		return ob !== null && ob.select_get () && cls._is_object_empty_image (ob);
+		return ob !== null && (function () {
+			var __accu0__ = ob;
+			return __call__ (__accu0__.select_get, __accu0__);
+		}) () && (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._is_object_empty_image, __accu0__, ob);
+		}) ();
 	});},
 	get _is_object_empty_image () {return function (ob) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1193,12 +1705,12 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 		}
 		else {
 		}
-		return ob.py_metatype == 'EMPTY' && ob.empty_display_type == 'IMAGE' && ob.data !== null;
+		return __eq__ (ob.py_metatype, 'EMPTY') && __eq__ (ob.empty_display_type, 'IMAGE') && ob.data !== null;
 	};},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1214,18 +1726,33 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 		var scene = context.scene;
 		var engine = scene.render.engine;
 		if (!__in__ (engine, COMPATIBLE_ENGINES)) {
-			self.report (new set (['ERROR']), rpt_ ('Cannot generate materials for unknown {:s} render engine').format (engine));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Cannot generate materials for unknown {:s} render engine');
+					return __call__ (__accu1__.format, __accu1__, engine);
+				}) ());
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (engine == 'BLENDER_WORKBENCH') {
-			self.report (new set (['WARNING']), rpt_ ("Generating Cycles/EEVEE compatible material, but won't be visible with {:s} engine").format (engine));
+		if (__eq__ (engine, 'BLENDER_WORKBENCH')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+					var __accu1__ = __call__ (rpt_, null, "Generating Cycles/EEVEE compatible material, but won't be visible with {:s} engine");
+					return __call__ (__accu1__.format, __accu1__, engine);
+				}) ());
+			}) ();
 		}
-		return context.window_manager.invoke_props_dialog (self);
+		return (function () {
+			var __accu0__ = context.window_manager;
+			return __call__ (__accu0__.invoke_props_dialog, __accu0__, self);
+		}) ();
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1239,62 +1766,116 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 		}
 		var selected_objects = (function () {
 			var __accu0__ = [];
-			for (var ob of context.selected_objects) {
-				__accu0__.append (ob);
+			var __iterable0__ = context.selected_objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var ob = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, ob);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		var converted = 0;
-		for (var ob of selected_objects) {
-			if (!(self._is_object_empty_image (ob))) {
+		var __iterable0__ = selected_objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ob = __getitem__ (__iterable0__, __index0__);
+			if (!((function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._is_object_empty_image, __accu0__, ob);
+			}) ())) {
 				continue;
 			}
 			var img = ob.data;
 			var img_user = ob.image_user;
 			var ob_name = ob.py_name;
-			if (self.name_from == 'IMAGE') {
-				var py_name = bpy.path.display_name (img.py_name, __kwargtrans__ ({title_case: false}));
+			if (__eq__ (self.name_from, 'IMAGE')) {
+				var py_name = (function () {
+					var __accu0__ = bpy.path;
+					return __call__ (__accu0__.display_name, __accu0__, img.py_name, __kwargtrans__ ({title_case: false}));
+				}) ();
 			}
 			else {
 				var py_name = ob.py_name;
 			}
-			var obj_space_corners = get_ref_object_space_coord (ob);
+			var obj_space_corners = __call__ (get_ref_object_space_coord, null, ob);
 			var face = [tuple ([0, 1, 3, 2])];
-			var mesh = bpy.data.meshes.py_new (py_name);
-			mesh.from_pydata (obj_space_corners, [], face);
-			var plane = bpy.data.objects.py_new (py_name, mesh);
-			mesh.uv_layers.py_new (__kwargtrans__ ({py_name: 'UVMap'}));
+			var mesh = (function () {
+				var __accu0__ = bpy.data.meshes;
+				return __call__ (__accu0__.py_new, __accu0__, py_name);
+			}) ();
+			(function () {
+				var __accu0__ = mesh;
+				return __call__ (__accu0__.from_pydata, __accu0__, obj_space_corners, [], face);
+			}) ();
+			var plane = (function () {
+				var __accu0__ = bpy.data.objects;
+				return __call__ (__accu0__.py_new, __accu0__, py_name, mesh);
+			}) ();
+			(function () {
+				var __accu0__ = mesh.uv_layers;
+				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: 'UVMap'}));
+			}) ();
 			var users_collection = ob.users_collection;
-			for (var collection of users_collection) {
-				collection.objects.link (plane);
+			var __iterable1__ = users_collection;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var collection = __getitem__ (__iterable1__, __index1__);
+				(function () {
+					var __accu0__ = collection.objects;
+					return __call__ (__accu0__.link, __accu0__, plane);
+				}) ();
 			}
 			plane.parent = ob.parent;
 			plane.matrix_local = ob.matrix_local;
 			plane.matrix_parent_inverse = ob.matrix_parent_inverse;
-			var img_spec = ImageSpec (img, tuple ([img.size [0], img.size [1]]), img_user.frame_start, img_user.frame_offset, img_user.frame_duration);
-			var material = create_cycles_material (self, context, img_spec, py_name);
-			plane.data.materials.append (material);
+			var img_spec = __call__ (ImageSpec, null, img, tuple ([__getitem__ (img.size, 0), __getitem__ (img.size, 1)]), img_user.frame_start, img_user.frame_offset, img_user.frame_duration);
+			var material = __call__ (create_cycles_material, null, self, context, img_spec, py_name);
+			(function () {
+				var __accu0__ = plane.data.materials;
+				return __call__ (__accu0__.append, __accu0__, material);
+			}) ();
 			if (self.delete_ref) {
-				for (var collection of users_collection) {
-					collection.objects.unlink (ob);
+				var __iterable1__ = users_collection;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var collection = __getitem__ (__iterable1__, __index1__);
+					(function () {
+						var __accu0__ = collection.objects;
+						return __call__ (__accu0__.unlink, __accu0__, ob);
+					}) ();
 				}
 				mesh.py_name = ob_name;
 				plane.py_name = ob_name;
 			}
-			plane.select_set (true);
-			converted++;
+			(function () {
+				var __accu0__ = plane;
+				return __call__ (__accu0__.select_set, __accu0__, true);
+			}) ();
+			var converted = __call__ (__iadd__, null, converted, 1);
 		}
 		if (!(converted)) {
-			self.report (new set (['ERROR']), 'No images converted');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No images converted');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		self.report (new set (['INFO']), rpt_ ('{:d} image(s) converted to mesh plane(s)').format (converted));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
+				var __accu1__ = __call__ (rpt_, null, '{:d} image(s) converted to mesh plane(s)');
+				return __call__ (__accu1__.format, __accu1__, converted);
+			}) ());
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1308,16 +1889,64 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var col = layout.column (__kwargtrans__ ({align: false}));
-		col.prop (self, 'name_from');
-		col.prop (self, 'delete_ref');
-		layout.separator ();
-		MaterialProperties_MixIn.draw_material_config (self, context);
-		TextureProperties_MixIn.draw_texture_config (self, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, self, 'name_from');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, self, 'delete_ref');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = MaterialProperties_MixIn;
+			return __call__ (__accu0__.draw_material_config, __accu0__, self, context);
+		}) ();
+		(function () {
+			var __accu0__ = TextureProperties_MixIn;
+			return __call__ (__accu0__.draw_texture_config, __accu0__, self, context);
+		}) ();
 	});}
 });
-IMAGE_OT_convert_to_mesh_plane.__annotations__ = dict ({'name_from': EnumProperty (__kwargtrans__ ({py_name: 'Name After', py_items: [tuple (['OBJECT', 'Source Object', 'Name after object source with a suffix']), tuple (['IMAGE', 'Source Image', 'Name from loaded image'])], py_default: 'OBJECT', description: 'Name for new mesh object and material'})), 'delete_ref': BoolProperty (__kwargtrans__ ({py_name: 'Delete Reference Object', py_default: true, description: 'Delete empty image object once mesh plane is created'}))});
+IMAGE_OT_convert_to_mesh_plane.__annotations__ = dict ({'name_from': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Name After', py_items: [tuple (['OBJECT', 'Source Object', 'Name after object source with a suffix']), tuple (['IMAGE', 'Source Image', 'Name from loaded image'])], py_default: 'OBJECT', description: 'Name for new mesh object and material'})), 'delete_ref': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Delete Reference Object', py_default: true, description: 'Delete empty image object once mesh plane is created'}))});
 export var classes = tuple ([IMAGE_OT_import_as_mesh_planes, IMAGE_OT_convert_to_mesh_plane]);
 
 //# sourceMappingURL=bl_operators.image_as_planes.map
 export {AddObjectHelper, BoolProperty, CollectionProperty, EnumProperty, FloatProperty, ImportHelper, Operator, StringProperty, Vector, _globals, _import, _lazy, _member, _module, i18n_contexts, namedtuple, rpt_, world_to_camera_view};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'COMPATIBLE_ENGINES': COMPATIBLE_ENGINES = value; break;
+		case 'ImageSpec': ImageSpec = value; break;
+		case 'find_image_sequences': find_image_sequences = value; break;
+		case 'load_images': load_images = value; break;
+		case 'offset_planes': offset_planes = value; break;
+		case 'compute_camera_size': compute_camera_size = value; break;
+		case 'center_in_camera': center_in_camera = value; break;
+		case 'get_ref_object_space_coord': get_ref_object_space_coord = value; break;
+		case 'MaterialProperties_MixIn': MaterialProperties_MixIn = value; break;
+		case '_TextureProperties_MixIn__ImageUser_use_auto_refresh': _TextureProperties_MixIn__ImageUser_use_auto_refresh = value; break;
+		case 'TextureProperties_MixIn': TextureProperties_MixIn = value; break;
+		case 'apply_texture_options': apply_texture_options = value; break;
+		case 'create_cycles_texnode': create_cycles_texnode = value; break;
+		case 'create_cycles_material': create_cycles_material = value; break;
+		case 'get_input_nodes': get_input_nodes = value; break;
+		case 'auto_align_nodes': auto_align_nodes = value; break;
+		case 'clean_node_tree': clean_node_tree = value; break;
+		case 'get_shadeless_node': get_shadeless_node = value; break;
+		case '_IMAGE_OT_import_as_mesh_planes_AXIS_MODES': _IMAGE_OT_import_as_mesh_planes_AXIS_MODES = value; break;
+		case '_IMAGE_OT_import_as_mesh_planes_update_size_mode': _IMAGE_OT_import_as_mesh_planes_update_size_mode = value; break;
+		case 'IMAGE_OT_import_as_mesh_planes': IMAGE_OT_import_as_mesh_planes = value; break;
+		case 'IMAGE_OT_convert_to_mesh_plane': IMAGE_OT_convert_to_mesh_plane = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

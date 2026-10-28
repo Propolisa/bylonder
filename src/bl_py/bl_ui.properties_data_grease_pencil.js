@@ -18,7 +18,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -30,7 +30,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 		}
 		else {
 		}
-		return hasattr (context, 'grease_pencil') && context.grease_pencil;
+		return __call__ (hasattr, null, context, 'grease_pencil') && context.grease_pencil;
 	});}
 });
 export var LayerDataButtonsPanel =  __class__ ('LayerDataButtonsPanel', [object], {
@@ -41,7 +41,7 @@ export var LayerDataButtonsPanel =  __class__ ('LayerDataButtonsPanel', [object]
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -62,7 +62,7 @@ export var GREASE_PENCIL_UL_masks =  __class__ ('GREASE_PENCIL_UL_masks', [UILis
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -82,10 +82,22 @@ export var GREASE_PENCIL_UL_masks =  __class__ ('GREASE_PENCIL_UL_masks', [UILis
 		else {
 		}
 		var mask = item;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (mask, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
-		row.prop (mask, 'invert', __kwargtrans__ ({text: '', emboss: false}));
-		row.prop (mask, 'hide', __kwargtrans__ ({text: '', emboss: false}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'invert', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'hide', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
 	});}
 });
 export var GreasePencil_LayerMaskPanel =  __class__ ('GreasePencil_LayerMaskPanel', [object], {
@@ -93,7 +105,7 @@ export var GreasePencil_LayerMaskPanel =  __class__ ('GreasePencil_LayerMaskPane
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -107,12 +119,15 @@ export var GreasePencil_LayerMaskPanel =  __class__ ('GreasePencil_LayerMaskPane
 		}
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
-		self.layout.prop (layer, 'use_masks', __kwargtrans__ ({text: '', toggle: 0}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'use_masks', __kwargtrans__ ({text: '', toggle: 0}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -133,16 +148,46 @@ export var GreasePencil_LayerMaskPanel =  __class__ ('GreasePencil_LayerMaskPane
 			return ;
 		}
 		var rows = 4;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('GREASE_PENCIL_UL_masks', '', layer, 'mask_layers', layer.mask_layers, 'active_mask_index', __kwargtrans__ ({rows: rows, sort_lock: true}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.menu ('GREASE_PENCIL_MT_layer_mask_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('grease_pencil.layer_mask_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		col.separator ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.operator ('grease_pencil.layer_mask_reorder', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).direction = 'UP';
-		sub.operator ('grease_pencil.layer_mask_reorder', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).direction = 'DOWN';
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'GREASE_PENCIL_UL_masks', '', layer, 'mask_layers', layer.mask_layers, 'active_mask_index', __kwargtrans__ ({rows: rows, sort_lock: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'GREASE_PENCIL_MT_layer_mask_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_mask_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_mask_reorder', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+		}) ().direction = 'UP';
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_mask_reorder', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		}) ().direction = 'DOWN';
 	});}
 });
 export var GreasePencil_LayerTransformPanel =  __class__ ('GreasePencil_LayerTransformPanel', [object], {
@@ -150,7 +195,7 @@ export var GreasePencil_LayerTransformPanel =  __class__ ('GreasePencil_LayerTra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -167,12 +212,30 @@ export var GreasePencil_LayerTransformPanel =  __class__ ('GreasePencil_LayerTra
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
 		layout.active = !(layer.lock);
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'translation');
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'rotation');
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'scale');
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'translation');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'rotation');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'scale');
+		}) ();
 	});}
 });
 export var GreasePencil_LayerAdjustmentsPanel =  __class__ ('GreasePencil_LayerAdjustmentsPanel', [object], {
@@ -180,7 +243,7 @@ export var GreasePencil_LayerAdjustmentsPanel =  __class__ ('GreasePencil_LayerA
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -197,11 +260,26 @@ export var GreasePencil_LayerAdjustmentsPanel =  __class__ ('GreasePencil_LayerA
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
 		layout.active = !(layer.lock);
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (layer, 'tint_color');
-		col.prop (layer, 'tint_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
-		var col = layout.row (__kwargtrans__ ({align: true}));
-		col.prop (layer, 'radius_offset', __kwargtrans__ ({text: 'Stroke Thickness'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'tint_color');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'tint_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'radius_offset', __kwargtrans__ ({text: 'Stroke Thickness'}));
+		}) ();
 	});}
 });
 export var GreasePencil_LayerRelationsPanel =  __class__ ('GreasePencil_LayerRelationsPanel', [object], {
@@ -209,7 +287,7 @@ export var GreasePencil_LayerRelationsPanel =  __class__ ('GreasePencil_LayerRel
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -226,20 +304,53 @@ export var GreasePencil_LayerRelationsPanel =  __class__ ('GreasePencil_LayerRel
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
 		layout.active = !(layer.lock);
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'parent', __kwargtrans__ ({text: 'Parent'}));
-		if (layer.parent && layer.parent.py_metatype == 'ARMATURE') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop_search (layer, 'parent_bone', layer.parent.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'parent', __kwargtrans__ ({text: 'Parent'}));
+		}) ();
+		if (layer.parent && __eq__ (layer.parent.py_metatype, 'ARMATURE')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_search, __accu0__, layer, 'parent_bone', layer.parent.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+			}) ();
 		}
-		layout.separator ();
-		var col = layout.row (__kwargtrans__ ({align: true}));
-		col.prop (layer, 'pass_index');
-		var col = layout.row (__kwargtrans__ ({align: true}));
-		col.prop_search (layer, 'viewlayer_render', context.scene, 'view_layers', __kwargtrans__ ({text: 'View Layer'}));
-		var col = layout.row (__kwargtrans__ ({align: true}));
-		col.enabled = bool (layer.viewlayer_render);
-		col.prop (layer, 'use_viewlayer_masks');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'pass_index');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_search, __accu0__, layer, 'viewlayer_render', context.scene, 'view_layers', __kwargtrans__ ({text: 'View Layer'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		col.enabled = __call__ (bool, null, layer.viewlayer_render);
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'use_viewlayer_masks');
+		}) ();
 	});}
 });
 export var GreasePencil_LayerDisplayPanel =  __class__ ('GreasePencil_LayerDisplayPanel', [object], {
@@ -248,7 +359,7 @@ export var GreasePencil_LayerDisplayPanel =  __class__ ('GreasePencil_LayerDispl
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -264,7 +375,10 @@ export var GreasePencil_LayerDisplayPanel =  __class__ ('GreasePencil_LayerDispl
 		layout.use_property_split = true;
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
-		layout.prop (layer, 'channel_color', __kwargtrans__ ({text: 'Channel Color'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'channel_color', __kwargtrans__ ({text: 'Channel Color'}));
+		}) ();
 	});}
 });
 export var GREASE_PENCIL_MT_layer_mask_add =  __class__ ('GREASE_PENCIL_MT_layer_mask_add', [Menu], {
@@ -273,7 +387,7 @@ export var GREASE_PENCIL_MT_layer_mask_add =  __class__ ('GREASE_PENCIL_MT_layer
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -289,15 +403,24 @@ export var GREASE_PENCIL_MT_layer_mask_add =  __class__ ('GREASE_PENCIL_MT_layer
 		var grease_pencil = context.grease_pencil;
 		var active_layer = grease_pencil.layers.active;
 		var found = false;
-		for (var layer of grease_pencil.layers) {
-			if (layer == active_layer || __in__ (layer.py_name, active_layer.mask_layers)) {
+		var __iterable0__ = grease_pencil.layers;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var layer = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (layer, active_layer) || __in__ (layer.py_name, active_layer.mask_layers)) {
 				continue;
 			}
 			var found = true;
-			layout.operator ('grease_pencil.layer_mask_add', __kwargtrans__ ({text: layer.py_name})).py_name = layer.py_name;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_mask_add', __kwargtrans__ ({text: layer.py_name}));
+			}) ().py_name = layer.py_name;
 		}
 		if (!(found)) {
-			layout.label (__kwargtrans__ ({text: 'No layers to add'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No layers to add'}));
+			}) ();
 		}
 	});}
 });
@@ -308,7 +431,7 @@ export var DATA_PT_context_grease_pencil =  __class__ ('DATA_PT_context_grease_p
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -325,10 +448,16 @@ export var DATA_PT_context_grease_pencil =  __class__ ('DATA_PT_context_grease_p
 		var grease_pencil = context.grease_pencil;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (grease_pencil) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -338,7 +467,7 @@ export var GREASE_PENCIL_MT_grease_pencil_add_layer_extra =  __class__ ('GREASE_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -353,30 +482,96 @@ export var GREASE_PENCIL_MT_grease_pencil_add_layer_extra =  __class__ ('GREASE_
 		var layout = self.layout;
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
-		layout.separator ();
-		layout.operator ('grease_pencil.layer_duplicate', __kwargtrans__ ({text: 'Duplicate', icon: 'DUPLICATE'})).empty_keyframes = false;
-		layout.operator ('grease_pencil.layer_duplicate', __kwargtrans__ ({text: 'Duplicate Empty Keyframes'})).empty_keyframes = true;
-		layout.separator ();
-		layout.operator ('grease_pencil.layer_reveal', __kwargtrans__ ({icon: 'RESTRICT_VIEW_OFF', text: 'Show All'}));
-		layout.operator ('grease_pencil.layer_hide', __kwargtrans__ ({icon: 'RESTRICT_VIEW_ON', text: 'Hide Others'})).unselected = true;
-		layout.separator ();
-		layout.operator ('grease_pencil.layer_lock_all', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'})).lock = true;
-		layout.operator ('grease_pencil.layer_lock_all', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'})).lock = false;
-		layout.separator ();
-		layout.prop (grease_pencil, 'use_autolock_layers', __kwargtrans__ ({text: 'Autolock Inactive Layers'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_duplicate', __kwargtrans__ ({text: 'Duplicate', icon: 'DUPLICATE'}));
+		}) ().empty_keyframes = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_duplicate', __kwargtrans__ ({text: 'Duplicate Empty Keyframes'}));
+		}) ().empty_keyframes = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_reveal', __kwargtrans__ ({icon: 'RESTRICT_VIEW_OFF', text: 'Show All'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_hide', __kwargtrans__ ({icon: 'RESTRICT_VIEW_ON', text: 'Hide Others'}));
+		}) ().unselected = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_lock_all', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'}));
+		}) ().lock = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_lock_all', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'}));
+		}) ().lock = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'use_autolock_layers', __kwargtrans__ ({text: 'Autolock Inactive Layers'}));
+		}) ();
 		if (layer) {
-			layout.prop (layer, 'ignore_locked_materials');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, layer, 'ignore_locked_materials');
+			}) ();
 		}
-		layout.separator ();
-		layout.operator ('grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge Down'})).mode = 'ACTIVE';
-		layout.operator ('grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge Group'})).mode = 'GROUP';
-		layout.operator ('grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge All'})).mode = 'ALL';
-		layout.separator ();
-		layout.operator ('grease_pencil.relative_layer_mask_add', __kwargtrans__ ({text: 'Mask with Layer Above'})).mode = 'ABOVE';
-		layout.operator ('grease_pencil.relative_layer_mask_add', __kwargtrans__ ({text: 'Mask with Layer Below'})).mode = 'BELOW';
-		layout.separator ();
-		layout.operator ('grease_pencil.layer_duplicate_object', __kwargtrans__ ({text: 'Copy Layer to Selected'})).only_active = true;
-		layout.operator ('grease_pencil.layer_duplicate_object', __kwargtrans__ ({text: 'Copy All Layers to Selected'})).only_active = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge Down'}));
+		}) ().mode = 'ACTIVE';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge Group'}));
+		}) ().mode = 'GROUP';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge All'}));
+		}) ().mode = 'ALL';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.relative_layer_mask_add', __kwargtrans__ ({text: 'Mask with Layer Above'}));
+		}) ().mode = 'ABOVE';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.relative_layer_mask_add', __kwargtrans__ ({text: 'Mask with Layer Below'}));
+		}) ().mode = 'BELOW';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_duplicate_object', __kwargtrans__ ({text: 'Copy Layer to Selected'}));
+		}) ().only_active = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_duplicate_object', __kwargtrans__ ({text: 'Copy All Layers to Selected'}));
+		}) ().only_active = false;
 	});}
 });
 export var GREASE_PENCIL_MT_group_context_menu =  __class__ ('GREASE_PENCIL_MT_group_context_menu', [Menu], {
@@ -385,7 +580,7 @@ export var GREASE_PENCIL_MT_group_context_menu =  __class__ ('GREASE_PENCIL_MT_g
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -398,12 +593,30 @@ export var GREASE_PENCIL_MT_group_context_menu =  __class__ ('GREASE_PENCIL_MT_g
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('grease_pencil.layer_group_remove', __kwargtrans__ ({text: 'Delete Group'})).keep_children = false;
-		layout.operator ('grease_pencil.layer_group_remove', __kwargtrans__ ({text: 'Ungroup'})).keep_children = true;
-		layout.operator ('grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge Group'})).mode = 'GROUP';
-		layout.separator ();
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.operator_enum ('grease_pencil.layer_group_color_tag', 'color_tag', __kwargtrans__ ({icon_only: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_group_remove', __kwargtrans__ ({text: 'Delete Group'}));
+		}) ().keep_children = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_group_remove', __kwargtrans__ ({text: 'Ungroup'}));
+		}) ().keep_children = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_merge', __kwargtrans__ ({text: 'Merge Group'}));
+		}) ().mode = 'GROUP';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator_enum, __accu0__, 'grease_pencil.layer_group_color_tag', 'color_tag', __kwargtrans__ ({icon_only: true}));
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_layers =  __class__ ('DATA_PT_grease_pencil_layers', [DataButtonsPanel, Panel], {
@@ -412,7 +625,7 @@ export var DATA_PT_grease_pencil_layers =  __class__ ('DATA_PT_grease_pencil_lay
 	get draw_settings () {return __getcm__ (this, function (cls, layout, grease_pencil) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -428,43 +641,109 @@ export var DATA_PT_grease_pencil_layers =  __class__ ('DATA_PT_grease_pencil_lay
 		var layer = grease_pencil.layers.active;
 		var is_layer_active = layer !== null;
 		var is_group_active = grease_pencil.layer_groups.active !== null;
-		var row = layout.row ();
-		row.template_grease_pencil_layer_tree ();
-		var col = row.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_grease_pencil_layer_tree, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.operator_context = 'EXEC_DEFAULT';
-		sub.operator ('grease_pencil.layer_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		sub.operator ('grease_pencil.layer_group_add', __kwargtrans__ ({icon: 'NEWFOLDER', text: ''}));
-		sub.separator ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_group_add', __kwargtrans__ ({icon: 'NEWFOLDER', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (is_layer_active) {
-			sub.operator ('grease_pencil.layer_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+			}) ();
 		}
 		if (is_group_active) {
-			sub.operator ('grease_pencil.layer_group_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''})).keep_children = true;
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_group_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+			}) ().keep_children = true;
 		}
-		sub.separator ();
-		sub.menu ('GREASE_PENCIL_MT_grease_pencil_add_layer_extra', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
-		col.separator ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.operator ('grease_pencil.layer_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).direction = 'UP';
-		sub.operator ('grease_pencil.layer_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).direction = 'DOWN';
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.menu, __accu0__, 'GREASE_PENCIL_MT_grease_pencil_add_layer_extra', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+		}) ().direction = 'UP';
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+		}) ().direction = 'DOWN';
 		if (!(is_layer_active)) {
 			return ;
 		}
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'blend_mode', __kwargtrans__ ({text: 'Blend Mode'}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'opacity', __kwargtrans__ ({text: 'Opacity', slider: true}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (layer, 'use_lights', __kwargtrans__ ({text: 'Lights'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'blend_mode', __kwargtrans__ ({text: 'Blend Mode'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'opacity', __kwargtrans__ ({text: 'Opacity', slider: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'use_lights', __kwargtrans__ ({text: 'Lights'}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -478,7 +757,10 @@ export var DATA_PT_grease_pencil_layers =  __class__ ('DATA_PT_grease_pencil_lay
 		}
 		var layout = self.layout;
 		var grease_pencil = context.grease_pencil;
-		self.draw_settings (layout, grease_pencil);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_settings, __accu0__, layout, grease_pencil);
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_layer_masks =  __class__ ('DATA_PT_grease_pencil_layer_masks', [LayerDataButtonsPanel, GreasePencil_LayerMaskPanel, Panel], {
@@ -521,7 +803,7 @@ export var DATA_PT_grease_pencil_layer_group_display =  __class__ ('DATA_PT_grea
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -539,7 +821,7 @@ export var DATA_PT_grease_pencil_layer_group_display =  __class__ ('DATA_PT_grea
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -555,7 +837,10 @@ export var DATA_PT_grease_pencil_layer_group_display =  __class__ ('DATA_PT_grea
 		layout.use_property_split = true;
 		var grease_pencil = context.grease_pencil;
 		var group = grease_pencil.layer_groups.active;
-		layout.prop (group, 'channel_color', __kwargtrans__ ({text: 'Channel Color'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, group, 'channel_color', __kwargtrans__ ({text: 'Channel Color'}));
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_onion_skinning =  __class__ ('DATA_PT_grease_pencil_onion_skinning', [DataButtonsPanel, Panel], {
@@ -564,7 +849,7 @@ export var DATA_PT_grease_pencil_onion_skinning =  __class__ ('DATA_PT_grease_pe
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -579,19 +864,49 @@ export var DATA_PT_grease_pencil_onion_skinning =  __class__ ('DATA_PT_grease_pe
 		var grease_pencil = context.grease_pencil;
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (grease_pencil, 'onion_mode');
-		col.prop (grease_pencil, 'onion_factor', __kwargtrans__ ({text: 'Opacity', slider: true}));
-		col.prop (grease_pencil, 'onion_keyframe_type');
-		if (grease_pencil.onion_mode == 'ABSOLUTE') {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.prop (grease_pencil, 'ghost_before_range', __kwargtrans__ ({text: 'Frames Before'}));
-			col.prop (grease_pencil, 'ghost_after_range', __kwargtrans__ ({text: 'Frames After'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'onion_mode');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'onion_factor', __kwargtrans__ ({text: 'Opacity', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'onion_keyframe_type');
+		}) ();
+		if (__eq__ (grease_pencil.onion_mode, 'ABSOLUTE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'ghost_before_range', __kwargtrans__ ({text: 'Frames Before'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'ghost_after_range', __kwargtrans__ ({text: 'Frames After'}));
+			}) ();
 		}
-		else if (grease_pencil.onion_mode == 'RELATIVE') {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.prop (grease_pencil, 'ghost_before_range', __kwargtrans__ ({text: 'Keyframes Before'}));
-			col.prop (grease_pencil, 'ghost_after_range', __kwargtrans__ ({text: 'Keyframes After'}));
+		else if (__eq__ (grease_pencil.onion_mode, 'RELATIVE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'ghost_before_range', __kwargtrans__ ({text: 'Keyframes Before'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'ghost_after_range', __kwargtrans__ ({text: 'Keyframes After'}));
+			}) ();
 		}
 	});}
 });
@@ -603,7 +918,7 @@ export var DATA_PT_grease_pencil_onion_skinning_custom_colors =  __class__ ('DAT
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -616,12 +931,15 @@ export var DATA_PT_grease_pencil_onion_skinning_custom_colors =  __class__ ('DAT
 		else {
 		}
 		var grease_pencil = context.grease_pencil;
-		self.layout.prop (grease_pencil, 'use_ghost_custom_colors', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'use_ghost_custom_colors', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -636,9 +954,15 @@ export var DATA_PT_grease_pencil_onion_skinning_custom_colors =  __class__ ('DAT
 		var grease_pencil = context.grease_pencil;
 		var layout = self.layout;
 		layout.use_property_split = true;
-		layout.enabled = grease_pencil.users <= 1 && grease_pencil.use_ghost_custom_colors;
-		layout.prop (grease_pencil, 'before_color', __kwargtrans__ ({text: 'Before'}));
-		layout.prop (grease_pencil, 'after_color', __kwargtrans__ ({text: 'After'}));
+		layout.enabled = __le__ (grease_pencil.users, 1) && grease_pencil.use_ghost_custom_colors;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'before_color', __kwargtrans__ ({text: 'Before'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'after_color', __kwargtrans__ ({text: 'After'}));
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_onion_skinning_display =  __class__ ('DATA_PT_grease_pencil_onion_skinning_display', [DataButtonsPanel, Panel], {
@@ -649,7 +973,7 @@ export var DATA_PT_grease_pencil_onion_skinning_display =  __class__ ('DATA_PT_g
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -664,12 +988,24 @@ export var DATA_PT_grease_pencil_onion_skinning_display =  __class__ ('DATA_PT_g
 		var grease_pencil = context.grease_pencil;
 		var layout = self.layout;
 		layout.use_property_split = true;
-		layout.enabled = grease_pencil.users <= 1;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (grease_pencil, 'use_onion_fade', __kwargtrans__ ({text: 'Fade'}));
-		var sub = layout.column ();
+		layout.enabled = __le__ (grease_pencil.users, 1);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'use_onion_fade', __kwargtrans__ ({text: 'Fade'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = __in__ (grease_pencil.onion_mode, new set (['RELATIVE', 'SELECTED']));
-		sub.prop (grease_pencil, 'use_onion_loop', __kwargtrans__ ({text: 'Show Start Frame'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'use_onion_loop', __kwargtrans__ ({text: 'Show Start Frame'}));
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_settings =  __class__ ('DATA_PT_grease_pencil_settings', [DataButtonsPanel, Panel], {
@@ -678,7 +1014,7 @@ export var DATA_PT_grease_pencil_settings =  __class__ ('DATA_PT_grease_pencil_s
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -694,8 +1030,14 @@ export var DATA_PT_grease_pencil_settings =  __class__ ('DATA_PT_grease_pencil_s
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var grease_pencil = context.grease_pencil;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (grease_pencil, 'stroke_depth_order', __kwargtrans__ ({text: 'Stroke Depth Order'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'stroke_depth_order', __kwargtrans__ ({text: 'Stroke Depth Order'}));
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_animation =  __class__ ('DATA_PT_grease_pencil_animation', [DataButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -712,7 +1054,7 @@ export var GREASE_PENCIL_UL_attributes =  __class__ ('GREASE_PENCIL_UL_attribute
 	get filter_items () {return __get__ (this, function (self, _context, data, property) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -726,33 +1068,50 @@ export var GREASE_PENCIL_UL_attributes =  __class__ ('GREASE_PENCIL_UL_attribute
 		}
 		else {
 		}
-		var attributes = getattr (data, property);
+		var attributes = __call__ (getattr, null, data, property);
 		var flags = [];
 		var indices = (function () {
 			var __accu0__ = [];
-			for (var i of list (range (len (attributes)))) {
-				__accu0__.append (i);
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, __call__ (len, null, attributes)));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var i = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, i);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		if (self.filter_name) {
-			var flags = bpy.types.UI_UL_list.filter_items_by_name (self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			var flags = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			}) ();
 		}
 		if (!(flags)) {
-			var flags = [self.bitflag_filter_item] * len (attributes);
+			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
-		for (var [idx, item] of py_enumerate (attributes)) {
-			flags [idx] = (item.is_internal ? 0 : flags [idx]);
+		var __iterable0__ = __call__ (py_enumerate, null, attributes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var idx = __left0__ [0];
+			var item = __left0__ [1];
+			__setitem__ (flags, idx, (item.is_internal ? 0 : __getitem__ (flags, idx)));
 		}
 		if (self.use_filter_sort_alpha) {
-			var indices = bpy.types.UI_UL_list.sort_items_by_name (attributes, 'name');
+			var indices = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
+			}) ();
 		}
 		return tuple ([flags, indices]);
 	});},
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, attribute, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -771,14 +1130,26 @@ export var GREASE_PENCIL_UL_attributes =  __class__ ('GREASE_PENCIL_UL_attribute
 		}
 		else {
 		}
-		var data_type = attribute.bl_rna.properties ['data_type'].enum_items [attribute.data_type];
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.5}));
+		var data_type = __getitem__ (__getitem__ (attribute.bl_rna.properties, 'data_type').enum_items, attribute.data_type);
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5}));
+		}) ();
 		py_split.emboss = 'NONE';
-		py_split.prop (attribute, 'name', __kwargtrans__ ({text: ''}));
-		var sub = py_split.row ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, attribute, 'name', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.alignment = 'RIGHT';
 		sub.active = false;
-		sub.label (__kwargtrans__ ({text: data_type.py_name}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: data_type.py_name}));
+		}) ();
 	});}
 });
 export var DATA_PT_grease_pencil_attributes =  __class__ ('DATA_PT_grease_pencil_attributes', [DataButtonsPanel, Panel], {
@@ -788,7 +1159,7 @@ export var DATA_PT_grease_pencil_attributes =  __class__ ('DATA_PT_grease_pencil
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -802,20 +1173,75 @@ export var DATA_PT_grease_pencil_attributes =  __class__ ('DATA_PT_grease_pencil
 		}
 		var grease_pencil = context.grease_pencil;
 		var layout = self.layout;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('GREASE_PENCIL_UL_attributes', 'attributes', grease_pencil, 'attributes', grease_pencil.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('geometry.attribute_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'GREASE_PENCIL_UL_attributes', 'attributes', grease_pencil, 'attributes', grease_pencil.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
 	});}
 });
 export var classes = tuple ([GREASE_PENCIL_UL_masks, GREASE_PENCIL_MT_layer_mask_add, DATA_PT_context_grease_pencil, DATA_PT_grease_pencil_layers, DATA_PT_grease_pencil_layer_masks, DATA_PT_grease_pencil_layer_transform, DATA_PT_grease_pencil_layer_adjustments, DATA_PT_grease_pencil_layer_relations, DATA_PT_grease_pencil_layer_display, DATA_PT_grease_pencil_layer_group_display, DATA_PT_grease_pencil_onion_skinning, DATA_PT_grease_pencil_onion_skinning_custom_colors, DATA_PT_grease_pencil_onion_skinning_display, DATA_PT_grease_pencil_settings, DATA_PT_grease_pencil_custom_props, GREASE_PENCIL_MT_grease_pencil_add_layer_extra, GREASE_PENCIL_MT_group_context_menu, DATA_PT_grease_pencil_animation, GREASE_PENCIL_UL_attributes, DATA_PT_grease_pencil_attributes]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_grease_pencil.map
 export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'LayerDataButtonsPanel': LayerDataButtonsPanel = value; break;
+		case 'GREASE_PENCIL_UL_masks': GREASE_PENCIL_UL_masks = value; break;
+		case 'GreasePencil_LayerMaskPanel': GreasePencil_LayerMaskPanel = value; break;
+		case 'GreasePencil_LayerTransformPanel': GreasePencil_LayerTransformPanel = value; break;
+		case 'GreasePencil_LayerAdjustmentsPanel': GreasePencil_LayerAdjustmentsPanel = value; break;
+		case 'GreasePencil_LayerRelationsPanel': GreasePencil_LayerRelationsPanel = value; break;
+		case 'GreasePencil_LayerDisplayPanel': GreasePencil_LayerDisplayPanel = value; break;
+		case 'GREASE_PENCIL_MT_layer_mask_add': GREASE_PENCIL_MT_layer_mask_add = value; break;
+		case 'DATA_PT_context_grease_pencil': DATA_PT_context_grease_pencil = value; break;
+		case 'GREASE_PENCIL_MT_grease_pencil_add_layer_extra': GREASE_PENCIL_MT_grease_pencil_add_layer_extra = value; break;
+		case 'GREASE_PENCIL_MT_group_context_menu': GREASE_PENCIL_MT_group_context_menu = value; break;
+		case 'DATA_PT_grease_pencil_layers': DATA_PT_grease_pencil_layers = value; break;
+		case 'DATA_PT_grease_pencil_layer_masks': DATA_PT_grease_pencil_layer_masks = value; break;
+		case 'DATA_PT_grease_pencil_layer_transform': DATA_PT_grease_pencil_layer_transform = value; break;
+		case 'DATA_PT_grease_pencil_layer_adjustments': DATA_PT_grease_pencil_layer_adjustments = value; break;
+		case 'DATA_PT_grease_pencil_layer_relations': DATA_PT_grease_pencil_layer_relations = value; break;
+		case 'DATA_PT_grease_pencil_layer_display': DATA_PT_grease_pencil_layer_display = value; break;
+		case 'DATA_PT_grease_pencil_layer_group_display': DATA_PT_grease_pencil_layer_group_display = value; break;
+		case 'DATA_PT_grease_pencil_onion_skinning': DATA_PT_grease_pencil_onion_skinning = value; break;
+		case 'DATA_PT_grease_pencil_onion_skinning_custom_colors': DATA_PT_grease_pencil_onion_skinning_custom_colors = value; break;
+		case 'DATA_PT_grease_pencil_onion_skinning_display': DATA_PT_grease_pencil_onion_skinning_display = value; break;
+		case 'DATA_PT_grease_pencil_settings': DATA_PT_grease_pencil_settings = value; break;
+		case 'DATA_PT_grease_pencil_animation': DATA_PT_grease_pencil_animation = value; break;
+		case 'DATA_PT_grease_pencil_custom_props': DATA_PT_grease_pencil_custom_props = value; break;
+		case 'GREASE_PENCIL_UL_attributes': GREASE_PENCIL_UL_attributes = value; break;
+		case 'DATA_PT_grease_pencil_attributes': DATA_PT_grease_pencil_attributes = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

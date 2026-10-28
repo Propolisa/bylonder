@@ -7,7 +7,7 @@ var __name__ = 'bpy_extras.keyconfig_utils';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -18,8 +18,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -27,7 +33,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -52,7 +58,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -71,7 +77,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,18 +90,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -106,8 +115,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -115,7 +130,7 @@ export var __all__ = tuple (['addon_keymap_register', 'addon_keymap_unregister',
 export var addon_keymap_register = function (keymap_data) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -126,36 +141,54 @@ export var addon_keymap_register = function (keymap_data) {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
+	var bpy = __call__ (_module, null, 'bpy');
 	var wm = bpy.context.window_manager;
-	var keymap_init_from_data = _member ('bl_keymap_utils.io', 'keymap_init_from_data');
+	var keymap_init_from_data = __call__ (_member, null, 'bl_keymap_utils.io', 'keymap_init_from_data');
 	var kconf = wm.keyconfigs.addon;
 	if (!(kconf)) {
 		return ;
 	}
-	for (var [km_name, km_args, km_content] of keymap_data) {
-		var km_space_type = km_args ['space_type'];
-		var km_region_type = km_args ['region_type'];
-		var km_modal = km_args.py_get ('modal', false);
-		var kmap = py_next (py_iter ((function () {
+	var __iterable0__ = keymap_data;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var km_name = __left0__ [0];
+		var km_args = __left0__ [1];
+		var km_content = __left0__ [2];
+		var km_space_type = __getitem__ (km_args, 'space_type');
+		var km_region_type = __getitem__ (km_args, 'region_type');
+		var km_modal = (function () {
+			var __accu0__ = km_args;
+			return __call__ (__accu0__.py_get, __accu0__, 'modal', false);
+		}) ();
+		var kmap = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 			var __accu0__ = [];
-			for (var k of kconf.keymaps) {
-				if (k.py_name == km_name && k.region_type == km_region_type && k.space_type == km_space_type && k.is_modal == km_modal) {
-					__accu0__.append (k);
+			var __iterable1__ = kconf.keymaps;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var k = __getitem__ (__iterable1__, __index1__);
+				if (__eq__ (k.py_name, km_name) && __eq__ (k.region_type, km_region_type) && __eq__ (k.space_type, km_space_type) && __eq__ (k.is_modal, km_modal)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, k);
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ()), null);
 		if (kmap === null) {
-			var kmap = kconf.keymaps.py_new (km_name, __kwargtrans__ (_merged (km_args)));
+			var kmap = (function () {
+				var __accu0__ = kconf.keymaps;
+				return __call__ (__accu0__.py_new, __accu0__, km_name, __kwargtrans__ (__call__ (_merged, null, km_args)));
+			}) ();
 		}
-		keymap_init_from_data (kmap, km_content ['items'], __kwargtrans__ ({is_modal: km_modal}));
+		__call__ (keymap_init_from_data, null, kmap, __getitem__ (km_content, 'items'), __kwargtrans__ ({is_modal: km_modal}));
 	}
 };
 export var addon_keymap_unregister = function (keymap_data) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -166,28 +199,61 @@ export var addon_keymap_unregister = function (keymap_data) {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
+	var bpy = __call__ (_module, null, 'bpy');
 	var wm = bpy.context.window_manager;
 	var kconfs = wm.keyconfigs;
-	for (var kconf of tuple ([kconfs.user, kconfs.addon])) {
-		for (var [km_name, km_args, km_content] of keymap_data) {
-			var km_space_type = km_args ['space_type'];
-			var km_region_type = km_args ['region_type'];
-			var km_modal = km_args.py_get ('modal', false);
+	var __iterable0__ = tuple ([kconfs.user, kconfs.addon]);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var kconf = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = keymap_data;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var km_name = __left0__ [0];
+			var km_args = __left0__ [1];
+			var km_content = __left0__ [2];
+			var km_space_type = __getitem__ (km_args, 'space_type');
+			var km_region_type = __getitem__ (km_args, 'region_type');
+			var km_modal = (function () {
+				var __accu0__ = km_args;
+				return __call__ (__accu0__.py_get, __accu0__, 'modal', false);
+			}) ();
 			var kmaps = (function () {
 				var __accu0__ = [];
-				for (var k of kconf.keymaps) {
-					if (k.py_name == km_name && k.region_type == km_region_type && k.space_type == km_space_type && k.is_modal == km_modal) {
-						__accu0__.append (k);
+				var __iterable2__ = kconf.keymaps;
+				__iterable2__ = __i__ (__iterable2__);
+				for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+					var k = __getitem__ (__iterable2__, __index2__);
+					if (__eq__ (k.py_name, km_name) && __eq__ (k.region_type, km_region_type) && __eq__ (k.space_type, km_space_type) && __eq__ (k.is_modal, km_modal)) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, k);
+						}) ();
 					}
 				}
 				return __accu0__;
 			}) ();
-			for (var kmap of kmaps) {
-				for (var [kmi_idname, _, _] of km_content ['items']) {
-					for (var kmi of kmap.keymap_items) {
-						if (kmi.idname == kmi_idname) {
-							kmap.keymap_items.remove (kmi);
+			var __iterable2__ = kmaps;
+			__iterable2__ = __i__ (__iterable2__);
+			for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+				var kmap = __getitem__ (__iterable2__, __index2__);
+				var __iterable3__ = __getitem__ (km_content, 'items');
+				__iterable3__ = __i__ (__iterable3__);
+				for (var __index3__ = 0; __index3__ < len (__iterable3__); __index3__++) {
+					var __left0__ = __getitem__ (__iterable3__, __index3__);
+					var kmi_idname = __left0__ [0];
+					var _ = __left0__ [1];
+					var _ = __left0__ [2];
+					var __iterable4__ = kmap.keymap_items;
+					__iterable4__ = __i__ (__iterable4__);
+					for (var __index4__ = 0; __index4__ < len (__iterable4__); __index4__++) {
+						var kmi = __getitem__ (__iterable4__, __index4__);
+						if (__eq__ (kmi.idname, kmi_idname)) {
+							(function () {
+								var __accu0__ = kmap.keymap_items;
+								return __call__ (__accu0__.remove, __accu0__, kmi);
+							}) ();
 						}
 					}
 				}
@@ -198,7 +264,7 @@ export var addon_keymap_unregister = function (keymap_data) {
 export var keyconfig_test = function (kc) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -209,11 +275,11 @@ export var keyconfig_test = function (kc) {
 	}
 	else {
 	}
-	var kmi_args_as_data = _member ('bl_keymap_utils.io', 'kmi_args_as_data');
+	var kmi_args_as_data = __call__ (_member, null, 'bl_keymap_utils.io', 'kmi_args_as_data');
 	var _kmistr = function (kmi, is_modal) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -231,7 +297,10 @@ export var keyconfig_test = function (kc) {
 		else {
 			var kmi_id = kmi.idname;
 		}
-		return '{:s}({:s})'.format (kmi_id, kmi_args_as_data (kmi));
+		return (function () {
+			var __accu0__ = '{:s}({:s})';
+			return __call__ (__accu0__.format, __accu0__, kmi_id, __call__ (kmi_args_as_data, null, kmi));
+		}) ();
 	};
 	var testEntry = function (kc, entry, src, parent) {
 		if (typeof src == 'undefined' || (src != null && src.hasOwnProperty ("__kwargtrans__"))) {;
@@ -242,7 +311,7 @@ export var keyconfig_test = function (kc) {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -262,47 +331,88 @@ export var keyconfig_test = function (kc) {
 		var spaceid = __left0__ [1];
 		var regionid = __left0__ [2];
 		var children = __left0__ [3];
-		var km = kc.keymaps.find (idname, __kwargtrans__ ({space_type: spaceid, region_type: regionid}));
+		var km = (function () {
+			var __accu0__ = kc.keymaps;
+			return __call__ (__accu0__.find, __accu0__, idname, __kwargtrans__ ({space_type: spaceid, region_type: regionid}));
+		}) ();
 		if (km) {
-			var km = km.active ();
+			var km = (function () {
+				var __accu0__ = km;
+				return __call__ (__accu0__.active, __accu0__);
+			}) ();
 			var is_modal = km.is_modal;
 			if (src) {
-				for (var item of km.keymap_items) {
-					if (src.compare (item)) {
-						print ('===========');
-						print (parent.py_name, '[parent]');
-						print (_kmistr (src, is_modal).strip ());
-						print (km.py_name, '[child]');
-						print (_kmistr (item, is_modal).strip ());
+				var __iterable0__ = km.keymap_items;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var item = __getitem__ (__iterable0__, __index0__);
+					if ((function () {
+						var __accu0__ = src;
+						return __call__ (__accu0__.compare, __accu0__, item);
+					}) ()) {
+						__call__ (print, null, '===========');
+						__call__ (print, null, parent.py_name, '[parent]');
+						__call__ (print, null, (function () {
+							var __accu0__ = __call__ (_kmistr, null, src, is_modal);
+							return __call__ (__accu0__.strip, __accu0__);
+						}) ());
+						__call__ (print, null, km.py_name, '[child]');
+						__call__ (print, null, (function () {
+							var __accu0__ = __call__ (_kmistr, null, item, is_modal);
+							return __call__ (__accu0__.strip, __accu0__);
+						}) ());
 						var result = true;
 					}
 				}
-				for (var child of children) {
-					if (testEntry (kc, child, src, parent)) {
+				var __iterable0__ = children;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var child = __getitem__ (__iterable0__, __index0__);
+					if (__call__ (testEntry, null, kc, child, src, parent)) {
 						var result = true;
 					}
 				}
 			}
 			else {
-				for (var [i, src] of py_enumerate (km.keymap_items)) {
-					for (var child of children) {
-						if (testEntry (kc, child, src, km)) {
+				var __iterable0__ = __call__ (py_enumerate, null, km.keymap_items);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var __left0__ = __getitem__ (__iterable0__, __index0__);
+					var i = __left0__ [0];
+					var src = __left0__ [1];
+					var __iterable1__ = children;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var child = __getitem__ (__iterable1__, __index1__);
+						if (__call__ (testEntry, null, kc, child, src, km)) {
 							var result = true;
 						}
 					}
-					for (var j = 0; j < (len (km.keymap_items) - i) - 1; j++) {
-						var item = km.keymap_items [(j + i) + 1];
-						if (src.compare (item)) {
-							print ('===========');
-							print (km.py_name, '[self conflict]');
-							print (_kmistr (src, is_modal).strip ());
-							print (_kmistr (item, is_modal).strip ());
+					for (var j = 0; j < __sub__ (__sub__ (__call__ (len, null, km.keymap_items), i), 1); j++) {
+						var item = __getitem__ (km.keymap_items, __add__ (__add__ (j, i), 1));
+						if ((function () {
+							var __accu0__ = src;
+							return __call__ (__accu0__.compare, __accu0__, item);
+						}) ()) {
+							__call__ (print, null, '===========');
+							__call__ (print, null, km.py_name, '[self conflict]');
+							__call__ (print, null, (function () {
+								var __accu0__ = __call__ (_kmistr, null, src, is_modal);
+								return __call__ (__accu0__.strip, __accu0__);
+							}) ());
+							__call__ (print, null, (function () {
+								var __accu0__ = __call__ (_kmistr, null, item, is_modal);
+								return __call__ (__accu0__.strip, __accu0__);
+							}) ());
 							var result = true;
 						}
 					}
 				}
-				for (var child of children) {
-					if (testEntry (kc, child)) {
+				var __iterable0__ = children;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var child = __getitem__ (__iterable0__, __index0__);
+					if (__call__ (testEntry, null, kc, child)) {
 						var result = true;
 					}
 				}
@@ -310,10 +420,16 @@ export var keyconfig_test = function (kc) {
 		}
 		return result;
 	};
-	var keymap_hierarchy = _member ('bl_keymap_utils', 'keymap_hierarchy');
+	var keymap_hierarchy = __call__ (_member, null, 'bl_keymap_utils', 'keymap_hierarchy');
 	var result = false;
-	for (var entry of keymap_hierarchy.generate ()) {
-		if (testEntry (kc, entry)) {
+	var __iterable0__ = (function () {
+		var __accu0__ = keymap_hierarchy;
+		return __call__ (__accu0__.generate, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var entry = __getitem__ (__iterable0__, __index0__);
+		if (__call__ (testEntry, null, kc, entry)) {
 			var result = true;
 		}
 	}
@@ -322,3 +438,19 @@ export var keyconfig_test = function (kc) {
 
 //# sourceMappingURL=bpy_extras.keyconfig_utils.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '__all__': __all__ = value; break;
+		case 'addon_keymap_register': addon_keymap_register = value; break;
+		case 'addon_keymap_unregister': addon_keymap_unregister = value; break;
+		case 'keyconfig_test': keyconfig_test = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

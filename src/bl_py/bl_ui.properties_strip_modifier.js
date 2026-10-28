@@ -13,7 +13,7 @@ export var StripModButtonsPanel =  __class__ ('StripModButtonsPanel', [object], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -35,7 +35,7 @@ export var STRIP_PT_modifiers =  __class__ ('STRIP_PT_modifiers', [StripModButto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -49,16 +49,34 @@ export var STRIP_PT_modifiers =  __class__ ('STRIP_PT_modifiers', [StripModButto
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		layout.operator ('wm.call_menu', __kwargtrans__ ({text: 'Add Modifier', icon: 'ADD'})).py_name = 'SEQUENCER_MT_modifier_add';
-		layout.template_strip_modifiers ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.call_menu', __kwargtrans__ ({text: 'Add Modifier', icon: 'ADD'}));
+		}) ().py_name = 'SEQUENCER_MT_modifier_add';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_strip_modifiers, __accu0__);
+		}) ();
 	});}
 });
 export var classes = tuple ([STRIP_PT_modifiers]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_strip_modifier.map
 export {Panel, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'StripModButtonsPanel': StripModButtonsPanel = value; break;
+		case 'STRIP_PT_modifiers': STRIP_PT_modifiers = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

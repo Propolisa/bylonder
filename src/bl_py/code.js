@@ -6,3 +6,9 @@ var __name__ = 'code';
 export var InteractiveConsole = null;
 
 //# sourceMappingURL=code.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'InteractiveConsole': InteractiveConsole = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -6,3 +6,9 @@ var __name__ = '_bpy_internal.extensions.wheel_manager';
 export var apply_action = null;
 
 //# sourceMappingURL=_bpy_internal.extensions.wheel_manager.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'apply_action': apply_action = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

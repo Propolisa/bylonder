@@ -6,7 +6,7 @@ var __name__ = '_bpy.app.handlers';
 export var persistent = function (function_) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -19,20 +19,97 @@ export var persistent = function (function_) {
 	}
 	return function_;
 };
-export var load_pre = [];
-export var load_post = [];
-export var save_pre = [];
-export var save_post = [];
-export var depsgraph_update_pre = [];
-export var depsgraph_update_post = [];
 export var frame_change_pre = [];
 export var frame_change_post = [];
 export var render_pre = [];
 export var render_post = [];
+export var render_write = [];
+export var render_stats = [];
+export var render_init = [];
+export var render_complete = [];
+export var render_cancel = [];
+export var load_pre = [];
+export var load_post = [];
+export var load_post_fail = [];
+export var save_pre = [];
+export var save_post = [];
+export var save_post_fail = [];
 export var undo_pre = [];
 export var undo_post = [];
 export var redo_pre = [];
 export var redo_post = [];
+export var depsgraph_update_pre = [];
+export var depsgraph_update_post = [];
 export var version_update = [];
+export var load_factory_preferences_post = [];
+export var load_factory_startup_post = [];
+export var xr_session_start_pre = [];
+export var annotation_pre = [];
+export var annotation_post = [];
+export var object_bake_pre = [];
+export var object_bake_complete = [];
+export var object_bake_cancel = [];
+export var composite_pre = [];
+export var composite_post = [];
+export var composite_cancel = [];
+export var animation_playback_pre = [];
+export var animation_playback_post = [];
+export var translation_update_post = [];
+export var _extension_repos_update_pre = [];
+export var _extension_repos_update_post = [];
+export var _extension_repos_sync = [];
+export var _extension_repos_files_clear = [];
+export var blend_import_pre = [];
+export var blend_import_post = [];
+export var exit_pre = [];
 
 //# sourceMappingURL=_bpy.app.handlers.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'persistent': persistent = value; break;
+		case 'frame_change_pre': frame_change_pre = value; break;
+		case 'frame_change_post': frame_change_post = value; break;
+		case 'render_pre': render_pre = value; break;
+		case 'render_post': render_post = value; break;
+		case 'render_write': render_write = value; break;
+		case 'render_stats': render_stats = value; break;
+		case 'render_init': render_init = value; break;
+		case 'render_complete': render_complete = value; break;
+		case 'render_cancel': render_cancel = value; break;
+		case 'load_pre': load_pre = value; break;
+		case 'load_post': load_post = value; break;
+		case 'load_post_fail': load_post_fail = value; break;
+		case 'save_pre': save_pre = value; break;
+		case 'save_post': save_post = value; break;
+		case 'save_post_fail': save_post_fail = value; break;
+		case 'undo_pre': undo_pre = value; break;
+		case 'undo_post': undo_post = value; break;
+		case 'redo_pre': redo_pre = value; break;
+		case 'redo_post': redo_post = value; break;
+		case 'depsgraph_update_pre': depsgraph_update_pre = value; break;
+		case 'depsgraph_update_post': depsgraph_update_post = value; break;
+		case 'version_update': version_update = value; break;
+		case 'load_factory_preferences_post': load_factory_preferences_post = value; break;
+		case 'load_factory_startup_post': load_factory_startup_post = value; break;
+		case 'xr_session_start_pre': xr_session_start_pre = value; break;
+		case 'annotation_pre': annotation_pre = value; break;
+		case 'annotation_post': annotation_post = value; break;
+		case 'object_bake_pre': object_bake_pre = value; break;
+		case 'object_bake_complete': object_bake_complete = value; break;
+		case 'object_bake_cancel': object_bake_cancel = value; break;
+		case 'composite_pre': composite_pre = value; break;
+		case 'composite_post': composite_post = value; break;
+		case 'composite_cancel': composite_cancel = value; break;
+		case 'animation_playback_pre': animation_playback_pre = value; break;
+		case 'animation_playback_post': animation_playback_post = value; break;
+		case 'translation_update_post': translation_update_post = value; break;
+		case '_extension_repos_update_pre': _extension_repos_update_pre = value; break;
+		case '_extension_repos_update_post': _extension_repos_update_post = value; break;
+		case '_extension_repos_sync': _extension_repos_sync = value; break;
+		case '_extension_repos_files_clear': _extension_repos_files_clear = value; break;
+		case 'blend_import_pre': blend_import_pre = value; break;
+		case 'blend_import_post': blend_import_post = value; break;
+		case 'exit_pre': exit_pre = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

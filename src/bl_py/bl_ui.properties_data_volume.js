@@ -18,7 +18,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -42,7 +42,7 @@ export var DATA_PT_context_volume =  __class__ ('DATA_PT_context_volume', [DataB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -59,10 +59,16 @@ export var DATA_PT_context_volume =  __class__ ('DATA_PT_context_volume', [DataB
 		var volume = context.volume;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (volume) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -73,7 +79,7 @@ export var DATA_PT_volume_file =  __class__ ('DATA_PT_volume_file', [DataButtons
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -87,26 +93,62 @@ export var DATA_PT_volume_file =  __class__ ('DATA_PT_volume_file', [DataButtons
 		}
 		var layout = self.layout;
 		var volume = context.volume;
-		volume.grids.load ();
-		layout.prop (volume, 'filepath', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = volume.grids;
+			return __call__ (__accu0__.load, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, volume, 'filepath', __kwargtrans__ ({text: ''}));
+		}) ();
 		if (volume.filepath) {
 			layout.use_property_split = true;
 			layout.use_property_decorate = false;
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.prop (volume, 'is_sequence');
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, volume, 'is_sequence');
+			}) ();
 			if (volume.is_sequence) {
-				col.prop (volume, 'frame_duration', __kwargtrans__ ({text: 'Frames'}));
-				col.prop (volume, 'frame_start', __kwargtrans__ ({text: 'Start'}));
-				col.prop (volume, 'frame_offset', __kwargtrans__ ({text: 'Offset'}));
-				col.prop (volume, 'sequence_mode', __kwargtrans__ ({text: 'Mode'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, volume, 'frame_duration', __kwargtrans__ ({text: 'Frames'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, volume, 'frame_start', __kwargtrans__ ({text: 'Start'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, volume, 'frame_offset', __kwargtrans__ ({text: 'Offset'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, volume, 'sequence_mode', __kwargtrans__ ({text: 'Mode'}));
+				}) ();
 			}
 		}
 		var error_msg = volume.grids.error_message;
 		if (error_msg) {
-			layout.separator ();
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.label (__kwargtrans__ ({text: 'Failed to load volume:'}));
-			col.label (__kwargtrans__ ({text: error_msg}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Failed to load volume:'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: error_msg}));
+			}) ();
 		}
 	});}
 });
@@ -115,7 +157,7 @@ export var VOLUME_UL_grids =  __class__ ('VOLUME_UL_grids', [UIList], {
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, grid, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -135,13 +177,22 @@ export var VOLUME_UL_grids =  __class__ ('VOLUME_UL_grids', [UIList], {
 		else {
 		}
 		var py_name = grid.py_name;
-		var data_type = grid.bl_rna.properties ['data_type'].enum_items [grid.data_type];
+		var data_type = __getitem__ (__getitem__ (grid.bl_rna.properties, 'data_type').enum_items, grid.data_type);
 		layout.emboss = 'NONE';
-		layout.label (__kwargtrans__ ({text: py_name}));
-		var row = layout.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: py_name}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.alignment = 'RIGHT';
 		row.active = false;
-		row.label (__kwargtrans__ ({text: data_type.py_name}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: data_type.py_name}));
+		}) ();
 	});}
 });
 export var DATA_PT_volume_grids =  __class__ ('DATA_PT_volume_grids', [DataButtonsPanel, Panel], {
@@ -151,7 +202,7 @@ export var DATA_PT_volume_grids =  __class__ ('DATA_PT_volume_grids', [DataButto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -165,8 +216,14 @@ export var DATA_PT_volume_grids =  __class__ ('DATA_PT_volume_grids', [DataButto
 		}
 		var layout = self.layout;
 		var volume = context.volume;
-		volume.grids.load ();
-		layout.template_list ('VOLUME_UL_grids', 'grids', volume, 'grids', volume.grids, 'active_index', __kwargtrans__ ({rows: 3}));
+		(function () {
+			var __accu0__ = volume.grids;
+			return __call__ (__accu0__.load, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_list, __accu0__, 'VOLUME_UL_grids', 'grids', volume, 'grids', volume.grids, 'active_index', __kwargtrans__ ({rows: 3}));
+		}) ();
 	});}
 });
 export var DATA_PT_volume_render =  __class__ ('DATA_PT_volume_render', [DataButtonsPanel, Panel], {
@@ -176,7 +233,7 @@ export var DATA_PT_volume_render =  __class__ ('DATA_PT_volume_render', [DataBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -194,18 +251,51 @@ export var DATA_PT_volume_render =  __class__ ('DATA_PT_volume_render', [DataBut
 		var scene = context.scene;
 		var volume = context.volume;
 		var render = volume.render;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (render, 'space');
-		if (scene.render.engine == 'CYCLES') {
-			col.prop (render, 'step_size');
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.prop (render, 'clipping');
-			var col = layout.column ();
-			col.prop (render, 'precision');
-			var col = layout.column (__kwargtrans__ ({align: false}));
-			col.prop (volume, 'velocity_grid');
-			col.prop (volume, 'velocity_unit');
-			col.prop (volume, 'velocity_scale');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, render, 'space');
+		}) ();
+		if (__eq__ (scene.render.engine, 'CYCLES')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, render, 'step_size');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, render, 'clipping');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, render, 'precision');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, volume, 'velocity_grid');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, volume, 'velocity_unit');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, volume, 'velocity_scale');
+			}) ();
 		}
 	});}
 });
@@ -216,7 +306,7 @@ export var DATA_PT_volume_viewport_display =  __class__ ('DATA_PT_volume_viewpor
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -233,14 +323,35 @@ export var DATA_PT_volume_viewport_display =  __class__ ('DATA_PT_volume_viewpor
 		layout.use_property_decorate = false;
 		var volume = context.volume;
 		var display = volume.display;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (display, 'wireframe_type');
-		var sub = col.row ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, display, 'wireframe_type');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.active = __in__ (display.wireframe_type, new set (['BOXES', 'POINTS']));
-		sub.prop (display, 'wireframe_detail', __kwargtrans__ ({text: 'Detail'}));
-		var col = layout.column ();
-		col.prop (display, 'density');
-		col.prop (display, 'interpolation_method');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, display, 'wireframe_detail', __kwargtrans__ ({text: 'Detail'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, display, 'density');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, display, 'interpolation_method');
+		}) ();
 	});}
 });
 export var DATA_PT_volume_viewport_display_slicing =  __class__ ('DATA_PT_volume_viewport_display_slicing', [DataButtonsPanel, Panel], {
@@ -251,7 +362,7 @@ export var DATA_PT_volume_viewport_display_slicing =  __class__ ('DATA_PT_volume
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -266,12 +377,15 @@ export var DATA_PT_volume_viewport_display_slicing =  __class__ ('DATA_PT_volume
 		var layout = self.layout;
 		var volume = context.volume;
 		var display = volume.display;
-		layout.prop (display, 'use_slice');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, display, 'use_slice');
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -289,9 +403,18 @@ export var DATA_PT_volume_viewport_display_slicing =  __class__ ('DATA_PT_volume
 		var volume = context.volume;
 		var display = volume.display;
 		layout.active = display.use_slice;
-		var col = layout.column ();
-		col.prop (display, 'slice_axis');
-		col.prop (display, 'slice_depth');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, display, 'slice_axis');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, display, 'slice_depth');
+		}) ();
 	});}
 });
 export var DATA_PT_volume_animation =  __class__ ('DATA_PT_volume_animation', [DataButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -306,11 +429,31 @@ export var DATA_PT_custom_props_volume =  __class__ ('DATA_PT_custom_props_volum
 	_property_type: bpy.types.Volume
 });
 export var classes = tuple ([DATA_PT_context_volume, DATA_PT_volume_grids, DATA_PT_volume_file, DATA_PT_volume_viewport_display, DATA_PT_volume_viewport_display_slicing, DATA_PT_volume_render, DATA_PT_volume_animation, DATA_PT_custom_props_volume, VOLUME_UL_grids]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_volume.map
 export {Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_volume': DATA_PT_context_volume = value; break;
+		case 'DATA_PT_volume_file': DATA_PT_volume_file = value; break;
+		case 'VOLUME_UL_grids': VOLUME_UL_grids = value; break;
+		case 'DATA_PT_volume_grids': DATA_PT_volume_grids = value; break;
+		case 'DATA_PT_volume_render': DATA_PT_volume_render = value; break;
+		case 'DATA_PT_volume_viewport_display': DATA_PT_volume_viewport_display = value; break;
+		case 'DATA_PT_volume_viewport_display_slicing': DATA_PT_volume_viewport_display_slicing = value; break;
+		case 'DATA_PT_volume_animation': DATA_PT_volume_animation = value; break;
+		case 'DATA_PT_custom_props_volume': DATA_PT_custom_props_volume = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -108,6 +108,8 @@ export var py_metatype = {
         cls.__metaclass__ = meta;
         cls.__name__ = name.startsWith ('py_') ? name.slice (3) : name;
         cls.__bases__ = bases;
+        __classes__.push (cls);
+        cls.__subclasses__ = function () {return __classes__.filter (function (c) {return c.__bases__.includes (cls);});};
         for (var attrib in attribs) {
             var descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, attrib);
             globalThis.Object.defineProperty (cls, attrib, descrip);
@@ -120,6 +122,17 @@ export var py_metatype = {
     }
 };
 py_metatype.__metaclass__ = py_metatype;
+var __classes__ = [];
+String.prototype.title = function () {
+    return this.replace (/[a-z]+/gi, function (word) {return word [0].toUpperCase () + word.slice (1).toLowerCase ();});
+};
+globalThis.Object.getPrototypeOf (function* () {}).prototype.send = function (value) {
+    var result = this.next (value);
+    if (result.done) {
+        throw StopIteration ();
+    }
+    return result.value;
+};
 export var object = {
     __init__: function (self) {},
     __metaclass__: py_metatype,
@@ -256,7 +269,10 @@ export function dir (obj) {
 export function setattr (obj, name, value) {
     obj [name] = value;
 };
-export function getattr (obj, name) {
+export function getattr (obj, name, py_default) {
+    if (arguments.length > 2 && (obj === null || obj === undefined || !(name in Object (obj) || 'py_' + name in Object (obj)))) {
+        return py_default;
+    }
     return name in obj ? obj [name] : obj ['py_' + name];
 };
 export function hasattr (obj, name) {
@@ -312,7 +328,8 @@ export function len (anObject) {
     return length;
 };
 export function __i__ (any) {
-    return py_typeof (any) == dict ? any.py_keys () : any;
+    if (py_typeof (any) == dict) return any.py_keys ();
+    return any == null || typeof any == 'string' || Array.isArray (any) || '__getitem__' in Object (any) ? any : Array.from (any);
 }
 export function __k__ (keyed, key) {
     var result = keyed [key];
@@ -1958,7 +1975,7 @@ export var Exception =  __class__ ('Exception', [BaseException], {
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2087,7 +2104,7 @@ export var _sort = function (iterable, key, reverse) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2104,7 +2121,7 @@ export var _sort = function (iterable, key, reverse) {
 		iterable.sort ((function __lambda__ (a, b) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2123,7 +2140,7 @@ export var _sort = function (iterable, key, reverse) {
 		iterable.sort ((function __lambda__ (a, b) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2147,7 +2164,7 @@ export var sorted = function (iterable) {
 	var reverse = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2174,7 +2191,7 @@ export var __sort__ = function (iterable) {
 	var reverse = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2238,7 +2255,7 @@ export var __Terminal__ =  __class__ ('__Terminal__', [object], {
 		var end = '\n';
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2277,7 +2294,7 @@ export var __Terminal__ =  __class__ ('__Terminal__', [object], {
 	get input () {return __get__ (this, function (self, question) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2335,5 +2352,54 @@ for (const [methods, prototype] of [[__str_methods__, String.prototype], [__list
 }
 // A keyword argument's Python name, for **kwargs: Transcrypt renames those that collide with JS or its runtime.
 export var __pyname__ = (key) => (key == 'py_metatype' ? 'type' : key.startsWith ('py_') ? key.slice (3) : key);
+// A class's __dict__: its own attributes. Transcrypt copies its bases' onto it, so those still the bases' are left out.
+globalThis.Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get () {
+    const own = dict (), bases = this.__bases__ ?? [];
+    for (const key of globalThis.Object.keys (this)) {
+        const mine = globalThis.Object.getOwnPropertyDescriptor (this, key);
+        const inherited = bases.some ((base) => { const theirs = globalThis.Object.getOwnPropertyDescriptor (base, key); return theirs && theirs.value === mine.value && theirs.get === mine.get; });
+        if (!inherited && !['__metaclass__', '__name__', '__bases__'].includes (key)) own [key] = this [key];
+    }
+    return own;
+} });
 
 export {_copy};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__envir__': __envir__ = value; break;
+		case 'py_metatype': py_metatype = value; break;
+		case 'object': object = value; break;
+		case 'abs': abs = value; break;
+		case 'py_enumerate': py_enumerate = value; break;
+		case 'bytes': bytes = value; break;
+		case 'pow': pow = value; break;
+		case 'BaseException': BaseException = value; break;
+		case 'Exception': Exception = value; break;
+		case 'IterableError': IterableError = value; break;
+		case 'StopIteration': StopIteration = value; break;
+		case 'ValueError': ValueError = value; break;
+		case 'KeyError': KeyError = value; break;
+		case 'AssertionError': AssertionError = value; break;
+		case 'NotImplementedError': NotImplementedError = value; break;
+		case 'IndexError': IndexError = value; break;
+		case 'AttributeError': AttributeError = value; break;
+		case 'py_TypeError': py_TypeError = value; break;
+		case 'Warning': Warning = value; break;
+		case 'UserWarning': UserWarning = value; break;
+		case 'DeprecationWarning': DeprecationWarning = value; break;
+		case 'RuntimeWarning': RuntimeWarning = value; break;
+		case '_sort': _sort = value; break;
+		case 'sorted': sorted = value; break;
+		case '__sort__': __sort__ = value; break;
+		case 'map': map = value; break;
+		case 'filter': filter = value; break;
+		case 'divmod': divmod = value; break;
+		case '__Terminal__': __Terminal__ = value; break;
+		case '__terminal__': __terminal__ = value; break;
+		case 'print': print = value; break;
+		case 'input': input = value; break;
+		case '__pyname__': __pyname__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

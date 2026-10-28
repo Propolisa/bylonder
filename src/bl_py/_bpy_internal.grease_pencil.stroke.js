@@ -7,7 +7,7 @@ var __name__ = '_bpy_internal.grease_pencil.stroke';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -18,8 +18,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -27,7 +33,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -52,7 +58,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -71,7 +77,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,18 +90,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -106,8 +115,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -122,7 +137,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 	get __init__ () {return __get__ (this, function (self, attributes, index, domain) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,7 +158,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 	get _get_attribute () {return __get__ (this, function (self, py_name, py_metatype, py_default) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -157,19 +172,25 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get (py_name);
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, py_name);
+		}) ();
 		if (attribute) {
 			if (__in__ (py_metatype, new set (['FLOAT', 'INT', 'STRING', 'BOOLEAN', 'INT8', 'INT32_2D', 'QUATERNION', 'FLOAT4X4']))) {
-				return attribute.data [self._index].value;
+				return __getitem__ (attribute.data, self._index).value;
 			}
-			else if (py_metatype == 'FLOAT_VECTOR') {
-				return attribute.data [self._index].vector;
+			else if (__eq__ (py_metatype, 'FLOAT_VECTOR')) {
+				return __getitem__ (attribute.data, self._index).vector;
 			}
 			else if (__in__ (py_metatype, new set (['FLOAT_COLOR', 'BYTE_COLOR']))) {
-				return attribute.data [self._index].color;
+				return __getitem__ (attribute.data, self._index).color;
 			}
 			else {
-				var __except0__ = Exception ('Unknown type {!r}'.format (py_metatype));
+				var __except0__ = __call__ (Exception, null, (function () {
+					var __accu0__ = 'Unknown type {!r}';
+					return __call__ (__accu0__.format, __accu0__, py_metatype);
+				}) ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
@@ -179,7 +200,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 	get _set_attribute_value () {return __get__ (this, function (self, attribute, index, py_metatype, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -195,16 +216,19 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 		else {
 		}
 		if (__in__ (py_metatype, new set (['FLOAT', 'INT', 'STRING', 'BOOLEAN', 'INT8', 'INT32_2D', 'QUATERNION', 'FLOAT4X4']))) {
-			attribute.data [index].value = value;
+			__getitem__ (attribute.data, index).value = value;
 		}
-		else if (py_metatype == 'FLOAT_VECTOR') {
-			attribute.data [index].vector = value;
+		else if (__eq__ (py_metatype, 'FLOAT_VECTOR')) {
+			__getitem__ (attribute.data, index).vector = value;
 		}
 		else if (__in__ (py_metatype, new set (['FLOAT_COLOR', 'BYTE_COLOR']))) {
-			attribute.data [index].color = value;
+			__getitem__ (attribute.data, index).color = value;
 		}
 		else {
-			var __except0__ = Exception ('Unknown type {!r}'.format (py_metatype));
+			var __except0__ = __call__ (Exception, null, (function () {
+				var __accu0__ = 'Unknown type {!r}';
+				return __call__ (__accu0__.format, __accu0__, py_metatype);
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -212,7 +236,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 	get _set_attribute () {return __get__ (this, function (self, py_name, py_metatype, value, py_default) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -227,21 +251,42 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get (py_name);
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, py_name);
+		}) ();
 		if (attribute) {
-			self._set_attribute_value (attribute, self._index, py_metatype, value);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._set_attribute_value, __accu0__, attribute, self._index, py_metatype, value);
+			}) ();
 		}
 		else {
-			var attribute = self._attributes.py_new (py_name, py_metatype, self._domain);
+			var attribute = (function () {
+				var __accu0__ = self._attributes;
+				return __call__ (__accu0__.py_new, __accu0__, py_name, py_metatype, self._domain);
+			}) ();
 			if (attribute) {
-				var num = self._attributes.domain_size (self._domain);
+				var num = (function () {
+					var __accu0__ = self._attributes;
+					return __call__ (__accu0__.domain_size, __accu0__, self._domain);
+				}) ();
 				for (var i = 0; i < num; i++) {
-					self._set_attribute_value (attribute, i, py_metatype, py_default);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__._set_attribute_value, __accu0__, attribute, i, py_metatype, py_default);
+					}) ();
 				}
-				self._set_attribute_value (attribute, self._index, py_metatype, value);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._set_attribute_value, __accu0__, attribute, self._index, py_metatype, value);
+				}) ();
 			}
 			else {
-				var __except0__ = Exception ('Could not create attribute {:s} of type {!r}'.format (py_name, py_metatype));
+				var __except0__ = __call__ (Exception, null, (function () {
+					var __accu0__ = 'Could not create attribute {:s} of type {!r}';
+					return __call__ (__accu0__.format, __accu0__, py_name, py_metatype);
+				}) ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
@@ -254,7 +299,7 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 	get __init__ () {return __get__ (this, function (self, start, stop) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -269,12 +314,12 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 		}
 		self._start = start;
 		self._stop = stop;
-		self._size = stop - start;
+		self._size = __sub__ (stop, start);
 	});},
 	get __len__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -290,7 +335,7 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 	get _is_valid_index () {return __get__ (this, function (self, key) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -302,18 +347,18 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 		}
 		else {
 		}
-		if (self._size <= 0) {
+		if (__le__ (self._size, 0)) {
 			return false;
 		}
-		if (key < 0) {
-			return abs (key) <= self._size;
+		if (__lt__ (key, 0)) {
+			return __le__ (__call__ (abs, null, key), self._size);
 		}
-		return abs (key) < self._size;
+		return __lt__ (__call__ (abs, null, key), self._size);
 	});},
 	get _getitem_helper () {return __get__ (this, function (self, key) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -325,30 +370,39 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 		}
 		else {
 		}
-		if (isinstance (key, int)) {
-			if (!(self._is_valid_index (key))) {
-				var __except0__ = IndexError ('Key {:d} is out of range'.format (key));
+		if (__call__ (isinstance, null, key, int)) {
+			if (!((function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._is_valid_index, __accu0__, key);
+			}) ())) {
+				var __except0__ = __call__ (IndexError, null, (function () {
+					var __accu0__ = 'Key {:d} is out of range';
+					return __call__ (__accu0__.format, __accu0__, key);
+				}) ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			return self._start + __mod__ (key, self._size);
+			return __add__ (self._start, __mod__ (key, self._size));
 		}
-		else if (isinstance (key, slice)) {
-			if (key.step !== null && key.step != 1) {
-				var __except0__ = ValueError ('Step values != 1 not supported');
+		else if (__call__ (isinstance, null, key, slice)) {
+			if (key.step !== null && __ne__ (key.step, 1)) {
+				var __except0__ = __call__ (ValueError, null, 'Step values != 1 not supported');
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 			var start = (key.start !== null ? key.start : 0);
 			var stop = (key.stop !== null ? key.stop : self._size);
-			var start = (start < 0 ? self._size + start : start);
-			var stop = (stop < 0 ? self._size + stop : stop);
-			var start = max (0, min (start, self._size));
-			var stop = max (0, min (stop, self._size));
-			return tuple ([self._start + start, self._start + stop]);
+			var start = (__lt__ (start, 0) ? __add__ (self._size, start) : start);
+			var stop = (__lt__ (stop, 0) ? __add__ (self._size, stop) : stop);
+			var start = __call__ (max, null, 0, __call__ (min, null, start, self._size));
+			var stop = __call__ (max, null, 0, __call__ (min, null, stop, self._size));
+			return tuple ([__add__ (self._start, start), __add__ (self._start, stop)]);
 		}
 		else {
-			var __except0__ = py_TypeError ('Unexpected index of type {!r}'.format (py_typeof (key)));
+			var __except0__ = __call__ (py_TypeError, null, (function () {
+				var __accu0__ = 'Unexpected index of type {!r}';
+				return __call__ (__accu0__.format, __accu0__, py_typeof (key));
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -357,7 +411,7 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 export var def_prop_for_attribute = function (attr_name, py_metatype, py_default, doc) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -374,7 +428,7 @@ export var def_prop_for_attribute = function (attr_name, py_metatype, py_default
 	var fget = function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -385,12 +439,15 @@ export var def_prop_for_attribute = function (attr_name, py_metatype, py_default
 		}
 		else {
 		}
-		return self._get_attribute (attr_name, py_metatype, py_default);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._get_attribute, __accu0__, attr_name, py_metatype, py_default);
+		}) ();
 	};
 	var fset = function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -402,15 +459,18 @@ export var def_prop_for_attribute = function (attr_name, py_metatype, py_default
 		}
 		else {
 		}
-		self._set_attribute (attr_name, py_metatype, value, py_default);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._set_attribute, __accu0__, attr_name, py_metatype, value, py_default);
+		}) ();
 	};
-	var prop = _property (__kwargtrans__ ({fget: fget, fset: fset, doc: doc}));
+	var prop = __call__ (_property, null, __kwargtrans__ ({fget: fget, fset: fset, doc: doc}));
 	return prop;
 };
 export var DefAttributeGetterSetters = function (attributes_list) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -424,7 +484,7 @@ export var DefAttributeGetterSetters = function (attributes_list) {
 	var wrapper = function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -435,9 +495,17 @@ export var DefAttributeGetterSetters = function (attributes_list) {
 		}
 		else {
 		}
-		for (var [prop_name, attr_name, py_metatype, py_default, doc] of attributes_list) {
-			var prop = def_prop_for_attribute (attr_name, py_metatype, py_default, doc);
-			setattr (cls, prop_name, prop);
+		var __iterable0__ = attributes_list;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop_name = __left0__ [0];
+			var attr_name = __left0__ [1];
+			var py_metatype = __left0__ [2];
+			var py_default = __left0__ [3];
+			var doc = __left0__ [4];
+			var prop = __call__ (def_prop_for_attribute, null, attr_name, py_metatype, py_default, doc);
+			__call__ (setattr, null, cls, prop_name, prop);
 		}
 		return cls;
 	};
@@ -449,7 +517,7 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 	get __init__ () {return __get__ (this, function (self, point, handle) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -468,7 +536,7 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 	get _get_position () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -479,13 +547,22 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 		}
 		else {
 		}
-		var attribute_name = ''.join (['handle_', _formatted (self._handle.py_name.lower (), '', '')]);
-		return self._point._get_attribute (attribute_name, 'FLOAT_VECTOR', tuple ([0.0, 0.0, 0.0]));
+		var attribute_name = (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['handle_', __call__ (_formatted, null, (function () {
+				var __accu1__ = self._handle.py_name;
+				return __call__ (__accu1__.lower, __accu1__);
+			}) (), '', '')]);
+		}) ();
+		return (function () {
+			var __accu0__ = self._point;
+			return __call__ (__accu0__._get_attribute, __accu0__, attribute_name, 'FLOAT_VECTOR', tuple ([0.0, 0.0, 0.0]));
+		}) ();
 	});},
 	get _set_position () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -497,13 +574,22 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 		}
 		else {
 		}
-		var attribute_name = ''.join (['handle_', _formatted (self._handle.py_name.lower (), '', '')]);
-		self._point._set_attribute (attribute_name, 'FLOAT_VECTOR', value, tuple ([0.0, 0.0, 0.0]));
+		var attribute_name = (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['handle_', __call__ (_formatted, null, (function () {
+				var __accu1__ = self._handle.py_name;
+				return __call__ (__accu1__.lower, __accu1__);
+			}) (), '', '')]);
+		}) ();
+		(function () {
+			var __accu0__ = self._point;
+			return __call__ (__accu0__._set_attribute, __accu0__, attribute_name, 'FLOAT_VECTOR', value, tuple ([0.0, 0.0, 0.0]));
+		}) ();
 	});},
 	get _get_type () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -514,13 +600,22 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 		}
 		else {
 		}
-		var attribute_name = ''.join (['handle_type_', _formatted (self._handle.py_name.lower (), '', '')]);
-		return self._point._get_attribute (attribute_name, 'INT', 0);
+		var attribute_name = (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['handle_type_', __call__ (_formatted, null, (function () {
+				var __accu1__ = self._handle.py_name;
+				return __call__ (__accu1__.lower, __accu1__);
+			}) (), '', '')]);
+		}) ();
+		return (function () {
+			var __accu0__ = self._point;
+			return __call__ (__accu0__._get_attribute, __accu0__, attribute_name, 'INT', 0);
+		}) ();
 	});},
 	get _get_select () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -531,13 +626,22 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 		}
 		else {
 		}
-		var attribute_name = ''.join (['.selection_handle_', _formatted (self._handle.py_name.lower (), '', '')]);
-		return self._point._get_attribute (attribute_name, 'BOOLEAN', true);
+		var attribute_name = (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['.selection_handle_', __call__ (_formatted, null, (function () {
+				var __accu1__ = self._handle.py_name;
+				return __call__ (__accu1__.lower, __accu1__);
+			}) (), '', '')]);
+		}) ();
+		return (function () {
+			var __accu0__ = self._point;
+			return __call__ (__accu0__._get_attribute, __accu0__, attribute_name, 'BOOLEAN', true);
+		}) ();
 	});},
 	get _set_select () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -549,20 +653,29 @@ export var GreasePencilStrokePointHandle =  __class__ ('GreasePencilStrokePointH
 		}
 		else {
 		}
-		var attribute_name = ''.join (['.selection_handle_', _formatted (self._handle.py_name.lower (), '', '')]);
-		self._point._set_attribute (attribute_name, 'BOOLEAN', value, true);
+		var attribute_name = (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['.selection_handle_', __call__ (_formatted, null, (function () {
+				var __accu1__ = self._handle.py_name;
+				return __call__ (__accu1__.lower, __accu1__);
+			}) (), '', '')]);
+		}) ();
+		(function () {
+			var __accu0__ = self._point;
+			return __call__ (__accu0__._set_attribute, __accu0__, attribute_name, 'BOOLEAN', value, true);
+		}) ();
 	});}
 });
 globalThis.Object.defineProperty (GreasePencilStrokePointHandle, 'select', property.call (GreasePencilStrokePointHandle, GreasePencilStrokePointHandle._get_select, GreasePencilStrokePointHandle._set_select));
 globalThis.Object.defineProperty (GreasePencilStrokePointHandle, 'type', property.call (GreasePencilStrokePointHandle, GreasePencilStrokePointHandle._get_type));
 globalThis.Object.defineProperty (GreasePencilStrokePointHandle, 'position', property.call (GreasePencilStrokePointHandle, GreasePencilStrokePointHandle._get_position, GreasePencilStrokePointHandle._set_position));;
-export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radius', 'radius', 'FLOAT', 0.01, 'The radius of the point.']), tuple (['opacity', 'opacity', 'FLOAT', 1.0, 'The opacity of the point.']), tuple (['vertex_color', 'vertex_color', 'FLOAT_COLOR', tuple ([0.0, 0.0, 0.0, 0.0]), 'The color for this point. The alpha value is used as a mix factor with the base color of the stroke.']), tuple (['rotation', 'rotation', 'FLOAT', 0.0, 'The rotation for this point. Used to rotate textures.']), tuple (['delta_time', 'delta_time', 'FLOAT', 0.0, 'The time delta in seconds since the start of the stroke.'])]) ( __class__ ('GreasePencilStrokePoint', [AttributeGetterSetter], {
+export var GreasePencilStrokePoint =  __call__ (__call__ (DefAttributeGetterSetters, null, [tuple (['radius', 'radius', 'FLOAT', 0.01, 'The radius of the point.']), tuple (['opacity', 'opacity', 'FLOAT', 1.0, 'The opacity of the point.']), tuple (['vertex_color', 'vertex_color', 'FLOAT_COLOR', tuple ([0.0, 0.0, 0.0, 0.0]), 'The color for this point. The alpha value is used as a mix factor with the base color of the stroke.']), tuple (['rotation', 'rotation', 'FLOAT', 0.0, 'The rotation for this point. Used to rotate textures.']), tuple (['delta_time', 'delta_time', 'FLOAT', 0.0, 'The time delta in seconds since the start of the stroke.'])]), null,  __class__ ('GreasePencilStrokePoint', [AttributeGetterSetter], {
 	__module__: __name__,
 	__slots__: tuple (['_drawing', '_curve_index', '_point_index']),
 	get __init__ () {return __get__ (this, function (self, drawing, curve_index, point_index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -576,7 +689,7 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		__super__ (GreasePencilStrokePoint, '__init__') (self, drawing.attributes, point_index, 'POINT');
+		__call__ (__call__ (__super__, null, GreasePencilStrokePoint, '__init__'), null, self, drawing.attributes, point_index, 'POINT');
 		self._drawing = drawing;
 		self._curve_index = curve_index;
 		self._point_index = point_index;
@@ -584,7 +697,7 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 	get _get_position () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -595,16 +708,19 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get ('position');
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, 'position');
+		}) ();
 		if (attribute) {
-			return attribute.data [self._point_index].vector;
+			return __getitem__ (attribute.data, self._point_index).vector;
 		}
 		return tuple ([0.0, 0.0, 0.0]);
 	});},
 	get _set_position () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -616,16 +732,22 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get ('position');
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, 'position');
+		}) ();
 		if (attribute) {
-			attribute.data [self._point_index].vector = value;
-			self._drawing.tag_positions_changed ();
+			__getitem__ (attribute.data, self._point_index).vector = value;
+			(function () {
+				var __accu0__ = self._drawing;
+				return __call__ (__accu0__.tag_positions_changed, __accu0__);
+			}) ();
 		}
 	});},
 	get _get_select () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -636,13 +758,16 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get ('.selection');
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, '.selection');
+		}) ();
 		if (attribute) {
-			if (attribute.domain == 'CURVE') {
-				return attribute.data [self._curve_index].value;
+			if (__eq__ (attribute.domain, 'CURVE')) {
+				return __getitem__ (attribute.data, self._curve_index).value;
 			}
-			else if (attribute.domain == 'POINT') {
-				return attribute.data [self._point_index].value;
+			else if (__eq__ (attribute.domain, 'POINT')) {
+				return __getitem__ (attribute.data, self._point_index).value;
 			}
 		}
 		return true;
@@ -650,7 +775,7 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 	get _set_select () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -662,26 +787,32 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get ('.selection');
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, '.selection');
+		}) ();
 		if (attribute) {
-			if (attribute.domain == 'CURVE') {
-				attribute.data [self._curve_index].value = value;
+			if (__eq__ (attribute.domain, 'CURVE')) {
+				__getitem__ (attribute.data, self._curve_index).value = value;
 			}
-			else if (attribute.domain == 'POINT') {
-				attribute.data [self._point_index].value = value;
+			else if (__eq__ (attribute.domain, 'POINT')) {
+				__getitem__ (attribute.data, self._point_index).value = value;
 			}
 		}
 		else {
-			var attribute = self._attributes.py_new ('.selection', 'BOOLEAN', 'POINT');
+			var attribute = (function () {
+				var __accu0__ = self._attributes;
+				return __call__ (__accu0__.py_new, __accu0__, '.selection', 'BOOLEAN', 'POINT');
+			}) ();
 			if (attribute) {
-				attribute.data [self._point_index].value = value;
+				__getitem__ (attribute.data, self._point_index).value = value;
 			}
 		}
 	});},
 	get _get_handle_left () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -692,16 +823,16 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		var stroke_curve_type = self._drawing.strokes [self._curve_index].curve_type;
-		if (stroke_curve_type == 2) {
-			return GreasePencilStrokePointHandle (self, BezierHandle.LEFT);
+		var stroke_curve_type = __getitem__ (self._drawing.strokes, self._curve_index).curve_type;
+		if (__eq__ (stroke_curve_type, 2)) {
+			return __call__ (GreasePencilStrokePointHandle, null, self, BezierHandle.LEFT);
 		}
 		return null;
 	});},
 	get _get_handle_right () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -712,9 +843,9 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		var stroke_curve_type = self._drawing.strokes [self._curve_index].curve_type;
-		if (stroke_curve_type == 2) {
-			return GreasePencilStrokePointHandle (self, BezierHandle.RIGHT);
+		var stroke_curve_type = __getitem__ (self._drawing.strokes, self._curve_index).curve_type;
+		if (__eq__ (stroke_curve_type, 2)) {
+			return __call__ (GreasePencilStrokePointHandle, null, self, BezierHandle.RIGHT);
 		}
 		return null;
 	});}
@@ -729,7 +860,7 @@ export var GreasePencilStrokePointSlice =  __class__ ('GreasePencilStrokePointSl
 	get __init__ () {return __get__ (this, function (self, drawing, curve_index, start, stop) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -744,14 +875,14 @@ export var GreasePencilStrokePointSlice =  __class__ ('GreasePencilStrokePointSl
 		}
 		else {
 		}
-		__super__ (GreasePencilStrokePointSlice, '__init__') (self, start, stop);
+		__call__ (__call__ (__super__, null, GreasePencilStrokePointSlice, '__init__'), null, self, start, stop);
 		self._drawing = drawing;
 		self._curve_index = curve_index;
 	});},
 	get __len__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -762,12 +893,12 @@ export var GreasePencilStrokePointSlice =  __class__ ('GreasePencilStrokePointSl
 		}
 		else {
 		}
-		return __super__ (GreasePencilStrokePointSlice, '__len__') (self);
+		return __call__ (__call__ (__super__, null, GreasePencilStrokePointSlice, '__len__'), null, self);
 	});},
 	get __getitem__ () {return __get__ (this, function (self, key) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -779,25 +910,25 @@ export var GreasePencilStrokePointSlice =  __class__ ('GreasePencilStrokePointSl
 		}
 		else {
 		}
-		var key = __super__ (GreasePencilStrokePointSlice, '_getitem_helper') (self, key);
-		if (isinstance (key, int)) {
-			return GreasePencilStrokePoint (self._drawing, self._curve_index, key);
+		var key = __call__ (__call__ (__super__, null, GreasePencilStrokePointSlice, '_getitem_helper'), null, self, key);
+		if (__call__ (isinstance, null, key, int)) {
+			return __call__ (GreasePencilStrokePoint, null, self._drawing, self._curve_index, key);
 		}
-		else if (isinstance (key, tuple)) {
+		else if (__call__ (isinstance, null, key, tuple)) {
 			var __left0__ = key;
 			var start = __left0__ [0];
 			var stop = __left0__ [1];
-			return GreasePencilStrokePointSlice (self._drawing, self._curve_index, start, stop);
+			return __call__ (GreasePencilStrokePointSlice, null, self._drawing, self._curve_index, start, stop);
 		}
 	});}
 });
-export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', 'cyclic', 'BOOLEAN', false, 'The closed state for this stroke.']), tuple (['material_index', 'material_index', 'INT', 0, 'The index of the material for this stroke.']), tuple (['fill_id', 'fill_id', 'INT', 0, 'The fill id of this stroke.']), tuple (['hide_stroke', 'hide_stroke', 'BOOLEAN', false, 'The stroke visibility state.']), tuple (['softness', 'softness', 'FLOAT', 0.0, 'Used by the renderer to generate a soft gradient from the stroke center line to the edges.']), tuple (['start_cap', 'start_cap', 'INT8', 0, 'The type of start cap of this stroke.']), tuple (['end_cap', 'end_cap', 'INT8', 0, 'The type of end cap of this stroke.']), tuple (['aspect_ratio', 'aspect_ratio', 'FLOAT', 1.0, 'The aspect ratio (x/y) used for textures. ']), tuple (['fill_opacity', 'fill_opacity', 'FLOAT', 1.0, 'The opacity of the fill.']), tuple (['fill_color', 'fill_color', 'FLOAT_COLOR', tuple ([0.0, 0.0, 0.0, 0.0]), 'The color of the fill.']), tuple (['time_start', 'init_time', 'FLOAT', 0.0, 'A time value for when the stroke was created.'])]) ( __class__ ('GreasePencilStroke', [AttributeGetterSetter], {
+export var GreasePencilStroke =  __call__ (__call__ (DefAttributeGetterSetters, null, [tuple (['cyclic', 'cyclic', 'BOOLEAN', false, 'The closed state for this stroke.']), tuple (['material_index', 'material_index', 'INT', 0, 'The index of the material for this stroke.']), tuple (['fill_id', 'fill_id', 'INT', 0, 'The fill id of this stroke.']), tuple (['hide_stroke', 'hide_stroke', 'BOOLEAN', false, 'The stroke visibility state.']), tuple (['softness', 'softness', 'FLOAT', 0.0, 'Used by the renderer to generate a soft gradient from the stroke center line to the edges.']), tuple (['start_cap', 'start_cap', 'INT8', 0, 'The type of start cap of this stroke.']), tuple (['end_cap', 'end_cap', 'INT8', 0, 'The type of end cap of this stroke.']), tuple (['aspect_ratio', 'aspect_ratio', 'FLOAT', 1.0, 'The aspect ratio (x/y) used for textures. ']), tuple (['fill_opacity', 'fill_opacity', 'FLOAT', 1.0, 'The opacity of the fill.']), tuple (['fill_color', 'fill_color', 'FLOAT_COLOR', tuple ([0.0, 0.0, 0.0, 0.0]), 'The color of the fill.']), tuple (['time_start', 'init_time', 'FLOAT', 0.0, 'A time value for when the stroke was created.'])]), null,  __class__ ('GreasePencilStroke', [AttributeGetterSetter], {
 	__module__: __name__,
 	__slots__: tuple (['_drawing', '_curve_index', '_points_start_index', '_points_end_index']),
 	get __init__ () {return __get__ (this, function (self, drawing, curve_index, points_start_index, points_end_index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -812,7 +943,7 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		__super__ (GreasePencilStroke, '__init__') (self, drawing.attributes, curve_index, 'CURVE');
+		__call__ (__call__ (__super__, null, GreasePencilStroke, '__init__'), null, self, drawing.attributes, curve_index, 'CURVE');
 		self._drawing = drawing;
 		self._curve_index = curve_index;
 		self._points_start_index = points_start_index;
@@ -821,7 +952,7 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 	get _get_points () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -832,12 +963,12 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		return GreasePencilStrokePointSlice (self._drawing, self._curve_index, self._points_start_index, self._points_end_index);
+		return __call__ (GreasePencilStrokePointSlice, null, self._drawing, self._curve_index, self._points_start_index, self._points_end_index);
 	});},
 	get add_points () {return __get__ (this, function (self, count) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -850,15 +981,18 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		else {
 		}
 		var previous_end = self._points_end_index;
-		var new_size = (self._points_end_index - self._points_start_index) + count;
-		self._drawing.resize_strokes (__kwargtrans__ ({sizes: [new_size], indices: [self._curve_index]}));
-		self._points_end_index = self._points_start_index + new_size;
-		return GreasePencilStrokePointSlice (self._drawing, self._curve_index, previous_end, self._points_end_index);
+		var new_size = __add__ (__sub__ (self._points_end_index, self._points_start_index), count);
+		(function () {
+			var __accu0__ = self._drawing;
+			return __call__ (__accu0__.resize_strokes, __accu0__, __kwargtrans__ ({sizes: [new_size], indices: [self._curve_index]}));
+		}) ();
+		self._points_end_index = __add__ (self._points_start_index, new_size);
+		return __call__ (GreasePencilStrokePointSlice, null, self._drawing, self._curve_index, previous_end, self._points_end_index);
 	});},
 	get remove_points () {return __get__ (this, function (self, count) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -870,17 +1004,20 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		var new_size = (self._points_end_index - self._points_start_index) - count;
-		if (new_size < 1) {
+		var new_size = __sub__ (__sub__ (self._points_end_index, self._points_start_index), count);
+		if (__lt__ (new_size, 1)) {
 			var new_size = 1;
 		}
-		self._drawing.resize_strokes (__kwargtrans__ ({sizes: [new_size], indices: [self._curve_index]}));
-		self._points_end_index = self._points_start_index + new_size;
+		(function () {
+			var __accu0__ = self._drawing;
+			return __call__ (__accu0__.resize_strokes, __accu0__, __kwargtrans__ ({sizes: [new_size], indices: [self._curve_index]}));
+		}) ();
+		self._points_end_index = __add__ (self._points_start_index, new_size);
 	});},
 	get _get_curve_type () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -891,12 +1028,12 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		return __super__ (GreasePencilStroke, '_get_attribute') (self, 'curve_type', 'INT8', 0);
+		return __call__ (__call__ (__super__, null, GreasePencilStroke, '_get_attribute'), null, self, 'curve_type', 'INT8', 0);
 	});},
 	get _get_select () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -907,16 +1044,25 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get ('.selection');
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, '.selection');
+		}) ();
 		if (attribute) {
-			if (attribute.domain == 'CURVE') {
-				return attribute.data [self._curve_index].value;
+			if (__eq__ (attribute.domain, 'CURVE')) {
+				return __getitem__ (attribute.data, self._curve_index).value;
 			}
-			else if (attribute.domain == 'POINT') {
-				return any ((function () {
+			else if (__eq__ (attribute.domain, 'POINT')) {
+				return __call__ (any, null, (function () {
 					var __accu0__ = [];
-					for (var point_index of list (range (self._points_start_index, self._points_end_index))) {
-						__accu0__.append (attribute.data [point_index].value);
+					var __iterable0__ = __call__ (list, null, __call__ (range, null, self._points_start_index, self._points_end_index));
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var point_index = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __getitem__ (attribute.data, point_index).value);
+						}) ();
 					}
 					return __accu0__;
 				}) ());
@@ -927,7 +1073,7 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 	get _set_select () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -939,21 +1085,27 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		var attribute = self._attributes.py_get ('.selection');
+		var attribute = (function () {
+			var __accu0__ = self._attributes;
+			return __call__ (__accu0__.py_get, __accu0__, '.selection');
+		}) ();
 		if (attribute) {
-			if (attribute.domain == 'CURVE') {
-				attribute.data [self._curve_index].value = value;
+			if (__eq__ (attribute.domain, 'CURVE')) {
+				__getitem__ (attribute.data, self._curve_index).value = value;
 			}
-			else if (attribute.domain == 'POINT') {
+			else if (__eq__ (attribute.domain, 'POINT')) {
 				for (var point_index = self._points_start_index; point_index < self._points_end_index; point_index++) {
-					attribute.data [point_index].value = value;
+					__getitem__ (attribute.data, point_index).value = value;
 				}
 			}
 		}
 		else {
-			var attribute = self._attributes.py_new ('.selection', 'BOOLEAN', 'CURVE');
+			var attribute = (function () {
+				var __accu0__ = self._attributes;
+				return __call__ (__accu0__.py_new, __accu0__, '.selection', 'BOOLEAN', 'CURVE');
+			}) ();
 			if (attribute) {
-				attribute.data [self._curve_index].value = value;
+				__getitem__ (attribute.data, self._curve_index).value = value;
 			}
 		}
 	});}
@@ -967,7 +1119,7 @@ export var GreasePencilStrokeSlice =  __class__ ('GreasePencilStrokeSlice', [Sli
 	get __init__ () {return __get__ (this, function (self, drawing, start, stop) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -981,14 +1133,14 @@ export var GreasePencilStrokeSlice =  __class__ ('GreasePencilStrokeSlice', [Sli
 		}
 		else {
 		}
-		__super__ (GreasePencilStrokeSlice, '__init__') (self, start, stop);
+		__call__ (__call__ (__super__, null, GreasePencilStrokeSlice, '__init__'), null, self, start, stop);
 		self._drawing = drawing;
 		self._curve_offsets = drawing.curve_offsets;
 	});},
 	get __len__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -999,12 +1151,12 @@ export var GreasePencilStrokeSlice =  __class__ ('GreasePencilStrokeSlice', [Sli
 		}
 		else {
 		}
-		return __super__ (GreasePencilStrokeSlice, '__len__') (self);
+		return __call__ (__call__ (__super__, null, GreasePencilStrokeSlice, '__len__'), null, self);
 	});},
 	get __getitem__ () {return __get__ (this, function (self, key) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1016,19 +1168,41 @@ export var GreasePencilStrokeSlice =  __class__ ('GreasePencilStrokeSlice', [Sli
 		}
 		else {
 		}
-		var key = __super__ (GreasePencilStrokeSlice, '_getitem_helper') (self, key);
-		if (isinstance (key, int)) {
+		var key = __call__ (__call__ (__super__, null, GreasePencilStrokeSlice, '_getitem_helper'), null, self, key);
+		if (__call__ (isinstance, null, key, int)) {
 			var offsets = self._curve_offsets;
-			return GreasePencilStroke (self._drawing, key, offsets [key].value, offsets [key + 1].value);
+			return __call__ (GreasePencilStroke, null, self._drawing, key, __getitem__ (offsets, key).value, __getitem__ (offsets, __add__ (key, 1)).value);
 		}
-		else if (isinstance (key, tuple)) {
+		else if (__call__ (isinstance, null, key, tuple)) {
 			var __left0__ = key;
 			var start = __left0__ [0];
 			var stop = __left0__ [1];
-			return GreasePencilStrokeSlice (self._drawing, start, stop);
+			return __call__ (GreasePencilStrokeSlice, null, self._drawing, start, stop);
 		}
 	});}
 });
 
 //# sourceMappingURL=_bpy_internal.grease_pencil.stroke.map
 export {Enum};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'BezierHandle': BezierHandle = value; break;
+		case 'AttributeGetterSetter': AttributeGetterSetter = value; break;
+		case 'SliceHelper': SliceHelper = value; break;
+		case 'def_prop_for_attribute': def_prop_for_attribute = value; break;
+		case 'DefAttributeGetterSetters': DefAttributeGetterSetters = value; break;
+		case 'GreasePencilStrokePointHandle': GreasePencilStrokePointHandle = value; break;
+		case 'GreasePencilStrokePoint': GreasePencilStrokePoint = value; break;
+		case 'GreasePencilStrokePointSlice': GreasePencilStrokePointSlice = value; break;
+		case 'GreasePencilStroke': GreasePencilStroke = value; break;
+		case 'GreasePencilStrokeSlice': GreasePencilStrokeSlice = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

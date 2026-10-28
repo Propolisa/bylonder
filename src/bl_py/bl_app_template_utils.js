@@ -13,7 +13,7 @@ export var _enable = function (template_id) {
 	var ignore_not_found = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -26,12 +26,12 @@ export var _enable = function (template_id) {
 	}
 	else {
 	}
-	var RestrictBlend = _member ('_bpy_restrict_state', 'RestrictBlend');
+	var RestrictBlend = __call__ (_member, null, '_bpy_restrict_state', 'RestrictBlend');
 	if (handle_error === null) {
 		var handle_error = function (_ex) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -42,40 +42,52 @@ export var _enable = function (template_id) {
 			}
 			else {
 			}
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
 		};
 	}
-	var __withid0__ = RestrictBlend ();
+	var __withid0__ = __call__ (RestrictBlend, null);
 	try {
 		__withid0__.__enter__ ();
 		try {
-			var mod = import_from_id (template_id, __kwargtrans__ ({ignore_not_found: ignore_not_found}));
+			var mod = __call__ (import_from_id, null, template_id, __kwargtrans__ ({ignore_not_found: ignore_not_found}));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				handle_error (ex);
+				__call__ (handle_error, null, ex);
 				return null;
 			}
 			else {
 				throw __except0__;
 			}
 		}
-		_modules [template_id] = mod;
+		__setitem__ (_modules, template_id, mod);
 		if (mod === null) {
 			return null;
 		}
 		mod.__template_enabled__ = false;
 		try {
-			mod.register ();
+			(function () {
+				var __accu0__ = mod;
+				return __call__ (__accu0__.register, __accu0__);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				print ('Exception in module register(): {!r}'.format (getattr (mod, '__file__', template_id)));
-				handle_error (ex);
-				_modules.py_pop (template_id);
+				__call__ (print, null, (function () {
+					var __accu0__ = 'Exception in module register(): {!r}';
+					return __call__ (__accu0__.format, __accu0__, __call__ (getattr, null, mod, '__file__', template_id));
+				}) ());
+				__call__ (handle_error, null, ex);
+				(function () {
+					var __accu0__ = _modules;
+					return __call__ (__accu0__.py_pop, __accu0__, template_id);
+				}) ();
 				return null;
 			}
 			else {
@@ -91,7 +103,7 @@ export var _enable = function (template_id) {
 	}
 	mod.__template_enabled__ = true;
 	if (_bpy.app.debug_python) {
-		print ('\tapp_template_utils.enable', mod.__name__);
+		__call__ (print, null, '\tapp_template_utils.enable', mod.__name__);
 	}
 	return mod;
 };
@@ -99,7 +111,7 @@ export var _disable = function (template_id) {
 	var handle_error = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -115,7 +127,7 @@ export var _disable = function (template_id) {
 		var handle_error = function (_ex) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -126,24 +138,39 @@ export var _disable = function (template_id) {
 			}
 			else {
 			}
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
 		};
 	}
-	var mod = _modules.py_get (template_id, false);
+	var mod = (function () {
+		var __accu0__ = _modules;
+		return __call__ (__accu0__.py_get, __accu0__, template_id, false);
+	}) ();
 	if (mod === null) {
-		_modules.py_pop (template_id);
+		(function () {
+			var __accu0__ = _modules;
+			return __call__ (__accu0__.py_pop, __accu0__, template_id);
+		}) ();
 	}
-	else if (getattr (mod, '__template_enabled__', false) !== false) {
+	else if (__call__ (getattr, null, mod, '__template_enabled__', false) !== false) {
 		mod.__template_enabled__ = false;
 		try {
-			mod.unregister ();
+			(function () {
+				var __accu0__ = mod;
+				return __call__ (__accu0__.unregister, __accu0__);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				print ('Exception in module unregister(): {!r}'.format (getattr (mod, '__file__', template_id)));
-				handle_error (ex);
+				__call__ (print, null, (function () {
+					var __accu0__ = 'Exception in module unregister(): {!r}';
+					return __call__ (__accu0__.format, __accu0__, __call__ (getattr, null, mod, '__file__', template_id));
+				}) ());
+				__call__ (handle_error, null, ex);
 			}
 			else {
 				throw __except0__;
@@ -151,17 +178,20 @@ export var _disable = function (template_id) {
 		}
 	}
 	else {
-		print ('\tapp_template_utils.disable: {:s} not {:s}.'.format (template_id, (mod === false ? 'disabled' : 'loaded')));
+		__call__ (print, null, (function () {
+			var __accu0__ = '\tapp_template_utils.disable: {:s} not {:s}.';
+			return __call__ (__accu0__.format, __accu0__, template_id, (mod === false ? 'disabled' : 'loaded'));
+		}) ());
 	}
 	if (_bpy.app.debug_python) {
-		print ('\tapp_template_utils.disable', template_id);
+		__call__ (print, null, '\tapp_template_utils.disable', template_id);
 	}
 };
 export var import_from_path = function (path) {
 	var ignore_not_found = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -173,19 +203,22 @@ export var import_from_path = function (path) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var import_module = _member ('importlib', 'import_module');
-	var __left0__ = path.rsplit (os.sep, 2).__getslice__ (-(2), null, 1);
+	var os = __call__ (_module, null, 'os');
+	var import_module = __call__ (_member, null, 'importlib', 'import_module');
+	var __left0__ = __getslice__ ((function () {
+		var __accu0__ = path;
+		return __call__ (__accu0__.rsplit, __accu0__, os.sep, 2);
+	}) (), __neg__ (2), null, 1);
 	var base_module = __left0__ [0];
 	var template_id = __left0__ [1];
-	var module_name = (base_module + '.') + template_id;
+	var module_name = __add__ (__add__ (base_module, '.'), template_id);
 	try {
-		return import_module (module_name);
+		return __call__ (import_module, null, module_name);
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, ModuleNotFoundError)) {
 			var ex = __except0__;
-			if (ignore_not_found && ex.py_name == module_name) {
+			if (ignore_not_found && __eq__ (ex.py_name, module_name)) {
 				return null;
 			}
 			var __except1__ = ex;
@@ -201,7 +234,7 @@ export var import_from_id = function (template_id) {
 	var ignore_not_found = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -213,25 +246,37 @@ export var import_from_id = function (template_id) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var path = py_next (py_iter (_bpy.utils.app_template_paths (__kwargtrans__ ({path: template_id}))), null);
+	var os = __call__ (_module, null, 'os');
+	var path = __call__ (py_next, null, __call__ (py_iter, null, (function () {
+		var __accu0__ = _bpy.utils;
+		return __call__ (__accu0__.app_template_paths, __accu0__, __kwargtrans__ ({path: template_id}));
+	}) ()), null);
 	if (path === null) {
 		if (ignore_not_found) {
 			return null;
 		}
 		else {
-			var __except0__ = Exception ('{!r} template not found!'.format (template_id));
+			var __except0__ = __call__ (Exception, null, (function () {
+				var __accu0__ = '{!r} template not found!';
+				return __call__ (__accu0__.format, __accu0__, template_id);
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 	}
 	else {
 		if (ignore_not_found) {
-			if (!(os.path.exists (os.path.join (path, '__init__.py')))) {
+			if (!((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.exists, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.join, __accu1__, path, '__init__.py');
+				}) ());
+			}) ())) {
 				return null;
 			}
 		}
-		return import_from_path (path, __kwargtrans__ ({ignore_not_found: ignore_not_found}));
+		return __call__ (import_from_path, null, path, __kwargtrans__ ({ignore_not_found: ignore_not_found}));
 	}
 };
 export var activate = function () {
@@ -239,7 +284,7 @@ export var activate = function () {
 	var reload_scripts = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -251,21 +296,21 @@ export var activate = function () {
 	}
 	else {
 	}
-	var template_id_prev = _app_template ['id'];
-	if (!(reload_scripts) && template_id_prev == template_id) {
+	var template_id_prev = __getitem__ (_app_template, 'id');
+	if (!(reload_scripts) && __eq__ (template_id_prev, template_id)) {
 		return ;
 	}
 	if (template_id_prev) {
-		_disable (template_id_prev);
+		__call__ (_disable, null, template_id_prev);
 	}
-	var _mod = (template_id ? _enable (template_id, __kwargtrans__ ({ignore_not_found: true})) : null);
-	_app_template ['id'] = template_id;
+	var _mod = (template_id ? __call__ (_enable, null, template_id, __kwargtrans__ ({ignore_not_found: true})) : null);
+	__setitem__ (_app_template, 'id', template_id);
 };
 export var reset = function () {
 	var reload_scripts = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -278,10 +323,28 @@ export var reset = function () {
 	}
 	var template_id = _bpy.context.preferences.app_template;
 	if (_bpy.app.debug_python) {
-		print ("bl_app_template_utils.reset('{:s}')".format (template_id));
+		__call__ (print, null, (function () {
+			var __accu0__ = "bl_app_template_utils.reset('{:s}')";
+			return __call__ (__accu0__.format, __accu0__, template_id);
+		}) ());
 	}
-	activate (__kwargtrans__ ({template_id: template_id, reload_scripts: reload_scripts}));
+	__call__ (activate, null, __kwargtrans__ ({template_id: template_id, reload_scripts: reload_scripts}));
 };
 
 //# sourceMappingURL=bl_app_template_utils.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case '_app_template': _app_template = value; break;
+		case '_modules': _modules = value; break;
+		case '_enable': _enable = value; break;
+		case '_disable': _disable = value; break;
+		case 'import_from_path': import_from_path = value; break;
+		case 'import_from_id': import_from_id = value; break;
+		case 'activate': activate = value; break;
+		case 'reset': reset = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

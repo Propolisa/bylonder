@@ -20,7 +20,7 @@ export var CameraButtonsPanel =  __class__ ('CameraButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -60,7 +60,7 @@ export var DATA_PT_context_camera =  __class__ ('DATA_PT_context_camera', [Camer
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -77,10 +77,16 @@ export var DATA_PT_context_camera =  __class__ ('DATA_PT_context_camera', [Camer
 		var cam = context.camera;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (cam) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -92,7 +98,7 @@ export var DATA_PT_lens =  __class__ ('DATA_PT_lens', [CameraButtonsPanel, Panel
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -107,93 +113,240 @@ export var DATA_PT_lens =  __class__ ('DATA_PT_lens', [CameraButtonsPanel, Panel
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var cam = context.camera;
-		layout.prop (cam, 'type');
-		var col = layout.column ();
-		col.separator ();
-		if (cam.py_metatype == 'PERSP') {
-			if (cam.lens_unit == 'MILLIMETERS') {
-				col.prop (cam, 'lens');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'type');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (__eq__ (cam.py_metatype, 'PERSP')) {
+			if (__eq__ (cam.lens_unit, 'MILLIMETERS')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, cam, 'lens');
+				}) ();
 			}
-			else if (cam.lens_unit == 'FOV') {
-				col.prop (cam, 'angle');
+			else if (__eq__ (cam.lens_unit, 'FOV')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, cam, 'angle');
+				}) ();
 			}
-			col.prop (cam, 'lens_unit');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cam, 'lens_unit');
+			}) ();
 		}
-		else if (cam.py_metatype == 'ORTHO') {
-			col.prop (cam, 'ortho_scale');
+		else if (__eq__ (cam.py_metatype, 'ORTHO')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cam, 'ortho_scale');
+			}) ();
 		}
-		else if (cam.py_metatype == 'PANO') {
+		else if (__eq__ (cam.py_metatype, 'PANO')) {
 			var engine = context.engine;
-			if (engine == 'CYCLES') {
-				col.prop (cam, 'panorama_type');
-				if (cam.panorama_type == 'FISHEYE_EQUIDISTANT') {
-					col.prop (cam, 'fisheye_fov');
+			if (__eq__ (engine, 'CYCLES')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, cam, 'panorama_type');
+				}) ();
+				if (__eq__ (cam.panorama_type, 'FISHEYE_EQUIDISTANT')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_fov');
+					}) ();
 				}
-				else if (cam.panorama_type == 'FISHEYE_EQUISOLID') {
-					col.prop (cam, 'fisheye_lens', __kwargtrans__ ({text: 'Lens'}));
-					col.prop (cam, 'fisheye_fov');
+				else if (__eq__ (cam.panorama_type, 'FISHEYE_EQUISOLID')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_lens', __kwargtrans__ ({text: 'Lens'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_fov');
+					}) ();
 				}
-				else if (cam.panorama_type == 'EQUIRECTANGULAR') {
-					var sub = col.column (__kwargtrans__ ({align: true}));
-					sub.prop (cam, 'latitude_min', __kwargtrans__ ({text: 'Latitude Min'}));
-					sub.prop (cam, 'latitude_max', __kwargtrans__ ({text: 'Max'}));
-					var sub = col.column (__kwargtrans__ ({align: true}));
-					sub.prop (cam, 'longitude_min', __kwargtrans__ ({text: 'Longitude Min'}));
-					sub.prop (cam, 'longitude_max', __kwargtrans__ ({text: 'Max'}));
+				else if (__eq__ (cam.panorama_type, 'EQUIRECTANGULAR')) {
+					var sub = (function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'latitude_min', __kwargtrans__ ({text: 'Latitude Min'}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'latitude_max', __kwargtrans__ ({text: 'Max'}));
+					}) ();
+					var sub = (function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'longitude_min', __kwargtrans__ ({text: 'Longitude Min'}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'longitude_max', __kwargtrans__ ({text: 'Max'}));
+					}) ();
 				}
-				else if (cam.panorama_type == 'FISHEYE_LENS_POLYNOMIAL') {
-					col.prop (cam, 'fisheye_fov');
-					col.prop (cam, 'fisheye_polynomial_k0', __kwargtrans__ ({text: 'K0'}));
-					col.prop (cam, 'fisheye_polynomial_k1', __kwargtrans__ ({text: 'K1'}));
-					col.prop (cam, 'fisheye_polynomial_k2', __kwargtrans__ ({text: 'K2'}));
-					col.prop (cam, 'fisheye_polynomial_k3', __kwargtrans__ ({text: 'K3'}));
-					col.prop (cam, 'fisheye_polynomial_k4', __kwargtrans__ ({text: 'K4'}));
+				else if (__eq__ (cam.panorama_type, 'FISHEYE_LENS_POLYNOMIAL')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_fov');
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_polynomial_k0', __kwargtrans__ ({text: 'K0'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_polynomial_k1', __kwargtrans__ ({text: 'K1'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_polynomial_k2', __kwargtrans__ ({text: 'K2'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_polynomial_k3', __kwargtrans__ ({text: 'K3'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'fisheye_polynomial_k4', __kwargtrans__ ({text: 'K4'}));
+					}) ();
 				}
-				else if (cam.panorama_type == 'CENTRAL_CYLINDRICAL') {
-					var sub = col.column (__kwargtrans__ ({align: true}));
-					sub.prop (cam, 'central_cylindrical_range_v_min', __kwargtrans__ ({text: 'Height Min'}));
-					sub.prop (cam, 'central_cylindrical_range_v_max', __kwargtrans__ ({text: 'Max'}));
-					var sub = col.column (__kwargtrans__ ({align: true}));
-					sub.prop (cam, 'central_cylindrical_range_u_min', __kwargtrans__ ({text: 'Longitude Min'}));
-					sub.prop (cam, 'central_cylindrical_range_u_max', __kwargtrans__ ({text: 'Max'}));
-					var sub = col.column (__kwargtrans__ ({align: true}));
-					sub.prop (cam, 'central_cylindrical_radius', __kwargtrans__ ({text: 'Cylinder Radius'}));
+				else if (__eq__ (cam.panorama_type, 'CENTRAL_CYLINDRICAL')) {
+					var sub = (function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'central_cylindrical_range_v_min', __kwargtrans__ ({text: 'Height Min'}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'central_cylindrical_range_v_max', __kwargtrans__ ({text: 'Max'}));
+					}) ();
+					var sub = (function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'central_cylindrical_range_u_min', __kwargtrans__ ({text: 'Longitude Min'}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'central_cylindrical_range_u_max', __kwargtrans__ ({text: 'Max'}));
+					}) ();
+					var sub = (function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'central_cylindrical_radius', __kwargtrans__ ({text: 'Cylinder Radius'}));
+					}) ();
 				}
 			}
 			else if (__in__ (engine, new set (['BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH']))) {
-				if (cam.lens_unit == 'MILLIMETERS') {
-					col.prop (cam, 'lens');
+				if (__eq__ (cam.lens_unit, 'MILLIMETERS')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'lens');
+					}) ();
 				}
-				else if (cam.lens_unit == 'FOV') {
-					col.prop (cam, 'angle');
+				else if (__eq__ (cam.lens_unit, 'FOV')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'angle');
+					}) ();
 				}
-				col.prop (cam, 'lens_unit');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, cam, 'lens_unit');
+				}) ();
 			}
 		}
-		else if (cam.py_metatype == 'CUSTOM') {
+		else if (__eq__ (cam.py_metatype, 'CUSTOM')) {
 			var engine = context.engine;
-			if (engine == 'CYCLES') {
-				var sub = col.row ();
-				sub.prop (cam, 'custom_mode', __kwargtrans__ ({text: ' ', expand: true}));
-				var sub = col.row (__kwargtrans__ ({align: true}));
-				if (cam.custom_mode == 'EXTERNAL') {
-					sub.prop (cam, 'custom_filepath', __kwargtrans__ ({text: ' '}));
+			if (__eq__ (engine, 'CYCLES')) {
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, cam, 'custom_mode', __kwargtrans__ ({text: ' ', expand: true}));
+				}) ();
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				if (__eq__ (cam.custom_mode, 'EXTERNAL')) {
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'custom_filepath', __kwargtrans__ ({text: ' '}));
+					}) ();
 				}
 				else {
-					sub.prop (cam, 'custom_shader', __kwargtrans__ ({text: ' '}));
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, cam, 'custom_shader', __kwargtrans__ ({text: ' '}));
+					}) ();
 				}
-				sub.operator ('object.camera_custom_update', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'object.camera_custom_update', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
+				}) ();
 			}
 		}
-		var col = layout.column ();
-		col.separator ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (cam, 'shift_x', __kwargtrans__ ({text: 'Shift X'}));
-		sub.prop (cam, 'shift_y', __kwargtrans__ ({text: 'Y'}));
-		col.separator ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (cam, 'clip_start', __kwargtrans__ ({text: 'Clip Start'}));
-		sub.prop (cam, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'shift_x', __kwargtrans__ ({text: 'Shift X'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'shift_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'clip_start', __kwargtrans__ ({text: 'Clip Start'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+		}) ();
 	});}
 });
 export var DATA_PT_camera_stereoscopy =  __class__ ('DATA_PT_camera_stereoscopy', [CameraButtonsPanel, Panel], {
@@ -203,7 +356,7 @@ export var DATA_PT_camera_stereoscopy =  __class__ ('DATA_PT_camera_stereoscopy'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -216,12 +369,12 @@ export var DATA_PT_camera_stereoscopy =  __class__ ('DATA_PT_camera_stereoscopy'
 		else {
 		}
 		var render = context.scene.render;
-		return __super__ (DATA_PT_camera_stereoscopy, 'poll') (self, context) && render.use_multiview && render.views_format == 'STEREO_3D';
+		return __call__ (__call__ (__super__, null, DATA_PT_camera_stereoscopy, 'poll'), null, self, context) && render.use_multiview && __eq__ (render.views_format, 'STEREO_3D');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -238,29 +391,74 @@ export var DATA_PT_camera_stereoscopy =  __class__ ('DATA_PT_camera_stereoscopy'
 		var render = context.scene.render;
 		var st = context.camera.stereo;
 		var cam = context.camera;
-		var is_spherical_stereo = cam.py_metatype != 'ORTHO' && render.use_spherical_stereo;
+		var is_spherical_stereo = __ne__ (cam.py_metatype, 'ORTHO') && render.use_spherical_stereo;
 		var use_spherical_stereo = is_spherical_stereo && st.use_spherical_stereo;
-		layout.prop (st, 'convergence_mode');
-		var col = layout.column ();
-		var sub = col.column ();
-		sub.active = st.convergence_mode != 'PARALLEL';
-		sub.prop (st, 'convergence_distance');
-		col.prop (st, 'interocular_distance');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st, 'convergence_mode');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		sub.active = __ne__ (st.convergence_mode, 'PARALLEL');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, st, 'convergence_distance');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, st, 'interocular_distance');
+		}) ();
 		if (is_spherical_stereo) {
-			col.separator ();
-			col.prop (st, 'use_spherical_stereo');
-			var sub = col.column ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, st, 'use_spherical_stereo');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			sub.active = st.use_spherical_stereo;
-			sub.prop (st, 'use_pole_merge');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, st, 'use_pole_merge');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = st.use_pole_merge;
-			sub.prop (st, 'pole_merge_angle_from', __kwargtrans__ ({text: 'Pole Merge Angle Start'}));
-			sub.prop (st, 'pole_merge_angle_to', __kwargtrans__ ({text: 'End'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, st, 'pole_merge_angle_from', __kwargtrans__ ({text: 'Pole Merge Angle Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, st, 'pole_merge_angle_to', __kwargtrans__ ({text: 'End'}));
+			}) ();
 		}
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = !(use_spherical_stereo);
-		col.separator ();
-		col.prop (st, 'pivot');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, st, 'pivot');
+		}) ();
 	});}
 });
 export var DATA_PT_camera =  __class__ ('DATA_PT_camera', [CameraButtonsPanel, Panel], {
@@ -271,7 +469,7 @@ export var DATA_PT_camera =  __class__ ('DATA_PT_camera', [CameraButtonsPanel, P
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -283,12 +481,15 @@ export var DATA_PT_camera =  __class__ ('DATA_PT_camera', [CameraButtonsPanel, P
 		}
 		else {
 		}
-		CAMERA_PT_presets.draw_panel_header (self.layout);
+		(function () {
+			var __accu0__ = CAMERA_PT_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, self.layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -303,18 +504,39 @@ export var DATA_PT_camera =  __class__ ('DATA_PT_camera', [CameraButtonsPanel, P
 		var layout = self.layout;
 		var cam = context.camera;
 		layout.use_property_split = true;
-		var col = layout.column ();
-		col.prop (cam, 'sensor_fit');
-		if (cam.sensor_fit == 'AUTO') {
-			col.prop (cam, 'sensor_width', __kwargtrans__ ({text: 'Size'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'sensor_fit');
+		}) ();
+		if (__eq__ (cam.sensor_fit, 'AUTO')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cam, 'sensor_width', __kwargtrans__ ({text: 'Size'}));
+			}) ();
 		}
 		else {
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.active = cam.sensor_fit == 'HORIZONTAL';
-			sub.prop (cam, 'sensor_width', __kwargtrans__ ({text: 'Width'}));
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.active = cam.sensor_fit == 'VERTICAL';
-			sub.prop (cam, 'sensor_height', __kwargtrans__ ({text: 'Height'}));
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			sub.active = __eq__ (cam.sensor_fit, 'HORIZONTAL');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, cam, 'sensor_width', __kwargtrans__ ({text: 'Width'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			sub.active = __eq__ (cam.sensor_fit, 'VERTICAL');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, cam, 'sensor_height', __kwargtrans__ ({text: 'Height'}));
+			}) ();
 		}
 	});}
 });
@@ -326,7 +548,7 @@ export var DATA_PT_camera_dof =  __class__ ('DATA_PT_camera_dof', [CameraButtons
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -340,12 +562,15 @@ export var DATA_PT_camera_dof =  __class__ ('DATA_PT_camera_dof', [CameraButtons
 		}
 		var cam = context.camera;
 		var dof = cam.dof;
-		self.layout.prop (dof, 'use_dof', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'use_dof', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -362,16 +587,37 @@ export var DATA_PT_camera_dof =  __class__ ('DATA_PT_camera_dof', [CameraButtons
 		var cam = context.camera;
 		var dof = cam.dof;
 		layout.active = dof.use_dof;
-		var col = layout.column ();
-		col.prop (dof, 'focus_object', __kwargtrans__ ({text: 'Focus on Object'}));
-		if (dof.focus_object && dof.focus_object.py_metatype == 'ARMATURE') {
-			col.prop_search (dof, 'focus_subtarget', dof.focus_object.data, 'bones', __kwargtrans__ ({text: 'Focus on Bone'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'focus_object', __kwargtrans__ ({text: 'Focus on Object'}));
+		}) ();
+		if (dof.focus_object && __eq__ (dof.focus_object.py_metatype, 'ARMATURE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop_search, __accu0__, dof, 'focus_subtarget', dof.focus_object.data, 'bones', __kwargtrans__ ({text: 'Focus on Bone'}));
+			}) ();
 		}
-		var sub = col.column ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = dof.focus_object === null;
-		var row = sub.row (__kwargtrans__ ({align: true}));
-		row.prop (dof, 'focus_distance', __kwargtrans__ ({text: 'Focus Distance'}));
-		row.operator ('ui.eyedropper_depth', __kwargtrans__ ({icon: 'EYEDROPPER', text: ''})).prop_data_path = 'scene.camera.data.dof.focus_distance';
+		var row = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'focus_distance', __kwargtrans__ ({text: 'Focus Distance'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'ui.eyedropper_depth', __kwargtrans__ ({icon: 'EYEDROPPER', text: ''}));
+		}) ().prop_data_path = 'scene.camera.data.dof.focus_distance';
 	});}
 });
 export var DATA_PT_camera_dof_aperture =  __class__ ('DATA_PT_camera_dof_aperture', [CameraButtonsPanel, Panel], {
@@ -382,7 +628,7 @@ export var DATA_PT_camera_dof_aperture =  __class__ ('DATA_PT_camera_dof_apertur
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -399,13 +645,34 @@ export var DATA_PT_camera_dof_aperture =  __class__ ('DATA_PT_camera_dof_apertur
 		var cam = context.camera;
 		var dof = cam.dof;
 		layout.active = dof.use_dof;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
-		col.prop (dof, 'aperture_fstop');
-		var col = flow.column ();
-		col.prop (dof, 'aperture_blades');
-		col.prop (dof, 'aperture_rotation');
-		col.prop (dof, 'aperture_ratio');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'aperture_fstop');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'aperture_blades');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'aperture_rotation');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, dof, 'aperture_ratio');
+		}) ();
 	});}
 });
 export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_background_image', [CameraButtonsPanel, Panel], {
@@ -416,7 +683,7 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -429,12 +696,15 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 		else {
 		}
 		var cam = context.camera;
-		self.layout.prop (cam, 'show_background_images', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_background_images', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -451,81 +721,221 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 		layout.use_property_decorate = false;
 		var cam = context.camera;
 		var use_multiview = context.scene.render.use_multiview;
-		var col = layout.column ();
-		col.operator ('view3d.camera_background_image_add', __kwargtrans__ ({text: 'Add Image'}));
-		for (var [i, bg] of py_enumerate (cam.background_images)) {
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'view3d.camera_background_image_add', __kwargtrans__ ({text: 'Add Image'}));
+		}) ();
+		var __iterable0__ = __call__ (py_enumerate, null, cam.background_images);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var bg = __left0__ [1];
 			layout.active = cam.show_background_images;
-			var box = layout.box ();
-			var row = box.row (__kwargtrans__ ({align: true}));
-			row.prop (bg, 'show_expanded', __kwargtrans__ ({text: '', emboss: false}));
-			if (bg.source == 'IMAGE' && bg.image) {
-				row.prop (bg.image, 'name', __kwargtrans__ ({text: '', emboss: false}));
+			var box = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.box, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, bg, 'show_expanded', __kwargtrans__ ({text: '', emboss: false}));
+			}) ();
+			if (__eq__ (bg.source, 'IMAGE') && bg.image) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, bg.image, 'name', __kwargtrans__ ({text: '', emboss: false}));
+				}) ();
 			}
-			else if (bg.source == 'MOVIE_CLIP' && bg.clip) {
-				row.prop (bg.clip, 'name', __kwargtrans__ ({text: '', emboss: false}));
+			else if (__eq__ (bg.source, 'MOVIE_CLIP') && bg.clip) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, bg.clip, 'name', __kwargtrans__ ({text: '', emboss: false}));
+				}) ();
 			}
 			else if (bg.source && bg.use_camera_clip) {
-				row.label (__kwargtrans__ ({text: 'Active Clip'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Active Clip'}));
+				}) ();
 			}
 			else {
-				row.label (__kwargtrans__ ({text: 'Not Set'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Not Set'}));
+				}) ();
 			}
-			row.prop (bg, 'show_background_image', __kwargtrans__ ({text: '', emboss: false, icon: (bg.show_background_image ? 'RESTRICT_VIEW_OFF' : 'RESTRICT_VIEW_ON')}));
-			row.operator ('view3d.camera_background_image_remove', __kwargtrans__ ({text: '', emboss: false, icon: 'X'})).index = i;
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, bg, 'show_background_image', __kwargtrans__ ({text: '', emboss: false, icon: (bg.show_background_image ? 'RESTRICT_VIEW_OFF' : 'RESTRICT_VIEW_ON')}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'view3d.camera_background_image_remove', __kwargtrans__ ({text: '', emboss: false, icon: 'X'}));
+			}) ().index = i;
 			if (bg.show_expanded) {
-				var row = box.row ();
-				row.prop (bg, 'source', __kwargtrans__ ({expand: true}));
+				var row = (function () {
+					var __accu0__ = box;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, bg, 'source', __kwargtrans__ ({expand: true}));
+				}) ();
 				var has_bg = false;
-				if (bg.source == 'IMAGE') {
-					var row = box.row ();
-					row.template_ID (bg, 'image', __kwargtrans__ ({open: 'image.open'}));
+				if (__eq__ (bg.source, 'IMAGE')) {
+					var row = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, bg, 'image', __kwargtrans__ ({open: 'image.open'}));
+					}) ();
 					if (bg.image !== null) {
-						box.template_image (bg, 'image', bg.image_user, __kwargtrans__ ({compact: true}));
+						(function () {
+							var __accu0__ = box;
+							return __call__ (__accu0__.template_image, __accu0__, bg, 'image', bg.image_user, __kwargtrans__ ({compact: true}));
+						}) ();
 						var has_bg = true;
 						if (use_multiview) {
-							box.prop (bg.image, 'use_multiview');
-							var column = box.column ();
+							(function () {
+								var __accu0__ = box;
+								return __call__ (__accu0__.prop, __accu0__, bg.image, 'use_multiview');
+							}) ();
+							var column = (function () {
+								var __accu0__ = box;
+								return __call__ (__accu0__.column, __accu0__);
+							}) ();
 							column.active = bg.image.use_multiview;
-							column.label (__kwargtrans__ ({text: 'Views Format:'}));
-							column.row ().prop (bg.image, 'views_format', __kwargtrans__ ({expand: true}));
-							var sub = column.box ();
-							sub.active = bg.image.views_format == 'STEREO_3D';
-							sub.template_image_stereo_3d (bg.image.stereo_3d_format);
+							(function () {
+								var __accu0__ = column;
+								return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Views Format:'}));
+							}) ();
+							(function () {
+								var __accu0__ = (function () {
+									var __accu1__ = column;
+									return __call__ (__accu1__.row, __accu1__);
+								}) ();
+								return __call__ (__accu0__.prop, __accu0__, bg.image, 'views_format', __kwargtrans__ ({expand: true}));
+							}) ();
+							var sub = (function () {
+								var __accu0__ = column;
+								return __call__ (__accu0__.box, __accu0__);
+							}) ();
+							sub.active = __eq__ (bg.image.views_format, 'STEREO_3D');
+							(function () {
+								var __accu0__ = sub;
+								return __call__ (__accu0__.template_image_stereo_3d, __accu0__, bg.image.stereo_3d_format);
+							}) ();
 						}
 					}
 				}
-				else if (bg.source == 'MOVIE_CLIP') {
-					box.prop (bg, 'use_camera_clip', __kwargtrans__ ({text: 'Active Clip'}));
-					var column = box.column ();
+				else if (__eq__ (bg.source, 'MOVIE_CLIP')) {
+					(function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'use_camera_clip', __kwargtrans__ ({text: 'Active Clip'}));
+					}) ();
+					var column = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
 					column.active = !(bg.use_camera_clip);
-					column.template_ID (bg, 'clip', __kwargtrans__ ({open: 'clip.open'}));
+					(function () {
+						var __accu0__ = column;
+						return __call__ (__accu0__.template_ID, __accu0__, bg, 'clip', __kwargtrans__ ({open: 'clip.open'}));
+					}) ();
 					if (bg.clip) {
-						column.template_movieclip (bg, 'clip', __kwargtrans__ ({compact: true}));
+						(function () {
+							var __accu0__ = column;
+							return __call__ (__accu0__.template_movieclip, __accu0__, bg, 'clip', __kwargtrans__ ({compact: true}));
+						}) ();
 					}
 					if (bg.use_camera_clip || bg.clip) {
 						var has_bg = true;
 					}
-					var column = box.column ();
+					var column = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
 					column.active = has_bg;
-					column.prop (bg.clip_user, 'use_render_undistorted');
-					column.prop (bg.clip_user, 'proxy_render_size');
+					(function () {
+						var __accu0__ = column;
+						return __call__ (__accu0__.prop, __accu0__, bg.clip_user, 'use_render_undistorted');
+					}) ();
+					(function () {
+						var __accu0__ = column;
+						return __call__ (__accu0__.prop, __accu0__, bg.clip_user, 'proxy_render_size');
+					}) ();
 				}
 				if (has_bg) {
-					var col = box.column ();
+					var col = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
 					if (bg.image !== null) {
-						col.prop (bg.image, 'use_view_as_render');
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop, __accu0__, bg.image, 'use_view_as_render');
+						}) ();
 					}
-					col.prop (bg, 'alpha');
-					col.row ().prop (bg, 'display_depth', __kwargtrans__ ({expand: true}));
-					col.row ().prop (bg, 'frame_method', __kwargtrans__ ({expand: true}));
-					var row = box.row ();
-					row.prop (bg, 'offset');
-					var col = box.column ();
-					col.prop (bg, 'rotation');
-					col.prop (bg, 'scale');
-					var col = box.column (__kwargtrans__ ({heading: 'Flip', heading_ctxt: i18n_contexts.id_image}));
-					col.prop (bg, 'use_flip_x', __kwargtrans__ ({text: 'X'}));
-					col.prop (bg, 'use_flip_y', __kwargtrans__ ({text: 'Y'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'alpha');
+					}) ();
+					(function () {
+						var __accu0__ = (function () {
+							var __accu1__ = col;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.prop, __accu0__, bg, 'display_depth', __kwargtrans__ ({expand: true}));
+					}) ();
+					(function () {
+						var __accu0__ = (function () {
+							var __accu1__ = col;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.prop, __accu0__, bg, 'frame_method', __kwargtrans__ ({expand: true}));
+					}) ();
+					var row = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'offset');
+					}) ();
+					var col = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'rotation');
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'scale');
+					}) ();
+					var col = (function () {
+						var __accu0__ = box;
+						return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Flip', heading_ctxt: i18n_contexts.id_image}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'use_flip_x', __kwargtrans__ ({text: 'X'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, bg, 'use_flip_y', __kwargtrans__ ({text: 'Y'}));
+					}) ();
 				}
 			}
 		}
@@ -539,7 +949,7 @@ export var DATA_PT_camera_display =  __class__ ('DATA_PT_camera_display', [Camer
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -554,22 +964,64 @@ export var DATA_PT_camera_display =  __class__ ('DATA_PT_camera_display', [Camer
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var cam = context.camera;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (cam, 'display_size', __kwargtrans__ ({text: 'Size'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Show'}));
-		col.prop (cam, 'show_limits', __kwargtrans__ ({text: 'Limits'}));
-		col.prop (cam, 'show_mist', __kwargtrans__ ({text: 'Mist'}));
-		col.prop (cam, 'show_sensor', __kwargtrans__ ({text: 'Sensor'}));
-		col.prop (cam, 'show_name', __kwargtrans__ ({text: 'Name'}));
-		var col = layout.column (__kwargtrans__ ({align: false, heading: 'Passepartout'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'display_size', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_limits', __kwargtrans__ ({text: 'Limits'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_mist', __kwargtrans__ ({text: 'Mist'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_sensor', __kwargtrans__ ({text: 'Sensor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_name', __kwargtrans__ ({text: 'Name'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Passepartout'}));
+		}) ();
 		col.use_property_decorate = false;
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (cam, 'show_passepartout', __kwargtrans__ ({text: ''}));
-		var sub = sub.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_passepartout', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = cam.show_passepartout;
-		sub.prop (cam, 'passepartout_alpha', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (cam, 'passepartout_alpha');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'passepartout_alpha', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, cam, 'passepartout_alpha');
+		}) ();
 	});}
 });
 export var DATA_PT_camera_display_composition_guides =  __class__ ('DATA_PT_camera_display_composition_guides', [CameraButtonsPanel, Panel], {
@@ -581,7 +1033,7 @@ export var DATA_PT_camera_display_composition_guides =  __class__ ('DATA_PT_came
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -593,12 +1045,15 @@ export var DATA_PT_camera_display_composition_guides =  __class__ ('DATA_PT_came
 		}
 		else {
 		}
-		self.draw_panel (self.layout, context.camera);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_panel, __accu0__, self.layout, context.camera);
+		}) ();
 	});},
 	get draw_panel () {return __getcm__ (this, function (cls, layout, camera) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -612,19 +1067,58 @@ export var DATA_PT_camera_display_composition_guides =  __class__ ('DATA_PT_came
 		else {
 		}
 		layout.use_property_split = true;
-		layout.prop (camera, 'show_composition_thirds');
-		var col = layout.column (__kwargtrans__ ({heading: 'Center', align: true}));
-		col.prop (camera, 'show_composition_center');
-		col.prop (camera, 'show_composition_center_diagonal', __kwargtrans__ ({text: 'Diagonal'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Golden', align: true}));
-		col.prop (camera, 'show_composition_golden', __kwargtrans__ ({text: 'Ratio'}));
-		col.prop (camera, 'show_composition_golden_tria_a', __kwargtrans__ ({text: 'Triangle A'}));
-		col.prop (camera, 'show_composition_golden_tria_b', __kwargtrans__ ({text: 'Triangle B'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Harmony', align: true}));
-		col.prop (camera, 'show_composition_harmony_tri_a', __kwargtrans__ ({text: 'Triangle A'}));
-		col.prop (camera, 'show_composition_harmony_tri_b', __kwargtrans__ ({text: 'Triangle B'}));
-		var col = layout.column ();
-		col.prop (camera, 'composition_guide_color', __kwargtrans__ ({text: 'Color'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_thirds');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Center', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_center');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_center_diagonal', __kwargtrans__ ({text: 'Diagonal'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Golden', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_golden', __kwargtrans__ ({text: 'Ratio'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_golden_tria_a', __kwargtrans__ ({text: 'Triangle A'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_golden_tria_b', __kwargtrans__ ({text: 'Triangle B'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Harmony', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_harmony_tri_a', __kwargtrans__ ({text: 'Triangle A'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'show_composition_harmony_tri_b', __kwargtrans__ ({text: 'Triangle B'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, camera, 'composition_guide_color', __kwargtrans__ ({text: 'Color'}));
+		}) ();
 	});}
 });
 export var DATA_PT_camera_safe_areas =  __class__ ('DATA_PT_camera_safe_areas', [CameraButtonsPanel, Panel], {
@@ -635,7 +1129,7 @@ export var DATA_PT_camera_safe_areas =  __class__ ('DATA_PT_camera_safe_areas', 
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -648,12 +1142,15 @@ export var DATA_PT_camera_safe_areas =  __class__ ('DATA_PT_camera_safe_areas', 
 		else {
 		}
 		var cam = context.camera;
-		self.layout.prop (cam, 'show_safe_areas', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_safe_areas', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -665,12 +1162,15 @@ export var DATA_PT_camera_safe_areas =  __class__ ('DATA_PT_camera_safe_areas', 
 		}
 		else {
 		}
-		CAMERA_PT_safe_areas_presets.draw_panel_header (self.layout);
+		(function () {
+			var __accu0__ = CAMERA_PT_safe_areas_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, self.layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -687,10 +1187,22 @@ export var DATA_PT_camera_safe_areas =  __class__ ('DATA_PT_camera_safe_areas', 
 		var camera = context.camera;
 		layout.use_property_split = true;
 		layout.active = camera.show_safe_areas;
-		var col = layout.column ();
-		var sub = col.column ();
-		sub.prop (safe_data, 'title', __kwargtrans__ ({slider: true}));
-		sub.prop (safe_data, 'action', __kwargtrans__ ({slider: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, safe_data, 'title', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, safe_data, 'action', __kwargtrans__ ({slider: true}));
+		}) ();
 	});}
 });
 export var DATA_PT_camera_safe_areas_center_cut =  __class__ ('DATA_PT_camera_safe_areas_center_cut', [CameraButtonsPanel, Panel], {
@@ -702,7 +1214,7 @@ export var DATA_PT_camera_safe_areas_center_cut =  __class__ ('DATA_PT_camera_sa
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -717,12 +1229,15 @@ export var DATA_PT_camera_safe_areas_center_cut =  __class__ ('DATA_PT_camera_sa
 		var cam = context.camera;
 		var layout = self.layout;
 		layout.active = cam.show_safe_areas;
-		layout.prop (cam, 'show_safe_center', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, cam, 'show_safe_center', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -739,9 +1254,18 @@ export var DATA_PT_camera_safe_areas_center_cut =  __class__ ('DATA_PT_camera_sa
 		var camera = context.camera;
 		layout.use_property_split = true;
 		layout.active = camera.show_safe_areas && camera.show_safe_center;
-		var col = layout.column ();
-		col.prop (safe_data, 'title_center', __kwargtrans__ ({slider: true}));
-		col.prop (safe_data, 'action_center', __kwargtrans__ ({slider: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, safe_data, 'title_center', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, safe_data, 'action_center', __kwargtrans__ ({slider: true}));
+		}) ();
 	});}
 });
 export var DATA_PT_camera_animation =  __class__ ('DATA_PT_camera_animation', [CameraButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -756,11 +1280,37 @@ export var DATA_PT_custom_props_camera =  __class__ ('DATA_PT_custom_props_camer
 	_property_type: bpy.types.Camera
 });
 export var classes = tuple ([CAMERA_PT_presets, CAMERA_PT_safe_areas_presets, DATA_PT_context_camera, DATA_PT_lens, DATA_PT_camera_dof, DATA_PT_camera_dof_aperture, DATA_PT_camera, DATA_PT_camera_stereoscopy, DATA_PT_camera_safe_areas, DATA_PT_camera_safe_areas_center_cut, DATA_PT_camera_background_image, DATA_PT_camera_display, DATA_PT_camera_display_composition_guides, DATA_PT_camera_animation, DATA_PT_custom_props_camera]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_camera.map
 export {Panel, PresetPanel, PropertiesAnimationMixin, PropertyPanel, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'CameraButtonsPanel': CameraButtonsPanel = value; break;
+		case 'CAMERA_PT_presets': CAMERA_PT_presets = value; break;
+		case 'CAMERA_PT_safe_areas_presets': CAMERA_PT_safe_areas_presets = value; break;
+		case 'DATA_PT_context_camera': DATA_PT_context_camera = value; break;
+		case 'DATA_PT_lens': DATA_PT_lens = value; break;
+		case 'DATA_PT_camera_stereoscopy': DATA_PT_camera_stereoscopy = value; break;
+		case 'DATA_PT_camera': DATA_PT_camera = value; break;
+		case 'DATA_PT_camera_dof': DATA_PT_camera_dof = value; break;
+		case 'DATA_PT_camera_dof_aperture': DATA_PT_camera_dof_aperture = value; break;
+		case 'DATA_PT_camera_background_image': DATA_PT_camera_background_image = value; break;
+		case 'DATA_PT_camera_display': DATA_PT_camera_display = value; break;
+		case 'DATA_PT_camera_display_composition_guides': DATA_PT_camera_display_composition_guides = value; break;
+		case 'DATA_PT_camera_safe_areas': DATA_PT_camera_safe_areas = value; break;
+		case 'DATA_PT_camera_safe_areas_center_cut': DATA_PT_camera_safe_areas_center_cut = value; break;
+		case 'DATA_PT_camera_animation': DATA_PT_camera_animation = value; break;
+		case 'DATA_PT_custom_props_camera': DATA_PT_custom_props_camera = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

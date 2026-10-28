@@ -8,7 +8,7 @@ var __name__ = 'collections';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -19,8 +19,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -28,7 +34,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -53,7 +59,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -72,7 +78,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,18 +91,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -107,8 +116,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -124,7 +139,7 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -139,8 +154,14 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 	}
 	else {
 	}
-	var fields = (isinstance (field_names, str) ? tuple (field_names.py_replace (',', ' ').py_split ()) : tuple (field_names));
-	var trailing = dict (zip (fields.__getslice__ (len (fields) - len (defaults || tuple ([])), null, 1), defaults || tuple ([])));
+	var fields = (__call__ (isinstance, null, field_names, str) ? __call__ (tuple, null, (function () {
+		var __accu0__ = (function () {
+			var __accu1__ = field_names;
+			return __call__ (__accu1__.py_replace, __accu1__, ',', ' ');
+		}) ();
+		return __call__ (__accu0__.py_split, __accu0__);
+	}) ()) : __call__ (tuple, null, field_names));
+	var trailing = __call__ (dict, null, __call__ (zip, null, __getslice__ (fields, __sub__ (__call__ (len, null, fields), __call__ (len, null, defaults || tuple ([]))), null, 1), defaults || tuple ([])));
 	var NamedTuple = __class__ ('NamedTuple', [object], {
 		__module__: __name__,
 		_fields: fields,
@@ -149,7 +170,7 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 			var kwargs = dict ();
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -164,14 +185,87 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 			else {
 				var args = tuple ();
 			}
-			for (var [index, py_name] of py_enumerate (fields)) {
-				setattr (self, py_name, (index < len (args) ? args [index] : kwargs.py_get (py_name, trailing.py_get (py_name))));
+			var __iterable0__ = __call__ (py_enumerate, null, fields);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var index = __left0__ [0];
+				var py_name = __left0__ [1];
+				__call__ (setattr, null, self, py_name, (__lt__ (index, __call__ (len, null, args)) ? __getitem__ (args, index) : (function () {
+					var __accu0__ = kwargs;
+					return __call__ (__accu0__.py_get, __accu0__, py_name, (function () {
+						var __accu1__ = trailing;
+						return __call__ (__accu1__.py_get, __accu1__, py_name);
+					}) ());
+				}) ()));
 			}
+		});},
+		get __getitem__ () {return __get__ (this, function (self, index) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+							case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return __call__ (getattr, null, self, __getitem__ (fields, index));
+		});},
+		get __iter__ () {return __get__ (this, function (self) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return __call__ (py_iter, null, (function () {
+				var __accu0__ = [];
+				var __iterable0__ = fields;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var py_name = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __call__ (getattr, null, self, py_name));
+					}) ();
+				}
+				return __accu0__;
+			}) ());
+		});},
+		[Symbol.iterator] () {return this.__iter__ ()},
+		get __len__ () {return __get__ (this, function (self) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return __call__ (len, null, fields);
 		});},
 		get _asdict () {return __get__ (this, function (self) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -184,8 +278,14 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 			}
 			return (function () {
 				var __accu0__ = [];
-				for (var py_name of fields) {
-					__accu0__.append ([py_name, getattr (self, py_name)]);
+				var __iterable0__ = fields;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var py_name = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, [py_name, __call__ (getattr, null, self, py_name)]);
+					}) ();
 				}
 				return dict (__accu0__);
 			}) ();
@@ -194,7 +294,7 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 			var kwargs = dict ();
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -207,9 +307,15 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 			}
 			else {
 			}
-			var py_values = self._asdict ();
-			py_values.py_update (kwargs);
-			return NamedTuple (__kwargtrans__ (_merged (py_values)));
+			var py_values = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._asdict, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = py_values;
+				return __call__ (__accu0__.py_update, __accu0__, kwargs);
+			}) ();
+			return __call__ (NamedTuple, null, __kwargtrans__ (__call__ (_merged, null, py_values)));
 		});}
 	});
 	NamedTuple.__name__ = typename;
@@ -222,7 +328,7 @@ export var defaultdict = function (default_factory) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -235,7 +341,7 @@ export var defaultdict = function (default_factory) {
 	else {
 		var args = tuple ();
 	}
-	var py_values = dict (...args);
+	var py_values = __call__ (dict, null, ...args);
 	return new Proxy(values, {get: (target, key) => key in target || typeof key !== 'string' || !default_factory ? target[key] : (target[key] = default_factory())});
 };
 export var Counter = function (iterable) {
@@ -244,7 +350,7 @@ export var Counter = function (iterable) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -256,8 +362,14 @@ export var Counter = function (iterable) {
 	else {
 	}
 	var counts = dict ({});
-	for (var item of iterable) {
-		counts [item] = counts.py_get (item, 0) + 1;
+	var __iterable0__ = iterable;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var item = __getitem__ (__iterable0__, __index0__);
+		__setitem__ (counts, item, __add__ ((function () {
+			var __accu0__ = counts;
+			return __call__ (__accu0__.py_get, __accu0__, item, 0);
+		}) (), 1));
 	}
 	return counts;
 };
@@ -270,7 +382,7 @@ export var deque = function (iterable, maxlen) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -282,11 +394,11 @@ export var deque = function (iterable, maxlen) {
 	}
 	else {
 	}
-	var py_items = list (iterable);
+	var py_items = __call__ (list, null, iterable);
 	py_items.appendleft = (function __lambda__ (item) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -297,12 +409,15 @@ export var deque = function (iterable, maxlen) {
 		}
 		else {
 		}
-		return py_items.insert (0, item);
+		return (function () {
+			var __accu0__ = py_items;
+			return __call__ (__accu0__.insert, __accu0__, 0, item);
+		}) ();
 	});
 	py_items.popleft = (function __lambda__ () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -310,9 +425,28 @@ export var deque = function (iterable, maxlen) {
 		}
 		else {
 		}
-		return py_items.py_pop (0);
+		return (function () {
+			var __accu0__ = py_items;
+			return __call__ (__accu0__.py_pop, __accu0__, 0);
+		}) ();
 	});
 	return py_items;
 };
 
 //# sourceMappingURL=collections.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'namedtuple': namedtuple = value; break;
+		case 'OrderedDict': OrderedDict = value; break;
+		case 'defaultdict': defaultdict = value; break;
+		case 'Counter': Counter = value; break;
+		case 'deque': deque = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

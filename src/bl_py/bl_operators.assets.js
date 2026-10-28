@@ -15,7 +15,7 @@ export var AssetBrowserMetadataOperator =  __class__ ('AssetBrowserMetadataOpera
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -27,11 +27,17 @@ export var AssetBrowserMetadataOperator =  __class__ ('AssetBrowserMetadataOpera
 		}
 		else {
 		}
-		if (!(SpaceAssetInfo.is_asset_browser_poll (context)) || !(context.asset)) {
+		if (!((function () {
+			var __accu0__ = SpaceAssetInfo;
+			return __call__ (__accu0__.is_asset_browser_poll, __accu0__, context);
+		}) ()) || !(context.asset)) {
 			return false;
 		}
 		if (!(context.asset.local_id)) {
-			Operator.poll_message_set ('Asset metadata from external asset libraries cannot be edited, only assets stored in the current file can');
+			(function () {
+				var __accu0__ = Operator;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Asset metadata from external asset libraries cannot be edited, only assets stored in the current file can');
+			}) ();
 			return false;
 		}
 		return true;
@@ -45,7 +51,7 @@ export var ASSET_OT_tag_add =  __class__ ('ASSET_OT_tag_add', [AssetBrowserMetad
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -58,7 +64,10 @@ export var ASSET_OT_tag_add =  __class__ ('ASSET_OT_tag_add', [AssetBrowserMetad
 		else {
 		}
 		var active_asset = context.asset;
-		active_asset.metadata.tags.py_new (data_ ('Tag'));
+		(function () {
+			var __accu0__ = active_asset.metadata.tags;
+			return __call__ (__accu0__.py_new, __accu0__, __call__ (data_, null, 'Tag'));
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -70,7 +79,7 @@ export var ASSET_OT_tag_remove =  __class__ ('ASSET_OT_tag_remove', [AssetBrowse
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -82,17 +91,17 @@ export var ASSET_OT_tag_remove =  __class__ ('ASSET_OT_tag_remove', [AssetBrowse
 		}
 		else {
 		}
-		if (!(__super__ (ASSET_OT_tag_remove, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (__super__, null, ASSET_OT_tag_remove, 'poll'), null, self, context))) {
 			return false;
 		}
 		var active_asset = context.asset;
 		var asset_metadata = active_asset.metadata;
-		return __in__ (asset_metadata.active_tag, range (len (asset_metadata.tags)));
+		return __in__ (asset_metadata.active_tag, __call__ (range, null, __call__ (len, null, asset_metadata.tags)));
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -106,9 +115,12 @@ export var ASSET_OT_tag_remove =  __class__ ('ASSET_OT_tag_remove', [AssetBrowse
 		}
 		var active_asset = context.asset;
 		var asset_metadata = active_asset.metadata;
-		var tag = asset_metadata.tags [asset_metadata.active_tag];
-		asset_metadata.tags.remove (tag);
-		asset_metadata.active_tag--;
+		var tag = __getitem__ (asset_metadata.tags, asset_metadata.active_tag);
+		(function () {
+			var __accu0__ = asset_metadata.tags;
+			return __call__ (__accu0__.remove, __accu0__, tag);
+		}) ();
+		asset_metadata.active_tag = __call__ (__isub__, null, asset_metadata.active_tag, 1);
 		return new set (['FINISHED']);
 	});}
 });
@@ -121,7 +133,7 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -133,25 +145,43 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		}
 		else {
 		}
-		var asset = getattr (context, 'asset', null);
+		var asset = __call__ (getattr, null, context, 'asset', null);
 		if (!(asset)) {
-			cls.poll_message_set ('No asset selected');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'No asset selected');
+			}) ();
 			return false;
 		}
 		if (asset.local_id) {
-			cls.poll_message_set ('Selected asset is contained in the current file');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is contained in the current file');
+			}) ();
 			return false;
 		}
 		if (asset.is_online) {
-			cls.poll_message_set ('Selected asset is stored online');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is stored online');
+			}) ();
 			return false;
 		}
 		if (!(asset.owner_asset_library.is_editable)) {
-			cls.poll_message_set ('The asset library this asset belongs to is not editable');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'The asset library this asset belongs to is not editable');
+			}) ();
 			return false;
 		}
-		if (asset.full_library_path.endswith ('.asset.blend')) {
-			cls.poll_message_set ('Selected asset is contained in a file managed by the asset system, manual edits should be avoided');
+		if ((function () {
+			var __accu0__ = asset.full_library_path;
+			return __call__ (__accu0__.endswith, __accu0__, '.asset.blend');
+		}) ()) {
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is contained in a file managed by the asset system, manual edits should be avoided');
+			}) ();
 			return false;
 		}
 		return true;
@@ -159,7 +189,7 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -173,20 +203,32 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		}
 		var asset = context.asset;
 		if (asset.local_id) {
-			self.report (new set (['WARNING']), 'This asset is stored in the current blend file');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'This asset is stored in the current blend file');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		var asset_lib_path = asset.full_library_path;
-		self.open_in_new_blender (asset_lib_path);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.open_in_new_blender, __accu0__, asset_lib_path);
+		}) ();
 		var wm = context.window_manager;
-		self._timer = wm.event_timer_add (0.1, __kwargtrans__ ({window: context.window}));
-		wm.modal_handler_add (self);
+		self._timer = (function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.event_timer_add, __accu0__, 0.1, __kwargtrans__ ({window: context.window}));
+		}) ();
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.modal_handler_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});},
 	get modal () {return __get__ (this, function (self, context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -199,31 +241,55 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		}
 		else {
 		}
-		if (event.py_metatype != 'TIMER') {
+		if (__ne__ (event.py_metatype, 'TIMER')) {
 			return new set (['PASS_THROUGH']);
 		}
 		if (self._process === null) {
-			self.report (new set (['ERROR']), 'Unable to find any running process');
-			self.cancel (context);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Unable to find any running process');
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.cancel, __accu0__, context);
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var returncode = self._process.poll ();
+		var returncode = (function () {
+			var __accu0__ = self._process;
+			return __call__ (__accu0__.poll, __accu0__);
+		}) ();
 		if (returncode === null) {
 			return new set (['RUNNING_MODAL']);
 		}
 		if (returncode) {
-			self.report (new set (['WARNING']), rpt_ ('Blender sub-process exited with error code {:d}').format (returncode));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Blender sub-process exited with error code {:d}');
+					return __call__ (__accu1__.format, __accu1__, returncode);
+				}) ());
+			}) ();
 		}
-		if (bpy.ops.asset.library_refresh.poll ()) {
-			bpy.ops.asset.library_refresh ();
+		if ((function () {
+			var __accu0__ = bpy.ops.asset.library_refresh;
+			return __call__ (__accu0__.poll, __accu0__);
+		}) ()) {
+			(function () {
+				var __accu0__ = bpy.ops.asset;
+				return __call__ (__accu0__.library_refresh, __accu0__);
+			}) ();
 		}
-		self.cancel (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.cancel, __accu0__, context);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get cancel () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -236,12 +302,15 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		else {
 		}
 		var wm = context.window_manager;
-		wm.event_timer_remove (self._timer);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.event_timer_remove, __accu0__, self._timer);
+		}) ();
 	});},
 	get open_in_new_blender () {return __get__ (this, function (self, filepath) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -253,9 +322,12 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		}
 		else {
 		}
-		var subprocess = _module ('subprocess');
-		var cli_args = [bpy.app.binary_path, str (filepath)];
-		self._process = subprocess.Popen (cli_args);
+		var subprocess = __call__ (_module, null, 'subprocess');
+		var cli_args = [bpy.app.binary_path, __call__ (str, null, filepath)];
+		self._process = (function () {
+			var __accu0__ = subprocess;
+			return __call__ (__accu0__.Popen, __accu0__, cli_args);
+		}) ();
 	});}
 });
 export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_containing_blend_file', [Operator], {
@@ -266,7 +338,7 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -278,17 +350,26 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 		}
 		else {
 		}
-		var asset = getattr (context, 'asset', null);
+		var asset = __call__ (getattr, null, context, 'asset', null);
 		if (!(asset)) {
-			cls.poll_message_set ('No asset selected');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'No asset selected');
+			}) ();
 			return false;
 		}
 		if (asset.local_id && !(bpy.data.filepath)) {
-			cls.poll_message_set ('Asset local to the current file, which is not saved anywhere');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Asset local to the current file, which is not saved anywhere');
+			}) ();
 			return false;
 		}
 		if (asset.is_online) {
-			cls.poll_message_set ('Selected asset is stored online');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is stored online');
+			}) ();
 			return false;
 		}
 		return true;
@@ -296,7 +377,7 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -308,18 +389,33 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 		}
 		else {
 		}
-		var Path = _member ('pathlib', 'Path');
+		var Path = __call__ (_member, null, 'pathlib', 'Path');
 		var asset = context.asset;
 		if (asset.local_id) {
-			var asset_path = Path (bpy.data.filepath);
+			var asset_path = __call__ (Path, null, bpy.data.filepath);
 		}
 		else {
-			var asset_path = Path (asset.full_library_path);
+			var asset_path = __call__ (Path, null, asset.full_library_path);
 		}
-		return bpy.ops.wm.path_open (__kwargtrans__ ({filepath: str (asset_path.parent)}));
+		return (function () {
+			var __accu0__ = bpy.ops.wm;
+			return __call__ (__accu0__.path_open, __accu0__, __kwargtrans__ ({filepath: __call__ (str, null, asset_path.parent)}));
+		}) ();
 	});}
 });
 export var classes = tuple ([ASSET_OT_tag_add, ASSET_OT_tag_remove, ASSET_OT_open_containing_blend_file, ASSET_OT_browse_containing_blend_file]);
 
 //# sourceMappingURL=bl_operators.assets.map
 export {Operator, SpaceAssetInfo, _globals, _import, _lazy, _member, _module, data_, rpt_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'AssetBrowserMetadataOperator': AssetBrowserMetadataOperator = value; break;
+		case 'ASSET_OT_tag_add': ASSET_OT_tag_add = value; break;
+		case 'ASSET_OT_tag_remove': ASSET_OT_tag_remove = value; break;
+		case 'ASSET_OT_open_containing_blend_file': ASSET_OT_open_containing_blend_file = value; break;
+		case 'ASSET_OT_browse_containing_blend_file': ASSET_OT_browse_containing_blend_file = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

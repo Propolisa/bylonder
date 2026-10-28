@@ -19,7 +19,7 @@ var __name__ = '_bpy_internal.disk_file_hash_service.backend_sqlite';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -30,8 +30,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -39,7 +45,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -64,7 +70,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -83,7 +89,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -96,18 +102,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -118,8 +127,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -135,7 +150,7 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 	get __init__ () {return __get__ (this, function (self, storage_path) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -148,14 +163,20 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		else {
 		}
 		self._storage_path = storage_path;
-		self.dbfile_path = storage_path.with_name ('{}_v{}.sqlite'.format (storage_path.stem, DB_SCHEMA_VERSION));
+		self.dbfile_path = (function () {
+			var __accu0__ = storage_path;
+			return __call__ (__accu0__.with_name, __accu0__, (function () {
+				var __accu1__ = '{}_v{}.sqlite';
+				return __call__ (__accu1__.format, __accu1__, storage_path.stem, DB_SCHEMA_VERSION);
+			}) ());
+		}) ();
 		self.db_conn_rw = null;
 		self.db_conn_ro = null;
 	});},
 	get __repr__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -166,12 +187,15 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		return '{!s}({!r})'.format (self.__class__.__qualname__, self._storage_path);
+		return (function () {
+			var __accu0__ = '{!s}({!r})';
+			return __call__ (__accu0__.format, __accu0__, self.__class__.__qualname__, self._storage_path);
+		}) ();
 	});},
 	get open () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -182,14 +206,20 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		var sqlite3 = _module ('sqlite3');
-		self.dbfile_path.parent.mkdir (__kwargtrans__ ({parents: true, exist_ok: true}));
-		self.db_conn_rw = sqlite3.connect (self.dbfile_path, __kwargtrans__ ({timeout: DB_TIMEOUT_MSEC / 1000, isolation_level: null}));
+		var sqlite3 = __call__ (_module, null, 'sqlite3');
+		(function () {
+			var __accu0__ = self.dbfile_path.parent;
+			return __call__ (__accu0__.mkdir, __accu0__, __kwargtrans__ ({parents: true, exist_ok: true}));
+		}) ();
+		self.db_conn_rw = (function () {
+			var __accu0__ = sqlite3;
+			return __call__ (__accu0__.connect, __accu0__, self.dbfile_path, __kwargtrans__ ({timeout: __truediv__ (DB_TIMEOUT_MSEC, 1000), isolation_level: null}));
+		}) ();
 		if (_DEBUG_QUERIES) {
 			var callback_rw = function (query) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -200,19 +230,37 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 				}
 				else {
 				}
-				var query = query.py_replace ('\n', '\n    ');
-				print (''.join (['SQL/RW: ', _formatted (query, '', '')]));
+				var query = (function () {
+					var __accu0__ = query;
+					return __call__ (__accu0__.py_replace, __accu0__, '\n', '\n    ');
+				}) ();
+				__call__ (print, null, (function () {
+					var __accu0__ = '';
+					return __call__ (__accu0__.join, __accu0__, ['SQL/RW: ', __call__ (_formatted, null, query, '', '')]);
+				}) ());
 			};
-			self.db_conn_rw.set_trace_callback (callback_rw);
+			(function () {
+				var __accu0__ = self.db_conn_rw;
+				return __call__ (__accu0__.set_trace_callback, __accu0__, callback_rw);
+			}) ();
 		}
-		self._execute_pragmas_on_connect (self.db_conn_rw);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._execute_pragmas_on_connect, __accu0__, self.db_conn_rw);
+		}) ();
 		try {
-			var uri = self.dbfile_path.as_uri () + '?mode=ro';
+			var uri = __add__ ((function () {
+				var __accu0__ = self.dbfile_path;
+				return __call__ (__accu0__.as_uri, __accu0__);
+			}) (), '?mode=ro');
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, ValueError)) {
 				var ex = __except0__;
-				var __except1__ = ValueError ('{!s}: {!s}'.format (ex, self.dbfile_path));
+				var __except1__ = __call__ (ValueError, null, (function () {
+					var __accu0__ = '{!s}: {!s}';
+					return __call__ (__accu0__.format, __accu0__, ex, self.dbfile_path);
+				}) ());
 				__except1__.__cause__ = null;
 				throw __except1__;
 			}
@@ -220,12 +268,15 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 				throw __except0__;
 			}
 		}
-		self.db_conn_ro = sqlite3.connect (uri, __kwargtrans__ ({uri: true, timeout: DB_TIMEOUT_MSEC / 1000, isolation_level: null}));
+		self.db_conn_ro = (function () {
+			var __accu0__ = sqlite3;
+			return __call__ (__accu0__.connect, __accu0__, uri, __kwargtrans__ ({uri: true, timeout: __truediv__ (DB_TIMEOUT_MSEC, 1000), isolation_level: null}));
+		}) ();
 		if (_DEBUG_QUERIES) {
 			var callback_ro = function (query) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -236,18 +287,33 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 				}
 				else {
 				}
-				var query = query.py_replace ('\n', '\n    ');
-				print (''.join (['SQL/RO: ', _formatted (query, '', '')]));
+				var query = (function () {
+					var __accu0__ = query;
+					return __call__ (__accu0__.py_replace, __accu0__, '\n', '\n    ');
+				}) ();
+				__call__ (print, null, (function () {
+					var __accu0__ = '';
+					return __call__ (__accu0__.join, __accu0__, ['SQL/RO: ', __call__ (_formatted, null, query, '', '')]);
+				}) ());
 			};
-			self.db_conn_ro.set_trace_callback (callback_ro);
+			(function () {
+				var __accu0__ = self.db_conn_ro;
+				return __call__ (__accu0__.set_trace_callback, __accu0__, callback_ro);
+			}) ();
 		}
-		self._execute_pragmas_on_connect (self.db_conn_ro);
-		self.db_conn_rw.executescript (CREATE_SCHEMA_V1);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._execute_pragmas_on_connect, __accu0__, self.db_conn_ro);
+		}) ();
+		(function () {
+			var __accu0__ = self.db_conn_rw;
+			return __call__ (__accu0__.executescript, __accu0__, CREATE_SCHEMA_V1);
+		}) ();
 	});},
 	get close () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -259,18 +325,24 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		else {
 		}
 		if (self.db_conn_ro) {
-			self.db_conn_ro.close ();
+			(function () {
+				var __accu0__ = self.db_conn_ro;
+				return __call__ (__accu0__.close, __accu0__);
+			}) ();
 			self.db_conn_ro = null;
 		}
 		if (self.db_conn_rw) {
-			self.db_conn_rw.close ();
+			(function () {
+				var __accu0__ = self.db_conn_rw;
+				return __call__ (__accu0__.close, __accu0__);
+			}) ();
 			self.db_conn_rw = null;
 		}
 	});},
 	get fetch_hash () {return __get__ (this, function (self, filepath, hash_algorithm) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -283,11 +355,20 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		var db = self._transaction_ro ();
+		var db = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._transaction_ro, __accu0__);
+		}) ();
 		try {
 			db.__enter__ ();
-			var cursor = db.execute (('SELECT h.size_in_bytes, h.hexdigest, h.file_stat_mtime ' + 'FROM files f INNER JOIN hashes h USING (file_id) ') + 'WHERE f.path=? AND h.hash_algo=?', tuple ([str (filepath), hash_algorithm]));
-			var row = cursor.fetchone ();
+			var cursor = (function () {
+				var __accu0__ = db;
+				return __call__ (__accu0__.execute, __accu0__, __add__ (__add__ ('SELECT h.size_in_bytes, h.hexdigest, h.file_stat_mtime ', 'FROM files f INNER JOIN hashes h USING (file_id) '), 'WHERE f.path=? AND h.hash_algo=?'), tuple ([__call__ (str, null, filepath), hash_algorithm]));
+			}) ();
+			var row = (function () {
+				var __accu0__ = cursor;
+				return __call__ (__accu0__.fetchone, __accu0__);
+			}) ();
 			db.__exit__ ();
 		}
 		catch (__except0__) {
@@ -302,7 +383,10 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		var size = __left0__ [0];
 		var hex = __left0__ [1];
 		var mtime = __left0__ [2];
-		return types.FileHashInfo (__kwargtrans__ ({hexhash: hex, file_size_bytes: size, file_stat_mtime: mtime}));
+		return (function () {
+			var __accu0__ = types;
+			return __call__ (__accu0__.FileHashInfo, __accu0__, __kwargtrans__ ({hexhash: hex, file_size_bytes: size, file_stat_mtime: mtime}));
+		}) ();
 	});},
 	get store_hash () {return __get__ (this, function (self, filepath, hash_algorithm, hash_info, pre_write_callback) {
 		if (typeof pre_write_callback == 'undefined' || (pre_write_callback != null && pre_write_callback.hasOwnProperty ("__kwargtrans__"))) {;
@@ -310,7 +394,7 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -325,16 +409,31 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		var now = self._now_string ();
-		var db = self._transaction_rw ();
+		var now = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._now_string, __accu0__);
+		}) ();
+		var db = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._transaction_rw, __accu0__);
+		}) ();
 		try {
 			db.__enter__ ();
 			if (pre_write_callback !== null) {
-				pre_write_callback ();
+				__call__ (pre_write_callback, null);
 			}
-			var cursor = db.execute ('INSERT INTO files (path) values (?) ON CONFLICT DO UPDATE SET file_id=file_id RETURNING file_id', tuple ([str (filepath)]));
-			var file_id = cursor.fetchone () [0];
-			db.execute ((('INSERT INTO hashes ' + '(file_id, hash_algo, hexdigest, size_in_bytes, file_stat_mtime, last_checked) ') + 'VALUES (:file_id, :hash_algo, :hex, :size, :mtime, :now) ON CONFLICT DO UPDATE ') + 'SET hexdigest=:hex, size_in_bytes=:size, file_stat_mtime=:mtime, last_checked=:now', dict ({'file_id': file_id, 'hash_algo': hash_algorithm, 'hex': hash_info.hexhash, 'size': hash_info.file_size_bytes, 'mtime': hash_info.file_stat_mtime, 'now': now}));
+			var cursor = (function () {
+				var __accu0__ = db;
+				return __call__ (__accu0__.execute, __accu0__, 'INSERT INTO files (path) values (?) ON CONFLICT DO UPDATE SET file_id=file_id RETURNING file_id', tuple ([__call__ (str, null, filepath)]));
+			}) ();
+			var file_id = __getitem__ ((function () {
+				var __accu0__ = cursor;
+				return __call__ (__accu0__.fetchone, __accu0__);
+			}) (), 0);
+			(function () {
+				var __accu0__ = db;
+				return __call__ (__accu0__.execute, __accu0__, __add__ (__add__ (__add__ ('INSERT INTO hashes ', '(file_id, hash_algo, hexdigest, size_in_bytes, file_stat_mtime, last_checked) '), 'VALUES (:file_id, :hash_algo, :hex, :size, :mtime, :now) ON CONFLICT DO UPDATE '), 'SET hexdigest=:hex, size_in_bytes=:size, file_stat_mtime=:mtime, last_checked=:now'), dict ({'file_id': file_id, 'hash_algo': hash_algorithm, 'hex': hash_info.hexhash, 'size': hash_info.file_size_bytes, 'mtime': hash_info.file_stat_mtime, 'now': now}));
+			}) ();
 			db.__exit__ ();
 		}
 		catch (__except0__) {
@@ -346,7 +445,7 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 	get mark_hash_as_fresh () {return __get__ (this, function (self, filepath, hash_algorithm) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -359,11 +458,20 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		var now = self._now_string ();
-		var db = self._transaction_rw ();
+		var now = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._now_string, __accu0__);
+		}) ();
+		var db = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._transaction_rw, __accu0__);
+		}) ();
 		try {
 			db.__enter__ ();
-			db.execute ('UPDATE hashes SET last_checked=? ' + 'WHERE file_id = (SELECT file_id FROM files WHERE path=?) AND hash_algo=?', tuple ([now, str (filepath), hash_algorithm]));
+			(function () {
+				var __accu0__ = db;
+				return __call__ (__accu0__.execute, __accu0__, __add__ ('UPDATE hashes SET last_checked=? ', 'WHERE file_id = (SELECT file_id FROM files WHERE path=?) AND hash_algo=?'), tuple ([now, __call__ (str, null, filepath), hash_algorithm]));
+			}) ();
 			db.__exit__ ();
 		}
 		catch (__except0__) {
@@ -375,7 +483,7 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 	get remove_older_than () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -387,12 +495,30 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		var older_than = self._now () - datetime.timedelta (__kwargtrans__ ({days: days}));
-		var db = self._transaction_rw ();
+		var older_than = __sub__ ((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._now, __accu0__);
+		}) (), (function () {
+			var __accu0__ = datetime;
+			return __call__ (__accu0__.timedelta, __accu0__, __kwargtrans__ ({days: days}));
+		}) ());
+		var db = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._transaction_rw, __accu0__);
+		}) ();
 		try {
 			db.__enter__ ();
-			db.execute ('DELETE FROM hashes WHERE last_checked<?', tuple ([older_than.isoformat ()]));
-			db.execute (((('DELETE FROM files WHERE file_id IN (' + 'SELECT f.file_id FROM files f ') + 'LEFT JOIN hashes h USING (file_id) ') + 'GROUP BY f.file_id HAVING count(h.file_id) == 0') + ')');
+			(function () {
+				var __accu0__ = db;
+				return __call__ (__accu0__.execute, __accu0__, 'DELETE FROM hashes WHERE last_checked<?', tuple ([(function () {
+					var __accu1__ = older_than;
+					return __call__ (__accu1__.isoformat, __accu1__);
+				}) ()]));
+			}) ();
+			(function () {
+				var __accu0__ = db;
+				return __call__ (__accu0__.execute, __accu0__, __add__ (__add__ (__add__ (__add__ ('DELETE FROM files WHERE file_id IN (', 'SELECT f.file_id FROM files f '), 'LEFT JOIN hashes h USING (file_id) '), 'GROUP BY f.file_id HAVING count(h.file_id) == 0'), ')'));
+			}) ();
 			db.__exit__ ();
 		}
 		catch (__except0__) {
@@ -404,7 +530,7 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 	get _now () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -415,12 +541,15 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		return datetime.datetime.now (__kwargtrans__ ({tz: datetime.timezone.utc}));
+		return (function () {
+			var __accu0__ = datetime.datetime;
+			return __call__ (__accu0__.now, __accu0__, __kwargtrans__ ({tz: datetime.timezone.utc}));
+		}) ();
 	});},
 	get _now_string () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -431,12 +560,18 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		return self._now ().isoformat ();
+		return (function () {
+			var __accu0__ = (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__._now, __accu1__);
+			}) ();
+			return __call__ (__accu0__.isoformat, __accu0__);
+		}) ();
 	});},
-	get _transaction_rw () {return __get__ (this, contextlib.contextmanager (function* (self) {
+	get _transaction_rw () {return __get__ (this, __call__ (contextlib.contextmanager, null, function* (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -447,18 +582,27 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		self.db_conn_rw.execute ('BEGIN EXCLUSIVE');
+		(function () {
+			var __accu0__ = self.db_conn_rw;
+			return __call__ (__accu0__.execute, __accu0__, 'BEGIN EXCLUSIVE');
+		}) ();
 		try {
 			yield self.db_conn_rw;
 			try {
-				self.db_conn_rw.commit ();
+				(function () {
+					var __accu0__ = self.db_conn_rw;
+					return __call__ (__accu0__.commit, __accu0__);
+				}) ();
 			}
 			catch (__except0__) {
 			}
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
-				self.db_conn_rw.rollback ();
+				(function () {
+					var __accu0__ = self.db_conn_rw;
+					return __call__ (__accu0__.rollback, __accu0__);
+				}) ();
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
@@ -467,10 +611,10 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 			}
 		}
 		}));},
-	get _transaction_ro () {return __get__ (this, contextlib.contextmanager (function* (self) {
+	get _transaction_ro () {return __get__ (this, __call__ (contextlib.contextmanager, null, function* (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -481,18 +625,24 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		self.db_conn_ro.execute ('BEGIN IMMEDIATE');
+		(function () {
+			var __accu0__ = self.db_conn_ro;
+			return __call__ (__accu0__.execute, __accu0__, 'BEGIN IMMEDIATE');
+		}) ();
 		try {
 			yield self.db_conn_ro;
 		}
 		finally {
-			self.db_conn_ro.rollback ();
+			(function () {
+				var __accu0__ = self.db_conn_ro;
+				return __call__ (__accu0__.rollback, __accu0__);
+			}) ();
 		}
 		}));},
 	get _execute_pragmas_on_connect () {return __get__ (this, function (self, db_conn) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -504,12 +654,45 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}
 		else {
 		}
-		db_conn.execute ('PRAGMA busy_timeout = {:d}'.format (DB_TIMEOUT_MSEC));
-		db_conn.execute ('PRAGMA foreign_keys = 1');
-		db_conn.execute ('PRAGMA journal_mode = WAL');
-		db_conn.execute ('PRAGMA synchronous = normal');
+		(function () {
+			var __accu0__ = db_conn;
+			return __call__ (__accu0__.execute, __accu0__, (function () {
+				var __accu1__ = 'PRAGMA busy_timeout = {:d}';
+				return __call__ (__accu1__.format, __accu1__, DB_TIMEOUT_MSEC);
+			}) ());
+		}) ();
+		(function () {
+			var __accu0__ = db_conn;
+			return __call__ (__accu0__.execute, __accu0__, 'PRAGMA foreign_keys = 1');
+		}) ();
+		(function () {
+			var __accu0__ = db_conn;
+			return __call__ (__accu0__.execute, __accu0__, 'PRAGMA journal_mode = WAL');
+		}) ();
+		(function () {
+			var __accu0__ = db_conn;
+			return __call__ (__accu0__.execute, __accu0__, 'PRAGMA synchronous = normal');
+		}) ();
 	});}
 });
 
 //# sourceMappingURL=_bpy_internal.disk_file_hash_service.backend_sqlite.map
 export {Callable, Iterator, Path, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '__all__': __all__ = value; break;
+		case 'DB_TIMEOUT_MSEC': DB_TIMEOUT_MSEC = value; break;
+		case 'DB_SCHEMA_VERSION': DB_SCHEMA_VERSION = value; break;
+		case 'CREATE_SCHEMA_V1': CREATE_SCHEMA_V1 = value; break;
+		case '_DEBUG_QUERIES': _DEBUG_QUERIES = value; break;
+		case 'SQLiteBackend': SQLiteBackend = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

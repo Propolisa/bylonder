@@ -8,7 +8,7 @@ export var __all__ = tuple (['connect_sockets', 'find_base_socket_type', 'find_n
 export var find_base_socket_type = function (socket) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -19,26 +19,29 @@ export var find_base_socket_type = function (socket) {
 	}
 	else {
 	}
-	if (socket.py_metatype == 'CUSTOM') {
+	if (__eq__ (socket.py_metatype, 'CUSTOM')) {
 		return socket.bl_idname;
 	}
-	if (socket.py_metatype == 'VALUE') {
+	if (__eq__ (socket.py_metatype, 'VALUE')) {
 		return 'NodeSocketFloat';
 	}
-	if (socket.py_metatype == 'BOOLEAN') {
+	if (__eq__ (socket.py_metatype, 'BOOLEAN')) {
 		return 'NodeSocketBool';
 	}
-	if (socket.py_metatype == 'RGBA') {
+	if (__eq__ (socket.py_metatype, 'RGBA')) {
 		return 'NodeSocketColor';
 	}
 	else {
-		return 'NodeSocket' + socket.py_metatype.title ();
+		return __add__ ('NodeSocket', (function () {
+			var __accu0__ = socket.py_metatype;
+			return __call__ (__accu0__.title, __accu0__);
+		}) ());
 	}
 };
 export var connect_sockets = function (input, output) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -50,7 +53,7 @@ export var connect_sockets = function (input, output) {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
+	var bpy = __call__ (_module, null, 'bpy');
 	if (input.is_output && !(output.is_output)) {
 		var __left0__ = tuple ([output, input]);
 		var input = __left0__ [0];
@@ -59,19 +62,22 @@ export var connect_sockets = function (input, output) {
 	var input_node = output.node;
 	var output_node = input.node;
 	if (input_node.id_data !== output_node.id_data) {
-		print ('Sockets do not belong to the same node tree');
+		__call__ (print, null, 'Sockets do not belong to the same node tree');
 		return ;
 	}
-	if ((py_typeof (input) == py_typeof (output) && py_typeof (output) == bpy.types.NodeSocketVirtual)) {
-		print ('Cannot connect two virtual sockets together');
+	if ((__eq__ (py_typeof (input), py_typeof (output)) && __eq__ (py_typeof (output), bpy.types.NodeSocketVirtual))) {
+		__call__ (print, null, 'Cannot connect two virtual sockets together');
 		return ;
 	}
-	return input_node.id_data.links.py_new (input, output, __kwargtrans__ ({handle_dynamic_sockets: true}));
+	return (function () {
+		var __accu0__ = input_node.id_data.links;
+		return __call__ (__accu0__.py_new, __accu0__, input, output, __kwargtrans__ ({handle_dynamic_sockets: true}));
+	}) ();
 };
 export var find_node_input = function (node, py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -83,8 +89,11 @@ export var find_node_input = function (node, py_name) {
 	}
 	else {
 	}
-	for (var input of node.inputs) {
-		if (input.py_name == py_name) {
+	var __iterable0__ = node.inputs;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var input = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (input.py_name, py_name)) {
 			return input;
 		}
 	}
@@ -93,3 +102,13 @@ export var find_node_input = function (node, py_name) {
 
 //# sourceMappingURL=bpy_extras.node_utils.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'find_base_socket_type': find_base_socket_type = value; break;
+		case 'connect_sockets': connect_sockets = value; break;
+		case 'find_node_input': find_node_input = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

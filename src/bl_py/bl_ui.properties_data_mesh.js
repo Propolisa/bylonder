@@ -17,7 +17,7 @@ export var MESH_MT_vertex_group_context_menu =  __class__ ('MESH_MT_vertex_group
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -30,29 +30,80 @@ export var MESH_MT_vertex_group_context_menu =  __class__ ('MESH_MT_vertex_group
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('object.vertex_group_sort', __kwargtrans__ ({icon: 'SORTALPHA', text: 'Sort by Name'})).sort_type = 'NAME';
-		layout.operator ('object.vertex_group_sort', __kwargtrans__ ({icon: 'BONE_DATA', text: 'Sort by Bone Hierarchy'})).sort_type = 'BONE_HIERARCHY';
-		layout.separator ();
-		layout.operator ('object.vertex_group_copy', __kwargtrans__ ({icon: 'DUPLICATE'}));
-		layout.operator ('object.vertex_group_copy_to_selected');
-		layout.separator ();
-		layout.operator ('object.vertex_group_mirror', __kwargtrans__ ({icon: 'ARROW_LEFTRIGHT'})).use_topology = false;
-		layout.operator ('object.vertex_group_mirror', __kwargtrans__ ({text: 'Mirror Vertex Group (Topology)'})).use_topology = true;
-		layout.separator ();
-		layout.operator ('object.vertex_group_remove_from', __kwargtrans__ ({icon: 'X', text: 'Remove from All Groups'})).use_all_groups = true;
-		layout.operator ('object.vertex_group_remove_from', __kwargtrans__ ({text: 'Clear Active Group'})).use_all_verts = true;
-		layout.operator ('object.vertex_group_remove', __kwargtrans__ ({text: 'Delete All Unlocked Groups'})).all_unlocked = true;
-		layout.operator ('object.vertex_group_remove', __kwargtrans__ ({text: 'Delete All Groups'})).all = true;
-		layout.separator ();
-		var props = layout.operator ('object.vertex_group_lock', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_sort', __kwargtrans__ ({icon: 'SORTALPHA', text: 'Sort by Name'}));
+		}) ().sort_type = 'NAME';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_sort', __kwargtrans__ ({icon: 'BONE_DATA', text: 'Sort by Bone Hierarchy'}));
+		}) ().sort_type = 'BONE_HIERARCHY';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_copy', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_copy_to_selected');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_mirror', __kwargtrans__ ({icon: 'ARROW_LEFTRIGHT'}));
+		}) ().use_topology = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_mirror', __kwargtrans__ ({text: 'Mirror Vertex Group (Topology)'}));
+		}) ().use_topology = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_remove_from', __kwargtrans__ ({icon: 'X', text: 'Remove from All Groups'}));
+		}) ().use_all_groups = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_remove_from', __kwargtrans__ ({text: 'Clear Active Group'}));
+		}) ().use_all_verts = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_remove', __kwargtrans__ ({text: 'Delete All Unlocked Groups'}));
+		}) ().all_unlocked = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_remove', __kwargtrans__ ({text: 'Delete All Groups'}));
+		}) ().all = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_lock', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'}));
+		}) ();
 		var __left0__ = tuple (['LOCK', 'ALL']);
 		props.action = __left0__ [0];
 		props.mask = __left0__ [1];
-		var props = layout.operator ('object.vertex_group_lock', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_lock', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'}));
+		}) ();
 		var __left0__ = tuple (['UNLOCK', 'ALL']);
 		props.action = __left0__ [0];
 		props.mask = __left0__ [1];
-		var props = layout.operator ('object.vertex_group_lock', __kwargtrans__ ({text: 'Lock Invert All'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_lock', __kwargtrans__ ({text: 'Lock Invert All'}));
+		}) ();
 		var __left0__ = tuple (['INVERT', 'ALL']);
 		props.action = __left0__ [0];
 		props.mask = __left0__ [1];
@@ -64,7 +115,7 @@ export var MESH_MT_shape_key_context_menu =  __class__ ('MESH_MT_shape_key_conte
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -77,28 +128,88 @@ export var MESH_MT_shape_key_context_menu =  __class__ ('MESH_MT_shape_key_conte
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('object.shape_key_add', __kwargtrans__ ({icon: 'ADD', text: 'New Combined'})).from_mix = true;
-		layout.operator ('object.shape_key_copy', __kwargtrans__ ({icon: 'DUPLICATE', text: 'Duplicate'}));
-		layout.operator ('object.shape_key_transfer', __kwargtrans__ ({text: 'Copy from Objects'}));
-		layout.separator ();
-		layout.operator ('object.join_shapes', __kwargtrans__ ({text: 'New from Objects'}));
-		layout.operator ('object.join_shapes', __kwargtrans__ ({text: 'New from Objects Flipped'})).use_mirror = true;
-		layout.operator ('object.update_shapes', __kwargtrans__ ({icon: 'FILE_REFRESH'}));
-		layout.operator ('object.update_shapes', __kwargtrans__ ({text: 'Update from Objects Flipped'})).use_mirror = true;
-		layout.separator ();
-		layout.operator ('object.shape_key_mirror', __kwargtrans__ ({icon: 'ARROW_LEFTRIGHT', text: 'Flip'})).use_topology = false;
-		layout.operator ('object.shape_key_mirror', __kwargtrans__ ({text: 'Flip (Topology)'})).use_topology = true;
-		layout.separator ();
-		layout.operator ('object.shape_key_lock', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'})).action = 'LOCK';
-		layout.operator ('object.shape_key_lock', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'})).action = 'UNLOCK';
-		layout.separator ();
-		layout.operator ('object.shape_key_make_basis', __kwargtrans__ ({text: 'Make Basis'}));
-		layout.operator ('object.shape_key_apply_to_basis', __kwargtrans__ ({text: 'Apply to Basis'}));
-		layout.separator ();
-		var props = layout.operator ('object.shape_key_remove', __kwargtrans__ ({text: 'Apply All'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_add', __kwargtrans__ ({icon: 'ADD', text: 'New Combined'}));
+		}) ().from_mix = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_copy', __kwargtrans__ ({icon: 'DUPLICATE', text: 'Duplicate'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_transfer', __kwargtrans__ ({text: 'Copy from Objects'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.join_shapes', __kwargtrans__ ({text: 'New from Objects'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.join_shapes', __kwargtrans__ ({text: 'New from Objects Flipped'}));
+		}) ().use_mirror = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.update_shapes', __kwargtrans__ ({icon: 'FILE_REFRESH'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.update_shapes', __kwargtrans__ ({text: 'Update from Objects Flipped'}));
+		}) ().use_mirror = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_mirror', __kwargtrans__ ({icon: 'ARROW_LEFTRIGHT', text: 'Flip'}));
+		}) ().use_topology = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_mirror', __kwargtrans__ ({text: 'Flip (Topology)'}));
+		}) ().use_topology = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_lock', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'}));
+		}) ().action = 'LOCK';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_lock', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'}));
+		}) ().action = 'UNLOCK';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_make_basis', __kwargtrans__ ({text: 'Make Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_apply_to_basis', __kwargtrans__ ({text: 'Apply to Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_remove', __kwargtrans__ ({text: 'Apply All'}));
+		}) ();
 		props.all = true;
 		props.apply_mix = true;
-		var props = layout.operator ('object.shape_key_remove', __kwargtrans__ ({icon: 'X', text: 'Delete All'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_remove', __kwargtrans__ ({icon: 'X', text: 'Delete All'}));
+		}) ();
 		props.all = true;
 		props.apply_mix = false;
 	});}
@@ -109,7 +220,7 @@ export var MESH_MT_shape_key_tree_context_menu =  __class__ ('MESH_MT_shape_key_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -122,12 +233,30 @@ export var MESH_MT_shape_key_tree_context_menu =  __class__ ('MESH_MT_shape_key_
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('object.shape_key_make_basis', __kwargtrans__ ({text: 'Make Basis'}));
-		layout.operator ('object.shape_key_apply_to_basis', __kwargtrans__ ({text: 'Apply to Basis'}));
-		layout.operator ('object.shape_key_copy', __kwargtrans__ ({icon: 'DUPLICATE', text: 'Duplicate'}));
-		layout.separator ();
-		layout.operator ('object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_UP_BAR', text: 'Move After Basis'})).py_metatype = 'TOP';
-		layout.operator ('object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_DOWN_BAR', text: 'Move to Last'})).py_metatype = 'BOTTOM';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_make_basis', __kwargtrans__ ({text: 'Make Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_apply_to_basis', __kwargtrans__ ({text: 'Apply to Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_copy', __kwargtrans__ ({icon: 'DUPLICATE', text: 'Duplicate'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_UP_BAR', text: 'Move After Basis'}));
+		}) ().py_metatype = 'TOP';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_DOWN_BAR', text: 'Move to Last'}));
+		}) ().py_metatype = 'BOTTOM';
 	});}
 });
 export var MESH_MT_color_attribute_context_menu =  __class__ ('MESH_MT_color_attribute_context_menu', [Menu], {
@@ -136,7 +265,7 @@ export var MESH_MT_color_attribute_context_menu =  __class__ ('MESH_MT_color_att
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -149,8 +278,14 @@ export var MESH_MT_color_attribute_context_menu =  __class__ ('MESH_MT_color_att
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('geometry.color_attribute_duplicate', __kwargtrans__ ({icon: 'DUPLICATE'}));
-		layout.operator ('geometry.color_attribute_convert');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_duplicate', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_convert');
+		}) ();
 	});}
 });
 export var MESH_MT_attribute_context_menu =  __class__ ('MESH_MT_attribute_context_menu', [Menu], {
@@ -159,7 +294,7 @@ export var MESH_MT_attribute_context_menu =  __class__ ('MESH_MT_attribute_conte
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -172,7 +307,10 @@ export var MESH_MT_attribute_context_menu =  __class__ ('MESH_MT_attribute_conte
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('geometry.attribute_convert');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_convert');
+		}) ();
 	});}
 });
 export var MESH_UL_vgroups =  __class__ ('MESH_UL_vgroups', [UIList], {
@@ -180,7 +318,7 @@ export var MESH_UL_vgroups =  __class__ ('MESH_UL_vgroups', [UIList], {
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data_, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -200,9 +338,15 @@ export var MESH_UL_vgroups =  __class__ ('MESH_UL_vgroups', [UIList], {
 		else {
 		}
 		var vgroup = item;
-		layout.prop (vgroup, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, vgroup, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+		}) ();
 		var icon = (vgroup.lock_weight ? 'LOCKED' : 'UNLOCKED');
-		layout.prop (vgroup, 'lock_weight', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, vgroup, 'lock_weight', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		}) ();
 	});}
 });
 export var MESH_UL_uvmaps =  __class__ ('MESH_UL_uvmaps', [UIList], {
@@ -210,7 +354,7 @@ export var MESH_UL_uvmaps =  __class__ ('MESH_UL_uvmaps', [UIList], {
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -229,9 +373,15 @@ export var MESH_UL_uvmaps =  __class__ ('MESH_UL_uvmaps', [UIList], {
 		}
 		else {
 		}
-		layout.prop (item, 'name', __kwargtrans__ ({text: '', emboss: false, icon: 'GROUP_UVS'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: '', emboss: false, icon: 'GROUP_UVS'}));
+		}) ();
 		var icon = (item.active_render ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON');
-		layout.prop (item, 'active_render', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, item, 'active_render', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		}) ();
 	});}
 });
 export var MeshButtonsPanel =  __class__ ('MeshButtonsPanel', [object], {
@@ -242,7 +392,7 @@ export var MeshButtonsPanel =  __class__ ('MeshButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -266,7 +416,7 @@ export var DATA_PT_context_mesh =  __class__ ('DATA_PT_context_mesh', [MeshButto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -283,10 +433,16 @@ export var DATA_PT_context_mesh =  __class__ ('DATA_PT_context_mesh', [MeshButto
 		var mesh = context.mesh;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (mesh) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -298,7 +454,7 @@ export var DATA_PT_texture_space =  __class__ ('DATA_PT_texture_space', [MeshBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -313,11 +469,26 @@ export var DATA_PT_texture_space =  __class__ ('DATA_PT_texture_space', [MeshBut
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var mesh = context.mesh;
-		layout.prop (mesh, 'texture_mesh');
-		layout.separator ();
-		layout.prop (mesh, 'use_auto_texspace');
-		layout.prop (mesh, 'texspace_location', __kwargtrans__ ({text: 'Location'}));
-		layout.prop (mesh, 'texspace_size', __kwargtrans__ ({text: 'Size'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mesh, 'texture_mesh');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mesh, 'use_auto_texspace');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mesh, 'texspace_location', __kwargtrans__ ({text: 'Location'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mesh, 'texspace_size', __kwargtrans__ ({text: 'Size'}));
+		}) ();
 	});}
 });
 export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshButtonsPanel, Panel], {
@@ -327,7 +498,7 @@ export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -346,7 +517,7 @@ export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -365,43 +536,106 @@ export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshBut
 		if (group) {
 			var rows = 5;
 		}
-		var row = layout.row ();
-		row.template_list ('MESH_UL_vgroups', '', ob, 'vertex_groups', ob.vertex_groups, 'active_index', __kwargtrans__ ({rows: rows}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('object.vertex_group_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		var props = col.operator ('object.vertex_group_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'MESH_UL_vgroups', '', ob, 'vertex_groups', ob.vertex_groups, 'active_index', __kwargtrans__ ({rows: rows}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		var props = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
 		var __left0__ = false;
 		props.all_unlocked = __left0__;
 		props.all = __left0__;
-		col.separator ();
-		col.menu ('MESH_MT_vertex_group_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'MESH_MT_vertex_group_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 		if (group) {
-			col.separator ();
-			col.operator ('object.vertex_group_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).direction = 'UP';
-			col.operator ('object.vertex_group_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).direction = 'DOWN';
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+			}) ().direction = 'UP';
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+			}) ().direction = 'DOWN';
 		}
-		if (ob.vertex_groups && (ob.mode == 'EDIT' || ob.mode == 'WEIGHT_PAINT' && ob.py_metatype == 'MESH' && ob.data.use_paint_mask_vertex)) {
-			var row = layout.row ();
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.operator ('object.vertex_group_assign', __kwargtrans__ ({text: 'Assign'}));
-			sub.operator ('object.vertex_group_remove_from', __kwargtrans__ ({text: 'Remove'}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.operator ('object.vertex_group_select', __kwargtrans__ ({text: 'Select'}));
-			sub.operator ('object.vertex_group_deselect', __kwargtrans__ ({text: 'Deselect'}));
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.separator ();
+		if (ob.vertex_groups && (__eq__ (ob.mode, 'EDIT') || __eq__ (ob.mode, 'WEIGHT_PAINT') && __eq__ (ob.py_metatype, 'MESH') && ob.data.use_paint_mask_vertex)) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_assign', __kwargtrans__ ({text: 'Assign'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_remove_from', __kwargtrans__ ({text: 'Remove'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_select', __kwargtrans__ ({text: 'Select'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_deselect', __kwargtrans__ ({text: 'Deselect'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			col.use_property_split = true;
 			col.use_property_decorate = false;
-			col.prop (context.tool_settings, 'vertex_group_weight', __kwargtrans__ ({text: 'Weight'}));
-			col.prop (context.tool_settings, 'use_auto_normalize', __kwargtrans__ ({text: 'Auto Normalize'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, context.tool_settings, 'vertex_group_weight', __kwargtrans__ ({text: 'Weight'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, context.tool_settings, 'use_auto_normalize', __kwargtrans__ ({text: 'Auto Normalize'}));
+			}) ();
 		}
-		draw_attribute_warnings (context, layout, null);
+		__call__ (draw_attribute_warnings, null, context, layout, null);
 	});}
 });
 export var draw_shape_key_properties = function (context, layout) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -417,33 +651,66 @@ export var draw_shape_key_properties = function (context, layout) {
 	var ob = context.object;
 	var key = ob.data.shape_keys;
 	var kb = ob.active_shape_key;
-	var enable_edit = ob.mode != 'EDIT';
+	var enable_edit = __ne__ (ob.mode, 'EDIT');
 	var enable_edit_value = false;
-	if (enable_edit || ob.use_shape_key_edit_mode && ob.py_metatype == 'MESH') {
+	if (enable_edit || ob.use_shape_key_edit_mode && __eq__ (ob.py_metatype, 'MESH')) {
 		if (ob.show_only_shape_key === false) {
 			var enable_edit_value = true;
 		}
 	}
 	layout.use_property_split = true;
 	if (key.use_relative) {
-		if (ob.active_shape_key_index != 0) {
-			var row = layout.row ();
+		if (__ne__ (ob.active_shape_key_index, 0)) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.active = enable_edit_value;
-			row.prop (kb, 'value');
-			var col = layout.column ();
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, kb, 'value');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = enable_edit_value;
-			sub.prop (kb, 'slider_min', __kwargtrans__ ({text: 'Range Min'}));
-			sub.prop (kb, 'slider_max', __kwargtrans__ ({text: 'Max'}));
-			col.prop_search (kb, 'vertex_group', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
-			col.prop_search (kb, 'relative_key', key, 'key_blocks', __kwargtrans__ ({text: 'Relative To'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, kb, 'slider_min', __kwargtrans__ ({text: 'Range Min'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, kb, 'slider_max', __kwargtrans__ ({text: 'Max'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop_search, __accu0__, kb, 'vertex_group', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop_search, __accu0__, kb, 'relative_key', key, 'key_blocks', __kwargtrans__ ({text: 'Relative To'}));
+			}) ();
 		}
 	}
 	else {
-		layout.prop (kb, 'interpolation');
-		var row = layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, kb, 'interpolation');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		row.active = enable_edit_value;
-		row.prop (key, 'eval_time');
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, key, 'eval_time');
+		}) ();
 	}
 };
 export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPanel, Panel], {
@@ -453,7 +720,7 @@ export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -472,7 +739,7 @@ export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -488,49 +755,124 @@ export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPa
 		var ob = context.object;
 		var key = ob.data.shape_keys;
 		var kb = ob.active_shape_key;
-		var enable_edit = ob.mode != 'EDIT';
+		var enable_edit = __ne__ (ob.mode, 'EDIT');
 		var enable_pin = false;
-		if (enable_edit || ob.use_shape_key_edit_mode && ob.py_metatype == 'MESH') {
+		if (enable_edit || ob.use_shape_key_edit_mode && __eq__ (ob.py_metatype, 'MESH')) {
 			var enable_pin = true;
 		}
-		var row = layout.row ();
-		row.template_shape_key_tree ();
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('object.shape_key_add', __kwargtrans__ ({icon: 'ADD', text: ''})).from_mix = false;
-		col.operator ('object.shape_key_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''})).all = false;
-		col.separator ();
-		col.menu ('MESH_MT_shape_key_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
-		if (ob.py_metatype == 'MESH') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_shape_key_tree, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ().from_mix = false;
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ().all = false;
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'MESH_MT_shape_key_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
+		if (__eq__ (ob.py_metatype, 'MESH')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.use_property_split = false;
 			row.alignment = 'LEFT';
-			row.prop (ob, 'add_rest_position_attribute');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'add_rest_position_attribute');
+			}) ();
 		}
 		if (kb) {
-			col.separator ();
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.operator ('object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).py_metatype = 'UP';
-			sub.operator ('object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).py_metatype = 'DOWN';
-			var py_split = layout.py_split (__kwargtrans__ ({factor: 0.4}));
-			var row = py_split.row ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+			}) ().py_metatype = 'UP';
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+			}) ().py_metatype = 'DOWN';
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.4}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.enabled = enable_edit;
-			row.prop (key, 'use_relative');
-			var row = py_split.row ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, key, 'use_relative');
+			}) ();
+			var row = (function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.alignment = 'RIGHT';
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.label ();
-			var subsub = sub.row (__kwargtrans__ ({align: true}));
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.label, __accu0__);
+			}) ();
+			var subsub = (function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			subsub.active = enable_pin;
-			subsub.prop (ob, 'show_only_shape_key', __kwargtrans__ ({text: ''}));
-			sub.prop (ob, 'use_shape_key_edit_mode', __kwargtrans__ ({text: ''}));
-			var sub = row.row ();
+			(function () {
+				var __accu0__ = subsub;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'show_only_shape_key', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'use_shape_key_edit_mode', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			if (key.use_relative) {
-				sub.operator ('object.shape_key_clear', __kwargtrans__ ({icon: 'X', text: ''}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_clear', __kwargtrans__ ({icon: 'X', text: ''}));
+				}) ();
 			}
 			else {
-				sub.operator ('object.shape_key_retime', __kwargtrans__ ({icon: 'RECOVER_LAST', text: ''}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_retime', __kwargtrans__ ({icon: 'RECOVER_LAST', text: ''}));
+				}) ();
 			}
-			draw_shape_key_properties (context, layout);
+			__call__ (draw_shape_key_properties, null, context, layout);
 		}
 	});}
 });
@@ -542,7 +884,7 @@ export var DATA_PT_uv_texture =  __class__ ('DATA_PT_uv_texture', [MeshButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -556,13 +898,31 @@ export var DATA_PT_uv_texture =  __class__ ('DATA_PT_uv_texture', [MeshButtonsPa
 		}
 		var layout = self.layout;
 		var me = context.mesh;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('MESH_UL_uvmaps', 'uvmaps', me, 'uv_layers', me.uv_layers, 'active_index', __kwargtrans__ ({rows: 2}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('mesh.uv_texture_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('mesh.uv_texture_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		draw_attribute_warnings (context, layout, me.uv_layers);
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'MESH_UL_uvmaps', 'uvmaps', me, 'uv_layers', me.uv_layers, 'active_index', __kwargtrans__ ({rows: 2}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mesh.uv_texture_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mesh.uv_texture_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		__call__ (draw_attribute_warnings, null, context, layout, me.uv_layers);
 	});}
 });
 export var DATA_PT_remesh =  __class__ ('DATA_PT_remesh', [MeshButtonsPanel, Panel], {
@@ -573,7 +933,7 @@ export var DATA_PT_remesh =  __class__ ('DATA_PT_remesh', [MeshButtonsPanel, Pan
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -588,21 +948,54 @@ export var DATA_PT_remesh =  __class__ ('DATA_PT_remesh', [MeshButtonsPanel, Pan
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		var mesh = context.mesh;
-		row.prop (mesh, 'remesh_mode', __kwargtrans__ ({text: 'Mode', expand: true}));
-		var col = layout.column ();
-		if (mesh.remesh_mode == 'VOXEL') {
-			col.prop (mesh, 'remesh_voxel_size');
-			col.prop (mesh, 'remesh_voxel_adaptivity');
-			col.prop (mesh, 'use_remesh_fix_poles');
-			var col = layout.column (__kwargtrans__ ({heading: 'Preserve'}));
-			col.prop (mesh, 'use_remesh_preserve_volume', __kwargtrans__ ({text: 'Volume'}));
-			col.prop (mesh, 'use_remesh_preserve_attributes', __kwargtrans__ ({text: 'Attributes'}));
-			col.operator ('object.voxel_remesh', __kwargtrans__ ({text: 'Voxel Remesh'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mesh, 'remesh_mode', __kwargtrans__ ({text: 'Mode', expand: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (mesh.remesh_mode, 'VOXEL')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mesh, 'remesh_voxel_size');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mesh, 'remesh_voxel_adaptivity');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mesh, 'use_remesh_fix_poles');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Preserve'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mesh, 'use_remesh_preserve_volume', __kwargtrans__ ({text: 'Volume'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mesh, 'use_remesh_preserve_attributes', __kwargtrans__ ({text: 'Attributes'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.voxel_remesh', __kwargtrans__ ({text: 'Voxel Remesh'}));
+			}) ();
 		}
 		else {
-			col.operator ('object.quadriflow_remesh', __kwargtrans__ ({text: 'QuadriFlow Remesh'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.quadriflow_remesh', __kwargtrans__ ({text: 'QuadriFlow Remesh'}));
+			}) ();
 		}
 	});}
 });
@@ -614,7 +1007,7 @@ export var DATA_PT_customdata =  __class__ ('DATA_PT_customdata', [MeshButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -630,16 +1023,37 @@ export var DATA_PT_customdata =  __class__ ('DATA_PT_customdata', [MeshButtonsPa
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var me = context.mesh;
-		var col = layout.column ();
-		col.operator ('mesh.customdata_mask_clear', __kwargtrans__ ({icon: 'X'}));
-		col.operator ('mesh.customdata_face_sets_clear', __kwargtrans__ ({icon: 'X'}));
-		col.operator ('mesh.customdata_skin_clear', __kwargtrans__ ({icon: 'X'}));
-		col.operator ('mesh.reorder_vertices_spatial');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mesh.customdata_mask_clear', __kwargtrans__ ({icon: 'X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mesh.customdata_face_sets_clear', __kwargtrans__ ({icon: 'X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mesh.customdata_skin_clear', __kwargtrans__ ({icon: 'X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mesh.reorder_vertices_spatial');
+		}) ();
 		if (me.has_custom_normals) {
-			col.operator ('mesh.customdata_custom_splitnormals_clear', __kwargtrans__ ({icon: 'X'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'mesh.customdata_custom_splitnormals_clear', __kwargtrans__ ({icon: 'X'}));
+			}) ();
 		}
 		else {
-			col.operator ('mesh.customdata_custom_splitnormals_add', __kwargtrans__ ({icon: 'ADD'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'mesh.customdata_custom_splitnormals_add', __kwargtrans__ ({icon: 'ADD'}));
+			}) ();
 		}
 	});}
 });
@@ -649,7 +1063,7 @@ export var DATA_PT_mesh_animation =  __class__ ('DATA_PT_mesh_animation', [MeshB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -665,14 +1079,32 @@ export var DATA_PT_mesh_animation =  __class__ ('DATA_PT_mesh_animation', [MeshB
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var mesh = context.mesh;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Mesh'}));
-		self.draw_action_and_slot_selector (context, col, mesh);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Mesh'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, mesh);
+		}) ();
 		var shape_keys = mesh.shape_keys;
 		if (shape_keys) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
-			self.draw_action_and_slot_selector (context, col, shape_keys);
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Shape Keys'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, shape_keys);
+			}) ();
 		}
 	});}
 });
@@ -688,7 +1120,7 @@ export var MESH_UL_attributes =  __class__ ('MESH_UL_attributes', [UIList], {
 	get filter_items () {return __get__ (this, function (self, _context, data, property) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -702,33 +1134,50 @@ export var MESH_UL_attributes =  __class__ ('MESH_UL_attributes', [UIList], {
 		}
 		else {
 		}
-		var attributes = getattr (data, property);
+		var attributes = __call__ (getattr, null, data, property);
 		var flags = [];
 		var indices = (function () {
 			var __accu0__ = [];
-			for (var i of list (range (len (attributes)))) {
-				__accu0__.append (i);
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, __call__ (len, null, attributes)));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var i = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, i);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		if (self.filter_name) {
-			var flags = bpy.types.UI_UL_list.filter_items_by_name (self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			var flags = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			}) ();
 		}
 		if (!(flags)) {
-			var flags = [self.bitflag_filter_item] * len (attributes);
+			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
-		for (var [idx, item] of py_enumerate (attributes)) {
-			flags [idx] = (item.is_internal ? self.bitflag_item_never_show : flags [idx]);
+		var __iterable0__ = __call__ (py_enumerate, null, attributes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var idx = __left0__ [0];
+			var item = __left0__ [1];
+			__setitem__ (flags, idx, (item.is_internal ? self.bitflag_item_never_show : __getitem__ (flags, idx)));
 		}
 		if (self.use_filter_sort_alpha) {
-			var indices = bpy.types.UI_UL_list.sort_items_by_name (attributes, 'name');
+			var indices = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
+			}) ();
 		}
 		return tuple ([flags, indices]);
 	});},
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, attribute, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -747,15 +1196,33 @@ export var MESH_UL_attributes =  __class__ ('MESH_UL_attributes', [UIList], {
 		}
 		else {
 		}
-		var data_type = attribute.bl_rna.properties ['data_type'].enum_items [attribute.data_type];
-		var domain_name = self.display_domain_names.py_get (attribute.domain, '');
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.5}));
+		var data_type = __getitem__ (__getitem__ (attribute.bl_rna.properties, 'data_type').enum_items, attribute.data_type);
+		var domain_name = (function () {
+			var __accu0__ = self.display_domain_names;
+			return __call__ (__accu0__.py_get, __accu0__, attribute.domain, '');
+		}) ();
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5}));
+		}) ();
 		py_split.emboss = 'NONE';
-		py_split.prop (attribute, 'name', __kwargtrans__ ({text: ''}));
-		var sub = py_split.row ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, attribute, 'name', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.alignment = 'RIGHT';
 		sub.active = false;
-		sub.label (__kwargtrans__ ({text: '{:s} - {:s}'.format (iface_ (domain_name), iface_ (data_type.py_name)), translate: false}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+				var __accu1__ = '{:s} - {:s}';
+				return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, domain_name), __call__ (iface_, null, data_type.py_name));
+			}) (), translate: false}));
+		}) ();
 	});}
 });
 export var DATA_PT_mesh_attributes =  __class__ ('DATA_PT_mesh_attributes', [MeshButtonsPanel, Panel], {
@@ -766,7 +1233,7 @@ export var DATA_PT_mesh_attributes =  __class__ ('DATA_PT_mesh_attributes', [Mes
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -780,21 +1247,45 @@ export var DATA_PT_mesh_attributes =  __class__ ('DATA_PT_mesh_attributes', [Mes
 		}
 		var mesh = context.mesh;
 		var layout = self.layout;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('MESH_UL_attributes', 'attributes', mesh, 'attributes', mesh.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('geometry.attribute_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		col.separator ();
-		col.menu ('MESH_MT_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
-		draw_attribute_warnings (context, layout, null);
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'MESH_UL_attributes', 'attributes', mesh, 'attributes', mesh.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'MESH_MT_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
+		__call__ (draw_attribute_warnings, null, context, layout, null);
 	});}
 });
 export var draw_attribute_warnings = function (context, layout, attributes) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -812,19 +1303,40 @@ export var draw_attribute_warnings = function (context, layout, attributes) {
 	if (!(mesh)) {
 		return ;
 	}
-	var unique_names = set ();
+	var unique_names = __call__ (set, null);
 	var colliding_names = [];
-	for (var collection of tuple ([mesh.attributes, (ob === null ? null : ob.vertex_groups)])) {
+	var __iterable0__ = tuple ([mesh.attributes, (ob === null ? null : ob.vertex_groups)]);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var collection = __getitem__ (__iterable0__, __index0__);
 		if (collection === null) {
-			colliding_names.append ('Cannot check for object vertex groups when pinning mesh');
+			(function () {
+				var __accu0__ = colliding_names;
+				return __call__ (__accu0__.append, __accu0__, 'Cannot check for object vertex groups when pinning mesh');
+			}) ();
 			continue;
 		}
-		for (var py_name of collection.py_keys ()) {
-			var unique_names_len = len (unique_names);
-			unique_names.add (py_name);
-			if (len (unique_names) == unique_names_len) {
-				if (!(attributes) || attributes.py_get (py_name)) {
-					colliding_names.append (py_name);
+		var __iterable1__ = (function () {
+			var __accu0__ = collection;
+			return __call__ (__accu0__.py_keys, __accu0__);
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var py_name = __getitem__ (__iterable1__, __index1__);
+			var unique_names_len = __call__ (len, null, unique_names);
+			(function () {
+				var __accu0__ = unique_names;
+				return __call__ (__accu0__.add, __accu0__, py_name);
+			}) ();
+			if (__eq__ (__call__ (len, null, unique_names), unique_names_len)) {
+				if (!(attributes) || (function () {
+					var __accu0__ = attributes;
+					return __call__ (__accu0__.py_get, __accu0__, py_name);
+				}) ()) {
+					(function () {
+						var __accu0__ = colliding_names;
+						return __call__ (__accu0__.append, __accu0__, py_name);
+					}) ();
 				}
 			}
 		}
@@ -832,7 +1344,13 @@ export var draw_attribute_warnings = function (context, layout, attributes) {
 	if (!(colliding_names)) {
 		return ;
 	}
-	layout.label (__kwargtrans__ ({text: rpt_ ('Name collisions: ') + ', '.join (set (colliding_names)), icon: 'ERROR', translate: false}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __add__ (__call__ (rpt_, null, 'Name collisions: '), (function () {
+			var __accu1__ = ', ';
+			return __call__ (__accu1__.join, __accu1__, __call__ (set, null, colliding_names));
+		}) ()), icon: 'ERROR', translate: false}));
+	}) ();
 };
 export var ColorAttributesListBase =  __class__ ('ColorAttributesListBase', [object], {
 	__module__: __name__,
@@ -840,7 +1358,7 @@ export var ColorAttributesListBase =  __class__ ('ColorAttributesListBase', [obj
 	get filter_items () {return __get__ (this, function (self, _context, data, property) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -854,27 +1372,44 @@ export var ColorAttributesListBase =  __class__ ('ColorAttributesListBase', [obj
 		}
 		else {
 		}
-		var attributes = getattr (data, property);
+		var attributes = __call__ (getattr, null, data, property);
 		var flags = [];
 		var indices = (function () {
 			var __accu0__ = [];
-			for (var i of list (range (len (attributes)))) {
-				__accu0__.append (i);
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, __call__ (len, null, attributes)));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var i = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, i);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		if (self.filter_name) {
-			var flags = bpy.types.UI_UL_list.filter_items_by_name (self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			var flags = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			}) ();
 		}
 		if (!(flags)) {
-			var flags = [self.bitflag_filter_item] * len (attributes);
+			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
-		for (var [idx, item] of py_enumerate (attributes)) {
+		var __iterable0__ = __call__ (py_enumerate, null, attributes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var idx = __left0__ [0];
+			var item = __left0__ [1];
 			var skip = !__in__ (item.domain, new set (['POINT', 'CORNER'])) || !__in__ (item.data_type, new set (['FLOAT_COLOR', 'BYTE_COLOR'])) || item.is_internal;
-			flags [idx] = (skip ? 0 : flags [idx]);
+			__setitem__ (flags, idx, (skip ? 0 : __getitem__ (flags, idx)));
 		}
 		if (self.use_filter_sort_alpha) {
-			var indices = bpy.types.UI_UL_list.sort_items_by_name (attributes, 'name');
+			var indices = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
+			}) ();
 		}
 		return tuple ([flags, indices]);
 	});}
@@ -884,7 +1419,7 @@ export var MESH_UL_color_attributes =  __class__ ('MESH_UL_color_attributes', [U
 	get draw_item () {return __get__ (this, function (self, _context, layout, data, attribute, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -903,19 +1438,43 @@ export var MESH_UL_color_attributes =  __class__ ('MESH_UL_color_attributes', [U
 		}
 		else {
 		}
-		var data_type = attribute.bl_rna.properties ['data_type'].enum_items [attribute.data_type];
-		var domain_name = self.display_domain_names.py_get (attribute.domain, '');
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.5}));
+		var data_type = __getitem__ (__getitem__ (attribute.bl_rna.properties, 'data_type').enum_items, attribute.data_type);
+		var domain_name = (function () {
+			var __accu0__ = self.display_domain_names;
+			return __call__ (__accu0__.py_get, __accu0__, attribute.domain, '');
+		}) ();
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5}));
+		}) ();
 		py_split.emboss = 'NONE';
-		py_split.prop (attribute, 'name', __kwargtrans__ ({text: '', icon: 'GROUP_VCOL'}));
-		var sub = py_split.row ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, attribute, 'name', __kwargtrans__ ({text: '', icon: 'GROUP_VCOL'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.alignment = 'RIGHT';
 		sub.active = false;
-		sub.label (__kwargtrans__ ({text: '{:s} - {:s}'.format (iface_ (domain_name), iface_ (data_type.py_name)), translate: false}));
-		var active_render = _index == data.color_attributes.render_color_index;
-		var row = layout.row ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+				var __accu1__ = '{:s} - {:s}';
+				return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, domain_name), __call__ (iface_, null, data_type.py_name));
+			}) (), translate: false}));
+		}) ();
+		var active_render = __eq__ (_index, data.color_attributes.render_color_index);
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.emboss = 'NONE';
-		var props = row.operator ('geometry.color_attribute_render_set', __kwargtrans__ ({text: '', icon: (active_render ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON')}));
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_render_set', __kwargtrans__ ({text: '', icon: (active_render ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON')}));
+		}) ();
 		props.py_name = attribute.py_name;
 	});}
 });
@@ -924,7 +1483,7 @@ export var MESH_UL_color_attributes_selector =  __class__ ('MESH_UL_color_attrib
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, attribute, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -944,7 +1503,10 @@ export var MESH_UL_color_attributes_selector =  __class__ ('MESH_UL_color_attrib
 		else {
 		}
 		layout.emboss = 'NONE';
-		layout.prop (attribute, 'name', __kwargtrans__ ({text: '', icon: 'GROUP_VCOL'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, attribute, 'name', __kwargtrans__ ({text: '', icon: 'GROUP_VCOL'}));
+		}) ();
 	});}
 });
 export var DATA_PT_vertex_colors =  __class__ ('DATA_PT_vertex_colors', [MeshButtonsPanel, Panel], {
@@ -955,7 +1517,7 @@ export var DATA_PT_vertex_colors =  __class__ ('DATA_PT_vertex_colors', [MeshBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -969,23 +1531,82 @@ export var DATA_PT_vertex_colors =  __class__ ('DATA_PT_vertex_colors', [MeshBut
 		}
 		var mesh = context.mesh;
 		var layout = self.layout;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('MESH_UL_color_attributes', 'color_attributes', mesh, 'color_attributes', mesh.color_attributes, 'active_color_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('geometry.color_attribute_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('geometry.color_attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		col.separator ();
-		col.menu ('MESH_MT_color_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
-		draw_attribute_warnings (context, layout, mesh.color_attributes);
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'MESH_UL_color_attributes', 'color_attributes', mesh, 'color_attributes', mesh.color_attributes, 'active_color_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'MESH_MT_color_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
+		__call__ (draw_attribute_warnings, null, context, layout, mesh.color_attributes);
 	});}
 });
 export var classes = tuple ([MESH_MT_vertex_group_context_menu, MESH_MT_shape_key_context_menu, MESH_MT_shape_key_tree_context_menu, MESH_MT_color_attribute_context_menu, MESH_MT_attribute_context_menu, MESH_UL_vgroups, MESH_UL_uvmaps, MESH_UL_attributes, DATA_PT_context_mesh, DATA_PT_vertex_groups, DATA_PT_shape_keys, DATA_PT_uv_texture, DATA_PT_vertex_colors, DATA_PT_mesh_attributes, DATA_PT_texture_space, DATA_PT_remesh, DATA_PT_customdata, DATA_PT_mesh_animation, DATA_PT_custom_props_mesh, MESH_UL_color_attributes, MESH_UL_color_attributes_selector]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_mesh.map
 export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, iface_, register_class, rpt_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'MESH_MT_vertex_group_context_menu': MESH_MT_vertex_group_context_menu = value; break;
+		case 'MESH_MT_shape_key_context_menu': MESH_MT_shape_key_context_menu = value; break;
+		case 'MESH_MT_shape_key_tree_context_menu': MESH_MT_shape_key_tree_context_menu = value; break;
+		case 'MESH_MT_color_attribute_context_menu': MESH_MT_color_attribute_context_menu = value; break;
+		case 'MESH_MT_attribute_context_menu': MESH_MT_attribute_context_menu = value; break;
+		case 'MESH_UL_vgroups': MESH_UL_vgroups = value; break;
+		case 'MESH_UL_uvmaps': MESH_UL_uvmaps = value; break;
+		case 'MeshButtonsPanel': MeshButtonsPanel = value; break;
+		case 'DATA_PT_context_mesh': DATA_PT_context_mesh = value; break;
+		case 'DATA_PT_texture_space': DATA_PT_texture_space = value; break;
+		case 'DATA_PT_vertex_groups': DATA_PT_vertex_groups = value; break;
+		case 'draw_shape_key_properties': draw_shape_key_properties = value; break;
+		case 'DATA_PT_shape_keys': DATA_PT_shape_keys = value; break;
+		case 'DATA_PT_uv_texture': DATA_PT_uv_texture = value; break;
+		case 'DATA_PT_remesh': DATA_PT_remesh = value; break;
+		case 'DATA_PT_customdata': DATA_PT_customdata = value; break;
+		case 'DATA_PT_mesh_animation': DATA_PT_mesh_animation = value; break;
+		case 'DATA_PT_custom_props_mesh': DATA_PT_custom_props_mesh = value; break;
+		case 'MESH_UL_attributes': MESH_UL_attributes = value; break;
+		case 'DATA_PT_mesh_attributes': DATA_PT_mesh_attributes = value; break;
+		case 'draw_attribute_warnings': draw_attribute_warnings = value; break;
+		case 'ColorAttributesListBase': ColorAttributesListBase = value; break;
+		case 'MESH_UL_color_attributes': MESH_UL_color_attributes = value; break;
+		case 'MESH_UL_color_attributes_selector': MESH_UL_color_attributes_selector = value; break;
+		case 'DATA_PT_vertex_colors': DATA_PT_vertex_colors = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

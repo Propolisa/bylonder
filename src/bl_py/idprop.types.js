@@ -11,3 +11,10 @@ export var IDPropertyGroup =  __class__ ('IDPropertyGroup', [object], {
 });
 
 //# sourceMappingURL=idprop.types.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'IDPropertyArray': IDPropertyArray = value; break;
+		case 'IDPropertyGroup': IDPropertyGroup = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

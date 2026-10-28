@@ -18,7 +18,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -40,7 +40,7 @@ export var DATA_PT_context_lattice =  __class__ ('DATA_PT_context_lattice', [Dat
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -57,10 +57,16 @@ export var DATA_PT_context_lattice =  __class__ ('DATA_PT_context_lattice', [Dat
 		var lat = context.lattice;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (lat) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -70,7 +76,7 @@ export var DATA_PT_lattice =  __class__ ('DATA_PT_lattice', [DataButtonsPanel, P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -85,20 +91,62 @@ export var DATA_PT_lattice =  __class__ ('DATA_PT_lattice', [DataButtonsPanel, P
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var lat = context.lattice;
-		var col = layout.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (lat, 'points_u', __kwargtrans__ ({text: 'Resolution U'}));
-		sub.prop (lat, 'points_v', __kwargtrans__ ({text: 'V'}));
-		sub.prop (lat, 'points_w', __kwargtrans__ ({text: 'W'}));
-		col.separator ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (lat, 'interpolation_type_u', __kwargtrans__ ({text: 'Interpolation U'}));
-		sub.prop (lat, 'interpolation_type_v', __kwargtrans__ ({text: 'V'}));
-		sub.prop (lat, 'interpolation_type_w', __kwargtrans__ ({text: 'W'}));
-		col.separator ();
-		col.prop (lat, 'use_outside');
-		col.separator ();
-		col.prop_search (lat, 'vertex_group', context.object, 'vertex_groups');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'points_u', __kwargtrans__ ({text: 'Resolution U'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'points_v', __kwargtrans__ ({text: 'V'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'points_w', __kwargtrans__ ({text: 'W'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'interpolation_type_u', __kwargtrans__ ({text: 'Interpolation U'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'interpolation_type_v', __kwargtrans__ ({text: 'V'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'interpolation_type_w', __kwargtrans__ ({text: 'W'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, lat, 'use_outside');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_search, __accu0__, lat, 'vertex_group', context.object, 'vertex_groups');
+		}) ();
 	});}
 });
 export var DATA_PT_lattice_animation =  __class__ ('DATA_PT_lattice_animation', [DataButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -106,7 +154,7 @@ export var DATA_PT_lattice_animation =  __class__ ('DATA_PT_lattice_animation', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -122,14 +170,32 @@ export var DATA_PT_lattice_animation =  __class__ ('DATA_PT_lattice_animation', 
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var lattice = context.lattice;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Lattice'}));
-		self.draw_action_and_slot_selector (context, col, lattice);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Lattice'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, lattice);
+		}) ();
 		var shape_keys = lattice.shape_keys;
 		if (shape_keys) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
-			self.draw_action_and_slot_selector (context, col, shape_keys);
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Shape Keys'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, shape_keys);
+			}) ();
 		}
 	});}
 });
@@ -139,11 +205,26 @@ export var DATA_PT_custom_props_lattice =  __class__ ('DATA_PT_custom_props_latt
 	_property_type: bpy.types.Lattice
 });
 export var classes = tuple ([DATA_PT_context_lattice, DATA_PT_lattice, DATA_PT_lattice_animation, DATA_PT_custom_props_lattice]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_lattice.map
 export {Panel, PropertiesAnimationMixin, PropertyPanel, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_lattice': DATA_PT_context_lattice = value; break;
+		case 'DATA_PT_lattice': DATA_PT_lattice = value; break;
+		case 'DATA_PT_lattice_animation': DATA_PT_lattice_animation = value; break;
+		case 'DATA_PT_custom_props_lattice': DATA_PT_custom_props_lattice = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

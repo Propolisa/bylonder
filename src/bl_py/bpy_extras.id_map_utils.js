@@ -10,7 +10,7 @@ export var __all__ = tuple (['get_id_reference_map', 'get_all_referenced_ids']);
 export var get_id_reference_map = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -19,12 +19,32 @@ export var get_id_reference_map = function () {
 	else {
 	}
 	var inv_map = dict ({});
-	for (var [key, py_values] of bpy.data.user_map ().py_items ()) {
-		for (var value of py_values) {
-			if (value == key) {
+	var __iterable0__ = (function () {
+		var __accu0__ = (function () {
+			var __accu1__ = bpy.data;
+			return __call__ (__accu1__.user_map, __accu1__);
+		}) ();
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var key = __left0__ [0];
+		var py_values = __left0__ [1];
+		var __iterable1__ = py_values;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var value = __getitem__ (__iterable1__, __index1__);
+			if (__eq__ (value, key)) {
 				continue;
 			}
-			inv_map.py_setdefault (value, set ()).add (key);
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = inv_map;
+					return __call__ (__accu1__.py_setdefault, __accu1__, value, __call__ (set, null));
+				}) ();
+				return __call__ (__accu0__.add, __accu0__, key);
+			}) ();
 		}
 	}
 	return inv_map;
@@ -32,7 +52,7 @@ export var get_id_reference_map = function () {
 export var get_all_referenced_ids = function (id, ref_map) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -47,7 +67,7 @@ export var get_all_referenced_ids = function (id, ref_map) {
 	var recursive_helper = function (ref_map, id, referenced_ids, visited) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -64,15 +84,35 @@ export var get_all_referenced_ids = function (id, ref_map) {
 		if (__in__ (id, visited)) {
 			return ;
 		}
-		visited.add (id);
-		for (var ref of ref_map.py_get (id, [])) {
-			referenced_ids.add (ref);
-			recursive_helper (__kwargtrans__ ({ref_map: ref_map, id: ref, referenced_ids: referenced_ids, visited: visited}));
+		(function () {
+			var __accu0__ = visited;
+			return __call__ (__accu0__.add, __accu0__, id);
+		}) ();
+		var __iterable0__ = (function () {
+			var __accu0__ = ref_map;
+			return __call__ (__accu0__.py_get, __accu0__, id, []);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ref = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = referenced_ids;
+				return __call__ (__accu0__.add, __accu0__, ref);
+			}) ();
+			__call__ (recursive_helper, null, __kwargtrans__ ({ref_map: ref_map, id: ref, referenced_ids: referenced_ids, visited: visited}));
 		}
 	};
-	var referenced_ids = set ();
-	recursive_helper (__kwargtrans__ ({ref_map: ref_map, id: id, referenced_ids: referenced_ids, visited: set ()}));
+	var referenced_ids = __call__ (set, null);
+	__call__ (recursive_helper, null, __kwargtrans__ ({ref_map: ref_map, id: id, referenced_ids: referenced_ids, visited: __call__ (set, null)}));
 	return referenced_ids;
 };
 
 //# sourceMappingURL=bpy_extras.id_map_utils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'get_id_reference_map': get_id_reference_map = value; break;
+		case 'get_all_referenced_ids': get_all_referenced_ids = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

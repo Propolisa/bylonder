@@ -26,7 +26,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 	get check_domain_has_unbaked_guide () {return function (domain) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -37,12 +37,12 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		return domain.use_guide && !(domain.has_cache_baked_guide) && (domain.guide_source == 'EFFECTOR' || domain.guide_source == 'DOMAIN' && !(domain.guide_parent));
+		return domain.use_guide && !(domain.has_cache_baked_guide) && (__eq__ (domain.guide_source, 'EFFECTOR') || __eq__ (domain.guide_source, 'DOMAIN') && !(domain.guide_parent));
 	};},
 	get poll_fluid () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -54,16 +54,16 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		else {
 		}
 		var ob = context.object;
-		if (!((ob && ob.py_metatype == 'MESH') && context.fluid)) {
+		if (!((ob && __eq__ (ob.py_metatype, 'MESH')) && context.fluid)) {
 			return false;
 		}
 		var md = context.fluid;
-		return md && context.fluid.fluid_type != 'NONE';
+		return md && __ne__ (context.fluid.fluid_type, 'NONE');
 	};},
 	get poll_fluid_domain () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -74,16 +74,19 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
-		return md && md.fluid_type == 'DOMAIN';
+		return md && __eq__ (md.fluid_type, 'DOMAIN');
 	};},
 	get poll_gas_domain () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -94,20 +97,23 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
-		if (md && md.fluid_type == 'DOMAIN') {
+		if (md && __eq__ (md.fluid_type, 'DOMAIN')) {
 			var domain = md.domain_settings;
-			return domain.domain_type == 'GAS';
+			return __eq__ (domain.domain_type, 'GAS');
 		}
 		return false;
 	};},
 	get poll_liquid_domain () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -118,20 +124,23 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
-		if (md && md.fluid_type == 'DOMAIN') {
+		if (md && __eq__ (md.fluid_type, 'DOMAIN')) {
 			var domain = md.domain_settings;
-			return domain.domain_type == 'LIQUID';
+			return __eq__ (domain.domain_type, 'LIQUID');
 		}
 		return false;
 	};},
 	get poll_fluid_flow () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -142,16 +151,19 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
-		return md && md.fluid_type == 'FLOW';
+		return md && __eq__ (md.fluid_type, 'FLOW');
 	};},
 	get poll_fluid_flow_outflow () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -162,17 +174,20 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_flow (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
 		var flow = md.flow_settings;
-		return flow.flow_behavior == 'OUTFLOW';
+		return __eq__ (flow.flow_behavior, 'OUTFLOW');
 	};},
 	get poll_fluid_flow_liquid () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -183,12 +198,15 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_flow (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
 		var flow = md.flow_settings;
-		return flow.flow_type == 'LIQUID';
+		return __eq__ (flow.flow_type, 'LIQUID');
 	};}
 });
 export var PHYSICS_PT_fluid =  __class__ ('PHYSICS_PT_fluid', [PhysicButtonsPanel, Panel], {
@@ -198,7 +216,7 @@ export var PHYSICS_PT_fluid =  __class__ ('PHYSICS_PT_fluid', [PhysicButtonsPane
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -211,12 +229,12 @@ export var PHYSICS_PT_fluid =  __class__ ('PHYSICS_PT_fluid', [PhysicButtonsPane
 		else {
 		}
 		var ob = context.object;
-		return (ob && ob.py_metatype == 'MESH') && __in__ (context.engine, cls.COMPAT_ENGINES) && context.fluid;
+		return (ob && __eq__ (ob.py_metatype, 'MESH')) && __in__ (context.engine, cls.COMPAT_ENGINES) && context.fluid;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -231,13 +249,22 @@ export var PHYSICS_PT_fluid =  __class__ ('PHYSICS_PT_fluid', [PhysicButtonsPane
 		var layout = self.layout;
 		layout.use_property_split = true;
 		if (!(bpy.app.build_options.fluid)) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			col.alignment = 'RIGHT';
-			col.label (__kwargtrans__ ({text: 'Built without Fluid modifier'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Built without Fluid modifier'}));
+			}) ();
 			return ;
 		}
 		var md = context.fluid;
-		layout.prop (md, 'fluid_type');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'fluid_type');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButtonsPanel, Panel], {
@@ -248,7 +275,7 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -260,7 +287,10 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -268,7 +298,7 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -285,131 +315,317 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 		var md = context.fluid;
 		var ob = context.object;
 		var scene = context.scene;
-		if (md.fluid_type == 'DOMAIN') {
+		if (__eq__ (md.fluid_type, 'DOMAIN')) {
 			var domain = md.domain_settings;
 			var is_baking_any = domain.is_cache_baking_any;
 			var has_baked_data = domain.has_cache_baked_data;
-			var row = layout.row ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.enabled = !(is_baking_any) && !(has_baked_data);
-			row.prop (domain, 'domain_type', __kwargtrans__ ({expand: false}));
-			var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'domain_type', __kwargtrans__ ({expand: false}));
+			}) ();
+			var flow = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+			}) ();
 			flow.enabled = !(is_baking_any) && !(has_baked_data);
-			var col = flow.column ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.enabled = !(domain.has_cache_baked_guide);
-			col.prop (domain, 'resolution_max', __kwargtrans__ ({text: 'Resolution Divisions'}));
-			col.prop (domain, 'time_scale', __kwargtrans__ ({text: 'Time Scale'}));
-			var col = flow.column ();
-			col.prop (domain, 'use_adaptive_timesteps');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'resolution_max', __kwargtrans__ ({text: 'Resolution Divisions'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'time_scale', __kwargtrans__ ({text: 'Time Scale'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'use_adaptive_timesteps');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = domain.use_adaptive_timesteps;
-			sub.prop (domain, 'cfl_condition', __kwargtrans__ ({text: 'CFL Number'}));
-			sub.prop (domain, 'timesteps_max', __kwargtrans__ ({text: 'Timesteps Maximum'}));
-			sub.prop (domain, 'timesteps_min', __kwargtrans__ ({text: 'Minimum'}));
-			col.separator ();
-			var col = flow.column ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'cfl_condition', __kwargtrans__ ({text: 'CFL Number'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'timesteps_max', __kwargtrans__ ({text: 'Timesteps Maximum'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'timesteps_min', __kwargtrans__ ({text: 'Minimum'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			if (scene.use_gravity) {
-				var sub = col.column ();
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				sub.enabled = false;
-				sub.prop (domain, 'gravity', __kwargtrans__ ({text: 'Scene Gravity', icon: 'SCENE_DATA'}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'gravity', __kwargtrans__ ({text: 'Scene Gravity', icon: 'SCENE_DATA'}));
+				}) ();
 			}
 			else {
-				col.prop (domain, 'gravity', __kwargtrans__ ({text: 'Gravity'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'gravity', __kwargtrans__ ({text: 'Gravity'}));
+				}) ();
 			}
-			var col = flow.column ();
-			if (PhysicButtonsPanel.poll_gas_domain (context)) {
-				col.prop (domain, 'clipping', __kwargtrans__ ({text: 'Empty Space'}));
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			if ((function () {
+				var __accu0__ = PhysicButtonsPanel;
+				return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+			}) ()) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'clipping', __kwargtrans__ ({text: 'Empty Space'}));
+				}) ();
 			}
-			col.prop (domain, 'delete_in_obstacle', __kwargtrans__ ({text: 'Delete in Obstacle'}));
-			if (domain.cache_type == 'MODULAR') {
-				col.separator ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'delete_in_obstacle', __kwargtrans__ ({text: 'Delete in Obstacle'}));
+			}) ();
+			if (__eq__ (domain.cache_type, 'MODULAR')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
 				var label = '';
 				var note_flag = true;
-				if (self.check_domain_has_unbaked_guide (domain)) {
+				if ((function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.check_domain_has_unbaked_guide, __accu0__, domain);
+				}) ()) {
 					var note_flag = false;
 					var label = 'Unbaked Guides: Bake Guides or disable them';
 				}
 				else if (!(domain.cache_resumable) && !(label)) {
 					var label = 'Non Resumable Cache: Baking ';
-					if (PhysicButtonsPanel.poll_liquid_domain (context)) {
-						label += 'mesh or particles will not be possible';
+					if ((function () {
+						var __accu0__ = PhysicButtonsPanel;
+						return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
+					}) ()) {
+						var label = __call__ (__iadd__, null, label, 'mesh or particles will not be possible');
 					}
-					else if (PhysicButtonsPanel.poll_gas_domain (context)) {
-						label += 'noise will not be possible';
+					else if ((function () {
+						var __accu0__ = PhysicButtonsPanel;
+						return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+					}) ()) {
+						var label = __call__ (__iadd__, null, label, 'noise will not be possible');
 					}
 					else {
 						var label = '';
 					}
 				}
 				if (label) {
-					var info = layout.py_split ();
-					var note = info.row ();
+					var info = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.py_split, __accu0__);
+					}) ();
+					var note = (function () {
+						var __accu0__ = info;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					note.enabled = note_flag;
 					note.alignment = 'RIGHT';
-					note.label (__kwargtrans__ ({icon: 'INFO', text: label}));
+					(function () {
+						var __accu0__ = note;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: label}));
+					}) ();
 				}
-				var py_split = layout.py_split ();
-				py_split.enabled = note_flag && ob.mode == 'OBJECT';
-				var bake_incomplete = domain.cache_frame_pause_data < domain.cache_frame_end;
+				var py_split = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.py_split, __accu0__);
+				}) ();
+				py_split.enabled = note_flag && __eq__ (ob.mode, 'OBJECT');
+				var bake_incomplete = __lt__ (domain.cache_frame_pause_data, domain.cache_frame_end);
 				if (domain.cache_resumable && domain.has_cache_baked_data && !(domain.is_cache_baking_data) && bake_incomplete) {
-					var col = py_split.column ();
-					col.operator ('fluid.bake_data', __kwargtrans__ ({text: 'Resume'}));
-					var col = py_split.column ();
-					col.operator ('fluid.free_data', __kwargtrans__ ({text: 'Free'}));
+					var col = (function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_data', __kwargtrans__ ({text: 'Resume'}));
+					}) ();
+					var col = (function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.free_data', __kwargtrans__ ({text: 'Free'}));
+					}) ();
 				}
 				else if (domain.is_cache_baking_data && !(domain.has_cache_baked_data)) {
 					py_split.enabled = false;
-					py_split.operator ('fluid.pause_bake', __kwargtrans__ ({text: 'Baking Data - ESC to pause'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Data - ESC to pause'}));
+					}) ();
 				}
 				else if (!(domain.has_cache_baked_data) && !(domain.is_cache_baking_data)) {
-					py_split.operator ('fluid.bake_data', __kwargtrans__ ({text: 'Bake Data'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_data', __kwargtrans__ ({text: 'Bake Data'}));
+					}) ();
 				}
 				else {
-					py_split.operator ('fluid.free_data', __kwargtrans__ ({text: 'Free Data'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.free_data', __kwargtrans__ ({text: 'Free Data'}));
+					}) ();
 				}
 			}
 		}
-		else if (md.fluid_type == 'FLOW') {
+		else if (__eq__ (md.fluid_type, 'FLOW')) {
 			var flow = md.flow_settings;
-			var row = layout.row ();
-			row.prop (flow, 'flow_type', __kwargtrans__ ({expand: false}));
-			var grid = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-			var col = grid.column ();
-			col.prop (flow, 'flow_behavior', __kwargtrans__ ({expand: false}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'flow_type', __kwargtrans__ ({expand: false}));
+			}) ();
+			var grid = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = grid;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'flow_behavior', __kwargtrans__ ({expand: false}));
+			}) ();
 			if (__in__ (flow.flow_behavior, new set (['INFLOW', 'OUTFLOW']))) {
-				col.prop (flow, 'use_inflow');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, flow, 'use_inflow');
+				}) ();
 			}
-			col.prop (flow, 'subframes', __kwargtrans__ ({text: 'Sampling Substeps'}));
-			if (!(flow.flow_behavior == 'OUTFLOW') && __in__ (flow.flow_type, new set (['SMOKE', 'BOTH', 'FIRE']))) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'subframes', __kwargtrans__ ({text: 'Sampling Substeps'}));
+			}) ();
+			if (!(__eq__ (flow.flow_behavior, 'OUTFLOW')) && __in__ (flow.flow_type, new set (['SMOKE', 'BOTH', 'FIRE']))) {
 				if (__in__ (flow.flow_type, new set (['SMOKE', 'BOTH']))) {
-					col.prop (flow, 'smoke_color', __kwargtrans__ ({text: 'Smoke Color'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, flow, 'smoke_color', __kwargtrans__ ({text: 'Smoke Color'}));
+					}) ();
 				}
-				var col = grid.column (__kwargtrans__ ({align: true}));
-				col.prop (flow, 'use_absolute', __kwargtrans__ ({text: 'Absolute Density'}));
+				var col = (function () {
+					var __accu0__ = grid;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, flow, 'use_absolute', __kwargtrans__ ({text: 'Absolute Density'}));
+				}) ();
 				if (__in__ (flow.flow_type, new set (['SMOKE', 'BOTH']))) {
-					col.prop (flow, 'temperature', __kwargtrans__ ({text: 'Initial Temperature'}));
-					col.prop (flow, 'density', __kwargtrans__ ({text: 'Density'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, flow, 'temperature', __kwargtrans__ ({text: 'Initial Temperature'}));
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, flow, 'density', __kwargtrans__ ({text: 'Density'}));
+					}) ();
 				}
 				if (__in__ (flow.flow_type, new set (['FIRE', 'BOTH']))) {
-					col.prop (flow, 'fuel_amount', __kwargtrans__ ({text: 'Fuel'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, flow, 'fuel_amount', __kwargtrans__ ({text: 'Fuel'}));
+					}) ();
 				}
-				col.separator ();
-				col.prop_search (flow, 'density_vertex_group', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, flow, 'density_vertex_group', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+				}) ();
 			}
 		}
-		else if (md.fluid_type == 'EFFECTOR') {
+		else if (__eq__ (md.fluid_type, 'EFFECTOR')) {
 			var effector_settings = md.effector_settings;
-			var row = layout.row ();
-			row.prop (effector_settings, 'effector_type');
-			var grid = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-			var col = grid.column ();
-			col.prop (effector_settings, 'subframes', __kwargtrans__ ({text: 'Sampling Substeps'}));
-			col.prop (effector_settings, 'surface_distance', __kwargtrans__ ({text: 'Surface Thickness'}));
-			var col = grid.column ();
-			col.prop (effector_settings, 'use_effector', __kwargtrans__ ({text: 'Use Effector'}));
-			col.prop (effector_settings, 'use_plane_init', __kwargtrans__ ({text: 'Is Planar'}));
-			if (effector_settings.effector_type == 'GUIDE') {
-				col.prop (effector_settings, 'velocity_factor', __kwargtrans__ ({text: 'Velocity Factor'}));
-				col.prop (effector_settings, 'guide_mode', __kwargtrans__ ({text: 'Guide Mode'}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, effector_settings, 'effector_type');
+			}) ();
+			var grid = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = grid;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, effector_settings, 'subframes', __kwargtrans__ ({text: 'Sampling Substeps'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, effector_settings, 'surface_distance', __kwargtrans__ ({text: 'Surface Thickness'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = grid;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, effector_settings, 'use_effector', __kwargtrans__ ({text: 'Use Effector'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, effector_settings, 'use_plane_init', __kwargtrans__ ({text: 'Is Planar'}));
+			}) ();
+			if (__eq__ (effector_settings.effector_type, 'GUIDE')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, effector_settings, 'velocity_factor', __kwargtrans__ ({text: 'Velocity Factor'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, effector_settings, 'guide_mode', __kwargtrans__ ({text: 'Guide Mode'}));
+				}) ();
 			}
 		}
 	});}
@@ -422,7 +638,7 @@ export var PHYSICS_PT_borders =  __class__ ('PHYSICS_PT_borders', [PhysicButtons
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -434,7 +650,10 @@ export var PHYSICS_PT_borders =  __class__ ('PHYSICS_PT_borders', [PhysicButtons
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -442,7 +661,7 @@ export var PHYSICS_PT_borders =  __class__ ('PHYSICS_PT_borders', [PhysicButtons
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -460,14 +679,35 @@ export var PHYSICS_PT_borders =  __class__ ('PHYSICS_PT_borders', [PhysicButtons
 		var domain = md.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.enabled = !(is_baking_any) && !(has_baked_data);
-		col.prop (domain, 'use_collision_border_front');
-		col.prop (domain, 'use_collision_border_back');
-		col.prop (domain, 'use_collision_border_right');
-		col.prop (domain, 'use_collision_border_left');
-		col.prop (domain, 'use_collision_border_top');
-		col.prop (domain, 'use_collision_border_bottom');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_front');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_back');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_right');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_left');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_top');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_bottom');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPanel, Panel], {
@@ -478,7 +718,7 @@ export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPane
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -490,7 +730,10 @@ export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_gas_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -498,7 +741,7 @@ export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -516,13 +759,31 @@ export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPane
 		var domain = md.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_data);
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'alpha', __kwargtrans__ ({text: 'Buoyancy Density'}));
-		col.prop (domain, 'beta', __kwargtrans__ ({text: 'Heat'}));
-		var col = flow.column ();
-		col.prop (domain, 'vorticity');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'alpha', __kwargtrans__ ({text: 'Buoyancy Density'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'beta', __kwargtrans__ ({text: 'Heat'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'vorticity');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', [PhysicButtonsPanel, Panel], {
@@ -535,7 +796,7 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -547,7 +808,10 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_gas_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -555,7 +819,7 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -571,12 +835,15 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		self.layout.enabled = !(is_baking_any);
-		self.layout.prop (md, 'use_dissolve_smoke', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_dissolve_smoke', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -594,13 +861,28 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 		var domain = md.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_data);
 		layout.active = domain.use_dissolve_smoke;
-		var col = flow.column ();
-		col.prop (domain, 'dissolve_speed', __kwargtrans__ ({text: 'Time'}));
-		var col = flow.column ();
-		col.prop (domain, 'use_dissolve_smoke_log', __kwargtrans__ ({text: 'Slow'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'dissolve_speed', __kwargtrans__ ({text: 'Time'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_dissolve_smoke_log', __kwargtrans__ ({text: 'Slow'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel, Panel], {
@@ -612,7 +894,7 @@ export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel,
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -624,7 +906,10 @@ export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel,
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_gas_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -632,7 +917,7 @@ export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel,
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -650,19 +935,55 @@ export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel,
 		var domain = md.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_data);
-		var col = flow.column ();
-		col.prop (domain, 'burning_rate', __kwargtrans__ ({text: 'Reaction Speed'}));
-		var row = col.row ();
-		var sub = row.column (__kwargtrans__ ({align: true}));
-		sub.prop (domain, 'flame_smoke', __kwargtrans__ ({text: 'Flame Smoke'}));
-		sub.prop (domain, 'flame_vorticity', __kwargtrans__ ({text: 'Vorticity'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'flame_max_temp', __kwargtrans__ ({text: 'Temperature Maximum'}));
-		col.prop (domain, 'flame_ignition', __kwargtrans__ ({text: 'Minimum'}));
-		var row = col.row ();
-		row.prop (domain, 'flame_smoke_color', __kwargtrans__ ({text: 'Smoke Color'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'burning_rate', __kwargtrans__ ({text: 'Reaction Speed'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'flame_smoke', __kwargtrans__ ({text: 'Flame Smoke'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'flame_vorticity', __kwargtrans__ ({text: 'Vorticity'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'flame_max_temp', __kwargtrans__ ({text: 'Temperature Maximum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'flame_ignition', __kwargtrans__ ({text: 'Minimum'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'flame_smoke_color', __kwargtrans__ ({text: 'Smoke Color'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPanel, Panel], {
@@ -673,7 +994,7 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -685,7 +1006,10 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_liquid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -693,7 +1017,7 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -709,12 +1033,15 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		self.layout.enabled = !(is_baking_any);
-		self.layout.prop (md, 'use_flip_particles', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_flip_particles', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -733,30 +1060,93 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
 		layout.enabled = !(is_baking_any) && !(has_baked_data);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
-		col.prop (domain, 'simulation_method', __kwargtrans__ ({expand: false}));
-		if (domain.simulation_method == 'FLIP') {
-			col.prop (domain, 'flip_ratio', __kwargtrans__ ({text: 'FLIP Ratio'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'simulation_method', __kwargtrans__ ({expand: false}));
+		}) ();
+		if (__eq__ (domain.simulation_method, 'FLIP')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'flip_ratio', __kwargtrans__ ({text: 'FLIP Ratio'}));
+			}) ();
 		}
-		col.prop (domain, 'sys_particle_maximum', __kwargtrans__ ({text: 'System Maximum'}));
-		var col = col.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'particle_radius', __kwargtrans__ ({text: 'Particle Radius'}));
-		col.prop (domain, 'particle_number', __kwargtrans__ ({text: 'Sampling'}));
-		col.prop (domain, 'particle_randomness', __kwargtrans__ ({text: 'Randomness'}));
-		var col = flow.column ();
-		var col = col.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'particle_max', __kwargtrans__ ({text: 'Particles Maximum'}));
-		col.prop (domain, 'particle_min', __kwargtrans__ ({text: 'Minimum'}));
-		col.separator ();
-		var col = col.column ();
-		col.prop (domain, 'particle_band_width', __kwargtrans__ ({text: 'Narrow Band Width'}));
-		var col = col.column ();
-		col.prop (domain, 'use_fractions', __kwargtrans__ ({text: 'Fractional Obstacles'}));
-		var sub = col.column ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sys_particle_maximum', __kwargtrans__ ({text: 'System Maximum'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_radius', __kwargtrans__ ({text: 'Particle Radius'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_number', __kwargtrans__ ({text: 'Sampling'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_randomness', __kwargtrans__ ({text: 'Randomness'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_max', __kwargtrans__ ({text: 'Particles Maximum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_min', __kwargtrans__ ({text: 'Minimum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_band_width', __kwargtrans__ ({text: 'Narrow Band Width'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_fractions', __kwargtrans__ ({text: 'Fractional Obstacles'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = domain.use_fractions;
-		sub.prop (domain, 'fractions_distance', __kwargtrans__ ({text: 'Obstacle Distance'}));
-		sub.prop (domain, 'fractions_threshold', __kwargtrans__ ({text: 'Threshold'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'fractions_distance', __kwargtrans__ ({text: 'Obstacle Distance'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'fractions_threshold', __kwargtrans__ ({text: 'Threshold'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_flow_source =  __class__ ('PHYSICS_PT_flow_source', [PhysicButtonsPanel, Panel], {
@@ -768,7 +1158,7 @@ export var PHYSICS_PT_flow_source =  __class__ ('PHYSICS_PT_flow_source', [Physi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -780,7 +1170,10 @@ export var PHYSICS_PT_flow_source =  __class__ ('PHYSICS_PT_flow_source', [Physi
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_flow (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -788,7 +1181,7 @@ export var PHYSICS_PT_flow_source =  __class__ ('PHYSICS_PT_flow_source', [Physi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -804,26 +1197,62 @@ export var PHYSICS_PT_flow_source =  __class__ ('PHYSICS_PT_flow_source', [Physi
 		layout.use_property_split = true;
 		var ob = context.object;
 		var flow = context.fluid.flow_settings;
-		var col = layout.column ();
-		col.prop (flow, 'flow_source', __kwargtrans__ ({expand: false, text: 'Flow Source'}));
-		if (flow.flow_source == 'PARTICLES') {
-			col.prop_search (flow, 'particle_system', ob, 'particle_systems', __kwargtrans__ ({text: 'Particle System'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, flow, 'flow_source', __kwargtrans__ ({expand: false, text: 'Flow Source'}));
+		}) ();
+		if (__eq__ (flow.flow_source, 'PARTICLES')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop_search, __accu0__, flow, 'particle_system', ob, 'particle_systems', __kwargtrans__ ({text: 'Particle System'}));
+			}) ();
 		}
-		var grid = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = grid.column ();
-		if (flow.flow_source == 'MESH') {
-			col.prop (flow, 'use_plane_init', __kwargtrans__ ({text: 'Is Planar'}));
-			col.prop (flow, 'surface_distance', __kwargtrans__ ({text: 'Surface Emission'}));
+		var grid = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = grid;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (flow.flow_source, 'MESH')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'use_plane_init', __kwargtrans__ ({text: 'Is Planar'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'surface_distance', __kwargtrans__ ({text: 'Surface Emission'}));
+			}) ();
 			if (__in__ (flow.flow_type, new set (['SMOKE', 'BOTH', 'FIRE']))) {
-				var col = grid.column ();
-				col.prop (flow, 'volume_density', __kwargtrans__ ({text: 'Volume Emission'}));
+				var col = (function () {
+					var __accu0__ = grid;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, flow, 'volume_density', __kwargtrans__ ({text: 'Volume Emission'}));
+				}) ();
 			}
 		}
-		if (flow.flow_source == 'PARTICLES') {
-			col.prop (flow, 'use_particle_size', __kwargtrans__ ({text: 'Set Size'}));
-			var sub = col.column ();
+		if (__eq__ (flow.flow_source, 'PARTICLES')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'use_particle_size', __kwargtrans__ ({text: 'Set Size'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			sub.active = flow.use_particle_size;
-			sub.prop (flow, 'particle_size');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, flow, 'particle_size');
+			}) ();
 		}
 	});}
 });
@@ -835,7 +1264,7 @@ export var PHYSICS_PT_flow_initial_velocity =  __class__ ('PHYSICS_PT_flow_initi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -847,10 +1276,16 @@ export var PHYSICS_PT_flow_initial_velocity =  __class__ ('PHYSICS_PT_flow_initi
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_flow (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
+		}) ())) {
 			return false;
 		}
-		if (PhysicButtonsPanel.poll_fluid_flow_outflow (context)) {
+		if ((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow_outflow, __accu0__, context);
+		}) ()) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -858,7 +1293,7 @@ export var PHYSICS_PT_flow_initial_velocity =  __class__ ('PHYSICS_PT_flow_initi
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -872,12 +1307,15 @@ export var PHYSICS_PT_flow_initial_velocity =  __class__ ('PHYSICS_PT_flow_initi
 		}
 		var md = context.fluid;
 		var flow_smoke = md.flow_settings;
-		self.layout.prop (flow_smoke, 'use_initial_velocity', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'use_initial_velocity', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -891,16 +1329,34 @@ export var PHYSICS_PT_flow_initial_velocity =  __class__ ('PHYSICS_PT_flow_initi
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var md = context.fluid;
 		var flow_smoke = md.flow_settings;
 		flow.active = flow_smoke.use_initial_velocity;
-		var col = flow.column ();
-		col.prop (flow_smoke, 'velocity_factor');
-		if (flow_smoke.flow_source == 'MESH') {
-			col.prop (flow_smoke, 'velocity_normal');
-			var col = flow.column ();
-			col.prop (flow_smoke, 'velocity_coord');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'velocity_factor');
+		}) ();
+		if (__eq__ (flow_smoke.flow_source, 'MESH')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'velocity_normal');
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'velocity_coord');
+			}) ();
 		}
 	});}
 });
@@ -913,7 +1369,7 @@ export var PHYSICS_PT_flow_texture =  __class__ ('PHYSICS_PT_flow_texture', [Phy
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -925,13 +1381,22 @@ export var PHYSICS_PT_flow_texture =  __class__ ('PHYSICS_PT_flow_texture', [Phy
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_flow (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
+		}) ())) {
 			return false;
 		}
-		if (PhysicButtonsPanel.poll_fluid_flow_outflow (context)) {
+		if ((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow_outflow, __accu0__, context);
+		}) ()) {
 			return false;
 		}
-		if (PhysicButtonsPanel.poll_fluid_flow_liquid (context)) {
+		if ((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow_liquid, __accu0__, context);
+		}) ()) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -939,7 +1404,7 @@ export var PHYSICS_PT_flow_texture =  __class__ ('PHYSICS_PT_flow_texture', [Phy
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -953,12 +1418,15 @@ export var PHYSICS_PT_flow_texture =  __class__ ('PHYSICS_PT_flow_texture', [Phy
 		}
 		var md = context.fluid;
 		var flow_smoke = md.flow_settings;
-		self.layout.prop (flow_smoke, 'use_texture', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'use_texture', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -972,23 +1440,50 @@ export var PHYSICS_PT_flow_texture =  __class__ ('PHYSICS_PT_flow_texture', [Phy
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var ob = context.object;
 		var flow_smoke = context.fluid.flow_settings;
-		var sub = flow.column ();
+		var sub = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = flow_smoke.use_texture;
-		sub.prop (flow_smoke, 'noise_texture');
-		sub.prop (flow_smoke, 'texture_map_type', __kwargtrans__ ({text: 'Mapping'}));
-		var col = flow.column ();
-		var sub = col.column ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'noise_texture');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'texture_map_type', __kwargtrans__ ({text: 'Mapping'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = flow_smoke.use_texture;
-		if (flow_smoke.texture_map_type == 'UV') {
-			sub.prop_search (flow_smoke, 'uv_layer', ob.data, 'uv_layers');
+		if (__eq__ (flow_smoke.texture_map_type, 'UV')) {
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop_search, __accu0__, flow_smoke, 'uv_layer', ob.data, 'uv_layers');
+			}) ();
 		}
-		if (flow_smoke.texture_map_type == 'AUTO') {
-			sub.prop (flow_smoke, 'texture_size');
+		if (__eq__ (flow_smoke.texture_map_type, 'AUTO')) {
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'texture_size');
+			}) ();
 		}
-		sub.prop (flow_smoke, 'texture_offset');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, flow_smoke, 'texture_offset');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain', [PhysicButtonsPanel, Panel], {
@@ -1000,7 +1495,7 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1012,12 +1507,15 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_gas_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var md = context.fluid;
 		var domain = md.domain_settings;
-		if (domain.use_guide && domain.guide_source == 'EFFECTOR') {
+		if (domain.use_guide && __eq__ (domain.guide_source, 'EFFECTOR')) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1025,7 +1523,7 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1042,12 +1540,15 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
 		self.layout.enabled = !(is_baking_any) && !(has_baked_any);
-		self.layout.prop (md, 'use_adaptive_domain', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_adaptive_domain', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1065,14 +1566,35 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 		layout.active = domain.use_adaptive_domain;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_any);
-		var col = flow.column ();
-		col.prop (domain, 'additional_res', __kwargtrans__ ({text: 'Add Resolution'}));
-		col.prop (domain, 'adapt_margin');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (domain, 'adapt_threshold', __kwargtrans__ ({text: 'Threshold'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'additional_res', __kwargtrans__ ({text: 'Add Resolution'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'adapt_margin');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'adapt_threshold', __kwargtrans__ ({text: 'Threshold'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPanel, Panel], {
@@ -1084,7 +1606,7 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1096,7 +1618,10 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_gas_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1104,7 +1629,7 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1120,12 +1645,15 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		self.layout.enabled = !(is_baking_any);
-		self.layout.prop (md, 'use_noise', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_noise', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1144,16 +1672,40 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 		layout.active = domain.use_noise;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_noise = domain.has_cache_baked_noise;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_noise);
-		var col = flow.column ();
-		col.prop (domain, 'noise_scale', __kwargtrans__ ({text: 'Upres Factor'}));
-		col.prop (domain, 'noise_strength', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.amount}));
-		var col = flow.column ();
-		col.prop (domain, 'noise_pos_scale', __kwargtrans__ ({text: 'Scale'}));
-		col.prop (domain, 'noise_time_anim', __kwargtrans__ ({text: 'Time'}));
-		if (domain.cache_type == 'MODULAR') {
-			col.separator ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'noise_scale', __kwargtrans__ ({text: 'Upres Factor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'noise_strength', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.amount}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'noise_pos_scale', __kwargtrans__ ({text: 'Scale'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'noise_time_anim', __kwargtrans__ ({text: 'Time'}));
+		}) ();
+		if (__eq__ (domain.cache_type, 'MODULAR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			var note_flag = true;
 			if (domain.use_noise) {
 				var label = '';
@@ -1164,32 +1716,65 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 					var label = 'Unbaked Data: Bake Data first';
 				}
 				if (label) {
-					var info = layout.py_split ();
-					var note = info.row ();
+					var info = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.py_split, __accu0__);
+					}) ();
+					var note = (function () {
+						var __accu0__ = info;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					var note_flag = false;
 					note.enabled = note_flag;
 					note.alignment = 'RIGHT';
-					note.label (__kwargtrans__ ({icon: 'INFO', text: label}));
+					(function () {
+						var __accu0__ = note;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: label}));
+					}) ();
 				}
 			}
-			var py_split = layout.py_split ();
-			py_split.enabled = domain.has_cache_baked_data && note_flag && ob.mode == 'OBJECT';
-			var bake_incomplete = domain.cache_frame_pause_noise < domain.cache_frame_end;
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			py_split.enabled = domain.has_cache_baked_data && note_flag && __eq__ (ob.mode, 'OBJECT');
+			var bake_incomplete = __lt__ (domain.cache_frame_pause_noise, domain.cache_frame_end);
 			if (domain.has_cache_baked_noise && !(domain.is_cache_baking_noise) && bake_incomplete) {
-				var col = py_split.column ();
-				col.operator ('fluid.bake_noise', __kwargtrans__ ({text: 'Resume'}));
-				var col = py_split.column ();
-				col.operator ('fluid.free_noise', __kwargtrans__ ({text: 'Free'}));
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_noise', __kwargtrans__ ({text: 'Resume'}));
+				}) ();
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_noise', __kwargtrans__ ({text: 'Free'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_noise) && domain.is_cache_baking_noise) {
 				py_split.enabled = false;
-				py_split.operator ('fluid.pause_bake', __kwargtrans__ ({text: 'Baking Noise - ESC to pause'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Noise - ESC to pause'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_noise) && !(domain.is_cache_baking_noise)) {
-				py_split.operator ('fluid.bake_noise', __kwargtrans__ ({text: 'Bake Noise'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_noise', __kwargtrans__ ({text: 'Bake Noise'}));
+				}) ();
 			}
 			else {
-				py_split.operator ('fluid.free_noise', __kwargtrans__ ({text: 'Free Noise'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_noise', __kwargtrans__ ({text: 'Free Noise'}));
+				}) ();
 			}
 		}
 	});}
@@ -1203,7 +1788,7 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1215,7 +1800,10 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_liquid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1223,7 +1811,7 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1239,12 +1827,15 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		self.layout.enabled = !(is_baking_any);
-		self.layout.prop (md, 'use_mesh', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_mesh', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1263,25 +1854,70 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 		layout.active = domain.use_mesh;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_mesh = domain.has_cache_baked_mesh;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_mesh);
-		var col = flow.column ();
-		col.prop (domain, 'mesh_scale', __kwargtrans__ ({text: 'Upres Factor'}));
-		col.prop (domain, 'mesh_particle_radius', __kwargtrans__ ({text: 'Particle Radius'}));
-		var col = flow.column ();
-		col.prop (domain, 'use_speed_vectors', __kwargtrans__ ({text: 'Speed Vectors'}));
-		col.separator ();
-		col.prop (domain, 'mesh_generator', __kwargtrans__ ({text: 'Mesh Generator'}));
-		if (domain.mesh_generator == 'IMPROVED') {
-			var col = flow.column (__kwargtrans__ ({align: true}));
-			col.prop (domain, 'mesh_smoothen_pos', __kwargtrans__ ({text: 'Smoothing Positive'}));
-			col.prop (domain, 'mesh_smoothen_neg', __kwargtrans__ ({text: 'Negative'}));
-			var col = flow.column (__kwargtrans__ ({align: true}));
-			col.prop (domain, 'mesh_concave_upper', __kwargtrans__ ({text: 'Concavity Upper'}));
-			col.prop (domain, 'mesh_concave_lower', __kwargtrans__ ({text: 'Lower'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_scale', __kwargtrans__ ({text: 'Upres Factor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_particle_radius', __kwargtrans__ ({text: 'Particle Radius'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_speed_vectors', __kwargtrans__ ({text: 'Speed Vectors'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_generator', __kwargtrans__ ({text: 'Mesh Generator'}));
+		}) ();
+		if (__eq__ (domain.mesh_generator, 'IMPROVED')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_smoothen_pos', __kwargtrans__ ({text: 'Smoothing Positive'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_smoothen_neg', __kwargtrans__ ({text: 'Negative'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_concave_upper', __kwargtrans__ ({text: 'Concavity Upper'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'mesh_concave_lower', __kwargtrans__ ({text: 'Lower'}));
+			}) ();
 		}
-		if (domain.cache_type == 'MODULAR') {
-			col.separator ();
+		if (__eq__ (domain.cache_type, 'MODULAR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			var note_flag = true;
 			if (domain.use_mesh) {
 				var label = '';
@@ -1292,32 +1928,65 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 					var label = 'Unbaked Data: Bake Data first';
 				}
 				if (label) {
-					var info = layout.py_split ();
-					var note = info.row ();
+					var info = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.py_split, __accu0__);
+					}) ();
+					var note = (function () {
+						var __accu0__ = info;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					var note_flag = false;
 					note.enabled = note_flag;
 					note.alignment = 'RIGHT';
-					note.label (__kwargtrans__ ({icon: 'INFO', text: label}));
+					(function () {
+						var __accu0__ = note;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: label}));
+					}) ();
 				}
 			}
-			var py_split = layout.py_split ();
-			py_split.enabled = domain.has_cache_baked_data && note_flag && ob.mode == 'OBJECT';
-			var bake_incomplete = domain.cache_frame_pause_mesh < domain.cache_frame_end;
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			py_split.enabled = domain.has_cache_baked_data && note_flag && __eq__ (ob.mode, 'OBJECT');
+			var bake_incomplete = __lt__ (domain.cache_frame_pause_mesh, domain.cache_frame_end);
 			if (domain.has_cache_baked_mesh && !(domain.is_cache_baking_mesh) && bake_incomplete) {
-				var col = py_split.column ();
-				col.operator ('fluid.bake_mesh', __kwargtrans__ ({text: 'Resume'}));
-				var col = py_split.column ();
-				col.operator ('fluid.free_mesh', __kwargtrans__ ({text: 'Free'}));
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_mesh', __kwargtrans__ ({text: 'Resume'}));
+				}) ();
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_mesh', __kwargtrans__ ({text: 'Free'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_mesh) && domain.is_cache_baking_mesh) {
 				py_split.enabled = false;
-				py_split.operator ('fluid.pause_bake', __kwargtrans__ ({text: 'Baking Mesh - ESC to pause'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Mesh - ESC to pause'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_mesh) && !(domain.is_cache_baking_mesh)) {
-				py_split.operator ('fluid.bake_mesh', __kwargtrans__ ({text: 'Bake Mesh'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_mesh', __kwargtrans__ ({text: 'Bake Mesh'}));
+				}) ();
 			}
 			else {
-				py_split.operator ('fluid.free_mesh', __kwargtrans__ ({text: 'Free Mesh'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_mesh', __kwargtrans__ ({text: 'Free Mesh'}));
+				}) ();
 			}
 		}
 	});}
@@ -1331,7 +2000,7 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1343,7 +2012,10 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_liquid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1351,7 +2023,7 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1370,55 +2042,184 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_particles = domain.has_cache_baked_particles;
 		var using_particles = domain.use_spray_particles || domain.use_foam_particles || domain.use_bubble_particles;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any);
 		var sndparticle_combined_export = domain.sndparticle_combined_export;
-		var col = flow.column ();
-		var row = col.row ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.enabled = __in__ (sndparticle_combined_export, new set (['OFF', 'FOAM + BUBBLES']));
-		row.prop (domain, 'use_spray_particles', __kwargtrans__ ({text: 'Spray'}));
-		row.prop (domain, 'use_foam_particles', __kwargtrans__ ({text: 'Foam'}));
-		row.prop (domain, 'use_bubble_particles', __kwargtrans__ ({text: 'Bubbles'}));
-		col.separator ();
-		col.prop (domain, 'sndparticle_combined_export');
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_spray_particles', __kwargtrans__ ({text: 'Spray'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_foam_particles', __kwargtrans__ ({text: 'Foam'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'use_bubble_particles', __kwargtrans__ ({text: 'Bubbles'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_combined_export');
+		}) ();
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_particles);
 		flow.active = using_particles;
-		var col = flow.column ();
-		col.prop (domain, 'particle_scale', __kwargtrans__ ({text: 'Upres Factor'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_potential_max_wavecrest', __kwargtrans__ ({text: 'Wave Crest Potential Maximum'}));
-		col.prop (domain, 'sndparticle_potential_min_wavecrest', __kwargtrans__ ({text: 'Minimum'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_potential_max_trappedair', __kwargtrans__ ({text: 'Trapped Air Potential Maximum'}));
-		col.prop (domain, 'sndparticle_potential_min_trappedair', __kwargtrans__ ({text: 'Minimum'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_potential_max_energy', __kwargtrans__ ({text: 'Kinetic Energy Potential Maximum'}));
-		col.prop (domain, 'sndparticle_potential_min_energy', __kwargtrans__ ({text: 'Minimum'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_potential_radius', __kwargtrans__ ({text: 'Potential Radius'}));
-		col.prop (domain, 'sndparticle_update_radius', __kwargtrans__ ({text: 'Particle Update Radius'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_sampling_wavecrest', __kwargtrans__ ({text: 'Wave Crest Particle Sampling'}));
-		col.prop (domain, 'sndparticle_sampling_trappedair', __kwargtrans__ ({text: 'Trapped Air Particle Sampling'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_life_max', __kwargtrans__ ({text: 'Particle Life Maximum'}));
-		col.prop (domain, 'sndparticle_life_min', __kwargtrans__ ({text: 'Minimum'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'sndparticle_bubble_buoyancy', __kwargtrans__ ({text: 'Bubble Buoyancy'}));
-		col.prop (domain, 'sndparticle_bubble_drag', __kwargtrans__ ({text: 'Bubble Drag'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (domain, 'sndparticle_boundary', __kwargtrans__ ({text: 'Particles in Boundary'}));
-		if (domain.cache_type == 'MODULAR') {
-			col.separator ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'particle_scale', __kwargtrans__ ({text: 'Upres Factor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_max_wavecrest', __kwargtrans__ ({text: 'Wave Crest Potential Maximum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_min_wavecrest', __kwargtrans__ ({text: 'Minimum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_max_trappedair', __kwargtrans__ ({text: 'Trapped Air Potential Maximum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_min_trappedair', __kwargtrans__ ({text: 'Minimum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_max_energy', __kwargtrans__ ({text: 'Kinetic Energy Potential Maximum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_min_energy', __kwargtrans__ ({text: 'Minimum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_potential_radius', __kwargtrans__ ({text: 'Potential Radius'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_update_radius', __kwargtrans__ ({text: 'Particle Update Radius'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_sampling_wavecrest', __kwargtrans__ ({text: 'Wave Crest Particle Sampling'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_sampling_trappedair', __kwargtrans__ ({text: 'Trapped Air Particle Sampling'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_life_max', __kwargtrans__ ({text: 'Particle Life Maximum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_life_min', __kwargtrans__ ({text: 'Minimum'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_bubble_buoyancy', __kwargtrans__ ({text: 'Bubble Buoyancy'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_bubble_drag', __kwargtrans__ ({text: 'Bubble Drag'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'sndparticle_boundary', __kwargtrans__ ({text: 'Particles in Boundary'}));
+		}) ();
+		if (__eq__ (domain.cache_type, 'MODULAR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			var note_flag = true;
 			if (using_particles) {
 				var label = '';
@@ -1429,32 +2230,65 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 					var label = 'Unbaked Data: Bake Data first';
 				}
 				if (label) {
-					var info = layout.py_split ();
-					var note = info.row ();
+					var info = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.py_split, __accu0__);
+					}) ();
+					var note = (function () {
+						var __accu0__ = info;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					var note_flag = false;
 					note.enabled = note_flag;
 					note.alignment = 'RIGHT';
-					note.label (__kwargtrans__ ({icon: 'INFO', text: label}));
+					(function () {
+						var __accu0__ = note;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: label}));
+					}) ();
 				}
 			}
-			var py_split = layout.py_split ();
-			py_split.enabled = note_flag && ob.mode == 'OBJECT' && domain.has_cache_baked_data && (domain.use_spray_particles || domain.use_bubble_particles || domain.use_foam_particles || domain.use_tracer_particles);
-			var bake_incomplete = domain.cache_frame_pause_particles < domain.cache_frame_end;
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			py_split.enabled = note_flag && __eq__ (ob.mode, 'OBJECT') && domain.has_cache_baked_data && (domain.use_spray_particles || domain.use_bubble_particles || domain.use_foam_particles || domain.use_tracer_particles);
+			var bake_incomplete = __lt__ (domain.cache_frame_pause_particles, domain.cache_frame_end);
 			if (domain.has_cache_baked_particles && !(domain.is_cache_baking_particles) && bake_incomplete) {
-				var col = py_split.column ();
-				col.operator ('fluid.bake_particles', __kwargtrans__ ({text: 'Resume'}));
-				var col = py_split.column ();
-				col.operator ('fluid.free_particles', __kwargtrans__ ({text: 'Free'}));
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_particles', __kwargtrans__ ({text: 'Resume'}));
+				}) ();
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_particles', __kwargtrans__ ({text: 'Free'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_particles) && domain.is_cache_baking_particles) {
 				py_split.enabled = false;
-				py_split.operator ('fluid.pause_bake', __kwargtrans__ ({text: 'Baking Particles - ESC to pause'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Particles - ESC to pause'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_particles) && !(domain.is_cache_baking_particles)) {
-				py_split.operator ('fluid.bake_particles', __kwargtrans__ ({text: 'Bake Particles'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_particles', __kwargtrans__ ({text: 'Bake Particles'}));
+				}) ();
 			}
 			else {
-				py_split.operator ('fluid.free_particles', __kwargtrans__ ({text: 'Free Particles'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_particles', __kwargtrans__ ({text: 'Free Particles'}));
+				}) ();
 			}
 		}
 	});}
@@ -1468,7 +2302,7 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1480,7 +2314,10 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_liquid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1488,7 +2325,7 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1505,12 +2342,15 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
 		self.layout.enabled = !(is_baking_any) && !(has_baked_any);
-		self.layout.prop (md, 'use_diffusion', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_diffusion', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1522,12 +2362,15 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 		}
 		else {
 		}
-		FLUID_PT_presets.draw_panel_header (self.layout);
+		(function () {
+			var __accu0__ = FLUID_PT_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, self.layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1546,13 +2389,31 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_any) && !(has_baked_data);
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'viscosity_base', __kwargtrans__ ({text: 'Base'}));
-		col.prop (domain, 'viscosity_exponent', __kwargtrans__ ({text: 'Exponent', slider: true}));
-		var col = flow.column ();
-		col.prop (domain, 'surface_tension', __kwargtrans__ ({text: 'Surface Tension'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'viscosity_base', __kwargtrans__ ({text: 'Base'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'viscosity_exponent', __kwargtrans__ ({text: 'Exponent', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'surface_tension', __kwargtrans__ ({text: 'Surface Tension'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicButtonsPanel, Panel], {
@@ -1564,7 +2425,7 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1576,7 +2437,10 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_liquid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1584,7 +2448,7 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1601,12 +2465,15 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
 		self.layout.enabled = !(is_baking_any) && !(has_baked_any);
-		self.layout.prop (md, 'use_viscosity', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_viscosity', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1625,10 +2492,19 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_any) && !(has_baked_data);
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (domain, 'viscosity_value', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.amount}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'viscosity_value', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.amount}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPanel, Panel], {
@@ -1640,7 +2516,7 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1652,7 +2528,10 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1660,7 +2539,7 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1676,12 +2555,15 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		self.layout.enabled = !(is_baking_any);
-		self.layout.prop (md, 'use_guide', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_guide', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1699,37 +2581,88 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 		layout.active = domain.use_guide;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_data);
-		var col = flow.column ();
-		col.prop (domain, 'guide_alpha', __kwargtrans__ ({text: 'Weight'}));
-		col.prop (domain, 'guide_beta', __kwargtrans__ ({text: 'Size'}));
-		col.prop (domain, 'guide_vel_factor', __kwargtrans__ ({text: 'Velocity Factor'}));
-		var col = flow.column ();
-		col.prop (domain, 'guide_source', __kwargtrans__ ({text: 'Velocity Source'}));
-		if (domain.guide_source == 'DOMAIN') {
-			col.prop (domain, 'guide_parent', __kwargtrans__ ({text: 'Guide Parent'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'guide_alpha', __kwargtrans__ ({text: 'Weight'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'guide_beta', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'guide_vel_factor', __kwargtrans__ ({text: 'Velocity Factor'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'guide_source', __kwargtrans__ ({text: 'Velocity Source'}));
+		}) ();
+		if (__eq__ (domain.guide_source, 'DOMAIN')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'guide_parent', __kwargtrans__ ({text: 'Guide Parent'}));
+			}) ();
 		}
-		if (domain.cache_type == 'MODULAR') {
-			col.separator ();
-			if (domain.guide_source == 'EFFECTOR') {
-				var py_split = layout.py_split ();
-				var bake_incomplete = domain.cache_frame_pause_guide < domain.cache_frame_end;
+		if (__eq__ (domain.cache_type, 'MODULAR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			if (__eq__ (domain.guide_source, 'EFFECTOR')) {
+				var py_split = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.py_split, __accu0__);
+				}) ();
+				var bake_incomplete = __lt__ (domain.cache_frame_pause_guide, domain.cache_frame_end);
 				if (domain.has_cache_baked_guide && !(domain.is_cache_baking_guide) && bake_incomplete) {
-					var col = py_split.column ();
-					col.operator ('fluid.bake_guides', __kwargtrans__ ({text: 'Resume'}));
-					var col = py_split.column ();
-					col.operator ('fluid.free_guides', __kwargtrans__ ({text: 'Free'}));
+					var col = (function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_guides', __kwargtrans__ ({text: 'Resume'}));
+					}) ();
+					var col = (function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.column, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.free_guides', __kwargtrans__ ({text: 'Free'}));
+					}) ();
 				}
 				else if (!(domain.has_cache_baked_guide) && domain.is_cache_baking_guide) {
 					py_split.enabled = false;
-					py_split.operator ('fluid.pause_bake', __kwargtrans__ ({text: 'Baking Guides - ESC to pause'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Guides - ESC to pause'}));
+					}) ();
 				}
 				else if (!(domain.has_cache_baked_guide) && !(domain.is_cache_baking_guide)) {
-					py_split.operator ('fluid.bake_guides', __kwargtrans__ ({text: 'Bake Guides'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_guides', __kwargtrans__ ({text: 'Bake Guides'}));
+					}) ();
 				}
 				else {
-					py_split.operator ('fluid.free_guides', __kwargtrans__ ({text: 'Free Guides'}));
+					(function () {
+						var __accu0__ = py_split;
+						return __call__ (__accu0__.operator, __accu0__, 'fluid.free_guides', __kwargtrans__ ({text: 'Free Guides'}));
+					}) ();
 				}
 			}
 		}
@@ -1744,7 +2677,7 @@ export var PHYSICS_PT_collections =  __class__ ('PHYSICS_PT_collections', [Physi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1756,7 +2689,10 @@ export var PHYSICS_PT_collections =  __class__ ('PHYSICS_PT_collections', [Physi
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1764,7 +2700,7 @@ export var PHYSICS_PT_collections =  __class__ ('PHYSICS_PT_collections', [Physi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1779,10 +2715,22 @@ export var PHYSICS_PT_collections =  __class__ ('PHYSICS_PT_collections', [Physi
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var domain = context.fluid.domain_settings;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
-		col.prop (domain, 'fluid_group', __kwargtrans__ ({text: 'Flow'}));
-		col.prop (domain, 'effector_group', __kwargtrans__ ({text: 'Effector'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'fluid_group', __kwargtrans__ ({text: 'Flow'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'effector_group', __kwargtrans__ ({text: 'Effector'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPanel, Panel], {
@@ -1793,7 +2741,7 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1805,7 +2753,10 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1813,7 +2764,7 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1830,45 +2781,117 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		var col = layout.column ();
-		col.prop (domain, 'cache_directory', __kwargtrans__ ({text: ''}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_directory', __kwargtrans__ ({text: ''}));
+		}) ();
 		col.enabled = !(is_baking_any);
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
-		var row = col.row ();
-		var row = row.column (__kwargtrans__ ({align: true}));
-		row.prop (domain, 'cache_frame_start', __kwargtrans__ ({text: 'Frame Start'}));
-		row.prop (domain, 'cache_frame_end', __kwargtrans__ ({text: 'End'}));
-		var row = col.row ();
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_frame_start', __kwargtrans__ ({text: 'Frame Start'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_frame_end', __kwargtrans__ ({text: 'End'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.enabled = __in__ (domain.cache_type, new set (['MODULAR', 'ALL']));
-		row.prop (domain, 'cache_frame_offset', __kwargtrans__ ({text: 'Offset'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (domain, 'cache_type', __kwargtrans__ ({expand: false}));
-		var row = col.row ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_frame_offset', __kwargtrans__ ({text: 'Offset'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_type', __kwargtrans__ ({expand: false}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.enabled = !(is_baking_any) && !(has_baked_data);
-		row.prop (domain, 'cache_resumable', __kwargtrans__ ({text: 'Resumable'}));
-		if (domain.cache_type == 'ALL') {
-			col.separator ();
-			var py_split = layout.py_split ();
-			py_split.enabled = ob.mode == 'OBJECT';
-			var bake_incomplete = domain.cache_frame_pause_data < domain.cache_frame_end;
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_resumable', __kwargtrans__ ({text: 'Resumable'}));
+		}) ();
+		if (__eq__ (domain.cache_type, 'ALL')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var py_split = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			py_split.enabled = __eq__ (ob.mode, 'OBJECT');
+			var bake_incomplete = __lt__ (domain.cache_frame_pause_data, domain.cache_frame_end);
 			if (domain.cache_resumable && domain.has_cache_baked_data && !(domain.is_cache_baking_data) && bake_incomplete) {
-				var col = py_split.column ();
-				col.operator ('fluid.bake_all', __kwargtrans__ ({text: 'Resume'}));
-				var col = py_split.column ();
-				col.operator ('fluid.free_all', __kwargtrans__ ({text: 'Free'}));
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_all', __kwargtrans__ ({text: 'Resume'}));
+				}) ();
+				var col = (function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_all', __kwargtrans__ ({text: 'Free'}));
+				}) ();
 			}
 			else if (domain.is_cache_baking_data && !(domain.has_cache_baked_data)) {
 				py_split.enabled = false;
-				py_split.operator ('fluid.pause_bake', __kwargtrans__ ({text: 'Baking All - ESC to pause'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking All - ESC to pause'}));
+				}) ();
 			}
 			else if (!(domain.has_cache_baked_data) && !(domain.is_cache_baking_data)) {
-				py_split.operator ('fluid.bake_all', __kwargtrans__ ({text: 'Bake All'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_all', __kwargtrans__ ({text: 'Bake All'}));
+				}) ();
 			}
 			else {
-				py_split.operator ('fluid.free_all', __kwargtrans__ ({text: 'Free All'}));
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_all', __kwargtrans__ ({text: 'Free All'}));
+				}) ();
 			}
 		}
 	});}
@@ -1882,7 +2905,7 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1894,7 +2917,10 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1902,7 +2928,7 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1922,26 +2948,59 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 		var has_baked_any = domain.has_cache_baked_any;
 		var has_baked_data = domain.has_cache_baked_data;
 		var has_baked_mesh = domain.has_cache_baked_mesh;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		flow.enabled = !(is_baking_any) && !(has_baked_any);
-		var col = flow.column ();
-		var row = col.row ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.enabled = !(is_baking_any) && !(has_baked_data);
-		row.prop (domain, 'cache_data_format', __kwargtrans__ ({text: 'Format'}));
-		if (domain.cache_data_format == 'OPENVDB') {
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_data_format', __kwargtrans__ ({text: 'Format'}));
+		}) ();
+		if (__eq__ (domain.cache_data_format, 'OPENVDB')) {
 			col.enabled = !(is_baking_any) && !(has_baked_data);
-			col.prop (domain, 'openvdb_cache_compress_type', __kwargtrans__ ({text: 'Compression'}));
-			var col = flow.column ();
-			col.prop (domain, 'openvdb_data_depth', __kwargtrans__ ({text: 'Precision'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'openvdb_cache_compress_type', __kwargtrans__ ({text: 'Compression'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'openvdb_data_depth', __kwargtrans__ ({text: 'Precision'}));
+			}) ();
 		}
-		if (md.domain_settings.domain_type == 'LIQUID' && domain.use_mesh) {
-			var row = col.row ();
+		if (__eq__ (md.domain_settings.domain_type, 'LIQUID') && domain.use_mesh) {
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.enabled = !(is_baking_any) && !(has_baked_mesh);
-			row.prop (domain, 'cache_mesh_format', __kwargtrans__ ({text: 'Meshes'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'cache_mesh_format', __kwargtrans__ ({text: 'Meshes'}));
+			}) ();
 		}
-		if (bpy.app.debug_value == 3001) {
-			var col = flow.column ();
-			col.prop (domain, 'export_manta_script', __kwargtrans__ ({text: 'Export Mantaflow Script'}));
+		if (__eq__ (bpy.app.debug_value, 3001)) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'export_manta_script', __kwargtrans__ ({text: 'Export Mantaflow Script'}));
+			}) ();
 		}
 	});}
 });
@@ -1954,7 +3013,7 @@ export var PHYSICS_PT_field_weights =  __class__ ('PHYSICS_PT_field_weights', [P
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1966,7 +3025,10 @@ export var PHYSICS_PT_field_weights =  __class__ ('PHYSICS_PT_field_weights', [P
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_fluid_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1974,7 +3036,7 @@ export var PHYSICS_PT_field_weights =  __class__ ('PHYSICS_PT_field_weights', [P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1987,7 +3049,7 @@ export var PHYSICS_PT_field_weights =  __class__ ('PHYSICS_PT_field_weights', [P
 		else {
 		}
 		var domain = context.fluid.domain_settings;
-		effector_weights_ui (self, domain.effector_weights, 'SMOKE');
+		__call__ (effector_weights_ui, null, self, domain.effector_weights, 'SMOKE');
 	});}
 });
 export var PHYSICS_PT_viewport_display =  __class__ ('PHYSICS_PT_viewport_display', [PhysicButtonsPanel, Panel], {
@@ -1998,7 +3060,7 @@ export var PHYSICS_PT_viewport_display =  __class__ ('PHYSICS_PT_viewport_displa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2010,12 +3072,15 @@ export var PHYSICS_PT_viewport_display =  __class__ ('PHYSICS_PT_viewport_displa
 		}
 		else {
 		}
-		return PhysicButtonsPanel.poll_fluid_domain (context);
+		return (function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2029,18 +3094,39 @@ export var PHYSICS_PT_viewport_display =  __class__ ('PHYSICS_PT_viewport_displa
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var domain = context.fluid.domain_settings;
-		var col = flow.column (__kwargtrans__ ({align: false}));
-		col.prop (domain, 'display_thickness');
-		var sub = col.column ();
-		sub.prop (domain, 'display_interpolation');
-		if (domain.use_color_ramp && domain.color_ramp_field == 'FLAGS') {
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'display_thickness');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'display_interpolation');
+		}) ();
+		if (domain.use_color_ramp && __eq__ (domain.color_ramp_field, 'FLAGS')) {
 			sub.enabled = false;
 		}
-		var col = col.column ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = !(domain.use_slice);
-		col.prop (domain, 'slice_per_voxel');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'slice_per_voxel');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_viewport_display_slicing =  __class__ ('PHYSICS_PT_viewport_display_slicing', [PhysicButtonsPanel, Panel], {
@@ -2051,7 +3137,7 @@ export var PHYSICS_PT_viewport_display_slicing =  __class__ ('PHYSICS_PT_viewpor
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2063,12 +3149,15 @@ export var PHYSICS_PT_viewport_display_slicing =  __class__ ('PHYSICS_PT_viewpor
 		}
 		else {
 		}
-		return PhysicButtonsPanel.poll_fluid_domain (context);
+		return (function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ();
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2081,12 +3170,15 @@ export var PHYSICS_PT_viewport_display_slicing =  __class__ ('PHYSICS_PT_viewpor
 		else {
 		}
 		var md = context.fluid.domain_settings;
-		self.layout.prop (md, 'use_slice', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_slice', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2102,12 +3194,27 @@ export var PHYSICS_PT_viewport_display_slicing =  __class__ ('PHYSICS_PT_viewpor
 		layout.use_property_split = true;
 		var domain = context.fluid.domain_settings;
 		layout.active = domain.use_slice;
-		var col = layout.column ();
-		col.prop (domain, 'slice_axis');
-		col.prop (domain, 'slice_depth');
-		var sub = col.column ();
-		sub.prop (domain, 'show_gridlines');
-		sub.active = domain.display_interpolation == 'CLOSEST' || domain.color_ramp_field == 'FLAGS';
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'slice_axis');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'slice_depth');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'show_gridlines');
+		}) ();
+		sub.active = __eq__ (domain.display_interpolation, 'CLOSEST') || __eq__ (domain.color_ramp_field, 'FLAGS');
 	});}
 });
 export var PHYSICS_PT_viewport_display_color =  __class__ ('PHYSICS_PT_viewport_display_color', [PhysicButtonsPanel, Panel], {
@@ -2118,7 +3225,7 @@ export var PHYSICS_PT_viewport_display_color =  __class__ ('PHYSICS_PT_viewport_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2130,12 +3237,15 @@ export var PHYSICS_PT_viewport_display_color =  __class__ ('PHYSICS_PT_viewport_
 		}
 		else {
 		}
-		return PhysicButtonsPanel.poll_fluid_domain (context);
+		return (function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ();
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2148,12 +3258,15 @@ export var PHYSICS_PT_viewport_display_color =  __class__ ('PHYSICS_PT_viewport_
 		else {
 		}
 		var md = context.fluid.domain_settings;
-		self.layout.prop (md, 'use_color_ramp', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'use_color_ramp', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2168,16 +3281,31 @@ export var PHYSICS_PT_viewport_display_color =  __class__ ('PHYSICS_PT_viewport_
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var domain = context.fluid.domain_settings;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = domain.use_color_ramp;
-		col.prop (domain, 'color_ramp_field');
-		if (!(domain.color_ramp_field == 'FLAGS')) {
-			col.prop (domain, 'color_ramp_field_scale');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'color_ramp_field');
+		}) ();
+		if (!(__eq__ (domain.color_ramp_field, 'FLAGS'))) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'color_ramp_field_scale');
+			}) ();
 		}
 		col.use_property_split = false;
-		if (domain.color_ramp_field.__getslice__ (null, 3, 1) != 'PHI' && !__in__ (domain.color_ramp_field, new set (['FLAGS', 'PRESSURE']))) {
-			var col = col.column ();
-			col.template_color_ramp (domain, 'color_ramp', __kwargtrans__ ({expand: true}));
+		if (__ne__ (__getslice__ (domain.color_ramp_field, null, 3, 1), 'PHI') && !__in__ (domain.color_ramp_field, new set (['FLAGS', 'PRESSURE']))) {
+			var col = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_color_ramp, __accu0__, domain, 'color_ramp', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 	});}
 });
@@ -2189,7 +3317,7 @@ export var PHYSICS_PT_viewport_display_debug =  __class__ ('PHYSICS_PT_viewport_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2201,12 +3329,15 @@ export var PHYSICS_PT_viewport_display_debug =  __class__ ('PHYSICS_PT_viewport_
 		}
 		else {
 		}
-		return PhysicButtonsPanel.poll_fluid_domain (context);
+		return (function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) ();
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2219,12 +3350,15 @@ export var PHYSICS_PT_viewport_display_debug =  __class__ ('PHYSICS_PT_viewport_
 		else {
 		}
 		var md = context.fluid.domain_settings;
-		self.layout.prop (md, 'show_velocity', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, md, 'show_velocity', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2238,26 +3372,62 @@ export var PHYSICS_PT_viewport_display_debug =  __class__ ('PHYSICS_PT_viewport_
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var domain = context.fluid.domain_settings;
-		var col = flow.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = domain.show_velocity;
-		col.prop (domain, 'vector_display_type', __kwargtrans__ ({text: 'Display As'}));
-		if (!(domain.use_guide) && domain.vector_field == 'GUIDE_VELOCITY') {
-			var note = layout.py_split ();
-			note.label (__kwargtrans__ ({icon: 'INFO', text: 'Enable Guides first! Defaulting to Fluid Velocity'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'vector_display_type', __kwargtrans__ ({text: 'Display As'}));
+		}) ();
+		if (!(domain.use_guide) && __eq__ (domain.vector_field, 'GUIDE_VELOCITY')) {
+			var note = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.py_split, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = note;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: 'Enable Guides first! Defaulting to Fluid Velocity'}));
+			}) ();
 		}
-		if (domain.vector_display_type == 'MAC') {
-			var sub = col.column (__kwargtrans__ ({heading: 'MAC Grid'}));
-			sub.prop (domain, 'vector_show_mac_x');
-			sub.prop (domain, 'vector_show_mac_y');
-			sub.prop (domain, 'vector_show_mac_z');
+		if (__eq__ (domain.vector_display_type, 'MAC')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'MAC Grid'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'vector_show_mac_x');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'vector_show_mac_y');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'vector_show_mac_z');
+			}) ();
 		}
 		else {
-			col.prop (domain, 'vector_scale_with_magnitude');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, domain, 'vector_scale_with_magnitude');
+			}) ();
 		}
-		col.prop (domain, 'vector_field');
-		col.prop (domain, 'vector_scale');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'vector_field');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'vector_scale');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_viewport_display_advanced =  __class__ ('PHYSICS_PT_viewport_display_advanced', [PhysicButtonsPanel, Panel], {
@@ -2268,7 +3438,7 @@ export var PHYSICS_PT_viewport_display_advanced =  __class__ ('PHYSICS_PT_viewpo
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2281,12 +3451,15 @@ export var PHYSICS_PT_viewport_display_advanced =  __class__ ('PHYSICS_PT_viewpo
 		else {
 		}
 		var domain = context.fluid.domain_settings;
-		return PhysicButtonsPanel.poll_fluid_domain (context) && domain.use_slice && domain.show_gridlines;
+		return (function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
+		}) () && domain.use_slice && domain.show_gridlines;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2301,23 +3474,50 @@ export var PHYSICS_PT_viewport_display_advanced =  __class__ ('PHYSICS_PT_viewpo
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var domain = context.fluid.domain_settings;
-		layout.active = domain.display_interpolation == 'CLOSEST' || domain.color_ramp_field == 'FLAGS';
-		var col = layout.column ();
-		col.prop (domain, 'gridlines_color_field', __kwargtrans__ ({text: 'Color Gridlines'}));
-		if (domain.gridlines_color_field == 'RANGE') {
-			if (domain.use_color_ramp && domain.color_ramp_field != 'FLAGS') {
-				col.prop (domain, 'gridlines_lower_bound');
-				col.prop (domain, 'gridlines_upper_bound');
-				col.prop (domain, 'gridlines_range_color');
-				col.prop (domain, 'gridlines_cell_filter');
+		layout.active = __eq__ (domain.display_interpolation, 'CLOSEST') || __eq__ (domain.color_ramp_field, 'FLAGS');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_color_field', __kwargtrans__ ({text: 'Color Gridlines'}));
+		}) ();
+		if (__eq__ (domain.gridlines_color_field, 'RANGE')) {
+			if (domain.use_color_ramp && __ne__ (domain.color_ramp_field, 'FLAGS')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_lower_bound');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_upper_bound');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_range_color');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_cell_filter');
+				}) ();
 			}
 			else {
-				var note = layout.py_split ();
+				var note = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.py_split, __accu0__);
+				}) ();
 				if (!(domain.use_color_ramp)) {
-					note.label (__kwargtrans__ ({icon: 'INFO', text: 'Enable Grid Display to use range highlighting!'}));
+					(function () {
+						var __accu0__ = note;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: 'Enable Grid Display to use range highlighting!'}));
+					}) ();
 				}
 				else {
-					note.label (__kwargtrans__ ({icon: 'INFO', text: 'Range highlighting for flags is not available!'}));
+					(function () {
+						var __accu0__ = note;
+						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: 'Range highlighting for flags is not available!'}));
+					}) ();
 				}
 			}
 		}
@@ -2332,7 +3532,7 @@ export var PHYSICS_PT_fluid_domain_render =  __class__ ('PHYSICS_PT_fluid_domain
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2344,7 +3544,10 @@ export var PHYSICS_PT_fluid_domain_render =  __class__ ('PHYSICS_PT_fluid_domain
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_gas_domain (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2352,7 +3555,7 @@ export var PHYSICS_PT_fluid_domain_render =  __class__ ('PHYSICS_PT_fluid_domain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2367,15 +3570,57 @@ export var PHYSICS_PT_fluid_domain_render =  __class__ ('PHYSICS_PT_fluid_domain
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var domain = context.fluid.domain_settings;
-		layout.prop (domain, 'velocity_scale');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, domain, 'velocity_scale');
+		}) ();
 	});}
 });
 export var classes = tuple ([FLUID_PT_presets, PHYSICS_PT_fluid, PHYSICS_PT_settings, PHYSICS_PT_borders, PHYSICS_PT_adaptive_domain, PHYSICS_PT_smoke, PHYSICS_PT_smoke_dissolve, PHYSICS_PT_noise, PHYSICS_PT_fire, PHYSICS_PT_liquid, PHYSICS_PT_diffusion, PHYSICS_PT_viscosity, PHYSICS_PT_particles, PHYSICS_PT_mesh, PHYSICS_PT_guide, PHYSICS_PT_collections, PHYSICS_PT_cache, PHYSICS_PT_export, PHYSICS_PT_field_weights, PHYSICS_PT_flow_source, PHYSICS_PT_flow_initial_velocity, PHYSICS_PT_flow_texture, PHYSICS_PT_viewport_display, PHYSICS_PT_viewport_display_slicing, PHYSICS_PT_viewport_display_color, PHYSICS_PT_viewport_display_debug, PHYSICS_PT_viewport_display_advanced, PHYSICS_PT_fluid_domain_render]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_fluid.map
 export {Panel, PresetPanel, effector_weights_ui, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'FLUID_PT_presets': FLUID_PT_presets = value; break;
+		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
+		case 'PHYSICS_PT_fluid': PHYSICS_PT_fluid = value; break;
+		case 'PHYSICS_PT_settings': PHYSICS_PT_settings = value; break;
+		case 'PHYSICS_PT_borders': PHYSICS_PT_borders = value; break;
+		case 'PHYSICS_PT_smoke': PHYSICS_PT_smoke = value; break;
+		case 'PHYSICS_PT_smoke_dissolve': PHYSICS_PT_smoke_dissolve = value; break;
+		case 'PHYSICS_PT_fire': PHYSICS_PT_fire = value; break;
+		case 'PHYSICS_PT_liquid': PHYSICS_PT_liquid = value; break;
+		case 'PHYSICS_PT_flow_source': PHYSICS_PT_flow_source = value; break;
+		case 'PHYSICS_PT_flow_initial_velocity': PHYSICS_PT_flow_initial_velocity = value; break;
+		case 'PHYSICS_PT_flow_texture': PHYSICS_PT_flow_texture = value; break;
+		case 'PHYSICS_PT_adaptive_domain': PHYSICS_PT_adaptive_domain = value; break;
+		case 'PHYSICS_PT_noise': PHYSICS_PT_noise = value; break;
+		case 'PHYSICS_PT_mesh': PHYSICS_PT_mesh = value; break;
+		case 'PHYSICS_PT_particles': PHYSICS_PT_particles = value; break;
+		case 'PHYSICS_PT_diffusion': PHYSICS_PT_diffusion = value; break;
+		case 'PHYSICS_PT_viscosity': PHYSICS_PT_viscosity = value; break;
+		case 'PHYSICS_PT_guide': PHYSICS_PT_guide = value; break;
+		case 'PHYSICS_PT_collections': PHYSICS_PT_collections = value; break;
+		case 'PHYSICS_PT_cache': PHYSICS_PT_cache = value; break;
+		case 'PHYSICS_PT_export': PHYSICS_PT_export = value; break;
+		case 'PHYSICS_PT_field_weights': PHYSICS_PT_field_weights = value; break;
+		case 'PHYSICS_PT_viewport_display': PHYSICS_PT_viewport_display = value; break;
+		case 'PHYSICS_PT_viewport_display_slicing': PHYSICS_PT_viewport_display_slicing = value; break;
+		case 'PHYSICS_PT_viewport_display_color': PHYSICS_PT_viewport_display_color = value; break;
+		case 'PHYSICS_PT_viewport_display_debug': PHYSICS_PT_viewport_display_debug = value; break;
+		case 'PHYSICS_PT_viewport_display_advanced': PHYSICS_PT_viewport_display_advanced = value; break;
+		case 'PHYSICS_PT_fluid_domain_render': PHYSICS_PT_fluid_domain_render = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -15,7 +15,7 @@ export var language_id = 'shell';
 export var add_scrollback = function (text, text_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -27,14 +27,26 @@ export var add_scrollback = function (text, text_type) {
 	}
 	else {
 	}
-	for (var line of text.py_split ('\n')) {
-		bpy.ops.console.scrollback_append (__kwargtrans__ ({text: line.py_replace ('\t', '    '), py_metatype: text_type}));
+	var __iterable0__ = (function () {
+		var __accu0__ = text;
+		return __call__ (__accu0__.py_split, __accu0__, '\n');
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var line = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = bpy.ops.console;
+			return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: (function () {
+				var __accu1__ = line;
+				return __call__ (__accu1__.py_replace, __accu1__, '\t', '    ');
+			}) (), py_metatype: text_type}));
+		}) ();
 	}
 };
 export var shell_run = function (text) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -45,8 +57,11 @@ export var shell_run = function (text) {
 	}
 	else {
 	}
-	var subprocess = _module ('subprocess');
-	var __left0__ = subprocess.getstatusoutput (text);
+	var subprocess = __call__ (_module, null, 'subprocess');
+	var __left0__ = (function () {
+		var __accu0__ = subprocess;
+		return __call__ (__accu0__.getstatusoutput, __accu0__, text);
+	}) ();
 	var val = __left0__ [0];
 	var output = __left0__ [1];
 	if (!(val)) {
@@ -55,13 +70,13 @@ export var shell_run = function (text) {
 	else {
 		var style = 'ERROR';
 	}
-	add_scrollback (output, style);
+	__call__ (add_scrollback, null, output, style);
 };
 export var PROMPT = '$ ';
 export var execute = function (context, _is_interactive) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -75,21 +90,30 @@ export var execute = function (context, _is_interactive) {
 	}
 	var sc = context.space_data;
 	try {
-		var line = sc.history [-(1)].body;
+		var line = __getitem__ (sc.history, __neg__ (1)).body;
 	}
 	catch (__except0__) {
 		return new set (['CANCELLED']);
 	}
-	bpy.ops.console.scrollback_append (__kwargtrans__ ({text: sc.prompt + line, py_metatype: 'INPUT'}));
-	shell_run (line);
-	bpy.ops.console.history_append (__kwargtrans__ ({text: '', current_character: 0, remove_duplicates: true}));
-	sc.prompt = os.getcwd () + PROMPT;
+	(function () {
+		var __accu0__ = bpy.ops.console;
+		return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: __add__ (sc.prompt, line), py_metatype: 'INPUT'}));
+	}) ();
+	__call__ (shell_run, null, line);
+	(function () {
+		var __accu0__ = bpy.ops.console;
+		return __call__ (__accu0__.history_append, __accu0__, __kwargtrans__ ({text: '', current_character: 0, remove_duplicates: true}));
+	}) ();
+	sc.prompt = __add__ ((function () {
+		var __accu0__ = os;
+		return __call__ (__accu0__.getcwd, __accu0__);
+	}) (), PROMPT);
 	return new set (['FINISHED']);
 };
 export var autocomplete = function (_context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -105,7 +129,7 @@ export var autocomplete = function (_context) {
 export var banner = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -117,10 +141,27 @@ export var banner = function (context) {
 	else {
 	}
 	var sc = context.space_data;
-	shell_run ('bash --version');
-	sc.prompt = os.getcwd () + PROMPT;
+	__call__ (shell_run, null, 'bash --version');
+	sc.prompt = __add__ ((function () {
+		var __accu0__ = os;
+		return __call__ (__accu0__.getcwd, __accu0__);
+	}) (), PROMPT);
 	return new set (['FINISHED']);
 };
 
 //# sourceMappingURL=_console_shell.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'language_id': language_id = value; break;
+		case 'add_scrollback': add_scrollback = value; break;
+		case 'shell_run': shell_run = value; break;
+		case 'PROMPT': PROMPT = value; break;
+		case 'execute': execute = value; break;
+		case 'autocomplete': autocomplete = value; break;
+		case 'banner': banner = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

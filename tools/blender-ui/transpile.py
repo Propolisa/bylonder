@@ -43,6 +43,10 @@ PATCHES = [
      "    return fixed ? Number (value).toFixed (+fixed [1]) : str (value);\n"
      "};\n"
      "__setproperty__ (String.prototype, 'format', {", FORMAT),
+    ('org.transcrypt.__runtime__.js', "    return py_typeof (any) == dict ? any.py_keys () : any;",
+     "    if (py_typeof (any) == dict) return any.py_keys ();\n"
+     "    return any == null || typeof any == 'string' || Array.isArray (any) || '__getitem__' in Object (any) ? any : Array.from (any);",
+     "iterators (enumerate, zip, generators) in loops, which Transcrypt indexes with operator overloading"),
     # JS's % on numbers is C's fmod: the remainder with the dividend's sign.
     ('org.transcrypt.__runtime__.js', "        cls.__bases__ = bases;\n",
      "        cls.__bases__ = bases;\n"
@@ -82,6 +86,8 @@ def finish(name, script):
     # Keyword arguments reach a parameter Transcrypt renames (type as py_metatype, others with a py_ prefix) under
     # its Python name too, as they do when they come from a dict (**kwargs).
     script = re.sub(r"case 'py_(metatype|\w+)': var py_\1", lambda m: f"case '{'type' if m[1] == 'metatype' else m[1]}': case 'py_{m[1]}': var py_{m[1]}", script)
+    # The keyword arguments check, for a last argument without Object's prototype too (a module's namespace).
+    script = re.sub(r'(arguments \[__ilastarg\d+__\]) && \1\.hasOwnProperty \("__kwargtrans__"\)', r'\1 && globalThis.Object.hasOwn (\1, "__kwargtrans__")', script)
     # **kwargs collects keyword arguments under their Python names.
     script = re.sub(r"default: (\w+) \[(__attrib\d+__)\] = (__allkwargs\d+__) \[\2\]", r"default: \1 [__pyname__ (\2)] = \3 [\2]", script)
     if '__pyname__ (' in script and name != 'org.transcrypt.__runtime__.js':
@@ -182,7 +188,9 @@ def class_scope_loads(statement):
         if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
             yield node
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            nodes += node.decorator_list + node.args.defaults + [d for d in node.args.kw_defaults if d]
+            # @x.setter names the property, which Transcrypt compiles in the class.
+            accessor = lambda d: isinstance(d, ast.Attribute) and d.attr in ('setter', 'getter', 'deleter')
+            nodes += [d for d in node.decorator_list if not accessor(d)] + node.args.defaults + [d for d in node.args.kw_defaults if d]
         elif not isinstance(node, (ast.Lambda, ast.ClassDef)) or node is statement:
             nodes += list(ast.iter_child_nodes(node))
 
@@ -408,16 +416,60 @@ class TranscryptFixes(ast.NodeTransformer):
                                                                 if None in merged.keys else [merged], keywords=[]))]
         return node
 
-    def visit_Assign(self, node):
-        """Assignments to __doc__, which do nothing for the UI and fail on Transcrypt's method accessors, dropped."""
-        self.generic_visit(node)
-        return None if any(isinstance(t, ast.Attribute) and t.attr == '__doc__' for t in node.targets) else node
-
     def visit_Subscript(self, node):
         """A builtin type subscripted (dict[str, int], a type alias) is the type: Transcrypt's types are not generic."""
         self.generic_visit(node)
         generic = isinstance(node.value, ast.Name) and node.value.id in ('dict', 'list', 'tuple', 'set', 'frozenset', 'type')
         return node.value if generic and isinstance(node.ctx, ast.Load) else node
+
+    starred_temporaries = 0
+
+    def unpacked(self, target, value):
+        """Assignments unpacking value into target, a tuple or list with a starred name (a, *rest), by index and slice."""
+        if not (isinstance(target, (ast.Tuple, ast.List)) and any(isinstance(e, ast.Starred) or self.has_starred(e) for e in target.elts)):
+            return [ast.Assign([target], value, lineno=0)]
+        TranscryptFixes.starred_temporaries += 1
+        temporary = f'_unpacked{TranscryptFixes.starred_temporaries}'
+        out = [ast.Assign([ast.Name(temporary, ast.Store())], ast.Call(ast.Name('list', ast.Load()), [value], []), lineno=0)]
+        star = next((i for i, e in enumerate(target.elts) if isinstance(e, ast.Starred)), None)
+        after = len(target.elts) - star - 1 if star is not None else 0
+        # Indices from the end as len() - k: a negative index is a JS property without operator overloading.
+        from_end = lambda k: ast.BinOp(ast.Call(ast.Name('len', ast.Load()), [ast.Name(temporary, ast.Load())], []), ast.Sub(), ast.Constant(k))
+        for i, element in enumerate(target.elts):
+            if isinstance(element, ast.Starred):
+                stop = from_end(after) if after else None
+                item = ast.Call(ast.Name('list', ast.Load()), [ast.Subscript(ast.Name(temporary, ast.Load()), ast.Slice(ast.Constant(i), stop), ast.Load())], [])
+                element = element.value
+            else:
+                index = ast.Constant(i) if star is None or i < star else from_end(len(target.elts) - i)
+                item = ast.Subscript(ast.Name(temporary, ast.Load()), index, ast.Load())
+            out += self.unpacked(element, item)
+        return out
+
+    @staticmethod
+    def has_starred(node):
+        return any(isinstance(n, ast.Starred) for n in ast.walk(node)) if isinstance(node, (ast.Tuple, ast.List)) else False
+
+    def visit_Assign(self, node):
+        """Starred unpacking (a, *rest = value), which Transcrypt compiles wrong with operator overloading, by index; and
+        assignments to __doc__, which do nothing for the UI and fail on Transcrypt's method accessors, dropped."""
+        self.generic_visit(node)
+        if any(isinstance(t, ast.Attribute) and t.attr == '__doc__' for t in node.targets):
+            return None
+        if len(node.targets) == 1 and self.has_starred(node.targets[0]):
+            return [ast.fix_missing_locations(ast.copy_location(n, node)) for n in self.unpacked(node.targets[0], node.value)]
+        return node
+
+    def visit_For(self, node):
+        """A for loop's starred target (for i, (a, *rest) in ...) unpacked in its body."""
+        self.generic_visit(node)
+        if self.has_starred(node.target):
+            TranscryptFixes.starred_temporaries += 1
+            item = f'_item{TranscryptFixes.starred_temporaries}'
+            node.body = self.unpacked(node.target, ast.Name(item, ast.Load())) + node.body
+            node.target = ast.Name(item, ast.Store())
+            ast.fix_missing_locations(node)
+        return node
 
     def visit_Compare(self, node):
         """Blender's reload idiom, `"name" in locals()`, is False: modules load once."""

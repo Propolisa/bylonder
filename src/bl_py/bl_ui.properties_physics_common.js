@@ -17,7 +17,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -35,7 +35,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 export var physics_add = function (layout, md, py_name, py_metatype, typeicon, toggles) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -51,24 +51,39 @@ export var physics_add = function (layout, md, py_name, py_metatype, typeicon, t
 	}
 	else {
 	}
-	var row = layout.row (__kwargtrans__ ({align: true}));
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	if (md) {
-		row.operator ('object.modifier_remove', __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: 'X'})).modifier = md.py_name;
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.modifier_remove', __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: 'X'}));
+		}) ().modifier = md.py_name;
 		if (toggles) {
-			row.prop (md, 'show_viewport', __kwargtrans__ ({text: ''}));
-			row.prop (md, 'show_render', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, md, 'show_viewport', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, md, 'show_render', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		return row;
 	}
 	else {
-		row.operator ('object.modifier_add', __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: typeicon})).py_metatype = py_metatype;
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.modifier_add', __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: typeicon}));
+		}) ().py_metatype = py_metatype;
 		return null;
 	}
 };
 export var physics_add_special = function (layout, data, py_name, addop, removeop, typeicon) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,12 +99,21 @@ export var physics_add_special = function (layout, data, py_name, addop, removeo
 	}
 	else {
 	}
-	var row = layout.row (__kwargtrans__ ({align: true}));
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	if (data) {
-		row.operator (removeop, __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: 'X'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, removeop, __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: 'X'}));
+		}) ();
 	}
 	else {
-		row.operator (addop, __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: typeicon}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, addop, __kwargtrans__ ({text: py_name, text_ctxt: i18n_contexts.py_default, icon: typeicon}));
+		}) ();
 	}
 };
 export var PHYSICS_PT_add =  __class__ ('PHYSICS_PT_add', [PhysicButtonsPanel, Panel], {
@@ -100,7 +124,7 @@ export var PHYSICS_PT_add =  __class__ ('PHYSICS_PT_add', [PhysicButtonsPanel, P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -113,38 +137,56 @@ export var PHYSICS_PT_add =  __class__ ('PHYSICS_PT_add', [PhysicButtonsPanel, P
 		else {
 		}
 		var layout = self.layout;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var obj = context.object;
-		var col = flow.column ();
-		if (!(obj.field) || obj.field.py_metatype == 'NONE') {
-			col.operator ('object.forcefield_toggle', __kwargtrans__ ({text: 'Force Field', icon: 'FORCE_FORCE'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (!(obj.field) || __eq__ (obj.field.py_metatype, 'NONE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.forcefield_toggle', __kwargtrans__ ({text: 'Force Field', icon: 'FORCE_FORCE'}));
+			}) ();
 		}
 		else {
-			col.operator ('object.forcefield_toggle', __kwargtrans__ ({text: 'Force Field', icon: 'X'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.forcefield_toggle', __kwargtrans__ ({text: 'Force Field', icon: 'X'}));
+			}) ();
 		}
-		if (obj.py_metatype == 'MESH') {
-			var row = physics_add (col, context.collision, 'Collision', 'COLLISION', 'MOD_PHYSICS', false);
+		if (__eq__ (obj.py_metatype, 'MESH')) {
+			var row = __call__ (physics_add, null, col, context.collision, 'Collision', 'COLLISION', 'MOD_PHYSICS', false);
 			if (row && obj.collision) {
-				row.prop (obj.collision, 'use', __kwargtrans__ ({text: '', icon: (obj.collision.use ? 'HIDE_OFF' : 'HIDE_ON')}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, obj.collision, 'use', __kwargtrans__ ({text: '', icon: (obj.collision.use ? 'HIDE_OFF' : 'HIDE_ON')}));
+				}) ();
 			}
-			physics_add (col, context.cloth, 'Cloth', 'CLOTH', 'MOD_CLOTH', true);
-			physics_add (col, context.dynamic_paint, 'Dynamic Paint', 'DYNAMIC_PAINT', 'MOD_DYNAMICPAINT', true);
+			__call__ (physics_add, null, col, context.cloth, 'Cloth', 'CLOTH', 'MOD_CLOTH', true);
+			__call__ (physics_add, null, col, context.dynamic_paint, 'Dynamic Paint', 'DYNAMIC_PAINT', 'MOD_DYNAMICPAINT', true);
 		}
-		var col = flow.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		if (__in__ (obj.py_metatype, new set (['MESH', 'LATTICE', 'CURVE', 'SURFACE', 'FONT']))) {
-			physics_add (col, context.soft_body, 'Soft Body', 'SOFT_BODY', 'MOD_SOFT', true);
+			__call__ (physics_add, null, col, context.soft_body, 'Soft Body', 'SOFT_BODY', 'MOD_SOFT', true);
 		}
-		if (obj.py_metatype == 'MESH') {
-			physics_add (col, context.fluid, 'Fluid', 'FLUID', 'MOD_FLUIDSIM', true);
-			physics_add_special (col, obj.rigid_body, 'Rigid Body', 'rigidbody.object_add', 'rigidbody.object_remove', 'RIGID_BODY');
+		if (__eq__ (obj.py_metatype, 'MESH')) {
+			__call__ (physics_add, null, col, context.fluid, 'Fluid', 'FLUID', 'MOD_FLUIDSIM', true);
+			__call__ (physics_add_special, null, col, obj.rigid_body, 'Rigid Body', 'rigidbody.object_add', 'rigidbody.object_remove', 'RIGID_BODY');
 		}
-		physics_add_special (col, obj.rigid_body_constraint, 'Rigid Body Constraint', 'rigidbody.constraint_add', 'rigidbody.constraint_remove', 'RIGID_BODY_CONSTRAINT');
+		__call__ (physics_add_special, null, col, obj.rigid_body_constraint, 'Rigid Body Constraint', 'rigidbody.constraint_add', 'rigidbody.constraint_remove', 'RIGID_BODY_CONSTRAINT');
 	});}
 });
 export var point_cache_ui = function (self, cache, enabled, cachetype) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -160,109 +202,244 @@ export var point_cache_ui = function (self, cache, enabled, cachetype) {
 	}
 	var layout = self.layout;
 	layout.use_property_split = true;
-	layout.context_pointer_set ('point_cache', cache);
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.context_pointer_set, __accu0__, 'point_cache', cache);
+	}) ();
 	var is_saved = bpy.data.is_saved;
 	var is_liboverride = cache.id_data.override_library !== null;
 	layout.use_property_decorate = false;
-	if (!(cachetype == 'RIGID_BODY')) {
-		var row = layout.row ();
-		row.template_list ('UI_UL_list', 'point_caches', cache, 'point_caches', cache.point_caches, 'active_index', __kwargtrans__ ({rows: 1}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('ptcache.add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('ptcache.remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+	if (!(__eq__ (cachetype, 'RIGID_BODY'))) {
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'point_caches', cache, 'point_caches', cache.point_caches, 'active_index', __kwargtrans__ ({rows: 1}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
 	}
 	if (__in__ (cachetype, new set (['PSYS', 'HAIR']))) {
-		var col = layout.column ();
-		col.prop (cache, 'use_external');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cache, 'use_external');
+		}) ();
 	}
 	if (cache.use_external) {
-		var col = layout.column ();
-		col.prop (cache, 'index', __kwargtrans__ ({text: 'Index'}));
-		col.prop (cache, 'filepath', __kwargtrans__ ({text: 'Path'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cache, 'index', __kwargtrans__ ({text: 'Index'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cache, 'filepath', __kwargtrans__ ({text: 'Path'}));
+		}) ();
 		var cache_info = cache.info;
 		if (cache_info) {
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.alignment = 'RIGHT';
-			col.label (__kwargtrans__ ({text: cache_info}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: cache_info}));
+			}) ();
 		}
 	}
-	else if (cachetype == 'DYNAMIC_PAINT') {
+	else if (__eq__ (cachetype, 'DYNAMIC_PAINT')) {
 		if (!(is_saved)) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			col.alignment = 'RIGHT';
-			col.label (__kwargtrans__ ({text: 'Cache is disabled until the file is saved'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Cache is disabled until the file is saved'}));
+			}) ();
 			layout.enabled = false;
 		}
 	}
 	if (!(cache.use_external)) {
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (!__in__ (cachetype, new set (['PSYS', 'DYNAMIC_PAINT']))) {
 			col.enabled = enabled;
-			col.prop (cache, 'frame_start', __kwargtrans__ ({text: 'Simulation Start'}));
-			col.prop (cache, 'frame_end');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cache, 'frame_start', __kwargtrans__ ({text: 'Simulation Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cache, 'frame_end');
+			}) ();
 		}
 		if (!__in__ (cachetype, new set (['CLOTH', 'DYNAMIC_PAINT', 'RIGID_BODY']))) {
-			col.prop (cache, 'frame_step');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cache, 'frame_step');
+			}) ();
 		}
 		var cache_info = cache.info;
 		if (cache_info) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			col.alignment = 'RIGHT';
-			col.label (__kwargtrans__ ({text: cache_info}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: cache_info}));
+			}) ();
 		}
 		var can_bake = true;
 		if (!__in__ (cachetype, new set (['DYNAMIC_PAINT', 'RIGID_BODY']))) {
 			if (!(is_saved)) {
-				var col = layout.column (__kwargtrans__ ({align: true}));
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
 				col.alignment = 'RIGHT';
-				col.label (__kwargtrans__ ({text: 'Options are disabled until the file is saved'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Options are disabled until the file is saved'}));
+				}) ();
 			}
-			var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+			var flow = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+			}) ();
 			flow.enabled = enabled && is_saved;
-			var col = flow.column (__kwargtrans__ ({align: true}));
-			col.prop (cache, 'use_disk_cache');
-			var subcol = col.column ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, cache, 'use_disk_cache');
+			}) ();
+			var subcol = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			subcol.active = cache.use_disk_cache;
-			subcol.prop (cache, 'use_library_path', __kwargtrans__ ({text: 'Use Library Path'}));
+			(function () {
+				var __accu0__ = subcol;
+				return __call__ (__accu0__.prop, __accu0__, cache, 'use_library_path', __kwargtrans__ ({text: 'Use Library Path'}));
+			}) ();
 			if (cache.id_data.library && !(cache.use_disk_cache)) {
 				var can_bake = false;
-				var col = layout.column (__kwargtrans__ ({align: true}));
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
 				col.alignment = 'RIGHT';
-				col.separator ();
-				col.label (__kwargtrans__ ({text: 'Linked object baking requires Disk Cache to be enabled'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Linked object baking requires Disk Cache to be enabled'}));
+				}) ();
 			}
 		}
 		else {
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
-		var col = flow.column ();
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = can_bake;
 		if (is_liboverride && !(cache.use_disk_cache)) {
-			col.operator ('ptcache.bake', __kwargtrans__ ({icon: 'ERROR', text: 'Bake (Disk Cache mandatory)'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'ptcache.bake', __kwargtrans__ ({icon: 'ERROR', text: 'Bake (Disk Cache mandatory)'}));
+			}) ();
 		}
 		else if (cache.is_baked === true) {
-			col.operator ('ptcache.free_bake', __kwargtrans__ ({text: 'Delete Bake'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'ptcache.free_bake', __kwargtrans__ ({text: 'Delete Bake'}));
+			}) ();
 		}
 		else {
-			col.operator ('ptcache.bake', __kwargtrans__ ({text: 'Bake'})).bake = true;
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'ptcache.bake', __kwargtrans__ ({text: 'Bake'}));
+			}) ().bake = true;
 		}
-		var sub = col.row ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.enabled = enabled;
-		sub.operator ('ptcache.bake', __kwargtrans__ ({text: 'Calculate to Frame'})).bake = false;
-		var sub = col.column ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.bake', __kwargtrans__ ({text: 'Calculate to Frame'}));
+		}) ().bake = false;
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.enabled = enabled;
-		sub.operator ('ptcache.bake_from_cache', __kwargtrans__ ({text: 'Current Cache to Bake'}));
-		var col = flow.column ();
-		col.operator ('ptcache.bake_all', __kwargtrans__ ({text: 'Bake All Physics'})).bake = true;
-		col.operator ('ptcache.free_bake_all', __kwargtrans__ ({text: 'Delete All Bakes'}));
-		col.operator ('ptcache.bake_all', __kwargtrans__ ({text: 'Update All to Frame'})).bake = false;
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.bake_from_cache', __kwargtrans__ ({text: 'Current Cache to Bake'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.bake_all', __kwargtrans__ ({text: 'Bake All Physics'}));
+		}) ().bake = true;
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.free_bake_all', __kwargtrans__ ({text: 'Delete All Bakes'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'ptcache.bake_all', __kwargtrans__ ({text: 'Update All to Frame'}));
+		}) ().bake = false;
 	}
 };
 export var effector_weights_ui = function (self, weights, weight_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -278,34 +455,97 @@ export var effector_weights_ui = function (self, weights, weight_type) {
 	var layout = self.layout;
 	layout.use_property_split = true;
 	layout.use_property_decorate = false;
-	layout.prop (weights, 'collection');
-	var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-	var col = flow.column ();
-	col.prop (weights, 'gravity', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'all', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'force', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'vortex', __kwargtrans__ ({slider: true}));
-	var col = flow.column ();
-	col.prop (weights, 'magnetic', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'harmonic', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'charge', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'lennardjones', __kwargtrans__ ({slider: true}));
-	var col = flow.column ();
-	col.prop (weights, 'wind', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'curve_guide', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'texture', __kwargtrans__ ({slider: true}));
-	if (weight_type != 'FLUID') {
-		col.prop (weights, 'smokeflow', __kwargtrans__ ({slider: true}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'collection');
+	}) ();
+	var flow = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = flow;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'gravity', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'all', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'force', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'vortex', __kwargtrans__ ({slider: true}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = flow;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'magnetic', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'harmonic', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'charge', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'lennardjones', __kwargtrans__ ({slider: true}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = flow;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'wind', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'curve_guide', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'texture', __kwargtrans__ ({slider: true}));
+	}) ();
+	if (__ne__ (weight_type, 'FLUID')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, weights, 'smokeflow', __kwargtrans__ ({slider: true}));
+		}) ();
 	}
-	var col = flow.column ();
-	col.prop (weights, 'turbulence', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'drag', __kwargtrans__ ({slider: true}));
-	col.prop (weights, 'boid', __kwargtrans__ ({slider: true}));
+	var col = (function () {
+		var __accu0__ = flow;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'turbulence', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'drag', __kwargtrans__ ({slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, weights, 'boid', __kwargtrans__ ({slider: true}));
+	}) ();
 };
 export var basic_force_field_settings_ui = function (self, field) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -319,57 +559,126 @@ export var basic_force_field_settings_ui = function (self, field) {
 	}
 	var layout = self.layout;
 	layout.use_property_split = true;
-	if (!(field) || field.py_metatype == 'NONE') {
+	if (!(field) || __eq__ (field.py_metatype, 'NONE')) {
 		return ;
 	}
-	var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-	var col = flow.column ();
-	if (field.py_metatype == 'DRAG') {
-		col.prop (field, 'linear_drag', __kwargtrans__ ({text: 'Linear'}));
+	var flow = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = flow;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	if (__eq__ (field.py_metatype, 'DRAG')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'linear_drag', __kwargtrans__ ({text: 'Linear'}));
+		}) ();
 	}
 	else {
-		col.prop (field, 'strength');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'strength');
+		}) ();
 	}
-	if (field.py_metatype == 'TURBULENCE') {
-		col.prop (field, 'size');
-		col.prop (field, 'flow');
+	if (__eq__ (field.py_metatype, 'TURBULENCE')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'size');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'flow');
+		}) ();
 	}
-	else if (field.py_metatype == 'HARMONIC') {
-		col.prop (field, 'harmonic_damping', __kwargtrans__ ({text: 'Damping'}));
-		col.prop (field, 'rest_length');
+	else if (__eq__ (field.py_metatype, 'HARMONIC')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'harmonic_damping', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'rest_length');
+		}) ();
 	}
-	else if (field.py_metatype == 'VORTEX' && field.shape != 'POINT') {
-		col.prop (field, 'inflow');
+	else if (__eq__ (field.py_metatype, 'VORTEX') && __ne__ (field.shape, 'POINT')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'inflow');
+		}) ();
 	}
-	else if (field.py_metatype == 'DRAG') {
-		col.prop (field, 'quadratic_drag', __kwargtrans__ ({text: 'Quadratic'}));
+	else if (__eq__ (field.py_metatype, 'DRAG')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'quadratic_drag', __kwargtrans__ ({text: 'Quadratic'}));
+		}) ();
 	}
 	else {
-		col.prop (field, 'flow');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'flow');
+		}) ();
 	}
-	var sub = col.column (__kwargtrans__ ({heading: 'Affect'}));
-	sub.prop (field, 'apply_to_location', __kwargtrans__ ({text: 'Location'}));
-	sub.prop (field, 'apply_to_rotation', __kwargtrans__ ({text: 'Rotation'}));
-	var col = flow.column ();
-	var sub = col.column (__kwargtrans__ ({align: true}));
-	sub.prop (field, 'noise', __kwargtrans__ ({text: 'Noise Amount'}));
-	sub.prop (field, 'seed', __kwargtrans__ ({text: 'Seed'}));
-	if (field.py_metatype == 'TURBULENCE') {
-		col.prop (field, 'use_global_coords', __kwargtrans__ ({text: 'Global'}));
+	var sub = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Affect'}));
+	}) ();
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'apply_to_location', __kwargtrans__ ({text: 'Location'}));
+	}) ();
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'apply_to_rotation', __kwargtrans__ ({text: 'Rotation'}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = flow;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	var sub = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'noise', __kwargtrans__ ({text: 'Noise Amount'}));
+	}) ();
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'seed', __kwargtrans__ ({text: 'Seed'}));
+	}) ();
+	if (__eq__ (field.py_metatype, 'TURBULENCE')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_global_coords', __kwargtrans__ ({text: 'Global'}));
+		}) ();
 	}
-	else if (field.py_metatype == 'HARMONIC') {
-		col.prop (field, 'use_multiple_springs');
+	else if (__eq__ (field.py_metatype, 'HARMONIC')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_multiple_springs');
+		}) ();
 	}
-	if (field.py_metatype == 'FORCE') {
-		col.prop (field, 'use_gravity_falloff', __kwargtrans__ ({text: 'Gravitation'}));
+	if (__eq__ (field.py_metatype, 'FORCE')) {
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_gravity_falloff', __kwargtrans__ ({text: 'Gravitation'}));
+		}) ();
 	}
-	col.prop (field, 'use_absorption');
-	col.prop (field, 'wind_factor');
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, field, 'use_absorption');
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, field, 'wind_factor');
+	}) ();
 };
 export var basic_force_field_falloff_ui = function (self, field) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -382,37 +691,106 @@ export var basic_force_field_falloff_ui = function (self, field) {
 	else {
 	}
 	var layout = self.layout;
-	if (!(field) || field.py_metatype == 'NONE') {
+	if (!(field) || __eq__ (field.py_metatype, 'NONE')) {
 		return ;
 	}
-	var col = layout.column ();
-	col.prop (field, 'z_direction');
-	col.prop (field, 'falloff_power', __kwargtrans__ ({text: 'Power', text_ctxt: i18n_contexts.id_particlesettings}));
-	var col = layout.column (__kwargtrans__ ({align: false, heading: 'Min Distance'}));
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, field, 'z_direction');
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, field, 'falloff_power', __kwargtrans__ ({text: 'Power', text_ctxt: i18n_contexts.id_particlesettings}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Min Distance'}));
+	}) ();
 	col.use_property_decorate = false;
-	var row = col.row (__kwargtrans__ ({align: true}));
-	var sub = row.row (__kwargtrans__ ({align: true}));
-	sub.prop (field, 'use_min_distance', __kwargtrans__ ({text: ''}));
-	var sub = sub.row (__kwargtrans__ ({align: true}));
+	var row = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	var sub = (function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'use_min_distance', __kwargtrans__ ({text: ''}));
+	}) ();
+	var sub = (function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	sub.active = field.use_min_distance;
-	sub.prop (field, 'distance_min', __kwargtrans__ ({text: ''}));
-	row.prop_decorator (field, 'distance_min');
-	var col = layout.column (__kwargtrans__ ({align: false, heading: 'Max Distance'}));
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'distance_min', __kwargtrans__ ({text: ''}));
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.prop_decorator, __accu0__, field, 'distance_min');
+	}) ();
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Max Distance'}));
+	}) ();
 	col.use_property_decorate = false;
-	var row = col.row (__kwargtrans__ ({align: true}));
-	var sub = row.row (__kwargtrans__ ({align: true}));
-	sub.prop (field, 'use_max_distance', __kwargtrans__ ({text: ''}));
-	var sub = sub.row (__kwargtrans__ ({align: true}));
+	var row = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	var sub = (function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'use_max_distance', __kwargtrans__ ({text: ''}));
+	}) ();
+	var sub = (function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	sub.active = field.use_max_distance;
-	sub.prop (field, 'distance_max', __kwargtrans__ ({text: ''}));
-	row.prop_decorator (field, 'distance_max');
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.prop, __accu0__, field, 'distance_max', __kwargtrans__ ({text: ''}));
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.prop_decorator, __accu0__, field, 'distance_max');
+	}) ();
 };
 export var classes = tuple ([PHYSICS_PT_add]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_common.map
 export {Panel, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
+		case 'physics_add': physics_add = value; break;
+		case 'physics_add_special': physics_add_special = value; break;
+		case 'PHYSICS_PT_add': PHYSICS_PT_add = value; break;
+		case 'point_cache_ui': point_cache_ui = value; break;
+		case 'effector_weights_ui': effector_weights_ui = value; break;
+		case 'basic_force_field_settings_ui': basic_force_field_settings_ui = value; break;
+		case 'basic_force_field_falloff_ui': basic_force_field_falloff_ui = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

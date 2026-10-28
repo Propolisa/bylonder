@@ -28,7 +28,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -47,195 +47,408 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 		var snode_id = snode.id;
 		var id_from = snode.id_from;
 		var tool_settings = context.tool_settings;
-		var is_compositor = snode.tree_type == 'CompositorNodeTree';
-		layout.template_header ();
+		var is_compositor = __eq__ (snode.tree_type, 'CompositorNodeTree');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_header, __accu0__);
+		}) ();
 		var display_pin = true;
-		if (snode.tree_type == 'ShaderNodeTree') {
-			layout.prop (snode, 'shader_type', __kwargtrans__ ({text: ''}));
+		if (__eq__ (snode.tree_type, 'ShaderNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'shader_type', __kwargtrans__ ({text: ''}));
+			}) ();
 			var ob = context.object;
-			if (snode.shader_type == 'OBJECT' && ob) {
+			if (__eq__ (snode.shader_type, 'OBJECT') && ob) {
 				var ob_type = ob.py_metatype;
-				NODE_MT_editor_menus.draw_collapsible (context, layout);
+				(function () {
+					var __accu0__ = NODE_MT_editor_menus;
+					return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+				}) ();
 				var types_that_support_material = new set (['MESH', 'CURVE', 'SURFACE', 'FONT', 'META', 'GPENCIL', 'VOLUME', 'CURVES', 'POINTCLOUD']);
-				layout.separator_spacer ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator_spacer, __accu0__);
+				}) ();
 				var has_material_slots = !(snode.pin) && __in__ (ob_type, types_that_support_material);
-				if (ob_type != 'LIGHT') {
-					var row = layout.row ();
+				if (__ne__ (ob_type, 'LIGHT')) {
+					var row = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					row.enabled = has_material_slots;
 					row.ui_units_x = 4;
-					row.popover (__kwargtrans__ ({panel: 'NODE_PT_material_slots'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_material_slots'}));
+					}) ();
 				}
-				var row = layout.row ();
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				row.enabled = has_material_slots;
 				if (!(id_from) && __in__ (ob_type, types_that_support_material)) {
-					row.template_ID (ob, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, ob, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
+					}) ();
 				}
-				if (id_from && ob_type != 'LIGHT') {
-					row.template_ID (id_from, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
+				if (id_from && __ne__ (ob_type, 'LIGHT')) {
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, id_from, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
+					}) ();
 				}
 			}
-			if (snode.shader_type == 'WORLD') {
-				NODE_MT_editor_menus.draw_collapsible (context, layout);
+			if (__eq__ (snode.shader_type, 'WORLD')) {
+				(function () {
+					var __accu0__ = NODE_MT_editor_menus;
+					return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+				}) ();
 				var world = scene.world;
 				if (snode_id) {
-					var row = layout.row ();
+					var row = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					if (world && world.use_eevee_finite_volume) {
-						row.operator ('world.convert_volume_to_mesh', __kwargtrans__ ({emboss: false, icon: 'WORLD', text: 'Convert Volume'}));
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.operator, __accu0__, 'world.convert_volume_to_mesh', __kwargtrans__ ({emboss: false, icon: 'WORLD', text: 'Convert Volume'}));
+						}) ();
 					}
 				}
-				layout.separator_spacer ();
-				var row = layout.row ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator_spacer, __accu0__);
+				}) ();
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				row.enabled = !(snode.pin);
-				row.template_ID (scene, 'world', __kwargtrans__ ({py_new: 'world.new'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.template_ID, __accu0__, scene, 'world', __kwargtrans__ ({py_new: 'world.new'}));
+				}) ();
 			}
-			if (snode.shader_type == 'LINESTYLE') {
+			if (__eq__ (snode.shader_type, 'LINESTYLE')) {
 				var view_layer = context.view_layer;
 				var lineset = view_layer.freestyle_settings.linesets.active;
 				if (lineset !== null) {
-					NODE_MT_editor_menus.draw_collapsible (context, layout);
+					(function () {
+						var __accu0__ = NODE_MT_editor_menus;
+						return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+					}) ();
 					if (snode_id) {
-						var row = layout.row ();
-						row.prop (snode_id, 'use_nodes');
+						var row = (function () {
+							var __accu0__ = layout;
+							return __call__ (__accu0__.row, __accu0__);
+						}) ();
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.prop, __accu0__, snode_id, 'use_nodes');
+						}) ();
 					}
-					layout.separator_spacer ();
-					var row = layout.row ();
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.separator_spacer, __accu0__);
+					}) ();
+					var row = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.row, __accu0__);
+					}) ();
 					row.enabled = !(snode.pin);
-					row.template_ID (lineset, 'linestyle', __kwargtrans__ ({py_new: 'scene.freestyle_linestyle_new'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, lineset, 'linestyle', __kwargtrans__ ({py_new: 'scene.freestyle_linestyle_new'}));
+					}) ();
 				}
 			}
 		}
-		else if (snode.tree_type == 'TextureNodeTree') {
-			layout.prop (snode, 'texture_type', __kwargtrans__ ({text: ''}));
-			NODE_MT_editor_menus.draw_collapsible (context, layout);
+		else if (__eq__ (snode.tree_type, 'TextureNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'texture_type', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = NODE_MT_editor_menus;
+				return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+			}) ();
 			if (snode_id) {
-				layout.prop (snode_id, 'use_nodes');
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, snode_id, 'use_nodes');
+				}) ();
 			}
-			layout.separator_spacer ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator_spacer, __accu0__);
+			}) ();
 			if (id_from) {
-				if (snode.texture_type == 'BRUSH') {
-					layout.template_ID (id_from, 'texture', __kwargtrans__ ({py_new: 'texture.new'}));
+				if (__eq__ (snode.texture_type, 'BRUSH')) {
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.template_ID, __accu0__, id_from, 'texture', __kwargtrans__ ({py_new: 'texture.new'}));
+					}) ();
 				}
 				else {
-					layout.template_ID (id_from, 'active_texture', __kwargtrans__ ({py_new: 'texture.new'}));
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.template_ID, __accu0__, id_from, 'active_texture', __kwargtrans__ ({py_new: 'texture.new'}));
+					}) ();
 				}
 			}
 		}
-		else if (snode.tree_type == 'CompositorNodeTree') {
-			layout.prop (snode, 'node_tree_sub_type', __kwargtrans__ ({text: ''}));
-			NODE_MT_editor_menus.draw_collapsible (context, layout);
-			layout.separator_spacer ();
-			if (snode.node_tree_sub_type == 'SCENE') {
-				var row = layout.row ();
+		else if (__eq__ (snode.tree_type, 'CompositorNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'node_tree_sub_type', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = NODE_MT_editor_menus;
+				return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator_spacer, __accu0__);
+			}) ();
+			if (__eq__ (snode.node_tree_sub_type, 'SCENE')) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				if (snode.pin) {
 					row.enabled = false;
-					row.template_ID (snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_compositing_node_group'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_compositing_node_group'}));
+					}) ();
 				}
 				else if (scene.compositing_node_group) {
-					row.template_ID (scene, 'compositing_node_group', __kwargtrans__ ({py_new: 'node.duplicate_compositing_node_group'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, scene, 'compositing_node_group', __kwargtrans__ ({py_new: 'node.duplicate_compositing_node_group'}));
+					}) ();
 				}
 				else {
-					row.template_ID (scene, 'compositing_node_group', __kwargtrans__ ({py_new: 'node.new_compositing_node_group'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, scene, 'compositing_node_group', __kwargtrans__ ({py_new: 'node.new_compositing_node_group'}));
+					}) ();
 				}
 			}
-			else if (snode.node_tree_sub_type == 'SEQUENCER') {
-				var row = layout.row ();
+			else if (__eq__ (snode.node_tree_sub_type, 'SEQUENCER')) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				var sequencer_scene = context.workspace.sequencer_scene;
 				var sequencer_editor = (sequencer_scene ? sequencer_scene.sequence_editor : null);
 				var active_strip = (sequencer_editor ? sequencer_editor.active_strip : null);
 				if (active_strip) {
 					var active_modifier = active_strip.modifiers.active;
-					var is_compositor_modifier_active = active_modifier && active_modifier.py_metatype == 'COMPOSITOR';
-					var is_compositor_effect_active = active_strip.py_metatype == 'COMPOSITOR';
+					var is_compositor_modifier_active = active_modifier && __eq__ (active_modifier.py_metatype, 'COMPOSITOR');
+					var is_compositor_effect_active = __eq__ (active_strip.py_metatype, 'COMPOSITOR');
 					if (is_compositor_effect_active && !(snode.pin)) {
-						row.template_ID (active_strip, 'node_group', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.template_ID, __accu0__, active_strip, 'node_group', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
+						}) ();
 					}
 					else if (is_compositor_modifier_active && !(snode.pin)) {
 						if (active_modifier.node_group) {
-							row.template_ID (active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.duplicate_compositing_modifier_node_group'}));
+							(function () {
+								var __accu0__ = row;
+								return __call__ (__accu0__.template_ID, __accu0__, active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.duplicate_compositing_modifier_node_group'}));
+							}) ();
 						}
 						else {
-							row.template_ID (active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
+							(function () {
+								var __accu0__ = row;
+								return __call__ (__accu0__.template_ID, __accu0__, active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
+							}) ();
 						}
 					}
-					else if (active_strip.py_metatype != 'SOUND') {
-						row.template_ID (snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
+					else if (__ne__ (active_strip.py_metatype, 'SOUND')) {
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
+						}) ();
 					}
 				}
 			}
 		}
-		else if (snode.tree_type == 'GeometryNodeTree') {
-			layout.prop (snode, 'node_tree_sub_type', __kwargtrans__ ({text: ''}));
-			NODE_MT_editor_menus.draw_collapsible (context, layout);
-			layout.separator_spacer ();
-			if (snode.node_tree_sub_type == 'MODIFIER') {
+		else if (__eq__ (snode.tree_type, 'GeometryNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'node_tree_sub_type', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = NODE_MT_editor_menus;
+				return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator_spacer, __accu0__);
+			}) ();
+			if (__eq__ (snode.node_tree_sub_type, 'MODIFIER')) {
 				var ob = context.object;
-				var row = layout.row ();
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				if (snode.pin) {
 					row.enabled = false;
-					row.template_ID (snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_assign'}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_assign'}));
+					}) ();
 				}
 				else if (ob) {
-					row.enabled = geometry_modifier_poll (context);
+					row.enabled = __call__ (geometry_modifier_poll, null, context);
 					var active_modifier = ob.modifiers.active;
-					if (active_modifier && active_modifier.py_metatype == 'NODES') {
+					if (active_modifier && __eq__ (active_modifier.py_metatype, 'NODES')) {
 						if (active_modifier.node_group) {
-							row.template_ID (active_modifier, 'node_group', __kwargtrans__ ({py_new: 'object.geometry_node_tree_copy_assign'}));
+							(function () {
+								var __accu0__ = row;
+								return __call__ (__accu0__.template_ID, __accu0__, active_modifier, 'node_group', __kwargtrans__ ({py_new: 'object.geometry_node_tree_copy_assign'}));
+							}) ();
 						}
 						else {
-							row.template_ID (active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_assign'}));
+							(function () {
+								var __accu0__ = row;
+								return __call__ (__accu0__.template_ID, __accu0__, active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_assign'}));
+							}) ();
 						}
 					}
 					else {
-						row.template_ID (snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_geometry_nodes_modifier'}));
+						(function () {
+							var __accu0__ = row;
+							return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_geometry_nodes_modifier'}));
+						}) ();
 					}
 				}
 			}
 			else {
-				layout.template_ID (snode, 'selected_node_group', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_tool'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.template_ID, __accu0__, snode, 'selected_node_group', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_tool'}));
+				}) ();
 				if (snode.node_tree) {
-					layout.popover (__kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_object_types', text: 'Types'}));
-					layout.popover (__kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_mode', text: 'Modes'}));
-					layout.popover (__kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_options', text: 'Options'}));
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_object_types', text: 'Types'}));
+					}) ();
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_mode', text: 'Modes'}));
+					}) ();
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_options', text: 'Options'}));
+					}) ();
 				}
 				var display_pin = false;
 			}
 		}
 		else {
-			NODE_MT_editor_menus.draw_collapsible (context, layout);
-			layout.separator_spacer ();
-			layout.template_ID (snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_node_tree'}));
+			(function () {
+				var __accu0__ = NODE_MT_editor_menus;
+				return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator_spacer, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_node_tree'}));
+			}) ();
 		}
 		if (display_pin) {
-			layout.prop (snode, 'pin', __kwargtrans__ ({text: '', emboss: false}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'pin', __kwargtrans__ ({text: '', emboss: false}));
+			}) ();
 		}
-		layout.separator_spacer ();
-		if (len (snode.path) > 1) {
-			var op = layout.operator ('node.tree_path_parent', __kwargtrans__ ({text: '', icon: 'FILE_PARENT'}));
-			op.parent_tree_index = len (snode.path) - 2;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		if (__gt__ (__call__ (len, null, snode.path), 1)) {
+			var op = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.tree_path_parent', __kwargtrans__ ({text: '', icon: 'FILE_PARENT'}));
+			}) ();
+			op.parent_tree_index = __sub__ (__call__ (len, null, snode.path), 2);
 		}
-		if (is_compositor && snode.node_tree_sub_type == 'SCENE') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (snode, 'show_backdrop', __kwargtrans__ ({toggle: true}));
+		if (is_compositor && __eq__ (snode.node_tree_sub_type, 'SCENE')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'show_backdrop', __kwargtrans__ ({toggle: true}));
+			}) ();
 			row.active = snode.node_tree !== null;
-			var sub = row.row (__kwargtrans__ ({align: true}));
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = snode.show_backdrop;
-			sub.prop (snode, 'backdrop_channels', __kwargtrans__ ({icon_only: true, text: ''}));
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (snode, 'show_gizmo', __kwargtrans__ ({icon: 'GIZMO', text: ''}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'backdrop_channels', __kwargtrans__ ({icon_only: true, text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'show_gizmo', __kwargtrans__ ({icon: 'GIZMO', text: ''}));
+			}) ();
 			row.active = snode.node_tree !== null;
-			var sub = row.row (__kwargtrans__ ({align: true}));
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = snode.show_gizmo && row.active;
-			sub.popover (__kwargtrans__ ({panel: 'NODE_PT_gizmo_display', text: ''}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_gizmo_display', text: ''}));
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (tool_settings, 'use_snap_node', __kwargtrans__ ({text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_snap_node', __kwargtrans__ ({text: ''}));
+		}) ();
 		row.active = snode.node_tree !== null;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (overlay, 'show_overlays', __kwargtrans__ ({icon: 'OVERLAY', text: ''}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, overlay, 'show_overlays', __kwargtrans__ ({icon: 'OVERLAY', text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.active = snode.node_tree !== null;
 		sub.active = overlay.show_overlays && row.active;
-		sub.popover (__kwargtrans__ ({panel: 'NODE_PT_overlay', text: ''}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_overlay', text: ''}));
+		}) ();
 	});}
 });
 export var NODE_PT_gizmo_display =  __class__ ('NODE_PT_gizmo_display', [Panel], {
@@ -247,7 +460,7 @@ export var NODE_PT_gizmo_display =  __class__ ('NODE_PT_gizmo_display', [Panel],
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -261,17 +474,32 @@ export var NODE_PT_gizmo_display =  __class__ ('NODE_PT_gizmo_display', [Panel],
 		}
 		var layout = self.layout;
 		var snode = context.space_data;
-		var is_compositor = snode.tree_type == 'CompositorNodeTree';
+		var is_compositor = __eq__ (snode.tree_type, 'CompositorNodeTree');
 		if (!(is_compositor)) {
 			return ;
 		}
-		var col = layout.column ();
-		col.label (__kwargtrans__ ({text: 'Viewport Gizmos'}));
-		col.separator ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Viewport Gizmos'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		col.active = snode.show_gizmo;
-		var colsub = col.column ();
+		var colsub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		colsub.active = snode.node_tree !== null && col.active;
-		colsub.prop (snode, 'show_gizmo_active_node', __kwargtrans__ ({text: 'Active Node'}));
+		(function () {
+			var __accu0__ = colsub;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'show_gizmo_active_node', __kwargtrans__ ({text: 'Active Node'}));
+		}) ();
 	});}
 });
 export var NODE_MT_editor_menus =  __class__ ('NODE_MT_editor_menus', [Menu], {
@@ -281,7 +509,7 @@ export var NODE_MT_editor_menus =  __class__ ('NODE_MT_editor_menus', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -294,10 +522,22 @@ export var NODE_MT_editor_menus =  __class__ ('NODE_MT_editor_menus', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.menu ('NODE_MT_view');
-		layout.menu ('NODE_MT_select');
-		layout.menu ('NODE_MT_add');
-		layout.menu ('NODE_MT_node');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_view');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_select');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_add');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_node');
+		}) ();
 	});}
 });
 export var NODE_MT_add =  __class__ ('NODE_MT_add', [node_add_menu.AddNodeMenu], {
@@ -309,7 +549,7 @@ export var NODE_MT_add =  __class__ ('NODE_MT_add', [node_add_menu.AddNodeMenu],
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -321,29 +561,53 @@ export var NODE_MT_add =  __class__ ('NODE_MT_add', [node_add_menu.AddNodeMenu],
 		}
 		else {
 		}
-		var nodeitems_utils = _module ('nodeitems_utils');
+		var nodeitems_utils = __call__ (_module, null, 'nodeitems_utils');
 		var layout = self.layout;
-		if (layout.operator_context == 'EXEC_REGION_WIN') {
+		if (__eq__ (layout.operator_context, 'EXEC_REGION_WIN')) {
 			layout.operator_context = 'INVOKE_REGION_WIN';
-			layout.operator ('WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'})).menu_idname = 'NODE_MT_add';
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'}));
+			}) ().menu_idname = 'NODE_MT_add';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var snode = context.space_data;
-		if (snode.tree_type == 'GeometryNodeTree') {
-			layout.menu_contents ('NODE_MT_geometry_node_add_all');
+		if (__eq__ (snode.tree_type, 'GeometryNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_geometry_node_add_all');
+			}) ();
 		}
-		else if (snode.tree_type == 'CompositorNodeTree') {
-			layout.menu_contents ('NODE_MT_compositor_node_add_all');
+		else if (__eq__ (snode.tree_type, 'CompositorNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_compositor_node_add_all');
+			}) ();
 		}
-		else if (snode.tree_type == 'ShaderNodeTree') {
-			layout.menu_contents ('NODE_MT_shader_node_add_all');
+		else if (__eq__ (snode.tree_type, 'ShaderNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_shader_node_add_all');
+			}) ();
 		}
-		else if (snode.tree_type == 'TextureNodeTree') {
-			layout.menu_contents ('NODE_MT_texture_node_add_all');
+		else if (__eq__ (snode.tree_type, 'TextureNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_texture_node_add_all');
+			}) ();
 		}
-		else if (nodeitems_utils.has_node_categories (context)) {
-			nodeitems_utils.draw_node_categories_menu (self, context);
+		else if ((function () {
+			var __accu0__ = nodeitems_utils;
+			return __call__ (__accu0__.has_node_categories, __accu0__, context);
+		}) ()) {
+			(function () {
+				var __accu0__ = nodeitems_utils;
+				return __call__ (__accu0__.draw_node_categories_menu, __accu0__, self, context);
+			}) ();
 		}
 	});}
 });
@@ -356,7 +620,7 @@ export var NODE_MT_swap =  __class__ ('NODE_MT_swap', [node_add_menu.SwapNodeMen
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -369,24 +633,42 @@ export var NODE_MT_swap =  __class__ ('NODE_MT_swap', [node_add_menu.SwapNodeMen
 		else {
 		}
 		var layout = self.layout;
-		if (layout.operator_context == 'EXEC_REGION_WIN') {
+		if (__eq__ (layout.operator_context, 'EXEC_REGION_WIN')) {
 			layout.operator_context = 'INVOKE_REGION_WIN';
-			layout.operator ('WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'})).menu_idname = 'NODE_MT_swap';
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'}));
+			}) ().menu_idname = 'NODE_MT_swap';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var snode = context.space_data;
-		if (snode.tree_type == 'GeometryNodeTree') {
-			layout.menu_contents ('NODE_MT_geometry_node_swap_all');
+		if (__eq__ (snode.tree_type, 'GeometryNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_geometry_node_swap_all');
+			}) ();
 		}
-		else if (snode.tree_type == 'CompositorNodeTree') {
-			layout.menu_contents ('NODE_MT_compositor_node_swap_all');
+		else if (__eq__ (snode.tree_type, 'CompositorNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_compositor_node_swap_all');
+			}) ();
 		}
-		else if (snode.tree_type == 'ShaderNodeTree') {
-			layout.menu_contents ('NODE_MT_shader_node_swap_all');
+		else if (__eq__ (snode.tree_type, 'ShaderNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_shader_node_swap_all');
+			}) ();
 		}
-		else if (snode.tree_type == 'TextureNodeTree') {
-			layout.menu_contents ('NODE_MT_texture_node_swap_all');
+		else if (__eq__ (snode.tree_type, 'TextureNodeTree')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_texture_node_swap_all');
+			}) ();
 		}
 	});}
 });
@@ -396,7 +678,7 @@ export var NODE_MT_view =  __class__ ('NODE_MT_view', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -410,30 +692,81 @@ export var NODE_MT_view =  __class__ ('NODE_MT_view', [Menu], {
 		}
 		var layout = self.layout;
 		var snode = context.space_data;
-		var is_compositor = snode.tree_type == 'CompositorNodeTree';
-		layout.prop (snode, 'show_region_toolbar');
-		layout.prop (snode, 'show_region_ui');
+		var is_compositor = __eq__ (snode.tree_type, 'CompositorNodeTree');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'show_region_toolbar');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'show_region_ui');
+		}) ();
 		if (is_compositor) {
-			layout.prop (snode, 'show_region_asset_shelf');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, snode, 'show_region_asset_shelf');
+			}) ();
 		}
-		layout.separator ();
-		var sub = layout.column ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.operator_context = 'EXEC_REGION_WIN';
-		sub.operator ('view2d.zoom_in');
-		sub.operator ('view2d.zoom_out');
-		layout.separator ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'view2d.zoom_in');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'view2d.zoom_out');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		layout.operator ('node.view_selected');
-		layout.operator ('node.view_all');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.view_selected');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.view_all');
+		}) ();
 		if (context.space_data.show_backdrop) {
-			layout.separator ();
-			layout.operator ('node.backimage_move', __kwargtrans__ ({text: 'Backdrop Move'}));
-			layout.operator ('node.backimage_zoom', __kwargtrans__ ({text: 'Backdrop Zoom In'})).factor = 1.2;
-			layout.operator ('node.backimage_zoom', __kwargtrans__ ({text: 'Backdrop Zoom Out'})).factor = 1.0 / 1.2;
-			layout.operator ('node.backimage_fit', __kwargtrans__ ({text: 'Fit Backdrop to Available Space'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.backimage_move', __kwargtrans__ ({text: 'Backdrop Move'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.backimage_zoom', __kwargtrans__ ({text: 'Backdrop Zoom In'}));
+			}) ().factor = 1.2;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.backimage_zoom', __kwargtrans__ ({text: 'Backdrop Zoom Out'}));
+			}) ().factor = __truediv__ (1.0, 1.2);
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.backimage_fit', __kwargtrans__ ({text: 'Fit Backdrop to Available Space'}));
+			}) ();
 		}
-		layout.separator ();
-		layout.menu ('INFO_MT_area');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_area');
+		}) ();
 	});}
 });
 export var NODE_MT_select =  __class__ ('NODE_MT_select', [Menu], {
@@ -442,7 +775,7 @@ export var NODE_MT_select =  __class__ ('NODE_MT_select', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -455,22 +788,70 @@ export var NODE_MT_select =  __class__ ('NODE_MT_select', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('node.select_all', __kwargtrans__ ({text: 'All'})).action = 'SELECT';
-		layout.operator ('node.select_all', __kwargtrans__ ({text: 'None'})).action = 'DESELECT';
-		layout.operator ('node.select_all', __kwargtrans__ ({text: 'Invert'})).action = 'INVERT';
-		layout.separator ();
-		layout.operator ('node.select_box').tweak = false;
-		layout.operator ('node.select_circle');
-		layout.operator_menu_enum ('node.select_lasso', 'mode');
-		layout.separator ();
-		layout.operator ('node.select_linked_from', __kwargtrans__ ({text: 'Linked from'}));
-		layout.operator ('node.select_linked_to', __kwargtrans__ ({text: 'Linked to'}));
-		layout.separator ();
-		layout.operator_menu_enum ('node.select_grouped', 'type', __kwargtrans__ ({text: 'Select Grouped'}));
-		layout.operator ('node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Previous'})).prev = true;
-		layout.operator ('node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Next'})).prev = false;
-		layout.separator ();
-		layout.operator ('node.find_node', __kwargtrans__ ({text: 'Find Node...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_all', __kwargtrans__ ({text: 'All'}));
+		}) ().action = 'SELECT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_all', __kwargtrans__ ({text: 'None'}));
+		}) ().action = 'DESELECT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_all', __kwargtrans__ ({text: 'Invert'}));
+		}) ().action = 'INVERT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_box');
+		}) ().tweak = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_circle');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'node.select_lasso', 'mode');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_linked_from', __kwargtrans__ ({text: 'Linked from'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_linked_to', __kwargtrans__ ({text: 'Linked to'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'node.select_grouped', 'type', __kwargtrans__ ({text: 'Select Grouped'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Previous'}));
+		}) ().prev = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Next'}));
+		}) ().prev = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.find_node', __kwargtrans__ ({text: 'Find Node...'}));
+		}) ();
 	});}
 });
 export var NODE_MT_node =  __class__ ('NODE_MT_node', [Menu], {
@@ -479,7 +860,7 @@ export var NODE_MT_node =  __class__ ('NODE_MT_node', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -494,52 +875,157 @@ export var NODE_MT_node =  __class__ ('NODE_MT_node', [Menu], {
 		var layout = self.layout;
 		var snode = context.space_data;
 		var group = snode.edit_tree;
-		var is_compositor = snode.tree_type == 'CompositorNodeTree';
-		layout.operator ('transform.translate').view2d_edge_pan = true;
-		layout.operator ('transform.rotate');
-		layout.operator ('transform.resize');
-		layout.separator ();
-		layout.operator ('node.delete_copy_reconnect', __kwargtrans__ ({text: 'Cut'}));
+		var is_compositor = __eq__ (snode.tree_type, 'CompositorNodeTree');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.translate');
+		}) ().view2d_edge_pan = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.rotate');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.resize');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.delete_copy_reconnect', __kwargtrans__ ({text: 'Cut'}));
+		}) ();
 		layout.operator_context = 'EXEC_DEFAULT';
-		layout.operator ('node.clipboard_copy', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.clipboard_copy', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
+		}) ();
 		layout.operator_context = 'EXEC_DEFAULT';
-		layout.operator ('node.clipboard_paste', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.clipboard_paste', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		}) ();
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		var props = layout.operator ('node.duplicate_move', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.duplicate_move', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		}) ();
 		props.NODE_OT_translate_attach.TRANSFORM_OT_translate.view2d_edge_pan = true;
-		var props = layout.operator ('node.duplicate_move_linked');
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.duplicate_move_linked');
+		}) ();
 		props.NODE_OT_translate_attach.TRANSFORM_OT_translate.view2d_edge_pan = true;
-		layout.separator ();
-		layout.operator ('node.delete', __kwargtrans__ ({icon: 'X'}));
-		layout.operator ('node.delete_reconnect');
-		layout.separator ();
-		layout.operator ('node.join', __kwargtrans__ ({text: 'Join in New Frame'}));
-		layout.operator ('node.detach', __kwargtrans__ ({text: 'Remove from Frame'}));
-		layout.operator ('node.join_nodes', __kwargtrans__ ({text: 'Join Group Inputs'}));
-		layout.operator ('node.join_named');
-		layout.separator ();
-		var props = layout.operator ('wm.call_panel', __kwargtrans__ ({text: 'Rename...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.delete', __kwargtrans__ ({icon: 'X'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.delete_reconnect');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.join', __kwargtrans__ ({text: 'Join in New Frame'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.detach', __kwargtrans__ ({text: 'Remove from Frame'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.join_nodes', __kwargtrans__ ({text: 'Join Group Inputs'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.join_named');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.call_panel', __kwargtrans__ ({text: 'Rename...'}));
+		}) ();
 		props.py_name = 'TOPBAR_PT_name';
 		props.keep_open = false;
-		layout.separator ();
-		layout.operator ('node.link_make').py_replace = false;
-		layout.operator ('node.link_make', __kwargtrans__ ({text: 'Make and Replace Links'})).py_replace = true;
-		layout.operator ('node.links_cut');
-		layout.operator ('node.links_detach');
-		layout.operator ('node.links_mute');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.link_make');
+		}) ().py_replace = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.link_make', __kwargtrans__ ({text: 'Make and Replace Links'}));
+		}) ().py_replace = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.links_cut');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.links_detach');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.links_mute');
+		}) ();
 		if (!(group) || group.bl_use_group_interface) {
-			layout.separator ();
-			layout.operator ('node.group_make', __kwargtrans__ ({icon: 'NODETREE'}));
-			layout.operator ('node.group_insert', __kwargtrans__ ({text: 'Insert Into Group'}));
-			layout.operator ('node.group_edit').exit = false;
-			layout.operator ('node.group_ungroup');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.group_make', __kwargtrans__ ({icon: 'NODETREE'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.group_insert', __kwargtrans__ ({text: 'Insert Into Group'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.group_edit');
+			}) ().exit = false;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.group_ungroup');
+			}) ();
 		}
-		layout.separator ();
-		layout.menu ('NODE_MT_swap');
-		layout.menu ('NODE_MT_context_menu_show_hide_menu');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_swap');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_context_menu_show_hide_menu');
+		}) ();
 		if (is_compositor) {
-			layout.separator ();
-			layout.operator ('node.read_viewlayers', __kwargtrans__ ({icon: 'RENDERLAYERS'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.read_viewlayers', __kwargtrans__ ({icon: 'RENDERLAYERS'}));
+			}) ();
 		}
 	});}
 });
@@ -549,7 +1035,7 @@ export var NODE_MT_view_pie =  __class__ ('NODE_MT_view_pie', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -562,9 +1048,18 @@ export var NODE_MT_view_pie =  __class__ ('NODE_MT_view_pie', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		var pie = layout.menu_pie ();
-		pie.operator ('node.view_all');
-		pie.operator ('node.view_selected', __kwargtrans__ ({icon: 'ZOOM_SELECTED'}));
+		var pie = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu_pie, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'node.view_all');
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'node.view_selected', __kwargtrans__ ({icon: 'ZOOM_SELECTED'}));
+		}) ();
 	});}
 });
 export var NODE_PT_active_tool =  __class__ ('NODE_PT_active_tool', [ToolActivePanelHelper, Panel], {
@@ -582,7 +1077,7 @@ export var NODE_PT_material_slots =  __class__ ('NODE_PT_material_slots', [Panel
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -595,12 +1090,15 @@ export var NODE_PT_material_slots =  __class__ ('NODE_PT_material_slots', [Panel
 		else {
 		}
 		var ob = context.object;
-		self.bl_label = (ob.material_slots ? iface_ ('Slot {:d}').format (ob.active_material_index + 1) : iface_ ('Slot'));
+		self.bl_label = (ob.material_slots ? (function () {
+			var __accu0__ = __call__ (iface_, null, 'Slot {:d}');
+			return __call__ (__accu0__.format, __accu0__, __add__ (ob.active_material_index, 1));
+		}) () : __call__ (iface_, null, 'Slot'));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -613,26 +1111,71 @@ export var NODE_PT_material_slots =  __class__ ('NODE_PT_material_slots', [Panel
 		else {
 		}
 		var layout = self.layout;
-		var row = layout.row ();
-		var col = row.column ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		var ob = context.object;
-		col.template_list ('MATERIAL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index');
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.operator ('object.material_slot_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('object.material_slot_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		col.separator ();
-		col.menu ('MATERIAL_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
-		if (len (ob.material_slots) > 1) {
-			col.separator ();
-			col.operator ('object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).direction = 'UP';
-			col.operator ('object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).direction = 'DOWN';
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'MATERIAL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index');
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'MATERIAL_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
+		if (__gt__ (__call__ (len, null, ob.material_slots), 1)) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+			}) ().direction = 'UP';
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+			}) ().direction = 'DOWN';
 		}
-		if (ob.mode == 'EDIT') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.operator ('object.material_slot_assign', __kwargtrans__ ({text: 'Assign'}));
-			if (ob.py_metatype != 'FONT') {
-				row.operator ('object.material_slot_select', __kwargtrans__ ({text: 'Select'}));
-				row.operator ('object.material_slot_deselect', __kwargtrans__ ({text: 'Deselect'}));
+		if (__eq__ (ob.mode, 'EDIT')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_assign', __kwargtrans__ ({text: 'Assign'}));
+			}) ();
+			if (__ne__ (ob.py_metatype, 'FONT')) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_select', __kwargtrans__ ({text: 'Select'}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_deselect', __kwargtrans__ ({text: 'Deselect'}));
+				}) ();
 			}
 		}
 	});}
@@ -646,7 +1189,7 @@ export var NODE_PT_geometry_node_tool_object_types =  __class__ ('NODE_PT_geomet
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -662,12 +1205,30 @@ export var NODE_PT_geometry_node_tool_object_types =  __class__ ('NODE_PT_geomet
 		var snode = context.space_data;
 		var group = snode.node_tree;
 		var types = [tuple (['is_type_mesh', 'Mesh', 'MESH_DATA']), tuple (['is_type_curve', 'Hair Curves', 'CURVES_DATA']), tuple (['is_type_grease_pencil', 'Grease Pencil', 'OUTLINER_OB_GREASEPENCIL']), tuple (['is_type_pointcloud', 'Point Cloud', 'POINTCLOUD_DATA'])];
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = group.is_tool;
-		for (var [prop, py_name, icon] of types) {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			row.label (__kwargtrans__ ({text: py_name, icon: icon}));
-			row.prop (group, prop, __kwargtrans__ ({text: ''}));
+		var __iterable0__ = types;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop = __left0__ [0];
+			var py_name = __left0__ [1];
+			var icon = __left0__ [2];
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: py_name, icon: icon}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, group, prop, __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});}
 });
@@ -680,7 +1241,7 @@ export var NODE_PT_geometry_node_tool_mode =  __class__ ('NODE_PT_geometry_node_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -696,17 +1257,44 @@ export var NODE_PT_geometry_node_tool_mode =  __class__ ('NODE_PT_geometry_node_
 		var snode = context.space_data;
 		var group = snode.node_tree;
 		var modes = tuple ([tuple (['is_mode_object', 'Object Mode', 'OBJECT_DATAMODE']), tuple (['is_mode_edit', 'Edit Mode', 'EDITMODE_HLT']), tuple (['is_mode_sculpt', 'Sculpt Mode', 'SCULPTMODE_HLT'])]);
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = group.is_tool;
-		for (var [prop, py_name, icon] of modes) {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			row.label (__kwargtrans__ ({text: py_name, icon: icon}));
-			row.prop (group, prop, __kwargtrans__ ({text: ''}));
+		var __iterable0__ = modes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop = __left0__ [0];
+			var py_name = __left0__ [1];
+			var icon = __left0__ [2];
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: py_name, icon: icon}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, group, prop, __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		if (group.is_type_grease_pencil) {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			row.label (__kwargtrans__ ({text: 'Draw Mode', icon: 'GREASEPENCIL'}));
-			row.prop (group, 'is_mode_paint', __kwargtrans__ ({text: ''}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Draw Mode', icon: 'GREASEPENCIL'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, group, 'is_mode_paint', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});}
 });
@@ -719,7 +1307,7 @@ export var NODE_PT_geometry_node_tool_options =  __class__ ('NODE_PT_geometry_no
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -736,11 +1324,23 @@ export var NODE_PT_geometry_node_tool_options =  __class__ ('NODE_PT_geometry_no
 		layout.use_property_decorate = false;
 		var snode = context.space_data;
 		var group = snode.node_tree;
-		layout.prop (group, 'use_wait_for_click');
-		layout.prop (group, 'node_tool_idname', __kwargtrans__ ({text: 'Identifier'}));
-		layout.template_node_operator_registration_errors (__kwargtrans__ ({idname: group.node_tool_idname}));
-		if (len (group.node_tool_idname) == 0) {
-			layout.label (__kwargtrans__ ({icon: 'ERROR', text: 'Missing operator identifier'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, group, 'use_wait_for_click');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, group, 'node_tool_idname', __kwargtrans__ ({text: 'Identifier'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_node_operator_registration_errors, __accu0__, __kwargtrans__ ({idname: group.node_tool_idname}));
+		}) ();
+		if (__eq__ (__call__ (len, null, group.node_tool_idname), 0)) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'ERROR', text: 'Missing operator identifier'}));
+			}) ();
 		}
 	});}
 });
@@ -757,7 +1357,7 @@ export var NODE_MT_node_color_context_menu =  __class__ ('NODE_MT_node_color_con
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -770,7 +1370,10 @@ export var NODE_MT_node_color_context_menu =  __class__ ('NODE_MT_node_color_con
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('node.node_copy_color', __kwargtrans__ ({text: 'Copy to Selected'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.node_copy_color', __kwargtrans__ ({text: 'Copy to Selected'}));
+		}) ();
 	});}
 });
 export var NODE_MT_context_menu_show_hide_menu =  __class__ ('NODE_MT_context_menu_show_hide_menu', [Menu], {
@@ -779,7 +1382,7 @@ export var NODE_MT_context_menu_show_hide_menu =  __class__ ('NODE_MT_context_me
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -792,17 +1395,38 @@ export var NODE_MT_context_menu_show_hide_menu =  __class__ ('NODE_MT_context_me
 		else {
 		}
 		var snode = context.space_data;
-		var is_compositor = snode.tree_type == 'CompositorNodeTree';
+		var is_compositor = __eq__ (snode.tree_type, 'CompositorNodeTree');
 		var layout = self.layout;
-		layout.operator ('node.mute_toggle', __kwargtrans__ ({text: 'Mute'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.mute_toggle', __kwargtrans__ ({text: 'Mute'}));
+		}) ();
 		if (is_compositor) {
-			layout.operator ('node.preview_toggle', __kwargtrans__ ({text: 'Node Preview'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.preview_toggle', __kwargtrans__ ({text: 'Node Preview'}));
+			}) ();
 		}
-		layout.operator ('node.options_toggle', __kwargtrans__ ({text: 'Node Options'}));
-		layout.separator ();
-		layout.operator ('node.hide_socket_toggle', __kwargtrans__ ({text: 'Unconnected Sockets'}));
-		layout.operator ('node.hide_toggle', __kwargtrans__ ({text: 'Collapse'}));
-		layout.operator ('node.collapse_hide_unused_toggle');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.options_toggle', __kwargtrans__ ({text: 'Node Options'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.hide_socket_toggle', __kwargtrans__ ({text: 'Unconnected Sockets'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.hide_toggle', __kwargtrans__ ({text: 'Collapse'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.collapse_hide_unused_toggle');
+		}) ();
 	});}
 });
 export var NODE_MT_context_menu_select_menu =  __class__ ('NODE_MT_context_menu_select_menu', [Menu], {
@@ -811,7 +1435,7 @@ export var NODE_MT_context_menu_select_menu =  __class__ ('NODE_MT_context_menu_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -824,13 +1448,34 @@ export var NODE_MT_context_menu_select_menu =  __class__ ('NODE_MT_context_menu_
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('node.select_grouped', __kwargtrans__ ({text: 'Select Grouped...'})).extend = false;
-		layout.separator ();
-		layout.operator ('node.select_linked_from');
-		layout.operator ('node.select_linked_to');
-		layout.separator ();
-		layout.operator ('node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Previous'})).prev = true;
-		layout.operator ('node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Next'})).prev = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_grouped', __kwargtrans__ ({text: 'Select Grouped...'}));
+		}) ().extend = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_linked_from');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_linked_to');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Previous'}));
+		}) ().prev = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.select_same_type_step', __kwargtrans__ ({text: 'Activate Same Type Next'}));
+		}) ().prev = false;
 	});}
 });
 export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
@@ -839,7 +1484,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -852,77 +1497,194 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 		else {
 		}
 		var snode = context.space_data;
-		var is_nested = len (snode.path) > 1;
-		var parent_tree_index = len (snode.path) - 2;
-		var is_geometrynodes = snode.tree_type == 'GeometryNodeTree';
+		var is_nested = __gt__ (__call__ (len, null, snode.path), 1);
+		var parent_tree_index = __sub__ (__call__ (len, null, snode.path), 2);
+		var is_geometrynodes = __eq__ (snode.tree_type, 'GeometryNodeTree');
 		var group = snode.edit_tree;
-		var selected_nodes_len = len (context.selected_nodes);
+		var selected_nodes_len = __call__ (len, null, context.selected_nodes);
 		var active_node = context.active_node;
 		var layout = self.layout;
-		if (selected_nodes_len == 0) {
+		if (__eq__ (selected_nodes_len, 0)) {
 			layout.operator_context = 'INVOKE_DEFAULT';
-			layout.menu ('NODE_MT_add', __kwargtrans__ ({icon: 'ADD'}));
-			layout.operator ('node.clipboard_paste', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
-			layout.separator ();
-			layout.operator ('node.find_node', __kwargtrans__ ({text: 'Find...', icon: 'VIEWZOOM'}));
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_add', __kwargtrans__ ({icon: 'ADD'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.clipboard_paste', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.find_node', __kwargtrans__ ({text: 'Find...', icon: 'VIEWZOOM'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			if (is_geometrynodes) {
 				layout.operator_context = 'INVOKE_DEFAULT';
-				layout.operator ('node.select', __kwargtrans__ ({text: 'Clear Viewer', icon: 'HIDE_ON'})).clear_viewer = true;
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.operator, __accu0__, 'node.select', __kwargtrans__ ({text: 'Clear Viewer', icon: 'HIDE_ON'}));
+				}) ().clear_viewer = true;
 			}
-			layout.operator ('node.links_cut');
-			layout.operator ('node.links_mute');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.links_cut');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.links_mute');
+			}) ();
 			if (is_nested) {
-				layout.separator ();
-				layout.operator ('node.tree_path_parent', __kwargtrans__ ({text: 'Exit Group', icon: 'FILE_PARENT'})).parent_tree_index = parent_tree_index;
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.operator, __accu0__, 'node.tree_path_parent', __kwargtrans__ ({text: 'Exit Group', icon: 'FILE_PARENT'}));
+				}) ().parent_tree_index = parent_tree_index;
 			}
 			return ;
 		}
 		if (is_geometrynodes) {
 			layout.operator_context = 'INVOKE_DEFAULT';
-			layout.operator ('node.link_viewer', __kwargtrans__ ({text: 'Link to Viewer', icon: 'HIDE_OFF'}));
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.link_viewer', __kwargtrans__ ({text: 'Link to Viewer', icon: 'HIDE_OFF'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		layout.operator ('node.delete_copy_reconnect', __kwargtrans__ ({text: 'Cut'}));
-		layout.operator ('node.clipboard_copy', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
-		layout.operator ('node.clipboard_paste', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.delete_copy_reconnect', __kwargtrans__ ({text: 'Cut'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.clipboard_copy', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.clipboard_paste', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		}) ();
 		layout.operator_context = 'INVOKE_DEFAULT';
-		layout.operator ('node.duplicate_move', __kwargtrans__ ({icon: 'DUPLICATE'}));
-		layout.separator ();
-		layout.operator ('node.delete', __kwargtrans__ ({icon: 'X'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.duplicate_move', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.delete', __kwargtrans__ ({icon: 'X'}));
+		}) ();
 		layout.operator_context = 'EXEC_REGION_WIN';
-		layout.operator ('node.delete_reconnect', __kwargtrans__ ({text: 'Dissolve'}));
-		if (selected_nodes_len > 1) {
-			layout.separator ();
-			layout.operator ('node.link_make').py_replace = false;
-			layout.operator ('node.link_make', __kwargtrans__ ({text: 'Make and Replace Links'})).py_replace = true;
-			layout.operator ('node.links_detach');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.delete_reconnect', __kwargtrans__ ({text: 'Dissolve'}));
+		}) ();
+		if (__gt__ (selected_nodes_len, 1)) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.link_make');
+			}) ().py_replace = false;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.link_make', __kwargtrans__ ({text: 'Make and Replace Links'}));
+			}) ().py_replace = true;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.links_detach');
+			}) ();
 		}
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (group && group.bl_use_group_interface) {
-			layout.operator ('node.group_make', __kwargtrans__ ({text: 'Make Group', icon: 'NODETREE'}));
-			layout.operator ('node.group_insert', __kwargtrans__ ({text: 'Insert Into Group'}));
-			if (active_node && active_node.py_metatype == 'GROUP') {
-				layout.operator ('node.group_edit').exit = false;
-				layout.operator ('node.group_ungroup', __kwargtrans__ ({text: 'Ungroup'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.group_make', __kwargtrans__ ({text: 'Make Group', icon: 'NODETREE'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.group_insert', __kwargtrans__ ({text: 'Insert Into Group'}));
+			}) ();
+			if (active_node && __eq__ (active_node.py_metatype, 'GROUP')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.operator, __accu0__, 'node.group_edit');
+				}) ().exit = false;
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.operator, __accu0__, 'node.group_ungroup', __kwargtrans__ ({text: 'Ungroup'}));
+				}) ();
 			}
 			if (is_nested) {
-				layout.operator ('node.tree_path_parent', __kwargtrans__ ({text: 'Exit Group', icon: 'FILE_PARENT'})).parent_tree_index = parent_tree_index;
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.operator, __accu0__, 'node.tree_path_parent', __kwargtrans__ ({text: 'Exit Group', icon: 'FILE_PARENT'}));
+				}) ().parent_tree_index = parent_tree_index;
 			}
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		layout.operator ('node.join', __kwargtrans__ ({text: 'Join in New Frame'}));
-		layout.operator ('node.detach', __kwargtrans__ ({text: 'Remove from Frame'}));
-		layout.separator ();
-		var props = layout.operator ('wm.call_panel', __kwargtrans__ ({text: 'Rename...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.join', __kwargtrans__ ({text: 'Join in New Frame'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.detach', __kwargtrans__ ({text: 'Remove from Frame'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.call_panel', __kwargtrans__ ({text: 'Rename...'}));
+		}) ();
 		props.py_name = 'TOPBAR_PT_name';
 		props.keep_open = false;
-		layout.separator ();
-		layout.menu ('NODE_MT_context_menu_select_menu');
-		layout.menu ('NODE_MT_context_menu_show_hide_menu');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_context_menu_select_menu');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_context_menu_show_hide_menu');
+		}) ();
 		if (active_node) {
-			layout.separator ();
-			var props = layout.operator ('wm.doc_view_manual', __kwargtrans__ ({text: 'Online Manual', icon: 'URL'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.doc_view_manual', __kwargtrans__ ({text: 'Online Manual', icon: 'URL'}));
+			}) ();
 			props.doc_id = active_node.bl_idname;
 		}
 	});}
@@ -936,7 +1698,7 @@ export var NODE_PT_active_node_generic =  __class__ ('NODE_PT_active_node_generi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -953,7 +1715,7 @@ export var NODE_PT_active_node_generic =  __class__ ('NODE_PT_active_node_generi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -970,23 +1732,65 @@ export var NODE_PT_active_node_generic =  __class__ ('NODE_PT_active_node_generi
 		var tree = node.id_data;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
-		col.prop (node, 'name', __kwargtrans__ ({placeholder: 'Name'}));
-		col.prop (node, 'label', __kwargtrans__ ({placeholder: 'Custom Label'}));
-		var col = col.column (__kwargtrans__ ({heading: 'Color'}));
-		col.active = node.bl_idname != 'NodeReroute';
-		var row = col.row ();
-		row.prop (node, 'use_custom_color', __kwargtrans__ ({text: ''}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, node, 'name', __kwargtrans__ ({placeholder: 'Name'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, node, 'label', __kwargtrans__ ({placeholder: 'Custom Label'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Color'}));
+		}) ();
+		col.active = __ne__ (node.bl_idname, 'NodeReroute');
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, node, 'use_custom_color', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = node.use_custom_color;
-		sub.prop (node, 'color', __kwargtrans__ ({text: ''}));
-		sub.menu ('NODE_MT_node_color_context_menu', __kwargtrans__ ({text: '', icon: 'DOWNARROW_HLT'}));
-		sub.popover (__kwargtrans__ ({panel: 'NODE_PT_node_color_presets', icon: 'PRESET', text: ''}));
-		var col = layout.column ();
-		col.prop (node, 'show_options');
-		col.prop (node, 'mute');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, node, 'color', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_node_color_context_menu', __kwargtrans__ ({text: '', icon: 'DOWNARROW_HLT'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_node_color_presets', icon: 'PRESET', text: ''}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, node, 'show_options');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, node, 'mute');
+		}) ();
 		if (__in__ (tree.py_metatype, tuple (['GEOMETRY', 'COMPOSITING']))) {
-			layout.prop (node, 'warning_propagation', __kwargtrans__ ({text: 'Propagate'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, node, 'warning_propagation', __kwargtrans__ ({text: 'Propagate'}));
+			}) ();
 		}
 	});}
 });
@@ -999,7 +1803,7 @@ export var NODE_PT_active_node_properties =  __class__ ('NODE_PT_active_node_pro
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1016,7 +1820,7 @@ export var NODE_PT_active_node_properties =  __class__ ('NODE_PT_active_node_pro
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1030,7 +1834,10 @@ export var NODE_PT_active_node_properties =  __class__ ('NODE_PT_active_node_pro
 		}
 		var layout = self.layout;
 		var node = context.active_node;
-		layout.template_node_inputs (node);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_node_inputs, __accu0__, node);
+		}) ();
 	});}
 });
 export var NODE_PT_active_node_custom_properties =  __class__ ('NODE_PT_active_node_custom_properties', [rna_prop_ui.PropertyPanel, Panel], {
@@ -1052,7 +1859,7 @@ export var NODE_PT_texture_mapping =  __class__ ('NODE_PT_texture_mapping', [Pan
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1065,12 +1872,12 @@ export var NODE_PT_texture_mapping =  __class__ ('NODE_PT_texture_mapping', [Pan
 		else {
 		}
 		var node = context.active_node;
-		return node && hasattr (node, 'texture_mapping') && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return node && __call__ (hasattr, null, node, 'texture_mapping') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1087,16 +1894,46 @@ export var NODE_PT_texture_mapping =  __class__ ('NODE_PT_texture_mapping', [Pan
 		layout.use_property_decorate = false;
 		var node = context.active_node;
 		var mapping = node.texture_mapping;
-		layout.prop (mapping, 'vector_type');
-		layout.separator ();
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (mapping, 'mapping_x', __kwargtrans__ ({text: 'Projection X'}));
-		col.prop (mapping, 'mapping_y', __kwargtrans__ ({text: 'Y'}));
-		col.prop (mapping, 'mapping_z', __kwargtrans__ ({text: 'Z'}));
-		layout.separator ();
-		layout.prop (mapping, 'translation');
-		layout.prop (mapping, 'rotation');
-		layout.prop (mapping, 'scale');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'vector_type');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'mapping_x', __kwargtrans__ ({text: 'Projection X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'mapping_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'mapping_z', __kwargtrans__ ({text: 'Z'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'translation');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'rotation');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mapping, 'scale');
+		}) ();
 	});}
 });
 export var NODE_PT_backdrop =  __class__ ('NODE_PT_backdrop', [Panel], {
@@ -1108,7 +1945,7 @@ export var NODE_PT_backdrop =  __class__ ('NODE_PT_backdrop', [Panel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1121,12 +1958,12 @@ export var NODE_PT_backdrop =  __class__ ('NODE_PT_backdrop', [Panel], {
 		else {
 		}
 		var snode = context.space_data;
-		return snode.tree_type == 'CompositorNodeTree';
+		return __eq__ (snode.tree_type, 'CompositorNodeTree');
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1139,12 +1976,15 @@ export var NODE_PT_backdrop =  __class__ ('NODE_PT_backdrop', [Panel], {
 		else {
 		}
 		var snode = context.space_data;
-		self.layout.prop (snode, 'show_backdrop', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'show_backdrop', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1161,13 +2001,34 @@ export var NODE_PT_backdrop =  __class__ ('NODE_PT_backdrop', [Panel], {
 		layout.use_property_decorate = false;
 		var snode = context.space_data;
 		layout.active = snode.show_backdrop;
-		var col = layout.column ();
-		col.prop (snode, 'backdrop_channels', __kwargtrans__ ({text: 'Channels'}));
-		col.prop (snode, 'backdrop_zoom', __kwargtrans__ ({text: 'Zoom'}));
-		col.prop (snode, 'backdrop_offset', __kwargtrans__ ({text: 'Offset'}));
-		col.separator ();
-		col.operator ('node.backimage_move', __kwargtrans__ ({text: 'Move'}));
-		col.operator ('node.backimage_fit', __kwargtrans__ ({text: 'Fit'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'backdrop_channels', __kwargtrans__ ({text: 'Channels'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'backdrop_zoom', __kwargtrans__ ({text: 'Zoom'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'backdrop_offset', __kwargtrans__ ({text: 'Offset'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'node.backimage_move', __kwargtrans__ ({text: 'Move'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'node.backimage_fit', __kwargtrans__ ({text: 'Fit'}));
+		}) ();
 	});}
 });
 export var NODE_PT_quality =  __class__ ('NODE_PT_quality', [Panel], {
@@ -1179,7 +2040,7 @@ export var NODE_PT_quality =  __class__ ('NODE_PT_quality', [Panel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1192,12 +2053,12 @@ export var NODE_PT_quality =  __class__ ('NODE_PT_quality', [Panel], {
 		else {
 		}
 		var snode = context.space_data;
-		return snode.tree_type == 'CompositorNodeTree' && snode.node_tree !== null;
+		return __eq__ (snode.tree_type, 'CompositorNodeTree') && snode.node_tree !== null;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1215,10 +2076,19 @@ export var NODE_PT_quality =  __class__ ('NODE_PT_quality', [Panel], {
 		var scene = context.scene;
 		var rd = scene.render;
 		var snode = context.space_data;
-		var col = layout.column ();
-		col.prop (rd, 'compositor_device', __kwargtrans__ ({text: 'Device'}));
-		if (rd.compositor_device == 'GPU') {
-			col.prop (rd, 'compositor_precision', __kwargtrans__ ({text: 'Precision'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_device', __kwargtrans__ ({text: 'Device'}));
+		}) ();
+		if (__eq__ (rd.compositor_device, 'GPU')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_precision', __kwargtrans__ ({text: 'Precision'}));
+			}) ();
 		}
 	});}
 });
@@ -1231,7 +2101,7 @@ export var NODE_PT_overlay =  __class__ ('NODE_PT_overlay', [Panel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1244,37 +2114,94 @@ export var NODE_PT_overlay =  __class__ ('NODE_PT_overlay', [Panel], {
 		else {
 		}
 		var layout = self.layout;
-		layout.label (__kwargtrans__ ({text: 'Node Editor Overlays'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Node Editor Overlays'}));
+		}) ();
 		var snode = context.space_data;
 		var overlay = snode.overlay;
 		layout.active = overlay.show_overlays;
-		var col = layout.column ();
-		col.prop (overlay, 'show_wire_color', __kwargtrans__ ({text: 'Wire Colors'}));
-		col.prop (overlay, 'show_reroute_auto_labels', __kwargtrans__ ({text: 'Reroute Auto Labels'}));
-		col.separator ();
-		col.prop (overlay, 'show_context_path', __kwargtrans__ ({text: 'Context Path'}));
-		col.prop (snode, 'show_annotation', __kwargtrans__ ({text: 'Annotations'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, overlay, 'show_wire_color', __kwargtrans__ ({text: 'Wire Colors'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, overlay, 'show_reroute_auto_labels', __kwargtrans__ ({text: 'Reroute Auto Labels'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, overlay, 'show_context_path', __kwargtrans__ ({text: 'Context Path'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, snode, 'show_annotation', __kwargtrans__ ({text: 'Annotations'}));
+		}) ();
 		if (snode.supports_previews) {
-			col.separator ();
-			col.prop (overlay, 'show_previews', __kwargtrans__ ({text: 'Previews'}));
-			if (snode.tree_type == 'ShaderNodeTree') {
-				var row = col.row ();
-				row.prop (overlay, 'preview_shape', __kwargtrans__ ({expand: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, overlay, 'show_previews', __kwargtrans__ ({text: 'Previews'}));
+			}) ();
+			if (__eq__ (snode.tree_type, 'ShaderNodeTree')) {
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, overlay, 'preview_shape', __kwargtrans__ ({expand: true}));
+				}) ();
 				row.active = overlay.show_previews;
 			}
 		}
-		if (snode.tree_type == 'GeometryNodeTree') {
-			col.separator ();
-			col.prop (overlay, 'show_timing', __kwargtrans__ ({text: 'Timings'}));
-			col.prop (overlay, 'show_named_attributes', __kwargtrans__ ({text: 'Named Attributes'}));
+		if (__eq__ (snode.tree_type, 'GeometryNodeTree')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, overlay, 'show_timing', __kwargtrans__ ({text: 'Timings'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, overlay, 'show_named_attributes', __kwargtrans__ ({text: 'Named Attributes'}));
+			}) ();
 		}
-		if (snode.tree_type == 'CompositorNodeTree') {
-			col.prop (overlay, 'show_timing', __kwargtrans__ ({text: 'Timings'}));
-			var subcol = col.column (__kwargtrans__ ({align: true}));
+		if (__eq__ (snode.tree_type, 'CompositorNodeTree')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, overlay, 'show_timing', __kwargtrans__ ({text: 'Timings'}));
+			}) ();
+			var subcol = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			subcol.active = overlay.show_render_size && snode.show_backdrop;
-			var row = subcol.row (__kwargtrans__ ({align: true}));
-			row.prop (overlay, 'show_render_size', __kwargtrans__ ({text: 'Render Region'}));
-			row.prop (overlay, 'passepartout_alpha', __kwargtrans__ ({text: 'Passepartout'}));
+			var row = (function () {
+				var __accu0__ = subcol;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, overlay, 'show_render_size', __kwargtrans__ ({text: 'Render Region'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, overlay, 'passepartout_alpha', __kwargtrans__ ({text: 'Passepartout'}));
+			}) ();
 		}
 	});}
 });
@@ -1284,7 +2211,7 @@ export var NODE_MT_node_tree_interface_context_menu =  __class__ ('NODE_MT_node_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1300,13 +2227,25 @@ export var NODE_MT_node_tree_interface_context_menu =  __class__ ('NODE_MT_node_
 		var snode = context.space_data;
 		var tree = snode.edit_tree;
 		var active_item = tree.interface.active;
-		layout.operator ('node.interface_item_duplicate', __kwargtrans__ ({icon: 'DUPLICATE'}));
-		layout.separator ();
-		if (active_item.item_type == 'SOCKET') {
-			layout.operator ('node.interface_item_make_panel_toggle');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.interface_item_duplicate', __kwargtrans__ ({icon: 'DUPLICATE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (__eq__ (active_item.item_type, 'SOCKET')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.interface_item_make_panel_toggle');
+			}) ();
 		}
-		else if (active_item.item_type == 'PANEL') {
-			layout.operator ('node.interface_item_unlink_panel_toggle');
+		else if (__eq__ (active_item.item_type, 'PANEL')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.interface_item_unlink_panel_toggle');
+			}) ();
 		}
 	});}
 });
@@ -1316,7 +2255,7 @@ export var NODE_MT_node_tree_interface_new_item =  __class__ ('NODE_MT_node_tree
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1329,10 +2268,16 @@ export var NODE_MT_node_tree_interface_new_item =  __class__ ('NODE_MT_node_tree
 		else {
 		}
 		var layout = self.layout;
-		layout.operator_enum ('node.interface_item_new', 'item_type');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_enum, __accu0__, 'node.interface_item_new', 'item_type');
+		}) ();
 		var active_item = context.space_data.edit_tree.interface.active;
-		if (active_item && active_item.item_type == 'PANEL') {
-			layout.operator ('node.interface_item_new_panel_toggle', __kwargtrans__ ({text: 'Panel Toggle'}));
+		if (active_item && __eq__ (active_item.item_type, 'PANEL')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'node.interface_item_new_panel_toggle', __kwargtrans__ ({text: 'Panel Toggle'}));
+			}) ();
 		}
 	});}
 });
@@ -1346,7 +2291,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1374,7 +2319,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1391,43 +2336,100 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 		var group = snode.edit_tree;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
-		col.prop (group, 'name', __kwargtrans__ ({text: 'Name', placeholder: 'Name'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, group, 'name', __kwargtrans__ ({text: 'Name', placeholder: 'Name'}));
+		}) ();
 		if (group.asset_data) {
-			col.prop (group.asset_data, 'description', __kwargtrans__ ({text: 'Description', placeholder: 'Description'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, group.asset_data, 'description', __kwargtrans__ ({text: 'Description', placeholder: 'Description'}));
+			}) ();
 		}
 		else {
-			col.prop (group, 'description', __kwargtrans__ ({text: 'Description', placeholder: 'Description'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, group, 'description', __kwargtrans__ ({text: 'Description', placeholder: 'Description'}));
+			}) ();
 		}
 		if (!(group.bl_use_group_interface)) {
 			return ;
 		}
-		col.prop (group, 'color_tag');
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.prop (group, 'default_group_node_width', __kwargtrans__ ({text: 'Node Width'}));
-		row.operator ('node.default_group_width_set', __kwargtrans__ ({text: '', icon: 'NODE'}));
-		if (group.bl_idname == 'GeometryNodeTree') {
-			var row = col.row ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, group, 'color_tag');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, group, 'default_group_node_width', __kwargtrans__ ({text: 'Node Width'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'node.default_group_width_set', __kwargtrans__ ({text: '', icon: 'NODE'}));
+		}) ();
+		if (__eq__ (group.bl_idname, 'GeometryNodeTree')) {
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.active = group.is_modifier;
-			row.prop (group, 'show_modifier_manage_panel');
-			var __left0__ = col.panel ('group_usage');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, group, 'show_modifier_manage_panel');
+			}) ();
+			var __left0__ = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.panel, __accu0__, 'group_usage');
+			}) ();
 			var header = __left0__ [0];
 			var body = __left0__ [1];
-			header.label (__kwargtrans__ ({text: 'Usage'}));
+			(function () {
+				var __accu0__ = header;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Usage'}));
+			}) ();
 			if (body) {
-				var col = body.column (__kwargtrans__ ({align: true}));
-				col.prop (group, 'is_modifier');
-				col.prop (group, 'is_tool');
+				var col = (function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, group, 'is_modifier');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, group, 'is_tool');
+				}) ();
 			}
 		}
-		else if (group.bl_idname == 'CompositorNodeTree') {
-			var __left0__ = col.panel ('group_usage');
+		else if (__eq__ (group.bl_idname, 'CompositorNodeTree')) {
+			var __left0__ = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.panel, __accu0__, 'group_usage');
+			}) ();
 			var header = __left0__ [0];
 			var body = __left0__ [1];
-			header.label (__kwargtrans__ ({text: 'Usage'}));
+			(function () {
+				var __accu0__ = header;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Usage'}));
+			}) ();
 			if (body) {
-				var col = body.column (__kwargtrans__ ({align: true}));
-				col.prop (group, 'is_strip_modifier');
+				var col = (function () {
+					var __accu0__ = body;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, group, 'is_strip_modifier');
+				}) ();
 			}
 		}
 	});}
@@ -1443,7 +2445,7 @@ export var NODE_PT_node_tree_animation =  __class__ ('NODE_PT_node_tree_animatio
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1471,7 +2473,7 @@ export var NODE_PT_node_tree_animation =  __class__ ('NODE_PT_node_tree_animatio
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1488,8 +2490,14 @@ export var NODE_PT_node_tree_animation =  __class__ ('NODE_PT_node_tree_animatio
 		layout.use_property_decorate = false;
 		var snode = context.space_data;
 		var group = snode.edit_tree;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		anim.draw_action_and_slot_selector_for_id (col, group);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = anim;
+			return __call__ (__accu0__.draw_action_and_slot_selector_for_id, __accu0__, col, group);
+		}) ();
 	});}
 });
 export var NODE_PT_annotation =  __class__ ('NODE_PT_annotation', [AnnotationDataPanel, Panel], {
@@ -1501,7 +2509,7 @@ export var NODE_PT_annotation =  __class__ ('NODE_PT_annotation', [AnnotationDat
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1520,7 +2528,7 @@ export var NODE_PT_annotation =  __class__ ('NODE_PT_annotation', [AnnotationDat
 export var node_panel = function (cls) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1531,14 +2539,23 @@ export var node_panel = function (cls) {
 	}
 	else {
 	}
-	var node_cls_dict = cls.__dict__.py_copy ();
-	node_cls_dict.py_pop ('bl_rna', null);
-	var node_cls = py_metatype.__new__ (py_metatype, 'NODE_' + cls.__name__, cls.__bases__, node_cls_dict);
+	var node_cls_dict = (function () {
+		var __accu0__ = cls.__dict__;
+		return __call__ (__accu0__.py_copy, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = node_cls_dict;
+		return __call__ (__accu0__.py_pop, __accu0__, 'bl_rna', null);
+	}) ();
+	var node_cls = (function () {
+		var __accu0__ = py_metatype;
+		return __call__ (__accu0__.__new__, __accu0__, py_metatype, __add__ ('NODE_', cls.__name__), cls.__bases__, node_cls_dict);
+	}) ();
 	node_cls.bl_space_type = 'NODE_EDITOR';
 	node_cls.bl_region_type = 'UI';
 	node_cls.bl_category = 'Options';
-	if (hasattr (node_cls, 'bl_parent_id')) {
-		node_cls.bl_parent_id = 'NODE_' + node_cls.bl_parent_id;
+	if (__call__ (hasattr, null, node_cls, 'bl_parent_id')) {
+		node_cls.bl_parent_id = __add__ ('NODE_', node_cls.bl_parent_id);
 	}
 	return node_cls;
 };
@@ -1551,7 +2568,7 @@ export var NODE_AST_compositor =  __class__ ('NODE_AST_compositor', [bpy.types.A
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1563,12 +2580,12 @@ export var NODE_AST_compositor =  __class__ ('NODE_AST_compositor', [bpy.types.A
 		}
 		else {
 		}
-		return context.space_data.tree_type == 'CompositorNodeTree';
+		return __eq__ (context.space_data.tree_type, 'CompositorNodeTree');
 	});},
 	get asset_poll () {return __getcm__ (this, function (cls, asset) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1580,15 +2597,24 @@ export var NODE_AST_compositor =  __class__ ('NODE_AST_compositor', [bpy.types.A
 		}
 		else {
 		}
-		var os = _module ('os');
-		var Path = _member ('pathlib', 'Path');
-		var compositing_type = bpy.types.NodeTree.bl_rna.properties ['type'].enum_items ['COMPOSITING'];
-		if (asset.id_type != 'NODETREE' || asset.metadata.py_get ('type') != compositing_type.value) {
+		var os = __call__ (_module, null, 'os');
+		var Path = __call__ (_member, null, 'pathlib', 'Path');
+		var compositing_type = __getitem__ (__getitem__ (bpy.types.NodeTree.bl_rna.properties, 'type').enum_items, 'COMPOSITING');
+		if (__ne__ (asset.id_type, 'NODETREE') || __ne__ ((function () {
+			var __accu0__ = asset.metadata;
+			return __call__ (__accu0__.py_get, __accu0__, 'type');
+		}) (), compositing_type.value)) {
 			return false;
 		}
 		var ignored_essentials = new set (['Combine Cylindrical', 'Combine Spherical', 'Separate Cylindrical', 'Separate Spherical', '3D to Screen Space', 'Screen to 3D Space', 'Project with Depth', 'Transform and Project']);
-		var compositor_essentials_path = Path (os.path.join (bpy.utils.system_resource ('DATAFILES'), 'assets', 'nodes', 'compositing_nodes_essentials.blend'));
-		if (Path (asset.full_library_path) == compositor_essentials_path) {
+		var compositor_essentials_path = __call__ (Path, null, (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, (function () {
+				var __accu1__ = bpy.utils;
+				return __call__ (__accu1__.system_resource, __accu1__, 'DATAFILES');
+			}) (), 'assets', 'nodes', 'compositing_nodes_essentials.blend');
+		}) ());
+		if (__eq__ (__call__ (Path, null, asset.full_library_path), compositor_essentials_path)) {
 			if (__in__ (asset.py_name, ignored_essentials)) {
 				return false;
 			}
@@ -1596,12 +2622,55 @@ export var NODE_AST_compositor =  __class__ ('NODE_AST_compositor', [bpy.types.A
 		return true;
 	});}
 });
-export var classes = tuple ([NODE_HT_header, NODE_MT_editor_menus, NODE_MT_add, NODE_MT_swap, NODE_MT_select, NODE_MT_node, NODE_MT_node_color_context_menu, NODE_MT_context_menu_show_hide_menu, NODE_MT_context_menu_select_menu, NODE_MT_context_menu, NODE_MT_view, NODE_MT_view_pie, NODE_PT_material_slots, NODE_PT_geometry_node_tool_object_types, NODE_PT_geometry_node_tool_mode, NODE_PT_geometry_node_tool_options, NODE_PT_node_color_presets, NODE_PT_node_tree_properties, NODE_MT_node_tree_interface_new_item, NODE_MT_node_tree_interface_context_menu, NODE_PT_node_tree_animation, NODE_PT_active_node_generic, NODE_PT_texture_mapping, NODE_PT_active_tool, NODE_PT_backdrop, NODE_PT_quality, NODE_PT_annotation, NODE_PT_overlay, NODE_PT_active_node_properties, NODE_PT_active_node_custom_properties, NODE_PT_gizmo_display, NODE_AST_compositor, node_panel (EEVEE_MATERIAL_PT_settings), node_panel (EEVEE_MATERIAL_PT_settings_surface), node_panel (EEVEE_MATERIAL_PT_settings_volume), node_panel (MATERIAL_PT_viewport), node_panel (WORLD_PT_viewport_display), node_panel (DATA_PT_light), node_panel (DATA_PT_EEVEE_light)]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+export var classes = tuple ([NODE_HT_header, NODE_MT_editor_menus, NODE_MT_add, NODE_MT_swap, NODE_MT_select, NODE_MT_node, NODE_MT_node_color_context_menu, NODE_MT_context_menu_show_hide_menu, NODE_MT_context_menu_select_menu, NODE_MT_context_menu, NODE_MT_view, NODE_MT_view_pie, NODE_PT_material_slots, NODE_PT_geometry_node_tool_object_types, NODE_PT_geometry_node_tool_mode, NODE_PT_geometry_node_tool_options, NODE_PT_node_color_presets, NODE_PT_node_tree_properties, NODE_MT_node_tree_interface_new_item, NODE_MT_node_tree_interface_context_menu, NODE_PT_node_tree_animation, NODE_PT_active_node_generic, NODE_PT_texture_mapping, NODE_PT_active_tool, NODE_PT_backdrop, NODE_PT_quality, NODE_PT_annotation, NODE_PT_overlay, NODE_PT_active_node_properties, NODE_PT_active_node_custom_properties, NODE_PT_gizmo_display, NODE_AST_compositor, __call__ (node_panel, null, EEVEE_MATERIAL_PT_settings), __call__ (node_panel, null, EEVEE_MATERIAL_PT_settings_surface), __call__ (node_panel, null, EEVEE_MATERIAL_PT_settings_volume), __call__ (node_panel, null, MATERIAL_PT_viewport), __call__ (node_panel, null, WORLD_PT_viewport_display), __call__ (node_panel, null, DATA_PT_light), __call__ (node_panel, null, DATA_PT_EEVEE_light)]);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_node.map
 export {AnnotationDataPanel, DATA_PT_EEVEE_light, DATA_PT_light, EEVEE_MATERIAL_PT_settings, EEVEE_MATERIAL_PT_settings_surface, EEVEE_MATERIAL_PT_settings_volume, Header, MATERIAL_PT_viewport, Menu, Panel, PresetPanel, ToolActivePanelHelper, WORLD_PT_viewport_display, _globals, _import, _lazy, _member, _module, geometry_modifier_poll, i18n_contexts, iface_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'NODE_HT_header': NODE_HT_header = value; break;
+		case 'NODE_PT_gizmo_display': NODE_PT_gizmo_display = value; break;
+		case 'NODE_MT_editor_menus': NODE_MT_editor_menus = value; break;
+		case 'NODE_MT_add': NODE_MT_add = value; break;
+		case 'NODE_MT_swap': NODE_MT_swap = value; break;
+		case 'NODE_MT_view': NODE_MT_view = value; break;
+		case 'NODE_MT_select': NODE_MT_select = value; break;
+		case 'NODE_MT_node': NODE_MT_node = value; break;
+		case 'NODE_MT_view_pie': NODE_MT_view_pie = value; break;
+		case 'NODE_PT_active_tool': NODE_PT_active_tool = value; break;
+		case 'NODE_PT_material_slots': NODE_PT_material_slots = value; break;
+		case 'NODE_PT_geometry_node_tool_object_types': NODE_PT_geometry_node_tool_object_types = value; break;
+		case 'NODE_PT_geometry_node_tool_mode': NODE_PT_geometry_node_tool_mode = value; break;
+		case 'NODE_PT_geometry_node_tool_options': NODE_PT_geometry_node_tool_options = value; break;
+		case 'NODE_PT_node_color_presets': NODE_PT_node_color_presets = value; break;
+		case 'NODE_MT_node_color_context_menu': NODE_MT_node_color_context_menu = value; break;
+		case 'NODE_MT_context_menu_show_hide_menu': NODE_MT_context_menu_show_hide_menu = value; break;
+		case 'NODE_MT_context_menu_select_menu': NODE_MT_context_menu_select_menu = value; break;
+		case 'NODE_MT_context_menu': NODE_MT_context_menu = value; break;
+		case 'NODE_PT_active_node_generic': NODE_PT_active_node_generic = value; break;
+		case 'NODE_PT_active_node_properties': NODE_PT_active_node_properties = value; break;
+		case 'NODE_PT_active_node_custom_properties': NODE_PT_active_node_custom_properties = value; break;
+		case 'NODE_PT_texture_mapping': NODE_PT_texture_mapping = value; break;
+		case 'NODE_PT_backdrop': NODE_PT_backdrop = value; break;
+		case 'NODE_PT_quality': NODE_PT_quality = value; break;
+		case 'NODE_PT_overlay': NODE_PT_overlay = value; break;
+		case 'NODE_MT_node_tree_interface_context_menu': NODE_MT_node_tree_interface_context_menu = value; break;
+		case 'NODE_MT_node_tree_interface_new_item': NODE_MT_node_tree_interface_new_item = value; break;
+		case 'NODE_PT_node_tree_properties': NODE_PT_node_tree_properties = value; break;
+		case 'NODE_PT_node_tree_animation': NODE_PT_node_tree_animation = value; break;
+		case 'NODE_PT_annotation': NODE_PT_annotation = value; break;
+		case 'node_panel': node_panel = value; break;
+		case 'NODE_AST_compositor': NODE_AST_compositor = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

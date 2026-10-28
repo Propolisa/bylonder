@@ -9,7 +9,7 @@ var __name__ = 'bl_ui.node_add_menu_shader';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -20,8 +20,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -29,7 +35,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -54,7 +60,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -73,7 +79,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -86,18 +92,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -108,15 +117,21 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
 export var line_style_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -128,12 +143,12 @@ export var line_style_shader_nodes_poll = function (context) {
 	else {
 	}
 	var snode = context.space_data;
-	return snode.tree_type == 'ShaderNodeTree' && snode.shader_type == 'LINESTYLE';
+	return __eq__ (snode.tree_type, 'ShaderNodeTree') && __eq__ (snode.shader_type, 'LINESTYLE');
 };
 export var world_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -145,12 +160,12 @@ export var world_shader_nodes_poll = function (context) {
 	else {
 	}
 	var snode = context.space_data;
-	return snode.tree_type == 'ShaderNodeTree' && snode.shader_type == 'WORLD';
+	return __eq__ (snode.tree_type, 'ShaderNodeTree') && __eq__ (snode.shader_type, 'WORLD');
 };
 export var object_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -162,12 +177,12 @@ export var object_shader_nodes_poll = function (context) {
 	else {
 	}
 	var snode = context.space_data;
-	return snode.tree_type == 'ShaderNodeTree' && snode.shader_type == 'OBJECT';
+	return __eq__ (snode.tree_type, 'ShaderNodeTree') && __eq__ (snode.shader_type, 'OBJECT');
 };
 export var object_material_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -179,12 +194,12 @@ export var object_material_shader_nodes_poll = function (context) {
 	else {
 	}
 	var owner = context.space_data.id_from;
-	return object_shader_nodes_poll (context) && (owner === null || owner.py_metatype != 'LIGHT');
+	return __call__ (object_shader_nodes_poll, null, context) && (owner === null || __ne__ (owner.py_metatype, 'LIGHT'));
 };
 export var object_light_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -196,12 +211,12 @@ export var object_light_shader_nodes_poll = function (context) {
 	else {
 	}
 	var owner = context.space_data.id_from;
-	return object_shader_nodes_poll (context) && (owner === null || owner.py_metatype == 'LIGHT');
+	return __call__ (object_shader_nodes_poll, null, context) && (owner === null || __eq__ (owner.py_metatype, 'LIGHT'));
 };
 export var cycles_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -212,12 +227,12 @@ export var cycles_shader_nodes_poll = function (context) {
 	}
 	else {
 	}
-	return context.engine == 'CYCLES';
+	return __eq__ (context.engine, 'CYCLES');
 };
 export var eevee_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -228,12 +243,12 @@ export var eevee_shader_nodes_poll = function (context) {
 	}
 	else {
 	}
-	return context.engine == 'BLENDER_EEVEE';
+	return __eq__ (context.engine, 'BLENDER_EEVEE');
 };
 export var object_not_eevee_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -244,12 +259,12 @@ export var object_not_eevee_shader_nodes_poll = function (context) {
 	}
 	else {
 	}
-	return object_shader_nodes_poll (context) && !(eevee_shader_nodes_poll (context));
+	return __call__ (object_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context));
 };
 export var object_eevee_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -260,7 +275,7 @@ export var object_eevee_shader_nodes_poll = function (context) {
 	}
 	else {
 	}
-	return object_shader_nodes_poll (context) && eevee_shader_nodes_poll (context);
+	return __call__ (object_shader_nodes_poll, null, context) && __call__ (eevee_shader_nodes_poll, null, context);
 };
 export var NODE_MT_shader_node_input_base =  __class__ ('NODE_MT_shader_node_input_base', [node_add_menu.NodeMenu], {
 	__module__: __name__,
@@ -268,7 +283,7 @@ export var NODE_MT_shader_node_input_base =  __class__ ('NODE_MT_shader_node_inp
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -281,30 +296,102 @@ export var NODE_MT_shader_node_input_base =  __class__ ('NODE_MT_shader_node_inp
 		else {
 		}
 		var layout = self.layout;
-		self.draw_menu (layout, 'Input/Constant');
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeAmbientOcclusion', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeAttribute');
-		self.node_operator (layout, 'ShaderNodeBevel', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeCameraData', ['View Vector', 'View Z Depth', 'View Distance']);
-		self.node_operator (layout, 'ShaderNodeVertexColor', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeHairInfo', ['Is Strand', 'Intercept', 'Length', 'Thickness', 'Tangent Normal', 'Random'], __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeFresnel', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeNewGeometry', ['Position', 'Normal', 'Tangent', 'True Normal', 'Incoming', 'Parametric', 'Backfacing', 'Pointiness', 'Random Per Island']);
-		self.node_operator (layout, 'ShaderNodeLayerWeight', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeLightPath', ['Is Camera Ray', 'Is Shadow Ray', 'Is Diffuse Ray', 'Is Glossy Ray', 'Is Singular Ray', 'Is Reflection Ray', 'Is Transmission Ray', 'Is Volume Scatter Ray', 'Ray Length', 'Ray Depth', 'Diffuse Depth', 'Glossy Depth', 'Transparent Depth', 'Transmission Depth', 'Portal Depth']);
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeObjectInfo', ['Location', 'Color', 'Alpha', 'Object Index', 'Material Index', 'Random'], __kwargtrans__ ({poll: object_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeParticleInfo', ['Index', 'Random', 'Age', 'Lifetime', 'Location', 'Size', 'Velocity', 'Angular Velocity'], __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodePointInfo', ['Position', 'Radius', 'Random'], __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeRaycast', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'GeometryNodeInputSceneTime', ['Frame', 'Seconds']);
-		self.node_operator (layout, 'ShaderNodeTangent');
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeTexCoord', ['Generated', 'Normal', 'UV', 'Object', 'Camera', 'Window', 'Reflection']);
-		self.node_operator (layout, 'ShaderNodeUVAlongStroke', __kwargtrans__ ({poll: line_style_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeUVMap', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator_with_outputs (context, layout, 'ShaderNodeVolumeInfo', ['Color', 'Density', 'Flame', 'Temperature'], __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeWireframe', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Input/Constant');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeAmbientOcclusion', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeAttribute');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBevel', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeCameraData', ['View Vector', 'View Z Depth', 'View Distance']);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVertexColor', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeHairInfo', ['Is Strand', 'Intercept', 'Length', 'Thickness', 'Tangent Normal', 'Random'], __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeFresnel', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeNewGeometry', ['Position', 'Normal', 'Tangent', 'True Normal', 'Incoming', 'Parametric', 'Backfacing', 'Pointiness', 'Random Per Island']);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeLayerWeight', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeLightPath', ['Is Camera Ray', 'Is Shadow Ray', 'Is Diffuse Ray', 'Is Glossy Ray', 'Is Singular Ray', 'Is Reflection Ray', 'Is Transmission Ray', 'Is Volume Scatter Ray', 'Ray Length', 'Ray Depth', 'Diffuse Depth', 'Glossy Depth', 'Transparent Depth', 'Transmission Depth', 'Portal Depth']);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeObjectInfo', ['Location', 'Color', 'Alpha', 'Object Index', 'Material Index', 'Random'], __kwargtrans__ ({poll: __call__ (object_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeParticleInfo', ['Index', 'Random', 'Age', 'Lifetime', 'Location', 'Size', 'Velocity', 'Angular Velocity'], __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodePointInfo', ['Position', 'Radius', 'Random'], __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeRaycast', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'GeometryNodeInputSceneTime', ['Frame', 'Seconds']);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTangent');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeTexCoord', ['Generated', 'Normal', 'UV', 'Object', 'Camera', 'Window', 'Reflection']);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeUVAlongStroke', __kwargtrans__ ({poll: __call__ (line_style_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeUVMap', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_outputs, __accu0__, context, layout, 'ShaderNodeVolumeInfo', ['Color', 'Density', 'Flame', 'Temperature'], __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeWireframe', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_input_constant_base =  __class__ ('NODE_MT_shader_node_input_constant_base', [node_add_menu.NodeMenu], {
@@ -315,7 +402,7 @@ export var NODE_MT_shader_node_input_constant_base =  __class__ ('NODE_MT_shader
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -327,14 +414,36 @@ export var NODE_MT_shader_node_input_constant_base =  __class__ ('NODE_MT_shader
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
-		self.node_operator (layout, 'FunctionNodeInputBool');
-		self.node_operator (layout, 'ShaderNodeRGB');
-		self.node_operator (layout, 'FunctionNodeInputInt');
-		self.node_operator (layout, 'FunctionNodeInputMenu');
-		self.node_operator (layout, 'ShaderNodeValue');
-		self.node_operator (layout, 'FunctionNodeInputVector');
-		self.draw_assets_for_catalog (layout, self.menu_path);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'FunctionNodeInputBool');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeRGB');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'FunctionNodeInputInt');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'FunctionNodeInputMenu');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeValue');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'FunctionNodeInputVector');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.menu_path);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_output_base =  __class__ ('NODE_MT_shader_node_output_base', [node_add_menu.NodeMenu], {
@@ -343,7 +452,7 @@ export var NODE_MT_shader_node_output_base =  __class__ ('NODE_MT_shader_node_ou
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -356,12 +465,30 @@ export var NODE_MT_shader_node_output_base =  __class__ ('NODE_MT_shader_node_ou
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'ShaderNodeOutputAOV', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context) || world_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeOutputLight', __kwargtrans__ ({poll: object_not_eevee_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeOutputLineStyle', __kwargtrans__ ({poll: line_style_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeOutputMaterial', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeOutputWorld', __kwargtrans__ ({poll: world_shader_nodes_poll (context)}));
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeOutputAOV', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) || __call__ (world_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeOutputLight', __kwargtrans__ ({poll: __call__ (object_not_eevee_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeOutputLineStyle', __kwargtrans__ ({poll: __call__ (line_style_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeOutputMaterial', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeOutputWorld', __kwargtrans__ ({poll: __call__ (world_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_shader_base', [node_add_menu.NodeMenu], {
@@ -370,7 +497,7 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -382,12 +509,12 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}
 		else {
 		}
-		return __super__ (NODE_MT_shader_node_shader_base, 'poll') (self, context) && !(line_style_shader_nodes_poll (context));
+		return __call__ (__call__ (__super__, null, NODE_MT_shader_node_shader_base, 'poll'), null, self, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -400,33 +527,114 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'ShaderNodeAddShader');
-		self.node_operator (layout, 'ShaderNodeMixShader');
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeBackground', __kwargtrans__ ({poll: world_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfDiffuse', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeEmission');
-		self.node_operator (layout, 'ShaderNodeBsdfGlass', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfGlossy', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfHair', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context) && !(eevee_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeHoldout', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfMetallic', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfPrincipled', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfHairPrincipled', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context) && !(eevee_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeBsdfRayPortal', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context) && !(eevee_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeBsdfRefraction', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfSheen', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context) && !(eevee_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeEeveeSpecular', __kwargtrans__ ({poll: object_eevee_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeSubsurfaceScattering', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfToon', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context) && !(eevee_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeBsdfTranslucent', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		self.node_operator (layout, 'ShaderNodeBsdfTransparent', __kwargtrans__ ({poll: object_material_shader_nodes_poll (context)}));
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeVolumePrincipled', __kwargtrans__ ({poll: !(object_light_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeVolumeAbsorption', __kwargtrans__ ({poll: !(object_light_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeVolumeScatter', __kwargtrans__ ({poll: !(object_light_shader_nodes_poll (context))}));
-		self.node_operator (layout, 'ShaderNodeVolumeCoefficients', __kwargtrans__ ({poll: !(object_light_shader_nodes_poll (context))}));
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeAddShader');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMixShader');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBackground', __kwargtrans__ ({poll: __call__ (world_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfDiffuse', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeEmission');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfGlass', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfGlossy', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfHair', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeHoldout', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfMetallic', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfPrincipled', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfHairPrincipled', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfRayPortal', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfRefraction', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfSheen', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeEeveeSpecular', __kwargtrans__ ({poll: __call__ (object_eevee_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeSubsurfaceScattering', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfToon', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfTranslucent', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfTransparent', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumePrincipled', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeAbsorption', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeScatter', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeCoefficients', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_color_base =  __class__ ('NODE_MT_shader_node_color_base', [node_add_menu.NodeMenu], {
@@ -435,7 +643,7 @@ export var NODE_MT_shader_node_color_base =  __class__ ('NODE_MT_shader_node_col
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -448,24 +656,78 @@ export var NODE_MT_shader_node_color_base =  __class__ ('NODE_MT_shader_node_col
 		else {
 		}
 		var layout = self.layout;
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeBlackbody');
-		self.node_operator (layout, 'ShaderNodeBrightContrast');
-		self.node_operator (layout, 'ShaderNodeValToRGB');
-		self.node_operator (layout, 'ShaderNodeGamma');
-		self.node_operator (layout, 'ShaderNodeHueSaturation');
-		self.node_operator (layout, 'ShaderNodeInvert');
-		self.node_operator (layout, 'ShaderNodeLightFalloff');
-		self.color_mix_node (context, layout);
-		self.node_operator (layout, 'ShaderNodeRGBCurve');
-		self.node_operator (layout, 'ShaderNodeWavelength');
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeCombineColor');
-		self.node_operator (layout, 'ShaderNodeSeparateColor');
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeRGBToBW');
-		self.node_operator (layout, 'ShaderNodeShaderToRGB', __kwargtrans__ ({poll: object_eevee_shader_nodes_poll (context)}));
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBlackbody');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBrightContrast');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeValToRGB');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeGamma');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeHueSaturation');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeInvert');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeLightFalloff');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.color_mix_node, __accu0__, context, layout);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeRGBCurve');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeWavelength');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeCombineColor');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeSeparateColor');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeRGBToBW');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeShaderToRGB', __kwargtrans__ ({poll: __call__ (object_eevee_shader_nodes_poll, null, context)}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_texture_base =  __class__ ('NODE_MT_shader_node_texture_base', [node_add_menu.NodeMenu], {
@@ -474,7 +736,7 @@ export var NODE_MT_shader_node_texture_base =  __class__ ('NODE_MT_shader_node_t
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -487,20 +749,62 @@ export var NODE_MT_shader_node_texture_base =  __class__ ('NODE_MT_shader_node_t
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'ShaderNodeTexBrick');
-		self.node_operator (layout, 'ShaderNodeTexChecker');
-		self.node_operator (layout, 'ShaderNodeTexEnvironment');
-		self.node_operator (layout, 'ShaderNodeTexGabor');
-		self.node_operator (layout, 'ShaderNodeTexGradient');
-		self.node_operator (layout, 'ShaderNodeTexIES');
-		self.node_operator (layout, 'ShaderNodeTexImage');
-		self.node_operator (layout, 'ShaderNodeTexMagic');
-		self.node_operator (layout, 'ShaderNodeTexNoise');
-		self.node_operator (layout, 'ShaderNodeTexSky');
-		self.node_operator (layout, 'ShaderNodeTexVoronoi');
-		self.node_operator (layout, 'ShaderNodeTexWave');
-		self.node_operator (layout, 'ShaderNodeTexWhiteNoise');
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexBrick');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexChecker');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexEnvironment');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexGabor');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexGradient');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexIES');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexImage');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexMagic');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexNoise');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexSky');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexVoronoi');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexWave');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeTexWhiteNoise');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_vector_base =  __class__ ('NODE_MT_shader_node_vector_base', [node_add_menu.NodeMenu], {
@@ -510,7 +814,7 @@ export var NODE_MT_shader_node_vector_base =  __class__ ('NODE_MT_shader_node_ve
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -523,25 +827,70 @@ export var NODE_MT_shader_node_vector_base =  __class__ ('NODE_MT_shader_node_ve
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'ShaderNodeCombineXYZ');
-		var props = self.node_operator (layout, 'ShaderNodeMapRange');
-		var ops = props.settings.add ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeCombineXYZ');
+		}) ();
+		var props = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMapRange');
+		}) ();
+		var ops = (function () {
+			var __accu0__ = props.settings;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
 		ops.py_name = 'data_type';
 		ops.value = "'FLOAT_VECTOR'";
-		var props = self.node_operator (layout, 'ShaderNodeMix', __kwargtrans__ ({label: 'Mix Vector'}));
-		var ops = props.settings.add ();
+		var props = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMix', __kwargtrans__ ({label: 'Mix Vector'}));
+		}) ();
+		var ops = (function () {
+			var __accu0__ = props.settings;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
 		ops.py_name = 'data_type';
 		ops.value = "'VECTOR'";
-		self.node_operator (layout, 'ShaderNodeSeparateXYZ');
-		layout.separator ();
-		self.node_operator (layout, 'ShaderNodeMapping');
-		self.node_operator (layout, 'ShaderNodeNormal');
-		self.node_operator (layout, 'ShaderNodeRadialTiling');
-		self.node_operator (layout, 'ShaderNodeVectorCurve');
-		self.node_operator_with_searchable_enum (context, layout, 'ShaderNodeVectorMath', 'operation', __kwargtrans__ ({defaults_callback: node_add_menu.set_vector_math_node_defaults}));
-		self.node_operator (layout, 'ShaderNodeVectorRotate');
-		self.node_operator (layout, 'ShaderNodeVectorTransform');
-		self.draw_assets_for_catalog (layout, self.menu_path);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeSeparateXYZ');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMapping');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeNormal');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeRadialTiling');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVectorCurve');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_searchable_enum, __accu0__, context, layout, 'ShaderNodeVectorMath', 'operation', __kwargtrans__ ({defaults_callback: node_add_menu.set_vector_math_node_defaults}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVectorRotate');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVectorTransform');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.menu_path);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_math_base =  __class__ ('NODE_MT_shader_node_math_base', [node_add_menu.NodeMenu], {
@@ -551,7 +900,7 @@ export var NODE_MT_shader_node_math_base =  __class__ ('NODE_MT_shader_node_math
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -564,12 +913,30 @@ export var NODE_MT_shader_node_math_base =  __class__ ('NODE_MT_shader_node_math
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'ShaderNodeClamp');
-		self.node_operator (layout, 'ShaderNodeFloatCurve');
-		self.node_operator (layout, 'ShaderNodeMapRange');
-		self.node_operator_with_searchable_enum (context, layout, 'ShaderNodeMath', 'operation', __kwargtrans__ ({defaults_callback: node_add_menu.set_math_node_default_props}));
-		self.node_operator (layout, 'ShaderNodeMix');
-		self.draw_assets_for_catalog (layout, self.menu_path);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeClamp');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeFloatCurve');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMapRange');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator_with_searchable_enum, __accu0__, context, layout, 'ShaderNodeMath', 'operation', __kwargtrans__ ({defaults_callback: node_add_menu.set_math_node_default_props}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeMix');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.menu_path);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_displacement_base =  __class__ ('NODE_MT_shader_node_displacement_base', [node_add_menu.NodeMenu], {
@@ -578,7 +945,7 @@ export var NODE_MT_shader_node_displacement_base =  __class__ ('NODE_MT_shader_n
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -590,12 +957,12 @@ export var NODE_MT_shader_node_displacement_base =  __class__ ('NODE_MT_shader_n
 		}
 		else {
 		}
-		return __super__ (NODE_MT_shader_node_displacement_base, 'poll') (self, context) && !(line_style_shader_nodes_poll (context));
+		return __call__ (__call__ (__super__, null, NODE_MT_shader_node_displacement_base, 'poll'), null, self, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -608,11 +975,26 @@ export var NODE_MT_shader_node_displacement_base =  __class__ ('NODE_MT_shader_n
 		else {
 		}
 		var layout = self.layout;
-		self.node_operator (layout, 'ShaderNodeBump');
-		self.node_operator (layout, 'ShaderNodeDisplacement');
-		self.node_operator (layout, 'ShaderNodeNormalMap');
-		self.node_operator (layout, 'ShaderNodeVectorDisplacement');
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBump');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeDisplacement');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeNormalMap');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVectorDisplacement');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_utilities_base =  __class__ ('NODE_MT_shader_node_utilities_base', [node_add_menu.NodeMenu], {
@@ -621,7 +1003,7 @@ export var NODE_MT_shader_node_utilities_base =  __class__ ('NODE_MT_shader_node
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -634,24 +1016,72 @@ export var NODE_MT_shader_node_utilities_base =  __class__ ('NODE_MT_shader_node
 		else {
 		}
 		var layout = self.layout;
-		self.draw_menu (layout, 'Utilities/Math');
-		self.draw_menu (layout, 'Utilities/Vector');
-		layout.separator ();
-		self.repeat_zone (layout, __kwargtrans__ ({label: 'Repeat'}));
-		layout.separator ();
-		self.node_operator (layout, 'NodeImplicitConversion');
-		self.closure_zone (layout, __kwargtrans__ ({label: 'Closure'}));
-		self.node_operator (layout, 'NodeEvaluateClosure');
-		self.node_operator (layout, 'NodeCombineBundle');
-		self.node_operator (layout, 'NodeSeparateBundle');
-		self.node_operator (layout, 'NodeJoinBundle');
-		layout.separator ();
-		self.node_operator (layout, 'GeometryNodeMenuSwitch');
-		if (cycles_shader_nodes_poll (context)) {
-			layout.separator ();
-			self.node_operator (layout, 'ShaderNodeScript');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Utilities/Math');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Utilities/Vector');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.repeat_zone, __accu0__, layout, __kwargtrans__ ({label: 'Repeat'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeImplicitConversion');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.closure_zone, __accu0__, layout, __kwargtrans__ ({label: 'Closure'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeEvaluateClosure');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeCombineBundle');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeSeparateBundle');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'NodeJoinBundle');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'GeometryNodeMenuSwitch');
+		}) ();
+		if (__call__ (cycles_shader_nodes_poll, null, context)) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeScript');
+			}) ();
 		}
-		self.draw_assets_for_catalog (layout, self.bl_label);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_assets_for_catalog, __accu0__, layout, self.bl_label);
+		}) ();
 	});}
 });
 export var NODE_MT_shader_node_all_base =  __class__ ('NODE_MT_shader_node_all_base', [node_add_menu.NodeMenu], {
@@ -662,7 +1092,7 @@ export var NODE_MT_shader_node_all_base =  __class__ ('NODE_MT_shader_node_all_b
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -674,33 +1104,120 @@ export var NODE_MT_shader_node_all_base =  __class__ ('NODE_MT_shader_node_all_b
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
-		self.draw_menu (layout, 'Input');
-		self.draw_menu (layout, 'Output');
-		layout.separator ();
-		self.draw_menu (layout, 'Shader');
-		self.draw_menu (layout, 'Displacement');
-		layout.separator ();
-		self.draw_menu (layout, 'Color');
-		self.draw_menu (layout, 'Texture');
-		self.draw_menu (layout, 'Utilities');
-		layout.separator ();
-		self.draw_root_assets (layout);
-		layout.separator ();
-		self.draw_menu (layout, 'Group');
-		self.draw_menu (layout, 'Layout');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Input');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Output');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Shader');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Displacement');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Color');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Texture');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Utilities');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_root_assets, __accu0__, layout);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Group');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_menu, __accu0__, layout, 'Layout');
+		}) ();
 	});}
 });
 export var add_menus = dict ({'NODE_MT_category_shader_input': NODE_MT_shader_node_input_base, 'NODE_MT_category_shader_input_constant': NODE_MT_shader_node_input_constant_base, 'NODE_MT_category_shader_output': NODE_MT_shader_node_output_base, 'NODE_MT_category_shader_color': NODE_MT_shader_node_color_base, 'NODE_MT_category_shader_shader': NODE_MT_shader_node_shader_base, 'NODE_MT_category_shader_texture': NODE_MT_shader_node_texture_base, 'NODE_MT_category_shader_displacement': NODE_MT_shader_node_displacement_base, 'NODE_MT_category_shader_vector': NODE_MT_shader_node_vector_base, 'NODE_MT_category_shader_math': NODE_MT_shader_node_math_base, 'NODE_MT_category_shader_utilities': NODE_MT_shader_node_utilities_base, 'NODE_MT_shader_node_add_all': NODE_MT_shader_node_all_base});
-var add_menus = node_add_menu.generate_menus (add_menus, __kwargtrans__ ({template: node_add_menu.AddNodeMenu, base_dict: node_add_menu.add_base_pathing_dict}));
+var add_menus = (function () {
+	var __accu0__ = node_add_menu;
+	return __call__ (__accu0__.generate_menus, __accu0__, add_menus, __kwargtrans__ ({template: node_add_menu.AddNodeMenu, base_dict: node_add_menu.add_base_pathing_dict}));
+}) ();
 export var swap_menus = dict ({'NODE_MT_shader_node_input_swap': NODE_MT_shader_node_input_base, 'NODE_MT_shader_node_input_constant_swap': NODE_MT_shader_node_input_constant_base, 'NODE_MT_shader_node_output_swap': NODE_MT_shader_node_output_base, 'NODE_MT_shader_node_color_swap': NODE_MT_shader_node_color_base, 'NODE_MT_shader_node_shader_swap': NODE_MT_shader_node_shader_base, 'NODE_MT_shader_node_texture_swap': NODE_MT_shader_node_texture_base, 'NODE_MT_shader_node_displacement_swap': NODE_MT_shader_node_displacement_base, 'NODE_MT_shader_node_vector_swap': NODE_MT_shader_node_vector_base, 'NODE_MT_shader_node_math_swap': NODE_MT_shader_node_math_base, 'NODE_MT_shader_node_utilities_swap': NODE_MT_shader_node_utilities_base, 'NODE_MT_shader_node_swap_all': NODE_MT_shader_node_all_base});
-var swap_menus = node_add_menu.generate_menus (swap_menus, __kwargtrans__ ({template: node_add_menu.SwapNodeMenu, base_dict: node_add_menu.swap_base_pathing_dict}));
-export var classes = _joined (add_menus, swap_menus);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+var swap_menus = (function () {
+	var __accu0__ = node_add_menu;
+	return __call__ (__accu0__.generate_menus, __accu0__, swap_menus, __kwargtrans__ ({template: node_add_menu.SwapNodeMenu, base_dict: node_add_menu.swap_base_pathing_dict}));
+}) ();
+export var classes = __call__ (_joined, null, add_menus, swap_menus);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.node_add_menu_shader.map
 export {i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'line_style_shader_nodes_poll': line_style_shader_nodes_poll = value; break;
+		case 'world_shader_nodes_poll': world_shader_nodes_poll = value; break;
+		case 'object_shader_nodes_poll': object_shader_nodes_poll = value; break;
+		case 'object_material_shader_nodes_poll': object_material_shader_nodes_poll = value; break;
+		case 'object_light_shader_nodes_poll': object_light_shader_nodes_poll = value; break;
+		case 'cycles_shader_nodes_poll': cycles_shader_nodes_poll = value; break;
+		case 'eevee_shader_nodes_poll': eevee_shader_nodes_poll = value; break;
+		case 'object_not_eevee_shader_nodes_poll': object_not_eevee_shader_nodes_poll = value; break;
+		case 'object_eevee_shader_nodes_poll': object_eevee_shader_nodes_poll = value; break;
+		case 'NODE_MT_shader_node_input_base': NODE_MT_shader_node_input_base = value; break;
+		case 'NODE_MT_shader_node_input_constant_base': NODE_MT_shader_node_input_constant_base = value; break;
+		case 'NODE_MT_shader_node_output_base': NODE_MT_shader_node_output_base = value; break;
+		case 'NODE_MT_shader_node_shader_base': NODE_MT_shader_node_shader_base = value; break;
+		case 'NODE_MT_shader_node_color_base': NODE_MT_shader_node_color_base = value; break;
+		case 'NODE_MT_shader_node_texture_base': NODE_MT_shader_node_texture_base = value; break;
+		case 'NODE_MT_shader_node_vector_base': NODE_MT_shader_node_vector_base = value; break;
+		case 'NODE_MT_shader_node_math_base': NODE_MT_shader_node_math_base = value; break;
+		case 'NODE_MT_shader_node_displacement_base': NODE_MT_shader_node_displacement_base = value; break;
+		case 'NODE_MT_shader_node_utilities_base': NODE_MT_shader_node_utilities_base = value; break;
+		case 'NODE_MT_shader_node_all_base': NODE_MT_shader_node_all_base = value; break;
+		case 'add_menus': add_menus = value; break;
+		case 'swap_menus': swap_menus = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

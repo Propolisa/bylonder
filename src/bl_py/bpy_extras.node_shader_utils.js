@@ -8,7 +8,7 @@ var __name__ = 'bpy_extras.node_shader_utils';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -19,8 +19,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -28,7 +34,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -53,7 +59,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -72,7 +78,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,18 +91,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -107,8 +116,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -116,7 +131,7 @@ export var __all__ = tuple (['PrincipledBSDFWrapper']);
 export var _set_check = function (func) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -127,12 +142,12 @@ export var _set_check = function (func) {
 	}
 	else {
 	}
-	var wraps = _member ('functools', 'wraps');
-	var wrapper = wraps (func) (function (self) {
+	var wraps = __call__ (_member, null, 'functools', 'wraps');
+	var wrapper = __call__ (__call__ (wraps, null, func), null, function (self) {
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -150,14 +165,14 @@ export var _set_check = function (func) {
 		if (self.is_readonly) {
 			return ;
 		}
-		return func (self, ...args, __kwargtrans__ (_merged (kwargs)));
+		return __call__ (func, null, self, ...args, __kwargtrans__ (__call__ (_merged, null, kwargs)));
 	});
 	return wrapper;
 };
 export var rgb_to_rgba = function (rgb) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -168,12 +183,12 @@ export var rgb_to_rgba = function (rgb) {
 	}
 	else {
 	}
-	return list (rgb) + [1.0];
+	return __add__ (__call__ (list, null, rgb), [1.0]);
 };
 export var rgba_to_rgb = function (rgba) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -184,12 +199,12 @@ export var rgba_to_rgb = function (rgba) {
 	}
 	else {
 	}
-	return Color (tuple ([rgba [0], rgba [1], rgba [2]]));
+	return __call__ (Color, null, tuple ([__getitem__ (rgba, 0), __getitem__ (rgba, 1), __getitem__ (rgba, 2)]));
 };
 export var values_clamp = function (val, minv, maxv) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -202,23 +217,29 @@ export var values_clamp = function (val, minv, maxv) {
 	}
 	else {
 	}
-	if (hasattr (val, '__iter__')) {
-		return tuple ((function () {
+	if (__call__ (hasattr, null, val, '__iter__')) {
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var v of val) {
-				__accu0__.append (max (minv, min (maxv, v)));
+			var __iterable0__ = val;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var v = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (max, null, minv, __call__ (min, null, maxv, v)));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
 	}
 	else {
-		return max (minv, min (maxv, val));
+		return __call__ (max, null, minv, __call__ (min, null, maxv, val));
 	}
 };
 export var node_input_value_set = function (node, input, value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -234,7 +255,7 @@ export var node_input_value_set = function (node, input, value) {
 	if (node === null || !__in__ (input, node.inputs)) {
 		return ;
 	}
-	node.inputs [input].default_value = value;
+	__getitem__ (node.inputs, input).default_value = value;
 };
 export var node_input_value_get = function (node, input, default_value) {
 	if (typeof default_value == 'undefined' || (default_value != null && default_value.hasOwnProperty ("__kwargtrans__"))) {;
@@ -242,7 +263,7 @@ export var node_input_value_get = function (node, input, default_value) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -258,11 +279,61 @@ export var node_input_value_get = function (node, input, default_value) {
 	if (node === null || !__in__ (input, node.inputs)) {
 		return default_value;
 	}
-	return node.inputs [input].default_value;
+	return __getitem__ (node.inputs, input).default_value;
+};
+export var _ShaderWrapper_NODES_LIST = tuple (['node_out', '_node_texcoords']);
+export var _ShaderWrapper_node_texcoords_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self._node_texcoords === _ellipsis) {
+		var __iterable0__ = self.material.node_tree.nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var n = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (n.bl_idname, 'ShaderNodeTexCoord')) {
+				self._node_texcoords = n;
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: n}));
+				}) ();
+				break;
+			}
+		}
+		if (self._node_texcoords === _ellipsis) {
+			self._node_texcoords = null;
+		}
+	}
+	if (self._node_texcoords === null && !(self.is_readonly)) {
+		var tree = self.material.node_tree;
+		var nodes = tree.nodes;
+		var node_texcoords = (function () {
+			var __accu0__ = nodes;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeTexCoord'}));
+		}) ();
+		node_texcoords.label = 'Texture Coords';
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._grid_to_location, __accu0__, __neg__ (5), 1, __kwargtrans__ ({dst_node: node_texcoords}));
+		}) ();
+		self._node_texcoords = node_texcoords;
+	}
+	return self._node_texcoords;
 };
 export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 	__module__: __name__,
-	NODES_LIST: tuple (['node_out', '_node_texcoords']),
+	NODES_LIST: _ShaderWrapper_NODES_LIST,
+	__slots__: __call__ (_joined, null, ['is_readonly', 'material', '_textures', '_grid_locations'], _ShaderWrapper_NODES_LIST),
 	_col_size: 300,
 	_row_size: 300,
 	get _grid_to_location () {return __get__ (this, function (self, x, y, dst_node, ref_node) {
@@ -274,7 +345,7 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -290,31 +361,34 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 		else {
 		}
 		if (ref_node !== null) {
-			var nx = round (ref_node.location.x / self._col_size);
-			var ny = round (ref_node.location.y / self._row_size);
-			x += nx;
-			y += ny;
+			var nx = __call__ (round, null, __truediv__ (ref_node.location.x, self._col_size));
+			var ny = __call__ (round, null, __truediv__ (ref_node.location.y, self._row_size));
+			var x = __call__ (__iadd__, null, x, nx);
+			var y = __call__ (__iadd__, null, y, ny);
 		}
 		var loc = null;
 		while (true) {
-			var loc = tuple ([x * self._col_size, y * self._row_size]);
+			var loc = tuple ([__mul__ (x, self._col_size), __mul__ (y, self._row_size)]);
 			if (!__in__ (loc, self._grid_locations)) {
 				break;
 			}
-			var loc = tuple ([x * self._col_size, (y - 1) * self._row_size]);
+			var loc = tuple ([__mul__ (x, self._col_size), __mul__ (__sub__ (y, 1), self._row_size)]);
 			if (!__in__ (loc, self._grid_locations)) {
 				break;
 			}
-			var loc = tuple ([x * self._col_size, (y - 2) * self._row_size]);
+			var loc = tuple ([__mul__ (x, self._col_size), __mul__ (__sub__ (y, 2), self._row_size)]);
 			if (!__in__ (loc, self._grid_locations)) {
 				break;
 			}
-			x--;
+			var x = __call__ (__isub__, null, x, 1);
 		}
-		self._grid_locations.add (loc);
+		(function () {
+			var __accu0__ = self._grid_locations;
+			return __call__ (__accu0__.add, __accu0__, loc);
+		}) ();
 		if (dst_node !== null) {
 			dst_node.location = loc;
-			dst_node.width = min (dst_node.width, self._col_size - 20);
+			dst_node.width = __call__ (min, null, dst_node.width, __sub__ (self._col_size, 20));
 		}
 		return loc;
 	});},
@@ -324,7 +398,7 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -339,12 +413,15 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 		}
 		self.is_readonly = is_readonly;
 		self.material = material;
-		self.py_update ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.py_update, __accu0__);
+		}) ();
 	});},
 	get py_update () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -355,61 +432,730 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 		}
 		else {
 		}
-		for (var node of self.NODES_LIST) {
-			setattr (self, node, null);
+		var __iterable0__ = self.NODES_LIST;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
+			__call__ (setattr, null, self, node, null);
 		}
 		self._textures = dict ({});
-		self._grid_locations = set ();
+		self._grid_locations = __call__ (set, null);
 	});},
-	get node_texcoords_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self._node_texcoords === _ellipsis) {
-			for (var n of self.material.node_tree.nodes) {
-				if (n.bl_idname == 'ShaderNodeTexCoord') {
-					self._node_texcoords = n;
-					self._grid_to_location (0, 0, __kwargtrans__ ({ref_node: n}));
-					break;
-				}
-			}
-			if (self._node_texcoords === _ellipsis) {
-				self._node_texcoords = null;
-			}
-		}
-		if (self._node_texcoords === null && !(self.is_readonly)) {
-			var tree = self.material.node_tree;
-			var nodes = tree.nodes;
-			var node_texcoords = nodes.py_new (__kwargtrans__ ({py_metatype: 'ShaderNodeTexCoord'}));
-			node_texcoords.label = 'Texture Coords';
-			self._grid_to_location (-(5), 1, __kwargtrans__ ({dst_node: node_texcoords}));
-			self._node_texcoords = node_texcoords;
-		}
-		return self._node_texcoords;
-	});}
+	node_texcoords_get: _ShaderWrapper_node_texcoords_get
 });
-globalThis.Object.defineProperty (ShaderWrapper, 'node_texcoords', property.call (ShaderWrapper, ShaderWrapper.node_texcoords_get));
-ShaderWrapper.__slots__ = _joined (['is_readonly', 'material', '_textures', '_grid_locations'], ShaderWrapper.NODES_LIST);
+globalThis.Object.defineProperty (ShaderWrapper, 'node_texcoords', property.call (ShaderWrapper, ShaderWrapper._ShaderWrapper_node_texcoords_get));
+export var _PrincipledBSDFWrapper_NODES_LIST = tuple (['node_out', 'node_principled_bsdf', '_node_normalmap', '_node_texcoords']);
+export var _PrincipledBSDFWrapper_node_normalmap_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	var node_principled = self.node_principled_bsdf;
+	if (self._node_normalmap === _ellipsis) {
+		if (__getitem__ (node_principled.inputs, 'Normal').is_linked) {
+			var node_normalmap = __getitem__ (__getitem__ (node_principled.inputs, 'Normal').links, 0).from_node;
+			if (__eq__ (node_normalmap.bl_idname, 'ShaderNodeNormalMap')) {
+				self._node_normalmap = node_normalmap;
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: node_normalmap}));
+				}) ();
+			}
+		}
+		if (self._node_normalmap === _ellipsis) {
+			self._node_normalmap = null;
+		}
+	}
+	if (self._node_normalmap === null && !(self.is_readonly)) {
+		var tree = self.material.node_tree;
+		var nodes = tree.nodes;
+		var links = tree.links;
+		var node_normalmap = (function () {
+			var __accu0__ = nodes;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeNormalMap'}));
+		}) ();
+		node_normalmap.label = 'Normal/Map';
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._grid_to_location, __accu0__, __neg__ (1), __neg__ (2), __kwargtrans__ ({dst_node: node_normalmap, ref_node: node_principled}));
+		}) ();
+		(function () {
+			var __accu0__ = links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (node_normalmap.outputs, 'Normal'), __getitem__ (node_principled.inputs, 'Normal'));
+		}) ();
+		self._node_normalmap = node_normalmap;
+	}
+	return self._node_normalmap;
+};
+export var _PrincipledBSDFWrapper_base_color_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return self.material.diffuse_color;
+	}
+	return __call__ (rgba_to_rgb, null, __getitem__ (self.node_principled_bsdf.inputs, 'Base Color').default_value);
+};
+export var _PrincipledBSDFWrapper_base_color_set = __call__ (_set_check, null, function (self, color) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'color': var color = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var color = __call__ (values_clamp, null, color, 0.0, 1.0);
+	var color = __call__ (rgb_to_rgba, null, color);
+	self.material.diffuse_color = color;
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Base Color').default_value = color;
+	}
+});
+export var _PrincipledBSDFWrapper_base_color_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Base Color'), __kwargtrans__ ({grid_row_diff: 1}));
+};
+export var _PrincipledBSDFWrapper_specular_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return self.material.specular_intensity;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'Specular IOR Level').default_value;
+};
+export var _PrincipledBSDFWrapper_specular_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1.0);
+	self.material.specular_intensity = value;
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Specular IOR Level').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_specular_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Specular IOR Level'), __kwargtrans__ ({grid_row_diff: 0, colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_specular_tint_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return __call__ (Color, null, tuple ([0.0, 0.0, 0.0]));
+	}
+	return __call__ (rgba_to_rgb, null, __getitem__ (self.node_principled_bsdf.inputs, 'Specular Tint').default_value);
+};
+export var _PrincipledBSDFWrapper_specular_tint_set = __call__ (_set_check, null, function (self, color) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'color': var color = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var color = __call__ (values_clamp, null, color, 0.0, 1.0);
+	var color = __call__ (rgb_to_rgba, null, color);
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Specular Tint').default_value = color;
+	}
+});
+export var _PrincipledBSDFWrapper_specular_tint_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Specular Tint'), __kwargtrans__ ({grid_row_diff: 0}));
+};
+export var _PrincipledBSDFWrapper_roughness_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return self.material.roughness;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'Roughness').default_value;
+};
+export var _PrincipledBSDFWrapper_roughness_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1.0);
+	self.material.roughness = value;
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Roughness').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_roughness_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Roughness'), __kwargtrans__ ({grid_row_diff: 0, colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_metallic_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return self.material.metallic;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'Metallic').default_value;
+};
+export var _PrincipledBSDFWrapper_metallic_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1.0);
+	self.material.metallic = value;
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Metallic').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_metallic_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Metallic'), __kwargtrans__ ({grid_row_diff: 0, colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_ior_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return 1.0;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'IOR').default_value;
+};
+export var _PrincipledBSDFWrapper_ior_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1000.0);
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'IOR').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_ior_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'IOR'), __kwargtrans__ ({grid_row_diff: __neg__ (1), colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_transmission_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return 0.0;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'Transmission Weight').default_value;
+};
+export var _PrincipledBSDFWrapper_transmission_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1.0);
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Transmission Weight').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_transmission_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Transmission Weight'), __kwargtrans__ ({grid_row_diff: __neg__ (1), colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_alpha_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return 1.0;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'Alpha').default_value;
+};
+export var _PrincipledBSDFWrapper_alpha_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1.0);
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Alpha').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_alpha_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Alpha'), __kwargtrans__ ({use_alpha: true, grid_row_diff: __neg__ (1), colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_emission_color_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return __call__ (Color, null, tuple ([0.0, 0.0, 0.0]));
+	}
+	return __call__ (rgba_to_rgb, null, __getitem__ (self.node_principled_bsdf.inputs, 'Emission Color').default_value);
+};
+export var _PrincipledBSDFWrapper_emission_color_set = __call__ (_set_check, null, function (self, color) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'color': var color = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf !== null) {
+		var color = __call__ (values_clamp, null, color, 0.0, 1000000.0);
+		var color = __call__ (rgb_to_rgba, null, color);
+		__getitem__ (self.node_principled_bsdf.inputs, 'Emission Color').default_value = color;
+	}
+});
+export var _PrincipledBSDFWrapper_emission_color_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Emission Color'), __kwargtrans__ ({grid_row_diff: 1}));
+};
+export var _PrincipledBSDFWrapper_emission_strength_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return 1.0;
+	}
+	return __getitem__ (self.node_principled_bsdf.inputs, 'Emission Strength').default_value;
+};
+export var _PrincipledBSDFWrapper_emission_strength_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 1000000.0);
+	if (self.node_principled_bsdf !== null) {
+		__getitem__ (self.node_principled_bsdf.inputs, 'Emission Strength').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_emission_strength_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_principled_bsdf === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_principled_bsdf, __getitem__ (self.node_principled_bsdf.inputs, 'Emission Strength'), __kwargtrans__ ({grid_row_diff: __neg__ (1), colorspace_name: 'Non-Color'}));
+};
+export var _PrincipledBSDFWrapper_normalmap_strength_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_normalmap === null) {
+		return 0.0;
+	}
+	return __getitem__ (self.node_normalmap.inputs, 'Strength').default_value;
+};
+export var _PrincipledBSDFWrapper_normalmap_strength_set = __call__ (_set_check, null, function (self, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var value = __call__ (values_clamp, null, value, 0.0, 10.0);
+	if (self.node_normalmap !== null) {
+		__getitem__ (self.node_normalmap.inputs, 'Strength').default_value = value;
+	}
+});
+export var _PrincipledBSDFWrapper_normalmap_texture_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_normalmap === null) {
+		return null;
+	}
+	return __call__ (ShaderImageTextureWrapper, null, self, self.node_normalmap, __getitem__ (self.node_normalmap.inputs, 'Color'), __kwargtrans__ ({grid_row_diff: __neg__ (2), colorspace_is_data: true}));
+};
 export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderWrapper], {
 	__module__: __name__,
-	NODES_LIST: tuple (['node_out', 'node_principled_bsdf', '_node_normalmap', '_node_texcoords']),
+	NODES_LIST: _PrincipledBSDFWrapper_NODES_LIST,
+	__slots__: __call__ (_joined, null, ['is_readonly', 'material'], _PrincipledBSDFWrapper_NODES_LIST),
+	NODES_LIST: __add__ (ShaderWrapper.NODES_LIST, _PrincipledBSDFWrapper_NODES_LIST),
 	get __init__ () {return __get__ (this, function (self, material, is_readonly) {
 		if (typeof is_readonly == 'undefined' || (is_readonly != null && is_readonly.hasOwnProperty ("__kwargtrans__"))) {;
 			var is_readonly = true;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -422,12 +1168,12 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 		}
 		else {
 		}
-		__super__ (PrincipledBSDFWrapper, '__init__') (self, material, is_readonly);
+		__call__ (__call__ (__super__, null, PrincipledBSDFWrapper, '__init__'), null, self, material, is_readonly);
 	});},
 	get py_update () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -438,27 +1184,33 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 		}
 		else {
 		}
-		__super__ (PrincipledBSDFWrapper, 'update') (self);
+		__call__ (__call__ (__super__, null, PrincipledBSDFWrapper, 'update'), null, self);
 		var tree = self.material.node_tree;
 		var nodes = tree.nodes;
 		var links = tree.links;
 		var node_out = null;
 		var node_principled = null;
-		for (var n of nodes) {
-			if (n.bl_idname == 'ShaderNodeOutputMaterial' && n.inputs [0].is_linked) {
+		var __iterable0__ = nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var n = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (n.bl_idname, 'ShaderNodeOutputMaterial') && __getitem__ (n.inputs, 0).is_linked) {
 				var node_out = n;
-				var node_principled = n.inputs [0].links [0].from_node;
+				var node_principled = __getitem__ (__getitem__ (n.inputs, 0).links, 0).from_node;
 			}
-			else if (n.bl_idname == 'ShaderNodeBsdfPrincipled' && n.outputs [0].is_linked) {
+			else if (__eq__ (n.bl_idname, 'ShaderNodeBsdfPrincipled') && __getitem__ (n.outputs, 0).is_linked) {
 				var node_principled = n;
-				for (var lnk of n.outputs [0].links) {
+				var __iterable1__ = __getitem__ (n.outputs, 0).links;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var lnk = __getitem__ (__iterable1__, __index1__);
 					var node_out = lnk.to_node;
-					if (node_out.bl_idname == 'ShaderNodeOutputMaterial') {
+					if (__eq__ (node_out.bl_idname, 'ShaderNodeOutputMaterial')) {
 						break;
 					}
 				}
 			}
-			if (node_out !== null && node_principled !== null && node_out.bl_idname == 'ShaderNodeOutputMaterial' && node_principled.bl_idname == 'ShaderNodeBsdfPrincipled') {
+			if (node_out !== null && node_principled !== null && __eq__ (node_out.bl_idname, 'ShaderNodeOutputMaterial') && __eq__ (node_principled.bl_idname, 'ShaderNodeBsdfPrincipled')) {
 				break;
 			}
 			var __left0__ = null;
@@ -466,749 +1218,520 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 			var node_principled = __left0__;
 		}
 		if (node_out !== null) {
-			self._grid_to_location (0, 0, __kwargtrans__ ({ref_node: node_out}));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: node_out}));
+			}) ();
 		}
 		else if (!(self.is_readonly)) {
-			var node_out = nodes.py_new (__kwargtrans__ ({py_metatype: 'ShaderNodeOutputMaterial'}));
+			var node_out = (function () {
+				var __accu0__ = nodes;
+				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeOutputMaterial'}));
+			}) ();
 			node_out.label = 'Material Out';
 			node_out.target = 'ALL';
-			self._grid_to_location (1, 1, __kwargtrans__ ({dst_node: node_out}));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._grid_to_location, __accu0__, 1, 1, __kwargtrans__ ({dst_node: node_out}));
+			}) ();
 		}
 		self.node_out = node_out;
 		if (node_principled !== null) {
-			self._grid_to_location (0, 0, __kwargtrans__ ({ref_node: node_principled}));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: node_principled}));
+			}) ();
 		}
 		else if (!(self.is_readonly)) {
-			var node_principled = nodes.py_new (__kwargtrans__ ({py_metatype: 'ShaderNodeBsdfPrincipled'}));
+			var node_principled = (function () {
+				var __accu0__ = nodes;
+				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeBsdfPrincipled'}));
+			}) ();
 			node_principled.label = 'Principled BSDF';
-			self._grid_to_location (0, 1, __kwargtrans__ ({dst_node: node_principled}));
-			links.py_new (node_principled.outputs ['BSDF'], self.node_out.inputs ['Surface']);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._grid_to_location, __accu0__, 0, 1, __kwargtrans__ ({dst_node: node_principled}));
+			}) ();
+			(function () {
+				var __accu0__ = links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (node_principled.outputs, 'BSDF'), __getitem__ (self.node_out.inputs, 'Surface'));
+			}) ();
 		}
 		self.node_principled_bsdf = node_principled;
 		self._node_normalmap = _ellipsis;
 		self._node_texcoords = _ellipsis;
 	});},
-	get node_normalmap_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		var node_principled = self.node_principled_bsdf;
-		if (self._node_normalmap === _ellipsis) {
-			if (node_principled.inputs ['Normal'].is_linked) {
-				var node_normalmap = node_principled.inputs ['Normal'].links [0].from_node;
-				if (node_normalmap.bl_idname == 'ShaderNodeNormalMap') {
-					self._node_normalmap = node_normalmap;
-					self._grid_to_location (0, 0, __kwargtrans__ ({ref_node: node_normalmap}));
-				}
-			}
-			if (self._node_normalmap === _ellipsis) {
-				self._node_normalmap = null;
-			}
-		}
-		if (self._node_normalmap === null && !(self.is_readonly)) {
-			var tree = self.material.node_tree;
-			var nodes = tree.nodes;
-			var links = tree.links;
-			var node_normalmap = nodes.py_new (__kwargtrans__ ({py_metatype: 'ShaderNodeNormalMap'}));
-			node_normalmap.label = 'Normal/Map';
-			self._grid_to_location (-(1), -(2), __kwargtrans__ ({dst_node: node_normalmap, ref_node: node_principled}));
-			links.py_new (node_normalmap.outputs ['Normal'], node_principled.inputs ['Normal']);
-			self._node_normalmap = node_normalmap;
-		}
-		return self._node_normalmap;
-	});},
-	get base_color_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return self.material.diffuse_color;
-		}
-		return rgba_to_rgb (self.node_principled_bsdf.inputs ['Base Color'].default_value);
-	});},
-	get base_color_set () {return __get__ (this, _set_check (function (self, color) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'color': var color = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var color = values_clamp (color, 0.0, 1.0);
-		var color = rgb_to_rgba (color);
-		self.material.diffuse_color = color;
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Base Color'].default_value = color;
-		}
-	}));},
-	get base_color_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Base Color'], __kwargtrans__ ({grid_row_diff: 1}));
-	});},
-	get specular_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return self.material.specular_intensity;
-		}
-		return self.node_principled_bsdf.inputs ['Specular IOR Level'].default_value;
-	});},
-	get specular_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1.0);
-		self.material.specular_intensity = value;
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Specular IOR Level'].default_value = value;
-		}
-	}));},
-	get specular_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Specular IOR Level'], __kwargtrans__ ({grid_row_diff: 0, colorspace_name: 'Non-Color'}));
-	});},
-	get specular_tint_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return Color (tuple ([0.0, 0.0, 0.0]));
-		}
-		return rgba_to_rgb (self.node_principled_bsdf.inputs ['Specular Tint'].default_value);
-	});},
-	get specular_tint_set () {return __get__ (this, _set_check (function (self, color) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'color': var color = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var color = values_clamp (color, 0.0, 1.0);
-		var color = rgb_to_rgba (color);
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Specular Tint'].default_value = color;
-		}
-	}));},
-	get specular_tint_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Specular Tint'], __kwargtrans__ ({grid_row_diff: 0}));
-	});},
-	get roughness_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return self.material.roughness;
-		}
-		return self.node_principled_bsdf.inputs ['Roughness'].default_value;
-	});},
-	get roughness_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1.0);
-		self.material.roughness = value;
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Roughness'].default_value = value;
-		}
-	}));},
-	get roughness_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Roughness'], __kwargtrans__ ({grid_row_diff: 0, colorspace_name: 'Non-Color'}));
-	});},
-	get metallic_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return self.material.metallic;
-		}
-		return self.node_principled_bsdf.inputs ['Metallic'].default_value;
-	});},
-	get metallic_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1.0);
-		self.material.metallic = value;
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Metallic'].default_value = value;
-		}
-	}));},
-	get metallic_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Metallic'], __kwargtrans__ ({grid_row_diff: 0, colorspace_name: 'Non-Color'}));
-	});},
-	get ior_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return 1.0;
-		}
-		return self.node_principled_bsdf.inputs ['IOR'].default_value;
-	});},
-	get ior_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1000.0);
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['IOR'].default_value = value;
-		}
-	}));},
-	get ior_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['IOR'], __kwargtrans__ ({grid_row_diff: -(1), colorspace_name: 'Non-Color'}));
-	});},
-	get transmission_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return 0.0;
-		}
-		return self.node_principled_bsdf.inputs ['Transmission Weight'].default_value;
-	});},
-	get transmission_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1.0);
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Transmission Weight'].default_value = value;
-		}
-	}));},
-	get transmission_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Transmission Weight'], __kwargtrans__ ({grid_row_diff: -(1), colorspace_name: 'Non-Color'}));
-	});},
-	get alpha_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return 1.0;
-		}
-		return self.node_principled_bsdf.inputs ['Alpha'].default_value;
-	});},
-	get alpha_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1.0);
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Alpha'].default_value = value;
-		}
-	}));},
-	get alpha_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Alpha'], __kwargtrans__ ({use_alpha: true, grid_row_diff: -(1), colorspace_name: 'Non-Color'}));
-	});},
-	get emission_color_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return Color (tuple ([0.0, 0.0, 0.0]));
-		}
-		return rgba_to_rgb (self.node_principled_bsdf.inputs ['Emission Color'].default_value);
-	});},
-	get emission_color_set () {return __get__ (this, _set_check (function (self, color) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'color': var color = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf !== null) {
-			var color = values_clamp (color, 0.0, 1000000.0);
-			var color = rgb_to_rgba (color);
-			self.node_principled_bsdf.inputs ['Emission Color'].default_value = color;
-		}
-	}));},
-	get emission_color_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Emission Color'], __kwargtrans__ ({grid_row_diff: 1}));
-	});},
-	get emission_strength_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return 1.0;
-		}
-		return self.node_principled_bsdf.inputs ['Emission Strength'].default_value;
-	});},
-	get emission_strength_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 1000000.0);
-		if (self.node_principled_bsdf !== null) {
-			self.node_principled_bsdf.inputs ['Emission Strength'].default_value = value;
-		}
-	}));},
-	get emission_strength_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_principled_bsdf === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_principled_bsdf, self.node_principled_bsdf.inputs ['Emission Strength'], __kwargtrans__ ({grid_row_diff: -(1), colorspace_name: 'Non-Color'}));
-	});},
-	get normalmap_strength_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_normalmap === null) {
-			return 0.0;
-		}
-		return self.node_normalmap.inputs ['Strength'].default_value;
-	});},
-	get normalmap_strength_set () {return __get__ (this, _set_check (function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var value = values_clamp (value, 0.0, 10.0);
-		if (self.node_normalmap !== null) {
-			self.node_normalmap.inputs ['Strength'].default_value = value;
-		}
-	}));},
-	get normalmap_texture_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_normalmap === null) {
-			return null;
-		}
-		return ShaderImageTextureWrapper (self, self.node_normalmap, self.node_normalmap.inputs ['Color'], __kwargtrans__ ({grid_row_diff: -(2), colorspace_is_data: true}));
-	});}
+	node_normalmap_get: _PrincipledBSDFWrapper_node_normalmap_get,
+	base_color_get: _PrincipledBSDFWrapper_base_color_get,
+	base_color_set: _PrincipledBSDFWrapper_base_color_set,
+	base_color_texture_get: _PrincipledBSDFWrapper_base_color_texture_get,
+	specular_get: _PrincipledBSDFWrapper_specular_get,
+	specular_set: _PrincipledBSDFWrapper_specular_set,
+	specular_texture_get: _PrincipledBSDFWrapper_specular_texture_get,
+	specular_tint_get: _PrincipledBSDFWrapper_specular_tint_get,
+	specular_tint_set: _PrincipledBSDFWrapper_specular_tint_set,
+	specular_tint_texture_get: _PrincipledBSDFWrapper_specular_tint_texture_get,
+	roughness_get: _PrincipledBSDFWrapper_roughness_get,
+	roughness_set: _PrincipledBSDFWrapper_roughness_set,
+	roughness_texture_get: _PrincipledBSDFWrapper_roughness_texture_get,
+	metallic_get: _PrincipledBSDFWrapper_metallic_get,
+	metallic_set: _PrincipledBSDFWrapper_metallic_set,
+	metallic_texture_get: _PrincipledBSDFWrapper_metallic_texture_get,
+	ior_get: _PrincipledBSDFWrapper_ior_get,
+	ior_set: _PrincipledBSDFWrapper_ior_set,
+	ior_texture_get: _PrincipledBSDFWrapper_ior_texture_get,
+	transmission_get: _PrincipledBSDFWrapper_transmission_get,
+	transmission_set: _PrincipledBSDFWrapper_transmission_set,
+	transmission_texture_get: _PrincipledBSDFWrapper_transmission_texture_get,
+	alpha_get: _PrincipledBSDFWrapper_alpha_get,
+	alpha_set: _PrincipledBSDFWrapper_alpha_set,
+	alpha_texture_get: _PrincipledBSDFWrapper_alpha_texture_get,
+	emission_color_get: _PrincipledBSDFWrapper_emission_color_get,
+	emission_color_set: _PrincipledBSDFWrapper_emission_color_set,
+	emission_color_texture_get: _PrincipledBSDFWrapper_emission_color_texture_get,
+	emission_strength_get: _PrincipledBSDFWrapper_emission_strength_get,
+	emission_strength_set: _PrincipledBSDFWrapper_emission_strength_set,
+	emission_strength_texture_get: _PrincipledBSDFWrapper_emission_strength_texture_get,
+	normalmap_strength_get: _PrincipledBSDFWrapper_normalmap_strength_get,
+	normalmap_strength_set: _PrincipledBSDFWrapper_normalmap_strength_set,
+	normalmap_texture_get: _PrincipledBSDFWrapper_normalmap_texture_get
 });
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'node_normalmap', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.node_normalmap_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'base_color', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.base_color_get, PrincipledBSDFWrapper.base_color_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'base_color_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.base_color_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.specular_get, PrincipledBSDFWrapper.specular_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.specular_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular_tint', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.specular_tint_get, PrincipledBSDFWrapper.specular_tint_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular_tint_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.specular_tint_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'roughness', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.roughness_get, PrincipledBSDFWrapper.roughness_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'roughness_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.roughness_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'metallic', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.metallic_get, PrincipledBSDFWrapper.metallic_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'metallic_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.metallic_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'ior', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.ior_get, PrincipledBSDFWrapper.ior_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'ior_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.ior_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'transmission', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.transmission_get, PrincipledBSDFWrapper.transmission_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'transmission_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.transmission_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'alpha', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.alpha_get, PrincipledBSDFWrapper.alpha_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'alpha_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.alpha_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_color', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.emission_color_get, PrincipledBSDFWrapper.emission_color_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_color_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.emission_color_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_strength', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.emission_strength_get, PrincipledBSDFWrapper.emission_strength_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_strength_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.emission_strength_texture_get));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'normalmap_strength', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.normalmap_strength_get, PrincipledBSDFWrapper.normalmap_strength_set));
-globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'normalmap_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper.normalmap_texture_get));
-PrincipledBSDFWrapper.__slots__ = _joined (['is_readonly', 'material'], PrincipledBSDFWrapper.NODES_LIST);
-PrincipledBSDFWrapper.NODES_LIST = ShaderWrapper.NODES_LIST + PrincipledBSDFWrapper.NODES_LIST;
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'node_normalmap', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_node_normalmap_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'base_color', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_base_color_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_base_color_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'base_color_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_base_color_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_specular_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_specular_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_specular_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular_tint', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_specular_tint_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_specular_tint_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'specular_tint_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_specular_tint_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'roughness', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_roughness_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_roughness_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'roughness_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_roughness_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'metallic', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_metallic_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_metallic_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'metallic_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_metallic_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'ior', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_ior_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_ior_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'ior_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_ior_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'transmission', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_transmission_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_transmission_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'transmission_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_transmission_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'alpha', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_alpha_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_alpha_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'alpha_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_alpha_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_color', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_emission_color_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_emission_color_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_color_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_emission_color_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_strength', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_emission_strength_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_emission_strength_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'emission_strength_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_emission_strength_texture_get));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'normalmap_strength', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_normalmap_strength_get, PrincipledBSDFWrapper._PrincipledBSDFWrapper_normalmap_strength_set));
+globalThis.Object.defineProperty (PrincipledBSDFWrapper, 'normalmap_texture', property.call (PrincipledBSDFWrapper, PrincipledBSDFWrapper._PrincipledBSDFWrapper_normalmap_texture_get));
+export var _ShaderImageTextureWrapper_NODES_LIST = tuple (['node_dst', 'socket_dst', '_node_image', '_node_mapping']);
+export var _ShaderImageTextureWrapper_node_image_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self._node_image === _ellipsis) {
+		if (self.socket_dst.is_linked) {
+			var node_image = __getitem__ (self.socket_dst.links, 0).from_node;
+			if (__eq__ (node_image.bl_idname, 'ShaderNodeTexImage')) {
+				self._node_image = node_image;
+				(function () {
+					var __accu0__ = self.owner_shader;
+					return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: node_image}));
+				}) ();
+			}
+		}
+		if (self._node_image === _ellipsis) {
+			self._node_image = null;
+		}
+	}
+	if (self._node_image === null && !(self.is_readonly)) {
+		var tree = self.owner_shader.material.node_tree;
+		var node_image = (function () {
+			var __accu0__ = tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeTexImage'}));
+		}) ();
+		(function () {
+			var __accu0__ = self.owner_shader;
+			return __call__ (__accu0__._grid_to_location, __accu0__, __neg__ (1), __add__ (0, self.grid_row_diff), __kwargtrans__ ({dst_node: node_image, ref_node: self.node_dst}));
+		}) ();
+		(function () {
+			var __accu0__ = tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (node_image.outputs, (self.use_alpha ? 'Alpha' : 'Color')), self.socket_dst);
+		}) ();
+		if (self.use_alpha) {
+			self.owner_shader.material.surface_render_method = 'DITHERED';
+			self.owner_shader.material.use_transparency_overlap = false;
+		}
+		self._node_image = node_image;
+	}
+	return self._node_image;
+};
+export var _ShaderImageTextureWrapper_image_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (self.node_image !== null ? self.node_image.image : null);
+};
+export var _ShaderImageTextureWrapper_image_set = __call__ (_set_check, null, function (self, image) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'image': var image = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.colorspace_is_data !== _ellipsis) {
+		if (__ne__ (image.colorspace_settings.is_data, self.colorspace_is_data) && __ge__ (image.users, 1)) {
+			var image = (function () {
+				var __accu0__ = image;
+				return __call__ (__accu0__.py_copy, __accu0__);
+			}) ();
+		}
+		image.colorspace_settings.is_data = self.colorspace_is_data;
+	}
+	if (self.colorspace_name !== _ellipsis) {
+		if (__ne__ (image.colorspace_settings.py_name, self.colorspace_name) && __ge__ (image.users, 1)) {
+			var image = (function () {
+				var __accu0__ = image;
+				return __call__ (__accu0__.py_copy, __accu0__);
+			}) ();
+		}
+		image.colorspace_settings.py_name = self.colorspace_name;
+	}
+	if (self.use_alpha) {
+		var tree = self.owner_shader.material.node_tree;
+		if (__lt__ (image.channels, 4) || __in__ (image.depth, new set ([24, 8]))) {
+			(function () {
+				var __accu0__ = tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (self.node_image.outputs, 'Color'), self.socket_dst);
+			}) ();
+		}
+		else {
+			(function () {
+				var __accu0__ = tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (self.node_image.outputs, 'Alpha'), self.socket_dst);
+			}) ();
+		}
+	}
+	self.node_image.image = image;
+});
+export var _ShaderImageTextureWrapper_projection_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (self.node_image !== null ? self.node_image.projection : 'FLAT');
+};
+export var _ShaderImageTextureWrapper_projection_set = __call__ (_set_check, null, function (self, projection) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'projection': var projection = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	self.node_image.projection = projection;
+});
+export var _ShaderImageTextureWrapper_texcoords_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_image !== null) {
+		var socket = __getitem__ (((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.has_mapping_node, __accu0__);
+		}) () ? self.node_mapping : self.node_image).inputs, 'Vector');
+		if (socket.is_linked) {
+			return __getitem__ (socket.links, 0).from_socket.py_name;
+		}
+	}
+	return 'UV';
+};
+export var _ShaderImageTextureWrapper_texcoords_set = __call__ (_set_check, null, function (self, texcoords) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'texcoords': var texcoords = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (texcoords, 'UV') && !((function () {
+		var __accu0__ = self;
+		return __call__ (__accu0__.has_mapping_node, __accu0__);
+	}) ())) {
+		return ;
+	}
+	var tree = self.node_image.id_data;
+	var links = tree.links;
+	var node_dst = ((function () {
+		var __accu0__ = self;
+		return __call__ (__accu0__.has_mapping_node, __accu0__);
+	}) () ? self.node_mapping : self.node_image);
+	var socket_src = __getitem__ (self.owner_shader.node_texcoords.outputs, texcoords);
+	(function () {
+		var __accu0__ = links;
+		return __call__ (__accu0__.py_new, __accu0__, socket_src, __getitem__ (node_dst.inputs, 'Vector'));
+	}) ();
+});
+export var _ShaderImageTextureWrapper_extension_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (self.node_image !== null ? self.node_image.extension : 'REPEAT');
+};
+export var _ShaderImageTextureWrapper_extension_set = __call__ (_set_check, null, function (self, extension) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'extension': var extension = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	self.node_image.extension = extension;
+});
+export var _ShaderImageTextureWrapper_node_mapping_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self._node_mapping === _ellipsis) {
+		if (self.node_image === null) {
+			return null;
+		}
+		if (__getitem__ (self.node_image.inputs, 'Vector').is_linked) {
+			var node_mapping = __getitem__ (__getitem__ (self.node_image.inputs, 'Vector').links, 0).from_node;
+			if (__eq__ (node_mapping.bl_idname, 'ShaderNodeMapping')) {
+				self._node_mapping = node_mapping;
+				(function () {
+					var __accu0__ = self.owner_shader;
+					return __call__ (__accu0__._grid_to_location, __accu0__, 0, __add__ (0, self.grid_row_diff), __kwargtrans__ ({ref_node: node_mapping}));
+				}) ();
+			}
+		}
+		if (self._node_mapping === _ellipsis) {
+			self._node_mapping = null;
+		}
+	}
+	if (self._node_mapping === null && !(self.is_readonly)) {
+		var socket_dst = __getitem__ (self.node_image.inputs, 'Vector');
+		var socket_src = (socket_dst.is_linked ? __getitem__ (socket_dst.links, 0).from_socket : __getitem__ (self.owner_shader.node_texcoords.outputs, 'UV'));
+		var tree = self.owner_shader.material.node_tree;
+		var node_mapping = (function () {
+			var __accu0__ = tree.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeMapping'}));
+		}) ();
+		node_mapping.vector_type = 'TEXTURE';
+		(function () {
+			var __accu0__ = self.owner_shader;
+			return __call__ (__accu0__._grid_to_location, __accu0__, __neg__ (1), 0, __kwargtrans__ ({dst_node: node_mapping, ref_node: self.node_image}));
+		}) ();
+		(function () {
+			var __accu0__ = tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (node_mapping.outputs, 'Vector'), socket_dst);
+		}) ();
+		(function () {
+			var __accu0__ = tree.links;
+			return __call__ (__accu0__.py_new, __accu0__, socket_src, __getitem__ (node_mapping.inputs, 'Vector'));
+		}) ();
+		self._node_mapping = node_mapping;
+	}
+	return self._node_mapping;
+};
+export var _ShaderImageTextureWrapper_translation_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return __call__ (node_input_value_get, null, self.node_mapping, 'Location', __call__ (Vector, null, tuple ([0.0, 0.0, 0.0])));
+};
+export var _ShaderImageTextureWrapper_translation_set = __call__ (_set_check, null, function (self, translation) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'translation': var translation = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	__call__ (node_input_value_set, null, self.node_mapping, 'Location', translation);
+});
+export var _ShaderImageTextureWrapper_rotation_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_mapping === null) {
+		return __call__ (Vector, null, tuple ([0.0, 0.0, 0.0]));
+	}
+	return __getitem__ (self.node_mapping.inputs, 'Rotation').default_value;
+};
+export var _ShaderImageTextureWrapper_rotation_set = __call__ (_set_check, null, function (self, rotation) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'rotation': var rotation = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	__getitem__ (self.node_mapping.inputs, 'Rotation').default_value = rotation;
+});
+export var _ShaderImageTextureWrapper_scale_get = function (self) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (self.node_mapping === null) {
+		return __call__ (Vector, null, tuple ([1.0, 1.0, 1.0]));
+	}
+	return __getitem__ (self.node_mapping.inputs, 'Scale').default_value;
+};
+export var _ShaderImageTextureWrapper_scale_set = __call__ (_set_check, null, function (self, scale) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'scale': var scale = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	__getitem__ (self.node_mapping.inputs, 'Scale').default_value = scale;
+});
 export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', [object], {
 	__module__: __name__,
-	NODES_LIST: tuple (['node_dst', 'socket_dst', '_node_image', '_node_mapping']),
+	NODES_LIST: _ShaderImageTextureWrapper_NODES_LIST,
+	__slots__: __call__ (_joined, null, ['owner_shader', 'is_readonly', 'grid_row_diff', 'use_alpha', 'colorspace_is_data', 'colorspace_name'], _ShaderImageTextureWrapper_NODES_LIST),
 	get __new__ () {return __get__ (this, function (cls, owner_shader, node_dst, socket_dst) {
 		var _kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1226,11 +1749,14 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		else {
 			var _args = tuple ();
 		}
-		var instance = owner_shader._textures.py_get (tuple ([node_dst, socket_dst]), null);
+		var instance = (function () {
+			var __accu0__ = owner_shader._textures;
+			return __call__ (__accu0__.py_get, __accu0__, tuple ([node_dst, socket_dst]), null);
+		}) ();
 		if (instance !== null) {
 			return instance;
 		}
-		var instance = __super__ (ShaderImageTextureWrapper, '__new__') (self, cls);
+		var instance = __call__ (__call__ (__super__, null, ShaderImageTextureWrapper, '__new__'), null, self, cls);
 		owner_shader._textures.__setitem__ ([node_dst, socket_dst], instance);
 		return instance;
 	});},
@@ -1249,7 +1775,7 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1278,16 +1804,16 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		self._node_image = _ellipsis;
 		self._node_mapping = _ellipsis;
 		if (socket_dst.is_linked) {
-			var from_node = socket_dst.links [0].from_node;
-			if (from_node.bl_idname == 'ShaderNodeTexImage') {
+			var from_node = __getitem__ (socket_dst.links, 0).from_node;
+			if (__eq__ (from_node.bl_idname, 'ShaderNodeTexImage')) {
 				self._node_image = from_node;
 			}
 		}
 		if (self.node_image !== null) {
-			var socket_dst = self.node_image.inputs ['Vector'];
+			var socket_dst = __getitem__ (self.node_image.inputs, 'Vector');
 			if (socket_dst.is_linked) {
-				var from_node = socket_dst.links [0].from_node;
-				if (from_node.bl_idname == 'ShaderNodeMapping') {
+				var from_node = __getitem__ (socket_dst.links, 0).from_node;
+				if (__eq__ (from_node.bl_idname, 'ShaderNodeMapping')) {
 					self._node_mapping = from_node;
 				}
 			}
@@ -1296,7 +1822,7 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 	get copy_from () {return __get__ (this, function (self, tex) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1314,14 +1840,17 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 			self.image = tex.image;
 			self.projection = tex.projection;
 			self.texcoords = tex.texcoords;
-			self.copy_mapping_from (tex);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.copy_mapping_from, __accu0__, tex);
+			}) ();
 		}
 		tex.is_readonly = is_readonly_back;
 	});},
 	get copy_mapping_from () {return __get__ (this, function (self, tex) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1336,19 +1865,28 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		var is_readonly_back = tex.is_readonly;
 		tex.is_readonly = true;
 		if (tex.node_mapping === null) {
-			if (self.has_mapping_node ()) {
+			if ((function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.has_mapping_node, __accu0__);
+			}) ()) {
 				var __left0__ = null;
 				var socket_dst = __left0__;
 				var socket_src = __left0__;
-				if (self.node_mapping.inputs ['Vector'].is_linked) {
-					var socket_dst = self.node_image.inputs ['Vector'];
-					var socket_src = self.node_mapping.inputs ['Vector'].links [0].from_socket;
+				if (__getitem__ (self.node_mapping.inputs, 'Vector').is_linked) {
+					var socket_dst = __getitem__ (self.node_image.inputs, 'Vector');
+					var socket_src = __getitem__ (__getitem__ (self.node_mapping.inputs, 'Vector').links, 0).from_socket;
 				}
 				var tree = self.owner_shader.material.node_tree;
-				tree.nodes.remove (self.node_mapping);
+				(function () {
+					var __accu0__ = tree.nodes;
+					return __call__ (__accu0__.remove, __accu0__, self.node_mapping);
+				}) ();
 				self._node_mapping = null;
 				if (socket_src !== null) {
-					tree.links.py_new (socket_src, socket_dst);
+					(function () {
+						var __accu0__ = tree.links;
+						return __call__ (__accu0__.py_new, __accu0__, socket_src, socket_dst);
+					}) ();
 				}
 			}
 		}
@@ -1359,215 +1897,19 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		}
 		tex.is_readonly = is_readonly_back;
 	});},
-	get node_image_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self._node_image === _ellipsis) {
-			if (self.socket_dst.is_linked) {
-				var node_image = self.socket_dst.links [0].from_node;
-				if (node_image.bl_idname == 'ShaderNodeTexImage') {
-					self._node_image = node_image;
-					self.owner_shader._grid_to_location (0, 0, __kwargtrans__ ({ref_node: node_image}));
-				}
-			}
-			if (self._node_image === _ellipsis) {
-				self._node_image = null;
-			}
-		}
-		if (self._node_image === null && !(self.is_readonly)) {
-			var tree = self.owner_shader.material.node_tree;
-			var node_image = tree.nodes.py_new (__kwargtrans__ ({py_metatype: 'ShaderNodeTexImage'}));
-			self.owner_shader._grid_to_location (-(1), 0 + self.grid_row_diff, __kwargtrans__ ({dst_node: node_image, ref_node: self.node_dst}));
-			tree.links.py_new (node_image.outputs [(self.use_alpha ? 'Alpha' : 'Color')], self.socket_dst);
-			if (self.use_alpha) {
-				self.owner_shader.material.surface_render_method = 'DITHERED';
-				self.owner_shader.material.use_transparency_overlap = false;
-			}
-			self._node_image = node_image;
-		}
-		return self._node_image;
-	});},
-	get image_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (self.node_image !== null ? self.node_image.image : null);
-	});},
-	get image_set () {return __get__ (this, _set_check (function (self, image) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'image': var image = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.colorspace_is_data !== _ellipsis) {
-			if (image.colorspace_settings.is_data != self.colorspace_is_data && image.users >= 1) {
-				var image = image.py_copy ();
-			}
-			image.colorspace_settings.is_data = self.colorspace_is_data;
-		}
-		if (self.colorspace_name !== _ellipsis) {
-			if (image.colorspace_settings.py_name != self.colorspace_name && image.users >= 1) {
-				var image = image.py_copy ();
-			}
-			image.colorspace_settings.py_name = self.colorspace_name;
-		}
-		if (self.use_alpha) {
-			var tree = self.owner_shader.material.node_tree;
-			if (image.channels < 4 || __in__ (image.depth, new set ([24, 8]))) {
-				tree.links.py_new (self.node_image.outputs ['Color'], self.socket_dst);
-			}
-			else {
-				tree.links.py_new (self.node_image.outputs ['Alpha'], self.socket_dst);
-			}
-		}
-		self.node_image.image = image;
-	}));},
-	get projection_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (self.node_image !== null ? self.node_image.projection : 'FLAT');
-	});},
-	get projection_set () {return __get__ (this, _set_check (function (self, projection) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'projection': var projection = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self.node_image.projection = projection;
-	}));},
-	get texcoords_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_image !== null) {
-			var socket = (self.has_mapping_node () ? self.node_mapping : self.node_image).inputs ['Vector'];
-			if (socket.is_linked) {
-				return socket.links [0].from_socket.py_name;
-			}
-		}
-		return 'UV';
-	});},
-	get texcoords_set () {return __get__ (this, _set_check (function (self, texcoords) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'texcoords': var texcoords = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (texcoords == 'UV' && !(self.has_mapping_node ())) {
-			return ;
-		}
-		var tree = self.node_image.id_data;
-		var links = tree.links;
-		var node_dst = (self.has_mapping_node () ? self.node_mapping : self.node_image);
-		var socket_src = self.owner_shader.node_texcoords.outputs [texcoords];
-		links.py_new (socket_src, node_dst.inputs ['Vector']);
-	}));},
-	get extension_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (self.node_image !== null ? self.node_image.extension : 'REPEAT');
-	});},
-	get extension_set () {return __get__ (this, _set_check (function (self, extension) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'extension': var extension = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self.node_image.extension = extension;
-	}));},
+	node_image_get: _ShaderImageTextureWrapper_node_image_get,
+	image_get: _ShaderImageTextureWrapper_image_get,
+	image_set: _ShaderImageTextureWrapper_image_set,
+	projection_get: _ShaderImageTextureWrapper_projection_get,
+	projection_set: _ShaderImageTextureWrapper_projection_set,
+	texcoords_get: _ShaderImageTextureWrapper_texcoords_get,
+	texcoords_set: _ShaderImageTextureWrapper_texcoords_set,
+	extension_get: _ShaderImageTextureWrapper_extension_get,
+	extension_set: _ShaderImageTextureWrapper_extension_set,
 	get has_mapping_node () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1580,164 +1922,99 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		}
 		return !__in__ (self._node_mapping, new set ([null, _ellipsis]));
 	});},
-	get node_mapping_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self._node_mapping === _ellipsis) {
-			if (self.node_image === null) {
-				return null;
-			}
-			if (self.node_image.inputs ['Vector'].is_linked) {
-				var node_mapping = self.node_image.inputs ['Vector'].links [0].from_node;
-				if (node_mapping.bl_idname == 'ShaderNodeMapping') {
-					self._node_mapping = node_mapping;
-					self.owner_shader._grid_to_location (0, 0 + self.grid_row_diff, __kwargtrans__ ({ref_node: node_mapping}));
-				}
-			}
-			if (self._node_mapping === _ellipsis) {
-				self._node_mapping = null;
-			}
-		}
-		if (self._node_mapping === null && !(self.is_readonly)) {
-			var socket_dst = self.node_image.inputs ['Vector'];
-			var socket_src = (socket_dst.is_linked ? socket_dst.links [0].from_socket : self.owner_shader.node_texcoords.outputs ['UV']);
-			var tree = self.owner_shader.material.node_tree;
-			var node_mapping = tree.nodes.py_new (__kwargtrans__ ({py_metatype: 'ShaderNodeMapping'}));
-			node_mapping.vector_type = 'TEXTURE';
-			self.owner_shader._grid_to_location (-(1), 0, __kwargtrans__ ({dst_node: node_mapping, ref_node: self.node_image}));
-			tree.links.py_new (node_mapping.outputs ['Vector'], socket_dst);
-			tree.links.py_new (socket_src, node_mapping.inputs ['Vector']);
-			self._node_mapping = node_mapping;
-		}
-		return self._node_mapping;
-	});},
-	get translation_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return node_input_value_get (self.node_mapping, 'Location', Vector (tuple ([0.0, 0.0, 0.0])));
-	});},
-	get translation_set () {return __get__ (this, _set_check (function (self, translation) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'translation': var translation = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		node_input_value_set (self.node_mapping, 'Location', translation);
-	}));},
-	get rotation_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_mapping === null) {
-			return Vector (tuple ([0.0, 0.0, 0.0]));
-		}
-		return self.node_mapping.inputs ['Rotation'].default_value;
-	});},
-	get rotation_set () {return __get__ (this, _set_check (function (self, rotation) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'rotation': var rotation = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self.node_mapping.inputs ['Rotation'].default_value = rotation;
-	}));},
-	get scale_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self.node_mapping === null) {
-			return Vector (tuple ([1.0, 1.0, 1.0]));
-		}
-		return self.node_mapping.inputs ['Scale'].default_value;
-	});},
-	get scale_set () {return __get__ (this, _set_check (function (self, scale) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'scale': var scale = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self.node_mapping.inputs ['Scale'].default_value = scale;
-	}));}
+	node_mapping_get: _ShaderImageTextureWrapper_node_mapping_get,
+	translation_get: _ShaderImageTextureWrapper_translation_get,
+	translation_set: _ShaderImageTextureWrapper_translation_set,
+	rotation_get: _ShaderImageTextureWrapper_rotation_get,
+	rotation_set: _ShaderImageTextureWrapper_rotation_set,
+	scale_get: _ShaderImageTextureWrapper_scale_get,
+	scale_set: _ShaderImageTextureWrapper_scale_set
 });
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'node_image', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.node_image_get));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'image', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.image_get, ShaderImageTextureWrapper.image_set));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'projection', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.projection_get, ShaderImageTextureWrapper.projection_set));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'texcoords', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.texcoords_get, ShaderImageTextureWrapper.texcoords_set));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'extension', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.extension_get, ShaderImageTextureWrapper.extension_set));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'node_mapping', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.node_mapping_get));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'translation', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.translation_get, ShaderImageTextureWrapper.translation_set));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'rotation', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.rotation_get, ShaderImageTextureWrapper.rotation_set));
-globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'scale', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper.scale_get, ShaderImageTextureWrapper.scale_set));
-ShaderImageTextureWrapper.__slots__ = _joined (['owner_shader', 'is_readonly', 'grid_row_diff', 'use_alpha', 'colorspace_is_data', 'colorspace_name'], ShaderImageTextureWrapper.NODES_LIST);
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'node_image', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_node_image_get));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'image', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_image_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_image_set));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'projection', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_projection_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_projection_set));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'texcoords', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_texcoords_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_texcoords_set));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'extension', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_extension_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_extension_set));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'node_mapping', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_node_mapping_get));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'translation', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_translation_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_translation_set));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'rotation', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_rotation_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_rotation_set));
+globalThis.Object.defineProperty (ShaderImageTextureWrapper, 'scale', property.call (ShaderImageTextureWrapper, ShaderImageTextureWrapper._ShaderImageTextureWrapper_scale_get, ShaderImageTextureWrapper._ShaderImageTextureWrapper_scale_set));
 
 //# sourceMappingURL=bpy_extras.node_shader_utils.map
 export {Color, Vector, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '__all__': __all__ = value; break;
+		case '_set_check': _set_check = value; break;
+		case 'rgb_to_rgba': rgb_to_rgba = value; break;
+		case 'rgba_to_rgb': rgba_to_rgb = value; break;
+		case 'values_clamp': values_clamp = value; break;
+		case 'node_input_value_set': node_input_value_set = value; break;
+		case 'node_input_value_get': node_input_value_get = value; break;
+		case '_ShaderWrapper_NODES_LIST': _ShaderWrapper_NODES_LIST = value; break;
+		case '_ShaderWrapper_node_texcoords_get': _ShaderWrapper_node_texcoords_get = value; break;
+		case 'ShaderWrapper': ShaderWrapper = value; break;
+		case '_PrincipledBSDFWrapper_NODES_LIST': _PrincipledBSDFWrapper_NODES_LIST = value; break;
+		case '_PrincipledBSDFWrapper_node_normalmap_get': _PrincipledBSDFWrapper_node_normalmap_get = value; break;
+		case '_PrincipledBSDFWrapper_base_color_get': _PrincipledBSDFWrapper_base_color_get = value; break;
+		case '_PrincipledBSDFWrapper_base_color_set': _PrincipledBSDFWrapper_base_color_set = value; break;
+		case '_PrincipledBSDFWrapper_base_color_texture_get': _PrincipledBSDFWrapper_base_color_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_specular_get': _PrincipledBSDFWrapper_specular_get = value; break;
+		case '_PrincipledBSDFWrapper_specular_set': _PrincipledBSDFWrapper_specular_set = value; break;
+		case '_PrincipledBSDFWrapper_specular_texture_get': _PrincipledBSDFWrapper_specular_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_specular_tint_get': _PrincipledBSDFWrapper_specular_tint_get = value; break;
+		case '_PrincipledBSDFWrapper_specular_tint_set': _PrincipledBSDFWrapper_specular_tint_set = value; break;
+		case '_PrincipledBSDFWrapper_specular_tint_texture_get': _PrincipledBSDFWrapper_specular_tint_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_roughness_get': _PrincipledBSDFWrapper_roughness_get = value; break;
+		case '_PrincipledBSDFWrapper_roughness_set': _PrincipledBSDFWrapper_roughness_set = value; break;
+		case '_PrincipledBSDFWrapper_roughness_texture_get': _PrincipledBSDFWrapper_roughness_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_metallic_get': _PrincipledBSDFWrapper_metallic_get = value; break;
+		case '_PrincipledBSDFWrapper_metallic_set': _PrincipledBSDFWrapper_metallic_set = value; break;
+		case '_PrincipledBSDFWrapper_metallic_texture_get': _PrincipledBSDFWrapper_metallic_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_ior_get': _PrincipledBSDFWrapper_ior_get = value; break;
+		case '_PrincipledBSDFWrapper_ior_set': _PrincipledBSDFWrapper_ior_set = value; break;
+		case '_PrincipledBSDFWrapper_ior_texture_get': _PrincipledBSDFWrapper_ior_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_transmission_get': _PrincipledBSDFWrapper_transmission_get = value; break;
+		case '_PrincipledBSDFWrapper_transmission_set': _PrincipledBSDFWrapper_transmission_set = value; break;
+		case '_PrincipledBSDFWrapper_transmission_texture_get': _PrincipledBSDFWrapper_transmission_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_alpha_get': _PrincipledBSDFWrapper_alpha_get = value; break;
+		case '_PrincipledBSDFWrapper_alpha_set': _PrincipledBSDFWrapper_alpha_set = value; break;
+		case '_PrincipledBSDFWrapper_alpha_texture_get': _PrincipledBSDFWrapper_alpha_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_emission_color_get': _PrincipledBSDFWrapper_emission_color_get = value; break;
+		case '_PrincipledBSDFWrapper_emission_color_set': _PrincipledBSDFWrapper_emission_color_set = value; break;
+		case '_PrincipledBSDFWrapper_emission_color_texture_get': _PrincipledBSDFWrapper_emission_color_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_emission_strength_get': _PrincipledBSDFWrapper_emission_strength_get = value; break;
+		case '_PrincipledBSDFWrapper_emission_strength_set': _PrincipledBSDFWrapper_emission_strength_set = value; break;
+		case '_PrincipledBSDFWrapper_emission_strength_texture_get': _PrincipledBSDFWrapper_emission_strength_texture_get = value; break;
+		case '_PrincipledBSDFWrapper_normalmap_strength_get': _PrincipledBSDFWrapper_normalmap_strength_get = value; break;
+		case '_PrincipledBSDFWrapper_normalmap_strength_set': _PrincipledBSDFWrapper_normalmap_strength_set = value; break;
+		case '_PrincipledBSDFWrapper_normalmap_texture_get': _PrincipledBSDFWrapper_normalmap_texture_get = value; break;
+		case 'PrincipledBSDFWrapper': PrincipledBSDFWrapper = value; break;
+		case '_ShaderImageTextureWrapper_NODES_LIST': _ShaderImageTextureWrapper_NODES_LIST = value; break;
+		case '_ShaderImageTextureWrapper_node_image_get': _ShaderImageTextureWrapper_node_image_get = value; break;
+		case '_ShaderImageTextureWrapper_image_get': _ShaderImageTextureWrapper_image_get = value; break;
+		case '_ShaderImageTextureWrapper_image_set': _ShaderImageTextureWrapper_image_set = value; break;
+		case '_ShaderImageTextureWrapper_projection_get': _ShaderImageTextureWrapper_projection_get = value; break;
+		case '_ShaderImageTextureWrapper_projection_set': _ShaderImageTextureWrapper_projection_set = value; break;
+		case '_ShaderImageTextureWrapper_texcoords_get': _ShaderImageTextureWrapper_texcoords_get = value; break;
+		case '_ShaderImageTextureWrapper_texcoords_set': _ShaderImageTextureWrapper_texcoords_set = value; break;
+		case '_ShaderImageTextureWrapper_extension_get': _ShaderImageTextureWrapper_extension_get = value; break;
+		case '_ShaderImageTextureWrapper_extension_set': _ShaderImageTextureWrapper_extension_set = value; break;
+		case '_ShaderImageTextureWrapper_node_mapping_get': _ShaderImageTextureWrapper_node_mapping_get = value; break;
+		case '_ShaderImageTextureWrapper_translation_get': _ShaderImageTextureWrapper_translation_get = value; break;
+		case '_ShaderImageTextureWrapper_translation_set': _ShaderImageTextureWrapper_translation_set = value; break;
+		case '_ShaderImageTextureWrapper_rotation_get': _ShaderImageTextureWrapper_rotation_get = value; break;
+		case '_ShaderImageTextureWrapper_rotation_set': _ShaderImageTextureWrapper_rotation_set = value; break;
+		case '_ShaderImageTextureWrapper_scale_get': _ShaderImageTextureWrapper_scale_get = value; break;
+		case '_ShaderImageTextureWrapper_scale_set': _ShaderImageTextureWrapper_scale_set = value; break;
+		case 'ShaderImageTextureWrapper': ShaderImageTextureWrapper = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

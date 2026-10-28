@@ -9,7 +9,7 @@ export var SpaceAssetInfo =  __class__ ('SpaceAssetInfo', [object], {
 	get is_asset_browser () {return __getcm__ (this, function (cls, space_data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -21,12 +21,12 @@ export var SpaceAssetInfo =  __class__ ('SpaceAssetInfo', [object], {
 		}
 		else {
 		}
-		return space_data && space_data.py_metatype == 'FILE_BROWSER' && space_data.browse_mode == 'ASSETS';
+		return space_data && __eq__ (space_data.py_metatype, 'FILE_BROWSER') && __eq__ (space_data.browse_mode, 'ASSETS');
 	});},
 	get is_asset_browser_poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -38,7 +38,10 @@ export var SpaceAssetInfo =  __class__ ('SpaceAssetInfo', [object], {
 		}
 		else {
 		}
-		return cls.is_asset_browser (context.space_data);
+		return (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.is_asset_browser, __accu0__, context.space_data);
+		}) ();
 	});}
 });
 export var AssetBrowserPanel =  __class__ ('AssetBrowserPanel', [object], {
@@ -47,7 +50,7 @@ export var AssetBrowserPanel =  __class__ ('AssetBrowserPanel', [object], {
 	get asset_browser_panel_poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -59,12 +62,15 @@ export var AssetBrowserPanel =  __class__ ('AssetBrowserPanel', [object], {
 		}
 		else {
 		}
-		return SpaceAssetInfo.is_asset_browser_poll (context);
+		return (function () {
+			var __accu0__ = SpaceAssetInfo;
+			return __call__ (__accu0__.is_asset_browser_poll, __accu0__, context);
+		}) ();
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -76,7 +82,10 @@ export var AssetBrowserPanel =  __class__ ('AssetBrowserPanel', [object], {
 		}
 		else {
 		}
-		return cls.asset_browser_panel_poll (context);
+		return (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.asset_browser_panel_poll, __accu0__, context);
+		}) ();
 	});}
 });
 export var AssetMetaDataPanel =  __class__ ('AssetMetaDataPanel', [object], {
@@ -86,7 +95,7 @@ export var AssetMetaDataPanel =  __class__ ('AssetMetaDataPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -99,8 +108,20 @@ export var AssetMetaDataPanel =  __class__ ('AssetMetaDataPanel', [object], {
 		else {
 		}
 		var active_file = context.active_file;
-		return SpaceAssetInfo.is_asset_browser_poll (context) && active_file && active_file.asset_data;
+		return (function () {
+			var __accu0__ = SpaceAssetInfo;
+			return __call__ (__accu0__.is_asset_browser_poll, __accu0__, context);
+		}) () && active_file && active_file.asset_data;
 	});}
 });
 
 //# sourceMappingURL=bpy_extras.asset_utils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'SpaceAssetInfo': SpaceAssetInfo = value; break;
+		case 'AssetBrowserPanel': AssetBrowserPanel = value; break;
+		case 'AssetMetaDataPanel': AssetMetaDataPanel = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

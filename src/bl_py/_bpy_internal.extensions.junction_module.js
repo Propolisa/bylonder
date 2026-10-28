@@ -6,3 +6,9 @@ var __name__ = '_bpy_internal.extensions.junction_module';
 export var JunctionModuleHandle = null;
 
 //# sourceMappingURL=_bpy_internal.extensions.junction_module.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'JunctionModuleHandle': JunctionModuleHandle = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

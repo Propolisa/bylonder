@@ -67,6 +67,26 @@ Every subsystem builds on these, one of each:
 - Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
 - UI: menus through `src/editors/interface/ui-layout.js`; panels through one layout renderer, with one number field carrying Blender's drag behavior.
 
+## Blender's Python tree
+
+`src/bl_py` is all of Blender's `scripts/startup` and `scripts/modules` (283 modules), loaded whole: `bpy.main()` runs
+Blender's startup, which registers its classes (2094: every menu, panel, header and Python operator) in
+`_bpy.registered` (`tests/bl-py.test.js`). Decisions:
+
+- Fixes are generic, in the transpiler (`TranscryptFixes` and `Walrus` in `transpile.py`, `runtime.js` for the runtime,
+  applied to both pipelines by `finish()`), or in tree.py for what spans modules. Never edit `src/bl_py`.
+- The tree's modules compile with operator overloading and iterable conversion (`opov`, `iconv`) for Python's
+  semantics (list `+`, loops over iterators); Transcrypt's own library modules compile without.
+- Module semantics: imported names are module attributes (re-exported); assigning a module's attribute
+  (`bpy.context = ...`) calls its `__py_setattr__`; cycles become JS namespace imports; `__import__` and `globals()`
+  look modules up in the registry.
+- `bpy.context` and `bpy.data` are proxies over what Bylonder pushes (`_bpy._context_push(context, data)`), as Blender
+  sets the window manager's context; with none pushed, Blender's RNA defaults (`makesrna/rna.js`). `bl_rna` is
+  `blRna(struct)` from the same RNA data.
+- Python's library modules Transcrypt lacks are at the boundary (`boundary/`), as small as Blender's scripts need;
+  values Blender's C reports (`bpy.app`, handlers, translation contexts, file extensions) are copied from the
+  reference binary. `os` is a read-only file system of Blender's scripts in Blender's layout (`_files`).
+
 ## Workspaces
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.

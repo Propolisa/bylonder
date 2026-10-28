@@ -10,7 +10,7 @@ var __name__ = 'bl_ui.properties_mask_common';
 export var draw_mask_context_menu = function (layout, _context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -22,28 +22,73 @@ export var draw_mask_context_menu = function (layout, _context) {
 	}
 	else {
 	}
-	layout.operator_menu_enum ('mask.handle_type_set', 'type');
-	layout.operator ('mask.switch_direction');
-	layout.operator ('mask.cyclic_toggle');
-	layout.separator ();
-	layout.operator ('mask.copy_splines', __kwargtrans__ ({icon: 'COPYDOWN'}));
-	layout.operator ('mask.paste_splines', __kwargtrans__ ({icon: 'PASTEDOWN'}));
-	layout.separator ();
-	layout.operator ('mask.shape_key_rekey', __kwargtrans__ ({text: 'Re-Key Shape Points'}));
-	layout.operator ('mask.feather_weight_clear');
-	layout.operator ('mask.shape_key_feather_reset', __kwargtrans__ ({text: 'Reset Feather Animation'}));
-	layout.separator ();
-	layout.operator ('mask.parent_set');
-	layout.operator ('mask.parent_clear');
-	layout.separator ();
-	layout.operator ('mask.delete');
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator_menu_enum, __accu0__, 'mask.handle_type_set', 'type');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.switch_direction');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.cyclic_toggle');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.copy_splines', __kwargtrans__ ({icon: 'COPYDOWN'}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.paste_splines', __kwargtrans__ ({icon: 'PASTEDOWN'}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_rekey', __kwargtrans__ ({text: 'Re-Key Shape Points'}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.feather_weight_clear');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_feather_reset', __kwargtrans__ ({text: 'Reset Feather Animation'}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.parent_set');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.parent_clear');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'mask.delete');
+	}) ();
 };
 export var MASK_UL_layers =  __class__ ('MASK_UL_layers', [UIList], {
 	__module__: __name__,
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -63,11 +108,26 @@ export var MASK_UL_layers =  __class__ ('MASK_UL_layers', [UIList], {
 		else {
 		}
 		var mask = item;
-		layout.prop (mask, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (mask, 'hide', __kwargtrans__ ({text: '', emboss: false}));
-		row.prop (mask, 'hide_select', __kwargtrans__ ({text: '', emboss: false}));
-		row.prop (mask, 'hide_render', __kwargtrans__ ({text: '', emboss: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'hide', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'hide_select', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'hide_render', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
 	});}
 });
 export var MASK_PT_mask =  __class__ ('MASK_PT_mask', [object], {
@@ -77,7 +137,7 @@ export var MASK_PT_mask =  __class__ ('MASK_PT_mask', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -90,12 +150,12 @@ export var MASK_PT_mask =  __class__ ('MASK_PT_mask', [object], {
 		else {
 		}
 		var space_data = context.space_data;
-		return space_data.mask && space_data.mode == 'MASK';
+		return space_data.mask && __eq__ (space_data.mode, 'MASK');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -112,9 +172,18 @@ export var MASK_PT_mask =  __class__ ('MASK_PT_mask', [object], {
 		layout.use_property_decorate = false;
 		var sc = context.space_data;
 		var mask = sc.mask;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (mask, 'frame_start');
-		col.prop (mask, 'frame_end');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'frame_start');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mask, 'frame_end');
+		}) ();
 	});}
 });
 export var MASK_PT_layers =  __class__ ('MASK_PT_layers', [object], {
@@ -123,7 +192,7 @@ export var MASK_PT_layers =  __class__ ('MASK_PT_layers', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -136,12 +205,12 @@ export var MASK_PT_layers =  __class__ ('MASK_PT_layers', [object], {
 		else {
 		}
 		var space_data = context.space_data;
-		return space_data.mask && space_data.mode == 'MASK';
+		return space_data.mask && __eq__ (space_data.mode, 'MASK');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -160,31 +229,85 @@ export var MASK_PT_layers =  __class__ ('MASK_PT_layers', [object], {
 		var mask = sc.mask;
 		var active_layer = mask.layers.active;
 		var rows = (active_layer ? 4 : 1);
-		var row = layout.row ();
-		row.template_list ('MASK_UL_layers', '', mask, 'layers', mask, 'active_layer_index', __kwargtrans__ ({rows: rows}));
-		var sub = row.column (__kwargtrans__ ({align: true}));
-		sub.operator ('mask.layer_new', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		sub.operator ('mask.layer_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_list, __accu0__, 'MASK_UL_layers', '', mask, 'layers', mask, 'active_layer_index', __kwargtrans__ ({rows: rows}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.layer_new', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.layer_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
 		if (active_layer) {
-			sub.separator ();
-			sub.operator ('mask.layer_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).direction = 'UP';
-			sub.operator ('mask.layer_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).direction = 'DOWN';
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (active_layer, 'alpha');
-			row.prop (active_layer, 'invert', __kwargtrans__ ({text: '', icon: 'IMAGE_ALPHA'}));
-			layout.prop (active_layer, 'blend');
-			layout.prop (active_layer, 'falloff');
-			var col = layout.column ();
-			col.prop (active_layer, 'fill_solver');
-			if (active_layer.fill_solver != 'SWEEP_LINE') {
-				var sub = col.column ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'mask.layer_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+			}) ().direction = 'UP';
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.operator, __accu0__, 'mask.layer_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+			}) ().direction = 'DOWN';
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'alpha');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'invert', __kwargtrans__ ({text: '', icon: 'IMAGE_ALPHA'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'blend');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'falloff');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'fill_solver');
+			}) ();
+			if (__ne__ (active_layer.fill_solver, 'SWEEP_LINE')) {
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				sub.active = false;
 			}
 			else {
 				var sub = col;
 			}
-			sub.prop (active_layer, 'use_fill_overlap', __kwargtrans__ ({text: 'Overlap'}));
-			col.prop (active_layer, 'use_fill_holes', __kwargtrans__ ({text: 'Holes'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'use_fill_overlap', __kwargtrans__ ({text: 'Overlap'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, active_layer, 'use_fill_holes', __kwargtrans__ ({text: 'Holes'}));
+			}) ();
 		}
 	});}
 });
@@ -194,7 +317,7 @@ export var MASK_PT_spline =  __class__ ('MASK_PT_spline', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -208,7 +331,7 @@ export var MASK_PT_spline =  __class__ ('MASK_PT_spline', [object], {
 		}
 		var sc = context.space_data;
 		var mask = sc.mask;
-		if (mask && sc.mode == 'MASK') {
+		if (mask && __eq__ (sc.mode, 'MASK')) {
 			return mask.layers.active && mask.layers.active.splines.active;
 		}
 		return false;
@@ -216,7 +339,7 @@ export var MASK_PT_spline =  __class__ ('MASK_PT_spline', [object], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -234,12 +357,30 @@ export var MASK_PT_spline =  __class__ ('MASK_PT_spline', [object], {
 		var sc = context.space_data;
 		var mask = sc.mask;
 		var spline = mask.layers.active.splines.active;
-		var col = layout.column ();
-		col.prop (spline, 'offset_mode');
-		col.prop (spline, 'weight_interpolation', __kwargtrans__ ({text: 'Interpolation'}));
-		col.prop (spline, 'use_cyclic');
-		col.prop (spline, 'use_fill');
-		col.prop (spline, 'use_self_intersection_check');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, spline, 'offset_mode');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, spline, 'weight_interpolation', __kwargtrans__ ({text: 'Interpolation'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, spline, 'use_cyclic');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, spline, 'use_fill');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, spline, 'use_self_intersection_check');
+		}) ();
 	});}
 });
 export var MASK_PT_point =  __class__ ('MASK_PT_point', [object], {
@@ -248,7 +389,7 @@ export var MASK_PT_point =  __class__ ('MASK_PT_point', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -262,7 +403,7 @@ export var MASK_PT_point =  __class__ ('MASK_PT_point', [object], {
 		}
 		var sc = context.space_data;
 		var mask = sc.mask;
-		if (mask && sc.mode == 'MASK') {
+		if (mask && __eq__ (sc.mode, 'MASK')) {
 			var mask_layer_active = mask.layers.active;
 			return mask_layer_active && mask_layer_active.splines.active_point;
 		}
@@ -271,7 +412,7 @@ export var MASK_PT_point =  __class__ ('MASK_PT_point', [object], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -290,22 +431,46 @@ export var MASK_PT_point =  __class__ ('MASK_PT_point', [object], {
 		var mask = sc.mask;
 		var point = mask.layers.active.splines.active_point;
 		var parent = point.parent;
-		var col = layout.column ();
-		col.label (__kwargtrans__ ({text: 'Parent:'}));
-		col.prop (parent, 'id', __kwargtrans__ ({text: ''}));
-		if (parent.id_type == 'MOVIECLIP' && parent.id) {
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Parent:'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, parent, 'id', __kwargtrans__ ({text: ''}));
+		}) ();
+		if (__eq__ (parent.id_type, 'MOVIECLIP') && parent.id) {
 			var clip = parent.id;
 			var tracking = clip.tracking;
-			var row = col.row ();
-			row.prop (parent, 'type', __kwargtrans__ ({expand: true}));
-			col.prop_search (parent, 'parent', tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA', text: 'Object'}));
-			var tracks_list = (parent.py_metatype == 'POINT_TRACK' ? 'tracks' : 'plane_tracks');
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, parent, 'type', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop_search, __accu0__, parent, 'parent', tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA', text: 'Object'}));
+			}) ();
+			var tracks_list = (__eq__ (parent.py_metatype, 'POINT_TRACK') ? 'tracks' : 'plane_tracks');
 			if (__in__ (parent.parent, tracking.objects)) {
-				var ob = tracking.objects [parent.parent];
-				col.prop_search (parent, 'sub_parent', ob, tracks_list, __kwargtrans__ ({icon: 'ANIM_DATA', text: 'Track', text_ctxt: i18n_contexts.id_movieclip}));
+				var ob = __getitem__ (tracking.objects, parent.parent);
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, parent, 'sub_parent', ob, tracks_list, __kwargtrans__ ({icon: 'ANIM_DATA', text: 'Track', text_ctxt: i18n_contexts.id_movieclip}));
+				}) ();
 			}
 			else {
-				col.prop_search (parent, 'sub_parent', tracking, tracks_list, __kwargtrans__ ({icon: 'ANIM_DATA', text: 'Track', text_ctxt: i18n_contexts.id_movieclip}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, parent, 'sub_parent', tracking, tracks_list, __kwargtrans__ ({icon: 'ANIM_DATA', text: 'Track', text_ctxt: i18n_contexts.id_movieclip}));
+				}) ();
 			}
 		}
 	});}
@@ -317,7 +482,7 @@ export var MASK_PT_animation =  __class__ ('MASK_PT_animation', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -330,12 +495,12 @@ export var MASK_PT_animation =  __class__ ('MASK_PT_animation', [object], {
 		else {
 		}
 		var space_data = context.space_data;
-		return space_data.mask && space_data.mode == 'MASK';
+		return space_data.mask && __eq__ (space_data.mode, 'MASK');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -352,8 +517,14 @@ export var MASK_PT_animation =  __class__ ('MASK_PT_animation', [object], {
 		layout.use_property_decorate = false;
 		var sc = context.space_data;
 		var mask = sc.mask;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		anim.draw_action_and_slot_selector_for_id (col, mask);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = anim;
+			return __call__ (__accu0__.draw_action_and_slot_selector_for_id, __accu0__, col, mask);
+		}) ();
 	});}
 });
 export var MASK_PT_display =  __class__ ('MASK_PT_display', [object], {
@@ -362,7 +533,7 @@ export var MASK_PT_display =  __class__ ('MASK_PT_display', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -375,12 +546,12 @@ export var MASK_PT_display =  __class__ ('MASK_PT_display', [object], {
 		else {
 		}
 		var space_data = context.space_data;
-		return space_data.mask && space_data.mode == 'MASK';
+		return space_data.mask && __eq__ (space_data.mode, 'MASK');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -394,19 +565,49 @@ export var MASK_PT_display =  __class__ ('MASK_PT_display', [object], {
 		}
 		var layout = self.layout;
 		var space_data = context.space_data;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (space_data, 'show_mask_spline', __kwargtrans__ ({text: 'Spline'}));
-		var sub = row.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, space_data, 'show_mask_spline', __kwargtrans__ ({text: 'Spline'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.active = space_data.show_mask_spline;
-		sub.prop (space_data, 'mask_display_type', __kwargtrans__ ({text: ''}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (space_data, 'show_mask_overlay', __kwargtrans__ ({text: 'Overlay'}));
-		var sub = row.row ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, space_data, 'mask_display_type', __kwargtrans__ ({text: ''}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, space_data, 'show_mask_overlay', __kwargtrans__ ({text: 'Overlay'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.active = space_data.show_mask_overlay;
-		sub.prop (space_data, 'mask_overlay_mode', __kwargtrans__ ({text: ''}));
-		var row = layout.row ();
-		row.active = space_data.show_mask_overlay && space_data.mask_overlay_mode == 'COMBINED';
-		row.prop (space_data, 'blend_factor', __kwargtrans__ ({text: 'Blending Factor'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, space_data, 'mask_overlay_mode', __kwargtrans__ ({text: ''}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		row.active = space_data.show_mask_overlay && __eq__ (space_data.mask_overlay_mode, 'COMBINED');
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, space_data, 'blend_factor', __kwargtrans__ ({text: 'Blending Factor'}));
+		}) ();
 	});}
 });
 export var MASK_PT_transforms =  __class__ ('MASK_PT_transforms', [object], {
@@ -416,7 +617,7 @@ export var MASK_PT_transforms =  __class__ ('MASK_PT_transforms', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -429,12 +630,12 @@ export var MASK_PT_transforms =  __class__ ('MASK_PT_transforms', [object], {
 		else {
 		}
 		var space_data = context.space_data;
-		return space_data.mask && space_data.mode == 'MASK';
+		return space_data.mask && __eq__ (space_data.mode, 'MASK');
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -447,12 +648,30 @@ export var MASK_PT_transforms =  __class__ ('MASK_PT_transforms', [object], {
 		else {
 		}
 		var layout = self.layout;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Transform:'}));
-		col.operator ('transform.translate');
-		col.operator ('transform.rotate');
-		col.operator ('transform.resize', __kwargtrans__ ({text: 'Scale'}));
-		col.operator ('transform.transform', __kwargtrans__ ({text: 'Scale Feather'})).mode = 'MASK_SHRINKFATTEN';
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Transform:'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.translate');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.rotate');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.resize', __kwargtrans__ ({text: 'Scale'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.transform', __kwargtrans__ ({text: 'Scale Feather'}));
+		}) ().mode = 'MASK_SHRINKFATTEN';
 	});}
 });
 export var MASK_PT_tools =  __class__ ('MASK_PT_tools', [object], {
@@ -462,7 +681,7 @@ export var MASK_PT_tools =  __class__ ('MASK_PT_tools', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -475,12 +694,12 @@ export var MASK_PT_tools =  __class__ ('MASK_PT_tools', [object], {
 		else {
 		}
 		var space_data = context.space_data;
-		return space_data.mask && space_data.mode == 'MASK';
+		return space_data.mask && __eq__ (space_data.mode, 'MASK');
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -493,25 +712,82 @@ export var MASK_PT_tools =  __class__ ('MASK_PT_tools', [object], {
 		else {
 		}
 		var layout = self.layout;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Spline:'}));
-		col.operator ('mask.delete');
-		col.operator ('mask.cyclic_toggle');
-		col.operator ('mask.switch_direction');
-		col.operator ('mask.handle_type_set').py_metatype = 'VECTOR';
-		col.operator ('mask.feather_weight_clear');
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Parenting:'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.operator ('mask.parent_set', __kwargtrans__ ({text: 'Parent'}));
-		row.operator ('mask.parent_clear', __kwargtrans__ ({text: 'Clear'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Animation:'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.operator ('mask.shape_key_insert', __kwargtrans__ ({text: 'Insert Key'}));
-		row.operator ('mask.shape_key_clear', __kwargtrans__ ({text: 'Clear Key'}));
-		col.operator ('mask.shape_key_feather_reset', __kwargtrans__ ({text: 'Reset Feather Animation'}));
-		col.operator ('mask.shape_key_rekey', __kwargtrans__ ({text: 'Re-Key Shape Points'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Spline:'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.delete');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.cyclic_toggle');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.switch_direction');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.handle_type_set');
+		}) ().py_metatype = 'VECTOR';
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.feather_weight_clear');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Parenting:'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.parent_set', __kwargtrans__ ({text: 'Parent'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.parent_clear', __kwargtrans__ ({text: 'Clear'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Animation:'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_insert', __kwargtrans__ ({text: 'Insert Key'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_clear', __kwargtrans__ ({text: 'Clear Key'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_feather_reset', __kwargtrans__ ({text: 'Reset Feather Animation'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_rekey', __kwargtrans__ ({text: 'Re-Key Shape Points'}));
+		}) ();
 	});}
 });
 export var MASK_MT_mask =  __class__ ('MASK_MT_mask', [Menu], {
@@ -520,7 +796,7 @@ export var MASK_MT_mask =  __class__ ('MASK_MT_mask', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -533,24 +809,78 @@ export var MASK_MT_mask =  __class__ ('MASK_MT_mask', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.menu ('MASK_MT_transform');
-		layout.operator ('mask.feather_weight_clear');
-		layout.separator ();
-		layout.operator ('mask.cyclic_toggle');
-		layout.operator ('mask.handle_type_set');
-		layout.operator ('mask.normals_make_consistent');
-		layout.operator ('mask.switch_direction');
-		layout.separator ();
-		layout.operator ('mask.copy_splines');
-		layout.operator ('mask.paste_splines');
-		layout.separator ();
-		layout.operator ('mask.parent_clear');
-		layout.operator ('mask.parent_set');
-		layout.separator ();
-		layout.menu ('MASK_MT_animation');
-		layout.separator ();
-		layout.menu ('MASK_MT_visibility');
-		layout.operator ('mask.delete');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'MASK_MT_transform');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.feather_weight_clear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.cyclic_toggle');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.handle_type_set');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.normals_make_consistent');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.switch_direction');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.copy_splines');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.paste_splines');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.parent_clear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.parent_set');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'MASK_MT_animation');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'MASK_MT_visibility');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.delete');
+		}) ();
 	});}
 });
 export var MASK_MT_add =  __class__ ('MASK_MT_add', [Menu], {
@@ -561,7 +891,7 @@ export var MASK_MT_add =  __class__ ('MASK_MT_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -575,8 +905,14 @@ export var MASK_MT_add =  __class__ ('MASK_MT_add', [Menu], {
 		}
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		layout.operator ('mask.primitive_circle_add', __kwargtrans__ ({text: 'Circle', icon: 'MESH_CIRCLE'}));
-		layout.operator ('mask.primitive_square_add', __kwargtrans__ ({text: 'Square', icon: 'MESH_PLANE'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.primitive_circle_add', __kwargtrans__ ({text: 'Circle', icon: 'MESH_CIRCLE'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.primitive_square_add', __kwargtrans__ ({text: 'Square', icon: 'MESH_PLANE'}));
+		}) ();
 	});}
 });
 export var MASK_MT_move_to_layer =  __class__ ('MASK_MT_move_to_layer', [Menu], {
@@ -585,7 +921,7 @@ export var MASK_MT_move_to_layer =  __class__ ('MASK_MT_move_to_layer', [Menu], 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -600,14 +936,26 @@ export var MASK_MT_move_to_layer =  __class__ ('MASK_MT_move_to_layer', [Menu], 
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var mask = context.space_data.mask;
-		layout.operator ('mask.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'})).add_new_layer = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
+		}) ().add_new_layer = true;
 		if (!(mask.layers)) {
 			return ;
 		}
-		layout.separator ();
-		for (var layer of mask.layers) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var __iterable0__ = mask.layers;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var layer = __getitem__ (__iterable0__, __index0__);
 			var icon = 'NONE';
-			layout.operator ('mask.move_to_layer', __kwargtrans__ ({text: layer.py_name, icon: icon})).target_layer_name = layer.py_name;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'mask.move_to_layer', __kwargtrans__ ({text: layer.py_name, icon: icon}));
+			}) ().target_layer_name = layer.py_name;
 		}
 	});}
 });
@@ -617,7 +965,7 @@ export var MASK_MT_visibility =  __class__ ('MASK_MT_visibility', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -630,9 +978,18 @@ export var MASK_MT_visibility =  __class__ ('MASK_MT_visibility', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('mask.hide_view_clear');
-		layout.operator ('mask.hide_view_set', __kwargtrans__ ({text: 'Hide Selected'})).unselected = false;
-		layout.operator ('mask.hide_view_set', __kwargtrans__ ({text: 'Hide Unselected'})).unselected = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.hide_view_clear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.hide_view_set', __kwargtrans__ ({text: 'Hide Selected'}));
+		}) ().unselected = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.hide_view_set', __kwargtrans__ ({text: 'Hide Unselected'}));
+		}) ().unselected = true;
 	});}
 });
 export var MASK_MT_transform =  __class__ ('MASK_MT_transform', [Menu], {
@@ -641,7 +998,7 @@ export var MASK_MT_transform =  __class__ ('MASK_MT_transform', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -654,15 +1011,42 @@ export var MASK_MT_transform =  __class__ ('MASK_MT_transform', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('transform.translate');
-		layout.operator ('transform.rotate');
-		layout.operator ('transform.resize');
-		layout.separator ();
-		layout.operator ('transform.tosphere');
-		layout.operator ('transform.shear');
-		layout.operator ('transform.push_pull');
-		layout.separator ();
-		layout.operator ('transform.transform', __kwargtrans__ ({text: 'Scale Feather'})).mode = 'MASK_SHRINKFATTEN';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.translate');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.rotate');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.resize');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.tosphere');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.shear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.push_pull');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'transform.transform', __kwargtrans__ ({text: 'Scale Feather'}));
+		}) ().mode = 'MASK_SHRINKFATTEN';
 	});}
 });
 export var MASK_MT_animation =  __class__ ('MASK_MT_animation', [Menu], {
@@ -671,7 +1055,7 @@ export var MASK_MT_animation =  __class__ ('MASK_MT_animation', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -684,10 +1068,22 @@ export var MASK_MT_animation =  __class__ ('MASK_MT_animation', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('mask.shape_key_clear');
-		layout.operator ('mask.shape_key_insert');
-		layout.operator ('mask.shape_key_feather_reset');
-		layout.operator ('mask.shape_key_rekey');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_clear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_insert');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_feather_reset');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.shape_key_rekey');
+		}) ();
 	});}
 });
 export var MASK_MT_select =  __class__ ('MASK_MT_select', [Menu], {
@@ -696,7 +1092,7 @@ export var MASK_MT_select =  __class__ ('MASK_MT_select', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -709,26 +1105,89 @@ export var MASK_MT_select =  __class__ ('MASK_MT_select', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('mask.select_all', __kwargtrans__ ({text: 'All'})).action = 'SELECT';
-		layout.operator ('mask.select_all', __kwargtrans__ ({text: 'None'})).action = 'DESELECT';
-		layout.operator ('mask.select_all', __kwargtrans__ ({text: 'Invert'})).action = 'INVERT';
-		layout.separator ();
-		layout.operator ('mask.select_box');
-		layout.operator ('mask.select_circle');
-		layout.operator_menu_enum ('mask.select_lasso', 'mode');
-		layout.separator ();
-		layout.operator ('mask.select_more');
-		layout.operator ('mask.select_less');
-		layout.separator ();
-		layout.operator ('mask.select_linked', __kwargtrans__ ({text: 'Select Linked'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_all', __kwargtrans__ ({text: 'All'}));
+		}) ().action = 'SELECT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_all', __kwargtrans__ ({text: 'None'}));
+		}) ().action = 'DESELECT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_all', __kwargtrans__ ({text: 'Invert'}));
+		}) ().action = 'INVERT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_box');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_circle');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'mask.select_lasso', 'mode');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_more');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_less');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'mask.select_linked', __kwargtrans__ ({text: 'Select Linked'}));
+		}) ();
 	});}
 });
 export var classes = tuple ([MASK_UL_layers, MASK_MT_mask, MASK_MT_add, MASK_MT_move_to_layer, MASK_MT_visibility, MASK_MT_transform, MASK_MT_animation, MASK_MT_select]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_mask_common.map
 export {Menu, UIList, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'draw_mask_context_menu': draw_mask_context_menu = value; break;
+		case 'MASK_UL_layers': MASK_UL_layers = value; break;
+		case 'MASK_PT_mask': MASK_PT_mask = value; break;
+		case 'MASK_PT_layers': MASK_PT_layers = value; break;
+		case 'MASK_PT_spline': MASK_PT_spline = value; break;
+		case 'MASK_PT_point': MASK_PT_point = value; break;
+		case 'MASK_PT_animation': MASK_PT_animation = value; break;
+		case 'MASK_PT_display': MASK_PT_display = value; break;
+		case 'MASK_PT_transforms': MASK_PT_transforms = value; break;
+		case 'MASK_PT_tools': MASK_PT_tools = value; break;
+		case 'MASK_MT_mask': MASK_MT_mask = value; break;
+		case 'MASK_MT_add': MASK_MT_add = value; break;
+		case 'MASK_MT_move_to_layer': MASK_MT_move_to_layer = value; break;
+		case 'MASK_MT_visibility': MASK_MT_visibility = value; break;
+		case 'MASK_MT_transform': MASK_MT_transform = value; break;
+		case 'MASK_MT_animation': MASK_MT_animation = value; break;
+		case 'MASK_MT_select': MASK_MT_select = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -14,7 +14,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -27,7 +27,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 		else {
 		}
 		var ob = context.object;
-		return ob && ob.py_metatype == 'EMPTY';
+		return ob && __eq__ (ob.py_metatype, 'EMPTY');
 	});}
 });
 export var DATA_PT_empty =  __class__ ('DATA_PT_empty', [DataButtonsPanel, Panel], {
@@ -37,7 +37,7 @@ export var DATA_PT_empty =  __class__ ('DATA_PT_empty', [DataButtonsPanel, Panel
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -52,30 +52,93 @@ export var DATA_PT_empty =  __class__ ('DATA_PT_empty', [DataButtonsPanel, Panel
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var ob = context.object;
-		layout.prop (ob, 'empty_display_type', __kwargtrans__ ({text: 'Display As'}));
-		layout.prop (ob, 'empty_display_size', __kwargtrans__ ({text: 'Size'}));
-		if (ob.empty_display_type == 'IMAGE') {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.prop (ob, 'empty_image_offset', __kwargtrans__ ({text: 'Offset X', index: 0}));
-			col.prop (ob, 'empty_image_offset', __kwargtrans__ ({text: 'Y', index: 1}));
-			var col = layout.column ();
-			var depth_row = col.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, ob, 'empty_display_type', __kwargtrans__ ({text: 'Display As'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, ob, 'empty_display_size', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		if (__eq__ (ob.empty_display_type, 'IMAGE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'empty_image_offset', __kwargtrans__ ({text: 'Offset X', index: 0}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'empty_image_offset', __kwargtrans__ ({text: 'Y', index: 1}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var depth_row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			depth_row.enabled = !(ob.show_in_front);
-			depth_row.prop (ob, 'empty_image_depth', __kwargtrans__ ({text: 'Depth', expand: true}));
-			col.row ().prop (ob, 'empty_image_side', __kwargtrans__ ({text: 'Side', expand: true}));
-			var col = layout.column (__kwargtrans__ ({heading: 'Show In', align: true}));
-			col.prop (ob, 'show_empty_image_orthographic', __kwargtrans__ ({text: 'Orthographic'}));
-			col.prop (ob, 'show_empty_image_perspective', __kwargtrans__ ({text: 'Perspective'}));
-			col.prop (ob, 'show_empty_image_only_axis_aligned', __kwargtrans__ ({text: 'Only Axis Aligned'}));
-			var col = layout.column (__kwargtrans__ ({align: false, heading: 'Opacity'}));
+			(function () {
+				var __accu0__ = depth_row;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'empty_image_depth', __kwargtrans__ ({text: 'Depth', expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, ob, 'empty_image_side', __kwargtrans__ ({text: 'Side', expand: true}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show In', align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'show_empty_image_orthographic', __kwargtrans__ ({text: 'Orthographic'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'show_empty_image_perspective', __kwargtrans__ ({text: 'Perspective'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'show_empty_image_only_axis_aligned', __kwargtrans__ ({text: 'Only Axis Aligned'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Opacity'}));
+			}) ();
 			col.use_property_decorate = false;
-			var row = col.row (__kwargtrans__ ({align: true}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.prop (ob, 'use_empty_image_alpha', __kwargtrans__ ({text: ''}));
-			var sub = sub.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'use_empty_image_alpha', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = ob.use_empty_image_alpha;
-			sub.prop (ob, 'color', __kwargtrans__ ({text: '', index: 3, slider: true}));
-			row.prop_decorator (ob, 'color', __kwargtrans__ ({index: 3}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'color', __kwargtrans__ ({text: '', index: 3, slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_decorator, __accu0__, ob, 'color', __kwargtrans__ ({index: 3}));
+			}) ();
 		}
 	});}
 });
@@ -85,7 +148,7 @@ export var DATA_PT_empty_image =  __class__ ('DATA_PT_empty_image', [DataButtons
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -98,12 +161,12 @@ export var DATA_PT_empty_image =  __class__ ('DATA_PT_empty_image', [DataButtons
 		else {
 		}
 		var ob = context.object;
-		return ob && ob.py_metatype == 'EMPTY' && ob.empty_display_type == 'IMAGE';
+		return ob && __eq__ (ob.py_metatype, 'EMPTY') && __eq__ (ob.empty_display_type, 'IMAGE');
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -117,17 +180,39 @@ export var DATA_PT_empty_image =  __class__ ('DATA_PT_empty_image', [DataButtons
 		}
 		var layout = self.layout;
 		var ob = context.object;
-		layout.template_ID (ob, 'data', __kwargtrans__ ({open: 'image.open', unlink: 'object.unlink_data'}));
-		layout.separator ();
-		layout.template_image (ob, 'data', ob.image_user, __kwargtrans__ ({compact: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_ID, __accu0__, ob, 'data', __kwargtrans__ ({open: 'image.open', unlink: 'object.unlink_data'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_image, __accu0__, ob, 'data', ob.image_user, __kwargtrans__ ({compact: true}));
+		}) ();
 	});}
 });
 export var classes = tuple ([DATA_PT_empty, DATA_PT_empty_image]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_empty.map
 export {Panel, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_empty': DATA_PT_empty = value; break;
+		case 'DATA_PT_empty_image': DATA_PT_empty_image = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

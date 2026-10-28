@@ -13,7 +13,7 @@ export var ASSETSHELF_PT_display =  __class__ ('ASSETSHELF_PT_display', [Panel],
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -29,13 +29,19 @@ export var ASSETSHELF_PT_display =  __class__ ('ASSETSHELF_PT_display', [Panel],
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var shelf = context.asset_shelf;
-		layout.prop (shelf, 'preview_size', __kwargtrans__ ({text: 'Size'}));
-		layout.prop (shelf, 'show_names', __kwargtrans__ ({text: 'Names'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, shelf, 'preview_size', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, shelf, 'show_names', __kwargtrans__ ({text: 'Names'}));
+		}) ();
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -59,7 +65,7 @@ export var ASSETSHELF_PT_filter =  __class__ ('ASSETSHELF_PT_filter', [Panel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -75,19 +81,37 @@ export var ASSETSHELF_PT_filter =  __class__ ('ASSETSHELF_PT_filter', [Panel], {
 		var prefs = context.preferences;
 		var use_remote_asset_libraries = prefs.experimental.use_remote_asset_libraries;
 		if (use_remote_asset_libraries) {
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.use_property_split = true;
 			col.use_property_decorate = false;
-			col.prop (prefs.view, 'asset_access', __kwargtrans__ ({text: 'Access'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, prefs.view, 'asset_access', __kwargtrans__ ({text: 'Access'}));
+			}) ();
 		}
 	});}
 });
 export var classes = tuple ([ASSETSHELF_PT_display, ASSETSHELF_PT_filter]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.asset_shelf.map
 export {Panel, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'ASSETSHELF_PT_display': ASSETSHELF_PT_display = value; break;
+		case 'ASSETSHELF_PT_filter': ASSETSHELF_PT_filter = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

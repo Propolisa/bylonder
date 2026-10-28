@@ -8,7 +8,7 @@ var __name__ = 'bl_app_override';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -19,8 +19,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -28,7 +34,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -53,7 +59,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -72,7 +78,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,18 +91,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -107,8 +116,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -117,7 +132,7 @@ export var class_filter = function* (cls_parent) {
 	var kw = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -130,18 +145,41 @@ export var class_filter = function* (cls_parent) {
 	}
 	else {
 	}
-	var whitelist = kw.py_pop ('whitelist', null);
-	var blacklist = kw.py_pop ('blacklist', null);
-	var kw_items = tuple (kw.py_items ());
-	for (var cls of cls_parent.__subclasses__ ()) {
+	var whitelist = (function () {
+		var __accu0__ = kw;
+		return __call__ (__accu0__.py_pop, __accu0__, 'whitelist', null);
+	}) ();
+	var blacklist = (function () {
+		var __accu0__ = kw;
+		return __call__ (__accu0__.py_pop, __accu0__, 'blacklist', null);
+	}) ();
+	var kw_items = __call__ (tuple, null, (function () {
+		var __accu0__ = kw;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ());
+	var __iterable0__ = (function () {
+		var __accu0__ = cls_parent;
+		return __call__ (__accu0__.__subclasses__, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
 		if (__in__ ('bl_rna', cls.__dict__)) {
 			if (blacklist !== null && __in__ (cls.__name__, blacklist)) {
 				continue;
 			}
-			if (whitelist !== null && cls.__name__ === whitelist || all ((function () {
+			if (whitelist !== null && cls.__name__ === whitelist || __call__ (all, null, (function () {
 				var __accu0__ = [];
-				for (var [attr, expect] of kw_items) {
-					__accu0__.append (__in__ (getattr (cls, attr), expect));
+				var __iterable1__ = kw_items;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var __left0__ = __getitem__ (__iterable1__, __index1__);
+					var attr = __left0__ [0];
+					var expect = __left0__ [1];
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __in__ (__call__ (getattr, null, cls, attr), expect));
+					}) ();
 				}
 				return __accu0__;
 			}) ())) {
@@ -158,7 +196,7 @@ export var ui_draw_filter_register = function () {
 	var ui_ignore_label = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -173,7 +211,7 @@ export var ui_draw_filter_register = function () {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
+	var bpy = __call__ (_module, null, 'bpy');
 	var UILayout = bpy.types.UILayout;
 	if (ui_ignore_classes === null) {
 		var ui_ignore_classes = tuple ([bpy.types.Panel, bpy.types.Menu, bpy.types.Header]);
@@ -187,7 +225,7 @@ export var ui_draw_filter_register = function () {
 		get __getattribute__ () {return __get__ (this, function (self, attr) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -200,12 +238,15 @@ export var ui_draw_filter_register = function () {
 			else {
 			}
 			if (__in__ (attr, new set (['row', 'split', 'column', 'box', 'column_flow']))) {
-				var real_func = UILayout.__getattribute__ (self, attr);
+				var real_func = (function () {
+					var __accu0__ = UILayout;
+					return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+				}) ();
 				var dummy_func = function () {
 					var kw = dict ();
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
@@ -219,21 +260,27 @@ export var ui_draw_filter_register = function () {
 					else {
 						var args = tuple ();
 					}
-					var ret = real_func (...args, __kwargtrans__ (_merged (kw)));
-					return UILayout_Fake (ret);
+					var ret = __call__ (real_func, null, ...args, __kwargtrans__ (__call__ (_merged, null, kw)));
+					return __call__ (UILayout_Fake, null, ret);
 				};
 				return dummy_func;
 			}
 			else if (__in__ (attr, new set (['operator', 'operator_menu_enum', 'operator_enum', 'operator_menu_hold']))) {
 				if (ui_ignore_operator === null) {
-					return UILayout.__getattribute__ (self, attr);
+					return (function () {
+						var __accu0__ = UILayout;
+						return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+					}) ();
 				}
-				var real_func = UILayout.__getattribute__ (self, attr);
+				var real_func = (function () {
+					var __accu0__ = UILayout;
+					return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+				}) ();
 				var dummy_func = function () {
 					var kw = dict ();
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
@@ -247,17 +294,20 @@ export var ui_draw_filter_register = function () {
 					else {
 						var args = tuple ();
 					}
-					var ui_test = ui_ignore_operator (args [0]);
+					var ui_test = __call__ (ui_ignore_operator, null, __getitem__ (args, 0));
 					if (ui_test === false) {
-						var ret = real_func (...args, __kwargtrans__ (_merged (kw)));
+						var ret = __call__ (real_func, null, ...args, __kwargtrans__ (__call__ (_merged, null, kw)));
 					}
 					else {
 						if (ui_test === null) {
-							UILayout.__getattribute__ (self, 'label') (__kwargtrans__ ({text: ''}));
+							__call__ ((function () {
+								var __accu0__ = UILayout;
+								return __call__ (__accu0__.__getattribute__, __accu0__, self, 'label');
+							}) (), null, __kwargtrans__ ({text: ''}));
 						}
 						else {
 						}
-						var ret = OperatorProperties_Fake ();
+						var ret = __call__ (OperatorProperties_Fake, null);
 					}
 					return ret;
 				};
@@ -265,14 +315,20 @@ export var ui_draw_filter_register = function () {
 			}
 			else if (__in__ (attr, new set (['prop', 'prop_enum']))) {
 				if (ui_ignore_property === null) {
-					return UILayout.__getattribute__ (self, attr);
+					return (function () {
+						var __accu0__ = UILayout;
+						return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+					}) ();
 				}
-				var real_func = UILayout.__getattribute__ (self, attr);
+				var real_func = (function () {
+					var __accu0__ = UILayout;
+					return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+				}) ();
 				var dummy_func = function () {
 					var kw = dict ();
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
@@ -286,13 +342,16 @@ export var ui_draw_filter_register = function () {
 					else {
 						var args = tuple ();
 					}
-					var ui_test = ui_ignore_property (args [0].__class__.__name__, args [1]);
+					var ui_test = __call__ (ui_ignore_property, null, __getitem__ (args, 0).__class__.__name__, __getitem__ (args, 1));
 					if (ui_test === false) {
-						var ret = real_func (...args, __kwargtrans__ (_merged (kw)));
+						var ret = __call__ (real_func, null, ...args, __kwargtrans__ (__call__ (_merged, null, kw)));
 					}
 					else {
 						if (ui_test === null) {
-							UILayout.__getattribute__ (self, 'label') (__kwargtrans__ ({text: ''}));
+							__call__ ((function () {
+								var __accu0__ = UILayout;
+								return __call__ (__accu0__.__getattribute__, __accu0__, self, 'label');
+							}) (), null, __kwargtrans__ ({text: ''}));
 						}
 						else {
 						}
@@ -302,16 +361,22 @@ export var ui_draw_filter_register = function () {
 				};
 				return dummy_func;
 			}
-			else if (attr == 'menu') {
+			else if (__eq__ (attr, 'menu')) {
 				if (ui_ignore_menu === null) {
-					return UILayout.__getattribute__ (self, attr);
+					return (function () {
+						var __accu0__ = UILayout;
+						return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+					}) ();
 				}
-				var real_func = UILayout.__getattribute__ (self, attr);
+				var real_func = (function () {
+					var __accu0__ = UILayout;
+					return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+				}) ();
 				var dummy_func = function () {
 					var kw = dict ();
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
@@ -325,13 +390,16 @@ export var ui_draw_filter_register = function () {
 					else {
 						var args = tuple ();
 					}
-					var ui_test = ui_ignore_menu (args [0]);
+					var ui_test = __call__ (ui_ignore_menu, null, __getitem__ (args, 0));
 					if (ui_test === false) {
-						var ret = real_func (...args, __kwargtrans__ (_merged (kw)));
+						var ret = __call__ (real_func, null, ...args, __kwargtrans__ (__call__ (_merged, null, kw)));
 					}
 					else {
 						if (ui_test === null) {
-							UILayout.__getattribute__ (self, 'label') (__kwargtrans__ ({text: ''}));
+							__call__ ((function () {
+								var __accu0__ = UILayout;
+								return __call__ (__accu0__.__getattribute__, __accu0__, self, 'label');
+							}) (), null, __kwargtrans__ ({text: ''}));
 						}
 						else {
 						}
@@ -341,16 +409,22 @@ export var ui_draw_filter_register = function () {
 				};
 				return dummy_func;
 			}
-			else if (attr == 'label') {
+			else if (__eq__ (attr, 'label')) {
 				if (ui_ignore_label === null) {
-					return UILayout.__getattribute__ (self, attr);
+					return (function () {
+						var __accu0__ = UILayout;
+						return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+					}) ();
 				}
-				var real_func = UILayout.__getattribute__ (self, attr);
+				var real_func = (function () {
+					var __accu0__ = UILayout;
+					return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+				}) ();
 				var dummy_func = function () {
 					var kw = dict ();
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
@@ -364,13 +438,16 @@ export var ui_draw_filter_register = function () {
 					else {
 						var args = tuple ();
 					}
-					var ui_test = ui_ignore_label ((args ? args [0] : kw.py_get ('text', '')));
+					var ui_test = __call__ (ui_ignore_label, null, (args ? __getitem__ (args, 0) : (function () {
+						var __accu0__ = kw;
+						return __call__ (__accu0__.py_get, __accu0__, 'text', '');
+					}) ()));
 					if (ui_test === false) {
-						var ret = real_func (...args, __kwargtrans__ (_merged (kw)));
+						var ret = __call__ (real_func, null, ...args, __kwargtrans__ (__call__ (_merged, null, kw)));
 					}
 					else {
 						if (ui_test === null) {
-							real_func (__kwargtrans__ ({text: ''}));
+							__call__ (real_func, null, __kwargtrans__ ({text: ''}));
 						}
 						else {
 						}
@@ -381,14 +458,17 @@ export var ui_draw_filter_register = function () {
 				return dummy_func;
 			}
 			else {
-				return UILayout.__getattribute__ (self, attr);
+				return (function () {
+					var __accu0__ = UILayout;
+					return __call__ (__accu0__.__getattribute__, __accu0__, self, attr);
+				}) ();
 			}
 		});},
 		get operator () {return __get__ (this, function () {
 			var kw = dict ();
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -402,13 +482,13 @@ export var ui_draw_filter_register = function () {
 			else {
 				var args = tuple ();
 			}
-			return __super__ (UILayout_Fake, 'operator') (self, ...args, __kwargtrans__ (_merged (kw)));
+			return __call__ (__call__ (__super__, null, UILayout_Fake, 'operator'), null, self, ...args, __kwargtrans__ (__call__ (_merged, null, kw)));
 		});}
 	});
 	var draw_override = function (func_orig, self_real, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -423,7 +503,7 @@ export var ui_draw_filter_register = function () {
 		}
 		var cls_real = self_real.__class__;
 		if (cls_real === super_) {
-			return func_orig (self_real, context);
+			return __call__ (func_orig, null, self_real, context);
 		}
 		var Wrapper = __class__ ('Wrapper', [cls_real], {
 			__module__: __name__,
@@ -431,7 +511,7 @@ export var ui_draw_filter_register = function () {
 			get __getattribute__ () {return __get__ (this, function (self, attr) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -443,22 +523,25 @@ export var ui_draw_filter_register = function () {
 				}
 				else {
 				}
-				if (attr == 'layout') {
-					return UILayout_Fake (self_real.layout);
+				if (__eq__ (attr, 'layout')) {
+					return __call__ (UILayout_Fake, null, self_real.layout);
 				}
 				else {
 					var cls = null;
 					try {
-						return cls.__getattr__ (self, attr);
+						return (function () {
+							var __accu0__ = cls;
+							return __call__ (__accu0__.__getattr__, __accu0__, self, attr);
+						}) ();
 					}
 					catch (__except0__) {
 						if (isinstance (__except0__, AttributeError)) {
 							try {
-								return getattr (cls, attr);
+								return __call__ (getattr, null, cls, attr);
 							}
 							catch (__except1__) {
 								if (isinstance (__except1__, AttributeError)) {
-									return getattr (UILayout (self), attr);
+									return __call__ (getattr, null, __call__ (UILayout, null, self), attr);
 								}
 								else {
 									throw __except1__;
@@ -474,7 +557,7 @@ export var ui_draw_filter_register = function () {
 			get _get_layout () {return __get__ (this, function (self) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -489,16 +572,25 @@ export var ui_draw_filter_register = function () {
 			});}
 		});
 		globalThis.Object.defineProperty (Wrapper, 'layout', property.call (Wrapper, Wrapper._get_layout));;
-		return func_orig (Wrapper (self_real), context);
+		return __call__ (func_orig, null, __call__ (Wrapper, null, self_real), context);
 	};
 	var ui_ignore_store = [];
-	for (var cls of ui_ignore_classes) {
-		for (var subcls of list (cls.__subclasses__ ())) {
+	var __iterable0__ = ui_ignore_classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = __call__ (list, null, (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.__subclasses__, __accu0__);
+		}) ());
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var subcls = __getitem__ (__iterable1__, __index1__);
 			if (__in__ ('draw', subcls.__dict__)) {
 				var replace_draw = function () {
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 							}
@@ -510,7 +602,7 @@ export var ui_draw_filter_register = function () {
 					var draw = function (self, context) {
 						if (arguments.length) {
 							var __ilastarg0__ = arguments.length - 1;
-							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 								var __allkwargs0__ = arguments [__ilastarg0__--];
 								for (var __attrib0__ in __allkwargs0__) {
 									switch (__attrib0__) {
@@ -522,12 +614,15 @@ export var ui_draw_filter_register = function () {
 						}
 						else {
 						}
-						return draw_override (draw_orig, self, context);
+						return __call__ (draw_override, null, draw_orig, self, context);
 					};
 					subcls.draw = draw;
 				};
-				ui_ignore_store.append (tuple ([subcls, 'draw', subcls.draw]));
-				replace_draw ();
+				(function () {
+					var __accu0__ = ui_ignore_store;
+					return __call__ (__accu0__.append, __accu0__, tuple ([subcls, 'draw', subcls.draw]));
+				}) ();
+				__call__ (replace_draw, null);
 			}
 		}
 	}
@@ -536,7 +631,7 @@ export var ui_draw_filter_register = function () {
 export var ui_draw_filter_unregister = function (ui_ignore_store) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -547,9 +642,30 @@ export var ui_draw_filter_unregister = function (ui_ignore_store) {
 	}
 	else {
 	}
-	for (var [obj, attr, value] of ui_ignore_store) {
-		setattr (obj, attr, value);
+	var __iterable0__ = ui_ignore_store;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var obj = __left0__ [0];
+		var attr = __left0__ [1];
+		var value = __left0__ [2];
+		__call__ (setattr, null, obj, attr, value);
 	}
 };
 
 //# sourceMappingURL=bl_app_override.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '__all__': __all__ = value; break;
+		case 'class_filter': class_filter = value; break;
+		case 'ui_draw_filter_register': ui_draw_filter_register = value; break;
+		case 'ui_draw_filter_unregister': ui_draw_filter_unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

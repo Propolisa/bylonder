@@ -9,3 +9,12 @@ export var GPUVertBuf = null;
 export var GPUVertFormat = null;
 
 //# sourceMappingURL=gpu.types.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'GPUBatch': GPUBatch = value; break;
+		case 'GPUIndexBuf': GPUIndexBuf = value; break;
+		case 'GPUVertBuf': GPUVertBuf = value; break;
+		case 'GPUVertFormat': GPUVertFormat = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

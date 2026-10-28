@@ -17,7 +17,7 @@ export var AnnotationDrawingToolsPanel =  __class__ ('AnnotationDrawingToolsPane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -31,19 +31,58 @@ export var AnnotationDrawingToolsPanel =  __class__ ('AnnotationDrawingToolsPane
 		}
 		var layout = self.layout;
 		var tool_settings = context.tool_settings;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Draw:'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.operator ('gpencil.annotate', __kwargtrans__ ({icon: 'GREASEPENCIL', text: 'Draw'})).mode = 'DRAW';
-		row.operator ('gpencil.annotate', __kwargtrans__ ({icon: 'FORCE_CURVE', text: 'Erase'})).mode = 'ERASER';
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.operator ('gpencil.annotate', __kwargtrans__ ({icon: 'LINE_DATA', text: 'Line'})).mode = 'DRAW_STRAIGHT';
-		row.operator ('gpencil.annotate', __kwargtrans__ ({icon: 'MESH_DATA', text: 'Poly'})).mode = 'DRAW_POLY';
-		col.separator ();
-		col.label (__kwargtrans__ ({text: 'Stroke Placement:'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.prop_enum (tool_settings, 'annotation_stroke_placement_view2d', 'VIEW');
-		row.prop_enum (tool_settings, 'annotation_stroke_placement_view2d', 'IMAGE', __kwargtrans__ ({text: 'Image'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Draw:'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'gpencil.annotate', __kwargtrans__ ({icon: 'GREASEPENCIL', text: 'Draw'}));
+		}) ().mode = 'DRAW';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'gpencil.annotate', __kwargtrans__ ({icon: 'FORCE_CURVE', text: 'Erase'}));
+		}) ().mode = 'ERASER';
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'gpencil.annotate', __kwargtrans__ ({icon: 'LINE_DATA', text: 'Line'}));
+		}) ().mode = 'DRAW_STRAIGHT';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'gpencil.annotate', __kwargtrans__ ({icon: 'MESH_DATA', text: 'Poly'}));
+		}) ().mode = 'DRAW_POLY';
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Stroke Placement:'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_enum, __accu0__, tool_settings, 'annotation_stroke_placement_view2d', 'VIEW');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_enum, __accu0__, tool_settings, 'annotation_stroke_placement_view2d', 'IMAGE', __kwargtrans__ ({text: 'Image'}));
+		}) ();
 	});}
 });
 export var GreasePencilSculptAdvancedPanel =  __class__ ('GreasePencilSculptAdvancedPanel', [object], {
@@ -51,7 +90,7 @@ export var GreasePencilSculptAdvancedPanel =  __class__ ('GreasePencilSculptAdva
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -71,11 +110,26 @@ export var GreasePencilSculptAdvancedPanel =  __class__ ('GreasePencilSculptAdva
 		var tool = brush.gpencil_sculpt_brush_type;
 		var gp_settings = brush.gpencil_settings;
 		if (__in__ (tool, new set (['SMOOTH', 'RANDOMIZE']))) {
-			var col = layout.column (__kwargtrans__ ({heading: 'Affect', align: true}));
-			col.prop (gp_settings, 'use_edit_position', __kwargtrans__ ({text: 'Position'}));
-			col.prop (gp_settings, 'use_edit_strength', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.id_gpencil}));
-			col.prop (gp_settings, 'use_edit_thickness', __kwargtrans__ ({text: 'Thickness'}));
-			col.prop (gp_settings, 'use_edit_uv', __kwargtrans__ ({text: 'UV'}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Affect', align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_position', __kwargtrans__ ({text: 'Position'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_strength', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.id_gpencil}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_thickness', __kwargtrans__ ({text: 'Thickness'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_uv', __kwargtrans__ ({text: 'UV'}));
+			}) ();
 		}
 	});}
 });
@@ -86,7 +140,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -99,16 +153,16 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 		else {
 		}
 		var ob = context.active_object;
-		if (context.mode == 'SCULPT_GREASE_PENCIL') {
+		if (__eq__ (context.mode, 'SCULPT_GREASE_PENCIL')) {
 			var brush = context.tool_settings.gpencil_sculpt_paint.brush;
 		}
-		else if (context.mode == 'WEIGHT_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'WEIGHT_GREASE_PENCIL')) {
 			var brush = context.tool_settings.gpencil_weight_paint.brush;
 		}
 		else {
 			var brush = context.tool_settings.gpencil_paint.brush;
 		}
-		if (ob && ob.py_metatype == 'GREASEPENCIL' && brush) {
+		if (ob && __eq__ (ob.py_metatype, 'GREASEPENCIL') && brush) {
 			return true;
 		}
 		return false;
@@ -116,7 +170,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -132,27 +186,30 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 			return ;
 		}
 		var tool_settings = context.tool_settings;
-		if (context.mode == 'PAINT_GREASE_PENCIL') {
+		if (__eq__ (context.mode, 'PAINT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_paint;
 		}
-		else if (context.mode == 'SCULPT_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'SCULPT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_sculpt_paint;
 		}
-		else if (context.mode == 'WEIGHT_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'WEIGHT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_weight_paint;
 		}
-		else if (context.mode == 'VERTEX_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'VERTEX_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_vertex_paint;
 		}
 		var brush = settings.brush;
 		if (brush) {
-			self.layout.prop (settings, 'show_brush', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -168,53 +225,92 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var tool_settings = context.tool_settings;
-		if (context.mode == 'PAINT_GREASE_PENCIL') {
+		if (__eq__ (context.mode, 'PAINT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_paint;
 		}
-		else if (context.mode == 'SCULPT_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'SCULPT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_sculpt_paint;
 		}
-		else if (context.mode == 'WEIGHT_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'WEIGHT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_weight_paint;
 		}
-		else if (context.mode == 'VERTEX_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'VERTEX_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_vertex_paint;
 		}
 		var brush = settings.brush;
 		var gp_settings = brush.gpencil_settings;
 		var ob = context.active_object;
 		if (self.is_popover && !__in__ (ob.mode, new set (['PAINT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL']))) {
-			var row = layout.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.use_property_split = false;
-			row.prop (settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+			}) ();
 		}
-		if (ob.mode == 'PAINT_GREASE_PENCIL') {
+		if (__eq__ (ob.mode, 'PAINT_GREASE_PENCIL')) {
 			if (self.is_popover) {
-				var row = layout.row (__kwargtrans__ ({align: true}));
-				row.prop (settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+				}) ();
 			}
-			if (brush.gpencil_brush_type == 'DRAW') {
-				var row = layout.row (__kwargtrans__ ({align: true}));
+			if (__eq__ (brush.gpencil_brush_type, 'DRAW')) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
 				row.active = settings.show_brush;
-				row.prop (gp_settings, 'show_lasso', __kwargtrans__ ({text: 'Show Fill Color While Drawing'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, gp_settings, 'show_lasso', __kwargtrans__ ({text: 'Show Fill Color While Drawing'}));
+				}) ();
 			}
 		}
-		else if (ob.mode == 'SCULPT_GREASE_PENCIL') {
-			var col = layout.column (__kwargtrans__ ({align: true}));
+		else if (__eq__ (ob.mode, 'SCULPT_GREASE_PENCIL')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			col.active = settings.show_brush;
-			col.prop (brush, 'cursor_color_add', __kwargtrans__ ({text: 'Cursor Color'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cursor_color_add', __kwargtrans__ ({text: 'Cursor Color'}));
+			}) ();
 			if (__in__ (brush.gpencil_sculpt_brush_type, new set (['THICKNESS', 'STRENGTH', 'PINCH', 'TWIST']))) {
-				col.prop (brush, 'cursor_color_subtract', __kwargtrans__ ({text: 'Inverse Color'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'cursor_color_subtract', __kwargtrans__ ({text: 'Inverse Color'}));
+				}) ();
 			}
 		}
-		else if (ob.mode == 'WEIGHT_GREASE_PENCIL') {
-			var col = layout.column (__kwargtrans__ ({align: true}));
+		else if (__eq__ (ob.mode, 'WEIGHT_GREASE_PENCIL')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			col.active = settings.show_brush;
-			col.prop (brush, 'cursor_color_add', __kwargtrans__ ({text: 'Cursor Color'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cursor_color_add', __kwargtrans__ ({text: 'Cursor Color'}));
+			}) ();
 		}
-		else if (ob.mode == 'VERTEX_GREASE_PENCIL') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+		else if (__eq__ (ob.mode, 'VERTEX_GREASE_PENCIL')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+			}) ();
 		}
 	});}
 });
@@ -225,7 +321,7 @@ export var GreasePencilBrushFalloff =  __class__ ('GreasePencilBrushFalloff', [o
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -240,29 +336,41 @@ export var GreasePencilBrushFalloff =  __class__ ('GreasePencilBrushFalloff', [o
 		var layout = self.layout;
 		var tool_settings = context.tool_settings;
 		var settings = null;
-		if (context.mode == 'PAINT_GREASE_PENCIL') {
+		if (__eq__ (context.mode, 'PAINT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_paint;
 		}
-		if (context.mode == 'SCULPT_GREASE_PENCIL') {
+		if (__eq__ (context.mode, 'SCULPT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_sculpt_paint;
 		}
-		else if (context.mode == 'WEIGHT_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'WEIGHT_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_weight_paint;
 		}
-		else if (context.mode == 'VERTEX_GREASE_PENCIL') {
+		else if (__eq__ (context.mode, 'VERTEX_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_vertex_paint;
 		}
 		if (settings) {
 			var brush = settings.brush;
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			if (context.region.py_metatype == 'TOOL_HEADER') {
-				col.prop (brush, 'curve_distance_falloff_preset', __kwargtrans__ ({expand: true}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			if (__eq__ (context.region.py_metatype, 'TOOL_HEADER')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'curve_distance_falloff_preset', __kwargtrans__ ({expand: true}));
+				}) ();
 			}
 			else {
-				col.prop (brush, 'curve_distance_falloff_preset', __kwargtrans__ ({text: ''}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'curve_distance_falloff_preset', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
-			if (brush.curve_distance_falloff_preset == 'CUSTOM') {
-				layout.template_curve_mapping (brush, 'curve_distance_falloff', __kwargtrans__ ({brush: true, use_negative_slope: true, show_presets: true}));
+			if (__eq__ (brush.curve_distance_falloff_preset, 'CUSTOM')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, 'curve_distance_falloff', __kwargtrans__ ({brush: true, use_negative_slope: true, show_presets: true}));
+				}) ();
 			}
 		}
 	});}
@@ -270,7 +378,7 @@ export var GreasePencilBrushFalloff =  __class__ ('GreasePencilBrushFalloff', [o
 export var draw_node = function (node, layout, grease_pencil) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -283,24 +391,33 @@ export var draw_node = function (node, layout, grease_pencil) {
 	}
 	else {
 	}
-	if (isinstance (node, GreasePencilLayerGroup)) {
-		layout.context_pointer_set ('active_gpencil_layer_group', node);
-		layout.menu ('GREASE_PENCIL_MT_layer_group', __kwargtrans__ ({text: node.py_name}));
+	if (__call__ (isinstance, null, node, GreasePencilLayerGroup)) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.context_pointer_set, __accu0__, 'active_gpencil_layer_group', node);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'GREASE_PENCIL_MT_layer_group', __kwargtrans__ ({text: node.py_name}));
+		}) ();
 	}
-	else if (isinstance (node, GreasePencilLayer)) {
-		if (node == grease_pencil.layers.active) {
+	else if (__call__ (isinstance, null, node, GreasePencilLayer)) {
+		if (__eq__ (node, grease_pencil.layers.active)) {
 			var icon = 'GREASEPENCIL';
 		}
 		else {
 			var icon = 'NONE';
 		}
-		layout.operator ('grease_pencil.move_to_layer', __kwargtrans__ ({text: node.py_name, icon: icon})).target_layer_name = node.py_name;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.move_to_layer', __kwargtrans__ ({text: node.py_name, icon: icon}));
+		}) ().target_layer_name = node.py_name;
 	}
 };
 export var draw_node_for_search = function (node, layout, grease_pencil) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -313,22 +430,34 @@ export var draw_node_for_search = function (node, layout, grease_pencil) {
 	}
 	else {
 	}
-	if (isinstance (node, GreasePencilLayerGroup)) {
-		var op = layout.operator ('grease_pencil.move_to_layer', __kwargtrans__ ({text: iface_ ('Add New Layer to {:s}').format (node.py_name), icon: 'ADD', translate: false}));
+	if (__call__ (isinstance, null, node, GreasePencilLayerGroup)) {
+		var op = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.move_to_layer', __kwargtrans__ ({text: (function () {
+				var __accu1__ = __call__ (iface_, null, 'Add New Layer to {:s}');
+				return __call__ (__accu1__.format, __accu1__, node.py_name);
+			}) (), icon: 'ADD', translate: false}));
+		}) ();
 		op.add_new_layer = true;
 		op.target_group_name = node.py_name;
-		for (var child of py_reversed (node.children)) {
-			draw_node_for_search (child, layout, grease_pencil);
+		var __iterable0__ = __call__ (py_reversed, null, node.children);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var child = __getitem__ (__iterable0__, __index0__);
+			__call__ (draw_node_for_search, null, child, layout, grease_pencil);
 		}
 	}
-	else if (isinstance (node, GreasePencilLayer)) {
-		if (node == grease_pencil.layers.active) {
+	else if (__call__ (isinstance, null, node, GreasePencilLayer)) {
+		if (__eq__ (node, grease_pencil.layers.active)) {
 			var icon = 'GREASEPENCIL';
 		}
 		else {
 			var icon = 'NONE';
 		}
-		layout.operator ('grease_pencil.move_to_layer', __kwargtrans__ ({text: node.py_name, icon: icon})).target_layer_name = node.py_name;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.move_to_layer', __kwargtrans__ ({text: node.py_name, icon: icon}));
+		}) ().target_layer_name = node.py_name;
 	}
 };
 export var GREASE_PENCIL_MT_move_to_layer =  __class__ ('GREASE_PENCIL_MT_move_to_layer', [Menu], {
@@ -337,7 +466,7 @@ export var GREASE_PENCIL_MT_move_to_layer =  __class__ ('GREASE_PENCIL_MT_move_t
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -350,20 +479,35 @@ export var GREASE_PENCIL_MT_move_to_layer =  __class__ ('GREASE_PENCIL_MT_move_t
 		else {
 		}
 		var layout = self.layout;
-		if (layout.operator_context == 'EXEC_REGION_WIN') {
+		if (__eq__ (layout.operator_context, 'EXEC_REGION_WIN')) {
 			layout.operator_context = 'INVOKE_REGION_WIN';
-			layout.operator ('WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'})).menu_idname = 'GREASE_PENCIL_MT_move_to_layer_SEARCH';
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'WM_OT_search_single_menu', __kwargtrans__ ({text: 'Search...', icon: 'VIEWZOOM'}));
+			}) ().menu_idname = 'GREASE_PENCIL_MT_move_to_layer_SEARCH';
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var grease_pencil = context.active_object.data;
-		layout.operator ('grease_pencil.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'})).add_new_layer = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
+		}) ().add_new_layer = true;
 		if (!(grease_pencil.layers)) {
 			return ;
 		}
-		layout.separator ();
-		for (var node of py_reversed (grease_pencil.root_nodes)) {
-			draw_node (node, layout, grease_pencil);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var __iterable0__ = __call__ (py_reversed, null, grease_pencil.root_nodes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
+			__call__ (draw_node, null, node, layout, grease_pencil);
 		}
 	});}
 });
@@ -373,7 +517,7 @@ export var GREASE_PENCIL_MT_layer_group =  __class__ ('GREASE_PENCIL_MT_layer_gr
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -387,17 +531,26 @@ export var GREASE_PENCIL_MT_layer_group =  __class__ ('GREASE_PENCIL_MT_layer_gr
 		}
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		var op = layout.operator ('grease_pencil.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
+		var op = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
+		}) ();
 		op.add_new_layer = true;
-		layout.separator ();
-		var target_group = getattr (context, 'active_gpencil_layer_group', null);
-		if (!(target_group) || !(isinstance (target_group, GreasePencilLayerGroup))) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var target_group = __call__ (getattr, null, context, 'active_gpencil_layer_group', null);
+		if (!(target_group) || !(__call__ (isinstance, null, target_group, GreasePencilLayerGroup))) {
 			return ;
 		}
 		op.target_group_name = target_group.py_name;
 		var grease_pencil = context.active_object.data;
-		for (var child of py_reversed (target_group.children)) {
-			draw_node (child, layout, grease_pencil);
+		var __iterable0__ = __call__ (py_reversed, null, target_group.children);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var child = __getitem__ (__iterable0__, __index0__);
+			__call__ (draw_node, null, child, layout, grease_pencil);
 		}
 	});}
 });
@@ -407,7 +560,7 @@ export var GREASE_PENCIL_MT_move_to_layer_SEARCH =  __class__ ('GREASE_PENCIL_MT
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -422,8 +575,11 @@ export var GREASE_PENCIL_MT_move_to_layer_SEARCH =  __class__ ('GREASE_PENCIL_MT
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var grease_pencil = context.active_object.data;
-		for (var node of py_reversed (grease_pencil.root_nodes)) {
-			draw_node_for_search (node, layout, grease_pencil);
+		var __iterable0__ = __call__ (py_reversed, null, grease_pencil.root_nodes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
+			__call__ (draw_node_for_search, null, node, layout, grease_pencil);
 		}
 	});}
 });
@@ -433,7 +589,7 @@ export var GREASE_PENCIL_MT_layer_active =  __class__ ('GREASE_PENCIL_MT_layer_a
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -448,21 +604,30 @@ export var GREASE_PENCIL_MT_layer_active =  __class__ ('GREASE_PENCIL_MT_layer_a
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var obd = context.active_object.data;
-		var nlop = layout.operator ('grease_pencil.layer_add', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
+		var nlop = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_add', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
+		}) ();
 		nlop.new_layer_name = 'Layer';
 		if (!(obd.layers)) {
 			return ;
 		}
-		layout.separator ();
-		for (var i = len (obd.layers) - 1; i > -(1); i--) {
-			var layer = obd.layers [i];
-			if (layer == obd.layers.active) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		for (var i = __sub__ (__call__ (len, null, obd.layers), 1); i > __neg__ (1); i--) {
+			var layer = __getitem__ (obd.layers, i);
+			if (__eq__ (layer, obd.layers.active)) {
 				var icon = 'GREASEPENCIL';
 			}
 			else {
 				var icon = 'NONE';
 			}
-			layout.operator ('grease_pencil.layer_active', __kwargtrans__ ({text: layer.py_name, icon: icon})).layer = i;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_active', __kwargtrans__ ({text: layer.py_name, icon: icon}));
+			}) ().layer = i;
 		}
 	});}
 });
@@ -471,7 +636,7 @@ export var GPENCIL_UL_annotation_layer =  __class__ ('GPENCIL_UL_annotation_laye
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -494,12 +659,30 @@ export var GPENCIL_UL_annotation_layer =  __class__ ('GPENCIL_UL_annotation_laye
 		if (gpl.lock) {
 			layout.active = false;
 		}
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.2}));
-		py_split.prop (gpl, 'color', __kwargtrans__ ({text: '', emboss: true}));
-		py_split.prop (gpl, 'info', __kwargtrans__ ({text: '', emboss: false}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (gpl, 'show_in_front', __kwargtrans__ ({text: '', icon: (gpl.show_in_front ? 'XRAY' : 'FACESEL'), emboss: false}));
-		row.prop (gpl, 'annotation_hide', __kwargtrans__ ({text: '', emboss: false}));
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.2}));
+		}) ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'color', __kwargtrans__ ({text: '', emboss: true}));
+		}) ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'info', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'show_in_front', __kwargtrans__ ({text: '', icon: (gpl.show_in_front ? 'XRAY' : 'FACESEL'), emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_hide', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
 	});}
 });
 export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
@@ -510,7 +693,7 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -524,13 +707,16 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 		}
 		var space = context.space_data;
 		if (!__in__ (space.py_metatype, new set (['VIEW_3D', 'TOPBAR', 'SEQUENCE_EDITOR', 'IMAGE_EDITOR', 'NODE_EDITOR', 'PROPERTIES']))) {
-			self.layout.prop (space, 'show_annotation', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.prop, __accu0__, space, 'show_annotation', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -545,31 +731,58 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 		var layout = self.layout;
 		layout.use_property_decorate = false;
 		var space = context.space_data;
-		var is_clip_editor = space.py_metatype == 'CLIP_EDITOR';
+		var is_clip_editor = __eq__ (space.py_metatype, 'CLIP_EDITOR');
 		var gpd_owner = context.annotation_data_owner;
 		var gpd = context.annotation_data;
 		if (is_clip_editor) {
-			var col = layout.column ();
-			col.label (__kwargtrans__ ({text: 'Data Source:'}));
-			var row = col.row ();
-			row.prop (space, 'annotation_source', __kwargtrans__ ({expand: true}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Data Source:'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, space, 'annotation_source', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 		if (context.annotation_data_owner === null) {
-			var row = layout.row ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.active = false;
-			row.label (__kwargtrans__ ({text: 'No annotation source'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No annotation source'}));
+			}) ();
 			return ;
 		}
-		var row = layout.row ();
-		row.template_ID (gpd_owner, 'annotation', __kwargtrans__ ({py_new: 'gpencil.annotation_add', unlink: 'gpencil.data_unlink'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.template_ID, __accu0__, gpd_owner, 'annotation', __kwargtrans__ ({py_new: 'gpencil.annotation_add', unlink: 'gpencil.data_unlink'}));
+		}) ();
 		if (gpd && gpd.layers) {
-			self.draw_layers (context, layout, gpd);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_layers, __accu0__, context, layout, gpd);
+			}) ();
 		}
 	});},
 	get draw_layers () {return __get__ (this, function (self, context, layout, gpd) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -583,48 +796,102 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 		}
 		else {
 		}
-		var row = layout.row ();
-		var col = row.column ();
-		if (len (gpd.layers) >= 2) {
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__ge__ (__call__ (len, null, gpd.layers), 2)) {
 			var layer_rows = 5;
 		}
 		else {
 			var layer_rows = 3;
 		}
-		col.template_list ('GPENCIL_UL_annotation_layer', '', gpd, 'layers', gpd.layers, 'active_index', __kwargtrans__ ({rows: layer_rows, sort_reverse: true, sort_lock: true}));
-		var col = row.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.operator ('gpencil.layer_annotation_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		sub.operator ('gpencil.layer_annotation_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'GPENCIL_UL_annotation_layer', '', gpd, 'layers', gpd.layers, 'active_index', __kwargtrans__ ({rows: layer_rows, sort_reverse: true, sort_lock: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'gpencil.layer_annotation_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'gpencil.layer_annotation_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
 		var gpl = context.active_annotation_layer;
 		if (gpl) {
-			if (len (gpd.layers) > 1) {
-				col.separator ();
-				var sub = col.column (__kwargtrans__ ({align: true}));
-				sub.operator ('gpencil.layer_annotation_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).py_metatype = 'UP';
-				sub.operator ('gpencil.layer_annotation_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).py_metatype = 'DOWN';
+			if (__gt__ (__call__ (len, null, gpd.layers), 1)) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'gpencil.layer_annotation_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+				}) ().py_metatype = 'UP';
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'gpencil.layer_annotation_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+				}) ().py_metatype = 'DOWN';
 			}
 		}
 		var tool_settings = context.tool_settings;
 		if (gpd && gpl) {
-			layout.prop (gpl, 'annotation_opacity', __kwargtrans__ ({text: 'Opacity', slider: true}));
-			layout.prop (gpl, 'thickness');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_opacity', __kwargtrans__ ({text: 'Opacity', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, gpl, 'thickness');
+			}) ();
 		}
 		else {
-			layout.prop (tool_settings, 'annotation_thickness', __kwargtrans__ ({text: 'Thickness'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'annotation_thickness', __kwargtrans__ ({text: 'Thickness'}));
+			}) ();
 		}
 		if (gpl) {
-			var row = layout.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.active = !(gpl.lock);
 			if (gpl.active_frame) {
-				var lock_status = (gpl.lock_frame ? iface_ ('Locked') : iface_ ('Unlocked'));
-				var lock_label = iface_ ('Frame: {:d} ({:s})').format (gpl.active_frame.frame_number, lock_status);
+				var lock_status = (gpl.lock_frame ? __call__ (iface_, null, 'Locked') : __call__ (iface_, null, 'Unlocked'));
+				var lock_label = (function () {
+					var __accu0__ = __call__ (iface_, null, 'Frame: {:d} ({:s})');
+					return __call__ (__accu0__.format, __accu0__, gpl.active_frame.frame_number, lock_status);
+				}) ();
 			}
 			else {
-				var lock_label = iface_ ('Lock Frame');
+				var lock_label = __call__ (iface_, null, 'Lock Frame');
 			}
-			row.prop (gpl, 'lock_frame', __kwargtrans__ ({text: lock_label, icon: 'UNLOCKED', translate: false}));
-			row.operator ('gpencil.annotation_active_frame_delete', __kwargtrans__ ({text: '', icon: 'X'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gpl, 'lock_frame', __kwargtrans__ ({text: lock_label, icon: 'UNLOCKED', translate: false}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'gpencil.annotation_active_frame_delete', __kwargtrans__ ({text: '', icon: 'X'}));
+			}) ();
 		}
 	});}
 });
@@ -636,7 +903,7 @@ export var AnnotationOnionSkin =  __class__ ('AnnotationOnionSkin', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -665,7 +932,7 @@ export var AnnotationOnionSkin =  __class__ ('AnnotationOnionSkin', [object], {
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -678,12 +945,15 @@ export var AnnotationOnionSkin =  __class__ ('AnnotationOnionSkin', [object], {
 		else {
 		}
 		var gpl = context.active_annotation_layer;
-		self.layout.prop (gpl, 'use_annotation_onion_skinning', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'use_annotation_onion_skinning', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -698,22 +968,55 @@ export var AnnotationOnionSkin =  __class__ ('AnnotationOnionSkin', [object], {
 		var layout = self.layout;
 		layout.use_property_decorate = false;
 		var gpl = context.active_annotation_layer;
-		var col = layout.column ();
-		col.prop (gpl, 'annotation_onion_use_custom_color');
-		var py_split = col.py_split (__kwargtrans__ ({factor: 0.5}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_use_custom_color');
+		}) ();
+		var py_split = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5}));
+		}) ();
 		py_split.active = gpl.use_annotation_onion_skinning;
-		var sub = py_split.column (__kwargtrans__ ({align: true}));
-		var row = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (gpl.annotation_onion_use_custom_color) {
-			row.prop (gpl, 'annotation_onion_before_color', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_before_color', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
-		sub.prop (gpl, 'annotation_onion_before_range', __kwargtrans__ ({text: 'Before'}));
-		var sub = py_split.column (__kwargtrans__ ({align: true}));
-		var row = sub.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_before_range', __kwargtrans__ ({text: 'Before'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (gpl.annotation_onion_use_custom_color) {
-			row.prop (gpl, 'annotation_onion_after_color', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_after_color', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
-		sub.prop (gpl, 'annotation_onion_after_range', __kwargtrans__ ({text: 'After'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_after_range', __kwargtrans__ ({text: 'After'}));
+		}) ();
 	});}
 });
 export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel', [object], {
@@ -721,7 +1024,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -734,83 +1037,158 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 		else {
 		}
 		var layout = self.layout;
-		var show_full_ui = self.bl_space_type == 'PROPERTIES';
-		var is_view3d = self.bl_space_type == 'VIEW_3D';
+		var show_full_ui = __eq__ (self.bl_space_type, 'PROPERTIES');
+		var is_view3d = __eq__ (self.bl_space_type, 'VIEW_3D');
 		var tool_settings = context.scene.tool_settings;
 		var gpencil_paint = tool_settings.gpencil_paint;
 		var brush = (gpencil_paint ? gpencil_paint.brush : null);
 		var ob = context.object;
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		if (ob) {
-			var is_sortable = len (ob.material_slots) > 1;
+			var is_sortable = __gt__ (__call__ (len, null, ob.material_slots), 1);
 			var rows = 7;
-			row.template_list ('GPENCIL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index', __kwargtrans__ ({rows: rows}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.template_list, __accu0__, 'GPENCIL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index', __kwargtrans__ ({rows: rows}));
+			}) ();
 			if (is_view3d && brush !== null) {
 				var gp_settings = brush.gpencil_settings;
 				if (gp_settings.use_material_pin) {
 					row.enabled = false;
 				}
 			}
-			var col = row.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			if (show_full_ui) {
-				col.operator ('object.material_slot_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
-				col.operator ('object.material_slot_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+				}) ();
 			}
-			col.separator ();
-			col.menu ('GREASE_PENCIL_MT_material_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.menu, __accu0__, 'GREASE_PENCIL_MT_material_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+			}) ();
 			if (is_sortable) {
-				col.separator ();
-				col.operator ('object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''})).direction = 'UP';
-				col.operator ('object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''})).direction = 'DOWN';
-				col.separator ();
-				var sub = col.column (__kwargtrans__ ({align: true}));
-				sub.operator ('grease_pencil.material_isolate', __kwargtrans__ ({icon: 'RESTRICT_VIEW_ON', text: ''})).affect_visibility = true;
-				sub.operator ('grease_pencil.material_isolate', __kwargtrans__ ({icon: 'LOCKED', text: ''})).affect_visibility = false;
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_UP', text: ''}));
+				}) ().direction = 'UP';
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
+				}) ().direction = 'DOWN';
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var sub = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_isolate', __kwargtrans__ ({icon: 'RESTRICT_VIEW_ON', text: ''}));
+				}) ().affect_visibility = true;
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_isolate', __kwargtrans__ ({icon: 'LOCKED', text: ''}));
+				}) ().affect_visibility = false;
 			}
 			if (show_full_ui) {
-				var row = layout.row ();
-				row.template_ID (ob, 'active_material', __kwargtrans__ ({py_new: 'material.new', live_icon: true}));
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.template_ID, __accu0__, ob, 'active_material', __kwargtrans__ ({py_new: 'material.new', live_icon: true}));
+				}) ();
 				var slot = context.material_slot;
 				if (slot) {
-					var icon_link = (slot.link == 'DATA' ? 'MESH_DATA' : 'OBJECT_DATA');
-					row.prop (slot, 'link', __kwargtrans__ ({icon: icon_link, icon_only: true}));
+					var icon_link = (__eq__ (slot.link, 'DATA') ? 'MESH_DATA' : 'OBJECT_DATA');
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, slot, 'link', __kwargtrans__ ({icon: icon_link, icon_only: true}));
+					}) ();
 				}
-				if (ob.mode == 'EDIT') {
-					var row = layout.row (__kwargtrans__ ({align: true}));
-					row.operator ('grease_pencil.stroke_material_set', __kwargtrans__ ({text: 'Assign'}));
-					row.operator ('grease_pencil.material_select', __kwargtrans__ ({text: 'Select'})).deselect = false;
-					row.operator ('grease_pencil.material_select', __kwargtrans__ ({text: 'Deselect'})).deselect = true;
+				if (__eq__ (ob.mode, 'EDIT')) {
+					var row = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.stroke_material_set', __kwargtrans__ ({text: 'Assign'}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_select', __kwargtrans__ ({text: 'Select'}));
+					}) ().deselect = false;
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_select', __kwargtrans__ ({text: 'Deselect'}));
+					}) ().deselect = true;
 				}
 			}
 			var ma = null;
 			if (is_view3d && brush !== null) {
 				var gp_settings = brush.gpencil_settings;
 				if (gp_settings.use_material_pin === false) {
-					if (len (ob.material_slots) > 0 && ob.active_material_index >= 0) {
-						var ma = ob.material_slots [ob.active_material_index].material;
+					if (__gt__ (__call__ (len, null, ob.material_slots), 0) && __ge__ (ob.active_material_index, 0)) {
+						var ma = __getitem__ (ob.material_slots, ob.active_material_index).material;
 					}
 				}
 				else {
 					var ma = gp_settings.material;
 				}
 			}
-			else if (len (ob.material_slots) > 0 && ob.active_material_index >= 0) {
-				var ma = ob.material_slots [ob.active_material_index].material;
+			else if (__gt__ (__call__ (len, null, ob.material_slots), 0) && __ge__ (ob.active_material_index, 0)) {
+				var ma = __getitem__ (ob.material_slots, ob.active_material_index).material;
 			}
 			if (is_view3d && ma !== null && ma.grease_pencil !== null) {
 				var gpcolor = ma.grease_pencil;
-				var col = layout.column (__kwargtrans__ ({align: true}));
-				if (gpcolor.stroke_style == 'SOLID') {
-					col.prop (gpcolor, 'color', __kwargtrans__ ({text: 'Stroke Color'}));
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				if (__eq__ (gpcolor.stroke_style, 'SOLID')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, gpcolor, 'color', __kwargtrans__ ({text: 'Stroke Color'}));
+					}) ();
 				}
-				if (gpcolor.fill_style == 'SOLID') {
-					col.prop (gpcolor, 'fill_color', __kwargtrans__ ({text: 'Fill Color'}));
+				if (__eq__ (gpcolor.fill_style, 'SOLID')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, gpcolor, 'fill_color', __kwargtrans__ ({text: 'Fill Color'}));
+					}) ();
 				}
 			}
 		}
 		else {
 			var space = context.space_data;
-			row.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -819,7 +1197,7 @@ export var GreasePencilSimplifyPanel =  __class__ ('GreasePencilSimplifyPanel', 
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -832,12 +1210,15 @@ export var GreasePencilSimplifyPanel =  __class__ ('GreasePencilSimplifyPanel', 
 		else {
 		}
 		var rd = context.scene.render;
-		self.layout.prop (rd, 'simplify_gpencil', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -854,13 +1235,34 @@ export var GreasePencilSimplifyPanel =  __class__ ('GreasePencilSimplifyPanel', 
 		layout.use_property_decorate = false;
 		var rd = context.scene.render;
 		layout.active = rd.use_simplify && rd.simplify_gpencil;
-		var col = layout.column ();
-		col.prop (rd, 'simplify_gpencil_onplay');
-		col.prop (rd, 'simplify_gpencil_view_fill');
-		col.prop (rd, 'simplify_gpencil_modifier');
-		col.prop (rd, 'simplify_gpencil_shader_fx');
-		col.prop (rd, 'simplify_gpencil_tint');
-		col.prop (rd, 'simplify_gpencil_antialiasing');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil_onplay');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil_view_fill');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil_modifier');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil_shader_fx');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil_tint');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_gpencil_antialiasing');
+		}) ();
 	});}
 });
 export var GREASE_PENCIL_MT_snap =  __class__ ('GREASE_PENCIL_MT_snap', [Menu], {
@@ -869,7 +1271,7 @@ export var GREASE_PENCIL_MT_snap =  __class__ ('GREASE_PENCIL_MT_snap', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -882,13 +1284,34 @@ export var GREASE_PENCIL_MT_snap =  __class__ ('GREASE_PENCIL_MT_snap', [Menu], 
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('grease_pencil.snap_to_grid', __kwargtrans__ ({text: 'Selection to Grid'}));
-		layout.operator ('grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor'})).use_offset = false;
-		layout.operator ('grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor (Keep Offset)'})).use_offset = true;
-		layout.separator ();
-		layout.operator ('grease_pencil.snap_cursor_to_selected', __kwargtrans__ ({text: 'Cursor to Selected'}));
-		layout.operator ('view3d.snap_cursor_to_center', __kwargtrans__ ({text: 'Cursor to World Origin'}));
-		layout.operator ('view3d.snap_cursor_to_grid', __kwargtrans__ ({text: 'Cursor to Grid'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_to_grid', __kwargtrans__ ({text: 'Selection to Grid'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor'}));
+		}) ().use_offset = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor (Keep Offset)'}));
+		}) ().use_offset = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_cursor_to_selected', __kwargtrans__ ({text: 'Cursor to Selected'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'view3d.snap_cursor_to_center', __kwargtrans__ ({text: 'Cursor to World Origin'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'view3d.snap_cursor_to_grid', __kwargtrans__ ({text: 'Cursor to Grid'}));
+		}) ();
 	});}
 });
 export var GREASE_PENCIL_MT_snap_pie =  __class__ ('GREASE_PENCIL_MT_snap_pie', [Menu], {
@@ -897,7 +1320,7 @@ export var GREASE_PENCIL_MT_snap_pie =  __class__ ('GREASE_PENCIL_MT_snap_pie', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -910,15 +1333,42 @@ export var GREASE_PENCIL_MT_snap_pie =  __class__ ('GREASE_PENCIL_MT_snap_pie', 
 		else {
 		}
 		var layout = self.layout;
-		var pie = layout.menu_pie ();
-		pie.operator ('view3d.snap_cursor_to_grid', __kwargtrans__ ({text: 'Cursor to Grid', icon: 'CURSOR'}));
-		pie.operator ('grease_pencil.snap_to_grid', __kwargtrans__ ({text: 'Selection to Grid', icon: 'RESTRICT_SELECT_OFF'}));
-		pie.operator ('grease_pencil.snap_cursor_to_selected', __kwargtrans__ ({text: 'Cursor to Selected', icon: 'CURSOR'}));
-		pie.operator ('grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor', icon: 'RESTRICT_SELECT_OFF'})).use_offset = false;
-		pie.operator ('grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor (Keep Offset)', icon: 'RESTRICT_SELECT_OFF'})).use_offset = true;
-		pie.separator ();
-		pie.operator ('view3d.snap_cursor_to_center', __kwargtrans__ ({text: 'Cursor to World Origin', icon: 'CURSOR'}));
-		pie.separator ();
+		var pie = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu_pie, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'view3d.snap_cursor_to_grid', __kwargtrans__ ({text: 'Cursor to Grid', icon: 'CURSOR'}));
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_to_grid', __kwargtrans__ ({text: 'Selection to Grid', icon: 'RESTRICT_SELECT_OFF'}));
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_cursor_to_selected', __kwargtrans__ ({text: 'Cursor to Selected', icon: 'CURSOR'}));
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor', icon: 'RESTRICT_SELECT_OFF'}));
+		}) ().use_offset = false;
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.snap_to_cursor', __kwargtrans__ ({text: 'Selection to Cursor (Keep Offset)', icon: 'RESTRICT_SELECT_OFF'}));
+		}) ().use_offset = true;
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'view3d.snap_cursor_to_center', __kwargtrans__ ({text: 'Cursor to World Origin', icon: 'CURSOR'}));
+		}) ();
+		(function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	});}
 });
 export var GREASE_PENCIL_MT_draw_delete =  __class__ ('GREASE_PENCIL_MT_draw_delete', [Menu], {
@@ -927,7 +1377,7 @@ export var GREASE_PENCIL_MT_draw_delete =  __class__ ('GREASE_PENCIL_MT_draw_del
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -941,8 +1391,14 @@ export var GREASE_PENCIL_MT_draw_delete =  __class__ ('GREASE_PENCIL_MT_draw_del
 		}
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		layout.operator ('grease_pencil.delete_frame', __kwargtrans__ ({text: 'Delete Active Keyframe (Active Layer)'})).py_metatype = 'ACTIVE_FRAME';
-		layout.operator ('grease_pencil.delete_frame', __kwargtrans__ ({text: 'Delete Active Keyframes (All Layers)'})).py_metatype = 'ALL_FRAMES';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.delete_frame', __kwargtrans__ ({text: 'Delete Active Keyframe (Active Layer)'}));
+		}) ().py_metatype = 'ACTIVE_FRAME';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.delete_frame', __kwargtrans__ ({text: 'Delete Active Keyframes (All Layers)'}));
+		}) ().py_metatype = 'ALL_FRAMES';
 	});}
 });
 export var GREASE_PENCIL_MT_stroke_simplify =  __class__ ('GREASE_PENCIL_MT_stroke_simplify', [Menu], {
@@ -951,7 +1407,7 @@ export var GREASE_PENCIL_MT_stroke_simplify =  __class__ ('GREASE_PENCIL_MT_stro
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -964,15 +1420,47 @@ export var GREASE_PENCIL_MT_stroke_simplify =  __class__ ('GREASE_PENCIL_MT_stro
 		else {
 		}
 		var layout = self.layout;
-		layout.operator_enum ('grease_pencil.stroke_simplify', 'mode');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_enum, __accu0__, 'grease_pencil.stroke_simplify', 'mode');
+		}) ();
 	});}
 });
 export var classes = tuple ([GPENCIL_UL_annotation_layer, GREASE_PENCIL_MT_move_to_layer, GREASE_PENCIL_MT_move_to_layer_SEARCH, GREASE_PENCIL_MT_layer_group, GREASE_PENCIL_MT_layer_active, GREASE_PENCIL_MT_snap, GREASE_PENCIL_MT_snap_pie, GREASE_PENCIL_MT_draw_delete, GREASE_PENCIL_MT_stroke_simplify]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_grease_pencil_common.map
 export {GreasePencil, GreasePencilLayer, GreasePencilLayerGroup, GreasePencilTreeNode, Menu, UILayout, UIList, i18n_contexts, iface_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'AnnotationDrawingToolsPanel': AnnotationDrawingToolsPanel = value; break;
+		case 'GreasePencilSculptAdvancedPanel': GreasePencilSculptAdvancedPanel = value; break;
+		case 'GreasePencilDisplayPanel': GreasePencilDisplayPanel = value; break;
+		case 'GreasePencilBrushFalloff': GreasePencilBrushFalloff = value; break;
+		case 'draw_node': draw_node = value; break;
+		case 'draw_node_for_search': draw_node_for_search = value; break;
+		case 'GREASE_PENCIL_MT_move_to_layer': GREASE_PENCIL_MT_move_to_layer = value; break;
+		case 'GREASE_PENCIL_MT_layer_group': GREASE_PENCIL_MT_layer_group = value; break;
+		case 'GREASE_PENCIL_MT_move_to_layer_SEARCH': GREASE_PENCIL_MT_move_to_layer_SEARCH = value; break;
+		case 'GREASE_PENCIL_MT_layer_active': GREASE_PENCIL_MT_layer_active = value; break;
+		case 'GPENCIL_UL_annotation_layer': GPENCIL_UL_annotation_layer = value; break;
+		case 'AnnotationDataPanel': AnnotationDataPanel = value; break;
+		case 'AnnotationOnionSkin': AnnotationOnionSkin = value; break;
+		case 'GreasePencilMaterialsPanel': GreasePencilMaterialsPanel = value; break;
+		case 'GreasePencilSimplifyPanel': GreasePencilSimplifyPanel = value; break;
+		case 'GREASE_PENCIL_MT_snap': GREASE_PENCIL_MT_snap = value; break;
+		case 'GREASE_PENCIL_MT_snap_pie': GREASE_PENCIL_MT_snap_pie = value; break;
+		case 'GREASE_PENCIL_MT_draw_delete': GREASE_PENCIL_MT_draw_delete = value; break;
+		case 'GREASE_PENCIL_MT_stroke_simplify': GREASE_PENCIL_MT_stroke_simplify = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

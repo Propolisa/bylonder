@@ -6,3 +6,9 @@ var __name__ = '_cycles';
 export var osl_version_string = null;
 
 //# sourceMappingURL=_cycles.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'osl_version_string': osl_version_string = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

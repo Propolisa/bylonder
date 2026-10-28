@@ -13,7 +13,7 @@ export var SPREADSHEET_HT_header =  __class__ ('SPREADSHEET_HT_header', [bpy.typ
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -27,19 +27,43 @@ export var SPREADSHEET_HT_header =  __class__ ('SPREADSHEET_HT_header', [bpy.typ
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		layout.template_header ();
-		SPREADSHEET_MT_editor_menus.draw_collapsible (context, layout);
-		layout.separator_spacer ();
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.active = self._selection_filter_available (space);
-		sub.prop (space, 'show_only_selected', __kwargtrans__ ({text: ''}));
-		row.prop (space, 'use_filter', __kwargtrans__ ({toggle: true, icon: (space.use_filter ? 'FILTER_FILLED' : 'FILTER'), icon_only: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_header, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = SPREADSHEET_MT_editor_menus;
+			return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		sub.active = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._selection_filter_available, __accu0__, space);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, space, 'show_only_selected', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, space, 'use_filter', __kwargtrans__ ({toggle: true, icon: (space.use_filter ? 'FILTER_FILLED' : 'FILTER'), icon_only: true}));
+		}) ();
 	});},
 	get _selection_filter_available () {return function (space) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -54,18 +78,18 @@ export var SPREADSHEET_HT_header =  __class__ ('SPREADSHEET_HT_header', [bpy.typ
 		if (!(path)) {
 			return false;
 		}
-		var root_context = path [0];
-		if (root_context.py_metatype != 'ID') {
+		var root_context = __getitem__ (path, 0);
+		if (__ne__ (root_context.py_metatype, 'ID')) {
 			return false;
 		}
 		var data_block = root_context.id;
-		if (isinstance (data_block, bpy.types.Object)) {
+		if (__call__ (isinstance, null, data_block, bpy.types.Object)) {
 			var obj = data_block;
 			var _match_subject = obj.py_metatype;
-			if (_match_subject == 'MESH' || _match_subject == 'POINTCLOUD') {
-				return obj.mode == 'EDIT';
+			if (__eq__ (_match_subject, 'MESH') || __eq__ (_match_subject, 'POINTCLOUD')) {
+				return __eq__ (obj.mode, 'EDIT');
 			}
-			else if (_match_subject == 'CURVES') {
+			else if (__eq__ (_match_subject, 'CURVES')) {
 				return __in__ (obj.mode, new set (['SCULPT_CURVES', 'EDIT']));
 			}
 		}
@@ -79,7 +103,7 @@ export var SPREADSHEET_MT_editor_menus =  __class__ ('SPREADSHEET_MT_editor_menu
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -91,8 +115,12 @@ export var SPREADSHEET_MT_editor_menus =  __class__ ('SPREADSHEET_MT_editor_menu
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
-		layout.menu ('SPREADSHEET_MT_view');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'SPREADSHEET_MT_view');
+		}) ();
 	});}
 });
 export var SPREADSHEET_MT_view =  __class__ ('SPREADSHEET_MT_view', [bpy.types.Menu], {
@@ -101,7 +129,7 @@ export var SPREADSHEET_MT_view =  __class__ ('SPREADSHEET_MT_view', [bpy.types.M
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -115,20 +143,51 @@ export var SPREADSHEET_MT_view =  __class__ ('SPREADSHEET_MT_view', [bpy.types.M
 		}
 		var layout = self.layout;
 		var sspreadsheet = context.space_data;
-		layout.prop (sspreadsheet, 'show_region_toolbar');
-		layout.prop (sspreadsheet, 'show_region_ui');
-		layout.separator ();
-		layout.prop (sspreadsheet, 'show_internal_attributes', __kwargtrans__ ({text: 'Internal Attributes'}));
-		layout.separator ();
-		layout.menu ('INFO_MT_area');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, sspreadsheet, 'show_region_toolbar');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, sspreadsheet, 'show_region_ui');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, sspreadsheet, 'show_internal_attributes', __kwargtrans__ ({text: 'Internal Attributes'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_area');
+		}) ();
 	});}
 });
 export var classes = tuple ([SPREADSHEET_HT_header, SPREADSHEET_MT_editor_menus, SPREADSHEET_MT_view]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_spreadsheet.map
 export {register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'SPREADSHEET_HT_header': SPREADSHEET_HT_header = value; break;
+		case 'SPREADSHEET_MT_editor_menus': SPREADSHEET_MT_editor_menus = value; break;
+		case 'SPREADSHEET_MT_view': SPREADSHEET_MT_view = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

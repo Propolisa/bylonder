@@ -40,6 +40,10 @@ C_NAMES = {'app', 'context', 'data', 'msgbus', 'props', 'types'}
 BOUNDARY = ['boundary', 'mathutils', 'idprop']
 
 
+# Each of Blender's scripts in the build (by its path there) and where Blender has it ('/blender/scripts/startup/...').
+FILES = {}
+
+
 def listing(path):
     """The Python files under a directory of Blender's repository at the tag, cached."""
     cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), transpile.TAG, path, '.listing.json')
@@ -82,6 +86,7 @@ def assemble(build):
         target = os.path.join(build, relative)
         os.makedirs(os.path.dirname(target), exist_ok=True)
         open(target, 'w').write(source)
+        FILES[relative] = '/blender/' + path
     for root, _, names in os.walk(build):
         if root != build and '__init__.py' not in names:
             open(os.path.join(root, '__init__.py'), 'w').close()
@@ -89,6 +94,9 @@ def assemble(build):
         source = os.path.join(HERE, package)
         target = build if package == 'boundary' else os.path.join(build, package)
         shutil.copytree(source, target, dirs_exist_ok=True)
+    open(os.path.join(build, '_files.py'), 'w').write(
+        "# Blender's scripts as files where Blender has them (written by tree.py), for the boundary's os.\n"
+        f'files = {sorted(FILES.values())!r}\n')
 
 
 def bpy_types(build):
@@ -136,6 +144,23 @@ class Imports(ast.NodeTransformer):
 
     def __init__(self, build, name, package, path):
         self.build, self.name, self.package, self.depth, self.path = build, name, package, 0, path
+
+    def visit_Module(self, node):
+        """A package's __import__(name=__name__, fromlist=names) with names a module-level list: its submodules imported
+        as its names too, as that __import__ makes them in Python (bl_ui's register() uses them as names)."""
+        lists = {t.id: n.value for n in node.body if isinstance(n, ast.Assign) and isinstance(n.value, ast.List) for t in n.targets
+                 if isinstance(t, ast.Name)}
+        body = []
+        for statement in node.body:
+            body.append(statement)
+            call = statement.value if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call) else None
+            fromlist = next((k.value for k in call.keywords if k.arg == 'fromlist'), None) if call and getattr(call.func, 'id', None) == '__import__' else None
+            if isinstance(fromlist, ast.Name) and fromlist.id in lists:
+                names = [e.value for e in lists[fromlist.id].elts if isinstance(e, ast.Constant)]
+                body += [ast.Import([ast.alias(f'{self.name}.{n}', n)]) for n in names if is_module(self.build, f'{self.name}.{n}')]
+        node.body = body
+        self.generic_visit(node)
+        return node
 
     def visit_Name(self, node):
         return ast.Constant(self.path) if node.id == '__file__' else node
@@ -200,6 +225,26 @@ def module_imports(build, name, tree):
     return [(target, node) for target, node in out if target != name]
 
 
+class ModuleAttributes(ast.NodeTransformer):
+    """Assignments to an imported module's attributes (_bpy.context = ...) as calls of its __py_setattr__ (write()), as
+    ES modules cannot be assigned to from outside; the module reassigns its own binding, which its importers see."""
+
+    assigned = set()  # (module, attribute) pairs the tree assigns, for write()
+
+    def __init__(self, tree):
+        self.modules = {a.asname or a.name.split('.')[0]: a.name if a.asname else a.name.split('.')[0]
+                        for n in tree.body if isinstance(n, ast.Import) for a in n.names}
+
+    def visit_Assign(self, node):
+        self.generic_visit(node)
+        target = node.targets[0]
+        if len(node.targets) == 1 and isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id in self.modules:
+            ModuleAttributes.assigned.add((self.modules[target.value.id], target.attr))
+            setter = ast.Attribute(ast.Name(target.value.id, ast.Load()), '__py_setattr__', ast.Load())
+            return ast.copy_location(ast.Expr(ast.Call(setter, [ast.Constant(target.attr), node.value], [])), node)
+        return node
+
+
 def lazy_cycles(build, trees, entry):
     """Module-level `import x` statements that close a cycle, as `x = _lazy('x')`, which write() makes a JS namespace
     import."""
@@ -233,6 +278,18 @@ def lazy_cycles(build, trees, entry):
 # Python library modules Transcrypt has (transcrypt/modules).
 TRANSCRYPT = {'cmath', 'copy', 'dataclasses', 'datetime', 'inspect', 'itertools', 'logging', 'math', 'random', 're', 'time',
               'typing', 'unicodedata', 'warnings', '__future__'}
+
+
+def referenced_modules(tree):
+    """The modules a tree imports, at module level or from functions (_module, _member, _lazy)."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and not node.level and node.module:
+            yield node.module
+        elif isinstance(node, ast.Import):
+            yield from (a.name for a in node.names)
+        elif isinstance(node, ast.Call) and getattr(node.func, 'id', None) in ('_member', '_module', '_lazy') and node.args \
+                and isinstance(node.args[0], ast.Constant):
+            yield node.args[0].value
 
 
 def stub_boundary(build, trees):
@@ -279,14 +336,19 @@ def prepare(build):
                 name = module_name(build, path)
                 package = name if file == '__init__.py' else name.rpartition('.')[0]
                 tree = ast.parse(open(path).read())
-                tree = Imports(build, name, package, '/blender/scripts/' + os.path.relpath(path, build)).visit(tree)
+                relative = os.path.relpath(path, build)
+                tree = Imports(build, name, package, FILES.get(relative, '/blender/scripts/' + relative)).visit(tree)
+                tree = ModuleAttributes(tree).visit(tree)
                 trees[name] = transpile.TranscryptFixes().visit(ast.parse(ast.unparse(tree)))
     # The boundary first, then bpy, then the rest: Blender sets up _bpy before any script runs.
-    first = lambda n: (0 if n.split('.')[0] in ('_bpy', 'mathutils', 'idprop', 'os', 'sys', 'typing') else 1 if n.split('.')[0] == 'bpy' else 2, n)
+    boundary = {f.removesuffix('.py') for f in os.listdir(os.path.join(HERE, 'boundary'))} | set(BOUNDARY)
+    first = lambda n: (0 if n.split('.')[0] in boundary else 1 if n.split('.')[0] == 'bpy' else 2, n)
     lazy_cycles(build, trees, sorted((n for n in trees if n != '_modules'), key=first))
     stub_boundary(build, trees)
-    # Every module, stubs included: those only looked up from functions load here too.
-    entry = sorted((n for n in trees if n != '_modules'), key=first)
+    # Every module, stubs included: those only looked up from functions load here too, and first Transcrypt's library
+    # modules the tree uses, which register like the others.
+    library = sorted({m for tree in trees.values() for m in referenced_modules(tree) if m in TRANSCRYPT - {'__future__', 'typing'}})
+    entry = library + sorted((n for n in trees if n != '_modules'), key=first)
     # Blender's startup (bpy.main(), called at the end of bpy's __init__, which loads the scripts) runs from the entry
     # module once every module has loaded: modules load ahead of their use here, not on import as in Python.
     trees['bpy'].body = [n for n in trees['bpy'].body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Call)
@@ -296,7 +358,9 @@ def prepare(build):
         if name != '_modules' and re.search(r'\b_(module|member|lazy|import|globals)\(', source):
             source = 'from _modules import _module, _member, _lazy, _import, _globals\n' + source
         source = (transpile.HELPERS if transpile.uses_helpers(source) else '') + source
-        open(module_path(build, name), 'w').write(source)
+        # Operator overloading for the tree's modules (a + b of lists), not for Transcrypt's, which assume JS operators;
+        # with it, loops index their iterable, so iterators become lists (iconv, __i__).
+        open(module_path(build, name), 'w').write("__pragma__('opov')\n__pragma__('iconv')\n" + source)
     # Aliased: Transcrypt names an imported module by its name without underscores, so _bpy_types and bpy_types collide.
     # Reversed: Transcrypt emits a module's imports last first.
     open(os.path.join(build, '__main__.py'), 'w').write(''.join(f'import {n} as _m{i}\n' for i, n in reversed(list(enumerate(entry))))
@@ -315,6 +379,19 @@ def compile_tree(build):
 # Bylonder's JS modules a boundary module imports, written in a pragma as this comment: Transcrypt would resolve an
 # import statement in a pragma as a Python module.
 JS_IMPORT = r'/\* js-import (\{[^}]*\}) from (\S+) \*/'
+
+
+def forwarded(script, attributes):
+    """The __py_setattr__ cases for imported names among a module's attributes that other modules assign: the module
+    they come from sets them, and this module's live binding follows."""
+    cases = ''
+    for name in sorted(attributes):
+        found = re.search(rf"^import \{{[^}}]*?\b(\w+) as {name}\b[^}}]*\}} from ('[^']*');$|^import \{{[^}}]*?\b{name}\b[^}}]*\}} from ('[^']*');$", script, flags=re.M)
+        if found and not re.search(rf'^export var {name}\b', script, flags=re.M):
+            source, path = found[1] or name, found[2] or found[3]
+            script = f"import * as __source_{name}__ from {path};\n" + script
+            cases += f"\t\tcase {name!r}: __source_{name}__.__py_setattr__ ({source!r}, value); break;\n"
+    return script, cases
 
 
 def reexport(script):
@@ -340,14 +417,20 @@ def write(target, modules):
                         r'getPrototypeOf|setPrototypeOf|entries)\b', r'globalThis.Object.\1', script)
         # Imports closing a cycle as JS namespace imports, which JS allows in a cycle (Transcrypt does not): the
         # module's re-exports are live before its own code has run, as a partly run module is in Python.
-        lazy = sorted(set(re.findall(r"_lazy \('([\w.]+)'\)", script)))
+        lazy_call = r"(?:_lazy \(|__call__ \(_lazy, null, )'([\w.]+)'\)"  # without and with operator overloading
+        lazy = sorted(set(re.findall(lazy_call, script)))
         for i, module in enumerate(lazy):
-            script = script.replace(f"_lazy ('{module}')", f'__cycle{i}__')
+            script = re.sub(lazy_call.replace(r"([\w.]+)", re.escape(module)), f'__cycle{i}__', script)
             script = f"import * as __cycle{i}__ from './{module}.js';\n" + script
         # Bylonder's JS modules the boundary imports (Transcrypt would look for an import in a pragma as Python).
         imports = re.findall(JS_IMPORT, script)
         script = ''.join(f"import {names} from '{path}';\n" for names, path in imports) + re.sub(JS_IMPORT, '', script)
         script = reexport(script)
+        script, cases = forwarded(script, {attribute for module, attribute in ModuleAttributes.assigned if module == file[:-3]})
+        variables = re.findall(r'^export var (\w+)', script, flags=re.M)
+        script += ('\nexport function __py_setattr__ (key, value) {\n\tswitch (key) {\n'
+                   + ''.join(f'\t\tcase {v!r}: {v} = value; break;\n' for v in variables) + cases
+                   + "\t\tdefault: throw new Error (`module attribute ${key} cannot be set`);\n\t}\n}\n")
         name = file[:-3]
         if name in modules:
             # Registered first: a module imported in a cycle is used before it has run to its end, as in Python.

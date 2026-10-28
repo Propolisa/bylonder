@@ -9,7 +9,7 @@ export var collect = function (generation) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -24,3 +24,9 @@ export var collect = function (generation) {
 };
 
 //# sourceMappingURL=gc.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'collect': collect = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

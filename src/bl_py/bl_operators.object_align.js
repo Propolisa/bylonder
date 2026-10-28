@@ -9,7 +9,7 @@ var __name__ = 'bl_operators.object_align';
 export var worldspace_bounds_from_object_bounds = function (bb_world) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -20,7 +20,7 @@ export var worldspace_bounds_from_object_bounds = function (bb_world) {
 	}
 	else {
 	}
-	var __left0__ = tuple ([bb_world [7] [0], bb_world [7] [0], bb_world [7] [1], bb_world [7] [1], bb_world [7] [2], bb_world [7] [2]]);
+	var __left0__ = tuple ([__getitem__ (__getitem__ (bb_world, 7), 0), __getitem__ (__getitem__ (bb_world, 7), 0), __getitem__ (__getitem__ (bb_world, 7), 1), __getitem__ (__getitem__ (bb_world, 7), 1), __getitem__ (__getitem__ (bb_world, 7), 2), __getitem__ (__getitem__ (bb_world, 7), 2)]);
 	var left = __left0__ [0];
 	var right = __left0__ [1];
 	var front = __left0__ [2];
@@ -28,34 +28,34 @@ export var worldspace_bounds_from_object_bounds = function (bb_world) {
 	var down = __left0__ [4];
 	var up = __left0__ [5];
 	for (var i = 0; i < 7; i++) {
-		var val = bb_world [i] [0];
-		if (val < left) {
+		var val = __getitem__ (__getitem__ (bb_world, i), 0);
+		if (__lt__ (val, left)) {
 			var left = val;
 		}
-		if (val > right) {
+		if (__gt__ (val, right)) {
 			var right = val;
 		}
-		var val = bb_world [i] [1];
-		if (val < front) {
+		var val = __getitem__ (__getitem__ (bb_world, i), 1);
+		if (__lt__ (val, front)) {
 			var front = val;
 		}
-		if (val > back) {
+		if (__gt__ (val, back)) {
 			var back = val;
 		}
-		var val = bb_world [i] [2];
-		if (val < down) {
+		var val = __getitem__ (__getitem__ (bb_world, i), 2);
+		if (__lt__ (val, down)) {
 			var down = val;
 		}
-		if (val > up) {
+		if (__gt__ (val, up)) {
 			var up = val;
 		}
 	}
-	return tuple ([Vector (tuple ([left, front, up])), Vector (tuple ([right, back, down]))]);
+	return tuple ([__call__ (Vector, null, tuple ([left, front, up])), __call__ (Vector, null, tuple ([right, back, down]))]);
 };
 export var worldspace_bounds_from_object_data = function (depsgraph, obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -67,49 +67,64 @@ export var worldspace_bounds_from_object_data = function (depsgraph, obj) {
 	}
 	else {
 	}
-	var matrix_world = obj.matrix_world.py_copy ();
-	var ob_eval = obj.evaluated_get (depsgraph);
-	var me = ob_eval.to_mesh ();
+	var matrix_world = (function () {
+		var __accu0__ = obj.matrix_world;
+		return __call__ (__accu0__.py_copy, __accu0__);
+	}) ();
+	var ob_eval = (function () {
+		var __accu0__ = obj;
+		return __call__ (__accu0__.evaluated_get, __accu0__, depsgraph);
+	}) ();
+	var me = (function () {
+		var __accu0__ = ob_eval;
+		return __call__ (__accu0__.to_mesh, __accu0__);
+	}) ();
 	var verts = me.vertices;
-	var val = __matmul__ (matrix_world, (verts ? verts [-(1)].co : Vector (tuple ([0.0, 0.0, 0.0]))));
-	var __left0__ = tuple ([val [0], val [0], val [1], val [1], val [2], val [2]]);
+	var val = __matmul__ (matrix_world, (verts ? __getitem__ (verts, __neg__ (1)).co : __call__ (Vector, null, tuple ([0.0, 0.0, 0.0]))));
+	var __left0__ = tuple ([__getitem__ (val, 0), __getitem__ (val, 0), __getitem__ (val, 1), __getitem__ (val, 1), __getitem__ (val, 2), __getitem__ (val, 2)]);
 	var left = __left0__ [0];
 	var right = __left0__ [1];
 	var front = __left0__ [2];
 	var back = __left0__ [3];
 	var down = __left0__ [4];
 	var up = __left0__ [5];
-	for (var v of verts) {
+	var __iterable0__ = verts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var v = __getitem__ (__iterable0__, __index0__);
 		var vco = __matmul__ (matrix_world, v.co);
-		var val = vco [0];
-		if (val < left) {
+		var val = __getitem__ (vco, 0);
+		if (__lt__ (val, left)) {
 			var left = val;
 		}
-		if (val > right) {
+		if (__gt__ (val, right)) {
 			var right = val;
 		}
-		var val = vco [1];
-		if (val < front) {
+		var val = __getitem__ (vco, 1);
+		if (__lt__ (val, front)) {
 			var front = val;
 		}
-		if (val > back) {
+		if (__gt__ (val, back)) {
 			var back = val;
 		}
-		var val = vco [2];
-		if (val < down) {
+		var val = __getitem__ (vco, 2);
+		if (__lt__ (val, down)) {
 			var down = val;
 		}
-		if (val > up) {
+		if (__gt__ (val, up)) {
 			var up = val;
 		}
 	}
-	ob_eval.to_mesh_clear ();
-	return tuple ([Vector (tuple ([left, front, up])), Vector (tuple ([right, back, down]))]);
+	(function () {
+		var __accu0__ = ob_eval;
+		return __call__ (__accu0__.to_mesh_clear, __accu0__);
+	}) ();
+	return tuple ([__call__ (Vector, null, tuple ([left, front, up])), __call__ (Vector, null, tuple ([right, back, down]))]);
 };
 export var align_objects = function (context, align_x, align_y, align_z, align_mode, relative_to, bb_quality) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -126,200 +141,240 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 	}
 	else {
 	}
-	var depsgraph = context.evaluated_depsgraph_get ();
+	var depsgraph = (function () {
+		var __accu0__ = context;
+		return __call__ (__accu0__.evaluated_depsgraph_get, __accu0__);
+	}) ();
 	var scene = context.scene;
 	var cursor = scene.cursor.location;
-	context.view_layer.py_update ();
+	(function () {
+		var __accu0__ = context.view_layer;
+		return __call__ (__accu0__.py_update, __accu0__);
+	}) ();
 	var Left_Front_Up_SEL = [0.0, 0.0, 0.0];
 	var Right_Back_Down_SEL = [0.0, 0.0, 0.0];
 	var flag_first = true;
 	var objects = [];
-	for (var obj of context.selected_objects) {
-		var matrix_world = obj.matrix_world.py_copy ();
+	var __iterable0__ = context.selected_objects;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var obj = __getitem__ (__iterable0__, __index0__);
+		var matrix_world = (function () {
+			var __accu0__ = obj.matrix_world;
+			return __call__ (__accu0__.py_copy, __accu0__);
+		}) ();
 		var bb_world = (function () {
 			var __accu0__ = [];
-			for (var v of obj.bound_box) {
-				__accu0__.append (__matmul__ (matrix_world, Vector (v)));
+			var __iterable1__ = obj.bound_box;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var v = __getitem__ (__iterable1__, __index1__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __matmul__ (matrix_world, __call__ (Vector, null, v)));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
-		objects.append (tuple ([obj, bb_world]));
+		(function () {
+			var __accu0__ = objects;
+			return __call__ (__accu0__.append, __accu0__, tuple ([obj, bb_world]));
+		}) ();
 	}
 	if (!(objects)) {
 		return false;
 	}
-	for (var [obj, bb_world] of objects) {
-		if (bb_quality && obj.py_metatype == 'MESH') {
-			var GBB = worldspace_bounds_from_object_data (depsgraph, obj);
+	var __iterable0__ = objects;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var obj = __left0__ [0];
+		var bb_world = __left0__ [1];
+		if (bb_quality && __eq__ (obj.py_metatype, 'MESH')) {
+			var GBB = __call__ (worldspace_bounds_from_object_data, null, depsgraph, obj);
 		}
 		else {
-			var GBB = worldspace_bounds_from_object_bounds (bb_world);
+			var GBB = __call__ (worldspace_bounds_from_object_bounds, null, bb_world);
 		}
-		var Left_Front_Up = GBB [0];
-		var Right_Back_Down = GBB [1];
-		if (obj == context.active_object) {
-			var center_active_x = (Left_Front_Up [0] + Right_Back_Down [0]) / 2.0;
-			var center_active_y = (Left_Front_Up [1] + Right_Back_Down [1]) / 2.0;
-			var center_active_z = (Left_Front_Up [2] + Right_Back_Down [2]) / 2.0;
-			var size_active_x = (Right_Back_Down [0] - Left_Front_Up [0]) / 2.0;
-			var size_active_y = (Right_Back_Down [1] - Left_Front_Up [1]) / 2.0;
-			var size_active_z = (Left_Front_Up [2] - Right_Back_Down [2]) / 2.0;
+		var Left_Front_Up = __getitem__ (GBB, 0);
+		var Right_Back_Down = __getitem__ (GBB, 1);
+		if (__eq__ (obj, context.active_object)) {
+			var center_active_x = __truediv__ (__add__ (__getitem__ (Left_Front_Up, 0), __getitem__ (Right_Back_Down, 0)), 2.0);
+			var center_active_y = __truediv__ (__add__ (__getitem__ (Left_Front_Up, 1), __getitem__ (Right_Back_Down, 1)), 2.0);
+			var center_active_z = __truediv__ (__add__ (__getitem__ (Left_Front_Up, 2), __getitem__ (Right_Back_Down, 2)), 2.0);
+			var size_active_x = __truediv__ (__sub__ (__getitem__ (Right_Back_Down, 0), __getitem__ (Left_Front_Up, 0)), 2.0);
+			var size_active_y = __truediv__ (__sub__ (__getitem__ (Right_Back_Down, 1), __getitem__ (Left_Front_Up, 1)), 2.0);
+			var size_active_z = __truediv__ (__sub__ (__getitem__ (Left_Front_Up, 2), __getitem__ (Right_Back_Down, 2)), 2.0);
 		}
 		if (flag_first) {
 			var flag_first = false;
-			Left_Front_Up_SEL [0] = Left_Front_Up [0];
-			Left_Front_Up_SEL [1] = Left_Front_Up [1];
-			Left_Front_Up_SEL [2] = Left_Front_Up [2];
-			Right_Back_Down_SEL [0] = Right_Back_Down [0];
-			Right_Back_Down_SEL [1] = Right_Back_Down [1];
-			Right_Back_Down_SEL [2] = Right_Back_Down [2];
+			__setitem__ (Left_Front_Up_SEL, 0, __getitem__ (Left_Front_Up, 0));
+			__setitem__ (Left_Front_Up_SEL, 1, __getitem__ (Left_Front_Up, 1));
+			__setitem__ (Left_Front_Up_SEL, 2, __getitem__ (Left_Front_Up, 2));
+			__setitem__ (Right_Back_Down_SEL, 0, __getitem__ (Right_Back_Down, 0));
+			__setitem__ (Right_Back_Down_SEL, 1, __getitem__ (Right_Back_Down, 1));
+			__setitem__ (Right_Back_Down_SEL, 2, __getitem__ (Right_Back_Down, 2));
 		}
 		else {
-			if (Left_Front_Up [0] < Left_Front_Up_SEL [0]) {
-				Left_Front_Up_SEL [0] = Left_Front_Up [0];
+			if (__lt__ (__getitem__ (Left_Front_Up, 0), __getitem__ (Left_Front_Up_SEL, 0))) {
+				__setitem__ (Left_Front_Up_SEL, 0, __getitem__ (Left_Front_Up, 0));
 			}
-			if (Left_Front_Up [1] < Left_Front_Up_SEL [1]) {
-				Left_Front_Up_SEL [1] = Left_Front_Up [1];
+			if (__lt__ (__getitem__ (Left_Front_Up, 1), __getitem__ (Left_Front_Up_SEL, 1))) {
+				__setitem__ (Left_Front_Up_SEL, 1, __getitem__ (Left_Front_Up, 1));
 			}
-			if (Left_Front_Up [2] > Left_Front_Up_SEL [2]) {
-				Left_Front_Up_SEL [2] = Left_Front_Up [2];
+			if (__gt__ (__getitem__ (Left_Front_Up, 2), __getitem__ (Left_Front_Up_SEL, 2))) {
+				__setitem__ (Left_Front_Up_SEL, 2, __getitem__ (Left_Front_Up, 2));
 			}
-			if (Right_Back_Down [0] > Right_Back_Down_SEL [0]) {
-				Right_Back_Down_SEL [0] = Right_Back_Down [0];
+			if (__gt__ (__getitem__ (Right_Back_Down, 0), __getitem__ (Right_Back_Down_SEL, 0))) {
+				__setitem__ (Right_Back_Down_SEL, 0, __getitem__ (Right_Back_Down, 0));
 			}
-			if (Right_Back_Down [1] > Right_Back_Down_SEL [1]) {
-				Right_Back_Down_SEL [1] = Right_Back_Down [1];
+			if (__gt__ (__getitem__ (Right_Back_Down, 1), __getitem__ (Right_Back_Down_SEL, 1))) {
+				__setitem__ (Right_Back_Down_SEL, 1, __getitem__ (Right_Back_Down, 1));
 			}
-			if (Right_Back_Down [2] < Right_Back_Down_SEL [2]) {
-				Right_Back_Down_SEL [2] = Right_Back_Down [2];
+			if (__lt__ (__getitem__ (Right_Back_Down, 2), __getitem__ (Right_Back_Down_SEL, 2))) {
+				__setitem__ (Right_Back_Down_SEL, 2, __getitem__ (Right_Back_Down, 2));
 			}
 		}
 	}
-	var center_sel_x = (Left_Front_Up_SEL [0] + Right_Back_Down_SEL [0]) / 2.0;
-	var center_sel_y = (Left_Front_Up_SEL [1] + Right_Back_Down_SEL [1]) / 2.0;
-	var center_sel_z = (Left_Front_Up_SEL [2] + Right_Back_Down_SEL [2]) / 2.0;
-	for (var [obj, bb_world] of objects) {
-		var matrix_world = obj.matrix_world.py_copy ();
+	var center_sel_x = __truediv__ (__add__ (__getitem__ (Left_Front_Up_SEL, 0), __getitem__ (Right_Back_Down_SEL, 0)), 2.0);
+	var center_sel_y = __truediv__ (__add__ (__getitem__ (Left_Front_Up_SEL, 1), __getitem__ (Right_Back_Down_SEL, 1)), 2.0);
+	var center_sel_z = __truediv__ (__add__ (__getitem__ (Left_Front_Up_SEL, 2), __getitem__ (Right_Back_Down_SEL, 2)), 2.0);
+	var __iterable0__ = objects;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var obj = __left0__ [0];
+		var bb_world = __left0__ [1];
+		var matrix_world = (function () {
+			var __accu0__ = obj.matrix_world;
+			return __call__ (__accu0__.py_copy, __accu0__);
+		}) ();
 		var bb_world = (function () {
 			var __accu0__ = [];
-			for (var v of obj.bound_box) {
-				__accu0__.append (__matmul__ (matrix_world, Vector (v.__getslice__ (null, null, 1))));
+			var __iterable1__ = obj.bound_box;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var v = __getitem__ (__iterable1__, __index1__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __matmul__ (matrix_world, __call__ (Vector, null, __getslice__ (v, null, null, 1))));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
-		if (bb_quality && obj.py_metatype == 'MESH') {
-			var GBB = worldspace_bounds_from_object_data (depsgraph, obj);
+		if (bb_quality && __eq__ (obj.py_metatype, 'MESH')) {
+			var GBB = __call__ (worldspace_bounds_from_object_data, null, depsgraph, obj);
 		}
 		else {
-			var GBB = worldspace_bounds_from_object_bounds (bb_world);
+			var GBB = __call__ (worldspace_bounds_from_object_bounds, null, bb_world);
 		}
-		var Left_Front_Up = GBB [0];
-		var Right_Back_Down = GBB [1];
-		var center_x = (Left_Front_Up [0] + Right_Back_Down [0]) / 2.0;
-		var center_y = (Left_Front_Up [1] + Right_Back_Down [1]) / 2.0;
-		var center_z = (Left_Front_Up [2] + Right_Back_Down [2]) / 2.0;
-		var positive_x = Right_Back_Down [0];
-		var positive_y = Right_Back_Down [1];
-		var positive_z = Left_Front_Up [2];
-		var negative_x = Left_Front_Up [0];
-		var negative_y = Left_Front_Up [1];
-		var negative_z = Right_Back_Down [2];
+		var Left_Front_Up = __getitem__ (GBB, 0);
+		var Right_Back_Down = __getitem__ (GBB, 1);
+		var center_x = __truediv__ (__add__ (__getitem__ (Left_Front_Up, 0), __getitem__ (Right_Back_Down, 0)), 2.0);
+		var center_y = __truediv__ (__add__ (__getitem__ (Left_Front_Up, 1), __getitem__ (Right_Back_Down, 1)), 2.0);
+		var center_z = __truediv__ (__add__ (__getitem__ (Left_Front_Up, 2), __getitem__ (Right_Back_Down, 2)), 2.0);
+		var positive_x = __getitem__ (Right_Back_Down, 0);
+		var positive_y = __getitem__ (Right_Back_Down, 1);
+		var positive_z = __getitem__ (Left_Front_Up, 2);
+		var negative_x = __getitem__ (Left_Front_Up, 0);
+		var negative_y = __getitem__ (Left_Front_Up, 1);
+		var negative_z = __getitem__ (Right_Back_Down, 2);
 		var obj_loc = obj.location;
 		if (align_x) {
-			if (relative_to == 'OPT_4') {
-				if (align_mode == 'OPT_1') {
-					var obj_x = (obj_loc [0] - negative_x) - size_active_x;
+			if (__eq__ (relative_to, 'OPT_4')) {
+				if (__eq__ (align_mode, 'OPT_1')) {
+					var obj_x = __sub__ (__sub__ (__getitem__ (obj_loc, 0), negative_x), size_active_x);
 				}
-				else if (align_mode == 'OPT_3') {
-					var obj_x = (obj_loc [0] - positive_x) + size_active_x;
+				else if (__eq__ (align_mode, 'OPT_3')) {
+					var obj_x = __add__ (__sub__ (__getitem__ (obj_loc, 0), positive_x), size_active_x);
 				}
 			}
-			else if (align_mode == 'OPT_1') {
-				var obj_x = obj_loc [0] - negative_x;
+			else if (__eq__ (align_mode, 'OPT_1')) {
+				var obj_x = __sub__ (__getitem__ (obj_loc, 0), negative_x);
 			}
-			else if (align_mode == 'OPT_3') {
-				var obj_x = obj_loc [0] - positive_x;
+			else if (__eq__ (align_mode, 'OPT_3')) {
+				var obj_x = __sub__ (__getitem__ (obj_loc, 0), positive_x);
 			}
-			if (align_mode == 'OPT_2') {
-				var obj_x = obj_loc [0] - center_x;
+			if (__eq__ (align_mode, 'OPT_2')) {
+				var obj_x = __sub__ (__getitem__ (obj_loc, 0), center_x);
 			}
-			if (relative_to == 'OPT_1') {
+			if (__eq__ (relative_to, 'OPT_1')) {
 				var loc_x = obj_x;
 			}
-			else if (relative_to == 'OPT_2') {
-				var loc_x = obj_x + cursor [0];
+			else if (__eq__ (relative_to, 'OPT_2')) {
+				var loc_x = __add__ (obj_x, __getitem__ (cursor, 0));
 			}
-			else if (relative_to == 'OPT_3') {
-				var loc_x = obj_x + center_sel_x;
+			else if (__eq__ (relative_to, 'OPT_3')) {
+				var loc_x = __add__ (obj_x, center_sel_x);
 			}
-			else if (relative_to == 'OPT_4') {
-				var loc_x = obj_x + center_active_x;
+			else if (__eq__ (relative_to, 'OPT_4')) {
+				var loc_x = __add__ (obj_x, center_active_x);
 			}
-			obj.location [0] = loc_x;
+			__setitem__ (obj.location, 0, loc_x);
 		}
 		if (align_y) {
-			if (relative_to == 'OPT_4') {
-				if (align_mode == 'OPT_1') {
-					var obj_y = (obj_loc [1] - negative_y) - size_active_y;
+			if (__eq__ (relative_to, 'OPT_4')) {
+				if (__eq__ (align_mode, 'OPT_1')) {
+					var obj_y = __sub__ (__sub__ (__getitem__ (obj_loc, 1), negative_y), size_active_y);
 				}
-				else if (align_mode == 'OPT_3') {
-					var obj_y = (obj_loc [1] - positive_y) + size_active_y;
+				else if (__eq__ (align_mode, 'OPT_3')) {
+					var obj_y = __add__ (__sub__ (__getitem__ (obj_loc, 1), positive_y), size_active_y);
 				}
 			}
-			else if (align_mode == 'OPT_1') {
-				var obj_y = obj_loc [1] - negative_y;
+			else if (__eq__ (align_mode, 'OPT_1')) {
+				var obj_y = __sub__ (__getitem__ (obj_loc, 1), negative_y);
 			}
-			else if (align_mode == 'OPT_3') {
-				var obj_y = obj_loc [1] - positive_y;
+			else if (__eq__ (align_mode, 'OPT_3')) {
+				var obj_y = __sub__ (__getitem__ (obj_loc, 1), positive_y);
 			}
-			if (align_mode == 'OPT_2') {
-				var obj_y = obj_loc [1] - center_y;
+			if (__eq__ (align_mode, 'OPT_2')) {
+				var obj_y = __sub__ (__getitem__ (obj_loc, 1), center_y);
 			}
-			if (relative_to == 'OPT_1') {
+			if (__eq__ (relative_to, 'OPT_1')) {
 				var loc_y = obj_y;
 			}
-			else if (relative_to == 'OPT_2') {
-				var loc_y = obj_y + cursor [1];
+			else if (__eq__ (relative_to, 'OPT_2')) {
+				var loc_y = __add__ (obj_y, __getitem__ (cursor, 1));
 			}
-			else if (relative_to == 'OPT_3') {
-				var loc_y = obj_y + center_sel_y;
+			else if (__eq__ (relative_to, 'OPT_3')) {
+				var loc_y = __add__ (obj_y, center_sel_y);
 			}
-			else if (relative_to == 'OPT_4') {
-				var loc_y = obj_y + center_active_y;
+			else if (__eq__ (relative_to, 'OPT_4')) {
+				var loc_y = __add__ (obj_y, center_active_y);
 			}
-			obj.location [1] = loc_y;
+			__setitem__ (obj.location, 1, loc_y);
 		}
 		if (align_z) {
-			if (relative_to == 'OPT_4') {
-				if (align_mode == 'OPT_1') {
-					var obj_z = (obj_loc [2] - negative_z) - size_active_z;
+			if (__eq__ (relative_to, 'OPT_4')) {
+				if (__eq__ (align_mode, 'OPT_1')) {
+					var obj_z = __sub__ (__sub__ (__getitem__ (obj_loc, 2), negative_z), size_active_z);
 				}
-				else if (align_mode == 'OPT_3') {
-					var obj_z = (obj_loc [2] - positive_z) + size_active_z;
+				else if (__eq__ (align_mode, 'OPT_3')) {
+					var obj_z = __add__ (__sub__ (__getitem__ (obj_loc, 2), positive_z), size_active_z);
 				}
 			}
-			else if (align_mode == 'OPT_1') {
-				var obj_z = obj_loc [2] - negative_z;
+			else if (__eq__ (align_mode, 'OPT_1')) {
+				var obj_z = __sub__ (__getitem__ (obj_loc, 2), negative_z);
 			}
-			else if (align_mode == 'OPT_3') {
-				var obj_z = obj_loc [2] - positive_z;
+			else if (__eq__ (align_mode, 'OPT_3')) {
+				var obj_z = __sub__ (__getitem__ (obj_loc, 2), positive_z);
 			}
-			if (align_mode == 'OPT_2') {
-				var obj_z = obj_loc [2] - center_z;
+			if (__eq__ (align_mode, 'OPT_2')) {
+				var obj_z = __sub__ (__getitem__ (obj_loc, 2), center_z);
 			}
-			if (relative_to == 'OPT_1') {
+			if (__eq__ (relative_to, 'OPT_1')) {
 				var loc_z = obj_z;
 			}
-			else if (relative_to == 'OPT_2') {
-				var loc_z = obj_z + cursor [2];
+			else if (__eq__ (relative_to, 'OPT_2')) {
+				var loc_z = __add__ (obj_z, __getitem__ (cursor, 2));
 			}
-			else if (relative_to == 'OPT_3') {
-				var loc_z = obj_z + center_sel_z;
+			else if (__eq__ (relative_to, 'OPT_3')) {
+				var loc_z = __add__ (obj_z, center_sel_z);
 			}
-			else if (relative_to == 'OPT_4') {
-				var loc_z = obj_z + center_active_z;
+			else if (__eq__ (relative_to, 'OPT_4')) {
+				var loc_z = __add__ (obj_z, center_active_z);
 			}
-			obj.location [2] = loc_z;
+			__setitem__ (obj.location, 2, loc_z);
 		}
 	}
 	return true;
@@ -332,7 +387,7 @@ export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -344,12 +399,12 @@ export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 		}
 		else {
 		}
-		return context.mode == 'OBJECT';
+		return __eq__ (context.mode, 'OBJECT');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -362,9 +417,12 @@ export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 		else {
 		}
 		var align_axis = self.align_axis;
-		var ret = align_objects (context, __in__ ('X', align_axis), __in__ ('Y', align_axis), __in__ ('Z', align_axis), self.align_mode, self.relative_to, self.bb_quality);
+		var ret = __call__ (align_objects, null, context, __in__ ('X', align_axis), __in__ ('Y', align_axis), __in__ ('Z', align_axis), self.align_mode, self.relative_to, self.bb_quality);
 		if (!(ret)) {
-			self.report (new set (['WARNING']), 'No objects with bound-box selected');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No objects with bound-box selected');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		else {
@@ -372,8 +430,19 @@ export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 		}
 	});}
 });
-AlignObjects.__annotations__ = dict ({'bb_quality': BoolProperty (__kwargtrans__ ({py_name: 'High Quality', description: 'Enables high quality but slow calculation of the bounding box for perfect results on complex shape meshes with rotation/scale', py_default: true})), 'align_mode': EnumProperty (__kwargtrans__ ({py_name: 'Align Mode', description: 'Side of object to use for alignment', py_items: tuple ([tuple (['OPT_1', 'Negative Sides', '']), tuple (['OPT_2', 'Centers', '']), tuple (['OPT_3', 'Positive Sides', ''])]), py_default: 'OPT_2'})), 'relative_to': EnumProperty (__kwargtrans__ ({py_name: 'Relative To', description: 'Reference location to align to', py_items: tuple ([tuple (['OPT_1', 'Scene Origin', 'Use the scene origin as the position for the selected objects to align to']), tuple (['OPT_2', '3D Cursor', 'Use the 3D cursor as the position for the selected objects to align to']), tuple (['OPT_3', 'Selection', 'Use the selected objects as the position for the selected objects to align to']), tuple (['OPT_4', 'Active', 'Use the active object as the position for the selected objects to align to'])]), py_default: 'OPT_4'})), 'align_axis': EnumProperty (__kwargtrans__ ({py_name: 'Align', description: 'Align to axis', py_items: tuple ([tuple (['X', 'X', '']), tuple (['Y', 'Y', '']), tuple (['Z', 'Z', ''])]), options: new set (['ENUM_FLAG'])}))});
+AlignObjects.__annotations__ = dict ({'bb_quality': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'High Quality', description: 'Enables high quality but slow calculation of the bounding box for perfect results on complex shape meshes with rotation/scale', py_default: true})), 'align_mode': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Align Mode', description: 'Side of object to use for alignment', py_items: tuple ([tuple (['OPT_1', 'Negative Sides', '']), tuple (['OPT_2', 'Centers', '']), tuple (['OPT_3', 'Positive Sides', ''])]), py_default: 'OPT_2'})), 'relative_to': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Relative To', description: 'Reference location to align to', py_items: tuple ([tuple (['OPT_1', 'Scene Origin', 'Use the scene origin as the position for the selected objects to align to']), tuple (['OPT_2', '3D Cursor', 'Use the 3D cursor as the position for the selected objects to align to']), tuple (['OPT_3', 'Selection', 'Use the selected objects as the position for the selected objects to align to']), tuple (['OPT_4', 'Active', 'Use the active object as the position for the selected objects to align to'])]), py_default: 'OPT_4'})), 'align_axis': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Align', description: 'Align to axis', py_items: tuple ([tuple (['X', 'X', '']), tuple (['Y', 'Y', '']), tuple (['Z', 'Z', ''])]), options: new set (['ENUM_FLAG'])}))});
 export var classes = tuple ([AlignObjects]);
 
 //# sourceMappingURL=bl_operators.object_align.map
 export {BoolProperty, EnumProperty, Operator, Vector};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'worldspace_bounds_from_object_bounds': worldspace_bounds_from_object_bounds = value; break;
+		case 'worldspace_bounds_from_object_data': worldspace_bounds_from_object_data = value; break;
+		case 'align_objects': align_objects = value; break;
+		case 'AlignObjects': AlignObjects = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

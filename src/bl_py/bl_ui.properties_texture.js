@@ -20,7 +20,7 @@ export var TEXTURE_MT_context_menu =  __class__ ('TEXTURE_MT_context_menu', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -33,8 +33,14 @@ export var TEXTURE_MT_context_menu =  __class__ ('TEXTURE_MT_context_menu', [Men
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('texture.slot_copy', __kwargtrans__ ({icon: 'COPYDOWN'}));
-		layout.operator ('texture.slot_paste', __kwargtrans__ ({icon: 'PASTEDOWN'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'texture.slot_copy', __kwargtrans__ ({icon: 'COPYDOWN'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'texture.slot_paste', __kwargtrans__ ({icon: 'PASTEDOWN'}));
+		}) ();
 	});}
 });
 export var TEXTURE_UL_texslots =  __class__ ('TEXTURE_UL_texslots', [UIList], {
@@ -42,7 +48,7 @@ export var TEXTURE_UL_texslots =  __class__ ('TEXTURE_UL_texslots', [UIList], {
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -64,17 +70,23 @@ export var TEXTURE_UL_texslots =  __class__ ('TEXTURE_UL_texslots', [UIList], {
 		var slot = item;
 		var tex = (slot ? slot.texture : null);
 		if (tex) {
-			layout.prop (tex, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
+			}) ();
 		}
 		else {
-			layout.label (__kwargtrans__ ({text: '', icon_value: icon}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon_value: icon}));
+			}) ();
 		}
 	});}
 });
 export var context_tex_datablock = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -111,7 +123,7 @@ export var TEXTURE_PT_preview =  __class__ ('TEXTURE_PT_preview', [TextureButton
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -124,12 +136,12 @@ export var TEXTURE_PT_preview =  __class__ ('TEXTURE_PT_preview', [TextureButton
 		else {
 		}
 		var tex = context.texture;
-		return tex && (tex.py_metatype != 'NONE' || tex.use_nodes) && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return tex && (__ne__ (tex.py_metatype, 'NONE') || tex.use_nodes) && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,17 +155,26 @@ export var TEXTURE_PT_preview =  __class__ ('TEXTURE_PT_preview', [TextureButton
 		}
 		var layout = self.layout;
 		var tex = context.texture;
-		var slot = getattr (context, 'texture_slot', null);
-		var idblock = context_tex_datablock (context);
+		var slot = __call__ (getattr, null, context, 'texture_slot', null);
+		var idblock = __call__ (context_tex_datablock, null, context);
 		if (idblock) {
-			layout.template_preview (tex, __kwargtrans__ ({parent: idblock, slot: slot}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_preview, __accu0__, tex, __kwargtrans__ ({parent: idblock, slot: slot}));
+			}) ();
 		}
 		else {
-			layout.template_preview (tex, __kwargtrans__ ({slot: slot}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_preview, __accu0__, tex, __kwargtrans__ ({slot: slot}));
+			}) ();
 		}
-		var idblock = context_tex_datablock (context);
-		if (isinstance (idblock, Brush)) {
-			layout.prop (tex, 'use_preview_alpha');
+		var idblock = __call__ (context_tex_datablock, null, context);
+		if (__call__ (isinstance, null, idblock, Brush)) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'use_preview_alpha');
+			}) ();
 		}
 	});}
 });
@@ -166,7 +187,7 @@ export var TEXTURE_PT_context =  __class__ ('TEXTURE_PT_context', [TextureButton
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -184,27 +205,54 @@ export var TEXTURE_PT_context =  __class__ ('TEXTURE_PT_context', [TextureButton
 		var pin_id = space.pin_id;
 		var use_pin_id = space.use_pin_id;
 		var user = context.texture_user;
-		var col = layout.column ();
-		if (!(use_pin_id && isinstance (pin_id, bpy.types.Texture))) {
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (!(use_pin_id && __call__ (isinstance, null, pin_id, bpy.types.Texture))) {
 			var pin_id = null;
 		}
 		if (!(pin_id)) {
-			col.template_texture_user ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_texture_user, __accu0__);
+			}) ();
 		}
 		if (user || pin_id) {
-			col.separator ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			if (pin_id) {
-				col.template_ID (space, 'pin_id');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+				}) ();
 			}
 			else {
 				var propname = context.texture_user_property.identifier;
-				col.template_ID (user, propname, __kwargtrans__ ({py_new: 'texture.new'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_ID, __accu0__, user, propname, __kwargtrans__ ({py_new: 'texture.new'}));
+				}) ();
 			}
 			if (tex) {
-				col.separator ();
-				var py_split = col.py_split (__kwargtrans__ ({factor: 0.2}));
-				py_split.label (__kwargtrans__ ({text: 'Type'}));
-				py_split.prop (tex, 'type', __kwargtrans__ ({text: ''}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var py_split = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.2}));
+				}) ();
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Type'}));
+				}) ();
+				(function () {
+					var __accu0__ = py_split;
+					return __call__ (__accu0__.prop, __accu0__, tex, 'type', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
 		}
 	});}
@@ -217,7 +265,7 @@ export var TEXTURE_PT_node =  __class__ ('TEXTURE_PT_node', [TextureButtonsPanel
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -235,7 +283,7 @@ export var TEXTURE_PT_node =  __class__ ('TEXTURE_PT_node', [TextureButtonsPanel
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -251,7 +299,10 @@ export var TEXTURE_PT_node =  __class__ ('TEXTURE_PT_node', [TextureButtonsPanel
 		layout.use_property_split = true;
 		var node = context.texture_node;
 		var ntree = node.id_data;
-		layout.template_node_view (ntree, node, null);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_node_view, __accu0__, ntree, node, null);
+		}) ();
 	});}
 });
 export var TextureTypePanel =  __class__ ('TextureTypePanel', [TextureButtonsPanel], {
@@ -259,7 +310,7 @@ export var TextureTypePanel =  __class__ ('TextureTypePanel', [TextureButtonsPan
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -273,7 +324,7 @@ export var TextureTypePanel =  __class__ ('TextureTypePanel', [TextureButtonsPan
 		}
 		var tex = context.texture;
 		var engine = context.engine;
-		return tex && ((tex.py_metatype == cls.tex_type && !(tex.use_nodes)) && __in__ (engine, cls.COMPAT_ENGINES));
+		return tex && ((__eq__ (tex.py_metatype, cls.tex_type) && !(tex.use_nodes)) && __in__ (engine, cls.COMPAT_ENGINES));
 	});}
 });
 export var TEXTURE_PT_clouds =  __class__ ('TEXTURE_PT_clouds', [TextureTypePanel, Panel], {
@@ -284,7 +335,7 @@ export var TEXTURE_PT_clouds =  __class__ ('TEXTURE_PT_clouds', [TextureTypePane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -298,20 +349,59 @@ export var TEXTURE_PT_clouds =  __class__ ('TEXTURE_PT_clouds', [TextureTypePane
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
-		col.separator ();
-		col.prop (tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'cloud_type');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		col.prop (tex, 'noise_depth', __kwargtrans__ ({text: 'Depth'}));
-		col.prop (tex, 'nabla', __kwargtrans__ ({text: 'Nabla'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'cloud_type');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_depth', __kwargtrans__ ({text: 'Depth'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'nabla', __kwargtrans__ ({text: 'Nabla'}));
+		}) ();
 	});}
 });
 export var TEXTURE_PT_wood =  __class__ ('TEXTURE_PT_wood', [TextureTypePanel, Panel], {
@@ -322,7 +412,7 @@ export var TEXTURE_PT_wood =  __class__ ('TEXTURE_PT_wood', [TextureTypePanel, P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -336,24 +426,69 @@ export var TEXTURE_PT_wood =  __class__ ('TEXTURE_PT_wood', [TextureTypePanel, P
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: false}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
-		col.separator ();
-		col.prop (tex, 'wood_type');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis_2', __kwargtrans__ ({text: 'Second Basis'}));
-		var col = col.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'wood_type');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis_2', __kwargtrans__ ({text: 'Second Basis'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = __in__ (tex.wood_type, new set (['RINGNOISE', 'BANDNOISE']));
-		col.prop (tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
-		col.separator ();
-		var sub = flow.column ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = __in__ (tex.wood_type, new set (['RINGNOISE', 'BANDNOISE']));
-		sub.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		sub.prop (tex, 'turbulence');
-		sub.prop (tex, 'nabla');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'turbulence');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'nabla');
+		}) ();
 	});}
 });
 export var TEXTURE_PT_marble =  __class__ ('TEXTURE_PT_marble', [TextureTypePanel, Panel], {
@@ -364,7 +499,7 @@ export var TEXTURE_PT_marble =  __class__ ('TEXTURE_PT_marble', [TextureTypePane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -378,22 +513,67 @@ export var TEXTURE_PT_marble =  __class__ ('TEXTURE_PT_marble', [TextureTypePane
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
-		col.separator ();
-		col.prop (tex, 'marble_type');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis_2', __kwargtrans__ ({text: 'Second Basis'}));
-		col.prop (tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		col.prop (tex, 'noise_depth', __kwargtrans__ ({text: 'Depth'}));
-		col.prop (tex, 'turbulence');
-		col.prop (tex, 'nabla');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'marble_type');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis_2', __kwargtrans__ ({text: 'Second Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_depth', __kwargtrans__ ({text: 'Depth'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'turbulence');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'nabla');
+		}) ();
 	});}
 });
 export var TEXTURE_PT_magic =  __class__ ('TEXTURE_PT_magic', [TextureTypePanel, Panel], {
@@ -404,7 +584,7 @@ export var TEXTURE_PT_magic =  __class__ ('TEXTURE_PT_magic', [TextureTypePanel,
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -418,12 +598,27 @@ export var TEXTURE_PT_magic =  __class__ ('TEXTURE_PT_magic', [TextureTypePanel,
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_depth', __kwargtrans__ ({text: 'Depth'}));
-		var col = flow.column ();
-		col.prop (tex, 'turbulence');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_depth', __kwargtrans__ ({text: 'Depth'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'turbulence');
+		}) ();
 	});}
 });
 export var TEXTURE_PT_blend =  __class__ ('TEXTURE_PT_blend', [TextureTypePanel, Panel], {
@@ -434,7 +629,7 @@ export var TEXTURE_PT_blend =  __class__ ('TEXTURE_PT_blend', [TextureTypePanel,
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -448,14 +643,32 @@ export var TEXTURE_PT_blend =  __class__ ('TEXTURE_PT_blend', [TextureTypePanel,
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'progression');
-		col.separator ();
-		var col = flow.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'progression');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = __in__ (tex.progression, new set (['LINEAR', 'QUADRATIC', 'EASING', 'RADIAL']));
-		col.prop (tex, 'use_flip_axis', __kwargtrans__ ({text: 'Orientation'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_flip_axis', __kwargtrans__ ({text: 'Orientation'}));
+		}) ();
 	});}
 });
 export var TEXTURE_PT_stucci =  __class__ ('TEXTURE_PT_stucci', [TextureTypePanel, Panel], {
@@ -466,7 +679,7 @@ export var TEXTURE_PT_stucci =  __class__ ('TEXTURE_PT_stucci', [TextureTypePane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -480,19 +693,58 @@ export var TEXTURE_PT_stucci =  __class__ ('TEXTURE_PT_stucci', [TextureTypePane
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
-		col.separator ();
-		col.row ().prop (tex, 'stucci_type');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		col.prop (tex, 'turbulence');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = col;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, tex, 'stucci_type');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'turbulence');
+		}) ();
 	});}
 });
 export var TEXTURE_PT_image =  __class__ ('TEXTURE_PT_image', [TextureTypePanel, Panel], {
@@ -503,7 +755,7 @@ export var TEXTURE_PT_image =  __class__ ('TEXTURE_PT_image', [TextureTypePanel,
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -516,6 +768,7 @@ export var TEXTURE_PT_image =  __class__ ('TEXTURE_PT_image', [TextureTypePanel,
 		else {
 		}
 		var layout = self.layout;
+		// pass;
 	});}
 });
 export var TEXTURE_PT_image_settings =  __class__ ('TEXTURE_PT_image_settings', [TextureTypePanel, Panel], {
@@ -527,7 +780,7 @@ export var TEXTURE_PT_image_settings =  __class__ ('TEXTURE_PT_image_settings', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -541,7 +794,10 @@ export var TEXTURE_PT_image_settings =  __class__ ('TEXTURE_PT_image_settings', 
 		}
 		var layout = self.layout;
 		var tex = context.texture;
-		layout.template_image (tex, 'image', tex.image_user);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_image, __accu0__, tex, 'image', tex.image_user);
+		}) ();
 	});}
 });
 export var TEXTURE_PT_image_sampling =  __class__ ('TEXTURE_PT_image_sampling', [TextureTypePanel, Panel], {
@@ -554,7 +810,7 @@ export var TEXTURE_PT_image_sampling =  __class__ ('TEXTURE_PT_image_sampling', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -568,11 +824,23 @@ export var TEXTURE_PT_image_sampling =  __class__ ('TEXTURE_PT_image_sampling', 
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'use_interpolation');
-		col.prop (tex, 'filter_size', __kwargtrans__ ({text: 'Size'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_interpolation');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'filter_size', __kwargtrans__ ({text: 'Size'}));
+		}) ();
 	});}
 });
 export var TEXTURE_PT_image_alpha =  __class__ ('TEXTURE_PT_image_alpha', [TextureTypePanel, Panel], {
@@ -585,7 +853,7 @@ export var TEXTURE_PT_image_alpha =  __class__ ('TEXTURE_PT_image_alpha', [Textu
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -598,12 +866,15 @@ export var TEXTURE_PT_image_alpha =  __class__ ('TEXTURE_PT_image_alpha', [Textu
 		else {
 		}
 		var tex = context.texture;
-		self.layout.prop (tex, 'use_alpha', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_alpha', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -618,10 +889,19 @@ export var TEXTURE_PT_image_alpha =  __class__ ('TEXTURE_PT_image_alpha', [Textu
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var tex = context.texture;
-		var col = layout.column ();
-		col.active = bool (tex.image && tex.image.alpha_mode != 'NONE');
-		col.prop (tex, 'use_calculate_alpha', __kwargtrans__ ({text: 'Calculate'}));
-		col.prop (tex, 'invert_alpha', __kwargtrans__ ({text: 'Invert'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		col.active = __call__ (bool, null, tex.image && __ne__ (tex.image.alpha_mode, 'NONE'));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_calculate_alpha', __kwargtrans__ ({text: 'Calculate'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'invert_alpha', __kwargtrans__ ({text: 'Invert'}));
+		}) ();
 	});}
 });
 export var TEXTURE_PT_image_mapping =  __class__ ('TEXTURE_PT_image_mapping', [TextureTypePanel, Panel], {
@@ -634,7 +914,7 @@ export var TEXTURE_PT_image_mapping =  __class__ ('TEXTURE_PT_image_mapping', [T
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -649,34 +929,98 @@ export var TEXTURE_PT_image_mapping =  __class__ ('TEXTURE_PT_image_mapping', [T
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var tex = context.texture;
-		var col = layout.column ();
-		col.prop (tex, 'use_flip_axis', __kwargtrans__ ({text: 'Flip Axes'}));
-		col.separator ();
-		var subcol = layout.column ();
-		subcol.prop (tex, 'extension');
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		if (tex.extension == 'REPEAT') {
-			var col = flow.column ();
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (tex, 'repeat_x', __kwargtrans__ ({text: 'Repeat X'}));
-			sub.prop (tex, 'repeat_y', __kwargtrans__ ({text: 'Y'}));
-			var col = flow.column (__kwargtrans__ ({heading: 'Mirror', heading_ctxt: i18n_contexts.id_image}));
-			var sub = col.column ();
-			sub.active = tex.repeat_x > 1;
-			sub.prop (tex, 'use_mirror_x', __kwargtrans__ ({text: 'X'}));
-			var sub = col.column ();
-			sub.active = tex.repeat_y > 1;
-			sub.prop (tex, 'use_mirror_y', __kwargtrans__ ({text: 'Y'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_flip_axis', __kwargtrans__ ({text: 'Flip Axes'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var subcol = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = subcol;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'extension');
+		}) ();
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		if (__eq__ (tex.extension, 'REPEAT')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'repeat_x', __kwargtrans__ ({text: 'Repeat X'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'repeat_y', __kwargtrans__ ({text: 'Y'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Mirror', heading_ctxt: i18n_contexts.id_image}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			sub.active = __gt__ (tex.repeat_x, 1);
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'use_mirror_x', __kwargtrans__ ({text: 'X'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			sub.active = __gt__ (tex.repeat_y, 1);
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'use_mirror_y', __kwargtrans__ ({text: 'Y'}));
+			}) ();
 		}
-		else if (tex.extension == 'CHECKER') {
-			subcol.separator ();
-			var col = flow.column ();
-			col.prop (tex, 'checker_distance', __kwargtrans__ ({text: 'Distance'}));
-			var col = flow.column (__kwargtrans__ ({heading: 'Tiles'}));
-			col.prop (tex, 'use_checker_even', __kwargtrans__ ({text: 'Even', text_ctxt: i18n_contexts.amount}));
-			col.prop (tex, 'use_checker_odd', __kwargtrans__ ({text: 'Odd'}));
+		else if (__eq__ (tex.extension, 'CHECKER')) {
+			(function () {
+				var __accu0__ = subcol;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'checker_distance', __kwargtrans__ ({text: 'Distance'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Tiles'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'use_checker_even', __kwargtrans__ ({text: 'Even', text_ctxt: i18n_contexts.amount}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'use_checker_odd', __kwargtrans__ ({text: 'Odd'}));
+			}) ();
 		}
 		else {
+			// pass;
 		}
 	});}
 });
@@ -690,7 +1034,7 @@ export var TEXTURE_PT_image_mapping_crop =  __class__ ('TEXTURE_PT_image_mapping
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -704,14 +1048,35 @@ export var TEXTURE_PT_image_mapping_crop =  __class__ ('TEXTURE_PT_image_mapping
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (tex, 'crop_min_x', __kwargtrans__ ({text: 'Minimum X'}));
-		col.prop (tex, 'crop_min_y', __kwargtrans__ ({text: 'Y'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (tex, 'crop_max_x', __kwargtrans__ ({text: 'Maximum X'}));
-		col.prop (tex, 'crop_max_y', __kwargtrans__ ({text: 'Y'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'crop_min_x', __kwargtrans__ ({text: 'Minimum X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'crop_min_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'crop_max_x', __kwargtrans__ ({text: 'Maximum X'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'crop_max_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
 	});}
 });
 export var TEXTURE_PT_musgrave =  __class__ ('TEXTURE_PT_musgrave', [TextureTypePanel, Panel], {
@@ -722,7 +1087,7 @@ export var TEXTURE_PT_musgrave =  __class__ ('TEXTURE_PT_musgrave', [TextureType
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -736,29 +1101,83 @@ export var TEXTURE_PT_musgrave =  __class__ ('TEXTURE_PT_musgrave', [TextureType
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
-		col.separator ();
-		col.prop (tex, 'musgrave_type');
-		col.separator ();
-		col.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		col.prop (tex, 'nabla');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'dimension_max', __kwargtrans__ ({text: 'Dimension'}));
-		col.prop (tex, 'lacunarity');
-		col.prop (tex, 'octaves');
-		col.separator ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'musgrave_type');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'nabla');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'dimension_max', __kwargtrans__ ({text: 'Dimension'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'lacunarity');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'octaves');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		var musgrave_type = tex.musgrave_type;
-		var col = flow.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		if (__in__ (musgrave_type, new set (['HETERO_TERRAIN', 'RIDGED_MULTIFRACTAL', 'HYBRID_MULTIFRACTAL']))) {
-			col.prop (tex, 'offset');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'offset');
+			}) ();
 		}
-		col.prop (tex, 'noise_intensity', __kwargtrans__ ({text: 'Intensity'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_intensity', __kwargtrans__ ({text: 'Intensity'}));
+		}) ();
 		if (__in__ (musgrave_type, new set (['RIDGED_MULTIFRACTAL', 'HYBRID_MULTIFRACTAL']))) {
-			col.prop (tex, 'gain');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'gain');
+			}) ();
 		}
 	});}
 });
@@ -770,7 +1189,7 @@ export var TEXTURE_PT_voronoi =  __class__ ('TEXTURE_PT_voronoi', [TextureTypePa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -784,21 +1203,60 @@ export var TEXTURE_PT_voronoi =  __class__ ('TEXTURE_PT_voronoi', [TextureTypePa
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'distance_metric');
-		var sub = col.column ();
-		sub.active = tex.distance_metric == 'MINKOVSKY';
-		sub.prop (tex, 'minkovsky_exponent', __kwargtrans__ ({text: 'Exponent'}));
-		sub.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'color_mode');
-		col.prop (tex, 'noise_intensity', __kwargtrans__ ({text: 'Intensity'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		col.prop (tex, 'nabla');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'distance_metric');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		sub.active = __eq__ (tex.distance_metric, 'MINKOVSKY');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'minkovsky_exponent', __kwargtrans__ ({text: 'Exponent'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'color_mode');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_intensity', __kwargtrans__ ({text: 'Intensity'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'nabla');
+		}) ();
 	});}
 });
 export var TEXTURE_PT_voronoi_feature_weights =  __class__ ('TEXTURE_PT_voronoi_feature_weights', [TextureTypePanel, Panel], {
@@ -810,7 +1268,7 @@ export var TEXTURE_PT_voronoi_feature_weights =  __class__ ('TEXTURE_PT_voronoi_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -824,14 +1282,35 @@ export var TEXTURE_PT_voronoi_feature_weights =  __class__ ('TEXTURE_PT_voronoi_
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (tex, 'weight_1', __kwargtrans__ ({text: 'First', slider: true}));
-		col.prop (tex, 'weight_2', __kwargtrans__ ({text: 'Second', slider: true}));
-		var sub = flow.column (__kwargtrans__ ({align: true}));
-		sub.prop (tex, 'weight_3', __kwargtrans__ ({text: 'Third', slider: true}));
-		sub.prop (tex, 'weight_4', __kwargtrans__ ({text: 'Fourth', slider: true}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'weight_1', __kwargtrans__ ({text: 'First', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'weight_2', __kwargtrans__ ({text: 'Second', slider: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'weight_3', __kwargtrans__ ({text: 'Third', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'weight_4', __kwargtrans__ ({text: 'Fourth', slider: true}));
+		}) ();
 	});}
 });
 export var TEXTURE_PT_distortednoise =  __class__ ('TEXTURE_PT_distortednoise', [TextureTypePanel, Panel], {
@@ -842,7 +1321,7 @@ export var TEXTURE_PT_distortednoise =  __class__ ('TEXTURE_PT_distortednoise', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -856,17 +1335,47 @@ export var TEXTURE_PT_distortednoise =  __class__ ('TEXTURE_PT_distortednoise', 
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
-		col.separator ();
-		col.prop (tex, 'noise_distortion', __kwargtrans__ ({text: 'Distortion'}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'distortion', __kwargtrans__ ({text: 'Amount'}));
-		col.prop (tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
-		col.prop (tex, 'nabla');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_basis', __kwargtrans__ ({text: 'Noise Basis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_distortion', __kwargtrans__ ({text: 'Distortion'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'distortion', __kwargtrans__ ({text: 'Amount'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'noise_scale', __kwargtrans__ ({text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'nabla');
+		}) ();
 	});}
 });
 export var TextureSlotPanel =  __class__ ('TextureSlotPanel', [TextureButtonsPanel], {
@@ -875,7 +1384,7 @@ export var TextureSlotPanel =  __class__ ('TextureSlotPanel', [TextureButtonsPan
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -887,7 +1396,7 @@ export var TextureSlotPanel =  __class__ ('TextureSlotPanel', [TextureButtonsPan
 		}
 		else {
 		}
-		if (!(hasattr (context, 'texture_slot'))) {
+		if (!(__call__ (hasattr, null, context, 'texture_slot'))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -900,7 +1409,7 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -912,11 +1421,11 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 		}
 		else {
 		}
-		var idblock = context_tex_datablock (context);
-		if (isinstance (idblock, Brush) && !(context.sculpt_object)) {
+		var idblock = __call__ (context_tex_datablock, null, context);
+		if (__call__ (isinstance, null, idblock, Brush) && !(context.sculpt_object)) {
 			return false;
 		}
-		if (!(getattr (context, 'texture_slot', null))) {
+		if (!(__call__ (getattr, null, context, 'texture_slot', null))) {
 			return false;
 		}
 		var engine = context.engine;
@@ -925,7 +1434,7 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -939,44 +1448,107 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var idblock = context_tex_datablock (context);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var idblock = __call__ (context_tex_datablock, null, context);
 		var tex = context.texture_slot;
-		if (isinstance (idblock, Brush)) {
+		if (__call__ (isinstance, null, idblock, Brush)) {
 			if (context.sculpt_object || context.image_paint_object) {
-				brush_texture_settings (layout, idblock, context.sculpt_object);
+				__call__ (brush_texture_settings, null, layout, idblock, context.sculpt_object);
 			}
 		}
 		else {
-			var col = flow.column ();
-			col.prop (tex, 'texture_coords', __kwargtrans__ ({text: 'Coordinates'}));
-			if (tex.texture_coords == 'UV') {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'texture_coords', __kwargtrans__ ({text: 'Coordinates'}));
+			}) ();
+			if (__eq__ (tex.texture_coords, 'UV')) {
 				var ob = context.object;
-				if (ob && ob.py_metatype == 'MESH') {
-					col.prop_search (tex, 'uv_layer', ob.data, 'uv_layers', __kwargtrans__ ({text: 'Map'}));
+				if (ob && __eq__ (ob.py_metatype, 'MESH')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop_search, __accu0__, tex, 'uv_layer', ob.data, 'uv_layers', __kwargtrans__ ({text: 'Map'}));
+					}) ();
 				}
 				else {
-					col.prop (tex, 'uv_layer', __kwargtrans__ ({text: 'Map'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, tex, 'uv_layer', __kwargtrans__ ({text: 'Map'}));
+					}) ();
 				}
 			}
-			else if (tex.texture_coords == 'OBJECT') {
-				col.prop (tex, 'object', __kwargtrans__ ({text: 'Object'}));
+			else if (__eq__ (tex.texture_coords, 'OBJECT')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, tex, 'object', __kwargtrans__ ({text: 'Object'}));
+				}) ();
 			}
-			col.separator ();
-			if (isinstance (idblock, FreestyleLineStyle)) {
-				var col = flow.column ();
-				col.prop (tex, 'mapping', __kwargtrans__ ({text: 'Projection'}));
-				col.separator ();
-				var col = flow.column ();
-				col.prop (tex, 'mapping_x', __kwargtrans__ ({text: 'Mapping X'}));
-				col.prop (tex, 'mapping_y', __kwargtrans__ ({text: 'Y'}));
-				col.prop (tex, 'mapping_z', __kwargtrans__ ({text: 'Z'}));
-				col.separator ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			if (__call__ (isinstance, null, idblock, FreestyleLineStyle)) {
+				var col = (function () {
+					var __accu0__ = flow;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, tex, 'mapping', __kwargtrans__ ({text: 'Projection'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var col = (function () {
+					var __accu0__ = flow;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, tex, 'mapping_x', __kwargtrans__ ({text: 'Mapping X'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, tex, 'mapping_y', __kwargtrans__ ({text: 'Y'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, tex, 'mapping_z', __kwargtrans__ ({text: 'Z'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
 			}
-			var col = flow.column (__kwargtrans__ ({align: true}));
-			col.column ().prop (tex, 'offset');
-			var col = flow.column (__kwargtrans__ ({align: true}));
-			col.column ().prop (tex, 'scale');
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.column, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, tex, 'offset');
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.column, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, tex, 'scale');
+			}) ();
 		}
 	});}
 });
@@ -988,7 +1560,7 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1000,11 +1572,11 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 		}
 		else {
 		}
-		var idblock = context_tex_datablock (context);
-		if (isinstance (idblock, Brush)) {
+		var idblock = __call__ (context_tex_datablock, null, context);
+		if (__call__ (isinstance, null, idblock, Brush)) {
 			return false;
 		}
-		if (!(getattr (context, 'texture_slot', null))) {
+		if (!(__call__ (getattr, null, context, 'texture_slot', null))) {
 			return false;
 		}
 		var engine = context.engine;
@@ -1013,7 +1585,7 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1027,13 +1599,16 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: false, even_rows: false, align: false}));
-		var idblock = context_tex_datablock (context);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: false, even_rows: false, align: false}));
+		}) ();
+		var idblock = __call__ (context_tex_datablock, null, context);
 		var tex = context.texture_slot;
 		var factor_but = function (layout, toggle, factor, py_name) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1047,44 +1622,86 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 			}
 			else {
 			}
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.active = getattr (tex, toggle);
-			row.prop (tex, factor, __kwargtrans__ ({text: py_name, slider: true}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.prop (tex, toggle, __kwargtrans__ ({text: ''}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			row.active = __call__ (getattr, null, tex, toggle);
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tex, factor, __kwargtrans__ ({text: py_name, slider: true}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, tex, toggle, __kwargtrans__ ({text: ''}));
+			}) ();
 			return sub;
 		};
-		if (isinstance (idblock, ParticleSettings)) {
-			var col = flow.column ();
-			factor_but (col, 'use_map_time', 'time_factor', 'General Time');
-			factor_but (col, 'use_map_life', 'life_factor', 'Lifetime');
-			factor_but (col, 'use_map_density', 'density_factor', 'Density');
-			factor_but (col, 'use_map_size', 'size_factor', 'Size');
-			col.separator ();
-			var col = flow.column ();
-			factor_but (col, 'use_map_velocity', 'velocity_factor', 'Physics Velocity');
-			factor_but (col, 'use_map_damp', 'damp_factor', 'Damp');
-			factor_but (col, 'use_map_gravity', 'gravity_factor', 'Gravity');
-			factor_but (col, 'use_map_field', 'field_factor', 'Force Fields');
-			col.separator ();
-			var col = flow.column ();
-			factor_but (col, 'use_map_length', 'length_factor', 'Hair Length');
-			factor_but (col, 'use_map_clump', 'clump_factor', 'Clump');
-			factor_but (col, 'use_map_twist', 'twist_factor', 'Twist');
-			var col = flow.column ();
-			factor_but (col, 'use_map_kink_amp', 'kink_amp_factor', 'Kink Amplitude');
-			factor_but (col, 'use_map_kink_freq', 'kink_freq_factor', 'Kink Frequency');
-			factor_but (col, 'use_map_rough', 'rough_factor', 'Rough');
+		if (__call__ (isinstance, null, idblock, ParticleSettings)) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			__call__ (factor_but, null, col, 'use_map_time', 'time_factor', 'General Time');
+			__call__ (factor_but, null, col, 'use_map_life', 'life_factor', 'Lifetime');
+			__call__ (factor_but, null, col, 'use_map_density', 'density_factor', 'Density');
+			__call__ (factor_but, null, col, 'use_map_size', 'size_factor', 'Size');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			__call__ (factor_but, null, col, 'use_map_velocity', 'velocity_factor', 'Physics Velocity');
+			__call__ (factor_but, null, col, 'use_map_damp', 'damp_factor', 'Damp');
+			__call__ (factor_but, null, col, 'use_map_gravity', 'gravity_factor', 'Gravity');
+			__call__ (factor_but, null, col, 'use_map_field', 'field_factor', 'Force Fields');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			__call__ (factor_but, null, col, 'use_map_length', 'length_factor', 'Hair Length');
+			__call__ (factor_but, null, col, 'use_map_clump', 'clump_factor', 'Clump');
+			__call__ (factor_but, null, col, 'use_map_twist', 'twist_factor', 'Twist');
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			__call__ (factor_but, null, col, 'use_map_kink_amp', 'kink_amp_factor', 'Kink Amplitude');
+			__call__ (factor_but, null, col, 'use_map_kink_freq', 'kink_freq_factor', 'Kink Frequency');
+			__call__ (factor_but, null, col, 'use_map_rough', 'rough_factor', 'Rough');
 		}
-		else if (isinstance (idblock, FreestyleLineStyle)) {
-			var col = flow.column ();
-			factor_but (col, 'use_map_color_diffuse', 'diffuse_color_factor', 'Color');
-			factor_but (col, 'use_map_alpha', 'alpha_factor', 'Alpha');
+		else if (__call__ (isinstance, null, idblock, FreestyleLineStyle)) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			__call__ (factor_but, null, col, 'use_map_color_diffuse', 'diffuse_color_factor', 'Color');
+			__call__ (factor_but, null, col, 'use_map_alpha', 'alpha_factor', 'Alpha');
 		}
-		if (!(isinstance (idblock, ParticleSettings))) {
-			var col = flow.column ();
-			col.prop (tex, 'blend_type', __kwargtrans__ ({text: 'Blend'}));
-			col.prop (tex, 'color', __kwargtrans__ ({text: ''}));
+		if (!(__call__ (isinstance, null, idblock, ParticleSettings))) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'blend_type', __kwargtrans__ ({text: 'Blend'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex, 'color', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});}
 });
@@ -1093,7 +1710,7 @@ export var TextureColorsPoll =  __class__ ('TextureColorsPoll', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1106,7 +1723,7 @@ export var TextureColorsPoll =  __class__ ('TextureColorsPoll', [object], {
 		else {
 		}
 		var tex = context.texture;
-		return tex && (tex.py_metatype != 'NONE' || tex.use_nodes) && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return tex && (__ne__ (tex.py_metatype, 'NONE') || tex.use_nodes) && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});}
 });
 export var TEXTURE_PT_colors =  __class__ ('TEXTURE_PT_colors', [TextureButtonsPanel, TextureColorsPoll, Panel], {
@@ -1117,7 +1734,7 @@ export var TEXTURE_PT_colors =  __class__ ('TEXTURE_PT_colors', [TextureButtonsP
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1131,19 +1748,55 @@ export var TEXTURE_PT_colors =  __class__ ('TEXTURE_PT_colors', [TextureButtonsP
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: false, columns: 0, even_columns: false, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 0, even_columns: false, even_rows: false, align: false}));
+		}) ();
 		var tex = context.texture;
-		var col = flow.column ();
-		col.prop (tex, 'use_clamp', __kwargtrans__ ({text: 'Clamp'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (tex, 'factor_red', __kwargtrans__ ({text: 'Multiply R'}));
-		col.prop (tex, 'factor_green', __kwargtrans__ ({text: 'G', text_ctxt: i18n_contexts.color}));
-		col.prop (tex, 'factor_blue', __kwargtrans__ ({text: 'B', text_ctxt: i18n_contexts.color}));
-		col.separator ();
-		var col = flow.column ();
-		col.prop (tex, 'intensity');
-		col.prop (tex, 'contrast');
-		col.prop (tex, 'saturation');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_clamp', __kwargtrans__ ({text: 'Clamp'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'factor_red', __kwargtrans__ ({text: 'Multiply R'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'factor_green', __kwargtrans__ ({text: 'G', text_ctxt: i18n_contexts.color}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'factor_blue', __kwargtrans__ ({text: 'B', text_ctxt: i18n_contexts.color}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'intensity');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'contrast');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'saturation');
+		}) ();
 	});}
 });
 export var TEXTURE_PT_colors_ramp =  __class__ ('TEXTURE_PT_colors_ramp', [TextureButtonsPanel, TextureColorsPoll, Panel], {
@@ -1155,7 +1808,7 @@ export var TEXTURE_PT_colors_ramp =  __class__ ('TEXTURE_PT_colors_ramp', [Textu
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1168,12 +1821,15 @@ export var TEXTURE_PT_colors_ramp =  __class__ ('TEXTURE_PT_colors_ramp', [Textu
 		else {
 		}
 		var tex = context.texture;
-		self.layout.prop (tex, 'use_color_ramp', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, tex, 'use_color_ramp', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1187,12 +1843,18 @@ export var TEXTURE_PT_colors_ramp =  __class__ ('TEXTURE_PT_colors_ramp', [Textu
 		}
 		var layout = self.layout;
 		var tex = context.texture;
-		var is_active = bool (tex && tex.use_color_ramp);
+		var is_active = __call__ (bool, null, tex && tex.use_color_ramp);
 		if (is_active) {
-			layout.template_color_ramp (tex, 'color_ramp', __kwargtrans__ ({expand: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_color_ramp, __accu0__, tex, 'color_ramp', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 		else {
-			layout.label (__kwargtrans__ ({text: 'Enable the Color Ramp first'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Enable the Color Ramp first'}));
+			}) ();
 		}
 	});}
 });
@@ -1201,7 +1863,7 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1213,12 +1875,12 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 		}
 		else {
 		}
-		return bool (context.texture);
+		return __call__ (bool, null, context.texture);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1237,20 +1899,47 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 		var texture_user = context.texture_user;
 		if (texture_user) {
 			var texture_user_id = texture_user.id_data;
-			if (hasattr (texture_user_id, 'animation_data')) {
-				var col = layout.column (__kwargtrans__ ({align: true}));
-				col.label (__kwargtrans__ ({text: texture_user_id.bl_rna.py_name}));
-				self.draw_action_and_slot_selector (context, col, texture_user_id);
+			if (__call__ (hasattr, null, texture_user_id, 'animation_data')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: texture_user_id.bl_rna.py_name}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, texture_user_id);
+				}) ();
 			}
 		}
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Texture'}));
-		self.draw_action_and_slot_selector (context, col, texture);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Texture'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, texture);
+		}) ();
 		var node_tree = texture.node_tree;
 		if (node_tree) {
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			col.label (__kwargtrans__ ({text: 'Shader Node Tree'}));
-			self.draw_action_and_slot_selector (context, col, node_tree);
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Shader Node Tree'}));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, node_tree);
+			}) ();
 		}
 	});}
 });
@@ -1262,7 +1951,7 @@ export var TEXTURE_PT_custom_props =  __class__ ('TEXTURE_PT_custom_props', [Tex
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1278,11 +1967,53 @@ export var TEXTURE_PT_custom_props =  __class__ ('TEXTURE_PT_custom_props', [Tex
 	});}
 });
 export var classes = tuple ([TEXTURE_MT_context_menu, TEXTURE_UL_texslots, TEXTURE_PT_preview, TEXTURE_PT_context, TEXTURE_PT_node, TEXTURE_PT_clouds, TEXTURE_PT_wood, TEXTURE_PT_marble, TEXTURE_PT_magic, TEXTURE_PT_blend, TEXTURE_PT_stucci, TEXTURE_PT_image, TEXTURE_PT_image_settings, TEXTURE_PT_image_alpha, TEXTURE_PT_image_mapping, TEXTURE_PT_image_mapping_crop, TEXTURE_PT_image_sampling, TEXTURE_PT_musgrave, TEXTURE_PT_voronoi, TEXTURE_PT_voronoi_feature_weights, TEXTURE_PT_distortednoise, TEXTURE_PT_influence, TEXTURE_PT_mapping, TEXTURE_PT_colors, TEXTURE_PT_colors_ramp, TEXTURE_PT_animation, TEXTURE_PT_custom_props]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_texture.map
 export {Brush, FreestyleLineStyle, Menu, Panel, ParticleSettings, PropertiesAnimationMixin, PropertyPanel, Texture, UIList, brush_texture_settings, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'TEXTURE_MT_context_menu': TEXTURE_MT_context_menu = value; break;
+		case 'TEXTURE_UL_texslots': TEXTURE_UL_texslots = value; break;
+		case 'context_tex_datablock': context_tex_datablock = value; break;
+		case 'TextureButtonsPanel': TextureButtonsPanel = value; break;
+		case 'TEXTURE_PT_preview': TEXTURE_PT_preview = value; break;
+		case 'TEXTURE_PT_context': TEXTURE_PT_context = value; break;
+		case 'TEXTURE_PT_node': TEXTURE_PT_node = value; break;
+		case 'TextureTypePanel': TextureTypePanel = value; break;
+		case 'TEXTURE_PT_clouds': TEXTURE_PT_clouds = value; break;
+		case 'TEXTURE_PT_wood': TEXTURE_PT_wood = value; break;
+		case 'TEXTURE_PT_marble': TEXTURE_PT_marble = value; break;
+		case 'TEXTURE_PT_magic': TEXTURE_PT_magic = value; break;
+		case 'TEXTURE_PT_blend': TEXTURE_PT_blend = value; break;
+		case 'TEXTURE_PT_stucci': TEXTURE_PT_stucci = value; break;
+		case 'TEXTURE_PT_image': TEXTURE_PT_image = value; break;
+		case 'TEXTURE_PT_image_settings': TEXTURE_PT_image_settings = value; break;
+		case 'TEXTURE_PT_image_sampling': TEXTURE_PT_image_sampling = value; break;
+		case 'TEXTURE_PT_image_alpha': TEXTURE_PT_image_alpha = value; break;
+		case 'TEXTURE_PT_image_mapping': TEXTURE_PT_image_mapping = value; break;
+		case 'TEXTURE_PT_image_mapping_crop': TEXTURE_PT_image_mapping_crop = value; break;
+		case 'TEXTURE_PT_musgrave': TEXTURE_PT_musgrave = value; break;
+		case 'TEXTURE_PT_voronoi': TEXTURE_PT_voronoi = value; break;
+		case 'TEXTURE_PT_voronoi_feature_weights': TEXTURE_PT_voronoi_feature_weights = value; break;
+		case 'TEXTURE_PT_distortednoise': TEXTURE_PT_distortednoise = value; break;
+		case 'TextureSlotPanel': TextureSlotPanel = value; break;
+		case 'TEXTURE_PT_mapping': TEXTURE_PT_mapping = value; break;
+		case 'TEXTURE_PT_influence': TEXTURE_PT_influence = value; break;
+		case 'TextureColorsPoll': TextureColorsPoll = value; break;
+		case 'TEXTURE_PT_colors': TEXTURE_PT_colors = value; break;
+		case 'TEXTURE_PT_colors_ramp': TEXTURE_PT_colors_ramp = value; break;
+		case 'TEXTURE_PT_animation': TEXTURE_PT_animation = value; break;
+		case 'TEXTURE_PT_custom_props': TEXTURE_PT_custom_props = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

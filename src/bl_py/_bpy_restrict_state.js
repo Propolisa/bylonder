@@ -13,7 +13,7 @@ export var _RestrictContext =  __class__ ('_RestrictContext', [object], {
 	get _get_window_manager () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -24,12 +24,12 @@ export var _RestrictContext =  __class__ ('_RestrictContext', [object], {
 		}
 		else {
 		}
-		return self._real_data.window_managers [0];
+		return __getitem__ (self._real_data.window_managers, 0);
 	});},
 	get _get_preferences () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -49,15 +49,15 @@ export var _RestrictData =  __class__ ('_RestrictData', [object], {
 	__module__: __name__,
 	__slots__: tuple ([])
 });
-export var _context_restrict = _RestrictContext ();
-export var _data_restrict = _RestrictData ();
+export var _context_restrict = __call__ (_RestrictContext, null);
+export var _data_restrict = __call__ (_RestrictData, null);
 export var RestrictBlend =  __class__ ('RestrictBlend', [object], {
 	__module__: __name__,
 	__slots__: tuple (['context', 'data']),
 	get __enter__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -70,13 +70,19 @@ export var RestrictBlend =  __class__ ('RestrictBlend', [object], {
 		}
 		self.data = _bpy.data;
 		self.context = _bpy.context;
-		_bpy.data = _data_restrict;
-		_bpy.context = _context_restrict;
+		(function () {
+			var __accu0__ = _bpy;
+			return __call__ (__accu0__.__py_setattr__, __accu0__, 'data', _data_restrict);
+		}) ();
+		(function () {
+			var __accu0__ = _bpy;
+			return __call__ (__accu0__.__py_setattr__, __accu0__, 'context', _context_restrict);
+		}) ();
 	});},
 	get __exit__ () {return __get__ (this, function (self, _type, _value, _traceback) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -90,9 +96,26 @@ export var RestrictBlend =  __class__ ('RestrictBlend', [object], {
 		}
 		else {
 		}
-		_bpy.data = self.data;
-		_bpy.context = self.context;
+		(function () {
+			var __accu0__ = _bpy;
+			return __call__ (__accu0__.__py_setattr__, __accu0__, 'data', self.data);
+		}) ();
+		(function () {
+			var __accu0__ = _bpy;
+			return __call__ (__accu0__.__py_setattr__, __accu0__, 'context', self.context);
+		}) ();
 	});}
 });
 
 //# sourceMappingURL=_bpy_restrict_state.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case '_RestrictContext': _RestrictContext = value; break;
+		case '_RestrictData': _RestrictData = value; break;
+		case '_context_restrict': _context_restrict = value; break;
+		case '_data_restrict': _data_restrict = value; break;
+		case 'RestrictBlend': RestrictBlend = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -12,7 +12,7 @@ export var INFO_HT_header =  __class__ ('INFO_HT_header', [Header], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -25,8 +25,14 @@ export var INFO_HT_header =  __class__ ('INFO_HT_header', [Header], {
 		else {
 		}
 		var layout = self.layout;
-		layout.template_header ();
-		INFO_MT_editor_menus.draw_collapsible (context, layout);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_header, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = INFO_MT_editor_menus;
+			return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
+		}) ();
 	});}
 });
 export var INFO_MT_editor_menus =  __class__ ('INFO_MT_editor_menus', [Menu], {
@@ -36,7 +42,7 @@ export var INFO_MT_editor_menus =  __class__ ('INFO_MT_editor_menus', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -49,8 +55,14 @@ export var INFO_MT_editor_menus =  __class__ ('INFO_MT_editor_menus', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.menu ('INFO_MT_view');
-		layout.menu ('INFO_MT_info');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_view');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_info');
+		}) ();
 	});}
 });
 export var INFO_MT_view =  __class__ ('INFO_MT_view', [Menu], {
@@ -59,7 +71,7 @@ export var INFO_MT_view =  __class__ ('INFO_MT_view', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -72,7 +84,10 @@ export var INFO_MT_view =  __class__ ('INFO_MT_view', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.menu ('INFO_MT_area');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_area');
+		}) ();
 	});}
 });
 export var INFO_MT_info =  __class__ ('INFO_MT_info', [Menu], {
@@ -81,7 +96,7 @@ export var INFO_MT_info =  __class__ ('INFO_MT_info', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -94,15 +109,42 @@ export var INFO_MT_info =  __class__ ('INFO_MT_info', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('info.select_all', __kwargtrans__ ({text: 'Select All'})).action = 'SELECT';
-		layout.operator ('info.select_all', __kwargtrans__ ({text: 'Deselect All'})).action = 'DESELECT';
-		layout.operator ('info.select_all', __kwargtrans__ ({text: 'Invert Selection'})).action = 'INVERT';
-		layout.operator ('info.select_all', __kwargtrans__ ({text: 'Toggle Selection'})).action = 'TOGGLE';
-		layout.separator ();
-		layout.operator ('info.select_box');
-		layout.separator ();
-		layout.operator ('info.report_delete', __kwargtrans__ ({text: 'Delete'}));
-		layout.operator ('info.report_copy', __kwargtrans__ ({text: 'Copy'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.select_all', __kwargtrans__ ({text: 'Select All'}));
+		}) ().action = 'SELECT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.select_all', __kwargtrans__ ({text: 'Deselect All'}));
+		}) ().action = 'DESELECT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.select_all', __kwargtrans__ ({text: 'Invert Selection'}));
+		}) ().action = 'INVERT';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.select_all', __kwargtrans__ ({text: 'Toggle Selection'}));
+		}) ().action = 'TOGGLE';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.select_box');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.report_delete', __kwargtrans__ ({text: 'Delete'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.report_copy', __kwargtrans__ ({text: 'Copy'}));
+		}) ();
 	});}
 });
 export var INFO_MT_area =  __class__ ('INFO_MT_area', [Menu], {
@@ -112,7 +154,7 @@ export var INFO_MT_area =  __class__ ('INFO_MT_area', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -125,23 +167,56 @@ export var INFO_MT_area =  __class__ ('INFO_MT_area', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		if (context.space_data.py_metatype == 'VIEW_3D') {
-			layout.operator ('screen.region_quadview');
-			layout.separator ();
+		if (__eq__ (context.space_data.py_metatype, 'VIEW_3D')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.region_quadview');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		layout.operator ('screen.area_split', __kwargtrans__ ({icon: 'SPLIT_HORIZONTAL', text: 'Horizontal Split'})).direction = 'HORIZONTAL';
-		layout.operator ('screen.area_split', __kwargtrans__ ({icon: 'SPLIT_VERTICAL', text: 'Vertical Split'})).direction = 'VERTICAL';
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.area_split', __kwargtrans__ ({icon: 'SPLIT_HORIZONTAL', text: 'Horizontal Split'}));
+		}) ().direction = 'HORIZONTAL';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.area_split', __kwargtrans__ ({icon: 'SPLIT_VERTICAL', text: 'Vertical Split'}));
+		}) ().direction = 'VERTICAL';
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (context.screen.show_fullscreen) {
-			layout.operator ('screen.screen_full_area', __kwargtrans__ ({text: 'Restore Areas'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.screen_full_area', __kwargtrans__ ({text: 'Restore Areas'}));
+			}) ();
 		}
 		else {
-			layout.operator ('screen.screen_full_area', __kwargtrans__ ({text: 'Maximize Area'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.screen_full_area', __kwargtrans__ ({text: 'Maximize Area'}));
+			}) ();
 		}
-		layout.operator ('screen.screen_full_area', __kwargtrans__ ({text: 'Focus Mode'})).use_hide_panels = true;
-		layout.operator ('screen.area_dupli');
-		layout.separator ();
-		layout.operator ('screen.area_close');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.screen_full_area', __kwargtrans__ ({text: 'Focus Mode'}));
+		}) ().use_hide_panels = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.area_dupli');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.area_close');
+		}) ();
 	});}
 });
 export var INFO_MT_context_menu =  __class__ ('INFO_MT_context_menu', [Menu], {
@@ -150,7 +225,7 @@ export var INFO_MT_context_menu =  __class__ ('INFO_MT_context_menu', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -163,16 +238,38 @@ export var INFO_MT_context_menu =  __class__ ('INFO_MT_context_menu', [Menu], {
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('info.report_copy', __kwargtrans__ ({text: 'Copy'}));
-		layout.operator ('info.report_delete', __kwargtrans__ ({text: 'Delete'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.report_copy', __kwargtrans__ ({text: 'Copy'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'info.report_delete', __kwargtrans__ ({text: 'Delete'}));
+		}) ();
 	});}
 });
 export var classes = tuple ([INFO_HT_header, INFO_MT_editor_menus, INFO_MT_area, INFO_MT_view, INFO_MT_info, INFO_MT_context_menu]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_info.map
 export {Header, Menu, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'INFO_HT_header': INFO_HT_header = value; break;
+		case 'INFO_MT_editor_menus': INFO_MT_editor_menus = value; break;
+		case 'INFO_MT_view': INFO_MT_view = value; break;
+		case 'INFO_MT_info': INFO_MT_info = value; break;
+		case 'INFO_MT_area': INFO_MT_area = value; break;
+		case 'INFO_MT_context_menu': INFO_MT_context_menu = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

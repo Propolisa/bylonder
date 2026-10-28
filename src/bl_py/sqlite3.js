@@ -5,3 +5,8 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 var __name__ = 'sqlite3';
 
 //# sourceMappingURL=sqlite3.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

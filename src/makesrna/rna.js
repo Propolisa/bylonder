@@ -39,7 +39,7 @@ export function blRna(struct) {
       for (const [identifier, [type, value]] of Object.entries(s.props)) {
         if (properties.some((p) => p.identifier === identifier)) continue;
         const pointer = type === 'P' || type === 'C';
-        properties.push({ identifier, name: identifier, description: '', type: TYPES[type], default: pointer ? null : value, is_readonly: false, enum_items: collection(),
+        properties.push({ identifier, name: identifier, description: '', type: TYPES[type], default: pointer ? null : value, is_readonly: false, enum_items: collection(), get enum_items_static() { return this.enum_items; },
           get fixed_type() { return pointer ? blRna(value) : null; } });
       }
     }

@@ -14,7 +14,7 @@ export var MAX_DISPLAY_ROWS = 8;
 export var rna_idprop_quote_path = function (prop) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -25,12 +25,18 @@ export var rna_idprop_quote_path = function (prop) {
 	}
 	else {
 	}
-	return '["{:s}"]'.format (bpy.utils.escape_identifier (prop));
+	return (function () {
+		var __accu0__ = '["{:s}"]';
+		return __call__ (__accu0__.format, __accu0__, (function () {
+			var __accu1__ = bpy.utils;
+			return __call__ (__accu1__.escape_identifier, __accu1__, prop);
+		}) ());
+	}) ();
 };
 export var rna_idprop_ui_prop_update = function (item, prop) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -42,16 +48,22 @@ export var rna_idprop_ui_prop_update = function (item, prop) {
 	}
 	else {
 	}
-	var prop_path = rna_idprop_quote_path (prop);
-	var prop_rna = item.path_resolve (prop_path, false);
-	if (isinstance (prop_rna, bpy.types.bpy_prop)) {
-		prop_rna.py_update ();
+	var prop_path = __call__ (rna_idprop_quote_path, null, prop);
+	var prop_rna = (function () {
+		var __accu0__ = item;
+		return __call__ (__accu0__.path_resolve, __accu0__, prop_path, false);
+	}) ();
+	if (__call__ (isinstance, null, prop_rna, bpy.types.bpy_prop)) {
+		(function () {
+			var __accu0__ = prop_rna;
+			return __call__ (__accu0__.py_update, __accu0__);
+		}) ();
 	}
 };
 export var rna_idprop_ui_prop_clear = function (item, prop) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -63,13 +75,19 @@ export var rna_idprop_ui_prop_clear = function (item, prop) {
 	}
 	else {
 	}
-	var ui_data = item.id_properties_ui (prop);
-	ui_data.py_clear ();
+	var ui_data = (function () {
+		var __accu0__ = item;
+		return __call__ (__accu0__.id_properties_ui, __accu0__, prop);
+	}) ();
+	(function () {
+		var __accu0__ = ui_data;
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
 };
 export var rna_idprop_context_value = function (context, context_member, property_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -83,25 +101,28 @@ export var rna_idprop_context_value = function (context, context_member, propert
 	else {
 	}
 	var space = context.space_data;
-	if (space === null || isinstance (space, bpy.types.SpaceProperties)) {
+	if (space === null || __call__ (isinstance, null, space, bpy.types.SpaceProperties)) {
 		var pin_id = space.pin_id;
 	}
 	else {
 		var pin_id = null;
 	}
-	if (pin_id && isinstance (pin_id, property_type)) {
+	if (pin_id && __call__ (isinstance, null, pin_id, property_type)) {
 		var rna_item = pin_id;
 		var context_member = 'space_data.pin_id';
 	}
 	else {
-		var rna_item = context.path_resolve (context_member);
+		var rna_item = (function () {
+			var __accu0__ = context;
+			return __call__ (__accu0__.path_resolve, __accu0__, context_member);
+		}) ();
 	}
 	return tuple ([rna_item, context_member]);
 };
 export var rna_idprop_has_properties = function (rna_item) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -112,13 +133,16 @@ export var rna_idprop_has_properties = function (rna_item) {
 	}
 	else {
 	}
-	var py_keys = rna_item.py_keys ();
-	return bool (py_keys);
+	var py_keys = (function () {
+		var __accu0__ = rna_item;
+		return __call__ (__accu0__.py_keys, __accu0__);
+	}) ();
+	return __call__ (bool, null, py_keys);
 };
 export var rna_idprop_value_to_python = function (value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -129,11 +153,17 @@ export var rna_idprop_value_to_python = function (value) {
 	}
 	else {
 	}
-	if (isinstance (value, IDPropertyArray)) {
-		return value.to_list ();
+	if (__call__ (isinstance, null, value, IDPropertyArray)) {
+		return (function () {
+			var __accu0__ = value;
+			return __call__ (__accu0__.to_list, __accu0__);
+		}) ();
 	}
-	else if (isinstance (value, IDPropertyGroup)) {
-		return value.to_dict ();
+	else if (__call__ (isinstance, null, value, IDPropertyGroup)) {
+		return (function () {
+			var __accu0__ = value;
+			return __call__ (__accu0__.to_dict, __accu0__);
+		}) ();
 	}
 	else {
 		return value;
@@ -142,7 +172,7 @@ export var rna_idprop_value_to_python = function (value) {
 export var rna_idprop_value_item_type = function (value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -153,14 +183,14 @@ export var rna_idprop_value_item_type = function (value) {
 	}
 	else {
 	}
-	var is_array = isinstance (value, ARRAY_TYPES) && len (value) > 0;
-	var item_value = (is_array ? value [0] : value);
+	var is_array = __call__ (isinstance, null, value, ARRAY_TYPES) && __gt__ (__call__ (len, null, value), 0);
+	var item_value = (is_array ? __getitem__ (value, 0) : value);
 	return tuple ([py_typeof (item_value), is_array]);
 };
 export var rna_idprop_ui_prop_default_set = function (item, prop, value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -174,7 +204,10 @@ export var rna_idprop_ui_prop_default_set = function (item, prop, value) {
 	else {
 	}
 	try {
-		var ui_data = item.id_properties_ui (prop);
+		var ui_data = (function () {
+			var __accu0__ = item;
+			return __call__ (__accu0__.id_properties_ui, __accu0__, prop);
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, py_TypeError)) {
@@ -185,7 +218,10 @@ export var rna_idprop_ui_prop_default_set = function (item, prop, value) {
 			throw __except0__;
 		}
 	}
-	ui_data.py_update (__kwargtrans__ ({py_default: value}));
+	(function () {
+		var __accu0__ = ui_data;
+		return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({py_default: value}));
+	}) ();
 };
 export var rna_idprop_ui_create = function (item, prop) {
 	var min = 0;
@@ -201,7 +237,7 @@ export var rna_idprop_ui_create = function (item, prop) {
 	var py_items = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -225,10 +261,13 @@ export var rna_idprop_ui_create = function (item, prop) {
 	}
 	else {
 	}
-	item [prop] = py_default;
-	rna_idprop_ui_prop_update (item, prop);
-	var ui_data = item.id_properties_ui (prop);
-	var __left0__ = rna_idprop_value_item_type (py_default);
+	__setitem__ (item, prop, py_default);
+	__call__ (rna_idprop_ui_prop_update, null, item, prop);
+	var ui_data = (function () {
+		var __accu0__ = item;
+		return __call__ (__accu0__.id_properties_ui, __accu0__, prop);
+	}) ();
+	var __left0__ = __call__ (rna_idprop_value_item_type, null, py_default);
 	var proptype = __left0__ [0];
 	var _ = __left0__ [1];
 	if (soft_min === null) {
@@ -238,10 +277,16 @@ export var rna_idprop_ui_create = function (item, prop) {
 		var soft_max = max;
 	}
 	if (proptype === bool || proptype === str) {
-		ui_data.py_update (__kwargtrans__ ({description: description, py_default: py_default}));
+		(function () {
+			var __accu0__ = ui_data;
+			return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({description: description, py_default: py_default}));
+		}) ();
 	}
-	else if (proptype === py_typeof (null) || issubclass (proptype, bpy.types.ID)) {
-		ui_data.py_update (__kwargtrans__ ({description: description, id_type: id_type}));
+	else if (proptype === py_typeof (null) || __call__ (issubclass, null, proptype, bpy.types.ID)) {
+		(function () {
+			var __accu0__ = ui_data;
+			return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({description: description, id_type: id_type}));
+		}) ();
 	}
 	else if (proptype === float) {
 		if (step === null) {
@@ -250,32 +295,44 @@ export var rna_idprop_ui_create = function (item, prop) {
 		if (precision === null) {
 			var precision = 3;
 		}
-		ui_data.py_update (__kwargtrans__ ({subtype: subtype, min: min, max: max, soft_min: soft_min, soft_max: soft_max, step: step, precision: precision, description: description, py_default: py_default}));
+		(function () {
+			var __accu0__ = ui_data;
+			return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({subtype: subtype, min: min, max: max, soft_min: soft_min, soft_max: soft_max, step: step, precision: precision, description: description, py_default: py_default}));
+		}) ();
 	}
 	else if (proptype === int) {
 		if (step === null) {
 			var step = 1;
 		}
 		if (py_items === null) {
-			ui_data.py_update (__kwargtrans__ ({subtype: subtype, min: min, max: max, soft_min: soft_min, soft_max: soft_max, step: step, description: description, py_default: py_default}));
+			(function () {
+				var __accu0__ = ui_data;
+				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({subtype: subtype, min: min, max: max, soft_min: soft_min, soft_max: soft_max, step: step, description: description, py_default: py_default}));
+			}) ();
 		}
 		else {
-			ui_data.py_update (__kwargtrans__ ({subtype: subtype, description: description, py_default: py_default, py_items: py_items}));
+			(function () {
+				var __accu0__ = ui_data;
+				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({subtype: subtype, description: description, py_default: py_default, py_items: py_items}));
+			}) ();
 		}
 	}
 	else {
-		var __except0__ = py_TypeError ('Unexpected value type');
+		var __except0__ = __call__ (py_TypeError, null, 'Unexpected value type');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	var prop_path = rna_idprop_quote_path (prop);
-	item.property_overridable_library_set (prop_path, overridable);
+	var prop_path = __call__ (rna_idprop_quote_path, null, prop);
+	(function () {
+		var __accu0__ = item;
+		return __call__ (__accu0__.property_overridable_library_set, __accu0__, prop_path, overridable);
+	}) ();
 };
 export var draw = function (layout, context, context_member, property_type) {
 	var use_edit = true;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -290,7 +347,7 @@ export var draw = function (layout, context, context_member, property_type) {
 	}
 	else {
 	}
-	var __left0__ = rna_idprop_context_value (context, context_member, property_type);
+	var __left0__ = __call__ (rna_idprop_context_value, null, context, context_member, property_type);
 	var rna_item = __left0__ [0];
 	var context_member = __left0__ [1];
 	if (!(rna_item)) {
@@ -300,76 +357,145 @@ export var draw = function (layout, context, context_member, property_type) {
 		var use_edit = false;
 	}
 	var is_lib_override = rna_item.id_data.override_library && rna_item.id_data.override_library.reference;
-	var py_items = list (rna_item.py_items ());
-	py_items.py_sort ();
+	var py_items = __call__ (list, null, (function () {
+		var __accu0__ = rna_item;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ());
+	(function () {
+		var __accu0__ = py_items;
+		return __call__ (__accu0__.py_sort, __accu0__);
+	}) ();
 	if (use_edit && !(is_lib_override)) {
-		var row = layout.row ();
-		var props = row.operator ('wm.properties_add', __kwargtrans__ ({text: 'New', icon: 'ADD'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'wm.properties_add', __kwargtrans__ ({text: 'New', icon: 'ADD'}));
+		}) ();
 		props.data_path = context_member;
-		layout.separator ();
+		// pass;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
 	var show_developer_ui = context.preferences.view.show_developer_ui;
 	var rna_properties = (py_items ? (function () {
 		var __accu0__ = [];
-		for (var prop of rna_item.bl_rna.properties) {
+		var __iterable0__ = rna_item.bl_rna.properties;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var prop = __getitem__ (__iterable0__, __index0__);
 			if (prop.is_runtime) {
-				__accu0__.append (prop.identifier);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, prop.identifier);
+				}) ();
 			}
 		}
 		return set (__accu0__);
 	}) () : null);
 	layout.use_property_decorate = false;
-	for (var [key, value] of py_items) {
+	var __iterable0__ = py_items;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var key = __left0__ [0];
+		var value = __left0__ [1];
 		var is_rna = __in__ (key, rna_properties);
 		if (is_rna && !(show_developer_ui)) {
 			continue;
 		}
-		var to_dict = getattr (value, 'to_dict', null);
-		var to_list = getattr (value, 'to_list', null);
-		var is_datablock = value === null || isinstance (value, bpy.types.ID);
+		var to_dict = __call__ (getattr, null, value, 'to_dict', null);
+		var to_list = __call__ (getattr, null, value, 'to_list', null);
+		var is_datablock = value === null || __call__ (isinstance, null, value, bpy.types.ID);
 		if (to_dict) {
-			var value = to_dict ();
+			var value = __call__ (to_dict, null);
 		}
 		else if (to_list) {
-			var value = to_list ();
+			var value = __call__ (to_list, null);
 		}
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.4, align: true}));
-		var label_row = py_split.row ();
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.4, align: true}));
+		}) ();
+		var label_row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		label_row.alignment = 'RIGHT';
-		label_row.label (__kwargtrans__ ({text: key, translate: false}));
-		var value_row = py_split.row (__kwargtrans__ ({align: true}));
-		var value_column = value_row.column (__kwargtrans__ ({align: true}));
-		var is_long_array = to_list && len (value) >= MAX_DISPLAY_ROWS;
+		(function () {
+			var __accu0__ = label_row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: key, translate: false}));
+		}) ();
+		var value_row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var value_column = (function () {
+			var __accu0__ = value_row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var is_long_array = to_list && __ge__ (__call__ (len, null, value), MAX_DISPLAY_ROWS);
 		if (is_rna) {
-			value_column.prop (rna_item, key, __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = value_column;
+				return __call__ (__accu0__.prop, __accu0__, rna_item, key, __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		else if (to_dict || is_long_array) {
-			var props = value_column.operator ('wm.properties_edit_value', __kwargtrans__ ({text: 'Edit Value'}));
+			var props = (function () {
+				var __accu0__ = value_column;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.properties_edit_value', __kwargtrans__ ({text: 'Edit Value'}));
+			}) ();
 			props.data_path = context_member;
 			props.property_name = key;
 		}
 		else if (is_datablock) {
-			value_column.template_ID (rna_item, rna_idprop_quote_path (key), __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = value_column;
+				return __call__ (__accu0__.template_ID, __accu0__, rna_item, __call__ (rna_idprop_quote_path, null, key), __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		else {
-			value_column.prop (rna_item, rna_idprop_quote_path (key), __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = value_column;
+				return __call__ (__accu0__.prop, __accu0__, rna_item, __call__ (rna_idprop_quote_path, null, key), __kwargtrans__ ({text: ''}));
+			}) ();
 		}
-		var operator_row = value_row.row (__kwargtrans__ ({align: true}));
+		var operator_row = (function () {
+			var __accu0__ = value_row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		operator_row.alignment = 'RIGHT';
 		operator_row.enabled = !(is_lib_override && __in__ (key, rna_item.id_data.override_library.reference));
 		if (use_edit) {
 			if (is_rna) {
-				operator_row.label (__kwargtrans__ ({text: 'API Defined'}));
+				(function () {
+					var __accu0__ = operator_row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'API Defined'}));
+				}) ();
 			}
 			else if (is_lib_override) {
 				operator_row.active = false;
-				operator_row.label (__kwargtrans__ ({text: '', icon: 'DECORATE_LIBRARY_OVERRIDE'}));
+				(function () {
+					var __accu0__ = operator_row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon: 'DECORATE_LIBRARY_OVERRIDE'}));
+				}) ();
 			}
 			else {
-				var props = operator_row.operator ('wm.properties_edit', __kwargtrans__ ({text: '', icon: 'PREFERENCES', emboss: false}));
+				var props = (function () {
+					var __accu0__ = operator_row;
+					return __call__ (__accu0__.operator, __accu0__, 'wm.properties_edit', __kwargtrans__ ({text: '', icon: 'PREFERENCES', emboss: false}));
+				}) ();
 				props.data_path = context_member;
 				props.property_name = key;
-				var props = operator_row.operator ('wm.properties_remove', __kwargtrans__ ({text: '', icon: 'X', emboss: false}));
+				var props = (function () {
+					var __accu0__ = operator_row;
+					return __call__ (__accu0__.operator, __accu0__, 'wm.properties_remove', __kwargtrans__ ({text: '', icon: 'X', emboss: false}));
+				}) ();
 				props.data_path = context_member;
 				props.property_name = key;
 			}
@@ -384,7 +510,7 @@ export var PropertyPanel =  __class__ ('PropertyPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -396,15 +522,15 @@ export var PropertyPanel =  __class__ ('PropertyPanel', [object], {
 		}
 		else {
 		}
-		var __left0__ = rna_idprop_context_value (context, cls._context_path, cls._property_type);
+		var __left0__ = __call__ (rna_idprop_context_value, null, context, cls._context_path, cls._property_type);
 		var rna_item = __left0__ [0];
 		var _context_member = __left0__ [1];
-		return bool (rna_item);
+		return __call__ (bool, null, rna_item);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -416,9 +542,28 @@ export var PropertyPanel =  __class__ ('PropertyPanel', [object], {
 		}
 		else {
 		}
-		draw (self.layout, context, self._context_path, self._property_type);
+		__call__ (draw, null, self.layout, context, self._context_path, self._property_type);
 	});}
 });
 
 //# sourceMappingURL=rna_prop_ui.map
 export {IDPropertyArray, IDPropertyGroup, Vector, bpy_prop_array};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'ARRAY_TYPES': ARRAY_TYPES = value; break;
+		case 'MAX_DISPLAY_ROWS': MAX_DISPLAY_ROWS = value; break;
+		case 'rna_idprop_quote_path': rna_idprop_quote_path = value; break;
+		case 'rna_idprop_ui_prop_update': rna_idprop_ui_prop_update = value; break;
+		case 'rna_idprop_ui_prop_clear': rna_idprop_ui_prop_clear = value; break;
+		case 'rna_idprop_context_value': rna_idprop_context_value = value; break;
+		case 'rna_idprop_has_properties': rna_idprop_has_properties = value; break;
+		case 'rna_idprop_value_to_python': rna_idprop_value_to_python = value; break;
+		case 'rna_idprop_value_item_type': rna_idprop_value_item_type = value; break;
+		case 'rna_idprop_ui_prop_default_set': rna_idprop_ui_prop_default_set = value; break;
+		case 'rna_idprop_ui_create': rna_idprop_ui_create = value; break;
+		case 'draw': draw = value; break;
+		case 'PropertyPanel': PropertyPanel = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

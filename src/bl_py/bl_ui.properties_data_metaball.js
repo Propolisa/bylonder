@@ -18,7 +18,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -40,7 +40,7 @@ export var DATA_PT_context_metaball =  __class__ ('DATA_PT_context_metaball', [D
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -57,10 +57,16 @@ export var DATA_PT_context_metaball =  __class__ ('DATA_PT_context_metaball', [D
 		var mball = context.meta_ball;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (mball) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -70,7 +76,7 @@ export var DATA_PT_metaball =  __class__ ('DATA_PT_metaball', [DataButtonsPanel,
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -85,13 +91,34 @@ export var DATA_PT_metaball =  __class__ ('DATA_PT_metaball', [DataButtonsPanel,
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var mball = context.meta_ball;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (mball, 'resolution', __kwargtrans__ ({text: 'Resolution Viewport'}));
-		col.prop (mball, 'render_resolution', __kwargtrans__ ({text: 'Render'}));
-		col.separator ();
-		col.prop (mball, 'threshold', __kwargtrans__ ({text: 'Influence Threshold'}));
-		col.separator ();
-		col.prop (mball, 'update_method', __kwargtrans__ ({text: 'Update on Edit'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'resolution', __kwargtrans__ ({text: 'Resolution Viewport'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'render_resolution', __kwargtrans__ ({text: 'Render'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'threshold', __kwargtrans__ ({text: 'Influence Threshold'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'update_method', __kwargtrans__ ({text: 'Update on Edit'}));
+		}) ();
 	});}
 });
 export var DATA_PT_mball_texture_space =  __class__ ('DATA_PT_mball_texture_space', [DataButtonsPanel, Panel], {
@@ -101,7 +128,7 @@ export var DATA_PT_mball_texture_space =  __class__ ('DATA_PT_mball_texture_spac
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -116,10 +143,22 @@ export var DATA_PT_mball_texture_space =  __class__ ('DATA_PT_mball_texture_spac
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var mball = context.meta_ball;
-		layout.prop (mball, 'use_auto_texspace');
-		var col = layout.column ();
-		col.prop (mball, 'texspace_location');
-		col.prop (mball, 'texspace_size');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'use_auto_texspace');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'texspace_location');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mball, 'texspace_size');
+		}) ();
 	});}
 });
 export var DATA_PT_metaball_element =  __class__ ('DATA_PT_metaball_element', [DataButtonsPanel, Panel], {
@@ -128,7 +167,7 @@ export var DATA_PT_metaball_element =  __class__ ('DATA_PT_metaball_element', [D
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -145,7 +184,7 @@ export var DATA_PT_metaball_element =  __class__ ('DATA_PT_metaball_element', [D
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -160,25 +199,67 @@ export var DATA_PT_metaball_element =  __class__ ('DATA_PT_metaball_element', [D
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var metaelem = context.meta_ball.elements.active;
-		var col = layout.column ();
-		col.prop (metaelem, 'type');
-		col.separator ();
-		col.prop (metaelem, 'stiffness', __kwargtrans__ ({text: 'Stiffness'}));
-		col.prop (metaelem, 'radius', __kwargtrans__ ({text: 'Radius'}));
-		col.prop (metaelem, 'use_negative', __kwargtrans__ ({text: 'Negative'}));
-		col.prop (metaelem, 'hide', __kwargtrans__ ({text: 'Hide'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, metaelem, 'type');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, metaelem, 'stiffness', __kwargtrans__ ({text: 'Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, metaelem, 'radius', __kwargtrans__ ({text: 'Radius'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, metaelem, 'use_negative', __kwargtrans__ ({text: 'Negative'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, metaelem, 'hide', __kwargtrans__ ({text: 'Hide'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (__in__ (metaelem.py_metatype, new set (['CUBE', 'ELLIPSOID']))) {
-			sub.prop (metaelem, 'size_x', __kwargtrans__ ({text: 'Size X'}));
-			sub.prop (metaelem, 'size_y', __kwargtrans__ ({text: 'Y'}));
-			sub.prop (metaelem, 'size_z', __kwargtrans__ ({text: 'Z'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, metaelem, 'size_x', __kwargtrans__ ({text: 'Size X'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, metaelem, 'size_y', __kwargtrans__ ({text: 'Y'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, metaelem, 'size_z', __kwargtrans__ ({text: 'Z'}));
+			}) ();
 		}
-		else if (metaelem.py_metatype == 'CAPSULE') {
-			sub.prop (metaelem, 'size_x', __kwargtrans__ ({text: 'Size X'}));
+		else if (__eq__ (metaelem.py_metatype, 'CAPSULE')) {
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, metaelem, 'size_x', __kwargtrans__ ({text: 'Size X'}));
+			}) ();
 		}
-		else if (metaelem.py_metatype == 'PLANE') {
-			sub.prop (metaelem, 'size_x', __kwargtrans__ ({text: 'Size X'}));
-			sub.prop (metaelem, 'size_y', __kwargtrans__ ({text: 'Y'}));
+		else if (__eq__ (metaelem.py_metatype, 'PLANE')) {
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, metaelem, 'size_x', __kwargtrans__ ({text: 'Size X'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, metaelem, 'size_y', __kwargtrans__ ({text: 'Y'}));
+			}) ();
 		}
 	});}
 });
@@ -192,11 +273,28 @@ export var DATA_PT_custom_props_metaball =  __class__ ('DATA_PT_custom_props_met
 	_property_type: bpy.types.MetaBall
 });
 export var classes = tuple ([DATA_PT_context_metaball, DATA_PT_metaball, DATA_PT_mball_texture_space, DATA_PT_metaball_element, DATA_PT_metaball_animation, DATA_PT_custom_props_metaball]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_metaball.map
 export {Panel, PropertiesAnimationMixin, PropertyPanel, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_metaball': DATA_PT_context_metaball = value; break;
+		case 'DATA_PT_metaball': DATA_PT_metaball = value; break;
+		case 'DATA_PT_mball_texture_space': DATA_PT_mball_texture_space = value; break;
+		case 'DATA_PT_metaball_element': DATA_PT_metaball_element = value; break;
+		case 'DATA_PT_metaball_animation': DATA_PT_metaball_animation = value; break;
+		case 'DATA_PT_custom_props_metaball': DATA_PT_custom_props_metaball = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

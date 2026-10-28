@@ -8,3 +8,10 @@ export var __all__ = tuple (['ToolDef']);
 
 //# sourceMappingURL=bpy.utils.toolsystem.map
 export {ToolDef};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -1,4 +1,13 @@
-# Python's os.path for Blender's scripts: POSIX path strings; nothing exists on a file system.
+# Python's os.path for Blender's scripts: POSIX path strings, over a read-only file system holding Blender's scripts
+# where Blender has them (_files, written by tree.py).
+from _files import files
+
+_directories = set()
+for _file in files:
+    _parts = _file.split('/')
+    for _end in range(2, len(_parts)):
+        _directories.add('/'.join(_parts[:_end]))
+_files_set = set(files)
 sep = '/'
 
 
@@ -52,8 +61,17 @@ def isabs(name):
     return name.startswith('/')
 
 
+def isfile(name):
+    return normpath(name) in _files_set
+
+
+def isdir(name):
+    return normpath(name) in _directories
+
+
 def exists(name):
+    return isfile(name) or isdir(name)
+
+
+def islink(name):
     return False
-
-
-isdir = isfile = islink = exists

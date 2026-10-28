@@ -14,7 +14,7 @@ var __name__ = 'bl_operators.node';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -25,8 +25,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -34,7 +40,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -59,7 +65,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -78,7 +84,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -91,18 +97,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -113,8 +122,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -124,7 +139,7 @@ export var has_child_sockets = new set (['NodeCombineBundle', 'NodeSeparateBundl
 export var cast_value = function (source, target) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -138,7 +153,7 @@ export var cast_value = function (source, target) {
 	}
 	var source_type = source.py_metatype;
 	var target_type = target.py_metatype;
-	if (hasattr (source, 'default_value')) {
+	if (__call__ (hasattr, null, source, 'default_value')) {
 		var value = source.default_value;
 	}
 	else {
@@ -147,7 +162,7 @@ export var cast_value = function (source, target) {
 	var to_bool = function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -158,12 +173,12 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return value > 0;
+		return __gt__ (value, 0);
 	};
 	var single_value_to_color = function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -174,12 +189,12 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return Vector (tuple ([value, value, value, 1.0]));
+		return __call__ (Vector, null, tuple ([value, value, value, 1.0]));
 	};
 	var single_value_to_vector = function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -190,12 +205,12 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return Vector ([value] * len (target.default_value));
+		return __call__ (Vector, null, __mul__ ([value], __call__ (len, null, target.default_value)));
 	};
 	var color_to_float = function (color) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -206,12 +221,12 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return (0.2126 * color [0] + 0.7152 * color [1]) + 0.0722 * color [2];
+		return __add__ (__add__ (__mul__ (0.2126, __getitem__ (color, 0)), __mul__ (0.7152, __getitem__ (color, 1))), __mul__ (0.0722, __getitem__ (color, 2)));
 	};
 	var vector_to_float = function (vector) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -222,12 +237,12 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return sum (vector) / len (vector);
+		return __truediv__ (__call__ (sum, null, vector), __call__ (len, null, vector));
 	};
 	var func_map = dict ([[tuple (['VALUE', 'INT']), int], [tuple (['VALUE', 'BOOLEAN']), to_bool], [tuple (['VALUE', 'RGBA']), single_value_to_color], [tuple (['VALUE', 'VECTOR']), single_value_to_vector], [tuple (['INT', 'VALUE']), float], [tuple (['INT', 'BOOLEAN']), to_bool], [tuple (['INT', 'RGBA']), single_value_to_color], [tuple (['INT', 'VECTOR']), single_value_to_vector], [tuple (['BOOLEAN', 'VALUE']), float], [tuple (['BOOLEAN', 'INT']), int], [tuple (['BOOLEAN', 'RGBA']), single_value_to_color], [tuple (['BOOLEAN', 'VECTOR']), single_value_to_vector], [tuple (['RGBA', 'VALUE']), color_to_float], [tuple (['RGBA', 'INT']), (function __lambda__ (color) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -238,11 +253,11 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return int (color_to_float (color));
+		return __call__ (int, null, __call__ (color_to_float, null, color));
 	})], [tuple (['RGBA', 'BOOLEAN']), (function __lambda__ (color) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -253,11 +268,11 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return to_bool (color_to_float (color));
+		return __call__ (to_bool, null, __call__ (color_to_float, null, color));
 	})], [tuple (['RGBA', 'VECTOR']), (function __lambda__ (color) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -268,11 +283,11 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return color.__getslice__ (null, len (target.default_value), 1);
+		return __getslice__ (color, null, __call__ (len, null, target.default_value), 1);
 	})], [tuple (['VECTOR', 'VALUE']), vector_to_float], [tuple (['VECTOR', 'INT']), (function __lambda__ (vector) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -283,11 +298,11 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return int (vector_to_float (vector));
+		return __call__ (int, null, __call__ (vector_to_float, null, vector));
 	})], [tuple (['VECTOR', 'BOOLEAN']), (function __lambda__ (vector) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -298,11 +313,11 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return bool (vector_to_float (vector));
+		return __call__ (bool, null, __call__ (vector_to_float, null, vector));
 	})], [tuple (['VECTOR', 'RGBA']), (function __lambda__ (vector) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -313,14 +328,20 @@ export var cast_value = function (source, target) {
 		}
 		else {
 		}
-		return list (vector).extend ([0.0] * (len (target.default_value) - len (vector)));
+		return (function () {
+			var __accu0__ = __call__ (list, null, vector);
+			return __call__ (__accu0__.extend, __accu0__, __mul__ ([0.0], __sub__ (__call__ (len, null, target.default_value), __call__ (len, null, vector))));
+		}) ();
 	})]]);
-	if (source_type == target_type) {
+	if (__eq__ (source_type, target_type)) {
 		return value;
 	}
-	var cast_func = func_map.py_get (tuple ([source_type, target_type]));
+	var cast_func = (function () {
+		var __accu0__ = func_map;
+		return __call__ (__accu0__.py_get, __accu0__, tuple ([source_type, target_type]));
+	}) ();
 	if (cast_func !== null) {
-		return cast_func (value);
+		return __call__ (cast_func, null, value);
 	}
 	return null;
 };
@@ -328,13 +349,13 @@ export var NodeSetting =  __class__ ('NodeSetting', [PropertyGroup], {
 	__module__: __name__,
 	__slots__: tuple ([])
 });
-NodeSetting.__annotations__ = dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Python expression to be evaluated as the initial node setting', py_default: ''}))});
+NodeSetting.__annotations__ = dict ({'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Python expression to be evaluated as the initial node setting', py_default: ''}))});
 export var NodeOperator =  __class__ ('NodeOperator', [object], {
 	__module__: __name__,
 	get description () {return __getcm__ (this, function (cls, _context, properties) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -347,21 +368,30 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		}
 		else {
 		}
-		var node_tree_group_type = _member ('nodeitems_builtins', 'node_tree_group_type');
-		var nodetype = properties ['type'];
-		if (__in__ (nodetype, node_tree_group_type.py_values ())) {
-			for (var setting of properties.settings) {
-				if (setting.py_name == 'node_tree') {
-					var node_group = eval (setting.value);
+		var node_tree_group_type = __call__ (_member, null, 'nodeitems_builtins', 'node_tree_group_type');
+		var nodetype = __getitem__ (properties, 'type');
+		if (__in__ (nodetype, (function () {
+			var __accu0__ = node_tree_group_type;
+			return __call__ (__accu0__.py_values, __accu0__);
+		}) ())) {
+			var __iterable0__ = properties.settings;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var setting = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (setting.py_name, 'node_tree')) {
+					var node_group = __call__ (eval, null, setting.value);
 					if (node_group.description) {
 						return node_group.description;
 					}
 				}
 			}
 		}
-		var bl_rna = bpy.types.Node.bl_rna_get_subclass (nodetype);
+		var bl_rna = (function () {
+			var __accu0__ = bpy.types.Node;
+			return __call__ (__accu0__.bl_rna_get_subclass, __accu0__, nodetype);
+		}) ();
 		if (bl_rna !== null) {
-			return tip_ (bl_rna.description);
+			return __call__ (tip_, null, bl_rna.description);
 		}
 		else {
 			return '';
@@ -370,7 +400,7 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 	get deselect_nodes () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -383,14 +413,17 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		}
 		var space = context.space_data;
 		var tree = space.edit_tree;
-		for (var n of tree.nodes) {
+		var __iterable0__ = tree.nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var n = __getitem__ (__iterable0__, __index0__);
 			n.select = false;
 		}
 	};},
 	get create_node () {return __get__ (this, function (self, context, node_type) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -406,12 +439,18 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		var space = context.space_data;
 		var tree = space.edit_tree;
 		try {
-			var node = tree.nodes.py_new (__kwargtrans__ ({py_metatype: node_type}));
+			var node = (function () {
+				var __accu0__ = tree.nodes;
+				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: node_type}));
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, RuntimeError)) {
 				var ex = __except0__;
-				self.report (new set (['ERROR']), str (ex));
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), __call__ (str, null, ex));
+				}) ();
 				return null;
 			}
 			else {
@@ -426,7 +465,7 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 	get apply_node_settings () {return __get__ (this, function (self, node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -438,24 +477,39 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		}
 		else {
 		}
-		for (var setting of self.settings) {
-			var value = eval (setting.value);
+		var __iterable0__ = self.settings;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var setting = __getitem__ (__iterable0__, __index0__);
+			var value = __call__ (eval, null, setting.value);
 			var node_data = node;
 			var node_attr_name = setting.py_name;
 			if (__in__ ('.', node_attr_name)) {
-				var __left0__ = node_attr_name.rsplit ('.', 1);
+				var __left0__ = (function () {
+					var __accu0__ = node_attr_name;
+					return __call__ (__accu0__.rsplit, __accu0__, '.', 1);
+				}) ();
 				var node_data_path = __left0__ [0];
 				var node_attr_name = __left0__ [1];
-				var node_data = node.path_resolve (node_data_path);
+				var node_data = (function () {
+					var __accu0__ = node;
+					return __call__ (__accu0__.path_resolve, __accu0__, node_data_path);
+				}) ();
 			}
 			try {
-				setattr (node_data, node_attr_name, value);
+				__call__ (setattr, null, node_data, node_attr_name, value);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, AttributeError)) {
 					var ex = __except0__;
-					self.report (new set (['ERROR_INVALID_INPUT']), rpt_ ('Node has no attribute {:s}').format (setting.py_name));
-					print (str (ex));
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.report, __accu0__, new set (['ERROR_INVALID_INPUT']), (function () {
+							var __accu1__ = __call__ (rpt_, null, 'Node has no attribute {:s}');
+							return __call__ (__accu1__.format, __accu1__, setting.py_name);
+						}) ());
+					}) ();
+					__call__ (print, null, __call__ (str, null, ex));
 				}
 				else {
 					throw __except0__;
@@ -465,13 +519,13 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		return node;
 	});}
 });
-NodeOperator.__annotations__ = dict ({'settings': CollectionProperty (__kwargtrans__ ({py_name: 'Settings', description: 'Settings to be applied on the newly created node', py_metatype: NodeSetting, options: new set (['SKIP_SAVE'])}))});
+NodeOperator.__annotations__ = dict ({'settings': __call__ (CollectionProperty, null, __kwargtrans__ ({py_name: 'Settings', description: 'Settings to be applied on the newly created node', py_metatype: NodeSetting, options: new set (['SKIP_SAVE'])}))});
 export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 	__module__: __name__,
 	get store_mouse_cursor () {return function (context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -485,13 +539,16 @@ export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 		}
 		var space = context.space_data;
 		var tree = space.edit_tree;
-		if (context.region.py_metatype == 'WINDOW') {
+		if (__eq__ (context.region.py_metatype, 'WINDOW')) {
 			var area = context.area;
-			var horizontal_pad = int (area.width / 10);
-			var vertical_pad = int (area.height / 10);
-			var inspace_x = min (max (horizontal_pad, event.mouse_region_x), area.width - horizontal_pad);
-			var inspace_y = min (max (vertical_pad, event.mouse_region_y), area.height - vertical_pad);
-			space.cursor_location_from_region (inspace_x, inspace_y);
+			var horizontal_pad = __call__ (int, null, __truediv__ (area.width, 10));
+			var vertical_pad = __call__ (int, null, __truediv__ (area.height, 10));
+			var inspace_x = __call__ (min, null, __call__ (max, null, horizontal_pad, event.mouse_region_x), __sub__ (area.width, horizontal_pad));
+			var inspace_y = __call__ (min, null, __call__ (max, null, vertical_pad, event.mouse_region_y), __sub__ (area.height, vertical_pad));
+			(function () {
+				var __accu0__ = space;
+				return __call__ (__accu0__.cursor_location_from_region, __accu0__, inspace_x, inspace_y);
+			}) ();
 		}
 		else {
 			space.cursor_location = tree.view_center;
@@ -500,7 +557,7 @@ export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -513,12 +570,12 @@ export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 		else {
 		}
 		var space = context.space_data;
-		return space && space.py_metatype == 'NODE_EDITOR' && space.edit_tree && space.edit_tree.is_editable;
+		return space && __eq__ (space.py_metatype, 'NODE_EDITOR') && space.edit_tree && space.edit_tree.is_editable;
 	});},
 	get invoke () {return __get__ (this, function (self, context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -531,15 +588,24 @@ export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 		}
 		else {
 		}
-		self.store_mouse_cursor (context, event);
-		var result = self.execute (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.store_mouse_cursor, __accu0__, context, event);
+		}) ();
+		var result = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 		if (self.use_transform && __in__ ('FINISHED', result)) {
-			bpy.ops.node.translate_attach_remove_on_cancel ('INVOKE_DEFAULT');
+			(function () {
+				var __accu0__ = bpy.ops.node;
+				return __call__ (__accu0__.translate_attach_remove_on_cancel, __accu0__, 'INVOKE_DEFAULT');
+			}) ();
 		}
 		return result;
 	});}
 });
-NodeAddOperator.__annotations__ = dict ({'use_transform': BoolProperty (__kwargtrans__ ({py_name: 'Use Transform', description: 'Start transform operator after inserting the node', py_default: false}))});
+NodeAddOperator.__annotations__ = dict ({'use_transform': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Use Transform', description: 'Start transform operator after inserting the node', py_default: false}))});
 export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	__module__: __name__,
 	properties_to_pass: tuple (['color', 'hide', 'label', 'mute', 'parent', 'show_options', 'show_preview', 'show_texture', 'use_alpha', 'use_clamp', 'use_custom_color', 'operation', 'domain', 'data_type', 'image', 'interpolation']),
@@ -548,7 +614,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -560,7 +626,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		}
 		else {
 		}
-		if (context.area === null || context.area.py_metatype != 'NODE_EDITOR') {
+		if (context.area === null || __ne__ (context.area.py_metatype, 'NODE_EDITOR')) {
 			return false;
 		}
 		if (context.space_data.edit_tree === null) {
@@ -569,8 +635,11 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		if (context.space_data.edit_tree.library !== null) {
 			return false;
 		}
-		if (len (context.selected_nodes) <= 0) {
-			cls.poll_message_set ('No nodes selected.');
+		if (__le__ (__call__ (len, null, context.selected_nodes), 0)) {
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'No nodes selected.');
+			}) ();
 			return false;
 		}
 		return true;
@@ -578,7 +647,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get transfer_node_properties () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -591,13 +660,16 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		}
 		else {
 		}
-		for (var attr of self.properties_to_pass) {
+		var __iterable0__ = self.properties_to_pass;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var attr = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (attr, self.settings)) {
 				continue;
 			}
-			if (hasattr (old_node, attr) && hasattr (new_node, attr)) {
+			if (__call__ (hasattr, null, old_node, attr) && __call__ (hasattr, null, new_node, attr)) {
 				try {
-					setattr (new_node, attr, getattr (old_node, attr));
+					__call__ (setattr, null, new_node, attr, __call__ (getattr, null, old_node, attr));
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, tuple ([py_TypeError, ValueError]))) {
@@ -613,7 +685,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get transfer_datablock_properties () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -626,13 +698,22 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		}
 		else {
 		}
-		for (var prop_name of self.id_prop_names) {
-			var socket_name = prop_name.title ();
-			if (hasattr (old_node, prop_name)) {
-				var prop = getattr (old_node, prop_name);
+		var __iterable0__ = self.id_prop_names;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var prop_name = __getitem__ (__iterable0__, __index0__);
+			var socket_name = (function () {
+				var __accu0__ = prop_name;
+				return __call__ (__accu0__.title, __accu0__);
+			}) ();
+			if (__call__ (hasattr, null, old_node, prop_name)) {
+				var prop = __call__ (getattr, null, old_node, prop_name);
 			}
 			else {
-				var socket = old_node.inputs.py_get (socket_name);
+				var socket = (function () {
+					var __accu0__ = old_node.inputs;
+					return __call__ (__accu0__.py_get, __accu0__, socket_name);
+				}) ();
 				if (socket !== null) {
 					var prop = socket.default_value;
 				}
@@ -641,11 +722,14 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 				}
 			}
 			try {
-				if (hasattr (new_node, prop_name)) {
-					setattr (new_node, prop_name, prop);
+				if (__call__ (hasattr, null, new_node, prop_name)) {
+					__call__ (setattr, null, new_node, prop_name, prop);
 				}
 				else {
-					var socket = new_node.inputs.py_get (socket_name);
+					var socket = (function () {
+						var __accu0__ = new_node.inputs;
+						return __call__ (__accu0__.py_get, __accu0__, socket_name);
+					}) ();
 					if (socket !== null) {
 						socket.default_value = prop;
 					}
@@ -664,7 +748,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get transfer_image_user_settings () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -678,14 +762,17 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		else {
 		}
 		var image_user_attr = 'image_user';
-		if (!(hasattr (old_node, image_user_attr) && hasattr (new_node, image_user_attr))) {
+		if (!(__call__ (hasattr, null, old_node, image_user_attr) && __call__ (hasattr, null, new_node, image_user_attr))) {
 			return ;
 		}
-		var old_image_user = getattr (old_node, image_user_attr);
-		var new_image_user = getattr (new_node, image_user_attr);
-		for (var attr of self.image_user_settings) {
+		var old_image_user = __call__ (getattr, null, old_node, image_user_attr);
+		var new_image_user = __call__ (getattr, null, new_node, image_user_attr);
+		var __iterable0__ = self.image_user_settings;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var attr = __getitem__ (__iterable0__, __index0__);
 			try {
-				setattr (new_image_user, attr, getattr (old_image_user, attr));
+				__call__ (setattr, null, new_image_user, attr, __call__ (getattr, null, old_image_user, attr));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, tuple ([AttributeError, KeyError, py_TypeError]))) {
@@ -700,7 +787,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get transfer_input_values () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -717,19 +804,33 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		var both_switch_nodes = __in__ (old_node.bl_idname, switch_nodes) && __in__ (new_node.bl_idname, switch_nodes);
 		var transfer_by_index = both_math_nodes || both_switch_nodes;
 		if (transfer_by_index) {
-			for (var [source_input, target_input] of zip (old_node.inputs, new_node.inputs)) {
-				var new_value = cast_value (__kwargtrans__ ({source: source_input, target: target_input}));
+			var __iterable0__ = __call__ (zip, null, old_node.inputs, new_node.inputs);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var source_input = __left0__ [0];
+				var target_input = __left0__ [1];
+				var new_value = __call__ (cast_value, null, __kwargtrans__ ({source: source_input, target: target_input}));
 				if (new_value !== null) {
 					target_input.default_value = new_value;
 				}
 			}
 		}
 		else {
-			for (var input of old_node.inputs) {
+			var __iterable0__ = old_node.inputs;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var input = __getitem__ (__iterable0__, __index0__);
 				try {
-					var new_socket = new_node.inputs [input.py_name];
-					var new_value = cast_value (__kwargtrans__ ({source: input, target: new_socket}));
-					var settings_name = 'inputs["{:s}"].default_value'.format (bpy.utils.escape_identifier (input.py_name));
+					var new_socket = __getitem__ (new_node.inputs, input.py_name);
+					var new_value = __call__ (cast_value, null, __kwargtrans__ ({source: input, target: new_socket}));
+					var settings_name = (function () {
+						var __accu0__ = 'inputs["{:s}"].default_value';
+						return __call__ (__accu0__.format, __accu0__, (function () {
+							var __accu1__ = bpy.utils;
+							return __call__ (__accu1__.escape_identifier, __accu1__, input.py_name);
+						}) ());
+					}) ();
 					var already_defined = __in__ (settings_name, self.settings);
 					if (new_value !== null && !(already_defined)) {
 						new_socket.default_value = new_value;
@@ -749,7 +850,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get transfer_links () {return function (tree, old_node, new_node, is_input) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -763,25 +864,39 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		}
 		else {
 		}
-		var is_reroute = old_node.bl_idname == 'NodeReroute';
+		var is_reroute = __eq__ (old_node.bl_idname, 'NodeReroute');
 		var both_math_nodes = __in__ (old_node.bl_idname, math_nodes) && __in__ (new_node.bl_idname, math_nodes);
 		var both_switch_nodes = __in__ (old_node.bl_idname, switch_nodes) && __in__ (new_node.bl_idname, switch_nodes);
 		var transfer_by_index = both_math_nodes || both_switch_nodes;
 		if (is_input) {
 			if (transfer_by_index) {
-				for (var [i, input] of py_enumerate (old_node.inputs)) {
-					for (var link of input.links.__getslice__ (null, null, 1)) {
+				var __iterable0__ = __call__ (py_enumerate, null, old_node.inputs);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var __left0__ = __getitem__ (__iterable0__, __index0__);
+					var i = __left0__ [0];
+					var input = __left0__ [1];
+					var __iterable1__ = __getslice__ (input.links, null, null, 1);
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var link = __getitem__ (__iterable1__, __index1__);
 						try {
 							var is_muted = link.is_muted;
 							var old_socket = link.from_socket;
-							var new_socket = new_node.inputs [i];
+							var new_socket = __getitem__ (new_node.inputs, i);
 							if (new_socket.hide || !(new_socket.enabled)) {
 								continue;
 							}
-							var new_link = tree.links.py_new (old_socket, new_socket);
+							var new_link = (function () {
+								var __accu0__ = tree.links;
+								return __call__ (__accu0__.py_new, __accu0__, old_socket, new_socket);
+							}) ();
 							new_link.is_muted = is_muted;
 							if (!(new_link.is_valid)) {
-								tree.links.remove (new_link);
+								(function () {
+									var __accu0__ = tree.links;
+									return __call__ (__accu0__.remove, __accu0__, new_link);
+								}) ();
 							}
 						}
 						catch (__except0__) {
@@ -796,31 +911,43 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 				}
 			}
 			else if (is_reroute) {
-				var input = old_node.inputs [0];
+				var input = __getitem__ (old_node.inputs, 0);
 				var new_socket = null;
-				for (var s of new_node.inputs) {
+				var __iterable0__ = new_node.inputs;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var s = __getitem__ (__iterable0__, __index0__);
 					if (s.hide || !(s.enabled)) {
 						continue;
 					}
-					if (s.py_metatype == input.py_metatype || cast_value (input, s) !== null) {
+					if (__eq__ (s.py_metatype, input.py_metatype) || __call__ (cast_value, null, input, s) !== null) {
 						var new_socket = s;
 						break;
 					}
 				}
 				if (new_socket) {
-					for (var link of input.links.__getslice__ (null, null, 1)) {
+					var __iterable0__ = __getslice__ (input.links, null, null, 1);
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var link = __getitem__ (__iterable0__, __index0__);
 						var is_muted = link.is_muted;
-						var new_link = tree.links.py_new (link.from_socket, new_socket);
+						var new_link = (function () {
+							var __accu0__ = tree.links;
+							return __call__ (__accu0__.py_new, __accu0__, link.from_socket, new_socket);
+						}) ();
 						new_link.is_muted = is_muted;
 					}
 				}
 			}
 			else {
-				for (var input of old_node.inputs) {
-					var links = sorted (input.links, __kwargtrans__ ({key: (function __lambda__ (link) {
+				var __iterable0__ = old_node.inputs;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var input = __getitem__ (__iterable0__, __index0__);
+					var links = __call__ (sorted, null, input.links, __kwargtrans__ ({key: (function __lambda__ (link) {
 						if (arguments.length) {
 							var __ilastarg0__ = arguments.length - 1;
-							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 								var __allkwargs0__ = arguments [__ilastarg0__--];
 								for (var __attrib0__ in __allkwargs0__) {
 									switch (__attrib0__) {
@@ -833,14 +960,20 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 						}
 						return link.multi_input_sort_id;
 					})}));
-					for (var link of links) {
+					var __iterable1__ = links;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var link = __getitem__ (__iterable1__, __index1__);
 						try {
 							var is_muted = link.is_muted;
-							var new_socket = new_node.inputs [input.py_name];
+							var new_socket = __getitem__ (new_node.inputs, input.py_name);
 							if (new_socket.hide || !(new_socket.enabled)) {
 								continue;
 							}
-							var new_link = tree.links.py_new (link.from_socket, new_socket);
+							var new_link = (function () {
+								var __accu0__ = tree.links;
+								return __call__ (__accu0__.py_new, __accu0__, link.from_socket, new_socket);
+							}) ();
 							new_link.is_muted = is_muted;
 						}
 						catch (__except0__) {
@@ -856,15 +989,26 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 			}
 		}
 		else if (transfer_by_index) {
-			for (var [i, output] of py_enumerate (old_node.outputs)) {
-				for (var link of output.links.__getslice__ (null, null, 1)) {
+			var __iterable0__ = __call__ (py_enumerate, null, old_node.outputs);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var i = __left0__ [0];
+				var output = __left0__ [1];
+				var __iterable1__ = __getslice__ (output.links, null, null, 1);
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var link = __getitem__ (__iterable1__, __index1__);
 					try {
 						var is_muted = link.is_muted;
-						var new_socket = new_node.outputs [i];
+						var new_socket = __getitem__ (new_node.outputs, i);
 						if (new_socket.hide || !(new_socket.enabled)) {
 							continue;
 						}
-						var new_link = tree.links.py_new (new_socket, link.to_socket);
+						var new_link = (function () {
+							var __accu0__ = tree.links;
+							return __call__ (__accu0__.py_new, __accu0__, new_socket, link.to_socket);
+						}) ();
 						new_link.is_muted = is_muted;
 					}
 					catch (__except0__) {
@@ -879,43 +1023,67 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 			}
 		}
 		else if (is_reroute) {
-			var output = old_node.outputs [0];
+			var output = __getitem__ (old_node.outputs, 0);
 			var new_socket = null;
-			for (var s of new_node.outputs) {
+			var __iterable0__ = new_node.outputs;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var s = __getitem__ (__iterable0__, __index0__);
 				if (s.hide || !(s.enabled)) {
 					continue;
 				}
-				if (s.py_metatype == output.py_metatype || cast_value (s, output) !== null) {
+				if (__eq__ (s.py_metatype, output.py_metatype) || __call__ (cast_value, null, s, output) !== null) {
 					var new_socket = s;
 					break;
 				}
 			}
 			if (new_socket) {
-				for (var link of output.links.__getslice__ (null, null, 1)) {
+				var __iterable0__ = __getslice__ (output.links, null, null, 1);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var link = __getitem__ (__iterable0__, __index0__);
 					var is_muted = link.is_muted;
 					var is_multi_input = link.to_socket.is_multi_input;
-					var new_link = tree.links.py_new (new_socket, link.to_socket);
+					var new_link = (function () {
+						var __accu0__ = tree.links;
+						return __call__ (__accu0__.py_new, __accu0__, new_socket, link.to_socket);
+					}) ();
 					new_link.is_muted = is_muted;
 					if (is_multi_input) {
-						new_link.swap_multi_input_sort_id (link);
+						(function () {
+							var __accu0__ = new_link;
+							return __call__ (__accu0__.swap_multi_input_sort_id, __accu0__, link);
+						}) ();
 					}
 				}
 			}
 		}
 		else {
-			for (var output of old_node.outputs) {
-				for (var link of output.links.__getslice__ (null, null, 1)) {
+			var __iterable0__ = old_node.outputs;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var output = __getitem__ (__iterable0__, __index0__);
+				var __iterable1__ = __getslice__ (output.links, null, null, 1);
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var link = __getitem__ (__iterable1__, __index1__);
 					try {
 						var is_muted = link.is_muted;
-						var new_socket = new_node.outputs [output.py_name];
+						var new_socket = __getitem__ (new_node.outputs, output.py_name);
 						if (new_socket.hide || !(new_socket.enabled)) {
 							continue;
 						}
 						var is_multi_input = link.to_socket.is_multi_input;
-						var new_link = tree.links.py_new (new_socket, link.to_socket);
+						var new_link = (function () {
+							var __accu0__ = tree.links;
+							return __call__ (__accu0__.py_new, __accu0__, new_socket, link.to_socket);
+						}) ();
 						new_link.is_muted = is_muted;
 						if (is_multi_input) {
-							new_link.swap_multi_input_sort_id (link);
+							(function () {
+								var __accu0__ = new_link;
+								return __call__ (__accu0__.swap_multi_input_sort_id, __accu0__, link);
+							}) ();
 						}
 					}
 					catch (__except0__) {
@@ -933,7 +1101,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get get_switch_items () {return function (node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -945,13 +1113,13 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		else {
 		}
 		var switch_type = node.bl_idname;
-		if (switch_type == 'GeometryNodeSwitch') {
-			return [node.inputs ['False'], node.inputs ['True']];
+		if (__eq__ (switch_type, 'GeometryNodeSwitch')) {
+			return [__getitem__ (node.inputs, 'False'), __getitem__ (node.inputs, 'True')];
 		}
-		if (switch_type == 'GeometryNodeMenuSwitch') {
+		if (__eq__ (switch_type, 'GeometryNodeMenuSwitch')) {
 			return node.enum_definition.enum_items;
 		}
-		if (switch_type == 'GeometryNodeIndexSwitch') {
+		if (__eq__ (switch_type, 'GeometryNodeIndexSwitch')) {
 			return node.index_switch_items;
 		}
 		return null;
@@ -959,7 +1127,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	get transfer_switch_data () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -972,60 +1140,91 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		}
 		else {
 		}
-		var old_switch_items = self.get_switch_items (old_node);
-		var new_switch_items = self.get_switch_items (new_node);
-		var old_selector_value = old_node.inputs [0].default_value;
-		if (old_node.bl_idname == 'GeometryNodeMenuSwitch') {
-			if (old_selector_value == '') {
+		var old_switch_items = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_switch_items, __accu0__, old_node);
+		}) ();
+		var new_switch_items = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_switch_items, __accu0__, new_node);
+		}) ();
+		var old_selector_value = __getitem__ (old_node.inputs, 0).default_value;
+		if (__eq__ (old_node.bl_idname, 'GeometryNodeMenuSwitch')) {
+			if (__eq__ (old_selector_value, '')) {
 				var old_selector_value = 0;
 			}
 			else {
-				var old_selector_value = py_next ((function () {
+				var old_selector_value = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 					var __accu0__ = [];
-					for (var [i, item] of list (py_enumerate (old_switch_items))) {
-						if (item.py_name == old_selector_value) {
-							__accu0__.append (i);
+					var __iterable0__ = __call__ (list, null, __call__ (py_enumerate, null, old_switch_items));
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var __left0__ = __getitem__ (__iterable0__, __index0__);
+						var i = __left0__ [0];
+						var item = __left0__ [1];
+						if (__eq__ (item.py_name, old_selector_value)) {
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, i);
+							}) ();
 						}
 					}
 					return __accu0__;
-				}) ());
+				}) ()));
 			}
 		}
 		if (__in__ (new_node.bl_idname, new set (['GeometryNodeMenuSwitch', 'GeometryNodeIndexSwitch']))) {
-			new_switch_items.py_clear ();
-			if (old_node.bl_idname == 'GeometryNodeSwitch') {
+			(function () {
+				var __accu0__ = new_switch_items;
+				return __call__ (__accu0__.py_clear, __accu0__);
+			}) ();
+			if (__eq__ (old_node.bl_idname, 'GeometryNodeSwitch')) {
 				new_node.data_type = old_node.input_type;
 			}
-			if (new_node.bl_idname == 'GeometryNodeMenuSwitch') {
-				for (var [i, old_item] of py_enumerate (old_switch_items.__getslice__ (null, null, 1))) {
-					if (old_node.bl_idname == 'GeometryNodeSwitch') {
+			if (__eq__ (new_node.bl_idname, 'GeometryNodeMenuSwitch')) {
+				var __iterable0__ = __call__ (py_enumerate, null, __getslice__ (old_switch_items, null, null, 1));
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var __left0__ = __getitem__ (__iterable0__, __index0__);
+					var i = __left0__ [0];
+					var old_item = __left0__ [1];
+					if (__eq__ (old_node.bl_idname, 'GeometryNodeSwitch')) {
 						var py_name = old_item.py_name;
 					}
 					else if (__in__ (old_node.bl_idname, new set (['GeometryNodeMenuSwitch', 'GeometryNodeIndexSwitch']))) {
-						var py_name = str (i);
+						var py_name = __call__ (str, null, i);
 					}
-					new_switch_items.py_new (py_name);
+					(function () {
+						var __accu0__ = new_switch_items;
+						return __call__ (__accu0__.py_new, __accu0__, py_name);
+					}) ();
 				}
 			}
-			else if (new_node.bl_idname == 'GeometryNodeIndexSwitch') {
-				for (var old_item of old_switch_items.__getslice__ (null, null, 1)) {
-					new_switch_items.py_new ();
+			else if (__eq__ (new_node.bl_idname, 'GeometryNodeIndexSwitch')) {
+				var __iterable0__ = __getslice__ (old_switch_items, null, null, 1);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var old_item = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu0__ = new_switch_items;
+						return __call__ (__accu0__.py_new, __accu0__);
+					}) ();
 				}
 			}
 		}
-		else if (new_node.bl_idname == 'GeometryNodeSwitch') {
-			if (old_node.bl_idname != 'GeometryNodeSwitch') {
+		else if (__eq__ (new_node.bl_idname, 'GeometryNodeSwitch')) {
+			if (__ne__ (old_node.bl_idname, 'GeometryNodeSwitch')) {
 				new_node.input_type = old_node.data_type;
 			}
 		}
-		if (new_node.bl_idname == 'GeometryNodeSwitch') {
-			new_node.inputs [0].default_value = bool (old_selector_value);
+		if (__eq__ (new_node.bl_idname, 'GeometryNodeSwitch')) {
+			__getitem__ (new_node.inputs, 0).default_value = __call__ (bool, null, old_selector_value);
 		}
-		else if (new_node.bl_idname == 'GeometryNodeMenuSwitch') {
-			new_node.inputs [0].default_value = str (old_selector_value);
+		else if (__eq__ (new_node.bl_idname, 'GeometryNodeMenuSwitch')) {
+			__getitem__ (new_node.inputs, 0).default_value = __call__ (str, null, old_selector_value);
 		}
-		else if (new_node.bl_idname == 'GeometryNodeIndexSwitch') {
-			new_node.inputs [0].default_value = int (old_selector_value);
+		else if (__eq__ (new_node.bl_idname, 'GeometryNodeIndexSwitch')) {
+			__getitem__ (new_node.inputs, 0).default_value = __call__ (int, null, old_selector_value);
 		}
 	});}
 });
@@ -1037,7 +1236,7 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1049,14 +1248,29 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 		}
 		else {
 		}
-		if (self.properties.is_property_set ('type')) {
-			self.deselect_nodes (context);
-			var node = self.create_node (context, self.py_metatype);
+		if ((function () {
+			var __accu0__ = self.properties;
+			return __call__ (__accu0__.is_property_set, __accu0__, 'type');
+		}) ()) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.deselect_nodes, __accu0__, context);
+			}) ();
+			var node = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.create_node, __accu0__, context, self.py_metatype);
+			}) ();
 			if (node) {
-				self.apply_node_settings (node);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.apply_node_settings, __accu0__, node);
+				}) ();
 				if (self.visible_output) {
-					for (var socket of node.outputs) {
-						if (socket.py_name != self.visible_output) {
+					var __iterable0__ = node.outputs;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var socket = __getitem__ (__iterable0__, __index0__);
+						if (__ne__ (socket.py_name, self.visible_output)) {
 							socket.hide = true;
 						}
 					}
@@ -1069,7 +1283,7 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 		}
 	});}
 });
-NODE_OT_add_node.__annotations__ = dict ({'type': StringProperty (__kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': StringProperty (__kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))});
+NODE_OT_add_node.__annotations__ = dict ({'type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))});
 export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperator, Operator], {
 	__module__: __name__,
 	bl_idname: 'node.swap_node',
@@ -1078,7 +1292,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 	get get_zone_pair () {return function (tree, node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1090,12 +1304,15 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 		}
 		else {
 		}
-		if (hasattr (node, 'paired_output')) {
+		if (__call__ (hasattr, null, node, 'paired_output')) {
 			return tuple ([node, node.paired_output]);
 		}
-		for (var input_node of tree.nodes) {
-			if (hasattr (input_node, 'paired_output')) {
-				if (input_node.paired_output == node) {
+		var __iterable0__ = tree.nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var input_node = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (hasattr, null, input_node, 'paired_output')) {
+				if (__eq__ (input_node.paired_output, node)) {
 					return tuple ([input_node, node]);
 				}
 			}
@@ -1105,7 +1322,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 	get get_node_sockets () {return function (node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1124,7 +1341,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 	get transfer_node_sockets () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1137,12 +1354,24 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 		}
 		else {
 		}
-		var old_items = self.get_node_sockets (old_node);
-		var new_items = self.get_node_sockets (new_node);
-		for (var old_item of old_items) {
+		var old_items = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_node_sockets, __accu0__, old_node);
+		}) ();
+		var new_items = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_node_sockets, __accu0__, new_node);
+		}) ();
+		var __iterable0__ = old_items;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var old_item = __getitem__ (__iterable0__, __index0__);
 			try {
-				var new_item = new_items.py_new (old_item.socket_type, old_item.py_name);
-				if (hasattr (old_item, 'structure_type') && hasattr (new_item, 'structure_type')) {
+				var new_item = (function () {
+					var __accu0__ = new_items;
+					return __call__ (__accu0__.py_new, __accu0__, old_item.socket_type, old_item.py_name);
+				}) ();
+				if (__call__ (hasattr, null, old_item, 'structure_type') && __call__ (hasattr, null, new_item, 'structure_type')) {
 					new_item.structure_type = old_item.structure_type;
 				}
 			}
@@ -1159,7 +1388,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 	get swap_visible_output () {return function (tree, node, output_name) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1172,14 +1401,26 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 		}
 		else {
 		}
-		var target_output = node.outputs [output_name];
+		var target_output = __getitem__ (node.outputs, output_name);
 		target_output.hide = false;
-		for (var socket of node.outputs) {
-			if (socket.py_name != output_name) {
-				for (var link of socket.links.__getslice__ (null, null, 1)) {
-					var new_link = tree.links.py_new (target_output, link.to_socket);
+		var __iterable0__ = node.outputs;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var socket = __getitem__ (__iterable0__, __index0__);
+			if (__ne__ (socket.py_name, output_name)) {
+				var __iterable1__ = __getslice__ (socket.links, null, null, 1);
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var link = __getitem__ (__iterable1__, __index1__);
+					var new_link = (function () {
+						var __accu0__ = tree.links;
+						return __call__ (__accu0__.py_new, __accu0__, target_output, link.to_socket);
+					}) ();
 					if (!(new_link.is_valid)) {
-						tree.links.remove (new_link);
+						(function () {
+							var __accu0__ = tree.links;
+							return __call__ (__accu0__.remove, __accu0__, new_link);
+						}) ();
 					}
 				}
 				socket.hide = true;
@@ -1189,7 +1430,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1202,72 +1443,144 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 		else {
 		}
 		var tree = context.space_data.edit_tree;
-		var nodes_to_delete = set ();
-		for (var old_node of context.selected_nodes.__getslice__ (null, null, 1)) {
+		var nodes_to_delete = __call__ (set, null);
+		var __iterable0__ = __getslice__ (context.selected_nodes, null, null, 1);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var old_node = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (old_node, nodes_to_delete)) {
 				continue;
 			}
-			if (old_node.bl_idname == self.py_metatype && !(hasattr (old_node, 'node_tree'))) {
-				self.apply_node_settings (old_node);
+			if (__eq__ (old_node.bl_idname, self.py_metatype) && !(__call__ (hasattr, null, old_node, 'node_tree'))) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.apply_node_settings, __accu0__, old_node);
+				}) ();
 				if (self.visible_output) {
-					self.swap_visible_output (tree, old_node, __kwargtrans__ ({output_name: self.visible_output}));
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.swap_visible_output, __accu0__, tree, old_node, __kwargtrans__ ({output_name: self.visible_output}));
+					}) ();
 				}
 				continue;
 			}
-			var new_node = self.create_node (context, self.py_metatype);
-			self.apply_node_settings (new_node);
+			var new_node = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.create_node, __accu0__, context, self.py_metatype);
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.apply_node_settings, __accu0__, new_node);
+			}) ();
 			if (self.visible_output) {
-				for (var socket of new_node.outputs) {
-					if (socket.py_name != self.visible_output) {
+				var __iterable1__ = new_node.outputs;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var socket = __getitem__ (__iterable1__, __index1__);
+					if (__ne__ (socket.py_name, self.visible_output)) {
 						socket.hide = true;
 					}
 				}
 			}
 			new_node.location_absolute = old_node.location_absolute;
-			if (old_node.bl_idname == 'NodeReroute') {
-				new_node.location_absolute.x -= new_node.width / 2;
-				new_node.location_absolute.y += 10;
+			if (__eq__ (old_node.bl_idname, 'NodeReroute')) {
+				new_node.location_absolute.x = __call__ (__isub__, null, new_node.location_absolute.x, __truediv__ (new_node.width, 2));
+				new_node.location_absolute.y = __call__ (__iadd__, null, new_node.location_absolute.y, 10);
 			}
 			new_node.select = true;
-			var zone_pair = self.get_zone_pair (tree, old_node);
+			var zone_pair = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.get_zone_pair, __accu0__, tree, old_node);
+			}) ();
 			if (zone_pair !== null) {
 				var __left0__ = zone_pair;
 				var input_node = __left0__ [0];
 				var output_node = __left0__ [1];
 				if (input_node.select && output_node.select) {
-					new_node.location_absolute = (input_node.location_absolute + output_node.location_absolute) / 2;
+					new_node.location_absolute = __truediv__ (__add__ (input_node.location_absolute, output_node.location_absolute), 2);
 				}
-				self.transfer_node_properties (old_node, new_node);
-				self.transfer_input_values (input_node, new_node);
-				self.transfer_links (tree, input_node, new_node, __kwargtrans__ ({is_input: true}));
-				self.transfer_links (tree, output_node, new_node, __kwargtrans__ ({is_input: false}));
-				for (var node of zone_pair) {
-					nodes_to_delete.add (node);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_node_properties, __accu0__, old_node, new_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_input_values, __accu0__, input_node, new_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, input_node, new_node, __kwargtrans__ ({is_input: true}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, output_node, new_node, __kwargtrans__ ({is_input: false}));
+				}) ();
+				var __iterable1__ = zone_pair;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var node = __getitem__ (__iterable1__, __index1__);
+					(function () {
+						var __accu0__ = nodes_to_delete;
+						return __call__ (__accu0__.add, __accu0__, node);
+					}) ();
 				}
 			}
 			else {
-				self.transfer_node_properties (old_node, new_node);
-				self.transfer_datablock_properties (old_node, new_node);
-				self.transfer_image_user_settings (old_node, new_node);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_node_properties, __accu0__, old_node, new_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_datablock_properties, __accu0__, old_node, new_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_image_user_settings, __accu0__, old_node, new_node);
+				}) ();
 				if (__in__ (old_node.bl_idname, switch_nodes) && __in__ (new_node.bl_idname, switch_nodes)) {
-					self.transfer_switch_data (old_node, new_node);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.transfer_switch_data, __accu0__, old_node, new_node);
+					}) ();
 				}
 				if (__in__ (old_node.bl_idname, has_child_sockets) && __in__ (new_node.bl_idname, has_child_sockets)) {
-					self.transfer_node_sockets (old_node, new_node);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.transfer_node_sockets, __accu0__, old_node, new_node);
+					}) ();
 				}
-				self.transfer_input_values (old_node, new_node);
-				self.transfer_links (tree, old_node, new_node, __kwargtrans__ ({is_input: true}));
-				self.transfer_links (tree, old_node, new_node, __kwargtrans__ ({is_input: false}));
-				nodes_to_delete.add (old_node);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_input_values, __accu0__, old_node, new_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_node, new_node, __kwargtrans__ ({is_input: true}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_node, new_node, __kwargtrans__ ({is_input: false}));
+				}) ();
+				(function () {
+					var __accu0__ = nodes_to_delete;
+					return __call__ (__accu0__.add, __accu0__, old_node);
+				}) ();
 			}
 		}
-		for (var node of nodes_to_delete) {
-			tree.nodes.remove (node);
+		var __iterable0__ = nodes_to_delete;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = tree.nodes;
+				return __call__ (__accu0__.remove, __accu0__, node);
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
 });
-NODE_OT_swap_node.__annotations__ = dict ({'type': StringProperty (__kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': StringProperty (__kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))});
+NODE_OT_swap_node.__annotations__ = dict ({'type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))});
 export var NODE_OT_add_empty_group =  __class__ ('NODE_OT_add_empty_group', [NodeAddOperator, bpy.types.Operator], {
 	__module__: __name__,
 	bl_idname: 'node.add_empty_group',
@@ -1277,7 +1590,7 @@ export var NODE_OT_add_empty_group =  __class__ ('NODE_OT_add_empty_group', [Nod
 	get description () {return __getcm__ (this, function (cls, _context, properties) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1295,7 +1608,7 @@ export var NODE_OT_add_empty_group =  __class__ ('NODE_OT_add_empty_group', [Nod
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1307,19 +1620,31 @@ export var NODE_OT_add_empty_group =  __class__ ('NODE_OT_add_empty_group', [Nod
 		}
 		else {
 		}
-		var node_tree_group_type = _member ('nodeitems_builtins', 'node_tree_group_type');
+		var node_tree_group_type = __call__ (_member, null, 'nodeitems_builtins', 'node_tree_group_type');
 		var tree = context.space_data.edit_tree;
-		var group = self.create_empty_group (tree.bl_idname);
-		self.deselect_nodes (context);
-		var node = self.create_node (context, node_tree_group_type [tree.bl_idname]);
-		self.apply_node_settings (node);
+		var group = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_empty_group, __accu0__, tree.bl_idname);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.deselect_nodes, __accu0__, context);
+		}) ();
+		var node = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_node, __accu0__, context, __getitem__ (node_tree_group_type, tree.bl_idname));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.apply_node_settings, __accu0__, node);
+		}) ();
 		node.node_tree = group;
 		return new set (['FINISHED']);
 	});},
 	get create_empty_group () {return function (idname) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1330,11 +1655,20 @@ export var NODE_OT_add_empty_group =  __class__ ('NODE_OT_add_empty_group', [Nod
 		}
 		else {
 		}
-		var group = bpy.data.node_groups.py_new (__kwargtrans__ ({py_name: data_ ('NodeGroup'), py_metatype: idname}));
-		var input_node = group.nodes.py_new ('NodeGroupInput');
+		var group = (function () {
+			var __accu0__ = bpy.data.node_groups;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: __call__ (data_, null, 'NodeGroup'), py_metatype: idname}));
+		}) ();
+		var input_node = (function () {
+			var __accu0__ = group.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupInput');
+		}) ();
 		input_node.select = false;
-		input_node.location.x = -(200) - input_node.width;
-		var output_node = group.nodes.py_new ('NodeGroupOutput');
+		input_node.location.x = __sub__ (__neg__ (200), input_node.width);
+		var output_node = (function () {
+			var __accu0__ = group.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupOutput');
+		}) ();
 		output_node.is_active_output = true;
 		output_node.select = false;
 		output_node.location.x = 200;
@@ -1350,7 +1684,7 @@ export var NODE_OT_swap_empty_group =  __class__ ('NODE_OT_swap_empty_group', [N
 	get description () {return __getcm__ (this, function (cls, _context, properties) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1368,7 +1702,7 @@ export var NODE_OT_swap_empty_group =  __class__ ('NODE_OT_swap_empty_group', [N
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1380,11 +1714,20 @@ export var NODE_OT_swap_empty_group =  __class__ ('NODE_OT_swap_empty_group', [N
 		}
 		else {
 		}
-		var node_tree_group_type = _member ('nodeitems_builtins', 'node_tree_group_type');
+		var node_tree_group_type = __call__ (_member, null, 'nodeitems_builtins', 'node_tree_group_type');
 		var tree = context.space_data.edit_tree;
-		var group = self.create_empty_group (tree.bl_idname);
-		bpy.ops.node.swap_node ('INVOKE_DEFAULT', __kwargtrans__ ({py_metatype: node_tree_group_type [tree.bl_idname]}));
-		for (var node of context.selected_nodes) {
+		var group = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_empty_group, __accu0__, tree.bl_idname);
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.node;
+			return __call__ (__accu0__.swap_node, __accu0__, 'INVOKE_DEFAULT', __kwargtrans__ ({py_metatype: __getitem__ (node_tree_group_type, tree.bl_idname)}));
+		}) ();
+		var __iterable0__ = context.selected_nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
 			node.node_tree = group;
 		}
 		return new set (['FINISHED']);
@@ -1392,7 +1735,7 @@ export var NODE_OT_swap_empty_group =  __class__ ('NODE_OT_swap_empty_group', [N
 	get create_empty_group () {return function (idname) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1403,11 +1746,20 @@ export var NODE_OT_swap_empty_group =  __class__ ('NODE_OT_swap_empty_group', [N
 		}
 		else {
 		}
-		var group = bpy.data.node_groups.py_new (__kwargtrans__ ({py_name: 'NodeGroup', py_metatype: idname}));
-		var input_node = group.nodes.py_new ('NodeGroupInput');
+		var group = (function () {
+			var __accu0__ = bpy.data.node_groups;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: 'NodeGroup', py_metatype: idname}));
+		}) ();
+		var input_node = (function () {
+			var __accu0__ = group.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupInput');
+		}) ();
 		input_node.select = false;
-		input_node.location.x = -(200) - input_node.width;
-		var output_node = group.nodes.py_new ('NodeGroupOutput');
+		input_node.location.x = __sub__ (__neg__ (200), input_node.width);
+		var output_node = (function () {
+			var __accu0__ = group.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupOutput');
+		}) ();
 		output_node.is_active_output = true;
 		output_node.select = false;
 		output_node.location.x = 200;
@@ -1423,7 +1775,7 @@ export var NODE_OT_add_typed_bundle =  __class__ ('NODE_OT_add_typed_bundle', [N
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1435,9 +1787,18 @@ export var NODE_OT_add_typed_bundle =  __class__ ('NODE_OT_add_typed_bundle', [N
 		}
 		else {
 		}
-		self.deselect_nodes (context);
-		var node = self.create_node (context, 'NodeCombineBundle');
-		node.bundle_items.py_new ('STRING', 'Type');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.deselect_nodes, __accu0__, context);
+		}) ();
+		var node = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_node, __accu0__, context, 'NodeCombineBundle');
+		}) ();
+		(function () {
+			var __accu0__ = node.bundle_items;
+			return __call__ (__accu0__.py_new, __accu0__, 'STRING', 'Type');
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -1450,7 +1811,7 @@ export var NODE_OT_swap_typed_bundle =  __class__ ('NODE_OT_swap_typed_bundle', 
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1462,20 +1823,29 @@ export var NODE_OT_swap_typed_bundle =  __class__ ('NODE_OT_swap_typed_bundle', 
 		}
 		else {
 		}
-		bpy.ops.node.swap_node ('INVOKE_DEFAULT', __kwargtrans__ ({py_metatype: 'NodeCombineBundle'}));
-		for (var node of context.selected_nodes) {
-			node.bundle_items.py_new ('STRING', 'Type');
+		(function () {
+			var __accu0__ = bpy.ops.node;
+			return __call__ (__accu0__.swap_node, __accu0__, 'INVOKE_DEFAULT', __kwargtrans__ ({py_metatype: 'NodeCombineBundle'}));
+		}) ();
+		var __iterable0__ = context.selected_nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = node.bundle_items;
+				return __call__ (__accu0__.py_new, __accu0__, 'STRING', 'Type');
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
 });
 export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 	__module__: __name__,
-	_zone_tooltips: dict ({'GeometryNodeSimulationInput': n_ ('Simulate the execution of nodes across a time span'), 'GeometryNodeRepeatInput': n_ ('Execute nodes with a dynamic number of repetitions'), 'GeometryNodeForeachGeometryElementInput': n_ ('Perform operations separately for each geometry element (e.g. vertices, edges, etc.)'), 'NodeClosureInput': n_ ('Wrap nodes inside a closure that can be executed at a different part of the node-tree')}),
+	_zone_tooltips: dict ({'GeometryNodeSimulationInput': __call__ (n_, null, 'Simulate the execution of nodes across a time span'), 'GeometryNodeRepeatInput': __call__ (n_, null, 'Execute nodes with a dynamic number of repetitions'), 'GeometryNodeForeachGeometryElementInput': __call__ (n_, null, 'Perform operations separately for each geometry element (e.g. vertices, edges, etc.)'), 'NodeClosureInput': __call__ (n_, null, 'Wrap nodes inside a closure that can be executed at a different part of the node-tree')}),
 	get description () {return __getcm__ (this, function (cls, _context, properties) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1488,21 +1858,24 @@ export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 		}
 		else {
 		}
-		var input_node_type = getattr (properties, 'input_node_type', null);
+		var input_node_type = __call__ (getattr, null, properties, 'input_node_type', null);
 		if (input_node_type === null) {
 			var input_node_type = cls.input_node_type;
 		}
-		return tip_ (cls._zone_tooltips.py_get (input_node_type, null));
+		return __call__ (tip_, null, (function () {
+			var __accu0__ = cls._zone_tooltips;
+			return __call__ (__accu0__.py_get, __accu0__, input_node_type, null);
+		}) ());
 	});}
 });
-ZoneOperator.__annotations__ = dict ({'offset': FloatVectorProperty (__kwargtrans__ ({py_name: 'Offset', description: 'Offset of nodes from the cursor when added', size: 2, py_default: tuple ([150, 0])}))});
+ZoneOperator.__annotations__ = dict ({'offset': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Offset', description: 'Offset of nodes from the cursor when added', size: 2, py_default: tuple ([150, 0])}))});
 export var NodeAddZoneOperator =  __class__ ('NodeAddZoneOperator', [ZoneOperator, NodeAddOperator], {
 	__module__: __name__,
 	add_default_geometry_link: true,
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1516,37 +1889,70 @@ export var NodeAddZoneOperator =  __class__ ('NodeAddZoneOperator', [ZoneOperato
 		}
 		var space = context.space_data;
 		var tree = space.edit_tree;
-		self.deselect_nodes (context);
-		var input_node = self.create_node (context, self.input_node_type);
-		var output_node = self.create_node (context, self.output_node_type);
-		self.apply_node_settings (input_node);
-		self.apply_node_settings (output_node);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.deselect_nodes, __accu0__, context);
+		}) ();
+		var input_node = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_node, __accu0__, context, self.input_node_type);
+		}) ();
+		var output_node = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.create_node, __accu0__, context, self.output_node_type);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.apply_node_settings, __accu0__, input_node);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.apply_node_settings, __accu0__, output_node);
+		}) ();
 		if (input_node === null || output_node === null) {
 			return new set (['CANCELLED']);
 		}
-		input_node.pair_with_output (output_node);
-		input_node.location -= Vector (self.offset);
-		output_node.location += Vector (self.offset);
-		if (tree.py_metatype == 'GEOMETRY' && self.add_default_geometry_link) {
-			var from_socket = py_next ((function () {
+		(function () {
+			var __accu0__ = input_node;
+			return __call__ (__accu0__.pair_with_output, __accu0__, output_node);
+		}) ();
+		input_node.location = __call__ (__isub__, null, input_node.location, __call__ (Vector, null, self.offset));
+		output_node.location = __call__ (__iadd__, null, output_node.location, __call__ (Vector, null, self.offset));
+		if (__eq__ (tree.py_metatype, 'GEOMETRY') && self.add_default_geometry_link) {
+			var from_socket = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 				var __accu0__ = [];
-				for (var s of input_node.outputs) {
-					if (s.py_metatype == 'GEOMETRY') {
-						__accu0__.append (s);
+				var __iterable0__ = input_node.outputs;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var s = __getitem__ (__iterable0__, __index0__);
+					if (__eq__ (s.py_metatype, 'GEOMETRY')) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, s);
+						}) ();
 					}
 				}
 				return __accu0__;
-			}) ());
-			var to_socket = py_next ((function () {
+			}) ()));
+			var to_socket = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 				var __accu0__ = [];
-				for (var s of output_node.inputs) {
-					if (s.py_metatype == 'GEOMETRY') {
-						__accu0__.append (s);
+				var __iterable0__ = output_node.inputs;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var s = __getitem__ (__iterable0__, __index0__);
+					if (__eq__ (s.py_metatype, 'GEOMETRY')) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, s);
+						}) ();
 					}
 				}
 				return __accu0__;
-			}) ());
-			tree.links.py_new (to_socket, from_socket);
+			}) ()));
+			(function () {
+				var __accu0__ = tree.links;
+				return __call__ (__accu0__.py_new, __accu0__, to_socket, from_socket);
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
@@ -1557,7 +1963,7 @@ export var NODE_OT_add_zone =  __class__ ('NODE_OT_add_zone', [NodeAddZoneOperat
 	bl_label: 'Add Zone',
 	bl_options: new set (['REGISTER', 'UNDO'])
 });
-NODE_OT_add_zone.__annotations__ = dict ({'input_node_type': StringProperty (__kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': StringProperty (__kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': BoolProperty (__kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))});
+NODE_OT_add_zone.__annotations__ = dict ({'input_node_type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))});
 export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, NodeSwapOperator, Operator], {
 	__module__: __name__,
 	bl_idname: 'node.swap_zone',
@@ -1566,7 +1972,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 	get get_zone_pair () {return function (tree, node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1578,12 +1984,15 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 		}
 		else {
 		}
-		if (hasattr (node, 'paired_output')) {
+		if (__call__ (hasattr, null, node, 'paired_output')) {
 			return tuple ([node, node.paired_output]);
 		}
-		for (var input_node of tree.nodes) {
-			if (hasattr (input_node, 'paired_output')) {
-				if (input_node.paired_output == node) {
+		var __iterable0__ = tree.nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var input_node = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (hasattr, null, input_node, 'paired_output')) {
+				if (__eq__ (input_node.paired_output, node)) {
 					return tuple ([input_node, node]);
 				}
 			}
@@ -1593,7 +2002,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 	get get_child_items () {return function (node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1604,22 +2013,28 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 		}
 		else {
 		}
-		if (hasattr (node, 'paired_output')) {
+		if (__call__ (hasattr, null, node, 'paired_output')) {
 			var output_node = node.paired_output;
 		}
 		else {
 			var output_node = node;
 		}
-		if (node.bl_idname.startswith ('GeometryNodeSimulation')) {
+		if ((function () {
+			var __accu0__ = node.bl_idname;
+			return __call__ (__accu0__.startswith, __accu0__, 'GeometryNodeSimulation');
+		}) ()) {
 			return output_node.state_items;
 		}
-		if (node.bl_idname.startswith ('GeometryNodeRepeat')) {
+		if ((function () {
+			var __accu0__ = node.bl_idname;
+			return __call__ (__accu0__.startswith, __accu0__, 'GeometryNodeRepeat');
+		}) ()) {
 			return output_node.repeat_items;
 		}
-		if (node.bl_idname == 'NodeClosureInput') {
+		if (__eq__ (node.bl_idname, 'NodeClosureInput')) {
 			return output_node.input_items;
 		}
-		if (node.bl_idname == 'NodeClosureOutput') {
+		if (__eq__ (node.bl_idname, 'NodeClosureOutput')) {
 			return output_node.output_items;
 		}
 		return null;
@@ -1627,7 +2042,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 	get transfer_zone_sockets () {return __get__ (this, function (self, old_node, new_node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1640,15 +2055,27 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 		}
 		else {
 		}
-		var old_children = self.get_child_items (old_node);
-		var new_children = self.get_child_items (new_node);
+		var old_children = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_child_items, __accu0__, old_node);
+		}) ();
+		var new_children = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_child_items, __accu0__, new_node);
+		}) ();
 		if (old_children === null || new_children === null) {
 			return ;
 		}
-		for (var item of old_children) {
+		var __iterable0__ = old_children;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var item = __getitem__ (__iterable0__, __index0__);
 			if (!__in__ (item.py_name, new_children)) {
 				try {
-					new_children.py_new (item.socket_type, item.py_name);
+					(function () {
+						var __accu0__ = new_children;
+						return __call__ (__accu0__.py_new, __accu0__, item.socket_type, item.py_name);
+					}) ();
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, RuntimeError)) {
@@ -1664,7 +2091,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1677,33 +2104,63 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 		else {
 		}
 		var tree = context.space_data.edit_tree;
-		var nodes_to_delete = set ();
-		for (var old_node of context.selected_nodes.__getslice__ (null, null, 1)) {
+		var nodes_to_delete = __call__ (set, null);
+		var __iterable0__ = __getslice__ (context.selected_nodes, null, null, 1);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var old_node = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (old_node, nodes_to_delete)) {
 				continue;
 			}
-			var zone_pair = self.get_zone_pair (tree, old_node);
+			var zone_pair = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.get_zone_pair, __accu0__, tree, old_node);
+			}) ();
 			if (__in__ (old_node.bl_idname, new set ([self.input_node_type, self.output_node_type]))) {
 				if (zone_pair !== null) {
 					var __left0__ = zone_pair;
 					var old_input_node = __left0__ [0];
 					var old_output_node = __left0__ [1];
-					self.apply_node_settings (old_input_node);
-					self.apply_node_settings (old_output_node);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.apply_node_settings, __accu0__, old_input_node);
+					}) ();
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.apply_node_settings, __accu0__, old_output_node);
+					}) ();
 				}
 				else {
-					self.apply_node_settings (old_node);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.apply_node_settings, __accu0__, old_node);
+					}) ();
 				}
 				continue;
 			}
-			var input_node = self.create_node (context, self.input_node_type);
-			var output_node = self.create_node (context, self.output_node_type);
-			self.apply_node_settings (input_node);
-			self.apply_node_settings (output_node);
+			var input_node = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.create_node, __accu0__, context, self.input_node_type);
+			}) ();
+			var output_node = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.create_node, __accu0__, context, self.output_node_type);
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.apply_node_settings, __accu0__, input_node);
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.apply_node_settings, __accu0__, output_node);
+			}) ();
 			if (input_node === null || output_node === null) {
 				return new set (['CANCELLED']);
 			}
-			input_node.pair_with_output (output_node);
+			(function () {
+				var __accu0__ = input_node;
+				return __call__ (__accu0__.pair_with_output, __accu0__, output_node);
+			}) ();
 			if (zone_pair !== null) {
 				var __left0__ = zone_pair;
 				var old_input_node = __left0__ [0];
@@ -1711,71 +2168,161 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 				input_node.location_absolute = old_input_node.location_absolute;
 				output_node.location_absolute = old_output_node.location_absolute;
 				if (__in__ (input_node.bl_idname, new set (['GeometryNodeSimulationInput', 'GeometryNodeRepeatInput']))) {
-					var new_zone_children = self.get_child_items (output_node);
-					new_zone_children.py_clear ();
-					for (var node of zone_pair) {
+					var new_zone_children = (function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.get_child_items, __accu0__, output_node);
+					}) ();
+					(function () {
+						var __accu0__ = new_zone_children;
+						return __call__ (__accu0__.py_clear, __accu0__);
+					}) ();
+					var __iterable1__ = zone_pair;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var node = __getitem__ (__iterable1__, __index1__);
 						if (node.select) {
-							self.transfer_zone_sockets (node, output_node);
+							(function () {
+								var __accu0__ = self;
+								return __call__ (__accu0__.transfer_zone_sockets, __accu0__, node, output_node);
+							}) ();
 						}
 					}
 				}
-				else if (input_node.bl_idname.startswith ('NodeClosure')) {
-					self.transfer_zone_sockets (old_input_node, input_node);
-					self.transfer_zone_sockets (old_output_node, output_node);
+				else if ((function () {
+					var __accu0__ = input_node.bl_idname;
+					return __call__ (__accu0__.startswith, __accu0__, 'NodeClosure');
+				}) ()) {
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.transfer_zone_sockets, __accu0__, old_input_node, input_node);
+					}) ();
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.transfer_zone_sockets, __accu0__, old_output_node, output_node);
+					}) ();
 				}
-				self.transfer_node_properties (old_input_node, input_node);
-				self.transfer_node_properties (old_output_node, output_node);
-				self.transfer_input_values (old_input_node, input_node);
-				self.transfer_input_values (old_output_node, output_node);
-				self.transfer_links (tree, old_input_node, input_node, __kwargtrans__ ({is_input: true}));
-				self.transfer_links (tree, old_input_node, input_node, __kwargtrans__ ({is_input: false}));
-				self.transfer_links (tree, old_output_node, output_node, __kwargtrans__ ({is_input: true}));
-				self.transfer_links (tree, old_output_node, output_node, __kwargtrans__ ({is_input: false}));
-				for (var node of zone_pair) {
-					nodes_to_delete.add (node);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_node_properties, __accu0__, old_input_node, input_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_node_properties, __accu0__, old_output_node, output_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_input_values, __accu0__, old_input_node, input_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_input_values, __accu0__, old_output_node, output_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_input_node, input_node, __kwargtrans__ ({is_input: true}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_input_node, input_node, __kwargtrans__ ({is_input: false}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_output_node, output_node, __kwargtrans__ ({is_input: true}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_output_node, output_node, __kwargtrans__ ({is_input: false}));
+				}) ();
+				var __iterable1__ = zone_pair;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var node = __getitem__ (__iterable1__, __index1__);
+					(function () {
+						var __accu0__ = nodes_to_delete;
+						return __call__ (__accu0__.add, __accu0__, node);
+					}) ();
 				}
 			}
 			else {
-				input_node.location_absolute = old_node.location_absolute - Vector (self.offset);
-				output_node.location_absolute = old_node.location_absolute + Vector (self.offset);
-				self.transfer_node_properties (old_node, input_node);
-				self.transfer_node_properties (old_node, output_node);
-				self.transfer_input_values (old_node, input_node);
-				self.transfer_links (tree, old_node, input_node, __kwargtrans__ ({is_input: true}));
-				self.transfer_links (tree, old_node, output_node, __kwargtrans__ ({is_input: false}));
-				nodes_to_delete.add (old_node);
-				if (tree.py_metatype == 'GEOMETRY' && self.add_default_geometry_link) {
-					var from_socket = py_next ((function () {
+				input_node.location_absolute = __sub__ (old_node.location_absolute, __call__ (Vector, null, self.offset));
+				output_node.location_absolute = __add__ (old_node.location_absolute, __call__ (Vector, null, self.offset));
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_node_properties, __accu0__, old_node, input_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_node_properties, __accu0__, old_node, output_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_input_values, __accu0__, old_node, input_node);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_node, input_node, __kwargtrans__ ({is_input: true}));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.transfer_links, __accu0__, tree, old_node, output_node, __kwargtrans__ ({is_input: false}));
+				}) ();
+				(function () {
+					var __accu0__ = nodes_to_delete;
+					return __call__ (__accu0__.add, __accu0__, old_node);
+				}) ();
+				if (__eq__ (tree.py_metatype, 'GEOMETRY') && self.add_default_geometry_link) {
+					var from_socket = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 						var __accu0__ = [];
-						for (var s of input_node.outputs) {
-							if (s.py_metatype == 'GEOMETRY') {
-								__accu0__.append (s);
+						var __iterable1__ = input_node.outputs;
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+							var s = __getitem__ (__iterable1__, __index1__);
+							if (__eq__ (s.py_metatype, 'GEOMETRY')) {
+								(function () {
+									var __accu1__ = __accu0__;
+									return __call__ (__accu1__.append, __accu1__, s);
+								}) ();
 							}
 						}
 						return __accu0__;
-					}) ());
-					var to_socket = py_next ((function () {
+					}) ()));
+					var to_socket = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 						var __accu0__ = [];
-						for (var s of output_node.inputs) {
-							if (s.py_metatype == 'GEOMETRY') {
-								__accu0__.append (s);
+						var __iterable1__ = output_node.inputs;
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+							var s = __getitem__ (__iterable1__, __index1__);
+							if (__eq__ (s.py_metatype, 'GEOMETRY')) {
+								(function () {
+									var __accu1__ = __accu0__;
+									return __call__ (__accu1__.append, __accu1__, s);
+								}) ();
 							}
 						}
 						return __accu0__;
-					}) ());
+					}) ()));
 					if (!(from_socket.is_linked || to_socket.is_linked)) {
-						tree.links.py_new (to_socket, from_socket);
+						(function () {
+							var __accu0__ = tree.links;
+							return __call__ (__accu0__.py_new, __accu0__, to_socket, from_socket);
+						}) ();
 					}
 				}
 			}
 		}
-		for (var node of nodes_to_delete) {
-			tree.nodes.remove (node);
+		var __iterable0__ = nodes_to_delete;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = tree.nodes;
+				return __call__ (__accu0__.remove, __accu0__, node);
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
 });
-NODE_OT_swap_zone.__annotations__ = dict ({'input_node_type': StringProperty (__kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': StringProperty (__kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': BoolProperty (__kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))});
+NODE_OT_swap_zone.__annotations__ = dict ({'input_node_type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))});
 export var NODE_OT_add_simulation_zone =  __class__ ('NODE_OT_add_simulation_zone', [NodeAddZoneOperator, Operator], {
 	__module__: __name__,
 	bl_idname: 'node.add_simulation_zone',
@@ -1818,7 +2365,7 @@ export var NODE_OT_collapse_hide_unused_toggle =  __class__ ('NODE_OT_collapse_h
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1831,12 +2378,12 @@ export var NODE_OT_collapse_hide_unused_toggle =  __class__ ('NODE_OT_collapse_h
 		else {
 		}
 		var space = context.space_data;
-		return space && space.py_metatype == 'NODE_EDITOR' && (space.edit_tree && space.edit_tree.is_editable);
+		return space && __eq__ (space.py_metatype, 'NODE_EDITOR') && (space.edit_tree && space.edit_tree.is_editable);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1850,14 +2397,23 @@ export var NODE_OT_collapse_hide_unused_toggle =  __class__ ('NODE_OT_collapse_h
 		}
 		var space = context.space_data;
 		var tree = space.edit_tree;
-		for (var node of tree.nodes) {
+		var __iterable0__ = tree.nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var node = __getitem__ (__iterable0__, __index0__);
 			if (node.select) {
 				var hide = !(node.hide);
 				node.hide = hide;
-				for (var socket of node.inputs) {
+				var __iterable1__ = node.inputs;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var socket = __getitem__ (__iterable1__, __index1__);
 					socket.hide = hide;
 				}
-				for (var socket of node.outputs) {
+				var __iterable1__ = node.outputs;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var socket = __getitem__ (__iterable1__, __index1__);
 					socket.hide = hide;
 				}
 			}
@@ -1873,7 +2429,7 @@ export var NODE_OT_tree_path_parent =  __class__ ('NODE_OT_tree_path_parent', [O
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1886,12 +2442,12 @@ export var NODE_OT_tree_path_parent =  __class__ ('NODE_OT_tree_path_parent', [O
 		else {
 		}
 		var space = context.space_data;
-		return space && space.py_metatype == 'NODE_EDITOR' && len (space.path) > 1;
+		return space && __eq__ (space.py_metatype, 'NODE_EDITOR') && __gt__ (__call__ (len, null, space.path), 1);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1904,20 +2460,23 @@ export var NODE_OT_tree_path_parent =  __class__ ('NODE_OT_tree_path_parent', [O
 		else {
 		}
 		var space = context.space_data;
-		var parent_number_to_pop = (len (space.path) - 1) - self.parent_tree_index;
+		var parent_number_to_pop = __sub__ (__sub__ (__call__ (len, null, space.path), 1), self.parent_tree_index);
 		for (var _ = 0; _ < parent_number_to_pop; _++) {
-			space.path.py_pop ();
+			(function () {
+				var __accu0__ = space.path;
+				return __call__ (__accu0__.py_pop, __accu0__);
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
 });
-NODE_OT_tree_path_parent.__annotations__ = dict ({'parent_tree_index': IntProperty (__kwargtrans__ ({py_name: 'Parent Index', description: 'Parent index in context path', py_default: 0}))});
+NODE_OT_tree_path_parent.__annotations__ = dict ({'parent_tree_index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Parent Index', description: 'Parent index in context path', py_default: 0}))});
 export var NodeInterfaceOperator =  __class__ ('NodeInterfaceOperator', [object], {
 	__module__: __name__,
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1930,7 +2489,7 @@ export var NodeInterfaceOperator =  __class__ ('NodeInterfaceOperator', [object]
 		else {
 		}
 		var space = context.space_data;
-		if (!(space) || space.py_metatype != 'NODE_EDITOR' || !(space.edit_tree)) {
+		if (!(space) || __ne__ (space.py_metatype, 'NODE_EDITOR') || !(space.edit_tree)) {
 			return false;
 		}
 		if (space.edit_tree.is_embedded_data) {
@@ -1947,7 +2506,7 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 	get find_valid_socket_type () {return function (tree) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1959,23 +2518,38 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 		else {
 		}
 		var socket_type = 'NodeSocketFloat';
-		if (!(hasattr (tree, 'valid_socket_type')) || tree.valid_socket_type (socket_type)) {
+		if (!(__call__ (hasattr, null, tree, 'valid_socket_type')) || (function () {
+			var __accu0__ = tree;
+			return __call__ (__accu0__.valid_socket_type, __accu0__, socket_type);
+		}) ()) {
 			return socket_type;
 		}
 		var types_to_check = [bpy.types.NodeSocket];
 		while (types_to_check) {
-			var t = types_to_check.py_pop ();
-			var idname = getattr (t, 'bl_idname', '');
-			if (tree.valid_socket_type (idname)) {
+			var t = (function () {
+				var __accu0__ = types_to_check;
+				return __call__ (__accu0__.py_pop, __accu0__);
+			}) ();
+			var idname = __call__ (getattr, null, t, 'bl_idname', '');
+			if ((function () {
+				var __accu0__ = tree;
+				return __call__ (__accu0__.valid_socket_type, __accu0__, idname);
+			}) ()) {
 				return idname;
 			}
-			types_to_check.extend (t.__subclasses__ ());
+			(function () {
+				var __accu0__ = types_to_check;
+				return __call__ (__accu0__.extend, __accu0__, (function () {
+					var __accu1__ = t;
+					return __call__ (__accu1__.__subclasses__, __accu1__);
+				}) ());
+			}) ();
 		}
 	};},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1991,32 +2565,53 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		var active_pos = (active_item ? active_item.position : -(1));
-		if (self.item_type == 'INPUT') {
-			var item = interface_.new_socket ('Socket', __kwargtrans__ ({socket_type: self.find_valid_socket_type (tree), in_out: 'INPUT'}));
+		var active_pos = (active_item ? active_item.position : __neg__ (1));
+		if (__eq__ (self.item_type, 'INPUT')) {
+			var item = (function () {
+				var __accu0__ = interface_;
+				return __call__ (__accu0__.new_socket, __accu0__, 'Socket', __kwargtrans__ ({socket_type: (function () {
+					var __accu1__ = self;
+					return __call__ (__accu1__.find_valid_socket_type, __accu1__, tree);
+				}) (), in_out: 'INPUT'}));
+			}) ();
 		}
-		else if (self.item_type == 'OUTPUT') {
-			var item = interface_.new_socket ('Socket', __kwargtrans__ ({socket_type: self.find_valid_socket_type (tree), in_out: 'OUTPUT'}));
+		else if (__eq__ (self.item_type, 'OUTPUT')) {
+			var item = (function () {
+				var __accu0__ = interface_;
+				return __call__ (__accu0__.new_socket, __accu0__, 'Socket', __kwargtrans__ ({socket_type: (function () {
+					var __accu1__ = self;
+					return __call__ (__accu1__.find_valid_socket_type, __accu1__, tree);
+				}) (), in_out: 'OUTPUT'}));
+			}) ();
 		}
-		else if (self.item_type == 'PANEL') {
-			var item = interface_.new_panel ('Panel');
+		else if (__eq__ (self.item_type, 'PANEL')) {
+			var item = (function () {
+				var __accu0__ = interface_;
+				return __call__ (__accu0__.new_panel, __accu0__, 'Panel');
+			}) ();
 		}
 		else {
 			return new set (['CANCELLED']);
 		}
 		if (active_item) {
-			if (active_item.item_type == 'PANEL' && item.item_type != 'PANEL') {
-				interface_.move_to_parent (item, active_item, len (active_item.interface_items));
+			if (__eq__ (active_item.item_type, 'PANEL') && __ne__ (item.item_type, 'PANEL')) {
+				(function () {
+					var __accu0__ = interface_;
+					return __call__ (__accu0__.move_to_parent, __accu0__, item, active_item, __call__ (len, null, active_item.interface_items));
+				}) ();
 			}
 			else {
-				interface_.move_to_parent (item, active_item.parent, active_pos + 1);
+				(function () {
+					var __accu0__ = interface_;
+					return __call__ (__accu0__.move_to_parent, __accu0__, item, active_item.parent, __add__ (active_pos, 1));
+				}) ();
 			}
 		}
 		interface_.active = item;
 		return new set (['FINISHED']);
 	});}
 });
-NODE_OT_interface_item_new.__annotations__ = dict ({'item_type': EnumProperty (__kwargtrans__ ({py_name: 'Item Type', description: 'Type of the item to create', py_items: tuple ([tuple (['INPUT', 'Input', '']), tuple (['OUTPUT', 'Output', '']), tuple (['PANEL', 'Panel', ''])]), py_default: 'INPUT'}))});
+NODE_OT_interface_item_new.__annotations__ = dict ({'item_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Item Type', description: 'Type of the item to create', py_items: tuple ([tuple (['INPUT', 'Input', '']), tuple (['OUTPUT', 'Output', '']), tuple (['PANEL', 'Panel', ''])]), py_default: 'INPUT'}))});
 export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interface_item_new_panel_toggle', [Operator], {
 	__module__: __name__,
 	bl_idname: 'node.interface_item_new_panel_toggle',
@@ -2025,7 +2620,7 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 	get get_panel_toggle () {return function (panel) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2036,8 +2631,8 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 		}
 		else {
 		}
-		if (len (panel.interface_items) > 0) {
-			var first_item = panel.interface_items [0];
+		if (__gt__ (__call__ (len, null, panel.interface_items), 0)) {
+			var first_item = __getitem__ (panel.interface_items, 0);
 			if (py_typeof (first_item) === bpy.types.NodeTreeInterfaceSocketBool && first_item.is_panel_toggle) {
 				return first_item;
 			}
@@ -2047,7 +2642,7 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2064,12 +2659,21 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 			var tree = snode.edit_tree;
 			var interface_ = tree.interface;
 			var active_item = interface_.active;
-			if (active_item.item_type != 'PANEL') {
-				cls.poll_message_set ('Active item is not a panel');
+			if (__ne__ (active_item.item_type, 'PANEL')) {
+				(function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.poll_message_set, __accu0__, 'Active item is not a panel');
+				}) ();
 				return false;
 			}
-			if (cls.get_panel_toggle (active_item) !== null) {
-				cls.poll_message_set ('Panel already has a toggle');
+			if ((function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.get_panel_toggle, __accu0__, active_item);
+			}) () !== null) {
+				(function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.poll_message_set, __accu0__, 'Panel already has a toggle');
+				}) ();
 				return false;
 			}
 			return true;
@@ -2086,7 +2690,7 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2102,8 +2706,14 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_panel = interface_.active;
-		var item = interface_.new_socket (active_panel.py_name, __kwargtrans__ ({socket_type: 'NodeSocketBool', in_out: 'INPUT'}));
-		interface_.move_to_parent (item, active_panel, 0);
+		var item = (function () {
+			var __accu0__ = interface_;
+			return __call__ (__accu0__.new_socket, __accu0__, active_panel.py_name, __kwargtrans__ ({socket_type: 'NodeSocketBool', in_out: 'INPUT'}));
+		}) ();
+		(function () {
+			var __accu0__ = interface_;
+			return __call__ (__accu0__.move_to_parent, __accu0__, item, active_panel, 0);
+		}) ();
 		item.is_panel_toggle = true;
 		return new set (['FINISHED']);
 	});}
@@ -2116,7 +2726,7 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2128,7 +2738,7 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 		}
 		else {
 		}
-		if (!(__super__ (NODE_OT_interface_item_duplicate, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (__super__, null, NODE_OT_interface_item_duplicate, 'poll'), null, self, context))) {
 			return false;
 		}
 		var snode = context.space_data;
@@ -2139,7 +2749,7 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2156,7 +2766,10 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 		var interface_ = tree.interface;
 		var item = interface_.active;
 		if (item) {
-			var item_copy = interface_.py_copy (item);
+			var item_copy = (function () {
+				var __accu0__ = interface_;
+				return __call__ (__accu0__.py_copy, __accu0__, item);
+			}) ();
 			interface_.active = item_copy;
 		}
 		return new set (['FINISHED']);
@@ -2170,7 +2783,7 @@ export var NODE_OT_interface_item_remove =  __class__ ('NODE_OT_interface_item_r
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2188,31 +2801,46 @@ export var NODE_OT_interface_item_remove =  __class__ ('NODE_OT_interface_item_r
 		var active_item = interface_.active;
 		var selected_items = (function () {
 			var __accu0__ = [];
-			for (var item of interface_.items_tree) {
-				if (item.select || item == active_item) {
-					__accu0__.append (item);
+			var __iterable0__ = interface_.items_tree;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var item = __getitem__ (__iterable0__, __index0__);
+				if (item.select || __eq__ (item, active_item)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, item);
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ();
-		if (len (selected_items) == 0) {
+		if (__eq__ (__call__ (len, null, selected_items), 0)) {
 			return new set (['CANCELLED']);
 		}
-		for (var item of py_reversed (selected_items)) {
-			if (item.item_type == 'PANEL') {
+		var __iterable0__ = __call__ (py_reversed, null, selected_items);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var item = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (item.item_type, 'PANEL')) {
 				var children = item.interface_items;
-				if (len (children) > 0) {
-					var first_child = children [0];
-					if (isinstance (first_child, bpy.types.NodeTreeInterfaceSocket) && first_child.is_panel_toggle) {
-						interface_.remove (first_child);
+				if (__gt__ (__call__ (len, null, children), 0)) {
+					var first_child = __getitem__ (children, 0);
+					if (__call__ (isinstance, null, first_child, bpy.types.NodeTreeInterfaceSocket) && first_child.is_panel_toggle) {
+						(function () {
+							var __accu0__ = interface_;
+							return __call__ (__accu0__.remove, __accu0__, first_child);
+						}) ();
 					}
 				}
 			}
-			interface_.remove (item);
+			(function () {
+				var __accu0__ = interface_;
+				return __call__ (__accu0__.remove, __accu0__, item);
+			}) ();
 		}
-		interface_.active_index = min (interface_.active_index, len (interface_.items_tree) - 1);
+		interface_.active_index = __call__ (min, null, interface_.active_index, __sub__ (__call__ (len, null, interface_.items_tree), 1));
 		var new_active = interface_.active;
-		if (isinstance (new_active, bpy.types.NodeTreeInterfaceSocket) && new_active.is_panel_toggle) {
+		if (__call__ (isinstance, null, new_active, bpy.types.NodeTreeInterfaceSocket) && new_active.is_panel_toggle) {
 			interface_.active_index = new_active.parent.index;
 		}
 		return new set (['FINISHED']);
@@ -2226,7 +2854,7 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2238,7 +2866,7 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 		}
 		else {
 		}
-		if (!(__super__ (NODE_OT_interface_item_make_panel_toggle, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (__super__, null, NODE_OT_interface_item_make_panel_toggle, 'poll'), null, self, context))) {
 			return false;
 		}
 		var snode = context.space_data;
@@ -2248,19 +2876,28 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 		if (!(active_item)) {
 			return false;
 		}
-		if (py_typeof (active_item) !== bpy.types.NodeTreeInterfaceSocketBool || active_item.in_out != 'INPUT') {
-			cls.poll_message_set ('Only boolean input sockets are supported');
+		if (py_typeof (active_item) !== bpy.types.NodeTreeInterfaceSocketBool || __ne__ (active_item.in_out, 'INPUT')) {
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Only boolean input sockets are supported');
+			}) ();
 			return false;
 		}
 		var parent_panel = active_item.parent;
 		if (parent_panel.parent === null) {
-			cls.poll_message_set ('Socket must be in a panel');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Socket must be in a panel');
+			}) ();
 			return false;
 		}
-		if (len (parent_panel.interface_items) > 0) {
-			var first_item = parent_panel.interface_items [0];
+		if (__gt__ (__call__ (len, null, parent_panel.interface_items), 0)) {
+			var first_item = __getitem__ (parent_panel.interface_items, 0);
 			if (first_item.is_panel_toggle) {
-				cls.poll_message_set ('Panel already has a toggle');
+				(function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.poll_message_set, __accu0__, 'Panel already has a toggle');
+				}) ();
 				return false;
 			}
 		}
@@ -2269,7 +2906,7 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2306,7 +2943,7 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2318,26 +2955,26 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 		}
 		else {
 		}
-		if (!(__super__ (NODE_OT_interface_item_unlink_panel_toggle, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (__super__, null, NODE_OT_interface_item_unlink_panel_toggle, 'poll'), null, self, context))) {
 			return false;
 		}
 		var snode = context.space_data;
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		if (!(active_item) || active_item.item_type != 'PANEL') {
+		if (!(active_item) || __ne__ (active_item.item_type, 'PANEL')) {
 			return false;
 		}
-		if (len (active_item.interface_items) == 0) {
+		if (__eq__ (__call__ (len, null, active_item.interface_items), 0)) {
 			return false;
 		}
-		var first_item = active_item.interface_items [0];
+		var first_item = __getitem__ (active_item.interface_items, 0);
 		return first_item.is_panel_toggle;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2353,13 +2990,13 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		if (!(active_item) || active_item.item_type != 'PANEL') {
+		if (!(active_item) || __ne__ (active_item.item_type, 'PANEL')) {
 			return new set (['CANCELLED']);
 		}
-		if (len (active_item.interface_items) == 0) {
+		if (__eq__ (__call__ (len, null, active_item.interface_items), 0)) {
 			return new set (['CANCELLED']);
 		}
-		var first_item = active_item.interface_items [0];
+		var first_item = __getitem__ (active_item.interface_items, 0);
 		if (py_typeof (first_item) !== bpy.types.NodeTreeInterfaceSocketBool || !(first_item.is_panel_toggle)) {
 			return new set (['CANCELLED']);
 		}
@@ -2377,7 +3014,7 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 	get get_connected_viewer () {return __get__ (this, function (self, node) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2389,10 +3026,16 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 		}
 		else {
 		}
-		for (var out of node.outputs) {
-			for (var link of out.links) {
+		var __iterable0__ = node.outputs;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var out = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = out.links;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var link = __getitem__ (__iterable1__, __index1__);
 				var nv = link.to_node;
-				if (nv.py_metatype == 'VIEWER') {
+				if (__eq__ (nv.py_metatype, 'VIEWER')) {
 					return nv;
 				}
 			}
@@ -2402,7 +3045,7 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2414,13 +3057,14 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 		}
 		else {
 		}
+		// pass;
 		var space = context.space_data;
-		return space !== null && space.py_metatype == 'NODE_EDITOR' && space.node_tree !== null && __in__ (space.tree_type, new set (['CompositorNodeTree', 'GeometryNodeTree']));
+		return space !== null && __eq__ (space.py_metatype, 'NODE_EDITOR') && space.node_tree !== null && __in__ (space.tree_type, new set (['CompositorNodeTree', 'GeometryNodeTree']));
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2433,29 +3077,50 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 		else {
 		}
 		var selected_nodes = context.selected_nodes;
-		if (len (selected_nodes) == 0) {
-			self.report (new set (['ERROR']), 'Select a node to assign a shortcut');
+		if (__eq__ (__call__ (len, null, selected_nodes), 0)) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Select a node to assign a shortcut');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var fav_node = selected_nodes [0];
-		if (fav_node.py_metatype == 'VIEWER') {
+		var fav_node = __getitem__ (selected_nodes, 0);
+		if (__eq__ (fav_node.py_metatype, 'VIEWER')) {
 			var viewer_node = fav_node;
 		}
 		else {
-			var viewer_node = self.get_connected_viewer (fav_node);
+			var viewer_node = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.get_connected_viewer, __accu0__, fav_node);
+			}) ();
 			if (!(viewer_node)) {
-				bpy.ops.node.link_viewer ();
-				var viewer_node = self.get_connected_viewer (fav_node);
+				(function () {
+					var __accu0__ = bpy.ops.node;
+					return __call__ (__accu0__.link_viewer, __accu0__);
+				}) ();
+				var viewer_node = (function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.get_connected_viewer, __accu0__, fav_node);
+				}) ();
 			}
 		}
 		if (!(viewer_node)) {
-			self.report (new set (['ERROR']), 'Unable to set shortcut, selected node is not a viewer node or does not support viewing');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Unable to set shortcut, selected node is not a viewer node or does not support viewing');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var __withid0__ = bpy.context.temp_override (__kwargtrans__ ({node: viewer_node}));
+		var __withid0__ = (function () {
+			var __accu0__ = bpy.context;
+			return __call__ (__accu0__.temp_override, __accu0__, __kwargtrans__ ({node: viewer_node}));
+		}) ();
 		try {
 			__withid0__.__enter__ ();
-			bpy.ops.node.activate_viewer ();
+			(function () {
+				var __accu0__ = bpy.ops.node;
+				return __call__ (__accu0__.activate_viewer, __accu0__);
+			}) ();
 			__withid0__.__exit__ ();
 		}
 		catch (__except0__) {
@@ -2464,11 +3129,17 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 			}
 		}
 		viewer_node.ui_shortcut = self.viewer_index;
-		self.report (new set (['INFO']), rpt_ ('Assigned shortcut {:d} to {:s}').format (self.viewer_index, viewer_node.py_name));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
+				var __accu1__ = __call__ (rpt_, null, 'Assigned shortcut {:d} to {:s}');
+				return __call__ (__accu1__.format, __accu1__, self.viewer_index, viewer_node.py_name);
+			}) ());
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
-NODE_OT_viewer_shortcut_set.__annotations__ = dict ({'viewer_index': IntProperty (__kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))});
+NODE_OT_viewer_shortcut_set.__annotations__ = dict ({'viewer_index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))});
 export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_get', [Operator], {
 	__module__: __name__,
 	bl_idname: 'node.viewer_shortcut_get',
@@ -2477,7 +3148,7 @@ export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_ge
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2489,13 +3160,14 @@ export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_ge
 		}
 		else {
 		}
+		// pass;
 		var space = context.space_data;
-		return space !== null && space.py_metatype == 'NODE_EDITOR' && space.node_tree !== null && __in__ (space.tree_type, new set (['CompositorNodeTree', 'GeometryNodeTree']));
+		return space !== null && __eq__ (space.py_metatype, 'NODE_EDITOR') && space.node_tree !== null && __in__ (space.tree_type, new set (['CompositorNodeTree', 'GeometryNodeTree']));
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2509,19 +3181,34 @@ export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_ge
 		}
 		var nodes = context.space_data.edit_tree.nodes;
 		var viewer_node = null;
-		for (var n of nodes) {
-			if (n.py_metatype == 'VIEWER' && n.ui_shortcut == self.viewer_index) {
+		var __iterable0__ = nodes;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var n = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (n.py_metatype, 'VIEWER') && __eq__ (n.ui_shortcut, self.viewer_index)) {
 				var viewer_node = n;
 			}
 		}
 		if (!(viewer_node)) {
-			self.report (new set (['INFO']), rpt_ ('Shortcut {:d} is not assigned to a Viewer node yet').format (self.viewer_index));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Shortcut {:d} is not assigned to a Viewer node yet');
+					return __call__ (__accu1__.format, __accu1__, self.viewer_index);
+				}) ());
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var __withid0__ = bpy.context.temp_override (__kwargtrans__ ({node: viewer_node}));
+		var __withid0__ = (function () {
+			var __accu0__ = bpy.context;
+			return __call__ (__accu0__.temp_override, __accu0__, __kwargtrans__ ({node: viewer_node}));
+		}) ();
 		try {
 			__withid0__.__enter__ ();
-			bpy.ops.node.toggle_viewer ();
+			(function () {
+				var __accu0__ = bpy.ops.node;
+				return __call__ (__accu0__.toggle_viewer, __accu0__);
+			}) ();
 			__withid0__.__exit__ ();
 		}
 		catch (__except0__) {
@@ -2532,17 +3219,20 @@ export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_ge
 		return new set (['FINISHED']);
 	});}
 });
-NODE_OT_viewer_shortcut_get.__annotations__ = dict ({'viewer_index': IntProperty (__kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))});
+NODE_OT_viewer_shortcut_get.__annotations__ = dict ({'viewer_index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))});
 export var NODE_FH_image_node =  __class__ ('NODE_FH_image_node', [FileHandler], {
 	__module__: __name__,
 	bl_idname: 'NODE_FH_image_node',
 	bl_label: 'Image node',
 	bl_import_operator: 'node.add_image',
-	bl_file_extensions: ';'.join (_joined (bpy.path.extensions_image, bpy.path.extensions_movie)),
+	bl_file_extensions: (function () {
+		var __accu0__ = ';';
+		return __call__ (__accu0__.join, __accu0__, __call__ (_joined, null, bpy.path.extensions_image, bpy.path.extensions_movie));
+	}) (),
 	get poll_drop () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2554,10 +3244,57 @@ export var NODE_FH_image_node =  __class__ ('NODE_FH_image_node', [FileHandler],
 		}
 		else {
 		}
-		return context.area !== null && context.area.py_metatype == 'NODE_EDITOR' && context.region !== null && context.region.py_metatype == 'WINDOW';
+		return context.area !== null && __eq__ (context.area.py_metatype, 'NODE_EDITOR') && context.region !== null && __eq__ (context.region.py_metatype, 'WINDOW');
 	});}
 });
 export var classes = tuple ([NodeSetting, NODE_FH_image_node, NODE_OT_add_node, NODE_OT_swap_node, NODE_OT_add_empty_group, NODE_OT_swap_empty_group, NODE_OT_add_zone, NODE_OT_swap_zone, NODE_OT_add_simulation_zone, NODE_OT_add_repeat_zone, NODE_OT_add_foreach_geometry_element_zone, NODE_OT_add_closure_zone, NODE_OT_add_typed_bundle, NODE_OT_swap_typed_bundle, NODE_OT_collapse_hide_unused_toggle, NODE_OT_interface_item_new, NODE_OT_interface_item_new_panel_toggle, NODE_OT_interface_item_duplicate, NODE_OT_interface_item_remove, NODE_OT_interface_item_make_panel_toggle, NODE_OT_interface_item_unlink_panel_toggle, NODE_OT_tree_path_parent, NODE_OT_viewer_shortcut_get, NODE_OT_viewer_shortcut_set]);
 
 //# sourceMappingURL=bl_operators.node.map
 export {BoolProperty, CollectionProperty, EnumProperty, FileHandler, FloatVectorProperty, IntProperty, Operator, PropertyGroup, StringProperty, Vector, _globals, _import, _lazy, _member, _module, data_, n_, rpt_, tip_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'math_nodes': math_nodes = value; break;
+		case 'switch_nodes': switch_nodes = value; break;
+		case 'has_child_sockets': has_child_sockets = value; break;
+		case 'cast_value': cast_value = value; break;
+		case 'NodeSetting': NodeSetting = value; break;
+		case 'NodeOperator': NodeOperator = value; break;
+		case 'NodeAddOperator': NodeAddOperator = value; break;
+		case 'NodeSwapOperator': NodeSwapOperator = value; break;
+		case 'NODE_OT_add_node': NODE_OT_add_node = value; break;
+		case 'NODE_OT_swap_node': NODE_OT_swap_node = value; break;
+		case 'NODE_OT_add_empty_group': NODE_OT_add_empty_group = value; break;
+		case 'NODE_OT_swap_empty_group': NODE_OT_swap_empty_group = value; break;
+		case 'NODE_OT_add_typed_bundle': NODE_OT_add_typed_bundle = value; break;
+		case 'NODE_OT_swap_typed_bundle': NODE_OT_swap_typed_bundle = value; break;
+		case 'ZoneOperator': ZoneOperator = value; break;
+		case 'NodeAddZoneOperator': NodeAddZoneOperator = value; break;
+		case 'NODE_OT_add_zone': NODE_OT_add_zone = value; break;
+		case 'NODE_OT_swap_zone': NODE_OT_swap_zone = value; break;
+		case 'NODE_OT_add_simulation_zone': NODE_OT_add_simulation_zone = value; break;
+		case 'NODE_OT_add_repeat_zone': NODE_OT_add_repeat_zone = value; break;
+		case 'NODE_OT_add_foreach_geometry_element_zone': NODE_OT_add_foreach_geometry_element_zone = value; break;
+		case 'NODE_OT_add_closure_zone': NODE_OT_add_closure_zone = value; break;
+		case 'NODE_OT_collapse_hide_unused_toggle': NODE_OT_collapse_hide_unused_toggle = value; break;
+		case 'NODE_OT_tree_path_parent': NODE_OT_tree_path_parent = value; break;
+		case 'NodeInterfaceOperator': NodeInterfaceOperator = value; break;
+		case 'NODE_OT_interface_item_new': NODE_OT_interface_item_new = value; break;
+		case 'NODE_OT_interface_item_new_panel_toggle': NODE_OT_interface_item_new_panel_toggle = value; break;
+		case 'NODE_OT_interface_item_duplicate': NODE_OT_interface_item_duplicate = value; break;
+		case 'NODE_OT_interface_item_remove': NODE_OT_interface_item_remove = value; break;
+		case 'NODE_OT_interface_item_make_panel_toggle': NODE_OT_interface_item_make_panel_toggle = value; break;
+		case 'NODE_OT_interface_item_unlink_panel_toggle': NODE_OT_interface_item_unlink_panel_toggle = value; break;
+		case 'NODE_OT_viewer_shortcut_set': NODE_OT_viewer_shortcut_set = value; break;
+		case 'NODE_OT_viewer_shortcut_get': NODE_OT_viewer_shortcut_get = value; break;
+		case 'NODE_FH_image_node': NODE_FH_image_node = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

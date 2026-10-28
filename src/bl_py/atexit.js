@@ -8,7 +8,7 @@ export var register = function (function_) {
 	var kwargs = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -23,13 +23,16 @@ export var register = function (function_) {
 	else {
 		var args = tuple ();
 	}
-	handlers.append (function_);
+	(function () {
+		var __accu0__ = handlers;
+		return __call__ (__accu0__.append, __accu0__, function_);
+	}) ();
 	return function_;
 };
 export var unregister = function (function_) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -41,8 +44,19 @@ export var unregister = function (function_) {
 	else {
 	}
 	if (__in__ (function_, handlers)) {
-		handlers.remove (function_);
+		(function () {
+			var __accu0__ = handlers;
+			return __call__ (__accu0__.remove, __accu0__, function_);
+		}) ();
 	}
 };
 
 //# sourceMappingURL=atexit.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'handlers': handlers = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

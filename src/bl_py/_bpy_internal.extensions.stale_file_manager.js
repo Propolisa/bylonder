@@ -6,3 +6,9 @@ var __name__ = '_bpy_internal.extensions.stale_file_manager';
 export var StaleFiles = null;
 
 //# sourceMappingURL=_bpy_internal.extensions.stale_file_manager.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'StaleFiles': StaleFiles = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

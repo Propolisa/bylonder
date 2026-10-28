@@ -10,12 +10,18 @@ import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bl_console_utils.autocomplete.intellisense';
-export var RE_MODULE = re.compile ('^import(\\s|$)|from.+');
-export var RE_UNQUOTED_WORD = re.compile ('(?:^|[^"\'a-zA-Z0-9_])((?:\\w+(?:\\w|[.]|\\[.+?\\])*|)(?:\\[[^\\]]*$)?)$', re.UNICODE);
+export var RE_MODULE = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '^import(\\s|$)|from.+');
+}) ();
+export var RE_UNQUOTED_WORD = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '(?:^|[^"\'a-zA-Z0-9_])((?:\\w+(?:\\w|[.]|\\[.+?\\])*|)(?:\\[[^\\]]*$)?)$', re.UNICODE);
+}) ();
 export var complete = function (line, cursor, namespace, private_) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -29,28 +35,52 @@ export var complete = function (line, cursor, namespace, private_) {
 	}
 	else {
 	}
-	var re_unquoted_word = RE_UNQUOTED_WORD.search (line.__getslice__ (null, cursor, 1));
+	var re_unquoted_word = (function () {
+		var __accu0__ = RE_UNQUOTED_WORD;
+		return __call__ (__accu0__.search, __accu0__, __getslice__ (line, null, cursor, 1));
+	}) ();
 	if (re_unquoted_word) {
-		var word = re_unquoted_word.group (1);
-		if (RE_MODULE.match (line)) {
-			var complete_import = _member ('_bl_console_utils.autocomplete', 'complete_import');
-			var matches = complete_import.complete (line);
+		var word = (function () {
+			var __accu0__ = re_unquoted_word;
+			return __call__ (__accu0__.group, __accu0__, 1);
+		}) ();
+		if ((function () {
+			var __accu0__ = RE_MODULE;
+			return __call__ (__accu0__.match, __accu0__, line);
+		}) ()) {
+			var complete_import = __call__ (_member, null, '_bl_console_utils.autocomplete', 'complete_import');
+			var matches = (function () {
+				var __accu0__ = complete_import;
+				return __call__ (__accu0__.complete, __accu0__, line);
+			}) ();
 			if (!(private_)) {
-				matches.__setslice__ (0, null, null, (function () {
+				__setslice__ (matches, 0, null, null, (function () {
 					var __accu0__ = [];
-					for (var m of matches) {
-						if (m.__getslice__ (null, 1, 1) != '_') {
-							__accu0__.append (m);
+					var __iterable0__ = matches;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var m = __getitem__ (__iterable0__, __index0__);
+						if (__ne__ (__getslice__ (m, null, 1, 1), '_')) {
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, m);
+							}) ();
 						}
 					}
 					return __accu0__;
 				}) ());
 			}
-			matches.py_sort ();
+			(function () {
+				var __accu0__ = matches;
+				return __call__ (__accu0__.py_sort, __accu0__);
+			}) ();
 		}
 		else {
-			var complete_namespace = _member ('_bl_console_utils.autocomplete', 'complete_namespace');
-			var matches = complete_namespace.complete (word, namespace, __kwargtrans__ ({private_: private_}));
+			var complete_namespace = __call__ (_member, null, '_bl_console_utils.autocomplete', 'complete_namespace');
+			var matches = (function () {
+				var __accu0__ = complete_namespace;
+				return __call__ (__accu0__.complete, __accu0__, word, namespace, __kwargtrans__ ({private_: private_}));
+			}) ();
 		}
 	}
 	else {
@@ -63,7 +93,7 @@ export var expand = function (line, cursor, namespace) {
 	var private_ = true;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -77,41 +107,77 @@ export var expand = function (line, cursor, namespace) {
 	}
 	else {
 	}
-	if (line.__getslice__ (null, cursor, 1).strip ().endswith ('(')) {
-		var complete_calltip = _member ('_bl_console_utils.autocomplete', 'complete_calltip');
-		var __left0__ = complete_calltip.complete (line, cursor, namespace);
+	if ((function () {
+		var __accu0__ = (function () {
+			var __accu1__ = __getslice__ (line, null, cursor, 1);
+			return __call__ (__accu1__.strip, __accu1__);
+		}) ();
+		return __call__ (__accu0__.endswith, __accu0__, '(');
+	}) ()) {
+		var complete_calltip = __call__ (_member, null, '_bl_console_utils.autocomplete', 'complete_calltip');
+		var __left0__ = (function () {
+			var __accu0__ = complete_calltip;
+			return __call__ (__accu0__.complete, __accu0__, line, cursor, namespace);
+		}) ();
 		var matches = __left0__ [0];
 		var word = __left0__ [1];
 		var scrollback = __left0__ [2];
-		var prefix = os.path.commonprefix (matches).__getslice__ (len (word), null, 1);
+		var prefix = __getslice__ ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.commonprefix, __accu0__, matches);
+		}) (), __call__ (len, null, word), null, 1);
 		var no_calltip = false;
 	}
 	else {
-		var __left0__ = complete (line, cursor, namespace, private_);
+		var __left0__ = __call__ (complete, null, line, cursor, namespace, private_);
 		var matches = __left0__ [0];
 		var word = __left0__ [1];
-		var prefix = os.path.commonprefix (matches).__getslice__ (len (word), null, 1);
-		if (len (matches) == 1) {
+		var prefix = __getslice__ ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.commonprefix, __accu0__, matches);
+		}) (), __call__ (len, null, word), null, 1);
+		if (__eq__ (__call__ (len, null, matches), 1)) {
 			var scrollback = '';
 		}
 		else {
-			var white_space = '    ' + ' ' * (cursor + len (prefix));
-			var word_prefix = word + prefix;
-			var scrollback = '\n'.join ((function () {
-				var __accu0__ = [];
-				for (var m of matches) {
-					__accu0__.append ((word_prefix && m.startswith (word_prefix) ? white_space + m.__getslice__ (len (word_prefix), null, 1) : white_space + m.rsplit ('.', 1) [-(1)]));
-				}
-				return __accu0__;
-			}) ());
+			var white_space = __add__ ('    ', __mul__ (' ', __add__ (cursor, __call__ (len, null, prefix))));
+			var word_prefix = __add__ (word, prefix);
+			var scrollback = (function () {
+				var __accu0__ = '\n';
+				return __call__ (__accu0__.join, __accu0__, (function () {
+					var __accu1__ = [];
+					var __iterable0__ = matches;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var m = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu2__ = __accu1__;
+							return __call__ (__accu2__.append, __accu2__, (word_prefix && (function () {
+								var __accu3__ = m;
+								return __call__ (__accu3__.startswith, __accu3__, word_prefix);
+							}) () ? __add__ (white_space, __getslice__ (m, __call__ (len, null, word_prefix), null, 1)) : __add__ (white_space, __getitem__ ((function () {
+								var __accu3__ = m;
+								return __call__ (__accu3__.rsplit, __accu3__, '.', 1);
+							}) (), __neg__ (1)))));
+						}) ();
+					}
+					return __accu1__;
+				}) ());
+			}) ();
 		}
 		var no_calltip = true;
 	}
 	if (prefix) {
-		var line = (line.__getslice__ (null, cursor, 1) + prefix) + line.__getslice__ (cursor, null, 1);
-		cursor += len (prefix.encode ('utf-8'));
-		if (no_calltip && prefix.endswith ('(')) {
-			return expand (line, cursor, namespace, __kwargtrans__ ({private_: private_}));
+		var line = __add__ (__add__ (__getslice__ (line, null, cursor, 1), prefix), __getslice__ (line, cursor, null, 1));
+		var cursor = __call__ (__iadd__, null, cursor, __call__ (len, null, (function () {
+			var __accu0__ = prefix;
+			return __call__ (__accu0__.encode, __accu0__, 'utf-8');
+		}) ()));
+		if (no_calltip && (function () {
+			var __accu0__ = prefix;
+			return __call__ (__accu0__.endswith, __accu0__, '(');
+		}) ()) {
+			return __call__ (expand, null, line, cursor, namespace, __kwargtrans__ ({private_: private_}));
 		}
 	}
 	return tuple ([line, cursor, scrollback]);
@@ -119,3 +185,13 @@ export var expand = function (line, cursor, namespace) {
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.intellisense.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'RE_MODULE': RE_MODULE = value; break;
+		case 'RE_UNQUOTED_WORD': RE_UNQUOTED_WORD = value; break;
+		case 'complete': complete = value; break;
+		case 'expand': expand = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

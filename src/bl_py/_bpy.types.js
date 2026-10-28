@@ -8,7 +8,7 @@ var __name__ = '_bpy.types';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -19,8 +19,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -28,7 +34,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -53,7 +59,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -72,7 +78,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,18 +91,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -107,8 +116,14 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
@@ -2923,7 +2938,7 @@ export var _types =  __class__ ('_types', [object], {
 });
 export var _StructRNA = _types.bpy_struct;
 export var _StructMetaPropGroup = _types.bpy_struct_meta_idprop;
-export var _sentinel = _new_object ();
+export var _sentinel = __call__ (_new_object, null);
 export var Context =  __class__ ('Context', [_StructRNA], {
 	__module__: __name__,
 	__slots__: tuple ([]),
@@ -2933,7 +2948,7 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2946,51 +2961,72 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 		}
 		else {
 		}
-		var sep = len (path);
+		var sep = __call__ (len, null, path);
 		var div = '';
-		for (var div_test of tuple (['.', '['])) {
-			var sep_test = path.find (div_test, 0, sep);
-			if (sep_test != -(1) && sep_test < sep) {
+		var __iterable0__ = tuple (['.', '[']);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var div_test = __getitem__ (__iterable0__, __index0__);
+			var sep_test = (function () {
+				var __accu0__ = path;
+				return __call__ (__accu0__.find, __accu0__, div_test, 0, sep);
+			}) ();
+			if (__ne__ (sep_test, __neg__ (1)) && __lt__ (sep_test, sep)) {
 				var sep = sep_test;
 				var div = div_test;
 			}
 		}
 		if (div) {
-			var attr = path.__getslice__ (null, sep, 1);
-			if (div == '.') {
-				sep++;
+			var attr = __getslice__ (path, null, sep, 1);
+			if (__eq__ (div, '.')) {
+				var sep = __call__ (__iadd__, null, sep, 1);
 			}
-			var path_rest = path.__getslice__ (sep, null, 1);
+			var path_rest = __getslice__ (path, sep, null, 1);
 		}
 		else {
 			var attr = path;
 			var path_rest = '';
 		}
-		var value = getattr (self, attr, _sentinel);
+		var value = __call__ (getattr, null, self, attr, _sentinel);
 		if (value === _sentinel) {
-			var __except0__ = ValueError ('Path could not be resolved: {!r}'.format (attr));
+			var __except0__ = __call__ (ValueError, null, (function () {
+				var __accu0__ = 'Path could not be resolved: {!r}';
+				return __call__ (__accu0__.format, __accu0__, attr);
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 		if (value === null) {
 			return value;
 		}
-		if (isinstance (value, list) && path_rest.startswith ('[')) {
-			var __left0__ = path_rest.__getslice__ (1, null, 1).partition (']');
+		if (__call__ (isinstance, null, value, list) && (function () {
+			var __accu0__ = path_rest;
+			return __call__ (__accu0__.startswith, __accu0__, '[');
+		}) ()) {
+			var __left0__ = (function () {
+				var __accu0__ = __getslice__ (path_rest, 1, null, 1);
+				return __call__ (__accu0__.partition, __accu0__, ']');
+			}) ();
 			var index_str = __left0__ [0];
 			var div = __left0__ [1];
 			var index_tail = __left0__ [2];
 			if (!(div)) {
-				var __except0__ = ValueError ('Path index is not terminated: {:s}{:s}'.format (attr, path_rest));
+				var __except0__ = __call__ (ValueError, null, (function () {
+					var __accu0__ = 'Path index is not terminated: {:s}{:s}';
+					return __call__ (__accu0__.format, __accu0__, attr, path_rest);
+				}) ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 			try {
-				var index = int (index_str);
+				var index = __call__ (int, null, index_str);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, ValueError)) {
-					var __except1__ = ValueError ('Path index is invalid: {:s}[{:s}]'.format (attr, index_str));
+					var __except1__ = __call__ (ValueError, null, (function () {
+						var __accu0__ = 'Path index is invalid: {:s}[{:s}]';
+						return __call__ (__accu0__.format, __accu0__, attr, index_str);
+					}) ());
 					__except1__.__cause__ = null;
 					throw __except1__;
 				}
@@ -2998,31 +3034,37 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 					throw __except0__;
 				}
 			}
-			if ((0 <= index && index < len (value))) {
+			if ((__le__ (0, index) && __lt__ (index, __call__ (len, null, value)))) {
 				var path_rest = index_tail;
-				var value = value [index];
+				var value = __getitem__ (value, index);
 			}
 			else {
-				var __except0__ = IndexError ('Path index out of range: {:s}[{:s}]'.format (attr, index_str));
+				var __except0__ = __call__ (IndexError, null, (function () {
+					var __accu0__ = 'Path index out of range: {:s}[{:s}]';
+					return __call__ (__accu0__.format, __accu0__, attr, index_str);
+				}) ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 		}
 		if (path_rest) {
-			var path_resolve_fn = getattr (value, 'path_resolve', null);
+			var path_resolve_fn = __call__ (getattr, null, value, 'path_resolve', null);
 			if (path_resolve_fn === null) {
-				var __except0__ = ValueError ('Path {:s} resolves to a non RNA value'.format (attr));
+				var __except0__ = __call__ (ValueError, null, (function () {
+					var __accu0__ = 'Path {:s} resolves to a non RNA value';
+					return __call__ (__accu0__.format, __accu0__, attr);
+				}) ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			return path_resolve_fn (path_rest, coerce);
+			return __call__ (path_resolve_fn, null, path_rest, coerce);
 		}
 		return value;
 	});},
 	get py_copy () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3033,22 +3075,31 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 		}
 		else {
 		}
-		var BuiltinMethodType = _member ('types', 'BuiltinMethodType');
+		var BuiltinMethodType = __call__ (_member, null, 'types', 'BuiltinMethodType');
 		var new_context = dict ({});
-		var generic_attrs = _joined (_StructRNA.__dict__.py_keys (), ['bl_rna', 'rna_type', 'copy']);
+		var generic_attrs = __call__ (_joined, null, (function () {
+			var __accu0__ = _StructRNA.__dict__;
+			return __call__ (__accu0__.py_keys, __accu0__);
+		}) (), ['bl_rna', 'rna_type', 'copy']);
 		var function_types = new set ([BuiltinMethodType, _types.bpy_func]);
-		for (var attr of dir (self)) {
-			if (attr.startswith ('_')) {
+		var __iterable0__ = __call__ (dir, null, self);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var attr = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = attr;
+				return __call__ (__accu0__.startswith, __accu0__, '_');
+			}) ()) {
 				continue;
 			}
 			if (__in__ (attr, generic_attrs)) {
 				continue;
 			}
-			var value = getattr (self, attr);
+			var value = __call__ (getattr, null, self, attr);
 			if (__in__ (py_typeof (value), function_types)) {
 				continue;
 			}
-			new_context [attr] = value;
+			__setitem__ (new_context, attr, value);
 		}
 		return new_context;
 	});}
@@ -3059,7 +3110,7 @@ export var Library =  __class__ ('Library', [_types.ID], {
 	get _get_users_id () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3070,14 +3121,23 @@ export var Library =  __class__ ('Library', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
+		var bpy = __call__ (_module, null, 'bpy');
 		var attr_links = tuple (['actions', 'armatures', 'brushes', 'cameras', 'curves', 'grease_pencils', 'collections', 'images', 'lights', 'lattices', 'materials', 'metaballs', 'meshes', 'node_groups', 'objects', 'scenes', 'sounds', 'speakers', 'textures', 'texts', 'fonts', 'worlds']);
-		return tuple ((function () {
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var attr of attr_links) {
-				for (var id_block of list (getattr (bpy.data, attr))) {
-					if (id_block.library == self) {
-						__accu0__.append (id_block);
+			var __iterable0__ = attr_links;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var attr = __getitem__ (__iterable0__, __index0__);
+				var __iterable1__ = __call__ (list, null, __call__ (getattr, null, bpy.data, attr));
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var id_block = __getitem__ (__iterable1__, __index1__);
+					if (__eq__ (id_block.library, self)) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, id_block);
+						}) ();
 					}
 				}
 			}
@@ -3092,7 +3152,7 @@ export var Texture =  __class__ ('Texture', [_types.ID], {
 	get _get_users_material () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3103,20 +3163,32 @@ export var Texture =  __class__ ('Texture', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		return tuple ((function () {
+		var bpy = __call__ (_module, null, 'bpy');
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var mat of bpy.data.materials) {
+			var __iterable0__ = bpy.data.materials;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var mat = __getitem__ (__iterable0__, __index0__);
 				if (__in__ (self, (function () {
 					var __accu1__ = [];
-					for (var slot of mat.texture_slots) {
+					var __iterable1__ = mat.texture_slots;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var slot = __getitem__ (__iterable1__, __index1__);
 						if (slot !== null) {
-							__accu1__.append (slot.texture);
+							(function () {
+								var __accu2__ = __accu1__;
+								return __call__ (__accu2__.append, __accu2__, slot.texture);
+							}) ();
 						}
 					}
 					return __accu1__;
 				}) ())) {
-					__accu0__.append (mat);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, mat);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -3125,7 +3197,7 @@ export var Texture =  __class__ ('Texture', [_types.ID], {
 	get _get_users_object_modifier () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3136,20 +3208,32 @@ export var Texture =  __class__ ('Texture', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		return tuple ((function () {
+		var bpy = __call__ (_module, null, 'bpy');
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var obj of bpy.data.objects) {
+			var __iterable0__ = bpy.data.objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var obj = __getitem__ (__iterable0__, __index0__);
 				if (__in__ (self, (function () {
 					var __accu1__ = [];
-					for (var mod of obj.modifiers) {
-						if (mod.py_metatype == 'DISPLACE') {
-							__accu1__.append (mod.texture);
+					var __iterable1__ = obj.modifiers;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var mod = __getitem__ (__iterable1__, __index1__);
+						if (__eq__ (mod.py_metatype, 'DISPLACE')) {
+							(function () {
+								var __accu2__ = __accu1__;
+								return __call__ (__accu2__.append, __accu2__, mod.texture);
+							}) ();
 						}
 					}
 					return __accu1__;
 				}) ())) {
-					__accu0__.append (obj);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, obj);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -3164,7 +3248,7 @@ export var Collection =  __class__ ('Collection', [_types.ID], {
 	get _get_children_recursive () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3179,7 +3263,7 @@ export var Collection =  __class__ ('Collection', [_types.ID], {
 		var recurse = function (parent) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3190,18 +3274,24 @@ export var Collection =  __class__ ('Collection', [_types.ID], {
 			}
 			else {
 			}
-			for (var child of parent.children) {
-				children_recursive.append (child);
-				recurse (child);
+			var __iterable0__ = parent.children;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var child = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = children_recursive;
+					return __call__ (__accu0__.append, __accu0__, child);
+				}) ();
+				__call__ (recurse, null, child);
 			}
 		};
-		recurse (self);
+		__call__ (recurse, null, self);
 		return children_recursive;
 	});},
 	get _get_users_dupli_group () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3212,12 +3302,18 @@ export var Collection =  __class__ ('Collection', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		return tuple ((function () {
+		var bpy = __call__ (_module, null, 'bpy');
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var obj of bpy.data.objects) {
-				if (self == obj.instance_collection) {
-					__accu0__.append (obj);
+			var __iterable0__ = bpy.data.objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var obj = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (self, obj.instance_collection)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, obj);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -3232,7 +3328,7 @@ export var Object =  __class__ ('Object', [_types.ID], {
 	get _get_children () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3243,12 +3339,18 @@ export var Object =  __class__ ('Object', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		return tuple ((function () {
+		var bpy = __call__ (_module, null, 'bpy');
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var child of bpy.data.objects) {
-				if (child.parent == self) {
-					__accu0__.append (child);
+			var __iterable0__ = bpy.data.objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var child = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (child.parent, self)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, child);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -3257,7 +3359,7 @@ export var Object =  __class__ ('Object', [_types.ID], {
 	get _get_children_recursive () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3268,19 +3370,28 @@ export var Object =  __class__ ('Object', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
+		var bpy = __call__ (_module, null, 'bpy');
 		var parent_child_map = dict ({});
-		for (var child of bpy.data.objects) {
+		var __iterable0__ = bpy.data.objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var child = __getitem__ (__iterable0__, __index0__);
 			var parent = child.parent;
 			if (parent !== null) {
-				parent_child_map.py_setdefault (parent, []).append (child);
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = parent_child_map;
+						return __call__ (__accu1__.py_setdefault, __accu1__, parent, []);
+					}) ();
+					return __call__ (__accu0__.append, __accu0__, child);
+				}) ();
 			}
 		}
 		var children_recursive = [];
 		var recurse = function (parent) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3291,18 +3402,27 @@ export var Object =  __class__ ('Object', [_types.ID], {
 			}
 			else {
 			}
-			for (var child of parent_child_map.py_get (parent, tuple ([]))) {
-				children_recursive.append (child);
-				recurse (child);
+			var __iterable0__ = (function () {
+				var __accu0__ = parent_child_map;
+				return __call__ (__accu0__.py_get, __accu0__, parent, tuple ([]));
+			}) ();
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var child = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = children_recursive;
+					return __call__ (__accu0__.append, __accu0__, child);
+				}) ();
+				__call__ (recurse, null, child);
 			}
 		};
-		recurse (self);
+		__call__ (recurse, null, self);
 		return children_recursive;
 	});},
 	get _get_users_collection () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3313,29 +3433,41 @@ export var Object =  __class__ ('Object', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		return tuple ((function () {
+		var bpy = __call__ (_module, null, 'bpy');
+		return __add__ (__call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var collection of bpy.data.collections) {
-				if (__in__ (self, collection.objects.__getslice__ (null, null, 1))) {
-					__accu0__.append (collection);
+			var __iterable0__ = bpy.data.collections;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var collection = __getitem__ (__iterable0__, __index0__);
+				if (__in__ (self, __getslice__ (collection.objects, null, null, 1))) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, collection);
+					}) ();
 				}
 			}
 			return __accu0__;
-		}) ()) + tuple ((function () {
+		}) ()), __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var scene of bpy.data.scenes) {
-				if (__in__ (self, scene.collection.objects.__getslice__ (null, null, 1))) {
-					__accu0__.append (scene.collection);
+			var __iterable0__ = bpy.data.scenes;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var scene = __getitem__ (__iterable0__, __index0__);
+				if (__in__ (self, __getslice__ (scene.collection.objects, null, null, 1))) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, scene.collection);
+					}) ();
 				}
 			}
 			return __accu0__;
-		}) ());
+		}) ()));
 	});},
 	get _get_users_scene () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3346,12 +3478,18 @@ export var Object =  __class__ ('Object', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		return tuple ((function () {
+		var bpy = __call__ (_module, null, 'bpy');
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var scene of bpy.data.scenes) {
-				if (__in__ (self, scene.objects.__getslice__ (null, null, 1))) {
-					__accu0__.append (scene);
+			var __iterable0__ = bpy.data.scenes;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var scene = __getitem__ (__iterable0__, __index0__);
+				if (__in__ (self, __getslice__ (scene.objects, null, null, 1))) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, scene);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -3360,7 +3498,7 @@ export var Object =  __class__ ('Object', [_types.ID], {
 	get evaluated_geometry () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3371,8 +3509,11 @@ export var Object =  __class__ ('Object', [_types.ID], {
 		}
 		else {
 		}
-		var GeometrySet = _member ('_bpy.types', 'GeometrySet');
-		return GeometrySet.from_evaluated_object (self);
+		var GeometrySet = __call__ (_member, null, '_bpy.types', 'GeometrySet');
+		return (function () {
+			var __accu0__ = GeometrySet;
+			return __call__ (__accu0__.from_evaluated_object, __accu0__, self);
+		}) ();
 	});}
 });
 globalThis.Object.defineProperty (Object, 'users_scene', property.call (Object, Object._get_users_scene));
@@ -3387,7 +3528,7 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 		var icon = 'NONE';
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3401,13 +3542,19 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		var popup = self.popmenu_begin__internal (title, __kwargtrans__ ({icon: icon}));
+		var bpy = __call__ (_module, null, 'bpy');
+		var popup = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.popmenu_begin__internal, __accu0__, title, __kwargtrans__ ({icon: icon}));
+		}) ();
 		try {
-			draw_func (popup, bpy.context);
+			__call__ (draw_func, null, popup, bpy.context);
 		}
 		finally {
-			self.popmenu_end__internal (popup);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.popmenu_end__internal, __accu0__, popup);
+			}) ();
 		}
 	});},
 	get popover () {return __get__ (this, function (self, draw_func) {
@@ -3416,7 +3563,7 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 		var from_active_button = false;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3431,13 +3578,19 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		var popup = self.popover_begin__internal (__kwargtrans__ ({ui_units_x: ui_units_x, from_active_button: from_active_button}));
+		var bpy = __call__ (_module, null, 'bpy');
+		var popup = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.popover_begin__internal, __accu0__, __kwargtrans__ ({ui_units_x: ui_units_x, from_active_button: from_active_button}));
+		}) ();
 		try {
-			draw_func (popup, bpy.context);
+			__call__ (draw_func, null, popup, bpy.context);
 		}
 		finally {
-			self.popover_end__internal (popup, __kwargtrans__ ({keymap: keymap}));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.popover_end__internal, __accu0__, popup, __kwargtrans__ ({keymap: keymap}));
+			}) ();
 		}
 	});},
 	get popup_menu_pie () {return __get__ (this, function (self, event, draw_func) {
@@ -3445,7 +3598,7 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 		var icon = 'NONE';
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3460,14 +3613,20 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		var pie = self.piemenu_begin__internal (title, __kwargtrans__ ({icon: icon, event: event}));
+		var bpy = __call__ (_module, null, 'bpy');
+		var pie = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.piemenu_begin__internal, __accu0__, title, __kwargtrans__ ({icon: icon, event: event}));
+		}) ();
 		if (pie) {
 			try {
-				draw_func (pie, bpy.context);
+				__call__ (draw_func, null, pie, bpy.context);
 			}
 			finally {
-				self.piemenu_end__internal (pie);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.piemenu_end__internal, __accu0__, pie);
+				}) ();
 			}
 		}
 	});}
@@ -3478,7 +3637,7 @@ export var WorkSpace =  __class__ ('WorkSpace', [_types.ID], {
 	get status_text_set () {return __get__ (this, function (self, text) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3490,18 +3649,21 @@ export var WorkSpace =  __class__ ('WorkSpace', [_types.ID], {
 		}
 		else {
 		}
-		var STATUSBAR_HT_header = _member ('bl_ui.space_statusbar', 'STATUSBAR_HT_header');
-		var draw_fn = getattr (STATUSBAR_HT_header, '_draw_orig', null);
+		var STATUSBAR_HT_header = __call__ (_member, null, 'bl_ui.space_statusbar', 'STATUSBAR_HT_header');
+		var draw_fn = __call__ (getattr, null, STATUSBAR_HT_header, '_draw_orig', null);
 		if (draw_fn === null) {
 			var __left0__ = STATUSBAR_HT_header.draw;
 			var draw_fn = __left0__;
 			STATUSBAR_HT_header._draw_orig = __left0__;
 		}
-		if (!(text === null || isinstance (text, str))) {
+		if (!(text === null || __call__ (isinstance, null, text, str))) {
 			var draw_fn = text;
 			var text = null;
 		}
-		self.status_text_set_internal (text);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.status_text_set_internal, __accu0__, text);
+		}) ();
 		STATUSBAR_HT_header.draw = draw_fn;
 	});}
 });
@@ -3511,7 +3673,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 	get translate () {return __get__ (this, function (self, vec) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3523,13 +3685,13 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		self.head += vec;
-		self.tail += vec;
+		self.head = __call__ (__iadd__, null, self.head, vec);
+		self.tail = __call__ (__iadd__, null, self.tail, vec);
 	});},
 	get parent_index () {return __get__ (this, function (self, parent_test) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3545,18 +3707,18 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		var parent = self.parent;
 		var i = 1;
 		while (parent) {
-			if (parent.py_name == py_name) {
+			if (__eq__ (parent.py_name, py_name)) {
 				return i;
 			}
 			var parent = parent.parent;
-			i++;
+			var i = __call__ (__iadd__, null, i, 1);
 		}
 		return 0;
 	});},
 	get _get_x_axis () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3567,13 +3729,16 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		var Vector = _member ('mathutils', 'Vector');
-		return __matmul__ (self.matrix.to_3x3 (), Vector (tuple ([1.0, 0.0, 0.0])));
+		var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+		return __matmul__ ((function () {
+			var __accu0__ = self.matrix;
+			return __call__ (__accu0__.to_3x3, __accu0__);
+		}) (), __call__ (Vector, null, tuple ([1.0, 0.0, 0.0])));
 	});},
 	get _get_y_axis () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3584,13 +3749,16 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		var Vector = _member ('mathutils', 'Vector');
-		return __matmul__ (self.matrix.to_3x3 (), Vector (tuple ([0.0, 1.0, 0.0])));
+		var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+		return __matmul__ ((function () {
+			var __accu0__ = self.matrix;
+			return __call__ (__accu0__.to_3x3, __accu0__);
+		}) (), __call__ (Vector, null, tuple ([0.0, 1.0, 0.0])));
 	});},
 	get _get_z_axis () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3601,13 +3769,16 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		var Vector = _member ('mathutils', 'Vector');
-		return __matmul__ (self.matrix.to_3x3 (), Vector (tuple ([0.0, 0.0, 1.0])));
+		var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+		return __matmul__ ((function () {
+			var __accu0__ = self.matrix;
+			return __call__ (__accu0__.to_3x3, __accu0__);
+		}) (), __call__ (Vector, null, tuple ([0.0, 0.0, 1.0])));
 	});},
 	get _get_basename () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3618,12 +3789,15 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		return self.py_name.py_split ('.') [0];
+		return __getitem__ ((function () {
+			var __accu0__ = self.py_name;
+			return __call__ (__accu0__.py_split, __accu0__, '.');
+		}) (), 0);
 	});},
 	get _get_parent_recursive () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3638,7 +3812,10 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		var parent = self.parent;
 		while (parent) {
 			if (parent) {
-				parent_list.append (parent);
+				(function () {
+					var __accu0__ = parent_list;
+					return __call__ (__accu0__.append, __accu0__, parent);
+				}) ();
 			}
 			var parent = parent.parent;
 		}
@@ -3647,7 +3824,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 	get _get_center () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3658,12 +3835,12 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		return (self.head + self.tail) * 0.5;
+		return __mul__ (__add__ (self.head, self.tail), 0.5);
 	});},
 	get _get_vector () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3674,12 +3851,12 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		else {
 		}
-		return self.tail - self.head;
+		return __sub__ (self.tail, self.head);
 	});},
 	get _get_children_recursive () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3691,32 +3868,52 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		else {
 		}
 		var bones_children = [];
-		for (var bone of self._other_bones) {
-			var index = bone.parent_index (self);
+		var __iterable0__ = self._other_bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
+			var index = (function () {
+				var __accu0__ = bone;
+				return __call__ (__accu0__.parent_index, __accu0__, self);
+			}) ();
 			if (index) {
-				bones_children.append (tuple ([index, bone]));
+				(function () {
+					var __accu0__ = bones_children;
+					return __call__ (__accu0__.append, __accu0__, tuple ([index, bone]));
+				}) ();
 			}
 		}
-		bones_children.py_sort (__kwargtrans__ ({key: (function __lambda__ (bone_pair) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'bone_pair': var bone_pair = __allkwargs0__ [__attrib0__]; break;
+		(function () {
+			var __accu0__ = bones_children;
+			return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (bone_pair) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'bone_pair': var bone_pair = __allkwargs0__ [__attrib0__]; break;
+							}
 						}
 					}
 				}
-			}
-			else {
-			}
-			return bone_pair [0];
-		})}));
+				else {
+				}
+				return __getitem__ (bone_pair, 0);
+			})}));
+		}) ();
 		return (function () {
 			var __accu0__ = [];
-			for (var [index, bone] of bones_children) {
-				__accu0__.append (bone);
+			var __iterable0__ = bones_children;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var index = __left0__ [0];
+				var bone = __left0__ [1];
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, bone);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -3724,7 +3921,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 	get _get_children_recursive_basename () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3741,18 +3938,27 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		while (true) {
 			var children = child.children;
 			var children_basename = [];
-			for (var child of children) {
-				if (basename == child.basename) {
-					children_basename.append (child);
+			var __iterable0__ = children;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var child = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (basename, child.basename)) {
+					(function () {
+						var __accu0__ = children_basename;
+						return __call__ (__accu0__.append, __accu0__, child);
+					}) ();
 				}
 			}
-			if (len (children_basename) == 1) {
-				var child = children_basename [0];
-				chain.append (child);
+			if (__eq__ (__call__ (len, null, children_basename), 1)) {
+				var child = __getitem__ (children_basename, 0);
+				(function () {
+					var __accu0__ = chain;
+					return __call__ (__accu0__.append, __accu0__, child);
+				}) ();
 			}
 			else {
 				if (children_basename) {
-					print ('multiple basenames found, this is probably not what you want!', self.py_name, children_basename);
+					__call__ (print, null, 'multiple basenames found, this is probably not what you want!', self.py_name, children_basename);
 				}
 				break;
 			}
@@ -3762,7 +3968,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 	get _get__other_bones () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3774,16 +3980,19 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		else {
 		}
 		var id_data = self.id_data;
-		if (isinstance (self, PoseBone)) {
+		if (__call__ (isinstance, null, self, PoseBone)) {
 			return id_data.pose.bones;
 		}
-		if (isinstance (self, EditBone)) {
+		if (__call__ (isinstance, null, self, EditBone)) {
 			return id_data.edit_bones;
 		}
-		if (isinstance (self, Bone)) {
+		if (__call__ (isinstance, null, self, Bone)) {
 			return id_data.bones;
 		}
-		var __except0__ = RuntimeError ('Invalid type {!r}'.format (self));
+		var __except0__ = __call__ (RuntimeError, null, (function () {
+			var __accu0__ = 'Invalid type {!r}';
+			return __call__ (__accu0__.format, __accu0__, self);
+		}) ());
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});}
@@ -3804,7 +4013,7 @@ export var PoseBone =  __class__ ('PoseBone', [_StructRNA, _GenericBone], {
 	get _get_children () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3817,10 +4026,16 @@ export var PoseBone =  __class__ ('PoseBone', [_StructRNA, _GenericBone], {
 		}
 		var obj = self.id_data;
 		var pbones = obj.pose.bones;
-		return tuple ((function () {
+		return __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var bone of self.bone.children) {
-				__accu0__.append (pbones [bone.py_name]);
+			var __iterable0__ = self.bone.children;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var bone = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getitem__ (pbones, bone.py_name));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
@@ -3837,7 +4052,7 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 	get _get_children () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3850,9 +4065,15 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 		}
 		return (function () {
 			var __accu0__ = [];
-			for (var child of self._other_bones) {
-				if (child.parent == self) {
-					__accu0__.append (child);
+			var __iterable0__ = self._other_bones;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var child = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (child.parent, self)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, child);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -3861,7 +4082,7 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 	get align_orientation () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3873,8 +4094,11 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 		}
 		else {
 		}
-		var vec = other.vector.normalized () * self.length;
-		self.tail = self.head + vec;
+		var vec = __mul__ ((function () {
+			var __accu0__ = other.vector;
+			return __call__ (__accu0__.normalized, __accu0__);
+		}) (), self.length);
+		self.tail = __add__ (self.head, vec);
 		self.roll = other.roll;
 	});},
 	get transform () {return __get__ (this, function (self, matrix) {
@@ -3882,7 +4106,7 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 		var roll = true;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3896,17 +4120,23 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 		}
 		else {
 		}
-		var Vector = _member ('mathutils', 'Vector');
-		var z_vec = __matmul__ (self.matrix.to_3x3 (), Vector (tuple ([0.0, 0.0, 1.0])));
+		var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+		var z_vec = __matmul__ ((function () {
+			var __accu0__ = self.matrix;
+			return __call__ (__accu0__.to_3x3, __accu0__);
+		}) (), __call__ (Vector, null, tuple ([0.0, 0.0, 1.0])));
 		self.tail = __matmul__ (matrix, self.tail);
 		self.head = __matmul__ (matrix, self.head);
 		if (scale) {
 			var scalar = matrix.median_scale;
-			self.head_radius *= scalar;
-			self.tail_radius *= scalar;
+			self.head_radius = __call__ (__imul__, null, self.head_radius, scalar);
+			self.tail_radius = __call__ (__imul__, null, self.tail_radius, scalar);
 		}
 		if (roll) {
-			self.align_roll (__matmul__ (matrix, z_vec));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.align_roll, __accu0__, __matmul__ (matrix, z_vec));
+			}) ();
 		}
 	});}
 }, _StructMetaPropGroup);
@@ -3917,7 +4147,7 @@ export var BoneCollection =  __class__ ('BoneCollection', [_StructRNA], {
 	get _get_bones_recursive () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3928,12 +4158,21 @@ export var BoneCollection =  __class__ ('BoneCollection', [_StructRNA], {
 		}
 		else {
 		}
-		var bones = set ();
+		var bones = __call__ (set, null);
 		var collections = [self];
 		while (collections) {
-			var visit = collections.py_pop ();
-			bones.py_update (visit.bones);
-			collections.extend (visit.children);
+			var visit = (function () {
+				var __accu0__ = collections;
+				return __call__ (__accu0__.py_pop, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = bones;
+				return __call__ (__accu0__.py_update, __accu0__, visit.bones);
+			}) ();
+			(function () {
+				var __accu0__ = collections;
+				return __call__ (__accu0__.extend, __accu0__, visit.children);
+			}) ();
 		}
 		return bones;
 	});}
@@ -3942,7 +4181,7 @@ globalThis.Object.defineProperty (BoneCollection, 'bones_recursive', property.ca
 export var _ord_ind = function (i1, i2) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -3954,7 +4193,7 @@ export var _ord_ind = function (i1, i2) {
 	}
 	else {
 	}
-	if (i1 < i2) {
+	if (__lt__ (i1, i2)) {
 		return tuple ([i1, i2]);
 	}
 	return tuple ([i2, i1]);
@@ -3962,7 +4201,7 @@ export var _ord_ind = function (i1, i2) {
 export var _name_convention_attribute_get = function (attributes, py_name, domain, data_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -3977,7 +4216,7 @@ export var _name_convention_attribute_get = function (attributes, py_name, domai
 	else {
 	}
 	try {
-		var attribute = attributes [py_name];
+		var attribute = __getitem__ (attributes, py_name);
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, KeyError)) {
@@ -3987,10 +4226,10 @@ export var _name_convention_attribute_get = function (attributes, py_name, domai
 			throw __except0__;
 		}
 	}
-	if (attribute.domain != domain) {
+	if (__ne__ (attribute.domain, domain)) {
 		return null;
 	}
-	if (attribute.data_type != data_type) {
+	if (__ne__ (attribute.data_type, data_type)) {
 		return null;
 	}
 	return attribute;
@@ -3998,7 +4237,7 @@ export var _name_convention_attribute_get = function (attributes, py_name, domai
 export var _name_convention_attribute_ensure = function (attributes, py_name, domain, data_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -4013,26 +4252,35 @@ export var _name_convention_attribute_ensure = function (attributes, py_name, do
 	else {
 	}
 	try {
-		var attribute = attributes [py_name];
+		var attribute = __getitem__ (attributes, py_name);
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, KeyError)) {
-			return attributes.py_new (py_name, data_type, domain);
+			return (function () {
+				var __accu0__ = attributes;
+				return __call__ (__accu0__.py_new, __accu0__, py_name, data_type, domain);
+			}) ();
 		}
 		else {
 			throw __except0__;
 		}
 	}
-	if (attribute.domain == domain && attribute.data_type == data_type) {
+	if (__eq__ (attribute.domain, domain) && __eq__ (attribute.data_type, data_type)) {
 		return attribute;
 	}
-	attributes.remove (attribute);
-	return attributes.py_new (py_name, data_type, domain);
+	(function () {
+		var __accu0__ = attributes;
+		return __call__ (__accu0__.remove, __accu0__, attribute);
+	}) ();
+	return (function () {
+		var __accu0__ = attributes;
+		return __call__ (__accu0__.py_new, __accu0__, py_name, data_type, domain);
+	}) ();
 };
 export var _name_convention_attribute_remove = function (attributes, py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -4045,7 +4293,10 @@ export var _name_convention_attribute_remove = function (attributes, py_name) {
 	else {
 	}
 	try {
-		attributes.remove (attributes [py_name]);
+		(function () {
+			var __accu0__ = attributes;
+			return __call__ (__accu0__.remove, __accu0__, __getitem__ (attributes, py_name));
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, KeyError)) {
@@ -4065,7 +4316,7 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4080,34 +4331,73 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		var chain = _member ('itertools', 'chain');
-		var islice = _member ('itertools', 'islice');
-		var accumulate = _member ('itertools', 'accumulate');
-		var face_lengths = tuple (map (len, faces));
-		var vertices_len = len (vertices);
-		var edges_len = len (edges);
-		var faces_len = len (faces);
-		self.vertices.add (vertices_len);
-		self.edges.add (edges_len);
-		self.loops.add (sum (face_lengths));
-		self.polygons.add (faces_len);
-		self.vertices.foreach_set ('co', tuple (chain.from_iterable (vertices)));
-		self.edges.foreach_set ('vertices', tuple (chain.from_iterable (edges)));
-		var vertex_indices = tuple (chain.from_iterable (faces));
-		var loop_starts = tuple (islice (chain ([0], accumulate (face_lengths)), faces_len));
-		self.polygons.foreach_set ('loop_start', loop_starts);
-		self.polygons.foreach_set ('vertices', vertex_indices);
+		var chain = __call__ (_member, null, 'itertools', 'chain');
+		var islice = __call__ (_member, null, 'itertools', 'islice');
+		var accumulate = __call__ (_member, null, 'itertools', 'accumulate');
+		var face_lengths = __call__ (tuple, null, __call__ (map, null, len, faces));
+		var vertices_len = __call__ (len, null, vertices);
+		var edges_len = __call__ (len, null, edges);
+		var faces_len = __call__ (len, null, faces);
+		(function () {
+			var __accu0__ = self.vertices;
+			return __call__ (__accu0__.add, __accu0__, vertices_len);
+		}) ();
+		(function () {
+			var __accu0__ = self.edges;
+			return __call__ (__accu0__.add, __accu0__, edges_len);
+		}) ();
+		(function () {
+			var __accu0__ = self.loops;
+			return __call__ (__accu0__.add, __accu0__, __call__ (sum, null, face_lengths));
+		}) ();
+		(function () {
+			var __accu0__ = self.polygons;
+			return __call__ (__accu0__.add, __accu0__, faces_len);
+		}) ();
+		(function () {
+			var __accu0__ = self.vertices;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'co', __call__ (tuple, null, (function () {
+				var __accu1__ = chain;
+				return __call__ (__accu1__.from_iterable, __accu1__, vertices);
+			}) ()));
+		}) ();
+		(function () {
+			var __accu0__ = self.edges;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'vertices', __call__ (tuple, null, (function () {
+				var __accu1__ = chain;
+				return __call__ (__accu1__.from_iterable, __accu1__, edges);
+			}) ()));
+		}) ();
+		var vertex_indices = __call__ (tuple, null, (function () {
+			var __accu0__ = chain;
+			return __call__ (__accu0__.from_iterable, __accu0__, faces);
+		}) ());
+		var loop_starts = __call__ (tuple, null, __call__ (islice, null, __call__ (chain, null, [0], __call__ (accumulate, null, face_lengths)), faces_len));
+		(function () {
+			var __accu0__ = self.polygons;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'loop_start', loop_starts);
+		}) ();
+		(function () {
+			var __accu0__ = self.polygons;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'vertices', vertex_indices);
+		}) ();
 		if (shade_flat) {
-			self.shade_flat ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.shade_flat, __accu0__);
+			}) ();
 		}
 		if (edges_len || faces_len) {
-			self.py_update (__kwargtrans__ ({calc_edges: bool (faces_len), calc_edges_loose: bool (edges_len)}));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({calc_edges: __call__ (bool, null, faces_len), calc_edges_loose: __call__ (bool, null, edges_len)}));
+			}) ();
 		}
 	});},
 	get _get_edge_keys () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4120,8 +4410,14 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		return (function () {
 			var __accu0__ = [];
-			for (var ed of self.edges) {
-				__accu0__.append (ed.key);
+			var __iterable0__ = self.edges;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var ed = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, ed.key);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -4129,7 +4425,7 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 	get _get_vertex_creases () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4140,12 +4436,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		return _name_convention_attribute_get (self.attributes, 'crease_vert', 'POINT', 'FLOAT');
+		return __call__ (_name_convention_attribute_get, null, self.attributes, 'crease_vert', 'POINT', 'FLOAT');
 	});},
 	get vertex_creases_ensure () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4156,12 +4452,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		return _name_convention_attribute_ensure (self.attributes, 'crease_vert', 'POINT', 'FLOAT');
+		return __call__ (_name_convention_attribute_ensure, null, self.attributes, 'crease_vert', 'POINT', 'FLOAT');
 	});},
 	get vertex_creases_remove () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4172,12 +4468,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		_name_convention_attribute_remove (self.attributes, 'crease_vert');
+		__call__ (_name_convention_attribute_remove, null, self.attributes, 'crease_vert');
 	});},
 	get _get_edge_creases () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4188,12 +4484,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		return _name_convention_attribute_get (self.attributes, 'crease_edge', 'EDGE', 'FLOAT');
+		return __call__ (_name_convention_attribute_get, null, self.attributes, 'crease_edge', 'EDGE', 'FLOAT');
 	});},
 	get edge_creases_ensure () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4204,12 +4500,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		return _name_convention_attribute_ensure (self.attributes, 'crease_edge', 'EDGE', 'FLOAT');
+		return __call__ (_name_convention_attribute_ensure, null, self.attributes, 'crease_edge', 'EDGE', 'FLOAT');
 	});},
 	get edge_creases_remove () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4220,12 +4516,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		_name_convention_attribute_remove (self.attributes, 'crease_edge');
+		__call__ (_name_convention_attribute_remove, null, self.attributes, 'crease_edge');
 	});},
 	get _get_vertex_paint_mask () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4236,12 +4532,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		return _name_convention_attribute_get (self.attributes, '.sculpt_mask', 'POINT', 'FLOAT');
+		return __call__ (_name_convention_attribute_get, null, self.attributes, '.sculpt_mask', 'POINT', 'FLOAT');
 	});},
 	get vertex_paint_mask_ensure () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4252,12 +4548,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		return _name_convention_attribute_ensure (self.attributes, '.sculpt_mask', 'POINT', 'FLOAT');
+		return __call__ (_name_convention_attribute_ensure, null, self.attributes, '.sculpt_mask', 'POINT', 'FLOAT');
 	});},
 	get vertex_paint_mask_remove () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4268,12 +4564,12 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		_name_convention_attribute_remove (self.attributes, '.sculpt_mask');
+		__call__ (_name_convention_attribute_remove, null, self.attributes, '.sculpt_mask');
 	});},
 	get shade_flat () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4284,15 +4580,18 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		var sharp_faces = _name_convention_attribute_ensure (self.attributes, 'sharp_face', 'FACE', 'BOOLEAN');
-		for (var value of sharp_faces.data) {
+		var sharp_faces = __call__ (_name_convention_attribute_ensure, null, self.attributes, 'sharp_face', 'FACE', 'BOOLEAN');
+		var __iterable0__ = sharp_faces.data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var value = __getitem__ (__iterable0__, __index0__);
 			value.value = true;
 		}
 	});},
 	get shade_smooth () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4303,7 +4602,7 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 		}
 		else {
 		}
-		_name_convention_attribute_remove (self.attributes, 'sharp_face');
+		__call__ (_name_convention_attribute_remove, null, self.attributes, 'sharp_face');
 	});}
 });
 globalThis.Object.defineProperty (Mesh, 'vertex_paint_mask', property.call (Mesh, Mesh._get_vertex_paint_mask));
@@ -4316,7 +4615,7 @@ export var MeshEdge =  __class__ ('MeshEdge', [_StructRNA], {
 	get _get_key () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4327,7 +4626,7 @@ export var MeshEdge =  __class__ ('MeshEdge', [_StructRNA], {
 		}
 		else {
 		}
-		return _ord_ind (...tuple (self.vertices));
+		return __call__ (_ord_ind, null, ...__call__ (tuple, null, self.vertices));
 	});}
 });
 globalThis.Object.defineProperty (MeshEdge, 'key', property.call (MeshEdge, MeshEdge._get_key));;
@@ -4337,7 +4636,7 @@ export var MeshLoopTriangle =  __class__ ('MeshLoopTriangle', [_StructRNA], {
 	get _get_center () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4348,14 +4647,14 @@ export var MeshLoopTriangle =  __class__ ('MeshLoopTriangle', [_StructRNA], {
 		}
 		else {
 		}
-		var face_verts = self.vertices.__getslice__ (null, null, 1);
+		var face_verts = __getslice__ (self.vertices, null, null, 1);
 		var mesh_verts = self.id_data.vertices;
-		return ((mesh_verts [face_verts [0]].co + mesh_verts [face_verts [1]].co) + mesh_verts [face_verts [2]].co) / 3.0;
+		return __truediv__ (__add__ (__add__ (__getitem__ (mesh_verts, __getitem__ (face_verts, 0)).co, __getitem__ (mesh_verts, __getitem__ (face_verts, 1)).co), __getitem__ (mesh_verts, __getitem__ (face_verts, 2)).co), 3.0);
 	});},
 	get _get_edge_keys () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4366,8 +4665,8 @@ export var MeshLoopTriangle =  __class__ ('MeshLoopTriangle', [_StructRNA], {
 		}
 		else {
 		}
-		var verts = self.vertices.__getslice__ (null, null, 1);
-		return tuple ([_ord_ind (verts [0], verts [1]), _ord_ind (verts [1], verts [2]), _ord_ind (verts [2], verts [0])]);
+		var verts = __getslice__ (self.vertices, null, null, 1);
+		return tuple ([__call__ (_ord_ind, null, __getitem__ (verts, 0), __getitem__ (verts, 1)), __call__ (_ord_ind, null, __getitem__ (verts, 1), __getitem__ (verts, 2)), __call__ (_ord_ind, null, __getitem__ (verts, 2), __getitem__ (verts, 0))]);
 	});}
 });
 globalThis.Object.defineProperty (MeshLoopTriangle, 'edge_keys', property.call (MeshLoopTriangle, MeshLoopTriangle._get_edge_keys));
@@ -4378,7 +4677,7 @@ export var MeshPolygon =  __class__ ('MeshPolygon', [_StructRNA], {
 	get _get_edge_keys () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4389,12 +4688,18 @@ export var MeshPolygon =  __class__ ('MeshPolygon', [_StructRNA], {
 		}
 		else {
 		}
-		var verts = self.vertices.__getslice__ (null, null, 1);
-		var vlen = len (self.vertices);
+		var verts = __getslice__ (self.vertices, null, null, 1);
+		var vlen = __call__ (len, null, self.vertices);
 		return (function () {
 			var __accu0__ = [];
-			for (var i of list (range (vlen))) {
-				__accu0__.append (_ord_ind (verts [i], verts [__mod__ (i + 1, vlen)]));
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, vlen));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var i = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (_ord_ind, null, __getitem__ (verts, i), __getitem__ (verts, __mod__ (__add__ (i, 1), vlen))));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -4402,7 +4707,7 @@ export var MeshPolygon =  __class__ ('MeshPolygon', [_StructRNA], {
 	get _get_loop_indices () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4414,8 +4719,8 @@ export var MeshPolygon =  __class__ ('MeshPolygon', [_StructRNA], {
 		else {
 		}
 		var start = self.loop_start;
-		var end = start + self.loop_total;
-		return range (start, end);
+		var end = __add__ (start, self.loop_total);
+		return __call__ (range, null, start, end);
 	});}
 });
 globalThis.Object.defineProperty (MeshPolygon, 'loop_indices', property.call (MeshPolygon, MeshPolygon._get_loop_indices));
@@ -4426,7 +4731,7 @@ export var Text =  __class__ ('Text', [_types.ID], {
 	get as_module () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4437,14 +4742,20 @@ export var Text =  __class__ ('Text', [_types.ID], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		var splitext = _member ('os.path', 'splitext');
-		var join = _member ('os.path', 'join');
-		var ModuleType = _member ('types', 'ModuleType');
+		var bpy = __call__ (_module, null, 'bpy');
+		var splitext = __call__ (_member, null, 'os.path', 'splitext');
+		var join = __call__ (_member, null, 'os.path', 'join');
+		var ModuleType = __call__ (_member, null, 'types', 'ModuleType');
 		var py_name = self.py_name;
-		var mod = ModuleType (splitext (py_name) [0]);
-		mod.__dict__.py_update (dict ({'__file__': join (bpy.data.filepath, py_name)}));
-		exec (self.as_string (), mod.__dict__);
+		var mod = __call__ (ModuleType, null, __getitem__ (__call__ (splitext, null, py_name), 0));
+		(function () {
+			var __accu0__ = mod.__dict__;
+			return __call__ (__accu0__.py_update, __accu0__, dict ({'__file__': __call__ (join, null, bpy.data.filepath, py_name)}));
+		}) ();
+		__call__ (exec, null, (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.as_string, __accu0__);
+		}) (), mod.__dict__);
 		return mod;
 	});}
 });
@@ -4454,7 +4765,7 @@ export var Sound =  __class__ ('Sound', [_types.ID], {
 	get _get_factory () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4465,8 +4776,14 @@ export var Sound =  __class__ ('Sound', [_types.ID], {
 		}
 		else {
 		}
-		var aud = _module ('aud');
-		return aud._sound_from_pointer (self.as_pointer ());
+		var aud = __call__ (_module, null, 'aud');
+		return (function () {
+			var __accu0__ = aud;
+			return __call__ (__accu0__._sound_from_pointer, __accu0__, (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__.as_pointer, __accu1__);
+			}) ());
+		}) ();
 	});}
 });
 globalThis.Object.defineProperty (Sound, 'factory', property.call (Sound, Sound._get_factory));;
@@ -4475,7 +4792,7 @@ export var _RNAMeta =  __class__ ('_RNAMeta', [py_metatype], {
 	get _get_is_registered () {return __get__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4499,7 +4816,7 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 	get __getattribute__ () {return __get__ (this, function (self, attr) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4511,17 +4828,20 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 		}
 		else {
 		}
-		var properties = _StructRNA.path_resolve (self, 'properties');
-		var bl_rna = getattr (properties, 'bl_rna', null);
+		var properties = (function () {
+			var __accu0__ = _StructRNA;
+			return __call__ (__accu0__.path_resolve, __accu0__, self, 'properties');
+		}) ();
+		var bl_rna = __call__ (getattr, null, properties, 'bl_rna', null);
 		if (bl_rna !== null && __in__ (attr, bl_rna.properties)) {
-			return getattr (properties, attr);
+			return __call__ (getattr, null, properties, attr);
 		}
-		return __super__ (Gizmo, '__getattribute__') (self, attr);
+		return __call__ (__call__ (__super__, null, Gizmo, '__getattribute__'), null, self, attr);
 	});},
 	get __setattr__ () {return __get__ (this, function (self, attr, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4534,17 +4854,20 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 		}
 		else {
 		}
-		var properties = _StructRNA.path_resolve (self, 'properties');
-		var bl_rna = getattr (properties, 'bl_rna', null);
+		var properties = (function () {
+			var __accu0__ = _StructRNA;
+			return __call__ (__accu0__.path_resolve, __accu0__, self, 'properties');
+		}) ();
+		var bl_rna = __call__ (getattr, null, properties, 'bl_rna', null);
 		if (bl_rna !== null && __in__ (attr, bl_rna.properties)) {
-			return setattr (properties, attr, value);
+			return __call__ (setattr, null, properties, attr, value);
 		}
-		return __super__ (Gizmo, '__setattr__') (self, attr, value);
+		return __call__ (__call__ (__super__, null, Gizmo, '__setattr__'), null, self, attr, value);
 	});},
 	get __delattr__ () {return __get__ (this, function (self, attr) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4556,19 +4879,22 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 		}
 		else {
 		}
-		var properties = _StructRNA.path_resolve (self, 'properties');
-		var bl_rna = getattr (properties, 'bl_rna', null);
+		var properties = (function () {
+			var __accu0__ = _StructRNA;
+			return __call__ (__accu0__.path_resolve, __accu0__, self, 'properties');
+		}) ();
+		var bl_rna = __call__ (getattr, null, properties, 'bl_rna', null);
 		if (bl_rna !== null && __in__ (attr, bl_rna.properties)) {
-			return delattr (properties, attr);
+			return __call__ (delattr, null, properties, attr);
 		}
-		return __super__ (Gizmo, '__delattr__') (self, attr);
+		return __call__ (__call__ (__super__, null, Gizmo, '__delattr__'), null, self, attr);
 	});},
 	get draw_custom_shape () {return __get__ (this, function (self, shape) {
 		var matrix = null;
 		var select_id = null;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4582,7 +4908,7 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 		}
 		else {
 		}
-		var gpu = _module ('gpu');
+		var gpu = __call__ (_module, null, 'gpu');
 		if (matrix === null) {
 			var matrix = self.matrix_world;
 		}
@@ -4590,27 +4916,45 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 		var batch = __left0__ [0];
 		var shader = __left0__ [1];
 		if (select_id !== null) {
-			gpu.select.load_id (select_id);
+			(function () {
+				var __accu0__ = gpu.select;
+				return __call__ (__accu0__.load_id, __accu0__, select_id);
+			}) ();
 			var use_blend = false;
 		}
 		else {
 			if (self.is_highlight) {
-				var color = _joined (self.color_highlight, [self.alpha_highlight]);
+				var color = __call__ (_joined, null, self.color_highlight, [self.alpha_highlight]);
 			}
 			else {
-				var color = _joined (self.color, [self.alpha]);
+				var color = __call__ (_joined, null, self.color, [self.alpha]);
 			}
-			shader.uniform_float ('color', color);
-			var use_blend = color [3] < 1.0;
+			(function () {
+				var __accu0__ = shader;
+				return __call__ (__accu0__.uniform_float, __accu0__, 'color', color);
+			}) ();
+			var use_blend = __lt__ (__getitem__ (color, 3), 1.0);
 		}
 		if (use_blend) {
-			gpu.state.blend_set ('ALPHA');
+			(function () {
+				var __accu0__ = gpu.state;
+				return __call__ (__accu0__.blend_set, __accu0__, 'ALPHA');
+			}) ();
 		}
-		var __withid0__ = gpu.matrix.push_pop ();
+		var __withid0__ = (function () {
+			var __accu0__ = gpu.matrix;
+			return __call__ (__accu0__.push_pop, __accu0__);
+		}) ();
 		try {
 			__withid0__.__enter__ ();
-			gpu.matrix.multiply_matrix (matrix);
-			batch.draw (shader);
+			(function () {
+				var __accu0__ = gpu.matrix;
+				return __call__ (__accu0__.multiply_matrix, __accu0__, matrix);
+			}) ();
+			(function () {
+				var __accu0__ = batch;
+				return __call__ (__accu0__.draw, __accu0__, shader);
+			}) ();
 			__withid0__.__exit__ ();
 		}
 		catch (__except0__) {
@@ -4619,13 +4963,16 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 			}
 		}
 		if (use_blend) {
-			gpu.state.blend_set ('NONE');
+			(function () {
+				var __accu0__ = gpu.state;
+				return __call__ (__accu0__.blend_set, __accu0__, 'NONE');
+			}) ();
 		}
 	});},
 	get new_custom_shape () {return function (py_metatype, verts) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4637,22 +4984,31 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 		}
 		else {
 		}
-		var gpu = _module ('gpu');
-		var GPUBatch = _member ('gpu.types', 'GPUBatch');
-		var GPUVertBuf = _member ('gpu.types', 'GPUVertBuf');
-		var GPUVertFormat = _member ('gpu.types', 'GPUVertFormat');
-		var dims = len (verts [0]);
+		var gpu = __call__ (_module, null, 'gpu');
+		var GPUBatch = __call__ (_member, null, 'gpu.types', 'GPUBatch');
+		var GPUVertBuf = __call__ (_member, null, 'gpu.types', 'GPUVertBuf');
+		var GPUVertFormat = __call__ (_member, null, 'gpu.types', 'GPUVertFormat');
+		var dims = __call__ (len, null, __getitem__ (verts, 0));
 		if (!__in__ (dims, new set ([2, 3]))) {
-			var __except0__ = ValueError ('Expected 2D or 3D vertex');
+			var __except0__ = __call__ (ValueError, null, 'Expected 2D or 3D vertex');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var fmt = GPUVertFormat ();
-		var pos_id = fmt.attr_add (__kwargtrans__ ({id: 'pos', comp_type: 'F32', len: dims, fetch_mode: 'FLOAT'}));
-		var vbo = GPUVertBuf (__kwargtrans__ ({len: len (verts), format: fmt}));
-		vbo.attr_fill (__kwargtrans__ ({id: pos_id, data: verts}));
-		var batch = GPUBatch (__kwargtrans__ ({py_metatype: py_metatype, buf: vbo}));
-		var shader = gpu.shader.from_builtin ('UNIFORM_COLOR');
+		var fmt = __call__ (GPUVertFormat, null);
+		var pos_id = (function () {
+			var __accu0__ = fmt;
+			return __call__ (__accu0__.attr_add, __accu0__, __kwargtrans__ ({id: 'pos', comp_type: 'F32', len: dims, fetch_mode: 'FLOAT'}));
+		}) ();
+		var vbo = __call__ (GPUVertBuf, null, __kwargtrans__ ({len: __call__ (len, null, verts), format: fmt}));
+		(function () {
+			var __accu0__ = vbo;
+			return __call__ (__accu0__.attr_fill, __accu0__, __kwargtrans__ ({id: pos_id, data: verts}));
+		}) ();
+		var batch = __call__ (GPUBatch, null, __kwargtrans__ ({py_metatype: py_metatype, buf: vbo}));
+		var shader = (function () {
+			var __accu0__ = gpu.shader;
+			return __call__ (__accu0__.from_builtin, __accu0__, 'UNIFORM_COLOR');
+		}) ();
 		return tuple ([batch, shader]);
 	};}
 });
@@ -4666,7 +5022,7 @@ export var Operator =  __class__ ('Operator', [_StructRNA], {
 	get __getattribute__ () {return __get__ (this, function (self, attr) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4678,17 +5034,20 @@ export var Operator =  __class__ ('Operator', [_StructRNA], {
 		}
 		else {
 		}
-		var properties = _StructRNA.path_resolve (self, 'properties');
-		var bl_rna = getattr (properties, 'bl_rna', null);
+		var properties = (function () {
+			var __accu0__ = _StructRNA;
+			return __call__ (__accu0__.path_resolve, __accu0__, self, 'properties');
+		}) ();
+		var bl_rna = __call__ (getattr, null, properties, 'bl_rna', null);
 		if (bl_rna !== null && __in__ (attr, bl_rna.properties)) {
-			return getattr (properties, attr);
+			return __call__ (getattr, null, properties, attr);
 		}
-		return __super__ (Operator, '__getattribute__') (self, attr);
+		return __call__ (__call__ (__super__, null, Operator, '__getattribute__'), null, self, attr);
 	});},
 	get __setattr__ () {return __get__ (this, function (self, attr, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4701,17 +5060,20 @@ export var Operator =  __class__ ('Operator', [_StructRNA], {
 		}
 		else {
 		}
-		var properties = _StructRNA.path_resolve (self, 'properties');
-		var bl_rna = getattr (properties, 'bl_rna', null);
+		var properties = (function () {
+			var __accu0__ = _StructRNA;
+			return __call__ (__accu0__.path_resolve, __accu0__, self, 'properties');
+		}) ();
+		var bl_rna = __call__ (getattr, null, properties, 'bl_rna', null);
 		if (bl_rna !== null && __in__ (attr, bl_rna.properties)) {
-			return setattr (properties, attr, value);
+			return __call__ (setattr, null, properties, attr, value);
 		}
-		return __super__ (Operator, '__setattr__') (self, attr, value);
+		return __call__ (__call__ (__super__, null, Operator, '__setattr__'), null, self, attr, value);
 	});},
 	get __delattr__ () {return __get__ (this, function (self, attr) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4723,18 +5085,21 @@ export var Operator =  __class__ ('Operator', [_StructRNA], {
 		}
 		else {
 		}
-		var properties = _StructRNA.path_resolve (self, 'properties');
-		var bl_rna = getattr (properties, 'bl_rna', null);
+		var properties = (function () {
+			var __accu0__ = _StructRNA;
+			return __call__ (__accu0__.path_resolve, __accu0__, self, 'properties');
+		}) ();
+		var bl_rna = __call__ (getattr, null, properties, 'bl_rna', null);
 		if (bl_rna !== null && __in__ (attr, bl_rna.properties)) {
-			return delattr (properties, attr);
+			return __call__ (delattr, null, properties, attr);
 		}
-		return __super__ (Operator, '__delattr__') (self, attr);
+		return __call__ (__call__ (__super__, null, Operator, '__delattr__'), null, self, attr);
 	});},
 	get as_keywords () {return __get__ (this, function (self) {
 		var ignore = tuple ([]);
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4746,12 +5111,21 @@ export var Operator =  __class__ ('Operator', [_StructRNA], {
 		}
 		else {
 		}
-		var ignore = ignore + tuple (['rna_type']);
+		var ignore = __add__ (ignore, tuple (['rna_type']));
 		return (function () {
 			var __accu0__ = [];
-			for (var attr of list (self.properties.rna_type.properties.py_keys ())) {
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = self.properties.rna_type.properties;
+				return __call__ (__accu1__.py_keys, __accu1__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var attr = __getitem__ (__iterable0__, __index0__);
 				if (!__in__ (attr, ignore)) {
-					__accu0__.append ([attr, getattr (self, attr)]);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, [attr, __call__ (getattr, null, self, attr)]);
+					}) ();
 				}
 			}
 			return dict (__accu0__);
@@ -4764,7 +5138,7 @@ export var Macro =  __class__ ('Macro', [_StructRNA], {
 	get define () {return __getcm__ (this, function (cls, operator) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4776,8 +5150,11 @@ export var Macro =  __class__ ('Macro', [_StructRNA], {
 		}
 		else {
 		}
-		var ops = _member ('_bpy', 'ops');
-		return ops.macro_define (cls, operator);
+		var ops = __call__ (_member, null, '_bpy', 'ops');
+		return (function () {
+			var __accu0__ = ops;
+			return __call__ (__accu0__.macro_define, __accu0__, cls, operator);
+		}) ();
 	});}
 });
 export var PropertyGroup =  __class__ ('PropertyGroup', [_StructRNA], {
@@ -4802,7 +5179,7 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 	get _dyn_ui_initialize () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4813,12 +5190,12 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 		}
 		else {
 		}
-		var draw_funcs = getattr (cls.draw, '_draw_funcs', null);
+		var draw_funcs = __call__ (getattr, null, cls.draw, '_draw_funcs', null);
 		if (draw_funcs === null) {
 			var draw_ls = function (self, context) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -4835,8 +5212,14 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 				if (workspace.use_filter_by_owner) {
 					var owner_names = (function () {
 						var __accu0__ = [];
-						for (var owner_id of workspace.owner_ids) {
-							__accu0__.append (owner_id.py_name);
+						var __iterable0__ = workspace.owner_ids;
+						__iterable0__ = __i__ (__iterable0__);
+						for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+							var owner_id = __getitem__ (__iterable0__, __index0__);
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, owner_id.py_name);
+							}) ();
 						}
 						return set (__accu0__);
 					}) ();
@@ -4844,12 +5227,15 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 				else {
 					var owner_names = null;
 				}
-				for (var func of draw_ls._draw_funcs) {
-					if (!(getattr (self, 'bl_owner_use_filter', true))) {
+				var __iterable0__ = draw_ls._draw_funcs;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var func = __getitem__ (__iterable0__, __index0__);
+					if (!(__call__ (getattr, null, self, 'bl_owner_use_filter', true))) {
 						// pass;
 					}
 					else if (owner_names !== null) {
-						var owner_id = getattr (func, '_owner', null);
+						var owner_id = __call__ (getattr, null, func, '_owner', null);
 						if (owner_id !== null) {
 							if (!__in__ (func._owner, owner_names)) {
 								continue;
@@ -4857,12 +5243,15 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 						}
 					}
 					try {
-						func (self, context);
+						__call__ (func, null, self, context);
 					}
 					catch (__except0__) {
 						if (isinstance (__except0__, Exception)) {
-							var traceback = _module ('traceback');
-							traceback.print_exc ();
+							var traceback = __call__ (_module, null, 'traceback');
+							(function () {
+								var __accu0__ = traceback;
+								return __call__ (__accu0__.print_exc, __accu0__);
+							}) ();
 						}
 						else {
 							throw __except0__;
@@ -4881,7 +5270,7 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 	get _dyn_owner_apply () {return function (draw_func) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4892,8 +5281,8 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 		}
 		else {
 		}
-		var _bl_owner_id_get = _member ('_bpy', '_bl_owner_id_get');
-		var owner_id = _bl_owner_id_get ();
+		var _bl_owner_id_get = __call__ (_member, null, '_bpy', '_bl_owner_id_get');
+		var owner_id = __call__ (_bl_owner_id_get, null);
 		if (owner_id !== null) {
 			draw_func._owner = owner_id;
 		}
@@ -4901,7 +5290,7 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 	get is_extended () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4912,16 +5301,16 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 		}
 		else {
 		}
-		var draw_funcs = getattr (cls.draw, '_draw_funcs', null);
+		var draw_funcs = __call__ (getattr, null, cls.draw, '_draw_funcs', null);
 		if (draw_funcs === null) {
 			return false;
 		}
-		return len (draw_funcs) > 1;
+		return __gt__ (__call__ (len, null, draw_funcs), 1);
 	});},
 	get append () {return __getcm__ (this, function (cls, draw_func) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4933,14 +5322,23 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 		}
 		else {
 		}
-		var draw_funcs = cls._dyn_ui_initialize ();
-		cls._dyn_owner_apply (draw_func);
-		draw_funcs.append (draw_func);
+		var draw_funcs = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._dyn_ui_initialize, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._dyn_owner_apply, __accu0__, draw_func);
+		}) ();
+		(function () {
+			var __accu0__ = draw_funcs;
+			return __call__ (__accu0__.append, __accu0__, draw_func);
+		}) ();
 	});},
 	get prepend () {return __getcm__ (this, function (cls, draw_func) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4952,14 +5350,23 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 		}
 		else {
 		}
-		var draw_funcs = cls._dyn_ui_initialize ();
-		cls._dyn_owner_apply (draw_func);
-		draw_funcs.insert (0, draw_func);
+		var draw_funcs = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._dyn_ui_initialize, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._dyn_owner_apply, __accu0__, draw_func);
+		}) ();
+		(function () {
+			var __accu0__ = draw_funcs;
+			return __call__ (__accu0__.insert, __accu0__, 0, draw_func);
+		}) ();
 	});},
 	get remove () {return __getcm__ (this, function (cls, draw_func) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4971,9 +5378,15 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 		}
 		else {
 		}
-		var draw_funcs = cls._dyn_ui_initialize ();
+		var draw_funcs = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._dyn_ui_initialize, __accu0__);
+		}) ();
 		try {
-			draw_funcs.remove (draw_func);
+			(function () {
+				var __accu0__ = draw_funcs;
+				return __call__ (__accu0__.remove, __accu0__, draw_func);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, ValueError)) {
@@ -5012,7 +5425,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 		var recursive_paths = false;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5034,43 +5447,70 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 		}
 		else {
 		}
-		var os = _module ('os');
-		var re = _module ('re');
-		var bpy = _module ('bpy');
-		var bpy = _module ('bpy');
-		var iface_ = _member ('_bpy.app.translations', 'pgettext_iface');
+		var os = __call__ (_module, null, 'os');
+		var re = __call__ (_module, null, 're');
+		var bpy = __call__ (_module, null, 'bpy');
+		var bpy = __call__ (_module, null, 'bpy');
+		var iface_ = __call__ (_member, null, '_bpy.app.translations', 'pgettext_iface');
 		var layout = self.layout;
 		if (!(searchpaths)) {
-			layout.label (__kwargtrans__ ({text: '* Missing Paths *'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '* Missing Paths *'}));
+			}) ();
 		}
-		var subdir = getattr (bpy.context, 'path_menu_directory', null);
+		var subdir = __call__ (getattr, null, bpy.context, 'path_menu_directory', null);
 		if (subdir) {
 			var searchpaths = [subdir];
 		}
 		var files = [];
 		var subdirs = [];
-		for (var directory of searchpaths) {
-			for (var entry of os.scandir (directory)) {
-				if (entry.py_name.startswith ('.')) {
+		var __iterable0__ = searchpaths;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var directory = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = (function () {
+				var __accu0__ = os;
+				return __call__ (__accu0__.scandir, __accu0__, directory);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var entry = __getitem__ (__iterable1__, __index1__);
+				if ((function () {
+					var __accu0__ = entry.py_name;
+					return __call__ (__accu0__.startswith, __accu0__, '.');
+				}) ()) {
 					continue;
 				}
-				if (entry.is_dir () && recursive_paths) {
-					subdirs.append (tuple ([entry.py_name, entry.path]));
+				if ((function () {
+					var __accu0__ = entry;
+					return __call__ (__accu0__.is_dir, __accu0__);
+				}) () && recursive_paths) {
+					(function () {
+						var __accu0__ = subdirs;
+						return __call__ (__accu0__.append, __accu0__, tuple ([entry.py_name, entry.path]));
+					}) ();
 					continue;
 				}
-				if (filter_ext !== null && !(filter_ext (os.path.splitext (entry.py_name) [1]))) {
+				if (filter_ext !== null && !(__call__ (filter_ext, null, __getitem__ ((function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.splitext, __accu0__, entry.py_name);
+				}) (), 1)))) {
 					continue;
 				}
-				if (filter_path !== null && !(filter_path (entry.py_name))) {
+				if (filter_path !== null && !(__call__ (filter_path, null, entry.py_name))) {
 					continue;
 				}
-				files.append (tuple ([entry.py_name, entry.path]));
+				(function () {
+					var __accu0__ = files;
+					return __call__ (__accu0__.append, __accu0__, tuple ([entry.py_name, entry.path]));
+				}) ();
 			}
 		}
 		var natural_sort_key = function (item) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5081,62 +5521,159 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 			}
 			else {
 			}
-			return tuple ((function () {
+			return __call__ (tuple, null, (function () {
 				var __accu0__ = [];
-				for (var t of list (re.py_split ('(\\d+)', item [0].lower ()))) {
-					__accu0__.append ((t.isdigit () ? int (t) : t));
+				var __iterable0__ = __call__ (list, null, (function () {
+					var __accu1__ = re;
+					return __call__ (__accu1__.py_split, __accu1__, '(\\d+)', (function () {
+						var __accu2__ = __getitem__ (item, 0);
+						return __call__ (__accu2__.lower, __accu2__);
+					}) ());
+				}) ());
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var t = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, ((function () {
+							var __accu2__ = t;
+							return __call__ (__accu2__.isdigit, __accu2__);
+						}) () ? __call__ (int, null, t) : t));
+					}) ();
 				}
 				return __accu0__;
 			}) ());
 		};
-		files.py_sort (__kwargtrans__ ({key: natural_sort_key}));
+		(function () {
+			var __accu0__ = files;
+			return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: natural_sort_key}));
+		}) ();
 		if (subdirs) {
-			subdirs.py_sort (__kwargtrans__ ({key: natural_sort_key}));
-			for (var [subdir_name, subdir_fullpath] of subdirs) {
-				layout.context_string_set ('path_menu_directory', subdir_fullpath);
-				layout.menu (self.bl_idname, __kwargtrans__ ({text: bpy.path.display_name (subdir_name)}));
+			(function () {
+				var __accu0__ = subdirs;
+				return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: natural_sort_key}));
+			}) ();
+			var __iterable0__ = subdirs;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var subdir_name = __left0__ [0];
+				var subdir_fullpath = __left0__ [1];
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.context_string_set, __accu0__, 'path_menu_directory', subdir_fullpath);
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.menu, __accu0__, self.bl_idname, __kwargtrans__ ({text: (function () {
+						var __accu1__ = bpy.path;
+						return __call__ (__accu1__.display_name, __accu1__, subdir_name);
+					}) ()}));
+				}) ();
 			}
 			if (files) {
-				layout.separator ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
 			}
 		}
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		for (var [f, filepath] of files) {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			var py_name = (display_name === null ? bpy.path.display_name (f) : display_name (filepath));
-			var props = row.operator (operator, __kwargtrans__ ({text: (translate ? iface_ (py_name) : py_name), translate: false}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var __iterable0__ = files;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var f = __left0__ [0];
+			var filepath = __left0__ [1];
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			var py_name = (display_name === null ? (function () {
+				var __accu0__ = bpy.path;
+				return __call__ (__accu0__.display_name, __accu0__, f);
+			}) () : __call__ (display_name, null, filepath));
+			var props = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, operator, __kwargtrans__ ({text: (translate ? __call__ (iface_, null, py_name) : py_name), translate: false}));
+			}) ();
 			if (props_default !== null) {
-				for (var [attr, value] of props_default.py_items ()) {
-					setattr (props, attr, value);
+				var __iterable1__ = (function () {
+					var __accu0__ = props_default;
+					return __call__ (__accu0__.py_items, __accu0__);
+				}) ();
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var __left0__ = __getitem__ (__iterable1__, __index1__);
+					var attr = __left0__ [0];
+					var value = __left0__ [1];
+					__call__ (setattr, null, props, attr, value);
 				}
 			}
-			setattr (props, prop_filepath, filepath);
-			if (operator == 'script.execute_preset') {
+			__call__ (setattr, null, props, prop_filepath, filepath);
+			if (__eq__ (operator, 'script.execute_preset')) {
 				props.menu_idname = self.bl_idname;
 			}
 			if (add_operator) {
-				var props = row.operator (add_operator, __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+				var props = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.operator, __accu0__, add_operator, __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+				}) ();
 				props.py_name = py_name;
 				props.remove_name = true;
 				if (add_operator_props !== null) {
-					for (var [attr, value] of add_operator_props.py_items ()) {
-						setattr (props, attr, value);
+					var __iterable1__ = (function () {
+						var __accu0__ = add_operator_props;
+						return __call__ (__accu0__.py_items, __accu0__);
+					}) ();
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var __left0__ = __getitem__ (__iterable1__, __index1__);
+						var attr = __left0__ [0];
+						var value = __left0__ [1];
+						__call__ (setattr, null, props, attr, value);
 					}
 				}
 			}
 		}
 		if (add_operator) {
-			var wm = bpy.data.window_managers [0];
-			layout.separator ();
-			var row = layout.row ();
-			var sub = row.row ();
+			var wm = __getitem__ (bpy.data.window_managers, 0);
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			sub.emboss = 'NORMAL';
-			sub.prop (wm, 'preset_name', __kwargtrans__ ({text: ''}));
-			var props = row.operator (add_operator, __kwargtrans__ ({text: '', icon: 'ADD'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, wm, 'preset_name', __kwargtrans__ ({text: ''}));
+			}) ();
+			var props = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, add_operator, __kwargtrans__ ({text: '', icon: 'ADD'}));
+			}) ();
 			props.py_name = wm.preset_name;
 			if (add_operator_props !== null) {
-				for (var [attr, value] of add_operator_props.py_items ()) {
-					setattr (props, attr, value);
+				var __iterable0__ = (function () {
+					var __accu0__ = add_operator_props;
+					return __call__ (__accu0__.py_items, __accu0__);
+				}) ();
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var __left0__ = __getitem__ (__iterable0__, __index0__);
+					var attr = __left0__ [0];
+					var value = __left0__ [1];
+					__call__ (setattr, null, props, attr, value);
 				}
 			}
 		}
@@ -5144,7 +5681,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 	get draw_preset () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5156,47 +5693,60 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 		}
 		else {
 		}
-		var bpy = _module ('bpy');
-		var ext_valid = getattr (self, 'preset_extensions', new set (['.py', '.xml']));
-		var props_default = getattr (self, 'preset_operator_defaults', null);
-		var add_operator = getattr (self, 'preset_add_operator', null);
-		var add_operator_props = getattr (self, 'preset_add_operator_properties', null);
-		self.path_menu (bpy.utils.preset_paths (self.preset_subdir), self.preset_operator, __kwargtrans__ ({props_default: props_default, filter_ext: (function __lambda__ (ext) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'ext': var ext = __allkwargs0__ [__attrib0__]; break;
+		// pass;
+		var bpy = __call__ (_module, null, 'bpy');
+		var ext_valid = __call__ (getattr, null, self, 'preset_extensions', new set (['.py', '.xml']));
+		var props_default = __call__ (getattr, null, self, 'preset_operator_defaults', null);
+		var add_operator = __call__ (getattr, null, self, 'preset_add_operator', null);
+		var add_operator_props = __call__ (getattr, null, self, 'preset_add_operator_properties', null);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.path_menu, __accu0__, (function () {
+				var __accu1__ = bpy.utils;
+				return __call__ (__accu1__.preset_paths, __accu1__, self.preset_subdir);
+			}) (), self.preset_operator, __kwargtrans__ ({props_default: props_default, filter_ext: (function __lambda__ (ext) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'ext': var ext = __allkwargs0__ [__attrib0__]; break;
+							}
 						}
 					}
 				}
-			}
-			else {
-			}
-			return __in__ (ext.lower (), ext_valid);
-		}), add_operator: add_operator, add_operator_props: add_operator_props, display_name: (function __lambda__ (py_name) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				else {
+				}
+				return __in__ ((function () {
+					var __accu1__ = ext;
+					return __call__ (__accu1__.lower, __accu1__);
+				}) (), ext_valid);
+			}), add_operator: add_operator, add_operator_props: add_operator_props, display_name: (function __lambda__ (py_name) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+							}
 						}
 					}
 				}
-			}
-			else {
-			}
-			return bpy.path.display_name (py_name, __kwargtrans__ ({title_case: false}));
-		})}));
+				else {
+				}
+				return (function () {
+					var __accu1__ = bpy.path;
+					return __call__ (__accu1__.display_name, __accu1__, py_name, __kwargtrans__ ({title_case: false}));
+				}) ();
+			})}));
+		}) ();
 	});},
 	get draw_collapsible () {return __getcm__ (this, function (cls, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5210,10 +5760,19 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 		else {
 		}
 		if (context.area.show_menus) {
-			layout.row (__kwargtrans__ ({align: true})).menu_contents (cls.__name__);
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__, __kwargtrans__ ({align: true}));
+				}) ();
+				return __call__ (__accu0__.menu_contents, __accu0__, cls.__name__);
+			}) ();
 		}
 		else {
-			layout.menu (cls.__name__, __kwargtrans__ ({icon: 'COLLAPSEMENU'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.menu, __accu0__, cls.__name__, __kwargtrans__ ({icon: 'COLLAPSEMENU'}));
+			}) ();
 		}
 	});}
 }, _RNAMeta);
@@ -5235,7 +5794,7 @@ export var Node =  __class__ ('Node', [_StructRNA], {
 	get poll () {return __getcm__ (this, function (cls, ntree) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5247,6 +5806,7 @@ export var Node =  __class__ ('Node', [_StructRNA], {
 		}
 		else {
 		}
+		// pass;
 		return true;
 	});}
 }, _RNAMetaPropGroup);
@@ -5260,7 +5820,7 @@ export var NodeSocket =  __class__ ('NodeSocket', [_StructRNA], {
 	get _get_links () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5273,18 +5833,24 @@ export var NodeSocket =  __class__ ('NodeSocket', [_StructRNA], {
 		}
 		var links = (function () {
 			var __accu0__ = [];
-			for (var link of self.id_data.links) {
+			var __iterable0__ = self.id_data.links;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var link = __getitem__ (__iterable0__, __index0__);
 				if (__in__ (self, tuple ([link.from_socket, link.to_socket]))) {
-					__accu0__.append (link);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, link);
+					}) ();
 				}
 			}
 			return __accu0__;
 		}) ();
 		if (!(self.is_output)) {
-			var links = sorted (links, __kwargtrans__ ({key: (function __lambda__ (link) {
+			var links = __call__ (sorted, null, links, __kwargtrans__ ({key: (function __lambda__ (link) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -5298,7 +5864,7 @@ export var NodeSocket =  __class__ ('NodeSocket', [_StructRNA], {
 				return link.multi_input_sort_id;
 			}), reverse: true}));
 		}
-		return tuple (links);
+		return __call__ (tuple, null, links);
 	});}
 }, _RNAMetaPropGroup);
 globalThis.Object.defineProperty (NodeSocket, 'links', property.call (NodeSocket, NodeSocket._get_links));;
@@ -5316,7 +5882,7 @@ export var CompositorNode =  __class__ ('CompositorNode', [NodeInternal], {
 	get poll () {return __getcm__ (this, function (cls, ntree) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5328,7 +5894,7 @@ export var CompositorNode =  __class__ ('CompositorNode', [NodeInternal], {
 		}
 		else {
 		}
-		return ntree.bl_idname == 'CompositorNodeTree';
+		return __eq__ (ntree.bl_idname, 'CompositorNodeTree');
 	});}
 });
 export var ShaderNode =  __class__ ('ShaderNode', [NodeInternal], {
@@ -5337,7 +5903,7 @@ export var ShaderNode =  __class__ ('ShaderNode', [NodeInternal], {
 	get poll () {return __getcm__ (this, function (cls, ntree) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5349,7 +5915,7 @@ export var ShaderNode =  __class__ ('ShaderNode', [NodeInternal], {
 		}
 		else {
 		}
-		return ntree.bl_idname == 'ShaderNodeTree';
+		return __eq__ (ntree.bl_idname, 'ShaderNodeTree');
 	});}
 });
 export var TextureNode =  __class__ ('TextureNode', [NodeInternal], {
@@ -5358,7 +5924,7 @@ export var TextureNode =  __class__ ('TextureNode', [NodeInternal], {
 	get poll () {return __getcm__ (this, function (cls, ntree) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5370,7 +5936,7 @@ export var TextureNode =  __class__ ('TextureNode', [NodeInternal], {
 		}
 		else {
 		}
-		return ntree.bl_idname == 'TextureNodeTree';
+		return __eq__ (ntree.bl_idname, 'TextureNodeTree');
 	});}
 });
 export var GeometryNode =  __class__ ('GeometryNode', [NodeInternal], {
@@ -5379,7 +5945,7 @@ export var GeometryNode =  __class__ ('GeometryNode', [NodeInternal], {
 	get poll () {return __getcm__ (this, function (cls, ntree) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5391,7 +5957,7 @@ export var GeometryNode =  __class__ ('GeometryNode', [NodeInternal], {
 		}
 		else {
 		}
-		return ntree.bl_idname == 'GeometryNodeTree';
+		return __eq__ (ntree.bl_idname, 'GeometryNodeTree');
 	});}
 });
 export var RenderEngine =  __class__ ('RenderEngine', [_StructRNA], {
@@ -5407,7 +5973,7 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5422,13 +5988,13 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		else {
 			var args = tuple ();
 		}
-		__super__ (HydraRenderEngine, '__init__') (self, ...args, __kwargtrans__ (_merged (kwargs)));
+		__call__ (__call__ (__super__, null, HydraRenderEngine, '__init__'), null, self, ...args, __kwargtrans__ (__call__ (_merged, null, kwargs)));
 		self.engine_ptr = null;
 	});},
 	get __del__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5439,17 +6005,20 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		}
 		else {
 		}
-		if (hasattr (self, 'engine_ptr')) {
+		if (__call__ (hasattr, null, self, 'engine_ptr')) {
 			if (self.engine_ptr) {
-				var _bpy_hydra = _module ('_bpy_hydra');
-				_bpy_hydra.engine_free (self.engine_ptr);
+				var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
+				(function () {
+					var __accu0__ = _bpy_hydra;
+					return __call__ (__accu0__.engine_free, __accu0__, self.engine_ptr);
+				}) ();
 			}
 		}
 	});},
 	get get_render_settings () {return __get__ (this, function (self, engine_type) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5466,7 +6035,7 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 	get py_update () {return __get__ (this, function (self, data, depsgraph) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5479,23 +6048,43 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		}
 		else {
 		}
-		var _bpy_hydra = _module ('_bpy_hydra');
+		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
 		var engine_type = (self.is_preview ? 'PREVIEW' : 'FINAL');
 		if (!(self.engine_ptr)) {
-			self.engine_ptr = _bpy_hydra.engine_create (self, engine_type, self.bl_delegate_id);
+			self.engine_ptr = (function () {
+				var __accu0__ = _bpy_hydra;
+				return __call__ (__accu0__.engine_create, __accu0__, self, engine_type, self.bl_delegate_id);
+			}) ();
 		}
 		if (!(self.engine_ptr)) {
 			return ;
 		}
-		_bpy_hydra.engine_update (self.engine_ptr, depsgraph, null);
-		for (var [key, val] of self.get_render_settings ((self.is_preview ? 'PREVIEW' : 'FINAL')).py_items ()) {
-			_bpy_hydra.engine_set_render_setting (self.engine_ptr, key, val);
+		(function () {
+			var __accu0__ = _bpy_hydra;
+			return __call__ (__accu0__.engine_update, __accu0__, self.engine_ptr, depsgraph, null);
+		}) ();
+		var __iterable0__ = (function () {
+			var __accu0__ = (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__.get_render_settings, __accu1__, (self.is_preview ? 'PREVIEW' : 'FINAL'));
+			}) ();
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var key = __left0__ [0];
+			var val = __left0__ [1];
+			(function () {
+				var __accu0__ = _bpy_hydra;
+				return __call__ (__accu0__.engine_set_render_setting, __accu0__, self.engine_ptr, key, val);
+			}) ();
 		}
 	});},
 	get render () {return __get__ (this, function (self, depsgraph) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5510,13 +6099,16 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		if (!(self.engine_ptr)) {
 			return ;
 		}
-		var _bpy_hydra = _module ('_bpy_hydra');
-		_bpy_hydra.engine_render (self.engine_ptr);
+		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
+		(function () {
+			var __accu0__ = _bpy_hydra;
+			return __call__ (__accu0__.engine_render, __accu0__, self.engine_ptr);
+		}) ();
 	});},
 	get view_update () {return __get__ (this, function (self, context, depsgraph) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5529,22 +6121,42 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		}
 		else {
 		}
-		var _bpy_hydra = _module ('_bpy_hydra');
+		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
 		if (!(self.engine_ptr)) {
-			self.engine_ptr = _bpy_hydra.engine_create (self, 'VIEWPORT', self.bl_delegate_id);
+			self.engine_ptr = (function () {
+				var __accu0__ = _bpy_hydra;
+				return __call__ (__accu0__.engine_create, __accu0__, self, 'VIEWPORT', self.bl_delegate_id);
+			}) ();
 		}
 		if (!(self.engine_ptr)) {
 			return ;
 		}
-		_bpy_hydra.engine_update (self.engine_ptr, depsgraph, context);
-		for (var [key, val] of self.get_render_settings ('VIEWPORT').py_items ()) {
-			_bpy_hydra.engine_set_render_setting (self.engine_ptr, key, val);
+		(function () {
+			var __accu0__ = _bpy_hydra;
+			return __call__ (__accu0__.engine_update, __accu0__, self.engine_ptr, depsgraph, context);
+		}) ();
+		var __iterable0__ = (function () {
+			var __accu0__ = (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__.get_render_settings, __accu1__, 'VIEWPORT');
+			}) ();
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var key = __left0__ [0];
+			var val = __left0__ [1];
+			(function () {
+				var __accu0__ = _bpy_hydra;
+				return __call__ (__accu0__.engine_set_render_setting, __accu0__, self.engine_ptr, key, val);
+			}) ();
 		}
 	});},
 	get view_draw () {return __get__ (this, function (self, context, depsgraph) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5560,8 +6172,11 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		if (!(self.engine_ptr)) {
 			return ;
 		}
-		var _bpy_hydra = _module ('_bpy_hydra');
-		_bpy_hydra.engine_view_draw (self.engine_ptr, context);
+		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
+		(function () {
+			var __accu0__ = _bpy_hydra;
+			return __call__ (__accu0__.engine_view_draw, __accu0__, self.engine_ptr, context);
+		}) ();
 	});}
 });
 export var GreasePencilDrawing =  __class__ ('GreasePencilDrawing', [_StructRNA], {
@@ -5570,7 +6185,7 @@ export var GreasePencilDrawing =  __class__ ('GreasePencilDrawing', [_StructRNA]
 	get _get_strokes () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5581,9 +6196,12 @@ export var GreasePencilDrawing =  __class__ ('GreasePencilDrawing', [_StructRNA]
 		}
 		else {
 		}
-		var GreasePencilStrokeSlice = _member ('_bpy_internal.grease_pencil.stroke', 'GreasePencilStrokeSlice');
-		var num_strokes = self.attributes.domain_size ('CURVE');
-		return GreasePencilStrokeSlice (self, 0, num_strokes);
+		var GreasePencilStrokeSlice = __call__ (_member, null, '_bpy_internal.grease_pencil.stroke', 'GreasePencilStrokeSlice');
+		var num_strokes = (function () {
+			var __accu0__ = self.attributes;
+			return __call__ (__accu0__.domain_size, __accu0__, 'CURVE');
+		}) ();
+		return __call__ (GreasePencilStrokeSlice, null, self, 0, num_strokes);
 	});}
 });
 globalThis.Object.defineProperty (GreasePencilDrawing, 'strokes', property.call (GreasePencilDrawing, GreasePencilDrawing._get_strokes));;
@@ -5593,7 +6211,7 @@ export var Material =  __class__ ('Material', [_types.ID], {
 	get inline_shader_nodes () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5604,8 +6222,11 @@ export var Material =  __class__ ('Material', [_types.ID], {
 		}
 		else {
 		}
-		var InlineShaderNodes = _member ('_bpy.types', 'InlineShaderNodes');
-		return InlineShaderNodes.from_material (self);
+		var InlineShaderNodes = __call__ (_member, null, '_bpy.types', 'InlineShaderNodes');
+		return (function () {
+			var __accu0__ = InlineShaderNodes;
+			return __call__ (__accu0__.from_material, __accu0__, self);
+		}) ();
 	});}
 });
 export var Light =  __class__ ('Light', [_types.ID], {
@@ -5614,7 +6235,7 @@ export var Light =  __class__ ('Light', [_types.ID], {
 	get inline_shader_nodes () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5625,8 +6246,11 @@ export var Light =  __class__ ('Light', [_types.ID], {
 		}
 		else {
 		}
-		var InlineShaderNodes = _member ('_bpy.types', 'InlineShaderNodes');
-		return InlineShaderNodes.from_light (self);
+		var InlineShaderNodes = __call__ (_member, null, '_bpy.types', 'InlineShaderNodes');
+		return (function () {
+			var __accu0__ = InlineShaderNodes;
+			return __call__ (__accu0__.from_light, __accu0__, self);
+		}) ();
 	});}
 });
 export var World =  __class__ ('World', [_types.ID], {
@@ -5635,7 +6259,7 @@ export var World =  __class__ ('World', [_types.ID], {
 	get inline_shader_nodes () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5646,8 +6270,11 @@ export var World =  __class__ ('World', [_types.ID], {
 		}
 		else {
 		}
-		var InlineShaderNodes = _member ('_bpy.types', 'InlineShaderNodes');
-		return InlineShaderNodes.from_world (self);
+		var InlineShaderNodes = __call__ (_member, null, '_bpy.types', 'InlineShaderNodes');
+		return (function () {
+			var __accu0__ = InlineShaderNodes;
+			return __call__ (__accu0__.from_world, __accu0__, self);
+		}) ();
 	});}
 });
 export var ANIM_MT_keyframe_insert_pie =  __class__ ('ANIM_MT_keyframe_insert_pie', [Menu], {
@@ -14761,3 +15388,4045 @@ export var bpy_prop_array = null;
 
 //# sourceMappingURL=_bpy.types.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case 'bpy_struct': bpy_struct = value; break;
+		case 'bpy_struct_meta_idprop': bpy_struct_meta_idprop = value; break;
+		case 'bpy_func': bpy_func = value; break;
+		case 'bpy_prop_collection': bpy_prop_collection = value; break;
+		case 'AOV': AOV = value; break;
+		case 'AOVs': AOVs = value; break;
+		case 'ID': ID = value; break;
+		case 'Action': Action = value; break;
+		case 'ActionChannelbag': ActionChannelbag = value; break;
+		case 'ActionChannelbagFCurves': ActionChannelbagFCurves = value; break;
+		case 'ActionChannelbagGroups': ActionChannelbagGroups = value; break;
+		case 'ActionChannelbags': ActionChannelbags = value; break;
+		case 'Constraint': Constraint = value; break;
+		case 'ActionConstraint': ActionConstraint = value; break;
+		case 'ActionGroup': ActionGroup = value; break;
+		case 'ActionStrip': ActionStrip = value; break;
+		case 'ActionKeyframeStrip': ActionKeyframeStrip = value; break;
+		case 'ActionLayer': ActionLayer = value; break;
+		case 'ActionLayers': ActionLayers = value; break;
+		case 'ActionPoseMarkers': ActionPoseMarkers = value; break;
+		case 'ActionSlot': ActionSlot = value; break;
+		case 'ActionSlots': ActionSlots = value; break;
+		case 'ActionStrips': ActionStrips = value; break;
+		case 'Strip': Strip = value; break;
+		case 'EffectStrip': EffectStrip = value; break;
+		case 'AddStrip': AddStrip = value; break;
+		case 'Addon': Addon = value; break;
+		case 'Addons': Addons = value; break;
+		case 'AdjustmentStrip': AdjustmentStrip = value; break;
+		case 'AlphaOverStrip': AlphaOverStrip = value; break;
+		case 'AlphaUnderStrip': AlphaUnderStrip = value; break;
+		case 'AnimData': AnimData = value; break;
+		case 'AnimDataDrivers': AnimDataDrivers = value; break;
+		case 'AnimViz': AnimViz = value; break;
+		case 'AnimVizMotionPaths': AnimVizMotionPaths = value; break;
+		case 'Annotation': Annotation = value; break;
+		case 'AnnotationFrame': AnnotationFrame = value; break;
+		case 'AnnotationFrames': AnnotationFrames = value; break;
+		case 'AnnotationLayer': AnnotationLayer = value; break;
+		case 'AnnotationLayers': AnnotationLayers = value; break;
+		case 'AnnotationStroke': AnnotationStroke = value; break;
+		case 'AnnotationStrokePoint': AnnotationStrokePoint = value; break;
+		case 'AnnotationStrokePoints': AnnotationStrokePoints = value; break;
+		case 'AnnotationStrokes': AnnotationStrokes = value; break;
+		case 'AnyType': AnyType = value; break;
+		case 'Area': Area = value; break;
+		case 'AreaSpaces': AreaSpaces = value; break;
+		case 'Armature': Armature = value; break;
+		case 'ArmatureBones': ArmatureBones = value; break;
+		case 'ArmatureConstraint': ArmatureConstraint = value; break;
+		case 'ArmatureConstraintTargets': ArmatureConstraintTargets = value; break;
+		case 'ArmatureEditBones': ArmatureEditBones = value; break;
+		case 'Modifier': Modifier = value; break;
+		case 'ArmatureModifier': ArmatureModifier = value; break;
+		case 'ArrayModifier': ArrayModifier = value; break;
+		case 'AssetLibrary': AssetLibrary = value; break;
+		case 'AssetLibraryCollection': AssetLibraryCollection = value; break;
+		case 'AssetLibraryReference': AssetLibraryReference = value; break;
+		case 'AssetMetaData': AssetMetaData = value; break;
+		case 'AssetRepresentation': AssetRepresentation = value; break;
+		case 'AssetTag': AssetTag = value; break;
+		case 'AssetTags': AssetTags = value; break;
+		case 'AssetWeakReference': AssetWeakReference = value; break;
+		case 'Attribute': Attribute = value; break;
+		case 'AttributeGroupCurves': AttributeGroupCurves = value; break;
+		case 'AttributeGroupGreasePencil': AttributeGroupGreasePencil = value; break;
+		case 'AttributeGroupGreasePencilDrawing': AttributeGroupGreasePencilDrawing = value; break;
+		case 'AttributeGroupMesh': AttributeGroupMesh = value; break;
+		case 'AttributeGroupPointCloud': AttributeGroupPointCloud = value; break;
+		case 'BakeSettings': BakeSettings = value; break;
+		case 'BevelModifier': BevelModifier = value; break;
+		case 'BezierSplinePoint': BezierSplinePoint = value; break;
+		case 'BlendData': BlendData = value; break;
+		case 'BlendDataActions': BlendDataActions = value; break;
+		case 'BlendDataAnnotations': BlendDataAnnotations = value; break;
+		case 'BlendDataArmatures': BlendDataArmatures = value; break;
+		case 'BlendDataBrushes': BlendDataBrushes = value; break;
+		case 'BlendDataCacheFiles': BlendDataCacheFiles = value; break;
+		case 'BlendDataCameras': BlendDataCameras = value; break;
+		case 'BlendDataCollections': BlendDataCollections = value; break;
+		case 'BlendDataCurves': BlendDataCurves = value; break;
+		case 'BlendDataFonts': BlendDataFonts = value; break;
+		case 'BlendDataGreasePencilsV3': BlendDataGreasePencilsV3 = value; break;
+		case 'BlendDataHairCurves': BlendDataHairCurves = value; break;
+		case 'BlendDataImages': BlendDataImages = value; break;
+		case 'BlendDataLattices': BlendDataLattices = value; break;
+		case 'BlendDataLibraries': BlendDataLibraries = value; break;
+		case 'BlendDataLights': BlendDataLights = value; break;
+		case 'BlendDataLineStyles': BlendDataLineStyles = value; break;
+		case 'BlendDataMasks': BlendDataMasks = value; break;
+		case 'BlendDataMaterials': BlendDataMaterials = value; break;
+		case 'BlendDataMeshes': BlendDataMeshes = value; break;
+		case 'BlendDataMetaBalls': BlendDataMetaBalls = value; break;
+		case 'BlendDataMovieClips': BlendDataMovieClips = value; break;
+		case 'BlendDataNodeTrees': BlendDataNodeTrees = value; break;
+		case 'BlendDataObjects': BlendDataObjects = value; break;
+		case 'BlendDataPaintCurves': BlendDataPaintCurves = value; break;
+		case 'BlendDataPalettes': BlendDataPalettes = value; break;
+		case 'BlendDataParticles': BlendDataParticles = value; break;
+		case 'BlendDataPointClouds': BlendDataPointClouds = value; break;
+		case 'BlendDataProbes': BlendDataProbes = value; break;
+		case 'BlendDataScenes': BlendDataScenes = value; break;
+		case 'BlendDataScreens': BlendDataScreens = value; break;
+		case 'BlendDataSounds': BlendDataSounds = value; break;
+		case 'BlendDataSpeakers': BlendDataSpeakers = value; break;
+		case 'BlendDataTexts': BlendDataTexts = value; break;
+		case 'BlendDataTextures': BlendDataTextures = value; break;
+		case 'BlendDataVolumes': BlendDataVolumes = value; break;
+		case 'BlendDataWindowManagers': BlendDataWindowManagers = value; break;
+		case 'BlendDataWorkSpaces': BlendDataWorkSpaces = value; break;
+		case 'BlendDataWorlds': BlendDataWorlds = value; break;
+		case 'BlendFileColorspace': BlendFileColorspace = value; break;
+		case 'BlendImportContext': BlendImportContext = value; break;
+		case 'BlendImportContextItem': BlendImportContextItem = value; break;
+		case 'BlendImportContextItems': BlendImportContextItems = value; break;
+		case 'BlendImportContextLibraries': BlendImportContextLibraries = value; break;
+		case 'BlendImportContextLibrary': BlendImportContextLibrary = value; break;
+		case 'BlenderRNA': BlenderRNA = value; break;
+		case 'BoidRule': BoidRule = value; break;
+		case 'BoidRuleAverageSpeed': BoidRuleAverageSpeed = value; break;
+		case 'BoidRuleAvoid': BoidRuleAvoid = value; break;
+		case 'BoidRuleAvoidCollision': BoidRuleAvoidCollision = value; break;
+		case 'BoidRuleFight': BoidRuleFight = value; break;
+		case 'BoidRuleFollowLeader': BoidRuleFollowLeader = value; break;
+		case 'BoidRuleGoal': BoidRuleGoal = value; break;
+		case 'BoidSettings': BoidSettings = value; break;
+		case 'BoidState': BoidState = value; break;
+		case 'BoneCollectionMemberships': BoneCollectionMemberships = value; break;
+		case 'BoneCollections': BoneCollections = value; break;
+		case 'BoneColor': BoneColor = value; break;
+		case 'BoolAttribute': BoolAttribute = value; break;
+		case 'BoolAttributeValue': BoolAttributeValue = value; break;
+		case 'Property': Property = value; break;
+		case 'BoolProperty': BoolProperty = value; break;
+		case 'BooleanModifier': BooleanModifier = value; break;
+		case 'StripModifier': StripModifier = value; break;
+		case 'BrightContrastModifier': BrightContrastModifier = value; break;
+		case 'Brush': Brush = value; break;
+		case 'BrushCapabilities': BrushCapabilities = value; break;
+		case 'BrushCapabilitiesImagePaint': BrushCapabilitiesImagePaint = value; break;
+		case 'BrushCapabilitiesSculpt': BrushCapabilitiesSculpt = value; break;
+		case 'BrushCapabilitiesVertexPaint': BrushCapabilitiesVertexPaint = value; break;
+		case 'BrushCapabilitiesWeightPaint': BrushCapabilitiesWeightPaint = value; break;
+		case 'BrushCurvesSculptSettings': BrushCurvesSculptSettings = value; break;
+		case 'BrushGpencilSettings': BrushGpencilSettings = value; break;
+		case 'TextureSlot': TextureSlot = value; break;
+		case 'BrushTextureSlot': BrushTextureSlot = value; break;
+		case 'BuildModifier': BuildModifier = value; break;
+		case 'ByteColorAttribute': ByteColorAttribute = value; break;
+		case 'ByteColorAttributeValue': ByteColorAttributeValue = value; break;
+		case 'ByteIntAttribute': ByteIntAttribute = value; break;
+		case 'ByteIntAttributeValue': ByteIntAttributeValue = value; break;
+		case 'CacheFile': CacheFile = value; break;
+		case 'CacheFileLayer': CacheFileLayer = value; break;
+		case 'CacheFileLayers': CacheFileLayers = value; break;
+		case 'CacheObjectPath': CacheObjectPath = value; break;
+		case 'CacheObjectPaths': CacheObjectPaths = value; break;
+		case 'Camera': Camera = value; break;
+		case 'CameraBackgroundImage': CameraBackgroundImage = value; break;
+		case 'CameraBackgroundImages': CameraBackgroundImages = value; break;
+		case 'CameraDOFSettings': CameraDOFSettings = value; break;
+		case 'CameraSolverConstraint': CameraSolverConstraint = value; break;
+		case 'CameraStereoData': CameraStereoData = value; break;
+		case 'CastModifier': CastModifier = value; break;
+		case 'ChannelDriverVariables': ChannelDriverVariables = value; break;
+		case 'ChildOfConstraint': ChildOfConstraint = value; break;
+		case 'ChildParticle': ChildParticle = value; break;
+		case 'ClampToConstraint': ClampToConstraint = value; break;
+		case 'ClothCollisionSettings': ClothCollisionSettings = value; break;
+		case 'ClothModifier': ClothModifier = value; break;
+		case 'ClothSettings': ClothSettings = value; break;
+		case 'ClothSolverResult': ClothSolverResult = value; break;
+		case 'CollectionChild': CollectionChild = value; break;
+		case 'CollectionChildren': CollectionChildren = value; break;
+		case 'CollectionExport': CollectionExport = value; break;
+		case 'CollectionExports': CollectionExports = value; break;
+		case 'CollectionImport': CollectionImport = value; break;
+		case 'CollectionLightLinking': CollectionLightLinking = value; break;
+		case 'CollectionObject': CollectionObject = value; break;
+		case 'CollectionObjects': CollectionObjects = value; break;
+		case 'CollectionProperty': CollectionProperty = value; break;
+		case 'CollisionModifier': CollisionModifier = value; break;
+		case 'CollisionSettings': CollisionSettings = value; break;
+		case 'ColorBalanceModifier': ColorBalanceModifier = value; break;
+		case 'ColorManagedDisplaySettings': ColorManagedDisplaySettings = value; break;
+		case 'ColorManagedInputColorspaceSettings': ColorManagedInputColorspaceSettings = value; break;
+		case 'ColorManagedSequencerColorspaceSettings': ColorManagedSequencerColorspaceSettings = value; break;
+		case 'ColorManagedViewSettings': ColorManagedViewSettings = value; break;
+		case 'ColorMapping': ColorMapping = value; break;
+		case 'ColorMixStrip': ColorMixStrip = value; break;
+		case 'ColorRamp': ColorRamp = value; break;
+		case 'ColorRampElement': ColorRampElement = value; break;
+		case 'ColorRampElements': ColorRampElements = value; break;
+		case 'ColorStrip': ColorStrip = value; break;
+		case 'CompositorStrip': CompositorStrip = value; break;
+		case 'ConsoleLine': ConsoleLine = value; break;
+		case 'ConstraintTarget': ConstraintTarget = value; break;
+		case 'ConstraintTargetBone': ConstraintTargetBone = value; break;
+		case 'CopyLocationConstraint': CopyLocationConstraint = value; break;
+		case 'CopyRotationConstraint': CopyRotationConstraint = value; break;
+		case 'CopyScaleConstraint': CopyScaleConstraint = value; break;
+		case 'CopyTransformsConstraint': CopyTransformsConstraint = value; break;
+		case 'CorrectiveSmoothModifier': CorrectiveSmoothModifier = value; break;
+		case 'CrossStrip': CrossStrip = value; break;
+		case 'CryptomatteEntry': CryptomatteEntry = value; break;
+		case 'Curve': Curve = value; break;
+		case 'CurveMap': CurveMap = value; break;
+		case 'CurveMapPoint': CurveMapPoint = value; break;
+		case 'CurveMapPoints': CurveMapPoints = value; break;
+		case 'CurveMapping': CurveMapping = value; break;
+		case 'CurveModifier': CurveModifier = value; break;
+		case 'CurvePaintSettings': CurvePaintSettings = value; break;
+		case 'CurvePoint': CurvePoint = value; break;
+		case 'CurveProfile': CurveProfile = value; break;
+		case 'CurveProfilePoint': CurveProfilePoint = value; break;
+		case 'CurveProfilePoints': CurveProfilePoints = value; break;
+		case 'CurveSlice': CurveSlice = value; break;
+		case 'CurveSplines': CurveSplines = value; break;
+		case 'Curves': Curves = value; break;
+		case 'CurvesModifier': CurvesModifier = value; break;
+		case 'Paint': Paint = value; break;
+		case 'CurvesSculpt': CurvesSculpt = value; break;
+		case 'DampedTrackConstraint': DampedTrackConstraint = value; break;
+		case 'DataTransferModifier': DataTransferModifier = value; break;
+		case 'DecimateModifier': DecimateModifier = value; break;
+		case 'Depsgraph': Depsgraph = value; break;
+		case 'DepsgraphObjectInstance': DepsgraphObjectInstance = value; break;
+		case 'DepsgraphUpdate': DepsgraphUpdate = value; break;
+		case 'DisplaceModifier': DisplaceModifier = value; break;
+		case 'DisplaySafeAreas': DisplaySafeAreas = value; break;
+		case 'DopeSheet': DopeSheet = value; break;
+		case 'Driver': Driver = value; break;
+		case 'DriverTarget': DriverTarget = value; break;
+		case 'DriverVariable': DriverVariable = value; break;
+		case 'DynamicPaintBrushSettings': DynamicPaintBrushSettings = value; break;
+		case 'DynamicPaintCanvasSettings': DynamicPaintCanvasSettings = value; break;
+		case 'DynamicPaintModifier': DynamicPaintModifier = value; break;
+		case 'DynamicPaintSurface': DynamicPaintSurface = value; break;
+		case 'DynamicPaintSurfaces': DynamicPaintSurfaces = value; break;
+		case 'EQCurveMappingData': EQCurveMappingData = value; break;
+		case 'EchoModifier': EchoModifier = value; break;
+		case 'EdgeSplitModifier': EdgeSplitModifier = value; break;
+		case 'EffectorWeights': EffectorWeights = value; break;
+		case 'EnumProperty': EnumProperty = value; break;
+		case 'EnumPropertyItem': EnumPropertyItem = value; break;
+		case 'ViewerPathElem': ViewerPathElem = value; break;
+		case 'EvaluateClosureNodeViewerPathElem': EvaluateClosureNodeViewerPathElem = value; break;
+		case 'Event': Event = value; break;
+		case 'ExplodeModifier': ExplodeModifier = value; break;
+		case 'FCurve': FCurve = value; break;
+		case 'FCurveKeyframePoints': FCurveKeyframePoints = value; break;
+		case 'FCurveModifiers': FCurveModifiers = value; break;
+		case 'FCurveSample': FCurveSample = value; break;
+		case 'FFmpegSettings': FFmpegSettings = value; break;
+		case 'FModifier': FModifier = value; break;
+		case 'FModifierCycles': FModifierCycles = value; break;
+		case 'FModifierEnvelope': FModifierEnvelope = value; break;
+		case 'FModifierEnvelopeControlPoint': FModifierEnvelopeControlPoint = value; break;
+		case 'FModifierEnvelopeControlPoints': FModifierEnvelopeControlPoints = value; break;
+		case 'FModifierFunctionGenerator': FModifierFunctionGenerator = value; break;
+		case 'FModifierGenerator': FModifierGenerator = value; break;
+		case 'FModifierLimits': FModifierLimits = value; break;
+		case 'FModifierNoise': FModifierNoise = value; break;
+		case 'FModifierSmooth': FModifierSmooth = value; break;
+		case 'FModifierStepped': FModifierStepped = value; break;
+		case 'FieldSettings': FieldSettings = value; break;
+		case 'FileAssetSelectIDFilter': FileAssetSelectIDFilter = value; break;
+		case 'FileSelectParams': FileSelectParams = value; break;
+		case 'FileAssetSelectParams': FileAssetSelectParams = value; break;
+		case 'FileBrowserFSMenuEntry': FileBrowserFSMenuEntry = value; break;
+		case 'FileSelectEntry': FileSelectEntry = value; break;
+		case 'FileSelectIDFilter': FileSelectIDFilter = value; break;
+		case 'Float2Attribute': Float2Attribute = value; break;
+		case 'Float2AttributeValue': Float2AttributeValue = value; break;
+		case 'Float4Attribute': Float4Attribute = value; break;
+		case 'Float4AttributeValue': Float4AttributeValue = value; break;
+		case 'Float4x4Attribute': Float4x4Attribute = value; break;
+		case 'Float4x4AttributeValue': Float4x4AttributeValue = value; break;
+		case 'FloatAttribute': FloatAttribute = value; break;
+		case 'FloatAttributeValue': FloatAttributeValue = value; break;
+		case 'FloatColorAttribute': FloatColorAttribute = value; break;
+		case 'FloatColorAttributeValue': FloatColorAttributeValue = value; break;
+		case 'FloatProperty': FloatProperty = value; break;
+		case 'FloatVectorAttribute': FloatVectorAttribute = value; break;
+		case 'FloatVectorAttributeValue': FloatVectorAttributeValue = value; break;
+		case 'FloatVectorValueReadOnly': FloatVectorValueReadOnly = value; break;
+		case 'FloorConstraint': FloorConstraint = value; break;
+		case 'FluidDomainSettings': FluidDomainSettings = value; break;
+		case 'FluidEffectorSettings': FluidEffectorSettings = value; break;
+		case 'FluidFlowSettings': FluidFlowSettings = value; break;
+		case 'FluidModifier': FluidModifier = value; break;
+		case 'FollowPathConstraint': FollowPathConstraint = value; break;
+		case 'FollowTrackConstraint': FollowTrackConstraint = value; break;
+		case 'ForeachGeometryElementGenerationItem': ForeachGeometryElementGenerationItem = value; break;
+		case 'ForeachGeometryElementInputItem': ForeachGeometryElementInputItem = value; break;
+		case 'ForeachGeometryElementMainItem': ForeachGeometryElementMainItem = value; break;
+		case 'ForeachGeometryElementZoneViewerPathElem': ForeachGeometryElementZoneViewerPathElem = value; break;
+		case 'FreestyleLineSet': FreestyleLineSet = value; break;
+		case 'FreestyleLineStyle': FreestyleLineStyle = value; break;
+		case 'FreestyleModuleSettings': FreestyleModuleSettings = value; break;
+		case 'FreestyleModules': FreestyleModules = value; break;
+		case 'FreestyleSettings': FreestyleSettings = value; break;
+		case 'Function': Function = value; break;
+		case 'GPencilInterpolateSettings': GPencilInterpolateSettings = value; break;
+		case 'GPencilSculptGuide': GPencilSculptGuide = value; break;
+		case 'GPencilSculptSettings': GPencilSculptSettings = value; break;
+		case 'GammaCrossStrip': GammaCrossStrip = value; break;
+		case 'GaussianBlurStrip': GaussianBlurStrip = value; break;
+		case 'GeometryAttributeConstraint': GeometryAttributeConstraint = value; break;
+		case 'GeometryNodeClosureToListItem': GeometryNodeClosureToListItem = value; break;
+		case 'GeometryNodeClosureToListItems': GeometryNodeClosureToListItems = value; break;
+		case 'GeometryNodeFieldToGridItem': GeometryNodeFieldToGridItem = value; break;
+		case 'GeometryNodeFieldToGridItems': GeometryNodeFieldToGridItems = value; break;
+		case 'GeometryNodeFieldToListItem': GeometryNodeFieldToListItem = value; break;
+		case 'GeometryNodeFieldToListItems': GeometryNodeFieldToListItems = value; break;
+		case 'GizmoGroupProperties': GizmoGroupProperties = value; break;
+		case 'GizmoProperties': GizmoProperties = value; break;
+		case 'Gizmos': Gizmos = value; break;
+		case 'GlowStrip': GlowStrip = value; break;
+		case 'GpPaint': GpPaint = value; break;
+		case 'GpSculptPaint': GpSculptPaint = value; break;
+		case 'GpVertexPaint': GpVertexPaint = value; break;
+		case 'GpWeightPaint': GpWeightPaint = value; break;
+		case 'GreasePencil': GreasePencil = value; break;
+		case 'GreasePencilArmatureModifier': GreasePencilArmatureModifier = value; break;
+		case 'GreasePencilArrayModifier': GreasePencilArrayModifier = value; break;
+		case 'GreasePencilBuildModifier': GreasePencilBuildModifier = value; break;
+		case 'GreasePencilColorModifier': GreasePencilColorModifier = value; break;
+		case 'GreasePencilDashModifierData': GreasePencilDashModifierData = value; break;
+		case 'GreasePencilDashModifierSegment': GreasePencilDashModifierSegment = value; break;
+		case 'GreasePencilEnvelopeModifier': GreasePencilEnvelopeModifier = value; break;
+		case 'GreasePencilFrame': GreasePencilFrame = value; break;
+		case 'GreasePencilFrames': GreasePencilFrames = value; break;
+		case 'GreasePencilHookModifier': GreasePencilHookModifier = value; break;
+		case 'GreasePencilLatticeModifier': GreasePencilLatticeModifier = value; break;
+		case 'GreasePencilTreeNode': GreasePencilTreeNode = value; break;
+		case 'GreasePencilLayer': GreasePencilLayer = value; break;
+		case 'GreasePencilLayerGroup': GreasePencilLayerGroup = value; break;
+		case 'GreasePencilLayerMask': GreasePencilLayerMask = value; break;
+		case 'GreasePencilLayerMasks': GreasePencilLayerMasks = value; break;
+		case 'GreasePencilLengthModifier': GreasePencilLengthModifier = value; break;
+		case 'GreasePencilLineartModifier': GreasePencilLineartModifier = value; break;
+		case 'GreasePencilMirrorModifier': GreasePencilMirrorModifier = value; break;
+		case 'GreasePencilMultiplyModifier': GreasePencilMultiplyModifier = value; break;
+		case 'GreasePencilNoiseModifier': GreasePencilNoiseModifier = value; break;
+		case 'GreasePencilOffsetModifier': GreasePencilOffsetModifier = value; break;
+		case 'GreasePencilOpacityModifier': GreasePencilOpacityModifier = value; break;
+		case 'GreasePencilOutlineModifier': GreasePencilOutlineModifier = value; break;
+		case 'GreasePencilShrinkwrapModifier': GreasePencilShrinkwrapModifier = value; break;
+		case 'GreasePencilSimplifyModifier': GreasePencilSimplifyModifier = value; break;
+		case 'GreasePencilSmoothModifier': GreasePencilSmoothModifier = value; break;
+		case 'GreasePencilSubdivModifier': GreasePencilSubdivModifier = value; break;
+		case 'GreasePencilTextureModifier': GreasePencilTextureModifier = value; break;
+		case 'GreasePencilThickModifierData': GreasePencilThickModifierData = value; break;
+		case 'GreasePencilTimeModifier': GreasePencilTimeModifier = value; break;
+		case 'GreasePencilTimeModifierSegment': GreasePencilTimeModifierSegment = value; break;
+		case 'GreasePencilTintModifier': GreasePencilTintModifier = value; break;
+		case 'GreasePencilWeightAngleModifier': GreasePencilWeightAngleModifier = value; break;
+		case 'GreasePencilWeightProximityModifier': GreasePencilWeightProximityModifier = value; break;
+		case 'GreasePencilv3LayerGroup': GreasePencilv3LayerGroup = value; break;
+		case 'GreasePencilv3Layers': GreasePencilv3Layers = value; break;
+		case 'GroupNodeViewerPathElem': GroupNodeViewerPathElem = value; break;
+		case 'Histogram': Histogram = value; break;
+		case 'HookModifier': HookModifier = value; break;
+		case 'HueCorrectModifier': HueCorrectModifier = value; break;
+		case 'IDMaterials': IDMaterials = value; break;
+		case 'IDOverrideLibrary': IDOverrideLibrary = value; break;
+		case 'IDOverrideLibraryProperties': IDOverrideLibraryProperties = value; break;
+		case 'IDOverrideLibraryProperty': IDOverrideLibraryProperty = value; break;
+		case 'IDOverrideLibraryPropertyOperation': IDOverrideLibraryPropertyOperation = value; break;
+		case 'IDOverrideLibraryPropertyOperations': IDOverrideLibraryPropertyOperations = value; break;
+		case 'IDPropertyWrapPtr': IDPropertyWrapPtr = value; break;
+		case 'IDViewerPathElem': IDViewerPathElem = value; break;
+		case 'IKParam': IKParam = value; break;
+		case 'Image': Image = value; break;
+		case 'ImageFormatSettings': ImageFormatSettings = value; break;
+		case 'ImagePackedFile': ImagePackedFile = value; break;
+		case 'ImagePaint': ImagePaint = value; break;
+		case 'ImagePreview': ImagePreview = value; break;
+		case 'ImageStrip': ImageStrip = value; break;
+		case 'ImageUser': ImageUser = value; break;
+		case 'IndexSwitchItem': IndexSwitchItem = value; break;
+		case 'Int2Attribute': Int2Attribute = value; break;
+		case 'Int2AttributeValue': Int2AttributeValue = value; break;
+		case 'IntAttribute': IntAttribute = value; break;
+		case 'IntAttributeValue': IntAttributeValue = value; break;
+		case 'IntProperty': IntProperty = value; break;
+		case 'Itasc': Itasc = value; break;
+		case 'Key': Key = value; break;
+		case 'KeyConfig': KeyConfig = value; break;
+		case 'KeyConfigPreferences': KeyConfigPreferences = value; break;
+		case 'KeyConfigurations': KeyConfigurations = value; break;
+		case 'KeyMap': KeyMap = value; break;
+		case 'KeyMapItem': KeyMapItem = value; break;
+		case 'KeyMapItems': KeyMapItems = value; break;
+		case 'KeyMaps': KeyMaps = value; break;
+		case 'Keyframe': Keyframe = value; break;
+		case 'KeyingSet': KeyingSet = value; break;
+		case 'KeyingSetPath': KeyingSetPath = value; break;
+		case 'KeyingSetPaths': KeyingSetPaths = value; break;
+		case 'KeyingSets': KeyingSets = value; break;
+		case 'KeyingSetsAll': KeyingSetsAll = value; break;
+		case 'KinematicConstraint': KinematicConstraint = value; break;
+		case 'LaplacianDeformModifier': LaplacianDeformModifier = value; break;
+		case 'LaplacianSmoothModifier': LaplacianSmoothModifier = value; break;
+		case 'Lattice': Lattice = value; break;
+		case 'LatticeModifier': LatticeModifier = value; break;
+		case 'LatticePoint': LatticePoint = value; break;
+		case 'LayerCollection': LayerCollection = value; break;
+		case 'LayerObjects': LayerObjects = value; break;
+		case 'LayoutPanelState': LayoutPanelState = value; break;
+		case 'LibraryWeakReference': LibraryWeakReference = value; break;
+		case 'LightProbe': LightProbe = value; break;
+		case 'LightProbePlane': LightProbePlane = value; break;
+		case 'LightProbeSphere': LightProbeSphere = value; break;
+		case 'LightProbeVolume': LightProbeVolume = value; break;
+		case 'Lightgroup': Lightgroup = value; break;
+		case 'Lightgroups': Lightgroups = value; break;
+		case 'LimitDistanceConstraint': LimitDistanceConstraint = value; break;
+		case 'LimitLocationConstraint': LimitLocationConstraint = value; break;
+		case 'LimitRotationConstraint': LimitRotationConstraint = value; break;
+		case 'LimitScaleConstraint': LimitScaleConstraint = value; break;
+		case 'LineStyleModifier': LineStyleModifier = value; break;
+		case 'LineStyleAlphaModifier': LineStyleAlphaModifier = value; break;
+		case 'LineStyleAlphaModifier_AlongStroke': LineStyleAlphaModifier_AlongStroke = value; break;
+		case 'LineStyleAlphaModifier_CreaseAngle': LineStyleAlphaModifier_CreaseAngle = value; break;
+		case 'LineStyleAlphaModifier_Curvature_3D': LineStyleAlphaModifier_Curvature_3D = value; break;
+		case 'LineStyleAlphaModifier_DistanceFromCamera': LineStyleAlphaModifier_DistanceFromCamera = value; break;
+		case 'LineStyleAlphaModifier_DistanceFromObject': LineStyleAlphaModifier_DistanceFromObject = value; break;
+		case 'LineStyleAlphaModifier_Material': LineStyleAlphaModifier_Material = value; break;
+		case 'LineStyleAlphaModifier_Noise': LineStyleAlphaModifier_Noise = value; break;
+		case 'LineStyleAlphaModifier_Tangent': LineStyleAlphaModifier_Tangent = value; break;
+		case 'LineStyleAlphaModifiers': LineStyleAlphaModifiers = value; break;
+		case 'LineStyleColorModifier': LineStyleColorModifier = value; break;
+		case 'LineStyleColorModifier_AlongStroke': LineStyleColorModifier_AlongStroke = value; break;
+		case 'LineStyleColorModifier_CreaseAngle': LineStyleColorModifier_CreaseAngle = value; break;
+		case 'LineStyleColorModifier_Curvature_3D': LineStyleColorModifier_Curvature_3D = value; break;
+		case 'LineStyleColorModifier_DistanceFromCamera': LineStyleColorModifier_DistanceFromCamera = value; break;
+		case 'LineStyleColorModifier_DistanceFromObject': LineStyleColorModifier_DistanceFromObject = value; break;
+		case 'LineStyleColorModifier_Material': LineStyleColorModifier_Material = value; break;
+		case 'LineStyleColorModifier_Noise': LineStyleColorModifier_Noise = value; break;
+		case 'LineStyleColorModifier_Tangent': LineStyleColorModifier_Tangent = value; break;
+		case 'LineStyleColorModifiers': LineStyleColorModifiers = value; break;
+		case 'LineStyleGeometryModifier': LineStyleGeometryModifier = value; break;
+		case 'LineStyleGeometryModifier_2DOffset': LineStyleGeometryModifier_2DOffset = value; break;
+		case 'LineStyleGeometryModifier_2DTransform': LineStyleGeometryModifier_2DTransform = value; break;
+		case 'LineStyleGeometryModifier_BackboneStretcher': LineStyleGeometryModifier_BackboneStretcher = value; break;
+		case 'LineStyleGeometryModifier_BezierCurve': LineStyleGeometryModifier_BezierCurve = value; break;
+		case 'LineStyleGeometryModifier_Blueprint': LineStyleGeometryModifier_Blueprint = value; break;
+		case 'LineStyleGeometryModifier_GuidingLines': LineStyleGeometryModifier_GuidingLines = value; break;
+		case 'LineStyleGeometryModifier_PerlinNoise1D': LineStyleGeometryModifier_PerlinNoise1D = value; break;
+		case 'LineStyleGeometryModifier_PerlinNoise2D': LineStyleGeometryModifier_PerlinNoise2D = value; break;
+		case 'LineStyleGeometryModifier_Polygonalization': LineStyleGeometryModifier_Polygonalization = value; break;
+		case 'LineStyleGeometryModifier_Sampling': LineStyleGeometryModifier_Sampling = value; break;
+		case 'LineStyleGeometryModifier_Simplification': LineStyleGeometryModifier_Simplification = value; break;
+		case 'LineStyleGeometryModifier_SinusDisplacement': LineStyleGeometryModifier_SinusDisplacement = value; break;
+		case 'LineStyleGeometryModifier_SpatialNoise': LineStyleGeometryModifier_SpatialNoise = value; break;
+		case 'LineStyleGeometryModifier_TipRemover': LineStyleGeometryModifier_TipRemover = value; break;
+		case 'LineStyleGeometryModifiers': LineStyleGeometryModifiers = value; break;
+		case 'LineStyleTextureSlot': LineStyleTextureSlot = value; break;
+		case 'LineStyleTextureSlots': LineStyleTextureSlots = value; break;
+		case 'LineStyleThicknessModifier': LineStyleThicknessModifier = value; break;
+		case 'LineStyleThicknessModifier_AlongStroke': LineStyleThicknessModifier_AlongStroke = value; break;
+		case 'LineStyleThicknessModifier_Calligraphy': LineStyleThicknessModifier_Calligraphy = value; break;
+		case 'LineStyleThicknessModifier_CreaseAngle': LineStyleThicknessModifier_CreaseAngle = value; break;
+		case 'LineStyleThicknessModifier_Curvature_3D': LineStyleThicknessModifier_Curvature_3D = value; break;
+		case 'LineStyleThicknessModifier_DistanceFromCamera': LineStyleThicknessModifier_DistanceFromCamera = value; break;
+		case 'LineStyleThicknessModifier_DistanceFromObject': LineStyleThicknessModifier_DistanceFromObject = value; break;
+		case 'LineStyleThicknessModifier_Material': LineStyleThicknessModifier_Material = value; break;
+		case 'LineStyleThicknessModifier_Noise': LineStyleThicknessModifier_Noise = value; break;
+		case 'LineStyleThicknessModifier_Tangent': LineStyleThicknessModifier_Tangent = value; break;
+		case 'LineStyleThicknessModifiers': LineStyleThicknessModifiers = value; break;
+		case 'Linesets': Linesets = value; break;
+		case 'LockedTrackConstraint': LockedTrackConstraint = value; break;
+		case 'LoopColors': LoopColors = value; break;
+		case 'MaintainVolumeConstraint': MaintainVolumeConstraint = value; break;
+		case 'Mask': Mask = value; break;
+		case 'MaskLayer': MaskLayer = value; break;
+		case 'MaskLayers': MaskLayers = value; break;
+		case 'MaskModifier': MaskModifier = value; break;
+		case 'MaskParent': MaskParent = value; break;
+		case 'MaskSpline': MaskSpline = value; break;
+		case 'MaskSplinePoint': MaskSplinePoint = value; break;
+		case 'MaskSplinePointUW': MaskSplinePointUW = value; break;
+		case 'MaskSplinePoints': MaskSplinePoints = value; break;
+		case 'MaskSplines': MaskSplines = value; break;
+		case 'MaskStrip': MaskStrip = value; break;
+		case 'MaskStripModifier': MaskStripModifier = value; break;
+		case 'MaterialGPencilStyle': MaterialGPencilStyle = value; break;
+		case 'MaterialLineArt': MaterialLineArt = value; break;
+		case 'MaterialSlot': MaterialSlot = value; break;
+		case 'MeshAutomaskingSettings': MeshAutomaskingSettings = value; break;
+		case 'MeshCacheModifier': MeshCacheModifier = value; break;
+		case 'MeshDeformModifier': MeshDeformModifier = value; break;
+		case 'MeshEdges': MeshEdges = value; break;
+		case 'MeshLoop': MeshLoop = value; break;
+		case 'MeshLoopColor': MeshLoopColor = value; break;
+		case 'MeshLoopColorLayer': MeshLoopColorLayer = value; break;
+		case 'MeshLoopTriangles': MeshLoopTriangles = value; break;
+		case 'MeshLoops': MeshLoops = value; break;
+		case 'MeshNormalValue': MeshNormalValue = value; break;
+		case 'MeshPolygons': MeshPolygons = value; break;
+		case 'MeshSequenceCacheModifier': MeshSequenceCacheModifier = value; break;
+		case 'MeshSkinVertex': MeshSkinVertex = value; break;
+		case 'MeshSkinVertexLayer': MeshSkinVertexLayer = value; break;
+		case 'MeshStatVis': MeshStatVis = value; break;
+		case 'MeshToVolumeModifier': MeshToVolumeModifier = value; break;
+		case 'MeshUVLoop': MeshUVLoop = value; break;
+		case 'MeshUVLoopLayer': MeshUVLoopLayer = value; break;
+		case 'MeshVertex': MeshVertex = value; break;
+		case 'MeshVertices': MeshVertices = value; break;
+		case 'MetaBall': MetaBall = value; break;
+		case 'MetaBallElements': MetaBallElements = value; break;
+		case 'MetaElement': MetaElement = value; break;
+		case 'MetaStrip': MetaStrip = value; break;
+		case 'MirrorModifier': MirrorModifier = value; break;
+		case 'ModifierViewerPathElem': ModifierViewerPathElem = value; break;
+		case 'MotionPath': MotionPath = value; break;
+		case 'MotionPathVert': MotionPathVert = value; break;
+		case 'MovieClip': MovieClip = value; break;
+		case 'MovieClipProxy': MovieClipProxy = value; break;
+		case 'MovieClipScopes': MovieClipScopes = value; break;
+		case 'MovieClipStrip': MovieClipStrip = value; break;
+		case 'MovieClipUser': MovieClipUser = value; break;
+		case 'MovieReconstructedCamera': MovieReconstructedCamera = value; break;
+		case 'MovieStrip': MovieStrip = value; break;
+		case 'MovieTracking': MovieTracking = value; break;
+		case 'MovieTrackingCamera': MovieTrackingCamera = value; break;
+		case 'MovieTrackingDopesheet': MovieTrackingDopesheet = value; break;
+		case 'MovieTrackingMarker': MovieTrackingMarker = value; break;
+		case 'MovieTrackingMarkers': MovieTrackingMarkers = value; break;
+		case 'MovieTrackingObject': MovieTrackingObject = value; break;
+		case 'MovieTrackingObjectPlaneTracks': MovieTrackingObjectPlaneTracks = value; break;
+		case 'MovieTrackingObjectTracks': MovieTrackingObjectTracks = value; break;
+		case 'MovieTrackingObjects': MovieTrackingObjects = value; break;
+		case 'MovieTrackingPlaneMarker': MovieTrackingPlaneMarker = value; break;
+		case 'MovieTrackingPlaneMarkers': MovieTrackingPlaneMarkers = value; break;
+		case 'MovieTrackingPlaneTrack': MovieTrackingPlaneTrack = value; break;
+		case 'MovieTrackingPlaneTracks': MovieTrackingPlaneTracks = value; break;
+		case 'MovieTrackingReconstructedCameras': MovieTrackingReconstructedCameras = value; break;
+		case 'MovieTrackingReconstruction': MovieTrackingReconstruction = value; break;
+		case 'MovieTrackingSettings': MovieTrackingSettings = value; break;
+		case 'MovieTrackingStabilization': MovieTrackingStabilization = value; break;
+		case 'MovieTrackingTrack': MovieTrackingTrack = value; break;
+		case 'MovieTrackingTracks': MovieTrackingTracks = value; break;
+		case 'MulticamStrip': MulticamStrip = value; break;
+		case 'MultiplyStrip': MultiplyStrip = value; break;
+		case 'MultiresModifier': MultiresModifier = value; break;
+		case 'NDOFMotionEventData': NDOFMotionEventData = value; break;
+		case 'NlaStrip': NlaStrip = value; break;
+		case 'NlaStripFCurves': NlaStripFCurves = value; break;
+		case 'NlaStrips': NlaStrips = value; break;
+		case 'NlaTrack': NlaTrack = value; break;
+		case 'NlaTracks': NlaTracks = value; break;
+		case 'NodeClosureInputItem': NodeClosureInputItem = value; break;
+		case 'NodeClosureInputItems': NodeClosureInputItems = value; break;
+		case 'NodeClosureOutputItem': NodeClosureOutputItem = value; break;
+		case 'NodeClosureOutputItems': NodeClosureOutputItems = value; break;
+		case 'NodeCombineBundleItem': NodeCombineBundleItem = value; break;
+		case 'NodeCombineBundleItems': NodeCombineBundleItems = value; break;
+		case 'NodeCompositorFileOutputItem': NodeCompositorFileOutputItem = value; break;
+		case 'NodeCompositorFileOutputItems': NodeCompositorFileOutputItems = value; break;
+		case 'NodeEnumItem': NodeEnumItem = value; break;
+		case 'NodeEvaluateClosureInputItem': NodeEvaluateClosureInputItem = value; break;
+		case 'NodeEvaluateClosureInputItems': NodeEvaluateClosureInputItems = value; break;
+		case 'NodeEvaluateClosureOutputItem': NodeEvaluateClosureOutputItem = value; break;
+		case 'NodeEvaluateClosureOutputItems': NodeEvaluateClosureOutputItems = value; break;
+		case 'NodeFunctionFormatStringItem': NodeFunctionFormatStringItem = value; break;
+		case 'NodeFunctionFormatStringItems': NodeFunctionFormatStringItems = value; break;
+		case 'NodeGeometryBakeItem': NodeGeometryBakeItem = value; break;
+		case 'NodeGeometryBakeItems': NodeGeometryBakeItems = value; break;
+		case 'NodeGeometryCaptureAttributeItem': NodeGeometryCaptureAttributeItem = value; break;
+		case 'NodeGeometryCaptureAttributeItems': NodeGeometryCaptureAttributeItems = value; break;
+		case 'NodeGeometryForeachGeometryElementGenerationItems': NodeGeometryForeachGeometryElementGenerationItems = value; break;
+		case 'NodeGeometryForeachGeometryElementInputItems': NodeGeometryForeachGeometryElementInputItems = value; break;
+		case 'NodeGeometryForeachGeometryElementMainItems': NodeGeometryForeachGeometryElementMainItems = value; break;
+		case 'NodeGeometryRepeatOutputItems': NodeGeometryRepeatOutputItems = value; break;
+		case 'NodeGeometrySimulationOutputItems': NodeGeometrySimulationOutputItems = value; break;
+		case 'NodeGeometryViewerItem': NodeGeometryViewerItem = value; break;
+		case 'NodeGeometryViewerItems': NodeGeometryViewerItems = value; break;
+		case 'NodeIndexSwitchItems': NodeIndexSwitchItems = value; break;
+		case 'NodeInputs': NodeInputs = value; break;
+		case 'NodeInternalSocketTemplate': NodeInternalSocketTemplate = value; break;
+		case 'NodeLink': NodeLink = value; break;
+		case 'NodeLinks': NodeLinks = value; break;
+		case 'NodeMenuSwitchItems': NodeMenuSwitchItems = value; break;
+		case 'NodeOutputs': NodeOutputs = value; break;
+		case 'NodePanelState': NodePanelState = value; break;
+		case 'NodeRaycastSampleAttributeItem': NodeRaycastSampleAttributeItem = value; break;
+		case 'NodeRaycastSampleAttributeItems': NodeRaycastSampleAttributeItems = value; break;
+		case 'NodeSeparateBundleItem': NodeSeparateBundleItem = value; break;
+		case 'NodeSeparateBundleItems': NodeSeparateBundleItems = value; break;
+		case 'NodeTreeInterface': NodeTreeInterface = value; break;
+		case 'NodeTreePath': NodeTreePath = value; break;
+		case 'Nodes': Nodes = value; break;
+		case 'NodesModifier': NodesModifier = value; break;
+		case 'NodesModifierBake': NodesModifierBake = value; break;
+		case 'NodesModifierBakeDataBlocks': NodesModifierBakeDataBlocks = value; break;
+		case 'NodesModifierBakes': NodesModifierBakes = value; break;
+		case 'NodesModifierDataBlock': NodesModifierDataBlock = value; break;
+		case 'NodesModifierPanel': NodesModifierPanel = value; break;
+		case 'NodesModifierPanels': NodesModifierPanels = value; break;
+		case 'NodesModifierProperties': NodesModifierProperties = value; break;
+		case 'NodesModifierPropertiesEmpty': NodesModifierPropertiesEmpty = value; break;
+		case 'NodesModifierWarning': NodesModifierWarning = value; break;
+		case 'NormalEditModifier': NormalEditModifier = value; break;
+		case 'ObjectBase': ObjectBase = value; break;
+		case 'ObjectConstraints': ObjectConstraints = value; break;
+		case 'ObjectDisplay': ObjectDisplay = value; break;
+		case 'ObjectLightLinking': ObjectLightLinking = value; break;
+		case 'ObjectLineArt': ObjectLineArt = value; break;
+		case 'ObjectModifiers': ObjectModifiers = value; break;
+		case 'ObjectShaderFx': ObjectShaderFx = value; break;
+		case 'ObjectSolverConstraint': ObjectSolverConstraint = value; break;
+		case 'OceanModifier': OceanModifier = value; break;
+		case 'OperatorMacro': OperatorMacro = value; break;
+		case 'OperatorOptions': OperatorOptions = value; break;
+		case 'OperatorProperties': OperatorProperties = value; break;
+		case 'PackedFile': PackedFile = value; break;
+		case 'PaintCurve': PaintCurve = value; break;
+		case 'PaintModeSettings': PaintModeSettings = value; break;
+		case 'Palette': Palette = value; break;
+		case 'PaletteColor': PaletteColor = value; break;
+		case 'PaletteColors': PaletteColors = value; break;
+		case 'Particle': Particle = value; break;
+		case 'ParticleBrush': ParticleBrush = value; break;
+		case 'ParticleDupliWeight': ParticleDupliWeight = value; break;
+		case 'ParticleEdit': ParticleEdit = value; break;
+		case 'ParticleHairKey': ParticleHairKey = value; break;
+		case 'ParticleInstanceModifier': ParticleInstanceModifier = value; break;
+		case 'ParticleKey': ParticleKey = value; break;
+		case 'ParticleSettings': ParticleSettings = value; break;
+		case 'ParticleSettingsTextureSlot': ParticleSettingsTextureSlot = value; break;
+		case 'ParticleSettingsTextureSlots': ParticleSettingsTextureSlots = value; break;
+		case 'ParticleSystem': ParticleSystem = value; break;
+		case 'ParticleSystemModifier': ParticleSystemModifier = value; break;
+		case 'ParticleSystems': ParticleSystems = value; break;
+		case 'ParticleTarget': ParticleTarget = value; break;
+		case 'PathCompare': PathCompare = value; break;
+		case 'PathCompareCollection': PathCompareCollection = value; break;
+		case 'PitchModifier': PitchModifier = value; break;
+		case 'PivotConstraint': PivotConstraint = value; break;
+		case 'Point': Point = value; break;
+		case 'PointCache': PointCache = value; break;
+		case 'PointCacheItem': PointCacheItem = value; break;
+		case 'PointCaches': PointCaches = value; break;
+		case 'PointCloud': PointCloud = value; break;
+		case 'PointerProperty': PointerProperty = value; break;
+		case 'Pose': Pose = value; break;
+		case 'PoseBoneConstraints': PoseBoneConstraints = value; break;
+		case 'Preferences': Preferences = value; break;
+		case 'PreferencesApps': PreferencesApps = value; break;
+		case 'PreferencesAssetLibraries': PreferencesAssetLibraries = value; break;
+		case 'PreferencesEdit': PreferencesEdit = value; break;
+		case 'PreferencesExperimental': PreferencesExperimental = value; break;
+		case 'PreferencesExtensions': PreferencesExtensions = value; break;
+		case 'PreferencesFilePaths': PreferencesFilePaths = value; break;
+		case 'PreferencesInput': PreferencesInput = value; break;
+		case 'PreferencesKeymap': PreferencesKeymap = value; break;
+		case 'PreferencesSystem': PreferencesSystem = value; break;
+		case 'PreferencesView': PreferencesView = value; break;
+		case 'PrimitiveBoolean': PrimitiveBoolean = value; break;
+		case 'PrimitiveFloat': PrimitiveFloat = value; break;
+		case 'PrimitiveInt': PrimitiveInt = value; break;
+		case 'PrimitiveString': PrimitiveString = value; break;
+		case 'PropertyGroupItem': PropertyGroupItem = value; break;
+		case 'QuaternionAttribute': QuaternionAttribute = value; break;
+		case 'QuaternionAttributeValue': QuaternionAttributeValue = value; break;
+		case 'RaytraceEEVEE': RaytraceEEVEE = value; break;
+		case 'ReadOnlyInteger': ReadOnlyInteger = value; break;
+		case 'Region': Region = value; break;
+		case 'RegionView3D': RegionView3D = value; break;
+		case 'RemeshModifier': RemeshModifier = value; break;
+		case 'RenderLayer': RenderLayer = value; break;
+		case 'RenderPass': RenderPass = value; break;
+		case 'RenderPasses': RenderPasses = value; break;
+		case 'RenderResult': RenderResult = value; break;
+		case 'RenderSettings': RenderSettings = value; break;
+		case 'RenderSlot': RenderSlot = value; break;
+		case 'RenderSlots': RenderSlots = value; break;
+		case 'RenderView': RenderView = value; break;
+		case 'RenderViews': RenderViews = value; break;
+		case 'RepeatItem': RepeatItem = value; break;
+		case 'RepeatZoneViewerPathElem': RepeatZoneViewerPathElem = value; break;
+		case 'Report': Report = value; break;
+		case 'RetimingKey': RetimingKey = value; break;
+		case 'RetimingKeys': RetimingKeys = value; break;
+		case 'RigidBodyConstraint': RigidBodyConstraint = value; break;
+		case 'RigidBodyObject': RigidBodyObject = value; break;
+		case 'RigidBodyWorld': RigidBodyWorld = value; break;
+		case 'SPHFluidSettings': SPHFluidSettings = value; break;
+		case 'Scene': Scene = value; break;
+		case 'SceneDisplay': SceneDisplay = value; break;
+		case 'SceneEEVEE': SceneEEVEE = value; break;
+		case 'SceneGpencil': SceneGpencil = value; break;
+		case 'SceneHydra': SceneHydra = value; break;
+		case 'SceneObjects': SceneObjects = value; break;
+		case 'SceneRenderView': SceneRenderView = value; break;
+		case 'SceneStrip': SceneStrip = value; break;
+		case 'Scopes': Scopes = value; break;
+		case 'Screen': Screen = value; break;
+		case 'ScrewModifier': ScrewModifier = value; break;
+		case 'ScriptDirectory': ScriptDirectory = value; break;
+		case 'ScriptDirectoryCollection': ScriptDirectoryCollection = value; break;
+		case 'Sculpt': Sculpt = value; break;
+		case 'SequenceEditor': SequenceEditor = value; break;
+		case 'SequenceTimelineChannel': SequenceTimelineChannel = value; break;
+		case 'SequencerCacheOverlay': SequencerCacheOverlay = value; break;
+		case 'SequencerCompositorModifierData': SequencerCompositorModifierData = value; break;
+		case 'SequencerCompositorModifierProperties': SequencerCompositorModifierProperties = value; break;
+		case 'SequencerCompositorModifierPropertiesEmpty': SequencerCompositorModifierPropertiesEmpty = value; break;
+		case 'SequencerPreviewOverlay': SequencerPreviewOverlay = value; break;
+		case 'SequencerTimelineOverlay': SequencerTimelineOverlay = value; break;
+		case 'SequencerTonemapModifierData': SequencerTonemapModifierData = value; break;
+		case 'SequencerToolSettings': SequencerToolSettings = value; break;
+		case 'ShaderFx': ShaderFx = value; break;
+		case 'ShaderFxBlur': ShaderFxBlur = value; break;
+		case 'ShaderFxColorize': ShaderFxColorize = value; break;
+		case 'ShaderFxFlip': ShaderFxFlip = value; break;
+		case 'ShaderFxGlow': ShaderFxGlow = value; break;
+		case 'ShaderFxPixel': ShaderFxPixel = value; break;
+		case 'ShaderFxRim': ShaderFxRim = value; break;
+		case 'ShaderFxShadow': ShaderFxShadow = value; break;
+		case 'ShaderFxSwirl': ShaderFxSwirl = value; break;
+		case 'ShaderFxWave': ShaderFxWave = value; break;
+		case 'ShapeKey': ShapeKey = value; break;
+		case 'ShapeKeyBezierPoint': ShapeKeyBezierPoint = value; break;
+		case 'ShapeKeyCurvePoint': ShapeKeyCurvePoint = value; break;
+		case 'ShapeKeyPoint': ShapeKeyPoint = value; break;
+		case 'Short2Attribute': Short2Attribute = value; break;
+		case 'Short2AttributeValue': Short2AttributeValue = value; break;
+		case 'ShrinkwrapConstraint': ShrinkwrapConstraint = value; break;
+		case 'ShrinkwrapModifier': ShrinkwrapModifier = value; break;
+		case 'SimpleDeformModifier': SimpleDeformModifier = value; break;
+		case 'SimulationStateItem': SimulationStateItem = value; break;
+		case 'SimulationZoneViewerPathElem': SimulationZoneViewerPathElem = value; break;
+		case 'SkinModifier': SkinModifier = value; break;
+		case 'SmoothModifier': SmoothModifier = value; break;
+		case 'SoftBodyModifier': SoftBodyModifier = value; break;
+		case 'SoftBodySettings': SoftBodySettings = value; break;
+		case 'SolidifyModifier': SolidifyModifier = value; break;
+		case 'SoundEqualizerModifier': SoundEqualizerModifier = value; break;
+		case 'SoundStrip': SoundStrip = value; break;
+		case 'Space': Space = value; break;
+		case 'SpaceClipEditor': SpaceClipEditor = value; break;
+		case 'SpaceClipOverlay': SpaceClipOverlay = value; break;
+		case 'SpaceConsole': SpaceConsole = value; break;
+		case 'SpaceDopeSheetEditor': SpaceDopeSheetEditor = value; break;
+		case 'SpaceDopeSheetOverlay': SpaceDopeSheetOverlay = value; break;
+		case 'SpaceFileBrowser': SpaceFileBrowser = value; break;
+		case 'SpaceGraphEditor': SpaceGraphEditor = value; break;
+		case 'SpaceImageEditor': SpaceImageEditor = value; break;
+		case 'SpaceImageOverlay': SpaceImageOverlay = value; break;
+		case 'SpaceInfo': SpaceInfo = value; break;
+		case 'SpaceNLA': SpaceNLA = value; break;
+		case 'SpaceNodeEditor': SpaceNodeEditor = value; break;
+		case 'SpaceNodeEditorPath': SpaceNodeEditorPath = value; break;
+		case 'SpaceNodeOverlay': SpaceNodeOverlay = value; break;
+		case 'SpaceOutliner': SpaceOutliner = value; break;
+		case 'SpacePreferences': SpacePreferences = value; break;
+		case 'SpaceProperties': SpaceProperties = value; break;
+		case 'SpaceSequenceEditor': SpaceSequenceEditor = value; break;
+		case 'SpaceSpreadsheet': SpaceSpreadsheet = value; break;
+		case 'SpaceTextEditor': SpaceTextEditor = value; break;
+		case 'SpaceUVEditor': SpaceUVEditor = value; break;
+		case 'SpaceView3D': SpaceView3D = value; break;
+		case 'Speaker': Speaker = value; break;
+		case 'SpeedControlStrip': SpeedControlStrip = value; break;
+		case 'Spline': Spline = value; break;
+		case 'SplineBezierPoints': SplineBezierPoints = value; break;
+		case 'SplineIKConstraint': SplineIKConstraint = value; break;
+		case 'SplinePoint': SplinePoint = value; break;
+		case 'SplinePoints': SplinePoints = value; break;
+		case 'SpreadsheetColumn': SpreadsheetColumn = value; break;
+		case 'SpreadsheetColumnID': SpreadsheetColumnID = value; break;
+		case 'SpreadsheetRowFilter': SpreadsheetRowFilter = value; break;
+		case 'SpreadsheetTable': SpreadsheetTable = value; break;
+		case 'SpreadsheetTableID': SpreadsheetTableID = value; break;
+		case 'SpreadsheetTableIDGeometry': SpreadsheetTableIDGeometry = value; break;
+		case 'SpreadsheetTables': SpreadsheetTables = value; break;
+		case 'Stereo3dDisplay': Stereo3dDisplay = value; break;
+		case 'Stereo3dFormat': Stereo3dFormat = value; break;
+		case 'StretchToConstraint': StretchToConstraint = value; break;
+		case 'StringAttribute': StringAttribute = value; break;
+		case 'StringAttributeValue': StringAttributeValue = value; break;
+		case 'StringProperty': StringProperty = value; break;
+		case 'StripColorBalanceData': StripColorBalanceData = value; break;
+		case 'StripColorBalance': StripColorBalance = value; break;
+		case 'StripCrop': StripCrop = value; break;
+		case 'StripElement': StripElement = value; break;
+		case 'StripElements': StripElements = value; break;
+		case 'StripModifiers': StripModifiers = value; break;
+		case 'StripProxy': StripProxy = value; break;
+		case 'StripTransform': StripTransform = value; break;
+		case 'StripsMeta': StripsMeta = value; break;
+		case 'StripsTopLevel': StripsTopLevel = value; break;
+		case 'Struct': Struct = value; break;
+		case 'StudioLight': StudioLight = value; break;
+		case 'StudioLights': StudioLights = value; break;
+		case 'SubsurfModifier': SubsurfModifier = value; break;
+		case 'SubtractStrip': SubtractStrip = value; break;
+		case 'SurfaceCurve': SurfaceCurve = value; break;
+		case 'SurfaceDeformModifier': SurfaceDeformModifier = value; break;
+		case 'SurfaceModifier': SurfaceModifier = value; break;
+		case 'TexMapping': TexMapping = value; break;
+		case 'TexPaintSlot': TexPaintSlot = value; break;
+		case 'TextBox': TextBox = value; break;
+		case 'TextCharacterFormat': TextCharacterFormat = value; break;
+		case 'TextCurve': TextCurve = value; break;
+		case 'TextLine': TextLine = value; break;
+		case 'TextStrip': TextStrip = value; break;
+		case 'TextboxState': TextboxState = value; break;
+		case 'Theme': Theme = value; break;
+		case 'ThemeBoneColorSet': ThemeBoneColorSet = value; break;
+		case 'ThemeClipEditor': ThemeClipEditor = value; break;
+		case 'ThemeCollectionColor': ThemeCollectionColor = value; break;
+		case 'ThemeCommon': ThemeCommon = value; break;
+		case 'ThemeCommonAnim': ThemeCommonAnim = value; break;
+		case 'ThemeCommonCurves': ThemeCommonCurves = value; break;
+		case 'ThemeConsole': ThemeConsole = value; break;
+		case 'ThemeDopeSheet': ThemeDopeSheet = value; break;
+		case 'ThemeFileBrowser': ThemeFileBrowser = value; break;
+		case 'ThemeFontStyle': ThemeFontStyle = value; break;
+		case 'ThemeGradientColors': ThemeGradientColors = value; break;
+		case 'ThemeGraphEditor': ThemeGraphEditor = value; break;
+		case 'ThemeImageEditor': ThemeImageEditor = value; break;
+		case 'ThemeInfo': ThemeInfo = value; break;
+		case 'ThemeNLAEditor': ThemeNLAEditor = value; break;
+		case 'ThemeNodeEditor': ThemeNodeEditor = value; break;
+		case 'ThemeOutliner': ThemeOutliner = value; break;
+		case 'ThemePreferences': ThemePreferences = value; break;
+		case 'ThemeProperties': ThemeProperties = value; break;
+		case 'ThemeRegions': ThemeRegions = value; break;
+		case 'ThemeRegionsAssetShelf': ThemeRegionsAssetShelf = value; break;
+		case 'ThemeRegionsChannels': ThemeRegionsChannels = value; break;
+		case 'ThemeRegionsScrubbing': ThemeRegionsScrubbing = value; break;
+		case 'ThemeRegionsSidebars': ThemeRegionsSidebars = value; break;
+		case 'ThemeSequenceEditor': ThemeSequenceEditor = value; break;
+		case 'ThemeSpaceGeneric': ThemeSpaceGeneric = value; break;
+		case 'ThemeSpaceGradient': ThemeSpaceGradient = value; break;
+		case 'ThemeSpreadsheet': ThemeSpreadsheet = value; break;
+		case 'ThemeStatusBar': ThemeStatusBar = value; break;
+		case 'ThemeStripColor': ThemeStripColor = value; break;
+		case 'ThemeStyle': ThemeStyle = value; break;
+		case 'ThemeTextEditor': ThemeTextEditor = value; break;
+		case 'ThemeTopBar': ThemeTopBar = value; break;
+		case 'ThemeUserInterface': ThemeUserInterface = value; break;
+		case 'ThemeView3D': ThemeView3D = value; break;
+		case 'ThemeWidgetColors': ThemeWidgetColors = value; break;
+		case 'ThemeWidgetStateColors': ThemeWidgetStateColors = value; break;
+		case 'TimelineMarker': TimelineMarker = value; break;
+		case 'TimelineMarkers': TimelineMarkers = value; break;
+		case 'Timer': Timer = value; break;
+		case 'ToolSettings': ToolSettings = value; break;
+		case 'TrackToConstraint': TrackToConstraint = value; break;
+		case 'TransformCacheConstraint': TransformCacheConstraint = value; break;
+		case 'TransformConstraint': TransformConstraint = value; break;
+		case 'TransformOrientation': TransformOrientation = value; break;
+		case 'TransformOrientationSlot': TransformOrientationSlot = value; break;
+		case 'TriangulateModifier': TriangulateModifier = value; break;
+		case 'UDIMTile': UDIMTile = value; break;
+		case 'UDIMTiles': UDIMTiles = value; break;
+		case 'UILayout': UILayout = value; break;
+		case 'UIPieMenu': UIPieMenu = value; break;
+		case 'UIPopover': UIPopover = value; break;
+		case 'UIPopupMenu': UIPopupMenu = value; break;
+		case 'UVLoopLayers': UVLoopLayers = value; break;
+		case 'UVProjectModifier': UVProjectModifier = value; break;
+		case 'UVProjector': UVProjector = value; break;
+		case 'UVWarpModifier': UVWarpModifier = value; break;
+		case 'UnifiedPaintSettings': UnifiedPaintSettings = value; break;
+		case 'UnitSettings': UnitSettings = value; break;
+		case 'UnknownType': UnknownType = value; break;
+		case 'UserAssetLibrary': UserAssetLibrary = value; break;
+		case 'UserExtensionRepo': UserExtensionRepo = value; break;
+		case 'UserExtensionRepoCollection': UserExtensionRepoCollection = value; break;
+		case 'UserSolidLight': UserSolidLight = value; break;
+		case 'UvSculpt': UvSculpt = value; break;
+		case 'VectorFont': VectorFont = value; break;
+		case 'VertexGroup': VertexGroup = value; break;
+		case 'VertexGroupElement': VertexGroupElement = value; break;
+		case 'VertexGroups': VertexGroups = value; break;
+		case 'VertexPaint': VertexPaint = value; break;
+		case 'VertexWeightEditModifier': VertexWeightEditModifier = value; break;
+		case 'VertexWeightMixModifier': VertexWeightMixModifier = value; break;
+		case 'VertexWeightProximityModifier': VertexWeightProximityModifier = value; break;
+		case 'View2D': View2D = value; break;
+		case 'View3DCursor': View3DCursor = value; break;
+		case 'View3DOverlay': View3DOverlay = value; break;
+		case 'View3DShading': View3DShading = value; break;
+		case 'ViewLayer': ViewLayer = value; break;
+		case 'ViewLayerEEVEE': ViewLayerEEVEE = value; break;
+		case 'ViewLayers': ViewLayers = value; break;
+		case 'ViewerNodeViewerPathElem': ViewerNodeViewerPathElem = value; break;
+		case 'ViewerPath': ViewerPath = value; break;
+		case 'Volume': Volume = value; break;
+		case 'VolumeDisplaceModifier': VolumeDisplaceModifier = value; break;
+		case 'VolumeDisplay': VolumeDisplay = value; break;
+		case 'VolumeGrid': VolumeGrid = value; break;
+		case 'VolumeGrids': VolumeGrids = value; break;
+		case 'VolumeRender': VolumeRender = value; break;
+		case 'VolumeToMeshModifier': VolumeToMeshModifier = value; break;
+		case 'WalkNavigation': WalkNavigation = value; break;
+		case 'WarpModifier': WarpModifier = value; break;
+		case 'WaveModifier': WaveModifier = value; break;
+		case 'WeightedNormalModifier': WeightedNormalModifier = value; break;
+		case 'WeldModifier': WeldModifier = value; break;
+		case 'WhiteBalanceModifier': WhiteBalanceModifier = value; break;
+		case 'Window': Window = value; break;
+		case 'Windows': Windows = value; break;
+		case 'WipeStrip': WipeStrip = value; break;
+		case 'WireframeModifier': WireframeModifier = value; break;
+		case 'WorkSpaceTool': WorkSpaceTool = value; break;
+		case 'WorldLighting': WorldLighting = value; break;
+		case 'WorldMistSettings': WorldMistSettings = value; break;
+		case 'XrActionMap': XrActionMap = value; break;
+		case 'XrActionMapBinding': XrActionMapBinding = value; break;
+		case 'XrActionMapBindings': XrActionMapBindings = value; break;
+		case 'XrActionMapItem': XrActionMapItem = value; break;
+		case 'XrActionMapItems': XrActionMapItems = value; break;
+		case 'XrActionMaps': XrActionMaps = value; break;
+		case 'XrComponentPath': XrComponentPath = value; break;
+		case 'XrComponentPaths': XrComponentPaths = value; break;
+		case 'XrEventData': XrEventData = value; break;
+		case 'XrNavigation': XrNavigation = value; break;
+		case 'XrSessionSettings': XrSessionSettings = value; break;
+		case 'XrSessionState': XrSessionState = value; break;
+		case 'XrUserPath': XrUserPath = value; break;
+		case 'XrUserPaths': XrUserPaths = value; break;
+		case 'XrViewfinderState': XrViewfinderState = value; break;
+		case 'wmOwnerID': wmOwnerID = value; break;
+		case 'wmOwnerIDs': wmOwnerIDs = value; break;
+		case 'wmTools': wmTools = value; break;
+		case '_types': _types = value; break;
+		case '_StructRNA': _StructRNA = value; break;
+		case '_StructMetaPropGroup': _StructMetaPropGroup = value; break;
+		case '_sentinel': _sentinel = value; break;
+		case 'Context': Context = value; break;
+		case 'Library': Library = value; break;
+		case 'Texture': Texture = value; break;
+		case 'Collection': Collection = value; break;
+		case 'Object': Object = value; break;
+		case 'WindowManager': WindowManager = value; break;
+		case 'WorkSpace': WorkSpace = value; break;
+		case '_GenericBone': _GenericBone = value; break;
+		case 'PoseBone': PoseBone = value; break;
+		case 'Bone': Bone = value; break;
+		case 'EditBone': EditBone = value; break;
+		case 'BoneCollection': BoneCollection = value; break;
+		case '_ord_ind': _ord_ind = value; break;
+		case '_name_convention_attribute_get': _name_convention_attribute_get = value; break;
+		case '_name_convention_attribute_ensure': _name_convention_attribute_ensure = value; break;
+		case '_name_convention_attribute_remove': _name_convention_attribute_remove = value; break;
+		case 'Mesh': Mesh = value; break;
+		case 'MeshEdge': MeshEdge = value; break;
+		case 'MeshLoopTriangle': MeshLoopTriangle = value; break;
+		case 'MeshPolygon': MeshPolygon = value; break;
+		case 'Text': Text = value; break;
+		case 'Sound': Sound = value; break;
+		case '_RNAMeta': _RNAMeta = value; break;
+		case '_RNAMetaPropGroup': _RNAMetaPropGroup = value; break;
+		case 'Gizmo': Gizmo = value; break;
+		case 'GizmoGroup': GizmoGroup = value; break;
+		case 'Operator': Operator = value; break;
+		case 'Macro': Macro = value; break;
+		case 'PropertyGroup': PropertyGroup = value; break;
+		case 'KeyingSetInfo': KeyingSetInfo = value; break;
+		case 'USDHook': USDHook = value; break;
+		case 'AddonPreferences': AddonPreferences = value; break;
+		case '_GenericUI': _GenericUI = value; break;
+		case 'Panel': Panel = value; break;
+		case 'UIList': UIList = value; break;
+		case 'Header': Header = value; break;
+		case 'Menu': Menu = value; break;
+		case 'AssetShelf': AssetShelf = value; break;
+		case 'FileHandler': FileHandler = value; break;
+		case 'NodeTree': NodeTree = value; break;
+		case 'Node': Node = value; break;
+		case 'NodeInternal': NodeInternal = value; break;
+		case 'NodeSocket': NodeSocket = value; break;
+		case 'NodeTreeInterfaceItem': NodeTreeInterfaceItem = value; break;
+		case 'NodeTreeInterfaceSocket': NodeTreeInterfaceSocket = value; break;
+		case 'CompositorNode': CompositorNode = value; break;
+		case 'ShaderNode': ShaderNode = value; break;
+		case 'TextureNode': TextureNode = value; break;
+		case 'GeometryNode': GeometryNode = value; break;
+		case 'RenderEngine': RenderEngine = value; break;
+		case 'HydraRenderEngine': HydraRenderEngine = value; break;
+		case 'GreasePencilDrawing': GreasePencilDrawing = value; break;
+		case 'Material': Material = value; break;
+		case 'Light': Light = value; break;
+		case 'World': World = value; break;
+		case 'ANIM_MT_keyframe_insert_pie': ANIM_MT_keyframe_insert_pie = value; break;
+		case 'ANIM_OT_clear_useless_actions': ANIM_OT_clear_useless_actions = value; break;
+		case 'ANIM_OT_keying_set_export': ANIM_OT_keying_set_export = value; break;
+		case 'ANIM_OT_slot_new_for_id': ANIM_OT_slot_new_for_id = value; break;
+		case 'ANIM_OT_slot_unassign_from_constraint': ANIM_OT_slot_unassign_from_constraint = value; break;
+		case 'ANIM_OT_slot_unassign_from_id': ANIM_OT_slot_unassign_from_id = value; break;
+		case 'ANIM_OT_slot_unassign_from_nla_strip': ANIM_OT_slot_unassign_from_nla_strip = value; break;
+		case 'ANIM_OT_version_bone_hide_property': ANIM_OT_version_bone_hide_property = value; break;
+		case 'ARMATURE_MT_collection_context_menu': ARMATURE_MT_collection_context_menu = value; break;
+		case 'ARMATURE_MT_collection_tree_context_menu': ARMATURE_MT_collection_tree_context_menu = value; break;
+		case 'ARMATURE_OT_collection_remove_unused': ARMATURE_OT_collection_remove_unused = value; break;
+		case 'ARMATURE_OT_collection_show_all': ARMATURE_OT_collection_show_all = value; break;
+		case 'ARMATURE_OT_collection_unsolo_all': ARMATURE_OT_collection_unsolo_all = value; break;
+		case 'ARMATURE_OT_copy_bone_color_to_selected': ARMATURE_OT_copy_bone_color_to_selected = value; break;
+		case 'ASSETBROWSER_MT_asset': ASSETBROWSER_MT_asset = value; break;
+		case 'ASSETBROWSER_MT_catalog': ASSETBROWSER_MT_catalog = value; break;
+		case 'ASSETBROWSER_MT_context_menu': ASSETBROWSER_MT_context_menu = value; break;
+		case 'ASSETBROWSER_MT_editor_menus': ASSETBROWSER_MT_editor_menus = value; break;
+		case 'ASSETBROWSER_MT_library': ASSETBROWSER_MT_library = value; break;
+		case 'ASSETBROWSER_MT_metadata_preview_menu': ASSETBROWSER_MT_metadata_preview_menu = value; break;
+		case 'ASSETBROWSER_MT_select': ASSETBROWSER_MT_select = value; break;
+		case 'ASSETBROWSER_MT_view': ASSETBROWSER_MT_view = value; break;
+		case 'ASSETBROWSER_PT_display': ASSETBROWSER_PT_display = value; break;
+		case 'ASSETBROWSER_PT_filter': ASSETBROWSER_PT_filter = value; break;
+		case 'ASSETBROWSER_PT_import': ASSETBROWSER_PT_import = value; break;
+		case 'ASSETBROWSER_PT_import_settings': ASSETBROWSER_PT_import_settings = value; break;
+		case 'ASSETBROWSER_PT_metadata': ASSETBROWSER_PT_metadata = value; break;
+		case 'ASSETBROWSER_PT_metadata_preview': ASSETBROWSER_PT_metadata_preview = value; break;
+		case 'ASSETBROWSER_PT_metadata_tags': ASSETBROWSER_PT_metadata_tags = value; break;
+		case 'ASSETBROWSER_UL_metadata_tags': ASSETBROWSER_UL_metadata_tags = value; break;
+		case 'ASSETSHELF_PT_display': ASSETSHELF_PT_display = value; break;
+		case 'ASSETSHELF_PT_filter': ASSETSHELF_PT_filter = value; break;
+		case 'ASSET_OT_assign_action': ASSET_OT_assign_action = value; break;
+		case 'ASSET_OT_browse_containing_blend_file': ASSET_OT_browse_containing_blend_file = value; break;
+		case 'ASSET_OT_open_containing_blend_file': ASSET_OT_open_containing_blend_file = value; break;
+		case 'ASSET_OT_tag_add': ASSET_OT_tag_add = value; break;
+		case 'ASSET_OT_tag_remove': ASSET_OT_tag_remove = value; break;
+		case 'AreaLight': AreaLight = value; break;
+		case 'BONE_PT_bActionConstraint': BONE_PT_bActionConstraint = value; break;
+		case 'BONE_PT_bActionConstraint_action': BONE_PT_bActionConstraint_action = value; break;
+		case 'BONE_PT_bActionConstraint_target': BONE_PT_bActionConstraint_target = value; break;
+		case 'BONE_PT_bArmatureConstraint': BONE_PT_bArmatureConstraint = value; break;
+		case 'BONE_PT_bArmatureConstraint_bones': BONE_PT_bArmatureConstraint_bones = value; break;
+		case 'BONE_PT_bCameraSolverConstraint': BONE_PT_bCameraSolverConstraint = value; break;
+		case 'BONE_PT_bChildOfConstraint': BONE_PT_bChildOfConstraint = value; break;
+		case 'BONE_PT_bClampToConstraint': BONE_PT_bClampToConstraint = value; break;
+		case 'BONE_PT_bDampTrackConstraint': BONE_PT_bDampTrackConstraint = value; break;
+		case 'BONE_PT_bDistLimitConstraint': BONE_PT_bDistLimitConstraint = value; break;
+		case 'BONE_PT_bFollowPathConstraint': BONE_PT_bFollowPathConstraint = value; break;
+		case 'BONE_PT_bFollowTrackConstraint': BONE_PT_bFollowTrackConstraint = value; break;
+		case 'BONE_PT_bGeometryAttributeConstraint': BONE_PT_bGeometryAttributeConstraint = value; break;
+		case 'BONE_PT_bKinematicConstraint': BONE_PT_bKinematicConstraint = value; break;
+		case 'BONE_PT_bLocLimitConstraint': BONE_PT_bLocLimitConstraint = value; break;
+		case 'BONE_PT_bLocateLikeConstraint': BONE_PT_bLocateLikeConstraint = value; break;
+		case 'BONE_PT_bLockTrackConstraint': BONE_PT_bLockTrackConstraint = value; break;
+		case 'BONE_PT_bMinMaxConstraint': BONE_PT_bMinMaxConstraint = value; break;
+		case 'BONE_PT_bObjectSolverConstraint': BONE_PT_bObjectSolverConstraint = value; break;
+		case 'BONE_PT_bPivotConstraint': BONE_PT_bPivotConstraint = value; break;
+		case 'BONE_PT_bRotLimitConstraint': BONE_PT_bRotLimitConstraint = value; break;
+		case 'BONE_PT_bRotateLikeConstraint': BONE_PT_bRotateLikeConstraint = value; break;
+		case 'BONE_PT_bSameVolumeConstraint': BONE_PT_bSameVolumeConstraint = value; break;
+		case 'BONE_PT_bShrinkwrapConstraint': BONE_PT_bShrinkwrapConstraint = value; break;
+		case 'BONE_PT_bSizeLikeConstraint': BONE_PT_bSizeLikeConstraint = value; break;
+		case 'BONE_PT_bSizeLimitConstraint': BONE_PT_bSizeLimitConstraint = value; break;
+		case 'BONE_PT_bSplineIKConstraint': BONE_PT_bSplineIKConstraint = value; break;
+		case 'BONE_PT_bSplineIKConstraint_chain_scaling': BONE_PT_bSplineIKConstraint_chain_scaling = value; break;
+		case 'BONE_PT_bSplineIKConstraint_fitting': BONE_PT_bSplineIKConstraint_fitting = value; break;
+		case 'BONE_PT_bStretchToConstraint': BONE_PT_bStretchToConstraint = value; break;
+		case 'BONE_PT_bTrackToConstraint': BONE_PT_bTrackToConstraint = value; break;
+		case 'BONE_PT_bTransLikeConstraint': BONE_PT_bTransLikeConstraint = value; break;
+		case 'BONE_PT_bTransformCacheConstraint': BONE_PT_bTransformCacheConstraint = value; break;
+		case 'BONE_PT_bTransformCacheConstraint_layers': BONE_PT_bTransformCacheConstraint_layers = value; break;
+		case 'BONE_PT_bTransformCacheConstraint_time': BONE_PT_bTransformCacheConstraint_time = value; break;
+		case 'BONE_PT_bTransformCacheConstraint_velocity': BONE_PT_bTransformCacheConstraint_velocity = value; break;
+		case 'BONE_PT_bTransformConstraint': BONE_PT_bTransformConstraint = value; break;
+		case 'BONE_PT_bTransformConstraint_from': BONE_PT_bTransformConstraint_from = value; break;
+		case 'BONE_PT_bTransformConstraint_to': BONE_PT_bTransformConstraint_to = value; break;
+		case 'BONE_PT_collections': BONE_PT_collections = value; break;
+		case 'BONE_PT_constraints': BONE_PT_constraints = value; break;
+		case 'BONE_PT_context_bone': BONE_PT_context_bone = value; break;
+		case 'BONE_PT_curved': BONE_PT_curved = value; break;
+		case 'BONE_PT_custom_props': BONE_PT_custom_props = value; break;
+		case 'BONE_PT_deform': BONE_PT_deform = value; break;
+		case 'BONE_PT_display': BONE_PT_display = value; break;
+		case 'BONE_PT_display_custom_shape': BONE_PT_display_custom_shape = value; break;
+		case 'BONE_PT_inverse_kinematics': BONE_PT_inverse_kinematics = value; break;
+		case 'BONE_PT_relations': BONE_PT_relations = value; break;
+		case 'BONE_PT_transform': BONE_PT_transform = value; break;
+		case 'BVH_PT_export_animation': BVH_PT_export_animation = value; break;
+		case 'BVH_PT_export_transform': BVH_PT_export_transform = value; break;
+		case 'BVH_PT_import_animation': BVH_PT_import_animation = value; break;
+		case 'BVH_PT_import_main': BVH_PT_import_main = value; break;
+		case 'BVH_PT_import_transform': BVH_PT_import_transform = value; break;
+		case 'BlendTexture': BlendTexture = value; break;
+		case 'CAMERA_OT_preset_add': CAMERA_OT_preset_add = value; break;
+		case 'CAMERA_OT_safe_areas_preset_add': CAMERA_OT_safe_areas_preset_add = value; break;
+		case 'CAMERA_PT_presets': CAMERA_PT_presets = value; break;
+		case 'CAMERA_PT_safe_areas_presets': CAMERA_PT_safe_areas_presets = value; break;
+		case 'CLIP_HT_header': CLIP_HT_header = value; break;
+		case 'CLIP_MT_clip': CLIP_MT_clip = value; break;
+		case 'CLIP_MT_marker_pie': CLIP_MT_marker_pie = value; break;
+		case 'CLIP_MT_masking_editor_menus': CLIP_MT_masking_editor_menus = value; break;
+		case 'CLIP_MT_pivot_pie': CLIP_MT_pivot_pie = value; break;
+		case 'CLIP_MT_plane_track_image_context_menu': CLIP_MT_plane_track_image_context_menu = value; break;
+		case 'CLIP_MT_proxy': CLIP_MT_proxy = value; break;
+		case 'CLIP_MT_reconstruction': CLIP_MT_reconstruction = value; break;
+		case 'CLIP_MT_reconstruction_pie': CLIP_MT_reconstruction_pie = value; break;
+		case 'CLIP_MT_select': CLIP_MT_select = value; break;
+		case 'CLIP_MT_select_graph': CLIP_MT_select_graph = value; break;
+		case 'CLIP_MT_select_grouped': CLIP_MT_select_grouped = value; break;
+		case 'CLIP_MT_solving_pie': CLIP_MT_solving_pie = value; break;
+		case 'CLIP_MT_stabilize_2d_context_menu': CLIP_MT_stabilize_2d_context_menu = value; break;
+		case 'CLIP_MT_stabilize_2d_rotation_context_menu': CLIP_MT_stabilize_2d_rotation_context_menu = value; break;
+		case 'CLIP_MT_track': CLIP_MT_track = value; break;
+		case 'CLIP_MT_track_animation': CLIP_MT_track_animation = value; break;
+		case 'CLIP_MT_track_cleanup': CLIP_MT_track_cleanup = value; break;
+		case 'CLIP_MT_track_clear': CLIP_MT_track_clear = value; break;
+		case 'CLIP_MT_track_motion': CLIP_MT_track_motion = value; break;
+		case 'CLIP_MT_track_refine': CLIP_MT_track_refine = value; break;
+		case 'CLIP_MT_track_transform': CLIP_MT_track_transform = value; break;
+		case 'CLIP_MT_track_visibility': CLIP_MT_track_visibility = value; break;
+		case 'CLIP_MT_tracking_context_menu': CLIP_MT_tracking_context_menu = value; break;
+		case 'CLIP_MT_tracking_editor_menus': CLIP_MT_tracking_editor_menus = value; break;
+		case 'CLIP_MT_tracking_pie': CLIP_MT_tracking_pie = value; break;
+		case 'CLIP_MT_view': CLIP_MT_view = value; break;
+		case 'CLIP_MT_view_pie': CLIP_MT_view_pie = value; break;
+		case 'CLIP_MT_view_zoom': CLIP_MT_view_zoom = value; break;
+		case 'CLIP_OT_bundles_to_mesh': CLIP_OT_bundles_to_mesh = value; break;
+		case 'CLIP_OT_camera_preset_add': CLIP_OT_camera_preset_add = value; break;
+		case 'CLIP_OT_constraint_to_fcurve': CLIP_OT_constraint_to_fcurve = value; break;
+		case 'CLIP_OT_delete_proxy': CLIP_OT_delete_proxy = value; break;
+		case 'CLIP_OT_filter_tracks': CLIP_OT_filter_tracks = value; break;
+		case 'CLIP_OT_set_active_clip': CLIP_OT_set_active_clip = value; break;
+		case 'CLIP_OT_set_viewport_background': CLIP_OT_set_viewport_background = value; break;
+		case 'CLIP_OT_setup_tracking_scene': CLIP_OT_setup_tracking_scene = value; break;
+		case 'CLIP_OT_track_color_preset_add': CLIP_OT_track_color_preset_add = value; break;
+		case 'CLIP_OT_track_settings_as_default': CLIP_OT_track_settings_as_default = value; break;
+		case 'CLIP_OT_track_settings_to_track': CLIP_OT_track_settings_to_track = value; break;
+		case 'CLIP_OT_track_to_empty': CLIP_OT_track_to_empty = value; break;
+		case 'CLIP_OT_tracking_settings_preset_add': CLIP_OT_tracking_settings_preset_add = value; break;
+		case 'CLIP_PT_2d_cursor': CLIP_PT_2d_cursor = value; break;
+		case 'CLIP_PT_active_mask_point': CLIP_PT_active_mask_point = value; break;
+		case 'CLIP_PT_active_mask_spline': CLIP_PT_active_mask_spline = value; break;
+		case 'CLIP_PT_animation': CLIP_PT_animation = value; break;
+		case 'CLIP_PT_annotation': CLIP_PT_annotation = value; break;
+		case 'CLIP_PT_camera_presets': CLIP_PT_camera_presets = value; break;
+		case 'CLIP_PT_clip_display': CLIP_PT_clip_display = value; break;
+		case 'CLIP_PT_display': CLIP_PT_display = value; break;
+		case 'CLIP_PT_footage': CLIP_PT_footage = value; break;
+		case 'CLIP_PT_gizmo_display': CLIP_PT_gizmo_display = value; break;
+		case 'CLIP_PT_marker': CLIP_PT_marker = value; break;
+		case 'CLIP_PT_mask': CLIP_PT_mask = value; break;
+		case 'CLIP_PT_mask_animation': CLIP_PT_mask_animation = value; break;
+		case 'CLIP_PT_mask_layers': CLIP_PT_mask_layers = value; break;
+		case 'CLIP_PT_objects': CLIP_PT_objects = value; break;
+		case 'CLIP_PT_overlay': CLIP_PT_overlay = value; break;
+		case 'CLIP_PT_overlay_display': CLIP_PT_overlay_display = value; break;
+		case 'CLIP_PT_overlay_guides': CLIP_PT_overlay_guides = value; break;
+		case 'CLIP_PT_overlay_mask': CLIP_PT_overlay_mask = value; break;
+		case 'CLIP_PT_plane_track': CLIP_PT_plane_track = value; break;
+		case 'CLIP_PT_proportional_edit': CLIP_PT_proportional_edit = value; break;
+		case 'CLIP_PT_proxy': CLIP_PT_proxy = value; break;
+		case 'CLIP_PT_stabilization': CLIP_PT_stabilization = value; break;
+		case 'CLIP_PT_tools_cleanup': CLIP_PT_tools_cleanup = value; break;
+		case 'CLIP_PT_tools_clip': CLIP_PT_tools_clip = value; break;
+		case 'CLIP_PT_tools_geometry': CLIP_PT_tools_geometry = value; break;
+		case 'CLIP_PT_tools_grease_pencil_draw': CLIP_PT_tools_grease_pencil_draw = value; break;
+		case 'CLIP_PT_tools_marker': CLIP_PT_tools_marker = value; break;
+		case 'CLIP_PT_tools_mask_tools': CLIP_PT_tools_mask_tools = value; break;
+		case 'CLIP_PT_tools_mask_transforms': CLIP_PT_tools_mask_transforms = value; break;
+		case 'CLIP_PT_tools_object': CLIP_PT_tools_object = value; break;
+		case 'CLIP_PT_tools_orientation': CLIP_PT_tools_orientation = value; break;
+		case 'CLIP_PT_tools_plane_tracking': CLIP_PT_tools_plane_tracking = value; break;
+		case 'CLIP_PT_tools_scenesetup': CLIP_PT_tools_scenesetup = value; break;
+		case 'CLIP_PT_tools_solve': CLIP_PT_tools_solve = value; break;
+		case 'CLIP_PT_tools_tracking': CLIP_PT_tools_tracking = value; break;
+		case 'CLIP_PT_track': CLIP_PT_track = value; break;
+		case 'CLIP_PT_track_color_presets': CLIP_PT_track_color_presets = value; break;
+		case 'CLIP_PT_track_settings': CLIP_PT_track_settings = value; break;
+		case 'CLIP_PT_track_settings_extras': CLIP_PT_track_settings_extras = value; break;
+		case 'CLIP_PT_tracking_camera': CLIP_PT_tracking_camera = value; break;
+		case 'CLIP_PT_tracking_lens': CLIP_PT_tracking_lens = value; break;
+		case 'CLIP_PT_tracking_settings': CLIP_PT_tracking_settings = value; break;
+		case 'CLIP_PT_tracking_settings_extras': CLIP_PT_tracking_settings_extras = value; break;
+		case 'CLIP_PT_tracking_settings_presets': CLIP_PT_tracking_settings_presets = value; break;
+		case 'CLIP_UL_tracking_objects': CLIP_UL_tracking_objects = value; break;
+		case 'CLOTH_OT_preset_add': CLOTH_OT_preset_add = value; break;
+		case 'CLOTH_PT_presets': CLOTH_PT_presets = value; break;
+		case 'COLLECTION_MT_context_menu': COLLECTION_MT_context_menu = value; break;
+		case 'COLLECTION_MT_context_menu_instance_offset': COLLECTION_MT_context_menu_instance_offset = value; break;
+		case 'COLLECTION_PT_collection_custom_props': COLLECTION_PT_collection_custom_props = value; break;
+		case 'COLLECTION_PT_collection_flags': COLLECTION_PT_collection_flags = value; break;
+		case 'COLLECTION_PT_exporters': COLLECTION_PT_exporters = value; break;
+		case 'COLLECTION_PT_importer': COLLECTION_PT_importer = value; break;
+		case 'COLLECTION_PT_instancing': COLLECTION_PT_instancing = value; break;
+		case 'COLLECTION_PT_lineart_collection': COLLECTION_PT_lineart_collection = value; break;
+		case 'COLLECTION_PT_viewlayer_flags': COLLECTION_PT_viewlayer_flags = value; break;
+		case 'CONSOLE_HT_header': CONSOLE_HT_header = value; break;
+		case 'CONSOLE_MT_console': CONSOLE_MT_console = value; break;
+		case 'CONSOLE_MT_context_menu': CONSOLE_MT_context_menu = value; break;
+		case 'CONSOLE_MT_editor_menus': CONSOLE_MT_editor_menus = value; break;
+		case 'CONSOLE_MT_language': CONSOLE_MT_language = value; break;
+		case 'CONSOLE_MT_view': CONSOLE_MT_view = value; break;
+		case 'CONSOLE_OT_autocomplete': CONSOLE_OT_autocomplete = value; break;
+		case 'CONSOLE_OT_banner': CONSOLE_OT_banner = value; break;
+		case 'CONSOLE_OT_copy_as_script': CONSOLE_OT_copy_as_script = value; break;
+		case 'CONSOLE_OT_execute': CONSOLE_OT_execute = value; break;
+		case 'CONSOLE_OT_language': CONSOLE_OT_language = value; break;
+		case 'CONSTRAINT_OT_add_target': CONSTRAINT_OT_add_target = value; break;
+		case 'CONSTRAINT_OT_disable_keep_transform': CONSTRAINT_OT_disable_keep_transform = value; break;
+		case 'CONSTRAINT_OT_normalize_target_weights': CONSTRAINT_OT_normalize_target_weights = value; break;
+		case 'CONSTRAINT_OT_remove_target': CONSTRAINT_OT_remove_target = value; break;
+		case 'CURVES_MT_add_attribute': CURVES_MT_add_attribute = value; break;
+		case 'CURVES_MT_attribute_context_menu': CURVES_MT_attribute_context_menu = value; break;
+		case 'CURVES_UL_attributes': CURVES_UL_attributes = value; break;
+		case 'CYCLES_CAMERA_PT_dof': CYCLES_CAMERA_PT_dof = value; break;
+		case 'CYCLES_CAMERA_PT_dof_aperture': CYCLES_CAMERA_PT_dof_aperture = value; break;
+		case 'CYCLES_CAMERA_PT_lens_custom_parameters': CYCLES_CAMERA_PT_lens_custom_parameters = value; break;
+		case 'CYCLES_LIGHT_PT_beam_shape': CYCLES_LIGHT_PT_beam_shape = value; break;
+		case 'CYCLES_LIGHT_PT_light': CYCLES_LIGHT_PT_light = value; break;
+		case 'CYCLES_LIGHT_PT_nodes': CYCLES_LIGHT_PT_nodes = value; break;
+		case 'CYCLES_LIGHT_PT_preview': CYCLES_LIGHT_PT_preview = value; break;
+		case 'CYCLES_LIGHT_PT_settings': CYCLES_LIGHT_PT_settings = value; break;
+		case 'CYCLES_MATERIAL_PT_displacement': CYCLES_MATERIAL_PT_displacement = value; break;
+		case 'CYCLES_MATERIAL_PT_preview': CYCLES_MATERIAL_PT_preview = value; break;
+		case 'CYCLES_MATERIAL_PT_settings': CYCLES_MATERIAL_PT_settings = value; break;
+		case 'CYCLES_MATERIAL_PT_settings_surface': CYCLES_MATERIAL_PT_settings_surface = value; break;
+		case 'CYCLES_MATERIAL_PT_settings_volume': CYCLES_MATERIAL_PT_settings_volume = value; break;
+		case 'CYCLES_MATERIAL_PT_surface': CYCLES_MATERIAL_PT_surface = value; break;
+		case 'CYCLES_MATERIAL_PT_volume': CYCLES_MATERIAL_PT_volume = value; break;
+		case 'CYCLES_OBJECT_PT_lightgroup': CYCLES_OBJECT_PT_lightgroup = value; break;
+		case 'CYCLES_OBJECT_PT_motion_blur': CYCLES_OBJECT_PT_motion_blur = value; break;
+		case 'CYCLES_OBJECT_PT_shading_caustics': CYCLES_OBJECT_PT_shading_caustics = value; break;
+		case 'CYCLES_OBJECT_PT_shading_gi_approximation': CYCLES_OBJECT_PT_shading_gi_approximation = value; break;
+		case 'CYCLES_OBJECT_PT_visibility': CYCLES_OBJECT_PT_visibility = value; break;
+		case 'CYCLES_OBJECT_PT_visibility_culling': CYCLES_OBJECT_PT_visibility_culling = value; break;
+		case 'CYCLES_OBJECT_PT_visibility_ray_visibility': CYCLES_OBJECT_PT_visibility_ray_visibility = value; break;
+		case 'CYCLES_OT_denoise_animation': CYCLES_OT_denoise_animation = value; break;
+		case 'CYCLES_OT_merge_images': CYCLES_OT_merge_images = value; break;
+		case 'CYCLES_OT_use_shading_nodes': CYCLES_OT_use_shading_nodes = value; break;
+		case 'CYCLES_PT_context_material': CYCLES_PT_context_material = value; break;
+		case 'CYCLES_PT_integrator_presets': CYCLES_PT_integrator_presets = value; break;
+		case 'CYCLES_PT_performance_presets': CYCLES_PT_performance_presets = value; break;
+		case 'CYCLES_PT_post_processing': CYCLES_PT_post_processing = value; break;
+		case 'CYCLES_PT_sampling_presets': CYCLES_PT_sampling_presets = value; break;
+		case 'CYCLES_PT_viewport_sampling_presets': CYCLES_PT_viewport_sampling_presets = value; break;
+		case 'CYCLES_RENDER_PT_bake': CYCLES_RENDER_PT_bake = value; break;
+		case 'CYCLES_RENDER_PT_bake_influence': CYCLES_RENDER_PT_bake_influence = value; break;
+		case 'CYCLES_RENDER_PT_bake_output': CYCLES_RENDER_PT_bake_output = value; break;
+		case 'CYCLES_RENDER_PT_bake_output_margin': CYCLES_RENDER_PT_bake_output_margin = value; break;
+		case 'CYCLES_RENDER_PT_bake_selected_to_active': CYCLES_RENDER_PT_bake_selected_to_active = value; break;
+		case 'CYCLES_RENDER_PT_curves': CYCLES_RENDER_PT_curves = value; break;
+		case 'CYCLES_RENDER_PT_curves_viewport_display': CYCLES_RENDER_PT_curves_viewport_display = value; break;
+		case 'CYCLES_RENDER_PT_debug': CYCLES_RENDER_PT_debug = value; break;
+		case 'CYCLES_RENDER_PT_film': CYCLES_RENDER_PT_film = value; break;
+		case 'CYCLES_RENDER_PT_film_pixel_filter': CYCLES_RENDER_PT_film_pixel_filter = value; break;
+		case 'CYCLES_RENDER_PT_film_transparency': CYCLES_RENDER_PT_film_transparency = value; break;
+		case 'CYCLES_RENDER_PT_filter': CYCLES_RENDER_PT_filter = value; break;
+		case 'CYCLES_RENDER_PT_light_paths': CYCLES_RENDER_PT_light_paths = value; break;
+		case 'CYCLES_RENDER_PT_light_paths_caustics': CYCLES_RENDER_PT_light_paths_caustics = value; break;
+		case 'CYCLES_RENDER_PT_light_paths_clamping': CYCLES_RENDER_PT_light_paths_clamping = value; break;
+		case 'CYCLES_RENDER_PT_light_paths_fast_gi': CYCLES_RENDER_PT_light_paths_fast_gi = value; break;
+		case 'CYCLES_RENDER_PT_light_paths_max_bounces': CYCLES_RENDER_PT_light_paths_max_bounces = value; break;
+		case 'CYCLES_RENDER_PT_motion_blur': CYCLES_RENDER_PT_motion_blur = value; break;
+		case 'CYCLES_RENDER_PT_motion_blur_curve': CYCLES_RENDER_PT_motion_blur_curve = value; break;
+		case 'CYCLES_RENDER_PT_passes': CYCLES_RENDER_PT_passes = value; break;
+		case 'CYCLES_RENDER_PT_passes_aov': CYCLES_RENDER_PT_passes_aov = value; break;
+		case 'CYCLES_RENDER_PT_passes_crypto': CYCLES_RENDER_PT_passes_crypto = value; break;
+		case 'CYCLES_RENDER_PT_passes_data': CYCLES_RENDER_PT_passes_data = value; break;
+		case 'CYCLES_RENDER_PT_passes_light': CYCLES_RENDER_PT_passes_light = value; break;
+		case 'CYCLES_RENDER_PT_passes_lightgroups': CYCLES_RENDER_PT_passes_lightgroups = value; break;
+		case 'CYCLES_RENDER_PT_performance': CYCLES_RENDER_PT_performance = value; break;
+		case 'CYCLES_RENDER_PT_performance_acceleration_structure': CYCLES_RENDER_PT_performance_acceleration_structure = value; break;
+		case 'CYCLES_RENDER_PT_performance_compositor': CYCLES_RENDER_PT_performance_compositor = value; break;
+		case 'CYCLES_RENDER_PT_performance_compositor_denoise_settings': CYCLES_RENDER_PT_performance_compositor_denoise_settings = value; break;
+		case 'CYCLES_RENDER_PT_performance_final_render': CYCLES_RENDER_PT_performance_final_render = value; break;
+		case 'CYCLES_RENDER_PT_performance_memory': CYCLES_RENDER_PT_performance_memory = value; break;
+		case 'CYCLES_RENDER_PT_performance_texture_cache': CYCLES_RENDER_PT_performance_texture_cache = value; break;
+		case 'CYCLES_RENDER_PT_performance_threads': CYCLES_RENDER_PT_performance_threads = value; break;
+		case 'CYCLES_RENDER_PT_performance_viewport': CYCLES_RENDER_PT_performance_viewport = value; break;
+		case 'CYCLES_RENDER_PT_sampling': CYCLES_RENDER_PT_sampling = value; break;
+		case 'CYCLES_RENDER_PT_sampling_advanced': CYCLES_RENDER_PT_sampling_advanced = value; break;
+		case 'CYCLES_RENDER_PT_sampling_advanced_sample_subset': CYCLES_RENDER_PT_sampling_advanced_sample_subset = value; break;
+		case 'CYCLES_RENDER_PT_sampling_lights': CYCLES_RENDER_PT_sampling_lights = value; break;
+		case 'CYCLES_RENDER_PT_sampling_path_guiding': CYCLES_RENDER_PT_sampling_path_guiding = value; break;
+		case 'CYCLES_RENDER_PT_sampling_path_guiding_debug': CYCLES_RENDER_PT_sampling_path_guiding_debug = value; break;
+		case 'CYCLES_RENDER_PT_sampling_render': CYCLES_RENDER_PT_sampling_render = value; break;
+		case 'CYCLES_RENDER_PT_sampling_render_denoise': CYCLES_RENDER_PT_sampling_render_denoise = value; break;
+		case 'CYCLES_RENDER_PT_sampling_viewport': CYCLES_RENDER_PT_sampling_viewport = value; break;
+		case 'CYCLES_RENDER_PT_sampling_viewport_denoise': CYCLES_RENDER_PT_sampling_viewport_denoise = value; break;
+		case 'CYCLES_RENDER_PT_simplify': CYCLES_RENDER_PT_simplify = value; break;
+		case 'CYCLES_RENDER_PT_simplify_culling': CYCLES_RENDER_PT_simplify_culling = value; break;
+		case 'CYCLES_RENDER_PT_simplify_render': CYCLES_RENDER_PT_simplify_render = value; break;
+		case 'CYCLES_RENDER_PT_simplify_viewport': CYCLES_RENDER_PT_simplify_viewport = value; break;
+		case 'CYCLES_RENDER_PT_subdivision': CYCLES_RENDER_PT_subdivision = value; break;
+		case 'CYCLES_RENDER_PT_volumes': CYCLES_RENDER_PT_volumes = value; break;
+		case 'CYCLES_VIEW3D_PT_shading_debug': CYCLES_VIEW3D_PT_shading_debug = value; break;
+		case 'CYCLES_VIEW3D_PT_shading_lighting': CYCLES_VIEW3D_PT_shading_lighting = value; break;
+		case 'CYCLES_VIEW3D_PT_shading_render_pass': CYCLES_VIEW3D_PT_shading_render_pass = value; break;
+		case 'CYCLES_VIEW3D_PT_simplify_greasepencil': CYCLES_VIEW3D_PT_simplify_greasepencil = value; break;
+		case 'CYCLES_WORLD_PT_mist': CYCLES_WORLD_PT_mist = value; break;
+		case 'CYCLES_WORLD_PT_preview': CYCLES_WORLD_PT_preview = value; break;
+		case 'CYCLES_WORLD_PT_ray_visibility': CYCLES_WORLD_PT_ray_visibility = value; break;
+		case 'CYCLES_WORLD_PT_settings': CYCLES_WORLD_PT_settings = value; break;
+		case 'CYCLES_WORLD_PT_settings_light_group': CYCLES_WORLD_PT_settings_light_group = value; break;
+		case 'CYCLES_WORLD_PT_settings_surface': CYCLES_WORLD_PT_settings_surface = value; break;
+		case 'CYCLES_WORLD_PT_settings_volume': CYCLES_WORLD_PT_settings_volume = value; break;
+		case 'CYCLES_WORLD_PT_surface': CYCLES_WORLD_PT_surface = value; break;
+		case 'CYCLES_WORLD_PT_volume': CYCLES_WORLD_PT_volume = value; break;
+		case 'CloudsTexture': CloudsTexture = value; break;
+		case 'CompositorNodeAlphaOver': CompositorNodeAlphaOver = value; break;
+		case 'CompositorNodeAntiAliasing': CompositorNodeAntiAliasing = value; break;
+		case 'CompositorNodeBilateralblur': CompositorNodeBilateralblur = value; break;
+		case 'CompositorNodeBlankImage': CompositorNodeBlankImage = value; break;
+		case 'CompositorNodeBlur': CompositorNodeBlur = value; break;
+		case 'CompositorNodeBokehBlur': CompositorNodeBokehBlur = value; break;
+		case 'CompositorNodeBokehImage': CompositorNodeBokehImage = value; break;
+		case 'CompositorNodeBoxMask': CompositorNodeBoxMask = value; break;
+		case 'CompositorNodeBrightContrast': CompositorNodeBrightContrast = value; break;
+		case 'CompositorNodeChannelMatte': CompositorNodeChannelMatte = value; break;
+		case 'CompositorNodeChromaMatte': CompositorNodeChromaMatte = value; break;
+		case 'CompositorNodeColorBalance': CompositorNodeColorBalance = value; break;
+		case 'CompositorNodeColorCorrection': CompositorNodeColorCorrection = value; break;
+		case 'CompositorNodeColorMatte': CompositorNodeColorMatte = value; break;
+		case 'CompositorNodeColorSpill': CompositorNodeColorSpill = value; break;
+		case 'CompositorNodeCombineColor': CompositorNodeCombineColor = value; break;
+		case 'CompositorNodeConvertColorSpace': CompositorNodeConvertColorSpace = value; break;
+		case 'CompositorNodeConvertToDisplay': CompositorNodeConvertToDisplay = value; break;
+		case 'CompositorNodeConvolve': CompositorNodeConvolve = value; break;
+		case 'CompositorNodeCornerPin': CompositorNodeCornerPin = value; break;
+		case 'CompositorNodeCrop': CompositorNodeCrop = value; break;
+		case 'CompositorNodeCryptomatte': CompositorNodeCryptomatte = value; break;
+		case 'CompositorNodeCryptomatteV2': CompositorNodeCryptomatteV2 = value; break;
+		case 'CompositorNodeCurveRGB': CompositorNodeCurveRGB = value; break;
+		case 'CompositorNodeCustomGroup': CompositorNodeCustomGroup = value; break;
+		case 'CompositorNodeDBlur': CompositorNodeDBlur = value; break;
+		case 'CompositorNodeDefocus': CompositorNodeDefocus = value; break;
+		case 'CompositorNodeDenoise': CompositorNodeDenoise = value; break;
+		case 'CompositorNodeDespeckle': CompositorNodeDespeckle = value; break;
+		case 'CompositorNodeDiffMatte': CompositorNodeDiffMatte = value; break;
+		case 'CompositorNodeDilateErode': CompositorNodeDilateErode = value; break;
+		case 'CompositorNodeDisplace': CompositorNodeDisplace = value; break;
+		case 'CompositorNodeDistanceMatte': CompositorNodeDistanceMatte = value; break;
+		case 'CompositorNodeDoubleEdgeMask': CompositorNodeDoubleEdgeMask = value; break;
+		case 'CompositorNodeEllipseMask': CompositorNodeEllipseMask = value; break;
+		case 'CompositorNodeExposure': CompositorNodeExposure = value; break;
+		case 'CompositorNodeFilter': CompositorNodeFilter = value; break;
+		case 'CompositorNodeFlip': CompositorNodeFlip = value; break;
+		case 'CompositorNodeGamma': CompositorNodeGamma = value; break;
+		case 'CompositorNodeGlare': CompositorNodeGlare = value; break;
+		case 'CompositorNodeGroup': CompositorNodeGroup = value; break;
+		case 'CompositorNodeHueCorrect': CompositorNodeHueCorrect = value; break;
+		case 'CompositorNodeHueSat': CompositorNodeHueSat = value; break;
+		case 'CompositorNodeIDMask': CompositorNodeIDMask = value; break;
+		case 'CompositorNodeImage': CompositorNodeImage = value; break;
+		case 'CompositorNodeImageCoordinates': CompositorNodeImageCoordinates = value; break;
+		case 'CompositorNodeImageInfo': CompositorNodeImageInfo = value; break;
+		case 'CompositorNodeInpaint': CompositorNodeInpaint = value; break;
+		case 'CompositorNodeInvert': CompositorNodeInvert = value; break;
+		case 'CompositorNodeKeying': CompositorNodeKeying = value; break;
+		case 'CompositorNodeKeyingScreen': CompositorNodeKeyingScreen = value; break;
+		case 'CompositorNodeKuwahara': CompositorNodeKuwahara = value; break;
+		case 'CompositorNodeLensdist': CompositorNodeLensdist = value; break;
+		case 'CompositorNodeLevels': CompositorNodeLevels = value; break;
+		case 'CompositorNodeLumaMatte': CompositorNodeLumaMatte = value; break;
+		case 'CompositorNodeMapUV': CompositorNodeMapUV = value; break;
+		case 'CompositorNodeMask': CompositorNodeMask = value; break;
+		case 'CompositorNodeMaskToSDF': CompositorNodeMaskToSDF = value; break;
+		case 'CompositorNodeMovieClip': CompositorNodeMovieClip = value; break;
+		case 'CompositorNodeMovieDistortion': CompositorNodeMovieDistortion = value; break;
+		case 'CompositorNodeNormal': CompositorNodeNormal = value; break;
+		case 'CompositorNodeNormalize': CompositorNodeNormalize = value; break;
+		case 'CompositorNodeOutputFile': CompositorNodeOutputFile = value; break;
+		case 'CompositorNodePixelate': CompositorNodePixelate = value; break;
+		case 'CompositorNodePlaneTrackDeform': CompositorNodePlaneTrackDeform = value; break;
+		case 'CompositorNodePosterize': CompositorNodePosterize = value; break;
+		case 'CompositorNodePremulKey': CompositorNodePremulKey = value; break;
+		case 'CompositorNodeRGB': CompositorNodeRGB = value; break;
+		case 'CompositorNodeRGBToBW': CompositorNodeRGBToBW = value; break;
+		case 'CompositorNodeRLayers': CompositorNodeRLayers = value; break;
+		case 'CompositorNodeRelativeToPixel': CompositorNodeRelativeToPixel = value; break;
+		case 'CompositorNodeRotate': CompositorNodeRotate = value; break;
+		case 'CompositorNodeScale': CompositorNodeScale = value; break;
+		case 'CompositorNodeSceneTime': CompositorNodeSceneTime = value; break;
+		case 'CompositorNodeSeparateColor': CompositorNodeSeparateColor = value; break;
+		case 'CompositorNodeSequencerStripInfo': CompositorNodeSequencerStripInfo = value; break;
+		case 'CompositorNodeSetAlpha': CompositorNodeSetAlpha = value; break;
+		case 'CompositorNodeSplit': CompositorNodeSplit = value; break;
+		case 'CompositorNodeStabilize': CompositorNodeStabilize = value; break;
+		case 'CompositorNodeStringToImage': CompositorNodeStringToImage = value; break;
+		case 'CompositorNodeSwitch': CompositorNodeSwitch = value; break;
+		case 'CompositorNodeSwitchView': CompositorNodeSwitchView = value; break;
+		case 'CompositorNodeTime': CompositorNodeTime = value; break;
+		case 'CompositorNodeTonemap': CompositorNodeTonemap = value; break;
+		case 'CompositorNodeTrackPos': CompositorNodeTrackPos = value; break;
+		case 'CompositorNodeTransform': CompositorNodeTransform = value; break;
+		case 'CompositorNodeTranslate': CompositorNodeTranslate = value; break;
+		case 'CompositorNodeTree': CompositorNodeTree = value; break;
+		case 'CompositorNodeVecBlur': CompositorNodeVecBlur = value; break;
+		case 'CompositorNodeViewer': CompositorNodeViewer = value; break;
+		case 'CompositorNodeZcombine': CompositorNodeZcombine = value; break;
+		case 'DATA_PT_CURVES_attributes': DATA_PT_CURVES_attributes = value; break;
+		case 'DATA_PT_EEVEE_light': DATA_PT_EEVEE_light = value; break;
+		case 'DATA_PT_EEVEE_light_distance': DATA_PT_EEVEE_light_distance = value; break;
+		case 'DATA_PT_EEVEE_light_influence': DATA_PT_EEVEE_light_influence = value; break;
+		case 'DATA_PT_EEVEE_light_shadow': DATA_PT_EEVEE_light_shadow = value; break;
+		case 'DATA_PT_armature_animation': DATA_PT_armature_animation = value; break;
+		case 'DATA_PT_bone_collections': DATA_PT_bone_collections = value; break;
+		case 'DATA_PT_camera': DATA_PT_camera = value; break;
+		case 'DATA_PT_camera_animation': DATA_PT_camera_animation = value; break;
+		case 'DATA_PT_camera_background_image': DATA_PT_camera_background_image = value; break;
+		case 'DATA_PT_camera_display': DATA_PT_camera_display = value; break;
+		case 'DATA_PT_camera_display_composition_guides': DATA_PT_camera_display_composition_guides = value; break;
+		case 'DATA_PT_camera_dof': DATA_PT_camera_dof = value; break;
+		case 'DATA_PT_camera_dof_aperture': DATA_PT_camera_dof_aperture = value; break;
+		case 'DATA_PT_camera_safe_areas': DATA_PT_camera_safe_areas = value; break;
+		case 'DATA_PT_camera_safe_areas_center_cut': DATA_PT_camera_safe_areas_center_cut = value; break;
+		case 'DATA_PT_camera_stereoscopy': DATA_PT_camera_stereoscopy = value; break;
+		case 'DATA_PT_cone': DATA_PT_cone = value; break;
+		case 'DATA_PT_context_arm': DATA_PT_context_arm = value; break;
+		case 'DATA_PT_context_camera': DATA_PT_context_camera = value; break;
+		case 'DATA_PT_context_curve': DATA_PT_context_curve = value; break;
+		case 'DATA_PT_context_curves': DATA_PT_context_curves = value; break;
+		case 'DATA_PT_context_grease_pencil': DATA_PT_context_grease_pencil = value; break;
+		case 'DATA_PT_context_lattice': DATA_PT_context_lattice = value; break;
+		case 'DATA_PT_context_light': DATA_PT_context_light = value; break;
+		case 'DATA_PT_context_lightprobe': DATA_PT_context_lightprobe = value; break;
+		case 'DATA_PT_context_mesh': DATA_PT_context_mesh = value; break;
+		case 'DATA_PT_context_metaball': DATA_PT_context_metaball = value; break;
+		case 'DATA_PT_context_pointcloud': DATA_PT_context_pointcloud = value; break;
+		case 'DATA_PT_context_speaker': DATA_PT_context_speaker = value; break;
+		case 'DATA_PT_context_volume': DATA_PT_context_volume = value; break;
+		case 'DATA_PT_curve_animation': DATA_PT_curve_animation = value; break;
+		case 'DATA_PT_curve_texture_space': DATA_PT_curve_texture_space = value; break;
+		case 'DATA_PT_curves_animation': DATA_PT_curves_animation = value; break;
+		case 'DATA_PT_curves_surface': DATA_PT_curves_surface = value; break;
+		case 'DATA_PT_custom_props_arm': DATA_PT_custom_props_arm = value; break;
+		case 'DATA_PT_custom_props_bcoll': DATA_PT_custom_props_bcoll = value; break;
+		case 'DATA_PT_custom_props_camera': DATA_PT_custom_props_camera = value; break;
+		case 'DATA_PT_custom_props_curve': DATA_PT_custom_props_curve = value; break;
+		case 'DATA_PT_custom_props_curves': DATA_PT_custom_props_curves = value; break;
+		case 'DATA_PT_custom_props_lattice': DATA_PT_custom_props_lattice = value; break;
+		case 'DATA_PT_custom_props_light': DATA_PT_custom_props_light = value; break;
+		case 'DATA_PT_custom_props_mesh': DATA_PT_custom_props_mesh = value; break;
+		case 'DATA_PT_custom_props_metaball': DATA_PT_custom_props_metaball = value; break;
+		case 'DATA_PT_custom_props_pointcloud': DATA_PT_custom_props_pointcloud = value; break;
+		case 'DATA_PT_custom_props_speaker': DATA_PT_custom_props_speaker = value; break;
+		case 'DATA_PT_custom_props_volume': DATA_PT_custom_props_volume = value; break;
+		case 'DATA_PT_customdata': DATA_PT_customdata = value; break;
+		case 'DATA_PT_display': DATA_PT_display = value; break;
+		case 'DATA_PT_distance': DATA_PT_distance = value; break;
+		case 'DATA_PT_empty': DATA_PT_empty = value; break;
+		case 'DATA_PT_empty_image': DATA_PT_empty_image = value; break;
+		case 'DATA_PT_font': DATA_PT_font = value; break;
+		case 'DATA_PT_font_transform': DATA_PT_font_transform = value; break;
+		case 'DATA_PT_geometry_curve': DATA_PT_geometry_curve = value; break;
+		case 'DATA_PT_geometry_curve_bevel': DATA_PT_geometry_curve_bevel = value; break;
+		case 'DATA_PT_geometry_curve_start_end': DATA_PT_geometry_curve_start_end = value; break;
+		case 'DATA_PT_grease_pencil_animation': DATA_PT_grease_pencil_animation = value; break;
+		case 'DATA_PT_grease_pencil_attributes': DATA_PT_grease_pencil_attributes = value; break;
+		case 'DATA_PT_grease_pencil_custom_props': DATA_PT_grease_pencil_custom_props = value; break;
+		case 'DATA_PT_grease_pencil_layer_adjustments': DATA_PT_grease_pencil_layer_adjustments = value; break;
+		case 'DATA_PT_grease_pencil_layer_display': DATA_PT_grease_pencil_layer_display = value; break;
+		case 'DATA_PT_grease_pencil_layer_group_display': DATA_PT_grease_pencil_layer_group_display = value; break;
+		case 'DATA_PT_grease_pencil_layer_masks': DATA_PT_grease_pencil_layer_masks = value; break;
+		case 'DATA_PT_grease_pencil_layer_relations': DATA_PT_grease_pencil_layer_relations = value; break;
+		case 'DATA_PT_grease_pencil_layer_transform': DATA_PT_grease_pencil_layer_transform = value; break;
+		case 'DATA_PT_grease_pencil_layers': DATA_PT_grease_pencil_layers = value; break;
+		case 'DATA_PT_grease_pencil_onion_skinning': DATA_PT_grease_pencil_onion_skinning = value; break;
+		case 'DATA_PT_grease_pencil_onion_skinning_custom_colors': DATA_PT_grease_pencil_onion_skinning_custom_colors = value; break;
+		case 'DATA_PT_grease_pencil_onion_skinning_display': DATA_PT_grease_pencil_onion_skinning_display = value; break;
+		case 'DATA_PT_grease_pencil_settings': DATA_PT_grease_pencil_settings = value; break;
+		case 'DATA_PT_iksolver_itasc': DATA_PT_iksolver_itasc = value; break;
+		case 'DATA_PT_lattice': DATA_PT_lattice = value; break;
+		case 'DATA_PT_lattice_animation': DATA_PT_lattice_animation = value; break;
+		case 'DATA_PT_lens': DATA_PT_lens = value; break;
+		case 'DATA_PT_light': DATA_PT_light = value; break;
+		case 'DATA_PT_light_animation': DATA_PT_light_animation = value; break;
+		case 'DATA_PT_lightprobe': DATA_PT_lightprobe = value; break;
+		case 'DATA_PT_lightprobe_animation': DATA_PT_lightprobe_animation = value; break;
+		case 'DATA_PT_lightprobe_bake': DATA_PT_lightprobe_bake = value; break;
+		case 'DATA_PT_lightprobe_bake_capture': DATA_PT_lightprobe_bake_capture = value; break;
+		case 'DATA_PT_lightprobe_bake_clamping': DATA_PT_lightprobe_bake_clamping = value; break;
+		case 'DATA_PT_lightprobe_bake_offset': DATA_PT_lightprobe_bake_offset = value; break;
+		case 'DATA_PT_lightprobe_bake_resolution': DATA_PT_lightprobe_bake_resolution = value; break;
+		case 'DATA_PT_lightprobe_capture': DATA_PT_lightprobe_capture = value; break;
+		case 'DATA_PT_lightprobe_display': DATA_PT_lightprobe_display = value; break;
+		case 'DATA_PT_lightprobe_display_eevee': DATA_PT_lightprobe_display_eevee = value; break;
+		case 'DATA_PT_lightprobe_eevee': DATA_PT_lightprobe_eevee = value; break;
+		case 'DATA_PT_lightprobe_parallax': DATA_PT_lightprobe_parallax = value; break;
+		case 'DATA_PT_lightprobe_visibility': DATA_PT_lightprobe_visibility = value; break;
+		case 'DATA_PT_mball_texture_space': DATA_PT_mball_texture_space = value; break;
+		case 'DATA_PT_mesh_animation': DATA_PT_mesh_animation = value; break;
+		case 'DATA_PT_mesh_attributes': DATA_PT_mesh_attributes = value; break;
+		case 'DATA_PT_metaball': DATA_PT_metaball = value; break;
+		case 'DATA_PT_metaball_animation': DATA_PT_metaball_animation = value; break;
+		case 'DATA_PT_metaball_element': DATA_PT_metaball_element = value; break;
+		case 'DATA_PT_modifiers': DATA_PT_modifiers = value; break;
+		case 'DATA_PT_motion_paths': DATA_PT_motion_paths = value; break;
+		case 'DATA_PT_motion_paths_display': DATA_PT_motion_paths_display = value; break;
+		case 'DATA_PT_paragraph': DATA_PT_paragraph = value; break;
+		case 'DATA_PT_paragraph_alignment': DATA_PT_paragraph_alignment = value; break;
+		case 'DATA_PT_paragraph_spacing': DATA_PT_paragraph_spacing = value; break;
+		case 'DATA_PT_pathanim': DATA_PT_pathanim = value; break;
+		case 'DATA_PT_pointcloud_attributes': DATA_PT_pointcloud_attributes = value; break;
+		case 'DATA_PT_pose': DATA_PT_pose = value; break;
+		case 'DATA_PT_preview': DATA_PT_preview = value; break;
+		case 'DATA_PT_remesh': DATA_PT_remesh = value; break;
+		case 'DATA_PT_shader_fx': DATA_PT_shader_fx = value; break;
+		case 'DATA_PT_shape_curve': DATA_PT_shape_curve = value; break;
+		case 'DATA_PT_shape_keys': DATA_PT_shape_keys = value; break;
+		case 'DATA_PT_speaker': DATA_PT_speaker = value; break;
+		case 'DATA_PT_speaker_animation': DATA_PT_speaker_animation = value; break;
+		case 'DATA_PT_spot': DATA_PT_spot = value; break;
+		case 'DATA_PT_text_boxes': DATA_PT_text_boxes = value; break;
+		case 'DATA_PT_texture_space': DATA_PT_texture_space = value; break;
+		case 'DATA_PT_uv_texture': DATA_PT_uv_texture = value; break;
+		case 'DATA_PT_vertex_colors': DATA_PT_vertex_colors = value; break;
+		case 'DATA_PT_vertex_groups': DATA_PT_vertex_groups = value; break;
+		case 'DATA_PT_volume_animation': DATA_PT_volume_animation = value; break;
+		case 'DATA_PT_volume_file': DATA_PT_volume_file = value; break;
+		case 'DATA_PT_volume_grids': DATA_PT_volume_grids = value; break;
+		case 'DATA_PT_volume_render': DATA_PT_volume_render = value; break;
+		case 'DATA_PT_volume_viewport_display': DATA_PT_volume_viewport_display = value; break;
+		case 'DATA_PT_volume_viewport_display_slicing': DATA_PT_volume_viewport_display_slicing = value; break;
+		case 'DATA_UL_bone_collections': DATA_UL_bone_collections = value; break;
+		case 'DOPESHEET_HT_header': DOPESHEET_HT_header = value; break;
+		case 'DOPESHEET_HT_playback_controls': DOPESHEET_HT_playback_controls = value; break;
+		case 'DOPESHEET_MT_action': DOPESHEET_MT_action = value; break;
+		case 'DOPESHEET_MT_cache': DOPESHEET_MT_cache = value; break;
+		case 'DOPESHEET_MT_channel': DOPESHEET_MT_channel = value; break;
+		case 'DOPESHEET_MT_channel_context_menu': DOPESHEET_MT_channel_context_menu = value; break;
+		case 'DOPESHEET_MT_context_menu': DOPESHEET_MT_context_menu = value; break;
+		case 'DOPESHEET_MT_delete': DOPESHEET_MT_delete = value; break;
+		case 'DOPESHEET_MT_editor_menus': DOPESHEET_MT_editor_menus = value; break;
+		case 'DOPESHEET_MT_gpencil_channel': DOPESHEET_MT_gpencil_channel = value; break;
+		case 'DOPESHEET_MT_key': DOPESHEET_MT_key = value; break;
+		case 'DOPESHEET_MT_key_transform': DOPESHEET_MT_key_transform = value; break;
+		case 'DOPESHEET_MT_marker': DOPESHEET_MT_marker = value; break;
+		case 'DOPESHEET_MT_select': DOPESHEET_MT_select = value; break;
+		case 'DOPESHEET_MT_snap_pie': DOPESHEET_MT_snap_pie = value; break;
+		case 'DOPESHEET_MT_view': DOPESHEET_MT_view = value; break;
+		case 'DOPESHEET_MT_view_pie': DOPESHEET_MT_view_pie = value; break;
+		case 'DOPESHEET_PT_ShapeKey': DOPESHEET_PT_ShapeKey = value; break;
+		case 'DOPESHEET_PT_action': DOPESHEET_PT_action = value; break;
+		case 'DOPESHEET_PT_action_slot': DOPESHEET_PT_action_slot = value; break;
+		case 'DOPESHEET_PT_asset_panel': DOPESHEET_PT_asset_panel = value; break;
+		case 'DOPESHEET_PT_custom_props_action': DOPESHEET_PT_custom_props_action = value; break;
+		case 'DOPESHEET_PT_dopesheet_overlay': DOPESHEET_PT_dopesheet_overlay = value; break;
+		case 'DOPESHEET_PT_filters': DOPESHEET_PT_filters = value; break;
+		case 'DOPESHEET_PT_grease_pencil_layer_adjustments': DOPESHEET_PT_grease_pencil_layer_adjustments = value; break;
+		case 'DOPESHEET_PT_grease_pencil_layer_display': DOPESHEET_PT_grease_pencil_layer_display = value; break;
+		case 'DOPESHEET_PT_grease_pencil_layer_masks': DOPESHEET_PT_grease_pencil_layer_masks = value; break;
+		case 'DOPESHEET_PT_grease_pencil_layer_relations': DOPESHEET_PT_grease_pencil_layer_relations = value; break;
+		case 'DOPESHEET_PT_grease_pencil_layer_transform': DOPESHEET_PT_grease_pencil_layer_transform = value; break;
+		case 'DOPESHEET_PT_grease_pencil_mode': DOPESHEET_PT_grease_pencil_mode = value; break;
+		case 'DOPESHEET_PT_overlay': DOPESHEET_PT_overlay = value; break;
+		case 'DOPESHEET_PT_proportional_edit': DOPESHEET_PT_proportional_edit = value; break;
+		case 'DOPESHEET_PT_snapping': DOPESHEET_PT_snapping = value; break;
+		case 'DistortedNoiseTexture': DistortedNoiseTexture = value; break;
+		case 'EEVEE_MATERIAL_PT_context_material': EEVEE_MATERIAL_PT_context_material = value; break;
+		case 'EEVEE_MATERIAL_PT_displacement': EEVEE_MATERIAL_PT_displacement = value; break;
+		case 'EEVEE_MATERIAL_PT_settings': EEVEE_MATERIAL_PT_settings = value; break;
+		case 'EEVEE_MATERIAL_PT_settings_surface': EEVEE_MATERIAL_PT_settings_surface = value; break;
+		case 'EEVEE_MATERIAL_PT_settings_volume': EEVEE_MATERIAL_PT_settings_volume = value; break;
+		case 'EEVEE_MATERIAL_PT_surface': EEVEE_MATERIAL_PT_surface = value; break;
+		case 'EEVEE_MATERIAL_PT_thickness': EEVEE_MATERIAL_PT_thickness = value; break;
+		case 'EEVEE_MATERIAL_PT_viewport_settings': EEVEE_MATERIAL_PT_viewport_settings = value; break;
+		case 'EEVEE_MATERIAL_PT_volume': EEVEE_MATERIAL_PT_volume = value; break;
+		case 'EEVEE_WORLD_PT_lightprobe': EEVEE_WORLD_PT_lightprobe = value; break;
+		case 'EEVEE_WORLD_PT_mist': EEVEE_WORLD_PT_mist = value; break;
+		case 'EEVEE_WORLD_PT_settings': EEVEE_WORLD_PT_settings = value; break;
+		case 'EEVEE_WORLD_PT_sun': EEVEE_WORLD_PT_sun = value; break;
+		case 'EEVEE_WORLD_PT_sun_shadow': EEVEE_WORLD_PT_sun_shadow = value; break;
+		case 'EEVEE_WORLD_PT_surface': EEVEE_WORLD_PT_surface = value; break;
+		case 'EEVEE_WORLD_PT_volume': EEVEE_WORLD_PT_volume = value; break;
+		case 'EXPORT_ANIM_OT_bvh': EXPORT_ANIM_OT_bvh = value; break;
+		case 'EXPORT_SCENE_OT_fbx': EXPORT_SCENE_OT_fbx = value; break;
+		case 'EXPORT_SCENE_OT_gltf': EXPORT_SCENE_OT_gltf = value; break;
+		case 'EXTENSIONS_OT_package_disable': EXTENSIONS_OT_package_disable = value; break;
+		case 'EXTENSIONS_OT_package_install': EXTENSIONS_OT_package_install = value; break;
+		case 'EXTENSIONS_OT_package_install_files': EXTENSIONS_OT_package_install_files = value; break;
+		case 'EXTENSIONS_OT_package_install_marked': EXTENSIONS_OT_package_install_marked = value; break;
+		case 'EXTENSIONS_OT_package_mark_clear': EXTENSIONS_OT_package_mark_clear = value; break;
+		case 'EXTENSIONS_OT_package_mark_clear_all': EXTENSIONS_OT_package_mark_clear_all = value; break;
+		case 'EXTENSIONS_OT_package_mark_set': EXTENSIONS_OT_package_mark_set = value; break;
+		case 'EXTENSIONS_OT_package_mark_set_all': EXTENSIONS_OT_package_mark_set_all = value; break;
+		case 'EXTENSIONS_OT_package_obsolete_marked': EXTENSIONS_OT_package_obsolete_marked = value; break;
+		case 'EXTENSIONS_OT_package_show_clear': EXTENSIONS_OT_package_show_clear = value; break;
+		case 'EXTENSIONS_OT_package_show_set': EXTENSIONS_OT_package_show_set = value; break;
+		case 'EXTENSIONS_OT_package_show_settings': EXTENSIONS_OT_package_show_settings = value; break;
+		case 'EXTENSIONS_OT_package_theme_disable': EXTENSIONS_OT_package_theme_disable = value; break;
+		case 'EXTENSIONS_OT_package_theme_enable': EXTENSIONS_OT_package_theme_enable = value; break;
+		case 'EXTENSIONS_OT_package_uninstall': EXTENSIONS_OT_package_uninstall = value; break;
+		case 'EXTENSIONS_OT_package_uninstall_marked': EXTENSIONS_OT_package_uninstall_marked = value; break;
+		case 'EXTENSIONS_OT_package_uninstall_system': EXTENSIONS_OT_package_uninstall_system = value; break;
+		case 'EXTENSIONS_OT_package_upgrade_all': EXTENSIONS_OT_package_upgrade_all = value; break;
+		case 'EXTENSIONS_OT_repo_enable_from_drop': EXTENSIONS_OT_repo_enable_from_drop = value; break;
+		case 'EXTENSIONS_OT_repo_lock_all': EXTENSIONS_OT_repo_lock_all = value; break;
+		case 'EXTENSIONS_OT_repo_refresh_all': EXTENSIONS_OT_repo_refresh_all = value; break;
+		case 'EXTENSIONS_OT_repo_sync': EXTENSIONS_OT_repo_sync = value; break;
+		case 'EXTENSIONS_OT_repo_sync_all': EXTENSIONS_OT_repo_sync_all = value; break;
+		case 'EXTENSIONS_OT_repo_unlock': EXTENSIONS_OT_repo_unlock = value; break;
+		case 'EXTENSIONS_OT_repo_unlock_all': EXTENSIONS_OT_repo_unlock_all = value; break;
+		case 'EXTENSIONS_OT_status_clear': EXTENSIONS_OT_status_clear = value; break;
+		case 'EXTENSIONS_OT_status_clear_errors': EXTENSIONS_OT_status_clear_errors = value; break;
+		case 'EXTENSIONS_OT_userpref_allow_online': EXTENSIONS_OT_userpref_allow_online = value; break;
+		case 'EXTENSIONS_OT_userpref_allow_online_popup': EXTENSIONS_OT_userpref_allow_online_popup = value; break;
+		case 'EXTENSIONS_OT_userpref_show_for_update': EXTENSIONS_OT_userpref_show_for_update = value; break;
+		case 'EXTENSIONS_OT_userpref_show_online': EXTENSIONS_OT_userpref_show_online = value; break;
+		case 'EXTENSIONS_OT_userpref_tags_set': EXTENSIONS_OT_userpref_tags_set = value; break;
+		case 'FILEBROWSER_HT_header': FILEBROWSER_HT_header = value; break;
+		case 'FILEBROWSER_MT_bookmarks_context_menu': FILEBROWSER_MT_bookmarks_context_menu = value; break;
+		case 'FILEBROWSER_MT_bookmarks_recents_specials_menu': FILEBROWSER_MT_bookmarks_recents_specials_menu = value; break;
+		case 'FILEBROWSER_MT_context_menu': FILEBROWSER_MT_context_menu = value; break;
+		case 'FILEBROWSER_MT_editor_menus': FILEBROWSER_MT_editor_menus = value; break;
+		case 'FILEBROWSER_MT_select': FILEBROWSER_MT_select = value; break;
+		case 'FILEBROWSER_MT_view': FILEBROWSER_MT_view = value; break;
+		case 'FILEBROWSER_MT_view_pie': FILEBROWSER_MT_view_pie = value; break;
+		case 'FILEBROWSER_PT_advanced_filter': FILEBROWSER_PT_advanced_filter = value; break;
+		case 'FILEBROWSER_PT_bookmarks_favorites': FILEBROWSER_PT_bookmarks_favorites = value; break;
+		case 'FILEBROWSER_PT_bookmarks_recents': FILEBROWSER_PT_bookmarks_recents = value; break;
+		case 'FILEBROWSER_PT_bookmarks_system': FILEBROWSER_PT_bookmarks_system = value; break;
+		case 'FILEBROWSER_PT_bookmarks_volumes': FILEBROWSER_PT_bookmarks_volumes = value; break;
+		case 'FILEBROWSER_PT_directory_path': FILEBROWSER_PT_directory_path = value; break;
+		case 'FILEBROWSER_PT_display': FILEBROWSER_PT_display = value; break;
+		case 'FILEBROWSER_PT_filter': FILEBROWSER_PT_filter = value; break;
+		case 'FILEBROWSER_UL_dir': FILEBROWSER_UL_dir = value; break;
+		case 'FLUID_OT_preset_add': FLUID_OT_preset_add = value; break;
+		case 'FLUID_PT_presets': FLUID_PT_presets = value; break;
+		case 'FunctionNode': FunctionNode = value; break;
+		case 'FunctionNodeAlignEulerToVector': FunctionNodeAlignEulerToVector = value; break;
+		case 'FunctionNodeAlignRotationToVector': FunctionNodeAlignRotationToVector = value; break;
+		case 'FunctionNodeAxesToRotation': FunctionNodeAxesToRotation = value; break;
+		case 'FunctionNodeAxisAngleToRotation': FunctionNodeAxisAngleToRotation = value; break;
+		case 'FunctionNodeBitMath': FunctionNodeBitMath = value; break;
+		case 'FunctionNodeBooleanMath': FunctionNodeBooleanMath = value; break;
+		case 'FunctionNodeCombineColor': FunctionNodeCombineColor = value; break;
+		case 'FunctionNodeCombineMatrix': FunctionNodeCombineMatrix = value; break;
+		case 'FunctionNodeCombineTransform': FunctionNodeCombineTransform = value; break;
+		case 'FunctionNodeCompare': FunctionNodeCompare = value; break;
+		case 'FunctionNodeEulerToRotation': FunctionNodeEulerToRotation = value; break;
+		case 'FunctionNodeFindInString': FunctionNodeFindInString = value; break;
+		case 'FunctionNodeFloatToInt': FunctionNodeFloatToInt = value; break;
+		case 'FunctionNodeFormatString': FunctionNodeFormatString = value; break;
+		case 'FunctionNodeHashValue': FunctionNodeHashValue = value; break;
+		case 'FunctionNodeInputBool': FunctionNodeInputBool = value; break;
+		case 'FunctionNodeInputColor': FunctionNodeInputColor = value; break;
+		case 'FunctionNodeInputInt': FunctionNodeInputInt = value; break;
+		case 'FunctionNodeInputIntVector': FunctionNodeInputIntVector = value; break;
+		case 'FunctionNodeInputMenu': FunctionNodeInputMenu = value; break;
+		case 'FunctionNodeInputRotation': FunctionNodeInputRotation = value; break;
+		case 'FunctionNodeInputSpecialCharacters': FunctionNodeInputSpecialCharacters = value; break;
+		case 'FunctionNodeInputString': FunctionNodeInputString = value; break;
+		case 'FunctionNodeInputVector': FunctionNodeInputVector = value; break;
+		case 'FunctionNodeIntegerMath': FunctionNodeIntegerMath = value; break;
+		case 'FunctionNodeInvertMatrix': FunctionNodeInvertMatrix = value; break;
+		case 'FunctionNodeInvertRotation': FunctionNodeInvertRotation = value; break;
+		case 'FunctionNodeMatchString': FunctionNodeMatchString = value; break;
+		case 'FunctionNodeMatrixDeterminant': FunctionNodeMatrixDeterminant = value; break;
+		case 'FunctionNodeMatrixMultiply': FunctionNodeMatrixMultiply = value; break;
+		case 'FunctionNodeMatrixSVD': FunctionNodeMatrixSVD = value; break;
+		case 'FunctionNodeProjectPoint': FunctionNodeProjectPoint = value; break;
+		case 'FunctionNodeQuaternionToRotation': FunctionNodeQuaternionToRotation = value; break;
+		case 'FunctionNodeRandomValue': FunctionNodeRandomValue = value; break;
+		case 'FunctionNodeReplaceString': FunctionNodeReplaceString = value; break;
+		case 'FunctionNodeReverseString': FunctionNodeReverseString = value; break;
+		case 'FunctionNodeRotateEuler': FunctionNodeRotateEuler = value; break;
+		case 'FunctionNodeRotateRotation': FunctionNodeRotateRotation = value; break;
+		case 'FunctionNodeRotateVector': FunctionNodeRotateVector = value; break;
+		case 'FunctionNodeRotationToAxisAngle': FunctionNodeRotationToAxisAngle = value; break;
+		case 'FunctionNodeRotationToEuler': FunctionNodeRotationToEuler = value; break;
+		case 'FunctionNodeRotationToQuaternion': FunctionNodeRotationToQuaternion = value; break;
+		case 'FunctionNodeSeparateColor': FunctionNodeSeparateColor = value; break;
+		case 'FunctionNodeSeparateMatrix': FunctionNodeSeparateMatrix = value; break;
+		case 'FunctionNodeSeparateTransform': FunctionNodeSeparateTransform = value; break;
+		case 'FunctionNodeSetStringCase': FunctionNodeSetStringCase = value; break;
+		case 'FunctionNodeSliceString': FunctionNodeSliceString = value; break;
+		case 'FunctionNodeSplitString': FunctionNodeSplitString = value; break;
+		case 'FunctionNodeStringLength': FunctionNodeStringLength = value; break;
+		case 'FunctionNodeStringToValue': FunctionNodeStringToValue = value; break;
+		case 'FunctionNodeTransformDirection': FunctionNodeTransformDirection = value; break;
+		case 'FunctionNodeTransformPoint': FunctionNodeTransformPoint = value; break;
+		case 'FunctionNodeTransposeMatrix': FunctionNodeTransposeMatrix = value; break;
+		case 'FunctionNodeTrimString': FunctionNodeTrimString = value; break;
+		case 'FunctionNodeValueToString': FunctionNodeValueToString = value; break;
+		case 'GPENCIL_UL_annotation_layer': GPENCIL_UL_annotation_layer = value; break;
+		case 'GPENCIL_UL_matslots': GPENCIL_UL_matslots = value; break;
+		case 'GRAPH_HT_header': GRAPH_HT_header = value; break;
+		case 'GRAPH_HT_playback_controls': GRAPH_HT_playback_controls = value; break;
+		case 'GRAPH_MT_channel': GRAPH_MT_channel = value; break;
+		case 'GRAPH_MT_context_menu': GRAPH_MT_context_menu = value; break;
+		case 'GRAPH_MT_delete': GRAPH_MT_delete = value; break;
+		case 'GRAPH_MT_editor_menus': GRAPH_MT_editor_menus = value; break;
+		case 'GRAPH_MT_key': GRAPH_MT_key = value; break;
+		case 'GRAPH_MT_key_blending': GRAPH_MT_key_blending = value; break;
+		case 'GRAPH_MT_key_density': GRAPH_MT_key_density = value; break;
+		case 'GRAPH_MT_key_smoothing': GRAPH_MT_key_smoothing = value; break;
+		case 'GRAPH_MT_key_snap': GRAPH_MT_key_snap = value; break;
+		case 'GRAPH_MT_key_transform': GRAPH_MT_key_transform = value; break;
+		case 'GRAPH_MT_marker': GRAPH_MT_marker = value; break;
+		case 'GRAPH_MT_pivot_pie': GRAPH_MT_pivot_pie = value; break;
+		case 'GRAPH_MT_select': GRAPH_MT_select = value; break;
+		case 'GRAPH_MT_snap_pie': GRAPH_MT_snap_pie = value; break;
+		case 'GRAPH_MT_view': GRAPH_MT_view = value; break;
+		case 'GRAPH_MT_view_pie': GRAPH_MT_view_pie = value; break;
+		case 'GRAPH_PT_driver_snapping': GRAPH_PT_driver_snapping = value; break;
+		case 'GRAPH_PT_filters': GRAPH_PT_filters = value; break;
+		case 'GRAPH_PT_proportional_edit': GRAPH_PT_proportional_edit = value; break;
+		case 'GRAPH_PT_snapping': GRAPH_PT_snapping = value; break;
+		case 'GREASE_PENCIL_MT_Layers': GREASE_PENCIL_MT_Layers = value; break;
+		case 'GREASE_PENCIL_MT_draw_delete': GREASE_PENCIL_MT_draw_delete = value; break;
+		case 'GREASE_PENCIL_MT_grease_pencil_add_layer_extra': GREASE_PENCIL_MT_grease_pencil_add_layer_extra = value; break;
+		case 'GREASE_PENCIL_MT_group_context_menu': GREASE_PENCIL_MT_group_context_menu = value; break;
+		case 'GREASE_PENCIL_MT_layer_active': GREASE_PENCIL_MT_layer_active = value; break;
+		case 'GREASE_PENCIL_MT_layer_group': GREASE_PENCIL_MT_layer_group = value; break;
+		case 'GREASE_PENCIL_MT_layer_mask_add': GREASE_PENCIL_MT_layer_mask_add = value; break;
+		case 'GREASE_PENCIL_MT_material_context_menu': GREASE_PENCIL_MT_material_context_menu = value; break;
+		case 'GREASE_PENCIL_MT_move_to_layer': GREASE_PENCIL_MT_move_to_layer = value; break;
+		case 'GREASE_PENCIL_MT_move_to_layer_SEARCH': GREASE_PENCIL_MT_move_to_layer_SEARCH = value; break;
+		case 'GREASE_PENCIL_MT_snap': GREASE_PENCIL_MT_snap = value; break;
+		case 'GREASE_PENCIL_MT_snap_pie': GREASE_PENCIL_MT_snap_pie = value; break;
+		case 'GREASE_PENCIL_MT_stroke_simplify': GREASE_PENCIL_MT_stroke_simplify = value; break;
+		case 'GREASE_PENCIL_OT_relative_layer_mask_add': GREASE_PENCIL_OT_relative_layer_mask_add = value; break;
+		case 'GREASE_PENCIL_UL_attributes': GREASE_PENCIL_UL_attributes = value; break;
+		case 'GREASE_PENCIL_UL_masks': GREASE_PENCIL_UL_masks = value; break;
+		case 'GeometryNodeAccumulateField': GeometryNodeAccumulateField = value; break;
+		case 'GeometryNodeApplySimulatedData': GeometryNodeApplySimulatedData = value; break;
+		case 'GeometryNodeAttributeDomainSize': GeometryNodeAttributeDomainSize = value; break;
+		case 'GeometryNodeAttributeStatistic': GeometryNodeAttributeStatistic = value; break;
+		case 'GeometryNodeBake': GeometryNodeBake = value; break;
+		case 'GeometryNodeBlurAttribute': GeometryNodeBlurAttribute = value; break;
+		case 'GeometryNodeBoneInfo': GeometryNodeBoneInfo = value; break;
+		case 'GeometryNodeBoundBox': GeometryNodeBoundBox = value; break;
+		case 'GeometryNodeCameraInfo': GeometryNodeCameraInfo = value; break;
+		case 'GeometryNodeCaptureAttribute': GeometryNodeCaptureAttribute = value; break;
+		case 'GeometryNodeClosureToList': GeometryNodeClosureToList = value; break;
+		case 'GeometryNodeClusterByConnected': GeometryNodeClusterByConnected = value; break;
+		case 'GeometryNodeClusterByDistance': GeometryNodeClusterByDistance = value; break;
+		case 'GeometryNodeCollectionChildren': GeometryNodeCollectionChildren = value; break;
+		case 'GeometryNodeCollectionInfo': GeometryNodeCollectionInfo = value; break;
+		case 'GeometryNodeConvexHull': GeometryNodeConvexHull = value; break;
+		case 'GeometryNodeCornersOfEdge': GeometryNodeCornersOfEdge = value; break;
+		case 'GeometryNodeCornersOfFace': GeometryNodeCornersOfFace = value; break;
+		case 'GeometryNodeCornersOfVertex': GeometryNodeCornersOfVertex = value; break;
+		case 'GeometryNodeCubeGridTopology': GeometryNodeCubeGridTopology = value; break;
+		case 'GeometryNodeCurveArc': GeometryNodeCurveArc = value; break;
+		case 'GeometryNodeCurveEndpointSelection': GeometryNodeCurveEndpointSelection = value; break;
+		case 'GeometryNodeCurveHandleTypeSelection': GeometryNodeCurveHandleTypeSelection = value; break;
+		case 'GeometryNodeCurveLength': GeometryNodeCurveLength = value; break;
+		case 'GeometryNodeCurveOfPoint': GeometryNodeCurveOfPoint = value; break;
+		case 'GeometryNodeCurvePrimitiveBezierSegment': GeometryNodeCurvePrimitiveBezierSegment = value; break;
+		case 'GeometryNodeCurvePrimitiveCircle': GeometryNodeCurvePrimitiveCircle = value; break;
+		case 'GeometryNodeCurvePrimitiveLine': GeometryNodeCurvePrimitiveLine = value; break;
+		case 'GeometryNodeCurvePrimitiveQuadrilateral': GeometryNodeCurvePrimitiveQuadrilateral = value; break;
+		case 'GeometryNodeCurveQuadraticBezier': GeometryNodeCurveQuadraticBezier = value; break;
+		case 'GeometryNodeCurveSetHandles': GeometryNodeCurveSetHandles = value; break;
+		case 'GeometryNodeCurveSpiral': GeometryNodeCurveSpiral = value; break;
+		case 'GeometryNodeCurveSplineType': GeometryNodeCurveSplineType = value; break;
+		case 'GeometryNodeCurveStar': GeometryNodeCurveStar = value; break;
+		case 'GeometryNodeCurveToMesh': GeometryNodeCurveToMesh = value; break;
+		case 'GeometryNodeCurveToPoints': GeometryNodeCurveToPoints = value; break;
+		case 'GeometryNodeCurvesToGreasePencil': GeometryNodeCurvesToGreasePencil = value; break;
+		case 'GeometryNodeCustomGroup': GeometryNodeCustomGroup = value; break;
+		case 'GeometryNodeDeformCurvesOnSurface': GeometryNodeDeformCurvesOnSurface = value; break;
+		case 'GeometryNodeDeleteGeometry': GeometryNodeDeleteGeometry = value; break;
+		case 'GeometryNodeDistributePointsInGrid': GeometryNodeDistributePointsInGrid = value; break;
+		case 'GeometryNodeDistributePointsInVolume': GeometryNodeDistributePointsInVolume = value; break;
+		case 'GeometryNodeDistributePointsOnFaces': GeometryNodeDistributePointsOnFaces = value; break;
+		case 'GeometryNodeDualMesh': GeometryNodeDualMesh = value; break;
+		case 'GeometryNodeDuplicateElements': GeometryNodeDuplicateElements = value; break;
+		case 'GeometryNodeEdgePathsToCurves': GeometryNodeEdgePathsToCurves = value; break;
+		case 'GeometryNodeEdgePathsToSelection': GeometryNodeEdgePathsToSelection = value; break;
+		case 'GeometryNodeEdgesOfCorner': GeometryNodeEdgesOfCorner = value; break;
+		case 'GeometryNodeEdgesOfVertex': GeometryNodeEdgesOfVertex = value; break;
+		case 'GeometryNodeEdgesToFaceGroups': GeometryNodeEdgesToFaceGroups = value; break;
+		case 'GeometryNodeExtrudeMesh': GeometryNodeExtrudeMesh = value; break;
+		case 'GeometryNodeFaceOfCorner': GeometryNodeFaceOfCorner = value; break;
+		case 'GeometryNodeFieldAtIndex': GeometryNodeFieldAtIndex = value; break;
+		case 'GeometryNodeFieldAverage': GeometryNodeFieldAverage = value; break;
+		case 'GeometryNodeFieldMinAndMax': GeometryNodeFieldMinAndMax = value; break;
+		case 'GeometryNodeFieldOnDomain': GeometryNodeFieldOnDomain = value; break;
+		case 'GeometryNodeFieldToGrid': GeometryNodeFieldToGrid = value; break;
+		case 'GeometryNodeFieldToList': GeometryNodeFieldToList = value; break;
+		case 'GeometryNodeFieldVariance': GeometryNodeFieldVariance = value; break;
+		case 'GeometryNodeFillCurve': GeometryNodeFillCurve = value; break;
+		case 'GeometryNodeFilletCurve': GeometryNodeFilletCurve = value; break;
+		case 'GeometryNodeFilterList': GeometryNodeFilterList = value; break;
+		case 'GeometryNodeFlipFaces': GeometryNodeFlipFaces = value; break;
+		case 'GeometryNodeForeachGeometryElementInput': GeometryNodeForeachGeometryElementInput = value; break;
+		case 'GeometryNodeForeachGeometryElementOutput': GeometryNodeForeachGeometryElementOutput = value; break;
+		case 'GeometryNodeGeometryToInstance': GeometryNodeGeometryToInstance = value; break;
+		case 'GeometryNodeGetAttributeNames': GeometryNodeGetAttributeNames = value; break;
+		case 'GeometryNodeGetGeometryBundle': GeometryNodeGetGeometryBundle = value; break;
+		case 'GeometryNodeGetGeometryComponent': GeometryNodeGetGeometryComponent = value; break;
+		case 'GeometryNodeGetNamedGrid': GeometryNodeGetNamedGrid = value; break;
+		case 'GeometryNodeGizmoDial': GeometryNodeGizmoDial = value; break;
+		case 'GeometryNodeGizmoLinear': GeometryNodeGizmoLinear = value; break;
+		case 'GeometryNodeGizmoTransform': GeometryNodeGizmoTransform = value; break;
+		case 'GeometryNodeGreasePencilToCurves': GeometryNodeGreasePencilToCurves = value; break;
+		case 'GeometryNodeGridAdvect': GeometryNodeGridAdvect = value; break;
+		case 'GeometryNodeGridClip': GeometryNodeGridClip = value; break;
+		case 'GeometryNodeGridCurl': GeometryNodeGridCurl = value; break;
+		case 'GeometryNodeGridDilateAndErode': GeometryNodeGridDilateAndErode = value; break;
+		case 'GeometryNodeGridDivergence': GeometryNodeGridDivergence = value; break;
+		case 'GeometryNodeGridGradient': GeometryNodeGridGradient = value; break;
+		case 'GeometryNodeGridInfo': GeometryNodeGridInfo = value; break;
+		case 'GeometryNodeGridLaplacian': GeometryNodeGridLaplacian = value; break;
+		case 'GeometryNodeGridMean': GeometryNodeGridMean = value; break;
+		case 'GeometryNodeGridMedian': GeometryNodeGridMedian = value; break;
+		case 'GeometryNodeGridPrune': GeometryNodeGridPrune = value; break;
+		case 'GeometryNodeGridToMesh': GeometryNodeGridToMesh = value; break;
+		case 'GeometryNodeGridToPoints': GeometryNodeGridToPoints = value; break;
+		case 'GeometryNodeGridVoxelize': GeometryNodeGridVoxelize = value; break;
+		case 'GeometryNodeGroup': GeometryNodeGroup = value; break;
+		case 'GeometryNodeImageInfo': GeometryNodeImageInfo = value; break;
+		case 'GeometryNodeImageTexture': GeometryNodeImageTexture = value; break;
+		case 'GeometryNodeImportCSV': GeometryNodeImportCSV = value; break;
+		case 'GeometryNodeImportOBJ': GeometryNodeImportOBJ = value; break;
+		case 'GeometryNodeImportPLY': GeometryNodeImportPLY = value; break;
+		case 'GeometryNodeImportSTL': GeometryNodeImportSTL = value; break;
+		case 'GeometryNodeImportText': GeometryNodeImportText = value; break;
+		case 'GeometryNodeImportVDB': GeometryNodeImportVDB = value; break;
+		case 'GeometryNodeIndexOfNearest': GeometryNodeIndexOfNearest = value; break;
+		case 'GeometryNodeIndexSwitch': GeometryNodeIndexSwitch = value; break;
+		case 'GeometryNodeInputActiveCamera': GeometryNodeInputActiveCamera = value; break;
+		case 'GeometryNodeInputCollection': GeometryNodeInputCollection = value; break;
+		case 'GeometryNodeInputCurveHandlePositions': GeometryNodeInputCurveHandlePositions = value; break;
+		case 'GeometryNodeInputCurveTilt': GeometryNodeInputCurveTilt = value; break;
+		case 'GeometryNodeInputEdgeSmooth': GeometryNodeInputEdgeSmooth = value; break;
+		case 'GeometryNodeInputFont': GeometryNodeInputFont = value; break;
+		case 'GeometryNodeInputID': GeometryNodeInputID = value; break;
+		case 'GeometryNodeInputImage': GeometryNodeInputImage = value; break;
+		case 'GeometryNodeInputIndex': GeometryNodeInputIndex = value; break;
+		case 'GeometryNodeInputInstanceBounds': GeometryNodeInputInstanceBounds = value; break;
+		case 'GeometryNodeInputInstanceReference': GeometryNodeInputInstanceReference = value; break;
+		case 'GeometryNodeInputInstanceRotation': GeometryNodeInputInstanceRotation = value; break;
+		case 'GeometryNodeInputInstanceScale': GeometryNodeInputInstanceScale = value; break;
+		case 'GeometryNodeInputMaterial': GeometryNodeInputMaterial = value; break;
+		case 'GeometryNodeInputMaterialIndex': GeometryNodeInputMaterialIndex = value; break;
+		case 'GeometryNodeInputMeshEdgeAngle': GeometryNodeInputMeshEdgeAngle = value; break;
+		case 'GeometryNodeInputMeshEdgeNeighbors': GeometryNodeInputMeshEdgeNeighbors = value; break;
+		case 'GeometryNodeInputMeshEdgeVertices': GeometryNodeInputMeshEdgeVertices = value; break;
+		case 'GeometryNodeInputMeshFaceArea': GeometryNodeInputMeshFaceArea = value; break;
+		case 'GeometryNodeInputMeshFaceIsPlanar': GeometryNodeInputMeshFaceIsPlanar = value; break;
+		case 'GeometryNodeInputMeshFaceNeighbors': GeometryNodeInputMeshFaceNeighbors = value; break;
+		case 'GeometryNodeInputMeshIsland': GeometryNodeInputMeshIsland = value; break;
+		case 'GeometryNodeInputMeshVertexNeighbors': GeometryNodeInputMeshVertexNeighbors = value; break;
+		case 'GeometryNodeInputNamedAttribute': GeometryNodeInputNamedAttribute = value; break;
+		case 'GeometryNodeInputNamedLayerSelection': GeometryNodeInputNamedLayerSelection = value; break;
+		case 'GeometryNodeInputNormal': GeometryNodeInputNormal = value; break;
+		case 'GeometryNodeInputObject': GeometryNodeInputObject = value; break;
+		case 'GeometryNodeInputPosition': GeometryNodeInputPosition = value; break;
+		case 'GeometryNodeInputRadius': GeometryNodeInputRadius = value; break;
+		case 'GeometryNodeInputSceneTime': GeometryNodeInputSceneTime = value; break;
+		case 'GeometryNodeInputShadeSmooth': GeometryNodeInputShadeSmooth = value; break;
+		case 'GeometryNodeInputShortestEdgePaths': GeometryNodeInputShortestEdgePaths = value; break;
+		case 'GeometryNodeInputSplineCyclic': GeometryNodeInputSplineCyclic = value; break;
+		case 'GeometryNodeInputSplineResolution': GeometryNodeInputSplineResolution = value; break;
+		case 'GeometryNodeInputTangent': GeometryNodeInputTangent = value; break;
+		case 'GeometryNodeInputVoxelIndex': GeometryNodeInputVoxelIndex = value; break;
+		case 'GeometryNodeInstanceOnPoints': GeometryNodeInstanceOnPoints = value; break;
+		case 'GeometryNodeInstanceTransform': GeometryNodeInstanceTransform = value; break;
+		case 'GeometryNodeInstancesToPoints': GeometryNodeInstancesToPoints = value; break;
+		case 'GeometryNodeInterpolateCurves': GeometryNodeInterpolateCurves = value; break;
+		case 'GeometryNodeIsViewport': GeometryNodeIsViewport = value; break;
+		case 'GeometryNodeJoinGeometry': GeometryNodeJoinGeometry = value; break;
+		case 'GeometryNodeListGetItem': GeometryNodeListGetItem = value; break;
+		case 'GeometryNodeListLength': GeometryNodeListLength = value; break;
+		case 'GeometryNodeMaterialSelection': GeometryNodeMaterialSelection = value; break;
+		case 'GeometryNodeMenuSwitch': GeometryNodeMenuSwitch = value; break;
+		case 'GeometryNodeMergeByDistance': GeometryNodeMergeByDistance = value; break;
+		case 'GeometryNodeMergeLayers': GeometryNodeMergeLayers = value; break;
+		case 'GeometryNodeMergePoints': GeometryNodeMergePoints = value; break;
+		case 'GeometryNodeMeshBevel': GeometryNodeMeshBevel = value; break;
+		case 'GeometryNodeMeshBoolean': GeometryNodeMeshBoolean = value; break;
+		case 'GeometryNodeMeshCircle': GeometryNodeMeshCircle = value; break;
+		case 'GeometryNodeMeshCone': GeometryNodeMeshCone = value; break;
+		case 'GeometryNodeMeshCube': GeometryNodeMeshCube = value; break;
+		case 'GeometryNodeMeshCylinder': GeometryNodeMeshCylinder = value; break;
+		case 'GeometryNodeMeshFaceSetBoundaries': GeometryNodeMeshFaceSetBoundaries = value; break;
+		case 'GeometryNodeMeshGrid': GeometryNodeMeshGrid = value; break;
+		case 'GeometryNodeMeshIcoSphere': GeometryNodeMeshIcoSphere = value; break;
+		case 'GeometryNodeMeshLine': GeometryNodeMeshLine = value; break;
+		case 'GeometryNodeMeshToCurve': GeometryNodeMeshToCurve = value; break;
+		case 'GeometryNodeMeshToDensityGrid': GeometryNodeMeshToDensityGrid = value; break;
+		case 'GeometryNodeMeshToPoints': GeometryNodeMeshToPoints = value; break;
+		case 'GeometryNodeMeshToSDFGrid': GeometryNodeMeshToSDFGrid = value; break;
+		case 'GeometryNodeMeshToVolume': GeometryNodeMeshToVolume = value; break;
+		case 'GeometryNodeMeshUVSphere': GeometryNodeMeshUVSphere = value; break;
+		case 'GeometryNodeObjectInfo': GeometryNodeObjectInfo = value; break;
+		case 'GeometryNodeOffsetCornerInFace': GeometryNodeOffsetCornerInFace = value; break;
+		case 'GeometryNodeOffsetPointInCurve': GeometryNodeOffsetPointInCurve = value; break;
+		case 'GeometryNodePoints': GeometryNodePoints = value; break;
+		case 'GeometryNodePointsOfCurve': GeometryNodePointsOfCurve = value; break;
+		case 'GeometryNodePointsToCurves': GeometryNodePointsToCurves = value; break;
+		case 'GeometryNodePointsToSDFGrid': GeometryNodePointsToSDFGrid = value; break;
+		case 'GeometryNodePointsToVertices': GeometryNodePointsToVertices = value; break;
+		case 'GeometryNodePointsToVolume': GeometryNodePointsToVolume = value; break;
+		case 'GeometryNodeProximity': GeometryNodeProximity = value; break;
+		case 'GeometryNodeRaycast': GeometryNodeRaycast = value; break;
+		case 'GeometryNodeRealizeInstances': GeometryNodeRealizeInstances = value; break;
+		case 'GeometryNodeRemoveAttribute': GeometryNodeRemoveAttribute = value; break;
+		case 'GeometryNodeRenameAttribute': GeometryNodeRenameAttribute = value; break;
+		case 'GeometryNodeRepeatInput': GeometryNodeRepeatInput = value; break;
+		case 'GeometryNodeRepeatOutput': GeometryNodeRepeatOutput = value; break;
+		case 'GeometryNodeReplaceMaterial': GeometryNodeReplaceMaterial = value; break;
+		case 'GeometryNodeResampleCurve': GeometryNodeResampleCurve = value; break;
+		case 'GeometryNodeReverseCurve': GeometryNodeReverseCurve = value; break;
+		case 'GeometryNodeRotateInstances': GeometryNodeRotateInstances = value; break;
+		case 'GeometryNodeSDFGridBoolean': GeometryNodeSDFGridBoolean = value; break;
+		case 'GeometryNodeSDFGridFillet': GeometryNodeSDFGridFillet = value; break;
+		case 'GeometryNodeSDFGridLaplacian': GeometryNodeSDFGridLaplacian = value; break;
+		case 'GeometryNodeSDFGridMean': GeometryNodeSDFGridMean = value; break;
+		case 'GeometryNodeSDFGridMeanCurvature': GeometryNodeSDFGridMeanCurvature = value; break;
+		case 'GeometryNodeSDFGridMedian': GeometryNodeSDFGridMedian = value; break;
+		case 'GeometryNodeSDFGridOffset': GeometryNodeSDFGridOffset = value; break;
+		case 'GeometryNodeSampleCurve': GeometryNodeSampleCurve = value; break;
+		case 'GeometryNodeSampleGrid': GeometryNodeSampleGrid = value; break;
+		case 'GeometryNodeSampleGridIndex': GeometryNodeSampleGridIndex = value; break;
+		case 'GeometryNodeSampleIndex': GeometryNodeSampleIndex = value; break;
+		case 'GeometryNodeSampleNearest': GeometryNodeSampleNearest = value; break;
+		case 'GeometryNodeSampleNearestSurface': GeometryNodeSampleNearestSurface = value; break;
+		case 'GeometryNodeSampleSoundFrequencies': GeometryNodeSampleSoundFrequencies = value; break;
+		case 'GeometryNodeSampleUVSurface': GeometryNodeSampleUVSurface = value; break;
+		case 'GeometryNodeScaleElements': GeometryNodeScaleElements = value; break;
+		case 'GeometryNodeScaleInstances': GeometryNodeScaleInstances = value; break;
+		case 'GeometryNodeSelfObject': GeometryNodeSelfObject = value; break;
+		case 'GeometryNodeSeparateComponents': GeometryNodeSeparateComponents = value; break;
+		case 'GeometryNodeSeparateGeometry': GeometryNodeSeparateGeometry = value; break;
+		case 'GeometryNodeSetCurveHandlePositions': GeometryNodeSetCurveHandlePositions = value; break;
+		case 'GeometryNodeSetCurveNormal': GeometryNodeSetCurveNormal = value; break;
+		case 'GeometryNodeSetCurveRadius': GeometryNodeSetCurveRadius = value; break;
+		case 'GeometryNodeSetCurveTilt': GeometryNodeSetCurveTilt = value; break;
+		case 'GeometryNodeSetGeometryBundle': GeometryNodeSetGeometryBundle = value; break;
+		case 'GeometryNodeSetGeometryName': GeometryNodeSetGeometryName = value; break;
+		case 'GeometryNodeSetGreasePencilColor': GeometryNodeSetGreasePencilColor = value; break;
+		case 'GeometryNodeSetGreasePencilDepth': GeometryNodeSetGreasePencilDepth = value; break;
+		case 'GeometryNodeSetGreasePencilSoftness': GeometryNodeSetGreasePencilSoftness = value; break;
+		case 'GeometryNodeSetGridBackground': GeometryNodeSetGridBackground = value; break;
+		case 'GeometryNodeSetGridTransform': GeometryNodeSetGridTransform = value; break;
+		case 'GeometryNodeSetID': GeometryNodeSetID = value; break;
+		case 'GeometryNodeSetInstanceTransform': GeometryNodeSetInstanceTransform = value; break;
+		case 'GeometryNodeSetMaterial': GeometryNodeSetMaterial = value; break;
+		case 'GeometryNodeSetMaterialIndex': GeometryNodeSetMaterialIndex = value; break;
+		case 'GeometryNodeSetMeshNormal': GeometryNodeSetMeshNormal = value; break;
+		case 'GeometryNodeSetNURBSOrder': GeometryNodeSetNURBSOrder = value; break;
+		case 'GeometryNodeSetNURBSWeight': GeometryNodeSetNURBSWeight = value; break;
+		case 'GeometryNodeSetPointRadius': GeometryNodeSetPointRadius = value; break;
+		case 'GeometryNodeSetPosition': GeometryNodeSetPosition = value; break;
+		case 'GeometryNodeSetShadeSmooth': GeometryNodeSetShadeSmooth = value; break;
+		case 'GeometryNodeSetSplineCyclic': GeometryNodeSetSplineCyclic = value; break;
+		case 'GeometryNodeSetSplineResolution': GeometryNodeSetSplineResolution = value; break;
+		case 'GeometryNodeSimulationInput': GeometryNodeSimulationInput = value; break;
+		case 'GeometryNodeSimulationOutput': GeometryNodeSimulationOutput = value; break;
+		case 'GeometryNodeSortElements': GeometryNodeSortElements = value; break;
+		case 'GeometryNodeSortList': GeometryNodeSortList = value; break;
+		case 'GeometryNodeSplineLength': GeometryNodeSplineLength = value; break;
+		case 'GeometryNodeSplineParameter': GeometryNodeSplineParameter = value; break;
+		case 'GeometryNodeSplitEdges': GeometryNodeSplitEdges = value; break;
+		case 'GeometryNodeSplitToInstances': GeometryNodeSplitToInstances = value; break;
+		case 'GeometryNodeStoreNamedAttribute': GeometryNodeStoreNamedAttribute = value; break;
+		case 'GeometryNodeStoreNamedGrid': GeometryNodeStoreNamedGrid = value; break;
+		case 'GeometryNodeStringJoin': GeometryNodeStringJoin = value; break;
+		case 'GeometryNodeStringToCurves': GeometryNodeStringToCurves = value; break;
+		case 'GeometryNodeSubdivideCurve': GeometryNodeSubdivideCurve = value; break;
+		case 'GeometryNodeSubdivideMesh': GeometryNodeSubdivideMesh = value; break;
+		case 'GeometryNodeSubdivisionSurface': GeometryNodeSubdivisionSurface = value; break;
+		case 'GeometryNodeSwitch': GeometryNodeSwitch = value; break;
+		case 'GeometryNodeTagFilter': GeometryNodeTagFilter = value; break;
+		case 'GeometryNodeTool3DCursor': GeometryNodeTool3DCursor = value; break;
+		case 'GeometryNodeToolActiveElement': GeometryNodeToolActiveElement = value; break;
+		case 'GeometryNodeToolFaceSet': GeometryNodeToolFaceSet = value; break;
+		case 'GeometryNodeToolMousePosition': GeometryNodeToolMousePosition = value; break;
+		case 'GeometryNodeToolSelection': GeometryNodeToolSelection = value; break;
+		case 'GeometryNodeToolSetFaceSet': GeometryNodeToolSetFaceSet = value; break;
+		case 'GeometryNodeToolSetSelection': GeometryNodeToolSetSelection = value; break;
+		case 'GeometryNodeTransferAttributes': GeometryNodeTransferAttributes = value; break;
+		case 'GeometryNodeTransform': GeometryNodeTransform = value; break;
+		case 'GeometryNodeTranslateInstances': GeometryNodeTranslateInstances = value; break;
+		case 'GeometryNodeTree': GeometryNodeTree = value; break;
+		case 'GeometryNodeTriangulate': GeometryNodeTriangulate = value; break;
+		case 'GeometryNodeTrimCurve': GeometryNodeTrimCurve = value; break;
+		case 'GeometryNodeUVPackIslands': GeometryNodeUVPackIslands = value; break;
+		case 'GeometryNodeUVTangent': GeometryNodeUVTangent = value; break;
+		case 'GeometryNodeUVUnwrap': GeometryNodeUVUnwrap = value; break;
+		case 'GeometryNodeVertexOfCorner': GeometryNodeVertexOfCorner = value; break;
+		case 'GeometryNodeViewer': GeometryNodeViewer = value; break;
+		case 'GeometryNodeViewportTransform': GeometryNodeViewportTransform = value; break;
+		case 'GeometryNodeVolumeCube': GeometryNodeVolumeCube = value; break;
+		case 'GeometryNodeVolumeToMesh': GeometryNodeVolumeToMesh = value; break;
+		case 'GeometryNodeWarning': GeometryNodeWarning = value; break;
+		case 'GeometryNodeXPBDSolver': GeometryNodeXPBDSolver = value; break;
+		case 'IMAGE_AST_brush_paint': IMAGE_AST_brush_paint = value; break;
+		case 'IMAGE_FH_drop_handler': IMAGE_FH_drop_handler = value; break;
+		case 'IMAGE_HT_header': IMAGE_HT_header = value; break;
+		case 'IMAGE_HT_tool_header': IMAGE_HT_tool_header = value; break;
+		case 'IMAGE_MT_editor_menus': IMAGE_MT_editor_menus = value; break;
+		case 'IMAGE_MT_image': IMAGE_MT_image = value; break;
+		case 'IMAGE_MT_image_invert': IMAGE_MT_image_invert = value; break;
+		case 'IMAGE_MT_image_transform': IMAGE_MT_image_transform = value; break;
+		case 'IMAGE_MT_mask_context_menu': IMAGE_MT_mask_context_menu = value; break;
+		case 'IMAGE_MT_pivot_pie': IMAGE_MT_pivot_pie = value; break;
+		case 'IMAGE_MT_select': IMAGE_MT_select = value; break;
+		case 'IMAGE_MT_select_all_by_trait': IMAGE_MT_select_all_by_trait = value; break;
+		case 'IMAGE_MT_select_linked': IMAGE_MT_select_linked = value; break;
+		case 'IMAGE_MT_uvs': IMAGE_MT_uvs = value; break;
+		case 'IMAGE_MT_uvs_align': IMAGE_MT_uvs_align = value; break;
+		case 'IMAGE_MT_uvs_context_menu': IMAGE_MT_uvs_context_menu = value; break;
+		case 'IMAGE_MT_uvs_merge': IMAGE_MT_uvs_merge = value; break;
+		case 'IMAGE_MT_uvs_mirror': IMAGE_MT_uvs_mirror = value; break;
+		case 'IMAGE_MT_uvs_select_mode': IMAGE_MT_uvs_select_mode = value; break;
+		case 'IMAGE_MT_uvs_showhide': IMAGE_MT_uvs_showhide = value; break;
+		case 'IMAGE_MT_uvs_snap': IMAGE_MT_uvs_snap = value; break;
+		case 'IMAGE_MT_uvs_snap_pie': IMAGE_MT_uvs_snap_pie = value; break;
+		case 'IMAGE_MT_uvs_split': IMAGE_MT_uvs_split = value; break;
+		case 'IMAGE_MT_uvs_transform': IMAGE_MT_uvs_transform = value; break;
+		case 'IMAGE_MT_uvs_unwrap': IMAGE_MT_uvs_unwrap = value; break;
+		case 'IMAGE_MT_view': IMAGE_MT_view = value; break;
+		case 'IMAGE_MT_view_pie': IMAGE_MT_view_pie = value; break;
+		case 'IMAGE_MT_view_zoom': IMAGE_MT_view_zoom = value; break;
+		case 'IMAGE_OT_convert_to_mesh_plane': IMAGE_OT_convert_to_mesh_plane = value; break;
+		case 'IMAGE_OT_external_edit': IMAGE_OT_external_edit = value; break;
+		case 'IMAGE_OT_import_as_mesh_planes': IMAGE_OT_import_as_mesh_planes = value; break;
+		case 'IMAGE_OT_open_images': IMAGE_OT_open_images = value; break;
+		case 'IMAGE_OT_project_apply': IMAGE_OT_project_apply = value; break;
+		case 'IMAGE_OT_project_edit': IMAGE_OT_project_edit = value; break;
+		case 'IMAGE_PT_active_mask_point': IMAGE_PT_active_mask_point = value; break;
+		case 'IMAGE_PT_active_mask_spline': IMAGE_PT_active_mask_spline = value; break;
+		case 'IMAGE_PT_active_tool': IMAGE_PT_active_tool = value; break;
+		case 'IMAGE_PT_annotation': IMAGE_PT_annotation = value; break;
+		case 'IMAGE_PT_gizmo_display': IMAGE_PT_gizmo_display = value; break;
+		case 'IMAGE_PT_image_properties': IMAGE_PT_image_properties = value; break;
+		case 'IMAGE_PT_mask': IMAGE_PT_mask = value; break;
+		case 'IMAGE_PT_mask_animation': IMAGE_PT_mask_animation = value; break;
+		case 'IMAGE_PT_mask_layers': IMAGE_PT_mask_layers = value; break;
+		case 'IMAGE_PT_overlay': IMAGE_PT_overlay = value; break;
+		case 'IMAGE_PT_overlay_guides': IMAGE_PT_overlay_guides = value; break;
+		case 'IMAGE_PT_overlay_image': IMAGE_PT_overlay_image = value; break;
+		case 'IMAGE_PT_overlay_mask': IMAGE_PT_overlay_mask = value; break;
+		case 'IMAGE_PT_overlay_render_guides': IMAGE_PT_overlay_render_guides = value; break;
+		case 'IMAGE_PT_overlay_uv_display': IMAGE_PT_overlay_uv_display = value; break;
+		case 'IMAGE_PT_overlay_uv_edit_geometry': IMAGE_PT_overlay_uv_edit_geometry = value; break;
+		case 'IMAGE_PT_overlay_uv_stretch': IMAGE_PT_overlay_uv_stretch = value; break;
+		case 'IMAGE_PT_paint_clone': IMAGE_PT_paint_clone = value; break;
+		case 'IMAGE_PT_paint_color': IMAGE_PT_paint_color = value; break;
+		case 'IMAGE_PT_paint_curve': IMAGE_PT_paint_curve = value; break;
+		case 'IMAGE_PT_paint_select': IMAGE_PT_paint_select = value; break;
+		case 'IMAGE_PT_paint_settings': IMAGE_PT_paint_settings = value; break;
+		case 'IMAGE_PT_paint_settings_advanced': IMAGE_PT_paint_settings_advanced = value; break;
+		case 'IMAGE_PT_paint_stroke': IMAGE_PT_paint_stroke = value; break;
+		case 'IMAGE_PT_paint_stroke_smooth_stroke': IMAGE_PT_paint_stroke_smooth_stroke = value; break;
+		case 'IMAGE_PT_paint_swatches': IMAGE_PT_paint_swatches = value; break;
+		case 'IMAGE_PT_proportional_edit': IMAGE_PT_proportional_edit = value; break;
+		case 'IMAGE_PT_render_slots': IMAGE_PT_render_slots = value; break;
+		case 'IMAGE_PT_sample_line': IMAGE_PT_sample_line = value; break;
+		case 'IMAGE_PT_scope_sample': IMAGE_PT_scope_sample = value; break;
+		case 'IMAGE_PT_snapping': IMAGE_PT_snapping = value; break;
+		case 'IMAGE_PT_tools_active': IMAGE_PT_tools_active = value; break;
+		case 'IMAGE_PT_tools_brush_display': IMAGE_PT_tools_brush_display = value; break;
+		case 'IMAGE_PT_tools_brush_texture': IMAGE_PT_tools_brush_texture = value; break;
+		case 'IMAGE_PT_tools_imagepaint_symmetry': IMAGE_PT_tools_imagepaint_symmetry = value; break;
+		case 'IMAGE_PT_tools_mask_texture': IMAGE_PT_tools_mask_texture = value; break;
+		case 'IMAGE_PT_udim_tiles': IMAGE_PT_udim_tiles = value; break;
+		case 'IMAGE_PT_uv_cursor': IMAGE_PT_uv_cursor = value; break;
+		case 'IMAGE_PT_uv_sculpt_curve': IMAGE_PT_uv_sculpt_curve = value; break;
+		case 'IMAGE_PT_uv_sculpt_options': IMAGE_PT_uv_sculpt_options = value; break;
+		case 'IMAGE_PT_view_display': IMAGE_PT_view_display = value; break;
+		case 'IMAGE_PT_view_histogram': IMAGE_PT_view_histogram = value; break;
+		case 'IMAGE_PT_view_vectorscope': IMAGE_PT_view_vectorscope = value; break;
+		case 'IMAGE_PT_view_waveform': IMAGE_PT_view_waveform = value; break;
+		case 'IMAGE_UL_render_slots': IMAGE_UL_render_slots = value; break;
+		case 'IMAGE_UL_udim_tiles': IMAGE_UL_udim_tiles = value; break;
+		case 'IMPORT_ANIM_OT_bvh': IMPORT_ANIM_OT_bvh = value; break;
+		case 'IMPORT_CURVE_OT_svg': IMPORT_CURVE_OT_svg = value; break;
+		case 'IMPORT_SCENE_OT_fbx': IMPORT_SCENE_OT_fbx = value; break;
+		case 'IMPORT_SCENE_OT_gltf': IMPORT_SCENE_OT_gltf = value; break;
+		case 'INFO_HT_header': INFO_HT_header = value; break;
+		case 'INFO_MT_area': INFO_MT_area = value; break;
+		case 'INFO_MT_context_menu': INFO_MT_context_menu = value; break;
+		case 'INFO_MT_editor_menus': INFO_MT_editor_menus = value; break;
+		case 'INFO_MT_info': INFO_MT_info = value; break;
+		case 'INFO_MT_view': INFO_MT_view = value; break;
+		case 'IO_FH_gltf2': IO_FH_gltf2 = value; break;
+		case 'IO_FH_svg_as_curves': IO_FH_svg_as_curves = value; break;
+		case 'ImageTexture': ImageTexture = value; break;
+		case 'MASK_MT_add': MASK_MT_add = value; break;
+		case 'MASK_MT_animation': MASK_MT_animation = value; break;
+		case 'MASK_MT_mask': MASK_MT_mask = value; break;
+		case 'MASK_MT_move_to_layer': MASK_MT_move_to_layer = value; break;
+		case 'MASK_MT_select': MASK_MT_select = value; break;
+		case 'MASK_MT_transform': MASK_MT_transform = value; break;
+		case 'MASK_MT_visibility': MASK_MT_visibility = value; break;
+		case 'MASK_UL_layers': MASK_UL_layers = value; break;
+		case 'MATERIAL_MT_context_menu': MATERIAL_MT_context_menu = value; break;
+		case 'MATERIAL_PT_animation': MATERIAL_PT_animation = value; break;
+		case 'MATERIAL_PT_custom_props': MATERIAL_PT_custom_props = value; break;
+		case 'MATERIAL_PT_freestyle_line': MATERIAL_PT_freestyle_line = value; break;
+		case 'MATERIAL_PT_gpencil_animation': MATERIAL_PT_gpencil_animation = value; break;
+		case 'MATERIAL_PT_gpencil_custom_props': MATERIAL_PT_gpencil_custom_props = value; break;
+		case 'MATERIAL_PT_gpencil_fillcolor': MATERIAL_PT_gpencil_fillcolor = value; break;
+		case 'MATERIAL_PT_gpencil_material_presets': MATERIAL_PT_gpencil_material_presets = value; break;
+		case 'MATERIAL_PT_gpencil_preview': MATERIAL_PT_gpencil_preview = value; break;
+		case 'MATERIAL_PT_gpencil_random': MATERIAL_PT_gpencil_random = value; break;
+		case 'MATERIAL_PT_gpencil_settings': MATERIAL_PT_gpencil_settings = value; break;
+		case 'MATERIAL_PT_gpencil_slots': MATERIAL_PT_gpencil_slots = value; break;
+		case 'MATERIAL_PT_gpencil_strokecolor': MATERIAL_PT_gpencil_strokecolor = value; break;
+		case 'MATERIAL_PT_gpencil_surface': MATERIAL_PT_gpencil_surface = value; break;
+		case 'MATERIAL_PT_lineart': MATERIAL_PT_lineart = value; break;
+		case 'MATERIAL_PT_preview': MATERIAL_PT_preview = value; break;
+		case 'MATERIAL_PT_viewport': MATERIAL_PT_viewport = value; break;
+		case 'MATERIAL_UL_matslots': MATERIAL_UL_matslots = value; break;
+		case 'MESH_MT_attribute_context_menu': MESH_MT_attribute_context_menu = value; break;
+		case 'MESH_MT_color_attribute_context_menu': MESH_MT_color_attribute_context_menu = value; break;
+		case 'MESH_MT_shape_key_context_menu': MESH_MT_shape_key_context_menu = value; break;
+		case 'MESH_MT_shape_key_tree_context_menu': MESH_MT_shape_key_tree_context_menu = value; break;
+		case 'MESH_MT_vertex_group_context_menu': MESH_MT_vertex_group_context_menu = value; break;
+		case 'MESH_OT_primitive_torus_add': MESH_OT_primitive_torus_add = value; break;
+		case 'MESH_OT_select_next_item': MESH_OT_select_next_item = value; break;
+		case 'MESH_OT_select_prev_item': MESH_OT_select_prev_item = value; break;
+		case 'MESH_UL_attributes': MESH_UL_attributes = value; break;
+		case 'MESH_UL_color_attributes': MESH_UL_color_attributes = value; break;
+		case 'MESH_UL_color_attributes_selector': MESH_UL_color_attributes_selector = value; break;
+		case 'MESH_UL_uvmaps': MESH_UL_uvmaps = value; break;
+		case 'MESH_UL_vgroups': MESH_UL_vgroups = value; break;
+		case 'MagicTexture': MagicTexture = value; break;
+		case 'MarbleTexture': MarbleTexture = value; break;
+		case 'MusgraveTexture': MusgraveTexture = value; break;
+		case 'NLA_HT_header': NLA_HT_header = value; break;
+		case 'NLA_HT_playback_controls': NLA_HT_playback_controls = value; break;
+		case 'NLA_MT_add': NLA_MT_add = value; break;
+		case 'NLA_MT_channel_context_menu': NLA_MT_channel_context_menu = value; break;
+		case 'NLA_MT_context_menu': NLA_MT_context_menu = value; break;
+		case 'NLA_MT_editor_menus': NLA_MT_editor_menus = value; break;
+		case 'NLA_MT_marker': NLA_MT_marker = value; break;
+		case 'NLA_MT_marker_select': NLA_MT_marker_select = value; break;
+		case 'NLA_MT_select': NLA_MT_select = value; break;
+		case 'NLA_MT_snap_pie': NLA_MT_snap_pie = value; break;
+		case 'NLA_MT_strips': NLA_MT_strips = value; break;
+		case 'NLA_MT_strips_transform': NLA_MT_strips_transform = value; break;
+		case 'NLA_MT_tracks': NLA_MT_tracks = value; break;
+		case 'NLA_MT_view': NLA_MT_view = value; break;
+		case 'NLA_MT_view_pie': NLA_MT_view_pie = value; break;
+		case 'NLA_OT_bake': NLA_OT_bake = value; break;
+		case 'NLA_PT_action': NLA_PT_action = value; break;
+		case 'NLA_PT_filters': NLA_PT_filters = value; break;
+		case 'NLA_PT_snapping': NLA_PT_snapping = value; break;
+		case 'NODE_AST_compositor': NODE_AST_compositor = value; break;
+		case 'NODE_CYCLES_LIGHT_PT_beam_shape': NODE_CYCLES_LIGHT_PT_beam_shape = value; break;
+		case 'NODE_CYCLES_LIGHT_PT_light': NODE_CYCLES_LIGHT_PT_light = value; break;
+		case 'NODE_CYCLES_LIGHT_PT_settings': NODE_CYCLES_LIGHT_PT_settings = value; break;
+		case 'NODE_CYCLES_MATERIAL_PT_settings': NODE_CYCLES_MATERIAL_PT_settings = value; break;
+		case 'NODE_CYCLES_MATERIAL_PT_settings_surface': NODE_CYCLES_MATERIAL_PT_settings_surface = value; break;
+		case 'NODE_CYCLES_MATERIAL_PT_settings_volume': NODE_CYCLES_MATERIAL_PT_settings_volume = value; break;
+		case 'NODE_CYCLES_WORLD_PT_ray_visibility': NODE_CYCLES_WORLD_PT_ray_visibility = value; break;
+		case 'NODE_CYCLES_WORLD_PT_settings': NODE_CYCLES_WORLD_PT_settings = value; break;
+		case 'NODE_CYCLES_WORLD_PT_settings_surface': NODE_CYCLES_WORLD_PT_settings_surface = value; break;
+		case 'NODE_CYCLES_WORLD_PT_settings_volume': NODE_CYCLES_WORLD_PT_settings_volume = value; break;
+		case 'NODE_DATA_PT_EEVEE_light': NODE_DATA_PT_EEVEE_light = value; break;
+		case 'NODE_DATA_PT_light': NODE_DATA_PT_light = value; break;
+		case 'NODE_EEVEE_MATERIAL_PT_settings': NODE_EEVEE_MATERIAL_PT_settings = value; break;
+		case 'NODE_EEVEE_MATERIAL_PT_settings_surface': NODE_EEVEE_MATERIAL_PT_settings_surface = value; break;
+		case 'NODE_EEVEE_MATERIAL_PT_settings_volume': NODE_EEVEE_MATERIAL_PT_settings_volume = value; break;
+		case 'NODE_FH_image_node': NODE_FH_image_node = value; break;
+		case 'NODE_HT_header': NODE_HT_header = value; break;
+		case 'NODE_MATERIAL_PT_viewport': NODE_MATERIAL_PT_viewport = value; break;
+		case 'NODE_MT_add': NODE_MT_add = value; break;
+		case 'NODE_MT_category_GEO_OUTPUT': NODE_MT_category_GEO_OUTPUT = value; break;
+		case 'NODE_MT_category_GEO_POINT': NODE_MT_category_GEO_POINT = value; break;
+		case 'NODE_MT_category_GEO_TEXT': NODE_MT_category_GEO_TEXT = value; break;
+		case 'NODE_MT_category_GEO_TEXTURE': NODE_MT_category_GEO_TEXTURE = value; break;
+		case 'NODE_MT_category_GEO_UTILITIES': NODE_MT_category_GEO_UTILITIES = value; break;
+		case 'NODE_MT_category_GEO_UTILITIES_DEPRECATED': NODE_MT_category_GEO_UTILITIES_DEPRECATED = value; break;
+		case 'NODE_MT_category_GEO_UTILITIES_FIELD': NODE_MT_category_GEO_UTILITIES_FIELD = value; break;
+		case 'NODE_MT_category_GEO_UTILITIES_MATH': NODE_MT_category_GEO_UTILITIES_MATH = value; break;
+		case 'NODE_MT_category_GEO_UTILITIES_ROTATION': NODE_MT_category_GEO_UTILITIES_ROTATION = value; break;
+		case 'NODE_MT_category_GEO_UV': NODE_MT_category_GEO_UV = value; break;
+		case 'NODE_MT_category_GEO_VECTOR': NODE_MT_category_GEO_VECTOR = value; break;
+		case 'NODE_MT_category_GEO_VOLUME': NODE_MT_category_GEO_VOLUME = value; break;
+		case 'NODE_MT_category_PRIMITIVES_MESH': NODE_MT_category_PRIMITIVES_MESH = value; break;
+		case 'NODE_MT_category_compositor_color': NODE_MT_category_compositor_color = value; break;
+		case 'NODE_MT_category_compositor_color_adjust': NODE_MT_category_compositor_color_adjust = value; break;
+		case 'NODE_MT_category_compositor_creative': NODE_MT_category_compositor_creative = value; break;
+		case 'NODE_MT_category_compositor_creative_swap': NODE_MT_category_compositor_creative_swap = value; break;
+		case 'NODE_MT_category_compositor_filter': NODE_MT_category_compositor_filter = value; break;
+		case 'NODE_MT_category_compositor_filter_blur': NODE_MT_category_compositor_filter_blur = value; break;
+		case 'NODE_MT_category_compositor_input': NODE_MT_category_compositor_input = value; break;
+		case 'NODE_MT_category_compositor_input_constant': NODE_MT_category_compositor_input_constant = value; break;
+		case 'NODE_MT_category_compositor_input_scene': NODE_MT_category_compositor_input_scene = value; break;
+		case 'NODE_MT_category_compositor_keying': NODE_MT_category_compositor_keying = value; break;
+		case 'NODE_MT_category_compositor_mask': NODE_MT_category_compositor_mask = value; break;
+		case 'NODE_MT_category_compositor_math': NODE_MT_category_compositor_math = value; break;
+		case 'NODE_MT_category_compositor_matrix': NODE_MT_category_compositor_matrix = value; break;
+		case 'NODE_MT_category_compositor_output': NODE_MT_category_compositor_output = value; break;
+		case 'NODE_MT_category_compositor_rotation': NODE_MT_category_compositor_rotation = value; break;
+		case 'NODE_MT_category_compositor_text': NODE_MT_category_compositor_text = value; break;
+		case 'NODE_MT_category_compositor_texture': NODE_MT_category_compositor_texture = value; break;
+		case 'NODE_MT_category_compositor_tracking': NODE_MT_category_compositor_tracking = value; break;
+		case 'NODE_MT_category_compositor_transform': NODE_MT_category_compositor_transform = value; break;
+		case 'NODE_MT_category_compositor_utilities': NODE_MT_category_compositor_utilities = value; break;
+		case 'NODE_MT_category_compositor_vector': NODE_MT_category_compositor_vector = value; break;
+		case 'NODE_MT_category_import': NODE_MT_category_import = value; break;
+		case 'NODE_MT_category_layout': NODE_MT_category_layout = value; break;
+		case 'NODE_MT_category_shader_color': NODE_MT_category_shader_color = value; break;
+		case 'NODE_MT_category_shader_displacement': NODE_MT_category_shader_displacement = value; break;
+		case 'NODE_MT_category_shader_input': NODE_MT_category_shader_input = value; break;
+		case 'NODE_MT_category_shader_input_constant': NODE_MT_category_shader_input_constant = value; break;
+		case 'NODE_MT_category_shader_math': NODE_MT_category_shader_math = value; break;
+		case 'NODE_MT_category_shader_output': NODE_MT_category_shader_output = value; break;
+		case 'NODE_MT_category_shader_shader': NODE_MT_category_shader_shader = value; break;
+		case 'NODE_MT_category_shader_texture': NODE_MT_category_shader_texture = value; break;
+		case 'NODE_MT_category_shader_utilities': NODE_MT_category_shader_utilities = value; break;
+		case 'NODE_MT_category_shader_vector': NODE_MT_category_shader_vector = value; break;
+		case 'NODE_MT_category_simulation': NODE_MT_category_simulation = value; break;
+		case 'NODE_MT_category_texture_color': NODE_MT_category_texture_color = value; break;
+		case 'NODE_MT_category_texture_converter': NODE_MT_category_texture_converter = value; break;
+		case 'NODE_MT_category_texture_distort': NODE_MT_category_texture_distort = value; break;
+		case 'NODE_MT_category_texture_input': NODE_MT_category_texture_input = value; break;
+		case 'NODE_MT_category_texture_output': NODE_MT_category_texture_output = value; break;
+		case 'NODE_MT_category_texture_pattern': NODE_MT_category_texture_pattern = value; break;
+		case 'NODE_MT_category_texture_texture': NODE_MT_category_texture_texture = value; break;
+		case 'NODE_MT_category_utilities_bundle': NODE_MT_category_utilities_bundle = value; break;
+		case 'NODE_MT_category_utilities_closure': NODE_MT_category_utilities_closure = value; break;
+		case 'NODE_MT_category_utilities_list': NODE_MT_category_utilities_list = value; break;
+		case 'NODE_MT_category_utilities_matrix': NODE_MT_category_utilities_matrix = value; break;
+		case 'NODE_MT_category_utilities_sound': NODE_MT_category_utilities_sound = value; break;
+		case 'NODE_MT_compositor_node_add_all': NODE_MT_compositor_node_add_all = value; break;
+		case 'NODE_MT_compositor_node_color_adjust_swap': NODE_MT_compositor_node_color_adjust_swap = value; break;
+		case 'NODE_MT_compositor_node_color_swap': NODE_MT_compositor_node_color_swap = value; break;
+		case 'NODE_MT_compositor_node_filter_blur_swap': NODE_MT_compositor_node_filter_blur_swap = value; break;
+		case 'NODE_MT_compositor_node_filter_swap': NODE_MT_compositor_node_filter_swap = value; break;
+		case 'NODE_MT_compositor_node_input_constant_swap': NODE_MT_compositor_node_input_constant_swap = value; break;
+		case 'NODE_MT_compositor_node_input_scene_swap': NODE_MT_compositor_node_input_scene_swap = value; break;
+		case 'NODE_MT_compositor_node_input_swap': NODE_MT_compositor_node_input_swap = value; break;
+		case 'NODE_MT_compositor_node_keying_swap': NODE_MT_compositor_node_keying_swap = value; break;
+		case 'NODE_MT_compositor_node_mask_swap': NODE_MT_compositor_node_mask_swap = value; break;
+		case 'NODE_MT_compositor_node_math_swap': NODE_MT_compositor_node_math_swap = value; break;
+		case 'NODE_MT_compositor_node_matrix_swap': NODE_MT_compositor_node_matrix_swap = value; break;
+		case 'NODE_MT_compositor_node_output_swap': NODE_MT_compositor_node_output_swap = value; break;
+		case 'NODE_MT_compositor_node_rotation_swap': NODE_MT_compositor_node_rotation_swap = value; break;
+		case 'NODE_MT_compositor_node_swap_all': NODE_MT_compositor_node_swap_all = value; break;
+		case 'NODE_MT_compositor_node_text_swap': NODE_MT_compositor_node_text_swap = value; break;
+		case 'NODE_MT_compositor_node_texture_swap': NODE_MT_compositor_node_texture_swap = value; break;
+		case 'NODE_MT_compositor_node_tracking_swap': NODE_MT_compositor_node_tracking_swap = value; break;
+		case 'NODE_MT_compositor_node_transform_swap': NODE_MT_compositor_node_transform_swap = value; break;
+		case 'NODE_MT_compositor_node_utilities_swap': NODE_MT_compositor_node_utilities_swap = value; break;
+		case 'NODE_MT_compositor_node_vector_swap': NODE_MT_compositor_node_vector_swap = value; break;
+		case 'NODE_MT_context_menu': NODE_MT_context_menu = value; break;
+		case 'NODE_MT_context_menu_select_menu': NODE_MT_context_menu_select_menu = value; break;
+		case 'NODE_MT_context_menu_show_hide_menu': NODE_MT_context_menu_show_hide_menu = value; break;
+		case 'NODE_MT_editor_menus': NODE_MT_editor_menus = value; break;
+		case 'NODE_MT_geometry_node_GEO_ATTRIBUTE': NODE_MT_geometry_node_GEO_ATTRIBUTE = value; break;
+		case 'NODE_MT_geometry_node_GEO_COLOR': NODE_MT_geometry_node_GEO_COLOR = value; break;
+		case 'NODE_MT_geometry_node_GEO_CURVE': NODE_MT_geometry_node_GEO_CURVE = value; break;
+		case 'NODE_MT_geometry_node_GEO_CURVE_OPERATIONS': NODE_MT_geometry_node_GEO_CURVE_OPERATIONS = value; break;
+		case 'NODE_MT_geometry_node_GEO_CURVE_READ': NODE_MT_geometry_node_GEO_CURVE_READ = value; break;
+		case 'NODE_MT_geometry_node_GEO_CURVE_SAMPLE': NODE_MT_geometry_node_GEO_CURVE_SAMPLE = value; break;
+		case 'NODE_MT_geometry_node_GEO_CURVE_WRITE': NODE_MT_geometry_node_GEO_CURVE_WRITE = value; break;
+		case 'NODE_MT_geometry_node_GEO_GEOMETRY': NODE_MT_geometry_node_GEO_GEOMETRY = value; break;
+		case 'NODE_MT_geometry_node_GEO_GEOMETRY_OPERATIONS': NODE_MT_geometry_node_GEO_GEOMETRY_OPERATIONS = value; break;
+		case 'NODE_MT_geometry_node_GEO_GEOMETRY_READ': NODE_MT_geometry_node_GEO_GEOMETRY_READ = value; break;
+		case 'NODE_MT_geometry_node_GEO_GEOMETRY_SAMPLE': NODE_MT_geometry_node_GEO_GEOMETRY_SAMPLE = value; break;
+		case 'NODE_MT_geometry_node_GEO_GEOMETRY_WRITE': NODE_MT_geometry_node_GEO_GEOMETRY_WRITE = value; break;
+		case 'NODE_MT_geometry_node_GEO_INPUT': NODE_MT_geometry_node_GEO_INPUT = value; break;
+		case 'NODE_MT_geometry_node_GEO_INPUT_CONSTANT': NODE_MT_geometry_node_GEO_INPUT_CONSTANT = value; break;
+		case 'NODE_MT_geometry_node_GEO_INPUT_GIZMO': NODE_MT_geometry_node_GEO_INPUT_GIZMO = value; break;
+		case 'NODE_MT_geometry_node_GEO_INPUT_GROUP': NODE_MT_geometry_node_GEO_INPUT_GROUP = value; break;
+		case 'NODE_MT_geometry_node_GEO_INPUT_SCENE': NODE_MT_geometry_node_GEO_INPUT_SCENE = value; break;
+		case 'NODE_MT_geometry_node_GEO_INSTANCE': NODE_MT_geometry_node_GEO_INSTANCE = value; break;
+		case 'NODE_MT_geometry_node_GEO_MATERIAL': NODE_MT_geometry_node_GEO_MATERIAL = value; break;
+		case 'NODE_MT_geometry_node_GEO_MESH': NODE_MT_geometry_node_GEO_MESH = value; break;
+		case 'NODE_MT_geometry_node_GEO_MESH_OPERATIONS': NODE_MT_geometry_node_GEO_MESH_OPERATIONS = value; break;
+		case 'NODE_MT_geometry_node_GEO_MESH_READ': NODE_MT_geometry_node_GEO_MESH_READ = value; break;
+		case 'NODE_MT_geometry_node_GEO_MESH_SAMPLE': NODE_MT_geometry_node_GEO_MESH_SAMPLE = value; break;
+		case 'NODE_MT_geometry_node_GEO_MESH_WRITE': NODE_MT_geometry_node_GEO_MESH_WRITE = value; break;
+		case 'NODE_MT_geometry_node_GEO_PRIMITIVES_CURVE': NODE_MT_geometry_node_GEO_PRIMITIVES_CURVE = value; break;
+		case 'NODE_MT_geometry_node_GEO_VOLUME_OPERATIONS': NODE_MT_geometry_node_GEO_VOLUME_OPERATIONS = value; break;
+		case 'NODE_MT_geometry_node_GEO_VOLUME_PRIMITIVES': NODE_MT_geometry_node_GEO_VOLUME_PRIMITIVES = value; break;
+		case 'NODE_MT_geometry_node_GEO_VOLUME_READ': NODE_MT_geometry_node_GEO_VOLUME_READ = value; break;
+		case 'NODE_MT_geometry_node_GEO_VOLUME_WRITE': NODE_MT_geometry_node_GEO_VOLUME_WRITE = value; break;
+		case 'NODE_MT_geometry_node_add_all': NODE_MT_geometry_node_add_all = value; break;
+		case 'NODE_MT_geometry_node_curve_topology': NODE_MT_geometry_node_curve_topology = value; break;
+		case 'NODE_MT_geometry_node_grease_pencil': NODE_MT_geometry_node_grease_pencil = value; break;
+		case 'NODE_MT_geometry_node_grease_pencil_operations': NODE_MT_geometry_node_grease_pencil_operations = value; break;
+		case 'NODE_MT_geometry_node_grease_pencil_read': NODE_MT_geometry_node_grease_pencil_read = value; break;
+		case 'NODE_MT_geometry_node_grease_pencil_write': NODE_MT_geometry_node_grease_pencil_write = value; break;
+		case 'NODE_MT_geometry_node_mesh_topology': NODE_MT_geometry_node_mesh_topology = value; break;
+		case 'NODE_MT_geometry_node_swap_all': NODE_MT_geometry_node_swap_all = value; break;
+		case 'NODE_MT_geometry_node_volume_sample': NODE_MT_geometry_node_volume_sample = value; break;
+		case 'NODE_MT_gn_attribute_swap': NODE_MT_gn_attribute_swap = value; break;
+		case 'NODE_MT_gn_color_swap': NODE_MT_gn_color_swap = value; break;
+		case 'NODE_MT_gn_curve_operations_swap': NODE_MT_gn_curve_operations_swap = value; break;
+		case 'NODE_MT_gn_curve_primitives_swap': NODE_MT_gn_curve_primitives_swap = value; break;
+		case 'NODE_MT_gn_curve_read_swap': NODE_MT_gn_curve_read_swap = value; break;
+		case 'NODE_MT_gn_curve_sample_swap': NODE_MT_gn_curve_sample_swap = value; break;
+		case 'NODE_MT_gn_curve_swap': NODE_MT_gn_curve_swap = value; break;
+		case 'NODE_MT_gn_curve_topology_swap': NODE_MT_gn_curve_topology_swap = value; break;
+		case 'NODE_MT_gn_curve_write_swap': NODE_MT_gn_curve_write_swap = value; break;
+		case 'NODE_MT_gn_geometry_operations_swap': NODE_MT_gn_geometry_operations_swap = value; break;
+		case 'NODE_MT_gn_geometry_read_swap': NODE_MT_gn_geometry_read_swap = value; break;
+		case 'NODE_MT_gn_geometry_sample_swap': NODE_MT_gn_geometry_sample_swap = value; break;
+		case 'NODE_MT_gn_geometry_swap': NODE_MT_gn_geometry_swap = value; break;
+		case 'NODE_MT_gn_geometry_write_swap': NODE_MT_gn_geometry_write_swap = value; break;
+		case 'NODE_MT_gn_grease_pencil_operations_swap': NODE_MT_gn_grease_pencil_operations_swap = value; break;
+		case 'NODE_MT_gn_grease_pencil_read_swap': NODE_MT_gn_grease_pencil_read_swap = value; break;
+		case 'NODE_MT_gn_grease_pencil_swap': NODE_MT_gn_grease_pencil_swap = value; break;
+		case 'NODE_MT_gn_grease_pencil_write_swap': NODE_MT_gn_grease_pencil_write_swap = value; break;
+		case 'NODE_MT_gn_input_constant_swap': NODE_MT_gn_input_constant_swap = value; break;
+		case 'NODE_MT_gn_input_gizmo_swap': NODE_MT_gn_input_gizmo_swap = value; break;
+		case 'NODE_MT_gn_input_group_swap': NODE_MT_gn_input_group_swap = value; break;
+		case 'NODE_MT_gn_input_import_swap': NODE_MT_gn_input_import_swap = value; break;
+		case 'NODE_MT_gn_input_scene_swap': NODE_MT_gn_input_scene_swap = value; break;
+		case 'NODE_MT_gn_input_swap': NODE_MT_gn_input_swap = value; break;
+		case 'NODE_MT_gn_instance_swap': NODE_MT_gn_instance_swap = value; break;
+		case 'NODE_MT_gn_material_swap': NODE_MT_gn_material_swap = value; break;
+		case 'NODE_MT_gn_mesh_operations_swap': NODE_MT_gn_mesh_operations_swap = value; break;
+		case 'NODE_MT_gn_mesh_primitives_swap': NODE_MT_gn_mesh_primitives_swap = value; break;
+		case 'NODE_MT_gn_mesh_read_swap': NODE_MT_gn_mesh_read_swap = value; break;
+		case 'NODE_MT_gn_mesh_sample_swap': NODE_MT_gn_mesh_sample_swap = value; break;
+		case 'NODE_MT_gn_mesh_swap': NODE_MT_gn_mesh_swap = value; break;
+		case 'NODE_MT_gn_mesh_topology_swap': NODE_MT_gn_mesh_topology_swap = value; break;
+		case 'NODE_MT_gn_mesh_uv_swap': NODE_MT_gn_mesh_uv_swap = value; break;
+		case 'NODE_MT_gn_mesh_write_swap': NODE_MT_gn_mesh_write_swap = value; break;
+		case 'NODE_MT_gn_output_swap': NODE_MT_gn_output_swap = value; break;
+		case 'NODE_MT_gn_point_swap': NODE_MT_gn_point_swap = value; break;
+		case 'NODE_MT_gn_simulation_swap': NODE_MT_gn_simulation_swap = value; break;
+		case 'NODE_MT_gn_texture_swap': NODE_MT_gn_texture_swap = value; break;
+		case 'NODE_MT_gn_utilities_bundle_swap': NODE_MT_gn_utilities_bundle_swap = value; break;
+		case 'NODE_MT_gn_utilities_closure_swap': NODE_MT_gn_utilities_closure_swap = value; break;
+		case 'NODE_MT_gn_utilities_deprecated_swap': NODE_MT_gn_utilities_deprecated_swap = value; break;
+		case 'NODE_MT_gn_utilities_field_swap': NODE_MT_gn_utilities_field_swap = value; break;
+		case 'NODE_MT_gn_utilities_list_swap': NODE_MT_gn_utilities_list_swap = value; break;
+		case 'NODE_MT_gn_utilities_math_swap': NODE_MT_gn_utilities_math_swap = value; break;
+		case 'NODE_MT_gn_utilities_matrix_swap': NODE_MT_gn_utilities_matrix_swap = value; break;
+		case 'NODE_MT_gn_utilities_rotation_swap': NODE_MT_gn_utilities_rotation_swap = value; break;
+		case 'NODE_MT_gn_utilities_sound_swap': NODE_MT_gn_utilities_sound_swap = value; break;
+		case 'NODE_MT_gn_utilities_swap': NODE_MT_gn_utilities_swap = value; break;
+		case 'NODE_MT_gn_utilities_text_swap': NODE_MT_gn_utilities_text_swap = value; break;
+		case 'NODE_MT_gn_utilities_vector_swap': NODE_MT_gn_utilities_vector_swap = value; break;
+		case 'NODE_MT_gn_volume_operations_swap': NODE_MT_gn_volume_operations_swap = value; break;
+		case 'NODE_MT_gn_volume_primitives_swap': NODE_MT_gn_volume_primitives_swap = value; break;
+		case 'NODE_MT_gn_volume_read_swap': NODE_MT_gn_volume_read_swap = value; break;
+		case 'NODE_MT_gn_volume_sample_swap': NODE_MT_gn_volume_sample_swap = value; break;
+		case 'NODE_MT_gn_volume_swap': NODE_MT_gn_volume_swap = value; break;
+		case 'NODE_MT_gn_volume_write_swap': NODE_MT_gn_volume_write_swap = value; break;
+		case 'NODE_MT_group_add': NODE_MT_group_add = value; break;
+		case 'NODE_MT_group_swap': NODE_MT_group_swap = value; break;
+		case 'NODE_MT_layout_swap': NODE_MT_layout_swap = value; break;
+		case 'NODE_MT_linked_group_add': NODE_MT_linked_group_add = value; break;
+		case 'NODE_MT_linked_group_swap': NODE_MT_linked_group_swap = value; break;
+		case 'NODE_MT_node': NODE_MT_node = value; break;
+		case 'NODE_MT_node_color_context_menu': NODE_MT_node_color_context_menu = value; break;
+		case 'NODE_MT_node_tree_interface_context_menu': NODE_MT_node_tree_interface_context_menu = value; break;
+		case 'NODE_MT_node_tree_interface_new_item': NODE_MT_node_tree_interface_new_item = value; break;
+		case 'NODE_MT_select': NODE_MT_select = value; break;
+		case 'NODE_MT_shader_node_add_all': NODE_MT_shader_node_add_all = value; break;
+		case 'NODE_MT_shader_node_color_swap': NODE_MT_shader_node_color_swap = value; break;
+		case 'NODE_MT_shader_node_displacement_swap': NODE_MT_shader_node_displacement_swap = value; break;
+		case 'NODE_MT_shader_node_input_constant_swap': NODE_MT_shader_node_input_constant_swap = value; break;
+		case 'NODE_MT_shader_node_input_swap': NODE_MT_shader_node_input_swap = value; break;
+		case 'NODE_MT_shader_node_math_swap': NODE_MT_shader_node_math_swap = value; break;
+		case 'NODE_MT_shader_node_output_swap': NODE_MT_shader_node_output_swap = value; break;
+		case 'NODE_MT_shader_node_shader_swap': NODE_MT_shader_node_shader_swap = value; break;
+		case 'NODE_MT_shader_node_swap_all': NODE_MT_shader_node_swap_all = value; break;
+		case 'NODE_MT_shader_node_texture_swap': NODE_MT_shader_node_texture_swap = value; break;
+		case 'NODE_MT_shader_node_utilities_swap': NODE_MT_shader_node_utilities_swap = value; break;
+		case 'NODE_MT_shader_node_vector_swap': NODE_MT_shader_node_vector_swap = value; break;
+		case 'NODE_MT_swap': NODE_MT_swap = value; break;
+		case 'NODE_MT_texture_node_add_all': NODE_MT_texture_node_add_all = value; break;
+		case 'NODE_MT_texture_node_color_swap': NODE_MT_texture_node_color_swap = value; break;
+		case 'NODE_MT_texture_node_converter_swap': NODE_MT_texture_node_converter_swap = value; break;
+		case 'NODE_MT_texture_node_distort_swap': NODE_MT_texture_node_distort_swap = value; break;
+		case 'NODE_MT_texture_node_input_swap': NODE_MT_texture_node_input_swap = value; break;
+		case 'NODE_MT_texture_node_output_swap': NODE_MT_texture_node_output_swap = value; break;
+		case 'NODE_MT_texture_node_pattern_swap': NODE_MT_texture_node_pattern_swap = value; break;
+		case 'NODE_MT_texture_node_swap_all': NODE_MT_texture_node_swap_all = value; break;
+		case 'NODE_MT_texture_node_texture_swap': NODE_MT_texture_node_texture_swap = value; break;
+		case 'NODE_MT_view': NODE_MT_view = value; break;
+		case 'NODE_MT_view_pie': NODE_MT_view_pie = value; break;
+		case 'NODE_OT_add_closure_zone': NODE_OT_add_closure_zone = value; break;
+		case 'NODE_OT_add_empty_group': NODE_OT_add_empty_group = value; break;
+		case 'NODE_OT_add_foreach_geometry_element_zone': NODE_OT_add_foreach_geometry_element_zone = value; break;
+		case 'NODE_OT_add_node': NODE_OT_add_node = value; break;
+		case 'NODE_OT_add_repeat_zone': NODE_OT_add_repeat_zone = value; break;
+		case 'NODE_OT_add_simulation_zone': NODE_OT_add_simulation_zone = value; break;
+		case 'NODE_OT_add_typed_bundle': NODE_OT_add_typed_bundle = value; break;
+		case 'NODE_OT_add_zone': NODE_OT_add_zone = value; break;
+		case 'NODE_OT_collapse_hide_unused_toggle': NODE_OT_collapse_hide_unused_toggle = value; break;
+		case 'NODE_OT_connect_to_output': NODE_OT_connect_to_output = value; break;
+		case 'NODE_OT_gltf_settings_node_operator': NODE_OT_gltf_settings_node_operator = value; break;
+		case 'NODE_OT_interface_item_duplicate': NODE_OT_interface_item_duplicate = value; break;
+		case 'NODE_OT_interface_item_make_panel_toggle': NODE_OT_interface_item_make_panel_toggle = value; break;
+		case 'NODE_OT_interface_item_new': NODE_OT_interface_item_new = value; break;
+		case 'NODE_OT_interface_item_new_panel_toggle': NODE_OT_interface_item_new_panel_toggle = value; break;
+		case 'NODE_OT_interface_item_remove': NODE_OT_interface_item_remove = value; break;
+		case 'NODE_OT_interface_item_unlink_panel_toggle': NODE_OT_interface_item_unlink_panel_toggle = value; break;
+		case 'NODE_OT_new_geometry_node_group_assign': NODE_OT_new_geometry_node_group_assign = value; break;
+		case 'NODE_OT_new_geometry_node_group_tool': NODE_OT_new_geometry_node_group_tool = value; break;
+		case 'NODE_OT_new_geometry_nodes_modifier': NODE_OT_new_geometry_nodes_modifier = value; break;
+		case 'NODE_OT_node_color_preset_add': NODE_OT_node_color_preset_add = value; break;
+		case 'NODE_OT_swap_empty_group': NODE_OT_swap_empty_group = value; break;
+		case 'NODE_OT_swap_node': NODE_OT_swap_node = value; break;
+		case 'NODE_OT_swap_typed_bundle': NODE_OT_swap_typed_bundle = value; break;
+		case 'NODE_OT_swap_zone': NODE_OT_swap_zone = value; break;
+		case 'NODE_OT_tree_path_parent': NODE_OT_tree_path_parent = value; break;
+		case 'NODE_OT_viewer_shortcut_get': NODE_OT_viewer_shortcut_get = value; break;
+		case 'NODE_OT_viewer_shortcut_set': NODE_OT_viewer_shortcut_set = value; break;
+		case 'NODE_PT_active_node_custom_properties': NODE_PT_active_node_custom_properties = value; break;
+		case 'NODE_PT_active_node_generic': NODE_PT_active_node_generic = value; break;
+		case 'NODE_PT_active_node_properties': NODE_PT_active_node_properties = value; break;
+		case 'NODE_PT_active_tool': NODE_PT_active_tool = value; break;
+		case 'NODE_PT_annotation': NODE_PT_annotation = value; break;
+		case 'NODE_PT_backdrop': NODE_PT_backdrop = value; break;
+		case 'NODE_PT_geometry_node_tool_mode': NODE_PT_geometry_node_tool_mode = value; break;
+		case 'NODE_PT_geometry_node_tool_object_types': NODE_PT_geometry_node_tool_object_types = value; break;
+		case 'NODE_PT_geometry_node_tool_options': NODE_PT_geometry_node_tool_options = value; break;
+		case 'NODE_PT_gizmo_display': NODE_PT_gizmo_display = value; break;
+		case 'NODE_PT_material_slots': NODE_PT_material_slots = value; break;
+		case 'NODE_PT_node_color_presets': NODE_PT_node_color_presets = value; break;
+		case 'NODE_PT_node_tree_animation': NODE_PT_node_tree_animation = value; break;
+		case 'NODE_PT_node_tree_properties': NODE_PT_node_tree_properties = value; break;
+		case 'NODE_PT_overlay': NODE_PT_overlay = value; break;
+		case 'NODE_PT_quality': NODE_PT_quality = value; break;
+		case 'NODE_PT_texture_mapping': NODE_PT_texture_mapping = value; break;
+		case 'NODE_PT_tools_active': NODE_PT_tools_active = value; break;
+		case 'NODE_WORLD_PT_viewport_display': NODE_WORLD_PT_viewport_display = value; break;
+		case 'NodeClosureInput': NodeClosureInput = value; break;
+		case 'NodeClosureOutput': NodeClosureOutput = value; break;
+		case 'NodeCombineBundle': NodeCombineBundle = value; break;
+		case 'NodeCustomGroup': NodeCustomGroup = value; break;
+		case 'NodeEnableOutput': NodeEnableOutput = value; break;
+		case 'NodeEvaluateClosure': NodeEvaluateClosure = value; break;
+		case 'NodeFrame': NodeFrame = value; break;
+		case 'NodeGetBundleItem': NodeGetBundleItem = value; break;
+		case 'NodeGetNestedBundlePaths': NodeGetNestedBundlePaths = value; break;
+		case 'NodeGroup': NodeGroup = value; break;
+		case 'NodeGroupInput': NodeGroupInput = value; break;
+		case 'NodeGroupOutput': NodeGroupOutput = value; break;
+		case 'NodeImplicitConversion': NodeImplicitConversion = value; break;
+		case 'NodeJoinBundle': NodeJoinBundle = value; break;
+		case 'NodeReroute': NodeReroute = value; break;
+		case 'NodeSeparateBundle': NodeSeparateBundle = value; break;
+		case 'NodeSocketStandard': NodeSocketStandard = value; break;
+		case 'NodeSocketBool': NodeSocketBool = value; break;
+		case 'NodeSocketBundle': NodeSocketBundle = value; break;
+		case 'NodeSocketClosure': NodeSocketClosure = value; break;
+		case 'NodeSocketCollection': NodeSocketCollection = value; break;
+		case 'NodeSocketColor': NodeSocketColor = value; break;
+		case 'NodeSocketFloat': NodeSocketFloat = value; break;
+		case 'NodeSocketFloatAngle': NodeSocketFloatAngle = value; break;
+		case 'NodeSocketFloatColorTemperature': NodeSocketFloatColorTemperature = value; break;
+		case 'NodeSocketFloatDistance': NodeSocketFloatDistance = value; break;
+		case 'NodeSocketFloatFactor': NodeSocketFloatFactor = value; break;
+		case 'NodeSocketFloatFrequency': NodeSocketFloatFrequency = value; break;
+		case 'NodeSocketFloatMass': NodeSocketFloatMass = value; break;
+		case 'NodeSocketFloatPercentage': NodeSocketFloatPercentage = value; break;
+		case 'NodeSocketFloatPixel': NodeSocketFloatPixel = value; break;
+		case 'NodeSocketFloatTime': NodeSocketFloatTime = value; break;
+		case 'NodeSocketFloatTimeAbsolute': NodeSocketFloatTimeAbsolute = value; break;
+		case 'NodeSocketFloatUnsigned': NodeSocketFloatUnsigned = value; break;
+		case 'NodeSocketFloatWavelength': NodeSocketFloatWavelength = value; break;
+		case 'NodeSocketFont': NodeSocketFont = value; break;
+		case 'NodeSocketGeometry': NodeSocketGeometry = value; break;
+		case 'NodeSocketImage': NodeSocketImage = value; break;
+		case 'NodeSocketInt': NodeSocketInt = value; break;
+		case 'NodeSocketIntFactor': NodeSocketIntFactor = value; break;
+		case 'NodeSocketIntPercentage': NodeSocketIntPercentage = value; break;
+		case 'NodeSocketIntPixel': NodeSocketIntPixel = value; break;
+		case 'NodeSocketIntUnsigned': NodeSocketIntUnsigned = value; break;
+		case 'NodeSocketIntVector2D': NodeSocketIntVector2D = value; break;
+		case 'NodeSocketIntVector3D': NodeSocketIntVector3D = value; break;
+		case 'NodeSocketIntVectorFactor2D': NodeSocketIntVectorFactor2D = value; break;
+		case 'NodeSocketIntVectorFactor3D': NodeSocketIntVectorFactor3D = value; break;
+		case 'NodeSocketIntVectorPercentage2D': NodeSocketIntVectorPercentage2D = value; break;
+		case 'NodeSocketIntVectorPercentage3D': NodeSocketIntVectorPercentage3D = value; break;
+		case 'NodeSocketIntVectorPixel2D': NodeSocketIntVectorPixel2D = value; break;
+		case 'NodeSocketIntVectorPixel3D': NodeSocketIntVectorPixel3D = value; break;
+		case 'NodeSocketIntVectorUnsigned2D': NodeSocketIntVectorUnsigned2D = value; break;
+		case 'NodeSocketIntVectorUnsigned3D': NodeSocketIntVectorUnsigned3D = value; break;
+		case 'NodeSocketMask': NodeSocketMask = value; break;
+		case 'NodeSocketMaterial': NodeSocketMaterial = value; break;
+		case 'NodeSocketMatrix': NodeSocketMatrix = value; break;
+		case 'NodeSocketMenu': NodeSocketMenu = value; break;
+		case 'NodeSocketObject': NodeSocketObject = value; break;
+		case 'NodeSocketRotation': NodeSocketRotation = value; break;
+		case 'NodeSocketScene': NodeSocketScene = value; break;
+		case 'NodeSocketShader': NodeSocketShader = value; break;
+		case 'NodeSocketSound': NodeSocketSound = value; break;
+		case 'NodeSocketString': NodeSocketString = value; break;
+		case 'NodeSocketStringFilePath': NodeSocketStringFilePath = value; break;
+		case 'NodeSocketText': NodeSocketText = value; break;
+		case 'NodeSocketTexture': NodeSocketTexture = value; break;
+		case 'NodeSocketVector': NodeSocketVector = value; break;
+		case 'NodeSocketVector2D': NodeSocketVector2D = value; break;
+		case 'NodeSocketVector4D': NodeSocketVector4D = value; break;
+		case 'NodeSocketVectorAcceleration': NodeSocketVectorAcceleration = value; break;
+		case 'NodeSocketVectorAcceleration2D': NodeSocketVectorAcceleration2D = value; break;
+		case 'NodeSocketVectorAcceleration4D': NodeSocketVectorAcceleration4D = value; break;
+		case 'NodeSocketVectorDirection': NodeSocketVectorDirection = value; break;
+		case 'NodeSocketVectorDirection2D': NodeSocketVectorDirection2D = value; break;
+		case 'NodeSocketVectorDirection4D': NodeSocketVectorDirection4D = value; break;
+		case 'NodeSocketVectorEuler': NodeSocketVectorEuler = value; break;
+		case 'NodeSocketVectorEuler2D': NodeSocketVectorEuler2D = value; break;
+		case 'NodeSocketVectorEuler4D': NodeSocketVectorEuler4D = value; break;
+		case 'NodeSocketVectorFactor': NodeSocketVectorFactor = value; break;
+		case 'NodeSocketVectorFactor2D': NodeSocketVectorFactor2D = value; break;
+		case 'NodeSocketVectorFactor4D': NodeSocketVectorFactor4D = value; break;
+		case 'NodeSocketVectorPercentage': NodeSocketVectorPercentage = value; break;
+		case 'NodeSocketVectorPercentage2D': NodeSocketVectorPercentage2D = value; break;
+		case 'NodeSocketVectorPercentage4D': NodeSocketVectorPercentage4D = value; break;
+		case 'NodeSocketVectorPixel': NodeSocketVectorPixel = value; break;
+		case 'NodeSocketVectorPixel2D': NodeSocketVectorPixel2D = value; break;
+		case 'NodeSocketVectorPixel4D': NodeSocketVectorPixel4D = value; break;
+		case 'NodeSocketVectorTranslation': NodeSocketVectorTranslation = value; break;
+		case 'NodeSocketVectorTranslation2D': NodeSocketVectorTranslation2D = value; break;
+		case 'NodeSocketVectorTranslation4D': NodeSocketVectorTranslation4D = value; break;
+		case 'NodeSocketVectorVelocity': NodeSocketVectorVelocity = value; break;
+		case 'NodeSocketVectorVelocity2D': NodeSocketVectorVelocity2D = value; break;
+		case 'NodeSocketVectorVelocity4D': NodeSocketVectorVelocity4D = value; break;
+		case 'NodeSocketVectorXYZ': NodeSocketVectorXYZ = value; break;
+		case 'NodeSocketVectorXYZ2D': NodeSocketVectorXYZ2D = value; break;
+		case 'NodeSocketVectorXYZ4D': NodeSocketVectorXYZ4D = value; break;
+		case 'NodeSocketVirtual': NodeSocketVirtual = value; break;
+		case 'NodeStoreBundleItem': NodeStoreBundleItem = value; break;
+		case 'NodeTreeInterfacePanel': NodeTreeInterfacePanel = value; break;
+		case 'NodeTreeInterfaceSocketBool': NodeTreeInterfaceSocketBool = value; break;
+		case 'NodeTreeInterfaceSocketBundle': NodeTreeInterfaceSocketBundle = value; break;
+		case 'NodeTreeInterfaceSocketClosure': NodeTreeInterfaceSocketClosure = value; break;
+		case 'NodeTreeInterfaceSocketCollection': NodeTreeInterfaceSocketCollection = value; break;
+		case 'NodeTreeInterfaceSocketColor': NodeTreeInterfaceSocketColor = value; break;
+		case 'NodeTreeInterfaceSocketFloat': NodeTreeInterfaceSocketFloat = value; break;
+		case 'NodeTreeInterfaceSocketFloatAngle': NodeTreeInterfaceSocketFloatAngle = value; break;
+		case 'NodeTreeInterfaceSocketFloatColorTemperature': NodeTreeInterfaceSocketFloatColorTemperature = value; break;
+		case 'NodeTreeInterfaceSocketFloatDistance': NodeTreeInterfaceSocketFloatDistance = value; break;
+		case 'NodeTreeInterfaceSocketFloatFactor': NodeTreeInterfaceSocketFloatFactor = value; break;
+		case 'NodeTreeInterfaceSocketFloatFrequency': NodeTreeInterfaceSocketFloatFrequency = value; break;
+		case 'NodeTreeInterfaceSocketFloatMass': NodeTreeInterfaceSocketFloatMass = value; break;
+		case 'NodeTreeInterfaceSocketFloatPercentage': NodeTreeInterfaceSocketFloatPercentage = value; break;
+		case 'NodeTreeInterfaceSocketFloatPixel': NodeTreeInterfaceSocketFloatPixel = value; break;
+		case 'NodeTreeInterfaceSocketFloatTime': NodeTreeInterfaceSocketFloatTime = value; break;
+		case 'NodeTreeInterfaceSocketFloatTimeAbsolute': NodeTreeInterfaceSocketFloatTimeAbsolute = value; break;
+		case 'NodeTreeInterfaceSocketFloatUnsigned': NodeTreeInterfaceSocketFloatUnsigned = value; break;
+		case 'NodeTreeInterfaceSocketFloatWavelength': NodeTreeInterfaceSocketFloatWavelength = value; break;
+		case 'NodeTreeInterfaceSocketFont': NodeTreeInterfaceSocketFont = value; break;
+		case 'NodeTreeInterfaceSocketGeometry': NodeTreeInterfaceSocketGeometry = value; break;
+		case 'NodeTreeInterfaceSocketImage': NodeTreeInterfaceSocketImage = value; break;
+		case 'NodeTreeInterfaceSocketInt': NodeTreeInterfaceSocketInt = value; break;
+		case 'NodeTreeInterfaceSocketIntFactor': NodeTreeInterfaceSocketIntFactor = value; break;
+		case 'NodeTreeInterfaceSocketIntPercentage': NodeTreeInterfaceSocketIntPercentage = value; break;
+		case 'NodeTreeInterfaceSocketIntPixel': NodeTreeInterfaceSocketIntPixel = value; break;
+		case 'NodeTreeInterfaceSocketIntUnsigned': NodeTreeInterfaceSocketIntUnsigned = value; break;
+		case 'NodeTreeInterfaceSocketIntVector2D': NodeTreeInterfaceSocketIntVector2D = value; break;
+		case 'NodeTreeInterfaceSocketIntVector3D': NodeTreeInterfaceSocketIntVector3D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorFactor2D': NodeTreeInterfaceSocketIntVectorFactor2D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorFactor3D': NodeTreeInterfaceSocketIntVectorFactor3D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorPercentage2D': NodeTreeInterfaceSocketIntVectorPercentage2D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorPercentage3D': NodeTreeInterfaceSocketIntVectorPercentage3D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorPixel2D': NodeTreeInterfaceSocketIntVectorPixel2D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorPixel3D': NodeTreeInterfaceSocketIntVectorPixel3D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorUnsigned2D': NodeTreeInterfaceSocketIntVectorUnsigned2D = value; break;
+		case 'NodeTreeInterfaceSocketIntVectorUnsigned3D': NodeTreeInterfaceSocketIntVectorUnsigned3D = value; break;
+		case 'NodeTreeInterfaceSocketMask': NodeTreeInterfaceSocketMask = value; break;
+		case 'NodeTreeInterfaceSocketMaterial': NodeTreeInterfaceSocketMaterial = value; break;
+		case 'NodeTreeInterfaceSocketMatrix': NodeTreeInterfaceSocketMatrix = value; break;
+		case 'NodeTreeInterfaceSocketMenu': NodeTreeInterfaceSocketMenu = value; break;
+		case 'NodeTreeInterfaceSocketObject': NodeTreeInterfaceSocketObject = value; break;
+		case 'NodeTreeInterfaceSocketRotation': NodeTreeInterfaceSocketRotation = value; break;
+		case 'NodeTreeInterfaceSocketScene': NodeTreeInterfaceSocketScene = value; break;
+		case 'NodeTreeInterfaceSocketShader': NodeTreeInterfaceSocketShader = value; break;
+		case 'NodeTreeInterfaceSocketSound': NodeTreeInterfaceSocketSound = value; break;
+		case 'NodeTreeInterfaceSocketString': NodeTreeInterfaceSocketString = value; break;
+		case 'NodeTreeInterfaceSocketStringFilePath': NodeTreeInterfaceSocketStringFilePath = value; break;
+		case 'NodeTreeInterfaceSocketText': NodeTreeInterfaceSocketText = value; break;
+		case 'NodeTreeInterfaceSocketTexture': NodeTreeInterfaceSocketTexture = value; break;
+		case 'NodeTreeInterfaceSocketVector': NodeTreeInterfaceSocketVector = value; break;
+		case 'NodeTreeInterfaceSocketVector2D': NodeTreeInterfaceSocketVector2D = value; break;
+		case 'NodeTreeInterfaceSocketVector4D': NodeTreeInterfaceSocketVector4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorAcceleration': NodeTreeInterfaceSocketVectorAcceleration = value; break;
+		case 'NodeTreeInterfaceSocketVectorAcceleration2D': NodeTreeInterfaceSocketVectorAcceleration2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorAcceleration4D': NodeTreeInterfaceSocketVectorAcceleration4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorDirection': NodeTreeInterfaceSocketVectorDirection = value; break;
+		case 'NodeTreeInterfaceSocketVectorDirection2D': NodeTreeInterfaceSocketVectorDirection2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorDirection4D': NodeTreeInterfaceSocketVectorDirection4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorEuler': NodeTreeInterfaceSocketVectorEuler = value; break;
+		case 'NodeTreeInterfaceSocketVectorEuler2D': NodeTreeInterfaceSocketVectorEuler2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorEuler4D': NodeTreeInterfaceSocketVectorEuler4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorFactor': NodeTreeInterfaceSocketVectorFactor = value; break;
+		case 'NodeTreeInterfaceSocketVectorFactor2D': NodeTreeInterfaceSocketVectorFactor2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorFactor4D': NodeTreeInterfaceSocketVectorFactor4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorPercentage': NodeTreeInterfaceSocketVectorPercentage = value; break;
+		case 'NodeTreeInterfaceSocketVectorPercentage2D': NodeTreeInterfaceSocketVectorPercentage2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorPercentage4D': NodeTreeInterfaceSocketVectorPercentage4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorPixel': NodeTreeInterfaceSocketVectorPixel = value; break;
+		case 'NodeTreeInterfaceSocketVectorPixel2D': NodeTreeInterfaceSocketVectorPixel2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorPixel4D': NodeTreeInterfaceSocketVectorPixel4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorTranslation': NodeTreeInterfaceSocketVectorTranslation = value; break;
+		case 'NodeTreeInterfaceSocketVectorTranslation2D': NodeTreeInterfaceSocketVectorTranslation2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorTranslation4D': NodeTreeInterfaceSocketVectorTranslation4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorVelocity': NodeTreeInterfaceSocketVectorVelocity = value; break;
+		case 'NodeTreeInterfaceSocketVectorVelocity2D': NodeTreeInterfaceSocketVectorVelocity2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorVelocity4D': NodeTreeInterfaceSocketVectorVelocity4D = value; break;
+		case 'NodeTreeInterfaceSocketVectorXYZ': NodeTreeInterfaceSocketVectorXYZ = value; break;
+		case 'NodeTreeInterfaceSocketVectorXYZ2D': NodeTreeInterfaceSocketVectorXYZ2D = value; break;
+		case 'NodeTreeInterfaceSocketVectorXYZ4D': NodeTreeInterfaceSocketVectorXYZ4D = value; break;
+		case 'NoiseTexture': NoiseTexture = value; break;
+		case 'OBJECT_MT_light_linking_context_menu': OBJECT_MT_light_linking_context_menu = value; break;
+		case 'OBJECT_MT_modifier_add': OBJECT_MT_modifier_add = value; break;
+		case 'OBJECT_MT_modifier_add_color': OBJECT_MT_modifier_add_color = value; break;
+		case 'OBJECT_MT_modifier_add_deform': OBJECT_MT_modifier_add_deform = value; break;
+		case 'OBJECT_MT_modifier_add_edit': OBJECT_MT_modifier_add_edit = value; break;
+		case 'OBJECT_MT_modifier_add_generate': OBJECT_MT_modifier_add_generate = value; break;
+		case 'OBJECT_MT_modifier_add_normals': OBJECT_MT_modifier_add_normals = value; break;
+		case 'OBJECT_MT_modifier_add_physics': OBJECT_MT_modifier_add_physics = value; break;
+		case 'OBJECT_MT_shadow_linking_context_menu': OBJECT_MT_shadow_linking_context_menu = value; break;
+		case 'OBJECT_OT_add_modifier_menu': OBJECT_OT_add_modifier_menu = value; break;
+		case 'OBJECT_OT_align': OBJECT_OT_align = value; break;
+		case 'OBJECT_OT_anim_transforms_to_deltas': OBJECT_OT_anim_transforms_to_deltas = value; break;
+		case 'OBJECT_OT_assign_property_defaults': OBJECT_OT_assign_property_defaults = value; break;
+		case 'OBJECT_OT_copy_global_transform': OBJECT_OT_copy_global_transform = value; break;
+		case 'OBJECT_OT_copy_relative_transform': OBJECT_OT_copy_relative_transform = value; break;
+		case 'OBJECT_OT_delete_fix_to_camera_keys': OBJECT_OT_delete_fix_to_camera_keys = value; break;
+		case 'OBJECT_OT_fix_to_camera': OBJECT_OT_fix_to_camera = value; break;
+		case 'OBJECT_OT_geometry_nodes_move_to_nodes': OBJECT_OT_geometry_nodes_move_to_nodes = value; break;
+		case 'OBJECT_OT_hide_render_clear_all': OBJECT_OT_hide_render_clear_all = value; break;
+		case 'OBJECT_OT_instance_offset_from_cursor': OBJECT_OT_instance_offset_from_cursor = value; break;
+		case 'OBJECT_OT_instance_offset_from_object': OBJECT_OT_instance_offset_from_object = value; break;
+		case 'OBJECT_OT_instance_offset_to_cursor': OBJECT_OT_instance_offset_to_cursor = value; break;
+		case 'OBJECT_OT_isolate_type_render': OBJECT_OT_isolate_type_render = value; break;
+		case 'OBJECT_OT_join_uvs': OBJECT_OT_join_uvs = value; break;
+		case 'OBJECT_OT_make_dupli_face': OBJECT_OT_make_dupli_face = value; break;
+		case 'OBJECT_OT_paste_transform': OBJECT_OT_paste_transform = value; break;
+		case 'OBJECT_OT_quick_explode': OBJECT_OT_quick_explode = value; break;
+		case 'OBJECT_OT_quick_fur': OBJECT_OT_quick_fur = value; break;
+		case 'OBJECT_OT_quick_liquid': OBJECT_OT_quick_liquid = value; break;
+		case 'OBJECT_OT_quick_smoke': OBJECT_OT_quick_smoke = value; break;
+		case 'OBJECT_OT_randomize_transform': OBJECT_OT_randomize_transform = value; break;
+		case 'OBJECT_OT_select_camera': OBJECT_OT_select_camera = value; break;
+		case 'OBJECT_OT_select_hierarchy': OBJECT_OT_select_hierarchy = value; break;
+		case 'OBJECT_OT_select_pattern': OBJECT_OT_select_pattern = value; break;
+		case 'OBJECT_OT_shape_key_transfer': OBJECT_OT_shape_key_transfer = value; break;
+		case 'OBJECT_OT_subdivision_set': OBJECT_OT_subdivision_set = value; break;
+		case 'OBJECT_OT_transforms_to_deltas': OBJECT_OT_transforms_to_deltas = value; break;
+		case 'OBJECT_PT_animation': OBJECT_PT_animation = value; break;
+		case 'OBJECT_PT_bActionConstraint': OBJECT_PT_bActionConstraint = value; break;
+		case 'OBJECT_PT_bActionConstraint_action': OBJECT_PT_bActionConstraint_action = value; break;
+		case 'OBJECT_PT_bActionConstraint_target': OBJECT_PT_bActionConstraint_target = value; break;
+		case 'OBJECT_PT_bArmatureConstraint': OBJECT_PT_bArmatureConstraint = value; break;
+		case 'OBJECT_PT_bArmatureConstraint_bones': OBJECT_PT_bArmatureConstraint_bones = value; break;
+		case 'OBJECT_PT_bCameraSolverConstraint': OBJECT_PT_bCameraSolverConstraint = value; break;
+		case 'OBJECT_PT_bChildOfConstraint': OBJECT_PT_bChildOfConstraint = value; break;
+		case 'OBJECT_PT_bClampToConstraint': OBJECT_PT_bClampToConstraint = value; break;
+		case 'OBJECT_PT_bDampTrackConstraint': OBJECT_PT_bDampTrackConstraint = value; break;
+		case 'OBJECT_PT_bDistLimitConstraint': OBJECT_PT_bDistLimitConstraint = value; break;
+		case 'OBJECT_PT_bFollowPathConstraint': OBJECT_PT_bFollowPathConstraint = value; break;
+		case 'OBJECT_PT_bFollowTrackConstraint': OBJECT_PT_bFollowTrackConstraint = value; break;
+		case 'OBJECT_PT_bGeometryAttributeConstraint': OBJECT_PT_bGeometryAttributeConstraint = value; break;
+		case 'OBJECT_PT_bKinematicConstraint': OBJECT_PT_bKinematicConstraint = value; break;
+		case 'OBJECT_PT_bLocLimitConstraint': OBJECT_PT_bLocLimitConstraint = value; break;
+		case 'OBJECT_PT_bLocateLikeConstraint': OBJECT_PT_bLocateLikeConstraint = value; break;
+		case 'OBJECT_PT_bLockTrackConstraint': OBJECT_PT_bLockTrackConstraint = value; break;
+		case 'OBJECT_PT_bMinMaxConstraint': OBJECT_PT_bMinMaxConstraint = value; break;
+		case 'OBJECT_PT_bObjectSolverConstraint': OBJECT_PT_bObjectSolverConstraint = value; break;
+		case 'OBJECT_PT_bPivotConstraint': OBJECT_PT_bPivotConstraint = value; break;
+		case 'OBJECT_PT_bRotLimitConstraint': OBJECT_PT_bRotLimitConstraint = value; break;
+		case 'OBJECT_PT_bRotateLikeConstraint': OBJECT_PT_bRotateLikeConstraint = value; break;
+		case 'OBJECT_PT_bSameVolumeConstraint': OBJECT_PT_bSameVolumeConstraint = value; break;
+		case 'OBJECT_PT_bShrinkwrapConstraint': OBJECT_PT_bShrinkwrapConstraint = value; break;
+		case 'OBJECT_PT_bSizeLikeConstraint': OBJECT_PT_bSizeLikeConstraint = value; break;
+		case 'OBJECT_PT_bSizeLimitConstraint': OBJECT_PT_bSizeLimitConstraint = value; break;
+		case 'OBJECT_PT_bStretchToConstraint': OBJECT_PT_bStretchToConstraint = value; break;
+		case 'OBJECT_PT_bTrackToConstraint': OBJECT_PT_bTrackToConstraint = value; break;
+		case 'OBJECT_PT_bTransLikeConstraint': OBJECT_PT_bTransLikeConstraint = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint': OBJECT_PT_bTransformCacheConstraint = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint_layers': OBJECT_PT_bTransformCacheConstraint_layers = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint_time': OBJECT_PT_bTransformCacheConstraint_time = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint_velocity': OBJECT_PT_bTransformCacheConstraint_velocity = value; break;
+		case 'OBJECT_PT_bTransformConstraint': OBJECT_PT_bTransformConstraint = value; break;
+		case 'OBJECT_PT_bTransformConstraint_destination': OBJECT_PT_bTransformConstraint_destination = value; break;
+		case 'OBJECT_PT_bTransformConstraint_source': OBJECT_PT_bTransformConstraint_source = value; break;
+		case 'OBJECT_PT_collections': OBJECT_PT_collections = value; break;
+		case 'OBJECT_PT_constraints': OBJECT_PT_constraints = value; break;
+		case 'OBJECT_PT_context_object': OBJECT_PT_context_object = value; break;
+		case 'OBJECT_PT_custom_props': OBJECT_PT_custom_props = value; break;
+		case 'OBJECT_PT_delta_transform': OBJECT_PT_delta_transform = value; break;
+		case 'OBJECT_PT_display': OBJECT_PT_display = value; break;
+		case 'OBJECT_PT_instancing': OBJECT_PT_instancing = value; break;
+		case 'OBJECT_PT_instancing_size': OBJECT_PT_instancing_size = value; break;
+		case 'OBJECT_PT_light_linking': OBJECT_PT_light_linking = value; break;
+		case 'OBJECT_PT_lineart': OBJECT_PT_lineart = value; break;
+		case 'OBJECT_PT_motion_paths': OBJECT_PT_motion_paths = value; break;
+		case 'OBJECT_PT_motion_paths_display': OBJECT_PT_motion_paths_display = value; break;
+		case 'OBJECT_PT_parent_inverse_transform': OBJECT_PT_parent_inverse_transform = value; break;
+		case 'OBJECT_PT_relations': OBJECT_PT_relations = value; break;
+		case 'OBJECT_PT_shading': OBJECT_PT_shading = value; break;
+		case 'OBJECT_PT_shadow_linking': OBJECT_PT_shadow_linking = value; break;
+		case 'OBJECT_PT_shadow_terminator': OBJECT_PT_shadow_terminator = value; break;
+		case 'OBJECT_PT_transform': OBJECT_PT_transform = value; break;
+		case 'OBJECT_PT_visibility': OBJECT_PT_visibility = value; break;
+		case 'OUTLINER_HT_header': OUTLINER_HT_header = value; break;
+		case 'OUTLINER_MT_asset': OUTLINER_MT_asset = value; break;
+		case 'OUTLINER_MT_collection': OUTLINER_MT_collection = value; break;
+		case 'OUTLINER_MT_collection_new': OUTLINER_MT_collection_new = value; break;
+		case 'OUTLINER_MT_collection_view_layer': OUTLINER_MT_collection_view_layer = value; break;
+		case 'OUTLINER_MT_collection_visibility': OUTLINER_MT_collection_visibility = value; break;
+		case 'OUTLINER_MT_context_menu': OUTLINER_MT_context_menu = value; break;
+		case 'OUTLINER_MT_context_menu_view': OUTLINER_MT_context_menu_view = value; break;
+		case 'OUTLINER_MT_edit_datablocks': OUTLINER_MT_edit_datablocks = value; break;
+		case 'OUTLINER_MT_editor_menus': OUTLINER_MT_editor_menus = value; break;
+		case 'OUTLINER_MT_id_data': OUTLINER_MT_id_data = value; break;
+		case 'OUTLINER_MT_liboverride': OUTLINER_MT_liboverride = value; break;
+		case 'OUTLINER_MT_object': OUTLINER_MT_object = value; break;
+		case 'OUTLINER_MT_view_pie': OUTLINER_MT_view_pie = value; break;
+		case 'OUTLINER_PT_filter': OUTLINER_PT_filter = value; break;
+		case 'OUTLINER_PT_options_filter': OUTLINER_PT_options_filter = value; break;
+		case 'OUTLINER_PT_options_search': OUTLINER_PT_options_search = value; break;
+		case 'OperatorFileListElement': OperatorFileListElement = value; break;
+		case 'OperatorMousePath': OperatorMousePath = value; break;
+		case 'OperatorStrokeElement': OperatorStrokeElement = value; break;
+		case 'PAINT_OT_vertex_color_dirt': PAINT_OT_vertex_color_dirt = value; break;
+		case 'PARTICLE_MT_context_menu': PARTICLE_MT_context_menu = value; break;
+		case 'PARTICLE_OT_hair_dynamics_preset_add': PARTICLE_OT_hair_dynamics_preset_add = value; break;
+		case 'PARTICLE_PT_animation': PARTICLE_PT_animation = value; break;
+		case 'PARTICLE_PT_boidbrain': PARTICLE_PT_boidbrain = value; break;
+		case 'PARTICLE_PT_cache': PARTICLE_PT_cache = value; break;
+		case 'PARTICLE_PT_children': PARTICLE_PT_children = value; break;
+		case 'PARTICLE_PT_children_clumping': PARTICLE_PT_children_clumping = value; break;
+		case 'PARTICLE_PT_children_clumping_noise': PARTICLE_PT_children_clumping_noise = value; break;
+		case 'PARTICLE_PT_children_kink': PARTICLE_PT_children_kink = value; break;
+		case 'PARTICLE_PT_children_parting': PARTICLE_PT_children_parting = value; break;
+		case 'PARTICLE_PT_children_roughness': PARTICLE_PT_children_roughness = value; break;
+		case 'PARTICLE_PT_context_particles': PARTICLE_PT_context_particles = value; break;
+		case 'PARTICLE_PT_custom_props': PARTICLE_PT_custom_props = value; break;
+		case 'PARTICLE_PT_draw': PARTICLE_PT_draw = value; break;
+		case 'PARTICLE_PT_emission': PARTICLE_PT_emission = value; break;
+		case 'PARTICLE_PT_emission_source': PARTICLE_PT_emission_source = value; break;
+		case 'PARTICLE_PT_field_weights': PARTICLE_PT_field_weights = value; break;
+		case 'PARTICLE_PT_force_fields': PARTICLE_PT_force_fields = value; break;
+		case 'PARTICLE_PT_force_fields_type1': PARTICLE_PT_force_fields_type1 = value; break;
+		case 'PARTICLE_PT_force_fields_type1_falloff': PARTICLE_PT_force_fields_type1_falloff = value; break;
+		case 'PARTICLE_PT_force_fields_type2': PARTICLE_PT_force_fields_type2 = value; break;
+		case 'PARTICLE_PT_force_fields_type2_falloff': PARTICLE_PT_force_fields_type2_falloff = value; break;
+		case 'PARTICLE_PT_hair_dynamics': PARTICLE_PT_hair_dynamics = value; break;
+		case 'PARTICLE_PT_hair_dynamics_collision': PARTICLE_PT_hair_dynamics_collision = value; break;
+		case 'PARTICLE_PT_hair_dynamics_presets': PARTICLE_PT_hair_dynamics_presets = value; break;
+		case 'PARTICLE_PT_hair_dynamics_structure': PARTICLE_PT_hair_dynamics_structure = value; break;
+		case 'PARTICLE_PT_hair_dynamics_volume': PARTICLE_PT_hair_dynamics_volume = value; break;
+		case 'PARTICLE_PT_hair_shape': PARTICLE_PT_hair_shape = value; break;
+		case 'PARTICLE_PT_physics': PARTICLE_PT_physics = value; break;
+		case 'PARTICLE_PT_physics_boids_battle': PARTICLE_PT_physics_boids_battle = value; break;
+		case 'PARTICLE_PT_physics_boids_misc': PARTICLE_PT_physics_boids_misc = value; break;
+		case 'PARTICLE_PT_physics_boids_movement': PARTICLE_PT_physics_boids_movement = value; break;
+		case 'PARTICLE_PT_physics_deflection': PARTICLE_PT_physics_deflection = value; break;
+		case 'PARTICLE_PT_physics_fluid_advanced': PARTICLE_PT_physics_fluid_advanced = value; break;
+		case 'PARTICLE_PT_physics_fluid_interaction': PARTICLE_PT_physics_fluid_interaction = value; break;
+		case 'PARTICLE_PT_physics_fluid_springs': PARTICLE_PT_physics_fluid_springs = value; break;
+		case 'PARTICLE_PT_physics_fluid_springs_advanced': PARTICLE_PT_physics_fluid_springs_advanced = value; break;
+		case 'PARTICLE_PT_physics_fluid_springs_viscoelastic': PARTICLE_PT_physics_fluid_springs_viscoelastic = value; break;
+		case 'PARTICLE_PT_physics_forces': PARTICLE_PT_physics_forces = value; break;
+		case 'PARTICLE_PT_physics_integration': PARTICLE_PT_physics_integration = value; break;
+		case 'PARTICLE_PT_physics_relations': PARTICLE_PT_physics_relations = value; break;
+		case 'PARTICLE_PT_render': PARTICLE_PT_render = value; break;
+		case 'PARTICLE_PT_render_collection': PARTICLE_PT_render_collection = value; break;
+		case 'PARTICLE_PT_render_collection_use_count': PARTICLE_PT_render_collection_use_count = value; break;
+		case 'PARTICLE_PT_render_extra': PARTICLE_PT_render_extra = value; break;
+		case 'PARTICLE_PT_render_object': PARTICLE_PT_render_object = value; break;
+		case 'PARTICLE_PT_render_path': PARTICLE_PT_render_path = value; break;
+		case 'PARTICLE_PT_render_path_timing': PARTICLE_PT_render_path_timing = value; break;
+		case 'PARTICLE_PT_rotation': PARTICLE_PT_rotation = value; break;
+		case 'PARTICLE_PT_rotation_angular_velocity': PARTICLE_PT_rotation_angular_velocity = value; break;
+		case 'PARTICLE_PT_textures': PARTICLE_PT_textures = value; break;
+		case 'PARTICLE_PT_velocity': PARTICLE_PT_velocity = value; break;
+		case 'PARTICLE_PT_vertexgroups': PARTICLE_PT_vertexgroups = value; break;
+		case 'PARTICLE_UL_particle_systems': PARTICLE_UL_particle_systems = value; break;
+		case 'PHYSICS_PT_adaptive_domain': PHYSICS_PT_adaptive_domain = value; break;
+		case 'PHYSICS_PT_add': PHYSICS_PT_add = value; break;
+		case 'PHYSICS_PT_borders': PHYSICS_PT_borders = value; break;
+		case 'PHYSICS_PT_cache': PHYSICS_PT_cache = value; break;
+		case 'PHYSICS_PT_cloth': PHYSICS_PT_cloth = value; break;
+		case 'PHYSICS_PT_cloth_cache': PHYSICS_PT_cloth_cache = value; break;
+		case 'PHYSICS_PT_cloth_collision': PHYSICS_PT_cloth_collision = value; break;
+		case 'PHYSICS_PT_cloth_damping': PHYSICS_PT_cloth_damping = value; break;
+		case 'PHYSICS_PT_cloth_field_weights': PHYSICS_PT_cloth_field_weights = value; break;
+		case 'PHYSICS_PT_cloth_internal_springs': PHYSICS_PT_cloth_internal_springs = value; break;
+		case 'PHYSICS_PT_cloth_object_collision': PHYSICS_PT_cloth_object_collision = value; break;
+		case 'PHYSICS_PT_cloth_physical_properties': PHYSICS_PT_cloth_physical_properties = value; break;
+		case 'PHYSICS_PT_cloth_pressure': PHYSICS_PT_cloth_pressure = value; break;
+		case 'PHYSICS_PT_cloth_property_weights': PHYSICS_PT_cloth_property_weights = value; break;
+		case 'PHYSICS_PT_cloth_self_collision': PHYSICS_PT_cloth_self_collision = value; break;
+		case 'PHYSICS_PT_cloth_shape': PHYSICS_PT_cloth_shape = value; break;
+		case 'PHYSICS_PT_cloth_stiffness': PHYSICS_PT_cloth_stiffness = value; break;
+		case 'PHYSICS_PT_collections': PHYSICS_PT_collections = value; break;
+		case 'PHYSICS_PT_collision': PHYSICS_PT_collision = value; break;
+		case 'PHYSICS_PT_collision_particle': PHYSICS_PT_collision_particle = value; break;
+		case 'PHYSICS_PT_collision_softbody': PHYSICS_PT_collision_softbody = value; break;
+		case 'PHYSICS_PT_diffusion': PHYSICS_PT_diffusion = value; break;
+		case 'PHYSICS_PT_dp_brush_source': PHYSICS_PT_dp_brush_source = value; break;
+		case 'PHYSICS_PT_dp_brush_source_color_ramp': PHYSICS_PT_dp_brush_source_color_ramp = value; break;
+		case 'PHYSICS_PT_dp_brush_velocity': PHYSICS_PT_dp_brush_velocity = value; break;
+		case 'PHYSICS_PT_dp_brush_velocity_color_ramp': PHYSICS_PT_dp_brush_velocity_color_ramp = value; break;
+		case 'PHYSICS_PT_dp_brush_velocity_smudge': PHYSICS_PT_dp_brush_velocity_smudge = value; break;
+		case 'PHYSICS_PT_dp_brush_wave': PHYSICS_PT_dp_brush_wave = value; break;
+		case 'PHYSICS_PT_dp_cache': PHYSICS_PT_dp_cache = value; break;
+		case 'PHYSICS_PT_dp_canvas_initial_color': PHYSICS_PT_dp_canvas_initial_color = value; break;
+		case 'PHYSICS_PT_dp_canvas_output': PHYSICS_PT_dp_canvas_output = value; break;
+		case 'PHYSICS_PT_dp_canvas_output_paintmaps': PHYSICS_PT_dp_canvas_output_paintmaps = value; break;
+		case 'PHYSICS_PT_dp_canvas_output_wetmaps': PHYSICS_PT_dp_canvas_output_wetmaps = value; break;
+		case 'PHYSICS_PT_dp_effects': PHYSICS_PT_dp_effects = value; break;
+		case 'PHYSICS_PT_dp_effects_drip': PHYSICS_PT_dp_effects_drip = value; break;
+		case 'PHYSICS_PT_dp_effects_drip_weights': PHYSICS_PT_dp_effects_drip_weights = value; break;
+		case 'PHYSICS_PT_dp_effects_shrink': PHYSICS_PT_dp_effects_shrink = value; break;
+		case 'PHYSICS_PT_dp_effects_spread': PHYSICS_PT_dp_effects_spread = value; break;
+		case 'PHYSICS_PT_dp_surface_canvas': PHYSICS_PT_dp_surface_canvas = value; break;
+		case 'PHYSICS_PT_dp_surface_canvas_paint_dissolve': PHYSICS_PT_dp_surface_canvas_paint_dissolve = value; break;
+		case 'PHYSICS_PT_dp_surface_canvas_paint_dry': PHYSICS_PT_dp_surface_canvas_paint_dry = value; break;
+		case 'PHYSICS_PT_dynamic_paint': PHYSICS_PT_dynamic_paint = value; break;
+		case 'PHYSICS_PT_dynamic_paint_settings': PHYSICS_PT_dynamic_paint_settings = value; break;
+		case 'PHYSICS_PT_export': PHYSICS_PT_export = value; break;
+		case 'PHYSICS_PT_field': PHYSICS_PT_field = value; break;
+		case 'PHYSICS_PT_field_falloff': PHYSICS_PT_field_falloff = value; break;
+		case 'PHYSICS_PT_field_falloff_angular': PHYSICS_PT_field_falloff_angular = value; break;
+		case 'PHYSICS_PT_field_falloff_radial': PHYSICS_PT_field_falloff_radial = value; break;
+		case 'PHYSICS_PT_field_settings': PHYSICS_PT_field_settings = value; break;
+		case 'PHYSICS_PT_field_settings_kink': PHYSICS_PT_field_settings_kink = value; break;
+		case 'PHYSICS_PT_field_settings_texture_select': PHYSICS_PT_field_settings_texture_select = value; break;
+		case 'PHYSICS_PT_field_weights': PHYSICS_PT_field_weights = value; break;
+		case 'PHYSICS_PT_fire': PHYSICS_PT_fire = value; break;
+		case 'PHYSICS_PT_flow_initial_velocity': PHYSICS_PT_flow_initial_velocity = value; break;
+		case 'PHYSICS_PT_flow_source': PHYSICS_PT_flow_source = value; break;
+		case 'PHYSICS_PT_flow_texture': PHYSICS_PT_flow_texture = value; break;
+		case 'PHYSICS_PT_fluid': PHYSICS_PT_fluid = value; break;
+		case 'PHYSICS_PT_fluid_domain_render': PHYSICS_PT_fluid_domain_render = value; break;
+		case 'PHYSICS_PT_geometry_nodes': PHYSICS_PT_geometry_nodes = value; break;
+		case 'PHYSICS_PT_guide': PHYSICS_PT_guide = value; break;
+		case 'PHYSICS_PT_liquid': PHYSICS_PT_liquid = value; break;
+		case 'PHYSICS_PT_mesh': PHYSICS_PT_mesh = value; break;
+		case 'PHYSICS_PT_noise': PHYSICS_PT_noise = value; break;
+		case 'PHYSICS_PT_particles': PHYSICS_PT_particles = value; break;
+		case 'PHYSICS_PT_rigid_body': PHYSICS_PT_rigid_body = value; break;
+		case 'PHYSICS_PT_rigid_body_collisions': PHYSICS_PT_rigid_body_collisions = value; break;
+		case 'PHYSICS_PT_rigid_body_collisions_collections': PHYSICS_PT_rigid_body_collisions_collections = value; break;
+		case 'PHYSICS_PT_rigid_body_collisions_sensitivity': PHYSICS_PT_rigid_body_collisions_sensitivity = value; break;
+		case 'PHYSICS_PT_rigid_body_collisions_surface': PHYSICS_PT_rigid_body_collisions_surface = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint': PHYSICS_PT_rigid_body_constraint = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_limits': PHYSICS_PT_rigid_body_constraint_limits = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_limits_angular': PHYSICS_PT_rigid_body_constraint_limits_angular = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_limits_linear': PHYSICS_PT_rigid_body_constraint_limits_linear = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_motor': PHYSICS_PT_rigid_body_constraint_motor = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_motor_angular': PHYSICS_PT_rigid_body_constraint_motor_angular = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_motor_linear': PHYSICS_PT_rigid_body_constraint_motor_linear = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_objects': PHYSICS_PT_rigid_body_constraint_objects = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_override_iterations': PHYSICS_PT_rigid_body_constraint_override_iterations = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_settings': PHYSICS_PT_rigid_body_constraint_settings = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_springs': PHYSICS_PT_rigid_body_constraint_springs = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_springs_angular': PHYSICS_PT_rigid_body_constraint_springs_angular = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_springs_linear': PHYSICS_PT_rigid_body_constraint_springs_linear = value; break;
+		case 'PHYSICS_PT_rigid_body_dynamics': PHYSICS_PT_rigid_body_dynamics = value; break;
+		case 'PHYSICS_PT_rigid_body_dynamics_deactivation': PHYSICS_PT_rigid_body_dynamics_deactivation = value; break;
+		case 'PHYSICS_PT_rigid_body_settings': PHYSICS_PT_rigid_body_settings = value; break;
+		case 'PHYSICS_PT_settings': PHYSICS_PT_settings = value; break;
+		case 'PHYSICS_PT_smoke': PHYSICS_PT_smoke = value; break;
+		case 'PHYSICS_PT_smoke_dissolve': PHYSICS_PT_smoke_dissolve = value; break;
+		case 'PHYSICS_PT_softbody': PHYSICS_PT_softbody = value; break;
+		case 'PHYSICS_PT_softbody_cache': PHYSICS_PT_softbody_cache = value; break;
+		case 'PHYSICS_PT_softbody_collision': PHYSICS_PT_softbody_collision = value; break;
+		case 'PHYSICS_PT_softbody_edge': PHYSICS_PT_softbody_edge = value; break;
+		case 'PHYSICS_PT_softbody_edge_aerodynamics': PHYSICS_PT_softbody_edge_aerodynamics = value; break;
+		case 'PHYSICS_PT_softbody_edge_stiffness': PHYSICS_PT_softbody_edge_stiffness = value; break;
+		case 'PHYSICS_PT_softbody_field_weights': PHYSICS_PT_softbody_field_weights = value; break;
+		case 'PHYSICS_PT_softbody_goal': PHYSICS_PT_softbody_goal = value; break;
+		case 'PHYSICS_PT_softbody_goal_settings': PHYSICS_PT_softbody_goal_settings = value; break;
+		case 'PHYSICS_PT_softbody_goal_strengths': PHYSICS_PT_softbody_goal_strengths = value; break;
+		case 'PHYSICS_PT_softbody_object': PHYSICS_PT_softbody_object = value; break;
+		case 'PHYSICS_PT_softbody_simulation': PHYSICS_PT_softbody_simulation = value; break;
+		case 'PHYSICS_PT_softbody_solver': PHYSICS_PT_softbody_solver = value; break;
+		case 'PHYSICS_PT_softbody_solver_diagnostics': PHYSICS_PT_softbody_solver_diagnostics = value; break;
+		case 'PHYSICS_PT_softbody_solver_helpers': PHYSICS_PT_softbody_solver_helpers = value; break;
+		case 'PHYSICS_PT_viewport_display': PHYSICS_PT_viewport_display = value; break;
+		case 'PHYSICS_PT_viewport_display_advanced': PHYSICS_PT_viewport_display_advanced = value; break;
+		case 'PHYSICS_PT_viewport_display_color': PHYSICS_PT_viewport_display_color = value; break;
+		case 'PHYSICS_PT_viewport_display_debug': PHYSICS_PT_viewport_display_debug = value; break;
+		case 'PHYSICS_PT_viewport_display_slicing': PHYSICS_PT_viewport_display_slicing = value; break;
+		case 'PHYSICS_PT_viscosity': PHYSICS_PT_viscosity = value; break;
+		case 'PHYSICS_UL_dynapaint_surfaces': PHYSICS_UL_dynapaint_surfaces = value; break;
+		case 'POINTCLOUD_MT_add_attribute': POINTCLOUD_MT_add_attribute = value; break;
+		case 'POINTCLOUD_MT_attribute_context_menu': POINTCLOUD_MT_attribute_context_menu = value; break;
+		case 'POINTCLOUD_UL_attributes': POINTCLOUD_UL_attributes = value; break;
+		case 'POSELIB_OT_copy_as_asset': POSELIB_OT_copy_as_asset = value; break;
+		case 'POSELIB_OT_paste_asset': POSELIB_OT_paste_asset = value; break;
+		case 'POSELIB_OT_pose_asset_select_bones': POSELIB_OT_pose_asset_select_bones = value; break;
+		case 'POSELIB_OT_restore_previous_action': POSELIB_OT_restore_previous_action = value; break;
+		case 'POSE_MT_selection_set_create': POSE_MT_selection_set_create = value; break;
+		case 'POSE_MT_selection_sets_context_menu': POSE_MT_selection_sets_context_menu = value; break;
+		case 'POSE_MT_selection_sets_select': POSE_MT_selection_sets_select = value; break;
+		case 'POSE_OT_selection_set_add': POSE_OT_selection_set_add = value; break;
+		case 'POSE_OT_selection_set_add_and_assign': POSE_OT_selection_set_add_and_assign = value; break;
+		case 'POSE_OT_selection_set_assign': POSE_OT_selection_set_assign = value; break;
+		case 'POSE_OT_selection_set_copy': POSE_OT_selection_set_copy = value; break;
+		case 'POSE_OT_selection_set_delete_all': POSE_OT_selection_set_delete_all = value; break;
+		case 'POSE_OT_selection_set_deselect': POSE_OT_selection_set_deselect = value; break;
+		case 'POSE_OT_selection_set_move': POSE_OT_selection_set_move = value; break;
+		case 'POSE_OT_selection_set_paste': POSE_OT_selection_set_paste = value; break;
+		case 'POSE_OT_selection_set_remove': POSE_OT_selection_set_remove = value; break;
+		case 'POSE_OT_selection_set_remove_bones': POSE_OT_selection_set_remove_bones = value; break;
+		case 'POSE_OT_selection_set_select': POSE_OT_selection_set_select = value; break;
+		case 'POSE_OT_selection_set_unassign': POSE_OT_selection_set_unassign = value; break;
+		case 'POSE_PT_selection_sets': POSE_PT_selection_sets = value; break;
+		case 'POSE_UL_selection_set': POSE_UL_selection_set = value; break;
+		case 'PREFERENCES_OT_addon_disable': PREFERENCES_OT_addon_disable = value; break;
+		case 'PREFERENCES_OT_addon_enable': PREFERENCES_OT_addon_enable = value; break;
+		case 'PREFERENCES_OT_addon_expand': PREFERENCES_OT_addon_expand = value; break;
+		case 'PREFERENCES_OT_addon_install': PREFERENCES_OT_addon_install = value; break;
+		case 'PREFERENCES_OT_addon_refresh': PREFERENCES_OT_addon_refresh = value; break;
+		case 'PREFERENCES_OT_addon_remove': PREFERENCES_OT_addon_remove = value; break;
+		case 'PREFERENCES_OT_addon_show': PREFERENCES_OT_addon_show = value; break;
+		case 'PREFERENCES_OT_app_template_install': PREFERENCES_OT_app_template_install = value; break;
+		case 'PREFERENCES_OT_copy_prev': PREFERENCES_OT_copy_prev = value; break;
+		case 'PREFERENCES_OT_keyconfig_activate': PREFERENCES_OT_keyconfig_activate = value; break;
+		case 'PREFERENCES_OT_keyconfig_export': PREFERENCES_OT_keyconfig_export = value; break;
+		case 'PREFERENCES_OT_keyconfig_import': PREFERENCES_OT_keyconfig_import = value; break;
+		case 'PREFERENCES_OT_keyconfig_remove': PREFERENCES_OT_keyconfig_remove = value; break;
+		case 'PREFERENCES_OT_keyconfig_test': PREFERENCES_OT_keyconfig_test = value; break;
+		case 'PREFERENCES_OT_keyitem_add': PREFERENCES_OT_keyitem_add = value; break;
+		case 'PREFERENCES_OT_keyitem_remove': PREFERENCES_OT_keyitem_remove = value; break;
+		case 'PREFERENCES_OT_keyitem_restore': PREFERENCES_OT_keyitem_restore = value; break;
+		case 'PREFERENCES_OT_keymap_restore': PREFERENCES_OT_keymap_restore = value; break;
+		case 'PREFERENCES_OT_script_directory_add': PREFERENCES_OT_script_directory_add = value; break;
+		case 'PREFERENCES_OT_script_directory_remove': PREFERENCES_OT_script_directory_remove = value; break;
+		case 'PREFERENCES_OT_studiolight_copy_settings': PREFERENCES_OT_studiolight_copy_settings = value; break;
+		case 'PREFERENCES_OT_studiolight_install': PREFERENCES_OT_studiolight_install = value; break;
+		case 'PREFERENCES_OT_studiolight_new': PREFERENCES_OT_studiolight_new = value; break;
+		case 'PREFERENCES_OT_studiolight_uninstall': PREFERENCES_OT_studiolight_uninstall = value; break;
+		case 'PREFERENCES_OT_theme_install': PREFERENCES_OT_theme_install = value; break;
+		case 'PROPERTIES_HT_header': PROPERTIES_HT_header = value; break;
+		case 'PROPERTIES_PT_navigation_bar': PROPERTIES_PT_navigation_bar = value; break;
+		case 'PROPERTIES_PT_options': PROPERTIES_PT_options = value; break;
+		case 'PROPERTIES_PT_visibility': PROPERTIES_PT_visibility = value; break;
+		case 'PointLight': PointLight = value; break;
+		case 'RENDER_MT_framerate_presets': RENDER_MT_framerate_presets = value; break;
+		case 'RENDER_MT_lineset_context_menu': RENDER_MT_lineset_context_menu = value; break;
+		case 'RENDER_MT_pixeldensity_presets': RENDER_MT_pixeldensity_presets = value; break;
+		case 'RENDER_OT_color_management_white_balance_preset_add': RENDER_OT_color_management_white_balance_preset_add = value; break;
+		case 'RENDER_OT_cycles_integrator_preset_add': RENDER_OT_cycles_integrator_preset_add = value; break;
+		case 'RENDER_OT_cycles_performance_preset_add': RENDER_OT_cycles_performance_preset_add = value; break;
+		case 'RENDER_OT_cycles_sampling_preset_add': RENDER_OT_cycles_sampling_preset_add = value; break;
+		case 'RENDER_OT_cycles_viewport_sampling_preset_add': RENDER_OT_cycles_viewport_sampling_preset_add = value; break;
+		case 'RENDER_OT_eevee_raytracing_preset_add': RENDER_OT_eevee_raytracing_preset_add = value; break;
+		case 'RENDER_OT_play_rendered_anim': RENDER_OT_play_rendered_anim = value; break;
+		case 'RENDER_OT_preset_add': RENDER_OT_preset_add = value; break;
+		case 'RENDER_OT_swap_dimensions': RENDER_OT_swap_dimensions = value; break;
+		case 'RENDER_PT_color_management': RENDER_PT_color_management = value; break;
+		case 'RENDER_PT_color_management_advanced': RENDER_PT_color_management_advanced = value; break;
+		case 'RENDER_PT_color_management_curves': RENDER_PT_color_management_curves = value; break;
+		case 'RENDER_PT_color_management_white_balance': RENDER_PT_color_management_white_balance = value; break;
+		case 'RENDER_PT_color_management_white_balance_presets': RENDER_PT_color_management_white_balance_presets = value; break;
+		case 'RENDER_PT_color_management_working_space': RENDER_PT_color_management_working_space = value; break;
+		case 'RENDER_PT_context': RENDER_PT_context = value; break;
+		case 'RENDER_PT_eevee_clamping': RENDER_PT_eevee_clamping = value; break;
+		case 'RENDER_PT_eevee_clamping_surface': RENDER_PT_eevee_clamping_surface = value; break;
+		case 'RENDER_PT_eevee_clamping_volume': RENDER_PT_eevee_clamping_volume = value; break;
+		case 'RENDER_PT_eevee_denoise': RENDER_PT_eevee_denoise = value; break;
+		case 'RENDER_PT_eevee_depth_of_field': RENDER_PT_eevee_depth_of_field = value; break;
+		case 'RENDER_PT_eevee_film': RENDER_PT_eevee_film = value; break;
+		case 'RENDER_PT_eevee_gi_approximation': RENDER_PT_eevee_gi_approximation = value; break;
+		case 'RENDER_PT_eevee_hair': RENDER_PT_eevee_hair = value; break;
+		case 'RENDER_PT_eevee_light_paths': RENDER_PT_eevee_light_paths = value; break;
+		case 'RENDER_PT_eevee_light_paths_intensity': RENDER_PT_eevee_light_paths_intensity = value; break;
+		case 'RENDER_PT_eevee_motion_blur': RENDER_PT_eevee_motion_blur = value; break;
+		case 'RENDER_PT_eevee_motion_blur_curve': RENDER_PT_eevee_motion_blur_curve = value; break;
+		case 'RENDER_PT_eevee_performance': RENDER_PT_eevee_performance = value; break;
+		case 'RENDER_PT_eevee_performance_compositor': RENDER_PT_eevee_performance_compositor = value; break;
+		case 'RENDER_PT_eevee_performance_compositor_denoise_settings': RENDER_PT_eevee_performance_compositor_denoise_settings = value; break;
+		case 'RENDER_PT_eevee_performance_memory': RENDER_PT_eevee_performance_memory = value; break;
+		case 'RENDER_PT_eevee_performance_viewport': RENDER_PT_eevee_performance_viewport = value; break;
+		case 'RENDER_PT_eevee_raytracing': RENDER_PT_eevee_raytracing = value; break;
+		case 'RENDER_PT_eevee_raytracing_presets': RENDER_PT_eevee_raytracing_presets = value; break;
+		case 'RENDER_PT_eevee_sampling': RENDER_PT_eevee_sampling = value; break;
+		case 'RENDER_PT_eevee_sampling_advanced': RENDER_PT_eevee_sampling_advanced = value; break;
+		case 'RENDER_PT_eevee_sampling_render': RENDER_PT_eevee_sampling_render = value; break;
+		case 'RENDER_PT_eevee_sampling_shadows': RENDER_PT_eevee_sampling_shadows = value; break;
+		case 'RENDER_PT_eevee_sampling_viewport': RENDER_PT_eevee_sampling_viewport = value; break;
+		case 'RENDER_PT_eevee_screen_trace': RENDER_PT_eevee_screen_trace = value; break;
+		case 'RENDER_PT_eevee_volumes': RENDER_PT_eevee_volumes = value; break;
+		case 'RENDER_PT_eevee_volumes_range': RENDER_PT_eevee_volumes_range = value; break;
+		case 'RENDER_PT_encoding': RENDER_PT_encoding = value; break;
+		case 'RENDER_PT_encoding_audio': RENDER_PT_encoding_audio = value; break;
+		case 'RENDER_PT_encoding_video': RENDER_PT_encoding_video = value; break;
+		case 'RENDER_PT_ffmpeg_presets': RENDER_PT_ffmpeg_presets = value; break;
+		case 'RENDER_PT_format': RENDER_PT_format = value; break;
+		case 'RENDER_PT_format_presets': RENDER_PT_format_presets = value; break;
+		case 'RENDER_PT_frame_range': RENDER_PT_frame_range = value; break;
+		case 'RENDER_PT_freestyle': RENDER_PT_freestyle = value; break;
+		case 'RENDER_PT_gpencil': RENDER_PT_gpencil = value; break;
+		case 'RENDER_PT_grease_pencil_render': RENDER_PT_grease_pencil_render = value; break;
+		case 'RENDER_PT_grease_pencil_viewport': RENDER_PT_grease_pencil_viewport = value; break;
+		case 'RENDER_PT_hydra_debug': RENDER_PT_hydra_debug = value; break;
+		case 'RENDER_PT_opengl_color': RENDER_PT_opengl_color = value; break;
+		case 'RENDER_PT_opengl_film': RENDER_PT_opengl_film = value; break;
+		case 'RENDER_PT_opengl_lighting': RENDER_PT_opengl_lighting = value; break;
+		case 'RENDER_PT_opengl_options': RENDER_PT_opengl_options = value; break;
+		case 'RENDER_PT_opengl_sampling': RENDER_PT_opengl_sampling = value; break;
+		case 'RENDER_PT_output': RENDER_PT_output = value; break;
+		case 'RENDER_PT_output_color_management': RENDER_PT_output_color_management = value; break;
+		case 'RENDER_PT_output_pixel_density': RENDER_PT_output_pixel_density = value; break;
+		case 'RENDER_PT_output_views': RENDER_PT_output_views = value; break;
+		case 'RENDER_PT_post_processing': RENDER_PT_post_processing = value; break;
+		case 'RENDER_PT_simplify': RENDER_PT_simplify = value; break;
+		case 'RENDER_PT_simplify_greasepencil': RENDER_PT_simplify_greasepencil = value; break;
+		case 'RENDER_PT_simplify_render': RENDER_PT_simplify_render = value; break;
+		case 'RENDER_PT_simplify_viewport': RENDER_PT_simplify_viewport = value; break;
+		case 'RENDER_PT_stamp': RENDER_PT_stamp = value; break;
+		case 'RENDER_PT_stamp_burn': RENDER_PT_stamp_burn = value; break;
+		case 'RENDER_PT_stamp_note': RENDER_PT_stamp_note = value; break;
+		case 'RENDER_PT_stereoscopy': RENDER_PT_stereoscopy = value; break;
+		case 'RENDER_PT_time_stretching': RENDER_PT_time_stretching = value; break;
+		case 'RENDER_UL_renderviews': RENDER_UL_renderviews = value; break;
+		case 'RIGIDBODY_OT_bake_to_keyframes': RIGIDBODY_OT_bake_to_keyframes = value; break;
+		case 'RIGIDBODY_OT_connect': RIGIDBODY_OT_connect = value; break;
+		case 'RIGIDBODY_OT_object_settings_copy': RIGIDBODY_OT_object_settings_copy = value; break;
+		case 'SCENE_OT_freestyle_add_edge_marks_to_keying_set': SCENE_OT_freestyle_add_edge_marks_to_keying_set = value; break;
+		case 'SCENE_OT_freestyle_add_face_marks_to_keying_set': SCENE_OT_freestyle_add_face_marks_to_keying_set = value; break;
+		case 'SCENE_OT_freestyle_fill_range_by_selection': SCENE_OT_freestyle_fill_range_by_selection = value; break;
+		case 'SCENE_OT_freestyle_module_open': SCENE_OT_freestyle_module_open = value; break;
+		case 'SCENE_OT_gltf2_action_filter_refresh': SCENE_OT_gltf2_action_filter_refresh = value; break;
+		case 'SCENE_OT_gpencil_brush_preset_add': SCENE_OT_gpencil_brush_preset_add = value; break;
+		case 'SCENE_OT_gpencil_material_preset_add': SCENE_OT_gpencil_material_preset_add = value; break;
+		case 'SCENE_PT_animation': SCENE_PT_animation = value; break;
+		case 'SCENE_PT_audio': SCENE_PT_audio = value; break;
+		case 'SCENE_PT_context_scene': SCENE_PT_context_scene = value; break;
+		case 'SCENE_PT_custom_props': SCENE_PT_custom_props = value; break;
+		case 'SCENE_PT_eevee_light_probes': SCENE_PT_eevee_light_probes = value; break;
+		case 'SCENE_PT_keyframing_settings': SCENE_PT_keyframing_settings = value; break;
+		case 'SCENE_PT_keying_set_paths': SCENE_PT_keying_set_paths = value; break;
+		case 'SCENE_PT_keying_sets': SCENE_PT_keying_sets = value; break;
+		case 'SCENE_PT_physics': SCENE_PT_physics = value; break;
+		case 'SCENE_PT_rigid_body_cache': SCENE_PT_rigid_body_cache = value; break;
+		case 'SCENE_PT_rigid_body_field_weights': SCENE_PT_rigid_body_field_weights = value; break;
+		case 'SCENE_PT_rigid_body_world': SCENE_PT_rigid_body_world = value; break;
+		case 'SCENE_PT_rigid_body_world_settings': SCENE_PT_rigid_body_world_settings = value; break;
+		case 'SCENE_PT_scene': SCENE_PT_scene = value; break;
+		case 'SCENE_PT_simulation': SCENE_PT_simulation = value; break;
+		case 'SCENE_PT_unit': SCENE_PT_unit = value; break;
+		case 'SCENE_UL_gltf2_filter_action': SCENE_UL_gltf2_filter_action = value; break;
+		case 'SCENE_UL_keying_set_paths': SCENE_UL_keying_set_paths = value; break;
+		case 'SCRIPT_OT_execute_preset': SCRIPT_OT_execute_preset = value; break;
+		case 'SEQUENCER_FH_image_strip': SEQUENCER_FH_image_strip = value; break;
+		case 'SEQUENCER_FH_movie_strip': SEQUENCER_FH_movie_strip = value; break;
+		case 'SEQUENCER_FH_sound_strip': SEQUENCER_FH_sound_strip = value; break;
+		case 'SEQUENCER_HT_header': SEQUENCER_HT_header = value; break;
+		case 'SEQUENCER_HT_playback_controls': SEQUENCER_HT_playback_controls = value; break;
+		case 'SEQUENCER_HT_tool_header': SEQUENCER_HT_tool_header = value; break;
+		case 'SEQUENCER_MT_add': SEQUENCER_MT_add = value; break;
+		case 'SEQUENCER_MT_add_effect': SEQUENCER_MT_add_effect = value; break;
+		case 'SEQUENCER_MT_add_empty': SEQUENCER_MT_add_empty = value; break;
+		case 'SEQUENCER_MT_add_transitions': SEQUENCER_MT_add_transitions = value; break;
+		case 'SEQUENCER_MT_change': SEQUENCER_MT_change = value; break;
+		case 'SEQUENCER_MT_color_tag_picker': SEQUENCER_MT_color_tag_picker = value; break;
+		case 'SEQUENCER_MT_context_menu': SEQUENCER_MT_context_menu = value; break;
+		case 'SEQUENCER_MT_editor_menus': SEQUENCER_MT_editor_menus = value; break;
+		case 'SEQUENCER_MT_image': SEQUENCER_MT_image = value; break;
+		case 'SEQUENCER_MT_image_apply': SEQUENCER_MT_image_apply = value; break;
+		case 'SEQUENCER_MT_image_clear': SEQUENCER_MT_image_clear = value; break;
+		case 'SEQUENCER_MT_image_transform': SEQUENCER_MT_image_transform = value; break;
+		case 'SEQUENCER_MT_marker': SEQUENCER_MT_marker = value; break;
+		case 'SEQUENCER_MT_modifier_add': SEQUENCER_MT_modifier_add = value; break;
+		case 'SEQUENCER_MT_navigation': SEQUENCER_MT_navigation = value; break;
+		case 'SEQUENCER_MT_pivot_pie': SEQUENCER_MT_pivot_pie = value; break;
+		case 'SEQUENCER_MT_preview_context_menu': SEQUENCER_MT_preview_context_menu = value; break;
+		case 'SEQUENCER_MT_preview_view_pie': SEQUENCER_MT_preview_view_pie = value; break;
+		case 'SEQUENCER_MT_preview_zoom': SEQUENCER_MT_preview_zoom = value; break;
+		case 'SEQUENCER_MT_proxy': SEQUENCER_MT_proxy = value; break;
+		case 'SEQUENCER_MT_range': SEQUENCER_MT_range = value; break;
+		case 'SEQUENCER_MT_retiming': SEQUENCER_MT_retiming = value; break;
+		case 'SEQUENCER_MT_select': SEQUENCER_MT_select = value; break;
+		case 'SEQUENCER_MT_select_channel': SEQUENCER_MT_select_channel = value; break;
+		case 'SEQUENCER_MT_select_handle': SEQUENCER_MT_select_handle = value; break;
+		case 'SEQUENCER_MT_strip': SEQUENCER_MT_strip = value; break;
+		case 'SEQUENCER_MT_strip_animation': SEQUENCER_MT_strip_animation = value; break;
+		case 'SEQUENCER_MT_strip_effect': SEQUENCER_MT_strip_effect = value; break;
+		case 'SEQUENCER_MT_strip_effect_change': SEQUENCER_MT_strip_effect_change = value; break;
+		case 'SEQUENCER_MT_strip_input': SEQUENCER_MT_strip_input = value; break;
+		case 'SEQUENCER_MT_strip_lock_mute': SEQUENCER_MT_strip_lock_mute = value; break;
+		case 'SEQUENCER_MT_strip_mirror': SEQUENCER_MT_strip_mirror = value; break;
+		case 'SEQUENCER_MT_strip_modifiers': SEQUENCER_MT_strip_modifiers = value; break;
+		case 'SEQUENCER_MT_strip_movie': SEQUENCER_MT_strip_movie = value; break;
+		case 'SEQUENCER_MT_strip_retiming': SEQUENCER_MT_strip_retiming = value; break;
+		case 'SEQUENCER_MT_strip_show_hide': SEQUENCER_MT_strip_show_hide = value; break;
+		case 'SEQUENCER_MT_strip_text': SEQUENCER_MT_strip_text = value; break;
+		case 'SEQUENCER_MT_strip_transform': SEQUENCER_MT_strip_transform = value; break;
+		case 'SEQUENCER_MT_view': SEQUENCER_MT_view = value; break;
+		case 'SEQUENCER_MT_view_pie': SEQUENCER_MT_view_pie = value; break;
+		case 'SEQUENCER_OT_crossfade_sounds': SEQUENCER_OT_crossfade_sounds = value; break;
+		case 'SEQUENCER_OT_deinterlace_selected_movies': SEQUENCER_OT_deinterlace_selected_movies = value; break;
+		case 'SEQUENCER_OT_fades_add': SEQUENCER_OT_fades_add = value; break;
+		case 'SEQUENCER_OT_fades_clear': SEQUENCER_OT_fades_clear = value; break;
+		case 'SEQUENCER_OT_split_multicam': SEQUENCER_OT_split_multicam = value; break;
+		case 'SEQUENCER_OT_text_strip_style_preset_add': SEQUENCER_OT_text_strip_style_preset_add = value; break;
+		case 'SEQUENCER_PT_active_tool': SEQUENCER_PT_active_tool = value; break;
+		case 'SEQUENCER_PT_annotation': SEQUENCER_PT_annotation = value; break;
+		case 'SEQUENCER_PT_annotation_onion': SEQUENCER_PT_annotation_onion = value; break;
+		case 'SEQUENCER_PT_cache_settings': SEQUENCER_PT_cache_settings = value; break;
+		case 'SEQUENCER_PT_cache_view_settings': SEQUENCER_PT_cache_view_settings = value; break;
+		case 'SEQUENCER_PT_frame_overlay': SEQUENCER_PT_frame_overlay = value; break;
+		case 'SEQUENCER_PT_gizmo_display': SEQUENCER_PT_gizmo_display = value; break;
+		case 'SEQUENCER_PT_overlay': SEQUENCER_PT_overlay = value; break;
+		case 'SEQUENCER_PT_preview': SEQUENCER_PT_preview = value; break;
+		case 'SEQUENCER_PT_preview_overlay': SEQUENCER_PT_preview_overlay = value; break;
+		case 'SEQUENCER_PT_preview_snapping': SEQUENCER_PT_preview_snapping = value; break;
+		case 'SEQUENCER_PT_proxy_settings': SEQUENCER_PT_proxy_settings = value; break;
+		case 'SEQUENCER_PT_sequencer_overlay': SEQUENCER_PT_sequencer_overlay = value; break;
+		case 'SEQUENCER_PT_sequencer_overlay_strips': SEQUENCER_PT_sequencer_overlay_strips = value; break;
+		case 'SEQUENCER_PT_sequencer_overlay_thumbnails': SEQUENCER_PT_sequencer_overlay_thumbnails = value; break;
+		case 'SEQUENCER_PT_sequencer_overlay_waveforms': SEQUENCER_PT_sequencer_overlay_waveforms = value; break;
+		case 'SEQUENCER_PT_sequencer_snapping': SEQUENCER_PT_sequencer_snapping = value; break;
+		case 'SEQUENCER_PT_snapping': SEQUENCER_PT_snapping = value; break;
+		case 'SEQUENCER_PT_strip_proxy': SEQUENCER_PT_strip_proxy = value; break;
+		case 'SEQUENCER_PT_tools_active': SEQUENCER_PT_tools_active = value; break;
+		case 'SEQUENCER_PT_view': SEQUENCER_PT_view = value; break;
+		case 'SEQUENCER_PT_view_composition_guides': SEQUENCER_PT_view_composition_guides = value; break;
+		case 'SEQUENCER_PT_view_cursor': SEQUENCER_PT_view_cursor = value; break;
+		case 'SEQUENCER_PT_view_safe_areas': SEQUENCER_PT_view_safe_areas = value; break;
+		case 'SEQUENCER_PT_view_safe_areas_center_cut': SEQUENCER_PT_view_safe_areas_center_cut = value; break;
+		case 'SPREADSHEET_HT_header': SPREADSHEET_HT_header = value; break;
+		case 'SPREADSHEET_MT_editor_menus': SPREADSHEET_MT_editor_menus = value; break;
+		case 'SPREADSHEET_MT_view': SPREADSHEET_MT_view = value; break;
+		case 'SPREADSHEET_OT_toggle_pin': SPREADSHEET_OT_toggle_pin = value; break;
+		case 'STATUSBAR_HT_header': STATUSBAR_HT_header = value; break;
+		case 'STRIP_PT_adjust_color': STRIP_PT_adjust_color = value; break;
+		case 'STRIP_PT_adjust_comp': STRIP_PT_adjust_comp = value; break;
+		case 'STRIP_PT_adjust_crop': STRIP_PT_adjust_crop = value; break;
+		case 'STRIP_PT_adjust_sound': STRIP_PT_adjust_sound = value; break;
+		case 'STRIP_PT_adjust_transform': STRIP_PT_adjust_transform = value; break;
+		case 'STRIP_PT_adjust_video': STRIP_PT_adjust_video = value; break;
+		case 'STRIP_PT_color_tag_picker': STRIP_PT_color_tag_picker = value; break;
+		case 'STRIP_PT_custom_props': STRIP_PT_custom_props = value; break;
+		case 'STRIP_PT_effect': STRIP_PT_effect = value; break;
+		case 'STRIP_PT_effect_text_box': STRIP_PT_effect_text_box = value; break;
+		case 'STRIP_PT_effect_text_layout': STRIP_PT_effect_text_layout = value; break;
+		case 'STRIP_PT_effect_text_outline': STRIP_PT_effect_text_outline = value; break;
+		case 'STRIP_PT_effect_text_shadow': STRIP_PT_effect_text_shadow = value; break;
+		case 'STRIP_PT_effect_text_style': STRIP_PT_effect_text_style = value; break;
+		case 'STRIP_PT_effect_text_style_presets': STRIP_PT_effect_text_style_presets = value; break;
+		case 'STRIP_PT_mask': STRIP_PT_mask = value; break;
+		case 'STRIP_PT_modifiers': STRIP_PT_modifiers = value; break;
+		case 'STRIP_PT_movie_clip': STRIP_PT_movie_clip = value; break;
+		case 'STRIP_PT_scene': STRIP_PT_scene = value; break;
+		case 'STRIP_PT_scene_sound': STRIP_PT_scene_sound = value; break;
+		case 'STRIP_PT_source': STRIP_PT_source = value; break;
+		case 'STRIP_PT_strip': STRIP_PT_strip = value; break;
+		case 'STRIP_PT_time': STRIP_PT_time = value; break;
+		case 'SelectedUvElement': SelectedUvElement = value; break;
+		case 'ShaderNodeAddShader': ShaderNodeAddShader = value; break;
+		case 'ShaderNodeAmbientOcclusion': ShaderNodeAmbientOcclusion = value; break;
+		case 'ShaderNodeAttribute': ShaderNodeAttribute = value; break;
+		case 'ShaderNodeBackground': ShaderNodeBackground = value; break;
+		case 'ShaderNodeBevel': ShaderNodeBevel = value; break;
+		case 'ShaderNodeBlackbody': ShaderNodeBlackbody = value; break;
+		case 'ShaderNodeBrightContrast': ShaderNodeBrightContrast = value; break;
+		case 'ShaderNodeBsdfAnisotropic': ShaderNodeBsdfAnisotropic = value; break;
+		case 'ShaderNodeBsdfDiffuse': ShaderNodeBsdfDiffuse = value; break;
+		case 'ShaderNodeBsdfGlass': ShaderNodeBsdfGlass = value; break;
+		case 'ShaderNodeBsdfHair': ShaderNodeBsdfHair = value; break;
+		case 'ShaderNodeBsdfHairPrincipled': ShaderNodeBsdfHairPrincipled = value; break;
+		case 'ShaderNodeBsdfMetallic': ShaderNodeBsdfMetallic = value; break;
+		case 'ShaderNodeBsdfPrincipled': ShaderNodeBsdfPrincipled = value; break;
+		case 'ShaderNodeBsdfRayPortal': ShaderNodeBsdfRayPortal = value; break;
+		case 'ShaderNodeBsdfRefraction': ShaderNodeBsdfRefraction = value; break;
+		case 'ShaderNodeBsdfSheen': ShaderNodeBsdfSheen = value; break;
+		case 'ShaderNodeBsdfToon': ShaderNodeBsdfToon = value; break;
+		case 'ShaderNodeBsdfTranslucent': ShaderNodeBsdfTranslucent = value; break;
+		case 'ShaderNodeBsdfTransparent': ShaderNodeBsdfTransparent = value; break;
+		case 'ShaderNodeBump': ShaderNodeBump = value; break;
+		case 'ShaderNodeCameraData': ShaderNodeCameraData = value; break;
+		case 'ShaderNodeClamp': ShaderNodeClamp = value; break;
+		case 'ShaderNodeCombineColor': ShaderNodeCombineColor = value; break;
+		case 'ShaderNodeCombineXYZ': ShaderNodeCombineXYZ = value; break;
+		case 'ShaderNodeCustomGroup': ShaderNodeCustomGroup = value; break;
+		case 'ShaderNodeDisplacement': ShaderNodeDisplacement = value; break;
+		case 'ShaderNodeEeveeSpecular': ShaderNodeEeveeSpecular = value; break;
+		case 'ShaderNodeEmission': ShaderNodeEmission = value; break;
+		case 'ShaderNodeFloatCurve': ShaderNodeFloatCurve = value; break;
+		case 'ShaderNodeFresnel': ShaderNodeFresnel = value; break;
+		case 'ShaderNodeGamma': ShaderNodeGamma = value; break;
+		case 'ShaderNodeGroup': ShaderNodeGroup = value; break;
+		case 'ShaderNodeHairInfo': ShaderNodeHairInfo = value; break;
+		case 'ShaderNodeHoldout': ShaderNodeHoldout = value; break;
+		case 'ShaderNodeHueSaturation': ShaderNodeHueSaturation = value; break;
+		case 'ShaderNodeInvert': ShaderNodeInvert = value; break;
+		case 'ShaderNodeLayerWeight': ShaderNodeLayerWeight = value; break;
+		case 'ShaderNodeLightFalloff': ShaderNodeLightFalloff = value; break;
+		case 'ShaderNodeLightPath': ShaderNodeLightPath = value; break;
+		case 'ShaderNodeMapRange': ShaderNodeMapRange = value; break;
+		case 'ShaderNodeMapping': ShaderNodeMapping = value; break;
+		case 'ShaderNodeMath': ShaderNodeMath = value; break;
+		case 'ShaderNodeMix': ShaderNodeMix = value; break;
+		case 'ShaderNodeMixRGB': ShaderNodeMixRGB = value; break;
+		case 'ShaderNodeMixShader': ShaderNodeMixShader = value; break;
+		case 'ShaderNodeNewGeometry': ShaderNodeNewGeometry = value; break;
+		case 'ShaderNodeNormal': ShaderNodeNormal = value; break;
+		case 'ShaderNodeNormalMap': ShaderNodeNormalMap = value; break;
+		case 'ShaderNodeObjectInfo': ShaderNodeObjectInfo = value; break;
+		case 'ShaderNodeOutputAOV': ShaderNodeOutputAOV = value; break;
+		case 'ShaderNodeOutputLight': ShaderNodeOutputLight = value; break;
+		case 'ShaderNodeOutputLineStyle': ShaderNodeOutputLineStyle = value; break;
+		case 'ShaderNodeOutputMaterial': ShaderNodeOutputMaterial = value; break;
+		case 'ShaderNodeOutputWorld': ShaderNodeOutputWorld = value; break;
+		case 'ShaderNodeParticleInfo': ShaderNodeParticleInfo = value; break;
+		case 'ShaderNodePointInfo': ShaderNodePointInfo = value; break;
+		case 'ShaderNodeRGB': ShaderNodeRGB = value; break;
+		case 'ShaderNodeRGBCurve': ShaderNodeRGBCurve = value; break;
+		case 'ShaderNodeRGBToBW': ShaderNodeRGBToBW = value; break;
+		case 'ShaderNodeRadialTiling': ShaderNodeRadialTiling = value; break;
+		case 'ShaderNodeRaycast': ShaderNodeRaycast = value; break;
+		case 'ShaderNodeScript': ShaderNodeScript = value; break;
+		case 'ShaderNodeSeparateColor': ShaderNodeSeparateColor = value; break;
+		case 'ShaderNodeSeparateXYZ': ShaderNodeSeparateXYZ = value; break;
+		case 'ShaderNodeShaderToRGB': ShaderNodeShaderToRGB = value; break;
+		case 'ShaderNodeSqueeze': ShaderNodeSqueeze = value; break;
+		case 'ShaderNodeSubsurfaceScattering': ShaderNodeSubsurfaceScattering = value; break;
+		case 'ShaderNodeTangent': ShaderNodeTangent = value; break;
+		case 'ShaderNodeTexBrick': ShaderNodeTexBrick = value; break;
+		case 'ShaderNodeTexChecker': ShaderNodeTexChecker = value; break;
+		case 'ShaderNodeTexCoord': ShaderNodeTexCoord = value; break;
+		case 'ShaderNodeTexEnvironment': ShaderNodeTexEnvironment = value; break;
+		case 'ShaderNodeTexGabor': ShaderNodeTexGabor = value; break;
+		case 'ShaderNodeTexGradient': ShaderNodeTexGradient = value; break;
+		case 'ShaderNodeTexIES': ShaderNodeTexIES = value; break;
+		case 'ShaderNodeTexImage': ShaderNodeTexImage = value; break;
+		case 'ShaderNodeTexMagic': ShaderNodeTexMagic = value; break;
+		case 'ShaderNodeTexNoise': ShaderNodeTexNoise = value; break;
+		case 'ShaderNodeTexSky': ShaderNodeTexSky = value; break;
+		case 'ShaderNodeTexVoronoi': ShaderNodeTexVoronoi = value; break;
+		case 'ShaderNodeTexWave': ShaderNodeTexWave = value; break;
+		case 'ShaderNodeTexWhiteNoise': ShaderNodeTexWhiteNoise = value; break;
+		case 'ShaderNodeTree': ShaderNodeTree = value; break;
+		case 'ShaderNodeUVAlongStroke': ShaderNodeUVAlongStroke = value; break;
+		case 'ShaderNodeUVMap': ShaderNodeUVMap = value; break;
+		case 'ShaderNodeValToRGB': ShaderNodeValToRGB = value; break;
+		case 'ShaderNodeValue': ShaderNodeValue = value; break;
+		case 'ShaderNodeVectorCurve': ShaderNodeVectorCurve = value; break;
+		case 'ShaderNodeVectorDisplacement': ShaderNodeVectorDisplacement = value; break;
+		case 'ShaderNodeVectorMath': ShaderNodeVectorMath = value; break;
+		case 'ShaderNodeVectorRotate': ShaderNodeVectorRotate = value; break;
+		case 'ShaderNodeVectorTransform': ShaderNodeVectorTransform = value; break;
+		case 'ShaderNodeVertexColor': ShaderNodeVertexColor = value; break;
+		case 'ShaderNodeVolumeAbsorption': ShaderNodeVolumeAbsorption = value; break;
+		case 'ShaderNodeVolumeCoefficients': ShaderNodeVolumeCoefficients = value; break;
+		case 'ShaderNodeVolumeInfo': ShaderNodeVolumeInfo = value; break;
+		case 'ShaderNodeVolumePrincipled': ShaderNodeVolumePrincipled = value; break;
+		case 'ShaderNodeVolumeScatter': ShaderNodeVolumeScatter = value; break;
+		case 'ShaderNodeWavelength': ShaderNodeWavelength = value; break;
+		case 'ShaderNodeWireframe': ShaderNodeWireframe = value; break;
+		case 'SpotLight': SpotLight = value; break;
+		case 'StucciTexture': StucciTexture = value; break;
+		case 'SunLight': SunLight = value; break;
+		case 'TEXTURE_MT_context_menu': TEXTURE_MT_context_menu = value; break;
+		case 'TEXTURE_PT_animation': TEXTURE_PT_animation = value; break;
+		case 'TEXTURE_PT_blend': TEXTURE_PT_blend = value; break;
+		case 'TEXTURE_PT_clouds': TEXTURE_PT_clouds = value; break;
+		case 'TEXTURE_PT_colors': TEXTURE_PT_colors = value; break;
+		case 'TEXTURE_PT_colors_ramp': TEXTURE_PT_colors_ramp = value; break;
+		case 'TEXTURE_PT_context': TEXTURE_PT_context = value; break;
+		case 'TEXTURE_PT_custom_props': TEXTURE_PT_custom_props = value; break;
+		case 'TEXTURE_PT_distortednoise': TEXTURE_PT_distortednoise = value; break;
+		case 'TEXTURE_PT_image': TEXTURE_PT_image = value; break;
+		case 'TEXTURE_PT_image_alpha': TEXTURE_PT_image_alpha = value; break;
+		case 'TEXTURE_PT_image_mapping': TEXTURE_PT_image_mapping = value; break;
+		case 'TEXTURE_PT_image_mapping_crop': TEXTURE_PT_image_mapping_crop = value; break;
+		case 'TEXTURE_PT_image_sampling': TEXTURE_PT_image_sampling = value; break;
+		case 'TEXTURE_PT_image_settings': TEXTURE_PT_image_settings = value; break;
+		case 'TEXTURE_PT_influence': TEXTURE_PT_influence = value; break;
+		case 'TEXTURE_PT_magic': TEXTURE_PT_magic = value; break;
+		case 'TEXTURE_PT_mapping': TEXTURE_PT_mapping = value; break;
+		case 'TEXTURE_PT_marble': TEXTURE_PT_marble = value; break;
+		case 'TEXTURE_PT_musgrave': TEXTURE_PT_musgrave = value; break;
+		case 'TEXTURE_PT_node': TEXTURE_PT_node = value; break;
+		case 'TEXTURE_PT_preview': TEXTURE_PT_preview = value; break;
+		case 'TEXTURE_PT_stucci': TEXTURE_PT_stucci = value; break;
+		case 'TEXTURE_PT_voronoi': TEXTURE_PT_voronoi = value; break;
+		case 'TEXTURE_PT_voronoi_feature_weights': TEXTURE_PT_voronoi_feature_weights = value; break;
+		case 'TEXTURE_PT_wood': TEXTURE_PT_wood = value; break;
+		case 'TEXTURE_UL_texpaintslots': TEXTURE_UL_texpaintslots = value; break;
+		case 'TEXTURE_UL_texslots': TEXTURE_UL_texslots = value; break;
+		case 'TEXT_EDITOR_OT_preset_add': TEXT_EDITOR_OT_preset_add = value; break;
+		case 'TEXT_HT_footer': TEXT_HT_footer = value; break;
+		case 'TEXT_HT_header': TEXT_HT_header = value; break;
+		case 'TEXT_MT_context_menu': TEXT_MT_context_menu = value; break;
+		case 'TEXT_MT_edit': TEXT_MT_edit = value; break;
+		case 'TEXT_MT_edit_to3d': TEXT_MT_edit_to3d = value; break;
+		case 'TEXT_MT_editor_menus': TEXT_MT_editor_menus = value; break;
+		case 'TEXT_MT_format': TEXT_MT_format = value; break;
+		case 'TEXT_MT_select': TEXT_MT_select = value; break;
+		case 'TEXT_MT_templates': TEXT_MT_templates = value; break;
+		case 'TEXT_MT_templates_osl': TEXT_MT_templates_osl = value; break;
+		case 'TEXT_MT_templates_py': TEXT_MT_templates_py = value; break;
+		case 'TEXT_MT_text': TEXT_MT_text = value; break;
+		case 'TEXT_MT_view': TEXT_MT_view = value; break;
+		case 'TEXT_MT_view_navigation': TEXT_MT_view_navigation = value; break;
+		case 'TEXT_PT_find': TEXT_PT_find = value; break;
+		case 'TEXT_PT_properties': TEXT_PT_properties = value; break;
+		case 'TIME_MT_view': TIME_MT_view = value; break;
+		case 'TIME_PT_auto_keyframing': TIME_PT_auto_keyframing = value; break;
+		case 'TIME_PT_jump': TIME_PT_jump = value; break;
+		case 'TIME_PT_keyframing_settings': TIME_PT_keyframing_settings = value; break;
+		case 'TIME_PT_playback': TIME_PT_playback = value; break;
+		case 'TIME_PT_playhead_snapping': TIME_PT_playhead_snapping = value; break;
+		case 'TOPBAR_HT_upper_bar': TOPBAR_HT_upper_bar = value; break;
+		case 'TOPBAR_MT_blender': TOPBAR_MT_blender = value; break;
+		case 'TOPBAR_MT_blender_system': TOPBAR_MT_blender_system = value; break;
+		case 'TOPBAR_MT_edit': TOPBAR_MT_edit = value; break;
+		case 'TOPBAR_MT_edit_armature_add': TOPBAR_MT_edit_armature_add = value; break;
+		case 'TOPBAR_MT_edit_curve_add': TOPBAR_MT_edit_curve_add = value; break;
+		case 'TOPBAR_MT_editor_menus': TOPBAR_MT_editor_menus = value; break;
+		case 'TOPBAR_MT_file': TOPBAR_MT_file = value; break;
+		case 'TOPBAR_MT_file_cleanup': TOPBAR_MT_file_cleanup = value; break;
+		case 'TOPBAR_MT_file_context_menu': TOPBAR_MT_file_context_menu = value; break;
+		case 'TOPBAR_MT_file_defaults': TOPBAR_MT_file_defaults = value; break;
+		case 'TOPBAR_MT_file_export': TOPBAR_MT_file_export = value; break;
+		case 'TOPBAR_MT_file_external_data': TOPBAR_MT_file_external_data = value; break;
+		case 'TOPBAR_MT_file_import': TOPBAR_MT_file_import = value; break;
+		case 'TOPBAR_MT_file_new': TOPBAR_MT_file_new = value; break;
+		case 'TOPBAR_MT_file_previews': TOPBAR_MT_file_previews = value; break;
+		case 'TOPBAR_MT_file_recover': TOPBAR_MT_file_recover = value; break;
+		case 'TOPBAR_MT_help': TOPBAR_MT_help = value; break;
+		case 'TOPBAR_MT_render': TOPBAR_MT_render = value; break;
+		case 'TOPBAR_MT_templates_more': TOPBAR_MT_templates_more = value; break;
+		case 'TOPBAR_MT_window': TOPBAR_MT_window = value; break;
+		case 'TOPBAR_MT_workspace_menu': TOPBAR_MT_workspace_menu = value; break;
+		case 'TOPBAR_PT_annotation_layers': TOPBAR_PT_annotation_layers = value; break;
+		case 'TOPBAR_PT_gpencil_primitive': TOPBAR_PT_gpencil_primitive = value; break;
+		case 'TOPBAR_PT_grease_pencil_layers': TOPBAR_PT_grease_pencil_layers = value; break;
+		case 'TOPBAR_PT_grease_pencil_materials': TOPBAR_PT_grease_pencil_materials = value; break;
+		case 'TOPBAR_PT_grease_pencil_vertex_color': TOPBAR_PT_grease_pencil_vertex_color = value; break;
+		case 'TOPBAR_PT_name': TOPBAR_PT_name = value; break;
+		case 'TOPBAR_PT_name_marker': TOPBAR_PT_name_marker = value; break;
+		case 'TOPBAR_PT_tool_fallback': TOPBAR_PT_tool_fallback = value; break;
+		case 'TOPBAR_PT_tool_settings_extra': TOPBAR_PT_tool_settings_extra = value; break;
+		case 'TextureNodeAt': TextureNodeAt = value; break;
+		case 'TextureNodeBricks': TextureNodeBricks = value; break;
+		case 'TextureNodeChecker': TextureNodeChecker = value; break;
+		case 'TextureNodeCombineColor': TextureNodeCombineColor = value; break;
+		case 'TextureNodeCompose': TextureNodeCompose = value; break;
+		case 'TextureNodeCoordinates': TextureNodeCoordinates = value; break;
+		case 'TextureNodeCurveRGB': TextureNodeCurveRGB = value; break;
+		case 'TextureNodeCurveTime': TextureNodeCurveTime = value; break;
+		case 'TextureNodeDecompose': TextureNodeDecompose = value; break;
+		case 'TextureNodeDistance': TextureNodeDistance = value; break;
+		case 'TextureNodeGroup': TextureNodeGroup = value; break;
+		case 'TextureNodeHueSaturation': TextureNodeHueSaturation = value; break;
+		case 'TextureNodeImage': TextureNodeImage = value; break;
+		case 'TextureNodeInvert': TextureNodeInvert = value; break;
+		case 'TextureNodeMath': TextureNodeMath = value; break;
+		case 'TextureNodeMixRGB': TextureNodeMixRGB = value; break;
+		case 'TextureNodeOutput': TextureNodeOutput = value; break;
+		case 'TextureNodeRGBToBW': TextureNodeRGBToBW = value; break;
+		case 'TextureNodeRotate': TextureNodeRotate = value; break;
+		case 'TextureNodeScale': TextureNodeScale = value; break;
+		case 'TextureNodeSeparateColor': TextureNodeSeparateColor = value; break;
+		case 'TextureNodeTexBlend': TextureNodeTexBlend = value; break;
+		case 'TextureNodeTexClouds': TextureNodeTexClouds = value; break;
+		case 'TextureNodeTexDistNoise': TextureNodeTexDistNoise = value; break;
+		case 'TextureNodeTexMagic': TextureNodeTexMagic = value; break;
+		case 'TextureNodeTexMarble': TextureNodeTexMarble = value; break;
+		case 'TextureNodeTexMusgrave': TextureNodeTexMusgrave = value; break;
+		case 'TextureNodeTexNoise': TextureNodeTexNoise = value; break;
+		case 'TextureNodeTexStucci': TextureNodeTexStucci = value; break;
+		case 'TextureNodeTexVoronoi': TextureNodeTexVoronoi = value; break;
+		case 'TextureNodeTexWood': TextureNodeTexWood = value; break;
+		case 'TextureNodeTexture': TextureNodeTexture = value; break;
+		case 'TextureNodeTranslate': TextureNodeTranslate = value; break;
+		case 'TextureNodeTree': TextureNodeTree = value; break;
+		case 'TextureNodeValToNor': TextureNodeValToNor = value; break;
+		case 'TextureNodeValToRGB': TextureNodeValToRGB = value; break;
+		case 'TextureNodeViewer': TextureNodeViewer = value; break;
+		case 'UILIST_OT_entry_add': UILIST_OT_entry_add = value; break;
+		case 'UILIST_OT_entry_move': UILIST_OT_entry_move = value; break;
+		case 'UILIST_OT_entry_remove': UILIST_OT_entry_remove = value; break;
+		case 'UI_MT_button_context_menu': UI_MT_button_context_menu = value; break;
+		case 'UI_MT_list_item_context_menu': UI_MT_list_item_context_menu = value; break;
+		case 'UI_UL_list': UI_UL_list = value; break;
+		case 'USERPREF_HT_header': USERPREF_HT_header = value; break;
+		case 'USERPREF_MT_addons_settings': USERPREF_MT_addons_settings = value; break;
+		case 'USERPREF_MT_editor_menus': USERPREF_MT_editor_menus = value; break;
+		case 'USERPREF_MT_extensions_active_repo': USERPREF_MT_extensions_active_repo = value; break;
+		case 'USERPREF_MT_extensions_active_repo_extra': USERPREF_MT_extensions_active_repo_extra = value; break;
+		case 'USERPREF_MT_extensions_active_repo_remove': USERPREF_MT_extensions_active_repo_remove = value; break;
+		case 'USERPREF_MT_extensions_item': USERPREF_MT_extensions_item = value; break;
+		case 'USERPREF_MT_extensions_settings': USERPREF_MT_extensions_settings = value; break;
+		case 'USERPREF_MT_interface_theme_presets': USERPREF_MT_interface_theme_presets = value; break;
+		case 'USERPREF_MT_keyconfigs': USERPREF_MT_keyconfigs = value; break;
+		case 'USERPREF_MT_save_load': USERPREF_MT_save_load = value; break;
+		case 'USERPREF_MT_view': USERPREF_MT_view = value; break;
+		case 'USERPREF_PT_addons': USERPREF_PT_addons = value; break;
+		case 'USERPREF_PT_addons_filter': USERPREF_PT_addons_filter = value; break;
+		case 'USERPREF_PT_addons_tags': USERPREF_PT_addons_tags = value; break;
+		case 'USERPREF_PT_animation_fcurves': USERPREF_PT_animation_fcurves = value; break;
+		case 'USERPREF_PT_animation_keyframes': USERPREF_PT_animation_keyframes = value; break;
+		case 'USERPREF_PT_animation_timeline': USERPREF_PT_animation_timeline = value; break;
+		case 'USERPREF_PT_animation_timeline_advanced': USERPREF_PT_animation_timeline_advanced = value; break;
+		case 'USERPREF_PT_assets': USERPREF_PT_assets = value; break;
+		case 'USERPREF_PT_developer_tools': USERPREF_PT_developer_tools = value; break;
+		case 'USERPREF_PT_edit_annotations': USERPREF_PT_edit_annotations = value; break;
+		case 'USERPREF_PT_edit_cursor': USERPREF_PT_edit_cursor = value; break;
+		case 'USERPREF_PT_edit_gpencil': USERPREF_PT_edit_gpencil = value; break;
+		case 'USERPREF_PT_edit_misc': USERPREF_PT_edit_misc = value; break;
+		case 'USERPREF_PT_edit_node_editor': USERPREF_PT_edit_node_editor = value; break;
+		case 'USERPREF_PT_edit_objects': USERPREF_PT_edit_objects = value; break;
+		case 'USERPREF_PT_edit_objects_duplicate_data': USERPREF_PT_edit_objects_duplicate_data = value; break;
+		case 'USERPREF_PT_edit_objects_new': USERPREF_PT_edit_objects_new = value; break;
+		case 'USERPREF_PT_edit_sequence_editor': USERPREF_PT_edit_sequence_editor = value; break;
+		case 'USERPREF_PT_edit_text_editor': USERPREF_PT_edit_text_editor = value; break;
+		case 'USERPREF_PT_edit_weight_paint': USERPREF_PT_edit_weight_paint = value; break;
+		case 'USERPREF_PT_experimental_new_features': USERPREF_PT_experimental_new_features = value; break;
+		case 'USERPREF_PT_experimental_prototypes': USERPREF_PT_experimental_prototypes = value; break;
+		case 'USERPREF_PT_extensions': USERPREF_PT_extensions = value; break;
+		case 'USERPREF_PT_extensions_filter': USERPREF_PT_extensions_filter = value; break;
+		case 'USERPREF_PT_extensions_repos': USERPREF_PT_extensions_repos = value; break;
+		case 'USERPREF_PT_file_paths_applications': USERPREF_PT_file_paths_applications = value; break;
+		case 'USERPREF_PT_file_paths_data': USERPREF_PT_file_paths_data = value; break;
+		case 'USERPREF_PT_file_paths_development': USERPREF_PT_file_paths_development = value; break;
+		case 'USERPREF_PT_file_paths_render': USERPREF_PT_file_paths_render = value; break;
+		case 'USERPREF_PT_file_paths_script_directories': USERPREF_PT_file_paths_script_directories = value; break;
+		case 'USERPREF_PT_input_keyboard': USERPREF_PT_input_keyboard = value; break;
+		case 'USERPREF_PT_input_mouse': USERPREF_PT_input_mouse = value; break;
+		case 'USERPREF_PT_input_ndof': USERPREF_PT_input_ndof = value; break;
+		case 'USERPREF_PT_input_tablet': USERPREF_PT_input_tablet = value; break;
+		case 'USERPREF_PT_input_touchpad': USERPREF_PT_input_touchpad = value; break;
+		case 'USERPREF_PT_interface_accessibility': USERPREF_PT_interface_accessibility = value; break;
+		case 'USERPREF_PT_interface_display': USERPREF_PT_interface_display = value; break;
+		case 'USERPREF_PT_interface_editors': USERPREF_PT_interface_editors = value; break;
+		case 'USERPREF_PT_interface_menus': USERPREF_PT_interface_menus = value; break;
+		case 'USERPREF_PT_interface_menus_mouse_over': USERPREF_PT_interface_menus_mouse_over = value; break;
+		case 'USERPREF_PT_interface_menus_pie': USERPREF_PT_interface_menus_pie = value; break;
+		case 'USERPREF_PT_interface_statusbar': USERPREF_PT_interface_statusbar = value; break;
+		case 'USERPREF_PT_interface_temporary_windows': USERPREF_PT_interface_temporary_windows = value; break;
+		case 'USERPREF_PT_interface_text': USERPREF_PT_interface_text = value; break;
+		case 'USERPREF_PT_interface_translation': USERPREF_PT_interface_translation = value; break;
+		case 'USERPREF_PT_keymap': USERPREF_PT_keymap = value; break;
+		case 'USERPREF_PT_navigation_bar': USERPREF_PT_navigation_bar = value; break;
+		case 'USERPREF_PT_navigation_fly_walk': USERPREF_PT_navigation_fly_walk = value; break;
+		case 'USERPREF_PT_navigation_fly_walk_gravity': USERPREF_PT_navigation_fly_walk_gravity = value; break;
+		case 'USERPREF_PT_navigation_fly_walk_navigation': USERPREF_PT_navigation_fly_walk_navigation = value; break;
+		case 'USERPREF_PT_navigation_orbit': USERPREF_PT_navigation_orbit = value; break;
+		case 'USERPREF_PT_navigation_zoom': USERPREF_PT_navigation_zoom = value; break;
+		case 'USERPREF_PT_ndof_settings': USERPREF_PT_ndof_settings = value; break;
+		case 'USERPREF_PT_save_preferences': USERPREF_PT_save_preferences = value; break;
+		case 'USERPREF_PT_saveload_autorun': USERPREF_PT_saveload_autorun = value; break;
+		case 'USERPREF_PT_saveload_blend': USERPREF_PT_saveload_blend = value; break;
+		case 'USERPREF_PT_saveload_file_browser': USERPREF_PT_saveload_file_browser = value; break;
+		case 'USERPREF_PT_studiolight_light_editor': USERPREF_PT_studiolight_light_editor = value; break;
+		case 'USERPREF_PT_studiolight_lights': USERPREF_PT_studiolight_lights = value; break;
+		case 'USERPREF_PT_studiolight_matcaps': USERPREF_PT_studiolight_matcaps = value; break;
+		case 'USERPREF_PT_studiolight_world': USERPREF_PT_studiolight_world = value; break;
+		case 'USERPREF_PT_system_cycles_devices': USERPREF_PT_system_cycles_devices = value; break;
+		case 'USERPREF_PT_system_display_graphics': USERPREF_PT_system_display_graphics = value; break;
+		case 'USERPREF_PT_system_memory': USERPREF_PT_system_memory = value; break;
+		case 'USERPREF_PT_system_network': USERPREF_PT_system_network = value; break;
+		case 'USERPREF_PT_system_os_settings': USERPREF_PT_system_os_settings = value; break;
+		case 'USERPREF_PT_system_sound': USERPREF_PT_system_sound = value; break;
+		case 'USERPREF_PT_system_video_sequencer': USERPREF_PT_system_video_sequencer = value; break;
+		case 'USERPREF_PT_text_editor': USERPREF_PT_text_editor = value; break;
+		case 'USERPREF_PT_text_editor_presets': USERPREF_PT_text_editor_presets = value; break;
+		case 'USERPREF_PT_theme': USERPREF_PT_theme = value; break;
+		case 'USERPREF_PT_theme_bone_color_sets': USERPREF_PT_theme_bone_color_sets = value; break;
+		case 'USERPREF_PT_theme_clip_editor': USERPREF_PT_theme_clip_editor = value; break;
+		case 'USERPREF_PT_theme_clip_editor_space': USERPREF_PT_theme_clip_editor_space = value; break;
+		case 'USERPREF_PT_theme_collection_colors': USERPREF_PT_theme_collection_colors = value; break;
+		case 'USERPREF_PT_theme_color_sets': USERPREF_PT_theme_color_sets = value; break;
+		case 'USERPREF_PT_theme_common': USERPREF_PT_theme_common = value; break;
+		case 'USERPREF_PT_theme_common_anim': USERPREF_PT_theme_common_anim = value; break;
+		case 'USERPREF_PT_theme_common_curves': USERPREF_PT_theme_common_curves = value; break;
+		case 'USERPREF_PT_theme_console': USERPREF_PT_theme_console = value; break;
+		case 'USERPREF_PT_theme_console_space': USERPREF_PT_theme_console_space = value; break;
+		case 'USERPREF_PT_theme_dopesheet_editor': USERPREF_PT_theme_dopesheet_editor = value; break;
+		case 'USERPREF_PT_theme_dopesheet_editor_space': USERPREF_PT_theme_dopesheet_editor_space = value; break;
+		case 'USERPREF_PT_theme_file_browser': USERPREF_PT_theme_file_browser = value; break;
+		case 'USERPREF_PT_theme_file_browser_space': USERPREF_PT_theme_file_browser_space = value; break;
+		case 'USERPREF_PT_theme_graph_editor': USERPREF_PT_theme_graph_editor = value; break;
+		case 'USERPREF_PT_theme_graph_editor_space': USERPREF_PT_theme_graph_editor_space = value; break;
+		case 'USERPREF_PT_theme_image_editor': USERPREF_PT_theme_image_editor = value; break;
+		case 'USERPREF_PT_theme_image_editor_space': USERPREF_PT_theme_image_editor_space = value; break;
+		case 'USERPREF_PT_theme_info': USERPREF_PT_theme_info = value; break;
+		case 'USERPREF_PT_theme_info_space': USERPREF_PT_theme_info_space = value; break;
+		case 'USERPREF_PT_theme_interface_gizmos': USERPREF_PT_theme_interface_gizmos = value; break;
+		case 'USERPREF_PT_theme_interface_icons': USERPREF_PT_theme_interface_icons = value; break;
+		case 'USERPREF_PT_theme_interface_panel': USERPREF_PT_theme_interface_panel = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_box': USERPREF_PT_theme_interface_shade_wcol_box = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_curve': USERPREF_PT_theme_interface_shade_wcol_curve = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_list_item': USERPREF_PT_theme_interface_shade_wcol_list_item = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_menu': USERPREF_PT_theme_interface_shade_wcol_menu = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_menu_back': USERPREF_PT_theme_interface_shade_wcol_menu_back = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_menu_item': USERPREF_PT_theme_interface_shade_wcol_menu_item = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_num': USERPREF_PT_theme_interface_shade_wcol_num = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_numslider': USERPREF_PT_theme_interface_shade_wcol_numslider = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_option': USERPREF_PT_theme_interface_shade_wcol_option = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_pie_menu': USERPREF_PT_theme_interface_shade_wcol_pie_menu = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_progress': USERPREF_PT_theme_interface_shade_wcol_progress = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_pulldown': USERPREF_PT_theme_interface_shade_wcol_pulldown = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_radio': USERPREF_PT_theme_interface_shade_wcol_radio = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_regular': USERPREF_PT_theme_interface_shade_wcol_regular = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_scroll': USERPREF_PT_theme_interface_shade_wcol_scroll = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_tab': USERPREF_PT_theme_interface_shade_wcol_tab = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_text': USERPREF_PT_theme_interface_shade_wcol_text = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_toggle': USERPREF_PT_theme_interface_shade_wcol_toggle = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_tool': USERPREF_PT_theme_interface_shade_wcol_tool = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_toolbar_item': USERPREF_PT_theme_interface_shade_wcol_toolbar_item = value; break;
+		case 'USERPREF_PT_theme_interface_shade_wcol_tooltip': USERPREF_PT_theme_interface_shade_wcol_tooltip = value; break;
+		case 'USERPREF_PT_theme_interface_state': USERPREF_PT_theme_interface_state = value; break;
+		case 'USERPREF_PT_theme_interface_styles': USERPREF_PT_theme_interface_styles = value; break;
+		case 'USERPREF_PT_theme_interface_transparent_checker': USERPREF_PT_theme_interface_transparent_checker = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_box': USERPREF_PT_theme_interface_wcol_box = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_curve': USERPREF_PT_theme_interface_wcol_curve = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_list_item': USERPREF_PT_theme_interface_wcol_list_item = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_menu': USERPREF_PT_theme_interface_wcol_menu = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_menu_back': USERPREF_PT_theme_interface_wcol_menu_back = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_menu_item': USERPREF_PT_theme_interface_wcol_menu_item = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_num': USERPREF_PT_theme_interface_wcol_num = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_numslider': USERPREF_PT_theme_interface_wcol_numslider = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_option': USERPREF_PT_theme_interface_wcol_option = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_pie_menu': USERPREF_PT_theme_interface_wcol_pie_menu = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_progress': USERPREF_PT_theme_interface_wcol_progress = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_pulldown': USERPREF_PT_theme_interface_wcol_pulldown = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_radio': USERPREF_PT_theme_interface_wcol_radio = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_regular': USERPREF_PT_theme_interface_wcol_regular = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_scroll': USERPREF_PT_theme_interface_wcol_scroll = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_tab': USERPREF_PT_theme_interface_wcol_tab = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_text': USERPREF_PT_theme_interface_wcol_text = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_toggle': USERPREF_PT_theme_interface_wcol_toggle = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_tool': USERPREF_PT_theme_interface_wcol_tool = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_toolbar_item': USERPREF_PT_theme_interface_wcol_toolbar_item = value; break;
+		case 'USERPREF_PT_theme_interface_wcol_tooltip': USERPREF_PT_theme_interface_wcol_tooltip = value; break;
+		case 'USERPREF_PT_theme_nla_editor': USERPREF_PT_theme_nla_editor = value; break;
+		case 'USERPREF_PT_theme_nla_editor_space': USERPREF_PT_theme_nla_editor_space = value; break;
+		case 'USERPREF_PT_theme_node_editor': USERPREF_PT_theme_node_editor = value; break;
+		case 'USERPREF_PT_theme_node_editor_space': USERPREF_PT_theme_node_editor_space = value; break;
+		case 'USERPREF_PT_theme_outliner': USERPREF_PT_theme_outliner = value; break;
+		case 'USERPREF_PT_theme_outliner_space': USERPREF_PT_theme_outliner_space = value; break;
+		case 'USERPREF_PT_theme_preferences': USERPREF_PT_theme_preferences = value; break;
+		case 'USERPREF_PT_theme_preferences_space': USERPREF_PT_theme_preferences_space = value; break;
+		case 'USERPREF_PT_theme_properties': USERPREF_PT_theme_properties = value; break;
+		case 'USERPREF_PT_theme_properties_space': USERPREF_PT_theme_properties_space = value; break;
+		case 'USERPREF_PT_theme_regions': USERPREF_PT_theme_regions = value; break;
+		case 'USERPREF_PT_theme_regions_asset_shelf': USERPREF_PT_theme_regions_asset_shelf = value; break;
+		case 'USERPREF_PT_theme_regions_channels': USERPREF_PT_theme_regions_channels = value; break;
+		case 'USERPREF_PT_theme_regions_scrubbing': USERPREF_PT_theme_regions_scrubbing = value; break;
+		case 'USERPREF_PT_theme_regions_sidebars': USERPREF_PT_theme_regions_sidebars = value; break;
+		case 'USERPREF_PT_theme_sequence_editor': USERPREF_PT_theme_sequence_editor = value; break;
+		case 'USERPREF_PT_theme_sequence_editor_space': USERPREF_PT_theme_sequence_editor_space = value; break;
+		case 'USERPREF_PT_theme_spreadsheet': USERPREF_PT_theme_spreadsheet = value; break;
+		case 'USERPREF_PT_theme_spreadsheet_space': USERPREF_PT_theme_spreadsheet_space = value; break;
+		case 'USERPREF_PT_theme_statusbar': USERPREF_PT_theme_statusbar = value; break;
+		case 'USERPREF_PT_theme_statusbar_space': USERPREF_PT_theme_statusbar_space = value; break;
+		case 'USERPREF_PT_theme_strip_colors': USERPREF_PT_theme_strip_colors = value; break;
+		case 'USERPREF_PT_theme_text_editor': USERPREF_PT_theme_text_editor = value; break;
+		case 'USERPREF_PT_theme_text_editor_space': USERPREF_PT_theme_text_editor_space = value; break;
+		case 'USERPREF_PT_theme_text_style': USERPREF_PT_theme_text_style = value; break;
+		case 'USERPREF_PT_theme_topbar': USERPREF_PT_theme_topbar = value; break;
+		case 'USERPREF_PT_theme_topbar_space': USERPREF_PT_theme_topbar_space = value; break;
+		case 'USERPREF_PT_theme_user_interface': USERPREF_PT_theme_user_interface = value; break;
+		case 'USERPREF_PT_theme_view_3d': USERPREF_PT_theme_view_3d = value; break;
+		case 'USERPREF_PT_theme_view_3d_space': USERPREF_PT_theme_view_3d_space = value; break;
+		case 'USERPREF_PT_theme_view_3d_space_gradients': USERPREF_PT_theme_view_3d_space_gradients = value; break;
+		case 'USERPREF_PT_viewport_display': USERPREF_PT_viewport_display = value; break;
+		case 'USERPREF_PT_viewport_quality': USERPREF_PT_viewport_quality = value; break;
+		case 'USERPREF_PT_viewport_subdivision': USERPREF_PT_viewport_subdivision = value; break;
+		case 'USERPREF_PT_viewport_textures': USERPREF_PT_viewport_textures = value; break;
+		case 'USERPREF_UL_extension_repos': USERPREF_UL_extension_repos = value; break;
+		case 'UV_OT_align_rotation': UV_OT_align_rotation = value; break;
+		case 'UV_OT_export_layout': UV_OT_export_layout = value; break;
+		case 'UV_OT_follow_active_quads': UV_OT_follow_active_quads = value; break;
+		case 'UV_OT_lightmap_pack': UV_OT_lightmap_pack = value; break;
+		case 'UV_OT_randomize_uv_transform': UV_OT_randomize_uv_transform = value; break;
+		case 'VIEW3D_AST_brush_gpencil_paint': VIEW3D_AST_brush_gpencil_paint = value; break;
+		case 'VIEW3D_AST_brush_gpencil_sculpt': VIEW3D_AST_brush_gpencil_sculpt = value; break;
+		case 'VIEW3D_AST_brush_gpencil_vertex': VIEW3D_AST_brush_gpencil_vertex = value; break;
+		case 'VIEW3D_AST_brush_gpencil_weight': VIEW3D_AST_brush_gpencil_weight = value; break;
+		case 'VIEW3D_AST_brush_sculpt': VIEW3D_AST_brush_sculpt = value; break;
+		case 'VIEW3D_AST_brush_sculpt_curves': VIEW3D_AST_brush_sculpt_curves = value; break;
+		case 'VIEW3D_AST_brush_texture_paint': VIEW3D_AST_brush_texture_paint = value; break;
+		case 'VIEW3D_AST_brush_vertex_paint': VIEW3D_AST_brush_vertex_paint = value; break;
+		case 'VIEW3D_AST_brush_weight_paint': VIEW3D_AST_brush_weight_paint = value; break;
+		case 'VIEW3D_AST_pose_library': VIEW3D_AST_pose_library = value; break;
+		case 'VIEW3D_FH_camera_background_image': VIEW3D_FH_camera_background_image = value; break;
+		case 'VIEW3D_FH_empty_image': VIEW3D_FH_empty_image = value; break;
+		case 'VIEW3D_FH_vdb_volume': VIEW3D_FH_vdb_volume = value; break;
+		case 'VIEW3D_HT_header': VIEW3D_HT_header = value; break;
+		case 'VIEW3D_HT_tool_header': VIEW3D_HT_tool_header = value; break;
+		case 'VIEW3D_MT_add': VIEW3D_MT_add = value; break;
+		case 'VIEW3D_MT_add_object': VIEW3D_MT_add_object = value; break;
+		case 'VIEW3D_MT_armature_add': VIEW3D_MT_armature_add = value; break;
+		case 'VIEW3D_MT_armature_context_menu': VIEW3D_MT_armature_context_menu = value; break;
+		case 'VIEW3D_MT_bone_collections': VIEW3D_MT_bone_collections = value; break;
+		case 'VIEW3D_MT_bone_options_disable': VIEW3D_MT_bone_options_disable = value; break;
+		case 'VIEW3D_MT_bone_options_enable': VIEW3D_MT_bone_options_enable = value; break;
+		case 'VIEW3D_MT_bone_options_toggle': VIEW3D_MT_bone_options_toggle = value; break;
+		case 'VIEW3D_MT_brush_context_menu': VIEW3D_MT_brush_context_menu = value; break;
+		case 'VIEW3D_MT_camera_add': VIEW3D_MT_camera_add = value; break;
+		case 'VIEW3D_MT_curve_add': VIEW3D_MT_curve_add = value; break;
+		case 'VIEW3D_MT_edit_armature': VIEW3D_MT_edit_armature = value; break;
+		case 'VIEW3D_MT_edit_armature_delete': VIEW3D_MT_edit_armature_delete = value; break;
+		case 'VIEW3D_MT_edit_armature_names': VIEW3D_MT_edit_armature_names = value; break;
+		case 'VIEW3D_MT_edit_armature_parent': VIEW3D_MT_edit_armature_parent = value; break;
+		case 'VIEW3D_MT_edit_armature_roll': VIEW3D_MT_edit_armature_roll = value; break;
+		case 'VIEW3D_MT_edit_curve': VIEW3D_MT_edit_curve = value; break;
+		case 'VIEW3D_MT_edit_curve_clean': VIEW3D_MT_edit_curve_clean = value; break;
+		case 'VIEW3D_MT_edit_curve_context_menu': VIEW3D_MT_edit_curve_context_menu = value; break;
+		case 'VIEW3D_MT_edit_curve_ctrlpoints': VIEW3D_MT_edit_curve_ctrlpoints = value; break;
+		case 'VIEW3D_MT_edit_curve_delete': VIEW3D_MT_edit_curve_delete = value; break;
+		case 'VIEW3D_MT_edit_curve_segments': VIEW3D_MT_edit_curve_segments = value; break;
+		case 'VIEW3D_MT_edit_curve_showhide': VIEW3D_MT_edit_curve_showhide = value; break;
+		case 'VIEW3D_MT_edit_curves': VIEW3D_MT_edit_curves = value; break;
+		case 'VIEW3D_MT_edit_curves_add': VIEW3D_MT_edit_curves_add = value; break;
+		case 'VIEW3D_MT_edit_curves_context_menu': VIEW3D_MT_edit_curves_context_menu = value; break;
+		case 'VIEW3D_MT_edit_curves_control_points': VIEW3D_MT_edit_curves_control_points = value; break;
+		case 'VIEW3D_MT_edit_curves_segments': VIEW3D_MT_edit_curves_segments = value; break;
+		case 'VIEW3D_MT_edit_curves_select_more_less': VIEW3D_MT_edit_curves_select_more_less = value; break;
+		case 'VIEW3D_MT_edit_font': VIEW3D_MT_edit_font = value; break;
+		case 'VIEW3D_MT_edit_font_chars': VIEW3D_MT_edit_font_chars = value; break;
+		case 'VIEW3D_MT_edit_font_context_menu': VIEW3D_MT_edit_font_context_menu = value; break;
+		case 'VIEW3D_MT_edit_font_delete': VIEW3D_MT_edit_font_delete = value; break;
+		case 'VIEW3D_MT_edit_font_kerning': VIEW3D_MT_edit_font_kerning = value; break;
+		case 'VIEW3D_MT_edit_greasepencil': VIEW3D_MT_edit_greasepencil = value; break;
+		case 'VIEW3D_MT_edit_greasepencil_animation': VIEW3D_MT_edit_greasepencil_animation = value; break;
+		case 'VIEW3D_MT_edit_greasepencil_cleanup': VIEW3D_MT_edit_greasepencil_cleanup = value; break;
+		case 'VIEW3D_MT_edit_greasepencil_delete': VIEW3D_MT_edit_greasepencil_delete = value; break;
+		case 'VIEW3D_MT_edit_greasepencil_point': VIEW3D_MT_edit_greasepencil_point = value; break;
+		case 'VIEW3D_MT_edit_greasepencil_showhide': VIEW3D_MT_edit_greasepencil_showhide = value; break;
+		case 'VIEW3D_MT_edit_greasepencil_stroke': VIEW3D_MT_edit_greasepencil_stroke = value; break;
+		case 'VIEW3D_MT_edit_lattice': VIEW3D_MT_edit_lattice = value; break;
+		case 'VIEW3D_MT_edit_lattice_context_menu': VIEW3D_MT_edit_lattice_context_menu = value; break;
+		case 'VIEW3D_MT_edit_mesh': VIEW3D_MT_edit_mesh = value; break;
+		case 'VIEW3D_MT_edit_mesh_clean': VIEW3D_MT_edit_mesh_clean = value; break;
+		case 'VIEW3D_MT_edit_mesh_context_menu': VIEW3D_MT_edit_mesh_context_menu = value; break;
+		case 'VIEW3D_MT_edit_mesh_delete': VIEW3D_MT_edit_mesh_delete = value; break;
+		case 'VIEW3D_MT_edit_mesh_edges': VIEW3D_MT_edit_mesh_edges = value; break;
+		case 'VIEW3D_MT_edit_mesh_extrude': VIEW3D_MT_edit_mesh_extrude = value; break;
+		case 'VIEW3D_MT_edit_mesh_faces': VIEW3D_MT_edit_mesh_faces = value; break;
+		case 'VIEW3D_MT_edit_mesh_faces_data': VIEW3D_MT_edit_mesh_faces_data = value; break;
+		case 'VIEW3D_MT_edit_mesh_merge': VIEW3D_MT_edit_mesh_merge = value; break;
+		case 'VIEW3D_MT_edit_mesh_normals': VIEW3D_MT_edit_mesh_normals = value; break;
+		case 'VIEW3D_MT_edit_mesh_normals_average': VIEW3D_MT_edit_mesh_normals_average = value; break;
+		case 'VIEW3D_MT_edit_mesh_normals_select_strength': VIEW3D_MT_edit_mesh_normals_select_strength = value; break;
+		case 'VIEW3D_MT_edit_mesh_normals_set_strength': VIEW3D_MT_edit_mesh_normals_set_strength = value; break;
+		case 'VIEW3D_MT_edit_mesh_select_by_trait': VIEW3D_MT_edit_mesh_select_by_trait = value; break;
+		case 'VIEW3D_MT_edit_mesh_select_linked': VIEW3D_MT_edit_mesh_select_linked = value; break;
+		case 'VIEW3D_MT_edit_mesh_select_loops': VIEW3D_MT_edit_mesh_select_loops = value; break;
+		case 'VIEW3D_MT_edit_mesh_select_mode': VIEW3D_MT_edit_mesh_select_mode = value; break;
+		case 'VIEW3D_MT_edit_mesh_select_more_less': VIEW3D_MT_edit_mesh_select_more_less = value; break;
+		case 'VIEW3D_MT_edit_mesh_select_similar': VIEW3D_MT_edit_mesh_select_similar = value; break;
+		case 'VIEW3D_MT_edit_mesh_shading': VIEW3D_MT_edit_mesh_shading = value; break;
+		case 'VIEW3D_MT_edit_mesh_showhide': VIEW3D_MT_edit_mesh_showhide = value; break;
+		case 'VIEW3D_MT_edit_mesh_split': VIEW3D_MT_edit_mesh_split = value; break;
+		case 'VIEW3D_MT_edit_mesh_vertices': VIEW3D_MT_edit_mesh_vertices = value; break;
+		case 'VIEW3D_MT_edit_mesh_weights': VIEW3D_MT_edit_mesh_weights = value; break;
+		case 'VIEW3D_MT_edit_meta': VIEW3D_MT_edit_meta = value; break;
+		case 'VIEW3D_MT_edit_meta_showhide': VIEW3D_MT_edit_meta_showhide = value; break;
+		case 'VIEW3D_MT_edit_metaball_context_menu': VIEW3D_MT_edit_metaball_context_menu = value; break;
+		case 'VIEW3D_MT_edit_pointcloud': VIEW3D_MT_edit_pointcloud = value; break;
+		case 'VIEW3D_MT_edit_surface': VIEW3D_MT_edit_surface = value; break;
+		case 'VIEW3D_MT_editor_menus': VIEW3D_MT_editor_menus = value; break;
+		case 'VIEW3D_MT_empty_add': VIEW3D_MT_empty_add = value; break;
+		case 'VIEW3D_MT_face_sets': VIEW3D_MT_face_sets = value; break;
+		case 'VIEW3D_MT_face_sets_init': VIEW3D_MT_face_sets_init = value; break;
+		case 'VIEW3D_MT_grease_pencil_add': VIEW3D_MT_grease_pencil_add = value; break;
+		case 'VIEW3D_MT_grease_pencil_assign_material': VIEW3D_MT_grease_pencil_assign_material = value; break;
+		case 'VIEW3D_MT_grease_pencil_sculpt_automasking_pie': VIEW3D_MT_grease_pencil_sculpt_automasking_pie = value; break;
+		case 'VIEW3D_MT_greasepencil_edit_context_menu': VIEW3D_MT_greasepencil_edit_context_menu = value; break;
+		case 'VIEW3D_MT_greasepencil_material_active': VIEW3D_MT_greasepencil_material_active = value; break;
+		case 'VIEW3D_MT_greasepencil_vertex_group': VIEW3D_MT_greasepencil_vertex_group = value; break;
+		case 'VIEW3D_MT_hook': VIEW3D_MT_hook = value; break;
+		case 'VIEW3D_MT_image_add': VIEW3D_MT_image_add = value; break;
+		case 'VIEW3D_MT_lattice_add': VIEW3D_MT_lattice_add = value; break;
+		case 'VIEW3D_MT_light_add': VIEW3D_MT_light_add = value; break;
+		case 'VIEW3D_MT_lightprobe_add': VIEW3D_MT_lightprobe_add = value; break;
+		case 'VIEW3D_MT_make_links': VIEW3D_MT_make_links = value; break;
+		case 'VIEW3D_MT_make_single_user': VIEW3D_MT_make_single_user = value; break;
+		case 'VIEW3D_MT_mask': VIEW3D_MT_mask = value; break;
+		case 'VIEW3D_MT_mesh_add': VIEW3D_MT_mesh_add = value; break;
+		case 'VIEW3D_MT_metaball_add': VIEW3D_MT_metaball_add = value; break;
+		case 'VIEW3D_MT_mirror': VIEW3D_MT_mirror = value; break;
+		case 'VIEW3D_MT_object': VIEW3D_MT_object = value; break;
+		case 'VIEW3D_MT_object_animation': VIEW3D_MT_object_animation = value; break;
+		case 'VIEW3D_MT_object_apply': VIEW3D_MT_object_apply = value; break;
+		case 'VIEW3D_MT_object_asset': VIEW3D_MT_object_asset = value; break;
+		case 'VIEW3D_MT_object_cleanup': VIEW3D_MT_object_cleanup = value; break;
+		case 'VIEW3D_MT_object_clear': VIEW3D_MT_object_clear = value; break;
+		case 'VIEW3D_MT_object_collection': VIEW3D_MT_object_collection = value; break;
+		case 'VIEW3D_MT_object_constraints': VIEW3D_MT_object_constraints = value; break;
+		case 'VIEW3D_MT_object_context_menu': VIEW3D_MT_object_context_menu = value; break;
+		case 'VIEW3D_MT_object_convert': VIEW3D_MT_object_convert = value; break;
+		case 'VIEW3D_MT_object_liboverride': VIEW3D_MT_object_liboverride = value; break;
+		case 'VIEW3D_MT_object_mode_pie': VIEW3D_MT_object_mode_pie = value; break;
+		case 'VIEW3D_MT_object_modifiers': VIEW3D_MT_object_modifiers = value; break;
+		case 'VIEW3D_MT_object_parent': VIEW3D_MT_object_parent = value; break;
+		case 'VIEW3D_MT_object_quick_effects': VIEW3D_MT_object_quick_effects = value; break;
+		case 'VIEW3D_MT_object_relations': VIEW3D_MT_object_relations = value; break;
+		case 'VIEW3D_MT_object_rigid_body': VIEW3D_MT_object_rigid_body = value; break;
+		case 'VIEW3D_MT_object_shading': VIEW3D_MT_object_shading = value; break;
+		case 'VIEW3D_MT_object_showhide': VIEW3D_MT_object_showhide = value; break;
+		case 'VIEW3D_MT_object_track': VIEW3D_MT_object_track = value; break;
+		case 'VIEW3D_MT_orientations_pie': VIEW3D_MT_orientations_pie = value; break;
+		case 'VIEW3D_MT_paint_grease_pencil': VIEW3D_MT_paint_grease_pencil = value; break;
+		case 'VIEW3D_MT_paint_vertex': VIEW3D_MT_paint_vertex = value; break;
+		case 'VIEW3D_MT_paint_vertex_grease_pencil': VIEW3D_MT_paint_vertex_grease_pencil = value; break;
+		case 'VIEW3D_MT_paint_weight': VIEW3D_MT_paint_weight = value; break;
+		case 'VIEW3D_MT_paint_weight_lock': VIEW3D_MT_paint_weight_lock = value; break;
+		case 'VIEW3D_MT_particle': VIEW3D_MT_particle = value; break;
+		case 'VIEW3D_MT_particle_context_menu': VIEW3D_MT_particle_context_menu = value; break;
+		case 'VIEW3D_MT_particle_showhide': VIEW3D_MT_particle_showhide = value; break;
+		case 'VIEW3D_MT_pivot_pie': VIEW3D_MT_pivot_pie = value; break;
+		case 'VIEW3D_MT_pose': VIEW3D_MT_pose = value; break;
+		case 'VIEW3D_MT_pose_apply': VIEW3D_MT_pose_apply = value; break;
+		case 'VIEW3D_MT_pose_constraints': VIEW3D_MT_pose_constraints = value; break;
+		case 'VIEW3D_MT_pose_context_menu': VIEW3D_MT_pose_context_menu = value; break;
+		case 'VIEW3D_MT_pose_ik': VIEW3D_MT_pose_ik = value; break;
+		case 'VIEW3D_MT_pose_modify': VIEW3D_MT_pose_modify = value; break;
+		case 'VIEW3D_MT_pose_motion': VIEW3D_MT_pose_motion = value; break;
+		case 'VIEW3D_MT_pose_names': VIEW3D_MT_pose_names = value; break;
+		case 'VIEW3D_MT_pose_propagate': VIEW3D_MT_pose_propagate = value; break;
+		case 'VIEW3D_MT_pose_showhide': VIEW3D_MT_pose_showhide = value; break;
+		case 'VIEW3D_MT_pose_slide': VIEW3D_MT_pose_slide = value; break;
+		case 'VIEW3D_MT_pose_transform': VIEW3D_MT_pose_transform = value; break;
+		case 'VIEW3D_MT_proportional_editing_falloff_pie': VIEW3D_MT_proportional_editing_falloff_pie = value; break;
+		case 'VIEW3D_MT_random_mask': VIEW3D_MT_random_mask = value; break;
+		case 'VIEW3D_MT_sculpt': VIEW3D_MT_sculpt = value; break;
+		case 'VIEW3D_MT_sculpt_automasking_pie': VIEW3D_MT_sculpt_automasking_pie = value; break;
+		case 'VIEW3D_MT_sculpt_curves': VIEW3D_MT_sculpt_curves = value; break;
+		case 'VIEW3D_MT_sculpt_face_sets_edit_pie': VIEW3D_MT_sculpt_face_sets_edit_pie = value; break;
+		case 'VIEW3D_MT_sculpt_mask_edit_pie': VIEW3D_MT_sculpt_mask_edit_pie = value; break;
+		case 'VIEW3D_MT_sculpt_set_pivot': VIEW3D_MT_sculpt_set_pivot = value; break;
+		case 'VIEW3D_MT_sculpt_showhide': VIEW3D_MT_sculpt_showhide = value; break;
+		case 'VIEW3D_MT_sculpt_transform': VIEW3D_MT_sculpt_transform = value; break;
+		case 'VIEW3D_MT_sculpt_trim': VIEW3D_MT_sculpt_trim = value; break;
+		case 'VIEW3D_MT_select_edit_armature': VIEW3D_MT_select_edit_armature = value; break;
+		case 'VIEW3D_MT_select_edit_curve': VIEW3D_MT_select_edit_curve = value; break;
+		case 'VIEW3D_MT_select_edit_curves': VIEW3D_MT_select_edit_curves = value; break;
+		case 'VIEW3D_MT_select_edit_grease_pencil': VIEW3D_MT_select_edit_grease_pencil = value; break;
+		case 'VIEW3D_MT_select_edit_lattice': VIEW3D_MT_select_edit_lattice = value; break;
+		case 'VIEW3D_MT_select_edit_mesh': VIEW3D_MT_select_edit_mesh = value; break;
+		case 'VIEW3D_MT_select_edit_metaball': VIEW3D_MT_select_edit_metaball = value; break;
+		case 'VIEW3D_MT_select_edit_pointcloud': VIEW3D_MT_select_edit_pointcloud = value; break;
+		case 'VIEW3D_MT_select_edit_surface': VIEW3D_MT_select_edit_surface = value; break;
+		case 'VIEW3D_MT_select_edit_text': VIEW3D_MT_select_edit_text = value; break;
+		case 'VIEW3D_MT_select_object': VIEW3D_MT_select_object = value; break;
+		case 'VIEW3D_MT_select_object_more_less': VIEW3D_MT_select_object_more_less = value; break;
+		case 'VIEW3D_MT_select_paint_mask': VIEW3D_MT_select_paint_mask = value; break;
+		case 'VIEW3D_MT_select_paint_mask_vertex': VIEW3D_MT_select_paint_mask_vertex = value; break;
+		case 'VIEW3D_MT_select_particle': VIEW3D_MT_select_particle = value; break;
+		case 'VIEW3D_MT_select_pose': VIEW3D_MT_select_pose = value; break;
+		case 'VIEW3D_MT_select_pose_more_less': VIEW3D_MT_select_pose_more_less = value; break;
+		case 'VIEW3D_MT_select_sculpt_curves': VIEW3D_MT_select_sculpt_curves = value; break;
+		case 'VIEW3D_MT_shading_ex_pie': VIEW3D_MT_shading_ex_pie = value; break;
+		case 'VIEW3D_MT_shading_pie': VIEW3D_MT_shading_pie = value; break;
+		case 'VIEW3D_MT_snap': VIEW3D_MT_snap = value; break;
+		case 'VIEW3D_MT_snap_pie': VIEW3D_MT_snap_pie = value; break;
+		case 'VIEW3D_MT_surface_add': VIEW3D_MT_surface_add = value; break;
+		case 'VIEW3D_MT_tools_projectpaint_clone': VIEW3D_MT_tools_projectpaint_clone = value; break;
+		case 'VIEW3D_MT_tools_projectpaint_stencil': VIEW3D_MT_tools_projectpaint_stencil = value; break;
+		case 'VIEW3D_MT_tools_projectpaint_uvlayer': VIEW3D_MT_tools_projectpaint_uvlayer = value; break;
+		case 'VIEW3D_MT_transform': VIEW3D_MT_transform = value; break;
+		case 'VIEW3D_MT_transform_armature': VIEW3D_MT_transform_armature = value; break;
+		case 'VIEW3D_MT_transform_gizmo_pie': VIEW3D_MT_transform_gizmo_pie = value; break;
+		case 'VIEW3D_MT_transform_object': VIEW3D_MT_transform_object = value; break;
+		case 'VIEW3D_MT_uv_map': VIEW3D_MT_uv_map = value; break;
+		case 'VIEW3D_MT_vertex_group': VIEW3D_MT_vertex_group = value; break;
+		case 'VIEW3D_MT_view': VIEW3D_MT_view = value; break;
+		case 'VIEW3D_MT_view_align': VIEW3D_MT_view_align = value; break;
+		case 'VIEW3D_MT_view_align_selected': VIEW3D_MT_view_align_selected = value; break;
+		case 'VIEW3D_MT_view_cameras': VIEW3D_MT_view_cameras = value; break;
+		case 'VIEW3D_MT_view_local': VIEW3D_MT_view_local = value; break;
+		case 'VIEW3D_MT_view_navigation': VIEW3D_MT_view_navigation = value; break;
+		case 'VIEW3D_MT_view_pie': VIEW3D_MT_view_pie = value; break;
+		case 'VIEW3D_MT_view_regions': VIEW3D_MT_view_regions = value; break;
+		case 'VIEW3D_MT_view_viewpoint': VIEW3D_MT_view_viewpoint = value; break;
+		case 'VIEW3D_MT_volume_add': VIEW3D_MT_volume_add = value; break;
+		case 'VIEW3D_MT_weight_grease_pencil': VIEW3D_MT_weight_grease_pencil = value; break;
+		case 'VIEW3D_MT_wpaint_vgroup_lock_pie': VIEW3D_MT_wpaint_vgroup_lock_pie = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_individual_move': VIEW3D_OT_edit_mesh_extrude_individual_move = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_manifold_normal': VIEW3D_OT_edit_mesh_extrude_manifold_normal = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_move_normal': VIEW3D_OT_edit_mesh_extrude_move_normal = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_move_shrink_fatten': VIEW3D_OT_edit_mesh_extrude_move_shrink_fatten = value; break;
+		case 'VIEW3D_OT_transform_gizmo_set': VIEW3D_OT_transform_gizmo_set = value; break;
+		case 'VIEW3D_PT_active_spline': VIEW3D_PT_active_spline = value; break;
+		case 'VIEW3D_PT_active_tool': VIEW3D_PT_active_tool = value; break;
+		case 'VIEW3D_PT_active_tool_duplicate': VIEW3D_PT_active_tool_duplicate = value; break;
+		case 'VIEW3D_PT_annotation_onion': VIEW3D_PT_annotation_onion = value; break;
+		case 'VIEW3D_PT_collections': VIEW3D_PT_collections = value; break;
+		case 'VIEW3D_PT_context_properties': VIEW3D_PT_context_properties = value; break;
+		case 'VIEW3D_PT_copy_global_transform': VIEW3D_PT_copy_global_transform = value; break;
+		case 'VIEW3D_PT_copy_global_transform_fix_to_camera': VIEW3D_PT_copy_global_transform_fix_to_camera = value; break;
+		case 'VIEW3D_PT_copy_global_transform_mirror': VIEW3D_PT_copy_global_transform_mirror = value; break;
+		case 'VIEW3D_PT_copy_global_transform_relative': VIEW3D_PT_copy_global_transform_relative = value; break;
+		case 'VIEW3D_PT_curves_sculpt_add_shape': VIEW3D_PT_curves_sculpt_add_shape = value; break;
+		case 'VIEW3D_PT_curves_sculpt_grow_shrink_scaling': VIEW3D_PT_curves_sculpt_grow_shrink_scaling = value; break;
+		case 'VIEW3D_PT_curves_sculpt_parameter_falloff': VIEW3D_PT_curves_sculpt_parameter_falloff = value; break;
+		case 'VIEW3D_PT_curves_sculpt_symmetry': VIEW3D_PT_curves_sculpt_symmetry = value; break;
+		case 'VIEW3D_PT_curves_sculpt_symmetry_for_topbar': VIEW3D_PT_curves_sculpt_symmetry_for_topbar = value; break;
+		case 'VIEW3D_PT_gizmo_display': VIEW3D_PT_gizmo_display = value; break;
+		case 'VIEW3D_PT_gpencil_brush_presets': VIEW3D_PT_gpencil_brush_presets = value; break;
+		case 'VIEW3D_PT_grease_pencil': VIEW3D_PT_grease_pencil = value; break;
+		case 'VIEW3D_PT_grease_pencil_guide': VIEW3D_PT_grease_pencil_guide = value; break;
+		case 'VIEW3D_PT_grease_pencil_lock': VIEW3D_PT_grease_pencil_lock = value; break;
+		case 'VIEW3D_PT_grease_pencil_multi_frame': VIEW3D_PT_grease_pencil_multi_frame = value; break;
+		case 'VIEW3D_PT_grease_pencil_origin': VIEW3D_PT_grease_pencil_origin = value; break;
+		case 'VIEW3D_PT_grease_pencil_sculpt_automasking': VIEW3D_PT_grease_pencil_sculpt_automasking = value; break;
+		case 'VIEW3D_PT_greasepencil_draw_context_menu': VIEW3D_PT_greasepencil_draw_context_menu = value; break;
+		case 'VIEW3D_PT_greasepencil_sculpt_context_menu': VIEW3D_PT_greasepencil_sculpt_context_menu = value; break;
+		case 'VIEW3D_PT_greasepencil_vertex_paint_context_menu': VIEW3D_PT_greasepencil_vertex_paint_context_menu = value; break;
+		case 'VIEW3D_PT_greasepencil_weight_context_menu': VIEW3D_PT_greasepencil_weight_context_menu = value; break;
+		case 'VIEW3D_PT_mask': VIEW3D_PT_mask = value; break;
+		case 'VIEW3D_PT_object_type_visibility': VIEW3D_PT_object_type_visibility = value; break;
+		case 'VIEW3D_PT_overlay': VIEW3D_PT_overlay = value; break;
+		case 'VIEW3D_PT_overlay_bones': VIEW3D_PT_overlay_bones = value; break;
+		case 'VIEW3D_PT_overlay_edit_curve': VIEW3D_PT_overlay_edit_curve = value; break;
+		case 'VIEW3D_PT_overlay_edit_curves': VIEW3D_PT_overlay_edit_curves = value; break;
+		case 'VIEW3D_PT_overlay_edit_mesh': VIEW3D_PT_overlay_edit_mesh = value; break;
+		case 'VIEW3D_PT_overlay_edit_mesh_freestyle': VIEW3D_PT_overlay_edit_mesh_freestyle = value; break;
+		case 'VIEW3D_PT_overlay_edit_mesh_measurement': VIEW3D_PT_overlay_edit_mesh_measurement = value; break;
+		case 'VIEW3D_PT_overlay_edit_mesh_normals': VIEW3D_PT_overlay_edit_mesh_normals = value; break;
+		case 'VIEW3D_PT_overlay_edit_mesh_shading': VIEW3D_PT_overlay_edit_mesh_shading = value; break;
+		case 'VIEW3D_PT_overlay_geometry': VIEW3D_PT_overlay_geometry = value; break;
+		case 'VIEW3D_PT_overlay_grease_pencil_canvas_options': VIEW3D_PT_overlay_grease_pencil_canvas_options = value; break;
+		case 'VIEW3D_PT_overlay_grease_pencil_options': VIEW3D_PT_overlay_grease_pencil_options = value; break;
+		case 'VIEW3D_PT_overlay_guides': VIEW3D_PT_overlay_guides = value; break;
+		case 'VIEW3D_PT_overlay_motion_tracking': VIEW3D_PT_overlay_motion_tracking = value; break;
+		case 'VIEW3D_PT_overlay_object': VIEW3D_PT_overlay_object = value; break;
+		case 'VIEW3D_PT_overlay_sculpt': VIEW3D_PT_overlay_sculpt = value; break;
+		case 'VIEW3D_PT_overlay_sculpt_curves': VIEW3D_PT_overlay_sculpt_curves = value; break;
+		case 'VIEW3D_PT_overlay_text': VIEW3D_PT_overlay_text = value; break;
+		case 'VIEW3D_PT_overlay_texture_paint': VIEW3D_PT_overlay_texture_paint = value; break;
+		case 'VIEW3D_PT_overlay_vertex_paint': VIEW3D_PT_overlay_vertex_paint = value; break;
+		case 'VIEW3D_PT_overlay_viewer_node': VIEW3D_PT_overlay_viewer_node = value; break;
+		case 'VIEW3D_PT_overlay_weight_paint': VIEW3D_PT_overlay_weight_paint = value; break;
+		case 'VIEW3D_PT_paint_texture_context_menu': VIEW3D_PT_paint_texture_context_menu = value; break;
+		case 'VIEW3D_PT_paint_vertex_context_menu': VIEW3D_PT_paint_vertex_context_menu = value; break;
+		case 'VIEW3D_PT_paint_weight_context_menu': VIEW3D_PT_paint_weight_context_menu = value; break;
+		case 'VIEW3D_PT_proportional_edit': VIEW3D_PT_proportional_edit = value; break;
+		case 'VIEW3D_PT_quad_view': VIEW3D_PT_quad_view = value; break;
+		case 'VIEW3D_PT_sculpt_automasking': VIEW3D_PT_sculpt_automasking = value; break;
+		case 'VIEW3D_PT_sculpt_context_menu': VIEW3D_PT_sculpt_context_menu = value; break;
+		case 'VIEW3D_PT_sculpt_dyntopo': VIEW3D_PT_sculpt_dyntopo = value; break;
+		case 'VIEW3D_PT_sculpt_options': VIEW3D_PT_sculpt_options = value; break;
+		case 'VIEW3D_PT_sculpt_options_gravity': VIEW3D_PT_sculpt_options_gravity = value; break;
+		case 'VIEW3D_PT_sculpt_snapping': VIEW3D_PT_sculpt_snapping = value; break;
+		case 'VIEW3D_PT_sculpt_symmetry': VIEW3D_PT_sculpt_symmetry = value; break;
+		case 'VIEW3D_PT_sculpt_symmetry_for_topbar': VIEW3D_PT_sculpt_symmetry_for_topbar = value; break;
+		case 'VIEW3D_PT_sculpt_voxel_remesh': VIEW3D_PT_sculpt_voxel_remesh = value; break;
+		case 'VIEW3D_PT_shading': VIEW3D_PT_shading = value; break;
+		case 'VIEW3D_PT_shading_cavity': VIEW3D_PT_shading_cavity = value; break;
+		case 'VIEW3D_PT_shading_color': VIEW3D_PT_shading_color = value; break;
+		case 'VIEW3D_PT_shading_compositor': VIEW3D_PT_shading_compositor = value; break;
+		case 'VIEW3D_PT_shading_lighting': VIEW3D_PT_shading_lighting = value; break;
+		case 'VIEW3D_PT_shading_options': VIEW3D_PT_shading_options = value; break;
+		case 'VIEW3D_PT_shading_options_shadow': VIEW3D_PT_shading_options_shadow = value; break;
+		case 'VIEW3D_PT_shading_options_ssao': VIEW3D_PT_shading_options_ssao = value; break;
+		case 'VIEW3D_PT_shading_render_pass': VIEW3D_PT_shading_render_pass = value; break;
+		case 'VIEW3D_PT_slots_color_attributes': VIEW3D_PT_slots_color_attributes = value; break;
+		case 'VIEW3D_PT_slots_paint_canvas': VIEW3D_PT_slots_paint_canvas = value; break;
+		case 'VIEW3D_PT_slots_projectpaint': VIEW3D_PT_slots_projectpaint = value; break;
+		case 'VIEW3D_PT_slots_vertex_groups': VIEW3D_PT_slots_vertex_groups = value; break;
+		case 'VIEW3D_PT_snapping': VIEW3D_PT_snapping = value; break;
+		case 'VIEW3D_PT_stencil_projectpaint': VIEW3D_PT_stencil_projectpaint = value; break;
+		case 'VIEW3D_PT_tools_active': VIEW3D_PT_tools_active = value; break;
+		case 'VIEW3D_PT_tools_armatureedit_options': VIEW3D_PT_tools_armatureedit_options = value; break;
+		case 'VIEW3D_PT_tools_brush_clone': VIEW3D_PT_tools_brush_clone = value; break;
+		case 'VIEW3D_PT_tools_brush_color': VIEW3D_PT_tools_brush_color = value; break;
+		case 'VIEW3D_PT_tools_brush_display': VIEW3D_PT_tools_brush_display = value; break;
+		case 'VIEW3D_PT_tools_brush_falloff': VIEW3D_PT_tools_brush_falloff = value; break;
+		case 'VIEW3D_PT_tools_brush_falloff_frontface': VIEW3D_PT_tools_brush_falloff_frontface = value; break;
+		case 'VIEW3D_PT_tools_brush_falloff_normal': VIEW3D_PT_tools_brush_falloff_normal = value; break;
+		case 'VIEW3D_PT_tools_brush_select': VIEW3D_PT_tools_brush_select = value; break;
+		case 'VIEW3D_PT_tools_brush_settings': VIEW3D_PT_tools_brush_settings = value; break;
+		case 'VIEW3D_PT_tools_brush_settings_advanced': VIEW3D_PT_tools_brush_settings_advanced = value; break;
+		case 'VIEW3D_PT_tools_brush_stroke': VIEW3D_PT_tools_brush_stroke = value; break;
+		case 'VIEW3D_PT_tools_brush_stroke_smooth_stroke': VIEW3D_PT_tools_brush_stroke_smooth_stroke = value; break;
+		case 'VIEW3D_PT_tools_brush_swatches': VIEW3D_PT_tools_brush_swatches = value; break;
+		case 'VIEW3D_PT_tools_brush_texture': VIEW3D_PT_tools_brush_texture = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_brush_vertex_color': VIEW3D_PT_tools_grease_pencil_brush_vertex_color = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_brush_vertex_falloff': VIEW3D_PT_tools_grease_pencil_brush_vertex_falloff = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_brush_vertex_palette': VIEW3D_PT_tools_grease_pencil_brush_vertex_palette = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_brush_weight_falloff': VIEW3D_PT_tools_grease_pencil_brush_weight_falloff = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_paint_appearance': VIEW3D_PT_tools_grease_pencil_paint_appearance = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_sculpt_appearance': VIEW3D_PT_tools_grease_pencil_sculpt_appearance = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_sculpt_brush_popover': VIEW3D_PT_tools_grease_pencil_sculpt_brush_popover = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_advanced': VIEW3D_PT_tools_grease_pencil_v3_brush_advanced = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_fill_advanced': VIEW3D_PT_tools_grease_pencil_v3_brush_fill_advanced = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_gap_closure': VIEW3D_PT_tools_grease_pencil_v3_brush_gap_closure = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_mix_palette': VIEW3D_PT_tools_grease_pencil_v3_brush_mix_palette = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_mixcolor': VIEW3D_PT_tools_grease_pencil_v3_brush_mixcolor = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_post_processing': VIEW3D_PT_tools_grease_pencil_v3_brush_post_processing = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_random': VIEW3D_PT_tools_grease_pencil_v3_brush_random = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_select': VIEW3D_PT_tools_grease_pencil_v3_brush_select = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_settings': VIEW3D_PT_tools_grease_pencil_v3_brush_settings = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_stabilizer': VIEW3D_PT_tools_grease_pencil_v3_brush_stabilizer = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_v3_brush_stroke': VIEW3D_PT_tools_grease_pencil_v3_brush_stroke = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_vertex_appearance': VIEW3D_PT_tools_grease_pencil_vertex_appearance = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_vertex_paint_select': VIEW3D_PT_tools_grease_pencil_vertex_paint_select = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_vertex_paint_settings': VIEW3D_PT_tools_grease_pencil_vertex_paint_settings = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_weight_appearance': VIEW3D_PT_tools_grease_pencil_weight_appearance = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_weight_options': VIEW3D_PT_tools_grease_pencil_weight_options = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_weight_paint_select': VIEW3D_PT_tools_grease_pencil_weight_paint_select = value; break;
+		case 'VIEW3D_PT_tools_grease_pencil_weight_paint_settings': VIEW3D_PT_tools_grease_pencil_weight_paint_settings = value; break;
+		case 'VIEW3D_PT_tools_imagepaint_options': VIEW3D_PT_tools_imagepaint_options = value; break;
+		case 'VIEW3D_PT_tools_imagepaint_options_cavity': VIEW3D_PT_tools_imagepaint_options_cavity = value; break;
+		case 'VIEW3D_PT_tools_imagepaint_options_external': VIEW3D_PT_tools_imagepaint_options_external = value; break;
+		case 'VIEW3D_PT_tools_imagepaint_symmetry': VIEW3D_PT_tools_imagepaint_symmetry = value; break;
+		case 'VIEW3D_PT_tools_mask_texture': VIEW3D_PT_tools_mask_texture = value; break;
+		case 'VIEW3D_PT_tools_meshedit_options': VIEW3D_PT_tools_meshedit_options = value; break;
+		case 'VIEW3D_PT_tools_meshedit_options_transform': VIEW3D_PT_tools_meshedit_options_transform = value; break;
+		case 'VIEW3D_PT_tools_meshedit_options_uvs': VIEW3D_PT_tools_meshedit_options_uvs = value; break;
+		case 'VIEW3D_PT_tools_object_options': VIEW3D_PT_tools_object_options = value; break;
+		case 'VIEW3D_PT_tools_object_options_transform': VIEW3D_PT_tools_object_options_transform = value; break;
+		case 'VIEW3D_PT_tools_particlemode': VIEW3D_PT_tools_particlemode = value; break;
+		case 'VIEW3D_PT_tools_particlemode_options': VIEW3D_PT_tools_particlemode_options = value; break;
+		case 'VIEW3D_PT_tools_particlemode_options_display': VIEW3D_PT_tools_particlemode_options_display = value; break;
+		case 'VIEW3D_PT_tools_particlemode_options_shapecut': VIEW3D_PT_tools_particlemode_options_shapecut = value; break;
+		case 'VIEW3D_PT_tools_posemode_options': VIEW3D_PT_tools_posemode_options = value; break;
+		case 'VIEW3D_PT_tools_vertexpaint_options': VIEW3D_PT_tools_vertexpaint_options = value; break;
+		case 'VIEW3D_PT_tools_vertexpaint_symmetry': VIEW3D_PT_tools_vertexpaint_symmetry = value; break;
+		case 'VIEW3D_PT_tools_vertexpaint_symmetry_for_topbar': VIEW3D_PT_tools_vertexpaint_symmetry_for_topbar = value; break;
+		case 'VIEW3D_PT_tools_weight_gradient': VIEW3D_PT_tools_weight_gradient = value; break;
+		case 'VIEW3D_PT_tools_weightpaint_options': VIEW3D_PT_tools_weightpaint_options = value; break;
+		case 'VIEW3D_PT_tools_weightpaint_symmetry': VIEW3D_PT_tools_weightpaint_symmetry = value; break;
+		case 'VIEW3D_PT_tools_weightpaint_symmetry_for_topbar': VIEW3D_PT_tools_weightpaint_symmetry_for_topbar = value; break;
+		case 'VIEW3D_PT_transform_orientations': VIEW3D_PT_transform_orientations = value; break;
+		case 'VIEW3D_PT_view3d_cursor': VIEW3D_PT_view3d_cursor = value; break;
+		case 'VIEW3D_PT_view3d_lock': VIEW3D_PT_view3d_lock = value; break;
+		case 'VIEW3D_PT_view3d_properties': VIEW3D_PT_view3d_properties = value; break;
+		case 'VIEW3D_PT_view3d_stereo': VIEW3D_PT_view3d_stereo = value; break;
+		case 'VIEW3D_PT_viewport_debug': VIEW3D_PT_viewport_debug = value; break;
+		case 'VIEWLAYER_MT_lightgroup_sync': VIEWLAYER_MT_lightgroup_sync = value; break;
+		case 'VIEWLAYER_PT_context_layer': VIEWLAYER_PT_context_layer = value; break;
+		case 'VIEWLAYER_PT_eevee_layer_passes_data': VIEWLAYER_PT_eevee_layer_passes_data = value; break;
+		case 'VIEWLAYER_PT_eevee_layer_passes_light': VIEWLAYER_PT_eevee_layer_passes_light = value; break;
+		case 'VIEWLAYER_PT_filter': VIEWLAYER_PT_filter = value; break;
+		case 'VIEWLAYER_PT_freestyle': VIEWLAYER_PT_freestyle = value; break;
+		case 'VIEWLAYER_PT_freestyle_animation': VIEWLAYER_PT_freestyle_animation = value; break;
+		case 'VIEWLAYER_PT_freestyle_edge_detection': VIEWLAYER_PT_freestyle_edge_detection = value; break;
+		case 'VIEWLAYER_PT_freestyle_lineset': VIEWLAYER_PT_freestyle_lineset = value; break;
+		case 'VIEWLAYER_PT_freestyle_lineset_collection': VIEWLAYER_PT_freestyle_lineset_collection = value; break;
+		case 'VIEWLAYER_PT_freestyle_lineset_edgetype': VIEWLAYER_PT_freestyle_lineset_edgetype = value; break;
+		case 'VIEWLAYER_PT_freestyle_lineset_facemarks': VIEWLAYER_PT_freestyle_lineset_facemarks = value; break;
+		case 'VIEWLAYER_PT_freestyle_lineset_visibilty': VIEWLAYER_PT_freestyle_lineset_visibilty = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_alpha': VIEWLAYER_PT_freestyle_linestyle_alpha = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_color': VIEWLAYER_PT_freestyle_linestyle_color = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_geometry': VIEWLAYER_PT_freestyle_linestyle_geometry = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes': VIEWLAYER_PT_freestyle_linestyle_strokes = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes_chaining': VIEWLAYER_PT_freestyle_linestyle_strokes_chaining = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes_dashedline': VIEWLAYER_PT_freestyle_linestyle_strokes_dashedline = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes_selection': VIEWLAYER_PT_freestyle_linestyle_strokes_selection = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes_sorting': VIEWLAYER_PT_freestyle_linestyle_strokes_sorting = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes_splitting': VIEWLAYER_PT_freestyle_linestyle_strokes_splitting = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_strokes_splitting_pattern': VIEWLAYER_PT_freestyle_linestyle_strokes_splitting_pattern = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_texture': VIEWLAYER_PT_freestyle_linestyle_texture = value; break;
+		case 'VIEWLAYER_PT_freestyle_linestyle_thickness': VIEWLAYER_PT_freestyle_linestyle_thickness = value; break;
+		case 'VIEWLAYER_PT_freestyle_style_modules': VIEWLAYER_PT_freestyle_style_modules = value; break;
+		case 'VIEWLAYER_PT_layer': VIEWLAYER_PT_layer = value; break;
+		case 'VIEWLAYER_PT_layer_custom_props': VIEWLAYER_PT_layer_custom_props = value; break;
+		case 'VIEWLAYER_PT_layer_passes': VIEWLAYER_PT_layer_passes = value; break;
+		case 'VIEWLAYER_PT_layer_passes_aov': VIEWLAYER_PT_layer_passes_aov = value; break;
+		case 'VIEWLAYER_PT_layer_passes_cryptomatte': VIEWLAYER_PT_layer_passes_cryptomatte = value; break;
+		case 'VIEWLAYER_PT_layer_passes_lightgroups': VIEWLAYER_PT_layer_passes_lightgroups = value; break;
+		case 'VIEWLAYER_PT_override': VIEWLAYER_PT_override = value; break;
+		case 'VIEWLAYER_PT_workbench_layer_passes_data': VIEWLAYER_PT_workbench_layer_passes_data = value; break;
+		case 'VIEWLAYER_UL_aov': VIEWLAYER_UL_aov = value; break;
+		case 'VIEWLAYER_UL_linesets': VIEWLAYER_UL_linesets = value; break;
+		case 'VOLUME_UL_grids': VOLUME_UL_grids = value; break;
+		case 'VoronoiTexture': VoronoiTexture = value; break;
+		case 'WM_MT_operator_presets': WM_MT_operator_presets = value; break;
+		case 'WM_MT_region_toggle_pie': WM_MT_region_toggle_pie = value; break;
+		case 'WM_MT_splash': WM_MT_splash = value; break;
+		case 'WM_MT_splash_about': WM_MT_splash_about = value; break;
+		case 'WM_MT_splash_quick_setup': WM_MT_splash_quick_setup = value; break;
+		case 'WM_MT_toolsystem_submenu': WM_MT_toolsystem_submenu = value; break;
+		case 'WM_OT_batch_rename': WM_OT_batch_rename = value; break;
+		case 'WM_OT_blend_strings_utf8_validate': WM_OT_blend_strings_utf8_validate = value; break;
+		case 'WM_OT_context_collection_boolean_set': WM_OT_context_collection_boolean_set = value; break;
+		case 'WM_OT_context_cycle_array': WM_OT_context_cycle_array = value; break;
+		case 'WM_OT_context_cycle_enum': WM_OT_context_cycle_enum = value; break;
+		case 'WM_OT_context_cycle_int': WM_OT_context_cycle_int = value; break;
+		case 'WM_OT_context_menu_enum': WM_OT_context_menu_enum = value; break;
+		case 'WM_OT_context_modal_mouse': WM_OT_context_modal_mouse = value; break;
+		case 'WM_OT_context_pie_enum': WM_OT_context_pie_enum = value; break;
+		case 'WM_OT_context_scale_float': WM_OT_context_scale_float = value; break;
+		case 'WM_OT_context_scale_int': WM_OT_context_scale_int = value; break;
+		case 'WM_OT_context_set_boolean': WM_OT_context_set_boolean = value; break;
+		case 'WM_OT_context_set_enum': WM_OT_context_set_enum = value; break;
+		case 'WM_OT_context_set_float': WM_OT_context_set_float = value; break;
+		case 'WM_OT_context_set_id': WM_OT_context_set_id = value; break;
+		case 'WM_OT_context_set_int': WM_OT_context_set_int = value; break;
+		case 'WM_OT_context_set_string': WM_OT_context_set_string = value; break;
+		case 'WM_OT_context_set_value': WM_OT_context_set_value = value; break;
+		case 'WM_OT_context_toggle': WM_OT_context_toggle = value; break;
+		case 'WM_OT_context_toggle_enum': WM_OT_context_toggle_enum = value; break;
+		case 'WM_OT_doc_view': WM_OT_doc_view = value; break;
+		case 'WM_OT_doc_view_manual': WM_OT_doc_view_manual = value; break;
+		case 'WM_OT_drop_blend_file': WM_OT_drop_blend_file = value; break;
+		case 'WM_OT_interface_theme_preset_add': WM_OT_interface_theme_preset_add = value; break;
+		case 'WM_OT_interface_theme_preset_remove': WM_OT_interface_theme_preset_remove = value; break;
+		case 'WM_OT_interface_theme_preset_save': WM_OT_interface_theme_preset_save = value; break;
+		case 'WM_OT_keyconfig_preset_add': WM_OT_keyconfig_preset_add = value; break;
+		case 'WM_OT_keyconfig_preset_remove': WM_OT_keyconfig_preset_remove = value; break;
+		case 'WM_OT_operator_cheat_sheet': WM_OT_operator_cheat_sheet = value; break;
+		case 'WM_OT_operator_pie_enum': WM_OT_operator_pie_enum = value; break;
+		case 'WM_OT_operator_preset_add': WM_OT_operator_preset_add = value; break;
+		case 'WM_OT_operator_presets_cleanup': WM_OT_operator_presets_cleanup = value; break;
+		case 'WM_OT_owner_disable': WM_OT_owner_disable = value; break;
+		case 'WM_OT_owner_enable': WM_OT_owner_enable = value; break;
+		case 'WM_OT_path_open': WM_OT_path_open = value; break;
+		case 'WM_OT_previews_batch_clear': WM_OT_previews_batch_clear = value; break;
+		case 'WM_OT_previews_batch_generate': WM_OT_previews_batch_generate = value; break;
+		case 'WM_OT_properties_add': WM_OT_properties_add = value; break;
+		case 'WM_OT_properties_context_change': WM_OT_properties_context_change = value; break;
+		case 'WM_OT_properties_edit': WM_OT_properties_edit = value; break;
+		case 'WM_OT_properties_edit_value': WM_OT_properties_edit_value = value; break;
+		case 'WM_OT_properties_remove': WM_OT_properties_remove = value; break;
+		case 'WM_OT_sysinfo': WM_OT_sysinfo = value; break;
+		case 'WM_OT_tool_set_by_brush_type': WM_OT_tool_set_by_brush_type = value; break;
+		case 'WM_OT_tool_set_by_id': WM_OT_tool_set_by_id = value; break;
+		case 'WM_OT_tool_set_by_index': WM_OT_tool_set_by_index = value; break;
+		case 'WM_OT_toolbar': WM_OT_toolbar = value; break;
+		case 'WM_OT_toolbar_fallback_pie': WM_OT_toolbar_fallback_pie = value; break;
+		case 'WM_OT_toolbar_prompt': WM_OT_toolbar_prompt = value; break;
+		case 'WM_OT_url_open': WM_OT_url_open = value; break;
+		case 'WM_OT_url_open_preset': WM_OT_url_open_preset = value; break;
+		case 'WM_PT_operator_presets': WM_PT_operator_presets = value; break;
+		case 'WORKSPACE_PT_addons': WORKSPACE_PT_addons = value; break;
+		case 'WORKSPACE_PT_custom_props': WORKSPACE_PT_custom_props = value; break;
+		case 'WORKSPACE_PT_main': WORKSPACE_PT_main = value; break;
+		case 'WORKSPACE_UL_addons_items': WORKSPACE_UL_addons_items = value; break;
+		case 'WORLD_OT_convert_volume_to_mesh': WORLD_OT_convert_volume_to_mesh = value; break;
+		case 'WORLD_PT_animation': WORLD_PT_animation = value; break;
+		case 'WORLD_PT_context_world': WORLD_PT_context_world = value; break;
+		case 'WORLD_PT_custom_props': WORLD_PT_custom_props = value; break;
+		case 'WORLD_PT_viewport_display': WORLD_PT_viewport_display = value; break;
+		case 'WoodTexture': WoodTexture = value; break;
+		case 'GeometrySet': GeometrySet = value; break;
+		case 'InlineShaderNodes': InlineShaderNodes = value; break;
+		case 'bpy_prop_array': bpy_prop_array = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

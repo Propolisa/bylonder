@@ -17,7 +17,7 @@ export var TIME_PT_playhead_snapping =  __class__ ('TIME_PT_playhead_snapping', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -29,12 +29,13 @@ export var TIME_PT_playhead_snapping =  __class__ ('TIME_PT_playhead_snapping', 
 		}
 		else {
 		}
+		// pass;
 		return true;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -48,24 +49,48 @@ export var TIME_PT_playhead_snapping =  __class__ ('TIME_PT_playhead_snapping', 
 		}
 		var tool_settings = context.tool_settings;
 		var layout = self.layout;
-		var col = layout.column ();
-		col.prop (tool_settings, 'playhead_snap_distance');
-		col.separator ();
-		col.label (__kwargtrans__ ({text: 'Snap Target'}));
-		col.prop (tool_settings, 'snap_playhead_element', __kwargtrans__ ({expand: true}));
-		col.separator ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'playhead_snap_distance');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Snap Target'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'snap_playhead_element', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (__in__ ('FRAME', tool_settings.snap_playhead_element)) {
-			col.prop (tool_settings, 'snap_playhead_frame_step');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'snap_playhead_frame_step');
+			}) ();
 		}
 		if (__in__ ('SECOND', tool_settings.snap_playhead_element)) {
-			col.prop (tool_settings, 'snap_playhead_second_step');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'snap_playhead_second_step');
+			}) ();
 		}
 	});}
 });
 export var playback_controls = function (layout, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -78,83 +103,194 @@ export var playback_controls = function (layout, context) {
 	else {
 	}
 	var st = context.space_data;
-	var is_sequencer = st.py_metatype == 'SEQUENCE_EDITOR';
-	var is_timeline = st.py_metatype == 'DOPESHEET_EDITOR' && st.mode == 'TIMELINE';
+	var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR');
+	var is_timeline = __eq__ (st.py_metatype, 'DOPESHEET_EDITOR') && __eq__ (st.mode, 'TIMELINE');
 	var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
 	var tool_settings = (scene ? scene.tool_settings : null);
 	var screen = context.screen;
 	if (!(scene)) {
 		return ;
 	}
-	layout.popover (__kwargtrans__ ({panel: 'TIME_PT_playback', text: 'Playback'}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_playback', text: 'Playback'}));
+	}) ();
 	if (tool_settings && !(is_timeline)) {
-		var icon_keytype = 'KEYTYPE_{:s}_VEC'.format (tool_settings.keyframe_type);
-		layout.popover (__kwargtrans__ ({panel: 'TIME_PT_keyframing_settings', text_ctxt: i18n_contexts.id_windowmanager, icon: icon_keytype}));
+		var icon_keytype = (function () {
+			var __accu0__ = 'KEYTYPE_{:s}_VEC';
+			return __call__ (__accu0__.format, __accu0__, tool_settings.keyframe_type);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_keyframing_settings', text_ctxt: i18n_contexts.id_windowmanager, icon: icon_keytype}));
+		}) ();
 	}
 	if (is_sequencer) {
-		layout.prop (context.workspace, 'use_scene_time_sync');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, context.workspace, 'use_scene_time_sync');
+		}) ();
 	}
-	layout.separator_spacer ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator_spacer, __accu0__);
+	}) ();
 	if (tool_settings) {
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (tool_settings, 'use_keyframe_insert_auto', __kwargtrans__ ({text: '', toggle: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_keyframe_insert_auto', __kwargtrans__ ({text: '', toggle: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = tool_settings.use_keyframe_insert_auto;
-		sub.popover (__kwargtrans__ ({panel: 'TIME_PT_auto_keyframing', text: ''}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_auto_keyframing', text: ''}));
+		}) ();
 	}
-	var row = layout.row (__kwargtrans__ ({align: true}));
-	row.operator ('screen.frame_jump', __kwargtrans__ ({text: '', icon: 'REW'})).end = false;
-	row.operator ('screen.keyframe_jump', __kwargtrans__ ({text: '', icon: 'PREV_KEYFRAME'})).py_next = false;
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.frame_jump', __kwargtrans__ ({text: '', icon: 'REW'}));
+	}) ().end = false;
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.keyframe_jump', __kwargtrans__ ({text: '', icon: 'PREV_KEYFRAME'}));
+	}) ().py_next = false;
 	if (!(screen.is_animation_playing)) {
-		if (scene && scene.sync_mode == 'AUDIO_SYNC' && context.preferences.system.audio_device == 'JACK') {
+		if (scene && __eq__ (scene.sync_mode, 'AUDIO_SYNC') && __eq__ (context.preferences.system.audio_device, 'JACK')) {
 			row.scale_x = 2;
-			row.operator ('screen.animation_play', __kwargtrans__ ({text: '', icon: 'PLAY'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.animation_play', __kwargtrans__ ({text: '', icon: 'PLAY'}));
+			}) ();
 			row.scale_x = 1;
 		}
 		else {
-			row.operator ('screen.animation_play', __kwargtrans__ ({text: '', icon: 'PLAY_REVERSE'})).reverse = true;
-			row.operator ('screen.animation_play', __kwargtrans__ ({text: '', icon: 'PLAY'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.animation_play', __kwargtrans__ ({text: '', icon: 'PLAY_REVERSE'}));
+			}) ().reverse = true;
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'screen.animation_play', __kwargtrans__ ({text: '', icon: 'PLAY'}));
+			}) ();
 		}
 	}
 	else {
 		row.scale_x = 2;
-		row.operator ('screen.animation_pause', __kwargtrans__ ({text: '', icon: 'PAUSE'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'screen.animation_pause', __kwargtrans__ ({text: '', icon: 'PAUSE'}));
+		}) ();
 		row.scale_x = 1;
 	}
-	row.operator ('screen.keyframe_jump', __kwargtrans__ ({text: '', icon: 'NEXT_KEYFRAME'})).py_next = true;
-	row.operator ('screen.frame_jump', __kwargtrans__ ({text: '', icon: 'FF'})).end = true;
-	var row = layout.row (__kwargtrans__ ({align: true}));
-	row.operator ('screen.time_jump', __kwargtrans__ ({text: '', icon: 'FRAME_PREV'})).backward = true;
-	row.operator ('screen.time_jump', __kwargtrans__ ({text: '', icon: 'FRAME_NEXT'})).backward = false;
-	row.popover (__kwargtrans__ ({panel: 'TIME_PT_jump', text: ''}));
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.keyframe_jump', __kwargtrans__ ({text: '', icon: 'NEXT_KEYFRAME'}));
+	}) ().py_next = true;
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.frame_jump', __kwargtrans__ ({text: '', icon: 'FF'}));
+	}) ().end = true;
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.time_jump', __kwargtrans__ ({text: '', icon: 'FRAME_PREV'}));
+	}) ().backward = true;
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.time_jump', __kwargtrans__ ({text: '', icon: 'FRAME_NEXT'}));
+	}) ().backward = false;
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_jump', text: ''}));
+	}) ();
 	if (tool_settings) {
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (tool_settings, 'use_snap_playhead', __kwargtrans__ ({text: ''}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.popover (__kwargtrans__ ({panel: 'TIME_PT_playhead_snapping', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_snap_playhead', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_playhead_snapping', text: ''}));
+		}) ();
 	}
-	layout.separator_spacer ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator_spacer, __accu0__);
+	}) ();
 	if (scene) {
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		if (scene.show_subframe) {
 			row.scale_x = 1.15;
-			row.prop (scene, 'frame_float', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_float', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		else {
 			row.scale_x = 0.95;
-			row.prop (scene, 'frame_current', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_current', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (scene, 'use_preview_range', __kwargtrans__ ({text: '', toggle: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'use_preview_range', __kwargtrans__ ({text: '', toggle: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.scale_x = 0.8;
 		if (!(scene.use_preview_range)) {
-			sub.prop (scene, 'frame_start', __kwargtrans__ ({text: 'Start'}));
-			sub.prop (scene, 'frame_end', __kwargtrans__ ({text: 'End'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_start', __kwargtrans__ ({text: 'Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_end', __kwargtrans__ ({text: 'End'}));
+			}) ();
 		}
 		else {
-			sub.prop (scene, 'frame_preview_start', __kwargtrans__ ({text: 'Start'}));
-			sub.prop (scene, 'frame_preview_end', __kwargtrans__ ({text: 'End'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_preview_start', __kwargtrans__ ({text: 'Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_preview_end', __kwargtrans__ ({text: 'End'}));
+			}) ();
 		}
 	}
 };
@@ -164,7 +300,7 @@ export var TIME_MT_view =  __class__ ('TIME_MT_view', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -179,34 +315,88 @@ export var TIME_MT_view =  __class__ ('TIME_MT_view', [Menu], {
 		var layout = self.layout;
 		var scene = context.scene;
 		var st = context.space_data;
-		layout.prop (st, 'show_region_hud');
-		layout.prop (st, 'show_region_channels');
-		layout.separator ();
-		layout.operator ('action.view_all');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st, 'show_region_hud');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st, 'show_region_channels');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'action.view_all');
+		}) ();
 		if (context.scene.use_preview_range) {
-			layout.operator ('anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
+			}) ();
 		}
 		else {
-			layout.operator ('anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Scene Range'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Scene Range'}));
+			}) ();
 		}
-		layout.operator ('action.view_frame');
-		layout.separator ();
-		layout.prop (st, 'show_markers');
-		layout.prop (st, 'show_seconds');
-		layout.prop (st, 'show_locked_time');
-		layout.separator ();
-		layout.prop (scene, 'show_keys_from_selected_only');
-		layout.prop (st.dopesheet, 'show_only_errors');
-		layout.separator ();
-		layout.menu ('DOPESHEET_MT_cache');
-		layout.separator ();
-		layout.menu ('INFO_MT_area');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'action.view_frame');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st, 'show_markers');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st, 'show_seconds');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st, 'show_locked_time');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'show_keys_from_selected_only');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, st.dopesheet, 'show_only_errors');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'DOPESHEET_MT_cache');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu, __accu0__, 'INFO_MT_area');
+		}) ();
 	});}
 });
 export var marker_menu_generic = function (layout, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -218,32 +408,86 @@ export var marker_menu_generic = function (layout, context) {
 	}
 	else {
 	}
-	layout.column ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
 	var tool_settings = context.tool_settings;
-	layout.prop (tool_settings, 'lock_markers');
-	layout.separator ();
-	layout.operator ('screen.marker_jump', __kwargtrans__ ({text: 'Jump to Previous Marker'})).py_next = false;
-	layout.operator ('screen.marker_jump', __kwargtrans__ ({text: 'Jump to Next Marker'})).py_next = true;
-	layout.separator ();
-	layout.operator ('marker.camera_bind');
-	layout.separator ();
-	layout.menu ('NLA_MT_marker_select');
-	layout.separator ();
-	layout.operator ('marker.move', __kwargtrans__ ({text: 'Move Marker'}));
-	var props = layout.operator ('wm.call_panel', __kwargtrans__ ({text: 'Rename Marker'}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, tool_settings, 'lock_markers');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.marker_jump', __kwargtrans__ ({text: 'Jump to Previous Marker'}));
+	}) ().py_next = false;
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'screen.marker_jump', __kwargtrans__ ({text: 'Jump to Next Marker'}));
+	}) ().py_next = true;
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'marker.camera_bind');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.menu, __accu0__, 'NLA_MT_marker_select');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'marker.move', __kwargtrans__ ({text: 'Move Marker'}));
+	}) ();
+	var props = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'wm.call_panel', __kwargtrans__ ({text: 'Rename Marker'}));
+	}) ();
 	props.py_name = 'TOPBAR_PT_name_marker';
 	props.keep_open = false;
-	layout.separator ();
-	layout.operator ('marker.delete', __kwargtrans__ ({text: 'Delete Marker'}));
-	if (len (bpy.data.scenes) > 10) {
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'marker.delete', __kwargtrans__ ({text: 'Delete Marker'}));
+	}) ();
+	if (__gt__ (__call__ (len, null, bpy.data.scenes), 10)) {
 		layout.operator_context = 'INVOKE_DEFAULT';
-		layout.operator ('marker.make_links_scene', __kwargtrans__ ({text: 'Duplicate Marker to Scene...', icon: 'OUTLINER_OB_EMPTY'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'marker.make_links_scene', __kwargtrans__ ({text: 'Duplicate Marker to Scene...', icon: 'OUTLINER_OB_EMPTY'}));
+		}) ();
 	}
 	else {
-		layout.operator_menu_enum ('marker.make_links_scene', 'scene', __kwargtrans__ ({text: 'Duplicate Marker to Scene'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'marker.make_links_scene', 'scene', __kwargtrans__ ({text: 'Duplicate Marker to Scene'}));
+		}) ();
 	}
-	layout.operator ('marker.duplicate', __kwargtrans__ ({text: 'Duplicate Marker'}));
-	layout.operator ('marker.add', __kwargtrans__ ({text: 'Add Marker'}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'marker.duplicate', __kwargtrans__ ({text: 'Duplicate Marker'}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, 'marker.add', __kwargtrans__ ({text: 'Add Marker'}));
+	}) ();
 };
 export var TimelinePanelButtons =  __class__ ('TimelinePanelButtons', [object], {
 	__module__: __name__,
@@ -258,7 +502,7 @@ export var TIME_PT_playback =  __class__ ('TIME_PT_playback', [TimelinePanelButt
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -275,38 +519,119 @@ export var TIME_PT_playback =  __class__ ('TIME_PT_playback', [TimelinePanelButt
 		layout.use_property_decorate = false;
 		var screen = context.screen;
 		var st = context.space_data;
-		var is_sequencer = st.py_metatype == 'SEQUENCE_EDITOR' && st.view_type == 'SEQUENCER';
+		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
 		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
-		layout.prop (scene, 'sync_mode', __kwargtrans__ ({text: 'Sync'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Audio'}));
-		col.prop (scene, 'use_audio_scrub', __kwargtrans__ ({text: 'Scrubbing'}));
-		col.prop (scene, 'use_audio');
-		var col = layout.column (__kwargtrans__ ({heading: 'Playback'}));
-		col.prop (scene, 'lock_frame_selection_to_range', __kwargtrans__ ({text: 'Limit to Frame Range'}));
-		var row = col.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'sync_mode', __kwargtrans__ ({text: 'Sync'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Audio'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'use_audio_scrub', __kwargtrans__ ({text: 'Scrubbing'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'use_audio');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Playback'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'lock_frame_selection_to_range', __kwargtrans__ ({text: 'Limit to Frame Range'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = !(scene.lock_frame_selection_to_range);
-		row.prop (scene, 'allow_preroll');
-		col.prop (screen, 'use_follow', __kwargtrans__ ({text: 'Follow Current Frame'}));
-		col.prop (scene, 'playback_loop_mode', __kwargtrans__ ({text: 'Loop'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Play In'}));
-		col.prop (screen, 'use_play_top_left_3d_editor', __kwargtrans__ ({text: 'Active Editor'}));
-		col.prop (screen, 'use_play_3d_editors', __kwargtrans__ ({text: '3D Viewport'}));
-		col.prop (screen, 'use_play_animation_editors', __kwargtrans__ ({text: 'Animation Editors'}));
-		col.prop (screen, 'use_play_image_editors', __kwargtrans__ ({text: 'Image Editor'}));
-		col.prop (screen, 'use_play_properties_editors', __kwargtrans__ ({text: 'Properties and Sidebars'}));
-		col.prop (screen, 'use_play_clip_editors', __kwargtrans__ ({text: 'Movie Clip Editor'}));
-		col.prop (screen, 'use_play_node_editors', __kwargtrans__ ({text: 'Node Editors'}));
-		col.prop (screen, 'use_play_sequence_editors', __kwargtrans__ ({text: 'Video Sequencer'}));
-		col.prop (screen, 'use_play_spreadsheet_editors', __kwargtrans__ ({text: 'Spreadsheet'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Show'}));
-		if (st.py_metatype == 'SEQUENCE_EDITOR') {
-			col.prop (st, 'show_scrubbing_region', __kwargtrans__ ({text: 'Scrubbing Region'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'allow_preroll');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_follow', __kwargtrans__ ({text: 'Follow Current Frame'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'playback_loop_mode', __kwargtrans__ ({text: 'Loop'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Play In'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_top_left_3d_editor', __kwargtrans__ ({text: 'Active Editor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_3d_editors', __kwargtrans__ ({text: '3D Viewport'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_animation_editors', __kwargtrans__ ({text: 'Animation Editors'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_image_editors', __kwargtrans__ ({text: 'Image Editor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_properties_editors', __kwargtrans__ ({text: 'Properties and Sidebars'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_clip_editors', __kwargtrans__ ({text: 'Movie Clip Editor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_node_editors', __kwargtrans__ ({text: 'Node Editors'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_sequence_editors', __kwargtrans__ ({text: 'Video Sequencer'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, screen, 'use_play_spreadsheet_editors', __kwargtrans__ ({text: 'Spreadsheet'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show'}));
+		}) ();
+		if (__eq__ (st.py_metatype, 'SEQUENCE_EDITOR')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, st, 'show_scrubbing_region', __kwargtrans__ ({text: 'Scrubbing Region'}));
+			}) ();
 		}
-		col.prop (scene, 'show_subframe', __kwargtrans__ ({text: 'Subframes'}));
-		layout.separator ();
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.operator ('anim.start_frame_set');
-		row.operator ('anim.end_frame_set');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'show_subframe', __kwargtrans__ ({text: 'Subframes'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.start_frame_set');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.end_frame_set');
+		}) ();
 	});}
 });
 export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_settings', [TimelinePanelButtons, Panel], {
@@ -318,7 +643,7 @@ export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_setting
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -331,7 +656,7 @@ export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_setting
 		else {
 		}
 		var st = context.space_data;
-		var is_sequencer = st.py_metatype == 'SEQUENCE_EDITOR' && st.view_type == 'SEQUENCER';
+		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
 		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
 		if (scene.keying_sets_all.active) {
 			self.bl_label = scene.keying_sets_all.active.bl_label;
@@ -343,14 +668,14 @@ export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_setting
 			}
 		}
 		else {
-			self.bl_label = n_ ('Keying', i18n_contexts.id_windowmanager);
+			self.bl_label = __call__ (n_, null, 'Keying', i18n_contexts.id_windowmanager);
 			self.bl_translation_context = i18n_contexts.id_windowmanager;
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -364,19 +689,49 @@ export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_setting
 		}
 		var layout = self.layout;
 		var st = context.space_data;
-		var is_sequencer = st.py_metatype == 'SEQUENCE_EDITOR' && st.view_type == 'SEQUENCER';
+		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
 		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
 		var tool_settings = context.tool_settings;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Active Keying Set'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.prop_search (scene.keying_sets_all, 'active', scene, 'keying_sets_all', __kwargtrans__ ({text: ''}));
-		row.operator ('anim.keyframe_insert', __kwargtrans__ ({text: '', icon: 'KEY_HLT'}));
-		row.operator ('anim.keyframe_delete', __kwargtrans__ ({text: '', icon: 'KEY_DEHLT'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'New Keyframe Type'}));
-		col.prop (tool_settings, 'keyframe_type', __kwargtrans__ ({text: ''}));
-		layout.prop (tool_settings, 'use_keyframe_cycle_aware');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Active Keying Set'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_search, __accu0__, scene.keying_sets_all, 'active', scene, 'keying_sets_all', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.keyframe_insert', __kwargtrans__ ({text: '', icon: 'KEY_HLT'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.keyframe_delete', __kwargtrans__ ({text: '', icon: 'KEY_DEHLT'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'New Keyframe Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'keyframe_type', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_keyframe_cycle_aware');
+		}) ();
 	});}
 });
 export var TIME_PT_auto_keyframing =  __class__ ('TIME_PT_auto_keyframing', [TimelinePanelButtons, Panel], {
@@ -388,7 +743,7 @@ export var TIME_PT_auto_keyframing =  __class__ ('TIME_PT_auto_keyframing', [Tim
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -404,11 +759,23 @@ export var TIME_PT_auto_keyframing =  __class__ ('TIME_PT_auto_keyframing', [Tim
 		var tool_settings = context.tool_settings;
 		var prefs = context.preferences;
 		layout.active = tool_settings.use_keyframe_insert_auto;
-		layout.prop (tool_settings, 'auto_keying_mode', __kwargtrans__ ({expand: true}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (tool_settings, 'use_keyframe_insert_keyingset', __kwargtrans__ ({text: 'Only Active Keying Set', toggle: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'auto_keying_mode', __kwargtrans__ ({expand: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_keyframe_insert_keyingset', __kwargtrans__ ({text: 'Only Active Keying Set', toggle: false}));
+		}) ();
 		if (!(prefs.edit.use_keyframe_insert_available)) {
-			col.prop (tool_settings, 'use_record_with_nla', __kwargtrans__ ({text: 'Layered Recording'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_record_with_nla', __kwargtrans__ ({text: 'Layered Recording'}));
+			}) ();
 		}
 	});}
 });
@@ -421,7 +788,7 @@ export var TIME_PT_jump =  __class__ ('TIME_PT_jump', [TimelinePanelButtons, Pan
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -437,18 +804,43 @@ export var TIME_PT_jump =  __class__ ('TIME_PT_jump', [TimelinePanelButtons, Pan
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var st = context.space_data;
-		var is_sequencer = st.py_metatype == 'SEQUENCE_EDITOR' && st.view_type == 'SEQUENCER';
+		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
 		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
-		layout.prop (scene, 'time_jump_unit', __kwargtrans__ ({expand: true, text: 'Jump Unit'}));
-		layout.prop (scene, 'time_jump_delta', __kwargtrans__ ({text: 'Delta'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'time_jump_unit', __kwargtrans__ ({expand: true, text: 'Jump Unit'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, scene, 'time_jump_delta', __kwargtrans__ ({text: 'Delta'}));
+		}) ();
 	});}
 });
 export var classes = tuple ([TIME_MT_view, TIME_PT_playback, TIME_PT_keyframing_settings, TIME_PT_auto_keyframing, TIME_PT_jump, TIME_PT_playhead_snapping]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_time.map
 export {Menu, Panel, i18n_contexts, n_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'TIME_PT_playhead_snapping': TIME_PT_playhead_snapping = value; break;
+		case 'playback_controls': playback_controls = value; break;
+		case 'TIME_MT_view': TIME_MT_view = value; break;
+		case 'marker_menu_generic': marker_menu_generic = value; break;
+		case 'TimelinePanelButtons': TimelinePanelButtons = value; break;
+		case 'TIME_PT_playback': TIME_PT_playback = value; break;
+		case 'TIME_PT_keyframing_settings': TIME_PT_keyframing_settings = value; break;
+		case 'TIME_PT_auto_keyframing': TIME_PT_auto_keyframing = value; break;
+		case 'TIME_PT_jump': TIME_PT_jump = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -4,7 +4,7 @@ var __name__ = '_modules';
 export var _module = function (module_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -20,7 +20,7 @@ export var _module = function (module_id) {
 export var _member = function (module_id, member_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -32,13 +32,13 @@ export var _member = function (module_id, member_id) {
 	}
 	else {
 	}
-	var found = getattr (_module (module_id), member_id, null);
-	return (found !== null ? found : _module ((module_id + '.') + member_id));
+	var found = __call__ (getattr, null, __call__ (_module, null, module_id), member_id, null);
+	return (found !== null ? found : __call__ (_module, null, __add__ (__add__ (module_id, '.'), member_id)));
 };
 export var _lazy = function (module_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -49,7 +49,7 @@ export var _lazy = function (module_id) {
 	}
 	else {
 	}
-	return new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id]})
+	return new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id], set: (target, key, value) => { globalThis.__py_modules[module_id].__py_setattr__(key, value); return true; }})
 };
 export var _import = function (py_name, globals, locals, fromlist, level) {
 	if (typeof globals == 'undefined' || (globals != null && globals.hasOwnProperty ("__kwargtrans__"))) {;
@@ -66,7 +66,7 @@ export var _import = function (py_name, globals, locals, fromlist, level) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -81,12 +81,12 @@ export var _import = function (py_name, globals, locals, fromlist, level) {
 	}
 	else {
 	}
-	return _lazy (py_name);
+	return __call__ (_lazy, null, py_name);
 };
 export var _globals = function (module_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -101,3 +101,13 @@ export var _globals = function (module_id) {
 };
 
 //# sourceMappingURL=_modules.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_module': _module = value; break;
+		case '_member': _member = value; break;
+		case '_lazy': _lazy = value; break;
+		case '_import': _import = value; break;
+		case '_globals': _globals = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

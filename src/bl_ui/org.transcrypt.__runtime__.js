@@ -328,7 +328,8 @@ export function len (anObject) {
     return length;
 };
 export function __i__ (any) {
-    return py_typeof (any) == dict ? any.py_keys () : any;
+    if (py_typeof (any) == dict) return any.py_keys ();
+    return any == null || typeof any == 'string' || Array.isArray (any) || '__getitem__' in Object (any) ? any : Array.from (any);
 }
 export function __k__ (keyed, key) {
     var result = keyed [key];
@@ -1974,7 +1975,7 @@ export var Exception =  __class__ ('Exception', [BaseException], {
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2103,7 +2104,7 @@ export var _sort = function (iterable, key, reverse) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2120,7 +2121,7 @@ export var _sort = function (iterable, key, reverse) {
 		iterable.sort ((function __lambda__ (a, b) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2139,7 +2140,7 @@ export var _sort = function (iterable, key, reverse) {
 		iterable.sort ((function __lambda__ (a, b) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2163,7 +2164,7 @@ export var sorted = function (iterable) {
 	var reverse = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2190,7 +2191,7 @@ export var __sort__ = function (iterable) {
 	var reverse = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2254,7 +2255,7 @@ export var __Terminal__ =  __class__ ('__Terminal__', [object], {
 		var end = '\n';
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2293,7 +2294,7 @@ export var __Terminal__ =  __class__ ('__Terminal__', [object], {
 	get input () {return __get__ (this, function (self, question) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2351,3 +2352,13 @@ for (const [methods, prototype] of [[__str_methods__, String.prototype], [__list
 }
 // A keyword argument's Python name, for **kwargs: Transcrypt renames those that collide with JS or its runtime.
 export var __pyname__ = (key) => (key == 'py_metatype' ? 'type' : key.startsWith ('py_') ? key.slice (3) : key);
+// A class's __dict__: its own attributes. Transcrypt copies its bases' onto it, so those still the bases' are left out.
+Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get () {
+    const own = dict (), bases = this.__bases__ ?? [];
+    for (const key of Object.keys (this)) {
+        const mine = Object.getOwnPropertyDescriptor (this, key);
+        const inherited = bases.some ((base) => { const theirs = Object.getOwnPropertyDescriptor (base, key); return theirs && theirs.value === mine.value && theirs.get === mine.get; });
+        if (!inherited && !['__metaclass__', '__name__', '__bases__'].includes (key)) own [key] = this [key];
+    }
+    return own;
+} });

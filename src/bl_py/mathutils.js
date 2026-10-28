@@ -10,7 +10,7 @@ export var Vector =  __class__ ('Vector', [object], {
 	get __init__ () {return __get__ (this, function (self, py_values) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -22,12 +22,12 @@ export var Vector =  __class__ ('Vector', [object], {
 		}
 		else {
 		}
-		self.py_values = list (py_values);
+		self.py_values = __call__ (list, null, py_values);
 	});},
 	get __getslice__ () {return __get__ (this, function (self, start, stop, step) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -41,7 +41,10 @@ export var Vector =  __class__ ('Vector', [object], {
 		}
 		else {
 		}
-		return self.py_values.slice (0);
+		return (function () {
+			var __accu0__ = self.py_values;
+			return __call__ (__accu0__.slice, __accu0__, 0);
+		}) ();
 	});}
 });
 export var Matrix =  __class__ ('Matrix', [object], {
@@ -49,7 +52,7 @@ export var Matrix =  __class__ ('Matrix', [object], {
 	get __init__ () {return __get__ (this, function (self, rows) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -66,7 +69,7 @@ export var Matrix =  __class__ ('Matrix', [object], {
 	get Rotation () {return function (angle, size, axis) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -79,14 +82,14 @@ export var Matrix =  __class__ ('Matrix', [object], {
 		}
 		else {
 		}
-		var c = cos (angle);
-		var s = sin (angle);
-		return Matrix (dict ({'X': [[1, 0, 0], [0, c, -(s)], [0, s, c]], 'Y': [[c, 0, s], [0, 1, 0], [-(s), 0, c]], 'Z': [[c, -(s), 0], [s, c, 0], [0, 0, 1]]}) [axis]);
+		var c = __call__ (cos, null, angle);
+		var s = __call__ (sin, null, angle);
+		return __call__ (Matrix, null, __getitem__ (dict ({'X': [[1, 0, 0], [0, c, __neg__ (s)], [0, s, c]], 'Y': [[c, 0, s], [0, 1, 0], [__neg__ (s), 0, c]], 'Z': [[c, __neg__ (s), 0], [s, c, 0], [0, 0, 1]]}), axis));
 	};},
 	get __matmul__ () {return __get__ (this, function (self, vector) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -99,14 +102,20 @@ export var Matrix =  __class__ ('Matrix', [object], {
 		else {
 		}
 		var out = [];
-		for (var row of self.rows) {
+		var __iterable0__ = self.rows;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var row = __getitem__ (__iterable0__, __index0__);
 			var total = 0.0;
-			for (var i = 0; i < len (row); i++) {
-				total += row [i] * vector.py_values [i];
+			for (var i = 0; i < __call__ (len, null, row); i++) {
+				var total = __call__ (__iadd__, null, total, __mul__ (__getitem__ (row, i), __getitem__ (vector.py_values, i)));
 			}
-			out.append (total);
+			(function () {
+				var __accu0__ = out;
+				return __call__ (__accu0__.append, __accu0__, total);
+			}) ();
 		}
-		return Vector (out);
+		return __call__ (Vector, null, out);
 	});}
 });
 export var Euler =  __class__ ('Euler', [object], {
@@ -120,7 +129,7 @@ export var Euler =  __class__ ('Euler', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -133,7 +142,7 @@ export var Euler =  __class__ ('Euler', [object], {
 		}
 		else {
 		}
-		self.py_values = list (angles);
+		self.py_values = __call__ (list, null, angles);
 		self.order = order;
 	});}
 });
@@ -145,7 +154,7 @@ export var Color =  __class__ ('Color', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -157,8 +166,17 @@ export var Color =  __class__ ('Color', [object], {
 		}
 		else {
 		}
-		self.py_values = list (rgb);
+		self.py_values = __call__ (list, null, rgb);
 	});}
 });
 
 //# sourceMappingURL=mathutils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'Vector': Vector = value; break;
+		case 'Matrix': Matrix = value; break;
+		case 'Euler': Euler = value; break;
+		case 'Color': Color = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

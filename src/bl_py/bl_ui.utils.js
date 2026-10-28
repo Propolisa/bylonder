@@ -13,7 +13,7 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 	get draw_panel_header () {return __getcm__ (this, function (cls, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -26,7 +26,10 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		else {
 		}
 		layout.emboss = 'NONE';
-		layout.popover (__kwargtrans__ ({panel: cls.__name__, icon: 'PRESET', text: ''}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: cls.__name__, icon: 'PRESET', text: ''}));
+		}) ();
 	});},
 	get draw_menu () {return __getcm__ (this, function (cls, layout, text) {
 		if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
@@ -34,7 +37,7 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -50,12 +53,15 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		if (text === null) {
 			var text = cls.bl_label;
 		}
-		layout.popover (__kwargtrans__ ({panel: cls.__name__, icon: 'PRESET', text: text}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: cls.__name__, icon: 'PRESET', text: text}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -70,9 +76,19 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		var layout = self.layout;
 		layout.emboss = 'PULLDOWN_MENU';
 		layout.operator_context = 'EXEC_DEFAULT';
-		Menu.draw_preset (self, context);
+		(function () {
+			var __accu0__ = Menu;
+			return __call__ (__accu0__.draw_preset, __accu0__, self, context);
+		}) ();
 	});}
 });
 
 //# sourceMappingURL=bl_ui.utils.map
 export {Menu};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'PresetPanel': PresetPanel = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}
