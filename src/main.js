@@ -49,7 +49,8 @@ import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
-import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
+import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds } from "./windowmanager/wm-operators.js";
+import { registered } from "./python/bpy_interface.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
@@ -216,7 +217,9 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Handle for debugging and the browser tests, which run against the production build.
-window.__bylonder ={ world, renderHost, runOperator, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+window.__bylonder ={ world, renderHost, runOperator,
+  // What this window runs of Blender (the Blender Coverage view): its operators and Blender's registered classes.
+  coverage: () => ({ operators: operatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {

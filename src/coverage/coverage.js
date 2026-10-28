@@ -38,7 +38,9 @@ function matches(path, node, ancestors) {
 
 export const DISPATCHED = '*';
 
-export function computeCoverage(surface, implemented, notesMarkdown = '') {
+// `available(node, ancestors)` tells what Bylonder provides at run time from Blender's own code: operators it runs and
+// menus and panels it draws from Blender's scripts, which the scan of its source cannot see.
+export function computeCoverage(surface, implemented, notesMarkdown = '', available = () => false) {
   const notes = parseNotes(notesMarkdown);
   const qualified = new Map(), plain = new Set();
   for (const entry of implemented) {
@@ -50,10 +52,10 @@ export function computeCoverage(surface, implemented, notesMarkdown = '') {
   }
   const has = (key, ancestors) => plain.has(key) || ancestors.some((a) => qualified.get(key)?.has(a.id));
   // A binding in a keymap Bylonder dispatches from Blender's own (`*` scoped to it) counts when its operator runs.
-  const dispatched = (node, ancestors) => plain.has(node.id) && has(DISPATCHED, ancestors);
+  const dispatched = (node, ancestors) => (plain.has(node.id) || available({ k: 'op', id: node.id }, ancestors)) && has(DISPATCHED, ancestors);
   const implementedNode = (node, ancestors) => (node.k === 'key'
     ? has(node.id + '|' + normalizeKeys(node.x), ancestors) || dispatched(node, ancestors)
-    : has(node.id, ancestors));
+    : has(node.id, ancestors) || available(node, ancestors));
   const all = [];
 
   function visit(node, ancestors, key) {

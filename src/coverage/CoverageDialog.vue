@@ -20,12 +20,28 @@ const expanded = ref([]);
 const selected = ref(null);
 const logo = import.meta.env.BASE_URL + "logo/bylonder.svg";
 
+// What Bylonder provides from Blender's own code counts where it has the editor and mode: the operators the scene
+// window runs, and the menus and panels it draws from Blender's scripts.
+const EDITORS = new Set(["TOPBAR", "VIEW_3D", "OUTLINER", "PROPERTIES", "TIMELINE", "DOPESHEET", "FCURVES", "DRIVERS", "ShaderNodeTree",
+  "CompositorNodeTree", "SEQUENCE_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO"]);
+const MODES = new Set(["VIEW_3D:OBJECT", "VIEW_3D:EDIT"]);
+function runtimeAvailable() {
+  const scene = [...document.querySelectorAll("iframe")].map((f) => f.contentWindow?.__bylonder).find((b) => b?.coverage);
+  const { operators = [], classes = [] } = scene?.coverage() ?? {};
+  const ops = new Set(operators), ui = new Set(classes);
+  return (node, ancestors) => {
+    const area = ancestors.find((a) => a.k === "area"), mode = ancestors.find((a) => a.k === "mode");
+    if (!EDITORS.has(area?.id) || (mode && !MODES.has(mode.id))) return false;
+    return node.k === "op" ? ops.has(node.id) : (node.k === "menu" || node.k === "panel") && ui.has(node.id);
+  };
+}
+
 // Menus drawn from Blender's scripts count by what they show, found by drawing them.
 Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw"), import("../editors/space_view3d/view3d-menus-edit-mesh.js"),
   import("../editors/space_buttons/modifier-add-menu.js"), import("../workspace/topbar.js")])
   .then(([surface, implemented, notes, menus, modifierMenus, topbar]) => (data.value = computeCoverage(surface.default,
     [...implemented.default, ...menus.editMeshMenuCoverage(), ...modifierMenus.modifierMenuCoverage(), ...topbar.topbarMenuCoverage()],
-    notes.default)));
+    notes.default, runtimeAvailable())));
 
 const FILTERS = {
   all: { label: "All", test: () => true },
