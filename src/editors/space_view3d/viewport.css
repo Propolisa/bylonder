@@ -33,29 +33,8 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #panel{background:var(--bl-back)}
 #pane{height:100%}
 .dock-header-content .bl-search{flex:1;min-width:40px;max-width:260px;margin:0 2px}
-#panel>.section-label,#panel>.tree-tools,#tree-info{display:none}
-#tree-root{display:flex;align-items:center;gap:5px;height:var(--bl-row);padding:0 6px 0 var(--bl-row);color:var(--bl-text);background:transparent}
-#objects{padding:0}
-#objects .object-row{min-height:var(--bl-row);height:var(--bl-row);gap:0;padding:0 calc(var(--bl-row)*.4) 0 calc(var(--depth,0)*var(--bl-row));color:var(--bl-text)}
-#objects .object-row:nth-child(even){background:#ffffff05}
-#objects .object-row:hover{background:var(--bl-hover)}
-#objects .object-row.active{background:var(--bl-list-select)}
-#objects .object-row.active:has(+.object-row:not(.active)),#objects .object-row.active:last-child{background:var(--bl-list-active)}
-#objects .object-row.dim .tree-label{color:var(--bl-text-off)}
-#objects .object-row>button{display:inline-flex;align-items:center;justify-content:center;height:var(--bl-row);min-width:20px;padding:0 2px;border:0;border-radius:0;background:transparent;color:var(--bl-text)}
-#objects .object-row>button:hover{background:transparent}
-#objects .object-row>button:not(.tree-name) .bl-icon{opacity:.85}
-#objects .object-row>button:not(.tree-name):hover .bl-icon{opacity:1}
-#objects .tree-toggle{width:var(--bl-row);margin-left:var(--bl-row)}
-#objects .object-row>.tree-restrict{flex:none;width:var(--bl-row);min-width:0;padding:0}
-#objects .data-row .tree-name{display:inline-flex;align-items:center}
-#objects .object-row .tree-name{flex:1;justify-content:flex-start;gap:5px;padding:0 2px;overflow:hidden}
-#objects .tree-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#objects .tree-data{width:14px;height:14px;margin-left:6px}
-@media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}#objects .object-row{height:auto}}
-#objects .object-row.active-collection,#tree-root.active-collection{background:#ffffff14}
-#objects .object-row.active-collection .tree-label,#tree-root.active-collection span{color:#fff}
-#tree-root{cursor:default}
+#panel>.section-label,#panel>.tree-tools{display:none}
+@media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}}
 
 .bl-select-box{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);background:var(--bl-hover)}
 .bl-select-circle{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);border-radius:50%}
