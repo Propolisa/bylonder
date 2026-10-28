@@ -71,7 +71,7 @@ Browsers may deny pointer lock (including restricted embeds). The app reports th
 
 `editors/object/selection.js` owns stable selection IDs, outlines, native groups and a transient `TransformNode` pivot. Multi-selection filters parent/child duplicates. The pivot's world delta is applied to selected root nodes and converted back to local space. It is never serialized. Gizmos, numeric fields and modal operations share this transform path. Babylon uses TRS decomposition; arbitrary shear from rotated non-uniform parent scaling is not supported. Grouping is organizational, not mesh merging or geometry editing.
 
-`editors/undo/storage.js` persists versioned node transforms and parent IDs, including groups. Version 1 flat snapshots migrate when read. Remember transforms is off by default. Enabling writes current and subsequent committed changes. Disabling/forgetting removes the saved snapshot without changing the current scene. Camera and system parameters remain session-only. Undo/redo covers 100 committed transform/group states; Inspector edits are direct advanced edits outside that history. Mesh names must be unique and stable; change the storage key for independently deployed projects.
+`editors/undo/storage.js` snapshots node transforms and parent IDs, including groups, for undo and the project's saved scene edits. Camera and system parameters remain session-only. Undo/redo covers 100 committed transform/group states; Inspector edits are direct advanced edits outside that history. Mesh names must be unique and stable; change the storage key for independently deployed projects.
 
 ## Reactive systems
 

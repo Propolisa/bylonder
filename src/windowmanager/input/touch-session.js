@@ -44,13 +44,3 @@ export function bindTouch(element, handlers, options={}){
   element.addEventListener('pointerdown',down,true);element.addEventListener('pointermove',move,true);element.addEventListener('pointerup',up,true);element.addEventListener('pointercancel',up,true);element.addEventListener('lostpointercapture',cancel);window.addEventListener('blur',cancel);
   return ()=>{session.cancel();element.removeEventListener('pointerdown',down,true);element.removeEventListener('pointermove',move,true);element.removeEventListener('pointerup',up,true);element.removeEventListener('pointercancel',up,true);element.removeEventListener('lostpointercapture',cancel);window.removeEventListener('blur',cancel);};
 }
-export function bindLongPress(element,callback){
-  let active=null,suppress=false;
-  const session=createTouchSession({hold:()=>{suppress=true;callback(active);}});
-  const down=e=>{if(e.pointerType==='touch'){session.cancel();suppress=false;active=e;session.down(e.pointerId,{x:e.clientX,y:e.clientY});}};
-  const move=e=>session.move(e.pointerId,{x:e.clientX,y:e.clientY});
-  const up=e=>session.up(e.pointerId,{x:e.clientX,y:e.clientY},e.type==='pointercancel');
-  const click=e=>{if(suppress){e.preventDefault();e.stopImmediatePropagation();suppress=false;}};
-  element.addEventListener('pointerdown',down);element.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);element.addEventListener('click',click,true);
-  return ()=>{session.cancel();element.removeEventListener('pointerdown',down);element.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);element.removeEventListener('click',click,true);};
-}
