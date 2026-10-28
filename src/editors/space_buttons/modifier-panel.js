@@ -12,6 +12,7 @@ import { hasMesh } from '../object/identity.js';
 import { openMenu } from '../interface/menu.js';
 import { kw } from '../../windowmanager/wm-operators.js';
 import { nodeModifierRows } from './addon-panels.js';
+import { moduleTexture } from '../../blenkernel/texture/texture.js';
 
 // eUI_Item_Flag bits a recorded prop carries (UI_interface_layout.hh).
 const FLAG = { expand: 1 << 1, slider: 1 << 2, toggle: 1 << 3, icon_only: 1 << 5, invert_checkbox: 1 << 12 };
@@ -74,7 +75,7 @@ export function modifierTemplates({ world, editor, rna, history }) {
       const data = (owner) => (owner === 'Object' ? rna.pointer('Object', ob) : struct);
       const body = () => {
         if (!definition?.mesh) return nodeModifierRows({ world, ob, modifier, definition, history });
-        const [root] = modifierPanel(modifier, (id) => world.textures?.pointer(id) ?? 0).children;
+        const [root] = modifierPanel(modifier, (id) => (world.textures?.byId(id) ? moduleTexture(world.textures.byId(id).values) : 0)).children;
         return root ? h(LayoutView, { layout: { kind: 'column', children: root.children.map((child) => layoutTree(child, data, id)).filter(Boolean) }, ui: env.ui }) : null;
       };
       return h('section', { key: modifier.id, class: ['bl-panel bl-panel-root', open && 'is-open', active && 'is-active'], 'data-blender': modifier.type, onPointerdown: setActive,

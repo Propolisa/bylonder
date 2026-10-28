@@ -37,6 +37,19 @@ export function textureDefaults() {
   return { ...defaults };
 }
 
+// Settings with changes written as RNA writes them, on a Tex made for it: a new type's settings are those its DNA
+// holds, as Blender's Tex keeps every type's fields.
+export function settingsAfter(values, changes) {
+  const tex = x.texture_new() >>> 0;
+  try {
+    writeTexture(tex, values);
+    writeTexture(tex, changes);
+    return readTexture(tex);
+  } finally {
+    x.texture_free(tex);
+  }
+}
+
 // A texture in Main (BKE_texture_add) with these settings.
 export function mainTexture(bmain, name, values) {
   const tex = withString(name, (p) => x.texture_add(bmain, p)) >>> 0;

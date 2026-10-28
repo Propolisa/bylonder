@@ -234,6 +234,22 @@ assert.deepEqual(lavaTree.nodes.map((node) => node.idname).sort(), ['ShaderNodeB
 assert.deepEqual(lavaTree.links.sort(), [['Noise Texture', 'Fac', 'Principled BSDF', 'Emission Strength'], ['Principled BSDF', 'BSDF', 'Material Output', 'Surface']]);
 assert(Math.abs(lavaTree.nodes.find((node) => node.idname === 'ShaderNodeTexNoise').inputs.W - 1.3) < 1e-6);
 assert.deepEqual(sync.check(), []);
+// The texture's record is the truth: Main's Tex is filled from it, undo restores it there, and what Blender's code
+// writes into the Tex comes back to the record.
+const tex = sync.textureOf(clouds.id);
+assert.equal(dnaGet('Texture', tex, 'type'), 'CLOUDS');
+world.textures.set(clouds, 'noise_depth', 5);
+const before = world.textures.capture();
+world.textures.set(clouds, 'noise_depth', 1);
+sync.flush();
+assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 1);
+world.textures.apply(before);
+sync.flush();
+assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 5);
+dnaSet('CloudsTexture', tex, 'noise_depth', 3);
+sync.writeBack();
+assert.equal(world.textures.byId(clouds.id).values.noise_depth, 3);
+assert.deepEqual(sync.check(), []);
 
 // Hooks keep a transform drag cheap: one changed object among many reaches Main without the others being read.
 for (let i = 0; i < 300; i++) box('Many ' + i, [i, 0, 0]);

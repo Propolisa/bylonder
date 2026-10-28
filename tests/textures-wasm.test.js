@@ -4,7 +4,7 @@ import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
 import { createMesh } from '../src/blenkernel/mesh/mesh.js';
 import { evaluateBlenderModifiers, modifierPanel } from '../src/modifiers/blender.js';
 import { blenderModule } from '../src/bmesh/bmesh-wasm.js';
-import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview } from '../src/blenkernel/texture/texture.js';
+import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview, moduleTexture } from '../src/blenkernel/texture/texture.js';
 import { createTextures } from '../src/blenkernel/texture/textures.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -77,17 +77,17 @@ const coordinates = (texture) => find(panel(texture), (n) => n.kind === 'column'
 const textures = createTextures({ objects: [] });
 const lava = textures.create();
 assert.equal(coordinates(0), false);
-assert.equal(coordinates(textures.pointer(lava.id)), true);
+assert.equal(coordinates(moduleTexture(lava.values)), true);
 
-// The textures slice: Blender's names, Main's Tex mirrors the record, undo restores it.
+// The textures slice: Blender's names, a setting as RNA writes it, undo restores it.
 assert.equal(textures.create().name, 'Texture.001');
 textures.set(lava, 'type', 'CLOUDS');
 textures.set(lava, 'noise_depth', 4);
-assert.deepEqual([readTexture(textures.pointer(lava.id)).type, readTexture(textures.pointer(lava.id)).noise_depth], ['CLOUDS', 4]);
+assert.deepEqual([lava.values.type, lava.values.noise_depth, lava.values.noise_scale], ['CLOUDS', 4, Math.fround(0.25)], 'a new type takes its DNA defaults');
 const saved = textures.capture();
 textures.set(lava, 'noise_depth', 1);
 textures.apply(saved);
-assert.equal(readTexture(textures.pointer(lava.id)).noise_depth, 4);
+assert.equal(textures.byId(lava.id).values.noise_depth, 4);
 
 // In the stack: a Displace modifier's texture displaces the object, and editing the texture evaluates it again.
 const engine = new NullEngine(), scene = new Scene(engine), box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
