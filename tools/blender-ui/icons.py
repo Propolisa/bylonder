@@ -1,6 +1,8 @@
 """Blender's interface icons (release/datafiles/icons_svg at the port's tag) into public/icons/blender, which BlIcon and
-icon.js draw by Blender's icon name in lower case, and the theme color each monochrome icon takes (UI_icons.hh:
-DEF_ICON_SCENE, DEF_ICON_OBJECT, ...) into src/editors/interface/icon-themes.json.
+icon.js draw by Blender's icon name in lower case, the theme color each monochrome icon takes (UI_icons.hh:
+DEF_ICON_SCENE, DEF_ICON_OBJECT, ...) into src/editors/interface/icon-themes.json, and the size of each icon whose
+document is not 1600 units square into src/editors/interface/icon-sizes.json: Blender draws 1600 units at the icon's
+size, centered (blf_glyph_cache_add_svg), so a smaller document draws smaller.
 
 usage: python3 -P tools/blender-ui/icons.py
 """
@@ -18,9 +20,15 @@ REPO, fetch, listing = transpile.REPO, transpile.fetch, transpile.listing
 FOLDER = 'release/datafiles/icons_svg'
 OUT = os.path.join(REPO, 'public', 'icons', 'blender')
 
+sizes = {}
 for path in listing(FOLDER):
     if path.endswith('.svg'):
-        open(os.path.join(OUT, os.path.basename(path)), 'w').write(fetch(path))
+        source = fetch(path)
+        open(os.path.join(OUT, os.path.basename(path)), 'w').write(source)
+        size = [int(re.search(r'<svg[^>]*?\s%s="([\d.]+)' % key, source, re.S).group(1).split('.')[0]) for key in ('width', 'height')]
+        if size != [1600, 1600]:
+            sizes[os.path.basename(path)[:-4]] = size
+json.dump(sizes, open(os.path.join(REPO, 'src', 'editors', 'interface', 'icon-sizes.json'), 'w'), indent=0, sort_keys=True)
 themes = {name: kind.lower() for kind, name in re.findall(r'^DEF_ICON_(SCENE|COLLECTION|OBJECT|OBJECT_DATA|MODIFIER|SHADING|FOLDER)\((\w+)\)',
                                                         fetch('source/blender/editors/include/UI_icons.hh'), re.M)}
 json.dump(themes, open(os.path.join(REPO, 'src', 'editors', 'interface', 'icon-themes.json'), 'w'), indent=0, sort_keys=True)

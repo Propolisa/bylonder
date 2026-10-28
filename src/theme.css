@@ -1,8 +1,8 @@
 :root{
-  --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:12px;
+  --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:11px;
   --bl-font:var(--bl-font-size) var(--bl-font-family);
-  --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;
-  --bl-panel:#3d3d3d;--bl-panel-header:#424242;--bl-tabs:#1d1d1d;
+  --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-view3d-header:#303030b3;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;
+  --bl-panel:#3d3d3d;--bl-navigation-bar:#181818;--bl-panel-header:#3d3d3d;--bl-tabs:#1d1d1d;
   --bl-text:#e6e6e6;--bl-text-dim:#a6a6a6;--bl-text-off:#7a7a7a;
   --bl-widget:#545454;--bl-widget-hi:#656565;--bl-widget-line:#3d3d3d;--bl-field:#1d1d1d;--bl-menu:#282828;--bl-tool:#282828;
   --bl-select:#4772b3;--bl-list-select:#334d80;--bl-list-active:#3b5689;--bl-hover:#ffffff14;
@@ -12,6 +12,9 @@
   --bl-playhead:#4772b3;--bl-key:#e6e6e6;--bl-key-sel:#ffbe33;
   --bl-status-done:#2f9e44;--bl-status-alt:#4c8dff;--bl-status-partial:#c08a1e;--bl-status-track:#4a4a4a;
   --bl-shadow-popup:0 10px 40px #000a;
+  /* A menu button's arrow (ROUNDBOX_TRIA_MENU in gpu_shader_2D_widget_base): a chevron 0.4 of the button's height,
+     centered 0.32 of it from the right. */
+  --bl-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 5'%3E%3Cpath d='M.7.7 4 4 7.3.7' fill='none' stroke='%23000' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   /* Blender's wcol_menu_back, wcol_menu_item and wcol_pulldown (userdef_default_theme.c). Hover blends the item's inner
      0.2 toward its text; a disabled item's hover blends 0.5 at alpha 64 (widget_state_menu_item). Menu shadow: width 6,
      alpha 0.2. Separators: text at alpha 30. Widget text is 11 points at a 20 pixel unit. */
@@ -56,10 +59,12 @@ html,body{background:var(--bl-gap);color:var(--bl-text);font:var(--bl-font)}
 .bl-icon.blank{background:none}.bl-icon.obj{color:var(--bl-obj)}.bl-icon.data{color:var(--bl-data)}.bl-icon.mod{color:var(--bl-mod)}.bl-icon.shading{color:var(--bl-shading)}
 .bl-icon-button{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 3px;border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-text);cursor:pointer}
 .bl-icon-button:hover{background:var(--bl-hover)}.bl-text-toggle{width:auto;padding:0 8px;font:var(--bl-font)}.bl-icon-button[aria-pressed=true],.bl-icon-button.active{background:var(--bl-select);color:#fff}
-.bl-pulldown{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px;border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-pulldown-text);font:var(--bl-font);white-space:nowrap;cursor:pointer}
+/* A header menu (ui_item_menu): its text and 0.75 of a unit, or a unit for an icon alone. */
+.bl-pulldown{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 calc(var(--bl-row)*.375);border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-pulldown-text);font:var(--bl-font);white-space:nowrap;cursor:pointer}
+.bl-pulldown:has(>.bl-icon:only-child){padding:0 calc(var(--bl-row)*.1)}
 .bl-pulldown:hover,.bl-pulldown.open{background:var(--bl-pulldown-sel);color:var(--bl-menu-item-text-sel)}
 .bl-pulldown.bl-dropdown{background:var(--bl-menu);color:var(--bl-text);box-shadow:inset 0 0 0 1px var(--bl-widget-line)}
-.bl-pulldown.bl-dropdown::after{content:'';width:0;height:0;margin-left:3px;border:3.5px solid transparent;border-top:4px solid currentColor;transform:translateY(2px);opacity:.75}
+.bl-pulldown.bl-dropdown{position:relative;padding-right:calc(var(--bl-row)*.75)}.bl-pulldown.bl-dropdown::after{content:'';position:absolute;right:calc(var(--bl-row)*.12);top:calc(50% - var(--bl-row)*.12);width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);background:currentColor;mask:var(--bl-chevron) center/contain no-repeat}
 .bl-pulldown.bl-dropdown:hover{background:#333}
 .bl-group{display:inline-flex;gap:1px}.bl-group>*{border-radius:0}.bl-group>:first-child{border-radius:var(--bl-radius) 0 0 var(--bl-radius)}.bl-group>:last-child{border-radius:0 var(--bl-radius) var(--bl-radius) 0}
 .bl-group>.bl-icon-button{background:var(--bl-widget)}.bl-group>.bl-icon-button:hover{background:var(--bl-widget-hi)}.bl-group>.bl-icon-button[aria-pressed=true]{background:var(--bl-select)}

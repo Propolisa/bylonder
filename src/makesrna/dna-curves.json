@@ -7,51 +7,96 @@
     "offset": 51,
     "size": 1,
     "kind": "int",
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "select_right_handle": {
     "offset": 53,
     "size": 1,
     "kind": "int",
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "select_control_point": {
     "offset": 52,
     "size": 1,
     "kind": "int",
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "hide": {
     "offset": 54,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "bit": 0
+    "bit": 0,
+    "type": "BOOLEAN"
    },
    "handle_left_type": {
     "offset": 49,
     "size": 1,
-    "kind": "int"
+    "kind": "int",
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FREE"
+     ],
+     [
+      2,
+      "VECTOR"
+     ],
+     [
+      3,
+      "ALIGNED"
+     ],
+     [
+      1,
+      "AUTO"
+     ]
+    ]
    },
    "handle_right_type": {
     "offset": 50,
     "size": 1,
-    "kind": "int"
+    "kind": "int",
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FREE"
+     ],
+     [
+      2,
+      "VECTOR"
+     ],
+     [
+      3,
+      "ALIGNED"
+     ],
+     [
+      1,
+      "AUTO"
+     ]
+    ]
    },
    "tilt": {
     "offset": 36,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "weight_softbody": {
     "offset": 40,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "radius": {
     "offset": 44,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    }
   }
  },
@@ -62,41 +107,47 @@
    "shape_keys": {
     "offset": 384,
     "size": 4,
-    "kind": "pointer"
+    "kind": "pointer",
+    "type": "POINTER"
    },
    "path_duration": {
     "offset": 440,
     "size": 4,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "use_path": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 8
+    "bit": 8,
+    "type": "BOOLEAN"
    },
    "use_path_follow": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 16
+    "bit": 16,
+    "type": "BOOLEAN"
    },
    "use_path_clamp": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 32
+    "bit": 32,
+    "type": "BOOLEAN"
    },
    "use_stretch": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 128
+    "bit": 128,
+    "type": "BOOLEAN"
    },
    "use_deform_bounds": {
     "offset": 448,
@@ -104,89 +155,118 @@
     "kind": "int",
     "signed": true,
     "bit": 64,
-    "negative": true
+    "negative": true,
+    "type": "BOOLEAN"
    },
    "use_radius": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 4096
+    "bit": 4096,
+    "type": "BOOLEAN"
    },
    "bevel_mode": {
     "offset": 483,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "custom": true
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "ROUND"
+     ],
+     [
+      1,
+      "OBJECT"
+     ],
+     [
+      2,
+      "PROFILE"
+     ]
+    ]
    },
    "bevel_profile": {
     "offset": 392,
     "size": 4,
-    "kind": "pointer"
+    "kind": "pointer",
+    "type": "POINTER"
    },
    "bevel_resolution": {
     "offset": 444,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "offset": {
     "offset": 452,
     "size": 4,
     "kind": "float",
-    "custom": true
+    "custom": true,
+    "type": "FLOAT"
    },
    "extrude": {
     "offset": 456,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "bevel_depth": {
     "offset": 460,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "resolution_u": {
     "offset": 464,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "resolution_v": {
     "offset": 466,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "render_resolution_u": {
     "offset": 468,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "render_resolution_v": {
     "offset": 470,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "eval_time": {
     "offset": 660,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "bevel_object": {
     "offset": 372,
     "size": 4,
     "kind": "pointer",
-    "custom": true
+    "custom": true,
+    "type": "POINTER"
    },
    "taper_object": {
     "offset": 376,
     "size": 4,
     "kind": "pointer",
-    "custom": true
+    "custom": true,
+    "type": "POINTER"
    },
    "dimensions": {
     "offset": 448,
@@ -194,7 +274,18 @@
     "kind": "int",
     "signed": true,
     "bitflag": true,
-    "custom": true
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "2D"
+     ],
+     [
+      1,
+      "3D"
+     ]
+    ]
    },
    "fill_mode": {
     "offset": 448,
@@ -202,93 +293,202 @@
     "kind": "int",
     "signed": true,
     "bitflag": true,
-    "custom": true
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FULL"
+     ],
+     [
+      4,
+      "BACK"
+     ],
+     [
+      2,
+      "FRONT"
+     ],
+     [
+      6,
+      "HALF"
+     ]
+    ]
    },
    "fill_solver": {
     "offset": 485,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SWEEP_LINE"
+     ],
+     [
+      1,
+      "CDT"
+     ]
+    ]
    },
    "fill_rule": {
     "offset": 486,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "EVEN_ODD"
+     ],
+     [
+      1,
+      "NONZERO"
+     ]
+    ]
    },
    "twist_mode": {
     "offset": 430,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "Z_UP"
+     ],
+     [
+      3,
+      "MINIMUM"
+     ],
+     [
+      4,
+      "TANGENT"
+     ]
+    ]
    },
    "taper_radius_mode": {
     "offset": 484,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "OVERRIDE"
+     ],
+     [
+      1,
+      "MULTIPLY"
+     ],
+     [
+      2,
+      "ADD"
+     ]
+    ]
    },
    "bevel_factor_mapping_start": {
     "offset": 672,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "RESOLUTION"
+     ],
+     [
+      1,
+      "SEGMENTS"
+     ],
+     [
+      2,
+      "SPLINE"
+     ]
+    ]
    },
    "bevel_factor_mapping_end": {
     "offset": 673,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "RESOLUTION"
+     ],
+     [
+      1,
+      "SEGMENTS"
+     ],
+     [
+      2,
+      "SPLINE"
+     ]
+    ]
    },
    "twist_smooth": {
     "offset": 432,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "use_fill_caps": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 16384
+    "bit": 16384,
+    "type": "BOOLEAN"
    },
    "use_map_taper": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 32768
+    "bit": 32768,
+    "type": "BOOLEAN"
    },
    "use_auto_texspace": {
     "offset": 422,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "texspace_location": {
     "offset": 396,
     "size": 4,
     "kind": "float",
     "length": 3,
-    "custom": true
+    "custom": true,
+    "type": "FLOAT"
    },
    "texspace_size": {
     "offset": 408,
     "size": 4,
     "kind": "float",
     "length": 3,
-    "custom": true
+    "custom": true,
+    "type": "FLOAT"
    },
    "bevel_factor_start": {
     "offset": 664,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "bevel_factor_end": {
     "offset": 668,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    }
   }
  },
@@ -305,125 +505,194 @@
     "offset": 56,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LINEAR"
+     ],
+     [
+      1,
+      "CARDINAL"
+     ],
+     [
+      2,
+      "BSPLINE"
+     ],
+     [
+      3,
+      "EASE"
+     ]
+    ]
    },
    "radius_interpolation": {
     "offset": 58,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LINEAR"
+     ],
+     [
+      1,
+      "CARDINAL"
+     ],
+     [
+      2,
+      "BSPLINE"
+     ],
+     [
+      3,
+      "EASE"
+     ]
+    ]
    },
    "type": {
     "offset": 8,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "custom": true
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "POLY"
+     ],
+     [
+      1,
+      "BEZIER"
+     ],
+     [
+      4,
+      "NURBS"
+     ]
+    ]
    },
    "point_count_u": {
     "offset": 16,
     "size": 4,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "point_count_v": {
     "offset": 20,
     "size": 4,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "order_u": {
     "offset": 32,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "order_v": {
     "offset": 34,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "resolution_u": {
     "offset": 28,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "resolution_v": {
     "offset": 30,
     "size": 2,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    },
    "use_cyclic_u": {
     "offset": 36,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "use_cyclic_v": {
     "offset": 38,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "use_endpoint_u": {
     "offset": 36,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 2
+    "bit": 2,
+    "type": "BOOLEAN"
    },
    "use_endpoint_v": {
     "offset": 38,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 2
+    "bit": 2,
+    "type": "BOOLEAN"
    },
    "use_bezier_u": {
     "offset": 36,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 4
+    "bit": 4,
+    "type": "BOOLEAN"
    },
    "use_bezier_v": {
     "offset": 38,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 4
+    "bit": 4,
+    "type": "BOOLEAN"
    },
    "use_smooth": {
     "offset": 14,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "hide": {
     "offset": 12,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "material_index": {
     "offset": 10,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "custom": true
+    "custom": true,
+    "type": "INT"
    },
    "character_index": {
     "offset": 60,
     "size": 4,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "INT"
    }
   }
  },
@@ -440,40 +709,47 @@
     "offset": 24,
     "size": 1,
     "kind": "int",
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN"
    },
    "hide": {
     "offset": 26,
     "size": 2,
     "kind": "int",
     "signed": true,
-    "bit": 0
+    "bit": 0,
+    "type": "BOOLEAN"
    },
    "co": {
     "offset": 0,
     "size": 4,
     "kind": "float",
-    "length": 4
+    "length": 4,
+    "type": "FLOAT"
    },
    "weight": {
     "offset": 12,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "tilt": {
     "offset": 16,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "weight_softbody": {
     "offset": 20,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "radius": {
     "offset": 28,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    }
   }
  },
@@ -494,22 +770,26 @@
    "x": {
     "offset": 0,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "y": {
     "offset": 4,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "width": {
     "offset": 8,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "height": {
     "offset": 12,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    }
   }
  },
@@ -522,33 +802,46 @@
     "size": 1,
     "kind": "int",
     "signed": true,
-    "bit": 1
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 412,
+    "consecutive": 0
    },
    "use_italic": {
     "offset": 6,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "bit": 2
+    "bit": 2,
+    "type": "BOOLEAN",
+    "icon": 413,
+    "consecutive": 0
    },
    "use_underline": {
     "offset": 6,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "bit": 4
+    "bit": 4,
+    "type": "BOOLEAN",
+    "icon": 420,
+    "consecutive": 0
    },
    "use_small_caps": {
     "offset": 6,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "bit": 16
+    "bit": 16,
+    "type": "BOOLEAN",
+    "icon": 417,
+    "consecutive": 0
    },
    "kerning": {
     "offset": 0,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    }
   }
  },
@@ -560,127 +853,208 @@
     "offset": 481,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LEFT"
+     ],
+     [
+      1,
+      "CENTER"
+     ],
+     [
+      2,
+      "RIGHT"
+     ],
+     [
+      3,
+      "JUSTIFY"
+     ],
+     [
+      4,
+      "FLUSH"
+     ]
+    ]
    },
    "align_y": {
     "offset": 482,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "TOP"
+     ],
+     [
+      0,
+      "TOP_BASELINE"
+     ],
+     [
+      2,
+      "CENTER"
+     ],
+     [
+      3,
+      "BOTTOM_BASELINE"
+     ],
+     [
+      4,
+      "BOTTOM"
+     ]
+    ]
    },
    "overflow": {
     "offset": 480,
     "size": 1,
     "kind": "int",
-    "signed": true
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "SCALE"
+     ],
+     [
+      2,
+      "TRUNCATE"
+     ]
+    ]
    },
    "size": {
     "offset": 500,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "small_caps_scale": {
     "offset": 436,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "space_line": {
     "offset": 492,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "space_word": {
     "offset": 504,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "space_character": {
     "offset": 488,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "shear": {
     "offset": 496,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "offset_x": {
     "offset": 516,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "offset_y": {
     "offset": 520,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "underline_position": {
     "offset": 508,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "underline_height": {
     "offset": 512,
     "size": 4,
-    "kind": "float"
+    "kind": "float",
+    "type": "FLOAT"
    },
    "active_textbox": {
     "offset": 644,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "custom": true
+    "custom": true,
+    "type": "INT"
    },
    "family": {
     "offset": 556,
     "size": 1,
     "kind": "int",
     "signed": true,
-    "length": 64
+    "length": 64,
+    "type": "STRING"
    },
    "body": {
     "offset": 548,
     "size": 4,
     "kind": "pointer",
-    "custom": true
+    "custom": true,
+    "type": "STRING"
    },
    "follow_curve": {
     "offset": 380,
     "size": 4,
     "kind": "pointer",
-    "custom": true
+    "custom": true,
+    "type": "POINTER"
    },
    "font": {
     "offset": 620,
     "size": 4,
-    "kind": "pointer"
+    "kind": "pointer",
+    "type": "POINTER"
    },
    "font_bold": {
     "offset": 624,
     "size": 4,
-    "kind": "pointer"
+    "kind": "pointer",
+    "type": "POINTER"
    },
    "font_italic": {
     "offset": 628,
     "size": 4,
-    "kind": "pointer"
+    "kind": "pointer",
+    "type": "POINTER"
    },
    "font_bold_italic": {
     "offset": 632,
     "size": 4,
-    "kind": "pointer"
+    "kind": "pointer",
+    "type": "POINTER"
    },
    "edit_format": {
     "offset": 652,
     "size": 8,
-    "kind": "struct"
+    "kind": "struct",
+    "type": "POINTER"
    },
    "use_fast_edit": {
     "offset": 448,
     "size": 4,
     "kind": "int",
     "signed": true,
-    "bit": 512
+    "bit": 512,
+    "type": "BOOLEAN"
    }
   }
  }

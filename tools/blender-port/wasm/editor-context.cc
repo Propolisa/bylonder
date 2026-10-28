@@ -4,11 +4,13 @@
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_matrix.hh"
+#include "BLI_math_vector.h"
 #include "CLG_log.h"
 #include "BLF_api.hh"
 #include "BKE_global.hh"
 #include "BLI_string.h"
 #include "BLI_rect.h"
+#include "BKE_wm_runtime.hh"
 #include "UI_view2d.hh"
 
 #include "BKE_context.hh"
@@ -56,6 +58,7 @@
 #include "curve_intern.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
+#include "RNA_enum_types.hh"
 #include "RNA_prototypes.hh"
 #include "operator-properties.hh"
 #include "extraction.hh"
@@ -292,6 +295,7 @@ struct OperatorDefinition {
   wmOperatorType *type = nullptr;
 };
 
+void outliner_operatortypes_ensure();
 void anim_operatortypes();
 namespace blender::ed::transform {
 void keymap_transform(wmKeyConfig *keyconf);
@@ -322,6 +326,7 @@ static Vector<OperatorDefinition> &operators()
 #undef OPERATOR
     };
     ed::transform::transform_operatortypes();
+    outliner_operatortypes_ensure();
     anim_operatortypes();
     table.extend(appended_operators());
     return table;
@@ -349,16 +354,18 @@ EXPORT(operator_count) int operator_count() { return int(operators().size()); }
 /* The name of an operator's registration function (MESH_OT_subdivide), which is its idname. */
 EXPORT(operator_name) const char *operator_name(int index) { return operators()[index].name; }
 
-EXPORT(operator_new) wmOperator *operator_new(int type)
+wmOperator *blender::operator_create(wmOperatorType *ot, const void *values)
 {
   wmOperator *op = MEM_new<wmOperator>(__func__);
-  op->type = operator_type(type);
+  op->type = ot;
   STRNCPY(op->idname, op->type->idname);
-  op->ptr = MEM_new<PointerRNA>(__func__, PointerRNA{nullptr, op->type->srna, operator_values_new()});
+  op->ptr = MEM_new<PointerRNA>(__func__, PointerRNA{nullptr, ot->srna, values ? operator_values_copy(values) : operator_values_new()});
   op->reports = MEM_new<ReportList>(__func__);
   BKE_reports_init(op->reports, RPT_STORE);
   return op;
 }
+
+EXPORT(operator_new) wmOperator *operator_new(int type) { return operator_create(operator_type(type)); }
 
 EXPORT(operator_free) void operator_free(wmOperator *op)
 {
@@ -443,6 +450,12 @@ wmEvent *wm_event_set(bContext *C, int type, int val, int x, int y, int modifier
   event.prev_press_type = wmEventType(prev_type);
   event.prev_xy[0] = event.prev_press_xy[0] = event.xy[0];
   event.prev_xy[1] = event.prev_press_xy[1] = event.xy[1];
+  /* The window's event state follows, as wm_event_add_ghostevent keeps it: where the pointer is and the keys held. */
+  const wmWindow *win = CTX_wm_window(C);
+  if (win && win->runtime && win->runtime->eventstate) {
+    copy_v2_v2_int(win->runtime->eventstate->xy, event.xy);
+    win->runtime->eventstate->modifier = event.modifier;
+  }
   return &event;
 }
 
@@ -497,9 +510,21 @@ EXPORT(operator_modal_item) int operator_modal_item(wmOperator *op, const char *
   return -1;
 }
 
+/* The menu the last operator called (WM_menu_name_call), which Bylonder's window manager opens, cleared by asking. */
+static std::string menu_called;
+EXPORT(operator_menu_called) const char *operator_menu_called()
+{
+  static std::string name;
+  name = std::exchange(menu_called, "");
+  return name.c_str();
+}
+
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
+
+/* port-override: Blender's menus are drawn by Bylonder's window manager (JS), which opens the menu named here. */
+void WM_menu_name_call(bContext * /*C*/, const char *menu_name, wm::OpCallContext /*context*/) { menu_called = menu_name; }
 
 /* As wm_operator_type.cc defines it, over the module's operator table. */
 wmOperatorType *WM_operatortype_find(const char *idname, bool /*quiet*/)
@@ -658,6 +683,15 @@ bool ED_operator_object_active_only_from_view_layer(bContext *C)
   return BKE_view_layer_active_object_get(view_layer) != nullptr;
 }
 
+/* port-override: as screen_edit.cc's, for Bylonder's window, whose area under the pointer is the context's: active while
+ * the pointer (the window's event state) is in the context's region. */
+int ED_screen_area_active(const bContext *C)
+{
+  const wmWindow *win = CTX_wm_window(C);
+  const ARegion *region = CTX_wm_region(C);
+  return win && win->runtime && region && CTX_wm_area(C) && BLI_rcti_isect_pt_v(&region->winrct, win->runtime->eventstate->xy);
+}
+
 /* As screen_ops.cc defines it. */
 bool ED_operator_scene_editable(bContext *C)
 {
@@ -778,5 +812,6 @@ void DEG_id_tag_update(ID *id, unsigned int flags)
 void DEG_id_tag_update_ex(Main * /*bmain*/, ID *id, unsigned int flags) { DEG_id_tag_update(id, flags); }
 void WM_main_add_notifier(uint /*type*/, void * /*reference*/) {}
 void WM_event_add_notifier(const bContext * /*C*/, uint /*type*/, void * /*reference*/) {}
+void WM_event_add_notifier_ex(wmWindowManager * /*wm*/, const wmWindow * /*win*/, uint /*type*/, void * /*reference*/) {}
 
 }  // namespace blender

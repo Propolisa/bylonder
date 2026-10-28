@@ -25,17 +25,18 @@ function wasiFor(memory) {
   }, { get: (calls, name) => calls[name] ?? (() => 0) });
 }
 
-// Blender symbols a module still lacks (tools/blender-port/wasm_module.py lists them): reaching one is a gap to port.
-// With BLENDER_WASM_MISSING=log (Node), each gap is logged once and returns 0 instead, to list a path's gaps in one run.
+// What a module's own API files import from JS (IMPORT in region-draw.cc), by name. Any other import is a Blender
+// symbol the module still lacks (tools/blender-port/wasm_module.py lists them): reaching one is a gap to port. With
+// BLENDER_WASM_MISSING=log (Node), each gap is logged once and returns 0 instead, to list a path's gaps in one run.
+export const provided = {};
 const logMissing = globalThis.process?.env?.BLENDER_WASM_MISSING === 'log', logged = new Set();
-const missing = new Proxy({}, {
-  get: (_, name) => () => {
-    if (!logMissing) throw new Error(`Blender's ${name} is not in this WebAssembly module`);
-    if (!logged.has(name)) process.stderr.write(`missing: ${name}\n`);
-    logged.add(name);
-    return 0;
-  },
-});
+const gap = (name) => {
+  if (!logMissing) throw new Error(`Blender's ${name} is not in this WebAssembly module`);
+  if (!logged.has(name)) process.stderr.write(`missing: ${name}\n`);
+  logged.add(name);
+  return 0;
+};
+const missing = new Proxy({}, { get: (_, name) => (...args) => (provided[name] ? provided[name](...args) : gap(name)) });
 
 // Compiled modules by URL, compiled once per realm; a worker is given its creator's (provideModule) instead of
 // compiling the bytes again.

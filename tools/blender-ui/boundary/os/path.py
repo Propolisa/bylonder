@@ -75,3 +75,12 @@ def exists(name):
 
 def islink(name):
     return False
+
+
+def _mount(directory, names):
+    """Folders Bylonder adds to the file system (its examples as Blender's app templates)."""
+    for name in names:
+        _directories.add(normpath(join(directory, name)))
+    parts = normpath(directory).split('/')
+    for end in range(2, len(parts) + 1):
+        _directories.add('/'.join(parts[:end]))

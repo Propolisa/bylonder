@@ -1,8 +1,8 @@
 """The 3D View's tool icons as SVG: Blender draws each from the triangles of release/datafiles/icons/NAME.dat, with
 colors per vertex; here each triangle takes its vertices' average color, triangles of one color forming one path.
-Writes public/icons/blender/tools/NAME.svg for the tools of the modes Bylonder has (from the transpiled toolbar).
+Writes public/icons/blender/tools/NAME.svg for the tools of the modes Bylonder has (from Blender's Python tree).
 
-usage: python3 tools/blender-ui/tool_icons.py   (after transpile.py)
+usage: python3 tools/blender-ui/tool_icons.py   (after tree.py)
 """
 import json
 import os
@@ -16,7 +16,7 @@ OUT = os.path.join(transpile.REPO, 'public', 'icons', 'blender', 'tools')
 MODES = ['OBJECT', 'EDIT_MESH']
 # The icons the tools of MODES name, and Blender's fallback for a missing one.
 ICONS = '''
-import { VIEW3D_PT_tools_active as P } from './src/bl_ui/space_toolsystem_toolbar.js';
+const { registered: { VIEW3D_PT_tools_active: P } } = await import('./src/python/bpy_interface.js');
 const names = new Set(['none']);
 for (const mode of %s) for (const item of P.tools_from_context({ mode })) for (const tool of [item ?? []].flat()) names.add(tool.icon);
 console.log(JSON.stringify([...names]));

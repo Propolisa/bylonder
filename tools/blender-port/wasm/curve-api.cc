@@ -25,7 +25,6 @@
 #include "BKE_screen.hh"
 #include "BKE_vfont.hh"
 #include "BKE_vfontdata.hh"
-#include "BLF_api.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_path_utils.hh"
@@ -57,11 +56,17 @@ using namespace blender;
 extern const char datatoc_bfont_pfb[];
 extern const int datatoc_bfont_pfb_size;
 
+/* Blender's blenfont, built for text objects with its BLF_ functions renamed vfont_BLF_ (manifest.json), as the
+ * interface's BLF_ functions are region-draw.cc's. */
+namespace blender {
+int vfont_BLF_init();
+}
+
 /* As Blender's main sets fonts up before any data is made (BLF_init, BKE_vfont_builtin_register); types_ensure
  * (modifier-api.cc) calls it. */
 void fonts_init()
 {
-  BLF_init();
+  vfont_BLF_init();
   BKE_vfont_builtin_register(datatoc_bfont_pfb, datatoc_bfont_pfb_size);
 }
 

@@ -7,7 +7,8 @@ import {KeyConfigs} from './_bpy._keyconfigs.js';
 import * as _utils_units from './_bpy._utils_units.js';
 import * as _utils_previews from './_bpy._utils_previews.js';
 import * as ops from './_bpy.ops.js';
-import * as types from './_bpy.types.js';
+import * as __module_types__ from './_bpy.types.js';
+var types = globalThis.__py_module_getattr__ (__module_types__);
 import * as props from './_bpy.props.js';
 import * as msgbus from './_bpy.msgbus.js';
 import * as app from './_bpy.app.js';
@@ -201,10 +202,7 @@ export var resource_path = function (resource_type, major, minor) {
 	}
 	else {
 	}
-	return __add__ ('/blender/', (function () {
-		var __accu0__ = resource_type;
-		return __call__ (__accu0__.lower, __accu0__);
-	}) ());
+	return (__eq__ (resource_type, 'USER') ? '/blender/user' : '/blender');
 };
 export var user_resource = function (resource_type, path, create) {
 	if (typeof path == 'undefined' || (path != null && globalThis.Object.hasOwn (path, "__kwargtrans__"))) {;
@@ -251,7 +249,7 @@ export var system_resource = function (resource_type, path) {
 	}
 	else {
 	}
-	return __add__ (__add__ ('/blender/system/', (function () {
+	return __add__ (__add__ ('/blender/', (function () {
 		var __accu0__ = resource_type;
 		return __call__ (__accu0__.lower, __accu0__);
 	}) ()), (path ? __add__ ('/', path) : ''));

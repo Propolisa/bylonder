@@ -17,7 +17,7 @@ const [startup] = cols.all();
 assert.deepEqual(cols.state.scene.children, [startup.id], 'the Scene Collection holds one Collection, as in Blender\'s startup file');
 assert.deepEqual(cols.objects(startup.id), ['A', 'B', 'C'], 'objects linked nowhere are its members');
 assert.deepEqual(cols.memberships('A'), [startup.id]);
-const props = cols.create({ objects: ['A', 'C'], move: true });
+const props = cols.create({ parent: MASTER, objects: ['A', 'C'], move: true });
 assert.equal(props.name, 'Collection.001');
 assert.deepEqual(cols.objects(startup.id), ['B']);
 assert.deepEqual(cols.objects(MASTER), []);

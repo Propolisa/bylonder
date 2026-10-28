@@ -1,6 +1,6 @@
 import { ArcRotateCamera, Color4, Vector3 } from '@babylonjs/core';
 import { menuButton } from '../interface/menu.js';
-import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
+import { iconEl, iconButton, iconStyle } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { menuUI } from '../../windowmanager/wm-operators.js';
@@ -215,7 +215,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const sync = () => {
     const editing = !!editMode();
     mode.querySelector('span:not(.bl-icon)').textContent = editing ? 'Edit Mode' : 'Object Mode';
-    mode.querySelector('.bl-icon').style.maskImage = `url(${iconUrl(editing ? 'editmode_hlt' : 'object_datamode')})`;
+    Object.assign(mode.querySelector('.bl-icon').style, iconStyle(editing ? 'editmode_hlt' : 'object_datamode'));
     selectModes.hidden = editKind() !== 'MESH';
     selectModeButtons.forEach((b) => b.setAttribute('aria-pressed', String(!!(world.editMode?.selectmode & b.dataset.selectBit))));
     object.hidden = editing;

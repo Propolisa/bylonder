@@ -128,7 +128,27 @@ def library_flags(entry, tree, deps, spec):
     flags = ([f'-I{os.path.join(deps[n], specs[n].get("include", ""))}' for n in used]
              + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
              + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
-    return flags, ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
+    key = ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
+    if 'rename' in entry:
+        header = renamed_functions(tree, **entry['rename'])
+        flags += ['-include', header]
+        key += hashlib.sha1(open(header, 'rb').read()).hexdigest()
+    return flags, key
+
+
+def renamed_functions(tree, header, functions, prefix):
+    """A header renaming the functions a header declares whose names start with `functions` (BLF_api.hh's BLF_) to
+    `prefix` + name, so a library built with it (Blender's blenfont, for text objects) leaves those names to the
+    module's own definitions (region-draw.cc's)."""
+    text = open(os.path.join(tree, header)).read()
+    macros = set(re.findall(r'#define\s+(\w+)', text))
+    names = sorted(set(re.findall(rf'\b({re.escape(functions)}\w+)\s*\(', text)) - macros)
+    out = os.path.join(tree + '-build', 'generated', prefix + os.path.basename(header))
+    lines = ''.join(f'#define {name} {prefix}{name}\n' for name in names)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    if not os.path.exists(out) or open(out).read() != lines:
+        open(out, 'w').write(lines)
+    return out
 
 
 def datatoc(build, paths, tag):
@@ -209,7 +229,8 @@ def rna_prototypes(build, args):
 def rna_dna_fields(build):
     """generated/rna_dna_fields.inc: DNA_FIELD(struct type, identifier, type, array length, where it is stored) for each
     modifier property, from src/makesrna/rna-modifiers.json (Blender's RNA) and dna-modifiers.json (its DNA fields,
-    modifier_dna.py), for the RNA getters and setters to read and write a modifier's DNA."""
+    modifier_dna.py), and for each property of the structs dna-outliner.json describes, for the RNA getters and setters
+    to read and write their DNA."""
     makesrna = os.path.join(convert.REPO, 'src', 'makesrna')
     rna = json.load(open(os.path.join(makesrna, 'rna-modifiers.json')))
     dna = json.load(open(os.path.join(makesrna, 'dna-modifiers.json')))
@@ -230,6 +251,19 @@ def rna_dna_fields(build):
             lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[prop["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
                          f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, {str("bitset" in field).lower()}, '
                          f'{str(field.get("negative", False)).lower()})')
+    # Structs whose properties dna-outliner.json describes whole (type, icon), with DNA_ICON(struct type, identifier,
+    # icon, consecutive) for those that have an icon.
+    for struct, info in json.load(open(os.path.join(makesrna, 'dna-outliner.json'))).items():
+        for name, field in info['properties'].items():
+            if field.get('type') not in kinds or field['kind'] == 'struct' or (field.get('bitset') is not None):
+                continue
+            length = 0 if field.get('type') == 'STRING' else field.get('length', 0)
+            kind = 's' if field['type'] == 'STRING' else field['kind'][0]
+            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[field["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
+                         f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, false, '
+                         f'{str(field.get("negative", False)).lower()})')
+            if field.get('icon'):
+                lines.append(f'DNA_ICON(RNA_{struct}, "{name}", {field["icon"]}, {field.get("consecutive", 0)})')
     path = os.path.join(build, 'generated', 'rna_dna_fields.inc')
     text = '\n'.join(lines) + '\n'
     if not os.path.exists(path) or open(path).read() != text:
@@ -310,7 +344,7 @@ def build(root, name, spec, tag):
     generated, operators = operator_table(tree, out_dir, args, spec)
     archives, members = [], []
     for entry in spec['libraries']:
-        # A library is a directory or a file, or {path, exclude, sources, dependency, uses, includes, defines}: a
+        # A library is a directory or a file, or {path, exclude, sources, dependency, uses, includes, defines, rename}: a
         # directory without some of its files, or some files of it, in Blender's tree or in a dependency's, whose sources
         # also see header directories (library_flags).
         spec_lib = entry if isinstance(entry, dict) else {'path': entry}

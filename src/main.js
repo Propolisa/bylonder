@@ -13,7 +13,7 @@ import {
 } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
-import { createOutliner } from "./editors/space_outliner/outliner";
+import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
@@ -352,7 +352,7 @@ const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: comm
 registerObjectOperators(world.objectActions, blenderObjects);
 registerAddOperators(creator);
 world.dock = viewportDock;
-world.outliner = createOutliner(world, editor, commands);
+world.outliner = createOutliner({ world, editor, commands, objects: blenderObjects, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
 const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
@@ -362,6 +362,9 @@ world.collections.subscribe(() => {
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
 ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || [], blenderRNA);
+// Blender's add operators leave the object they add selected and active alone, so a scene opens that way (startup.blend's cube).
+const added = world.objects.findLast((n) => n.metadata?.wbCreation?.operator);
+if (added) { editor.selection.replace([added]); editor.reconcile(); }
 const nodeSection = document.querySelector("#nodes-section");
 let shadingReady = false;
 const backdrop = createCompositorBackdrop({
@@ -518,7 +521,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);

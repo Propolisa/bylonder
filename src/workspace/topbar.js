@@ -1,8 +1,7 @@
 import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { drawMenu, menuCoverage } from '../editors/interface/ui-layout.js';
 import { registerOperators, appendMenu, prependMenu, kw, menuUI } from '../windowmanager/wm-operators.js';
-import { menus as blenderMenus } from '../python/bpy_interface.js';
-import { templates } from '../bl_ui/bpy._app.js';
+import { menus as blenderMenus, module } from '../python/bpy_interface.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
 import { fullDate, timeAgo } from './relative-time.js';
@@ -87,7 +86,8 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   const TOPBAR_MT_file_open_recent = Object.assign(() => ({
     draw() { for (const project of recent) this.layout.operator('wm.open_mainfile', kw({ text: project.name, icon: 'FILE_BLEND' })).filepath = project.id; },
   }), { bl_label: 'Open Recent' });
-  templates.splice(0, Infinity, ...examples.map((example) => example.title));
+  // The examples as Blender's application templates, which File > New lists (bpy.utils.app_template_paths).
+  module('os.path')._mount('/blender/scripts/startup/bl_app_templates_system', examples.map((example) => example.title));
   const context = () => ({
     area: { show_menus: true }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
     scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},

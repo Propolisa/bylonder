@@ -80,6 +80,11 @@ const SETUP = {
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
   "curve-edit": (app) => addAndEdit(app, "curve.primitive_bezier_circle_add"),
   "text-edit": (app) => addAndEdit(app, "object.text_add"),
+  "outliner-expanded": async (app) => {
+    const box = await app.locator(".bl-outliner-region").boundingBox();
+    await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await app.page.keyboard.press("Shift+A");
+  },
 };
 // As ui-shots.py: Delete over the view, the Add operator, then Tab.
 async function addAndEdit(app, idname) {

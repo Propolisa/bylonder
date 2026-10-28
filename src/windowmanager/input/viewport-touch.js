@@ -1,5 +1,5 @@
 import { reactive, createApp, h, Teleport } from 'vue';
-import { bindTouch, bindLongPress } from './touch-session.js';
+import { bindTouch } from './touch-session.js';
 // Touch gestures for every 3D Viewport (attach(view) per view) and the touch controls, mounted once.
 export function createViewportTouch(world, editor, creator, views){
   const state=reactive({multi:false,snap:false,fine:false,axis:null,mode:editor.mode,count:editor.selection.size,modal:!!editor.modal});
@@ -34,11 +34,6 @@ export function createViewportTouch(world, editor, creator, views){
     end(cancel){if(operation==='transform')editor.finish(!cancel);operation=null;}
   },{enabled:()=>!view.state.cameraView});
   };
-  const graph=document.querySelector('#objects');
-  const unbindGraph=bindLongPress(graph,event=>{
-    const row=event.target.closest('[data-id]');
-    if(row){const node=[...world.objects,...world.scene.cameras,...world.scene.lights].find(n=>(n.metadata?.wbId||n.name)===row.dataset.id);world.contextMenu.open(event,node);}
-  });
   world.multiSelect=()=>state.multi;
   const host=document.createElement('div');host.id='touch-controls';document.querySelector('#viewport-section').append(host);
   const button=(text,fn,active=false,title=text)=>h('button',{onClick:fn,class:{active},title,'aria-pressed':active},text);
@@ -60,5 +55,5 @@ export function createViewportTouch(world, editor, creator, views){
       button('↶',()=>world.objectActions.invoke('undo'),false,'Undo'),button('↷',()=>world.objectActions.invoke('redo'),false,'Redo')
     ])
   ]});app.mount(host);
-  return {attach,dispose(){unbindGraph();world.onEditorState=null;app.unmount();host.remove();graphControls.remove();}};
+  return {attach,dispose(){world.onEditorState=null;app.unmount();host.remove();graphControls.remove();}};
 }

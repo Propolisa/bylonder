@@ -8,6 +8,19 @@ import 'splitpanes/dist/splitpanes.css';
 import './dock.css';
 import { profile, validateLayout, swapSections, focusedSection } from './model.js';
 
+// Pane sizes (percent of the panes, and pixels) of a split `size` px long whose first pane takes `share` of it, as
+// Blender places areas: the edge between them is a screen vertex at that share of the vertex range, rounded from the
+// left or bottom (screen_geom_vertices_scale), and each area sits 2 px inside its vertices, 1 px below the top bar
+// (area_calc_totrct). So areas are 3 px apart, the splitter's width.
+const SPLITTER=3;
+export function areaSizes([a,b],size,horizontal,top){
+  const range=size+(horizontal&&top?2:3),panes=size-SPLITTER;
+  const edge=share=>Math.floor(share*range+0.5)-SPLITTER;
+  const first=horizontal?panes-edge(b/(a+b)):edge(a/(a+b));
+  return {pixels:[first,panes-first],percent:[100*first/panes,100*(panes-first)/panes]};
+}
+
+// An item with `overlap` draws under its header, as an editor whose header overlaps its main region (region overlap).
 export function mountDock({host, items, tree, defaults, storageKey, bareFocus=false, focus: defaultFocus=null}) {
   items=[...items];
   const headers=new Map();
@@ -23,10 +36,10 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   };
   let saved={}, menuElement, hovered=null, frameId, disposed=false;
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0,width:0,height:0});
+  const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0,width:0,height:0,content:null});
   const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
   for(const extra of extras)if(typeof extra.id==='string'&&extra.id.startsWith('area:')&&items.slice(0,baseCount).some(item=>item.id===extra.type)){
-    const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,element});ids.push(extra.id);
+    const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,overlap:original.overlap,element});ids.push(extra.id);
   }
   const load=()=>{
     const initial=defaults(state.profile);initial.order=[...initial.order,...ids.slice(baseCount)];initial.hidden=[...initial.hidden,...ids.slice(baseCount)];
@@ -57,12 +70,19 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
       const element=focused&&bareFocus?space:slots.get(slot);
       panel.hidden=!show||!element;
       if(panel.hidden)continue;
-      const rect=element.getBoundingClientRect();
+      const overlap=!focused&&items.find(item=>item.id===id)?.overlap;
+      panel.classList.toggle('dock-overlap',!!overlap);
+      const rect=(overlap?element.parentElement:element).getBoundingClientRect();
       Object.assign(panel.style,{left:rect.left-base.left+'px',top:rect.top-base.top+'px',width:Math.max(0,rect.width)+'px',height:Math.max(0,rect.height)+'px'});
     }
   }
   const schedule=()=>{cancelAnimationFrame(frameId);frameId=requestAnimationFrame(position);};
-  const observer=new ResizeObserver(()=>{state.width=host.clientWidth;state.height=host.clientHeight;schedule();});observer.observe(host);
+  const observer=new ResizeObserver(()=>{
+    state.width=host.clientWidth;state.height=host.clientHeight;
+    const tree=root.querySelector('.dock-split-tree');
+    if(tree&&(tree.clientWidth!==state.content?.width||tree.clientHeight!==state.content?.height))state.content={width:tree.clientWidth,height:tree.clientHeight,top:true};
+    schedule();
+  });observer.observe(host);
   // Blender keeps each area at least one header high (screen_geom_vertices_scale).
   const minSize=horizontal=>{const header=parseFloat(getComputedStyle(host).getPropertyValue('--bl-header-h'))||26,length=horizontal?state.height:state.width;return length?Math.min(50,100*header/length):8;};
   const persist=()=>{
@@ -89,10 +109,10 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   };
   const button=(label,fn,title,attrs={})=>h('button',{type:'button',onClick:fn,title,...attrs},label);
   const select=(value,change,options,label)=>h('select',{value,'aria-label':label,onChange:e=>change(e.target.value)},options.map(([id,title])=>h('option',{value:id},title)));
-  function renderNode(node){
+  function renderNode(node,extent=state.content){
     if(typeof node==='number'){
       const id=state.layout.order[node];
-      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare}],onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
+      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap}],onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
         h('div',{class:'dock-heading',onContextmenu:e=>openArea(e,node)},[
           h('button',{type:'button',class:'dock-editor-type',title:'Editor Type · '+(items.find(item=>item.id===id)?.title||''),'aria-label':'Editor Type',onClick:e=>editorMenu(e.currentTarget,node)},[icon((items.find(item=>item.id===(items.find(i=>i.id===id)?.type||id))||{}).icon||'properties')]),
           h('div',{class:'dock-header-host',ref:el=>{const content=header(id);if(el&&content.parentElement!==el)el.replaceChildren(content);}}),
@@ -105,17 +125,19 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
         }})
       ]);
     }
-    const live=node.children.map(hasVisible),available=live.some(Boolean)?live:[true,true];
-    return h(Splitpanes,{horizontal:state.layout.horizontal[node.id],maximizePanes:false,pushOtherPanes:false,onResize:schedule,onResized:event=>{
+    const live=node.children.map(hasVisible),available=live.some(Boolean)?live:[true,true],horizontal=state.layout.horizontal[node.id];
+    const areas=extent&&live.every(Boolean)?areaSizes(state.layout.sizes[node.id],horizontal?extent.height:extent.width,horizontal,extent.top):null;
+    const childExtent=i=>areas&&(horizontal?{...extent,height:areas.pixels[i],top:extent.top&&i===0}:{...extent,width:areas.pixels[i]});
+    return h(Splitpanes,{horizontal,maximizePanes:false,pushOtherPanes:false,onResize:schedule,onResized:event=>{
       if(live.every(Boolean)){state.layout.sizes[node.id]=event.panes.map(p=>Math.max(1,p.size));persist();}
-    }},{default:()=>node.children.map((child,i)=>h(Pane,{key:i,size:available[i]?(available[1-i]?state.layout.sizes[node.id][i]:100):0,minSize:available[i]&&available[1-i]?minSize(state.layout.horizontal[node.id]):0,maxSize:available[i]?100:0,class:{'dock-collapsed':!live[i]}},{default:()=>renderNode(child)}))});
+    }},{default:()=>node.children.map((child,i)=>h(Pane,{key:i,size:available[i]?(available[1-i]?(areas?.percent??state.layout.sizes[node.id])[i]:100):0,minSize:available[i]&&available[1-i]?minSize(horizontal):0,maxSize:available[i]?100:0,class:{'dock-collapsed':!live[i]}},{default:()=>renderNode(child,childExtent(i))}))});
   }
   const setFactory=(type,factory)=>{factories.set(type,factory);state.factoryCount=factories.size;for(const item of items)if(item.type===type&&!instances.has(item.id))instances.set(item.id,factory(item.element,item.id));};
   const split=(slot,horizontal)=>{
     const original=items.find(item=>item.id===state.layout.order[slot]),type=original.type||original.id;
     const selected=factories.has(type)?type:factories.has('properties')?'properties':null;
     if(!selected)return;
-    const id='area:'+crypto.randomUUID(),element=document.createElement('section'),item={id,type:selected,title:items.find(i=>i.id===selected).title,element};
+    const id='area:'+crypto.randomUUID(),element=document.createElement('section'),item={id,type:selected,title:items.find(i=>i.id===selected).title,overlap:items.find(i=>i.id===selected).overlap,element};
     const index=ids.length;items.push(item);ids.push(id);state.layout.order.push(id);
     const panel=document.createElement('div');panel.className='dock-content';panel.dataset.section=id;panel.append(element);host.append(panel);panels.set(id,panel);instances.set(id,factories.get(selected)(element,id));
     const splitId='split:'+crypto.randomUUID();state.tree=mapArea(state.tree,slot,()=>({id:splitId,children:[slot,index]}));state.layout.horizontal[splitId]=horizontal;state.layout.sizes[splitId]=[50,50];state.focus=null;persist();
@@ -142,7 +164,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
         button('Layout',openMenu,'Arrange panels',{class:'dock-layout-button'}),
         h('div',{class:'dock-toolbar'})
       ]),
-      h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'},bareFocus?[]:[renderNode(state.layout.order.indexOf(focus()))]):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree'},[renderNode(state.tree)])),
+      h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'},bareFocus?[]:[renderNode(state.layout.order.indexOf(focus()))]):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree',ref:el=>el&&observer.observe(el)},[renderNode(state.tree)])),
       h(Teleport,{to:document.body},[h('dialog',{class:'dock-dialog',ref:el=>menuElement=el,onClick:e=>{if(e.target===menuElement)closeMenu();}},[
         h('div',{class:'dock-dialog-title'},[h('strong','Workspace Layout'),button('×',closeMenu,'Close layout')]),
         h('label',[h('input',{type:'checkbox',checked:state.remember,onChange:e=>{state.remember=e.target.checked;persist();}}),'Remember on this device']),

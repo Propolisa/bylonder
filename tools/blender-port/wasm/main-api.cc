@@ -5,8 +5,18 @@
  * tagged (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec, on main_C).
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_attribute.hh"
+#include "BKE_collection.hh"
+#include "BKE_node.hh"
+#include "BKE_node_tree_update.hh"
+#include "DNA_light_types.h"
+#include "DNA_linestyle_types.h"
+#include "DNA_material_types.h"
+#include "DNA_texture_types.h"
+#include "DNA_world_types.h"
 #include "BKE_context.hh"
 #include "BKE_global.hh"
+#include "BKE_wm_runtime.hh"
+#include "DNA_collection_types.h"
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_library.hh"
@@ -28,7 +38,9 @@
 #include "DNA_screen_types.h"
 #include "DNA_windowmanager_types.h"
 #include "DNA_workspace_types.h"
+#include "ED_screen.hh"
 #include "MEM_guardedalloc.h"
+#include "NOD_defaults.hh"
 #include "WM_api.hh"
 
 #include "extraction.hh"
@@ -48,13 +60,17 @@ struct BlenderMain {
   Scene scene = {};
   ToolSettings tool_settings = {};
   ViewLayer view_layer = {};
+  wmWindowManager wm = {};
   wmWindow window = {};
+  wmEvent eventstate = {};
   WorkSpaceInstanceHook workspace_hook = {};
   WorkSpace workspace = {};
   WorkSpaceLayout layout = {};
   bScreen screen = {};
   ExtractionHeader extraction = {};
 };
+
+static void collections_synced(BlenderMain *ctx);
 
 EXPORT(main_new) BlenderMain *main_new()
 {
@@ -64,10 +80,11 @@ EXPORT(main_new) BlenderMain *main_new()
   ctx->bmain = MEM_new<Main>(__func__);
   /* The Main Blender's code finds through G_MAIN (the built-in font, BKE_vfont_builtin_ensure), as loading a file sets it. */
   G_MAIN = ctx->bmain;
-  ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
-  BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
   STRNCPY(ctx->scene.id.name, "SCScene");
   STRNCPY(ctx->view_layer.name, "ViewLayer");
+  ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
+  BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
+  ctx->scene.master_collection = BKE_collection_master_add(&ctx->scene);
   ctx->scene.toolsettings = &ctx->tool_settings;
   /* Auto keying is off until Bylonder sets its own (anim_scene_time_set). */
   ctx->tool_settings.autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
@@ -76,9 +93,16 @@ EXPORT(main_new) BlenderMain *main_new()
   ctx->workspace_hook = {&ctx->workspace, &ctx->layout};
   ctx->window.scene = &ctx->scene;
   ctx->window.workspace_hook = &ctx->workspace_hook;
+  /* The window's event state, which buttons and operators read the held keys from. */
+  ctx->window.runtime = MEM_new<bke::WindowRuntime>(__func__);
+  ctx->window.runtime->eventstate = &ctx->eventstate;
+  ctx->wm.runtime = MEM_new<bke::WindowManagerRuntime>(__func__);
+  BLI_addtail(&ctx->wm.windows, &ctx->window);
   ctx->C = CTX_create();
   CTX_data_main_set(ctx->C, ctx->bmain);
+  CTX_wm_manager_set(ctx->C, &ctx->wm);
   CTX_wm_window_set(ctx->C, &ctx->window);
+  collections_synced(ctx);
   return ctx;
 }
 
@@ -86,52 +110,194 @@ EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
 EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return &ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
+EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return &ctx->view_layer; }
+/* The scene's active camera (an object, or null). */
+EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera) { ctx->scene.camera = camera; }
 
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }
 
-/* The bases changed, so the view layer's map from objects to them is made again when next asked. */
-static void bases_changed(BlenderMain *ctx) { MEM_SAFE_DELETE(ctx->view_layer.runtime->object_bases_hash); }
+/* port-override: the module's one scene is not in Main's scenes (scene.cc, which makes them, is not built), so
+ * BKE_main_collection_sync does not reach its view layer: the collections' changes are synced to it here, after each
+ * change, as BKE_main_collection_sync syncs a scene's. */
+static void collections_synced(BlenderMain *ctx)
+{
+  BKE_view_layer_need_resync_tag(&ctx->view_layer);
+  BKE_view_layer_synced_ensure(*ctx->bmain, &ctx->scene, &ctx->view_layer);
+}
+EXPORT(main_collections_sync) void main_collections_sync(BlenderMain *ctx) { collections_synced(ctx); }
 
-/* An object of a type (ObjectType) with new data of its type, as BKE_object_add makes it, in the view layer. */
+/* An object of a type (ObjectType) with new data of its type, as BKE_object_add makes it, in the Scene Collection. */
 EXPORT(main_object_add) Object *main_object_add(BlenderMain *ctx, int type, const char *name)
 {
   Object *ob = BKE_object_add_only_object(ctx->bmain, ObjectType(type), name);
   ob->data = static_cast<ID *>(BKE_object_obdata_add_from_type(ctx->bmain, ObjectType(type), name));
-  Base *base = MEM_new<Base>(__func__);
-  base->object = ob;
-  base->local_view_bits = ~0;
-  BLI_addtail(&ctx->view_layer.object_bases, base);
-  bases_changed(ctx);
+  BKE_collection_object_add(ctx->bmain, ctx->scene.master_collection, ob);
+  collections_synced(ctx);
   return ob;
 }
 
 /* An object's data (Mesh, Curve, Light, Camera...), or null for an empty. */
 EXPORT(object_data) ID *object_data(Object *ob) { return ob->data; }
 
-/* Removes an object and its data; no other object may have it as parent. */
+/* Removes an object and its data from its collections and Main; no other object may have it as parent. */
 EXPORT(main_object_remove) void main_object_remove(BlenderMain *ctx, Object *ob)
 {
-  Base *base = base_of(ctx, ob);
-  if (ctx->view_layer.basact == base) {
-    ctx->view_layer.basact = nullptr;
+  for (Collection &collection : ctx->bmain->collections) {
+    BKE_collection_object_remove(ctx->bmain, &collection, ob, false);
   }
-  BLI_freelinkN(&ctx->view_layer.object_bases, base);
-  bases_changed(ctx);
+  BKE_collection_object_remove(ctx->bmain, ctx->scene.master_collection, ob, false);
+  collections_synced(ctx);
   if (ob->data) {
     BKE_id_free(ctx->bmain, ob->data);
   }
   BKE_id_free(ctx->bmain, ob);
 }
 
-/* An object's base: its collection's visibility, whether it is hidden, unselectable or selected, and whether it is
+/* Collections. A collection's parent and objects are set whole, in order, as Bylonder holds them. */
+
+/* A collection (in Main's collections), as a child of a parent (null: the Scene Collection). */
+EXPORT(main_collection_add) Collection *main_collection_add(BlenderMain *ctx, Collection *parent, const char *name)
+{
+  Collection *collection = BKE_collection_add(ctx->bmain, parent ? parent : ctx->scene.master_collection, name);
+  collections_synced(ctx);
+  return collection;
+}
+EXPORT(main_collection_remove) void main_collection_remove(BlenderMain *ctx, Collection *collection)
+{
+  BKE_id_free(ctx->bmain, &collection->id);
+  collections_synced(ctx);
+}
+/* The Scene Collection. */
+EXPORT(main_collection_master) Collection *main_collection_master(BlenderMain *ctx) { return ctx->scene.master_collection; }
+
+/* A collection's children: those given, in order. */
+EXPORT(collection_children_set) void collection_children_set(BlenderMain *ctx, Collection *parent, Collection **children, int count)
+{
+  const Set<Collection *> wanted(Span(children, count));
+  Vector<Collection *> stale;
+  for (CollectionChild &child : parent->children) {
+    if (!wanted.contains(child.collection)) {
+      stale.append(child.collection);
+    }
+  }
+  for (Collection *child : stale) {
+    BKE_collection_child_remove(ctx->bmain, parent, child);
+  }
+  for (Collection *child : Span(children, count)) {
+    if (!BKE_collection_has_collection(parent, child) || !BLI_findptr(&parent->children, child, offsetof(CollectionChild, collection))) {
+      BKE_collection_child_add_no_sync(ctx->bmain, parent, child);
+    }
+  }
+  /* Their order. */
+  for (const int i : IndexRange(count)) {
+    CollectionChild *link = static_cast<CollectionChild *>(BLI_findptr(&parent->children, children[i], offsetof(CollectionChild, collection)));
+    BLI_remlink(&parent->children, link);
+    BLI_addtail(&parent->children, link);
+  }
+  collections_synced(ctx);
+}
+
+/* A collection's objects: those given, in order. */
+EXPORT(collection_objects_set) void collection_objects_set(BlenderMain *ctx, Collection *collection, Object **objects, int count)
+{
+  const Set<Object *> wanted(Span(objects, count));
+  Vector<Object *> stale;
+  for (CollectionObject &cob : collection->gobject) {
+    if (!wanted.contains(cob.ob)) {
+      stale.append(cob.ob);
+    }
+  }
+  for (Object *ob : stale) {
+    BKE_collection_object_remove(ctx->bmain, collection, ob, false);
+  }
+  for (Object *ob : Span(objects, count)) {
+    BKE_collection_object_add(ctx->bmain, collection, ob);
+  }
+  for (const int i : IndexRange(count)) {
+    CollectionObject *link = static_cast<CollectionObject *>(BLI_findptr(&collection->gobject, objects[i], offsetof(CollectionObject, ob)));
+    BLI_remlink(&collection->gobject, link);
+    BLI_addtail(&collection->gobject, link);
+  }
+  collections_synced(ctx);
+}
+
+/* What a collection holds, written to r_items when given: its children (`objects` false) or its objects. */
+EXPORT(collection_items) int collection_items(Collection *collection, bool objects, void **r_items)
+{
+  int count = 0;
+  if (objects) {
+    for (CollectionObject &cob : collection->gobject) {
+      if (r_items) {
+        r_items[count] = cob.ob;
+      }
+      count++;
+    }
+  }
+  else {
+    for (CollectionChild &child : collection->children) {
+      if (r_items) {
+        r_items[count] = child.collection;
+      }
+      count++;
+    }
+  }
+  return count;
+}
+
+/* Main's IDs of a type (ID_Type), written to r_ids when given. */
+EXPORT(main_ids) int main_ids(BlenderMain *ctx, int type, ID **r_ids)
+{
+  int count = 0;
+  for (ID &id : *which_libbase(ctx->bmain, short(type))) {
+    if (r_ids) {
+      r_ids[count] = &id;
+    }
+    count++;
+  }
+  return count;
+}
+
+/* An ID's name without its type code, and a rename as Blender renames IDs (unique in Main). */
+EXPORT(id_name) const char *id_name(const ID *id) { return id->name + 2; }
+EXPORT(id_rename) void id_rename(BlenderMain *ctx, ID *id, const char *name) { BKE_libblock_rename(*ctx->bmain, *id, name); }
+
+/* A collection's LayerCollection in the view layer, the active one, and making one active. */
+EXPORT(main_layer_collection) LayerCollection *main_layer_collection(BlenderMain *ctx, Collection *collection)
+{
+  return BKE_layer_collection_first_from_scene_collection(&ctx->view_layer, collection);
+}
+EXPORT(main_layer_collection_active) LayerCollection *main_layer_collection_active(BlenderMain *ctx)
+{
+  return BKE_layer_collection_get_active(&ctx->view_layer);
+}
+EXPORT(main_layer_collection_activate) void main_layer_collection_activate(BlenderMain *ctx, LayerCollection *lc)
+{
+  BKE_layer_collection_activate(&ctx->view_layer, lc);
+}
+EXPORT(layer_collection_collection) Collection *layer_collection_collection(LayerCollection *lc) { return lc->collection; }
+
+/* An object's base flags (eBaseFlags) and whether it is the active one, or -1 when it has no base. */
+EXPORT(main_base_get) int main_base_get(BlenderMain *ctx, Object *ob)
+{
+  BKE_view_layer_synced_ensure(*ctx->bmain, &ctx->scene, &ctx->view_layer);
+  const Base *base = base_of(ctx, ob);
+  return base ? base->flag | (ctx->view_layer.basact == base ? 1 << 30 : 0) : -1;
+}
+EXPORT(object_parent) Object *object_parent(Object *ob) { return ob->parent; }
+
+/* An object's base: whether it is kept out of view (not `visible`), hidden, unselectable or selected, and whether it is
  * the active object, with its flags evaluated as the view layer's sync evaluates them. */
 EXPORT(main_base_set)
 void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool hide_select, bool select, bool active)
 {
   Base *base = base_of(ctx, ob);
-  base->flag_from_collection = visible ? BASE_ENABLED_VIEWPORT | BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT |
-                                             BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT | BASE_SELECTABLE | BASE_ENABLED_RENDER :
-                                         BASE_ENABLED_RENDER;
+  if (!base) {
+    return; /* Linked only to collections excluded from the view layer. */
+  }
+  /* Its collections' visibility is the view layer's sync's; an object they show can still be kept out of view. */
+  if (!visible) {
+    base->flag_from_collection = BASE_ENABLED_RENDER;
+  }
   SET_FLAG_FROM_TEST(base->flag, hidden, BASE_HIDDEN);
   SET_FLAG_FROM_TEST(base->flag, select, BASE_SELECTED);
   SET_FLAG_FROM_TEST(ob->visibility_flag, hide_select, OB_HIDE_SELECT);
@@ -253,6 +419,51 @@ EXPORT(object_mesh_attribute) const void *object_mesh_attribute(Object *ob, cons
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
+
+/* port-override: the module has no shader nodes, so a new light gets no node tree (BKE_light_add); Bylonder's lights
+ * draw without one. */
+void nodes::node_tree_shader_default(const bContext * /*C*/, Main * /*bmain*/, ID * /*id*/) {}
+
+/* As scene.cc defines it. */
+void BKE_scene_object_base_flag_sync_from_base(Base *base) { base->object->base_flag = base->flag; }
+
+/* As node.cc defines them; node.cc comes with Blender's node system, which the module does without. */
+bNodeTree **bke::node_tree_ptr_from_id(ID *id)
+{
+  switch (GS(id->name)) {
+    case ID_MA:
+      return &reinterpret_cast<Material *>(id)->nodetree;
+    case ID_LA:
+      return &reinterpret_cast<Light *>(id)->nodetree;
+    case ID_WO:
+      return &reinterpret_cast<World *>(id)->nodetree;
+    case ID_TE:
+      return &reinterpret_cast<Tex *>(id)->nodetree;
+    case ID_SCE:
+      return &reinterpret_cast<Scene *>(id)->nodetree;
+    case ID_LS:
+      return &reinterpret_cast<FreestyleLineStyle *>(id)->nodetree;
+    default:
+      return nullptr;
+  }
+}
+bNodeTree *bke::node_tree_from_id(ID *id)
+{
+  bNodeTree **nodetree = node_tree_ptr_from_id(id);
+  return (nodetree != nullptr) ? *nodetree : nullptr;
+}
+
+/* port-override: Main holds no node trees (the module has no nodes), so no node tree uses an ID that changed. */
+void bke::node_tree_update_all_users(Main * /*main*/, ID * /*id*/) {}
+
+/* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
+void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}
+
+/* port-override: Main holds no node trees (the module has no nodes), so after an ID's removal none has to update. */
+void BKE_ntree_update(Main & /*bmain*/, std::optional<Span<bNodeTree *>> /*modified_trees*/, const NodeTreeUpdateExtraParams & /*params*/) {}
+
+/* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
+bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }
 
 /* As wm_window.cc defines them, for the one window. */
 Scene *WM_window_get_active_scene(const wmWindow *win) { return win->scene; }
