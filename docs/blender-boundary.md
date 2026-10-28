@@ -252,7 +252,7 @@ CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.
 
 ## Menus
 
-Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
+Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order. A binding gives an operator button its shortcut only when its properties are the ones the button sets, as Blender's buttons compare them (`WM_key_event_operator_string`, strict), then the ones set away from their defaults; an operator's own `keys(props)` binds the properties it reads (`menuUI` in `wm-operators.js`). So File > New's templates, which set `app_template`, show no Ctrl N; File's New entry shows the Ctrl N that opens it.
 
 ## 3D View regions
 
