@@ -1,4 +1,4 @@
-import { reactive, createApp, h, Teleport } from 'vue';
+import { reactive, createApp, h } from 'vue';
 import { bindTouch } from './touch-session.js';
 import { runOperator } from '../wm-operators.js';
 // Touch gestures for every 3D Viewport (attach(view) per view) and the touch controls, mounted once.
@@ -39,10 +39,8 @@ export function createViewportTouch(world, editor, creator, views){
   world.multiSelect=()=>state.multi;
   const host=document.createElement('div');host.id='touch-controls';document.querySelector('#viewport-section').append(host);
   const button=(text,fn,active=false,title=text)=>h('button',{onClick:fn,class:{active},title,'aria-pressed':active},text);
-  const graphControls=document.createElement('span');graphControls.className='graph-touch-controls';document.querySelector('.tree-tools').append(graphControls);
   const setTool=value=>{creator.finish();editor.finish(false);editor.setMode(value);};
   const app=createApp({setup:()=>()=>[
-    h(Teleport,{to:graphControls},[button('Multi',()=>state.multi=!state.multi,state.multi,'Toggle additive selection')]),
     state.count>0 && state.mode!=='select' ? h('div',{class:'touch-row touch-transform-options'},[
       ...['x','y','z'].map(axis=>button(axis.toUpperCase(),()=>{state.axis=state.axis===axis?null:axis;if(editor.modal)editor.axis(axis);},state.axis===axis)),
       button('Snap',()=>state.snap=!state.snap,state.snap),button('Fine',()=>state.fine=!state.fine,state.fine),
@@ -57,5 +55,5 @@ export function createViewportTouch(world, editor, creator, views){
       button('↶',()=>runOperator('ed.undo'),false,'Undo'),button('↷',()=>runOperator('ed.redo'),false,'Redo')
     ])
   ]});app.mount(host);
-  return {attach,dispose(){world.onEditorState=null;app.unmount();host.remove();graphControls.remove();}};
+  return {attach,dispose(){world.onEditorState=null;app.unmount();host.remove();}};
 }

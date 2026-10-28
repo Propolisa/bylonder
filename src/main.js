@@ -197,7 +197,6 @@ const live = () =>
 views = createViews({ engine, scene, live });
 syncLightDirections(scene);
 world.views = views;
-world.focusViewport = () => views.input?.canvas.focus();
 let creator;
 const systems = sdk.systems;
 // Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
@@ -256,7 +255,6 @@ window.addEventListener("message", (e) => {
     return;
   if (e.data.type === "reset-layout") viewportDock.reset();
   if (e.data.type === "invoke") runOperator(e.data.payload);
-  if (e.data.type === "help") help.showModal();
   if (e.data.type === "view-layer") {
     const cols = world.collections, { op, id } = e.data.payload;
     ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
@@ -419,10 +417,6 @@ const scriptingEditors = [
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
   mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info"), rna: blenderRNA }),
 ];
-document.querySelector("#add-mesh").onclick = () => creator.show();
-document.querySelector("#delete-objects").onclick = () => commands.remove();
-document.querySelector("#duplicate-objects").onclick = () =>
-  commands.duplicate();
 let inspectorBusy = false;
 async function inspector() {
   if (inspectorBusy) return;
@@ -443,12 +437,9 @@ async function inspector() {
     views.relayout();
   }
 }
-const help = document.querySelector("#shortcuts");
-document.querySelector("#help").onclick = () => help.showModal();
-document.querySelector("#close-help").onclick = () => help.close();
 // 3D Viewports: the primary area and any added by splitting it (dock factory 'viewport').
 const viewportCtx = {
-  world, views, editor, registry: world.objectActions, rna: blenderRNA, creator, dock: viewportDock, capture, inspector, help, overlays,
+  world, views, editor, rna: blenderRNA, creator, dock: viewportDock, capture, overlays,
   sceneCamera: authored,
   // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
   // (the last one clicked, else the first) shows the compositor.
@@ -460,7 +451,6 @@ const viewportCtx = {
     world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera });
     const cameraView = !!views.input?.state.cameraView;
     document.body.classList.toggle("scene-mode", cameraView);
-    document.querySelector("#scene-mode").textContent = cameraView ? "Scene mode" : "Edit mode";
     views.relayout();
   },
 };
@@ -529,15 +519,6 @@ const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), {
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
 ownObservers = observerCount() - userObservers;
-document.querySelector("#inspector").onclick = inspector;
-document.querySelector("#scene-mode").onclick = () => activeView()?.toggleCameraView();
-document.querySelector("#opposite-view").onclick = () => activeView().nav.opposite();
-document.querySelector("#projection").onclick = () => activeView().nav.toggle();
-document.querySelector("#frame").onclick = () => nav.frame(editor.selected);
-document.querySelector("#panel-toggle").onclick = () => viewportDock.show("properties", viewportDock.profile !== "desktop");
-document
-  .querySelectorAll("[data-view]")
-  .forEach((b) => (b.onclick = () => activeView().nav.view(b.dataset.view)));
 function undoRedo(redo) {
   creator.finish();
   editor.finish(false);
@@ -549,7 +530,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area');
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event?.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
@@ -614,17 +595,14 @@ registerOperators({
   },
   "wm.toolbar": { poll: () => !!contextView(), run: () => contextView().toolbar.popup(editor.pointer) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
-  "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
 });
 appendMenu("VIEW3D_MT_view", ({ layout }) => {
   layout.separator();
   layout.operator("bylonder.inspector", kw({ text: "Babylon Inspector" }));
-  layout.operator("bylonder.shortcuts", kw({ text: "Keyboard Shortcuts" }));
 });
 // Bylonder's own keys, below Blender's keymaps.
 const bylonderKeys = createKeymap([
   { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
-  { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
 // Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve or Font), then the

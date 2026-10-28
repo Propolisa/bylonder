@@ -71,7 +71,6 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     // The project's code (Monaco, files and the browser console's output) beside the scene, as an add-on's workbench.
     'bylonder.project_code': { run: () => { if (dock.maximized === 'scene') { dock.maximize('scene'); dock.show('code'); } else dock.maximize('scene'); } },
     'bylonder.layout_reset': { run: () => dock.reset() },
-    'bylonder.shortcuts': { keys: () => '?', run: () => send('help') },
     'bylonder.docs': { run: url(import.meta.env.BASE_URL + 'docs.html') },
     'bylonder.babylon_docs': { run: url('https://doc.babylonjs.com/') },
   });
@@ -88,7 +87,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   prependMenu('TOPBAR_MT_render', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); layout.prop(settings, 'auto_run'); layout.separator(); });
   appendMenu('TOPBAR_MT_render', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); });
   appendMenu('TOPBAR_MT_window', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_code', 'Toggle Project Code'); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); });
-  appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.shortcuts', 'Keyboard Shortcuts'); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
+  appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
   // Open Recent is a menu Blender defines in C (wm_files.cc): the recent files, here the recent projects.
   const TOPBAR_MT_file_open_recent = Object.assign(() => ({
     draw() { for (const project of recent) this.layout.operator('wm.open_mainfile', kw({ text: project.name, icon: 'FILE_BLEND' })).filepath = project.id; },
@@ -154,7 +153,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     files.append(column('New File', [item('General', 'file_new', newProject), ...examples.map(example => item(example.title, 'file_new', () => openExample(example)))]), recent);
     const links = Object.assign(document.createElement('div'), { className: 'bl-splash-columns bl-splash-links' });
     links.append(
-      column('', [item('Open…', 'file_folder', () => document.getElementById('import').click()), item('Keyboard Shortcuts', 'help', () => send('help'))]),
+      column('', [item('Open…', 'file_folder', () => document.getElementById('import').click())]),
       column('', [item('Blender Coverage', 'blender', () => import('../coverage/open.js').then((m) => m.openCoverage())), item('Documentation', 'help', () => open(import.meta.env.BASE_URL + 'docs.html', '_blank', 'noopener')), item('Changelog', 'time', () => import('./changelog/open.js').then((m) => m.openChangelog()))]),
     );
     dialog.append(banner, files, links);

@@ -1,4 +1,3 @@
-body>header,body>footer{display:none!important}
 .runtime-dock .dock-content{background:var(--bl-region)}
 #viewport-section,.viewport-area{background:var(--bl-viewport)}
 /* The main region spans the area under the header, which overlaps it (Blender's region overlap). */
@@ -29,8 +28,6 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #panel{background:var(--bl-back)}
 #pane{height:100%}
 .dock-header-content .bl-search{flex:1;min-width:40px;max-width:260px;margin:0 2px}
-#panel>.section-label,#panel>.tree-tools{display:none}
-@media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}}
 
 .bl-select-box{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);background:var(--bl-hover)}
 .bl-select-circle{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);border-radius:50%}

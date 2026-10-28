@@ -19,7 +19,6 @@ export function mountRuntimeLayout(){
     if(['gesture-cursor','gesture-guide'].includes(child.id))document.body.append(child);
     else viewport.append(child);
   }
-  panel.querySelector('.panel-heading')?.remove();
   const timeline=document.createElement('section');timeline.id='timeline-section';
   const dopesheet=document.createElement('section');dopesheet.id='dopesheet-section';
   const graph=document.createElement('section');graph.id='graph-section';
@@ -35,19 +34,5 @@ export function mountRuntimeLayout(){
     headerless:['info'],
   };
   const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','nodes','sequencer','files','text','console','info']:['objects','properties','timeline','dopesheet','graph','nodes','sequencer','files','text','console','info'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting}});
-  const menu=document.createElement('details');menu.className='scene-menu';
-  const summary=document.createElement('summary');summary.textContent='⋯';summary.setAttribute('aria-label','Scene options');
-  const content=document.createElement('div');content.className='scene-menu-content';
-  const heading=text=>{const label=document.createElement('div');label.className='menu-label';label.textContent=text;content.append(label);};
-  heading('View');
-  content.append(document.querySelector('.views'));
-  content.append(document.querySelector('#frame'));
-  heading('Scene');
-  for(const id of ['scene-mode','inspector','help'])content.append(document.getElementById(id));
-  const layout=document.createElement('button');layout.textContent='Arrange panels';layout.onclick=()=>dock.openMenu();content.append(layout);
-  menu.append(summary,content);
-  dock.toolbar.append(document.querySelector('#add-mesh'),menu);
-  document.querySelector('body>header').hidden=true;
-  content.addEventListener('click',event=>{if(event.target.closest('button'))menu.open=false;});
   return dock;
 }

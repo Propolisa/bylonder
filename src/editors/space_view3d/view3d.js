@@ -49,7 +49,7 @@ const dataPath = (data, name) => ({ SpaceView3D: 'space_data.', ToolSettings: 't
 // One 3D Viewport area: its canvas, editor camera, navigation, header menus, overlays and per-view state
 // (shading, overlays, camera view), as in Blender where each 3D Viewport has its own view and shading.
 // Rendering goes through the shared view manager (views.js); editing goes through the shared editor.
-//   ctx: { world, views, editor, creator, dock, capture, inspector, help, overlays, rna (createRNA),
+//   ctx: { world, views, editor, creator, dock, capture, overlays, rna (createRNA),
 //          sceneCamera() -> authored camera, shadingChanged(), name }
 export function createView3D(ctx, { section, canvas = null, headerId, cameraName = '__editorCamera:' + headerId, from = null }) {
   const { world, views, editor, creator, dock } = ctx;
