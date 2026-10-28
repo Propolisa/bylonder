@@ -30,7 +30,7 @@ function withoutGeometry(geometries) {
 }
 
 // The nodes the export holds, each the evaluated object, and the materials they use.
-export function exportedContent(scene) {
+function exportedContent(scene) {
   const nodes = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].filter((n) => !excluded(n)).map(evaluatedMesh);
   const meshes = nodes.filter((n) => n.geometry !== undefined);
   const materials = new Set(meshes.flatMap((m) => (m.material ? [m.material, ...(m.material.subMaterials ?? [])] : [])).filter(Boolean));

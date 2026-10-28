@@ -99,6 +99,68 @@ Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outlin
 - **Scene sync.** The module's Scene is not in Main's scenes, so `BKE_main_collection_sync` does not resync its view layer after an ID is deleted or remapped: the area resyncs it after every operator (`syncCollections`). Main's ID remapping reaches the area's tree store through `BKE_library_callback_remap_editor_id_reference_set`.
 - **Not yet:** the popup menus `outliner_operator_menu` builds (context menus on mesh data, materials and other IDs that are not objects or collections), the edge pan while dragging (`WM_operator_name_call_ptr` runs only an exec), scroll bars, the display modes other than View Layer, and Bylonder's materials as Material IDs under their meshes.
 
+### Export for Babylon
+
+Decided 2026-10-28. File > Export (`TOPBAR_MT_file_export`, Blender's menu) gets Babylon (.babylon) and JavaScript (.js),
+operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.js`), which the scene window runs
+(`src/io_scene_babylon`).
+
+- **The evaluated scene, serialized in place.** The modifier stack draws its result into each object's Babylon mesh,
+  so that mesh is the evaluated, modifier-applied mesh, as Blender's glTF exporter exports the evaluated depsgraph.
+  Babylon's `SceneSerializer` writes it directly; no copy of the geometry is made besides the file's own (the JSON
+  arrays of `.babylon`, the base64 typed arrays of `.js`, read with `getVerticesData`). `evaluatedMesh(node)` in
+  `babylon-export.js` is where the sync layer's function for an object's evaluated mesh takes over when it lands.
+- **What goes in.** Every node except Bylonder's helpers (named `__`, `doNotSerialize`, deleted objects, a Mesh's
+  loose-edge line child, which glTF also leaves out by default), and only the materials those meshes use. Flags are
+  set for the serializer and restored after; ids are the objects' unique names for the export. Bylonder's metadata
+  (`wb*`) stays out. The scene camera is the active camera; a camera aimed with `lockedTarget` keeps the rotation it
+  looks with.
+- **Rendered state.** The environment is written as a URL the loader reads (public https URLs kept, others embedded as
+  data URLs), with `createDefaultSkybox` when the World shows a skybox; a reflection probe's cube is named
+  (`environmentProbe`). Textures without a public URL (blob, raw, procedural) are embedded as base64.
+- **Animation** is one Babylon AnimationGroup sampled at every frame of the scene range from Blender's F-Curves
+  (`animation.sample()`). Channels carry their Babylon target and property (`register({ target, property })`); a
+  material's property is animated through a mesh using it (`material.albedoColor`), a rotation on a quaternion node
+  as `rotationQuaternion`. Channels without a Babylon target (modifier settings, stores, `depthOfField`) stay out.
+- **Effects.** The scene camera's rendering pipelines (Bylonder's render effects and the project's own) go in
+  `renderingPipelines` and the scene's image processing in `imageProcessingConfiguration`, in Babylon's own
+  serialization; camera post-processes go in `postProcesses`, which Babylon's loader reads. Babylon's `.babylon`
+  loader ignores the first two and does not play animation groups: the `.js` export applies them all.
+- **JavaScript.** `createScene(engine, canvas)` builds each mesh and empty as code (geometry, transform, parent,
+  material, flags, thin instances), and parses materials, lights, cameras, shadows, effect layers, probes, particles,
+  pipelines and animation with Babylon's `Parse` functions, as the loader does. It imports `@babylonjs/core`, mapped
+  in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/+esm` (the header names the URL).
+- **Checked.** `tests/export.test.js` (NullEngine: serialize, reload with Babylon's loader and import the module,
+  compare geometry, material, camera and animation) and `tests/e2e/smoke.mjs` (File > Export in the app).
+
+### Modifier kernels polyfill (design, not built)
+
+Exports apply modifiers. A polyfill would keep them live: a WebAssembly module of only Blender's modifier evaluation,
+with a small JS runtime, loaded by an exported scene that has modifiers.
+
+- **Sources.** A second module in `tools/blender-port/manifest.json`, `modifiers.wasm`, whose API is
+  `modifier-api.cc` (mesh arrays in, `mesh_create_eval_final` over Blender's ModifierData, results read in place) and
+  `platform.cc`. Its libraries are the subset of `bmesh.wasm`'s that modifiers reach: `modifiers/intern` (without
+  `MOD_nodes.cc`), `blenkernel/intern` (mesh, customdata, attributes, modifier, subdiv, mesh_wrapper, idtype; the
+  linker's `--gc-sections` drops the rest), `bmesh/intern`, `operators` and `tools` (Bevel, Triangulate, Decimate,
+  Wireframe), `geometry/intern/mesh_merge_verts.cc` (Weld), `intern/opensubdiv` with OpenSubdiv's far, sdc, vtr, bfr
+  and osd (Subdivision Surface), `intern/dualcon` (Remesh), `rb_convex_hull_api.cpp` with Bullet's LinearMath (Skin),
+  `functions`, `blenlib`, `guardedalloc`, `clog`, Eigen and fmt. Left out: every editor, `animrig`, `windowmanager`,
+  `makesrna`, `blentranslation`, the outliner and interface code, and OpenVDB unless Remesh's Voxel mode is wanted.
+- **Loading.** The `.js` export writes, for an object with live modifiers, its base Mesh (Blender's arrays: positions,
+  edges, face offsets, corner verts, UVs) and its stack (`{ type, values }` by RNA identifier, as `metadata.wbModifiers`
+  holds it) next to the evaluated geometry it draws first. `createScene` then imports the polyfill lazily from the same
+  CDN path as the app (`modifiers.js`: the module loader, the DNA offsets of `dna-modifiers.json` for writing settings,
+  and `mesh_batch_cache_vertex_data` to turn the result into Babylon vertex data), evaluates in a worker, and
+  re-evaluates when an animated modifier value changes (an AnimationGroup on the stack's values). A `.babylon` file
+  keeps the same base and stack in the mesh's metadata, so a page that loads the polyfill can do the same; without it,
+  the applied geometry still shows.
+- **Size.** Not measured: there is no Blender tree or object cache on this machine, and compiling `blenkernel`,
+  OpenSubdiv and the rest for one link is not cheap. `bmesh.wasm` today is 14.2 MB, 4.0 MB gzipped. The modifier
+  subset drops the editors, animation, the outliner, RNA and translation; an estimate is 5 to 7 MB (1.5 to 2 MB
+  gzipped) without OpenVDB, 2 to 3 MB more with it. A first build should check this, and whether
+  `BKE_idtype_init` (which reaches every ID type) can be narrowed to Mesh and Object.
+
 ## Shared foundations
 
 Every subsystem builds on these, one of each:
