@@ -1,15 +1,18 @@
 // Blender's Workbench engine for Solid and Wireframe shading (draw/engines/workbench): Solid lights every object with
 // the "Default" studio light in view space (workbench_world_light_lib.glsl) in its material's color, never the scene's
-// lights; Wireframe draws unlit edges in the theme's wire colors through everything (X-ray). Each view's camera has
-// its own render pass, so a view in Solid or Wireframe gives every object a Workbench material for its pass only, and
-// views in Material Preview or Rendered keep the scene's materials and lights.
+// lights, and with X-ray see-through at the X-ray alpha; Wireframe draws unlit edges in the theme's wire colors through
+// everything (X-ray). Each view's camera has its own render pass, so a view in Solid or Wireframe gives every object a
+// Workbench material for its pass only, and views in Material Preview or Rendered keep the scene's materials and lights.
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { LinesMesh } from '@babylonjs/core/Meshes/linesMesh.js';
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
+import { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRenderTarget.js';
+import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { mesh_batch_cache_wire_indices } from './mesh-batch-cache.js';
+import { createFullscreenPass } from './fullscreen-pass.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 
 // BKE_studiolight_default (studiolight.cc): direction, diffuse color with wrap (smooth), specular color.
@@ -19,6 +22,8 @@ const STUDIO_LIGHT_DEFAULT = [
   [[0.521739, 0.826087, 0.212999], [0.038403, 0.034357, 0.04953, 0.478261], [0.106102, 0.125981, 0.158523]],
   [[0.624519, -0.562067, -0.542269], [0.090838, 0.08208, 0.072255, 0.2], [0.106535, 0.084771, 0.06608]],
 ];
+// View3DShading.xray_alpha's default.
+const XRAY_ALPHA = 0.5;
 // Blender's default surface: the startup cube's material (base color 0.8, roughness 0.5, not metallic).
 const DEFAULT_SURFACE = { color: [0.8, 0.8, 0.8], roughness: 0.5, metallic: 0 };
 
@@ -51,7 +56,7 @@ void main() {
 }`;
 
 // Babylon's view space looks down +Z; Blender's down -Z, so Z flips.
-const FRAGMENT = `precision highp float;
+const LIGHTING = `precision highp float;
 varying vec3 vNormalView;
 varying vec3 vPositionView;
 uniform mat4 projection;
@@ -115,12 +120,55 @@ vec3 linear_to_srgb(vec3 c) {
   c = clamp(c, 0.0, 1.0);
   return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
 }
-void main() {
+vec3 shaded_color() {
   vec3 N = normalize(vec3(vNormalView.xy, -vNormalView.z));
   vec3 P = vec3(vPositionView.xy, -vPositionView.z);
   vec3 I = projection[3][3] == 0.0 ? normalize(-P) : vec3(0.0, 0.0, 1.0);
   if (dot(N, I) < 0.0) N = -N;
-  gl_FragColor = vec4(linear_to_srgb(get_world_lighting(baseColor, roughness, metallic, N, I)), 1.0);
+  return get_world_lighting(baseColor, roughness, metallic, N, I);
+}`;
+const FRAGMENT = `${LIGHTING}
+void main() { gl_FragColor = vec4(linear_to_srgb(shaded_color()), 1.0); }`;
+
+// X-ray (workbench_transparent_accum_frag.glsl, workbench_transparent_resolve_frag.glsl): every surface at the X-ray
+// alpha, blended in any order by weighted blended order-independent transparency. Blender multiplies revealage into
+// the accumulation's alpha by a blend mode Babylon lacks; here the alpha sums -log(1 - alpha), whose exponent is the
+// same product, under the additive blend both targets share. Weights use the view-space depth.
+const ACCUM_FRAGMENT = `${LIGHTING}
+uniform float xray_alpha;
+layout(location = 0) out vec4 out_transparent_accum;
+layout(location = 1) out vec4 out_revealage_accum;
+float calculate_transparent_weight() {
+  /* Eq 7 of McGuire and Bavoil, Weighted Blended Order-Independent Transparency (JCGT 2013), optimized. */
+  float a = abs(vPositionView.z) / 5.0;
+  float b = abs(vPositionView.z) / 200.0;
+  b *= b;
+  float w = 10.0 / ((1e-5 + a * a) + b * (b * b));
+  return clamp(w, 1e-2, 3e2);
+}
+void main() {
+  float alpha = xray_alpha;
+  float weight = calculate_transparent_weight() * alpha;
+  out_transparent_accum = vec4(shaded_color() * weight, -log(1.0 - alpha));
+  out_revealage_accum = vec4(weight);
+}`;
+const RESOLVE_FRAGMENT = `precision highp float;
+uniform sampler2D transparent_accum;
+uniform sampler2D transparent_revealage;
+uniform vec4 region;
+layout(location = 0) out vec4 frag_color;
+vec3 linear_to_srgb(vec3 c) {
+  c = clamp(c, 0.0, 1.0);
+  return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
+}
+void main() {
+  ivec2 texel = clamp(ivec2(gl_FragCoord.xy), ivec2(region.xy), ivec2(region.zw));
+  vec4 trans_accum = texelFetch(transparent_accum, texel, 0);
+  float trans_weight = texelFetch(transparent_revealage, texel, 0).r;
+  float trans_reveal = exp(-trans_accum.a);
+  /* Listing 4 */
+  frag_color.rgb = linear_to_srgb(trans_accum.rgb / clamp(trans_weight, 1e-4, 5e4));
+  frag_color.a = 1.0 - trans_reveal;
 }`;
 
 // Wireframe: each object's edges as lines sharing its positions, in its wire color; the object itself draws nothing.
@@ -153,22 +201,29 @@ function surface(material, out) {
 
 //   wireColor(mesh) -> RGBA theme color of a mesh's wire (selected, active or not)
 export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
-  const shaded = new Map(); // camera -> 'solid' | 'wire'
-  const solid = new ShaderMaterial('__workbenchSolid', scene, { vertexSource: VERTEX, fragmentSource: FRAGMENT }, {
-    attributes: ['position', 'normal'], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular'], samplers: SAMPLERS,
-  });
-  solid.backFaceCulling = false;
-  solid.setArray4('lightDirection', STUDIO_LIGHT_DEFAULT.flatMap(([d]) => [...d, 0]));
-  solid.setArray4('lightDiffuseWrap', STUDIO_LIGHT_DEFAULT.flatMap(([, c]) => c));
-  solid.setArray4('lightSpecular', STUDIO_LIGHT_DEFAULT.flatMap(([, , s]) => [...s, 0]));
+  const shaded = new Map(); // camera -> 'solid' | 'xray' | 'wire'
   const current = { color: [0, 0, 0], roughness: 0, metallic: 0 };
-  solid.onBindObservable.add((mesh) => {
-    const { color, roughness, metallic } = surface(mesh.material, current);
-    const effect = solid.getEffect();
-    effect.setFloat3('baseColor', color[0], color[1], color[2]);
-    effect.setFloat('roughness', roughness);
-    effect.setFloat('metallic', metallic);
-  });
+  const lit = (name, fragmentSource, uniforms = []) => {
+    const material = new ShaderMaterial(name, scene, { vertexSource: VERTEX, fragmentSource }, {
+      attributes: ['position', 'normal'], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms], samplers: SAMPLERS,
+    });
+    material.backFaceCulling = false;
+    material.setArray4('lightDirection', STUDIO_LIGHT_DEFAULT.flatMap(([d]) => [...d, 0]));
+    material.setArray4('lightDiffuseWrap', STUDIO_LIGHT_DEFAULT.flatMap(([, c]) => c));
+    material.setArray4('lightSpecular', STUDIO_LIGHT_DEFAULT.flatMap(([, , s]) => [...s, 0]));
+    material.onBindObservable.add((mesh) => {
+      const { color, roughness, metallic } = surface(mesh.material, current);
+      const effect = material.getEffect();
+      effect.setFloat3('baseColor', color[0], color[1], color[2]);
+      effect.setFloat('roughness', roughness);
+      effect.setFloat('metallic', metallic);
+    });
+    return material;
+  };
+  const solid = lit('__workbenchSolid', FRAGMENT);
+  const accum = lit('__workbenchTransparentAccum', ACCUM_FRAGMENT, ['xray_alpha']);
+  Object.assign(accum, { alphaMode: Constants.ALPHA_ONEONE_ONEONE, disableDepthWrite: true, depthFunction: Constants.ALWAYS, transparencyMode: Material.MATERIAL_ALPHABLEND });
+  accum.setFloat('xray_alpha', XRAY_ALPHA);
   const wire = new ShaderMaterial('__workbenchWire', scene, { vertexSource: WIRE_VERTEX, fragmentSource: WIRE_FRAGMENT }, {
     attributes: ['position'], uniforms: ['worldViewProjection', 'wireColor'],
   });
@@ -179,7 +234,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
     wire.getEffect().setFloat4('wireColor', c[0], c[1], c[2], c[3] ?? 1);
   });
   const hidden = new ShaderMaterial('__workbenchHidden', scene, { vertexSource: HIDDEN_VERTEX, fragmentSource: HIDDEN_FRAGMENT }, { attributes: ['position'] });
-  const materials = { solid, wire: hidden };
+  const materials = { solid, xray: hidden, wire: hidden };
   // Overlays (grid, extras, Edit Mode) and line meshes draw themselves.
   const shadedMesh = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && !(mesh instanceof LinesMesh) && mesh.getTotalVertices() > 0;
   const assign = (mesh, camera) => mesh.setMaterialForRenderPass(camera.renderPassId, materials[shaded.get(camera)]);
@@ -214,21 +269,50 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
       edges(mesh).isVisible = show && mesh.isVisible;
     }
   });
+  // X-ray: a view's surfaces accumulate into the transparent targets before it renders (TransparentPass), and the
+  // resolve draws them over its background before anything else.
+  const engine = scene.getEngine(), pass = createFullscreenPass(engine);
+  const transparent = new MultiRenderTarget('__workbenchTransparent', pass.size, 2, scene, {
+    generateMipMaps: false, generateDepthBuffer: false, types: [Constants.TEXTURETYPE_HALF_FLOAT, Constants.TEXTURETYPE_HALF_FLOAT],
+    samplingModes: [Constants.TEXTURE_NEAREST_SAMPLINGMODE, Constants.TEXTURE_NEAREST_SAMPLINGMODE],
+  });
+  Object.assign(transparent, { clearColor: new Color4(0, 0, 0, 0), renderParticles: false, renderSprites: false });
+  transparent.renderListPredicate = (mesh) => {
+    if (!shadedMesh(mesh)) return false;
+    if (mesh.getMaterialForRenderPass(transparent.renderPassId) !== accum) transparent.setMaterialForRendering(mesh, accum);
+    return true;
+  };
+  const fitted = transparent.onBeforeBindObservable.add(() => pass.fit([transparent]));
+  const resolve = pass.effect('workbenchTransparentResolve', RESOLVE_FRAGMENT, [], ['transparent_accum', 'transparent_revealage']);
+  const resolved = scene.onBeforeRenderingGroupObservable.add(({ renderingGroupId, camera }) => {
+    if (renderingGroupId !== 0 || shaded.get(camera) !== 'xray' || engine.currentRenderPassId !== camera.renderPassId || !resolve.effect.isReady()) return;
+    engine.setAlphaMode(Constants.ALPHA_COMBINE);
+    pass.draw(resolve, camera, (effect) => {
+      effect.setTexture('transparent_accum', transparent.textures[0]);
+      effect.setTexture('transparent_revealage', transparent.textures[1]);
+    });
+    engine.setAlphaMode(Constants.ALPHA_DISABLE);
+    scene.resetCachedMaterial();
+  });
   return {
-    // Solid ('solid'), Wireframe ('wire') or the scene's materials (null) for what `camera` renders. Not per frame.
+    // Solid ('solid'), Solid with X-ray ('xray'), Wireframe ('wire') or the scene's materials (null) for what `camera`
+    // renders. Not per frame.
     setShading(camera, type) {
       if ((shaded.get(camera) ?? null) === type) return;
       if (type) shaded.set(camera, type); else shaded.delete(camera);
       for (const mesh of scene.meshes) if (shadedMesh(mesh)) mesh.setMaterialForRenderPass(camera.renderPassId, type ? materials[type] : undefined);
+      const targets = camera.customRenderTargets, index = targets.indexOf(transparent);
+      if (type === 'xray' && index < 0) targets.push(transparent);
+      else if (type !== 'xray' && index >= 0) targets.splice(index, 1);
     },
     dispose() {
       scene.onNewMeshAddedObservable.remove(added);
       scene.onBeforeCameraRenderObservable.remove(showWires);
+      scene.onBeforeRenderingGroupObservable.remove(resolved);
+      transparent.onBeforeBindObservable.remove(fitted);
       for (const lines of wires.values()) lines.dispose();
-      hidden.dispose();
       for (const camera of [...shaded.keys()]) this.setShading(camera, null);
-      solid.dispose();
-      wire.dispose();
+      for (const resource of [hidden, solid, accum, wire, transparent, resolve, pass]) resource.dispose();
     },
   };
 }

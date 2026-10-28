@@ -3,17 +3,16 @@
 // renders the outlined meshes' ids and depth, the detect pass finds the pixels where the id changes and writes each
 // one's color and line, and the anti-aliasing pass draws those lines over the view at a constant pixel width, dimmed
 // where the scene hides them. With X-ray the prepass draws each mesh's silhouette edges instead of its faces.
-// Every pass covers the view's region of the working canvas, at the same pixels as the view.
 import { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTargetTexture.js';
 import { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRenderTarget.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
-import { EffectRenderer, EffectWrapper } from '@babylonjs/core/Materials/effectRenderer.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { mesh_batch_cache_edge_detection } from './mesh-batch-cache.js';
+import { createFullscreenPass } from './fullscreen-pass.js';
 
 // Replaces the top 2 bits (of 16) by the color id, leaving 16K ids to outline objects against each other.
 const outline_id_pack = (outline_id, object_id) => (outline_id << 14) | (object_id & 0x3fff);
@@ -42,23 +41,25 @@ void main() {
 }`;
 
 // Each line vertex carries its edge's four corners (a line adjacency primitive) and draws when the edge is a
-// silhouette. Babylon's view space looks down +Z, so the incident vector of an orthographic view is -Z.
+// silhouette. Babylon's view space looks down +Z, so the incident vector of an orthographic view is -Z. The lines take
+// their mesh's world matrix and thin instances; bones and morph targets do not move them.
 const PREPASS_WIRE_VERTEX = `precision highp float;
 attribute vec3 position;
 attribute vec3 adjacency0;
 attribute vec3 adjacency1;
 attribute vec3 adjacency2;
 attribute vec3 adjacency3;
-uniform mat4 ownerWorld;
+#include<instancesDeclaration>
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 viewProjection;
 float safe_rcp(float a) { return a != 0.0 ? 1.0 / a : 0.0; }
-vec3 drw_point_world_to_view(vec3 p) { return (view * ownerWorld * vec4(p, 1.0)).xyz; }
+vec3 drw_point_world_to_view(mat4 finalWorld, vec3 p) { return (view * finalWorld * vec4(p, 1.0)).xyz; }
 vec3 drw_view_incident_vector(vec3 P) { return projection[3][3] == 0.0 ? normalize(-P) : vec3(0.0, 0.0, -1.0); }
 void main() {
-  vec3 vs_P0 = drw_point_world_to_view(adjacency0), vs_P1 = drw_point_world_to_view(adjacency1);
-  vec3 vs_P2 = drw_point_world_to_view(adjacency2), vs_P3 = drw_point_world_to_view(adjacency3);
+#include<instancesVertex>
+  vec3 vs_P0 = drw_point_world_to_view(finalWorld, adjacency0), vs_P1 = drw_point_world_to_view(finalWorld, adjacency1);
+  vec3 vs_P2 = drw_point_world_to_view(finalWorld, adjacency2), vs_P3 = drw_point_world_to_view(finalWorld, adjacency3);
   vec3 view_vec = -drw_view_incident_vector(vs_P1);
   vec3 v10 = vs_P0 - vs_P1;
   vec3 v12 = vs_P2 - vs_P1;
@@ -75,7 +76,7 @@ void main() {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     return;
   }
-  gl_Position = viewProjection * ownerWorld * vec4(position, 1.0);
+  gl_Position = viewProjection * finalWorld * vec4(position, 1.0);
   gl_Position.z -= 1e-3;
 }`;
 
@@ -84,10 +85,6 @@ const PREPASS_FRAGMENT = `precision highp float;
 uniform float ob_id;
 layout(location = 0) out vec4 out_object_id;
 void main() { out_object_id = vec4(ob_id, gl_FragCoord.z, 0.0, 0.0); }`;
-
-const FULLSCREEN_VERTEX = `precision highp float;
-attribute vec2 position;
-void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
 
 // Without textureGather (Blender's #else path). Reads stay inside the view's region; the line data's alpha holds the
 // outline's depth for the anti-aliasing pass, which tests it against the scene's.
@@ -544,16 +541,16 @@ void main()
   gl_FragDepth = center.depth;
 }`;
 
-//   outlined() -> Map of the meshes to outline to the selected node each outlines for (selection.outlined)
-//   isActive(node) -> whether it is the active object, isTransform() -> whether objects are being transformed
+//   outlined() -> the meshes to outline (selection.outlined), isActive(mesh) -> whether it is the active object,
+//   isTransform() -> whether objects are being transformed
 export function createOutlineOverlay(scene, { outlined, isActive, isTransform = () => false }) {
-  const engine = scene.getEngine(), size = { width: 1, height: 1 };
-  const prepassTarget = new RenderTargetTexture('__outlinePrepass', size, scene, {
+  const engine = scene.getEngine(), pass = createFullscreenPass(engine);
+  const prepassTarget = new RenderTargetTexture('__outlinePrepass', pass.size, scene, {
     generateMipMaps: false, type: Constants.TEXTURETYPE_FLOAT, format: Constants.TEXTUREFORMAT_RG,
     samplingMode: Constants.TEXTURE_NEAREST_SAMPLINGMODE, generateDepthBuffer: true, generateStencilBuffer: false,
   });
   Object.assign(prepassTarget, { clearColor: new Color4(0, 1, 0, 0), renderParticles: false, renderSprites: false, renderList: [] });
-  const lineTarget = new MultiRenderTarget('__outlineLines', size, 2, scene, {
+  const lineTarget = new MultiRenderTarget('__outlineLines', pass.size, 2, scene, {
     generateMipMaps: false, generateDepthBuffer: false, types: [Constants.TEXTURETYPE_UNSIGNED_BYTE, Constants.TEXTURETYPE_FLOAT],
     samplingModes: [Constants.TEXTURE_NEAREST_SAMPLINGMODE, Constants.TEXTURE_NEAREST_SAMPLINGMODE],
   });
@@ -562,27 +559,20 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
   const prepassMaterial = (name, vertexSource, attributes, uniforms) => {
     const material = new ShaderMaterial(name, scene, { vertexSource, fragmentSource: PREPASS_FRAGMENT }, { attributes, uniforms: [...uniforms, 'ob_id'] });
     material.backFaceCulling = false;
-    material.onBindObservable.add((mesh) => {
-      const effect = material.getEffect();
-      effect.setFloat('ob_id', ids.get(mesh) ?? 0);
-      if (mesh.metadata?.outlineOwner) effect.setMatrix('ownerWorld', mesh.metadata.outlineOwner.getWorldMatrix());
-    });
+    material.onBindObservable.add((mesh) => material.getEffect().setFloat('ob_id', ids.get(mesh) ?? 0));
     return material;
   };
   const surface = prepassMaterial('__outlinePrepassMesh', PREPASS_VERTEX, ['position'], [
     'world', 'viewProjection', 'mBones', 'morphTargetInfluences', 'morphTargetCount', 'morphTargetTextureInfo', 'morphTargetTextureIndices',
     'bakedVertexAnimationSettings', 'bakedVertexAnimationTextureSizeInverted', 'bakedVertexAnimationTime',
   ]);
-  const wire = prepassMaterial('__outlinePrepassWire', PREPASS_WIRE_VERTEX, ['position', 'adjacency0', 'adjacency1', 'adjacency2', 'adjacency3'], ['ownerWorld', 'view', 'projection', 'viewProjection']);
+  const wire = prepassMaterial('__outlinePrepassWire', PREPASS_WIRE_VERTEX, ['position', 'adjacency0', 'adjacency1', 'adjacency2', 'adjacency3'], ['world', 'view', 'projection', 'viewProjection']);
   wire.fillMode = Material.LineListDrawMode;
 
-  // Each mesh's edges with their adjacent corners as a line list, rebuilt when its geometry is replaced.
+  // Each mesh's edges with their adjacent corners as a line list, rebuilt when its geometry is replaced, placed and
+  // instanced as the mesh is.
   const wires = new Map(); // mesh -> lines mesh
-  const edgeDetection = (mesh) => {
-    const buffer = mesh.getVertexBuffer('position'), positions = buffer?.getData() ?? buffer;
-    let lines = wires.get(mesh);
-    if (lines?.metadata.positions === positions) return lines;
-    lines?.dispose();
+  const edgeLines = (mesh, positions) => {
     const p = mesh.getVerticesData('position'), adjacency = mesh_batch_cache_edge_detection(mesh), count = adjacency.length / 2;
     const corners = [0, 1, 2, 3].map(() => new Float32Array(count * 3)), position = new Float32Array(count * 3);
     for (let e = 0; e < adjacency.length / 4; e++) {
@@ -592,48 +582,45 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
         position.set(p.subarray(adjacency[e * 4 + 1 + end] * 3, adjacency[e * 4 + 1 + end] * 3 + 3), v * 3);
       }
     }
-    lines = new Mesh('__outlineWire ' + mesh.name, scene);
+    const lines = new Mesh('__outlineWire ' + mesh.name, scene);
     lines.setVerticesData('position', position, false, 3);
     corners.forEach((data, k) => lines.setVerticesData('adjacency' + k, data, false, 3));
     Object.assign(lines, { isUnIndexed: true, isPickable: false, doNotSerialize: true, layerMask: PREPASS_ONLY });
     lines._getRenderingFillMode = (fillMode) => fillMode;
-    lines.metadata = { overlay: true, outlineOwner: mesh, positions };
+    lines.metadata = { overlay: true, positions, instances: null };
     prepassTarget.setMaterialForRendering(lines, wire);
-    wires.set(mesh, lines);
+    return lines;
+  };
+  const edgeDetection = (mesh) => {
+    const buffer = mesh.getVertexBuffer('position'), positions = buffer?.getData() ?? buffer;
+    let lines = wires.get(mesh);
+    if (lines?.metadata.positions !== positions) {
+      lines?.dispose();
+      wires.set(mesh, (lines = edgeLines(mesh, positions)));
+    }
+    lines.freezeWorldMatrix(mesh.computeWorldMatrix());
+    const instances = mesh.thinInstanceCount ? mesh._thinInstanceDataStorage.matrixData : null;
+    if (instances !== lines.metadata.instances) lines.thinInstanceSetBuffer('matrix', instances, 16, false);
+    else if (instances) lines.thinInstanceBufferUpdated('matrix');
+    if (instances) lines.thinInstanceCount = mesh.thinInstanceCount;
+    lines.metadata.instances = instances;
     return lines;
   };
 
   const colors = { colors_object_select: theme.object_selected, colors_active_object: theme.object_active, colors_transform: theme.transform };
-  const wrapper = (name, fragmentShader, uniforms, samplers) =>
-    new EffectWrapper({ engine, name, vertexShader: FULLSCREEN_VERTEX, fragmentShader, uniforms: ['region', ...uniforms], samplers });
-  const detect = wrapper('outlineDetect', DETECT_FRAGMENT, ['size_viewport', 'do_thick_outlines', 'do_anti_aliasing', 'is_xray_wires', ...Object.keys(colors)], ['outline_id_tx']);
-  const antiAliasing = wrapper('outlineAntiAliasing', ANTI_ALIASING_FRAGMENT, ['do_smooth_lines', 'sizes_pixel', 'alpha_occlu'], ['color_tx', 'line_tx']);
-  const renderer = new EffectRenderer(engine);
-
-  let active = false, xray = false;
-  // The camera's viewport in pixels of the working canvas, inclusive.
-  const region = (effect, camera) => {
-    const { x, y, width, height } = camera.viewport, w = size.width, h = size.height;
-    const x0 = Math.round(x * w), y0 = Math.round(y * h);
-    effect.setFloat4('region', x0, y0, x0 + Math.round(width * w) - 1, y0 + Math.round(height * h) - 1);
-  };
-  const fullscreen = (effectWrapper, camera, bind) => {
-    renderer.setViewport(camera.viewport);
-    renderer.applyEffectWrapper(effectWrapper, true);
-    region(effectWrapper.effect, camera);
-    bind(effectWrapper.effect);
-    renderer.draw();
-  };
+  const detect = pass.effect('outlineDetect', DETECT_FRAGMENT, ['size_viewport', 'do_thick_outlines', 'do_anti_aliasing', 'is_xray_wires', ...Object.keys(colors)], ['outline_id_tx']);
+  const antiAliasing = pass.effect('outlineAntiAliasing', ANTI_ALIASING_FRAGMENT, ['do_smooth_lines', 'sizes_pixel', 'alpha_occlu'], ['color_tx', 'line_tx']);
   const ready = () => detect.effect.isReady() && antiAliasing.effect.isReady();
+  let active = false, xray = false;
 
   // After the prepass, before the view renders: the detect pass into the line targets.
   const detected = prepassTarget.onAfterUnbindObservable.add(() => {
     if (!active || !ready()) return;
     const camera = scene.activeCamera, pixelsize = 1 / engine.getHardwareScalingLevel();
     engine.bindFramebuffer(lineTarget.renderTarget);
-    fullscreen(detect, camera, (effect) => {
+    pass.draw(detect, camera, (effect) => {
       effect.setTexture('outline_id_tx', prepassTarget);
-      effect.setFloat2('size_viewport', size.width, size.height);
+      effect.setFloat2('size_viewport', pass.size.width, pass.size.height);
       effect.setBool('do_thick_outlines', pixelsize > 1 || theme.outline_width > 2);
       effect.setBool('do_anti_aliasing', true);
       effect.setBool('is_xray_wires', xray);
@@ -652,13 +639,13 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
     // Don't occlude the outline if in xray mode as it causes too much flickering.
     for (const [func, alpha_occlu] of xray ? [[Constants.ALWAYS, 1]] : [[Constants.LEQUAL, 1], [Constants.GREATER, 0.35]]) {
       engine.setDepthFunction(func);
-      fullscreen(antiAliasing, camera, (effect) => {
+      pass.draw(antiAliasing, camera, (effect) => {
         effect.setTexture('color_tx', lineTarget.textures[0]);
         effect.setTexture('line_tx', lineTarget.textures[1]);
         effect.setBool('do_smooth_lines', true);
         effect.setFloat('sizes_pixel', 1 / engine.getHardwareScalingLevel());
         effect.setFloat('alpha_occlu', alpha_occlu);
-      });
+      }, true);
     }
     engine.setAlphaMode(Constants.ALPHA_DISABLE);
     engine.setDepthFunction(depthFunction);
@@ -675,23 +662,18 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
   return {
     // Fills the prepass from the outlined meshes, or skips every pass when none is; called per view before it renders.
     update(shown, { xray: inXray = false } = {}) {
-      const owners = shown ? outlined() : null;
-      show(!!owners?.size);
+      // Line meshes have no surface to outline.
+      const meshes = shown ? outlined().filter((mesh) => !mesh.getClassName().includes('LinesMesh')) : [];
+      show(meshes.length > 0);
+      for (const [mesh, lines] of wires) if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); }
       if (!active) return;
       xray = inXray;
-      const width = engine.getRenderWidth(true), height = engine.getRenderHeight(true);
-      if (size.width !== width || size.height !== height) {
-        Object.assign(size, { width, height });
-        prepassTarget.resize(size);
-        lineTarget.resize(size);
-      }
+      pass.fit([prepassTarget, lineTarget]);
       const transform = isTransform(), list = prepassTarget.renderList;
       ids.clear();
       list.length = 0;
-      for (const [mesh, owner] of owners) {
-        // Line meshes have no surface to outline.
-        if (mesh.getClassName().includes('LinesMesh')) continue;
-        const id = outline_id_pack(outline_colorid_get(transform, isActive(owner)), list.length + 1);
+      for (const mesh of meshes) {
+        const id = outline_id_pack(outline_colorid_get(transform, isActive(mesh)), list.length + 1);
         const drawn = xray ? edgeDetection(mesh) : mesh, source = mesh.sourceMesh ?? mesh;
         if (!xray && source.getMaterialForRenderPass(prepassTarget.renderPassId) !== surface) prepassTarget.setMaterialForRendering(source, surface);
         list.push(drawn);
@@ -699,14 +681,13 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
         // An instance draws through its source.
         if (!ids.has(source)) ids.set(source, id);
       }
-      for (const [mesh, lines] of wires) if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); }
     },
     dispose() {
       show(false);
       prepassTarget.onAfterUnbindObservable.remove(detected);
       scene.onAfterRenderingGroupObservable.remove(drawn);
       for (const lines of wires.values()) lines.dispose();
-      for (const resource of [prepassTarget, lineTarget, surface, wire, detect, antiAliasing, renderer]) resource.dispose();
+      for (const resource of [prepassTarget, lineTarget, surface, wire, detect, antiAliasing, pass]) resource.dispose();
     },
   };
 }

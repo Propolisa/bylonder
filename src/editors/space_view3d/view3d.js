@@ -195,7 +195,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     section.classList.toggle('overlays-off', !state.overlays || state.cameraView);
     section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
-    world.workbench.setShading(editorCamera, view.rendered ? null : state.shading);
+    world.workbench.setShading(editorCamera, view.rendered ? null : state.shading === 'solid' && state.xray ? 'xray' : state.shading);
     toolbar.el.hidden = !state.show_region_toolbar;
     if (state.show_region_toolbar) toolbar.draw();
     section.classList.toggle('toolbar-shown', state.show_region_toolbar);
