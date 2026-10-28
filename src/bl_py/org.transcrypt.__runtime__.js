@@ -98,7 +98,7 @@ export var py_metatype = {
                 if (descrip == null) {
                     continue;
                 }
-                globalThis.Object.defineProperty (cls, attrib, descrip);
+                globalThis.Object.defineProperty (cls, attrib, __settable__ (attrib, descrip));
             }
             for (let symbol of Object.getOwnPropertySymbols (base)) {
                 let descrip = globalThis.Object.getOwnPropertyDescriptor (base, symbol);
@@ -112,7 +112,7 @@ export var py_metatype = {
         cls.__subclasses__ = function () {return __classes__.filter (function (c) {return c.__bases__.includes (cls);});};
         for (var attrib in attribs) {
             var descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, attrib);
-            globalThis.Object.defineProperty (cls, attrib, descrip);
+            globalThis.Object.defineProperty (cls, attrib, __settable__ (attrib, descrip));
         }
         for (let symbol of Object.getOwnPropertySymbols (attribs)) {
             let descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, symbol);
@@ -2362,8 +2362,15 @@ globalThis.Object.defineProperty (Function.prototype, '__dict__', { configurable
     }
     return own;
 } });
-// A module with a module-level __getattr__ (PEP 562, bpy.ops) as its importers see it: its names, then __getattr__.
-globalThis.__py_module_getattr__ = (module) => new Proxy (module, { get: (target, key) => (key in target || typeof key != 'string' ? target [key] : target.__getattr__ (key)) });
+// A module with a module-level __getattr__ (PEP 562, bpy.ops) as its importers see it: its names, then __getattr__ (also
+// for the None tree.py's stub_boundary gives a name it imports: bpy.types' registered classes).
+globalThis.__py_module_getattr__ = (module) => new Proxy (module, { get: (target, key) => (typeof key != 'string' || key.startsWith ('__') || (target [key] ?? null) !== null ? target [key] : target.__getattr__ (key) ?? target [key]) });
+// A class attribute's descriptor that can be assigned: a method (a getter) is replaced by the value assigned, on the
+// class or the instance assigned to.
+function __settable__ (attrib, descrip) {
+    if (descrip.get && !descrip.set) descrip.set = function (value) { globalThis.Object.defineProperty (this, attrib, { value, writable: true, configurable: true, enumerable: true }); };
+    return descrip;
+}
 
 export {_copy};
 
