@@ -558,9 +558,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     check,
     evaluatedMesh,
     // For code that reads Main's geometry: fn runs with every object's geometry filled.
-    withMeshes(fn, nodes = [...objects.keys()]) {
+    withMeshes(fn, nodes) {
       flush();
-      fill(nodes);
+      fill(nodes ?? [...objects.keys()]);
       try { return fn(); } finally { release(); }
     },
     // The scene as a .blend file (its bytes), written by Blender's writer from Main, with the geometry filled as it

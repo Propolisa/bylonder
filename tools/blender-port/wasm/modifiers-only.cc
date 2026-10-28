@@ -1,9 +1,29 @@
 /* The modifier kernels module (modifiers.wasm): modifier-api.cc without the rest of the scene module. It holds the
  * modifiers that evaluate on a mesh alone (MESH_ONLY in src/modifiers/blender.js); the other types are left out of its
  * library and are unknown here, as modifier-api.cc makes Geometry Nodes unknown. */
+#include "BKE_global.hh"
+#include "BKE_idtype.hh"
 #include "BKE_modifier.hh"
+#include "BLT_translation.hh"
+#include "DNA_node_types.h"
+#include "DNA_scene_types.h"
+#include "DNA_userdef_types.h"
+#include "RNA_types.hh"
 
 namespace blender {
+
+/* As blender.cc and editor-context.cc define them: Blender's globals start zeroed. */
+Global G;
+UserDef U;
+extern const PointerRNA PointerRNA_NULL = {};
+
+IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t size, const char *name,
+                                const char *name_plural, const char *context, uint32_t flags);
+/* Scenes and node trees, without scene.cc and node.cc: the module's one scene is outside Main. */
+IDTypeInfo IDType_ID_SCE = id_type_without_data(ID_SCE, FILTER_ID_SCE, INDEX_ID_SCE, sizeof(Scene), "Scene", "scenes",
+                                                BLT_I18NCONTEXT_ID_SCENE, 0);
+IDTypeInfo IDType_ID_NT = id_type_without_data(ID_NT, FILTER_ID_NT, INDEX_ID_NT, sizeof(bNodeTree), "NodeTree", "node_groups",
+                                               BLT_I18NCONTEXT_ID_NODETREE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 
 ModifierTypeInfo modifierType_Armature = {};
 ModifierTypeInfo modifierType_Boolean = {};

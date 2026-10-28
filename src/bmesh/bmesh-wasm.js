@@ -463,16 +463,12 @@ export class BlenderMain {
   // Main as a .blend file, written by Blender's own writer (writefile.cc and each ID type's blend_write) through its
   // wm.save_as_mainfile operator, as a copy: the file's bytes.
   writeBlend(filepath = '/untitled.blend') {
-    x.main_scene_adopt(this.#context, true);
-    try {
-      const { status, report } = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
-      const bytes = files.get(filepath);
-      files.delete(filepath);
-      if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
-      return bytes;
-    } finally {
-      x.main_scene_adopt(this.#context, false);
-    }
+    x.main_save_preferences();
+    const { status, report } = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
+    const bytes = files.get(filepath);
+    files.delete(filepath);
+    if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
+    return bytes;
   }
 
   // Main's IDs of a type (ID_GR, ID_OB...).

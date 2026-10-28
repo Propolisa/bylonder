@@ -104,7 +104,8 @@ if (!reference) {
     const close = (a, b, tolerance = 1e-4) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < tolerance);
     const ob = read.objects;
     assert.deepEqual(Object.keys(ob).sort(), ['Camera', 'Cube', 'Light', 'Pivot']);
-    assert(close(ob.Cube.location, [3, 3, 2]) && ob.Cube.parent === 'Pivot', `Cube in Blender's axes: ${JSON.stringify(ob.Cube)}`);
+    // At frame 1, where Blender evaluates the location F-Curve to x = 1.
+    assert(close(ob.Cube.location, [1, 3, 2]) && ob.Cube.parent === 'Pivot', `Cube in Blender's axes: ${JSON.stringify(ob.Cube)}`);
     assert.equal(ob.Cube.rotation_mode, 'YXZ');
     assert(close(ob.Cube.rotation, [-0.1, -0.3, -0.2]));
     assert.deepEqual([ob.Cube.data.verts, ob.Cube.data.faces], [8, 6], 'the geometry, filled as Main was written');

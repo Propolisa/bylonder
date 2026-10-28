@@ -7,6 +7,7 @@
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
 #include "BKE_idprop.hh"
+#include "BKE_idtype.hh"
 #include "BKE_material.hh"
 #include "BKE_world.h"
 #include "BKE_node.hh"
@@ -28,7 +29,9 @@
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
+#include "BKE_scene.hh"
 #include "BKE_workspace.hh"
+#include "BLI_filereader.h"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_set.hh"
@@ -43,12 +46,18 @@
 #include "DNA_userdef_types.h"
 #include "DNA_workspace_types.h"
 #include "ED_screen.hh"
+#include "DNA_genfile.h"
+#include "DNA_sequence_types.h"
+#include "DNA_view3d_enums.h"
 #include "GPU_material.hh"
+#include "IMB_colormanagement.hh"
 #include "MEM_guardedalloc.h"
 #include "NOD_defaults.hh"
+#include "SEQ_sequencer.hh"
 #include "WM_api.hh"
 
 #include "extraction.hh"
+#include "transform_convert.hh"
 
 #include <algorithm>
 #include <cfloat>
@@ -66,9 +75,9 @@ int ed_screen_context(const bContext *C, const char *member, bContextDataResult 
 struct BlenderMain {
   bContext *C;
   Main *bmain;
-  Scene scene = {};
-  ToolSettings tool_settings = {};
-  ViewLayer view_layer = {};
+  /* Main's one scene, as BKE_scene_add makes it, and its view layer. */
+  Scene *scene;
+  ViewLayer *view_layer;
   wmWindowManager wm = {};
   wmWindow window = {};
   wmEvent eventstate = {};
@@ -84,23 +93,22 @@ static void collections_synced(BlenderMain *ctx);
 EXPORT(main_new) BlenderMain *main_new()
 {
   types_ensure();
+  /* As Blender's main does once, for the files it writes. */
+  static const bool sdna = (DNA_sdna_current_init(), true);
+  (void)sdna;
   BlenderMain *ctx = MEM_new<BlenderMain>(__func__);
   /* As BKE_main_new makes it, without the working color space: the module has no color management. */
   ctx->bmain = MEM_new<Main>(__func__);
   /* The Main Blender's code finds through G_MAIN (the built-in font, BKE_vfont_builtin_ensure), as loading a file sets it. */
   G_MAIN = ctx->bmain;
-  STRNCPY(ctx->scene.id.name, "SCScene");
-  STRNCPY(ctx->view_layer.name, "ViewLayer");
-  ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
-  BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
-  ctx->scene.master_collection = BKE_collection_master_add(&ctx->scene);
-  ctx->scene.toolsettings = &ctx->tool_settings;
+  ctx->scene = BKE_scene_add(ctx->bmain, "Scene");
+  ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
   /* Auto keying is off until the scene sync sets Bylonder's. */
-  ctx->tool_settings.autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
+  ctx->scene->toolsettings->autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
   ctx->workspace_hook = {&ctx->workspace, &ctx->layout};
-  ctx->window.scene = &ctx->scene;
+  ctx->window.scene = ctx->scene;
   ctx->window.workspace_hook = &ctx->workspace_hook;
   /* The window's event state, which buttons and operators read the held keys from. */
   ctx->window.runtime = MEM_new<bke::WindowRuntime>(__func__);
@@ -116,22 +124,20 @@ EXPORT(main_new) BlenderMain *main_new()
 }
 
 EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
-EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return &ctx->scene; }
+EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
-EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return &ctx->view_layer; }
+EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return ctx->view_layer; }
 /* The scene's active camera (an object, or null). */
-EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera) { ctx->scene.camera = camera; }
+EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera) { ctx->scene->camera = camera; }
 
-static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }
+static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(ctx->view_layer, ob); }
 
-/* port-override: the module's one scene is not in Main's scenes (but while a .blend is written), so
- * BKE_main_collection_sync does not reach its view layer: the collections' changes are synced to it here, after each
- * change, as BKE_main_collection_sync syncs a scene's. */
+/* The collections' changes synced to the view layer after each change, as BKE_main_collection_sync syncs a scene's. */
 static void collections_synced(BlenderMain *ctx)
 {
-  BKE_view_layer_need_resync_tag(&ctx->view_layer);
-  BKE_view_layer_synced_ensure(*ctx->bmain, &ctx->scene, &ctx->view_layer);
+  BKE_view_layer_need_resync_tag(ctx->view_layer);
+  BKE_view_layer_synced_ensure(*ctx->bmain, ctx->scene, ctx->view_layer);
 }
 EXPORT(main_collections_sync) void main_collections_sync(BlenderMain *ctx) { collections_synced(ctx); }
 
@@ -140,7 +146,7 @@ EXPORT(main_object_add) Object *main_object_add(BlenderMain *ctx, int type, cons
 {
   Object *ob = BKE_object_add_only_object(ctx->bmain, ObjectType(type), name);
   ob->data = static_cast<ID *>(BKE_object_obdata_add_from_type(ctx->bmain, ObjectType(type), name));
-  BKE_collection_object_add(ctx->bmain, ctx->scene.master_collection, ob);
+  BKE_collection_object_add(ctx->bmain, ctx->scene->master_collection, ob);
   collections_synced(ctx);
   return ob;
 }
@@ -154,7 +160,7 @@ EXPORT(main_object_remove) void main_object_remove(BlenderMain *ctx, Object *ob)
   for (Collection &collection : ctx->bmain->collections) {
     BKE_collection_object_remove(ctx->bmain, &collection, ob, false);
   }
-  BKE_collection_object_remove(ctx->bmain, ctx->scene.master_collection, ob, false);
+  BKE_collection_object_remove(ctx->bmain, ctx->scene->master_collection, ob, false);
   collections_synced(ctx);
   if (ob->data) {
     BKE_id_free(ctx->bmain, ob->data);
@@ -167,7 +173,7 @@ EXPORT(main_object_remove) void main_object_remove(BlenderMain *ctx, Object *ob)
 /* A collection (in Main's collections), as a child of a parent (null: the Scene Collection). */
 EXPORT(main_collection_add) Collection *main_collection_add(BlenderMain *ctx, Collection *parent, const char *name)
 {
-  Collection *collection = BKE_collection_add(ctx->bmain, parent ? parent : ctx->scene.master_collection, name);
+  Collection *collection = BKE_collection_add(ctx->bmain, parent ? parent : ctx->scene->master_collection, name);
   collections_synced(ctx);
   return collection;
 }
@@ -177,13 +183,13 @@ EXPORT(main_collection_remove) void main_collection_remove(BlenderMain *ctx, Col
   collections_synced(ctx);
 }
 /* The Scene Collection. */
-EXPORT(main_collection_master) Collection *main_collection_master(BlenderMain *ctx) { return ctx->scene.master_collection; }
+EXPORT(main_collection_master) Collection *main_collection_master(BlenderMain *ctx) { return ctx->scene->master_collection; }
 
 /* Objects Blender's code deleted leave the Scene Collection, as remapping unlinks a deleted object from the scenes in
  * Main (BKE_collections_object_remove_nulls), which the module's scene is not one of. Its object cache is made again. */
 EXPORT(main_collection_master_clean) void main_collection_master_clean(BlenderMain *ctx)
 {
-  Collection *master = ctx->scene.master_collection;
+  Collection *master = ctx->scene->master_collection;
   Set<const Object *> alive;
   for (const Object &ob : ctx->bmain->objects) {
     alive.add(&ob);
@@ -298,24 +304,24 @@ EXPORT(id_rename) void id_rename(BlenderMain *ctx, ID *id, const char *name) { B
 /* A collection's LayerCollection in the view layer, the active one, and making one active. */
 EXPORT(main_layer_collection) LayerCollection *main_layer_collection(BlenderMain *ctx, Collection *collection)
 {
-  return BKE_layer_collection_first_from_scene_collection(&ctx->view_layer, collection);
+  return BKE_layer_collection_first_from_scene_collection(ctx->view_layer, collection);
 }
 EXPORT(main_layer_collection_active) LayerCollection *main_layer_collection_active(BlenderMain *ctx)
 {
-  return BKE_layer_collection_get_active(&ctx->view_layer);
+  return BKE_layer_collection_get_active(ctx->view_layer);
 }
 EXPORT(main_layer_collection_activate) void main_layer_collection_activate(BlenderMain *ctx, LayerCollection *lc)
 {
-  BKE_layer_collection_activate(&ctx->view_layer, lc);
+  BKE_layer_collection_activate(ctx->view_layer, lc);
 }
 EXPORT(layer_collection_collection) Collection *layer_collection_collection(LayerCollection *lc) { return lc->collection; }
 
 /* An object's base flags (eBaseFlags) and whether it is the active one, or -1 when it has no base. */
 EXPORT(main_base_get) int main_base_get(BlenderMain *ctx, Object *ob)
 {
-  BKE_view_layer_synced_ensure(*ctx->bmain, &ctx->scene, &ctx->view_layer);
+  BKE_view_layer_synced_ensure(*ctx->bmain, ctx->scene, ctx->view_layer);
   const Base *base = base_of(ctx, ob);
-  return base ? base->flag | (ctx->view_layer.basact == base ? 1 << 30 : 0) : -1;
+  return base ? base->flag | (ctx->view_layer->basact == base ? 1 << 30 : 0) : -1;
 }
 EXPORT(object_parent) Object *object_parent(Object *ob) { return ob->parent; }
 
@@ -338,10 +344,10 @@ void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool
   BKE_base_eval_flags(base);
   ob->base_flag = base->flag;
   if (active) {
-    ctx->view_layer.basact = base;
+    ctx->view_layer->basact = base;
   }
-  else if (ctx->view_layer.basact == base) {
-    ctx->view_layer.basact = nullptr;
+  else if (ctx->view_layer->basact == base) {
+    ctx->view_layer->basact = nullptr;
   }
 }
 
@@ -380,10 +386,10 @@ EXPORT(object_fields) const ObjectFields *object_fields(Object *ob)
 }
 
 /* The scene's 3D cursor location and its pivot point (V3D_AROUND_*), which operators read. */
-EXPORT(main_cursor) float *main_cursor(BlenderMain *ctx) { return ctx->scene.cursor.location; }
+EXPORT(main_cursor) float *main_cursor(BlenderMain *ctx) { return ctx->scene->cursor.location; }
 EXPORT(main_pivot_point_set) void main_pivot_point_set(BlenderMain *ctx, int pivot_point)
 {
-  ctx->tool_settings.transform_pivot_point = char(pivot_point);
+  ctx->scene->toolsettings->transform_pivot_point = char(pivot_point);
 }
 
 static void where_is_calc(Depsgraph *depsgraph, Scene *scene, Object *ob, Set<Object *> &done)
@@ -404,7 +410,7 @@ EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx)
   Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(ctx->C);
   Set<Object *> done;
   for (Object &ob : ctx->bmain->objects) {
-    where_is_calc(depsgraph, &ctx->scene, &ob, done);
+    where_is_calc(depsgraph, ctx->scene, &ob, done);
     ob.id.recalc = 0;
     if (ob.data) {
       ob.data->recalc = 0;
@@ -464,7 +470,7 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   }
   Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(ctx->C);
   CustomData_MeshMasks mask = CD_MASK_MESH;
-  result = bke::mesh_create_eval_final(depsgraph, &ctx->scene, ob, &mask);
+  result = bke::mesh_create_eval_final(depsgraph, ctx->scene, ob, &mask);
   mesh_extraction(*result, ctx->extraction);
   return &ctx->extraction;
 }
@@ -497,18 +503,18 @@ EXPORT(id_fake_user_set) void id_fake_user_set_export(ID *id, bool fake)
 /* The scene's world (null for none), which it uses. */
 EXPORT(main_scene_world_set) void main_scene_world_set(BlenderMain *ctx, World *world)
 {
-  if (ctx->scene.world == world) {
+  if (ctx->scene->world == world) {
     return;
   }
-  if (ctx->scene.world) {
-    id_us_min(&ctx->scene.world->id);
+  if (ctx->scene->world) {
+    id_us_min(&ctx->scene->world->id);
   }
-  ctx->scene.world = world;
+  ctx->scene->world = world;
   if (world) {
     id_us_plus(&world->id);
   }
 }
-EXPORT(main_scene_world) World *main_scene_world(BlenderMain *ctx) { return ctx->scene.world; }
+EXPORT(main_scene_world) World *main_scene_world(BlenderMain *ctx) { return ctx->scene->world; }
 
 /* An object's material slots, set whole (null for an empty slot), on its data as Blender assigns them by default. */
 EXPORT(object_materials_set) void object_materials_set(BlenderMain *ctx, Object *ob, Material **materials, int count)
@@ -535,24 +541,11 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
   return prop ? IDP_string_get(prop) : nullptr;
 }
 
-/* The module's Scene in Main's scenes, for Blender's code that reads them (the .blend writer, which writes Main's IDs),
- * as the one scene, with one user; and out again. Saving makes no thumbnail (the module has no GPU) and no backups. */
-EXPORT(main_scene_adopt) void main_scene_adopt(BlenderMain *ctx, bool adopt)
+/* What saving a .blend reads from the Preferences: no thumbnail (the module has no GPU) and no backups. */
+EXPORT(main_save_preferences) void main_save_preferences()
 {
-  const bool adopted = BLI_findindex(&ctx->bmain->scenes, &ctx->scene) != -1;
-  if (adopt == adopted) {
-    return;
-  }
-  if (adopt) {
-    BKE_libblock_runtime_ensure(ctx->scene.id);
-    ctx->scene.id.us = std::max(ctx->scene.id.us, 1);
-    BLI_addtail(&ctx->bmain->scenes, &ctx->scene);
-    U.file_preview_type = USER_FILE_PREVIEW_NONE;
-    U.versions = 0;
-  }
-  else {
-    BLI_remlink(&ctx->bmain->scenes, &ctx->scene);
-  }
+  U.file_preview_type = USER_FILE_PREVIEW_NONE;
+  U.versions = 0;
 }
 
 /* An ID's shader node tree (a Material's or World's), built node by node: nodes by idname, which Blender's node types
@@ -672,6 +665,11 @@ EXPORT(node_tree_describe) const char *node_tree_describe(ID *owner)
   return text.c_str();
 }
 
+/* port-override: the bundled startup file wm_files.cc reads a factory startup from; the module saves files and reads
+ * none (Bylonder's scene is its own startup). */
+extern "C" int datatoc_startup_blend_size = 0;
+extern "C" const char datatoc_startup_blend[] = {0};
+
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
@@ -712,8 +710,50 @@ void BKE_ntree_update(Main & /*bmain*/, std::optional<Span<bNodeTree *>> /*modif
 void BKE_ntree_update_after_single_tree_change(Main & /*bmain*/, bNodeTree & /*modified_tree*/, const NodeTreeUpdateExtraParams & /*params*/) {}
 void BKE_ntree_update_without_main(bNodeTree & /*tree*/) {}
 
+/* port-override: the module has no zlib (its calls would not link), so a gzip-compressed file is one it cannot
+ * read, as when zlib reports an error; it reads no files anyway. */
+FileReader *BLI_filereader_new_gzip(FileReader * /*base*/) { return nullptr; }
+
 /* port-override: the module has no GPU materials, so a material's list of them is empty. */
 void GPU_material_free(ListBaseT<LinkData> * /*gpumaterial*/) {}
+
+/* port-override: the module has no OpenColorIO, so a new scene's color management names what Blender's bundled
+ * configuration gives (its default display and sequencer role), which Bylonder's view settings then set. */
+const char *IMB_colormanagement_role_colorspace_name_get(int /*role*/) { return "sRGB"; }
+const char *IMB_colormanagement_display_get_default_name() { return "sRGB"; }
+const ColorManagedDisplay *IMB_colormanagement_display_get_named(const char * /*name*/) { return nullptr; }
+void IMB_colormanagement_validate_settings(const ColorManagedDisplaySettings * /*display_settings*/,
+                                           ColorManagedViewSettings * /*view_settings*/)
+{
+}
+
+/* As sequencer.cc defines it; the module has no sequencer. */
+SequencerToolSettings *seq::tool_settings_init()
+{
+  SequencerToolSettings *tool_settings = MEM_new<SequencerToolSettings>("Sequencer tool settings");
+  tool_settings->fit_method = SEQ_SCALE_TO_FIT;
+  tool_settings->snap_mode = SEQ_SNAP_TO_STRIPS | SEQ_SNAP_TO_CURRENT_FRAME | SEQ_SNAP_TO_STRIP_HOLD | SEQ_SNAP_TO_MARKERS |
+                             SEQ_SNAP_TO_RETIMING | SEQ_SNAP_TO_PREVIEW_BORDERS | SEQ_SNAP_TO_PREVIEW_CENTER |
+                             SEQ_SNAP_TO_STRIPS_PREVIEW | SEQ_SNAP_TO_FRAME_RANGE;
+  tool_settings->snap_flag = SEQ_SNAP_TO_ALL_CHANNEL_STRIPS;
+  tool_settings->snap_distance = 15;
+  tool_settings->overlap_mode = SEQ_OVERLAP_SHUFFLE;
+  tool_settings->pivot_point = V3D_AROUND_LOCAL_ORIGINS;
+  return tool_settings;
+}
+
+/* port-override: the module's IDs are never assets, so none has an asset type's pre-save step (asset_mark_clear.cc). */
+namespace ed::asset {
+void pre_save_assets(Main * /*bmain*/) {}
+}  // namespace ed::asset
+
+/* port-override: the module has no file browser, whose bookmarks and recent directories a saved file updates. */
+void ED_file_read_bookmarks() {}
+
+/* As transform_convert_armature.cc defines them, without its conversions: the module has no armatures, so transform
+ * never picks them. */
+ed::transform::TransConvertTypeInfo ed::transform::TransConvertType_EditArmature = {};
+ed::transform::TransConvertTypeInfo ed::transform::TransConvertType_Pose = {};
 
 /* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
 bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }
