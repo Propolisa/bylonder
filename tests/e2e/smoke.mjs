@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
 import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
+import { displacedSphere, lavaMaterial } from "./lava.mjs";
 
 const renderStatus = ".render-result [data-status]";
 const rendered = () => app.until((b, selector) => /^(Finished|Render failed)/.test(document.querySelector(selector).textContent), renderStatus, 60000);
@@ -348,6 +349,39 @@ const checks = {
     await app.until((b) => b.views.all.filter((v) => v.nav).length === 2);
     await app.locator('.bl-view3d-header [data-value="WIREFRAME"]').nth(1).click();
     assert.deepEqual(await app.bylonder((b) => b.views.all.filter((v) => v.nav).map((v) => v.state.shading).sort()), ["solid", "wire"]);
+  },
+
+  // docs/lava-material.md: a UV sphere displaced by a Clouds texture, then a lava material made from Blender's nodes in
+  // the Shading workspace's Shader Editor, shown in Material Preview.
+  async "Displace with a Clouds texture, and a lava material from the Shader Editor's nodes in Material Preview"() {
+    await displacedSphere(app);
+    // Displaced by the clouds: the subdivided sphere's radius varies from point to point.
+    await app.until((b) => {
+      const p = b.world.scene.getMeshByName("Sphere").getVerticesData("position"), r = [];
+      for (let i = 0; i < p.length; i += 3) r.push(Math.hypot(p[i], p[i + 1], p[i + 2]));
+      return p.length > 7000 * 3 && Math.max(...r) - Math.min(...r) > 0.1;
+    }, null, 30000);
+    await lavaMaterial(app);
+    const FUNCTIONS = ["node_noise_tex_fbm_4d", "valtorgb_opti_linear", "node_bump", "bl_tex_coord"];
+    await app.until((b, functions) => {
+      const m = b.world.scene.getMeshByName("Sphere").material, code = m._fragmentCompilationState?._builtCompilationString ?? "";
+      return !m._buildIsInProgress && functions.every((f) => code.includes(f));
+    }, FUNCTIONS, 60000);
+    const links = await app.bylonder((b) => b.world.scene.getMeshByName("Sphere").material.attachedBlocks.flatMap((block) => block.inputs
+      .filter((i) => i.connectedPoint && block.declared?.(i.name)).map((i) => `${i.connectedPoint.ownerBlock.getClassName()} > ${block.getClassName()} ${i.name}`)));
+    for (const expected of ["ShaderNodeTexCoord > ShaderNodeTexNoise Vector", "ShaderNodeTexNoise > ShaderNodeValToRGB Fac", "ShaderNodeValToRGB > ShaderNodeBsdfPrincipled Emission Color",
+      "ShaderNodeTexNoise > ShaderNodeBsdfPrincipled Emission Strength", "ShaderNodeTexNoise > ShaderNodeBump Height", "ShaderNodeBump > ShaderNodeBsdfPrincipled Normal"]) assert.ok(links.includes(expected), expected);
+    // Material Preview draws the sphere glowing: orange pixels where it is.
+    const warm = await app.bylonder(async (b) => {
+      const engine = b.world.scene.getEngine();
+      b.views.wake();
+      await new Promise((resolve) => b.world.scene.onAfterRenderObservable.addOnce(resolve));
+      const pixels = await engine.readPixels(0, 0, engine.getRenderWidth(), engine.getRenderHeight());
+      let count = 0;
+      for (let i = 0; i < pixels.length; i += 4) if (pixels[i] > 120 && pixels[i] > 2 * pixels[i + 2]) count++;
+      return count;
+    });
+    assert.ok(warm > 200, `${warm} orange pixels`);
   },
 
   // The Scripting workspace's Python Console runs Blender's console in CPython over Bylonder's bpy, and the Text

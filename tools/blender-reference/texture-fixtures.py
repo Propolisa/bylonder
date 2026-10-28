@@ -16,6 +16,7 @@ TEXTURES = {
     "clouds-voronoi": {**CLOUDS, "noise_basis": "VORONOI_F2_F1", "noise_scale": 0.6},
     "clouds-color": {**CLOUDS, "cloud_type": "COLOR", "noise_depth": 4},
     "clouds-adjusted": {**CLOUDS, "intensity": 1.2, "contrast": 1.5, "saturation": 0.8},
+    "clouds-lava": {**CLOUDS, "noise_scale": 0.6, "noise_depth": 3},
 }
 POINTS = [(0.0, 0.0, 0.0), (0.3, -0.7, 0.2), (1.0, 0.5, -0.25), (-2.1, 3.3, 0.9), (0.05, 0.05, 1.7)]
 CASES = {
@@ -27,6 +28,8 @@ CASES = {
     "displace-voronoi-subsurf": ("clouds-voronoi", {"strength": 0.2, "mid_level": 0.0}, 1),
     "displace-color-rgb": ("clouds-color", {"direction": "RGB_TO_XYZ", "strength": 0.3}, 0),
     "displace-global-z": ("clouds", {"direction": "Z", "texture_coords": "GLOBAL", "strength": 0.6}, 1),
+    "displace-lava": ("clouds-lava", {"strength": 0.4}, 1),
+    "displace-lava-level-2": ("clouds-lava", {"strength": 0.25, "mid_level": 0.4}, 2),
 }
 
 

@@ -8,6 +8,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { chromium, openApp, startServer } from "../../tests/e2e/app.mjs";
+import { displacedSphere, lavaMaterial } from "../../tests/e2e/lava.mjs";
 
 const here = new URL(".", import.meta.url).pathname, root = new URL("../..", import.meta.url).pathname;
 const args = process.argv.slice(2);
@@ -97,6 +98,8 @@ const SETUP = {
     await app.page.click('[data-workspace="scripting"]');
     await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console")?.textContent ?? ""), null, 180000);
   },
+  "displaced-sphere": async (app) => { await displacedSphere(app); await app.hover(...REST); },
+  "lava-material": async (app) => { await displacedSphere(app); await lavaMaterial(app); await app.hover(...REST); },
   "outliner-expanded": async (app) => {
     const box = await app.locator(".bl-outliner-region").boundingBox();
     await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

@@ -55,20 +55,24 @@ const WIDTHS = { ShaderNodeBsdfPrincipled: 240 };
 // A shader node tree as Blender builds it (BlenderMain.setNodeTree), from the RNA of one (its output node and the nodes
 // linked into it), laid out right to left.
 export function shaderTree(tree) {
-  const nodes = [], links = [];
+  const nodes = [], links = [], byName = new Map();
+  // A node once, however many links leave it; the outputs it links from (a closure's, or the link's socket).
   const add = (node, depth) => {
+    if (byName.has(node.name)) return byName.get(node.name);
     const idname = node[INFO].struct, output = SHADER_OUTPUTS[idname];
     const entry = { idname, name: node.name, location: [-300 * depth, 0], width: WIDTHS[idname] ?? 140, inputs: [],
       outputs: output ? [{ identifier: output, socket: 'NodeSocketShader' }] : [] };
     nodes.push(entry);
+    byName.set(node.name, entry);
     for (const input of node.inputs) {
-      const from = input.is_linked ? input.links[0].from_node : null;
-      entry.inputs.push({ identifier: input.identifier, name: input.name, socket: input[INFO].struct, value: from ? null : plain(input.default_value) ?? null });
-      if (from) {
-        add(from, depth + 1);
-        links.push([from.name, SHADER_OUTPUTS[from[INFO].struct], node.name, input.identifier]);
-      }
+      const link = input.is_linked ? input.links[0] : null;
+      entry.inputs.push({ identifier: input.identifier, name: input.name, socket: input[INFO].struct, value: link ? null : plain(input.default_value) ?? null });
+      if (!link) continue;
+      const from = add(link.from_node, depth + 1), socket = link.from_socket?.identifier ?? SHADER_OUTPUTS[from.idname];
+      if (!from.outputs.some((o) => o.identifier === socket)) from.outputs.push({ identifier: socket, socket: link.from_socket[INFO].struct });
+      links.push([from.name, socket, node.name, input.identifier]);
     }
+    return entry;
   };
   add(tree.get_output_node(), 0);
   return { nodes, links };
@@ -198,7 +202,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const signature = JSON.stringify(stack.map(({ type, values, showViewport, showRender }) => [type, values, showViewport, showRender]));
     if (signature === entry.modifiers) return;
     entry.modifiers = signature;
-    blender.setModifiers(entry.ob, moduleModifiers(stack));
+    // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
+    blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => world.textures?.pointer(m.values.texture) ?? 0));
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
   function pushBase({ node, ob }, active = selection.nodes.at(-1)) {

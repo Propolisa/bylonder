@@ -147,6 +147,41 @@ def add_and_edit(module, name, **props):
         bpy.ops.object.mode_set(mode="EDIT")
 
 
+# docs/lava-material.md as parity.mjs makes it through Bylonder's UI (tests/e2e/lava.mjs): the cube deleted, a UV
+# sphere with Subdivision Surface and Displace by a new Clouds texture, the Properties editor on the Texture tab.
+def displaced_sphere():
+    bpy.data.objects.remove(bpy.data.objects["Cube"])
+    view = area("VIEW_3D")
+    with bpy.context.temp_override(window=window(), area=view, region=next(r for r in view.regions if r.type == "WINDOW")):
+        bpy.ops.mesh.primitive_uv_sphere_add()
+    sphere = bpy.context.view_layer.objects.active
+    sphere.modifiers.new("Subdivision", "SUBSURF")
+    sphere.modifiers.new("Displace", "DISPLACE").texture = bpy.data.textures.new("Texture", "CLOUDS")
+    area("PROPERTIES").spaces.active.context = "TEXTURE"
+    return sphere
+
+
+# Then the Shading workspace and a new material with the lava nodes, placed as lava.mjs places them.
+def lava_material():
+    sphere = displaced_sphere()
+    material = bpy.data.materials.new("Material")
+    sphere.data.materials.append(material)
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    principled = nodes["Principled BSDF"]
+    coord, noise, ramp, detail, bump = (nodes.new(idname) for idname in
+                                        ("ShaderNodeTexCoord", "ShaderNodeTexNoise", "ShaderNodeValToRGB", "ShaderNodeTexNoise", "ShaderNodeBump"))
+    for node, location in [(coord, (-900, 200)), (noise, (-650, 300)), (ramp, (-400, 300)), (detail, (-650, -50)), (bump, (-400, -100))]:
+        node.location = location
+    noise.noise_dimensions = detail.noise_dimensions = "4D"
+    detail.inputs["Detail"].default_value = 8.0
+    ramp.color_ramp.elements[1].color = (1.0, 0.117, 0.0, 1.0)
+    for a, output, b, input in [(coord, "Object", noise, "Vector"), (coord, "Object", detail, "Vector"), (noise, "Fac", ramp, "Fac"),
+                                (ramp, "Color", principled, "Emission Color"), (noise, "Fac", principled, "Emission Strength"),
+                                (detail, "Fac", bump, "Height"), (bump, "Normal", principled, "Normal")]:
+        links.new(a.outputs[output], b.inputs[input])
+    window().workspace = bpy.data.workspaces["Shading"]
+
+
 SETUP = {
     "startup": lambda: None,
     "object-menu": lambda: click(*OBJECT_MENU),
@@ -170,6 +205,8 @@ SETUP = {
     "text-edit": lambda: add_and_edit("object", "text_add"),
     "scripting": lambda: setattr(window(), "workspace", bpy.data.workspaces["Scripting"]),
     "outliner-expanded": lambda: key("A", *outliner_point(0.5, 0.5), shift=True),
+    "displaced-sphere": displaced_sphere,
+    "lava-material": lava_material,
 }
 
 

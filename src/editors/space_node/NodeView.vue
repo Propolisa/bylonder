@@ -23,7 +23,7 @@ const firstOutput = computed(() => props.layout.sockets.find((s) => s.side === "
 <template>
   <div v-if="node.reroute" class="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black"
     :style="{ left: node.x + 'px', top: node.y + 'px', background: socketColor(node.outputs[0]?.type ?? 'CUSTOM'), boxShadow: selected ? `0 0 0 1.5px ${outline}` : 'none' }" />
-  <div v-else class="absolute rounded-[var(--node-radius)] text-[length:var(--node-font)] text-foreground"
+  <div v-else class="absolute rounded-[var(--node-radius)] text-[length:var(--node-font)] text-foreground" :data-node="node.blender ?? node.block.getClassName()"
     :class="{ 'opacity-60': node.muted }"
     :style="{ left: node.x + 'px', top: node.y + 'px', width: layout.width + 'px', height: layout.height + 'px', boxShadow: `0 0 0 1px ${outline}, 0 3px 8px #0006` }">
     <div class="flex items-center gap-1 overflow-hidden rounded-t-[var(--node-radius)] px-1 text-white"
@@ -48,7 +48,7 @@ const firstOutput = computed(() => props.layout.sockets.find((s) => s.side === "
         <line :x1="0" :y1="firstInput.y - node.y - HEADER" :x2="layout.width" :y2="firstOutput.y - node.y - HEADER" stroke="var(--bl-node-muted-link)" stroke-width="2" />
       </svg>
     </div>
-    <span v-for="s in layout.sockets" :key="s.key" class="absolute border border-black" :class="shape(s.socket)"
+    <span v-for="s in layout.sockets" :key="s.key" class="absolute border border-black" :class="shape(s.socket)" :data-socket="s.side + ':' + s.socket.id"
       :style="{ width: SOCKET_RADIUS * 2 + 'px', height: SOCKET_RADIUS * 2 + 'px', left: s.x - node.x - SOCKET_RADIUS + 'px', top: s.y - node.y - SOCKET_RADIUS + 'px', background: socketColor(s.socket.type) }" />
   </div>
 </template>

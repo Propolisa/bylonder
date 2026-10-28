@@ -96,6 +96,12 @@ for noise_type in bpy.types.ShaderNodeTexNoise.bl_rna.properties["noise_type"].e
 for settings, inputs in [({"noise_dimensions": "3D", "normalize": False}, {"Detail": 0.0}), ({"noise_dimensions": "3D"}, {"Detail": 15.0, "Distortion": 0.0}),
                          ({"noise_dimensions": "4D"}, {"W": 2.5, "Scale": 6.0, "Detail": 8.0, "Roughness": 0.55})]:
     cases.append(case("shader", "ShaderNodeTexNoise", settings, {"Vector": VECTOR, **inputs}, "Fac"))
+# The lava material's noises (docs/lava-material.md): 4D, W as the seed, the color noise and the bump's finer one.
+LAVA_VECTOR = (0.42, -0.17, 0.73)
+for detail in (2.0, 8.0):
+    for output in ("Fac", "Color"):
+        cases.append(case("shader", "ShaderNodeTexNoise", {"noise_dimensions": "4D"},
+                          {"Vector": LAVA_VECTOR, "W": 1.3, "Scale": 2.5, "Detail": detail, "Roughness": 0.6, "Lacunarity": 2.0}, output))
 RAMPS = [
     {"interpolation": "LINEAR", "elements": [{"position": 0.2, "color": (0.1, 0.0, 0.0, 1.0)}, {"position": 0.7, "color": (1.0, 0.4, 0.05, 0.5)}]},
     {"interpolation": "EASE", "elements": [{"position": 0.0, "color": (0.0, 0.0, 0.0, 1.0)}, {"position": 1.0, "color": (1.0, 0.8, 0.2, 1.0)}]},
@@ -109,6 +115,8 @@ RAMPS = [
     {"interpolation": "CONSTANT", "elements": [{"position": 0.1, "color": (0.0, 0.1, 0.2, 1.0)}, {"position": 0.5, "color": (0.9, 0.2, 0.1, 1.0)},
                                                {"position": 0.9, "color": (0.2, 0.9, 0.3, 1.0)}]},
     {"color_mode": "HSV", "hue_interpolation": "FAR", "elements": [{"position": 0.0, "color": (1.0, 0.0, 0.0, 1.0)}, {"position": 1.0, "color": (0.0, 0.0, 1.0, 1.0)}]},
+    {"interpolation": "LINEAR", "elements": [{"position": 0.35, "color": (0.0, 0.0, 0.0, 1.0)}, {"position": 0.5, "color": (0.6, 0.02, 0.0, 1.0)},
+                                             {"position": 0.62, "color": (1.0, 0.25, 0.0, 1.0)}, {"position": 0.75, "color": (1.0, 0.8, 0.2, 1.0)}]},
     {"color_mode": "HSL", "hue_interpolation": "CW", "elements": [{"position": 0.2, "color": (0.9, 0.6, 0.1, 1.0)}, {"position": 0.8, "color": (0.1, 0.3, 0.9, 1.0)}]},
 ]
 for ramp in RAMPS:

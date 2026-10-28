@@ -13,6 +13,8 @@ How the Shader Editor and the Compositor work: one Babylon graph per tree, holdi
 7. **The editor is Bylonder's, on Blender's terms.** Babylon's editors are React bundles whose canvas, links and frames would all change to behave as Blender's, and new UI here is Vue. So the editor is Bylonder's own (`src/editors/space_node`): it draws nodes as `node_draw.cc` does in Blender 5.2's theme, runs Blender's Node Editor keymap, and takes from Babylon's editors what makes a block: their block catalogs and `BlockTools` (forked from their sources by `tools/babylon-editor/vendor.mjs`) and the block properties they edit (`@editableInPropertyPage`).
 8. **The Add menu is Blender's.** Shift A opens `NODE_MT_add` and the `node_add_menu_*.py` menus, compiled by the transpiler, and typing searches them with the extra entries Blender's menus add for search (Math > Multiply). Entries add the Blender nodes Bylonder runs; the others are greyed out. Babylon's blocks are in a Babylon sub-menu at the end of the matching Blender categories, as an add-on extends Blender's menus.
 
+9. **Shader nodes reach the scene's geometry through helpers.** What Blender's GPU code reads of the shaded point (position, normal, texture space, UVs) comes from Babylon blocks Bylonder links to hidden inputs, named `blender:` (or the attribute's name). The editor draws neither them nor their links. Principled BSDF is Babylon's PBR block and Material Output Babylon's fragment output, with the vertex output a material needs added when one is placed. Main's node tree of the material (the scene sync) has the Blender nodes, their input values and links.
+
 ## What a Blender user finds
 
 | Blender | Here |
@@ -31,13 +33,13 @@ How the Shader Editor and the Compositor work: one Babylon graph per tree, holdi
 ## Files
 
 - `src/nodes/blender/`: the node types (`node-types.json`), Blender's GLSL (`gpu-library.js`, `glsl.js`), sockets, the code steps (`node-code.js`) and the block classes (`shader-nodes.js`, `compositor-nodes.js`).
-- `src/editors/space_node/`: the editor: `node-tree.js` (a Babylon graph as a node tree), `node-layout.js` (where node parts go), `node-editor-controller.js` (Blender's operators and modal handlers), `NodeEditor.vue`, `NodeView.vue`, `NodeValue.vue`, `node-add-menu.js`, `blender-node-editor.js` (mounting and keys), `babylon/` (forked catalogs).
-- Tests: `tests/nodes.test.js` (graphs with both kinds of nodes build, save and load), `tests/nodes-gpu.test.js` (105 cases run in WebGL 2 match Blender's GPU compositor output, `tests/fixtures/blender-nodes.json` from `tools/blender-reference/node-fixtures.py`), `tests/node-editor.test.js` (menus, linking, cutting, keymap).
+- `src/editors/space_node/`: the editor: `node-tree.js` (a Babylon graph as a node tree), `node-layout.js` (where node parts go), `node-editor-controller.js` (Blender's operators and modal handlers), `NodeEditor.vue`, `NodeView.vue`, `NodeValue.vue`, `NodeColorRamp.vue` (a Color Ramp's ramp, as `uiTemplateColorRamp`), `node-add-menu.js`, `blender-node-editor.js` (mounting and keys), `babylon/` (forked catalogs).
+- Tests: `tests/nodes.test.js` (graphs with both kinds of nodes build, save and load), `tests/nodes-gpu.test.js` (192 cases of Math, Mix, Noise Texture and Color Ramp run in WebGL 2 match Blender's GPU compositor output, `tests/fixtures/blender-nodes.json` from `tools/blender-reference/node-fixtures.py`), `tests/node-editor.test.js` (menus, linking, cutting, keymap, the lava material of `docs/lava-material.md` built from the Add menu), `tests/e2e/smoke.mjs` (the same in the app, shown in Material Preview).
 
 ## Next
 
-1. More nodes by porting their steps: Clamp, Map Range, Vector Math, Invert, Combine and Separate XYZ, Color Ramp, Noise and Voronoi textures, then Principled BSDF as a block that writes Babylon's PBR inputs (a shader socket as a struct of PBR inputs), with Material Output.
-2. Texture nodes' default vector (Blender's Generated coordinates) from the mesh's bounds.
+1. More nodes by porting their steps: Clamp, Map Range, Vector Math, Invert, Combine and Separate XYZ, Voronoi Texture.
+2. Principled BSDF's socket panels (Subsurface, Specular, Emission, ...), collapsed as Blender draws them.
 3. Compositor: other inputs linked from images (more textures per pass), multi-pass nodes (Glare, Blur) as chains of tasks, and Blender's pixel operation fusion (several pixel nodes in one pass).
 4. Link drag search (dropping a link on empty space), node insertion on links with auto-offset, Shift S swap menu from Blender's swap menus.
 5. Node groups and Tab, as Babylon custom blocks over a subgraph.

@@ -138,14 +138,44 @@ const sliceValue = (slice, path) => ({ get: (world) => world[slice] && path.spli
 // A value is { get, set } on the data; host.update is the notifier, as for bound properties.
 function shaderNode(r, [name, type, inputs]) {
   return rna(type, { name, label: '', bl_idname: type, inputs: collection(inputs.map(([input, socket, value]) => {
-    const linked = Array.isArray(value) ? shaderNode(r, value) : null;
+    // A linked node, or { node, socket }: a node and the output it links from.
+    const from = Array.isArray(value) ? { node: value } : value?.node ? value : null, linked = from && shaderNode(r, from.node);
+    const fromSocket = from?.socket ? rna(from.socket.type, { identifier: from.socket.identifier, name: from.socket.identifier }) : null;
     const data = { name: input, identifier: input, enabled: true, hide_value: false, is_linked: !!linked,
-      links: collection(linked ? [rna('NodeLink', { from_node: linked, from_socket: null, is_valid: true })] : []) };
+      links: collection(linked ? [rna('NodeLink', { from_node: linked, from_socket: fromSocket, is_valid: true })] : []) };
     if (value && !linked) Object.defineProperty(data, 'default_value', { enumerable: true, get: value.get, set: (v) => { value.set(v); r.host.update?.(socket, 'default_value', data); } });
     return rna(socket, data);
   })), outputs: collection() });
 }
 const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => shaderNode(r, output) });
+// Blender's socket types (node-types.json) as the socket structs Main's node trees are built with.
+const SOCKET_STRUCTS = { VALUE: 'NodeSocketFloat', RGBA: 'NodeSocketColor', VECTOR: 'NodeSocketVector', SHADER: 'NodeSocketShader' };
+const socketStruct = (s) => (s.type === 'VALUE' && s.subtype === 'FACTOR' ? 'NodeSocketFloatFactor' : SOCKET_STRUCTS[s.type]);
+// A node material's Blender nodes (src/nodes/blender) as Blender's node tree, from its Material Output: each node's
+// inputs, unlinked ones by their values. Babylon's blocks and the nodes' properties are kept in the material's graph
+// only (main-sync's PROPERTIES.graph).
+function blenderNodeTree(r, material) {
+  const output = material.attachedBlocks?.find((b) => b.getClassName() === 'ShaderNodeOutputMaterial');
+  if (!output) return null;
+  const names = new Map();
+  const nameOf = (block) => {
+    if (!names.has(block)) {
+      const taken = new Set(names.values());
+      let name = block.name;
+      for (let i = 1; taken.has(name); i++) name = `${block.name}.${String(i).padStart(3, '0')}`;
+      names.set(block, name);
+    }
+    return names.get(block);
+  };
+  const isBlender = (block) => !!block?.declaration && !!block.idname;
+  const node = (block) => [nameOf(block), block.idname, block.declaration.inputs.filter(socketStruct).map((s) => {
+    const from = block.getInputByName(s.identifier)?.connectedPoint;
+    const out = isBlender(from?.ownerBlock) && from.ownerBlock.declaration.outputs.find((o) => o.identifier === from.name);
+    const value = s.hide_value ? null : { get: () => block.values[s.identifier], set: (v) => { block.values[s.identifier] = v; } };
+    return [s.identifier, socketStruct(s), out ? { node: node(from.ownerBlock), socket: { identifier: out.identifier, type: socketStruct(out) } } : value];
+  })];
+  return nodeTree(r, node(output));
+}
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
 // A Babylon material's inputs as Principled BSDF sockets: a PBR material's own, a Standard material's color and alpha.
 const color3 = (owner, key) => owner[key] && ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
@@ -247,7 +277,7 @@ const STRUCTS = {
     name: { get: (material) => material.name, set: (material, name, r) => r.world.materials.rename(material, name) },
     use_fake_user: { get: (material) => !!material.metadata?.wbFakeUser, set: (material, value, r) => { if (!!value !== !!material.metadata?.wbFakeUser) r.world.materials.toggleFakeUser(material); } },
     use_nodes: () => true,
-    node_tree: (material, r) => nodeTree(r, ['Material Output', 'ShaderNodeOutputMaterial', [
+    node_tree: (material, r) => blenderNodeTree(r, material) ?? nodeTree(r, ['Material Output', 'ShaderNodeOutputMaterial', [
       ['Surface', 'NodeSocketShader', ['Principled BSDF', 'ShaderNodeBsdfPrincipled', principledInputs(material)]],
       ['Volume', 'NodeSocketShader', null]]]),
     use_backface_culling: synced(settable('backFaceCulling')),
