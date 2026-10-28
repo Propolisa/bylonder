@@ -88,6 +88,8 @@ html,body{background:var(--bl-gap);color:var(--bl-text);font:var(--bl-font)}
 .bl-menu .bl-menu-item{position:relative;isolation:isolate;display:flex;align-items:center;box-sizing:border-box;width:100%;height:var(--u);padding:0 calc(var(--inset-r) - 1px) 0 calc(var(--u)*.5);border:0;background:none;color:inherit;font:inherit;text-align:left;white-space:nowrap;cursor:default;outline:none}
 .bl-menu-item::before{content:'';position:absolute;z-index:-1;inset:1px var(--inset-r) 1px var(--inset-l);border-radius:calc(var(--pad) - 1px)}
 .bl-menu-item.current{color:var(--bl-menu-item-text-sel)}.bl-menu-item.current::before{background:var(--bl-menu-item-hover)}
+/* The row under the pointer highlights at once, by the browser; while a sub-menu is open its parent's rows wait for menu.js (mouse_motion_towards_check). */
+.bl-menu:not(.sub-open,.keyboard) .bl-menu-item:not(.disabled):hover{color:var(--bl-menu-item-text-sel)}.bl-menu:not(.sub-open,.keyboard) .bl-menu-item:not(.disabled):hover::before{background:var(--bl-menu-item-hover)}
 .bl-menu-item.disabled{color:color-mix(in srgb,var(--bl-menu-item-text) 50%,transparent)}.bl-menu-item.disabled.active::before{background:var(--bl-menu-item-disabled-hover)}
 .bl-menu-item>.bl-icon{width:calc(var(--u)*.8);height:calc(var(--u)*.8);margin-right:calc(var(--u)*.3)}
 .bl-menu-label{flex:1;padding-right:calc(var(--u)*.25)}.bl-menu-label u{text-decoration-thickness:1px;text-underline-offset:2px}

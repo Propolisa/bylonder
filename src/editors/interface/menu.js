@@ -23,6 +23,7 @@ function closeFrom(level) {
     clearInterval(menu.scrollTimer);
     menu.el.remove();
   }
+  levels.at(-1)?.el.classList.remove('sub-open');
   if (!levels.length && bar) { bar.button.classList.remove('open'); bar = null; }
 }
 export const closeMenus = () => closeFrom(0);
@@ -100,7 +101,7 @@ function render(items, anchor, level, title, search) {
   levels.push(menu);
   document.body.append(menu.el);
   place(menu);
-  menu.el.onpointermove = e => { if (towards && levels.at(-1) === menu) Object.assign(towards, { x: e.clientX, y: e.clientY, time: performance.now() }); autoScroll(menu); };
+  menu.el.onpointermove = e => { menu.el.classList.remove('keyboard'); if (towards && levels.at(-1) === menu) Object.assign(towards, { x: e.clientX, y: e.clientY, time: performance.now() }); autoScroll(menu); };
   menu.el.addEventListener('wheel', e => { e.preventDefault(); wheel(menu, e.deltaY > 0 ? 1 : -1); }, { passive: false });
   return menu;
 }
@@ -111,6 +112,8 @@ function setActive(menu, index, reveal = false) {
   const row = menu.rows[index];
   if (!row) return;
   row.el.classList.add('current');
+  // A row the keys moved to is the one highlighted, not the one under the pointer, until the pointer moves.
+  menu.el.classList.toggle('keyboard', reveal);
   if (reveal) revealRow(menu, row.el);
 }
 
@@ -169,6 +172,7 @@ function openSubmenu(level, index, fromKeyboard = false) {
   const frame = menu.el.getBoundingClientRect(), r = row.el.getBoundingClientRect();
   const sub = render(row.item.items, { kind: 'submenu', rect: { left: frame.left, right: frame.right, top: r.top, bottom: r.bottom, width: frame.width } }, level + 1);
   sub.parentIndex = index;
+  menu.el.classList.add('sub-open');
   towards = { ...pointer, time: performance.now() };
   if (fromKeyboard) setActive(sub, 0, true);
 }
