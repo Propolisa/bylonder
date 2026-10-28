@@ -281,7 +281,8 @@ const STRUCTS = {
       ['Surface', 'NodeSocketShader', ['Principled BSDF', 'ShaderNodeBsdfPrincipled', principledInputs(material)]],
       ['Volume', 'NodeSocketShader', null]]]),
     use_backface_culling: synced(settable('backFaceCulling')),
-    alpha_threshold: synced(settable('alphaCutOff')),
+    // A node material has no cutoff of its own: Blender's default.
+    alpha_threshold: synced({ ...settable('alphaCutOff'), get: (material) => material.alphaCutOff ?? 0.5 }),
     surface_render_method: synced({ get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
       set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }),
     // Viewport Display: the surface's color, metalness and roughness, as Blender's Solid shading shows a material.

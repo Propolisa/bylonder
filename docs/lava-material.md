@@ -20,13 +20,13 @@ match Blender's (`tests/textures-wasm.test.js`).
 
 1. Click the Shading workspace tab: the 3D Viewport in Material Preview over the Shader Editor.
 2. In the Shader Editor, New Material makes Blender's new material: Principled BSDF into Material Output.
-3. Shift A adds the nodes; drag from a socket to a socket to link them:
+3. Shift A adds the nodes (typing searches the menu); drag from a socket to a socket to link them:
    - Input > Texture Coordinate. Its Object output into a Texture > Noise Texture set to 4D. W is the seed; Scale,
      Detail (octaves), Roughness and Lacunarity shape it.
-   - Noise Texture's Fac into Converter > Color Ramp (Blender 5 lists it under Color). Edit its stops: click a stop
-     on the band to pick it and drag it, + and - add and remove stops, the swatch below sets the stop's color.
-   - Color Ramp's Color into Principled BSDF's Emission Color, Noise Texture's Fac into Emission Strength.
-   - A second Noise Texture, 4D, with the same W and coordinates and a higher Detail, its Fac into Vector > Bump's
+   - Noise Texture's Factor into Color > Color Ramp. Edit its stops: click a stop on the band to pick it and drag it,
+     + and - add and remove stops, the swatch below sets the stop's color.
+   - Color Ramp's Color into Principled BSDF's Emission Color, Noise Texture's Factor into Emission Strength.
+   - A second Noise Texture, 4D, with the same W and coordinates and a higher Detail, its Factor into Displacement > Bump's
      Height, Bump's Normal into Principled BSDF's Normal.
 4. Material Preview and Rendered shading (the header's shading buttons) show the material. Edits rebuild it as
    Blender recompiles its shader.

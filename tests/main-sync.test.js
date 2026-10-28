@@ -22,6 +22,8 @@ import { asObject } from '../src/runtime/object-transform.js';
 import { createHistory } from '../src/editors/undo/storage.js';
 import '../src/editors/interface/region-draw.js';
 import { OutlinerArea } from '../src/editors/space_outliner/outliner-area.js';
+import { shaderNodeClasses } from '../src/nodes/blender/shader-nodes.js';
+import { createTextures } from '../src/blenkernel/texture/textures.js';
 
 const scene = new Scene(new NullEngine());
 const objects = [];
@@ -33,6 +35,7 @@ world.renderSettings = createRenderSettings(world);
 world.collections = createCollections(world);
 world.materials = createMaterialLibrary(world);
 world.worlds = createWorlds(world);
+world.textures = createTextures(world);
 world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
 const selection = createSelection(scene, objects);
 const rna = createRNA({ world, selection });
@@ -212,6 +215,25 @@ for (const [name] of steps) {
   sync.flush();
   assert.deepEqual(sync.check(), [], `after redoing ${name}`);
 }
+
+// docs/lava-material.md: a node material's Blender nodes are its node tree in Main, with their values and links; a
+// Displace modifier's texture is Main's Tex.
+const lava = box('Lava', [0, 6, 0]);
+const lavaMaterial = world.materials.newMaterial(lava, 0, 'node');
+const noise = new shaderNodeClasses.ShaderNodeTexNoise();
+noise.values.W = 1.3;
+lavaMaterial.attachedBlocks.push(noise);
+noise.getOutputByName('Fac').connectTo(lavaMaterial.attachedBlocks.find((b) => b.getClassName() === 'ShaderNodeBsdfPrincipled').getInputByName('Emission Strength'));
+const clouds = world.textures.create();
+world.textures.set(clouds, 'type', 'CLOUDS');
+const displace = world.modifiers.add(lava, 'DISPLACE');
+world.modifiers.set(lava, displace.id, 'texture', clouds.id);
+sync.flush();
+const lavaTree = blender.nodeTree(sync.materialOf(lavaMaterial));
+assert.deepEqual(lavaTree.nodes.map((node) => node.idname).sort(), ['ShaderNodeBsdfPrincipled', 'ShaderNodeOutputMaterial', 'ShaderNodeTexNoise']);
+assert.deepEqual(lavaTree.links.sort(), [['Noise Texture', 'Fac', 'Principled BSDF', 'Emission Strength'], ['Principled BSDF', 'BSDF', 'Material Output', 'Surface']]);
+assert(Math.abs(lavaTree.nodes.find((node) => node.idname === 'ShaderNodeTexNoise').inputs.W - 1.3) < 1e-6);
+assert.deepEqual(sync.check(), []);
 
 // Hooks keep a transform drag cheap: one changed object among many reaches Main without the others being read.
 for (let i = 0; i < 300; i++) box('Many ' + i, [i, 0, 0]);
