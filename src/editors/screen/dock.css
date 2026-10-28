@@ -4,10 +4,11 @@
 .dock-splits{flex:1;min-height:0;padding:2px}
 .dock-tabs{display:none}
 .dock-leaf{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;border-radius:var(--bl-radius);overflow:hidden}
-.dock-heading{position:relative;display:flex;align-items:center;gap:2px;height:var(--bl-header-h);flex-shrink:0;padding:0 4px;background:var(--bl-header);overflow:hidden}
-.dock-editor-type{display:inline-flex;align-items:center;gap:1px;height:20px;padding:0 3px 0 4px;border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-text);cursor:pointer;flex-shrink:0}
-.dock-editor-type::after{content:'';border:3px solid transparent;border-top:3.5px solid currentColor;transform:translateY(2px);opacity:.6;margin-left:1px}
-.dock-editor-type:hover{background:var(--bl-hover)}
+/* UI_HEADER_OFFSET at a header's ends; its first button is the editor type menu (ED_area_header_switchbutton, 1.6 units). */
+.dock-heading{position:relative;display:flex;align-items:center;gap:2px;height:var(--bl-header-h);flex-shrink:0;padding:0 calc(var(--bl-row)*.4);background:var(--bl-header);overflow:hidden}
+.dock-editor-type{position:relative;display:inline-flex;align-items:center;width:calc(var(--bl-row)*1.6);height:var(--bl-row);padding:0 0 0 6px;border:0;border-radius:var(--bl-radius);background:var(--bl-wcol-menu);box-shadow:inset 0 0 0 1px var(--bl-wcol-outline);color:var(--bl-text);cursor:pointer;flex-shrink:0}
+.dock-editor-type::after{content:'';position:absolute;right:calc(var(--bl-row)*.12);top:calc(50% - var(--bl-row)*.12);width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);background:currentColor;mask:var(--bl-chevron) center/contain no-repeat;color:var(--bl-wcol-menu-item)}
+.dock-editor-type:hover{background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .dock-header-host{flex:1;min-width:0;height:100%;display:flex}
 .dock-header-content{flex:1;min-width:0;display:flex;align-items:center;gap:2px;overflow:hidden}
 .dock-header-content>.spacer{flex:1}
@@ -16,11 +17,13 @@
 .dock-corner:hover{background:linear-gradient(225deg,#ffffff50 0 40%,transparent 40%)}
 .dock-slot{flex:1;min-height:0;min-width:0;pointer-events:none}
 .dock-content{position:absolute;z-index:2;overflow:hidden;min-width:0;min-height:0;background:var(--bl-region);border-radius:0 0 var(--bl-radius) var(--bl-radius)}
+.dock-overlap{box-sizing:border-box;padding-top:var(--bl-header-h);border-radius:var(--bl-radius)}
+.dock-leaf.overlap>.dock-heading{z-index:3;background:var(--bl-view3d-header)}
 .dock-content>*{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;position:relative!important;inset:auto!important}
 .dock .splitpanes__pane{background:transparent;transition:none!important;overflow:hidden}
 .dock .splitpanes__splitter{background:var(--bl-gap);position:relative;z-index:8;touch-action:none}
-.dock .splitpanes--vertical>.splitpanes__splitter{width:2px;min-width:2px;cursor:ew-resize}
-.dock .splitpanes--horizontal>.splitpanes__splitter{height:2px;min-height:2px;cursor:ns-resize}
+.dock .splitpanes--vertical>.splitpanes__splitter{width:3px;min-width:3px;cursor:ew-resize}
+.dock .splitpanes--horizontal>.splitpanes__splitter{height:3px;min-height:3px;cursor:ns-resize}
 .dock .splitpanes__splitter::before{content:'';position:absolute;inset:-3px;z-index:1}
 .dock .dock-collapsed{visibility:hidden}
 .dock .dock-collapsed+.splitpanes__splitter,.dock .splitpanes__splitter:has(+.dock-collapsed){display:none}
