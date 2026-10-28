@@ -55,7 +55,13 @@ Bylonder's Babylon scene owns all data; the module holds a mirror for as long as
 
 ### Known limits
 
-Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Blender's auto keying stays off in the module, which has no animation data yet. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+
+### Animation
+
+Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`).
+
+The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
 
 ## Shared foundations
 

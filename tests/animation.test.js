@@ -20,7 +20,7 @@ let updates=0;store.effect(['intensity'],()=>updates++,{mode:'immediate'});
 animation.insert(storeRef,1,0);animation.insert(storeRef,25,10);animation.seek(13);assert.equal(store.values.intensity,5);assert.ok(updates>1);
 const serialized=animation.serialize();
 const shared=decodeProject(encodeProject({name:"Animated",animation:serialized,files:{"index.js":{kind:"text",content:""}},settings:{remember:false},overrides:{},folders:[]},{includeOverrides:false}));assert.deepEqual(shared.animation,serialized);
-animation.clear(ref);animation.load(serialized);animation.seek(7);assert.equal(x,9*6/19);
+animation.clear(ref);animation.load(serialized);animation.seek(7);assert.ok(Math.abs(x-9*6/19)<1e-6,"Blender's F-Curves hold floats");
 animation.editKeys([{ref,frame:25}],{offset:10,duplicate:true});assert.ok(animation.track(ref).keys.some(k=>k.frame===35));assert.ok(animation.track(ref).keys.some(k=>k.frame===25));
 animation.deleteKeys([{ref,frame:35}]);assert.ok(!animation.track(ref).keys.some(k=>k.frame===35));
 assert.throws(()=>normalizeAnimation({...serialized,time:{...serialized.time,fps:0}}));

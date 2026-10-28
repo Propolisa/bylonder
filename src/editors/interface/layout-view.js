@@ -389,9 +389,14 @@ function item(node, env) {
     case 'operator': return operatorButton(node, env);
     case 'operator_menu_enum': case 'menu': case 'prop_with_menu': {
       const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : () => [];
-      return menuButton({ text: node.text ?? '', iconName: node.icon, items, disabled: !env.enabled });
+      return menuButton({ text: node.text ?? (node.kind === 'menu' ? env.ui.menuLabel?.(node.menu) : null) ?? '', iconName: node.icon, items, disabled: !env.enabled });
     }
     case 'popover': return popover([node.panel], node, env);
+    // A menu's entries in place (a header's editor menus, Menu.draw_collapsible), drawn as the layout it makes.
+    case 'menu_contents': {
+      const contents = env.ui.menuContents?.(node.menu);
+      return contents ? layout(contents, env) : null;
+    }
     // An enum's menu button that opens the panel (uiItemPopoverPanel over the property's current item).
     case 'prop_with_popover': {
       const prop = resolve(node, env.ui), current = prop && enumItem(prop.items(), prop.get());

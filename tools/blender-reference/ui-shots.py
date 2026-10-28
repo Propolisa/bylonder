@@ -65,6 +65,14 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
+# The cube's location keyed at frames 1 and 40, then the Timeline's area showing another of its editors.
+def animation_editor(ui_type):
+    cube = bpy.data.objects["Cube"]
+    cube.keyframe_insert("location", frame=1)
+    cube.location = (2, 0, 1)
+    cube.keyframe_insert("location", frame=40)
+    bpy.context.scene.frame_set(1)
+    area("DOPESHEET_EDITOR").ui_type = ui_type
 def properties_tab(name, tab):
     """The object made active and selected alone, and the Properties editor on a tab."""
     def setup():
@@ -90,6 +98,8 @@ SETUP = {
     "add-menu": lambda: key("A", *view3d_point(0.5, 0.5), shift=True),
     "edit-mode": lambda: key("TAB", *view3d_point(*REST)),
     "modifier-tab": add_subdivision,
+    "graph-editor": lambda: animation_editor("FCURVES"),
+    "dope-sheet": lambda: animation_editor("DOPESHEET"),
     "object-tab": properties_tab("Cube", "OBJECT"),
     "light-data": properties_tab("Light", "DATA"),
     "camera-data": properties_tab("Camera", "DATA"),
