@@ -53,28 +53,46 @@ const operatorTypes = new Map(Array.from({ length: x.operator_count() }, (_, i) 
 }));
 export const hasOperator = (idname) => operatorTypes.has(idname);
 
-// Runs a Blender operator's exec in a context (bContext), with properties by name (an enum by its item's identifier, an
-// enum flag by a list of them; the rest keep their defaults). Returns its status flags (0 when it does not poll) and the
-// message of the last report it made for the user.
-function runOperator(C, idname, props) {
+// The module's exports and memory helpers, for subsystems with API files of their own (anim-api.cc).
+export const blenderModule = { exports: x, withArrays, withString, cString };
+
+// A Blender operator with properties by name (an enum by its item's identifier, an enum flag by a list of them; the
+// rest keep their defaults), for exec, or for invoke and modal, which keep it while it runs; x.operator_free frees it.
+export function newOperator(idname, props = {}) {
   if (!operatorTypes.has(idname)) throw new Error(`${idname} is not in this WebAssembly module`);
   const op = x.operator_new(operatorTypes.get(idname));
   try {
-    for (const [name, value] of Object.entries(props)) {
-      const numbers = Float64Array.from([value].flat(), Number);
-      const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
-      const ok = withString(name, (namePointer) => items !== null
-        ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
-        : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
-      if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
-    }
-    const status = x.operator_exec(C, op), report = x.operator_report(op);
-    return { status, report: report ? cString(report) : undefined };
+    setOperatorProperties(op, props);
+  } catch (error) {
+    x.operator_free(op);
+    throw new Error(`${idname}: ${error.message}`);
+  }
+  return op;
+}
+export function setOperatorProperties(op, props) {
+  for (const [name, value] of Object.entries(props)) {
+    const numbers = Float64Array.from([value].flat(), Number);
+    const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
+    const ok = withString(name, (namePointer) => items !== null
+      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
+      : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
+    if (!ok) throw new Error(`no property ${name} = ${value}`);
+  }
+}
+export const operatorReport = (op) => { const report = x.operator_report(op); return report ? cString(report) : undefined; };
+
+// Runs an operator's exec in a context (bContext): its status flags (0 when it does not poll) and the message of the
+// last report it made for the user.
+function runOperator(C, idname, props) {
+  const op = newOperator(idname, props);
+  try {
+    return { status: x.operator_exec(C, op), report: operatorReport(op) };
   } finally {
     x.operator_free(op);
   }
 }
-const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
+export const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
+export const operatorNames = () => [...operatorTypes.keys()];
 // An enum property's items as the operator's UI lists them in a context (its item function, as Blender's menus call
 // it): [identifier, name] pairs.
 function operatorEnumItems(C, idname, prop) {
@@ -317,6 +335,14 @@ const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 // A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
 const DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
+// eBaseFlags, and the bit main_base_get adds for the active base.
+const BASE_SELECTED = 1 << 0, BASE_HIDDEN = 1 << 8, BASE_ACTIVE = 1 << 30;
+// The addresses an export writes when given an array, after it counted them without one.
+const addresses = (fn) => {
+  const count = fn(0);
+  return withArrays([new Uint32Array(count)], ([p]) => { fn(p); return Array.from(new Uint32Array(x.memory.buffer, p, count)); });
+};
+
 const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 
@@ -401,7 +427,39 @@ export class BlenderMain {
 
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
+  get scene() { return x.main_scene(this.#context) >>> 0; }
+  get C() { return this.#C; }
   data(ob) { return x.object_data(ob) >>> 0; }
+
+  // Collections, by address: the Scene Collection holds the rest. A collection's children and objects are set whole,
+  // in order.
+  get masterCollection() { return x.main_collection_master(this.#context) >>> 0; }
+  addCollection(parent, name) { return withString(name, (p) => x.main_collection_add(this.#context, parent ?? 0, p)) >>> 0; }
+  removeCollection(collection) { x.main_collection_remove(this.#context, collection); }
+  setCollectionChildren(collection, children) {
+    withArrays([Uint32Array.from(children)], ([p]) => x.collection_children_set(this.#context, collection, p, children.length));
+  }
+  setCollectionObjects(collection, objects) {
+    withArrays([Uint32Array.from(objects)], ([p]) => x.collection_objects_set(this.#context, collection, p, objects.length));
+  }
+  collectionChildren(collection) { return addresses((p) => x.collection_items(collection, false, p)); }
+  collectionObjects(collection) { return addresses((p) => x.collection_items(collection, true, p)); }
+  // Main's IDs of a type (ID_GR, ID_OB...).
+  ids(type) { return addresses((p) => x.main_ids(this.#context, type, p)); }
+  name(id) { return cString(x.id_name(id)); }
+  rename(id, name) { withString(name, (p) => x.id_rename(this.#context, id, p)); }
+  // A collection's LayerCollection in the view layer, the active one (its collection), and activating one.
+  layerCollection(collection) { return x.main_layer_collection(this.#context, collection) >>> 0; }
+  get activeCollection() { return x.layer_collection_collection(x.main_layer_collection_active(this.#context)) >>> 0; }
+  set activeCollection(collection) { x.main_layer_collection_activate(this.#context, this.layerCollection(collection)); }
+  syncCollections() { x.main_collections_sync(this.#context); }
+  // An object's base (eBaseFlags, with ACTIVE when it is the active one), or null when it has none in the view layer,
+  // and its parent.
+  base(ob) {
+    const flag = x.main_base_get(this.#context, ob);
+    return flag < 0 ? null : { flag, selected: !!(flag & BASE_SELECTED), hidden: !!(flag & BASE_HIDDEN), active: !!(flag & BASE_ACTIVE) };
+  }
+  parent(ob) { return x.object_parent(ob) >>> 0; }
 
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   poll(idname) { return pollOperator(this.#C, idname); }

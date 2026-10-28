@@ -2,9 +2,12 @@
 module (the edit-mode BMesh), where per-function units (wasm.py) would copy it at every call.
 
 A module (manifest `modules`: output path under src/, its API files in wasm/, the library directories it draws on,
-the libraries Blender builds against, and Blender paths the source tree lacks):
+the libraries Blender builds against, Blender paths the source tree lacks, and Blender files outside it to build with
+its API, `fetch`, such as the default theme):
 - builds from a hard-linked copy of the Blender tree with the reviewed patches in wasm/patches applied;
-- compiles every source of its libraries in parallel, cached by source, flags and patches, and archives what builds;
+- compiles every source of its libraries in parallel, cached by source, flags and patches (not by where the checkout
+  or tree is, so worktrees share objects), and archives what builds; a source that does not build is not tried again
+  until it or the flags change;
 - links its API against the archives, so only what the API reaches is in the module. Functions still missing become
   imports, listed after the build: calling one throws (src/port/wasm.js), so a gap shows where it is reached. Data
   still missing fails the build, since it would read as zeros instead.
@@ -49,6 +52,20 @@ def fetch_blender_paths(root, paths, tag):
     for path in paths:
         if not os.path.exists(os.path.join(root, path)):
             fetch(path)
+
+
+def fetched_files(build, paths, tag):
+    """Blender files outside the source tree's directories (data such as the default theme), fetched once into the
+    build at the manifest's tag, so the tree and its objects stay as they are."""
+    files = []
+    for path in paths:
+        target = os.path.join(build, 'fetched', tag, path)
+        if not os.path.exists(target):
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            url = f'{BLENDER}/raw/{urllib.parse.quote(path, safe="")}?ref={tag}'
+            open(target, 'wb').write(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
+        files.append(target)
+    return files
 
 
 def patched_tree(root):
@@ -158,7 +175,8 @@ def rna_prototypes(build, args):
 def rna_dna_fields(build):
     """generated/rna_dna_fields.inc: DNA_FIELD(struct type, identifier, type, array length, where it is stored) for each
     modifier property, from src/makesrna/rna-modifiers.json (Blender's RNA) and dna-modifiers.json (its DNA fields,
-    modifier_dna.py), for the RNA getters and setters to read and write a modifier's DNA."""
+    modifier_dna.py), and for each property of the structs dna-outliner.json describes, for the RNA getters and setters
+    to read and write their DNA."""
     makesrna = os.path.join(convert.REPO, 'src', 'makesrna')
     rna = json.load(open(os.path.join(makesrna, 'rna-modifiers.json')))
     dna = json.load(open(os.path.join(makesrna, 'dna-modifiers.json')))
@@ -179,6 +197,19 @@ def rna_dna_fields(build):
             lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[prop["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
                          f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, {str("bitset" in field).lower()}, '
                          f'{str(field.get("negative", False)).lower()})')
+    # Structs whose properties dna-outliner.json describes whole (type, icon), with DNA_ICON(struct type, identifier,
+    # icon, consecutive) for those that have an icon.
+    for struct, info in json.load(open(os.path.join(makesrna, 'dna-outliner.json'))).items():
+        for name, field in info['properties'].items():
+            if field.get('type') not in kinds or field['kind'] == 'struct' or (field.get('bitset') is not None):
+                continue
+            length = 0 if field.get('type') == 'STRING' else field.get('length', 0)
+            kind = 's' if field['type'] == 'STRING' else field['kind'][0]
+            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[field["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
+                         f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, false, '
+                         f'{str(field.get("negative", False)).lower()})')
+            if field.get('icon'):
+                lines.append(f'DNA_ICON(RNA_{struct}, "{name}", {field["icon"]}, {field.get("consecutive", 0)})')
     path = os.path.join(build, 'generated', 'rna_dna_fields.inc')
     text = '\n'.join(lines) + '\n'
     if not os.path.exists(path) or open(path).read() != text:
@@ -196,14 +227,24 @@ def compile_all(build, sources, args, key):
     """Objects of the sources that build, by source; what does not build is left out (an archive member nothing needs)."""
     objects = os.path.join(build, 'objects')
     os.makedirs(objects, exist_ok=True)
-    common = hashlib.sha1((' '.join(args) + key + open(os.path.join(WASM, 'compat.h')).read()).encode()).hexdigest()
+    # Keyed without the checkout's and tree's paths, so worktrees can share objects.
+    stable = ' '.join(args).replace(build, '$BUILD').replace(build.removesuffix('-build'), '$TREE').replace(convert.REPO, '$REPO')
+    common = hashlib.sha1((stable + key + open(os.path.join(WASM, 'compat.h')).read()).encode()).hexdigest()
+    # A source that does not build is not tried again until it, the flags or the module's own headers change.
+    failed = f'.{own_headers()[:8]}.failed'
 
     def one(src):
         digest = hashlib.sha1((common + open(src, 'rb').read().hex()).encode()).hexdigest()[:16]
         obj = os.path.join(objects, f'{os.path.basename(src)}.{digest}.o')
         if os.path.exists(obj):
             return src, obj
-        result = subprocess.run(['clang++', *args, '-c', src, '-o', obj], capture_output=True, text=True)
+        if os.path.exists(obj + failed):
+            return src, None
+        # A C source (Blender's data files) builds as C, as Blender's build compiles it.
+        language = ['-x', 'c', *(a.replace('-std=c++20', '-std=c11') for a in args)] if src.endswith('.c') else args
+        result = subprocess.run(['clang++', *language, '-c', src, '-o', obj], capture_output=True, text=True)
+        if result.returncode:
+            open(obj + failed, 'w').write(result.stderr)
         return src, (obj if result.returncode == 0 else None)
 
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as pool:
@@ -264,7 +305,8 @@ def build(root, name, spec, tag):
     # The module's own files also see wasm/, the generated operator table and the operators' editors' headers; Blender's
     # sources need none of them.
     own_args = args + [f'-I{generated}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
-    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)],
+    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)]
+                      + fetched_files(out_dir, spec.get('fetch', []), tag),
                       own_args, patches + operators + rna_dna_fields(out_dir) + own_headers())
     failed = [src for src, obj in own.items() if obj is None]
     if failed:
