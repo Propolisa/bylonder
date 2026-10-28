@@ -444,9 +444,10 @@ const checks = {
       return !m._buildIsInProgress && functions.every((f) => code.includes(f));
     }, FUNCTIONS, 60000);
     const links = await app.bylonder((b) => b.world.scene.getMeshByName("Sphere").material.attachedBlocks.flatMap((block) => block.inputs
-      .filter((i) => i.connectedPoint && block.declared?.(i.name)).map((i) => `${i.connectedPoint.ownerBlock.getClassName()} > ${block.getClassName()} ${i.name}`)));
-    for (const expected of ["ShaderNodeTexCoord > ShaderNodeTexNoise Vector", "ShaderNodeTexNoise > ShaderNodeValToRGB Fac", "ShaderNodeValToRGB > ShaderNodeBsdfPrincipled Emission Color",
-      "ShaderNodeTexNoise > ShaderNodeBsdfPrincipled Emission Strength", "ShaderNodeTexNoise > ShaderNodeBump Height", "ShaderNodeBump > ShaderNodeBsdfPrincipled Normal"]) assert.ok(links.includes(expected), expected);
+      .filter((i) => i.connectedPoint && block.declared?.(i.name)).map((i) => `${i.connectedPoint.ownerBlock.getClassName()} ${i.connectedPoint.name} > ${block.getClassName()} ${i.name}`)));
+    assert.deepEqual(links.sort(), ["ShaderNodeBsdfPrincipled BSDF > ShaderNodeOutputMaterial Surface", "ShaderNodeBump Normal > ShaderNodeBsdfPrincipled Normal", "ShaderNodeTexCoord Object > ShaderNodeTexNoise Vector",
+      "ShaderNodeTexCoord Object > ShaderNodeTexNoise Vector", "ShaderNodeTexNoise Fac > ShaderNodeBsdfPrincipled Emission Strength", "ShaderNodeTexNoise Fac > ShaderNodeBump Height",
+      "ShaderNodeTexNoise Fac > ShaderNodeValToRGB Fac", "ShaderNodeValToRGB Color > ShaderNodeBsdfPrincipled Emission Color"]);
     // Material Preview draws the sphere glowing: orange pixels where it is.
     const warm = await app.bylonder(async (b) => {
       const engine = b.world.scene.getEngine();

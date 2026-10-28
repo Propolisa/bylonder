@@ -57,7 +57,12 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
   };
 
   // Hit tests, topmost first: sockets, then nodes, then frames.
-  const socketAt = (p) => sockets().find((s) => Math.hypot(s.x - p[0], s.y - p[1]) <= SOCKET_HIT / Math.min(1, state.view.zoom));
+  // The nearest socket within reach (node_find_indicated_socket): zoomed out, neighbors' reaches overlap.
+  const socketAt = (p) => {
+    const distance = (s) => Math.hypot(s.x - p[0], s.y - p[1]);
+    const near = sockets().filter((s) => distance(s) <= SOCKET_HIT / Math.min(1, state.view.zoom));
+    return near.reduce((best, s) => (!best || distance(s) < distance(best) ? s : best), null) ?? undefined;
+  };
   const nodeAt = (p) => [...layouts()].reverse().find((l) => p[0] >= l.node.x - (l.node.reroute ? 6 : 0) && p[0] <= l.node.x + Math.max(l.width, 6)
     && p[1] >= l.node.y - (l.node.reroute ? 6 : 0) && p[1] <= l.node.y + Math.max(l.height, 6));
   const frameAt = (p) => frames().find((f) => p[0] >= f.x && p[0] <= f.x + f.width && p[1] >= f.y && p[1] <= f.y + f.height);
