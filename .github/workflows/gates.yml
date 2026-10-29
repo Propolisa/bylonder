@@ -1,7 +1,8 @@
 name: Gates
 
 # The gates before main (scripts/gates.mjs) on GitHub's runners, each part on a machine of its own: one production
-# build, then the unit tests, the e2e smoke tests and the workflows in shards on that build, and the production check.
+# build, the unit tests and the production check on every push. The e2e smoke tests and workflows run locally while we
+# iterate; a manual run (workflow_dispatch) adds them here in shards.
 on:
   push:
     branches: ['claude/**']
@@ -47,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        run: ['smoke 0/3', 'smoke 1/3', 'smoke 2/3', 'workflows 0/2', 'workflows 1/2', 'prod']
+        run: ${{ github.event_name == 'workflow_dispatch' && fromJSON('["smoke 0/3", "smoke 1/3", "smoke 2/3", "workflows 0/2", "workflows 1/2", "prod"]') || fromJSON('["prod"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
