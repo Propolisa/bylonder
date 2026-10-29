@@ -69,8 +69,13 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   relations Bylonder's own editors write on Babylon's objects (`main-sync.js`, by setter hooks and a flush before
   Blender's code runs and before every undo push), the document slices' state (materials, worlds, textures,
   collections, scene settings), Bylonder's modifier stack, curve data while a curve is edited, an armature's record,
-  and a material's or world's node tree when Bylonder's own material library changes it. Edit Mode still edits a
-  separate edit mesh (`EditMesh`) and writes its Mesh data into Main on each step.
+  and a material's or world's node tree when Bylonder's own material library changes it.
+- **Edit Mode.** Blender's Edit Mode on Main's object works underneath: `object.mode_set` gives the Mesh its
+  BMEditMesh, Blender's mesh operators edit it on Main's context, the view draws it and its overlay
+  (`view-api.cc` `view_edit_mesh_extract`), and undo loads Blender's edit-mode steps. `src/editors/mesh/editmesh-mode.js`
+  is the editor's mode over it, picking as in X-ray (`view_xray_picking`: the module has no GPU select buffer, so
+  there is no occlusion). The app still uses the separate edit mesh (`EditMesh`, `object-edit.js`), which writes its
+  Mesh data into Main on each step, until Blender's window handles Edit Mode input.
 
 ### .blend files
 
