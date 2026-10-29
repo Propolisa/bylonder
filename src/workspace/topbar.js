@@ -1,5 +1,4 @@
 import { menuButton, openMenu } from '../editors/interface/menu.js';
-import { treeMenu } from '../editors/interface/block-view.js';
 import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
@@ -110,7 +109,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     if (menus.childElementCount || !scene()) return;
     for (const { label, menu } of scene().bar()) {
       const logo = menu === 'TOPBAR_MT_blender';
-      const items = () => { refreshRecent(); const topbarArea = scene(); return topbarArea ? treeMenu(topbarArea.menu(menu) ?? { children: [] }, topbarArea.ui) : []; };
+      const items = () => { refreshRecent(); const topbarArea = scene(); return topbarArea?.items(menu) ?? []; };
       menus.append(menuButton(logo ? '' : label, items, { blender: menu, icon: logo ? 'bylonder' : undefined }));
     }
     bar.querySelector('.bl-logo')?.remove();

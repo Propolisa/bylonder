@@ -6,6 +6,7 @@
 import { markRaw } from 'vue';
 import { AnimArea, RGN_TYPE_HEADER } from '../animation/anim-area.js';
 import { menuTree } from '../interface/ui-tree.js';
+import { treeMenu } from '../interface/block-view.js';
 import { invokeOperator, registerOperator, runsOperator, appendMenu, prependMenu } from '../../windowmanager/wm-operators.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 
@@ -43,5 +44,7 @@ export function createTopbarArea(main, sync) {
     bar: () => buttons(menu('TOPBAR_MT_editor_menus') ?? {}).filter((b) => b.menu).map((b) => ({ label: b.text, menu: b.menu })),
     // A menu's tree (ui-tree.js), or null without the menu.
     menu,
+    // A menu's entries for menu.js, built here: their sub-menus are laid out by this window's module.
+    items: (name) => treeMenu(menu(name) ?? { children: [] }, ui),
   };
 }
