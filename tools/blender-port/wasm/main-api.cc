@@ -1,7 +1,7 @@
 /* Blender's data outside Edit Mode: a Main holding Bylonder's objects and their data, one Scene with one ViewLayer
  * whose Bases hold the selection and the active object, and Main's window manager with one window whose screen
- * answers context members as Blender's screen context does (screen_context.cc) and runs its events (wm-api.cc). Bylonder owns the data: before an operator the
- * editor writes the objects' transforms, parents, bases and data here, and afterwards reads back what the operator
+ * answers context members as Blender's screen context does (screen_context.cc) and runs its events (wm-api.cc). Main
+ * owns the data (docs/model.md); Babylon draws it after Blender's code ran (src/blenkernel/main-view.js), reading what it
  * tagged (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec, on main_C).
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_armature.hh"
@@ -523,10 +523,6 @@ EXPORT(object_mesh_attribute) const void *object_mesh_attribute(Object *ob, cons
   reader.varray.materialize(values.data());
   return values.data();
 }
-
-/* A mesh object's Mesh without its geometry, as it is at rest: Bylonder's scene owns geometry, and fills the Mesh only
- * while Blender's code needs it. Its material slots stay. */
-EXPORT(object_mesh_clear) void object_mesh_clear(Object *ob) { BKE_mesh_clear_geometry(id_cast<Mesh *>(ob->data)); }
 
 /* A mesh object's Mesh with its modifiers applied, as the viewport evaluates it, read through the header until the next
  * call. */
