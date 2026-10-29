@@ -310,7 +310,7 @@ WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE']
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager'}
 # The API's seam implementations in other libraries (each a port-override in tools/blender-port/wasm), which win too:
 # what Bylonder's own editor does in Blender's place.
-SEAM_FUNCTIONS = {'blender::ED_view3d_gizmo_mesh_preselect_get_active'}
+SEAM_FUNCTIONS = set()
 
 
 def link_module(host, out, entries, extra, archives, module_libraries):

@@ -125,11 +125,6 @@ EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype, int subtype
   area->spacetype = char(spacetype);
   area->butspacetype_subtype = short(std::max(subtype, 0));
   screen_area_spacelink_add(WM_window_get_active_scene(win), area, eSpace_Type(spacetype));
-  if (spacetype == SPACE_VIEW3D) {
-    /* port-override: the module has no GPU select buffer, so its 3D Views pick edit-mesh elements as in X-ray, through
-     * each element's projection (view-api.cc's view_xray_picking); the page draws the shading. */
-    static_cast<View3D *>(area->spacedata.first)->shading.flag |= V3D_SHADING_XRAY | V3D_SHADING_XRAY_WIREFRAME;
-  }
   ED_area_and_region_types_init(area);
   if (area->type->space_subtype_set && subtype >= 0) {
     area->type->space_subtype_set(area, subtype);
@@ -470,10 +465,42 @@ static void wm_window_timers_process(wmWindowManager *wm)
 
 /* Blender's main loop once for the page's window, with what the page added to its queue: its due timers, its events
  * and notifiers handled (wm_event_do_handlers, wm_event_do_notifiers). Returns event_result's JSON. */
+/* port-override: the module has no GPU select buffer (DRW_select_buffer_*), so while the window handles events its 3D
+ * Views pick edit-mesh elements as in X-ray, through each element's projection (view-api.cc's view_xray_picking); the
+ * page's own shading is given back after. */
+class XrayPicking {
+  Vector<std::pair<View3D *, eView3DShading_Flag>> shading_;
+
+ public:
+  explicit XrayPicking(wmWindow *win)
+  {
+    for (ScrArea &area : WM_window_get_active_screen(win)->areabase) {
+      if (area.spacetype == SPACE_VIEW3D) {
+        View3D *v3d = static_cast<View3D *>(area.spacedata.first);
+        shading_.append({v3d, v3d->shading.flag});
+        v3d->shading.flag |= V3D_SHADING_XRAY | V3D_SHADING_XRAY_WIREFRAME;
+      }
+    }
+  }
+  ~XrayPicking()
+  {
+    for (const auto &[v3d, flag] : shading_) {
+      v3d->shading.flag = flag;
+    }
+  }
+};
+
+static bContext *handling_context = nullptr;
+/* The context of the event the window handles, for the module's gizmo map (editor-context.cc), or null. */
+bContext *wm_handling_context() { return handling_context; }
+
 static const char *wm_window_handle(bContext *C, FunctionRef<void(wmWindowManager *, wmWindow *)> add_events)
 {
   wmWindowManager *wm = CTX_wm_manager(C);
   wmWindow *win = static_cast<wmWindow *>(wm->windows.first);
+  const XrayPicking xray(win);
+  bContext *outer = std::exchange(handling_context, C);
+  BLI_SCOPED_DEFER([&]() { handling_context = outer; });
   Set<wmOperator *> registered;
   for (wmOperator &op : wm->runtime->operators) {
     registered.add(&op);

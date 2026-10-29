@@ -24,10 +24,14 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   let running = false;
 
   // A view's area, laid out from the page (unless `layout` is false: as it last was).
+  let configured = false;
   function area(view, layout = true) {
-    configureWindow(window);
-    // Mesh Edit Mode is Blender's on Main: its operators the page has no code of its own for are Blender's (the Knife).
-    allowOperators(window, operatorNames().filter((idname) => idname.startsWith('mesh.') && !hasOperator(idname)));
+    if (!configured) {
+      configured = true;
+      configureWindow(window);
+      // Mesh Edit Mode is Blender's on Main: its operators the page has no code of its own for are Blender's (the Knife).
+      allowOperators(window, operatorNames().filter((idname) => idname.startsWith('mesh.') && !hasOperator(idname)));
+    }
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
     else if (!layout) return areas.get(view);
     window.size = { width: innerWidth, height: innerHeight };

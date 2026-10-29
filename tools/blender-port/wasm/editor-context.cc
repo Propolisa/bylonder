@@ -139,8 +139,40 @@ static wmGizmoMap *gizmo_map_standin()
 
 namespace blender {
 
-/* port-override: the gizmos are Bylonder's (wm-gizmo-map.js); the stand-in map has no groups. */
-wmGizmoGroup *WM_gizmomap_group_find(wmGizmoMap * /*gzmap*/, const char * /*idname*/) { return nullptr; }
+bContext *wm_handling_context();
+
+/* The preselection gizmos (view3d_gizmo_preselect_type.cc), Blender's own, in a group of their own. */
+static wmGizmo *preselect_gizmo(const char *group, const char *type)
+{
+  static Map<std::string, wmGizmoGroup *> groups;
+  wmGizmoGroup *gzgroup = groups.lookup_or_add_cb(group, [&]() {
+    wmGizmoGroup *made = MEM_new_zeroed<wmGizmoGroup>(__func__);
+    made->type = WM_gizmogrouptype_find(group, true);
+    WM_gizmo_new_ptr(WM_gizmotype_find(type, false), made, nullptr);
+    return made;
+  });
+  return static_cast<wmGizmo *>(gzgroup->gizmos.first);
+}
+
+/* port-override: the gizmos are Bylonder's (wm-gizmo-map.js), but for the preselection ones tools read (Loop Cut's
+ * edge ring, Poly Build's element): the element under the mouse, picked by the gizmo's own test_select in the window
+ * region of the event the window handles. */
+wmGizmoGroup *WM_gizmomap_group_find(wmGizmoMap * /*gzmap*/, const char *idname)
+{
+  const char *type = STREQ(idname, "VIEW3D_GGT_mesh_preselect_edgering") ? "GIZMO_GT_mesh_preselect_edgering_3d" :
+                     STREQ(idname, "VIEW3D_GGT_mesh_preselect_elem")     ? "GIZMO_GT_mesh_preselect_elem_3d" :
+                                                                            nullptr;
+  bContext *C = wm_handling_context();
+  const ARegion *region = C ? CTX_wm_region(C) : nullptr;
+  if (!type || !region || region->regiontype != RGN_TYPE_WINDOW || !CTX_data_edit_object(C)) {
+    return nullptr;
+  }
+  wmGizmo *gz = preselect_gizmo(idname, type);
+  const int *xy = CTX_wm_window(C)->runtime->eventstate->xy;
+  const int mval[2] = {xy[0] - region->winrct.xmin, xy[1] - region->winrct.ymin};
+  gz->type->test_select(C, gz, mval);
+  return gz->parent_gzgroup;
+}
 bool WM_gizmo_context_check_drawstep(const bContext * /*C*/, eWM_GizmoFlagMapDrawStep /*step*/) { return true; }
 /* No gizmo runs modally in the module, and none of its groups is listed: the gizmos are Bylonder's. */
 wmGizmo *WM_gizmomap_get_modal(const wmGizmoMap * /*gzmap*/) { return nullptr; }
@@ -179,12 +211,6 @@ bool WM_gizmo_group_type_ensure_ptr(wmGizmoGroupType * /*gzgt*/) { return true; 
 bool WM_gizmo_group_type_ensure(StringRef idname) { return WM_gizmo_group_type_ensure_ptr(WM_gizmogrouptype_find(idname, true)); }
 void WM_gizmo_group_type_reinit_ptr(Main * /*bmain*/, wmGizmoGroupType *gzgt) { WM_gizmo_group_type_ensure_ptr(gzgt); }
 
-/* port-override: no preselection gizmo has an element under the mouse. */
-void ED_view3d_gizmo_mesh_preselect_get_active(const bContext * /*C*/, const wmGizmo * /*gz*/, Base **r_base, BMElem **r_ele)
-{
-  *r_base = nullptr;
-  *r_ele = nullptr;
-}
 
 }  // namespace blender
 
