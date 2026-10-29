@@ -51,8 +51,9 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
   const placeOf = (ref, create = false) => {
     const [id, path] = JSON.parse(ref), transform = objectPath(id, path);
     if (transform) return { owner: create ? ids.object(id) : ids.find(id), ...transform };
-    const own = channels.get(ref)?.owner?.(), property = customPropertyName(own ? path : `${id} ${path}`);
-    return { owner: own || ids.scene, property, rna_path: customPropertyPath(property), index: 0, factor: 1 };
+    const owner = channels.get(ref)?.owner, property = customPropertyName(owner ? path : `${id} ${path}`);
+    // An owner not in Main yet holds no channels.
+    return { owner: owner ? owner() : ids.scene, property, rna_path: customPropertyPath(property), index: 0, factor: 1 };
   };
   // Every F-Curve with the Bylonder channel it animates.
   const tracks = () => curves ??= (() => {
@@ -89,7 +90,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     const found = trackFor(ref);
     if (found) return found;
     const channel = channels.get(ref), [id, path] = JSON.parse(ref), place = placeOf(ref, true);
-    if (!place.owner) throw Error('Animation channel without an owner in Main: ' + ref);
+    if (!place.owner) return null;
     const rna = place.property ? { type: discreteKind(ref, sample), subtype: 'NONE' } : animatedProperty('Object', place.rna_path);
     if (place.property) setCustomProperty(place.owner, place.property, toCurve(ref, sample ?? 0, 1), { description: channel?.label ?? path });
     anim.fcurve(place.owner, place.rna_path, place.index, { group: place.property ? channel?.group ?? id : 'Object Transforms', type: rna.type, subtype: rna.subtype });
@@ -136,6 +137,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     if (track.values) strings.set(ref, [...track.values]);
     const sample = track.keys[0]?.value;
     const found = fcurveFor(ref, sample);
+    if (!found) return;
     if (track.keys.some((k) => k.handle_left)) {
       found.fcurve.keys = track.keys.map((k) => ({ ...k, co: [k.frame, toCurve(ref, k.value, found.factor)],
         handle_left: [k.handle_left[0], k.handle_left[1] * found.factor], handle_right: [k.handle_right[0], k.handle_right[1] * found.factor] }));
@@ -172,6 +174,8 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     evaluateMain: null,
     removeTarget(id) { for (const [ref, ch] of channels) if (ch.id === id) { channels.delete(ref); pose.delete(ref); } notify(); },
     track(ref) { const t = trackFor(ref); return t && { id: t.id, path: t.path, keys: keysOf(t) }; },
+    // A channel's RNA path from its owner's ID (`["name"]` for a custom property), as Copy Data Path gives it.
+    dataPath: (ref) => placeOf(ref).rna_path,
     state(ref) {
       const channel = channels.get(ref), track = trackFor(ref);
       if (!channel?.available()) return 'unavailable';
@@ -188,6 +192,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
         const next = value === undefined ? clone(channel.get()) : value;
         if (!scalar(next) || typeof next !== typeof channel.get()) throw Error('Invalid animation value');
         const track = fcurveFor(ref, next);
+        if (!track) continue;
         anim.insert(track.fcurve, frame, toCurve(ref, next, track.factor));
       }
       changed(); commit();

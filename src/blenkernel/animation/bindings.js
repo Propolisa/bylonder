@@ -19,7 +19,6 @@ export function registerObjects(animation, objects) {
     });
   }
 }
-export const objectRefs=(nodes,property)=>nodes.flatMap(node=>(property?[property]:['position','rotation','scaling']).flatMap(prop=>['x','y','z'].map(axis=>address('object:'+nodeId(node),prop+'.'+axis))));
 
 export function bindProperties(animation,target,{id,title=id,properties}) {
   if(!id)throw Error('Animated targets require a stable id');

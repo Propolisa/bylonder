@@ -10,7 +10,7 @@ export function materialPanels({ world, node, row, panel }) {
   if (!material) return [];
   const id = materialId(material), type = library.type(material);
   const graphRows = () => {
-    const rows = bindGraph(world.animation, { id: 'material:' + id + ':graph', title: material.name, graph: material, kind: 'material' }).map(f => row({ ...f, default: undefined }));
+    const rows = bindGraph(world.animation, { id: 'material:' + id + ':graph', title: material.name, graph: material, kind: 'material', owner: () => world.mainSync?.materialOf(material) }).map(f => row({ ...f, default: undefined }));
     return [...(rows.length ? rows : [h('p', { class: 'bl-message' }, 'No uniform inputs. Add Input blocks in the Shader Editor to expose values here.')]),
       h('button', { type: 'button', class: 'bl-widget bl-tool flex h-unit items-center justify-center gap-1 rounded-md text-xs', onClick: () => world.openNodeEditor?.('shader') }, [icon('NODE_MATERIAL'), 'Open in Shader Editor'])];
   };

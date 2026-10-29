@@ -66,7 +66,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   const sync = () => {
     for (const material of all()) {
       register(material);
-      if (materialType(material) === 'node') bindGraph(animation, { id: 'material:' + materialId(material) + ':graph', title: material.name, graph: material, kind: 'material' });
+      if (materialType(material) === 'node') bindGraph(animation, { id: 'material:' + materialId(material) + ':graph', title: material.name, graph: material, kind: 'material', owner: () => world.mainSync?.materialOf(material) });
     }
     emit();
   };
