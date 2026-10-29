@@ -60,6 +60,12 @@ function wasiFor(memory) {
       return ESUCCESS;
     },
     fd_close: (fd) => open.delete(fd) ? ESUCCESS : EBADF,
+    // Nanoseconds: the realtime clock (0) from the epoch, the others from the page's start (BLI_time_now_seconds).
+    clock_time_get(id, _precision, out) {
+      const ms = id === 0 ? Date.now() : performance.timeOrigin + performance.now();
+      view().setBigUint64(out, BigInt(Math.round(ms * 1e6)), true);
+      return ESUCCESS;
+    },
     fd_write(fd, iovs, count, nwritten) {
       const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length).slice());
       const total = chunks.reduce((n, c) => n + c.length, 0);
