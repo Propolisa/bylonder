@@ -18,6 +18,7 @@ export function mountTextEditor(section, { header, files, context, beforeRun = (
   editor.area = { space: 'TEXT_EDITOR' };
   editor.space = () => pointerStruct(structFind('Area'), 0, area.area.pointer).spaces.active;
   editor.refresh = area.refresh;
+  editor.dispose = area.dispose;
   const texts = blendData().texts;
   editor.space().text = texts.get(ENTRY) ?? texts[0] ?? null;
   area.refresh();

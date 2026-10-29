@@ -534,7 +534,7 @@ const checks = {
     await app.page.keyboard.type("bpy.ops.mesh.primitive_cube_add()");
     await app.page.keyboard.press("Enter");
     await app.until((b, n) => b.world.objects.length > n, before);
-    await app.until(() => /bpy\.ops\.mesh\.primitive_cube_add\(/.test(document.querySelector(".bl-info").textContent));
+    await app.until(() => /bpy\.ops\.mesh\.primitive_cube_add\(/.test(document.querySelector('[data-blender="INFO"]').textContent));
     await textEditor.hover();
     await app.page.keyboard.press("Alt+n");
     await app.page.keyboard.type("import bpy\nbpy.context.object.location.x = 2\n");
