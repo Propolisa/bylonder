@@ -29,7 +29,6 @@ const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
 // Operators whose invoke reads the mouse or the view, run with their event as Blender's window manager runs them.
 const MOUSE_OPERATORS = new Set(['mesh.knife_tool', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_delete_at_cursor', 'mesh.spin', 'mesh.bisect']);
 
-const MESH_MODES = ['OBJECT', 'EDIT', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT'];
 
 // A dashed line in the view's overlay color (ED_region_draw_mouse_line_cb, wm_gesture_draw_line).
 function drawDashedLine(ctx, [[x0, y0], [x1, y1]]) {
@@ -338,13 +337,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     'mesh.select_linked_pick': pick((event, { deselect }) => linkedPick(event, deselect)),
     'mesh.loop_select': pick((event, props) => loopPick(event, 'mesh.loop_select', props)),
     'mesh.edgering_select': pick((event, props) => loopPick(event, 'mesh.edgering_select', props)),
-    // Object and Edit Mode; a mesh's other modes (object_mode_set_itemf) show greyed.
-    'object.mode_set': {
-      supports: ({ mode }) => mode === 'OBJECT' || mode === 'EDIT',
-      poll: ({ mode }) => mode === 'OBJECT' || !!em || editable(activeObject()),
-      run: ({ mode }) => (mode === 'EDIT' ? em || enter() : em && exit()),
-      enumItems: (prop) => (prop === 'mode' ? rnaOperators['object.mode_set'].properties.mode.items.filter(([id]) => MESH_MODES.includes(id)) : []),
-    },
   });
   const modeKeys = createKeymap([
     { blender: 'object.mode_set', keys: 'Tab', poll: () => !!em || editable(activeObject()), run: () => (em ? exit() : enter()) },
@@ -414,6 +406,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     },
     enter,
     exit,
+    editable: () => editable(activeObject()),
     toggle: () => (em ? exit() : enter()),
     // The Mesh of the object in Edit Mode, extracted from its edit mesh, which owns it while editing; null for another.
     meshOf: (node) => (em?.object === node ? em.mesh : null),
