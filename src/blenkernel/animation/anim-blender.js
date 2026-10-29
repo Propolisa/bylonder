@@ -172,8 +172,8 @@ export class BlenderAnimation {
   // The F-Curve of an ID's property, made as keying makes it when missing (a channel group, PropertyType and subtype
   // decide its flags and color).
   fcurve(id, rnaPath, index, { group = '', type = 'FLOAT', subtype = 'NONE' } = {}) {
-    return new FCurve(withString(rnaPath, (p) => withString(group, (g) =>
-      x.anim_fcurve_ensure(this.main.bmain, id, p, index, g, PROPERTY_TYPES[type], PROPERTY_SUBTYPES.get(subtype) ?? 0))) >>> 0);
+    return this.#evaluated(new FCurve(withString(rnaPath, (p) => withString(group, (g) =>
+      x.anim_fcurve_ensure(this.main.bmain, id, p, index, g, PROPERTY_TYPES[type], PROPERTY_SUBTYPES.get(subtype) ?? 0))) >>> 0));
   }
   fcurves(id) { return pointerList(x.anim_fcurves(id, 0), (p) => x.anim_fcurves(id, p)).map((p) => new FCurve(p)); }
   // An ID's drivers (AnimData.drivers), and a driver added on one of its properties (anim_driver_add; flag:
@@ -181,17 +181,23 @@ export class BlenderAnimation {
   drivers(id) { return pointerList(x.anim_drivers(id, 0), (p) => x.anim_drivers(id, p)).map((p) => new FCurve(p)); }
   addDriver(id, rnaPath, index, flag = CREATEDRIVER_WITH_DEFAULT_DVAR) {
     const pointer = withString(rnaPath, (p) => x.anim_driver_add(id, p, index, flag)) >>> 0;
-    return pointer ? new FCurve(pointer) : null;
+    return this.#evaluated(pointer ? new FCurve(pointer) : null);
   }
-  remove(id, fcurve) { x.anim_fcurve_remove(id, fcurve.pointer); }
+  remove(id, fcurve) { this.#evaluated(x.anim_fcurve_remove(id, fcurve.pointer)); }
   // Inserts a key as Blender's keying does.
-  insert(fcurve, frame, value, flags = INSERTKEY_NOFLAGS) { return x.anim_keyframe_insert(this.main.scene, fcurve.pointer, frame, value, flags); }
+  insert(fcurve, frame, value, flags = INSERTKEY_NOFLAGS) { return this.#evaluated(x.anim_keyframe_insert(this.main.scene, fcurve.pointer, frame, value, flags)); }
   // Keys an ID's RNA path at the scene's frame with its value now, as keyframe_insert() does (every element of an array
   // for index -1), into a channel group (Blender's default for an empty one): the keys inserted. keyDelete and
   // keyClear remove the key at the frame and the whole F-Curves, as keyframe_delete() and Clear Keyframes do.
-  keyInsert(id, path, index = -1, group = '') { return withString(path, (p) => withString(group, (g) => x.anim_path_keyframe_insert(this.main.C, id, p, index, g))); }
-  keyDelete(id, path, index = -1) { return withString(path, (p) => x.anim_path_keyframe_delete(this.main.C, id, p, index)); }
-  keyClear(id, path, index = -1) { return withString(path, (p) => x.anim_path_keyframe_clear(this.main.C, id, p, index)); }
+  keyInsert(id, path, index = -1, group = '') { return this.#evaluated(withString(path, (p) => withString(group, (g) => x.anim_path_keyframe_insert(this.main.C, id, p, index, g)))); }
+  keyDelete(id, path, index = -1) { return this.#evaluated(withString(path, (p) => x.anim_path_keyframe_delete(this.main.C, id, p, index))); }
+  keyClear(id, path, index = -1) { return this.#evaluated(withString(path, (p) => x.anim_path_keyframe_clear(this.main.C, id, p, index))); }
+  // Main evaluated after a keying operation, as Blender's window evaluates after each operator: a new F-Curve's
+  // animation is then evaluated once, while the values are the keyed ones. Returns the operation's result.
+  #evaluated(result) {
+    this.main.evaluate();
+    return result;
+  }
   // The scene's time and keying settings the editors read.
   setTime({ frame, start, end, previewStart, previewEnd, preview, fps, keyframeType = 'KEYFRAME', autoKey = false }) {
     const cfra = Math.floor(frame);

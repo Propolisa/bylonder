@@ -31,6 +31,7 @@
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
 #include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
 #include "DEG_depsgraph_query.hh"
 #include "DNA_curve_types.h"
 #include "DNA_object_types.h"
@@ -86,6 +87,9 @@ struct NurbsHeader {
 
 /* The edit splines in Edit Mode, else the curve's. */
 static ListBaseT<Nurb> &nurbs_of(Object *ob) { return *BKE_curve_nurbs_get(&curve_of(ob)); }
+
+/* The editor wrote into an object's Curve, which the depsgraph evaluates again. */
+static void data_changed(Object *ob) { DEG_id_tag_update(static_cast<ID *>(ob->data), ID_RECALC_GEOMETRY); }
 
 /* The splines in curve_nurbs_set's layout, valid until the next call. */
 EXPORT(curve_nurbs_get) const NurbsHeader *curve_nurbs_get(Object *ob)
@@ -182,6 +186,7 @@ EXPORT(curve_nurbs_set) void curve_nurbs_set(Object *ob, int nurbs_num, const in
   Curve &cu = curve_of(ob);
   cu.actnu = actnu;
   cu.actvert = actvert;
+  data_changed(ob);
 }
 
 /* What RNA's update does after a point of a spline changes (rna_Curve_update_points): its handles calculated again. */
@@ -190,6 +195,7 @@ EXPORT(curve_nurb_handles_calc) void curve_nurb_handles_calc(Object *ob, int ind
   if (Nurb *nu = static_cast<Nurb *>(BLI_findlink(&nurbs_of(ob), index))) {
     BKE_nurb_handles_calc(nu);
   }
+  data_changed(ob);
 }
 
 /* Text: its body (UTF-8; the edit text in Edit Mode), each character's format, the cursor and selection, the text
@@ -245,6 +251,7 @@ EXPORT(curve_text_set) void curve_text_set(Object *ob, const char *body, const C
     cu.editfont->selstart = selstart;
     cu.editfont->selend = selend;
   }
+  data_changed(ob);
 }
 
 /* Sets the text boxes (x, y, width and height each) and the active one. */
@@ -260,6 +267,7 @@ EXPORT(curve_bevel_profile_update) void curve_bevel_profile_update(Object *ob)
     cu.bevel_profile = BKE_curveprofile_add(PROF_PRESET_LINE);
   }
   BKE_curveprofile_init(cu.bevel_profile, cu.bevresol + 1);
+  data_changed(ob);
 }
 
 EXPORT(curve_text_boxes_set) void curve_text_boxes_set(Object *ob, const float *boxes, int totbox, int actbox)
@@ -268,6 +276,7 @@ EXPORT(curve_text_boxes_set) void curve_text_boxes_set(Object *ob, const float *
   cu.totbox = std::clamp(totbox, 1, MAXTEXTBOX);
   cu.actbox = actbox;
   std::copy_n(boxes, 4 * cu.totbox, &cu.tb[0].x);
+  data_changed(ob);
 }
 
 /* A font in the Main from a TrueType, OpenType or Type 1 file's bytes, packed as Blender packs a font file; null when
@@ -305,12 +314,16 @@ EXPORT(curve_text_font_set) void curve_text_font_set(Object *ob, int slot, VFont
   }
   *fonts[slot] = vfont;
   id_us_plus(&vfont->id);
+  data_changed(ob);
+  DEG_relations_tag_update(G_MAIN);
 }
 
 /* The object a Curve's pointer (bevel_object, taper_object, follow_curve) names, at its DNA offset. */
 EXPORT(curve_object_pointer_set) void curve_object_pointer_set(Object *ob, int offset, Object *target)
 {
   *reinterpret_cast<Object **>(reinterpret_cast<char *>(ob->data) + offset) = target;
+  data_changed(ob);
+  DEG_relations_tag_update(G_MAIN);
 }
 
 /* Evaluates a curve or text object as the depsgraph does in the viewport (its modifiers included; objects it follows
@@ -358,6 +371,7 @@ EXPORT(curve_edit_load_free) void curve_edit_load_free(Main *bmain, Object *ob)
     ED_curve_editnurb_free(ob);
   }
   BKE_nurbList_free(&snapshot);
+  data_changed(ob);
 }
 
 /* A transform's steps each start from the edit splines as they were when it began, as Blender's transform restores
@@ -372,6 +386,7 @@ EXPORT(curve_edit_restore) void curve_edit_restore(Object *ob)
   ListBaseT<Nurb> &nurbs = nurbs_of(ob);
   BKE_nurbList_free(&nurbs);
   BKE_nurbList_duplicate(&nurbs, &snapshot);
+  data_changed(ob);
 }
 
 /* view3d.select in Edit Mode: Blender's pick at a region pixel within dist_px (ED_view3d_select_dist_px, which reads

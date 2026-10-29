@@ -2,6 +2,8 @@
  * and pose in and out, Edit Mode's edit bones (armature_utils.cc's ED_armature_to_edit and ED_armature_from_edit, which
  * object.mode_set runs), the pose Blender evaluates (BKE_pose_where_is, in main_evaluate), which Bylonder draws, and
  * picking a bone in Edit and Pose Mode. */
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
 #include "BKE_action.hh"
 #include "BKE_armature.hh"
 #include "BKE_context.hh"
@@ -170,6 +172,9 @@ void armature_bones_set(Main *bmain, Object *ob, int bones_num, const int *ints,
     copy_v3_v3(pchan->eul, f + 7);
     copy_v3_v3(pchan->scale, f + 10);
   }
+  DEG_id_tag_update(&arm.id, ID_RECALC_GEOMETRY);
+  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
+  DEG_relations_tag_update(bmain);
 }
 
 /* A click on a bone (its index in armature_bones_get's order, -1 for none; `part` 0 for its body, 1 its head, 2 its

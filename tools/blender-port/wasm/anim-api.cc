@@ -7,6 +7,7 @@
 #include "ANIM_animdata.hh"
 #include "ANIM_fcurve.hh"
 #include "ANIM_keyframing.hh"
+#include "BKE_anim_data.hh"
 #include "BKE_animsys.h"
 #include "BKE_node.hh"
 #include "BKE_pointcache.h"
@@ -14,6 +15,7 @@
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
 #include "BKE_fcurve.hh"
+#include "BKE_global.hh"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
 #include "BLT_translation.hh"
@@ -24,6 +26,8 @@
 #include "BLI_listbase.h"
 #include "BLI_math_vector.h"
 #include "BLI_string.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
 #include "DNA_anim_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
@@ -91,6 +95,21 @@ static animrig::Channelbag *channelbag(ID *id)
   return animrig::channelbag_for_action_slot(adt->action->wrap(), adt->slot_handle);
 }
 
+/* Keys, F-Curves or drivers changed: the Actions copied for evaluation again and the IDs Main animates tagged, as
+ * Blender's keying and editors tag them. An edit of keys evaluates them again (ANIM_animdata_update); keying does not, so
+ * the values keyed and the ones not yet keyed stay (ID_RECALC_ANIMATION_NO_FLUSH). F-Curves or drivers added or removed
+ * change what the IDs animate, which rebuilds the depsgraph's relations. */
+static void animation_changed(const IDRecalcFlag flag, const bool curves)
+{
+  for (bAction &action : G_MAIN->actions) {
+    DEG_id_tag_update(&action.id, ID_RECALC_ANIMATION_NO_FLUSH);
+  }
+  BKE_animdata_main_cb(G_MAIN, [&](ID *id, AnimData * /*adt*/) { DEG_id_tag_update(id, flag); });
+  if (curves) {
+    DEG_relations_tag_update(G_MAIN);
+  }
+}
+
 /* The FCurve of an ID's property (RNA path and array index), made as keying makes it when missing: in a channel group
  * (or none for an empty name), discrete or integer by its PropertyType, colored by its PropertySubType. */
 EXPORT(anim_fcurve_ensure)
@@ -100,7 +119,9 @@ FCurve *anim_fcurve_ensure(Main *bmain, ID *id, const char *rna_path, int index,
   if (group[0]) {
     descriptor.channel_group = group;
   }
-  return &channelbag_ensure(bmain, id).fcurve_ensure(bmain, descriptor);
+  FCurve *fcurve = &channelbag_ensure(bmain, id).fcurve_ensure(bmain, descriptor);
+  animation_changed(ID_RECALC_ANIMATION_NO_FLUSH, true);
+  return fcurve;
 }
 
 /* Moves an ID's AnimData to another ID of the same type that has none (the object standing for the same Bylonder
@@ -109,6 +130,7 @@ EXPORT(anim_animdata_move) void anim_animdata_move(Main *bmain, ID *from, ID *to
 {
   std::swap(reinterpret_cast<IdAdtTemplate *>(from)->adt, reinterpret_cast<IdAdtTemplate *>(to)->adt);
   animrig::Slot::users_invalidate(*bmain);
+  animation_changed(ID_RECALC_ANIMATION_NO_FLUSH, true);
 }
 
 /* The FCurves of an ID's Action slot: their count, and their addresses written to r_fcurves when given. */
@@ -133,6 +155,7 @@ EXPORT(anim_fcurve_remove) void anim_fcurve_remove(ID *id, FCurve *fcu)
   if (bag) {
     bag->fcurve_remove(*fcu);
   }
+  animation_changed(ID_RECALC_ANIMATION, true);
 }
 
 /* Inserts a key as Blender's keying does, with the scene's keyframe type and the Preferences' interpolation and
@@ -141,8 +164,10 @@ EXPORT(anim_keyframe_insert) bool anim_keyframe_insert(Scene *scene, FCurve *fcu
 {
   animrig::KeyframeSettings settings = animrig::get_keyframe_settings(true);
   settings.keyframe_type = eBezTriple_KeyframeType(scene->toolsettings->keyframe_type);
-  return animrig::insert_vert_fcurve(fcu, {frame, value}, settings, eInsertKeyFlags(flag)) ==
-         animrig::SingleKeyingResult::SUCCESS;
+  const bool inserted = animrig::insert_vert_fcurve(fcu, {frame, value}, settings, eInsertKeyFlags(flag)) ==
+                        animrig::SingleKeyingResult::SUCCESS;
+  animation_changed(ID_RECALC_ANIMATION_NO_FLUSH, false);
+  return inserted;
 }
 
 /* Replaces an FCurve's keys with count BezTriples copied from bezts, then sorts and recalculates handles as the editors
@@ -157,6 +182,7 @@ EXPORT(anim_fcurve_keys_set) void anim_fcurve_keys_set(FCurve *fcu, const BezTri
   }
   sort_time_fcurve(*fcu);
   BKE_fcurve_handles_recalc(*fcu);
+  animation_changed(ID_RECALC_ANIMATION, false);
 }
 
 EXPORT(anim_fcurve_evaluate) float anim_fcurve_evaluate(FCurve *fcu, float frame) { return evaluate_fcurve(fcu, frame); }
@@ -182,15 +208,21 @@ EXPORT(anim_path_keyframe_insert) int anim_path_keyframe_insert(bContext *C, ID 
   const animrig::CombinedKeyingResult result = animrig::insert_keyframes(
       CTX_data_main(C), &id_ptr, channel_group, {rna_path_of(path, index)}, std::nullopt, context,
       eBezTriple_KeyframeType(scene->toolsettings->keyframe_type), animrig::get_keyframing_flags(scene));
-  return result.get_count(animrig::SingleKeyingResult::SUCCESS);
+  const int inserted = result.get_count(animrig::SingleKeyingResult::SUCCESS);
+  animation_changed(ID_RECALC_ANIMATION_NO_FLUSH, true);
+  return inserted;
 }
 EXPORT(anim_path_keyframe_delete) int anim_path_keyframe_delete(bContext *C, ID *id, const char *path, int index)
 {
-  return animrig::delete_keyframe(CTX_data_main(C), nullptr, id, rna_path_of(path, index), BKE_scene_frame_get(CTX_data_scene(C)));
+  const int deleted = animrig::delete_keyframe(CTX_data_main(C), nullptr, id, rna_path_of(path, index), BKE_scene_frame_get(CTX_data_scene(C)));
+  animation_changed(ID_RECALC_ANIMATION_NO_FLUSH, true);
+  return deleted;
 }
 EXPORT(anim_path_keyframe_clear) int anim_path_keyframe_clear(bContext *C, ID *id, const char *path, int index)
 {
-  return animrig::clear_keyframe(CTX_data_main(C), nullptr, id, rna_path_of(path, index));
+  const int cleared = animrig::clear_keyframe(CTX_data_main(C), nullptr, id, rna_path_of(path, index));
+  animation_changed(ID_RECALC_ANIMATION, true);
+  return cleared;
 }
 
 /* Custom properties (ID properties, `["name"]` paths) on an ID, which Babylon-native data is animated through: set to
@@ -463,7 +495,9 @@ EXPORT(anim_driver_add) FCurve *anim_driver_add(ID *id, const char *rna_path, in
   BKE_reports_init(&reports, RPT_STORE);
   const bool added = ANIM_add_driver(&reports, id, rna_path, index, short(flag), DRIVER_TYPE_PYTHON);
   BKE_reports_free(&reports);
-  return added ? verify_driver_fcurve(id, rna_path, index, DRIVER_FCURVE_LOOKUP_ONLY) : nullptr;
+  FCurve *driver = added ? verify_driver_fcurve(id, rna_path, index, DRIVER_FCURVE_LOOKUP_ONLY) : nullptr;
+  animation_changed(ID_RECALC_ANIMATION, true);
+  return driver;
 }
 /* An ID's drivers (AnimData.drivers): their count, written to r_fcurves when given. */
 EXPORT(anim_drivers) int anim_drivers(ID *id, FCurve **r_fcurves)
@@ -538,6 +572,7 @@ EXPORT(anim_action_use_frame_range_set) void anim_action_use_frame_range_set(bAc
   else {
     action.flag &= ~ACT_FRAME_RANGE;
   }
+  animation_changed(ID_RECALC_ANIMATION, false);
 }
 
 /* The Action's active slot (ActionSlot): its display name (the identifier without its ID type prefix), or null, and

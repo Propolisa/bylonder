@@ -30,7 +30,8 @@ import { MultiMaterial } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
-import { createMainView, mainPBR, ID_GR, ID_MA, ID_WO, ID_RECALC_GEOMETRY, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { createMainView, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { ID_RECALC_TRANSFORM, ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
 
 const ID_TE = 0x4554;
@@ -91,10 +92,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
-  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, offset, ptr: blender.scene + offset, shadow: new Map() }; };
+  // A struct of the scene's (not an ID), whose writes tag the scene.
+  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, offset, ptr: blender.scene + offset, get id() { return blender.scene; }, shadow: new Map() }; };
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings'), cursor = sceneStruct('View3DCursor');
   const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
-  const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), shadow: new Map() };
+  const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), get id() { return blender.scene; }, shadow: new Map() };
   // The scene's records, over the world: the scene, its render, unit and tool settings and 3D cursor, those whose slices it has.
   const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units, cursor] : []), tools, display];
   // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
@@ -152,8 +154,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
   }
 
-  // A record's values from Babylon into Main, where they differ from what was last synced; what Main holds is kept.
+  // A record's values from Babylon into Main, where they differ from what was last synced; what Main holds is kept. The
+  // ID written into is tagged for the depsgraph (an object's transform and flags, any other ID whole).
   function push(record, owner) {
+    const written = api.writes;
     for (const [name, binding] of syncBindings(rna, record.struct, owner)) {
       const field = dnaProperty(record.struct, name);
       if (!field || field.kind === 'pointer' || field.kind === 'struct') continue;
@@ -168,6 +172,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       record.shadow.set(name, dnaGet(record.struct, record.ptr, name));
       api.writes++;
     }
+    if (api.writes !== written) blender.tag(record.id ?? record.ptr, record.struct === 'Object' ? ID_RECALC_TRANSFORM | ID_RECALC_SYNC_TO_EVAL : 0);
   }
   // Objects: one per Bylonder object, with data of its type; one made again when its type changed. A deleted one is
   // deleted in Main, which undo brings back; one that left the scene keeps its keys (blender-ids.js).
@@ -290,7 +295,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // The scene: its values, its camera and world, and what operators read of its tool settings.
   function pushScene() {
     for (const record of sceneRecords()) push(record, world);
-    if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) dnaSet('ColorManagedViewSettings', view.ptr, name, value);
+    if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) {
+      if (dnaGet('ColorManagedViewSettings', view.ptr, name) === value) continue;
+      dnaSet('ColorManagedViewSettings', view.ptr, name, value);
+      blender.tag(blender.scene, ID_RECALC_SHADING);
+    }
     const settings = rna.pointer('Scene', world);
     blender.pivotPoint = V3D_AROUND[settings.tool_settings.transform_pivot_point];
     blender.camera = objects.get(world.sceneSettings?.camera())?.ob;
@@ -381,7 +390,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       collections.delete(id);
     }
     for (const c of cols.state.collections) {
-      if (!collections.has(c.id)) collections.set(c.id, { struct: 'Collection', ptr: blender.addCollection(null, c.name), shadow: new Map(), layer: { struct: 'LayerCollection', shadow: new Map() } });
+      if (!collections.has(c.id)) collections.set(c.id, { struct: 'Collection', ptr: blender.addCollection(null, c.name), shadow: new Map(), layer: { struct: 'LayerCollection', id: blender.scene, shadow: new Map() } });
       const record = collections.get(c.id);
       if (blender.name(record.ptr) !== c.name) blender.rename(record.ptr, c.name);
       push(record, c);
@@ -405,7 +414,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const pointer of pointers) if (!byPointer.has(pointer)) {
       const id = newId(pointer);
       byPointer.set(pointer, id);
-      collections.set(id, { struct: 'Collection', ptr: pointer, shadow: new Map(), layer: { struct: 'LayerCollection', shadow: new Map() } });
+      collections.set(id, { struct: 'Collection', ptr: pointer, shadow: new Map(), layer: { struct: 'LayerCollection', id: blender.scene, shadow: new Map() } });
     }
     for (const [id, record] of collections) if (!pointers.includes(record.ptr)) collections.delete(id);
     const idOf = (pointer) => (pointer === blender.masterCollection ? cols.MASTER : byPointer.get(pointer));
@@ -434,7 +443,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
 
   // Babylon into Main: what hooks marked changed, or `all` of it before Blender's code runs (so what no hook sees, the
   // selection and the slices' state, is in Main too), each value compared with what was last synced; then Main
-  // evaluated, as the depsgraph would.
+  // evaluated by its depsgraph, as Blender's window evaluates after each event.
   function flush(all = true) {
     if (state.applying) return;
     // Objects come and go by the world's list and by deleting (metadata, which hooks see).
@@ -458,9 +467,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       pushScene();
       sceneChanged = false;
     }
-    if (!all) return;
     blender.evaluate();
-    if (api.debug) assertEqual('flush');
+    if (all && api.debug) assertEqual('flush');
   }
 
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
@@ -701,5 +709,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     mainView.adoptScene();
     ids.read = false;
   }
+  // Evaluated from the start, as Blender's window evaluates Main after each event.
+  blender.evaluate();
   return api;
 }

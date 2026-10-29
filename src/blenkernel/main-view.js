@@ -17,7 +17,7 @@ import { CurveObject, evaluateCurve } from './curve/curve.js';
 import { blenderTransform } from '../editors/curve/curve-objects.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject } from '../runtime/object-transform.js';
-import { blenderModule } from '../bmesh/bmesh-wasm.js';
+import { blenderModule, ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { readTexture } from './texture/texture.js';
@@ -26,10 +26,7 @@ import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
-export const ID_RECALC_GEOMETRY = 1 << 1;
 const MODIFIER_DEFINITIONS = [...blenderModifierDefinitions, ...sceneModifierDefinitions];
-// The data an undo step read again (memfile_undosys_step_decode) is tagged to be copied for evaluation.
-const ID_RECALC_SYNC_TO_EVAL = 1 << 13;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.

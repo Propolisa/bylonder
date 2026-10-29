@@ -136,6 +136,8 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
     ownedMesh(extractedMesh(x.mesh_from_faces(positions.length / 3, p, face_offsets.length - 1, f, c) >>> 0)));
 
 
+// IDRecalcFlag: what the depsgraph evaluates again of an ID tagged with it (0 for all of it).
+export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 // A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
@@ -199,10 +201,15 @@ export class BlenderMain {
     const fields = this.#fields(ob);
     if (rotation_mode) fields.rotation_mode[0] = ROTATION_MODES.indexOf(rotation_mode);
     for (const [name, values] of Object.entries(arrays)) fields[name].set(values);
+    this.tag(ob, ID_RECALC_TRANSFORM);
   }
   // Folds an object's parent inverse into its own transform, keeping where it is.
   foldParentInverse(ob) { x.object_parent_inverse_fold(ob); }
 
+  // An ID the editor wrote into, tagged for the depsgraph (ID_RECALC_*, 0 for all of it); relations between IDs (a
+  // parent, a modifier's target) changed.
+  tag(id, flags = 0) { x.id_tag_update(id, flags); }
+  relationsChanged() { x.main_relations_tag(this.#context); }
   // What the last operator tagged for an update (ID_RECALC_*) on an object and on its data, until evaluate().
   tags(ob) {
     const { recalc, dataRecalc } = this.#fields(ob);
@@ -215,10 +222,12 @@ export class BlenderMain {
   // The scene's active camera object (or null).
   set camera(ob) { x.main_scene_camera_set(this.#context, ob ?? 0); }
 
-  // World matrices, parents first, as the depsgraph evaluates them; clears the tags.
+  // Main evaluated by Blender's depsgraph for what was tagged; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }
-  // The scene's frame, its animation and drivers evaluated for it (view-api.cc view_frame_set).
+  // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
+  // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.
+  updates() { return Array.from({ length: x.main_updates() }, (_, i) => ({ id: x.main_update(i) >>> 0, recalc: x.main_update_recalc(i) >>> 0 })); }
 
   // A mesh object's Mesh, with the attributes Blender's Mesh has types for.
   setMesh(ob, mesh) {
@@ -248,10 +257,19 @@ export class BlenderMain {
     const header = x.view_edit_mesh_extract(ob, what) >>> 0;
     return header ? { mesh: extractedMesh(header), selectmode: x.view_edit_mesh_selectmode(ob) } : null;
   }
-  // A mesh object's Mesh with its modifiers applied, as Blender's viewport evaluates it: a Mesh that is its own.
-  evaluatedMesh(ob) { return ownedMesh(extractedMesh(x.object_mesh_eval(this.#context, ob) >>> 0)); }
+  // An object's evaluated mesh as the depsgraph evaluated it (a mesh's with its modifiers, a curve's or text's as Blender
+  // draws it), valid until the next call, or null when it has none.
+  evaluatedMesh(ob) {
+    const header = x.object_mesh_eval(this.#context, ob) >>> 0;
+    return header ? extractedMesh(header) : null;
+  }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
-  setModifiers(ob, modifiers) { return setModifiers(ob, modifiers).errors; }
+  setModifiers(ob, modifiers) {
+    const { errors } = setModifiers(ob, modifiers);
+    this.tag(ob, ID_RECALC_GEOMETRY);
+    this.relationsChanged();
+    return errors;
+  }
   // An object's modifiers as Main holds them: each one's type (ModifierType), name, mode (ModifierMode) and address.
   modifiers(ob) {
     const list = [];
@@ -302,6 +320,8 @@ export class BlenderMain {
       const a = made.get(from), b = made.get(to);
       x.node_link_add(owner, a.node, a.sockets.get('out:' + output), b.node, b.sockets.get('in:' + input));
     }
+    this.tag(owner, ID_RECALC_SHADING);
+    this.relationsChanged();
   }
   nodeTree(owner) { return JSON.parse(cString(x.node_tree_describe(owner))); }
 

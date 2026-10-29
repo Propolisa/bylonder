@@ -1009,3 +1009,4 @@ bool ED_operator_objectmode(bContext *C)
 }
 
 }  // namespace blender
+
