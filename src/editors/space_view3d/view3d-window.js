@@ -1,6 +1,6 @@
 // The 3D Views as areas of Blender's window (windowmanager/wm-window.js): their window regions are their canvases, their
 // views Babylon's cameras, and in Object Mode their input runs Blender's keymaps and modal operators on Main, which the
-// scene sync keeps equal to the scene: flushed before Blender's code runs, written back after, with the selected meshes'
+// scene sync keeps equal to the scene: flushed before Blender's code runs, viewed after, with the selected meshes'
 // geometry given to it while an operator runs, an undo step when one finishes, and the popups it opens drawn by the
 // page. What Blender leaves unhandled goes to the page's keymaps (wm-event-system.js).
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../windowmanager/wm-window.js';
@@ -56,7 +56,7 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
     host.keying(() => { result = window.event(kind, data, strings); });
     if (!acting) return result;
     running = result.modal;
-    if (running) sync.writeBack();
+    if (running) sync.view();
     else sync.end();
     if (running) host.notify(areas.get(view)?.status ?? '');
     else if (result.finished.length) host.notify('');
