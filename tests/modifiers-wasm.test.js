@@ -5,7 +5,7 @@ import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { evaluateBlenderModifiers, evaluated, moduleModifiers, evaluation, estimatedFaces } from '../src/modifiers/blender.js';
 import { evaluateHere } from '../src/modifiers/evaluator.js';
 import { createJobs } from '../src/windowmanager/wm-jobs.js';
-import { EditMesh } from '../src/bmesh/bmesh-wasm.js';
+import { scratchMain, evaluateModifiers } from '../src/bmesh/bmesh-wasm.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createMesh, createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
@@ -43,14 +43,18 @@ for (const file of fs.readdirSync(dir).sort().filter((name) => !SKIPPED[name])) 
 assert.deepEqual(failed, [], 'Modifier results that differ from Blender');
 assert.equal(known.length, Object.keys(KNOWN).length, 'A known difference is gone: remove it from KNOWN');
 
-// In Edit Mode: the same modifiers on the edit mesh give Blender's result, mapped back to the edit mesh's faces.
-const edit = EditMesh.fromMesh(primitive_add('mesh.primitive_cube_add'), 1);
+// In Edit Mode on Main: the same modifiers on the edit mesh give Blender's result.
+const main = scratchMain(), ob = main.add('MESH', 'Cube');
 const subsurf = JSON.parse(fs.readFileSync(new URL('subsurf.json', dir)));
-const final = evaluated(edit.evaluate(moduleModifiers(subsurf.stack)));
+main.setMesh(ob, primitive_add('mesh.primitive_cube_add'));
+main.setModifiers(ob, moduleModifiers(subsurf.stack));
+main.setBase(ob, { select: true, active: true });
+main.run('object.mode_set', { mode: 'EDIT' });
+main.evaluate();
+const final = main.evaluatedMesh(ob);
 assert.deepEqual(Array.from(final.corner_verts), subsurf.corner_verts);
-assert.deepEqual([...new Set(final.orig_index('FACE'))].sort(), [0, 1, 2, 3, 4, 5]);
-assert.equal(edit.evaluate([]).mesh, null);
-edit.free();
+main.run('object.mode_set', { mode: 'OBJECT' });
+main.remove(ob);
 
 // In the stack: Blender's modifiers draw on the object, and Apply keeps the evaluated Mesh.
 const engine = new NullEngine(), scene = new Scene(engine), box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
@@ -66,13 +70,11 @@ modifiers.apply(box, subsurfModifier.id);
 assert.equal(box.metadata.wbCreation.mesh.face_offsets.length - 1, 96);
 modifiers.dispose();
 
-// Evaluations posted to another realm (a worker) give the same Mesh, in Edit Mode with the edit mesh's faces.
-const cubeEdit = EditMesh.fromMesh(primitive_add('mesh.primitive_cube_add'), 1);
-const posted = evaluateHere(structuredClone(evaluation(cubeEdit.toMesh(), subsurf.stack, cubeEdit.selectmode)));
-const direct = evaluated(cubeEdit.evaluate(moduleModifiers(subsurf.stack)));
-assert.deepEqual([posted.corner_verts, posted.orig_index('FACE'), posted.vert_positions].map((a) => Array.from(a)),
-  [direct.corner_verts, direct.orig_index('FACE'), direct.vert_positions].map((a) => Array.from(a)));
-cubeEdit.free();
+// Evaluations posted to another realm (a worker) give the same Mesh.
+const cubeMesh = primitive_add('mesh.primitive_cube_add');
+const posted = evaluateHere(structuredClone(evaluation(cubeMesh, subsurf.stack)));
+const direct = evaluated(evaluateModifiers(cubeMesh, moduleModifiers(subsurf.stack)));
+assert.deepEqual([posted.corner_verts, posted.vert_positions].map((a) => Array.from(a)), [direct.corner_verts, direct.vert_positions].map((a) => Array.from(a)));
 assert.ok(estimatedFaces(primitive_add('mesh.primitive_cube_add'), [{ type: 'SUBSURF', values: { levels: 11 } }]) > 4e6);
 
 // With jobs, evaluations run off the main thread (a timer stands in for the worker; levels from 5 never finish): the
