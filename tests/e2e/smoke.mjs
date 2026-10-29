@@ -113,6 +113,29 @@ const checks = {
     for (const item of ["Insert Keyframes", "Reset All to Default Values", "Copy Data Path"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
   },
 
+  // docs/model.md 7: I over a material's Base Color in the Properties editor keys it in Main (the button operator on
+  // the button under the pointer), and the frames the Timeline sets are evaluated by Blender's animation and drawn.
+  async "I over a material's Base Color keys it, and the Timeline's frames animate the material"() {
+    const properties = app.locator("#properties-section");
+    await properties.locator('[title^="Material"]').first().click();
+    const baseColor = properties.locator('[data-blender="default_value"]').first();
+    const keyAt = async (frame, color) => {
+      await app.bylonder((b, f) => b.world.animation.seek(f), frame);
+      await app.bylonder((b, c) => { b.world.scene.getMeshByName("Cube").material.albedoColor.set(...c); b.world.mainSync.flush(); }, color);
+      await baseColor.hover();
+      await app.page.keyboard.press("i");
+    };
+    await keyAt(1, [1, 0, 0]);
+    await keyAt(21, [0, 0, 1]);
+    await typeInto('[role="spinbutton"][aria-label="Current Frame"]', "11");
+    await app.until((b) => {
+      const [red, , blue] = b.world.scene.getMeshByName("Cube").material.albedoColor.asArray();
+      return Math.abs(red - 0.5) < 0.01 && Math.abs(blue - 0.5) < 0.01;
+    });
+    await typeInto('[role="spinbutton"][aria-label="Current Frame"]', "21");
+    await app.until((b) => b.world.scene.getMeshByName("Cube").material.albedoColor.b > 0.99);
+  },
+
   // The HUD region's panel draws the operator's RNA properties; a change re-runs it.
   async "Add > Cylinder shows Adjust Last Operation, whose Vertices rebuild it"() {
     await app.click(0.3, 0.3);
@@ -568,6 +591,13 @@ async function screenOf([bx, by, bz]) {
     return [p.x / width, p.y / height];
   }, [bx, by, bz]);
   return app.point(fx, fy);
+}
+
+async function typeInto(selector, value) {
+  await app.locator(selector).first().click();
+  await app.page.keyboard.press("Control+A");
+  await app.page.keyboard.type(value);
+  await app.page.keyboard.press("Enter");
 }
 
 async function rightClick(x, y) {
