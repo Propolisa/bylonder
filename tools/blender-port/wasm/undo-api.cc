@@ -7,6 +7,8 @@
 #include "BKE_undo_system.hh"
 #include "BKE_wm_runtime.hh"
 #include "BLI_listbase.h"
+#include "BLI_listbase_iterator.hh"
+#include "BLO_undofile.hh"
 #include "BLI_string.h"
 #include "DNA_windowmanager_types.h"
 #include "ED_undo.hh"
@@ -53,11 +55,36 @@ EXPORT(undo_stack_init) void undo_stack_init(bContext *C)
   BKE_undosys_stack_init_from_context(wm->runtime->undo_stack, C);
 }
 
-/* Pushes a step of Main's state (a memfile step, or an edit-mode step while an object is edited) and returns it. */
+/* As memfile_undo.cc declares it. */
+struct MemFileUndoStep {
+  UndoStep step;
+  MemFileUndoData *data;
+};
+
+/* Whether a memfile step wrote a chunk the step before it did not (BLO_memfile_chunk_add). */
+static bool memfile_changed(UndoStep *step)
+{
+  const MemFile &memfile = reinterpret_cast<MemFileUndoStep *>(step)->data->memfile;
+  for (const MemFileChunk &chunk : memfile.chunks) {
+    if (!chunk.is_identical) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/* Pushes a step of Main's state (a memfile step, or an edit-mode step while an object is edited) and returns the
+ * active step: the last one when Main did not change, as a memfile step that wrote no new chunk holds nothing. */
 EXPORT(undo_push) UndoStep *undo_push(bContext *C, const char *name)
 {
+  UndoStack *ustack = stack_of(C);
+  UndoStep *last = ustack->step_active;
   ED_undo_push(C, name);
-  return stack_of(C)->step_active;
+  UndoStep *step = ustack->step_active;
+  if (last && step != last && step->type == BKE_UNDOSYS_TYPE_MEMFILE && !memfile_changed(step)) {
+    BKE_undosys_stack_clear_active(ustack);
+  }
+  return ustack->step_active;
 }
 
 /* Makes Main's state a step's, undoing or redoing to it; false when the stack no longer holds it. */
