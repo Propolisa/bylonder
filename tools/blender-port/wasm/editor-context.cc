@@ -632,6 +632,8 @@ EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int typ
   int total = 0;
   bool free = false;
   text.clear();
+  /* So the items function gets the context, as the UI's operator enum menus do (uiItemsFullEnumO). */
+  WM_operator_properties_sanitize(op->ptr, false);
   if (prop) {
     RNA_property_enum_items(C, op->ptr, prop, &items, &total, &free);
   }
