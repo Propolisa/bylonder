@@ -184,7 +184,7 @@ std::string operator_values_json(PointerRNA *ptr)
     }
     else if (type == PROP_ENUM) {
       const char *identifier = nullptr;
-      RNA_property_enum_identifier(nullptr, ptr, prop, RNA_property_enum_get(ptr, prop), &identifier);
+      RNA_property_enum_identifier(property_context, ptr, prop, RNA_property_enum_get(ptr, prop), &identifier);
       json += identifier ? "\"" + std::string(identifier) + "\"" : number(type, RNA_property_enum_get(ptr, prop));
     }
     else if (RNA_property_array_check(prop)) {

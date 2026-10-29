@@ -1,9 +1,9 @@
 // The scene module's check (manifest `check`, run by wasm_module.py after linking): the unit tests that drive
 // bmesh.wasm, run on the given build of it (BYLONDER_BMESH_WASM). Together they start Blender's types and Main, add
 // every primitive, enter and leave Edit Mode and run its operators and tools, evaluate modifier stacks, run Object Mode
-// operators, draw the Outliner, run the animation editors' operators, evaluate curves and text, run armatures and handle input in
-// Blender's window manager. Prints each test's result; the build runs it on the module and on copies with their data
-// moved, which must print the same.
+// operators, draw the Outliner, run the animation editors' operators, evaluate curves and text, run armatures and handle
+// input in Blender's window manager. Prints each test's result; the build runs it on the module and on copies with
+// their data moved, which must print the same.
 // usage: node tools/blender-port/check-bmesh.mjs MODULE.wasm
 import { execFile } from 'node:child_process';
 import { resolve } from 'node:path';

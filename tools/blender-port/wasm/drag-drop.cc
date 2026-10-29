@@ -23,8 +23,10 @@ namespace blender {
 
 void WM_operator_free(wmOperator *op) { operator_free(op); }
 
-/* As wm_event_system.cc defines them, for operators run in the context's area and region. */
-bool WM_operator_poll(bContext *C, wmOperatorType *ot) { return !ot->poll || ot->poll(C); }
+bool wm_operator_blocked(wmOperatorType *ot);
+/* As wm_event_system.cc defines them, for operators run in the context's area and region; an operator the page runs
+ * itself does not poll in the window's event handling (wm_operator_blocked). */
+bool WM_operator_poll(bContext *C, wmOperatorType *ot) { return !wm_operator_blocked(ot) && (!ot->poll || ot->poll(C)); }
 bool WM_operator_poll_context(bContext *C, wmOperatorType *ot, wm::OpCallContext /*context*/) { return WM_operator_poll(C, ot); }
 wmEventHandler_Dropbox *WM_event_add_dropbox_handler(ListBaseT<wmEventHandler> *handlers, ListBaseT<wmDropBox> *dropboxes)
 {
