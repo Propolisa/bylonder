@@ -137,6 +137,8 @@ export function createCollections(world, { commit = () => {} } = {}) {
     refresh: sync,
     // A whole state from Main after Blender's code ran (main-view.js), whose undo step is that code's.
     assign(next) {
+      // Main placed every object it holds: adopt() leaves them where Blender's code put them.
+      ids().forEach(id => known.add(id));
       if (JSON.stringify(next) === JSON.stringify(state)) return;
       state = clone(next); sync();
     },

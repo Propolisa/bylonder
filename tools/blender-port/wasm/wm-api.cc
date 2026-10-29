@@ -125,6 +125,11 @@ EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype, int subtype
   area->spacetype = char(spacetype);
   area->butspacetype_subtype = short(std::max(subtype, 0));
   screen_area_spacelink_add(WM_window_get_active_scene(win), area, eSpace_Type(spacetype));
+  if (spacetype == SPACE_VIEW3D) {
+    /* port-override: the module has no GPU select buffer, so its 3D Views pick edit-mesh elements as in X-ray, through
+     * each element's projection (view-api.cc's view_xray_picking); the page draws the shading. */
+    static_cast<View3D *>(area->spacedata.first)->shading.flag |= V3D_SHADING_XRAY | V3D_SHADING_XRAY_WIREFRAME;
+  }
   ED_area_and_region_types_init(area);
   if (area->type->space_subtype_set && subtype >= 0) {
     area->type->space_subtype_set(area, subtype);

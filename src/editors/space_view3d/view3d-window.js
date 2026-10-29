@@ -3,7 +3,9 @@
 // scene sync keeps equal to the scene: flushed before Blender's code runs, viewed after, with the selected meshes'
 // geometry given to it while an operator runs, an undo step when one finishes, and the popups it opens drawn by the
 // page. What Blender leaves unhandled goes to the page's keymaps (wm-event-system.js).
-import { Window, configureWindow, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../windowmanager/wm-window.js';
+import { Window, configureWindow, allowOperators, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../windowmanager/wm-window.js';
+import { hasOperator } from '../../windowmanager/wm-operators.js';
+import { operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { regionView3D } from './view3d-project.js';
 import { openModulePopup, runBlenderOperator } from '../object/object-operators.js';
 import { tagRedraw } from '../../draw/overlay-tool.js';
@@ -24,6 +26,8 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   // A view's area, laid out from the page (unless `layout` is false: as it last was).
   function area(view, layout = true) {
     configureWindow(window);
+    // Mesh Edit Mode is Blender's on Main: its operators the page has no code of its own for are Blender's (the Knife).
+    allowOperators(window, operatorNames().filter((idname) => idname.startsWith('mesh.') && !hasOperator(idname)));
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
     else if (!layout) return areas.get(view);
     window.size = { width: innerWidth, height: innerHeight };

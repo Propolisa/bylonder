@@ -557,6 +557,10 @@ static void panel_json(std::ostringstream &out, Panel *panel)
 EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
 {
   static std::string json;
+  /* A region without a size yet (one an area split just made) is not laid out, as Blender draws no such region. */
+  if (const ARegion *region = CTX_wm_region(C); !region || region->winx < 1 || region->winy < 1) {
+    return "{\"category\":\"\",\"categories\":[],\"panels\":[]}";
+  }
   ARegion *region = region_drawn(C);
   if (region->runtime->type->layout) {
     region->runtime->type->layout(C, region);
