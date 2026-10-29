@@ -606,15 +606,6 @@ EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const d
   return set;
 }
 
-EXPORT(operator_macro_debug) const char *operator_macro_debug(wmOperator *op)
-{
-  static std::string json;
-  json = "[";
-  for (wmOperator *opm = static_cast<wmOperator *>(op->macro.first); opm; opm = opm->next) {
-    json += operator_values_json(opm->ptr) + ",";
-  }
-  return (json += "]").c_str();
-}
 /* The values the operator ran with, as JSON (operator_values_json). */
 EXPORT(operator_values) const char *operator_values(wmOperator *op)
 {

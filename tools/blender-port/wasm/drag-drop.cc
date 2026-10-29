@@ -23,16 +23,6 @@ namespace blender {
 
 void WM_operator_free(wmOperator *op) { operator_free(op); }
 
-/* As wm_operators.cc defines them, over the module's operator properties (no IDProperties). */
-void WM_operator_properties_alloc(PointerRNA **ptr, IDProperty **properties, const char *opstring)
-{
-  if (*ptr == nullptr) {
-    *ptr = MEM_new<PointerRNA>(__func__, WM_operator_properties_create_ptr(WM_operatortype_find(opstring, false)));
-  }
-  *properties = nullptr;
-}
-void WM_operator_properties_sanitize(PointerRNA * /*ptr*/, const bool /*no_context*/) {}
-
 /* As wm_event_system.cc defines them, for operators run in the context's area and region. */
 bool WM_operator_poll(bContext *C, wmOperatorType *ot) { return !ot->poll || ot->poll(C); }
 bool WM_operator_poll_context(bContext *C, wmOperatorType *ot, wm::OpCallContext /*context*/) { return WM_operator_poll(C, ot); }
