@@ -1,11 +1,10 @@
 // Blender's Python (bpy_interface.cc): Blender's scripts, transpiled whole (src/bl_py, tools/blender-ui/tree.py), loaded
 // and started as Blender starts them, which registers their classes. Bylonder draws and runs those classes by name.
 import { loadRNAUI } from '../makesrna/rna.js';
-import { invokeOperator, runOperator, pollOperator, hasOperator, registerOperator, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
+import { invokeOperator, runOperator, pollOperator, hasOperator, registerFallback, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
 import { hasOperator as blenderHasOperator } from '../bmesh/bmesh-wasm.js';
-import { report } from '../windowmanager/wm-reports.js';
-import { set, __class__, __get__ } from '../bl_py/org.transcrypt.__runtime__.js';
-import { registerClass } from './bpy_rna.js';
+import { set, bool, __class__, __get__ } from '../bl_py/org.transcrypt.__runtime__.js';
+import { registerClass, inPythonContext, contextPointer } from './bpy_rna.js';
 
 
 // Blender's scripts read RNA's enums as they load. Vite serves JSON as a module, without Node's import attribute.
@@ -76,36 +75,27 @@ export const headers = ofKind('_HT_');
 // A module of the tree by its Python name (bl_ui.space_toolsystem_common).
 export const module = (name) => globalThis.__py_modules[name];
 
-// Blender's Python operators (bpy_operator_wrap.cc) Bylonder does not run its own way: an instance with its properties'
-// defaults and the values given, under Python's names and Transcrypt's (py_name), polled and executed (or invoked
-// from an event) in bpy.context. Bylonder's own registration of an idname, before or after, replaces this.
-const pythonNames = (key) => (key === 'type' ? ['type', 'py_metatype'] : [key, `py_${key}`]);
-function operatorInstance(cls, props) {
-  const operator = cls();
-  for (const [name, property] of Object.entries(cls.__annotations__ ?? {})) for (const key of pythonNames(name)) operator[key] = property.keywords?.default ?? null;
-  for (const [name, value] of Object.entries(props)) for (const key of pythonNames(name)) operator[key] = value;
-  operator.properties = operator;
-  operator.report = (types, message) => report([...types][0] ?? 'INFO', message);
-  return operator;
-}
-for (const [idname, cls] of Object.entries(registered)) {
-  if (!idname.includes('.') || hasOperator(idname)) continue;
-  registerOperator(idname, {
-    poll: () => {
-      try {
-        return !cls.poll || !!cls.poll(_bpy.context);
-      } catch (error) {
-        // As bpy_class_call: an exception in poll is printed and the operator is unavailable.
-        console.error(`Python: ${idname}.poll`, error);
-        return false;
-      }
-    },
-    run(props, event) {
-      const operator = operatorInstance(cls, props);
-      const result = event && operator.invoke ? operator.invoke(_bpy.context, event) : operator.execute?.(_bpy.context);
-      return [...(result ?? ['FINISHED'])][0];
-    },
-  });
+// Blender's Python operators are Blender's operator types (rna-operator.cc). Those Bylonder does not run its own way are
+// run by Blender in the scene's window with `run(idname, props, event)` (runBlenderOperator, the scene made current around
+// them), polled by their class in its context once `beforePoll()` made Main current.
+export function registerPythonOperators(run, beforePoll) {
+  for (const [idname, cls] of Object.entries(registered)) {
+    if (!idname.includes('.') || hasOperator(idname)) continue;
+    registerFallback(idname, {
+      blender: true,
+      poll: () => {
+        beforePoll();
+        try {
+          return inPythonContext(contextPointer(), () => !cls.poll || !!bool(cls.poll(_bpy.context)));
+        } catch (error) {
+          // As bpy_class_call: an exception in poll is printed and the operator is unavailable.
+          console.error(`Python: ${idname}.poll`, error);
+          return false;
+        }
+      },
+      run: (props, event) => run(idname, props, event),
+    });
+  }
 }
 
 // bpy.context (and bpy.data) for what is drawn or run next, as Blender sets the window manager's context.

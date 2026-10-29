@@ -54,7 +54,7 @@ import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
-import { registered } from "./python/bpy_interface.js";
+import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
@@ -405,6 +405,7 @@ history.start();
 const objectOperatorHost = { transaction: commands.transaction, notify, keying: (run) => animation.keying(run), commit, wm: () => world.wm,
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
+registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !world.editMode.active, host: objectOperatorHost,
   menu: (name, at) => world.callMenu(name, at) });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);

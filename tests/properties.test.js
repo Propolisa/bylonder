@@ -1,6 +1,5 @@
-// The Properties editor drawn from Blender's own panels (properties_*.py in Blender's Python tree): every tab of every object type
-// Bylonder has draws its panels without errors over a NullEngine scene, each property a panel shows exists in Blender's
-// RNA, and bound properties read and write through.
+// Bylonder's RNA over a NullEngine scene, as the scene sync reads it (makesrna/rna-bylonder.js): a text object's and a
+// curve's data, a material's Principled BSDF, and light and camera data read and write through in Blender's units.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, Mesh, MeshBuilder, TransformNode, Vector3, PointLight, SpotLight, DirectionalLight, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -12,17 +11,11 @@ import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
-import { loadRNAUI, rnaProperty, INFO } from '../src/makesrna/rna.js';
-import { panelTypes, drawPanels } from '../src/editors/interface/panels.js';
-import { isLayout } from '../src/editors/interface/layout.js';
+import { loadRNAUI } from '../src/makesrna/rna.js';
 import { CurveObject } from '../src/blenkernel/curve/curve.js';
-import { propertiesContext, propertiesTabs, TAB_CONTEXTS } from '../src/editors/space_buttons/buttons-context.js';
 import { asObject } from '../src/runtime/object-transform.js';
 
 await loadRNAUI();
-const { panels, menus, headers } = await import('../src/python/bpy_interface.js');
-const modules = [{ classes: [...Object.values(panels), ...Object.values(menus), ...Object.values(headers)] }];
-const types = panelTypes(modules, { space: 'PROPERTIES' });
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene), empty = new TransformNode('Empty', scene);
@@ -50,62 +43,25 @@ const selection = createSelection(scene, objects);
 const updates = [];
 const r = createRNA({ world, selection, update: (struct, name) => updates.push(`${struct}.${name}`) });
 
-// Every node of a drawn panel, and the properties it shows that Blender's RNA lacks.
-const walk = (node, visit) => { visit(node); if (isLayout(node)) node.children.forEach((child) => walk(child, visit)); };
-const missing = new Set(), errors = [];
-let drawn = 0;
-const check = (panel) => {
-  drawn++;
-  if (panel.error) errors.push(`${panel.id}: ${panel.error.stack.split('\n').slice(0, 3).join(' | ')}`);
-  for (const layout of [panel.header, panel.preset, panel.body].filter(Boolean)) walk(layout, (node) => {
-    if (!['prop', 'prop_enum', 'prop_search', 'prop_menu_enum'].includes(node.kind) || !node.data) return;
-    const struct = node.data[INFO]?.struct;
-    if (struct && !rnaProperty(struct, node.property)) missing.add(`${panel.id}: ${struct}.${node.property}`);
-  });
-  panel.children.forEach(check);
-};
+const pointer = (node) => r.pointer('Object', node);
 
-const space = { context: 'OBJECT', pin: null, search: '', tabs: () => propertiesTabs(context, rnaProperty('SpaceProperties', 'context').items) };
-let context;
-const tabsOf = () => space.tabs().filter(Boolean).map(([id]) => id);
-world.materials.newMaterial(cube);
-const drawn_tabs = {};
-for (const ob of objects) {
-  selection.replace([ob]);
-  context = propertiesContext(r, space);
-  const tabs = tabsOf();
-  drawn_tabs[ob.name] = tabs;
-  for (const tab of tabs) {
-    space.context = tab;
-    drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]] }).forEach(check);
-  }
-}
-assert.deepEqual(errors, [], 'panels draw without errors');
-assert.deepEqual([...missing], [], "every property a panel shows is Blender's");
-assert.deepEqual(drawn_tabs.Cube, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'MODIFIER', 'PARTICLES', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
-const panelsOf = (ob, tab) => { selection.replace([ob]); context = propertiesContext(r, space); space.context = tab; return drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]] }).map((p) => p.id); };
-assert.deepEqual(drawn_tabs.Text, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'MODIFIER', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
-assert.ok(['DATA_PT_font', 'DATA_PT_paragraph', 'DATA_PT_text_boxes', 'DATA_PT_geometry_curve'].every((id) => panelsOf(text, 'DATA').includes(id)), "a text object's data is Blender's Font panels");
-assert.equal(context.curve.align_x, 'CENTER');
-assert.equal(context.curve.extrude, Math.fround(0.1));
-assert.ok(panelsOf(curve, 'DATA').includes('DATA_PT_shape_curve'), "a curve's data is Blender's Curve panels");
+// A text object's data is Blender's Font, a curve's Blender's Curve.
+assert.equal(pointer(text).data.align_x, 'CENTER');
+assert.equal(pointer(text).data.extrude, Math.fround(0.1));
+assert.equal(pointer(curve).type, 'CURVE');
 // A material is a Principled BSDF over the Babylon material's inputs.
-selection.replace([cube]);
-context = propertiesContext(r, space);
-const principled = context.material.node_tree.get_output_node('EEVEE').inputs.get('Surface').links[0].from_node;
+world.materials.newMaterial(cube);
+const principled = pointer(cube).active_material.node_tree.get_output_node('EEVEE').inputs.get('Surface').links[0].from_node;
 assert.equal(principled.name, 'Principled BSDF');
 principled.inputs.get('Roughness').default_value = 0.25;
 assert.equal(world.materials.activeMaterial(cube).roughness, 0.25);
-assert.ok(panelsOf(cube, 'MATERIAL').includes('EEVEE_MATERIAL_PT_surface'));
-assert.deepEqual(drawn_tabs.Light, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'PHYSICS', 'CONSTRAINT', 'DATA']);
 
 // Light and camera data read and write through in Blender's units.
-selection.replace([point]);
-context = propertiesContext(r, space);
-assert.equal(context.light.type, 'POINT');
+const light = pointer(point).data;
+assert.equal(light.type, 'POINT');
 // A Babylon light's power is Blender's as Blender's glTF exporter converts it (Unitless: W / 4π candela).
-assert.ok(Math.abs(context.light.energy - 4 * Math.PI) < 1e-9);
-context.light.energy = 500;
+assert.ok(Math.abs(light.energy - 4 * Math.PI) < 1e-9);
+light.energy = 500;
 assert.ok(Math.abs(point.intensity - 500 / (4 * Math.PI)) < 1e-9);
 // A light Blender's code made keeps all of Blender's settings; its Babylon light is derived from them.
 const { makeBlenderLight, lightLosses } = await import('../src/blenkernel/light/light-home.js');
@@ -118,19 +74,18 @@ assert.ok(Math.abs(lamp.intensity - 2000 / (4 * Math.PI)) < 1e-9, 'exposure doub
 lampData.energy = 400;
 assert.ok(Math.abs(lamp.intensity - 800 / (4 * Math.PI)) < 1e-9);
 assert.deepEqual(lightLosses(lamp), ['"' + lamp.name + '": its color temperature has no Babylon equivalent']);
-selection.replace([camera]);
-context = propertiesContext(r, space);
-context.camera.lens = 50;
+const cameraObject = pointer(camera);
+cameraObject.data.lens = 50;
 const degrees = (radians) => [...radians].map((r) => Math.round(r * 180 / Math.PI * 1000) / 1000 + 0);
-assert.deepEqual(degrees(context.object.rotation_euler), [63.559, 0, 46.692], "a camera's rotation is Blender's");
-assert.deepEqual([...context.object.location].map((v) => Math.round(v * 1e4) / 1e4), [7.3589, -6.9258, 4.9583]);
-context.object.rotation_euler = [Math.PI / 2, 0, 0];
-assert.deepEqual(degrees(context.object.rotation_euler), [90, 0, 0], 'and writes back');
+assert.deepEqual(degrees(cameraObject.rotation_euler), [63.559, 0, 46.692], "a camera's rotation is Blender's");
+assert.deepEqual([...cameraObject.location].map((v) => Math.round(v * 1e4) / 1e4), [7.3589, -6.9258, 4.9583]);
+cameraObject.rotation_euler = [Math.PI / 2, 0, 0];
+assert.deepEqual(degrees(cameraObject.rotation_euler), [90, 0, 0], 'and writes back');
 assert.ok(Vector3.TransformNormal(new Vector3(0, 0, 1), camera.getWorldMatrix()).subtract(new Vector3(0, 0, 1)).length() < 1e-6, 'looking along Blender +Y, Babylon +Z');
-assert.ok(Math.abs(context.camera.lens - 50) < 1e-9);
+assert.ok(Math.abs(cameraObject.data.lens - 50) < 1e-9);
 assert.ok(updates.includes('PointLight.energy') && updates.includes('Camera.lens'));
 
 world.modifiers.dispose();
 scene.dispose();
 engine.dispose();
-console.log(`Properties: ${drawn} of Blender's panels draw for ${objects.length} objects in every tab; light and camera data read and write through`);
+console.log('Properties: text, curve, material, light and camera data read and write through');

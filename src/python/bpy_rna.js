@@ -254,7 +254,7 @@ const structHandler = {
   has(target, key) {
     if (typeof key !== 'string' || key.startsWith('_') || key in target) return key in target;
     const ptr = target[POINTER_RNA], name = rnaName(key);
-    return !!findProperty(ptr, name) || !!findFunction(ptr[0], name) || name in STRUCT_METHODS
+    return !!findProperty(ptr, name) || !!operatorProperty(ptr, name) || !!findFunction(ptr[0], name) || name in STRUCT_METHODS
       || (isContext(ptr) && contextMember(ptr[2], name) !== undefined);
   },
 };
