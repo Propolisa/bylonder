@@ -20,8 +20,7 @@ export function mountRuntimeLayout(){
   const properties=document.createElement('section');properties.id='properties-section';properties.append(document.querySelector('#pane'));
   for(const child of [...host.children]){
     if(child===panel)continue;
-    if(['gesture-cursor','gesture-guide'].includes(child.id))document.body.append(child);
-    else viewport.append(child);
+    viewport.append(child);
   }
   const timeline=document.createElement('section');timeline.id='timeline-section';
   const dopesheet=document.createElement('section');dopesheet.id='dopesheet-section';

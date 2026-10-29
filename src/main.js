@@ -19,7 +19,7 @@ import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
 import { windowCapture } from "./windowmanager/mouse-capture";
-import { createEventSystem, dragStart } from "./windowmanager/wm-event-system.js";
+import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -193,7 +193,7 @@ const overlays = createViewportOverlays(scene, {
     aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
   },
   origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
-  outlines: { outlined: () => editor?.selection.outlined() ?? [], isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!editor?.modal && !editor.modal.cursor },
+  outlines: { outlined: () => editor?.selection.outlined() ?? [], isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!world.wm?.modal },
   view3dCursor: () => world.sceneSettings.state.cursor,
 });
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
@@ -287,7 +287,7 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
     const requestId = e.data.payload.requestId;
-    if (creator?.pending || editor.modal) send("snapshot-result",{requestId,error:"Finish or cancel the active edit before sharing."});
+    if (creator?.pending || world.wm.modal) send("snapshot-result",{requestId,error:"Finish or cancel the active edit before sharing."});
     else send("snapshot-result",{requestId,state:currentOverrides()});
   }
   if (e.data.type === "remember") {
@@ -328,7 +328,6 @@ const editor = createEditor(
   views,
   history,
   () => { refreshUI(); views.wake(); },
-  notify,
   capture,
 );
 const activeView = () => views.input;
@@ -371,7 +370,7 @@ const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT
 // Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
 const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
 const applyTool = () => {
-  if (!editor.modal && !world.editMode.active) editor.setMode(TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ?? "select");
+  if (!world.wm?.modal && !world.editMode.active) editor.setMode(TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ?? "select");
 };
 // The 3D View operators act on: the context area's (wm-operators.js), else the one under the pointer.
 const contextView = () => contextArea()?.space ?? activeView();
@@ -432,7 +431,7 @@ const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['
 const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, sync: world.mainSync, commit });
 const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
-const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });
+const unsubscribeAnimation = animation.subscribe(() => { if (!world.wm?.modal) {editor.selection.sync();refreshUI();} });
 // The Scripting workspace's editors: Text Editor, Python Console and Info.
 registerTextOperators(world.texts);
 registerConsoleOperators();
@@ -445,7 +444,6 @@ const scriptingEditors = [
 let inspectorBusy = false;
 async function inspector() {
   if (inspectorBusy) return;
-  editor.finish(false);
   inspectorBusy = true;
   try {
     if (world.scene.debugLayer.isVisible()) world.scene.debugLayer.hide();
@@ -481,9 +479,9 @@ const viewportCtx = {
 };
 const mountView = (options) => {
   const view = createView3D(viewportCtx, options);
-  const detachEditor = editor.attach(view), detachTouch = touch.attach(view);
+  const detachTouch = touch.attach(view);
   const dispose = view.dispose;
-  view.dispose = () => { detachEditor(); detachTouch(); dispose(); };
+  view.dispose = () => { detachTouch(); dispose(); };
   views.add(view);
   viewportCtx.shadingChanged();
   return view;
@@ -556,7 +554,6 @@ world.modifiers.onDrawn(() => views.wake());
 ownObservers = observerCount() - userObservers;
 function undoRedo(redo) {
   creator.finish();
-  editor.finish(false);
   redo ? history.redo() : history.undo();
   world.curves.refresh();
   editor.reconcile();
@@ -610,10 +607,8 @@ registerOperators({
     poll: (props) => editor.selection.size > 0 || !!props.cursor_transform,
     run: (props, event) => {
       creator.finish();
-      if (world.editMode.kind === "MESH" && !props.cursor_transform) return world.editMode.module(idname, props, event);
-      if (!world.editMode.active && !props.cursor_transform) return runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event });
-      const point = event && (props.cursor_transform ? dragStart(event) : event);
-      editor.start(type, { point, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
+      if (world.editMode.active && !props.cursor_transform) return world.editMode.module(idname, props, event);
+      return runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event });
     },
   }])),
   // Blender's is Python setting the data path with exec; a path to a property Bylonder does not bind passes through.
@@ -662,7 +657,7 @@ viewportDock.onHeaderMenu((id, event) => {
 });
 // Bylonder's own keys, below Blender's keymaps.
 const bylonderKeys = createKeymap([
-  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
+  { keys: "ESC", poll: () => !world.wm.modal, run: () => renderHost.escape() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
 // Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve or Font), then the

@@ -74,25 +74,6 @@ dialog {
 dialog::backdrop {
   background: #0008;
 }
-#gesture-cursor {
-  position: fixed;
-  z-index: 10;
-  pointer-events: none;
-  font: 20px monospace;
-  color: #fff;
-  text-shadow: 0 0 3px #000;
-  transform: translate(-50%, -50%);
-}
-#gesture-guide {
-  position: fixed;
-  z-index: 9;
-  width: 7px;
-  height: 7px;
-  border: 1px solid #ffb354;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
 [hidden] {
   display: none !important;
 }

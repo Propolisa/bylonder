@@ -10,11 +10,8 @@ import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDB
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { do_mesh_region_select, boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
-import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix } from '../transform/transform.js';
-import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js';
+import { regionView3D, viewProjection, toBlender, toBlenderMatrix } from '../space_view3d/view3d-project.js';
 import { runModal, modifierFlags } from '../space_view3d/view3d-modal.js';
-import { createTransMesh } from '../transform/transform-mesh.js';
-import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperator, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { redoProperties } from '../interface/hud.js';
@@ -107,7 +104,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   function enter(object = activeObject()) {
     if (em || !editable(object)) return false;
-    editor.finish(false);
     editor.setMode('select');
     em = { object, edit: load(objectMesh(object)), overlay: createEditMeshOverlay(object) };
     object.metadata = { ...object.metadata, editing: true };
@@ -164,13 +160,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   // Runs a select operator, recorded as an undo step through sync.
   const run = (idname, props) => () => { place(); meshOperator(em.edit, idname, props); selectmode = em.edit.selectmode; sync({ extract: EXTRACT_FLAGS }); };
-  // The Normal orientation, Z along the summed normals of the selected faces, for a move constrained to it.
-  function normalOrientation() {
-    const { mesh, object } = em, normals = mesh.face_normals(), selected = mesh.attribute('.select_poly'), sum = [0, 0, 0];
-    for (let f = 0; f < mesh.faces_num; f++) if (selected[f]) for (let a = 0; a < 3; a++) sum[a] += normals[f * 3 + a];
-    const normal = Vector3.TransformNormal(new Vector3(sum[0], sum[2], sum[1]), object.computeWorldMatrix(true));
-    return { type: 'NORMAL', matrix: createSpaceNormal(toBlender(normal)), axis: 'Z' };
-  }
   // Places the object for what operators do in world space.
   const place = () => {
     em.edit.objectToWorld = toBlenderMatrix(em.object.computeWorldMatrix(true));
@@ -324,7 +313,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     if (hit) run('mesh.select_linked_pick', { object_index: 0, index: EDBM_elem_to_index_any(em.mesh, hit), deselect })();
   };
   const menuApi = {
-    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, macro, module: moduleOperator, start: (type, options) => editor.start(type, options),
+    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, module: moduleOperator,
     inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
   };
   const menus = editMeshMenus(menuApi);
@@ -340,7 +329,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const pick = (select) => ({ poll: (props, event) => !!em && !!event?.view, run: (props, event) => select(event, props) });
   registerOperators({
     ...Object.fromEntries(Object.entries(editMeshActions(menuApi))
-      .filter(([idname]) => !['transform.translate', 'transform.rotate', 'transform.resize', 'view3d.select_box'].includes(idname)).map(([idname, run]) => [idname, { poll: inEdit, run }])),
+      .filter(([idname]) => idname !== 'view3d.select_box').map(([idname, run]) => [idname, { poll: inEdit, run }])),
     // A tool's drag adjusts the operator's value as it moves (WM_operator_type_modal_from_exec_for_object_edit_coords).
     ...Object.fromEntries(['mesh.vertices_smooth', 'transform.vertex_random'].map((idname) => [idname, {
       poll: () => !!em && em.edit.poll(idname),
@@ -441,29 +430,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     },
     selectBox: (event, { mode = 'SET' }) => selectBox(event, mode, /mouse$/.test(event.type)),
     selectRegion,
-    // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
-    // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
-    // the operator that ran first (extrude).
-    transform(type, view, mouse, { orient, keep } = {}) {
-      if (!em) return null;
-      const changed = (fn) => (...args) => { const result = fn(...args); sync({ commit: false, extract: EXTRACT_POSITIONS }); return result; };
-      let session;
-      if (type === 'edge_slide') {
-        // Edge Slide's JS port slides a BMesh of the edit mesh's arrays; its coordinates go to the edit mesh.
-        const bm = editBMesh(em.edit, em.mesh), slide = beginEdgeSlide(bm, em.object, view, mouse);
-        if (!slide) { notify('Invalid Edge Selection'); return null; }
-        const verts = Array.from({ length: em.mesh.verts_num }, (_, v) => v);
-        const push = () => { em.edit.setCoords(verts, bm.v.co.subarray(0, verts.length * 3)); sync({ commit: false, extract: EXTRACT_POSITIONS }); };
-        const slid = (fn) => (...args) => { const result = fn(...args); push(); return result; };
-        const handled = (fn) => (...args) => fn(...args) && (push(), true);
-        session = Object.assign(Object.create(slide), { update: slid(slide.update), keymap: handled(slide.keymap), numinput: handled(slide.numinput), cancel: slid(slide.cancel) });
-      } else {
-        const data = createTransMesh(em.edit, em.mesh, em.object);
-        if (!data) return null;
-        session = initTransform(type, { ...data, apply: changed(data.apply), restore: changed(data.restore) }, view, mouse, { orient: orient === 'NORMAL' ? normalOrientation() : undefined });
-      }
-      return Object.assign(Object.create(session), { keep, finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep, extract: EXTRACT_POSITIONS }); } });
-    },
     // After undo or redo: the object's restored Mesh becomes the edit mesh again.
     reload() {
       if (!em) return;

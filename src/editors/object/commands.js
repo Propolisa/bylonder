@@ -1,8 +1,6 @@
-import { Mesh, TransformNode, VertexData } from "@babylonjs/core";
 import { nodeId, deleted, identify } from "./identity.js";
-import { rebuildMesh } from "./mesh-catalog.js";
 export function createObjectCommands(world, editor, history, refresh) {
-  const { scene, objects } = world;
+  const { objects } = world;
   const roots = () => editor.selection.roots;
   const live = () => objects.filter((n) => !deleted(n));
   const unique = (base) => {
@@ -15,7 +13,6 @@ export function createObjectCommands(world, editor, history, refresh) {
   let before = () => {};
   const transaction = (fn) => {
     before();
-    editor.finish(false);
     fn();
     history.commit();
     editor.reconcile();

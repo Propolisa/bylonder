@@ -1,10 +1,8 @@
 // Edit Mode on curve and text objects (editcurve.cc, editfont.cc): the object's Curve data goes into the module, where
 // Blender's own curve and font editors change it (ED_curve_editnurb_make, ED_curve_editfont_make), and comes back on
 // every change to be drawn and kept as an undo step. Operators run by their exec, registered by Blender idname for
-// Blender's Curve and Font keymaps and menus; transforms run Blender's transform operator for each step from the edit
-// data as it was (transform_convert_curve.cc); picking is Blender's (ED_curve_editnurb_select_pick) in the 3D View's
-// region, the only operator that runs with one.
-import { Vector3 } from '@babylonjs/core';
+// Blender's Curve and Font keymaps and menus; transforms and macros run modally in the module's 3D View
+// (transform_convert_curve.cc); picking is Blender's (ED_curve_editnurb_select_pick) in the 3D View's region.
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { hasOperator, OPERATOR_FINISHED, moduleAccess } from '../../bmesh/bmesh-wasm.js';
 import { openMenu } from '../interface/menu.js';
@@ -13,8 +11,8 @@ import { createEditCurveOverlay } from '../../draw/overlay-edit-curve.js';
 import { createEditTextOverlay } from '../../draw/overlay-edit-text.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createMesh } from '../../blenkernel/mesh/mesh.js';
-import { initTransform, toBlender, toBlenderView } from '../transform/transform.js';
-import { worldAxes } from '../transform/transform-mesh.js';
+import { regionView3D, toBlenderView } from '../space_view3d/view3d-project.js';
+import { runModal } from '../space_view3d/view3d-modal.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
@@ -23,8 +21,6 @@ import { curveData } from './curve-objects.js';
 
 const EMPTY = () => createMesh({ vert_positions: new Float32Array(0), edges: new Int32Array(0), face_offsets: new Int32Array([0]),
   corner_verts: new Int32Array(0), corner_edges: new Int32Array(0) });
-// Blender's macros: an operator, then a move of what it made.
-const MACROS = { 'curve.extrude_move': 'curve.extrude', 'curve.duplicate_move': 'curve.duplicate' };
 
 // Blender's window matrix (GL, right-handed) for a Babylon camera, as RegionView3D.winmat.
 function winmat(camera, aspect) {
@@ -35,20 +31,6 @@ function winmat(camera, aspect) {
   }
   const f = 1 / Math.tan(camera.fov / 2);
   return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) / (near - far), -1, 0, 0, (2 * far * near) / (near - far), 0];
-}
-
-// The angle and axis of a rotation matrix (columns).
-function axisAngle(m) {
-  const angle = Math.acos(Math.max(-1, Math.min(1, (m[0][0] + m[1][1] + m[2][2] - 1) / 2)));
-  const axis = [m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0]], length = Math.hypot(...axis);
-  return length < 1e-9 ? [0, [0, 0, 1]] : [angle, axis.map((v) => v / length)];
-}
-// An orientation whose Z is the axis.
-function axisMatrix(z) {
-  const x = Math.abs(z[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
-  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-  const y = cross(z, x), ny = Math.hypot(...y), yn = y.map((v) => v / ny), xn = cross(yn, z);
-  return [...xn, ...yn, ...z];
 }
 
 export function createEditCurve({ world, editor, views, history, notify, changed, curves }) {
@@ -82,7 +64,6 @@ export function createEditCurve({ world, editor, views, history, notify, changed
 
   function enter(node = activeObject()) {
     if (ed || !editable(node)) return false;
-    editor.finish(false);
     editor.setMode('select');
     const object = curves.object(node);
     // What it follows, evaluated as they are, for the edit object to follow too.
@@ -125,10 +106,14 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     return status;
   }
 
-  // An operator and then a move of what it made, as Blender's macros run: one undo step, kept when the move is cancelled.
-  function operatorMove(idname) {
-    if (!(exec(idname) & OPERATOR_FINISHED)) return;
-    editor.start('move', { keep: true });
+  // An operator Blender's code runs modally in the module's 3D View (a transform or a macro), the edit data drawn as it
+  // runs; one undo step when it finishes.
+  function module(idname, props, event) {
+    const view = event?.view ?? views.input, main = ed.object.main;
+    main.view = regionView3D(view);
+    return runModal({ wm: world.wm, view, pointer: editor.pointer, target: main, idname, props, event, notify,
+      step: () => sync({ commit: false }),
+      end: (status) => sync({ commit: !!(status & OPERATOR_FINISHED) }) }).status;
   }
 
   // view3d.select in Edit Mode: Blender's pick at the mouse.
@@ -177,51 +162,6 @@ export function createEditCurve({ world, editor, views, history, notify, changed
   }
   const wm = () => world.wm;
 
-  // The selected points' median in world space (Blender's axes), from their transform data's centers.
-  function median() {
-    const world_m = ed.node.computeWorldMatrix(true), centers = [];
-    for (const spline of ed.object.data.splines) {
-      for (const p of spline.bezier_points ?? []) {
-        if (p.hide) continue;
-        if (p.select_control_point) centers.push(p.co, p.co, p.co);
-        else {
-          if (p.select_left_handle) centers.push(p.handle_left);
-          if (p.select_right_handle) centers.push(p.handle_right);
-        }
-      }
-      for (const p of spline.points ?? []) if (p.select && !p.hide) centers.push(p.co);
-    }
-    if (!centers.length) return null;
-    const sum = centers.reduce((s, c) => s.add(Vector3.TransformCoordinates(new Vector3(c[0], c[2], c[1]), world_m)), Vector3.Zero());
-    return toBlender(sum.scale(1 / centers.length));
-  }
-
-  // A modal transform: each step runs Blender's transform operator, from the edit data as it was, with the step's
-  // values (world space): translate by the translation, rotate by the matrix's angle about its axis, scale by its
-  // diagonal, about the transform's center.
-  function transform(type, view, mouse, { keep } = {}) {
-    if (!ed || ed.kind === 'FONT') return null;
-    const center = median();
-    if (!center) return null;
-    ed.object.snapshot();
-    const step = (idname, props) => { ed.object.restore(); ed.object.run(idname, props); sync({ commit: false }); };
-    const data = {
-      center,
-      local: worldAxes(ed.node.computeWorldMatrix(true)),
-      apply(mat, c, translation, mode) {
-        if (mode === 'translate') return step('transform.translate', { value: translation });
-        if (mode === 'rotate') {
-          const [angle, axis] = axisAngle(mat);
-          return step('transform.rotate', { value: angle, orient_axis: 'Z', orient_matrix: axisMatrix(axis), center_override: c });
-        }
-        return step('transform.resize', { value: [mat[0][0], mat[1][1], mat[2][2]], center_override: c });
-      },
-      restore() { ed.object.restore(); sync({ commit: false }); },
-    };
-    const session = initTransform(type, data, view, mouse);
-    return Object.assign(Object.create(session), { keep, finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); } });
-  }
-
   // Typing in Edit Text: a key with a character inserts it, as Blender's TEXTINPUT event does (font.text_insert).
   function typed(event) {
     const key = event.native?.key;
@@ -248,7 +188,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
   for (const idname of Object.keys(rna).filter((id) => /^(curve|font)\./.test(id) && !id.startsWith('curve.primitive_') && hasOperator(id))) {
     registerOperator(idname, { poll: inEdit(idname), run: invoke(idname), enumItems: (prop) => ed?.object.enumItems(idname, prop) });
   }
-  registerOperators(Object.fromEntries(Object.entries(MACROS).map(([macro, idname]) => [macro, { poll: inEdit(idname), run: () => operatorMove(idname) }])));
+  for (const idname of ['curve.extrude_move', 'curve.duplicate_move']) registerOperator(idname, { poll: inEdit(idname), run: (props, event) => module(idname, props, event) });
   // The text clipboard is the browser's: copy and cut write the selection (BKE_vfont_select_get) to it, paste inserts
   // what it holds, as editfont.cc does with the window manager's clipboard.
   const selection = () => {
@@ -281,7 +221,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     toggle: () => (ed ? exit() : enter()),
     exec,
     keymap: (event) => modeKeys(event) || (!!ed && typed(event)),
-    transform,
+    module,
     // view3d.select, view3d.select_box and the other region selects, as the tools' and 3D View's keymaps run them.
     selectOperator(event, { toggle, select_passthrough }) {
       if (ed?.kind === 'CURVE') selectPick(event, !!toggle);
@@ -321,7 +261,6 @@ const NEW_OBJECT = { use_path: true, dimensions: '3D' };
 
 export function registerCurveAddOperators({ editor, history, commands, curves, editCurve }) {
   const create = (type, name, fill) => {
-    editor.finish(false);
     const object = new CurveObject(type, name);
     try {
       fill?.(object);

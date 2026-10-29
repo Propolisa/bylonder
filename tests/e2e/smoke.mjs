@@ -229,7 +229,7 @@ const checks = {
     await app.hover(0.6, 0.3);
     await app.click(0.6, 0.3);
     await expectStats(({ Verts }) => Verts[1] > before);
-    assert.equal(await app.bylonder((b) => !!b.editor.modal), false);
+    assert.equal(await app.bylonder((b) => !!b.world.wm.modal), false);
   },
 
   async "Add Modifier > Subdivision Surface subdivides the cube"() {
@@ -283,7 +283,7 @@ const checks = {
       await app.page.keyboard.press("g");
       await app.page.mouse.move(x + 5 + dx, y + 5, { steps: 10 });
       await app.page.mouse.click(x + 5 + dx, y + 5);
-      await app.until((b) => !b.editor.modal);
+      await app.until((b) => !b.world.wm.modal);
       const [, , x1, y1] = await screen();
       assert.ok(Math.abs(x1 - x0 - dx) < 2 && Math.abs(y1 - y0) < 2, `moved by ${[x1 - x0, y1 - y0]} px for ${dx} px`);
     }

@@ -52,7 +52,7 @@ const dataPath = (data, name) => ({ SpaceView3D: 'space_data.', ToolSettings: 't
 //   ctx: { world, views, editor, creator, dock, capture, overlays, rna (createRNA),
 //          sceneCamera() -> authored camera, shadingChanged(), name }
 export function createView3D(ctx, { section, canvas = null, headerId, cameraName = '__editorCamera:' + headerId, from = null }) {
-  const { world, views, editor, creator, dock } = ctx;
+  const { world, views, creator, dock } = ctx;
   const { scene } = world;
   section.classList.add('viewport-area');
   if (!canvas) { canvas = document.createElement('canvas'); section.prepend(canvas); }
@@ -89,7 +89,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.nav = nav;
 
   const toggleCameraView = () => {
-    creator.finish(); editor.finish(false); ctx.capture.release();
+    creator.finish(); ctx.capture.release();
     const camera = ctx.sceneCamera();
     state.cameraView = !state.cameraView;
     if (state.cameraView) camera?.attachControl(canvas, true); else camera?.detachControl();

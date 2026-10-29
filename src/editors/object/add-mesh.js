@@ -6,7 +6,7 @@ import { eulO_to_mat3, mat3_normalized_to_eulO } from "../../blenlib/math-rotati
 import { unit_m3 } from "../../blenlib/math-matrix.js";
 import { cursorRotationMatrix } from "../../blenkernel/scene/cursor.js";
 import { viewProjection } from "../space_view3d/view3d-project.js";
-import { toBabylon } from "../transform/transform.js";
+import { toBabylon } from "../space_view3d/view3d-project.js";
 
 const recipeOf = (preset, options) => (preset.operator ? { operator: preset.operator, options } : { builder: preset.builder, options });
 // The operator's properties that place the object rather than build its mesh.
@@ -83,7 +83,6 @@ export function createAddMesh(world, editor, history, commands, config, notify) 
   // the object, as an Add operator's properties do, at the 3D cursor by default.
   const add = (preset, { options = {}, location = world.sceneSettings?.state.cursor.location ?? [0, 0, 0], rotation = [0, 0, 0] } = {}) => {
     finish();
-    editor.finish(false);
     const before = snapshot(world.objects);
     const defaults = Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default]));
     const recipe = recipeOf(preset, { ...defaults, ...options });

@@ -4322,6 +4322,42 @@
    }
   }
  },
+ "View3DCursor": {
+  "sdna": "View3DCursor",
+  "size": 64,
+  "properties": {
+   "location": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "rotation_quaternion": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "length": 4,
+    "type": "FLOAT"
+   },
+   "rotation_euler": {
+    "offset": 28,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "rotation_mode": {
+    "offset": 56,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   }
+  }
+ },
  "World": {
   "sdna": "World",
   "size": 480,

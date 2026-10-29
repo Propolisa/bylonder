@@ -48,8 +48,14 @@ export function newOperator(idname, props = {}) {
   }
   return op;
 }
+// A macro's properties of one of its operators (TRANSFORM_OT_translate in mesh.extrude_region_move's), a dict or a
+// keymap item's [name, value] pairs, by their paths ("TRANSFORM_OT_translate.value").
+const isPairs = (value) => Array.isArray(value) && value.length > 0 && value.every((v) => Array.isArray(v) && typeof v[0] === 'string');
+const flatProperties = (props, prefix = '') => Object.entries(props).flatMap(([name, value]) =>
+  (isPairs(value) || (value && typeof value === 'object' && !Array.isArray(value)) ? flatProperties(isPairs(value) ? Object.fromEntries(value) : value, `${prefix}${name}.`)
+    : [[prefix + name, value]]));
 export function setOperatorProperties(op, props) {
-  for (const [name, value] of Object.entries(props)) {
+  for (const [name, value] of flatProperties(props)) {
     const numbers = Float64Array.from([value].flat(), Number);
     const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
     // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).

@@ -13,7 +13,7 @@ import { registerToolGizmos } from './view3d-gizmo-tool.js';
 import { registerMeshGizmos } from './view3d-gizmo-mesh.js';
 import { createAnnotate } from '../gpencil/annotate.js';
 import { objectMesh } from '../object/object-mesh.js';
-import { worldAxes } from '../transform/transform-mesh.js';
+import { worldAxes } from './view3d-project.js';
 import { unit_m3 } from '../../blenlib/math-matrix.js';
 
 // The drag actions of the Transform tool's gizmo group (VIEW3D_GGT_xform_gizmo's drag_action).

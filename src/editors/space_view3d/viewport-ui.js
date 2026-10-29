@@ -42,7 +42,7 @@ export function createViewportStatus({ world, editor, views, send }) {
     const tris = visible.reduce((s, n) => s + (n.getTotalIndices() || n.getTotalVertices()) / 3, 0);
     const detail = `(${Math.round(world.animation.time.frame)}) ${home}${active ? ' | ' + active.name : ''}`;
     for (const view of views.all) view.setDetail?.(detail);
-    const hints = editor.modal
+    const hints = world.wm?.modal
       ? [[['mouse_lmb'], 'Confirm'], [['mouse_rmb'], 'Cancel'], [['X', 'Y', 'Z'], 'Axis'], [['Shift'], 'Precision'], [['Ctrl'], 'Snap']]
       : [[['mouse_lmb'], 'Select'], [['mouse_mmb'], 'Rotate View'], [['mouse_rmb'], 'Object Context Menu']];
     const fps = views.idle ? 'Idle' : Math.round(world.engine.getFps()) + ' FPS';

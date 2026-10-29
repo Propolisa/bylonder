@@ -1,9 +1,21 @@
 // A 3D View's projection in Blender's terms (view3d_project.cc, view3d_utils.cc) over its Babylon camera: Blender world
 // points (Z up) to client pixels and back, and the view's axes (RegionView3D.viewinv).
 import { Matrix, Ray, Vector3 } from '@babylonjs/core';
-import { toBabylon, toBlender, toBlenderView } from '../transform/transform.js';
-import { worldAxes } from '../transform/transform-mesh.js';
 import { add_v3, mul_v3_fl, sub_v3, dot_v3, normalize_v3, isect_ray_plane_v3_factor } from '../../blenlib/math-geom.js';
+
+// Babylon's world is Y up; Blender's is Z up.
+export const toBlender = (v) => [v.x, v.z, v.y];
+export const toBabylon = ([x, y, z]) => new Vector3(x, z, y);
+// A Babylon matrix in Blender's axes, column-major as Blender stores it (Babylon's row vectors give the same layout).
+export const toBlenderMatrix = (m) => Array.from({ length: 16 }, (_, i) => m.m[[0, 2, 1, 3][i >> 2] * 4 + [0, 2, 1, 3][i & 3]]);
+// A Babylon camera's view matrix as Blender's RegionView3D.viewmat: Blender's axes in, and a right-handed view that
+// looks along -Z out.
+export const toBlenderView = (m) => Array.from({ length: 16 }, (_, i) => ((i & 3) === 2 ? -1 : 1) * m.m[[0, 2, 1, 3][i >> 2] * 4 + (i & 3)]);
+// Babylon world matrix columns as Blender world axes, normalized.
+export function worldAxes(world) {
+  const m = world.m;
+  return [0, 2, 1].map((c) => toBlender(new Vector3(m[c * 4], m[c * 4 + 1], m[c * 4 + 2]).normalize()));
+}
 
 export function viewProjection(view) {
   const { camera, canvas } = view;

@@ -116,13 +116,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Each synced owner's record: its RNA struct, its Main address and what was last synced, by RNA name.
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
-  const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings' };
+  const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
   const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', SCENE_STRUCTS[name]).offset, shadow: new Map() });
-  const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings');
+  const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings'), cursor = sceneStruct('View3DCursor');
   const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
   const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), shadow: new Map() };
-  // The scene's records, over the world: the scene, its render, unit and tool settings, those whose slices it has.
-  const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units] : []), tools, display];
+  // The scene's records, over the world: the scene, its render, unit and tool settings and 3D cursor, those whose slices it has.
+  const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units, cursor] : []), tools, display];
   // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
   const viewNames = () => {
     const settings = rna.pointer('Scene', world).view_settings;
@@ -434,7 +434,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const record of sceneRecords()) push(record, world);
     if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) dnaSet('ColorManagedViewSettings', view.ptr, name, value);
     const settings = rna.pointer('Scene', world);
-    blender.cursor = Array.from(settings.cursor.location);
     blender.pivotPoint = V3D_AROUND[settings.tool_settings.transform_pivot_point];
     blender.camera = objects.get(world.sceneSettings?.camera())?.ob;
     blender.world = worlds.get(world.worlds?.active()?.id)?.wo;

@@ -31,9 +31,18 @@ wmOperator *operator_create(wmOperatorType *ot, const IDProperty *values)
   WM_operator_properties_alloc(&op->ptr, &op->properties, ot->idname);
   op->reports = MEM_new<ReportList>(__func__);
   BKE_reports_init(op->reports, RPT_STORE);
-  /* A macro's operators, in order, each with its properties from the macro's and the macro type's fixed values (as
-   * wm_operator_create fills op->macro). */
-  wmOperatorTypeMacro *otmacro = static_cast<wmOperatorTypeMacro *>(ot->macro.first);
+  operator_macro_fill(op);
+  return op;
+}
+
+/* A macro's operators, in order, each with its properties from the macro's and the macro type's fixed values (as
+ * wm_operator_create fills op->macro); made again after the macro's properties change. */
+void operator_macro_fill(wmOperator *op)
+{
+  while (wmOperator *opm = static_cast<wmOperator *>(BLI_pophead(&op->macro))) {
+    operator_destroy(opm);
+  }
+  wmOperatorTypeMacro *otmacro = static_cast<wmOperatorTypeMacro *>(op->type->macro.first);
   RNA_STRUCT_BEGIN (op->ptr, prop) {
     if (otmacro == nullptr) {
       break;
@@ -48,7 +57,6 @@ wmOperator *operator_create(wmOperatorType *ot, const IDProperty *values)
     }
   }
   RNA_STRUCT_END;
-  return op;
 }
 
 void operator_destroy(wmOperator *op)
@@ -106,6 +114,11 @@ static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double va
 
 bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *text)
 {
+  /* A macro's operator's property, as "TRANSFORM_OT_translate.value". */
+  if (const char *dot = strchr(name, '.')) {
+    PointerRNA sub = RNA_pointer_get(ptr, std::string(name, dot).c_str());
+    return sub.data && operator_property_set(&sub, dot + 1, numbers, len, text);
+  }
   PropertyRNA *prop = RNA_struct_find_property(ptr, name);
   if (!prop) {
     return false;
@@ -155,6 +168,11 @@ std::string operator_values_json(PointerRNA *ptr)
     json += (json.size() > 1 ? ",\"" : "\"") + std::string(RNA_property_identifier(prop)) + "\":";
     if (type == PROP_STRING) {
       json += "\"" + std::string(RNA_property_string_get(ptr, prop)) + "\"";
+    }
+    else if (type == PROP_POINTER) {
+      /* A macro's operator's properties. */
+      PointerRNA values = RNA_property_pointer_get(ptr, prop);
+      json += values.data ? operator_values_json(&values) : "null";
     }
     else if (type == PROP_ENUM) {
       const char *identifier = nullptr;

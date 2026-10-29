@@ -599,9 +599,22 @@ EXPORT(operator_free) void operator_free(wmOperator *op) { operator_destroy(op);
 /* Sets a property: numbers (len of them), or a string or enum identifiers. */
 EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const double *numbers, int len, const char *text)
 {
-  return operator_property_set(op->ptr, name, numbers, len, text);
+  const bool set = operator_property_set(op->ptr, name, numbers, len, text);
+  if (set && strchr(name, '.')) {
+    operator_macro_fill(op);
+  }
+  return set;
 }
 
+EXPORT(operator_macro_debug) const char *operator_macro_debug(wmOperator *op)
+{
+  static std::string json;
+  json = "[";
+  LISTBASE_FOREACH (wmOperator *, opm, &op->macro) {
+    json += operator_values_json(opm->ptr) + ",";
+  }
+  return (json += "]").c_str();
+}
 /* The values the operator ran with, as JSON (operator_values_json). */
 EXPORT(operator_values) const char *operator_values(wmOperator *op)
 {

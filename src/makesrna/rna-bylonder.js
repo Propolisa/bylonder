@@ -403,11 +403,11 @@ const STRUCTS = {
         ...rnaProperty('TransformOrientationSlot', 'type').items] } })))).get(world)),
   },
   View3DCursor: {
-    location: array((world) => [...cursorOf(world).location], (world, value) => world.sceneSettings.setCursor({ location: value })),
-    rotation_mode: { get: (world) => cursorOf(world).rotation_mode, set: (world, rotation_mode) => world.sceneSettings.setCursor({ rotation_mode }) },
-    rotation_euler: array((world) => [...cursorOf(world).rotation_euler], (world, value) => world.sceneSettings.setCursor({ rotation_euler: value })),
-    rotation_quaternion: array((world) => [...cursorOf(world).rotation_quaternion],
-      (world, value) => world.sceneSettings.setCursor({ rotation_quaternion: value }), 'wxyz'),
+    location: { ...array((world) => [...cursorOf(world).location], (world, value) => world.sceneSettings.setCursor({ location: value })), sync: true },
+    rotation_mode: { get: (world) => cursorOf(world).rotation_mode, set: (world, rotation_mode) => world.sceneSettings.setCursor({ rotation_mode }), sync: true },
+    rotation_euler: { ...array((world) => [...cursorOf(world).rotation_euler], (world, value) => world.sceneSettings.setCursor({ rotation_euler: value })), sync: true },
+    rotation_quaternion: { ...array((world) => [...cursorOf(world).rotation_quaternion],
+      (world, value) => world.sceneSettings.setCursor({ rotation_quaternion: value }), 'wxyz'), sync: true },
   },
   ToolSettings: {
     workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },

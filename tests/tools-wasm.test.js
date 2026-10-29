@@ -9,7 +9,6 @@ import '../src/python/bpy_interface.js';
 import { defaultKeymaps, modalItem } from '../src/windowmanager/keyconfig.js';
 import { dragDirection, WM_DRAG_THRESHOLD_MOUSE } from '../src/windowmanager/wm-event-system.js';
 import { SCE_SELECT_VERTEX } from '../src/bmesh/intern/bmesh-marking.js';
-import { isMacro, macroSteps } from '../src/editors/space_view3d/view3d-menus-edit-mesh.js';
 
 const fixtures = JSON.parse(await readFile(new URL('./fixtures/tools/edit-mesh.json', import.meta.url), 'utf8'))
   .filter(({ tool }) => tool.startsWith(process.env.ONLY ?? ''));
@@ -47,7 +46,7 @@ function replay(edit, tool, events, gizmo) {
       (!kmi.direction || kmi.direction === 'ANY' || kmi.direction === direction));
     if (!found) return;
     const [idname, , data] = found, props = Object.fromEntries(data?.properties ?? []);
-    run(idname === 'mesh.loopcut_slide' ? loopcutSteps(props) : isMacro(idname) ? macroSteps(idname, props) : [[idname, props]], event);
+    run(idname === 'mesh.loopcut_slide' ? loopcutSteps(props) : [[idname, props]], event);
   };
   // Operators in turn as a macro runs them, each invoked with the event (or run by its exec), until one runs modally.
   const run = (steps, event) => {

@@ -3,9 +3,8 @@
 // point perpendicular to a previous point or an end as snap_edge_points_impl does; else the surface hit. Occlusion is
 // "as seen": an element behind the surface under the mouse does not count.
 import { Vector3 } from '@babylonjs/core';
-import { toBlender } from './transform.js';
+import { toBlender, worldAxes } from '../space_view3d/view3d-project.js';
 import { sub_v3, dot_v3, add_v3, mul_v3_fl, closest_to_line_segment_v2, line_point_factor_v3, interp_v3 } from '../../blenlib/math-geom.js';
-import { worldAxes } from './transform-mesh.js';
 
 // eSnapMode (DNA_scene_types.h).
 export const SCE_SNAP_TO_POINT = 1 << 0, SCE_SNAP_TO_EDGE_MIDPOINT = 1 << 1, SCE_SNAP_TO_EDGE_ENDPOINT = 1 << 2,
