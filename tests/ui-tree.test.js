@@ -3,7 +3,7 @@ import { BlenderMain, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { blendData, setContextPointer, pointerStruct, structFind } from '../src/python/bpy_rna.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/editors/animation/anim-area.js';
-import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, panelClosedSet } from '../src/editors/interface/ui-tree.js';
+import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, buttonOperator, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 // Blender's Properties editor laid out by Blender's uiLayout in the module, its panels Blender's Python registered as
 // Blender's panel types, drawing Main's data; the trees the browser draws (ui-tree.cc).
@@ -72,7 +72,11 @@ const displace = ob.modifiers.new('Displace', 'DISPLACE');
 const displaceButtons = () => panels().filter((panel) => /displace/i.test(panel.id)).flatMap(panelButtons);
 assert.ok(displaceButtons().some((b) => b.operator === 'texture.new'), 'template_ID offers New');
 assert.equal(displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, true);
-displace.texture = blendData().textures.new('Texture', 'CLOUDS');
+// New runs as Blender's handlers run it, the button active: the texture it makes is the modifier's.
+const textureNew = displaceButtons().find((b) => b.operator === 'texture.new');
+assert.equal(area.inContext(RGN_TYPE_WINDOW, (C) => buttonOperator(C, textureNew)) & 4, 4, 'texture.new finished');
+assert.ok(displace.texture, 'and its texture is the modifier\'s');
+displace.texture.type = 'CLOUDS';
 assert.ok(!displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, 'active with a texture');
 
 // The header (PROPERTIES_HT_header) and a menu of Blender's Python, its items operators with their properties.

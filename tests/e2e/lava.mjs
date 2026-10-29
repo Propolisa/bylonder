@@ -18,7 +18,7 @@ export async function displacedSphere(app) {
     await app.frame().getByRole("menuitem", { name: category }).hover();
     await app.frame().getByRole("menuitem", { name }).click();
   }
-  await app.frame().locator('section[data-blender="DISPLACE"]').getByRole("button", { name: "New" }).click();
+  await app.frame().locator('section[data-blender="MOD_PT_Displace"]').getByRole("button", { name: "New" }).click();
   await app.locator('[role="tab"][aria-label="Texture"]').click();
   await app.frame().getByRole("button", { name: "Image or Movie" }).click();
   await app.frame().getByRole("menuitem", { name: "Clouds" }).click();

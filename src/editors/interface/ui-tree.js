@@ -23,5 +23,7 @@ export const panelClosedSet = (C, idname, closed) => withString(idname, (p) => x
 export const buttonPress = (C, button, value = -1) => x.ui_button_press(C, button.id, value);
 // What runs after a property button's value changed through RNA (its functions, its property's update).
 export const buttonApplied = (C, button) => x.ui_button_applied(C, button.id);
+// An operator button pressed as Blender's handlers run it: its operator with the button active; its wmOperatorStatus.
+export const buttonOperator = (C, button) => x.ui_button_operator(C, button.id);
 export const buttonValueSet = (C, button, value) => x.ui_button_value_set(C, button.id, value);
 export const buttonTextSet = (C, button, text) => withString(text, (p) => x.ui_button_text_set(C, button.id, p));

@@ -18,7 +18,8 @@ import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
-import { buttonMenu, buttonPress, buttonApplied, buttonValueSet, buttonTextSet } from './ui-tree.js';
+import { buttonMenu, buttonPress, buttonApplied, buttonValueSet, buttonTextSet, buttonOperator } from './ui-tree.js';
+import { runsOperator } from '../../windowmanager/wm-operators.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
@@ -133,6 +134,15 @@ function buttonNode(b, env) {
     onContextmenu: (e) => { e.preventDefault(); button.menu(e); } });
 }
 
+// An operator button: run by Bylonder's registry where it has the operator, else by Blender's handlers in the module,
+// the button active (template_ID's New assigns what it makes).
+const OPERATOR_FINISHED = 4;
+function runOperator(b, ui, event) {
+  if (runsOperator(b.operator)) return ui.run(b.operator, b.properties ?? {}, event);
+  const status = ui.inContext((C) => buttonOperator(C, b));
+  return status & OPERATOR_FINISHED ? ui.undoPush(b.tip || b.operator) : ui.refresh();
+}
+
 function widgetNode(b, env) {
   const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
   // A scaled layout's buttons (scale_y) keep the height Blender gave them.
@@ -178,7 +188,7 @@ function widgetNode(b, env) {
         return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, onClick: () => press(b, ui) }));
       }
       return withStyle(button({ text: shown, iconName, kind: 'tool', ...common, iconOnly: !shown && !!iconName, emboss: !flat, pressed: !!b.selected, className: 'flex-1',
-        onClick: (event) => (b.operator ? ui.run(b.operator, b.properties ?? {}, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
+        onClick: (event) => (b.operator ? runOperator(b, ui, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
   }
 }
 

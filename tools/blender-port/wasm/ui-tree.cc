@@ -712,6 +712,22 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
   button_update(but);
   return (but->flag & UI_SELECT) ? 1 : 0;
 }
+/* An operator button pressed, as ui_apply_but_funcs_after runs it: its operator in the button's context with the button
+ * active (template_ID's New assigns what it makes to the template's property), then the button's functions. Returns the
+ * operator's wmOperatorStatus. */
+EXPORT(ui_button_operator) int ui_button_operator(bContext *C, Button *but)
+{
+  const bContextStore *previous = CTX_store_get(C);
+  if (but->context) {
+    CTX_store_set(C, but->context);
+  }
+  but->flag |= BUT_ACTIVE_OVERRIDE;
+  const wmOperatorStatus status = WM_operator_name_call_ptr(C, but->optype, but->opcontext, but->opptr, nullptr);
+  but->flag &= ~BUT_ACTIVE_OVERRIDE;
+  CTX_store_set(C, previous);
+  button_applied(C, but);
+  return int(status);
+}
 /* After JS set a property button's value through RNA: its functions, as after a press. */
 EXPORT(ui_button_applied) void ui_button_applied(bContext *C, Button *but) { button_applied(C, but); }
 /* A number or text button without RNA (a value of Blender's code, but->poin): set as the button sets it. */
