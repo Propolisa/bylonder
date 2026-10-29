@@ -19,6 +19,7 @@ import sys
 import zlib
 
 import wasm_module
+import wasm_snapshot
 import wasm_weaken
 from wasm_module import WASM, demangle
 
@@ -310,7 +311,7 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     failed = [(s, e) for s, o, e in built if not o]
     if failed:
         sys.exit('\n'.join(f'{os.path.basename(s)} does not build: {first_error(e)}' for s, e in failed))
-    module = os.path.join(out, 'bylonder.wasm')
+    module = os.path.join(out, 'bylonder-raw.wasm')
     ar = shutil.which('llvm-ar') or shutil.which('llvm-ar-18')
     linked = os.path.join(out, 'module-archives')
     shutil.rmtree(linked, ignore_errors=True)
@@ -346,6 +347,8 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     print(f'{module}: {os.path.getsize(module)} bytes; API wins {sum(map(len, replaced["blender"].values()))} symbols, '
           f'Blender {sum(map(len, replaced["api"].values()))} (replaced.json); {len(missing)} imports, which throw when called',
           file=sys.stderr)
+    # The module the app loads starts initialized (wasm_snapshot.py): Blender's RNA and node types are in its data.
+    wasm_snapshot.snapshot(module, os.path.join(out, 'bylonder.wasm'))
 
 
 def duplicate_losers(stderr, preferred):
