@@ -1,73 +1,42 @@
-// Bylonder's scene and Blender's Main, kept equal both ways (docs/blender-boundary.md, "Who owns what"). The Babylon
-// scene is the truth and renders; Main is a second model of the same scene, so Blender's code (operators, editors,
-// the .blend writer) works on real data whenever it runs.
-// - One mapping: the RNA bindings marked `sync` (makesrna/rna-bylonder.js), read and written in Main at the DNA field
-//   Blender's RNA names (makesrna/dna-struct.js). What is not a value (names, parents, object data, materials,
-//   collections, modifiers, bases) is written here, under the same RNA names (an object's in RELATIONS).
-// - Babylon to Main: hooks on Babylon's setters and observables mark an object changed (hooks.js); flush() writes
-//   what differs from what was last synced, at the end of the task and before any of Blender's code runs.
-// - Main to Babylon: after Blender's code ran (run()), what it changed is written back through the same mapping:
-//   geometry by its recalc tag (ID_RECALC_GEOMETRY), values that differ from what was last synced (which also catches
-//   the writes Blender's buttons make without tagging). Writing back does not echo into Main.
-// - Geometry has one owner, the Babylon scene: Main's Meshes hold none at rest. Code that needs it gets it filled for
-//   its run (`meshes`), and only what the code changed comes back. In Edit Mode the module's edit mesh owns it.
+// Bylonder's scene and Blender's Main (docs/model.md). Main owns what Blender has a type for, its undo and its file;
+// Babylon draws it (main-view.js, the view). Until Bylonder's editors write Main through its RNA, what they write on
+// Babylon's objects crosses into Main here.
+// - One mapping: the RNA bindings marked `sync` (makesrna/rna-bylonder.js), at the DNA field Blender's RNA names
+//   (makesrna/dna-struct.js). What is not a value (names, parents, object data, materials, collections, modifiers,
+//   bases) is written here under the same RNA names (an object's in RELATIONS).
+// - Babylon to Main: hooks on Babylon's setters and observables mark an object changed (main-sync-hooks.js); flush()
+//   writes what differs from what was last written, at the end of the task and before any of Blender's code runs.
+// - Main to Babylon: after Blender's code ran (run(), view()) or an undo step loaded (undoLoad), the view writes what
+//   Main holds. Writing it does not echo into Main.
+// - Geometry: Main's Meshes own it. A mesh object's Mesh data goes into Main once, and again only when Bylonder's code
+//   sets new Mesh data (its recipe, metadata.wbCreation); the view draws what Blender's code changed. A mesh Babylon
+//   built itself (a MeshBuilder's) keeps its geometry: Main holds a stand-in, filled from it when Blender's code needs
+//   it, until Blender's code changes it.
+// - Undo is Blender's (undo-api.cc): undoPush pushes a step of Main, undoLoad loads one and draws it.
 // - check() compares the overlap of both models; with `debug` on it runs after every flush and run.
 import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
-import { createLight } from './light/light-home.js';
-import { createWorld } from './scene/world.js';
 import { modifierStack } from '../modifiers/stack.js';
-import { moduleModifiers, blenderModifierDefinitions, asBlenderModifier } from '../modifiers/blender.js';
-import { mesh_serialize } from './mesh/mesh.js';
+import { moduleModifiers, asBlenderModifier } from '../modifiers/blender.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
-import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
 import { CurveObject } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
-import { buildMesh } from '../editors/object/mesh-catalog.js';
-import { blenderTransform } from '../editors/curve/curve-objects.js';
-import { evaluateCurve } from './curve/curve.js';
-import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
-import { asObject } from '../runtime/object-transform.js';
-import { addModifier } from '../modifiers/stack.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
-import { blenderModule } from '../bmesh/bmesh-wasm.js';
-import { Color3, FreeCamera, Material, Mesh, MultiMaterial, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { MultiMaterial } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
+import { createMainView, ID_GR, ID_MA, ID_WO, ID_RECALC_GEOMETRY, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
 
-// ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
-const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d;
-const ID_RECALC_GEOMETRY = 1 << 1;
-const CURVE_TYPES = ['CURVE', 'FONT'];
+const ID_TE = 0x4554;
+
 const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, MEDIAN_POINT: 3, ACTIVE_ELEMENT: 4 };
-const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 const FLAGS = { hideSelect: 'hide_select', hideViewport: 'hide_viewport', hideRender: 'hide_render' };
-// Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
-export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material' };
 const LAYER_FLAGS = { exclude: 'exclude', hideViewport: 'hide_viewport' };
-// eRotationModes, and ModifierMode's viewport and render bits.
-const ROTATION_MODES = { QUATERNION: 0, XYZ: 1, XZY: 2, YXZ: 3, YZX: 4, ZXY: 5, ZYX: 6, AXIS_ANGLE: -1 };
-const MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
-// The Babylon objects a read Object becomes, by its type and its data's; a light of a type Babylon has no light for
-// becomes the nearest, with a warning.
-const MAKERS = {
-  EMPTY: (scene, name) => new TransformNode(name, scene),
-  CAMERA: (scene, name) => asObject(new FreeCamera(name, Vector3.Zero(), scene)),
-  // A light Blender's code made is Blender's (docs/blender-boundary.md point 4a); pull fills its settings from Main.
-  LIGHT: (scene, name, type) => createLight(name, type, {}, scene),
-};
-
-// A value as both models compare it: arrays plain, Main's floats being 32-bit.
-const plain = (value) => (value && typeof value === 'object' ? Array.from(value) : value);
-const close = (a, b) => Math.abs(a - b) <= 1e-5 * Math.max(1, Math.abs(a), Math.abs(b));
-export const same = (a, b) => (Array.isArray(a) ? Array.isArray(b) && a.length === b.length && a.every((v, i) => same(v, b[i]))
-  : typeof a === 'number' && typeof b === 'number' ? close(a, b) : a === b);
 // Whether `main` holds every value `babylon` has (nested records, Main's floats being 32-bit).
 const holdsAll = (main, babylon) => (babylon && typeof babylon === 'object' && !Array.isArray(babylon)
   ? !!main && typeof main === 'object' && Object.keys(babylon).every((key) => holdsAll(main[key], babylon[key]))
@@ -76,6 +45,8 @@ const holdsAll = (main, babylon) => (babylon && typeof babylon === 'object' && !
 const sameName = (babylon, main) => main === babylon || main.replace(/\.\d{3}$/, '') === babylon.slice(0, 63);
 // A value DNA can hold: an enum's identifier must be one of its items.
 const holds = (field, value) => field.type !== 'ENUM' || typeof value !== 'string' || dnaIsText(field) || field.items?.some(([, id]) => id === value);
+// Mesh data Bylonder's code made (a recipe of Mesh data or a Blender primitive), which Main owns once it holds it.
+const meshData = (node) => !!(node.metadata?.wbCreation?.mesh || node.metadata?.wbCreation?.operator);
 
 // The output each shader node RNA's node trees link from (rna-bylonder.js nodeTree), with its socket.
 const SHADER_OUTPUTS = { ShaderNodeBsdfPrincipled: 'BSDF', ShaderNodeBackground: 'Background', ShaderNodeVolumeScatter: 'Volume', ShaderNodeEmission: 'Emission' };
@@ -119,7 +90,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
-  const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', SCENE_STRUCTS[name]).offset, shadow: new Map() });
+  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, offset, ptr: blender.scene + offset, shadow: new Map() }; };
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings'), cursor = sceneStruct('View3DCursor');
   const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
   const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), shadow: new Map() };
@@ -130,10 +101,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const settings = rna.pointer('Scene', world).view_settings;
     return { view_transform: viewTransforms[settings.view_transform]?.ocioView ?? 'Standard', look: looks[settings.look]?.[0] ?? 'None' };
   };
-  let applying = false, scheduled = false, sceneChanged = true, listed = -1;
+  let scheduled = false, sceneChanged = true, listed = -1;
   // The objects hooks saw change since the last flush.
   const dirty = new Set();
-  const filled = new Set();
   const animationData = new BlenderAnimation(blender);
 
   const objectType = (node) => rna.pointer('Object', node).type;
@@ -151,7 +121,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       babylon: (node) => objects.get(node.parent)?.ob ?? 0,
       main: (ob) => blender.parent(ob),
       set: (ob, parent) => blender.setParent(ob, parent),
-      apply: (node, parent) => node.setParent(nodeOf(parent)),
+      // Its transform stays the one relative to its parent, as Main's (its parent inverse folded in).
+      apply: (node, parent) => { node.parent = nodeOf(parent); },
     },
     material_slots: {
       applies: (entry) => entry.type === 'MESH',
@@ -179,158 +150,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!exact(value, relation.main(entry.ob))) relation.set(entry.ob, value);
     }
   }
-  function pullRelations(entry) {
-    for (const [, relation] of relations(entry)) {
-      const value = relation.main(entry.ob);
-      if (relation.apply && !exact(value, relation.babylon(entry.node))) relation.apply(entry.node, value);
-    }
-  }
-
-  // Main into Babylon for what Main holds and the sync does not (a read file's IDs, or objects Blender's code added):
-  // each made in Babylon of its kind and given Main's values through the mapping (pull, with nothing synced yet), its
-  // relations (RELATIONS), modifiers and animation. Geometry goes to Babylon once and Main's Mesh is released.
-  // Returns what Bylonder cannot show, as warnings, which Blender's Info shows.
-  const fcurvePaths = (id) => animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
-  function adopt(scene = world.scene) {
-    const warnings = [], was = applying;
-    applying = true;
-    try {
-      for (const ma of blender.ids(ID_MA)) if (!materialFor(ma)) adoptMaterial(ma, scene, warnings);
-      const made = [];
-      for (const ob of blender.ids(ID_OB)) {
-        if (nodeOf(ob)) continue;
-        const type = dnaGet('Object', ob, 'type'), name = blender.name(ob), data = blender.data(ob);
-        const lightType = type === 'LIGHT' ? dnaGet('Light', data, 'type') : null;
-        if (!MAKERS[type] && !DATA_MAKERS[type] && !CURVE_TYPES.includes(type)) { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
-        if (lightType === 'AREA') warnings.push(`"${name}": an Area light opens as a point light`);
-        const node = DATA_MAKERS[type] ? DATA_MAKERS[type](scene, name, ob) : CURVE_TYPES.includes(type) ? adoptCurve(scene, name, ob, type) : MAKERS[type](scene, name, lightType);
-        // A copy Blender's code made (object.duplicate) carries its original's id: it gets one of its own.
-        const id = blender.property(ob, PROPERTIES.id) ?? name, taken = [...objects.keys()].some((other) => nodeId(other) === id);
-        node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id };
-        made.push(adoptEntry(node, ob, type));
-      }
-      for (const entry of made) pullRelations(entry);
-      for (const entry of made) {
-        const { node, ob } = entry, wanted = rna.pointer('Object', node).rotation_mode;
-        if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
-        if (dnaGet('Object', ob, 'rotation_mode') !== wanted) {
-          if (fcurvePaths(ob).includes('rotation_euler')) warnings.push(`"${node.name}": its rotation keys are in another rotation order than Bylonder's`);
-          blender.setRotationMode(ob, ROTATION_MODES[wanted]);
-        }
-        pull(entry, node);
-        if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
-        if (entry.type === 'MESH') adoptModifiers(entry, warnings);
-        else if (blender.modifiers(ob).length) warnings.push(`"${node.name}": the modifiers of ${entry.type.toLowerCase()} objects are not opened`);
-        if (CURVE_TYPES.includes(entry.type)) drawCurve(node);
-        if (entry.type === 'ARMATURE') pullArmature(entry);
-        if (blender.materials(ob).length > 1) warnings.push(`"${node.name}": its faces show its first material`);
-        for (const path of new Set(fcurvePaths(ob))) if (!['location', 'rotation_euler', 'scale'].includes(path)) warnings.push(`"${node.name}": its ${path} keys are not opened`);
-        if (blender.camera === ob) scene.activeCamera = node;
-      }
-      const wo = blender.world;
-      if (wo && !ids.adopted.has('world')) adoptWorld(wo, scene, warnings);
-      return { nodes: made.map(({ node }) => node), warnings };
-    } finally {
-      applying = was;
-    }
-  }
-  // An object's entry, as syncObjects makes one, for an Object Main already holds.
-  function adoptEntry(node, ob, type) {
-    const entry = { struct: 'Object', ptr: ob, node, key: key(node), type, ob, shadow: new Map(), babylonName: node.name, name: blender.name(ob) };
-    entry.data = { struct: dataStruct(node), ptr: blender.data(ob), shadow: new Map() };
-    // The data's type is the Babylon object's own (a light's class).
-    if (entry.data.struct === 'Light') entry.data.shadow.set('type', dnaGet('Light', entry.data.ptr, 'type'));
-    ids.adopt(entry.key, ob, type);
-    entry.unwatch = () => {};
-    objects.set(node, entry);
-    return entry;
-  }
-  // Objects made of their data in Main: a read Mesh's geometry goes to Babylon, which owns it from then on; an
-  // armature's bones are held by its Babylon object too, as a curve's splines are, and drawn as Blender evaluates them.
-  const DATA_MAKERS = {
-    MESH: adoptMesh,
-    ARMATURE: (scene, name, ob) => Object.assign(new Mesh(name, scene), { metadata: { wbCreation: { armature: armatureData(ob) } } }),
-  };
-  function adoptMesh(scene, name, ob) {
-    blender.readAttributes(ob);
-    const creation = { mesh: mesh_serialize(blender.mesh(ob)) }, node = buildMesh(scene, name, creation);
-    node.metadata = { ...node.metadata, wbCreation: creation };
-    blender.clearMesh(ob);
-    return node;
-  }
-  // A read curve or text object: its Curve data held by its Babylon object too, as Bylonder's curves are.
-  function adoptCurve(scene, name, ob, type) {
-    const node = new Mesh(name, scene);
-    node.metadata = { wbCreation: { curve: new CurveObject(type, name, ob, blender).data } };
-    return node;
-  }
-  const drawCurve = (node) => {
-    const data = node.metadata.wbCreation.curve;
-    const mesh = evaluateCurve(data, { transform: blenderTransform(node), modifiers: data.modifiers ?? [], targets: {} });
-    if (mesh) mesh_batch_cache_apply(mesh, node);
-  };
-  // A read object's modifiers, as Bylonder's stack holds Blender's; the types Bylonder does not have are left out.
-  function adoptModifiers(entry, warnings) {
-    const view = () => new DataView(blenderModule.exports.memory.buffer);
-    for (const { type, name, mode, md } of blender.modifiers(entry.ob)) {
-      const definition = blenderModifierDefinitions.find((d) => d.mesh.type === type);
-      if (!definition) { warnings.push(`"${entry.node.name}": its modifier "${name}" is not opened`); continue; }
-      const modifier = addModifier(entry.node, definition.id, definition.mesh.read(view(), md));
-      Object.assign(modifier, { name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER) });
-    }
-  }
-  // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
-  // Bylonder wrote keeps), its values and its Principled BSDF inputs.
-  function adoptMaterial(ma, scene, warnings) {
-    const name = blender.name(ma), kind = blender.property(ma, PROPERTIES.material), graph = blender.property(ma, PROPERTIES.graph);
-    const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : kind === 'standard' ? new StandardMaterial(name, scene)
-      : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
-    material.name = name;
-    material.metadata = { ...material.metadata, wbId: name };
-    const record = { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true };
-    materials.set(material, record);
-    ids.adopted.set(material, ma);
-    pull(record, material);
-    if (!graph) pullTree(ma, rna.pointer('Material', material), name, warnings);
-  }
-  // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
-  function adoptWorld(wo, scene, warnings) {
-    const background = blender.nodeTree(wo).nodes.find((node) => node.idname === 'ShaderNodeBackground');
-    const color = background?.inputs.Color ?? dnaGet('World', wo, 'color');
-    createWorld(scene, color && { color: [...color].slice(0, 3) });
-    if (background && background.inputs.Strength !== 1) warnings.push(`World "${blender.name(wo)}": its strength opens as 1`);
-    ids.adopted.set('world', wo);
-  }
-  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types.
-  function pullTree(id, data, label, warnings) {
-    const held = blender.nodeTree(id).nodes, mapped = new Set(['ShaderNodeOutputMaterial', 'ShaderNodeOutputWorld']);
-    const visit = (node) => {
-      mapped.add(node[INFO].struct);
-      const from = held.find((h) => h.idname === node[INFO].struct);
-      for (const input of node.inputs) {
-        if (input.is_linked) { visit(input.links[0].from_node); continue; }
-        const value = from?.inputs[input.identifier];
-        if (value !== undefined && input[INFO].bound.has('default_value')) input.default_value = value;
-      }
-    };
-    visit(data.node_tree.get_output_node());
-    const unmapped = [...new Set(held.map((h) => h.idname).filter((idname) => !mapped.has(idname)))];
-    if (unmapped.length) warnings.push(`Material "${label}": its ${unmapped.join(', ')} nodes are not opened`);
-  }
-  // A read file's scene, once the slices it sets exist: its settings, world and collections.
-  function adoptScene() {
-    applying = true;
-    try {
-      // Twice: a value the slice refuses before another is set (a frame range's start after its old end) is set after.
-      for (const record of [...sceneRecords(), ...sceneRecords()]) {
-        record.shadow.clear();
-        try { pull(record, world); } catch { /* set on the second pass */ }
-      }
-      readCollections((pointer) => 'collection:' + blender.name(pointer));
-    } finally {
-      applying = false;
-    }
-  }
 
   // A record's values from Babylon into Main, where they differ from what was last synced; what Main holds is kept.
   function push(record, owner) {
@@ -349,21 +168,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       api.writes++;
     }
   }
-  // A record's values that Blender's code changed in Main, written to Babylon.
-  function pull(record, owner) {
-    let changed = false;
-    for (const [name, binding] of syncBindings(rna, record.struct, owner)) {
-      const field = dnaProperty(record.struct, name);
-      if (!field || field.kind === 'pointer' || field.kind === 'struct' || record.unheld?.has(name)) continue;
-      const value = dnaGet(record.struct, record.ptr, name);
-      if (same(record.shadow.get(name), value)) continue;
-      record.shadow.set(name, value);
-      if (binding.set) { binding.set(value); changed = true; }
-    }
-    return changed;
-  }
-
-  // Objects: one per Bylonder object, with data of its type; one made again when its type changed.
+  // Objects: one per Bylonder object, with data of its type; one made again when its type changed. A deleted one is
+  // deleted in Main, which undo brings back; one that left the scene keeps its keys (blender-ids.js).
   function syncObjects() {
     const nodes = live(), alive = new Set(nodes);
     for (const [node, entry] of objects) {
@@ -371,7 +177,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       objects.delete(node);
       dirty.delete(entry);
       entry.unwatch();
-      if (!alive.has(node)) ids.remove(entry.key);
+      if (deleted(node)) {
+        blender.remove(entry.ob);
+        ids.forget(entry.key);
+      } else if (!alive.has(node)) ids.remove(entry.key);
     }
     for (const node of nodes) {
       if (objects.has(node)) continue;
@@ -384,9 +193,20 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       objects.set(node, entry);
     }
   }
+  // An object Main no longer holds (Blender's code deleted it, or an undo step does not have it): deleted, its children
+  // without it, as Main's are.
+  function forget(node, entry) {
+    node.metadata = { ...node.metadata, wbDeleted: true };
+    node.setEnabled(false);
+    for (const child of objects.keys()) if (child.parent === node) child.parent = null;
+    objects.delete(node);
+    dirty.delete(entry);
+    entry.unwatch();
+    ids.forget(entry.key);
+  }
   // A hook saw an object change (or, without one, something no hook sees): it goes to Main at the end of the task.
   function changed(entry) {
-    if (applying) return;
+    if (state.applying) return;
     if (entry) dirty.add(entry);
     else {
       for (const e of objects.values()) dirty.add(e);
@@ -401,9 +221,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Relations, by RNA name: what both models hold that is not a DNA value.
   function pushObject(entry) {
     const { node, ob } = entry, data = rna.pointer('Object', node);
+    // A name is Blender's, unique among its IDs ("Cube.001" for a second "Cube").
     if (node.name !== entry.babylonName) {
       blender.rename(ob, node.name);
-      [entry.babylonName, entry.name] = [node.name, blender.name(ob)];
+      node.name = entry.babylonName = entry.name = blender.name(ob);
     }
     pushRelations(entry);
     // An armature's mode is Blender's: its Edit and Pose Modes are entered by Blender's operators in Main.
@@ -411,9 +232,17 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (entry.id !== nodeId(node)) blender.setProperty(ob, PROPERTIES.id, (entry.id = nodeId(node)));
     push(entry, node);
     if (entry.data.ptr && entry.data.struct) push(entry.data, node);
+    pushGeometry(entry);
     pushModifiers(entry);
     pushCurve(entry);
     pushArmature(entry);
+  }
+  // Mesh data Bylonder's code set on a mesh object (its recipe): Main's Mesh becomes it, and owns it from then on.
+  function pushGeometry(entry) {
+    const creation = entry.node.metadata?.wbCreation;
+    if (entry.type !== 'MESH' || creation === entry.creation || !meshData(entry.node)) return;
+    blender.setMesh(entry.ob, objectMesh(entry.node));
+    [entry.creation, entry.owned] = [creation, true];
   }
   // An armature object's bones and pose (its edit bones in Edit Mode), live in Main as in Babylon, drawn as Blender
   // evaluates them.
@@ -424,14 +253,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     setArmatureData(blender.bmain, entry.ob, data);
     blender.evaluate();
     armature_draw(armatureDrawn(entry.ob), entry.node);
-  }
-  // What Blender's code changed of an armature (bones, pose, its mode), after Main is evaluated.
-  function pullArmature(entry) {
-    const { node, ob } = entry, data = armatureData(ob), signature = JSON.stringify(data), mode = dnaGet('Object', ob, 'mode');
-    if (signature === entry.armature && mode === node.metadata.wbMode) return;
-    entry.armature = signature;
-    node.metadata = { ...node.metadata, wbCreation: { armature: data }, wbMode: mode };
-    armature_draw(armatureDrawn(ob), node);
   }
   // A curve or text object's Curve data, live in Main as in Babylon (the edit data in Edit Mode).
   function pushCurve(entry) {
@@ -508,14 +329,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (record.babylonName !== entry.name) { blender.rename(record.tex, entry.name); record.babylonName = entry.name; }
       blender.setFakeUser(record.tex, entry.fakeUser);
       if (record.values !== entry.values) { writeTexture(record.tex, entry.values); record.values = entry.values; }
-    }
-  }
-  // What Blender's code changed of a Tex goes back to its record.
-  function pullTextures() {
-    for (const [id, record] of textures) {
-      const entry = world.textures.byId(id), values = readTexture(record.tex);
-      if (entry && !Object.entries(values).every(([name, value]) => same(value, entry.values[name]))) world.textures.assign(entry, values);
-      if (entry) record.values = entry.values;
     }
   }
   function pushWorlds() {
@@ -607,7 +420,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // selection and the slices' state, is in Main too), each value compared with what was last synced; then Main
   // evaluated, as the depsgraph would.
   function flush(all = true) {
-    if (applying) return;
+    if (state.applying) return;
     // Objects come and go by the world's list and by deleting (metadata, which hooks see).
     if (all || world.objects.length !== listed || [...dirty].some(({ node, type }) => deleted(node) || objectType(node) !== type)) {
       syncObjects();
@@ -634,102 +447,61 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (api.debug) assertEqual('flush');
   }
 
-  // Fills meshes' geometry, the one large buffer Main holds only while Blender's code needs it, from Babylon's (the
-  // edit mesh's in Edit Mode), and releases it after.
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
-  // Returns the entries it filled, which were not filled already.
+  // The stand-ins of meshes Babylon built itself, filled with their geometry as it is now, for Blender's code.
   function fill(nodes) {
-    const made = [];
     for (const node of nodes) {
       const entry = objects.get(node);
-      if (!entry || filled.has(entry) || entry.type !== 'MESH') continue;
-      blender.setMesh(entry.ob, world.editMode?.meshOf?.(node) ?? objectMesh(node));
-      filled.add(entry);
-      made.push(entry);
-    }
-    return made;
-  }
-  function release(entries = [...filled]) {
-    for (const entry of entries) {
-      blender.clearMesh(entry.ob);
-      filled.delete(entry);
+      if (entry?.type === 'MESH' && !entry.owned) blender.setMesh(entry.ob, objectMesh(node));
     }
   }
 
-  // Main into Babylon, after Blender's code: what it changed, with geometry it changed of the meshes it was given.
-  function writeBack() {
-    applying = true;
-    try {
-      const alive = new Set(blender.ids(ID_OB)), chosen = [], active = [];
-      blender.cleanMasterCollection();
-      for (const [node, entry] of [...objects]) {
-        if (!alive.has(entry.ob)) {
-          node.metadata = { ...node.metadata, wbDeleted: true };
-          node.setEnabled(false);
-          objects.delete(node);
-          dirty.delete(entry);
-          filled.delete(entry);
-          entry.unwatch();
-          ids.forget(entry.key);
-          continue;
-        }
-        const { ob } = entry, tags = blender.tags(ob);
-        if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
-        pull(entry, node);
-        if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
-        const name = blender.name(ob);
-        if (name !== entry.name) [node.name, entry.name, entry.babylonName] = [name, name, name];
-        pullRelations(entry);
-        const base = blender.base(ob), data = rna.pointer('Object', node);
-        if (base?.selected) (base.active ? active : chosen).push(node);
-        if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
-        if ((tags.object | tags.data) & ID_RECALC_GEOMETRY) {
-          if (filled.has(entry)) rebuildMesh(node, { mesh: mesh_serialize(blender.mesh(ob)) });
-          else if (CURVE_TYPES.includes(entry.type) && world.curves) {
-            world.curves.set(node, curveObject(entry).data);
-            entry.curve = JSON.stringify(world.curves.data(node));
-          }
-        }
-      }
-      const { nodes: added } = adopt();
-      world.objects.push(...added);
-      for (const node of added) {
-        const base = blender.base(objects.get(node).ob);
-        if (base?.selected) (base.active ? active : chosen).push(node);
-      }
-      selection.replace([...chosen, ...active]);
-      for (const [material, record] of materials) pull(record, material);
-      for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
-      pullTextures();
-      for (const record of sceneRecords()) pull(record, world);
-      blender.evaluate();
-      for (const entry of objects.values()) if (entry.type === 'ARMATURE') pullArmature(entry);
-    } finally {
-      applying = false;
-    }
-    // Last, as the collections' subscribers (the Outliner) draw from Main as soon as they change.
-    if (slice()) readCollections();
-    world.modifiers?.refresh();
-  }
-
-  // Runs Blender's code on Main made current, with the geometry of `meshes` filled for it, and writes back what it
-  // changed; returns what fn returns. Run inside the undo step the change makes.
+  // Runs Blender's code on Main made current, with the stand-ins of `meshes` filled for it, and draws what it changed;
+  // returns what fn returns. Run inside the undo step the change makes.
   function run(fn, { meshes = [] } = {}) {
     flush();
     fill(meshes);
-    try {
-      const result = fn();
-      writeBack();
-      flush();
-      if (api.debug) assertEqual('run');
-      return result;
-    } finally {
-      release();
-    }
+    const result = fn();
+    api.view();
+    return result;
   }
 
-  // The differences between both models where they overlap, as messages; none when they are equal. Geometry is
-  // compared only where Main holds it (filled).
+  // Blender's undo (undo-api.cc): a step of Main pushed, with what Babylon wrote flushed into it first, and one loaded,
+  // whose Main the view then draws. Returns the step, or whether it loaded.
+  function undoPush(name) {
+    flush();
+    return blender.undoPush(name);
+  }
+  function undoLoad(step) {
+    if (!blender.undoLoad(step)) return false;
+    relink();
+    api.view();
+    return true;
+  }
+  // The records of what an undo step's Main read again at another address (an ID it brought back, the scene's
+  // settings), found again by name; one that is gone is made again when Babylon still has it.
+  function relink() {
+    scene.ptr = blender.scene;
+    for (const record of [render, units, cursor, view, display]) record.ptr = blender.scene + record.offset;
+    tools.ptr = dnaGet('Scene', blender.scene, 'tool_settings');
+    const byName = (code) => new Map(blender.ids(code).map((id) => [blender.name(id), id]));
+    const again = (records, code, field, nameOf) => {
+      const held = byName(code), alive = new Set(held.values());
+      for (const [owner, record] of records) {
+        if (alive.has(record[field])) continue;
+        const id = held.get(nameOf(owner, record));
+        if (id) record[field] = record.ptr = id;
+        else records.delete(owner);
+      }
+    };
+    again(materials, ID_MA, 'ma', (material) => material.name);
+    again(worlds, ID_WO, 'wo', (id) => world.worlds.byId(id)?.name);
+    again(textures, ID_TE, 'tex', (id) => world.textures.byId(id)?.name);
+    again(collections, ID_GR, 'ptr', (id) => world.collections.byId(id)?.name);
+    collectionsSynced = '';
+  }
+
+  // The differences between both models where they overlap, as messages; none when they are equal.
   function check() {
     const diffs = [];
     const compare = (label, record, owner) => {
@@ -754,7 +526,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (base && base.active !== (node === active) && base.selected) diffs.push(`${label}: active differs`);
       if (CURVE_TYPES.includes(entry.type) && world.curves && !holdsAll(curveObject(entry).data, world.curves.data(node))) diffs.push(`${label}: curve data differs`);
       if (entry.type === 'ARMATURE' && !holdsAll(armatureData(entry.ob), node.metadata?.wbCreation?.armature)) diffs.push(`${label}: armature data differs`);
-      if (filled.has(entry)) {
+      if (entry.owned) {
         const mesh = blender.mesh(entry.ob), own = objectMesh(node);
         if (!same(Array.from(mesh.vert_positions), Array.from(own.vert_positions)) || !same(Array.from(mesh.corner_verts), Array.from(own.corner_verts)))
           diffs.push(`${label}: geometry differs`);
@@ -809,17 +581,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (diffs.length) throw new Error(`Babylon and Main differ after ${when}:\n  ${diffs.join('\n  ')}`);
   }
 
-  // A mesh object's Mesh with its modifiers applied, as Blender evaluates it (for export): filled, evaluated, released.
-  // Releases only what it filled: a modal operator's geometry stays filled while it runs (the modifier stack evaluates
-  // here as an armature it deforms by moves).
+  // A mesh object's Mesh with its modifiers applied, as Blender evaluates it (for export, and the stacks that evaluate
+  // in Main).
   function evaluatedMesh(node) {
     flush();
-    const made = fill([node]);
-    try {
-      return blender.evaluatedMesh(objects.get(node).ob);
-    } finally {
-      release(made);
-    }
+    fill([node]);
+    return blender.evaluatedMesh(objects.get(node).ob);
   }
 
   // What Blender's code tagged so far: the objects whose geometry it changed, with their types.
@@ -841,36 +608,39 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     ids,
     flush,
     run,
-    // For editors that run Blender's code over several events (the Outliner's modal operators and drags): what it
-    // changed, written back.
-    writeBack: () => { writeBack(); flush(); if (api.debug) assertEqual('writeBack'); },
-    // A run over several events (a modal operator's): Main made Babylon's with the meshes' geometry, until end writes
-    // back what it changed and releases the geometry.
+    // Babylon drawn from Main after Blender's code ran (main-view.js), for editors that run it over several events (the
+    // Outliner's modal operators and drags).
+    view: () => { mainView.view(); flush(); if (api.debug) assertEqual('view'); },
+    // A run over several events (a modal operator's): Main made current with the meshes' stand-ins filled, until end
+    // draws what it changed.
     begin({ meshes = [] } = {}) { flush(); fill(meshes); },
-    end() { try { api.writeBack(); } finally { release(); } },
+    end: () => api.view(),
+    // Blender's undo stack, started from Main as it is (the scene's first state), its steps pushed and loaded.
+    undoInit: () => { flush(); blender.undoInit(); },
+    undoPush,
+    undoLoad,
     geometryTagged,
     revert,
     check,
     evaluatedMesh,
-    // For code that reads Main's geometry: fn runs with every object's geometry filled.
+    // For code that reads Main's geometry: fn runs with the stand-ins filled.
     withMeshes(fn, nodes) {
       flush();
       fill(nodes ?? [...objects.keys()]);
-      try { return fn(); } finally { release(); }
+      return fn();
     },
-    // The scene as a .blend file (its bytes), written by Blender's writer from Main, with the geometry filled as it
-    // writes.
+    // The scene as a .blend file (its bytes), written by Blender's writer from Main.
     writeBlend: (filepath) => api.withMeshes(() => blender.writeBlend(filepath)),
-    // A .blend's data read into Main and made Babylon's in `scene` (adopt); returns the Babylon objects it made and
-    // Blender's and Bylonder's warnings. Its scene settings and collections follow when the scene sync of the world
-    // starts (ids.read).
+    // A .blend's data read into Main and made Babylon's in `scene` (the view's adopt); returns the Babylon objects it
+    // made and Blender's and Bylonder's warnings. Its scene settings and collections follow when the scene sync of the
+    // world starts (ids.read).
     readBlend(bytes, scene = world.scene) {
-      const read = blender.readBlend(bytes), { nodes, warnings } = adopt(scene);
-      if (world.collections) adoptScene();
+      const read = blender.readBlend(bytes), { nodes, warnings } = mainView.adopt(scene);
+      if (world.collections) mainView.adoptScene();
       else ids.read = true;
       return { nodes, warnings: [...read, ...warnings] };
     },
-    adopt,
+    adopt: (scene) => mainView.adopt(scene),
     // Whether Blender's code may change an object's data: its geometry is filled for it (lights and cameras are
     // Bylonder's objects of their own kind).
     holdsData: (node) => ['MESH', 'EMPTY', 'ARMATURE', ...CURVE_TYPES].includes(objects.get(node)?.type),
@@ -887,8 +657,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // Values written into Main so far, to tell that writing back does not echo.
     writes: 0,
   };
+  const state = {
+    rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
+    sceneRecords, readCollections, relations, nodeOf, forget,
+  };
+  const mainView = createMainView(state);
   if (ids.read && world.collections) {
-    adoptScene();
+    mainView.adoptScene();
     ids.read = false;
   }
   return api;

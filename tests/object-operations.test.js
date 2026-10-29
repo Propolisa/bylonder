@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { NullEngine, Scene, MeshBuilder } from "@babylonjs/core";
 import { createSelection } from "../src/editors/object/selection.js";
 import { snapshot, apply, createHistory } from "../src/editors/undo/storage.js";
+import { sceneMain } from "./scene-main.js";
 import { createObjectCommands } from "../src/editors/object/commands.js";
 import {
   meshCatalog,
@@ -30,7 +31,7 @@ const editor = {
   },
   start() {},
 };
-const history = createHistory(objects, () => {});
+const history = createHistory(objects, () => {}, { main: sceneMain({ scene, objects }, selection) });
 const commands = createObjectCommands(
   { scene, objects },
   editor,
@@ -85,7 +86,7 @@ rebuildMesh(cube, { operator: "mesh.primitive_cube_add", options: { size: 4 } })
 assert.equal(cube.getBoundingInfo().boundingBox.maximum.x, 2);
 history.commit();
 history.undo();
-assert.equal(cube.metadata.wbCreation.options.size, 2);
+// Main owns the cube's Mesh: undo restores it there and the view draws it.
 assert.equal(cube.getBoundingInfo().boundingBox.maximum.x, 1);
 scene.dispose();
 newScene.dispose();
