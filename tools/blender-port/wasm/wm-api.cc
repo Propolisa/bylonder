@@ -16,6 +16,8 @@
 #include "BLI_rect.h"
 #include "BLI_set.hh"
 #include "BLI_string.h"
+#include "BLI_function_ref.hh"
+#include "BLI_time.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
 #include "DNA_view3d_types.h"
@@ -257,7 +259,9 @@ static void ghost_event_add(wmWindowManager *wm, wmWindow *win, int kind, const 
 static std::string unhandled_events;
 static int unhandled_event(bContext * /*C*/, const wmEvent *event, void * /*user_data*/)
 {
-  if (ISMOUSE_MOTION(event->type) || ISTIMER(event->type) || event->type == EVT_MODAL_MAP || event->type >= EVT_FILESELECT) {
+  if (event->type == EVENT_NONE || ISMOUSE_MOTION(event->type) || ISTIMER(event->type) || event->type == EVT_MODAL_MAP ||
+      event->type >= EVT_FILESELECT)
+  {
     return WM_UI_HANDLER_CONTINUE;
   }
   const wmWindow *win = static_cast<wmWindow *>(static_cast<wmWindowManager *>(G_MAIN->wm.first)->windows.first);
@@ -405,10 +409,47 @@ static const char *event_result(wmWindow *win, const Set<wmOperator *> &register
   return json.c_str();
 }
 
-/* One input event of the page: added to the window's queue as GHOST adds it, then handled as Blender's main loop
- * handles its events and notifiers (wm_event_do_handlers, wm_event_do_notifiers). Returns event_result's JSON. */
-EXPORT(wm_event)
-const char *wm_event(bContext *C, int kind, const int *data, const char *code, const char *key, const char *text, double time)
+/* port-override: wm_window_timers_process (wm_window.cc) for the page's window, which has no GHOST loop to run it: the
+ * window timers that are due become TIMER events in its queue (panel animations, tooltips, modal operators' timers),
+ * notifier timers add their notifiers. Jobs and autosave have no timers here. */
+static void wm_window_timers_process(wmWindowManager *wm)
+{
+  const double time = BLI_time_now_seconds();
+  for (wmTimer &wt : wm->runtime->timers.items_mutable()) {
+    if ((wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) || wt.sleep || wt.time_next >= time) {
+      continue;
+    }
+    if (wt.event_type != TIMERNOTIFIER && BLI_findindex(&wm->windows, wt.win) == -1) {
+      continue;
+    }
+    wt.time_delta = time - wt.time_last;
+    wt.time_duration += wt.time_delta;
+    wt.time_last = time;
+    wt.time_next = wt.time_start;
+    if (wt.time_step != 0.0f) {
+      wt.time_next += wt.time_step * ceil(wt.time_duration / wt.time_step);
+    }
+    if (wt.event_type == TIMERNOTIFIER) {
+      WM_main_add_notifier(POINTER_AS_UINT(wt.customdata), nullptr);
+    }
+    else if (wmWindow *win = wt.win; !ELEM(wt.event_type, TIMERJOBS, TIMERAUTOSAVE)) {
+      wmEvent event;
+      wm_event_init_from_window(win, &event);
+      event.type = wt.event_type;
+      event.val = KM_NOTHING;
+      event.keymodifier = EVENT_NONE;
+      event.flag = eWM_EventFlag(0);
+      event.custom = EVT_DATA_TIMER;
+      event.customdata = &wt;
+      WM_event_add(win, &event);
+    }
+  }
+  wm_window_timers_delete_removed(wm);
+}
+
+/* Blender's main loop once for the page's window, with what the page added to its queue: its due timers, its events
+ * and notifiers handled (wm_event_do_handlers, wm_event_do_notifiers). Returns event_result's JSON. */
+static const char *wm_window_handle(bContext *C, FunctionRef<void(wmWindowManager *, wmWindow *)> add_events)
 {
   wmWindowManager *wm = CTX_wm_manager(C);
   wmWindow *win = static_cast<wmWindow *>(wm->windows.first);
@@ -418,13 +459,78 @@ const char *wm_event(bContext *C, int kind, const int *data, const char *code, c
   }
   unhandled_handler_ensure(win);
   unhandled_events.clear();
-  ghost_event_add(wm, win, kind, data, code, key, text, uint64_t(time));
+  wm_window_timers_process(wm);
+  add_events(wm, win);
   operator_calls_wrap();
   wm_event_do_handlers(C);
   wm_event_do_notifiers(C);
   operator_calls_unwrap();
   CTX_wm_window_set(C, win);
   return event_result(win, registered);
+}
+
+/* One input event of the page, added to the window's queue as GHOST adds it, and the window handled. */
+EXPORT(wm_event)
+const char *wm_event(bContext *C, int kind, const int *data, const char *code, const char *key, const char *text, double time)
+{
+  return wm_window_handle(C, [&](wmWindowManager *wm, wmWindow *win) {
+    ghost_event_add(wm, win, kind, data, code, key, text, uint64_t(time));
+  });
+}
+
+/* The window handled with no input, for its timers (each animation frame while it has some, wm_timers_active). */
+EXPORT(wm_tick) const char *wm_tick(bContext *C)
+{
+  return wm_window_handle(C, [](wmWindowManager * /*wm*/, wmWindow * /*win*/) {});
+}
+EXPORT(wm_timers_active) bool wm_timers_active(bContext *C)
+{
+  wmWindowManager *wm = CTX_wm_manager(C);
+  for (const wmTimer &wt : wm->runtime->timers) {
+    if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && !ELEM(wt.event_type, TIMERJOBS, TIMERAUTOSAVE) &&
+        BLI_findindex(&wm->windows, wt.win) != -1)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/* port-override: as wm_window.cc's, but for a context without a window manager (an operator run on its own, as Edit
+ * Mode's are), whose timers nothing would run. */
+wmTimer *WM_event_timer_add(wmWindowManager *wm, wmWindow *win, const wmEventType event_type, const double time_step)
+{
+  if (!wm) {
+    return nullptr;
+  }
+  wmTimer *wt = MEM_new_zeroed<wmTimer>("window timer");
+  wt->event_type = event_type;
+  wt->time_last = BLI_time_now_seconds();
+  wt->time_next = wt->time_last + time_step;
+  wt->time_start = wt->time_last;
+  wt->time_step = time_step;
+  wt->win = win;
+  BLI_addtail(&wm->runtime->timers, wt);
+  return wt;
+}
+void WM_event_timer_remove(wmWindowManager *wm, wmWindow * /*win*/, wmTimer *timer)
+{
+  if (!wm || BLI_findindex(&wm->runtime->timers, timer) == -1) {
+    return;
+  }
+  timer->flags |= WM_TIMER_TAGGED_FOR_REMOVAL;
+  if (wm->runtime->reports.reporttimer == timer) {
+    wm->runtime->reports.reporttimer = nullptr;
+  }
+  for (wmWindow &win : wm->windows) {
+    for (wmEvent &event : win.runtime->event_queue) {
+      if (event.customdata == timer) {
+        event.customdata = nullptr;
+        event.type = EVENT_NONE;
+      }
+    }
+  }
+  WM_event_timer_free_data(timer);
 }
 
 /* Puts the context in an area's region (regiontype), as the window manager does before running a region's handlers;

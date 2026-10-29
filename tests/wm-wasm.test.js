@@ -10,6 +10,7 @@ import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, Area, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { AnimArea, SPACE_GRAPH } from '../src/editors/animation/anim-area.js';
+import { regionPanels, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 const TOP = { viewmat: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -10, 1], winmat: [0.2, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, -0.02, 0, 0, 0, 0, 1], persp: false };
 const round = (values) => Array.from(values, (v) => Math.round(v * 1e4) / 1e4 + 0);
@@ -120,5 +121,25 @@ window.event('keyup', [0], { code: 'AltLeft', key: 'Alt' });
 assert.equal(text.as_string(), 'a', 'Alt S types nothing');
 assert.deepEqual(save.unhandled.map(({ type, value, modifier }) => [type, value, modifier]), [['S', 'PRESS', 4]], 'Alt S goes to the page');
 textArea.free();
+
+// The window's timers run when it ticks: a Properties editor's panel closed animates (a timer and a modal panel
+// handler, as in Blender) until its time is up.
+const SPACE_PROPERTIES = 4, RGN_TYPE_NAV_BAR = 9;
+const properties = new AnimArea(main, SPACE_PROPERTIES);
+properties.layout(RGN_TYPE_NAV_BAR, 0, 0, 30, 600);
+properties.layout(RGN_TYPE_WINDOW, 30, 0, 270, 600);
+const drawPanels = () => properties.inContext(RGN_TYPE_WINDOW, (C) => regionPanels(C));
+drawPanels();
+properties.inContext(RGN_TYPE_WINDOW, (C) => panelClosedSet(C, 'OBJECT_PT_transform', true));
+drawPanels();
+properties.layout(RGN_TYPE_WINDOW, 30, 0, 200, 300);
+drawPanels();
+assert.equal(window.timersActive, true, 'the panels animate');
+for (let i = 0; i < 10 && window.timersActive; i++) {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  window.tick();
+}
+assert.equal(window.timersActive, false, 'the animation ends, its timer and handler gone');
+properties.dispose();
 
 console.log('window manager: G, mouse moves and a click move an object in a 3D View and keys in a Graph Editor through Blender\'s own handlers');

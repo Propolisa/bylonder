@@ -916,16 +916,11 @@ wmOperatorStatus WM_generic_select_invoke(bContext *C, wmOperator *op, const wmE
  * WM_gesture_is_modal_first answers that it is the first call. */
 Array<int2> WM_gesture_lasso_path_to_array(bContext * /*C*/, wmOperator * /*op*/) { return Array<int2>(lasso_path.as_span()); }
 
-/* port-override: the pointer's shape and timers are Bylonder's window manager's. */
+/* port-override: the pointer's shape is Bylonder's window manager's. */
 bool WM_cursor_modal_is_set_ok(const wmWindow * /*win*/) { return true; }
 void WM_cursor_modal_set(wmWindow * /*win*/, int /*val*/) {}
 void WM_cursor_modal_restore(wmWindow * /*win*/) {}
 void WM_cursor_wait(bool /*val*/) {}
-wmTimer *WM_event_timer_add(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmEventType /*event_type*/, double /*time_step*/)
-{
-  return nullptr;
-}
-void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
 
 /* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
  * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with
