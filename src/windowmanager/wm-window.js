@@ -2,7 +2,9 @@
 // editors' areas, and the browser as GHOST's system. The page lays the areas out and gives their rectangles, one way;
 // its input becomes GHOST's events, which Blender's own event system handles with Blender's keymaps, modal handlers,
 // macros and gestures. Each event returns the regions Blender tagged for redrawing.
-import { blenderModule, flatProperties } from '../bmesh/bmesh-wasm.js';
+import { blenderModule } from '../bmesh/bmesh-wasm.js';
+import { contextStruct, contextPointer, setContextPointer } from '../python/bpy_rna.js';
+import '../python/bpy_interface.js';
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
 
@@ -12,29 +14,20 @@ export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE
 // The browser's input as wm_event takes it (BrowserEvent in wm-api.cc).
 const KINDS = { pointermove: 0, buttondown: 1, buttonup: 2, wheel: 3, trackpad: 4, keydown: 5, keyup: 6 };
 
-// Keyconfig data (keymap_data/blender_default.py's generate_keymaps) into Blender's default key configuration, as
-// Python's keyconfig_init_from_data loads it through KeyMaps.new and KeyMapItems.new.
-const MODIFIERS = ['shift', 'ctrl', 'alt', 'oskey', 'hyper'];
-const modifier = (value) => (value === true ? 1 : value === false || value === undefined ? 0 : value);
+// Keyconfig data (keymap_data/blender_default.py's generate_keymaps) into Blender's default key configuration by
+// Blender's own Python (bl_keymap_utils.io.keyconfig_init_from_data: KeyMaps.new, KeyMapItems.new and the items'
+// properties, through bpy_rna.js).
 export function loadKeyconfig(C, keyconfig) {
-  for (const [name, { space_type, region_type, modal = false }, { items }] of keyconfig) {
-    const km = withString(name, (n) => withString(space_type, (s) => withString(region_type, (r) => x.wm_keymap_new(C, n, s, r, modal))));
-    for (const [idname, kmi, data] of items) addItem(km, idname, kmi, data?.properties);
+  const previous = contextPointer();
+  setContextPointer(C);
+  try {
+    globalThis.__py_modules['bl_keymap_utils.io'].keyconfig_init_from_data(contextStruct(C).window_manager.keyconfigs.default, keyconfig);
+  } finally {
+    setContextPointer(previous);
   }
   x.wm_keyconfig_loaded();
 }
-function addItem(km, idname, { type, value, any = false, key_modifier = '', direction = '', repeat = false, ...held }, properties) {
-  const strings = [idname, type, value, key_modifier, direction];
-  const kmi = withArrays([Int32Array.from(MODIFIERS, (key) => modifier(held[key]))], ([mods]) =>
-    withStrings(strings, ([i, t, v, k, d]) => x.wm_keymap_item_new(km, i, t, v, any, mods, k, d, repeat))) >>> 0;
-  for (const [name, value] of flatProperties(Object.fromEntries(properties ?? []))) {
-    const text = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
-    const numbers = Float64Array.from(text === null ? [value].flat() : [], Number);
-    withString(name, (n) => (text === null
-      ? withArrays([numbers], ([p]) => x.wm_keymap_item_property_set(kmi, n, p, numbers.length, 0))
-      : withString(text, (t) => x.wm_keymap_item_property_set(kmi, n, 0, 0, t))));
-  }
-}
+
 const withStrings = (strings, fn, pointers = []) => (strings.length
   ? withString(strings[0], (p) => withStrings(strings.slice(1), fn, [...pointers, p]))
   : fn(pointers));

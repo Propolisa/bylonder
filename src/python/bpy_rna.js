@@ -210,7 +210,8 @@ const structHandler = {
         return true;
       }
     }
-    return Reflect.set(target, key, value, receiver);
+    if (!Reflect.set(target, key, value, receiver)) throw AttributeError(`bpy_struct: attribute "${key}" from "${structIdentifier(target[POINTER_RNA][0])}" is read-only`);
+    return true;
   },
   has(target, key) {
     if (typeof key !== 'string' || key.startsWith('_') || key in target) return key in target;

@@ -78,72 +78,7 @@ void wm_init(bContext *C)
   WM_event_add_dropbox_handler(&win->runtime->handlers, WM_dropboxmap_find("Window", SPACE_EMPTY, RGN_TYPE_WINDOW));
 }
 
-/* Keyconfig data (keymap_data/blender_default.py's) into the default key configuration, as Python's
- * keyconfig_init_from_data does through KeyMaps.new and KeyMapItems.new (rna_wm_api.cc), with enum items by
- * identifier. */
-static int enum_value(const EnumPropertyItem *items, const char *identifier)
-{
-  int value = 0;
-  RNA_enum_value_from_id(items, identifier, &value);
-  return value;
-}
-
-EXPORT(wm_keymap_new) wmKeyMap *wm_keymap_new(bContext *C, const char *name, const char *space_type, const char *region_type, bool modal)
-{
-  wmKeyConfig *keyconf = CTX_wm_manager(C)->runtime->defaultconf;
-  return modal ? WM_modalkeymap_ensure(keyconf, name, nullptr)
-               : WM_keymap_ensure(keyconf, name, enum_value(rna_enum_space_type_items, space_type),
-                                  enum_value(rna_enum_region_type_items, region_type));
-}
-
-static int16_t modifier_flag(bool any, const int *modifiers)
-{
-  if (any) {
-    return KM_ANY;
-  }
-  const int flags[] = {KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY, KM_HYPER};
-  int16_t modifier = 0;
-  for (int i = 0; i < 5; i++) {
-    modifier |= modifiers[i] == KM_MOD_HELD ? flags[i] : modifiers[i] == KM_ANY ? KMI_PARAMS_MOD_TO_ANY(flags[i]) : 0;
-  }
-  return modifier;
-}
-
-/* An item: an operator's (by Python idname) in a keymap, a modal item's value (by identifier) in a modal keymap.
- * modifiers: shift, ctrl, alt, oskey and hyper, each KM_MOD_HELD, KM_ANY or 0. */
-EXPORT(wm_keymap_item_new)
-wmKeyMapItem *wm_keymap_item_new(wmKeyMap *km, const char *idname, const char *type, const char *value, bool any,
-                                 const int *modifiers, const char *keymodifier, const char *direction, bool repeat)
-{
-  KeyMapItem_Params params{};
-  params.type = int16_t(enum_value(rna_enum_event_type_items, type));
-  params.value = int8_t(enum_value(rna_enum_event_value_items, value));
-  params.modifier = modifier_flag(any, modifiers);
-  params.keymodifier = int16_t(keymodifier[0] ? enum_value(rna_enum_event_type_items, keymodifier) : 0);
-  params.direction = int8_t(direction[0] ? enum_value(rna_enum_event_direction_items, direction) : KM_ANY);
-  wmKeyMapItem *kmi;
-  if (km->flag & KEYMAP_MODAL) {
-    kmi = km->modal_items ? WM_modalkeymap_add_item(km, &params, enum_value(static_cast<const EnumPropertyItem *>(km->modal_items), idname))
-                          : WM_modalkeymap_add_item_str(km, &params, idname);
-  }
-  else {
-    char idname_bl[OP_MAX_TYPENAME];
-    WM_operator_bl_idname(idname_bl, idname);
-    kmi = WM_keymap_add_item(km, idname_bl, &params);
-  }
-  if (!repeat) {
-    kmi->flag |= KMI_REPEAT_IGNORE;
-  }
-  return kmi;
-}
-
-/* One of an item's operator properties (kmi.properties), as operator_set sets an operator's. */
-EXPORT(wm_keymap_item_property_set)
-bool wm_keymap_item_property_set(wmKeyMapItem *kmi, const char *name, const double *numbers, int len, const char *text)
-{
-  return kmi->ptr && operator_property_set(kmi->ptr, name, numbers, len, text);
-}
-
+/* Keyconfig data is loaded by Blender's Python (bl_keymap_utils.io, through rna-bridge.cc). */
 /* After loading: the user key configuration is made from the default one before the next event (WM_keyconfig_update). */
 EXPORT(wm_keyconfig_loaded) void wm_keyconfig_loaded() { WM_keyconfig_update_tag(nullptr, nullptr); }
 
