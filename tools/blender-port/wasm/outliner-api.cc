@@ -33,31 +33,22 @@ using namespace blender;
 extern "C" void region_draw_begin(int winx, int winy);
 extern "C" const char *region_draw_end();
 
-/* The interface's resolution as WM_window_dpi_set_userdef sets it at Blender's default scale of 1, the default theme
- * (userdef_default_theme.c), the default style and the icons. */
-static void ui_ensure()
+/* As WM_init initializes the interface (UI_init): the resolution WM_window_dpi_set_userdef sets at Blender's default
+ * scale of 1, the default theme (userdef_default_theme.c), the default style and the icons. */
+void ui_init()
 {
-  static const bool done = [] {
-    U.dpi = 72;
-    U.scale_factor = 1.0f;
-    U.inv_scale_factor = 1.0f;
-    U.pixelsize = 1.0f;
-    U.widget_unit = 20;
-    ui::theme::init_default();
-    ui::style_init_default();
-    ui::icons_init();
-    return true;
-  }();
-  (void)done;
+  U.dpi = 72;
+  U.scale_factor = 1.0f;
+  U.inv_scale_factor = 1.0f;
+  U.pixelsize = 1.0f;
+  U.widget_unit = 20;
+  /* port-override: views change at once; Bylonder's window manager has no timers to animate them. */
+  U.smooth_viewtx = 0;
+  ui::theme::init_default();
+  ui::style_init_default();
+  ui::icons_init();
 }
 
-/* The Outliner's operators, registered by Blender's own registration function (called by editor-context's operator
- * table). */
-void outliner_operatortypes_ensure()
-{
-  ed::outliner::outliner_operatortypes();
-  ui::ED_operatortypes_view2d();
-}
 
 static ARegion *main_region(ScrArea *area) { return BKE_area_find_region_type(area, RGN_TYPE_WINDOW); }
 
@@ -84,14 +75,6 @@ static SpaceOutliner *space(ScrArea *area) { return static_cast<SpaceOutliner *>
  * regions. */
 EXPORT(outliner_new) ScrArea *outliner_new(bContext *C)
 {
-  ui_ensure();
-  /* As ED_spacetypes_init registers it and its dropboxes. */
-  static const bool registered = [] {
-    ED_spacetype_outliner();
-    BKE_spacetype_from_id(SPACE_OUTLINER)->dropboxes();
-    return true;
-  }();
-  (void)registered;
   SpaceType *st = BKE_spacetype_from_id(SPACE_OUTLINER);
   ScrArea *area = MEM_new<ScrArea>(__func__);
   area->spacetype = SPACE_OUTLINER;

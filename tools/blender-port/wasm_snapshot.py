@@ -15,8 +15,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.realpath(os.path.join(HERE, '..', '..'))
 CUSTOM, MEMORY, GLOBAL, EXPORT, DATA = 0, 5, 6, 7, 11
 INITIALIZERS = {'_initialize', 'blender_init'}
-# Zero bytes between nonzero ones that stay in one data segment: a segment costs about 6 bytes.
+# Zero bytes between nonzero ones that stay in one data segment (a segment costs about 6 bytes), widened until the
+# segments are fewer than engines take (V8: 100000).
 GAP = 16
+SEGMENTS = 50000
 DUMP = """
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -73,7 +75,7 @@ def stack_top(globals_body):
             return value
 
 
-def data_segments(memory, start):
+def data_segments(memory, start, gap=GAP):
     """Active segments for memory[start:]'s nonzero bytes."""
     segments, i, end = [], start, len(memory)
     while i < end:
@@ -81,11 +83,13 @@ def data_segments(memory, start):
             i += 1
             continue
         first, zeros = i, 0
-        while i < end and zeros <= GAP:
+        while i < end and zeros <= gap:
             zeros = zeros + 1 if not memory[i] else 0
             i += 1
         last = i - zeros
         segments.append(b'\x00\x41' + sleb(first) + b'\x0b' + uleb(last - first) + memory[first:last])
+    if len(segments) > SEGMENTS:
+        return data_segments(memory, start, gap * 2)
     return uleb(len(segments)) + b''.join(segments)
 
 

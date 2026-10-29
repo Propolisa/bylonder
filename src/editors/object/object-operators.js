@@ -18,8 +18,9 @@ const CONFIRM = { 'object.delete': { title: 'Delete selected objects?', button: 
 const ENUMS = {
   'object.parent_set': { type: [['OBJECT', 'Object']] },
 };
-// Run by Blender's code in the module, matching Blender (tests/objects-wasm.test.js).
-const BLENDER_OPERATORS = ['object.transform_apply', 'object.origin_set', 'object.location_clear', 'object.rotation_clear', 'object.scale_clear'];
+// Blender's Object Mode operators, run by Blender's code in the module (tests/objects-wasm.test.js) where Bylonder has no
+// action of its own for them.
+const blenderOperators = (blender) => blender.operators().filter((idname) => idname.startsWith('object.'));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
 // Runs an operator's exec as one undo step, with the selected objects' geometry given to it; returns its status and
@@ -42,7 +43,7 @@ const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 //   sync: the scene's (createMainSync); transaction(fn): an undo step around a change; notify(text): a report;
 //   keying(run): runs an operator that may insert keys (auto keying), for the animation to take them.
 export function registerObjectOperators(registry, { sync, transaction, notify, keying = (fn) => fn() } = {}) {
-  if (sync) for (const idname of BLENDER_OPERATORS) registerOperator(idname, {
+  if (sync) for (const idname of blenderOperators(sync.blender)) registerOperator(idname, {
     poll: () => { sync.flush(); return sync.blender.poll(idname); },
     run: (props) => runBlenderOperator(sync, idname, props, { transaction, notify, keying }),
   });

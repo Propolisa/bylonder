@@ -39,6 +39,7 @@
 #include "DNA_screen_types.h"
 #include "DNA_windowmanager_types.h"
 #include "DNA_workspace_types.h"
+#include "ED_space_api.hh"
 
 #include "BKE_report.hh"
 #include "BKE_screen.hh"
@@ -542,8 +543,9 @@ EXPORT(edit_context_object_matrix_set) void edit_context_object_matrix_set(EditC
 
 /* Operators, registered by Blender's own registration functions through the window manager (WM_operatortype_append),
  * by the index JS finds them at (operator_name). */
-void outliner_operatortypes_ensure();
-void anim_operatortypes();
+namespace blender {
+void wm_operatortypes_register();
+}
 namespace blender::ed::transform {
 void keymap_transform(wmKeyConfig *keyconf);
 }
@@ -553,13 +555,11 @@ void gesture_straightline_modal_keymap(wmKeyConfig *keyconf);
 
 static Vector<wmOperatorType *> &operators()
 {
+  /* As WM_init registers them: the window manager's, every space's with their operators and gizmos, then macros. */
   static Vector<wmOperatorType *> table = [] {
-#define OPERATOR(define) WM_operatortype_append(define);
-#include "operators.inc"
-#undef OPERATOR
-    ed::transform::transform_operatortypes();
-    outliner_operatortypes_ensure();
-    anim_operatortypes();
+    wm_operatortypes_register();
+    ED_spacetypes_init();
+    ED_spacemacros_init();
     ed::transform::keymap_transform(nullptr);
     knifetool_modal_keymap(nullptr);
     gesture_straightline_modal_keymap(nullptr);
@@ -572,9 +572,13 @@ static Vector<wmOperatorType *> &operators()
   return table;
 }
 
+void operators_register() { operators(); }
+
 static wmOperatorType *operator_type(int index) { return operators()[index]; }
 
 EXPORT(operator_count) int operator_count() { return int(operators().size()); }
+/* Whether an operator runs without a modal session (has exec), as a menu or a script calls it. */
+EXPORT(operator_has_exec) bool operator_has_exec(int index) { return operators()[index]->exec != nullptr; }
 /* An operator's idname as Blender's C code has it (MESH_OT_subdivide). */
 EXPORT(operator_name) const char *operator_name(int index) { return operators()[index]->idname; }
 

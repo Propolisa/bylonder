@@ -29,6 +29,8 @@ const operatorTypes = new Map(Array.from({ length: x.operator_count() }, (_, i) 
   return [`${prefix.toLowerCase()}.${name}`, i];
 }));
 export const hasOperator = (idname) => operatorTypes.has(idname);
+// The operators that run without a modal session (exec), by idname.
+export const execOperators = () => [...operatorTypes].filter(([, i]) => x.operator_has_exec(i)).map(([idname]) => idname);
 
 // The module's exports and memory helpers, for subsystems with API files of their own (anim-api.cc).
 export const blenderModule = { exports: x, withArrays, withString, cString };
@@ -282,6 +284,8 @@ export class EditMesh {
   }
 
   // Runs a Blender operator's exec on the edit mesh, as runOperator takes it.
+  // Blender's operators that run without a modal session, by idname.
+  operators() { return execOperators(); }
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
 
   // Whether an operator polls for this edit mesh.

@@ -60,6 +60,9 @@ using namespace blender;
 /* As Blender's main sets them up before any data is made, once, on first use: other files' statics they reach are not
  * constructed yet while the module initializes. */
 void fonts_init();
+void operators_register();
+void ui_init();
+
 /* What Blender's main initializes (creator.cc), in its order, without the window system and Python. */
 static void blender_init()
 {
@@ -84,6 +87,8 @@ static void blender_init()
   BKE_particle_init_rng();
   fonts_init();
   BKE_materials_init();
+  ui_init();
+  operators_register();
 }
 
 void types_ensure()

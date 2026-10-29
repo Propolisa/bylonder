@@ -64,33 +64,7 @@ void keymap_transform(wmKeyConfig *keyconf);
 }
 }  // namespace blender
 
-/* The interface's resolution as WM_window_dpi_set_userdef sets it at Blender's default 1.0 scale, and the default
- * theme (userdef_default_theme.c), which the editors read curve and channel colors from. */
-static void ui_ensure()
-{
-  U.dpi = 72;
-  U.scale_factor = 1.0f;
-  U.inv_scale_factor = 1.0f;
-  U.pixelsize = 1.0f;
-  U.widget_unit = 20;
-  /* port-override: views change at once; Bylonder's window manager has no timers to animate them. */
-  U.smooth_viewtx = 0;
-  ui::theme::init_default();
-  ui::style_init_default();
-}
 
-/* The animation editors' operators, registered by their own registration functions (called by editor-context's
- * operator table), and the transform operators' modal keymap. */
-void anim_operatortypes()
-{
-  ui_ensure();
-  graphedit_operatortypes();
-  action_operatortypes();
-  ED_operatortypes_animchannels();
-  ED_operatortypes_anim();
-  ED_operatortypes_marker();
-  ui::ED_operatortypes_view2d();
-}
 
 /* Animation data. */
 
@@ -235,16 +209,10 @@ struct AnimArea : BylonderArea {};
 
 static ARegion *area_region(AnimArea *a, int regiontype) { return BKE_area_find_region_type(&a->area, regiontype); }
 
-static void space_types_ensure()
-{
-  static const bool types = (ED_spacetype_ipo(), ED_spacetype_action(), true);
-  (void)types;
-}
 
 /* An area of a space type (SPACE_GRAPH, SPACE_ACTION), as ED_area_newspace makes one. */
 EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int subtype)
 {
-  space_types_ensure();
   AnimArea *a = MEM_new<AnimArea>(__func__);
   SpaceType *st = BKE_spacetype_from_id(spacetype);
   /* As ED_area_newspace: the space is made for the sub-type the area asks for, then set to it. */
