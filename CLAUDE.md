@@ -26,21 +26,16 @@ Bylonder's own keys. The shared foundations every subsystem builds on are in `do
 decisions and equivalents go in `docs/blender-coverage.md` and `docs/blender-boundary.md`. Regenerate Blender's side
 with `tools/blender-reference/surface.py`.
 
-## Ports of Blender code
+## Blender's code in the app
 
-Blender's algorithm code (bmesh, blenlib, geometry, mesh parts of blenkernel) is generated, not hand-ported:
-`tools/blender-port/port.py` follows `manifest.json` roots through Clang's AST and writes `*.gen.js` modules mirroring
-Blender's files, pinned to one Blender tag. Never edit `*.gen.js`. Bylonder diverges only in shims: the public module
-(`bmesh-query.js`) exports a Blender name to replace its generated port and re-exports the rest. `status.json` states the
-overlap: generated, shimmed (with signature differences), excluded (with a reason) and missing.
+Blender's C/C++ runs in the WASM module (`tools/blender-port/blender_build.py`, `manifest.json`), built from Blender's
+sources; Bylonder's hand-written C is limited to seams in `tools/blender-port/wasm/`, and a seam that replaces Blender's
+own definition carries a `// port-override: <reason>` comment. Call the module, never port C to JS.
 
-- Fix wrong output in the converter (`convert.py`, mapping tables in `rules.py`), never by hand, and keep improving it
-  without regressions, preferring what Clang or JS tooling states exactly over text matching. Try a change on one file
-  with `port.py SRC --check FILE` (seconds) before a full run.
-- A shim that deviates from what the converter would produce on purpose (performance, Bylonder's design) carries a
-  `// port-override: <reason>` comment, so overrides can be found and rechecked as Blender changes.
-- Goal: the same module boundaries can also be built to WASM from Blender's sources, selectable per subsystem at
-  build or run time.
+The generated JS ports (`*.gen.js` and their shims, from `tools/blender-port/port.py`) are kept for tests and possible
+later use, but must not ship: `node scripts/port-usage.mjs` lists which port modules the app still imports
+(`tools/blender-port/build-usage.json`), and that list only shrinks. Never edit `*.gen.js`; fix the converter
+(`convert.py`, `rules.py`) if a port is regenerated.
 
 ## Code style
 
