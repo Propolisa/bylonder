@@ -71,6 +71,7 @@ import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
 import { setContextPointer } from "./python/bpy_rna.js";
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
+import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
@@ -228,7 +229,10 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Handle for debugging and the browser tests, which run against the production build.
+let topbarArea = null;
 window.__bylonder ={ world, renderHost, runOperator,
+  // The Top Bar's menus, laid out here for the app page's topbar.
+  get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
   coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,

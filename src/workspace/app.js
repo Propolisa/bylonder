@@ -29,8 +29,7 @@ await preloadIcons();
 const reveal = () => document.body.classList.remove("bl-loading");
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
-let topbarMenus;
-const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
+const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin), sceneTopbar: () => frame?.contentWindow?.__bylonder?.topbar });
 let repo,
   project,
   active = "index.js",
@@ -544,7 +543,6 @@ async function run({ keepParked = false } = {}) {
   frame.allow = "fullscreen; clipboard-write; web-share";
   frame.src = APP_BASE + "viewport.html?channel=" + encodeURIComponent(channel);
   $("frame-host").append(frame);
-  topbarMenus ??= topbar.loadMenus().catch(failure);
   $("run-status").textContent = "Running createScene…";
   if (old) removeRun(old.base).catch(console.warn);
 }
@@ -597,7 +595,7 @@ window.addEventListener("message", (e) => {
     );
   if (type === "text") textChanged(payload);
   if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(() => { reveal(); setTimeout(code, 0); }));
-  if (type === "running") { $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
+  if (type === "running") { topbar.connect(); $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
   if (type === "run-error") {
     $("run-status").textContent = "Run failed";
     log(payload.message, "error");

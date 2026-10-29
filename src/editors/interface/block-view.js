@@ -72,7 +72,8 @@ export function treeMenu(tree, ui) {
   const items = [];
   const visit = (node) => {
     if (node.kind !== 'button') return node.children?.forEach(visit);
-    const text = node.text || node.display || '';
+    // A menu's entry shows its shortcut after UI_SEP_CHAR (ui_menu_block_set_keymaps).
+    const [text, shortcut] = (node.text || node.display || '').split('|');
     const iconName = node.icon && node.icon !== 'NONE' ? node.icon : undefined;
     switch (node.type) {
       case 'SEPR': case 'SEPR_LINE': items.push('-'); break;
@@ -86,8 +87,8 @@ export function treeMenu(tree, ui) {
           label: text, icon: iconName, title: node.tip, blender: node.operator,
           enabled: () => !node.disabled,
           ...(['TOGGLE', 'TOGGLE_N', 'ICON_TOGGLE', 'ICON_TOGGLE_N', 'CHECKBOX', 'CHECKBOX_N', 'ROW'].includes(node.type) && { checked: () => !!node.selected }),
-          ...(node.operator && { keys: ui.keys?.(node.operator, node.properties ?? {}) }),
-          run: (event) => (node.operator ? ui.run(node.operator, node.properties ?? {}, event) : press(node, ui)),
+          ...(node.operator && { keys: shortcut ?? ui.keys?.(node.operator, node.properties ?? {}) }),
+          run: (event) => (node.operator ? runOperator(node, ui, event) : press(node, ui)),
         });
     }
   };
