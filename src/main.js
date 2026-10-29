@@ -71,6 +71,8 @@ import { registerTextOperators } from "./editors/space_text/text-ops.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
+// Boot phases, as performance marks (the workspace marks its own).
+performance.mark("bl:viewport-imported");
 await preloadIcons();
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
@@ -119,6 +121,7 @@ window.addEventListener("unhandledrejection", (e) =>
     text: String(e.reason?.stack || e.reason),
   }),
 );
+performance.mark("bl:viewport-input");
 const input = await new Promise((resolve) => {
   window.addEventListener("message", function init(e) {
     if (
@@ -158,6 +161,7 @@ const jobs = createJobs({ ask: true });
 const runningJobs = createRunningJobs(document.body.appendChild(document.createElement("div")), jobs);
 let built;
 try {
+  performance.mark("bl:world");
   built = await createWorld({ input, engine, canvas, hooks: {
     commit,
     jobs,
@@ -740,6 +744,7 @@ function dispose() {
   world.engine.dispose();
   clearTimeout(toastTimer);
 }
+performance.mark("bl:viewport-running");
 send("running", {});
 window.addEventListener("pagehide", dispose, { once: true });
 if (import.meta.hot) import.meta.hot.dispose(dispose);

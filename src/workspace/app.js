@@ -23,6 +23,7 @@ import { preferences, openPreferences } from "./preferences.js";
 import { menuButton } from "../editors/interface/menu.js";
 import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
+performance.mark("bl:workspace-imported");
 await preloadIcons();
 // The window shows once the scene's interface has drawn, or failed to (and in any case after a while: index.html).
 const reveal = () => document.body.classList.remove("bl-loading");
@@ -434,7 +435,9 @@ async function run({ keepParked = false } = {}) {
   clearTimeout(runTimer);
   await save();
   $("run-status").textContent = "Preparing modules…";
+  performance.mark("bl:run");
   const next = await publishRun(structuredClone(project));
+  performance.mark("bl:published");
   if (generation !== runGeneration) {
     await removeRun(next.base);
     return;
@@ -443,6 +446,7 @@ async function run({ keepParked = false } = {}) {
   frame?.remove();
   runData = next;
   channel = crypto.randomUUID();
+  performance.mark("bl:frame");
   frame = document.createElement("iframe");
   frame.title = "Babylon scene";
   frame.allow = "fullscreen; clipboard-write; web-share";

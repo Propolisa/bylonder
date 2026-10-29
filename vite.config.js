@@ -53,6 +53,8 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       input: { workspace: "index.html", viewport: "viewport.html", render: "render.html", docs: "docs.html" },
+      // Babylon's shaders, each its own dynamic import (four per effect), in one chunk: one request, not hundreds.
+      output: { manualChunks: (id) => (/@babylonjs\/core\/Shaders(WGSL)?\//.test(id) ? "babylon-shaders" : undefined) },
     },
     chunkSizeWarningLimit: 7000,
   },
