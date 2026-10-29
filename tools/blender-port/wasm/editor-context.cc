@@ -666,14 +666,5 @@ void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}
 
 /* No window or view to update. */
 void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}
-/* port-override: no depsgraph to flush tags through, so they stay on the ID (`recalc`), where the editor reads what an
- * operator changed. */
-void DEG_id_tag_update(ID *id, unsigned int flags)
-{
-  if (id) {
-    id->recalc |= flags;
-  }
-}
-void DEG_id_tag_update_ex(Main * /*bmain*/, ID *id, unsigned int flags) { DEG_id_tag_update(id, flags); }
 
 }  // namespace blender

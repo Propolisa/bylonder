@@ -1,13 +1,10 @@
 /* What the view (src/blenkernel/main-view.js) reads of Main besides RNA's values and the extracted geometry: a Mesh's
  * attributes, so a mesh is drawn whole whoever made it (Bylonder, a read file or an undo step), an object's edit mesh
- * in Edit Mode, and Main evaluated for a frame, as the depsgraph evaluates a new frame. */
-#include "BKE_anim_data.hh"
-#include "BKE_animsys.h"
+ * in Edit Mode, and Main evaluated for a frame by its depsgraph. */
 #include "BKE_attribute.hh"
 #include "BKE_context.hh"
 #include "BKE_editmesh.hh"
 #include "BLI_map.hh"
-#include "BKE_lib_query.hh"
 #include "BKE_main.hh"
 #include "BKE_mesh.hh"
 #include "BKE_scene.hh"
@@ -39,19 +36,12 @@ EXPORT(mesh_attributes_list) const char *mesh_attributes_list(const Object *ob)
   return list.c_str();
 }
 
-/* The scene at a frame (BKE_scene_graph_update_for_newframe without a graph to evaluate): the frame set, then every
- * ID's animation and drivers evaluated into it, embedded node trees' included (BKE_animsys_evaluate_animdata), each ID being its own evaluated copy;
- * the objects' matrices follow (main_evaluate). */
+/* The scene at a frame, evaluated by its depsgraph as Blender evaluates a new frame (animation, drivers and what
+ * depends on them). */
 EXPORT(view_frame_set) void view_frame_set(bContext *C, float frame)
 {
-  Main *bmain = CTX_data_main(C);
-  Scene *scene = CTX_data_scene(C);
-  BKE_scene_frame_set(scene, frame);
-  const AnimationEvalContext context = BKE_animsys_eval_context_construct(CTX_data_depsgraph_pointer(C), BKE_scene_ctime_get(scene));
-  /* Embedded IDs too (a material's node tree), as the depsgraph has a node for each. */
-  BKE_animdata_main_cb(bmain, [&](ID *id, AnimData *adt) {
-    BKE_animsys_evaluate_animdata(id, adt, &context, ADT_RECALC_ALL, false);
-  });
+  BKE_scene_frame_set(CTX_data_scene(C), frame);
+  BKE_scene_graph_update_for_newframe(CTX_data_depsgraph_pointer(C));
 }
 
 /* An object Main holds in Edit Mode: its edit mesh's arrays as the draw cache extracts them (extraction.hh), the parts

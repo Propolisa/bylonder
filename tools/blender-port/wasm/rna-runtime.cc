@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 
+#include "BKE_context.hh"
+#include "BKE_global.hh"
 #include "BKE_idprop.hh"
 #include "BKE_report.hh"
 #include "BLI_listbase.h"
@@ -112,9 +114,16 @@ static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double va
   }
 }
 
-/* The context properties are set in, for enums whose items depend on it, as bpy's BPY_context_get. */
+/* The context properties are set in, for enums whose items depend on it, as bpy's BPY_context_get; its Main is the one
+ * Blender's code finds through G_MAIN (where DEG_id_tag_update tags its depsgraphs), as loading a file sets it. */
 static bContext *property_context = nullptr;
-EXPORT(rna_context_set) void rna_context_set(bContext *C) { property_context = C; }
+EXPORT(rna_context_set) void rna_context_set(bContext *C)
+{
+  property_context = C;
+  if (C) {
+    G_MAIN = CTX_data_main(C);
+  }
+}
 
 bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *text)
 {

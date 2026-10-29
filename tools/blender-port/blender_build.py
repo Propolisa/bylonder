@@ -202,8 +202,8 @@ def generate(host, out, missing, by_any, extra):
 
 
 # The module build's own sources that stand in for what this build compiles from Blender: RNA's runtime (its generated
-# definitions and rna_access) and the dependency graph.
-STAND_INS = {'operator-properties.cc', 'rna-fcurve.cc', 'rna-space.cc', 'no-depsgraph.cc'}
+# definitions and rna_access).
+STAND_INS = {'operator-properties.cc', 'rna-fcurve.cc', 'rna-space.cc'}
 
 
 def glue(host, out, entries, extra):

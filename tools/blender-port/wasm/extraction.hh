@@ -42,4 +42,8 @@ void extraction_update(BMesh *bm, Extraction &extraction, int what);
 /* Points the header at an evaluated Mesh's own arrays (the flags stay null: they exist in Edit Mode only). */
 void mesh_extraction(const Mesh &mesh, ExtractionHeader &header);
 
+/* A Mesh outside Main from the arrays bm_from_arrays takes; a UV map, when given, as Blender's default "UVMap". */
+Mesh *mesh_from_arrays(int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num, const int *face_offsets,
+                       const int *corner_verts, const int *corner_edges, const float2 *uvs);
+
 }  // namespace blender

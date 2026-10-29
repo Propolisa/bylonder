@@ -41,7 +41,7 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "armature-api.cc", "view3d-api.cc", "gesture-api.cc", "no-depsgraph.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "wm-gesture.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "edit-api.cc", "clipboard.cc", "reports.cc", "python.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "armature-api.cc", "view3d-api.cc", "gesture-api.cc", "modifier-object-main.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "wm-gesture.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "edit-api.cc", "clipboard.cc", "reports.cc", "python.cc"],
       "check": "tools/blender-port/check-bmesh.mjs",
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],
@@ -108,7 +108,7 @@
         "source/blender/bmesh/tools",
         {"path": "source/blender/blenkernel/intern", "exclude": ["blender.cc", "scene.cc", "constraint.cc", "shader_fx.cc", "action.cc", "vfontdata_freetype.cc", "node.cc", "node_tree_update.cc", "colortools.cc", "packedFile.cc"]},
         {"path": "source/blender/blenkernel/intern/packedFile.cc", "includes": ["wasm/fstream"]},
-        {"path": "source/blender/blenkernel/intern/scene.cc", "defines": ["BKE_scene_ensure_depsgraph=scene_cc_ensure_depsgraph", "BKE_scene_graph_evaluated_ensure=scene_cc_graph_evaluated_ensure",
+        {"path": "source/blender/blenkernel/intern/scene.cc", "defines": [
           "get_render_subsurf_level=scene_cc_get_render_subsurf_level", "BKE_scene_ctime_get=scene_cc_ctime_get", "BKE_scene_camera_switch_update=scene_cc_camera_switch_update"]},
         {"path": "source/blender/blenkernel/intern/colortools.cc", "includes": ["source/blender/imbuf/opencolorio"]},
         {"path": "source/blender/blenloader/intern/writefile.cc", "uses": ["zstd"], "includes": ["source/blender/blenloader_core", "wasm/fstream"]},
@@ -121,6 +121,11 @@
         {"path": "source/blender/blenkernel/intern/constraint.cc", "includes": ["source/blender/ikplugin"]},
         {"path": "source/blender/blenkernel/intern/action.cc", "includes": ["source/blender/ikplugin"]},
         {"path": "source/blender/blenkernel/intern/shader_fx.cc", "includes": ["source/blender/shader_fx"]},
+        "source/blender/depsgraph/intern",
+        "source/blender/depsgraph/intern/builder",
+        "source/blender/depsgraph/intern/eval",
+        "source/blender/depsgraph/intern/node",
+        "source/blender/depsgraph/intern/debug",
         {"path": "source/blender/modifiers/intern", "exclude": ["MOD_nodes.cc"]},
         "source/blender/geometry/intern/mesh_merge_verts.cc",
         "source/blender/render/intern/texture_procedural.cc",
@@ -168,7 +173,7 @@
       ]
     },
     "modifiers/modifiers.wasm": {
-      "api": ["modifier-api.cc", "no-depsgraph.cc", "modifiers-only.cc", "texture-api.cc"],
+      "api": ["modifier-api.cc", "modifier-object.cc", "no-depsgraph.cc", "modifiers-only.cc", "texture-api.cc"],
       "check": "tools/blender-port/check-modifiers.mjs",
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH"],
       "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "extern/bullet2/src"],

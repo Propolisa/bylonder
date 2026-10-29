@@ -1,6 +1,6 @@
-/* Blender's modifier stack on an object outside Edit Mode: the object's mesh comes in as arrays, its modifiers are
- * Blender's ModifierData (JS writes their settings at the offsets of their DNA structs), and mesh_create_eval_final
- * evaluates them as the depsgraph would. The result's arrays are read in place through an ExtractionHeader. */
+/* Blender's modifier stacks: modifiers are Blender's ModifierData (JS writes their settings at the offsets of their DNA
+ * structs), on Main's objects or on a module's object of its own (modifier-object.cc, modifier-object-main.cc), whose
+ * evaluated mesh is read in place through an ExtractionHeader. */
 #include "BKE_attribute.hh"
 #include "BKE_blender.hh"
 #include "BKE_brush.hh"
@@ -100,78 +100,13 @@ void types_ensure()
  * before anything else. */
 EXPORT(blender_init) void blender_init_export() { types_ensure(); }
 
-struct ModifierObject {
-  Scene scene = {};
-  Object object = {};
-  Mesh *result = nullptr;
-  ExtractionHeader header = {};
-};
-
-static Mesh *&object_mesh(ModifierObject &mo) { return reinterpret_cast<Mesh *&>(mo.object.data); }
-
 /* As BKE_object_free_modifiers frees a mesh object's. */
-static void modifiers_free(Object &ob)
+void modifiers_free(Object &ob)
 {
   while (ModifierData *md = static_cast<ModifierData *>(BLI_pophead(&ob.modifiers))) {
     BKE_modifier_free(md);
   }
 }
-
-static void result_free(ModifierObject &mo)
-{
-  if (mo.result) {
-    BKE_id_free(nullptr, mo.result);
-    mo.result = nullptr;
-  }
-}
-
-EXPORT(modifier_object_new) ModifierObject *modifier_object_new()
-{
-  types_ensure();
-  ModifierObject *mo = MEM_new<ModifierObject>(__func__);
-  mo->object.type = OB_MESH;
-  mo->object.runtime = MEM_new<bke::ObjectRuntime>(__func__);
-  mo->object.runtime->object_to_world = float4x4::identity();
-  mo->object.runtime->world_to_object = float4x4::identity();
-  return mo;
-}
-
-EXPORT(modifier_object_free) void modifier_object_free(ModifierObject *mo)
-{
-  result_free(*mo);
-  modifiers_free(mo->object);
-  if (object_mesh(*mo)) {
-    BKE_id_free(nullptr, object_mesh(*mo));
-  }
-  MEM_delete(mo->object.runtime);
-  MEM_delete(mo);
-}
-
-/* The object's mesh, from the arrays bm_from_arrays takes; a UV map comes in as Blender's default "UVMap". */
-EXPORT(modifier_object_mesh_set)
-void modifier_object_mesh_set(ModifierObject *mo, int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num,
-                              const int *face_offsets, const int *corner_verts, const int *corner_edges, const float2 *uvs)
-{
-  const int corners_num = face_offsets[faces_num];
-  Mesh *mesh = BKE_mesh_new_nomain(verts_num, edges_num, faces_num, corners_num);
-  mesh->vert_positions_for_write().copy_from({positions, verts_num});
-  mesh->edges_for_write().copy_from({edges, edges_num});
-  mesh->face_offsets_for_write().copy_from({face_offsets, faces_num + 1});
-  mesh->corner_verts_for_write().copy_from({corner_verts, corners_num});
-  mesh->corner_edges_for_write().copy_from({corner_edges, corners_num});
-  if (uvs) {
-    mesh->attributes_for_write().add<float2>("UVMap", bke::AttrDomain::Corner,
-                                             bke::AttributeInitVArray(VArray<float2>::from_span({uvs, corners_num})));
-    mesh->uv_maps_active_set("UVMap");
-    mesh->uv_maps_default_set("UVMap");
-  }
-  if (object_mesh(*mo)) {
-    BKE_id_free(nullptr, object_mesh(*mo));
-  }
-  object_mesh(*mo) = mesh;
-}
-
-EXPORT(modifier_object) Object *modifier_object(ModifierObject *mo) { return &mo->object; }
 
 /* A modifier of a type (ModifierType) with Blender's defaults, last in an object's stack. */
 EXPORT(modifier_add) ModifierData *modifier_add(Object *ob, int type)
@@ -206,14 +141,24 @@ EXPORT(modifier_name) const char *modifier_name(const ModifierData *md) { return
 EXPORT(modifier_mode) int modifier_mode(const ModifierData *md) { return md->mode; }
 
 /* Evaluates the stack as the viewport does and extracts the result, which stays until the next evaluation. */
-EXPORT(modifier_object_eval) const ExtractionHeader *modifier_object_eval(ModifierObject *mo)
+
+Mesh *blender::mesh_from_arrays(int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num,
+                                const int *face_offsets, const int *corner_verts, const int *corner_edges, const float2 *uvs)
 {
-  result_free(*mo);
-  Depsgraph *depsgraph = BKE_scene_ensure_depsgraph(nullptr, &mo->scene, nullptr);
-  CustomData_MeshMasks mask = CD_MASK_MESH;
-  mo->result = bke::mesh_create_eval_final(depsgraph, &mo->scene, &mo->object, &mask);
-  mesh_extraction(*mo->result, mo->header);
-  return &mo->header;
+  const int corners_num = face_offsets[faces_num];
+  Mesh *mesh = BKE_mesh_new_nomain(verts_num, edges_num, faces_num, corners_num);
+  mesh->vert_positions_for_write().copy_from({positions, verts_num});
+  mesh->edges_for_write().copy_from({edges, edges_num});
+  mesh->face_offsets_for_write().copy_from({face_offsets, faces_num + 1});
+  mesh->corner_verts_for_write().copy_from({corner_verts, corners_num});
+  mesh->corner_edges_for_write().copy_from({corner_edges, corners_num});
+  if (uvs) {
+    mesh->attributes_for_write().add<float2>("UVMap", bke::AttrDomain::Corner,
+                                             bke::AttributeInitVArray(VArray<float2>::from_span({uvs, corners_num})));
+    mesh->uv_maps_active_set("UVMap");
+    mesh->uv_maps_default_set("UVMap");
+  }
+  return mesh;
 }
 
 /* Subdivision Surface last in the stack defers to the wrapper, which holds the subdivided mesh. */

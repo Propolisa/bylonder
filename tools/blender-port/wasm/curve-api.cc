@@ -600,8 +600,4 @@ bool ED_operator_editfont(bContext *C)
   return false;
 }
 
-/* port-override: the module has no depsgraph to say which curves something follows (the Curve modifier, Follow
- * Path, text on a curve), so every curve has its path evaluated, as Blender does for a curve something follows. */
-uint32_t DEG_get_eval_flags_for_id(const Depsgraph * /*graph*/, const ID * /*id*/) { return DAG_EVAL_NEED_CURVE_PATH; }
-
 }  // namespace blender

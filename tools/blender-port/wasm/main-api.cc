@@ -1,8 +1,8 @@
 /* Blender's data outside Edit Mode: a Main holding Bylonder's objects and their data, one Scene with one ViewLayer
  * whose Bases hold the selection and the active object, and Main's window manager with one window whose screen
  * answers context members as Blender's screen context does (screen_context.cc) and runs its events (wm-api.cc). Main
- * owns the data (docs/model.md); Babylon draws it after Blender's code ran (src/blenkernel/main-view.js), reading what it
- * tagged (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec, on main_C).
+ * owns the data (docs/model.md); Blender's depsgraph evaluates it, and Babylon draws what the evaluation updated
+ * (src/blenkernel/main-view.js). Operators run by their own exec (operator_exec, on main_C).
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_armature.hh"
 #include "BKE_attribute.hh"
@@ -40,6 +40,7 @@
 #include "BKE_scene.hh"
 #include "BKE_workspace.hh"
 #include "BLI_filereader.h"
+#include "BLI_iterator.h"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
@@ -47,6 +48,8 @@
 #include "BLI_map.hh"
 #include "BLI_set.hh"
 #include "BLI_string.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
 #include "DEG_depsgraph_query.hh"
 #include "DNA_layer_types.h"
 #include "DNA_mesh_types.h"
@@ -108,6 +111,7 @@ struct BlenderMain {
 };
 
 static void collections_synced(BlenderMain *ctx);
+static void scene_updated(const DEGEditorUpdateContext *update_ctx, bool updated);
 
 EXPORT(main_new) BlenderMain *main_new()
 {
@@ -142,6 +146,7 @@ EXPORT(main_new) BlenderMain *main_new()
   CTX_wm_manager_set(ctx->C, ctx->wm);
   CTX_wm_window_set(ctx->C, &ctx->window);
   wm_init(ctx->C);
+  DEG_editors_set_update_cb(nullptr, scene_updated);
   collections_synced(ctx);
   return ctx;
 }
@@ -171,7 +176,11 @@ EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return ctx->scene; }
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
 EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return ctx->view_layer; }
 /* The scene's active camera (an object, or null). */
-EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera) { ctx->scene->camera = camera; }
+EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera)
+{
+  ctx->scene->camera = camera;
+  DEG_relations_tag_update(ctx->bmain);
+}
 
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(ctx->view_layer, ob); }
 
@@ -180,6 +189,8 @@ static void collections_synced(BlenderMain *ctx)
 {
   BKE_view_layer_need_resync_tag(ctx->view_layer);
   BKE_view_layer_synced_ensure(*ctx->bmain, ctx->scene, ctx->view_layer);
+  DEG_id_tag_update(&ctx->scene->id, ID_RECALC_BASE_FLAGS | ID_RECALC_SYNC_TO_EVAL);
+  DEG_relations_tag_update(ctx->bmain);
 }
 EXPORT(main_collections_sync) void main_collections_sync(BlenderMain *ctx) { collections_synced(ctx); }
 
@@ -210,6 +221,7 @@ EXPORT(object_rotation_mode_set) void object_rotation_mode_set(Object *ob, int m
     mat3_normalized_to_quat(ob->quat, mat);
   }
   ob->rotmode = mode;
+  DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
 }
 
 /* Removes an object and its data from its collections and Main; no other object may have it as parent. */
@@ -401,6 +413,7 @@ void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool
   SET_FLAG_FROM_TEST(ob->visibility_flag, hide_select, OB_HIDE_SELECT);
   BKE_base_eval_flags(base);
   ob->base_flag = base->flag;
+  DEG_id_tag_update(&ctx->scene->id, ID_RECALC_BASE_FLAGS);
   if (active) {
     ctx->view_layer->basact = base;
   }
@@ -414,10 +427,16 @@ EXPORT(object_parent_set) void object_parent_set(Object *ob, Object *parent)
 {
   ob->parent = parent;
   ob->partype = PAROBJECT;
+  DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
+  DEG_relations_tag_update(G_MAIN);
 }
 
 /* An object's mode (eObjectMode). */
-EXPORT(object_mode_set) void object_mode_set(Object *ob, int mode) { ob->mode = eObjectMode(mode); }
+EXPORT(object_mode_set) void object_mode_set(Object *ob, int mode)
+{
+  ob->mode = eObjectMode(mode);
+  DEG_id_tag_update(&ob->id, ID_RECALC_SYNC_TO_EVAL);
+}
 
 /* port-override: Bylonder's objects have no parent inverse, so it folds into the object's own transform, keeping its
  * world matrix (evaluated). */
@@ -425,7 +444,13 @@ EXPORT(object_parent_inverse_fold) void object_parent_inverse_fold(Object *ob)
 {
   unit_m4(ob->parentinv);
   BKE_object_apply_mat4(ob, ob->object_to_world().ptr(), true, true);
+  DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
 }
+
+/* Tags an ID for the depsgraph to evaluate again (IDRecalcFlag; 0 for all of it), after the editor wrote its DNA. */
+EXPORT(id_tag_update) void id_tag_update(ID *id, unsigned int flags) { DEG_id_tag_update(id, flags); }
+/* The relations between IDs changed (a parent, a modifier's target), which the depsgraph builds again. */
+EXPORT(main_relations_tag) void main_relations_tag(BlenderMain *ctx) { DEG_relations_tag_update(ctx->bmain); }
 
 /* Where an object's transform is: Blender's DNA, which the editor reads and writes in place. */
 struct ObjectFields {
@@ -450,46 +475,49 @@ EXPORT(main_pivot_point_set) void main_pivot_point_set(BlenderMain *ctx, int piv
   ctx->scene->toolsettings->transform_pivot_point = char(pivot_point);
 }
 
-static void where_is_calc(Depsgraph *depsgraph, Scene *scene, Object *ob, Set<Object *> &done)
+/* What the depsgraph updated in its evaluations since the editor last took it: each original ID and its recalc flags
+ * (IDRecalcFlag), as the editors' update callback sees them before they are cleared (ED_render_scene_update). */
+static Map<ID *, unsigned int> updates;
+static Vector<ID *> taken;
+static void scene_updated(const DEGEditorUpdateContext *update_ctx, bool updated)
 {
-  if (!done.add(ob)) {
+  if (!updated) {
     return;
   }
-  if (ob->parent) {
-    where_is_calc(depsgraph, scene, ob->parent, done);
+  DEGIDIterData data = {update_ctx->depsgraph, true};
+  ITER_BEGIN (DEG_iterator_ids_begin, DEG_iterator_ids_next, DEG_iterator_ids_end, &data, ID *, id) {
+    updates.lookup_or_add(DEG_get_original(id), 0) |= id->recalc;
   }
-  BKE_object_where_is_calc(depsgraph, scene, ob);
-  BKE_pose_where_is(depsgraph, scene, ob);
+  ITER_END;
 }
 
-/* What the depsgraph does once the editor has written the objects or an operator has changed them: each object's
- * world matrix, parents first, an armature's pose, and the tags cleared. */
-EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx)
+/* The scene's depsgraph, active (its evaluation writes back to the originals what the editors show). */
+static Depsgraph *depsgraph_of(BlenderMain *ctx) { return CTX_data_depsgraph_pointer(ctx->C); }
+
+/* Main evaluated by Blender's depsgraph for what was tagged since the last evaluation, as the window manager does
+ * after each event (wm_event_do_depsgraph). */
+EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx) { BKE_scene_graph_update_tagged(depsgraph_of(ctx), ctx->bmain); }
+
+/* The IDs the depsgraph updated since the last call, taken: their count, then each one (main_update) and its flags. */
+EXPORT(main_updates) int main_updates()
 {
-  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(ctx->C);
-  Set<Object *> done;
-  for (Object &ob : ctx->bmain->objects) {
-    where_is_calc(depsgraph, ctx->scene, &ob, done);
-    ob.id.recalc = 0;
-    if (ob.data) {
-      ob.data->recalc = 0;
-    }
+  taken.clear();
+  for (ID *id : updates.keys()) {
+    taken.append(id);
   }
+  return taken.size();
 }
+EXPORT(main_update) ID *main_update(int index) { return taken[index]; }
+EXPORT(main_update_recalc) unsigned int main_update_recalc(int index) { return updates.pop(taken[index]); }
 
 /* A mesh object's Mesh replaced by one of the arrays bm_from_arrays takes; attributes are added after. */
 EXPORT(object_mesh_set)
 void object_mesh_set(Object *ob, int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num,
                      const int *face_offsets, const int *corner_verts, const int *corner_edges)
 {
-  const int corners_num = face_offsets[faces_num];
-  Mesh *mesh = BKE_mesh_new_nomain(verts_num, edges_num, faces_num, corners_num);
-  mesh->vert_positions_for_write().copy_from({positions, verts_num});
-  mesh->edges_for_write().copy_from({edges, edges_num});
-  mesh->face_offsets_for_write().copy_from({face_offsets, faces_num + 1});
-  mesh->corner_verts_for_write().copy_from({corner_verts, corners_num});
-  mesh->corner_edges_for_write().copy_from({corner_edges, corners_num});
+  Mesh *mesh = mesh_from_arrays(verts_num, positions, edges_num, edges, faces_num, face_offsets, corner_verts, corner_edges, nullptr);
   BKE_mesh_nomain_to_mesh(mesh, id_cast<Mesh *>(ob->data), ob);
+  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
 }
 
 /* Adds an attribute of a domain (AttrDomain) and type (AttrType) to a mesh object's Mesh, from one value per element. */
@@ -498,6 +526,7 @@ EXPORT(object_mesh_attribute_add) bool object_mesh_attribute_add(Object *ob, con
   bke::MutableAttributeAccessor attributes = id_cast<Mesh *>(ob->data)->attributes_for_write();
   const CPPType &cpp_type = bke::attribute_type_to_cpp_type(bke::AttrType(type));
   const GSpan values(cpp_type, data, attributes.domain_size(bke::AttrDomain(domain)));
+  DEG_id_tag_update(ob->data, ID_RECALC_GEOMETRY);
   return attributes.add(name, bke::AttrDomain(domain), bke::AttrType(type), bke::AttributeInitVArray(GVArray::from_span(values)));
 }
 
@@ -526,18 +555,17 @@ EXPORT(object_mesh_attribute) const void *object_mesh_attribute(Object *ob, cons
   return values.data();
 }
 
-/* A mesh object's Mesh with its modifiers applied, as the viewport evaluates it, read through the header until the next
- * call. */
+/* An object's evaluated mesh (a mesh object's Mesh with its modifiers, a curve's or text's as Blender draws it), as the
+ * depsgraph evaluated it, read through the header until the next call; null when it has none. */
 EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *ctx, Object *ob)
 {
-  static Mesh *result = nullptr;
-  if (result) {
-    BKE_id_free(nullptr, result);
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  BKE_scene_graph_evaluated_ensure(depsgraph, ctx->bmain);
+  const Mesh *mesh = BKE_object_get_evaluated_mesh(DEG_get_evaluated(depsgraph, ob));
+  if (!mesh) {
+    return nullptr;
   }
-  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(ctx->C);
-  CustomData_MeshMasks mask = CD_MASK_MESH;
-  result = bke::mesh_create_eval_final(depsgraph, ctx->scene, ob, &mask);
-  mesh_extraction(*result, ctx->extraction);
+  mesh_extraction(*mesh, ctx->extraction);
   return &ctx->extraction;
 }
 
@@ -579,6 +607,7 @@ EXPORT(main_scene_world_set) void main_scene_world_set(BlenderMain *ctx, World *
   if (world) {
     id_us_plus(&world->id);
   }
+  DEG_relations_tag_update(ctx->bmain);
 }
 EXPORT(main_scene_world) World *main_scene_world(BlenderMain *ctx) { return ctx->scene->world; }
 
@@ -586,6 +615,8 @@ EXPORT(main_scene_world) World *main_scene_world(BlenderMain *ctx) { return ctx-
 EXPORT(object_materials_set) void object_materials_set(BlenderMain *ctx, Object *ob, Material **materials, int count)
 {
   BKE_object_material_array_assign(ctx->bmain, ob, &materials, count, false);
+  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
+  DEG_relations_tag_update(ctx->bmain);
 }
 EXPORT(object_materials) int object_materials(Object *ob, Material **r_materials)
 {
