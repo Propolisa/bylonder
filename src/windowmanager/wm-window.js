@@ -12,7 +12,7 @@ const { exports: x, withArrays, withString, cString } = blenderModule;
 
 // Blender's space and region types (eSpace_Type, eRegion_Type).
 export const SPACE_VIEW3D = 1;
-export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_TOOL_HEADER = 12;
+export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_FOOTER = 11, RGN_TYPE_TOOL_HEADER = 12;
 // The browser's input as wm_event takes it (BrowserEvent in wm-api.cc).
 const KINDS = { pointermove: 0, buttondown: 1, buttonup: 2, wheel: 3, trackpad: 4, keydown: 5, keyup: 6 };
 

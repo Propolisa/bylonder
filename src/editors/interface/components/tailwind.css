@@ -19,6 +19,7 @@
   --text-sm: var(--bl-font-size);
   --text-base: 13px;
   --color-background: var(--bl-region);
+  --color-header: var(--bl-header);
   --color-foreground: var(--bl-text);
   --color-card: var(--bl-panel);
   --color-card-foreground: var(--bl-text);
