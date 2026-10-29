@@ -37,9 +37,10 @@ export const blenderModule = { exports: x, withArrays, withString, cString };
 
 // A Blender operator with properties by name (an enum by its item's identifier, an enum flag by a list of them; the
 // rest keep their defaults), for exec, or for invoke and modal, which keep it while it runs; x.operator_free frees it.
+// A type registered after the module's own (a class of Blender's Python, rna-operator.cc) is found by its idname.
 export function newOperator(idname, props = {}) {
-  if (!operatorTypes.has(idname)) throw new Error(`${idname} is not in this WebAssembly module`);
-  const op = x.operator_new(operatorTypes.get(idname));
+  const op = operatorTypes.has(idname) ? x.operator_new(operatorTypes.get(idname)) : withString(idname, (p) => x.operator_new_named(p));
+  if (!op) throw new Error(`${idname} is not in this WebAssembly module`);
   try {
     setOperatorProperties(op, props);
   } catch (error) {

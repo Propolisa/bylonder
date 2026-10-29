@@ -26,9 +26,10 @@ globalThis.__bylonder_operators__ = {
 // Registered classes by Blender's idname (VIEW3D_MT_object, PROPERTIES_PT_context_object, OBJECT_OT_...).
 export const registered = _bpy.registered;
 
-// Blender's panels, menus, headers and lists become Blender's types in the module, in the order the scripts register
-// them, as register_class makes them (bpy_rna.js), so Blender's regions lay them out.
-const REGISTERED_TYPES = /_(PT|MT|HT|UL)_/;
+// Blender's panels, menus, headers, lists and operators become Blender's types in the module, in the order the scripts
+// register them, as register_class makes them (bpy_rna.js), so Blender's regions lay them out and its window manager
+// runs them.
+const REGISTERED_TYPES = /_(PT|MT|HT|UL)_|\./;
 for (const [idname, cls] of Object.entries(registered)) {
   if (!REGISTERED_TYPES.test(idname)) continue;
   try {

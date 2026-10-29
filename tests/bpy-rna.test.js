@@ -73,4 +73,10 @@ assert.equal(rna.properties.get('count').default, 3);
 assert.equal(rna.properties.get('count').hard_max, 10);
 assert.equal(rna.properties.get('mode').default, 'B');
 assert.ok(registered, 'Blender\'s scripts loaded');
+
+// A Python operator is Blender's operator type (rna-operator.cc): Blender runs it, its execute is the class's.
+ob.select_set(false);
+const { status } = blender.run('object.select_pattern', { pattern: 'Bo*' });
+assert.equal(status & 4, 4, 'object.select_pattern finished');
+assert.equal(ob.select_get(), true);
 console.log('bpy over the module: properties, collections, functions, context and registration');

@@ -113,12 +113,13 @@ EXPORT(bpy_id_pointer) void bpy_id_pointer(ID *id) { put(RNA_id_pointer_create(i
 /* The struct `type`'s pointer to data (refined, as RNA refines a pointer to a base type). */
 EXPORT(bpy_pointer) void bpy_pointer(StructRNA *type, ID *id, void *data) { put(pointer(type, id, data)); }
 
-/* A JS instance kept with the data (an operator's, RNA_struct_instance), or 0. */
+/* A JS instance kept with the data (an operator's, RNA_struct_instance), 0 for none yet, or -1 where the type keeps
+ * none. */
 EXPORT(bpy_instance) int bpy_instance(StructRNA *type, ID *id, void *data)
 {
   PointerRNA ptr = pointer(type, id, data);
   void **instance = RNA_struct_instance(&ptr);
-  return instance ? int(intptr_t(*instance)) : 0;
+  return instance ? int(intptr_t(*instance)) : -1;
 }
 EXPORT(bpy_instance_set) void bpy_instance_set(StructRNA *type, ID *id, void *data, int value)
 {
@@ -747,9 +748,15 @@ static void class_free(void *data) { js_class_free(int(intptr_t(data))); }
 static std::string register_error;
 EXPORT(bpy_register_error) const char *bpy_register_error() { return register_error.c_str(); }
 
+namespace blender {
+void operator_registration_ensure();
+}
+
 /* The new type, or null (the reason in bpy_register_error). */
 EXPORT(bpy_register) StructRNA *bpy_register(bContext *C, StructRNA *base, int cls, const char *identifier)
 {
+  static const bool operators = (operator_registration_ensure(), true);
+  (void)operators;
   StructRegisterFunc reg = RNA_struct_register(base);
   if (!reg) {
     register_error = std::string(RNA_struct_identifier(base)) + " does not support registration";
@@ -853,7 +860,9 @@ EXPORT(bpy_def_string_default) void bpy_def_string_default(PropertyRNA *prop, co
   if (maxlen > 0) {
     RNA_def_property_string_maxlength(prop, maxlen + 1);
   }
-  RNA_def_property_string_default(prop, value);
+  if (value[0]) {
+    RNA_def_property_string_default(prop, value);
+  }
 }
 EXPORT(bpy_def_range)
 void bpy_def_range(PropertyRNA *prop, double min, double max, double soft_min, double soft_max, double step, int precision)
