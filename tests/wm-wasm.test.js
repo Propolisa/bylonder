@@ -101,6 +101,23 @@ assert.equal(gg.modal, true, 'G in the Graph Editor runs Move modally');
 move(500, 750);
 click();
 assert.deepEqual(anim.fcurves(ob)[0].keys.map((k) => Math.round(k.co[0])), [11, 21], 'the keys moved 10 frames');
+
+// A drag from empty space is Blender's box gesture (wm_gesture_ops.cc), drawn by the page as the window gives it, which
+// selects the keys inside it when the button comes up.
+window.allow(['transform.translate', 'graph.select_all', 'graph.select_box', 'graph.clickselect']);
+const selected = () => anim.fcurves(ob)[0].keys.map((k) => k.select[1]);
+window.event('keydown', [0], { code: 'AltLeft', key: 'Alt' });
+key('KeyA', 'a');
+window.event('keyup', [0], { code: 'AltLeft', key: 'Alt' });
+assert.deepEqual(selected(), [false, false], 'Alt A deselects the keys');
+move(290, 720);
+window.event('buttondown', [0]);
+move(300, 730);
+move(330, 780);
+assert.deepEqual(window.gestures, [{ type: 'BOX', rect: [290, 720, 330, 780] }], 'the box runs from the press to the pointer');
+window.event('buttonup', [0]);
+assert.deepEqual(window.gestures, [], 'the box ends with the button');
+assert.deepEqual(selected(), [true, false], 'the key inside the box is selected');
 graph.dispose();
 
 // A Text Editor in its place: Alt S matches text.save, an operator the page runs, so the event goes to the page and stops

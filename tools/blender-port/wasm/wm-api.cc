@@ -328,10 +328,14 @@ static wmOperatorStatus page_exec(bContext *C, wmOperator *op)
   return operator_calls().lookup(op->type).exec(C, op);
 }
 static void operator_calls_unwrap();
+static bool handling = false;
+/* Whether the page's window is handling an event (anim-api.cc's gestures are Blender's then). */
+bool wm_window_handling() { return handling; }
 /* Unwrapped first, in case an exception left the last event's wrapping in place. */
 static void operator_calls_wrap()
 {
   operator_calls_unwrap();
+  handling = true;
   for (wmOperatorType *ot : WM_operatortypes_registered_get()) {
     operator_calls().add_new(ot, {ot->invoke, ot->exec});
     if (ot->invoke) {
@@ -344,6 +348,7 @@ static void operator_calls_wrap()
 }
 static void operator_calls_unwrap()
 {
+  handling = false;
   for (auto [ot, calls] : operator_calls().items()) {
     ot->invoke = calls.invoke;
     ot->exec = calls.exec;
