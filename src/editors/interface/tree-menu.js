@@ -3,6 +3,7 @@
 //   ui: block-view.js's region contract; `runs(idname)` may say which operators ui.run runs itself (else Bylonder's
 //   registry's do), `adjust(tree)` may change a tree before its entries are made.
 import { buttonMenu, buttonPress, buttonOperator } from './ui-tree.js';
+import { takeOperatorPopup } from '../../bmesh/bmesh-wasm.js';
 import { runsOperator } from '../../windowmanager/wm-operators.js';
 
 export const press = (b, ui, value = -1) => {
@@ -14,9 +15,21 @@ export const press = (b, ui, value = -1) => {
 // An operator button: run by Bylonder's registry where it has the operator, else by Blender's handlers in the module,
 // the button active (template_ID's New assigns what it makes).
 const OPERATOR_FINISHED = 4;
+// A button's operator properties, but rna_type, which is no value to set.
+const buttonProperties = (b) => Object.fromEntries(Object.entries(b.properties ?? {}).filter(([, value]) => value !== null));
+// wm::OpCallContext: the contexts before ExecDefault invoke.
+const EXEC_DEFAULT = 6;
 export function runOperator(b, ui, event) {
-  if (ui.runs?.(b.operator) ?? runsOperator(b.operator)) return ui.run(b.operator, b.properties ?? {}, event);
+  if (ui.runs?.(b.operator) ?? runsOperator(b.operator)) {
+    const invoke = (b.context ?? EXEC_DEFAULT) < EXEC_DEFAULT;
+    const at = { type: 'NONE', value: 'NOTHING', clientX: event?.clientX ?? event?.x, clientY: event?.clientY ?? event?.y, shiftKey: event?.shiftKey,
+      ctrlKey: event?.ctrlKey, altKey: event?.altKey, metaKey: event?.metaKey, invoke };
+    return ui.run(b.operator, buttonProperties(b), at);
+  }
   const status = ui.inContext((C) => buttonOperator(C, b));
+  // The popup its invoke opened (a properties dialog, a confirmation): the page's (wm-popups.js).
+  const popup = takeOperatorPopup();
+  if (popup) import('../../windowmanager/wm-popups.js').then(({ openOperatorPopup }) => openOperatorPopup({ ...popup, idname: b.operator, values: buttonProperties(b) }, event));
   return status & OPERATOR_FINISHED ? ui.undoPush(b.tip || b.operator) : ui.refresh();
 }
 

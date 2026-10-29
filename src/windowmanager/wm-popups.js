@@ -4,7 +4,24 @@
 import { createApp, h, reactive, markRaw } from 'vue';
 import { openMenu } from '../editors/interface/menu.js';
 import { BlockView, treeMenu } from '../editors/interface/block-view.js';
+import { blenderMain } from '../bmesh/bmesh-wasm.js';
+import { invokeOperator, runOperator } from './wm-operators.js';
 import '../editors/interface/layout-view.css';
+
+// The popup an operator a button or menu entry called opened (takeOperatorPopup: { type, title, text }), with the
+// operator's idname and the button's values, at the event's pointer: a properties dialog is the operator invoked
+// again by Bylonder's registry, which keeps it for the dialog; the others run it with the values chosen.
+export function openOperatorPopup({ type, title, text, idname, values = {} }, event) {
+  const at = { x: event?.clientX ?? event?.x ?? innerWidth / 2, y: event?.clientY ?? event?.y ?? innerHeight / 2 };
+  const set = Object.fromEntries(Object.entries(values).filter(([, value]) => value !== null));
+  if (type === 'PROPS') return invokeOperator(idname, set, { type: 'NONE', value: 'NOTHING', clientX: at.x, clientY: at.y });
+  return openPopup({ type, title, text }, {
+    idname, at, C: blenderMain().C,
+    finish: (chosen) => chosen && runOperator(idname, { ...set, ...chosen }),
+    run: (id, props) => invokeOperator(id, props, { type: 'NONE', value: 'NOTHING', clientX: at.x, clientY: at.y }),
+    enumItems: (prop) => blenderMain().enumItems(idname, prop),
+  });
+}
 
 // Opens a popup at a client point `at`. finish(props) ends the operator waiting on it: its exec with the properties
 // chosen ({} for a properties dialog, which edits them in place), or cancelled with null. A popup menu's operators run

@@ -109,7 +109,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
   const blender = menuUI({ menus, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
   const run = blender.run;
-  blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
+  blender.run = (idname, props, event) => { views.setInput(view); run(idname, props, event); };
   // The toolbar region, Blender's tool system's.
   const toolbar = createToolbar({
     panel: world.toolsystem.panel, run: blender.run, python: (fn) => world.toolsystem.python(fn, view),
@@ -128,7 +128,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
   const headerUI = {
     ...blender,
-    run: (idname, props, event) => (idname === 'mesh.select_mode' ? world.editMode.setSelectMode(props.type, !!event?.shiftKey) : blender.run(idname, props)),
+    run: (idname, props, event) => (idname === 'mesh.select_mode' ? world.editMode.setSelectMode(props.type, !!event?.shiftKey) : blender.run(idname, props, event)),
     supported: (idname, props) => idname === 'mesh.select_mode' || blender.supported(idname, props),
   };
   const regions = createRegions({

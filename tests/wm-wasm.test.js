@@ -159,4 +159,18 @@ for (let i = 0; i < 10 && window.timersActive; i++) {
 assert.equal(window.timersActive, false, 'the animation ends, its timer and handler gone');
 properties.dispose();
 
+// A macro the page allows runs its steps too, though they are not allowed alone: Shift D duplicates once, and the
+// duplicate follows the pointer until a click.
+window.allow(['object.duplicate_move']);
+const objects = () => blendData().objects.length;
+const before = objects();
+move(700, 250);
+window.event('keydown', [0], { code: 'ShiftLeft', key: 'Shift' });
+const duplicated = key('KeyD', 'D');
+window.event('keyup', [0], { code: 'ShiftLeft', key: 'Shift' });
+assert.equal(duplicated.modal, true, 'Shift D moves the duplicate');
+assert.deepEqual(duplicated.unhandled, [], 'the macro handles it');
+click();
+assert.equal(objects(), before + 1, 'one duplicate');
+
 console.log('window manager: G, mouse moves and a click move an object in a 3D View and keys in a Graph Editor through Blender\'s own handlers');

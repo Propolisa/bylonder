@@ -68,6 +68,11 @@ function runOperator(C, idname, props) {
     x.operator_free(op);
   }
 }
+// The popup the last operator a button called opened (operator_popup): { type, title, text }, or null.
+export const takeOperatorPopup = () => {
+  const type = POPUPS[x.operator_popup()];
+  return type ? { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) } : null;
+};
 export const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
 export const operatorNames = () => [...operatorTypes.keys()];
 // The enum property an operator's invoke offers as a menu (WM_menu_invoke), or null.
