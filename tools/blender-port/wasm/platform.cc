@@ -40,6 +40,9 @@ extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { std::abort(); }
 
 /* thread_local destructors: a reactor module never exits its one thread. */
 extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0; }
+/* port-override: WASI has no users: one user, without a passwd entry (Blender then uses $HOME or its defaults). */
+extern "C" __attribute__((weak)) unsigned getuid() { return 0; }
+extern "C" __attribute__((weak)) struct passwd *getpwuid(unsigned) { return nullptr; }
 
 /* Weak: where Blender's own threads.cc builds (over wasm/include/pthread.h) it gives the same one-thread answers. */
 #define WEAK __attribute__((weak))
