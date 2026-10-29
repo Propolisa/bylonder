@@ -3,9 +3,7 @@
 // scene sync keeps equal to the scene: flushed before Blender's code runs, viewed after, with the selected meshes'
 // geometry given to it while an operator runs, an undo step when one finishes, and the popups it opens drawn by the
 // page. What Blender leaves unhandled goes to the page's keymaps (wm-event-system.js).
-import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../windowmanager/wm-window.js';
-import { defaultKeymaps } from '../../windowmanager/keyconfig.js';
-import { blenderOperatorIds } from '../../windowmanager/wm-operators.js';
+import { Window, configureWindow, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../windowmanager/wm-window.js';
 import { regionView3D } from './view3d-project.js';
 import { openModulePopup, runBlenderOperator } from '../object/object-operators.js';
 import { tagRedraw } from '../../draw/overlay-tool.js';
@@ -20,7 +18,7 @@ const pageRect = (rect) => ({ x: rect.left, y: rect.top, width: rect.width, heig
 export function createView3DWindow({ sync, views, takes, host, menu }) {
   const window = new Window(sync.blender);
   const areas = new Map();
-  let keyconfig = false, running = false;
+  let running = false;
 
   function area(view) {
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
@@ -28,14 +26,6 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
     a.layout(rect, { [RGN_TYPE_WINDOW]: rect });
     a.view3d = regionView3D(view);
     return a;
-  }
-  // Blender's keymaps and the operators Bylonder runs as Blender's, once Blender's Python (the keyconfig) is loaded.
-  function ready() {
-    if (!keyconfig) {
-      loadKeyconfig(window.C, defaultKeymaps());
-      window.allow(blenderOperatorIds());
-      keyconfig = true;
-    }
   }
 
   function popup({ menu: name, type, title, text, idname, values }, event) {
@@ -46,7 +36,7 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
   }
 
   function send(kind, data, strings, view) {
-    ready();
+    configureWindow(window);
     window.size = { width: innerWidth, height: innerHeight };
     for (const v of views()) area(v);
     const acting = kind !== 'pointermove' || running;

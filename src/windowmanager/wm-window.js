@@ -5,6 +5,8 @@
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { contextStruct, contextPointer, setContextPointer } from '../python/bpy_rna.js';
 import '../python/bpy_interface.js';
+import { defaultKeymaps } from './keyconfig.js';
+import { blenderOperatorIds } from './wm-operators.js';
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
 
@@ -26,6 +28,23 @@ export function loadKeyconfig(C, keyconfig) {
     setContextPointer(previous);
   }
   x.wm_keyconfig_loaded();
+}
+// Blender's keymaps and the operators Bylonder runs as Blender's, once, when Blender's window first takes an event
+// (Blender's Python, the keyconfig, is loaded by then).
+let configured = false;
+const owned = new Set();
+const allowed = () => [...blenderOperatorIds(), ...owned];
+export function configureWindow(window) {
+  if (configured) return;
+  configured = true;
+  loadKeyconfig(window.C, defaultKeymaps());
+  window.allow(allowed());
+}
+// Operators the window runs as Blender's besides those Bylonder registered with `blender: true`: those of an editor that
+// is Blender's own (editors/screen/blender-area.js).
+export function allowOperators(window, idnames) {
+  idnames.forEach((idname) => owned.add(idname));
+  if (configured) window.allow(allowed());
 }
 
 const withStrings = (strings, fn, pointers = []) => (strings.length
