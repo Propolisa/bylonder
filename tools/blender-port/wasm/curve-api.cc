@@ -476,9 +476,6 @@ EXPORT(operator_menu_property) const char *operator_menu_property(wmOperator *op
   return op->type->invoke == WM_menu_invoke && op->type->prop ? RNA_property_identifier(op->type->prop) : nullptr;
 }
 
-/* Sets a string property (font.text_insert's text). */
-EXPORT(operator_string_set) void operator_string_set(wmOperator *op, const char *name, const char *value) { RNA_string_set(op->ptr, name, value); }
-
 /* A 3D View's area and window region, for operators that pick or project (curve picking, transform): the region's size
  * and the view's matrices (column-major, Blender's axes) as ED_view3d_update_viewmat sets them, and the overlay's
  * handle display. */

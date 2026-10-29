@@ -61,7 +61,7 @@ export function setOperatorProperties(op, props) {
     const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
     // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).
     const ok = withString(name, (namePointer) => items !== null
-      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item) || (typeof value === 'string' && (x.operator_string_set(op, namePointer, item), true)))
+      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
       : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
     if (!ok) throw new Error(`no property ${name} = ${value}`);
   }
@@ -368,6 +368,8 @@ export class BlenderMain {
   #context = x.main_new();
   #C = x.main_C(this.#context);
   #attributes = new Map();
+
+  constructor() { x.rna_context_set(this.#C); }
 
   // An object of a type (EMPTY, MESH, CURVE, FONT, LIGHT, CAMERA) with new data of its type.
   add(type, name) { return withString(name, (p) => x.main_object_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
