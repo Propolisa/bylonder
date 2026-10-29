@@ -41,6 +41,9 @@ void buttons_context_compute(const bContext *C, SpaceProperties *sbuts);
 
 namespace blender::ui {
 
+/* A popup menu's laid out block, as the running invoke's popup (anim-api.cc). */
+void popup_layout_open(const std::string &title, const std::string &layout);
+
 /* What interface_layout.cc's ButtonItem and LayoutRoot hold (it defines the structs privately). */
 struct RecordedItem : public Item {
   Button *but;
@@ -753,7 +756,6 @@ EXPORT(ui_button_text_set) void ui_button_text_set(bContext *C, Button *but, con
 
 /* Popups. */
 
-void popup_layout_open(const std::string &title, const std::string &layout);
 
 /* port-override: a popup menu Blender's code builds (popup_menu_begin to popup_menu_end) is drawn by Bylonder's window
  * manager: its block is laid out by Blender and handed over as the invoke's popup. */
