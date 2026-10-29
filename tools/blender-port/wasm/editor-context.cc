@@ -610,7 +610,7 @@ EXPORT(operator_macro_debug) const char *operator_macro_debug(wmOperator *op)
 {
   static std::string json;
   json = "[";
-  LISTBASE_FOREACH (wmOperator *, opm, &op->macro) {
+  for (wmOperator *opm = static_cast<wmOperator *>(op->macro.first); opm; opm = opm->next) {
     json += operator_values_json(opm->ptr) + ",";
   }
   return (json += "]").c_str();

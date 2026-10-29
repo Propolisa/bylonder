@@ -170,6 +170,10 @@ std::string operator_values_json(PointerRNA *ptr)
       json += "\"" + std::string(RNA_property_string_get(ptr, prop)) + "\"";
     }
     else if (type == PROP_POINTER) {
+      if (STREQ(RNA_property_identifier(prop), "rna_type")) {
+        json += "null";
+        continue;
+      }
       /* A macro's operator's properties. */
       PointerRNA values = RNA_property_pointer_get(ptr, prop);
       json += values.data ? operator_values_json(&values) : "null";
