@@ -144,12 +144,14 @@ async function newDefaultCube() {
 }
 
 const filter = process.argv[2];
+// SHARD=i/n runs every n-th workflow from the i-th, in an app instance of its own (scripts/gates.mjs).
+const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
 const server = await startServer();
 const browser = await chromium.launch();
 let failed = 0, first = true;
 try {
   app = await openApp(browser, server.url, { video: process.env.WORKFLOW_VIDEO });
-  for (const [name, steps] of Object.entries(workflows)) {
+  for (const [name, steps] of Object.entries(workflows).filter((_, i) => i % shards === shard)) {
     if (filter && !name.includes(filter)) continue;
     const started = Date.now();
     try {
