@@ -129,35 +129,20 @@ async function outlinerClick(name, { modifiers = [] } = {}) {
   await app.page.mouse.click(row.x + row.width / 2, row.y + row.height / 2);
   for (const key of modifiers) await app.page.keyboard.up(key);
 }
-async function newDefaultCube() {
-  const before = app.frame();
-  await app.page.click('[data-blender="TOPBAR_MT_file"]');
-  await app.page.getByRole("menuitem", { name: /^New/ }).first().hover();
-  await app.page.getByRole("menuitem", { name: "Default Cube" }).click();
-  // The project's code runs in a new 3D Viewport frame.
-  const until = Date.now() + 60000;
-  const fresh = (b) => b?.rna?.objects().map((ob) => ob.name).sort().join() === "Camera,Cube,Light";
-  while (app.frame() === before || !(await Promise.resolve().then(() => app.bylonder(fresh)).catch(() => false))) {
-    assert.ok(Date.now() < until, "File > New > Default Cube never showed its scene");
-    await app.page.waitForTimeout(100);
-  }
-}
 
 const filter = process.argv[2];
-// SHARD=i/n runs every n-th workflow from the i-th, in an app instance of its own (scripts/gates.mjs).
+// SHARD=i/n runs every n-th workflow from the i-th (scripts/gates.mjs); each workflow starts from a fresh app, so none
+// depends on another's state.
 const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
 const server = await startServer();
 const browser = await chromium.launch();
-let failed = 0, first = true;
+let failed = 0;
 try {
-  app = await openApp(browser, server.url, { video: process.env.WORKFLOW_VIDEO });
   for (const [name, steps] of Object.entries(workflows).filter((_, i) => i % shards === shard)) {
     if (filter && !name.includes(filter)) continue;
     const started = Date.now();
     try {
-      if (!first) await newDefaultCube();
-      first = false;
-      app.errors.length = 0;
+      app = await openApp(browser, server.url, { video: process.env.WORKFLOW_VIDEO });
       await steps();
       compare(await state(), expected[name]);
       assert.deepEqual(app.errors, [], "page errors");
@@ -165,8 +150,11 @@ try {
     } catch (error) {
       failed++;
       const shot = `${tmpdir()}/workflow-${name}.png`;
-      await app.page.screenshot({ path: shot }).catch(() => {});
+      await app?.page.screenshot({ path: shot }).catch(() => {});
       console.log(`FAIL  ${name}\n${error.stack}\nScreenshot: ${shot}`);
+    } finally {
+      await app?.close();
+      app = null;
     }
   }
 } finally {
