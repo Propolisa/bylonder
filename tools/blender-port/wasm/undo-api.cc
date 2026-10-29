@@ -2,14 +2,12 @@
  * manager's undo stack, whose steps Blender's undo types write and load. Bylonder's editor keeps one history; each of
  * its steps holds the Blender step pushed with it, which loading makes Main's state again. */
 #include "BKE_context.hh"
-#include "BKE_lib_id.hh"
 #include "BKE_main.hh"
 #include "BKE_undo_system.hh"
 #include "BKE_wm_runtime.hh"
 #include "BLI_listbase.h"
 #include "BLI_listbase_iterator.hh"
 #include "BLO_undofile.hh"
-#include "BLI_string.h"
 #include "DNA_windowmanager_types.h"
 #include "ED_undo.hh"
 
@@ -19,34 +17,11 @@ using namespace blender;
 
 static UndoStack *stack_of(bContext *C) { return CTX_wm_manager(C)->runtime->undo_stack; }
 
-/* The window manager as Blender keeps it, Main's first one, where undo finds it (ED_undo_stack_get,
- * ED_editors_init_for_undo) and memfile undo carries it from one Main to the next (IDTYPE_FLAGS_NO_MEMFILE_UNDO). It
- * leaves Main while a file is read or written, as its windows are not a file's (a read file's own window manager
- * stays, after it). */
-EXPORT(wm_main_link) void wm_main_link(bContext *C, bool linked)
-{
-  Main *bmain = CTX_data_main(C);
-  wmWindowManager *wm = CTX_wm_manager(C);
-  if (!wm->id.name[0]) {
-    STRNCPY(wm->id.name, "WMWinMan");
-    wm->id.tag |= ID_TAG_NO_MAIN;
-    BKE_lib_libblock_session_uid_ensure(&wm->id);
-  }
-  if (!linked) {
-    BKE_libblock_management_main_remove(bmain, wm);
-    return;
-  }
-  BKE_libblock_management_main_add(bmain, wm);
-  BLI_remlink(&bmain->wm, wm);
-  BLI_addhead(&bmain->wm, wm);
-}
-
 /* A new undo stack from Main as it is, as reading a file starts one (wm_file_read_post). */
 EXPORT(undo_stack_init) void undo_stack_init(bContext *C)
 {
   static const bool types = (ED_undosys_type_init(), true);
   (void)types;
-  wm_main_link(C, true);
   wmWindowManager *wm = CTX_wm_manager(C);
   if (wm->runtime->undo_stack == nullptr) {
     wm->runtime->undo_stack = BKE_undosys_stack_create();

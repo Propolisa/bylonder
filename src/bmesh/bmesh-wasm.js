@@ -519,14 +519,7 @@ export class BlenderMain {
   // wm.save_as_mainfile operator, as a copy: the file's bytes.
   writeBlend(filepath = '/untitled.blend') {
     x.main_save_preferences();
-    x.wm_main_link(this.#C, false);
-    let result;
-    try {
-      result = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
-    } finally {
-      x.wm_main_link(this.#C, true);
-    }
-    const { status, report } = result;
+    const { status, report } = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
     const bytes = files.get(filepath);
     files.delete(filepath);
     if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
@@ -547,9 +540,7 @@ export class BlenderMain {
   // A .blend opened as the Main, as Blender opens one (main_open): returns its warnings; throws when it cannot be read.
   // The undo stack starts again from the file, as reading one starts it (wm_file_read_post).
   readBlend(bytes) {
-    x.wm_main_link(this.#C, false);
     const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
-    x.wm_main_link(this.#C, true);
     if (this.#undo) this.undoInit();
     if (!report) throw new Error('Not a .blend file Blender can read');
     // A file without a screen is opened without its UI, which Bylonder never opens.

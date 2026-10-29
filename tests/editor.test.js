@@ -6,6 +6,7 @@ import {
 } from "@babylonjs/core";
 import { createSelection } from "../src/editors/object/selection.js";
 import { snapshot, apply, createHistory } from "../src/editors/undo/storage.js";
+import { sceneMain } from "./scene-main.js";
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-5, `${a} != ${b}`);
 const engine = new NullEngine();
 const scene = new Scene(engine);
@@ -15,7 +16,7 @@ a.position.x = -2;
 b.position.x = 2;
 const objects = [a, b];
 const selection = createSelection(scene, objects);
-const history = createHistory(objects, () => {});
+const history = createHistory(objects, () => {}, { main: sceneMain({ scene, objects }, selection) });
 selection.toggle(a);
 assert.equal(selection.size, 1);
 assert.deepEqual(selection.outlined(), [a]);

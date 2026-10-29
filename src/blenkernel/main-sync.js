@@ -188,16 +188,17 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const entry = { struct: 'Object', ptr: ob, node, key: key(node), type, ob, shadow: new Map() };
       entry.data = { struct: dataStruct(node), ptr: blender.data(entry.ob), shadow: new Map() };
       entry.name = blender.name(entry.ob);
-      entry.unwatch = watch(entry);
+      entry.unwatch = watchObject(node, () => changed(entry));
       dirty.add(entry);
       objects.set(node, entry);
     }
   }
-  const watch = (entry) => watchObject(entry.node, () => changed(entry));
-  // An object Main no longer holds (Blender's code deleted it, or an undo step does not have it): deleted.
+  // An object Main no longer holds (Blender's code deleted it, or an undo step does not have it): deleted, its children
+  // without it, as Main's are.
   function forget(node, entry) {
     node.metadata = { ...node.metadata, wbDeleted: true };
     node.setEnabled(false);
+    for (const child of objects.keys()) if (child.parent === node) child.parent = null;
     objects.delete(node);
     dirty.delete(entry);
     entry.unwatch();
@@ -658,7 +659,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, watch, forget,
+    sceneRecords, readCollections, relations, nodeOf, forget,
   };
   const mainView = createMainView(state);
   if (ids.read && world.collections) {

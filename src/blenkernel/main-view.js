@@ -25,6 +25,8 @@ import { armature_draw } from '../draw/overlay-armature.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const ID_RECALC_GEOMETRY = 1 << 1;
+// The data an undo step read again (memfile_undosys_step_decode) is tagged to be copied for evaluation.
+const ID_RECALC_SYNC_TO_EVAL = 1 << 13;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material' };
@@ -58,7 +60,7 @@ export function drawMesh(entry, blender) {
 }
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
-//   textures, sceneRecords(), readCollections(), relations(entry), entryOf/nodeOf, and `applying`, which mutes its hooks.
+//   textures, sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.
 export function createMainView(state) {
   const { rna, world, selection, blender, ids, objects, materials, worlds, textures } = state;
 
@@ -126,7 +128,8 @@ export function createMainView(state) {
     // The data's type is the Babylon object's own (a light's class).
     if (entry.data.struct === 'Light') entry.data.shadow.set('type', dnaGet('Light', entry.data.ptr, 'type'));
     ids.adopt(entry.key, ob, type);
-    entry.unwatch = state.watch(entry);
+    // Without hooks: a full flush writes what Babylon changed of it before Blender's code runs or an undo step is pushed.
+    entry.unwatch = () => {};
     objects.set(node, entry);
     return entry;
   }
@@ -156,7 +159,10 @@ export function createMainView(state) {
         node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id };
         made.push(link(node, ob, type));
       }
-      for (const entry of [...made, ...revived]) pullRelations(entry);
+      for (const entry of [...made, ...revived]) {
+        pullRelations(entry);
+        if (entry.type === 'MESH' || CURVE_TYPES.includes(entry.type) || entry.type === 'ARMATURE') drawData(entry);
+      }
       for (const entry of made) {
         const { node, ob } = entry, wanted = rna.pointer('Object', node).rotation_mode;
         if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
@@ -173,7 +179,6 @@ export function createMainView(state) {
       for (const entry of [...made, ...revived]) {
         pull(entry, entry.node);
         if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
-        if (entry.type === 'MESH' || CURVE_TYPES.includes(entry.type) || entry.type === 'ARMATURE') drawData(entry);
       }
       const wo = blender.world;
       if (wo && !ids.adopted.has('world')) adoptWorld(wo, scene, warnings);
@@ -262,8 +267,8 @@ export function createMainView(state) {
     try {
       const alive = new Set(blender.ids(ID_OB)), chosen = [], active = [];
       blender.cleanMasterCollection();
-      for (const [node, entry] of [...objects]) {
-        if (!alive.has(entry.ob)) { state.forget(node, entry); continue; }
+      const kept = [...objects].filter(([node, entry]) => alive.has(entry.ob) || state.forget(node, entry));
+      for (const [node, entry] of kept) {
         const { ob } = entry, tags = blender.tags(ob);
         entry.data.ptr = blender.data(ob);
         if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
@@ -271,14 +276,16 @@ export function createMainView(state) {
         if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
         const name = blender.name(ob);
         if (name !== entry.name) [node.name, entry.name, entry.babylonName] = [name, name, name];
-        pullRelations(entry);
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
-        if ((tags.object | tags.data) & ID_RECALC_GEOMETRY && entry.type !== 'ARMATURE') drawData(entry);
+        const changed = (tags.object & ID_RECALC_GEOMETRY) || (tags.data & (ID_RECALC_GEOMETRY | ID_RECALC_SYNC_TO_EVAL));
+        if (changed && entry.type !== 'ARMATURE') drawData(entry);
       }
       const { nodes: added, revived } = adopt();
       world.objects.push(...added);
+      // Once every object Main holds is drawn: a parent an undo step brought back is one.
+      for (const [, entry] of kept) pullRelations(entry);
       for (const node of [...added, ...revived]) {
         const base = blender.base(objects.get(node).ob);
         if (base?.selected) (base.active ? active : chosen).push(node);

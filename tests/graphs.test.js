@@ -5,6 +5,7 @@ import { bindGraph } from '../src/nodes/bindings.js';
 import { geometryNodesDefinition } from '../src/nodes/geometry-nodes.js';
 import { createModifierSystem, registerModifier } from '../src/modifiers/stack.js';
 import { createHistory } from '../src/editors/undo/storage.js';
+import { sceneMain } from './scene-main.js';
 import { createLogic } from '../src/nodes/logic.js';
 const engine = new NullEngine(), scene = new Scene(engine);
 new ArcRotateCamera('c', 0, 1, 5, Vector3.Zero(), scene);
@@ -23,7 +24,7 @@ const box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene); box.metadata = { 
 const objects = [box]; objects.scene = scene;
 let history;
 const mods = createModifierSystem({ scene, objects, animation }, { commit: () => history?.commit(), notify: m => { throw Error(m); } });
-history = createHistory(objects, () => mods.refresh());
+history = createHistory(objects, () => mods.refresh(), { main: sceneMain({ scene, objects, animation }) });
 const nodes = mods.add(box, 'NODES');
 assert.equal(box.getTotalVertices(), 24, 'default Geometry Nodes group passes geometry through');
 history.undo(); assert.equal(mods.stack(box).length, 0); history.redo(); assert.equal(mods.stack(box)[0].id, nodes.id);
