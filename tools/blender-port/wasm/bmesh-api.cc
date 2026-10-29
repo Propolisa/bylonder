@@ -1,5 +1,5 @@
-/* Edit Mode in WebAssembly: the BMesh Blender's edit mode makes of a mesh, what JS reads and writes of it (selection,
- * coordinates), and the mesh arrays Blender's edit mode writes back. The module has no ID system, so mesh arrays go in and out
+/* Edit Mode in WebAssembly: the BMesh Blender's edit mode makes of a mesh, what JS reads and writes of it (its selection),
+ * and the mesh arrays Blender's edit mode writes back. The module has no ID system, so mesh arrays go in and out
  * as BM_mesh_bm_from_me and BM_mesh_bm_to_me order them: positions, edges, faces and their corners, the UV map, and the
  * flags Blender keeps as boolean attributes (indexed by MeshFlag), any of which may be absent. */
 #include "BLI_listbase.h"
@@ -96,7 +96,6 @@ BMesh *bm_from_arrays(int verts_num, const float (*positions)[3], int edges_num,
   BM_mesh_normals_update(bm);
   return bm;
 }
-EXPORT(bm_free) void bm_free(BMesh *bm) { BM_mesh_free(bm); }
 
 template<typename T> static T *sized(Vector<T> &buffer, int size)
 {
@@ -220,25 +219,6 @@ EXPORT(bm_select) void bm_select(BMesh *bm, int htype, int index)
   BM_select_history_store(bm, ele);
 }
 
-/* The selection history (bm->selected), oldest first, as element types and indices. */
-EXPORT(bm_select_history_set) void bm_select_history_set(BMesh *bm, const int *htypes, const int *indices, int len)
-{
-  BM_select_history_clear(bm);
-  for (int i = 0; i < len; i++) {
-    BM_select_history_store(bm, element_at(bm, htypes[i], indices[i]));
-  }
-}
-EXPORT(bm_select_history_len) int bm_select_history_len(BMesh *bm) { return BLI_listbase_count(&bm->selected); }
-EXPORT(bm_select_history_get) int bm_select_history_get(BMesh *bm, int i, int *htype)
-{
-  const BMEditSelection *ese = static_cast<const BMEditSelection *>(BLI_findlink(&bm->selected, i));
-  BM_mesh_elem_index_ensure(bm, ese->htype);
-  *htype = ese->htype;
-  return BM_elem_index_get(ese->ele);
-}
-/* A copy in the same element order with the same selection history (BM_mesh_copy). */
-EXPORT(bm_copy) BMesh *bm_copy(BMesh *bm) { return BM_mesh_copy(bm); }
-
 /* Clears the selection and history and sets the selection mode, before selecting anew. */
 EXPORT(bm_select_clear) void bm_select_clear(BMesh *bm, int selectmode)
 {
@@ -257,19 +237,3 @@ void bm_select_elements(BMesh *bm, int htype, const int *indices, const bool *se
   }
 }
 
-/* Moves vertices to object-space coordinates, as a transform writes BMVert.co, and updates normals. */
-EXPORT(bm_vert_coords_set) void bm_vert_coords_set(BMesh *bm, const int *indices, const float (*coords)[3], int len)
-{
-  BM_mesh_elem_table_ensure(bm, BM_VERT);
-  for (int i = 0; i < len; i++) {
-    copy_v3_v3(BM_vert_at_index(bm, indices[i])->co, coords[i]);
-  }
-  BM_mesh_normals_update(bm);
-}
-
-/* Element and selected element counts: verts, edges, faces, then loops. */
-EXPORT(bm_totals) void bm_totals(BMesh *bm, int *totals)
-{
-  const int values[] = {bm->totvert, bm->totvertsel, bm->totedge, bm->totedgesel, bm->totface, bm->totfacesel, bm->totloop};
-  std::copy_n(values, 7, totals);
-}

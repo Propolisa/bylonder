@@ -1,6 +1,6 @@
-/* Blender's mesh editors without a window manager: a scene with one object in Edit Mode, found the way Blender's
- * context finds it (the context store), and operators registered by their own MESH_OT_* functions and run by their
- * own exec. The window manager's and depsgraph's updates have nothing to update here, so they do nothing. */
+/* Blender's operators without its window manager: registered by their own registration functions and run by their
+ * own invoke, modal and exec on a context (Main's, main-api.cc), the 3D View they act in, and the stand-ins they read
+ * of what the window manager and screen would give. */
 #include "BLI_listbase.h"
 #include "BLI_set.hh"
 #include "BLI_math_matrix.h"
@@ -86,215 +86,6 @@ using namespace blender::ed::object;
 /* Logging is set up first, as Blender's main sets it up. */
 static const bool logging = (CLG_init(), true);
 
-/* A scene holding one mesh object in Edit Mode, whose edit mesh owns a BMesh made by bm_from_arrays. */
-struct EditContext {
-  bContext *C;
-  Vector<std::unique_ptr<bContextStore>> stores;
-  Scene scene = {};
-  ToolSettings tool_settings = {};
-  ViewLayer view_layer = {};
-  Base base = {};
-  Object object = {};
-  Mesh mesh = {};
-  /* What evaluating an edit mesh without modifiers gives: a mesh that wraps it (ME_WRAPPER_TYPE_BMESH). */
-  Mesh mesh_eval = {};
-  /* The 3D View the operators act in once the editor gives its view (edit_context_view_set): its window and screen,
-   * area, space and window region; without a region type, as in Blender's background mode, nothing is drawn. */
-  BylonderArea view_area;
-  wmWindow window = {};
-  wmEvent eventstate = {};
-  WorkSpaceInstanceHook workspace_hook = {};
-  WorkSpaceLayout layout = {};
-  bScreen screen = {};
-  View3D v3d = {};
-  ARegion region = {};
-  RegionView3D rv3d = {};
-  Extraction extraction;
-  /* The edit mesh's final mesh when its object has modifiers (editbmesh_get_eval_cage). */
-  ExtractionHeader evaluated = {};
-};
-
-EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
-{
-  EditContext *ctx = MEM_new<EditContext>(__func__);
-  ctx->mesh.runtime = MEM_new<bke::MeshRuntime>(__func__);
-  ctx->mesh.runtime->edit_mesh = std::make_shared<BMEditMesh>();
-  ctx->mesh.runtime->edit_mesh->bm = bm;
-  ctx->mesh.runtime->edit_mesh->selectmode = bm->selectmode;
-  /* As entering Edit Mode does (EDBM_mesh_make), for the operators that ray-cast the edit mesh (the knife). */
-  BKE_editmesh_looptris_calc(ctx->mesh.runtime->edit_mesh.get());
-  STRNCPY(ctx->mesh.id.name, "MEMesh");
-  ctx->mesh_eval.runtime = MEM_new<bke::MeshRuntime>(__func__);
-  ctx->mesh_eval.runtime->wrapper_type = ME_WRAPPER_TYPE_BMESH;
-  ctx->mesh_eval.runtime->edit_mesh = ctx->mesh.runtime->edit_mesh;
-  ctx->object.runtime = MEM_new<bke::ObjectRuntime>(__func__);
-  ctx->object.runtime->data_eval = &ctx->mesh_eval.id;
-  ctx->object.type = OB_MESH;
-  ctx->object.mode = OB_MODE_EDIT;
-  ctx->object.data = &ctx->mesh.id;
-  STRNCPY(ctx->object.id.name, "OBMesh");
-  ctx->base.object = &ctx->object;
-  ctx->base.flag = BASE_SELECTED | BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT | BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT;
-  ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
-  BLI_addtail(&ctx->view_layer.object_bases, &ctx->base);
-  ctx->view_layer.basact = &ctx->base;
-  BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
-  ctx->tool_settings.selectmode = bm->selectmode;
-  ctx->scene.toolsettings = &ctx->tool_settings;
-
-  ctx->region.runtime = MEM_new<bke::ARegionRuntime>(__func__);
-  /* The window's event state and the modal handlers an invoke adds (operator_modal_added). */
-  ctx->window.runtime = MEM_new<bke::WindowRuntime>(__func__);
-  ctx->window.runtime->eventstate = &ctx->eventstate;
-
-  ctx->C = CTX_create();
-  CTX_wm_region_set(ctx->C, &ctx->region);
-  CTX_data_scene_set(ctx->C, &ctx->scene);
-  PointerRNA object_ptr = {&ctx->object.id, RNA_Object, &ctx->object};
-  CTX_store_add(ctx->stores, "edit_object", &object_ptr);
-  CTX_store_add(ctx->stores, "active_object", &object_ptr);
-  bContextStore *store = CTX_store_add(ctx->stores, "object", &object_ptr);
-  CTX_store_set(ctx->C, store);
-  return ctx;
-}
-
-/* The context its operators run in. */
-EXPORT(edit_context_C) bContext *edit_context_C(EditContext *ctx) { return ctx->C; }
-
-EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
-{
-  CTX_free(ctx->C);
-  BKE_object_free_derived_caches(&ctx->object);
-  while (ModifierData *md = static_cast<ModifierData *>(BLI_pophead(&ctx->object.modifiers))) {
-    BKE_modifier_free(md);
-  }
-  MEM_delete(ctx->region.runtime);
-  MEM_delete(ctx->window.runtime);
-  MEM_delete(ctx->view_layer.runtime->object_bases_hash);
-  MEM_delete(ctx->view_layer.runtime);
-  BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
-  ctx->mesh.runtime->edit_mesh.reset();
-  MEM_delete(ctx->mesh.runtime);
-  MEM_delete(ctx->mesh_eval.runtime);
-  MEM_delete(ctx->object.runtime);
-  MEM_delete(ctx);
-}
-
-/* The edit mesh's BMesh, which may be a new one after an operator (as Undo replaces it). */
-EXPORT(edit_context_bmesh) BMesh *edit_context_bmesh(EditContext *ctx) { return ctx->mesh.runtime->edit_mesh->bm; }
-/* Replaces the edit mesh's BMesh, freeing the one it had, as loading an undo step does. */
-EXPORT(edit_context_bmesh_set) void edit_context_bmesh_set(EditContext *ctx, BMesh *bm)
-{
-  BMEditMesh &em = *ctx->mesh.runtime->edit_mesh;
-  BM_mesh_free(em.bm);
-  em.bm = bm;
-  bm->selectmode = em.selectmode;
-}
-EXPORT(edit_context_selectmode) int edit_context_selectmode(EditContext *ctx) { return ctx->tool_settings.selectmode; }
-EXPORT(edit_context_selectmode_set) void edit_context_selectmode_set(EditContext *ctx, int selectmode)
-{
-  ctx->tool_settings.selectmode = selectmode;
-  ctx->mesh.runtime->edit_mesh->selectmode = selectmode;
-  ctx->mesh.runtime->edit_mesh->bm->selectmode = selectmode;
-}
-/* Refills the extraction by what changed (ExtractFlag) and gives its header. */
-EXPORT(edit_mesh_extract) const ExtractionHeader *edit_mesh_extract(EditContext *ctx, int what)
-{
-  extraction_update(ctx->mesh.runtime->edit_mesh->bm, ctx->extraction, what);
-  return &ctx->extraction.header;
-}
-
-/* EDBM_selectmode_flush: selection flushed from the elements of the select mode. */
-EXPORT(edit_mesh_select_flush) void edit_mesh_select_flush(EditContext *ctx) { EDBM_selectmode_flush(ctx->mesh.runtime->edit_mesh.get()); }
-
-/* port-override: EDBM_select_pick (editmesh_select.cc) once its view has found the element (htype and index, or -1
- * for none): the view and its picking stay in JS. UV select sync is off, so its UV selection is left out, and the
- * object has no material slots to make the face's active. */
-EXPORT(edit_mesh_select_pick) bool edit_mesh_select_pick(EditContext *ctx, int htype, int index, int sel_op, bool deselect_all)
-{
-  BMEditMesh *em = ctx->mesh.runtime->edit_mesh.get();
-  BMesh *bm = em->bm;
-  BMElem *ele = nullptr;
-  if (index >= 0) {
-    BM_mesh_elem_table_ensure(bm, char(htype));
-    ele = htype == BM_VERT ? reinterpret_cast<BMElem *>(BM_vert_at_index(bm, index)) :
-          htype == BM_EDGE ? reinterpret_cast<BMElem *>(BM_edge_at_index(bm, index)) :
-                             reinterpret_cast<BMElem *>(BM_face_at_index(bm, index));
-  }
-  bool changed = false;
-  if (sel_op == SEL_OP_SET && (ele || deselect_all)) {
-    EDBM_flag_disable_all(em, BM_ELEM_SELECT);
-    changed = true;
-  }
-  if (!ele) {
-    return changed;
-  }
-  BMFace *efa = htype == BM_FACE ? reinterpret_cast<BMFace *>(ele) : nullptr;
-  switch (sel_op) {
-    case SEL_OP_ADD:
-      if (efa) {
-        BM_mesh_active_face_set(bm, efa);
-      }
-      /* Deselected first so it becomes active even when it was selected. */
-      BM_select_history_remove(bm, ele);
-      BM_elem_select_set(bm, ele, false);
-      BM_select_history_store(bm, ele);
-      BM_elem_select_set(bm, ele, true);
-      break;
-    case SEL_OP_SUB:
-      BM_select_history_remove(bm, ele);
-      BM_elem_select_set(bm, ele, false);
-      break;
-    case SEL_OP_XOR:
-      if (efa) {
-        BM_mesh_active_face_set(bm, efa);
-      }
-      if (!BM_elem_flag_test(ele, BM_ELEM_SELECT)) {
-        BM_select_history_store(bm, ele);
-        BM_elem_select_set(bm, ele, true);
-      }
-      else {
-        BM_select_history_remove(bm, ele);
-        BM_elem_select_set(bm, ele, false);
-      }
-      break;
-    case SEL_OP_SET:
-      if (efa) {
-        BM_mesh_active_face_set(bm, efa);
-      }
-      if (!BM_elem_flag_test(ele, BM_ELEM_SELECT)) {
-        BM_select_history_store(bm, ele);
-        BM_elem_select_set(bm, ele, true);
-      }
-      break;
-  }
-  EDBM_selectmode_flush(em);
-  if (efa) {
-    em->mat_nr = efa->mat_nr;
-  }
-  return true;
-}
-
-/* The object's matrix (column-major, Blender's axes), which operators read for world space (the 3D cursor). */
-/* The edited object, whose modifier stack modifier_add and modifier_clear (modifier-api.cc) change. */
-EXPORT(edit_context_object) Object *edit_context_object(EditContext *ctx) { return &ctx->object; }
-
-/* Evaluates the object's modifiers on the edit mesh as Blender's depsgraph does in Edit Mode and extracts the final
- * mesh, which stays until the next evaluation; null without modifiers, when the edit mesh is the final mesh. */
-EXPORT(edit_mesh_eval) const ExtractionHeader *edit_mesh_eval(EditContext *ctx)
-{
-  Object &ob = ctx->object;
-  BKE_object_free_derived_caches(&ob);
-  if (BLI_listbase_is_empty(&ob.modifiers)) {
-    ob.runtime->data_eval = &ctx->mesh_eval.id;
-    return nullptr;
-  }
-  Depsgraph *depsgraph = BKE_scene_ensure_depsgraph(nullptr, &ctx->scene, &ctx->view_layer);
-  bke::editbmesh_get_eval_cage(depsgraph, &ctx->scene, &ob, ctx->mesh.runtime->edit_mesh.get(), &CD_MASK_BAREMESH);
-  mesh_extraction(*BKE_object_get_editmesh_eval_final(&ob), ctx->evaluated);
-  return &ctx->evaluated;
-}
-
 /* port-override: the 3D View the editor shows (ED_view3d_update_viewmat with Babylon's camera as its matrices): its view
  * and window matrices (Blender's axes, column-major), its size in pixels and whether it is a perspective view. Operators
  * then act in it as in Blender's window region, projecting the mouse as it does. */
@@ -314,7 +105,7 @@ void view3d_matrices_set(RegionView3D &rv3d, const float *viewmat, const float *
   rv3d.pixsize = (2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)))) / float(std::max(winx, winy));
 }
 static wmGizmoMap *gizmo_map_standin();
-/* A 3D View's window region given its view (edit_context_view_set, main_view_set): area, space and region linked
+/* A 3D View's window region given its view (main_view_set): area, space and region linked
  * once, the region's view set each time. */
 void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx,
                        int winy, bool is_persp)
@@ -339,31 +130,6 @@ void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D
   }
 }
 
-EXPORT(edit_context_view_set)
-void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
-{
-  ScrArea &area = ctx->view_area.area;
-  if (BLI_listbase_is_empty(&area.spacedata)) {
-    ctx->window.scene = &ctx->scene;
-    ctx->window.workspace_hook = &ctx->workspace_hook;
-    ctx->workspace_hook.act_layout = &ctx->layout;
-    ctx->layout.screen = &ctx->screen;
-    BLI_addtail(&ctx->screen.areabase, &area);
-  }
-  view3d_region_set(area, ctx->v3d, ctx->region, ctx->rv3d, viewmat, winmat, winx, winy, is_persp);
-  CTX_wm_window_set(ctx->C, &ctx->window);
-  CTX_wm_area_set(ctx->C, &area);
-  CTX_wm_region_set(ctx->C, &ctx->region);
-}
-
-/* The gizmo map Bylonder's window manager keeps (wm-gizmo-map.js), as the module's operators see it: the group of
- * the active tool JS shows (edit_context_gizmo_group_set), the gizmo groups an operator asks for after it runs (its
- * redo gizmos, read by edit_context_gizmo_requested), and the mesh element the preselection gizmo has under the mouse
- * (edit_mesh_preselect_elem). */
-static std::string gizmo_group_shown;
-static std::string gizmo_groups_requested;
-static BMElem *preselected = nullptr;
-
 /* An empty map, so that Blender's code reading it (the window's event handling, wm_event_system.cc) finds no groups. */
 static wmGizmoMap *gizmo_map_standin()
 {
@@ -371,29 +137,10 @@ static wmGizmoMap *gizmo_map_standin()
   return &standin;
 }
 
-EXPORT(edit_context_gizmo_group_set) void edit_context_gizmo_group_set(const char *idname) { gizmo_group_shown = idname; }
-EXPORT(edit_context_gizmo_requested) const char *edit_context_gizmo_requested()
-{
-  static std::string requested;
-  requested = gizmo_groups_requested;
-  gizmo_groups_requested.clear();
-  return requested.c_str();
-}
-
 namespace blender {
 
-/* port-override: the stand-in gizmo map has one gizmo group, the one JS shows, with one gizmo; what an operator reads
- * of it is answered below (ED_view3d_gizmo_mesh_preselect_get_active). */
-wmGizmoGroup *WM_gizmomap_group_find(wmGizmoMap * /*gzmap*/, const char *idname)
-{
-  static wmGizmoGroup group = {};
-  static wmGizmo gizmo = {};
-  if (gizmo_group_shown != idname || !STREQ(idname, "VIEW3D_GGT_mesh_preselect_elem")) {
-    return nullptr;
-  }
-  group.gizmos.first = group.gizmos.last = &gizmo;
-  return &group;
-}
+/* port-override: the gizmos are Bylonder's (wm-gizmo-map.js); the stand-in map has no groups. */
+wmGizmoGroup *WM_gizmomap_group_find(wmGizmoMap * /*gzmap*/, const char * /*idname*/) { return nullptr; }
 bool WM_gizmo_context_check_drawstep(const bContext * /*C*/, eWM_GizmoFlagMapDrawStep /*step*/) { return true; }
 /* No gizmo runs modally in the module, and none of its groups is listed: the gizmos are Bylonder's. */
 wmGizmo *WM_gizmomap_get_modal(const wmGizmoMap * /*gzmap*/) { return nullptr; }
@@ -428,157 +175,18 @@ wmGizmoGroupType *WM_gizmogrouptype_find(StringRef idname, bool /*quiet*/)
     return type;
   }).get();
 }
-bool WM_gizmo_group_type_ensure_ptr(wmGizmoGroupType *gzgt)
-{
-  gizmo_groups_requested += std::string(gzgt->idname) + "\n";
-  return true;
-}
+bool WM_gizmo_group_type_ensure_ptr(wmGizmoGroupType * /*gzgt*/) { return true; }
 bool WM_gizmo_group_type_ensure(StringRef idname) { return WM_gizmo_group_type_ensure_ptr(WM_gizmogrouptype_find(idname, true)); }
 void WM_gizmo_group_type_reinit_ptr(Main * /*bmain*/, wmGizmoGroupType *gzgt) { WM_gizmo_group_type_ensure_ptr(gzgt); }
 
-/* port-override: the preselection gizmo is Bylonder's; its element is the one edit_mesh_preselect_elem found. */
-void ED_view3d_gizmo_mesh_preselect_get_active(const bContext *C, const wmGizmo * /*gz*/, Base **r_base, BMElem **r_ele)
+/* port-override: no preselection gizmo has an element under the mouse. */
+void ED_view3d_gizmo_mesh_preselect_get_active(const bContext * /*C*/, const wmGizmo * /*gz*/, Base **r_base, BMElem **r_ele)
 {
-  ViewLayer *view_layer = CTX_data_view_layer(C);
-  BKE_view_layer_synced_ensure(*CTX_data_main(C), CTX_data_scene(C), view_layer);
-  *r_base = preselected ? BKE_view_layer_active_base_get(view_layer) : nullptr;
-  *r_ele = preselected;
+  *r_base = nullptr;
+  *r_ele = nullptr;
 }
 
 }  // namespace blender
-
-/* port-override: the layouts of editmesh_preselect_edgering.cc's and editmesh_preselect_elem.cc's private structs,
- * whose geometry JS draws. */
-struct PreSelEdgeRingLayout {
-  float (*edges)[2][3];
-  int edges_len;
-  float (*verts)[3];
-  int verts_len;
-};
-struct PreSelElemLayout {
-  float (*edges)[2][3];
-  int edges_len;
-  float (*verts)[3];
-  int verts_len;
-  float (*preview_tris)[3][3];
-  int preview_tris_len;
-  float (*preview_lines)[2][3];
-  int preview_lines_len;
-};
-
-/* Preselection geometry for JS, in object space: counts of edges, vertices, preview triangles and preview lines,
- * then their coordinates in that order. */
-static Vector<float> preselection_geometry;
-static const float *preselection_pack(float (*edges)[2][3], int edges_len, float (*verts)[3], int verts_len,
-                                      float (*tris)[3][3], int tris_len, float (*lines)[2][3], int lines_len)
-{
-  preselection_geometry = {float(edges_len), float(verts_len), float(tris_len), float(lines_len)};
-  const auto add = [](const void *data, int len) {
-    preselection_geometry.extend(Span(static_cast<const float *>(data), data ? len : 0));
-  };
-  add(edges, edges_len * 6);
-  add(verts, verts_len * 3);
-  add(tris, tris_len * 9);
-  add(lines, lines_len * 6);
-  return preselection_geometry.data();
-}
-
-/* The Loop Cut tool's preview (gizmo_preselect_edgering_test_select): the edge ring from an edge with `cuts` cuts
- * (EDBM_preselect_edgering_update_from_edge), or nothing for -1. */
-EXPORT(edit_mesh_preselect_edgering) const float *edit_mesh_preselect_edgering(EditContext *ctx, int edge_index, int cuts)
-{
-  BMesh *bm = ctx->mesh.runtime->edit_mesh->bm;
-  EditMesh_PreSelEdgeRing *psel = EDBM_preselect_edgering_create();
-  if (edge_index >= 0 && edge_index < bm->totedge) {
-    BM_mesh_elem_table_ensure(bm, BM_EDGE);
-    EDBM_preselect_edgering_update_from_edge(psel, bm, BM_edge_at_index(bm, edge_index), cuts, {});
-  }
-  PreSelEdgeRingLayout &ring = *reinterpret_cast<PreSelEdgeRingLayout *>(psel);
-  const float *out = preselection_pack(ring.edges, ring.edges_len, ring.verts, ring.verts_len, nullptr, 0, nullptr, 0);
-  EDBM_preselect_edgering_destroy(psel);
-  return out;
-}
-
-/* The Poly Build tool's preselection (gizmo_preselect_elem_test_select, mirrored): the element under the mouse
- * (region pixels, y up) by EDBM_unified_findnearest_from_raycast, Ctrl creating and Shift deleting, and its
- * preview; it is the element the tool's operators then act on. */
-EXPORT(edit_mesh_preselect_elem) const float *edit_mesh_preselect_elem(EditContext *ctx, int x, int y, int modifier)
-{
-  bContext *C = ctx->C;
-  static EditMesh_PreSelElem *psel = EDBM_preselect_elem_create();
-  const bool is_ctrl_pressed = (modifier & KM_CTRL) != 0;
-  const bool is_shift_pressed = (modifier & KM_SHIFT) != 0;
-  EDBM_preselect_action_set(psel, PRESELECT_ACTION_TRANSFORM);
-  if (is_ctrl_pressed && !is_shift_pressed) {
-    EDBM_preselect_action_set(psel, PRESELECT_ACTION_CREATE);
-  }
-  if (!is_ctrl_pressed && is_shift_pressed) {
-    EDBM_preselect_action_set(psel, PRESELECT_ACTION_DELETE);
-  }
-  Vector<Base *> bases = BKE_view_layer_array_from_bases_in_edit_mode(*CTX_data_main(C), CTX_data_scene(C), CTX_data_view_layer(C), CTX_wm_view3d(C));
-  ViewContext vc = em_setup_viewcontext(C);
-  vc.mval[0] = x;
-  vc.mval[1] = y;
-  BMElem *best = nullptr;
-  int base_index_vert = -1, base_index_edge = -1, base_index_face = -1;
-  BMVert *eve_test;
-  BMEdge *eed_test;
-  BMFace *efa_test;
-  if (EDBM_unified_findnearest_from_raycast(&vc, bases, false, true, &base_index_vert, &base_index_edge, &base_index_face,
-                                            &eve_test, &eed_test, &efa_test))
-  {
-    if (EDBM_preselect_action_get(psel) == PRESELECT_ACTION_DELETE) {
-      if (efa_test) {
-        best = reinterpret_cast<BMElem *>(efa_test);
-      }
-    }
-    else if (eed_test) {
-      best = reinterpret_cast<BMElem *>(eed_test);
-    }
-    if (eve_test) {
-      float vert_p_co[2], vert_co[3];
-      const float mval_f[2] = {float(x), float(y)};
-      mul_v3_m4v3(vert_co, bases[base_index_vert]->object->object_to_world().ptr(), eve_test->co);
-      ED_view3d_project_v2(vc.region, vert_co, vert_p_co);
-      if (len_v2v2(vert_p_co, mval_f) < 35) {
-        best = reinterpret_cast<BMElem *>(eve_test);
-      }
-      if (!BM_vert_is_boundary(eve_test) && EDBM_preselect_action_get(psel) != PRESELECT_ACTION_DELETE) {
-        best = reinterpret_cast<BMElem *>(eve_test);
-      }
-    }
-  }
-  preselected = best;
-  BMesh *bm = ctx->mesh.runtime->edit_mesh->bm;
-  if (best) {
-    const int mval[2] = {x, y};
-    EDBM_preselect_elem_update_from_single(psel, bm, best, {});
-    EDBM_preselect_elem_update_preview(psel, &vc, bm, best, mval);
-  }
-  else {
-    EDBM_preselect_elem_clear(psel);
-    EDBM_preselect_preview_clear(psel);
-  }
-  PreSelElemLayout &elem = *reinterpret_cast<PreSelElemLayout *>(psel);
-  return preselection_pack(elem.edges, elem.edges_len, elem.verts, elem.verts_len, elem.preview_tris, elem.preview_tris_len,
-                           elem.preview_lines, elem.preview_lines_len);
-}
-
-/* The text the last operator showed in the view's header (ED_area_status_text), or null. */
-EXPORT(edit_context_status) const char *edit_context_status(EditContext *ctx)
-{
-  return ctx->view_area.status.empty() ? nullptr : ctx->view_area.status.c_str();
-}
-
-/* The 3D cursor of the scene the edited object is in (scene.cursor), which operators place things at. */
-EXPORT(edit_context_cursor) float *edit_context_cursor(EditContext *ctx) { return ctx->scene.cursor.location; }
-
-EXPORT(edit_context_object_matrix_set) void edit_context_object_matrix_set(EditContext *ctx, const float *object_to_world)
-{
-  bke::ObjectRuntime &runtime = *ctx->object.runtime;
-  std::copy_n(object_to_world, 16, runtime.object_to_world.base_ptr());
-  runtime.world_to_object = math::invert(runtime.object_to_world);
-}
 
 /* Operators, registered by Blender's own registration functions through the window manager (WM_operatortype_append),
  * by the index JS finds them at (operator_name). */
