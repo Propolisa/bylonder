@@ -1,9 +1,11 @@
-// The 3D View's regions drawn from Blender's scripts besides the toolbar: the header (VIEW3D_HT_header), the tool
-// settings row (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header) and the sidebar
-// (RGN_TYPE_UI): its tabs (the panels' bl_category, in the order the panels register) and the panels of the active
-// tab whose context (the mode's, '.objectmode') and poll() match, with their sub-panels. All draw through the shared
-// layout renderer (interface/layout-view.js).
+// The 3D View's regions besides the toolbar: the header (VIEW3D_HT_header) and the sidebar (RGN_TYPE_UI) with its
+// tabs, laid out by Blender in the view's area of its window (ui-tree.js) and drawn by block-view.js. The tool
+// settings row (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header), which needs the workspace's tools, and Bylonder's own
+// mesh Edit Mode, which Main does not know, still draw Blender's scripts through the JS layout (layout-view.js).
 import { createApp, h, reactive, markRaw } from 'vue';
+import { BlockView, PanelsView } from '../interface/block-view.js';
+import { regionHeader, regionPanels, categorySet, panelClosedSet } from '../interface/ui-tree.js';
+import { contextStruct } from '../../python/bpy_rna.js';
 import { panels, headers, menus } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { panelTypes, drawPanels, headerLayout, idname, drawType } from '../interface/panels.js';
@@ -16,12 +18,24 @@ import './view3d-regions.css';
 const MODULES = [{ classes: [VIEW3D_PT_transform] }, { classes: Object.values(panels) }];
 // view3d_buttons_region_layout: the context string of each mode.
 const MODE_CONTEXTS = { OBJECT: '.objectmode', EDIT_MESH: '.mesh_edit' };
+const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_TOOL_HEADER = 12;
+// The view's state Bylonder draws with (view3d.js) as the area's SpaceView3D has it, by RNA path.
+const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', material: 'MATERIAL', rendered: 'RENDERED' };
+const SPACE_STATE = [
+  ['show_gizmo', ['show_gizmo']],
+  ['overlays', ['overlay', 'show_overlays']],
+  ['xray', ['shading', 'show_xray'], (value) => !!value],
+  ['shading', ['shading', 'type'], (value) => SHADING[value], (type) => Object.keys(SHADING).find((id) => SHADING[id] === type)],
+];
+// Region flags follow the page's regions (rects()): only Blender's changes to them come back.
+const REGION_STATE = ['show_region_toolbar', 'show_region_ui', 'show_region_tool_header'];
 const polls = (type, context) => { try { return !type.poll || !!type.poll(context); } catch { return false; } };
 
-// `context(region)` gives bpy.context for a region of the view, `ui` runs operators and draws menus (menuUI), `menu(idname)`
-// draws a menu of the header's (the mode's own), `templates` are the header's C templates, `changed()` redraws after an
-// edit, which `undoPush(name)` records.
-export function createRegions({ view, context, ui, menu, templates, changed, undoPush }) {
+// `area()` is the view's area in Blender's window, `scene` the scene's Main (main-sync.js), `legacy()` whether the
+// JS layout draws (mesh Edit Mode). `context(region)` gives bpy.context for a region of the view there, `ui` runs
+// operators and draws menus (menuUI), `menu(idname)` draws a menu of the header's (the mode's own), `templates` are
+// the header's C templates, `changed()` redraws after an edit, which `undoPush(name)` records.
+export function createRegions({ view, area, scene, legacy, context, ui, menu, templates, changed, undoPush }) {
   const headerRegion = Object.assign(document.createElement('div'), { className: 'bl-ui bl-view3d-header' });
   const toolHeader = Object.assign(document.createElement('div'), { className: 'bl-ui bl-tool-header' });
   const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui bl-sidebar' });
@@ -62,8 +76,54 @@ export function createRegions({ view, context, ui, menu, templates, changed, und
       .map(idname),
   });
 
-  const mount = (el, render) => {
-    const app = createApp({ render: () => { void state.revision; return state.ready ? render() : null; } });
+  // The view's state into the area's space before Blender reads it, and back after Blender changed it.
+  const space = (layout) => area(layout).inContext(RGN_TYPE_WINDOW, () => contextStruct().space_data);
+  let laidOut = {};
+  const toSpace = () => {
+    const data = space();
+    laidOut = Object.fromEntries(REGION_STATE.map((key) => [key, data[key]]));
+    for (const [key, path, out = (v) => v] of SPACE_STATE) {
+      const owner = path.slice(0, -1).reduce((o, name) => o[name], data), value = out(view.state[key]);
+      if (owner[path.at(-1)] !== value) owner[path.at(-1)] = value;
+    }
+  };
+  const fromSpace = () => {
+    const data = space(false);
+    for (const [key, path, , back = (v) => v] of SPACE_STATE) {
+      const value = back(path.reduce((o, name) => o[name], data));
+      if (value !== view.state[key]) (key === 'shading' ? view.setShading(value) : (view.state[key] = value));
+    }
+    for (const key of REGION_STATE) if (data[key] !== laidOut[key]) view.state[key] = data[key];
+    view.sync?.();
+  };
+
+  // What block-view.js needs to draw a region of the view's area: Main and the view made current before Blender reads
+  // them, the scene and the view after a button changed them.
+  const after = () => { scene.view(); fromSpace(); changed(); state.revision++; };
+  const blenderUI = (type) => markRaw({
+    inContext: (fn) => { scene.flush(); toSpace(); return area().inContext(type, fn); },
+    refresh: after,
+    undoPush: (name) => { after(); undoPush(name); },
+    report: (error) => console.warn(error),
+    run: (idname, props, event) => { ui.run(idname, props, event); fromSpace(); state.revision++; },
+    keys: (idname, props) => ui.keys(idname, props),
+    panelClosed: (id, closed) => area().inContext(type, (C) => panelClosedSet(C, id, closed)),
+  });
+  const blenderUIs = { [RGN_TYPE_HEADER]: blenderUI(RGN_TYPE_HEADER), [RGN_TYPE_UI]: blenderUI(RGN_TYPE_UI) };
+  const blenderHeader = (type) => (blenderUIs[type].inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: blenderUIs[type], header: true }));
+  const blenderSidebar = () => {
+    const sidebarUI = blenderUIs[RGN_TYPE_UI], { category, categories, panels: drawn } = sidebarUI.inContext((C) => regionPanels(C));
+    return [
+      h(PanelsView, { panels: drawn, ui: sidebarUI }),
+      h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
+        type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category),
+        onClick: () => { area().inContext(RGN_TYPE_UI, (C) => categorySet(C, name)); state.revision++; },
+      }, name))),
+    ];
+  };
+
+  const mount = (el, render, blender) => {
+    const app = createApp({ render: () => { void state.revision; return blender && !legacy() ? blender() : state.ready ? render() : null; } });
     app.mount(el);
     return app;
   };
@@ -88,9 +148,10 @@ export function createRegions({ view, context, ui, menu, templates, changed, und
   };
 
   const apps = [
-    mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header))),
+    mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header)), () => blenderHeader(RGN_TYPE_HEADER)),
+    // The tool settings stay the JS layout's until the window's workspace has Blender's tools (WorkSpace.tools).
     mount(toolHeader, () => header('TOOL_HEADER', drawHeaderType(headers.VIEW3D_HT_tool_header))),
-    mount(sidebar, sidebarRegion),
+    mount(sidebar, sidebarRegion, blenderSidebar),
   ];
 
   loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { state.ready = true; draw(); });
@@ -100,5 +161,10 @@ export function createRegions({ view, context, ui, menu, templates, changed, und
     sidebar.hidden = !regions.show_region_ui;
     state.revision++;
   }
-  return { header: headerRegion, toolHeader, sidebar, draw, dispose: () => { apps.forEach((app) => app.unmount()); [headerRegion, toolHeader, sidebar].forEach((el) => el.remove()); } };
+  // The regions' rectangles in the page, for the view's area (the regions not shown are hidden there).
+  const rects = () => Object.fromEntries([[RGN_TYPE_HEADER, headerRegion], [RGN_TYPE_TOOL_HEADER, toolHeader], [RGN_TYPE_UI, sidebar], [RGN_TYPE_TOOLS, view.toolbar?.el]]
+    .filter(([, el]) => el)
+    .filter(([, el]) => !el.hidden && el.isConnected).map(([type, el]) => [type, el.getBoundingClientRect()])
+    .filter(([, r]) => r.width && r.height).map(([type, r]) => [type, { x: r.left, y: r.top, width: r.width, height: r.height }]));
+  return { header: headerRegion, toolHeader, sidebar, draw, rects, blenderUI: blenderUI(RGN_TYPE_WINDOW), dispose: () => { apps.forEach((app) => app.unmount()); [headerRegion, toolHeader, sidebar].forEach((el) => el.remove()); } };
 }

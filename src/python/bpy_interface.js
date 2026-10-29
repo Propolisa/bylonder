@@ -1,9 +1,10 @@
 // Blender's Python (bpy_interface.cc): Blender's scripts, transpiled whole (src/bl_py, tools/blender-ui/tree.py), loaded
 // and started as Blender starts them, which registers their classes. Bylonder draws and runs those classes by name.
 import { loadRNAUI } from '../makesrna/rna.js';
-import { invokeOperator, runOperator, pollOperator, hasOperator, registerOperator } from '../windowmanager/wm-operators.js';
+import { invokeOperator, runOperator, pollOperator, hasOperator, registerOperator, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
+import { hasOperator as blenderHasOperator } from '../bmesh/bmesh-wasm.js';
 import { report } from '../windowmanager/wm-reports.js';
-import { set } from '../bl_py/org.transcrypt.__runtime__.js';
+import { set, __class__, __get__ } from '../bl_py/org.transcrypt.__runtime__.js';
 import { registerClass } from './bpy_rna.js';
 
 
@@ -38,6 +39,35 @@ for (const [idname, cls] of Object.entries(registered)) {
     console.error(`Python: register_class(${idname}):`, error.__args__?.[0] ?? error);
   }
 }
+// Bylonder's operators Blender has no type for become Blender's operator types, as an add-on's Python operators do:
+// Blender's menus and buttons show them, polled and run by Bylonder.
+const ownTypes = new Set();
+onRegister((idname) => {
+  if (ownTypes.has(idname) || blenderHasOperator(idname) || registered[idname] || !/^[a-z0-9_]+\.[a-z0-9_]+$/.test(idname)) return;
+  ownTypes.add(idname);
+  const [prefix, name] = idname.split('.');
+  try {
+    registerClass(__class__(`${prefix.toUpperCase()}_OT_${name}`, [globalThis.__py_modules['_bpy.types'].Operator], {
+      bl_idname: idname,
+      bl_label: idname,
+      poll: () => pollOperator(idname, {}),
+      execute: () => set([runOperator(idname, {}) ?? 'FINISHED']),
+    }));
+  } catch (error) {
+    console.error(`register_class(${idname}):`, error.__args__?.[0] ?? error);
+  }
+});
+// Menu.append and Menu.prepend of Bylonder's draw functions (appendMenu), on Blender's menu types. They make the class's
+// draw a function (_GenericUI._dyn_ui_initialize), which Python binds to the instance and Transcrypt does not: it is
+// given through __get__, as the class's own methods are.
+extendMenus((idname, side, draw) => {
+  const cls = registered[idname];
+  if (!cls) return;
+  cls[side](draw);
+  const own = Object.getOwnPropertyDescriptor(cls, 'draw');
+  if (typeof own?.value === 'function') Object.defineProperty(cls, 'draw', { get() { return __get__(this, own.value); }, configurable: true });
+});
+
 const ofKind = (kind) => Object.fromEntries(Object.entries(registered).filter(([idname]) => idname.includes(kind)));
 export const menus = ofKind('_MT_');
 export const panels = ofKind('_PT_');

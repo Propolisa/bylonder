@@ -282,7 +282,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     void headerState.revision;
     area.layoutHeader(headerHost.clientWidth || region.clientWidth, headerHost.clientHeight || HEADER_HEIGHT);
     sync();
-    return (headerUI.inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: headerUI }));
+    return (headerUI.inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: headerUI, header: true }));
   } });
   headerApp.mount(headerHost);
   const drawHeader = () => { headerState.revision++; };
