@@ -245,6 +245,8 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
     SET_FLAG_FROM_TEST(region.flag, !shown, RGN_FLAG_HIDDEN);
     region.runtime->visible = shown != nullptr;
     if (!shown) {
+      /* As region_rect_recursive leaves a hidden region: no rectangle, so no event finds it. */
+      BLI_rcti_init(&region.winrct, 0, 0, 0, 0);
       continue;
     }
     region.winrct = window_rect(win, shown);
