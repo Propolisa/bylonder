@@ -49,9 +49,10 @@ export function newOperator(idname, props = {}) {
   return op;
 }
 // A macro's properties of one of its operators (TRANSFORM_OT_translate in mesh.extrude_region_move's), a dict or a
-// keymap item's [name, value] pairs, by their paths ("TRANSFORM_OT_translate.value").
+// keymap item's [name, value] pairs, by their paths ("TRANSFORM_OT_translate.value"). A transpiled Python dict's
+// methods are not properties.
 const isPairs = (value) => Array.isArray(value) && value.length > 0 && value.every((v) => Array.isArray(v) && typeof v[0] === 'string');
-const flatProperties = (props, prefix = '') => Object.entries(props).flatMap(([name, value]) =>
+const flatProperties = (props, prefix = '') => Object.entries(props).filter(([, value]) => typeof value !== 'function').flatMap(([name, value]) =>
   (isPairs(value) || (value && typeof value === 'object' && !Array.isArray(value)) ? flatProperties(isPairs(value) ? Object.fromEntries(value) : value, `${prefix}${name}.`)
     : [[prefix + name, value]]));
 export function setOperatorProperties(op, props) {
