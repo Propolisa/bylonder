@@ -1,17 +1,24 @@
 // Runs the unit tests (tests/*.test.js, or those whose names contain an argument) in parallel, one process each, as
 // many at a time as there are cores (JOBS=n to change it), slowest first by the last run's times. Prints each test's
-// last line and time, and a failing test's whole output.
+// last line and time, and a failing test's whole output. Tests of generated ports the app no longer ships
+// (scripts/port-usage.mjs) are skipped unless --ports is given.
 import { spawn } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { availableParallelism } from 'node:os';
+import { portUsage, reachable } from './import-graph.mjs';
 
 const TIMES = 'node_modules/.cache/test-times.json';
 const read = (path) => { try { return JSON.parse(readFileSync(path, 'utf8')); } catch { return {}; } };
 const times = read(TIMES);
-const filters = process.argv.slice(2);
-const tests = readdirSync('tests').filter((f) => f.endsWith('.test.js') && (!filters.length || filters.some((s) => f.includes(s))))
-  .map((f) => `tests/${f}`).sort((a, b) => (times[b] ?? Infinity) - (times[a] ?? Infinity));
+const ports = process.argv.includes('--ports');
+const filters = process.argv.slice(2).filter((a) => a !== '--ports');
+const unshipped = new Set(portUsage().unused);
+const testsPort = (test) => [...reachable([test])].some((m) => unshipped.has(m));
+const matching = readdirSync('tests').filter((f) => f.endsWith('.test.js') && (!filters.length || filters.some((s) => f.includes(s)))).map((f) => `tests/${f}`);
+const skipped = ports ? [] : matching.filter(testsPort);
+const tests = matching.filter((t) => !skipped.includes(t)).sort((a, b) => (times[b] ?? Infinity) - (times[a] ?? Infinity));
+if (skipped.length) console.log(`skip ${skipped.join(', ')} (ports the app does not ship; --ports runs them)`);
 
 const run = (test) => new Promise((resolve) => {
   const start = performance.now(), child = spawn(process.execPath, [test], { stdio: ['ignore', 'pipe', 'pipe'] });

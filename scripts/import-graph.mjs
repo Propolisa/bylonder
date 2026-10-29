@@ -1,6 +1,6 @@
 // The relative imports of src/ modules as Vite resolves them: static and dynamic imports, re-exports and workers
 // (new URL('./x.js', import.meta.url)).
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve, relative } from 'node:path';
 import { parseAst } from 'vite';
 
@@ -48,3 +48,17 @@ export function reachable(entries) {
 // The scripts the production build's HTML entries load (vite.config.js rollupOptions.input).
 export const APP_ENTRIES = ['index.html', 'viewport.html', 'render.html', 'docs.html']
   .flatMap((html) => [...readFileSync(html, 'utf8').matchAll(/<script[^>]*src="\/([^"]+\.js)"/g)].map((m) => m[1]));
+
+// The generated ports of Blender's C (tools/blender-port): each *.gen.js and the shim beside it (name.js, or name.js for
+// name.unit.gen.js).
+const PORT_DIRS = ['src/bmesh/intern', 'src/bmesh/operators', 'src/bmesh/tools', 'src/blenlib', 'src/blenkernel', 'src/makesdna', 'src/intern'];
+export function portModules() {
+  const generated = PORT_DIRS.flatMap((dir) => readdirSync(dir, { recursive: true }).map((f) => join(dir, f))).filter((f) => f.endsWith('.gen.js'));
+  return [...new Set(generated.flatMap((gen) => [gen, gen.replace(/(\.unit)?\.gen\.js$/, '.js')]))].sort();
+}
+
+// The port modules the production app imports, and those it does not.
+export function portUsage() {
+  const shipped = reachable(APP_ENTRIES), ports = portModules();
+  return { shipped: ports.filter((p) => shipped.has(p)), unused: ports.filter((p) => !shipped.has(p)) };
+}
