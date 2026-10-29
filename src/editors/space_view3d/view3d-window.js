@@ -20,10 +20,14 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
   const areas = new Map();
   let running = false;
 
-  function area(view) {
+  // A view's area, laid out from the page (unless `layout` is false: as it last was).
+  function area(view, layout = true) {
+    configureWindow(window);
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
+    else if (!layout) return areas.get(view);
+    window.size = { width: innerWidth, height: innerHeight };
     const a = areas.get(view), rect = pageRect(view.canvas.getBoundingClientRect());
-    a.layout(rect, { [RGN_TYPE_WINDOW]: rect });
+    a.layout(rect, { [RGN_TYPE_WINDOW]: rect, ...view.regions?.rects() });
     a.view3d = regionView3D(view);
     return a;
   }
@@ -36,8 +40,6 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
   }
 
   function send(kind, data, strings, view) {
-    configureWindow(window);
-    window.size = { width: innerWidth, height: innerHeight };
     for (const v of views()) area(v);
     const acting = kind !== 'pointermove' || running;
     // An operator may start: Main gets the scene, and the selected meshes' geometry while it runs.
@@ -59,6 +61,8 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
   return {
     takes: (native, view) => running || (takes() && !!view && native.pointerType !== 'touch'),
     send,
+    // A view's area, laid out from its elements (its header, tool header and sidebar are view.regions').
+    area,
     pressHandled: () => window.pressHandled(),
   };
 }

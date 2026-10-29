@@ -231,8 +231,9 @@ const rootEnv = (ui, extra = {}) => ({ ui, active: true, enabled: true, root: tr
 
 export const BlockView = defineComponent({
   name: 'BlockView',
-  props: { tree: Object, ui: Object },
-  setup: (props) => () => (props.tree ? layoutNode(props.tree, rootEnv(props.ui)) : null),
+  // header: a header region's block, whose menus are pulldowns and whose buttons keep their widths.
+  props: { tree: Object, ui: Object, header: Boolean },
+  setup: (props) => () => (props.tree ? layoutNode(props.tree, rootEnv(props.ui, { header: props.header })) : null),
 });
 
 // A region's panel as interface_panel.cc draws it: its header (disclosure, draw_header's layout, label, preset), then

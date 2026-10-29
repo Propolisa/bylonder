@@ -1,13 +1,15 @@
-// Bylonder's implementations of Blender's operators, by idname, and the draw functions added to Blender's menus, for
-// the menus and headers drawn from Blender's own scripts (src/bl_py, drawn by editors/interface/ui-layout.js).
-// Operators Blender lacks (Bylonder's project and code features) are registered as `bylonder.*`, and added to Blender's
-// menus with appendMenu, as add-ons extend Blender.
+// Bylonder's implementations of Blender's operators, by idname, and the draw functions added to Blender's menus.
+// Operators Blender lacks (Bylonder's project and code features) are registered as `bylonder.*` and become Blender's
+// operator types (python/bpy_interface.js), and appendMenu adds them to Blender's menus, as add-ons extend Blender.
 import { operatorKeys, setProperties } from './input/keymap.js';
 import { blenderKeys } from './keyconfig.js';
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
 import { operatorFinished } from './wm-reports.js';
 
-const operators = new Map(), spaceOperators = new Map(), extensions = new Map();
+const operators = new Map(), spaceOperators = new Map();
+// Who is told of each registration (bpy_interface.js, which makes Blender's types of Bylonder's operators).
+const registrations = new Set();
+export const onRegister = (fn) => { registrations.add(fn); for (const idname of new Set([...operators.keys(), ...[...spaceOperators.values()].flatMap((m) => [...m.keys()])])) fn(idname); };
 
 // An operator: run(props, event), optionally poll(props, event) (the event when a key or click ran it), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
 // with some properties only and enumItems(prop) for its enum properties' items where they differ from Blender's
@@ -17,6 +19,7 @@ const operators = new Map(), spaceOperators = new Map(), extensions = new Map();
 export function registerOperator(idname, operator, space = null) {
   if (space) (spaceOperators.get(space) ?? spaceOperators.set(space, new Map()).get(space)).set(idname, operator);
   else operators.set(idname, operator);
+  registrations.forEach((fn) => fn(idname));
 }
 
 // Registers Blender's own operator behind one Bylonder registered: Bylonder's runs the calls it supports and polls
@@ -91,10 +94,16 @@ registerOperator('wm.call_menu', {
   run: ({ name }, event) => area.menu(name)(event),
 });
 
-const extension = (idname) => extensions.get(idname) ?? extensions.set(idname, { prepend: [], append: [] }).get(idname);
-// Menu.append and Menu.prepend: draw(self, context), drawing into self.layout.
-export const appendMenu = (idname, draw) => extension(idname).append.push(draw);
-export const prependMenu = (idname, draw) => extension(idname).prepend.push(draw);
+// Menu.append and Menu.prepend: draw(self, context), drawing into self.layout; given to Blender's menu types once
+// Blender's Python has loaded (extendMenus, bpy_interface.js).
+let extend = null;
+const pending = [];
+export const appendMenu = (idname, draw) => (extend ? extend(idname, 'append', draw) : pending.push([idname, 'append', draw]));
+export const prependMenu = (idname, draw) => (extend ? extend(idname, 'prepend', draw) : pending.push([idname, 'prepend', draw]));
+export function extendMenus(fn) {
+  extend = fn;
+  pending.splice(0).forEach((args) => fn(...args));
+}
 
 // Python keyword arguments for a layout call from JS, as Transcrypt passes them.
 export const kw = (keywords) => ({ ...keywords, __kwargtrans__: null });
@@ -113,7 +122,6 @@ export const menuUI = ({ menus, context, prop, keymaps = () => ['Window', 'Scree
   menus,
   context,
   prop,
-  extensions: (idname) => extensions.get(idname),
   supported: (idname, props) => !!operatorFor(idname) && (operatorFor(idname).supports?.(props) ?? true),
   poll: (idname, props) => operatorFor(idname)?.poll?.(props) ?? true,
   run: runOperator,

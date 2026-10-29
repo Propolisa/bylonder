@@ -112,7 +112,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
       const nav = area.inContext(RGN_TYPE_NAV_BAR, (C) => regionPanels(C));
       const main = area.inContext(RGN_TYPE_WINDOW, (C) => regionPanels(C));
       tabs = navigationTabs(nav, space());
-      const headerView = h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, header.map((tree) => h(BlockView, { tree, ui: ui[RGN_TYPE_HEADER] })));
+      const headerView = h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, header.map((tree) => h(BlockView, { tree, ui: ui[RGN_TYPE_HEADER], header: true })));
       const tab = space().context;
       return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES', tabindex: -1, onKeydown,
         onPointerenter: (e) => e.currentTarget.focus({ preventScroll: true }) }, [
