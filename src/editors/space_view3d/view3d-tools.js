@@ -73,7 +73,7 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
   registerMeshGizmos({
     region, wm: world.wm, active: (gizmo) => world.editMode.active && toolActive(gizmo)(), toolKeymap,
     preselect: { edgeRing: (event, cuts) => world.editMode.preselectEdgeRing(event, cuts), elem: (event) => world.editMode.preselectElem(event) },
-    cuts: () => Object.fromEntries(world.toolsystem.properties(tool(), 'mesh.loopcut_slide').MESH_OT_loopcut ?? []).number_cuts ?? 1,
+    cuts: () => world.toolsystem.properties(tool(), 'mesh.loopcut_slide').MESH_OT_loopcut?.number_cuts ?? 1,
     spinAxes: () => {
       const axis = world.toolsystem.properties(tool(), 'MESH_GGT_spin').axis ?? ['Z'];
       return ['X', 'Y', 'Z'].flatMap((name, i) => ([...(typeof axis === 'string' ? [axis] : axis)].includes(name) ? [i] : []));

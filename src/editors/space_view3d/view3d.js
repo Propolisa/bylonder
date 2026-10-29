@@ -112,8 +112,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   // The toolbar region, Blender's tool system's.
   const toolbar = createToolbar({
-    panel: world.toolsystem.panel, ui: blender, run: blender.run,
-    context: (width) => world.blenderContext(view, { type: 'TOOLS', width }),
+    panel: world.toolsystem.panel, run: blender.run, python: (fn) => world.toolsystem.python(fn, view),
     keys: (idname, props, strict) => blenderKeys(['Object Mode', 'Mesh', ...KEYMAPS], idname, props, strict),
   });
   section.append(toolbar.el);

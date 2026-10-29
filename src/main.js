@@ -21,6 +21,7 @@ import { createWorkbench } from "./draw/workbench.js";
 import { windowCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import { createView3DWindow } from "./editors/space_view3d/view3d-window.js";
+import { RGN_TYPE_TOOLS } from "./windowmanager/wm-window.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -384,7 +385,10 @@ const applyTool = () => {
 // The 3D View operators act on: the context area's (wm-operators.js), else the one under the pointer.
 const contextView = () => contextArea()?.space ?? activeView();
 world.toolsystem = createToolSystem({
-  context: () => world.blenderContext(contextView()),
+  // The workspace's tools in Main, read in the context of the 3D View the window manager acts on (a view's toolbar in its
+  // own area's toolbar region).
+  inContext: (fn, view) => (view ? world.view3dArea(view).inContext(RGN_TYPE_TOOLS, fn) : world.view3dArea(contextView(), false).inContext(0, fn)),
+  mode: contextMode,
   changed: () => { applyTool(); tagRedraw(); viewports().forEach((view) => view.sync()); },
 });
 // The tools' operators and the active tool's gizmos in the 3D View under the pointer.

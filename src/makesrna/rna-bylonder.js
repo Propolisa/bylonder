@@ -12,9 +12,8 @@ import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/cor
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { mesh_deserialize, mesh_serialize } from '../blenkernel/mesh/mesh.js';
-import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct, operatorIdname, defineStructProperties } from './rna.js';
+import { rna, collection, baseOf, INFO, pyArgs, rnaProperty } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
-import rnaOperators from './rna-operators.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
 import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
@@ -415,7 +414,6 @@ const STRUCTS = {
       (world, value) => world.sceneSettings.setCursor({ rotation_quaternion: value }), 'wxyz'), sync: true },
   },
   ToolSettings: {
-    workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },
     mesh_select_mode: array((world) => SELECT_BITS.map((bit) => !!((world.editMode?.selectmode ?? SCE_SELECT_VERTEX) & bit)), (world, value) => {
       const mode = SELECT_BITS.reduce((mask, bit, i) => (value[i] ? mask | bit : mask), 0);
       if (mode && world.editMode) world.editMode.selectmode = mode;
@@ -597,25 +595,6 @@ const STRUCTS = {
       'physics', 'constraints', 'data', 'bone', 'bone_constraints', 'material', 'texture', 'strip', 'strip_modifier'].map((tab) => ['show_properties_' + tab, () => true])),
   },
   // A 3D Viewport (space_view3d/view3d.js): its shading, overlays and view.
-  // The workspace's active tools (bToolRef, windowmanager/wm-toolsystem.js), as rna_workspace_api.cc gives them.
-  WorkSpace: {
-    tools: (world, r) => Object.assign(collection(), {
-      from_space_view3d_mode: (...list) => {
-        const { mode, create } = pyArgs(list, ['mode', 'create']);
-        return r.pointer('WorkSpaceTool', world.toolsystem?.ref('VIEW_3D', mode, !!create));
-      },
-    }),
-  },
-  WorkSpaceTool: {
-    ...Object.fromEntries(['idname', 'idname_fallback', 'index', 'space_type', 'mode'].map((name) => [name, (ref) => ref[name]])),
-    widget: (ref) => ref.gizmo_group,
-    use_brushes: (ref) => ref.options.has('USE_BRUSHES'),
-    use_paint_canvas: (ref) => ref.options.has('USE_PAINT_CANVAS'),
-    setup: (ref, r) => (...list) => r.world.toolsystem.setup(ref, pyArgs(list, TOOL_SETUP)),
-    refresh_from_context: () => () => {},
-    operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
-    gizmo_group_properties: (ref, r) => (idname) => gizmoGroupProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
-  },
   // The Python Console (editors/space_console): its lines, prompt and language.
   SpaceConsole: {
     type: () => 'CONSOLE',
@@ -712,61 +691,10 @@ const orientationSlots = new WeakMap();
 // The scene's 3D cursor, or Blender's default one in a world without scene settings.
 const DEFAULT_CURSOR = { location: [0, 0, 0], rotation_mode: 'XYZ', rotation_euler: [0, 0, 0], rotation_quaternion: [1, 0, 0, 0] };
 const cursorOf = (world) => world.sceneSettings?.state.cursor ?? DEFAULT_CURSOR;
-const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
 
 // A tool's orientation slot's own choice (rna_scene.cc: rna_TransformOrientation_with_scene_itemf).
 const ORIENTATION_DEFAULT = ['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN'];
 
-// The properties tools set on their gizmo groups (the groups' RNA_def_* in transform_gizmo_3d.cc,
-// transform_gizmo_extrude_3d.cc, view3d_gizmo_tool_generic.cc and editmesh_extrude_spin_gizmo.cc): default and enum
-// items, a flag enum's default a list.
-const GIZMO_GROUP_PROPERTIES = {
-  VIEW3D_GGT_xform_gizmo: { drag_action: ['TRANSLATE', [['TRANSLATE', 'Move', '', 'NONE'], ['ROTATE', 'Rotate', '', 'NONE'], ['SCALE', 'Scale', '', 'NONE'], ['NONE', 'None', '', 'NONE']]] },
-  VIEW3D_GGT_xform_extrude: { axis_type: ['NORMAL', [['NORMAL', 'Normal', 'Only show normal axis', 'NONE'], ['XYZ', 'XYZ', 'Follow scene orientation', 'NONE']]] },
-  VIEW3D_GGT_tool_generic_handle_normal: { radius: [100] },
-  VIEW3D_GGT_tool_generic_handle_free: { radius: [36], backdrop_fill_alpha: [0.125] },
-  MESH_GGT_spin: { axis: [['Z'], [['X', 'X', '', 'NONE'], ['Y', 'Y', '', 'NONE'], ['Z', 'Z', '', 'NONE']]] },
-};
-// Each group type's properties are a struct named after it, as Blender's are.
-for (const [idname, properties] of Object.entries(GIZMO_GROUP_PROPERTIES)) {
-  defineStructProperties(idname, Object.fromEntries(Object.entries(properties).map(([name, [def, items]]) => [name, {
-    identifier: name, name: name.split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' '), default: def, array: 0,
-    type: items ? 'E' : typeof def === 'number' ? 'F' : 'B', flag: Array.isArray(def), items,
-  }])));
-}
-// A tool's properties of a gizmo group (WM_toolsystem_ref_properties_ensure_from_gizmo_group): the values set on it
-// over the group's defaults.
-export function gizmoGroupProperties(idname, values, host) {
-  const data = {}, items = {};
-  for (const [name, [def, enumItems]] of Object.entries(GIZMO_GROUP_PROPERTIES[idname] ?? {})) {
-    Object.defineProperty(data, name, { enumerable: true, get: () => values[name] ?? def, set: (value) => { values[name] = value; host?.update?.('GizmoGroupProperties', name, values); } });
-    if (enumItems) items[name] = () => enumItems;
-  }
-  return rna(idname, data, { items });
-}
-
-// An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
-// until set. Writing one is an update (host.update), as a tool setting is. A macro's operators' properties are its
-// pointers, stored as [name, value] pairs as keymap items keep them.
-export function operatorProperties(idname, values, host) {
-  const data = {};
-  for (const [name, def] of Object.entries(rnaOperators[idname]?.properties ?? {})) {
-    if (def.type === 'POINTER' && /_OT_/.test(def.fixed_type)) {
-      const nested = () => {
-        const own = Object.fromEntries(values[name] ?? []);
-        return operatorProperties(operatorIdname(def.fixed_type), own, { update: (struct, key) => { values[name] = Object.entries(own); host?.update?.(struct, key, values); } });
-      };
-      Object.defineProperty(data, name, { enumerable: true, get: nested });
-      continue;
-    }
-    Object.defineProperty(data, name, {
-      enumerable: true,
-      get: () => values[name] ?? def.default,
-      set: (value) => { values[name] = value; host?.update?.('OperatorProperties', name, values); },
-    });
-  }
-  return rna(operatorStruct(idname), data);
-}
 function setViewState(view, key, value) {
   if (value === undefined) throw TypeError(`bpy_struct: invalid ${key}`);
   if (key === 'shading' && view.setShading) return view.setShading(value);

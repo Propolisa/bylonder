@@ -17,6 +17,7 @@
 #include "BLI_string.h"
 #include "MEM_guardedalloc.h"
 #include "DNA_ID.h"
+#include "DNA_workspace_types.h"
 #include "RNA_access.hh"
 #include "RNA_path.hh"
 #include "RNA_define.hh"
@@ -876,4 +877,19 @@ EXPORT(bpy_def_property_done) void bpy_def_property_done(StructRNA *srna, Proper
   RNA_def_property_flag(prop, PropertyFlag(set));
   RNA_def_property_clear_flag(prop, PropertyFlag(clear));
   RNA_def_property_duplicate_pointers(srna, prop);
+}
+
+/* A tool (bToolRef) as WorkSpaceTool.setup left it (bToolRef_Runtime), for Bylonder's event handling, which runs its
+ * keymaps: {keymap, keymap_fallback, gizmo_group, op, fallback_keymap}, or null before it is set up. */
+EXPORT(bpy_tool_runtime) const char *bpy_tool_runtime(const bToolRef *tref)
+{
+  static std::string json;
+  const bToolRef_Runtime *runtime = tref ? tref->runtime : nullptr;
+  if (!runtime) {
+    return "null";
+  }
+  json = "{\"keymap\":" + json_string(runtime->keymap) + ",\"keymap_fallback\":" + json_string(runtime->keymap_fallback) +
+         ",\"gizmo_group\":" + json_string(runtime->gizmo_group) + ",\"op\":" + json_string(runtime->op) +
+         ",\"fallback_keymap\":" + (runtime->flag & TOOLREF_FLAG_FALLBACK_KEYMAP ? "true" : "false") + "}";
+  return json.c_str();
 }

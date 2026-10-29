@@ -1,7 +1,7 @@
-// The 3D View's regions besides the toolbar: the header (VIEW3D_HT_header) and the sidebar (RGN_TYPE_UI) with its
-// tabs, laid out by Blender in the view's area of its window (ui-tree.js) and drawn by block-view.js. The tool
-// settings row (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header), which needs the workspace's tools, and Bylonder's own
-// mesh Edit Mode, which Main does not know, still draw Blender's scripts through the JS layout (layout-view.js).
+// The 3D View's regions besides the toolbar: the header (VIEW3D_HT_header), the tool settings row
+// (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header) and the sidebar (RGN_TYPE_UI) with its tabs, laid out by Blender in
+// the view's area of its window (ui-tree.js) and drawn by block-view.js. In Bylonder's own mesh Edit Mode, which Main
+// does not know, the header and sidebar still draw Blender's scripts through the JS layout (layout-view.js).
 import { createApp, h, reactive, markRaw } from 'vue';
 import { BlockView, PanelsView } from '../interface/block-view.js';
 import { regionHeader, regionPanels, categorySet, panelClosedSet } from '../interface/ui-tree.js';
@@ -112,7 +112,7 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     keys: (idname, props) => ui.keys(idname, props),
     panelClosed: (id, closed) => area().inContext(type, (C) => panelClosedSet(C, id, closed)),
   });
-  const blenderUIs = { [RGN_TYPE_HEADER]: blenderUI(RGN_TYPE_HEADER), [RGN_TYPE_UI]: blenderUI(RGN_TYPE_UI) };
+  const blenderUIs = { [RGN_TYPE_HEADER]: blenderUI(RGN_TYPE_HEADER), [RGN_TYPE_TOOL_HEADER]: blenderUI(RGN_TYPE_TOOL_HEADER), [RGN_TYPE_UI]: blenderUI(RGN_TYPE_UI) };
   const blenderHeader = (type) => (blenderUIs[type].inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: blenderUIs[type], header: true }));
   const blenderSidebar = () => {
     const sidebarUI = blenderUIs[RGN_TYPE_UI], { category, categories, panels: drawn } = sidebarUI.inContext((C) => regionPanels(C));
@@ -152,8 +152,8 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
 
   const apps = [
     mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header)), () => blenderHeader(RGN_TYPE_HEADER)),
-    // The tool settings stay the JS layout's until the window's workspace has Blender's tools (WorkSpace.tools).
-    mount(toolHeader, () => header('TOOL_HEADER', drawHeaderType(headers.VIEW3D_HT_tool_header))),
+    // The tool settings are the workspace's tools' (WorkSpace.tools) in every mode.
+    mount(toolHeader, () => blenderHeader(RGN_TYPE_TOOL_HEADER), () => blenderHeader(RGN_TYPE_TOOL_HEADER)),
     mount(sidebar, sidebarRegion, () => (sidebar.hidden ? null : blenderSidebar())),
   ];
 

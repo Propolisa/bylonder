@@ -1,29 +1,27 @@
 // The tool system (windowmanager/wm-toolsystem.js): Blender's own tool definitions (space_toolsystem_toolbar.py,
-// transpiled) list the 3D View's tools per mode as Blender does, Blender's Python sets the active tool through the
-// WorkSpaceTool RNA, W cycles the select tools, and the active tool's keymap runs before the 3D View's with the
-// settings the tool stores.
+// transpiled) list the 3D View's tools per mode as Blender does, Blender's Python sets the active tool in the
+// workspace's tools in Main (WorkSpace.tools, wm_toolsystem.cc), W cycles the select tools, and the active tool's keymap
+// runs before the 3D View's with the settings the tool stores.
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, MeshBuilder, Camera } from '@babylonjs/core';
-import { createSelection } from '../src/editors/object/selection.js';
-import { createRNA } from '../src/makesrna/rna-bylonder.js';
-import { createContext } from '../src/blenkernel/context.js';
+import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
+import { setContextPointer } from '../src/python/bpy_rna.js';
+import { Window, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 import { createToolSystem } from '../src/windowmanager/wm-toolsystem.js';
 import { keymapHandler } from '../src/windowmanager/keyconfig.js';
-import { registerOperator, invokeOperator } from '../src/windowmanager/wm-operators.js';
+import { registerOperator, invokeOperator, kw } from '../src/windowmanager/wm-operators.js';
 import { boxRegion, lassoRegion, circleRegion } from '../src/editors/space_view3d/view3d-select.js';
 
-const engine = new NullEngine(), scene = new Scene(engine);
-const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
-const objects = [cube];
-objects.scene = scene;
-const world = { scene, objects, editMode: { object: null, get active() { return !!this.object; } } };
-const selection = createSelection(scene, objects);
+const blender = new BlenderMain();
+setContextPointer(blender.C);
+const area = new Window(blender).area(SPACE_VIEW3D);
+area.layout({ x: 0, y: 0, width: 800, height: 600 }, { [RGN_TYPE_WINDOW]: { x: 0, y: 0, width: 800, height: 600 } });
+let editMode = 'OBJECT';
 const changes = [];
-const r = createRNA({ world, selection, update: () => {} });
-const view = { state: { shading: 'solid', overlays: true, show_region_toolbar: true, show_region_ui: false }, editorCamera: { mode: Camera.PERSPECTIVE_CAMERA }, sync() {} };
-const context = () => createContext(r, { space: view });
-world.toolsystem = createToolSystem({ context, changed: (ref) => changes.push(ref.idname) });
-const { panel } = world.toolsystem;
+const toolsystem = createToolSystem({ inContext: (fn) => area.inContext(RGN_TYPE_WINDOW, fn), mode: () => editMode, changed: () => changes.push(editMode) });
+const world = { toolsystem };
+const { panel } = toolsystem;
+// The mode's tool in Main's workspace, as the scripts read it.
+const workspaceTool = (mode = editMode) => toolsystem.python((context) => context.workspace.tools.from_space_view3d_mode(mode, kw({ create: false })));
 
 // Blender's toolbar per mode: groups in parentheses, separators as -.
 const listing = (mode) => [...panel.tools_from_context({ mode })]
@@ -41,11 +39,11 @@ assert.equal(listing('EDIT_MESH'), COMMON + ' - (builtin.extrude_region builtin.
 const active = world.toolsystem.active('OBJECT');
 assert.equal(active.idname, 'builtin.select_box');
 assert.deepEqual(world.toolsystem.keymaps('OBJECT'), ['3D View Tool: Select Box']);
-assert.equal(context().workspace.tools.from_space_view3d_mode('OBJECT').idname, 'builtin.select_box');
+assert.equal(workspaceTool().idname, 'builtin.select_box', "the workspace's tool in Main");
 
 // Drawing the toolbar (draw_cls, into a layout that only takes its calls) remembers each group's shown tool.
 const layout = { column: () => layout, row: () => layout, label() {}, operator: () => ({}), operator_menu_hold: () => ({}) };
-const drawToolbar = () => panel.draw_cls(layout, createContext(r, { space: view, region: { type: 'TOOLS', width: 56 } }));
+const drawToolbar = () => toolsystem.python((context) => panel.draw_cls(layout, context));
 // wm.tool_set_by_id, as the toolbar's buttons and Blender's keymap run it: W cycles the select group.
 // Blender redraws the toolbar after each change; a cycle goes on from the tool it shows.
 const set = (props) => { const result = invokeOperator('wm.tool_set_by_id', props, {}); drawToolbar(); return result; };
@@ -62,27 +60,25 @@ assert.deepEqual(world.toolsystem.keymaps('OBJECT', { visible: true }), ['3D Vie
 assert.deepEqual(world.toolsystem.keymaps('OBJECT', { visible: true, highlight: true }), ['3D View Tool: Move', '3D View Tool: Select Box (fallback)']);
 assert.equal(set({ name: 'builtin.no_such_tool' }), 'CANCELLED');
 // A mode keeps its own tool.
-world.editMode.object = cube;
-assert.equal(context().mode, 'EDIT_MESH');
+editMode = 'EDIT_MESH';
 assert.equal(world.toolsystem.active('EDIT_MESH').idname, 'builtin.select_box');
 set({ name: 'builtin.extrude_region' });
 assert.equal(world.toolsystem.active('EDIT_MESH').keymap, '3D View Tool: Edit Mesh, Extrude Region');
 assert.equal(world.toolsystem.active('OBJECT').idname, 'builtin.move');
-world.editMode.object = null;
+editMode = 'OBJECT';
 
 // The active tool's keymap runs first, with the settings the tool stores (the Select Box mode in the tool header).
 const ran = [];
 registerOperator('view3d.select_box', { run: (props) => { ran.push(['box', props.mode ?? 'SET']); } });
 registerOperator('view3d.select', { run: (props) => { ran.push(['select', !!props.deselect_all]); return props.select_passthrough ? 'PASS_THROUGH' : 'FINISHED'; } });
 registerOperator('transform.translate', { run: (props) => { ran.push(['move', !!props.release_confirm]); } });
-const mode = () => context().mode;
+const mode = () => editMode;
 const keys = keymapHandler(() => [...world.toolsystem.keymaps(mode()), 'Object Mode', '3D View'], () => true,
   (name, idname) => world.toolsystem.keymapProperties(mode(), name, idname));
 const event = (value, modifiers = {}) => ({ type: 'leftmouse', value, shift: false, ctrl: false, alt: false, ...modifiers });
 set({ name: 'builtin.select_box' });
-const tool = context().workspace.tools.from_space_view3d_mode('OBJECT');
-tool.operator_properties('view3d.select_box').mode = 'XOR';
-assert.equal(tool.operator_properties('view3d.select_box').mode, 'XOR');
+toolsystem.python(() => { workspaceTool().operator_properties('view3d.select_box').mode = 'XOR'; });
+assert.equal(toolsystem.python(() => workspaceTool().operator_properties('view3d.select_box').mode), 'XOR');
 assert.ok(keys(event('CLICK_DRAG')) && keys(event('CLICK_DRAG', { shift: true })));
 assert.ok(keys(event('CLICK')));
 set({ name: 'builtin.move' });
@@ -93,7 +89,7 @@ assert.equal(keys(event('PRESS')), false, 'the Tweak press selects and passes th
 registerOperator('view3d.select_circle', { run: (props) => { ran.push(['circle', props.wait_for_input, props.radius ?? 25, props.mode ?? 'SET']); } });
 registerOperator('view3d.select_lasso', { run: (props) => { ran.push(['lasso', props.mode ?? 'SET']); } });
 set({ name: 'builtin.select_circle' });
-context().workspace.tools.from_space_view3d_mode('OBJECT').operator_properties('view3d.select_circle').radius = 40;
+toolsystem.python(() => { workspaceTool().operator_properties('view3d.select_circle').radius = 40; });
 assert.ok(keys(event('PRESS')) && keys(event('PRESS', { ctrl: true })));
 set({ name: 'builtin.select_lasso' });
 assert.ok(keys(event('CLICK_DRAG', { shift: true, ctrl: true })));
@@ -107,6 +103,4 @@ assert.ok(lasso.point([2, 2]) && !lasso.point([8, 8]) && lasso.edge([-5, 2], [20
 assert.ok(circle.point([3, 4]) && !circle.point([4, 4]) && circle.edge([-10, 1], [10, 1]) && !circle.edge([-10, 6], [10, 6]) && !circle.edgesInsideFirst);
 assert.ok(changes.length >= 8);
 
-scene.dispose();
-engine.dispose();
 console.log('Tool system: Blender\'s toolbar lists for Object and Edit Mode, default and cycled tools, and the active tool\'s keymap with its settings passed');
