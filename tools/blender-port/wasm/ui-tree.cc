@@ -35,6 +35,10 @@
 
 extern "C" const char *ui_icon_name(int icon);
 
+namespace blender {
+void buttons_context_compute(const bContext *C, SpaceProperties *sbuts);
+}
+
 namespace blender::ui {
 
 /* What interface_layout.cc's ButtonItem and LayoutRoot hold (it defines the structs privately). */
@@ -234,7 +238,7 @@ static void button_json(std::ostringstream &out, Button *but)
   }
   if (but->rnaprop) {
     rna_json(out, "rna", but->rnapoin, but->rnaprop, but->rnaindex);
-    if (ELEM(but->type, ButtonType::Row, ButtonType::ListRow)) {
+    if (ELEM(but->type, ButtonType::Row, ButtonType::ListRow, ButtonType::Tab)) {
       out << ",\"value\":" << but->hardmax;
     }
   }
@@ -511,11 +515,18 @@ EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
 {
   static std::string json;
   ARegion *region = region_drawn(C);
-  /* A region type without a layout callback lays its panels out in its draw (graph_buttons_region_draw), as this. */
   if (region->runtime->type->layout) {
     region->runtime->type->layout(C, region);
   }
   else {
+    /* A region type without a layout callback lays its panels out in its draw, as this
+     * (buttons_navigation_bar_region_draw, graph_buttons_region_draw). */
+    if (region->regiontype == RGN_TYPE_NAV_BAR && CTX_wm_space_properties(C)) {
+      buttons_context_compute(C, CTX_wm_space_properties(C));
+      for (PanelType &pt : region->runtime->type->paneltypes) {
+        pt.flag |= PANEL_TYPE_LAYOUT_VERT_BAR;
+      }
+    }
     ED_region_panels_layout(C, region);
   }
   Vector<Panel *> panels;
@@ -693,7 +704,7 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
     const bool on = value < 0 ? button_value_get(but) == 0.0 : value != 0;
     button_value_set(but, on ? 1.0 : 0.0);
   }
-  else if (ELEM(but->type, ButtonType::Row, ButtonType::ListRow)) {
+  else if (ELEM(but->type, ButtonType::Row, ButtonType::ListRow, ButtonType::Tab)) {
     button_value_set(but, but->hardmax);
   }
   button_applied(C, but);

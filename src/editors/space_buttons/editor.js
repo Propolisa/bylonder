@@ -16,6 +16,7 @@ import { inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
 import './properties-operators.js';
+import { blenderButton } from '../animation/keyframing-button.js';
 import { propertyPanels } from './registry.js';
 import { addonPanels } from './addon-panels.js';
 import { hasMesh } from '../object/identity.js';
@@ -47,7 +48,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
 
   // What a region's buttons need: its context, and after a change the scene made current and redrawn (an undo step at
   // the end of an edit).
-  const refresh = () => { sync?.writeBack(); state.revision++; };
+  const refresh = () => { sync?.view(); state.revision++; };
   const regionUI = (type) => markRaw({
     inContext: (fn) => area.inContext(type, fn),
     refresh,
@@ -56,6 +57,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
     run: (idname, props, event) => { inArea(contextArea, () => invokeOperator(idname, props, event)); refresh(); },
     keys: (idname, props) => blenderKeys(['Property Editor', 'Window'], idname, props),
     panelClosed: (id, closed) => area.inContext(type, (C) => panelClosedSet(C, id, closed)),
+    button: (b) => blenderButton(area, type, b, () => { refresh(); history.commit(); }),
   });
   const ui = { [RGN_TYPE_HEADER]: regionUI(RGN_TYPE_HEADER), [RGN_TYPE_NAV_BAR]: regionUI(RGN_TYPE_NAV_BAR), [RGN_TYPE_WINDOW]: regionUI(RGN_TYPE_WINDOW) };
 
