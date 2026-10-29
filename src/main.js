@@ -1,3 +1,4 @@
+import { nextTick } from "vue";
 import { preloadIcons } from "./editors/interface/icon.js";
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
 import { crossingLosses } from "./blenkernel/light/light-home.js";
@@ -231,7 +232,15 @@ const renderHost = createRenderHost({
 });
 // Handle for debugging and the browser tests, which run against the production build.
 let topbarArea = null;
-window.__bylonder ={ world, renderHost, runOperator,
+// Test builds only (VITE_TEST_HOOKS): resolves once what the last input started is done (Blender's code and the
+// views it changed, modifier evaluations, a drawn frame), so a test acts next without polling or waiting.
+const settled = import.meta.env.VITE_TEST_HOOKS && (async () => {
+  await world.modifiers.settled();
+  await nextTick();
+  await new Promise((done) => requestAnimationFrame(() => done()));
+  await world.modifiers.settled();
+});
+window.__bylonder ={ world, renderHost, runOperator, settled,
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.

@@ -270,8 +270,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const modifierTarget = ({ values }) => [...objects.values()].find(({ node }) => nodeId(node) === values.object)?.ob ?? 0;
   const blenderStack = (entry) => modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
   const modifiersSignature = (stack) => JSON.stringify(stack.map((m) => [m.type, m.values, m.showViewport, m.showRender, textures.get(m.values.texture)?.tex, modifierTarget(m)]));
-  // Whether the page changed an object's stack since it last wrote it to Main (its next flush writes it).
-  const modifiersPending = (entry) => modifiersSignature(blenderStack(entry)) !== entry.modifiers;
+  // Whether the page changed an object's stack since it last wrote it to Main (its next flush writes it); one never
+  // written has none.
+  const modifiersPending = (entry) => modifiersSignature(blenderStack(entry)) !== (entry.modifiers ?? '[]');
   function pushModifiers(entry) {
     if (entry.type !== 'MESH') return;
     const stack = blenderStack(entry), signature = modifiersSignature(stack), target = modifierTarget;

@@ -41,10 +41,13 @@ export async function lavaMaterial(app) {
     const at = [box.x + box.width * fx, box.y + box.height * fy];
     await app.page.mouse.move(...at);
     await app.page.keyboard.press("Shift+A");
+    await app.settled();
     await app.page.keyboard.type(name);
+    await app.settled();
     await app.page.keyboard.press("Enter");
     await app.page.mouse.move(at[0] + 4, at[1] + 4);
     await app.page.mouse.click(at[0] + 4, at[1] + 4);
+    await app.settled();
   };
   await add("Texture Coordinate", 0.02, 0.2);
   await add("Noise Texture", 0.12, 0.05);

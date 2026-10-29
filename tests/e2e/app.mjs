@@ -28,7 +28,7 @@ export async function startServer({ build = true } = {}) {
   if (!build && !mtime("dist/index.html")) throw Error("No dist/: run npm run build first");
   if (build && stale()) {
     console.log("Building dist/ ...");
-    if (spawnSync("npm", ["run", "build"], { cwd: root, stdio: ["ignore", "ignore", "inherit"] }).status) throw Error("Build failed");
+    if (spawnSync("npm", ["run", "build"], { cwd: root, stdio: ["ignore", "ignore", "inherit"], env: { ...process.env, VITE_TEST_HOOKS: "1" } }).status) throw Error("Build failed");
   }
   const server = await preview({ root, logLevel: "warn", preview: { port: 4320, strictPort: false } });
   return { url: server.resolvedUrls.local[0], close: () => server.close() };
@@ -60,6 +60,8 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
     page, context, errors, frame,
     // Evaluates fn(window.__bylonder, arg) in the 3D Viewport frame.
     bylonder: (fn, arg) => frame().evaluate(([source, arg]) => (0, eval)(source)(window.__bylonder, arg), [String(fn), arg]),
+    // Resolves once the app has done what the last input started (the test build's __bylonder.settled).
+    settled: () => frame().evaluate(() => window.__bylonder.settled()),
     // Waits until fn(window.__bylonder, arg) is truthy.
     until: (fn, arg, timeout = 15000) => frame().waitForFunction(([source, arg]) => (0, eval)(source)(window.__bylonder, arg), [String(fn), arg], { timeout }),
     locator: (selector) => frame().locator(selector),

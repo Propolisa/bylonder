@@ -92,7 +92,10 @@ function compare(actual, wanted) {
 
 const keys = async (...list) => {
   await app.hover(0.5, 0.6);
-  for (const key of list) await app.page.keyboard.press(key);
+  for (const key of list) {
+    await app.page.keyboard.press(key);
+    await app.settled();
+  }
 };
 const pick = (label) => app.frame().getByRole("menuitem", { name: label, exact: true }).last().click();
 // A point of the scene in Blender's axes, in page coordinates of the 3D Viewport.
