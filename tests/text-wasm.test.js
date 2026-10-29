@@ -2,17 +2,18 @@
 // Blender's text operators through Blender's own window manager and Text keymaps, and the Console's input line edited
 // by its operators, as in Blender.
 import assert from 'node:assert/strict';
-import { BlenderMain, operatorNames } from '../src/bmesh/bmesh-wasm.js';
+import { blenderMain, operatorNames } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/windowmanager/wm-window.js';
 import { regionHeader } from '../src/editors/interface/ui-tree.js';
 import { createTextFiles } from '../src/blenkernel/text-files.js';
 import { clipboardText, setClipboardText } from '../src/windowmanager/wm-clipboard.js';
+import { report } from '../src/windowmanager/wm-reports.js';
 import { blendData, pointerStruct, setContextPointer, structFind } from '../src/python/bpy_rna.js';
 
 const SPACE_TEXT = 9, SPACE_CONSOLE = 18;
-const main = new BlenderMain();
+const main = blenderMain();
 setContextPointer(main.C);
 const window = new Window(main);
 window.size = { width: 1200, height: 800 };
@@ -91,4 +92,11 @@ const consoleSpace = pointerStruct(structFind('Area'), 0, console_.pointer).spac
 assert.equal(consoleSpace.history[consoleSpace.history.length - 1].body, '1 + 2', "the console's input line holds what was typed");
 console_.free();
 
-console.log("text editor: Blender's Text Editor and Python Console edit Main's data through Blender's own operators and keymaps");
+// Info: the window manager's reports, the page's among them, drawn by Blender's info_draw.cc.
+report('WARNING', 'a warning from the page');
+const info = window.area(7);
+info.layout(rect, { [RGN_TYPE_WINDOW]: rect });
+assert.ok(JSON.stringify(info.draw(RGN_TYPE_WINDOW)).includes('a warning from the page'), "the page's report is in Blender's Info");
+info.free();
+
+console.log("text editor: Blender's Text Editor and Python Console edit Main's data through Blender's own operators and keymaps; Info lists Blender's reports");

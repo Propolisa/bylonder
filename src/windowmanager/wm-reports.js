@@ -1,19 +1,20 @@
-// The window manager's reports (wm->reports, BKE_report): what operators and scripts report, which the Info editor
-// lists. A finished operator with the REGISTER option reports its call as Python (wm_operator_reports).
+// The window manager's reports (wm->reports, BKE_report): what operators and scripts report, kept by Blender's window
+// manager (tools/blender-port/wasm/reports.cc), whose Info editor lists them. A finished operator with the REGISTER
+// option reports its call as Python (wm_operator_reports).
 import registerOperators from './operator-register.json' with { type: 'json' };
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
+import { blenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
 
+const { exports: x, withString } = blenderModule;
 const REGISTER = new Set(registerOperators);
-export const reports = [];
 const listeners = new Set();
 
 // BKE_report: type is one of DEBUG, INFO, OPERATOR, PROPERTY, WARNING, ERROR, ERROR_INVALID_INPUT, ...
 export function report(type, message) {
-  reports.push({ type, message: String(message), selected: false });
-  listeners.forEach((fn) => fn(reports.at(-1)));
+  withString(type, (t) => withString(String(message), (m) => x.wm_report(blenderMain().C, t, m)));
+  listeners.forEach((fn) => fn({ type, message: String(message) }));
 }
 export const subscribeReports = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
-export const reportsChanged = () => listeners.forEach((fn) => fn(null));
 
 // RNA_property_as_string: Python literals as Blender writes them.
 const literal = (value, enumProperty) => {

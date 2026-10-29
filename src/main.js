@@ -455,7 +455,7 @@ const scriptingEditors = [
   // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
   mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), files: world.texts, context: () => createContext(blenderRNA, { area: "TEXT_EDITOR" }), beforeRun: () => creator.finish() }),
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
-  mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info"), rna: blenderRNA }),
+  mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info") }),
 ];
 let inspectorBusy = false;
 async function inspector() {
