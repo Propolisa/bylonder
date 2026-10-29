@@ -189,11 +189,11 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   function sync() {
     scene.flush();
   }
-  // After it ran: the keys it changed reach the channels, what else it changed (the frame, the range, the selection)
-  // reaches the scene, and a finished operator that is an undo step makes one.
+  // After it ran: what it changed (the frame, the range, the selection) reaches the scene, then the keys it changed
+  // reach the channels (at the new frame, Main evaluated for it), and a finished operator that is an undo step makes one.
   function after(status) {
-    animation.edited();
     scene.view();
+    animation.edited();
     if (status & OPERATOR_FINISHED && area.undo) commit();
     redraw();
     return status;

@@ -39,8 +39,9 @@ function rnaValue(b) {
 }
 function setRna(b, value, ui, finish = true) {
   try {
-    const data = struct(b.rna);
-    if (b.rna.index >= 0) data[b.rna.prop][b.rna.index] = value;
+    // A button of a property that is not an array may still carry index 0 (rnaindex), as rnaValue reads it.
+    const data = struct(b.rna), array = b.rna.index >= 0 && data[b.rna.prop]?.__getitem__;
+    if (array) data[b.rna.prop][b.rna.index] = value;
     else data[b.rna.prop] = value;
     ui.inContext((C) => buttonApplied(C, b));
     if (finish) ui.undoPush(b.tip || b.rna.prop);
