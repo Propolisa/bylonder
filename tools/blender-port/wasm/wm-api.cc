@@ -23,6 +23,7 @@
 #include "GPU_context.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
+#include "UI_resources.hh"
 #include "RNA_enum_types.hh"
 #include "WM_api.hh"
 #include "WM_keymap.hh"
@@ -42,6 +43,8 @@
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
 GHOST_IWindow *ghost_window_new(uint32_t width, uint32_t height);
+extern "C" void region_draw_begin(int winx, int winy);
+extern "C" const char *region_draw_end();
 GHOST_TKey ghost_key_from_browser(const char *code, const char *key);
 void view3d_matrices_set(blender::RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp);
 
@@ -412,6 +415,23 @@ const char *wm_event(bContext *C, int kind, const int *data, const char *code, c
   handling = false;
   CTX_wm_window_set(C, win);
   return event_result(win, registered);
+}
+
+/* A region of an area drawn by its type's draw callback (or its overlay's, draw_overlay), with the area and region the
+ * context's as wm_draw.cc draws them, recorded by region-draw.cc: returns the recording's JSON. */
+EXPORT(wm_region_draw) const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay)
+{
+  ARegion *region = BKE_area_find_region_type(area, regiontype);
+  ScrArea *area_prev = CTX_wm_area(C);
+  ARegion *region_prev = CTX_wm_region(C);
+  CTX_wm_area_set(C, area);
+  CTX_wm_region_set(C, region);
+  region_draw_begin(region->winx, region->winy);
+  ui::theme::theme_set(area->spacetype, regiontype);
+  (overlay ? region->runtime->type->draw_overlay : region->runtime->type->draw)(C, region);
+  CTX_wm_area_set(C, area_prev);
+  CTX_wm_region_set(C, region_prev);
+  return region_draw_end();
 }
 
 /* port-override: the GPU module is past the seam (the browser draws), so the window has no GPU context to make

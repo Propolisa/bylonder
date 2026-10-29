@@ -234,20 +234,11 @@ EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int su
 
 /* A region drawn by its own draw callback (the region type's draw: action_channel_region_draw,
  * graph_channel_region_draw, ...), or its overlay's (graph_main_region_draw_overlay: the current frame, scrollers and
- * value scale), recorded by region-draw.cc: returns the recording's JSON. */
-extern "C" void region_draw_begin(int winx, int winy);
-extern "C" const char *region_draw_end();
+ * value scale), as wm_region_draw records it. */
+extern "C" const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay);
 EXPORT(anim_region_draw) const char *anim_region_draw(bContext *C, AnimArea *a, int regiontype, bool overlay)
 {
-  ARegion *region = BKE_area_find_region_type(&a->area, regiontype);
-  CTX_wm_area_set(C, &a->area);
-  CTX_wm_region_set(C, region);
-  region_draw_begin(region->winx, region->winy);
-  ui::theme::theme_set(a->area.spacetype, regiontype);
-  (overlay ? region->runtime->type->draw_overlay : region->runtime->type->draw)(C, region);
-  CTX_wm_area_set(C, nullptr);
-  CTX_wm_region_set(C, nullptr);
-  return region_draw_end();
+  return wm_region_draw(C, &a->area, regiontype, overlay);
 }
 
 /* The space's dope sheet filter text (bDopeSheet.searchstr, DopeSheet.filter_text) and flag (ADS_FLAG_*). */
