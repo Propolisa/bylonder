@@ -874,12 +874,41 @@ EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int c
 enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS, POPUP_LAYOUT };
 static Popup popup_opened = POPUP_NONE;
 static std::string popup_title, popup_text;
+/* The operator that opened it, by idname, and the values it was invoked with, for running it from the popup. */
+static std::string popup_idname, popup_values;
 
 /* The popup the last invoke opened (Popup), cleared by asking: its title, and its confirm button's text, the enum
  * property's identifier or the recorded layout of a popup menu (panel-layout.cc). */
 EXPORT(operator_popup) int operator_popup() { return std::exchange(popup_opened, POPUP_NONE); }
 EXPORT(operator_popup_title) const char *operator_popup_title() { return popup_title.c_str(); }
 EXPORT(operator_popup_text) const char *operator_popup_text() { return popup_text.c_str(); }
+
+static std::string json_string(const std::string &text)
+{
+  std::string out = "\"";
+  for (const char c : text) {
+    out += c == '"' ? "\\\"" : c == '\\' ? "\\\\" : c == '\n' ? "\\n" : std::string(1, c);
+  }
+  return out + "\"";
+}
+extern "C" const char *operator_menu_called();
+namespace blender {
+/* The popup the last operator opened or the menu it called, as JSON for an event's result (wm-api.cc), cleared:
+ * { type, title, text, idname, values } (type as operator_popup's numbers), { menu }, or null. */
+std::string operator_popup_json()
+{
+  const std::string menu = operator_menu_called();
+  if (!menu.empty()) {
+    return "{\"menu\":" + json_string(menu) + "}";
+  }
+  const Popup popup = std::exchange(popup_opened, POPUP_NONE);
+  if (popup == POPUP_NONE) {
+    return "null";
+  }
+  return "{\"type\":" + std::to_string(popup) + ",\"title\":" + json_string(popup_title) + ",\"text\":" +
+         json_string(popup_text) + ",\"idname\":" + json_string(popup_idname) + ",\"values\":" + popup_values + "}";
+}
+}  // namespace blender
 
 /* What the editors reach of Blender's window manager and screen, which are Bylonder's (JS). */
 
@@ -912,17 +941,19 @@ void WM_gesture_lasso_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 namespace ui {
 std::string operator_props_layout(bContext *C, wmOperator *op);
 }
-static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text)
+static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text, wmOperator *op = nullptr)
 {
   popup_opened = popup;
   popup_title = title;
   popup_text = text;
+  popup_idname = op ? op->idname : "";
+  popup_values = op ? operator_values_json(op->ptr) : "{}";
   return OPERATOR_INTERFACE;
 }
 wmOperatorStatus WM_operator_confirm_ex(bContext * /*C*/, wmOperator *op, const char *title, const char * /*message*/,
                                         const char *confirm_text, ui::AlertIcon /*icon*/, bool /*cancel_default*/)
 {
-  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"));
+  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"), op);
 }
 /* As wm_operators.cc defines it, the menu being Bylonder's. */
 wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/)
@@ -934,7 +965,7 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
   if (RNA_property_is_set(op->ptr, prop)) {
     return op->type->exec(C, op);
   }
-  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
+  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop), op);
 }
 
 /* The properties popups and dialogs (wm_operators.cc): Bylonder's window manager shows the operator's properties as
@@ -946,7 +977,7 @@ wmOperatorStatus WM_operator_props_dialog_popup(bContext *C, wmOperator *op, int
 {
   const std::string confirm = confirm_text.value_or(IFACE_("OK"));
   const std::string text = "{\"confirm\":\"" + confirm + "\",\"layout\":" + ui::operator_props_layout(C, op) + "}";
-  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str());
+  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str(), op);
 }
 wmOperatorStatus WM_operator_props_popup(bContext *C, wmOperator *op, const wmEvent * /*event*/)
 {

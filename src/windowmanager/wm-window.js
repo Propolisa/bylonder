@@ -68,10 +68,16 @@ export class Window {
     this.C = main.C;
   }
   set size({ width, height }) { x.wm_window_size_set(this.C, width, height); }
+  // The operators (Python idnames) events may run; the others pass their events on, unhandled, to the page.
+  allow(idnames) { withString(idnames.join('\n'), (p) => x.wm_operators_allow(p)); }
+  // The page's keymaps used an unhandled press: no click or drag of it follows.
+  pressHandled() { x.wm_event_press_handled(this.C); }
   area(spacetype) { return new Area(this, spacetype); }
   // One input event: `kind` a key of KINDS; `data` its numbers (the pointer's page x and y; a button's number; the
   // wheel's axis and steps; a trackpad's subtype, x, y, deltas and inversion; a key's repeat); a key's DOM `code`,
-  // `key` and text. Returns { redraw: [[area, regiontype], ...], modal } (wm-api.cc's event_result).
+  // `key` and text. Returns wm-api.cc's event_result: { redraw: [[area, regiontype], ...], modal, finished: [{ idname,
+  // undo }], popup: { type, title, text, idname, values } or { menu } or null, unhandled: [{ type, value, modifier,
+  // xy, press, direction, repeat }] } with page coordinates.
   event(kind, data, { code = '', key = '', text = '' } = {}, time = performance.now()) {
     const numbers = Int32Array.from({ length: 6 }, (_, i) => Math.round(data[i] ?? 0));
     const json = withArrays([numbers], ([p]) => withStrings([code, key, text], ([c, k, t]) => cString(x.wm_event(this.C, KINDS[kind], p, c, k, t, time))));
