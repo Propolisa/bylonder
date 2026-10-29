@@ -33,6 +33,7 @@ const finished = (idname, props, result) => {
 export const runOperator = (idname, props = {}) => finished(idname, props, operatorFor(idname).run(props));
 export const hasOperator = (idname) => operators.has(idname);
 export const operatorIds = () => [...operators.keys()];
+export const spaceOperatorIds = () => Object.fromEntries([...spaceOperators].map(([space, table]) => [space, [...table.keys()]]));
 // Whether an operator is registered and can run now with those properties (WM_operator_poll).
 export const pollOperator = (idname, props = {}) => { const operator = operatorFor(idname); return !!operator && (operator.supports?.(props) ?? true) && (operator.poll?.(props) ?? true); };
 
