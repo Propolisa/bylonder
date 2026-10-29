@@ -7,7 +7,10 @@
 // RNA names (blenkernel/main-sync.js): the same declaration reads and writes both ways.
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
-import { Camera, Color3, Light, PointLight, SpotLight, Quaternion, VertexBuffer } from '@babylonjs/core';
+import { Camera, Color3, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
+import { objectMesh } from '../editors/object/object-mesh.js';
+import { rebuildMesh } from '../editors/object/mesh-catalog.js';
+import { mesh_serialize } from '../blenkernel/mesh/mesh.js';
 import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct, operatorIdname, defineStructProperties } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
@@ -149,7 +152,33 @@ function shaderNode(r, [name, type, inputs]) {
     return rna(socket, data);
   })), outputs: collection() });
 }
-const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => shaderNode(r, output) });
+// An object's AnimData: the scene's Action (Blender 5's layered one: a layer with a keyframe strip) with its slot for
+// the object, whose channelbag holds the F-Curves on the Object that stands for it in the module's Blender world.
+function animationData(r, ob) {
+  const { animation } = r.world, owner = animation?.ids.find('object:' + nodeId(ob)), fcurves = owner ? animation.anim.fcurves(owner) : [];
+  if (!fcurves.length) return null;
+  const slot = rna('ActionSlot', { identifier: 'OB' + ob.name, name_display: ob.name, target_id_type: 'OBJECT' });
+  const keyframe = (key) => rna('Keyframe', { co: key.co, handle_left: key.handle_left, handle_right: key.handle_right, interpolation: key.interpolation });
+  const fcurve = (curve) => rna('FCurve', { data_path: curve.rna_path, array_index: curve.array_index, group: curve.group, keyframe_points: collection(curve.keys.map(keyframe)) });
+  const channelbag = rna('ActionChannelbag', { slot, fcurves: collection(fcurves.map(fcurve)) });
+  const strip = rna('ActionKeyframeStrip', { type: 'KEYFRAME', channelbags: collection([channelbag]), channelbag: (forSlot) => (forSlot === slot ? channelbag : null) });
+  const action = rna('Action', { name: animation.action.name, is_action_layered: true, slots: collection([slot]), layers: collection([rna('ActionLayer', { name: 'Layer', strips: collection([strip]) })]) });
+  return rna('AnimData', { action, action_slot: slot });
+}
+// The nodes from a tree's output down its links, each once.
+function treeNodes(output, found = new Map()) {
+  if (found.has(output[0])) return found;
+  found.set(output[0], output);
+  for (const [, , value] of output[2]) {
+    const linked = Array.isArray(value) ? value : value?.node;
+    if (linked) treeNodes(linked, found);
+  }
+  return found;
+}
+const nodeTree = (r, output) => rna('ShaderNodeTree', {
+  get_output_node: () => shaderNode(r, output),
+  get nodes() { return collection([...treeNodes(output).values()].map((node) => shaderNode(r, node))); },
+});
 // Blender's socket types (node-types.json) as the socket structs Main's node trees are built with.
 const SOCKET_STRUCTS = { VALUE: 'NodeSocketFloat', RGBA: 'NodeSocketColor', VECTOR: 'NodeSocketVector', SHADER: 'NodeSocketShader' };
 const socketStruct = (s) => (s.type === 'VALUE' && s.subtype === 'FACTOR' ? 'NodeSocketFloatFactor' : SOCKET_STRUCTS[s.type]);
@@ -267,10 +296,19 @@ const STRUCTS = {
     parent: (ob, r) => (r.world.objects.includes(ob.parent) ? r.pointer('Object', ob.parent) : null),
     children: (ob, r) => collection(r.objects().filter((child) => child.parent === ob).map((child) => r.pointer('Object', child))),
     // The active modifier is the one last made active (object.modifier_set_active, or added), else the last.
+    // ObjectModifiers.new(name, type) and remove(modifier).
     modifiers: (ob, r) => {
-      const stack = modifierStack(ob), structs = stack.map((modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier));
-      return collection(structs, structs[stack.findIndex((m) => m.id === ob.metadata?.wbActiveModifier)] ?? structs.at(-1) ?? null);
+      const stack = modifierStack(ob), pointer = (modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier), structs = stack.map(pointer);
+      const add = (...list) => {
+        const { name, type } = pyArgs(list, ['name', 'type']), modifier = r.world.modifiers.add(ob, type);
+        if (name) r.world.modifiers.update(ob, modifier.id, { name });
+        return pointer(modifier);
+      };
+      const remove = (...list) => r.world.modifiers.remove(ob, pyArgs(list, ['modifier']).modifier[INFO].owner.modifier.id);
+      return Object.assign(collection(structs, structs[stack.findIndex((m) => m.id === ob.metadata?.wbActiveModifier)] ?? structs.at(-1) ?? null),
+        { new: add, py_new: add, remove });
     },
+    animation_data: (ob, r) => animationData(r, ob),
     material_slots: (ob, r) => collection((r.world.materials?.slots(ob) ?? []).map((material, slot_index) =>
       rna('MaterialSlot', { name: material?.name ?? '', material: r.pointer('Material', material), slot_index }))),
     active_material: (ob, r) => r.pointer('Material', r.world.materials?.activeMaterial(ob)),
@@ -294,7 +332,9 @@ const STRUCTS = {
     total_edge_sel: (ob, r) => editTotals(ob, r).edges[0],
     total_face_sel: (ob, r) => editTotals(ob, r).faces[0],
     count_selected_items: (ob, r) => () => { const t = editTotals(ob, r); return [t.verts[0], t.edges[0], t.faces[0]]; },
-    vertices: (ob, r) => meshVertices(ob, r),
+    vertices: (ob, r) => meshElements(ob, r).vertices,
+    edges: (ob, r) => meshElements(ob, r).edges,
+    polygons: (ob, r) => meshElements(ob, r).polygons,
   },
   // A material of the material library (blenkernel/material/library.js): Babylon's PBR or Standard material as
   // Blender's Principled BSDF, its settings as Blender's.
@@ -654,23 +694,34 @@ const textLine = (text, i, r) => rna('TextLine', {
   set body(value) { text.lines[i] = String(value); r.world.texts.edited(text); },
   format: '',
 });
-// Mesh.vertices over the Babylon mesh's position buffer, the geometry's one owner (docs/blender-boundary.md, Who owns
-// what): `co` in Blender's axes, per vertex (MeshVertex, made when read) or whole through foreach_get and foreach_set,
-// which copy the buffer once. Babylon's vertices are split where Blender's are shared.
-function meshVertices(ob, r) {
-  const positions = () => ob.getVerticesData?.(VertexBuffer.PositionKind) ?? [];
-  const write = (data) => { ob.setVerticesData(VertexBuffer.PositionKind, data, ob.getVertexBuffer(VertexBuffer.PositionKind)?.isUpdatable()); ob.refreshBoundingInfo?.(); r.host.update?.('Mesh', 'vertices', ob); };
+// Mesh.vertices, edges and polygons: the object's Mesh (objectMesh, its Blender topology in Blender's axes), filled
+// from Babylon's side when read (docs/blender-boundary.md, Who owns what, point 5). `co` reads and writes per vertex
+// (MeshVertex, made when read) or whole through foreach_get and foreach_set; a write rebuilds the object's mesh.
+function meshElements(ob, r) {
+  const mesh = objectMesh(ob), positions = mesh.vert_positions;
+  const write = () => {
+    const recipe = { mesh: mesh_serialize(mesh) };
+    ob.metadata = { ...ob.metadata, wbCreation: recipe };
+    rebuildMesh(ob, recipe);
+    r.host.update?.('Mesh', 'vertices', ob);
+  };
+  const indexed = (list, element) => new Proxy(list, { get: (target, key) => (typeof key === 'string' && /^\d+$/.test(key) ? element(Number(key)) : target[key]) });
   const vertex = (i) => rna('MeshVertex', {
     index: i,
-    get co() { const p = positions(); return axes([p[3 * i], p[3 * i + 1], p[3 * i + 2]]); },
-    set co(value) { const p = Float32Array.from(positions()); [p[3 * i], p[3 * i + 2], p[3 * i + 1]] = value; write(p); },
+    get co() { return [...positions.subarray(3 * i, 3 * i + 3)]; },
+    set co(value) { positions.set(value, 3 * i); write(); },
   });
-  const swap = (from, to) => { for (let i = 0; i < from.length; i += 3) { to[i] = from[i]; to[i + 1] = from[i + 2]; to[i + 2] = from[i + 1]; } return to; };
-  const list = Object.assign(collection(new Array(positions().length / 3)), {
-    __foreach_get__: (attr) => (attr === 'co' ? swap(positions(), new Float64Array(positions().length)) : undefined),
-    __foreach_set__: (attr, values) => (attr === 'co' ? (write(swap(values, new Float32Array(values.length))), true) : undefined),
+  const vertices = Object.assign(collection(new Array(mesh.verts_num)), {
+    __foreach_get__: (attr) => (attr === 'co' ? Float64Array.from(positions) : undefined),
+    __foreach_set__: (attr, values) => (attr === 'co' ? (positions.set(values), write(), true) : undefined),
   });
-  return new Proxy(list, { get: (target, key) => (typeof key === 'string' && /^\d+$/.test(key) ? vertex(Number(key)) : target[key]) });
+  const edge = (i) => rna('MeshEdge', { index: i, vertices: [...mesh.edges.subarray(2 * i, 2 * i + 2)] });
+  const polygon = (i) => rna('MeshPolygon', { index: i, vertices: [...mesh.corner_verts.subarray(mesh.face_offsets[i], mesh.face_offsets[i + 1])] });
+  return {
+    vertices: indexed(vertices, vertex),
+    edges: indexed(collection(new Array(mesh.edges_num)), edge),
+    polygons: indexed(collection(new Array(mesh.faces_num)), polygon),
+  };
 }
 
 // The window manager's clipboard (WM_clipboard_text_set); the system's is written too, and read where it can be.

@@ -187,7 +187,7 @@ const consoleKeys = keymapHandler(['Console', 'Screen', 'Window']);
 }
 
 // ---- The JS side of CPython's bridge: Python's names over the tree's, and bulk copies of mesh geometry from and to
-// the Babylon buffer that owns it.
+// the object's Mesh.
 {
   const ops = module('bpy').ops;
   const mesh = api.getattr(ops, 'mesh');
@@ -200,8 +200,10 @@ const consoleKeys = keymapHandler(['Console', 'Screen', 'Window']);
   assert.equal(before.length, vertices.length * 3);
   assert.deepEqual([...vertices[0].co], [...before.slice(0, 3)], 'foreach_get matches each vertex in Blender axes');
   api.foreachSet(vertices, 'co', before.map((v, i) => (i % 3 === 2 ? v + 1 : v)));
-  assert.ok(Math.abs(vertices[0].co[2] - before[2] - 1) < 1e-6, 'foreach_set writes the Babylon buffer (Blender Z is Babylon y)');
-  assert.ok(Math.abs(objects[0].getVerticesData('position')[1] - before[2] - 1) < 1e-6);
+  assert.equal(vertices.length, 8, "Blender's vertices, not Babylon's split ones");
+  assert.deepEqual([ob.data.edges.length, ob.data.polygons.length], [18, 12], "a Babylon box's triangles");
+  assert.ok(Math.abs(ob.data.vertices[0].co[2] - before[2] - 1) < 1e-6, 'foreach_set writes the Mesh');
+  assert.ok(objects[0].getVerticesData('position').some((y, i) => i % 3 === 1 && Math.abs(y - before[2] - 1) < 1e-6), 'and the Babylon buffer, Blender Z as Babylon y');
 }
 
 console.log('scripting: ok');

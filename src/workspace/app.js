@@ -1,3 +1,4 @@
+import { askText } from "../editors/interface/props-dialog.js";
 import { preloadIcons } from "../editors/interface/icon.js";
 import { renderSettings, setupRenderSettings } from "./render-settings.js";
 import { setupSharing } from "./share-ui.js";
@@ -344,7 +345,7 @@ function renderTree() {
   }
 }
 async function rename(path, folder) {
-  const to = prompt("New relative path", path);
+  const to = await askText("Rename", "Path", path);
   if (!to || to === path) return;
   normalizePath(to);
   project.files = renamePath(project.files, path, to);
@@ -492,9 +493,9 @@ $("scene-actions").append(
   })), { id: "scene-delete" }),
 );
 $("scene").onchange = action((e) => activateScene(e.target.value));
-$("scene").ondblclick = action(() => {
+$("scene").ondblclick = action(async () => {
   const scene = sceneList(project).find((s) => s.id === activeSceneId(project));
-  const name = prompt("Scene name", scene.name);
+  const name = await askText("Rename Scene", "Name", scene.name);
   if (name) { renameSceneTo(scene.id, name); postToScene(scene.id, "scene-name", sceneList(project).find((s) => s.id === scene.id).name); }
 });
 preferences.subscribe((key, value) => { if (key === "keepScenesLoaded" && !value) unloadParked(); });
@@ -832,7 +833,7 @@ const sharing = setupSharing({
 $("share-project").onclick = () => sharing.open();
 $("project").onchange = action((e) => load(e.target.value));
 $("new-project").onclick = action(async () => {
-  const name = prompt("Project name", "Untitled");
+  const name = await askText("New Project", "Name", "Untitled");
   if (!name) return;
   await save();
   const created = await repo.create(name, defaultFiles());
@@ -853,7 +854,7 @@ const openExample = action(async (example) => {
   await load(created.id);
 });
 $("fork-project").onclick = action(async () => {
-  const name = prompt("Fork name", project.name + " copy");
+  const name = await askText("Fork Project", "Name", project.name + " copy");
   if (!name) return;
   await save();
   const created = await repo.create(name, structuredClone(project.files), {
@@ -866,15 +867,15 @@ $("fork-project").onclick = action(async () => {
   await load(created.id);
 });
 $("rename-project").onclick = action(async () => {
-  const name = prompt("Project name", project.name);
+  const name = await askText("Rename Project", "Name", project.name);
   if (!name) return;
   project.name = name;
   markDirty();
   await save("Rename project");
   await updateProjects();
 });
-$("new-file").onclick = action(() => {
-  const path = prompt("File path, e.g. modules/material.js");
+$("new-file").onclick = action(async () => {
+  const path = await askText("New File", "Path", "modules/");
   if (!path) return;
   normalizePath(path);
   if (project.files[path]) throw Error("File already exists");
@@ -883,8 +884,8 @@ $("new-file").onclick = action(() => {
   openFile(path);
   markDirty();
 });
-$("new-folder").onclick = action(() => {
-  const path = prompt("Folder path");
+$("new-folder").onclick = action(async () => {
+  const path = await askText("New Folder", "Path", "");
   if (!path) return;
   normalizePath(path);
   if (project.files[path]) throw Error("A file exists at that path");
@@ -895,7 +896,7 @@ $("new-folder").onclick = action(() => {
 $("run").onclick = action(run);
 $("stop").onclick = stop;
 $("checkpoint").onclick = action(async () => {
-  const label = prompt("Checkpoint label", "Checkpoint");
+  const label = await askText("Save Checkpoint", "Label", "Checkpoint");
   if (label) await save(label);
 });
 $("export").onclick = action(exportZip);

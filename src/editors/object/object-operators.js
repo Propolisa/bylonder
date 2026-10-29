@@ -13,6 +13,15 @@ const BY_PROPS = {
 };
 // Operators that ask before running from a key, as their invoke does (object_add.cc).
 const CONFIRM = { 'object.delete': { title: 'Delete selected objects?', button: 'Delete' } };
+// Operators whose invoke asks with a menu when called without the property that picks what they do.
+const MENUS = {
+  // parent_set_invoke_menu (object_relations.cc), for the parents Bylonder has: objects.
+  'object.parent_set': (props) => !('type' in props) && { title: 'Set Parent To', items: [
+    ['Object', 'object.parent_set', { type: 'OBJECT', keep_transform: false }, 'object_data'],
+    ['Object (Keep Transform)', 'object.parent_set', { type: 'OBJECT', keep_transform: true }],
+    ['Object (Without Inverse)', 'object.parent_no_inverse_set', { keep_transform: false }],
+    ['Object (Keep Transform Without Inverse)', 'object.parent_no_inverse_set', { keep_transform: true }]] },
+};
 // Enum items Blender makes from the context (parent_set_enum_itemf in object_relations.cc); the rest are Blender's
 // static items (rna-operators.json).
 const ENUMS = {
@@ -56,6 +65,7 @@ export function registerObjectOperators(registry, { sync, transaction, notify, k
       poll: (props) => action(props)?.enabled?.() ?? true,
       enumItems: (prop) => action()?.enumItems?.(prop) ?? ENUMS[idname]?.[prop],
       confirm: CONFIRM[idname],
+      menu: MENUS[idname],
       run: (props) => registry.invoke(action(props).id, props),
     });
   }

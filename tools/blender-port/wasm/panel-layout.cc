@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "BKE_context.hh"
+#include "BKE_idprop.hh"
 #include "BKE_modifier.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
@@ -24,6 +25,9 @@ using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
+/* Opens a recorded popup layout as the running invoke's popup (anim-api.cc). */
+void popup_layout_open(const std::string &title, const std::string &layout);
+
 namespace blender::ui {
 
 /* What a layout or an item in it draws; a layout's own state (active, enabled) is read from it when written out. */
@@ -38,8 +42,17 @@ struct Node {
   bool split = false, decorate = true, align = false, emboss_none = false;
   /* A property's struct type, owner ID and data, for JS to read and write it in the module (rna_get, rna_set). */
   std::optional<PointerRNA> pointer;
+  /* An operator item's properties (button_operator_ptr_ensure), which the code drawing it sets through the pointer
+   * Layout::op returns. */
+  std::optional<PointerRNA> op_properties;
   const Layout *layout = nullptr;
   std::vector<std::unique_ptr<Node>> children;
+  ~Node()
+  {
+    if (op_properties) {
+      IDP_FreeProperty(static_cast<IDProperty *>(op_properties->data));
+    }
+  }
 };
 
 static std::map<const Layout *, Node *> nodes;
@@ -168,7 +181,14 @@ PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int i
   node.prop = opname;
   node.icon = icon;
   node.text = name ? std::string(*name) : std::string("\x01");
-  return PointerRNA_NULL;
+  wmOperatorType *ot = WM_operatortype_find(opname.c_str(), false);
+  if (!ot) {
+    return PointerRNA_NULL;
+  }
+  /* As uiItemFullO_ptr_ex assigns them. */
+  node.op_properties = WM_operator_properties_create_ptr(ot);
+  node.op_properties->data = bke::idprop::create_group("wmOperatorProperties").release();
+  return *node.op_properties;
 }
 /* An operator's enum menu: its operator and property by name. */
 PointerRNA Layout::op_menu_enum(const bContext * /*C*/, StringRefNull opname, StringRefNull propname, StringRefNull name,
@@ -332,6 +352,10 @@ static void write(std::ostringstream &out, const Node &node)
   if (node.kind == "button") {
     out << ",\"button\":" << panel_button_json(node.index);
   }
+  if (node.op_properties) {
+    PointerRNA properties = *node.op_properties;
+    out << ",\"properties\":" << operator_values_json(&properties);
+  }
   out << ",\"index\":" << node.index << ",\"flag\":" << node.flag << ",\"split\":" << node.split << ",\"decorate\":" << node.decorate;
   if (node.layout) {
     out << ",\"active\":" << LayoutInternal::active(*node.layout) << ",\"enabled\":" << LayoutInternal::enabled(*node.layout)
@@ -430,6 +454,33 @@ void layout_record_clear()
   roots.clear();
   nodes.clear();
   layouts.clear();
+}
+
+/* port-override: a popup menu Blender's code builds (popup_menu_begin to popup_menu_end) is drawn by Bylonder's window
+ * manager: its layout is recorded and handed over as the invoke's popup. */
+struct PopupMenu {
+  Layout *layout;
+  std::string title;
+};
+PopupMenu *popup_menu_begin_ex(bContext * /*C*/, const char *title, const char * /*block_name*/, int /*icon*/)
+{
+  return MEM_new<PopupMenu>(__func__, &layout_record_begin("column"), title);
+}
+PopupMenu *popup_menu_begin(bContext *C, const char *title, int icon) { return popup_menu_begin_ex(C, title, __func__, icon); }
+Layout *popup_menu_layout(PopupMenu *pup) { return pup->layout; }
+void popup_menu_end(bContext * /*C*/, PopupMenu *pup)
+{
+  popup_layout_open(pup->title, layout_record_json(*pup->layout));
+  MEM_delete(pup);
+}
+bool popup_menu_end_or_cancel(bContext *C, PopupMenu *pup)
+{
+  if (nodes.at(pup->layout)->children.empty()) {
+    MEM_delete(pup);
+    return false;
+  }
+  popup_menu_end(C, pup);
+  return true;
 }
 
 }  // namespace blender::ui

@@ -1,5 +1,6 @@
 // The Text Editor's operators (text_ops.cc) by Blender's idname, on the Text Editor that is the context area: each
 // edit is an undo step of the text (ED_text_undo_push_init), saves the text and scrolls the cursor into view.
+import { askText } from '../interface/props-dialog.js';
 import { registerOperators, contextArea } from '../../windowmanager/wm-operators.js';
 import { report } from '../../windowmanager/wm-reports.js';
 import { readClipboard, setClipboard } from '../../makesrna/rna-bylonder.js';
@@ -156,8 +157,8 @@ export function registerTextOperators(texts) {
     'text.start_find': { poll: () => !!editor(), run: () => editor().startFind() },
     'text.jump': {
       poll: () => !!text(),
-      run: () => {
-        const e = editor(), t = text(), line = Number(prompt('Line Number', String(t.curl + 1)));
+      run: async () => {
+        const e = editor(), t = text(), line = Number(await askText('Jump to Line Number', 'Line', String(t.curl + 1)));
         if (Number.isInteger(line) && line > 0) { t.moveTo(line - 1, 0, false); e.edited(t, { save: false }); }
       },
     },

@@ -36,8 +36,9 @@ export async function startServer({ build = true } = {}) {
 
 // Opens Bylonder in a fresh browser context (fresh project storage), opens `example` from the splash (none: the new
 // project's scene) and waits until the 3D Viewport shows the node `node`. Page errors of every frame land in `errors`.
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", size = { width: 1600, height: 950 } } = {}) {
-  const context = await browser.newContext({ viewport: size, acceptDownloads: true });
+// `video`: a directory to record the session to.
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", size = { width: 1600, height: 950 }, video } = {}) {
+  const context = await browser.newContext({ viewport: size, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) });
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));

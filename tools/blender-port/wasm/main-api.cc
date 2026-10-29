@@ -62,6 +62,8 @@
 #include "GPU_material.hh"
 #include "IMB_colormanagement.hh"
 #include "MEM_guardedalloc.h"
+#include "DNA_view3d_types.h"
+#include "area.hh"
 #include "NOD_defaults.hh"
 #include "SEQ_iterator.hh"
 #include "SEQ_sequencer.hh"
@@ -97,6 +99,11 @@ struct BlenderMain {
   WorkSpaceLayout layout = {};
   bScreen screen = {};
   ExtractionHeader extraction = {};
+  /* The 3D View Object Mode's operators act in once the editor gives its view (main_view_set). */
+  BylonderArea view_area;
+  View3D v3d = {};
+  ARegion region = {};
+  RegionView3D rv3d = {};
 };
 
 static void collections_synced(BlenderMain *ctx);
@@ -134,6 +141,23 @@ EXPORT(main_new) BlenderMain *main_new()
 }
 
 EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
+
+void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx,
+                       int winy, bool is_persp);
+/* The 3D View the editor shows, as edit_context_view_set gives Edit Mode's: Object Mode's operators (transforms, view
+ * operators) then act in its window region. */
+EXPORT(main_view_set)
+void main_view_set(BlenderMain *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
+{
+  ScrArea &area = ctx->view_area.area;
+  if (BLI_listbase_is_empty(&area.spacedata)) {
+    BLI_addtail(&ctx->screen.areabase, &area);
+  }
+  view3d_region_set(area, ctx->v3d, ctx->region, ctx->rv3d, viewmat, winmat, winx, winy, is_persp);
+  CTX_wm_window_set(ctx->C, &ctx->window);
+  CTX_wm_area_set(ctx->C, &area);
+  CTX_wm_region_set(ctx->C, &ctx->region);
+}
 EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }

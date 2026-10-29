@@ -62,6 +62,13 @@ export function createViews({ engine, scene, live = () => false }) {
     }
   });
 
+  // Keys go to the area under the mouse, as Blender sends them: hovering a view focuses it, unless text is being typed
+  // elsewhere (a field or the code editor, in this window or the workspace around it).
+  const typing = (element) => !!element && (element.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(element.tagName));
+  const takeKeys = (canvas) => {
+    if (typing(document.activeElement) || (window.parent !== window && typing(window.parent.document.activeElement))) return;
+    canvas.focus({ preventScroll: true });
+  };
   const api = {
     add(view) {
       const engineView = engine.registerView(view.canvas, view.camera);
@@ -69,7 +76,7 @@ export function createViews({ engine, scene, live = () => false }) {
       engineView.customResize = () => {};
       views.set(view.canvas, { view, engineView });
       observer.observe(view.canvas);
-      const enter = () => api.setInput(view);
+      const enter = () => { api.setInput(view); takeKeys(view.canvas); };
       const down = () => { api.setInput(view); if (focused !== view) { focused = view; api.onFocus?.(view); } };
       view.canvas.addEventListener('pointerenter', enter);
       view.canvas.addEventListener('pointerdown', down, true);

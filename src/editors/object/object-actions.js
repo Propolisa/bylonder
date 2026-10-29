@@ -1,3 +1,4 @@
+import { askText } from "../interface/props-dialog.js";
 import { nodeId } from "./identity.js";
 import { openMenu } from "../interface/menu.js";
 import { runOperator } from "../../windowmanager/wm-operators.js";
@@ -13,13 +14,12 @@ export function createObjectActions({ world, editor, commands, creator }) {
   // its invoke asks), else its menu.
   const toCollection = (menu, put) => ({ collection_uid = -1, is_new = false, new_collection_name } = {}) => {
     if (collection_uid < 0) return world.callMenu(menu, pointer);
-    let id = collectionMenus.idOf(collection_uid);
-    if (is_new) {
-      const name = new_collection_name ?? prompt("Name", "Collection");
-      if (name === null) return "CANCELLED";
-      id = cols.create({ parent: id, name: name || "Collection" }).id;
-    }
-    put(ids(), id);
+    const parent = collectionMenus.idOf(collection_uid), objects = ids();
+    const into = (name) => put(objects, cols.create({ parent, name: name || "Collection" }).id);
+    if (!is_new) return put(objects, parent);
+    if (new_collection_name !== undefined) return into(new_collection_name);
+    // object_move_to_collection's invoke asks for the new collection's name.
+    askText("Move to Collection", "Name", "Collection", pointer).then((name) => name !== null && into(name));
   };
   // collection.objects_remove's enum: the collections the selected objects are in.
   const memberships = () => [...new Set(ids().flatMap((id) => cols.memberships(id)))]
@@ -27,9 +27,9 @@ export function createObjectActions({ world, editor, commands, creator }) {
   const active = () => editor.selection.nodes.at(-1),
     has = () => editor.selection.size > 0,
     several = () => editor.selection.size > 1;
-  const rename = () => {
+  const rename = async () => {
     const node = active();
-    const name = node && prompt("Object name", node.name);
+    const name = node && await askText("Rename Active Item", "Name", node.name, pointer);
     if (name) commands.rename(node, name);
   };
   const finished = (run) => () => { creator.finish(); run(); };

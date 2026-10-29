@@ -871,12 +871,12 @@ EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int c
 
 /* Popups an invoke opens (wm_operators.cc): Bylonder's window manager shows them, then runs the operator's exec when
  * the user confirms, or sets the enum property and runs it when the user picks an item. */
-enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS };
+enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS, POPUP_LAYOUT };
 static Popup popup_opened = POPUP_NONE;
 static std::string popup_title, popup_text;
 
-/* The popup the last invoke opened (Popup), cleared by asking: its title, and its confirm button's text or the enum
- * property's identifier. */
+/* The popup the last invoke opened (Popup), cleared by asking: its title, and its confirm button's text, the enum
+ * property's identifier or the recorded layout of a popup menu (panel-layout.cc). */
 EXPORT(operator_popup) int operator_popup() { return std::exchange(popup_opened, POPUP_NONE); }
 EXPORT(operator_popup_title) const char *operator_popup_title() { return popup_title.c_str(); }
 EXPORT(operator_popup_text) const char *operator_popup_text() { return popup_text.c_str(); }
@@ -943,6 +943,23 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
 wmOperatorStatus WM_operator_props_popup(bContext * /*C*/, wmOperator *op, const wmEvent * /*event*/)
 {
   return popup_open(POPUP_PROPS, op->type->name, op->type->idname);
+}
+/* The properties dialogs (wm_operators.cc), the same popup with their title. */
+wmOperatorStatus WM_operator_props_dialog_popup(bContext * /*C*/, wmOperator *op, int /*width*/, std::optional<std::string> title,
+                                                std::optional<std::string> /*confirm_text*/, bool /*cancel_default*/,
+                                                std::optional<std::string> /*message*/, bool /*show_icon*/)
+{
+  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, op->type->idname);
+}
+wmOperatorStatus WM_operator_props_popup_confirm_ex(bContext *C, wmOperator *op, const wmEvent * /*event*/, std::optional<std::string> title,
+                                                    std::optional<std::string> confirm_text, bool cancel_default,
+                                                    std::optional<std::string> message)
+{
+  return WM_operator_props_dialog_popup(C, op, 300, title, confirm_text, cancel_default, message);
+}
+wmOperatorStatus WM_operator_props_popup_confirm(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return WM_operator_props_popup_confirm_ex(C, op, event);
 }
 
 /* As wm_operators.cc defines them. */
@@ -1178,3 +1195,9 @@ ARegionType *ui::ED_area_type_hud(int /*space_type*/)
 }
 
 }  // namespace blender
+
+/* A popup menu's recorded layout (panel-layout.cc's popup_menu_end) as the running invoke's popup. */
+void popup_layout_open(const std::string &title, const std::string &layout)
+{
+  blender::popup_open(POPUP_LAYOUT, title.c_str(), layout.c_str());
+}

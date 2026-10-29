@@ -6,6 +6,7 @@ import json
 import math
 import os
 
+import bmesh
 import bpy
 from bpy_extras import anim_utils
 
@@ -34,7 +35,9 @@ def state():
         }
         if ob.type == 'MESH':
             mesh = ob.data
-            entry['mesh'] = {'vertices': len(mesh.vertices), 'edges': len(mesh.edges), 'faces': len(mesh.polygons)}
+            coords = [v.co for v in mesh.vertices]
+            entry['mesh'] = {'vertices': len(mesh.vertices), 'edges': len(mesh.edges), 'faces': len(mesh.polygons),
+                             'bounds': [rounded(min(c[i] for c in coords) for i in range(3)), rounded(max(c[i] for c in coords) for i in range(3))]}
         action = ob.animation_data.action if ob.animation_data else None
         if action:
             # A layered action's F-Curves, in the object's slot (Blender 5).
@@ -72,12 +75,15 @@ def block_out():
 
 
 def edit_model():
-    """Tab, A, Subdivide; select the top faces by... the whole mesh extruded: E Z 1; Tab; Ctrl 2 (Subdivision Surface
-    level 2); Shade Smooth."""
+    """Tab, 3 (face select), click the top face, I 0.2, E 1; Tab; Ctrl 2 (Subdivision Surface level 2); Shade Smooth."""
     bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.subdivide()
-    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={'value': (0, 0, 1), 'constraint_axis': (False, False, True)})
+    bpy.ops.mesh.select_mode(type='FACE')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bm = bmesh.from_edit_mesh(bpy.context.object.data)
+    next(f for f in bm.faces if f.normal.z > 0.9).select_set(True)
+    bmesh.update_edit_mesh(bpy.context.object.data)
+    bpy.ops.mesh.inset(thickness=0.2)
+    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={'value': (0, 0, 1), 'orient_type': 'NORMAL', 'constraint_axis': (False, False, True)})
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.subdivision_set(level=2, relative=False)
     bpy.ops.object.shade_smooth()
@@ -96,14 +102,16 @@ def organize():
 
 
 def animate():
-    """I on frame 1 (Location), frame 30, G Z 2, I (Location)."""
-    # I > Location (anim.keyframe_insert_by_name, which needs a window) keys the active object's location.
-    ob = bpy.context.object
+    """I on frame 1, frame 30 (typed in the Timeline), G Z 2, I."""
+    # I (anim.keyframe_insert, which needs a 3D Viewport) keys the channels the Preferences name: Location, Rotation, Scale.
+    def insert():
+        for path in ('location', 'rotation_euler', 'scale'):
+            bpy.context.object.keyframe_insert(path)
     bpy.context.scene.frame_set(1)
-    ob.keyframe_insert('location')
+    insert()
     bpy.context.scene.frame_set(30)
     bpy.ops.transform.translate(value=(0, 0, 2), constraint_axis=(False, False, True))
-    ob.keyframe_insert('location')
+    insert()
 
 
 def material():

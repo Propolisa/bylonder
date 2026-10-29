@@ -3,7 +3,7 @@
 //   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step,
 //   macro(steps, event): Blender's macro's operators in turn, module(idname, props, event): one of Blender's modal
 //   operators, start(type, options): a transform, and the
-//   modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
+//   modal tools inset, bevel(affect), loopcut, selectBox.
 import { menus as MENUS } from '../../python/bpy_interface.js';
 import { drawMenu, runs } from '../interface/ui-layout.js';
 import { rna } from '../../makesrna/rna.js';
@@ -16,8 +16,9 @@ import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../../bmesh
 // The keymaps an Edit Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Mesh', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
-// A macro's properties of one of its operators (TRANSFORM_OT_translate in mesh.extrude_context_move's).
-const macroProps = (props, name) => Object.fromEntries(props[name] ?? []);
+// A macro's properties of one of its operators (TRANSFORM_OT_translate in mesh.extrude_context_move's): a keymap
+// item's [name, value] pairs or a script's dict.
+const macroProps = (props, name) => (Array.isArray(props[name]) ? Object.fromEntries(props[name]) : { ...props[name] });
 // The operator RNA struct names a macro's properties are kept under.
 const struct = (idname) => idname.split('.')[0].toUpperCase() + '_OT_' + idname.split('.')[1];
 // Blender's macros (mesh_ops.cc, ED_operatormacros_mesh): their operators in turn, with the properties the macro sets.
@@ -52,7 +53,6 @@ export const editMeshActions = (api) => ({
   'transform.rotate': () => api.start('rotate'),
   'transform.resize': () => api.start('scale'),
   ...Object.fromEntries(MODULE_TRANSFORMS.map((idname) => [idname, (props, event) => api.module(idname, props, event)])),
-  'view3d.edit_mesh_extrude_move_normal': () => api.extrudeMove(),
   'view3d.select_box': () => api.selectBox(),
   ...Object.fromEntries(Object.keys(MACROS).map((idname) => [idname, (props = {}, event) => api.macro(macroSteps(idname, props), event)])),
   'mesh.loopcut_slide': (props = {}, event) => api.loopcut(event, macroProps(props, 'TRANSFORM_OT_edge_slide'), macroProps(props, 'MESH_OT_loopcut')),
@@ -130,5 +130,5 @@ export function idleApi(record = () => {}) {
       tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
     });
   };
-  return api = { context, exec: record, macro: ([[idname, props]]) => record(idname, props), module: record, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
+  return api = { context, exec: record, macro: ([[idname, props]]) => record(idname, props), module: record, start: none, inset: none, bevel: none, loopcut: none, selectBox: none };
 }

@@ -185,8 +185,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     const point = (co) => toBlender(Vector3.TransformCoordinates(new Vector3(co[0], co[2], co[1]), world_m));
     return Object.fromEntries(Object.entries(geometry).map(([key, points]) => [key, points.map(point)]));
   };
-  // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
-  const extrudeMove = () => macro([['mesh.extrude_region', {}], ['transform.translate', em.edit.totals.totfacesel ? { orient_type: 'NORMAL' } : {}]]);
   // One of Blender's operators run in the module's 3D View as its window manager runs it: invoked with the event
   // (or the pointer), then given the following events while it runs modally, its modal keymap's items as items. The
   // edit mesh redraws as it changes and the view's header shows its text. A finished run is one undo step, as is a
@@ -346,7 +344,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   };
   const menuApi = {
     context: () => world.blenderContext(views.input), edit: () => em.edit, exec, macro, module: moduleOperator, start: (type, options) => editor.start(type, options),
-    extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
+    inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
   };
   const menus = editMeshMenus(menuApi);
   // Blender's mesh operators the module runs, and Edit Mode's macros, modal tools and picks, by idname, for Blender's

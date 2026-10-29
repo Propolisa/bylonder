@@ -53,7 +53,7 @@ These follow Blender's tree, as the restructure set up:
 - `src/blenlib/`: `array-store.js`, `polyfill-2d.js`, `polyfill-2d-beautify.js`, `kdopbvh.js`
 - `src/blenkernel/mesh/`: `mesh.js`, `attribute.js`, `mesh-normals.js`, `mesh-tessellate.js`, `mesh-from-babylon.js` (welding import for code-built meshes)
 - `src/bmesh/intern/`: `bmesh-class.js`, `bmesh-core.js`, `bmesh-construct.js`, `bmesh-mesh-convert.js`, `bmesh-marking.js`, `bmesh-query.js`, `bmesh-walkers.js`, `bmesh-polygon.js`, `bmesh-interp.js`, `bmesh-mesh-normals.js`, `bmesh-mesh-partial-update.js`, `bmesh-delete.js`, `bmesh-mods.js`
-- `src/bmesh/operators/`: `bmo-primitive.js`, `bmo-extrude.js`, `bmo-dissolve.js`, `bmo-subdivide.js`, and so on, one file per Blender file
+- `src/bmesh/operators/`: `bmo-primitive.js` and `bmo-dissolve.js`, one file per Blender file (the rest run as Blender's C in the module)
 - `src/bmesh/tools/`: `bmesh-bevel.js`
 - `src/editors/mesh/`: `editmesh-select.js`, `editmesh-tools.js`, `editmesh-extrude.js`, `editmesh-add.js`, `editmesh-undo.js`, `editmesh-utils.js`, `editmesh-loopcut.js`, `mesh-data.js`
 - `src/editors/transform/`: the modal transform, moved out of `editors/object/editor.js` and shared by both modes

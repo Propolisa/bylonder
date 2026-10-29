@@ -20,9 +20,13 @@ const literal = (value, enumProperty) => {
   if (typeof value === 'boolean') return value ? 'True' : 'False';
   if (typeof value === 'number') return Number.isInteger(value) ? String(value) : String(Number(value.toPrecision(6)));
   if (typeof value === 'string') return enumProperty ? `'${value}'` : JSON.stringify(value);
-  if (Array.isArray(value) || value?.[Symbol.iterator]) {
+  if (Array.isArray(value) || ArrayBuffer.isView(value) || value instanceof Set) {
     const items = [...value].map((item) => literal(item, enumProperty));
     return enumProperty ? `{${items.join(', ')}}` : `(${items.join(', ')})`;
+  }
+  // A macro's properties of one of its operators.
+  if (value && typeof value === 'object') {
+    return `{${Object.entries(value).filter(([, v]) => typeof v !== 'function').map(([k, v]) => `"${k}":${literal(v)}`).join(', ')}}`;
   }
   return value == null ? 'None' : String(value);
 };

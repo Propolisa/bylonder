@@ -291,10 +291,11 @@ EXPORT(edit_mesh_eval) const ExtractionHeader *edit_mesh_eval(EditContext *ctx)
  * and window matrices (Blender's axes, column-major), its size in pixels and whether it is a perspective view. Operators
  * then act in it as in Blender's window region, projecting the mouse as it does. */
 static wmGizmoMap *gizmo_map_standin();
-EXPORT(edit_context_view_set)
-void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
+/* A 3D View's window region given its view (edit_context_view_set, main_view_set): area, space and region linked
+ * once, the region's view set each time. */
+void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx,
+                       int winy, bool is_persp)
 {
-  RegionView3D &rv3d = ctx->rv3d;
   std::copy_n(viewmat, 16, &rv3d.viewmat[0][0]);
   std::copy_n(winmat, 16, &rv3d.winmat[0][0]);
   mul_m4_m4m4(rv3d.persmat, rv3d.winmat, rv3d.viewmat);
@@ -307,12 +308,28 @@ void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *
   const float v1[3] = {rv3d.persmat[0][0], rv3d.persmat[1][0], rv3d.persmat[2][0]};
   const float v2[3] = {rv3d.persmat[0][1], rv3d.persmat[1][1], rv3d.persmat[2][1]};
   rv3d.pixsize = (2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)))) / float(std::max(winx, winy));
-  ARegion &region = ctx->region;
   region.regiondata = &rv3d;
   region.regiontype = RGN_TYPE_WINDOW;
   region.winx = short(winx);
   region.winy = short(winy);
   BLI_rcti_init(&region.winrct, 0, winx - 1, 0, winy - 1);
+  BLI_rcti_init(&area.totrct, 0, winx - 1, 0, winy - 1);
+  if (BLI_listbase_is_empty(&area.spacedata)) {
+    if (!region.runtime) {
+      region.runtime = MEM_new<bke::ARegionRuntime>(__func__);
+    }
+    /* The editor's gizmo map (wm-gizmo-map.js) draws and runs the view's gizmos; the module's stands in for it
+     * (WM_gizmomap_group_find below). */
+    region.runtime->gizmo_map = gizmo_map_standin();
+    area.spacetype = SPACE_VIEW3D;
+    BLI_addtail(&area.spacedata, &v3d);
+    BLI_addtail(&area.regionbase, &region);
+  }
+}
+
+EXPORT(edit_context_view_set)
+void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
+{
   ScrArea &area = ctx->view_area.area;
   if (BLI_listbase_is_empty(&area.spacedata)) {
     ctx->window.scene = &ctx->scene;
@@ -320,17 +337,11 @@ void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *
     ctx->workspace_hook.act_layout = &ctx->layout;
     ctx->layout.screen = &ctx->screen;
     BLI_addtail(&ctx->screen.areabase, &area);
-    /* The editor's gizmo map (wm-gizmo-map.js) draws and runs the view's gizmos; the module's stands in for it
-     * (WM_gizmomap_group_find below). */
-    ctx->region.runtime->gizmo_map = gizmo_map_standin();
-    area.spacetype = SPACE_VIEW3D;
-    BLI_addtail(&area.spacedata, &ctx->v3d);
-    BLI_addtail(&area.regionbase, &region);
-    BLI_rcti_init(&area.totrct, 0, winx - 1, 0, winy - 1);
   }
+  view3d_region_set(area, ctx->v3d, ctx->region, ctx->rv3d, viewmat, winmat, winx, winy, is_persp);
   CTX_wm_window_set(ctx->C, &ctx->window);
   CTX_wm_area_set(ctx->C, &area);
-  CTX_wm_region_set(ctx->C, &region);
+  CTX_wm_region_set(ctx->C, &ctx->region);
 }
 
 /* The gizmo map Bylonder's window manager keeps (wm-gizmo-map.js), as the module's operators see it: the group of

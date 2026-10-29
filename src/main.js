@@ -225,7 +225,7 @@ const renderHost = createRenderHost({
 // Handle for debugging and the browser tests, which run against the production build.
 window.__bylonder ={ world, renderHost, runOperator,
   // What this window runs of Blender (the Blender Coverage view): its operators and Blender's registered classes.
-  coverage: () => ({ operators: operatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+  coverage: () => ({ operators: operatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
