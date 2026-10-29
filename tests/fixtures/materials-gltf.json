@@ -1,0 +1,691 @@
+{
+ "bright-specular": {
+  "gltf": {
+   "doubleSided": true,
+   "extensions": {
+    "KHR_materials_specular": {
+     "specularColorFactor": [
+      0.800000011920929,
+      1.600000023841858,
+      1.600000023841858
+     ]
+    }
+   },
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     1
+    ],
+    "roughnessFactor": 0.10000000149011612
+   }
+  },
+  "inputs": {
+   "Alpha": 1.0,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.029999999329447746,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.0,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Emission Strength": 0.0,
+   "IOR": 1.5,
+   "Metallic": 1.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.10000000149011612,
+   "Sheen Roughness": 0.5,
+   "Sheen Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Sheen Weight": 0.0,
+   "Specular IOR Level": 0.800000011920929,
+   "Specular Tint": [
+    0.5,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.0,
+   "Weight": 0.0
+  },
+  "use_backface_culling": false
+ },
+ "clear": {
+  "gltf": {
+   "alphaMode": "MASK",
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     0
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  "inputs": {
+   "Alpha": 0.0,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.029999999329447746,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.0,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Emission Strength": 0.0,
+   "IOR": 1.5,
+   "Metallic": 0.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.5,
+   "Sheen Roughness": 0.5,
+   "Sheen Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Sheen Weight": 0.0,
+   "Specular IOR Level": 0.5,
+   "Specular Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.0,
+   "Weight": 0.0
+  },
+  "use_backface_culling": false
+ },
+ "default": {
+  "gltf": {
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  "inputs": {
+   "Alpha": 1.0,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.029999999329447746,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.0,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Emission Strength": 0.0,
+   "IOR": 1.5,
+   "Metallic": 0.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.5,
+   "Sheen Roughness": 0.5,
+   "Sheen Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Sheen Weight": 0.0,
+   "Specular IOR Level": 0.5,
+   "Specular Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.0,
+   "Weight": 0.0
+  },
+  "use_backface_culling": false
+ },
+ "dim-glow": {
+  "gltf": {
+   "doubleSided": true,
+   "emissiveFactor": [
+    0.10000000149011612,
+    0.20000000298023224,
+    0.30000001192092896
+   ],
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.10000000149011612,
+     0.20000000298023224,
+     0.30000001192092896,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  "inputs": {
+   "Alpha": 1.0,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.10000000149011612,
+    0.20000000298023224,
+    0.30000001192092896,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.029999999329447746,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.0,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    0.20000000298023224,
+    0.4000000059604645,
+    0.6000000238418579,
+    1.0
+   ],
+   "Emission Strength": 0.5,
+   "IOR": 1.5,
+   "Metallic": 0.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.5,
+   "Sheen Roughness": 0.5,
+   "Sheen Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Sheen Weight": 0.0,
+   "Specular IOR Level": 0.5,
+   "Specular Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.0,
+   "Weight": 0.0
+  },
+  "use_backface_culling": false
+ },
+ "glow": {
+  "gltf": {
+   "alphaMode": "BLEND",
+   "emissiveFactor": [
+    1,
+    0.5,
+    0.20000000298023224
+   ],
+   "extensions": {
+    "KHR_materials_emissive_strength": {
+     "emissiveStrength": 3
+    }
+   },
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     0.5
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  "inputs": {
+   "Alpha": 0.5,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.029999999329447746,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.0,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    1.0,
+    0.5,
+    0.20000000298023224,
+    1.0
+   ],
+   "Emission Strength": 3.0,
+   "IOR": 1.5,
+   "Metallic": 0.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.5,
+   "Sheen Roughness": 0.5,
+   "Sheen Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Sheen Weight": 0.0,
+   "Specular IOR Level": 0.5,
+   "Specular Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.0,
+   "Weight": 0.0
+  },
+  "use_backface_culling": true
+ },
+ "layers": {
+  "gltf": {
+   "doubleSided": true,
+   "extensions": {
+    "KHR_materials_clearcoat": {
+     "clearcoatFactor": 0.699999988079071,
+     "clearcoatRoughnessFactor": 0.20000000298023224
+    },
+    "KHR_materials_ior": {
+     "ior": 1.4500000476837158
+    },
+    "KHR_materials_sheen": {
+     "sheenColorFactor": [
+      0.30000001192092896,
+      0.4000000059604645,
+      0.5
+     ],
+     "sheenRoughnessFactor": 0.6000000238418579
+    },
+    "KHR_materials_specular": {
+     "specularColorFactor": [
+      0.8999999761581421,
+      0.800000011920929,
+      0.699999988079071
+     ],
+     "specularFactor": 0.5
+    },
+    "KHR_materials_transmission": {
+     "transmissionFactor": 0.30000001192092896
+    }
+   },
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  "inputs": {
+   "Alpha": 1.0,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.20000000298023224,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.699999988079071,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Emission Strength": 0.0,
+   "IOR": 1.4500000476837158,
+   "Metallic": 0.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.5,
+   "Sheen Roughness": 0.6000000238418579,
+   "Sheen Tint": [
+    0.30000001192092896,
+    0.4000000059604645,
+    0.5,
+    1.0
+   ],
+   "Sheen Weight": 0.5,
+   "Specular IOR Level": 0.25,
+   "Specular Tint": [
+    0.8999999761581421,
+    0.800000011920929,
+    0.699999988079071,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.30000001192092896,
+   "Weight": 0.0
+  },
+  "use_backface_culling": false
+ },
+ "red": {
+  "gltf": {
+   "doubleSided": true,
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.10000000149011612,
+     0.10000000149011612,
+     1
+    ],
+    "metallicFactor": 0.20000000298023224,
+    "roughnessFactor": 0.4000000059604645
+   }
+  },
+  "inputs": {
+   "Alpha": 1.0,
+   "Anisotropic": 0.0,
+   "Anisotropic Rotation": 0.0,
+   "Base Color": [
+    0.800000011920929,
+    0.10000000149011612,
+    0.10000000149011612,
+    1.0
+   ],
+   "Coat IOR": 1.5,
+   "Coat Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Coat Roughness": 0.029999999329447746,
+   "Coat Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Coat Weight": 0.0,
+   "Diffuse Roughness": 0.0,
+   "Emission Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Emission Strength": 0.0,
+   "IOR": 1.5,
+   "Metallic": 0.20000000298023224,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Roughness": 0.4000000059604645,
+   "Sheen Roughness": 0.5,
+   "Sheen Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Sheen Weight": 0.0,
+   "Specular IOR Level": 0.5,
+   "Specular Tint": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "Subsurface Anisotropy": 0.0,
+   "Subsurface IOR": 1.399999976158142,
+   "Subsurface Radius": [
+    1.0,
+    0.20000000298023224,
+    0.10000000149011612
+   ],
+   "Subsurface Scale": 0.004999999888241291,
+   "Subsurface Weight": 0.0,
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thin Film IOR": 1.3300000429153442,
+   "Thin Film Thickness": 0.0,
+   "Thin Wall": false,
+   "Transmission Weight": 0.0,
+   "Weight": 0.0
+  },
+  "use_backface_culling": false
+ }
+}

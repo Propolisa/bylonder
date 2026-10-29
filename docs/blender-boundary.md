@@ -54,8 +54,12 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   geometry: Main holds a stand-in (`bylonder_standin`), filled from it when Blender's code needs it, until Blender's
   code changes it, which makes it Main's.
 - **Materials and worlds are Main's**: a Material or World ID and its node tree, edited by Blender's Properties
-  editor and animated by Blender's animation system. A Principled BSDF or Background the view draws into the Babylon
-  material or world by its inputs (Base Color into `albedoColor`, and so on); the Viewport Display values
+  editor and animated by Blender's animation system. The view draws a Principled BSDF into a PBRMaterial as Blender's
+  glTF exporter writes it and Babylon's glTF loader reads it, both copied as tables
+  (`src/blenkernel/material/principled-gltf.js`, checked against the exporter's output in
+  `tests/fixtures/materials-gltf.json`, written by `tools/blender-reference/material-fixtures.py`, and against the
+  loader in `tests/principled-gltf.test.js`). A Standard material or a world's Background takes its node inputs
+  through the RNA mapping. The Viewport Display values
   (`diffuse_color`, a world's `color`) stay Main's. One Babylon makes that Main does not hold yet (the project's code,
   Bylonder's material library) goes into Main once, as Blender's node tree. A Node Material's graph is Babylon's: Main
   holds a stand-in Material with the graph in `bylonder_node_material`.

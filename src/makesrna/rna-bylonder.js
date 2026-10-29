@@ -128,6 +128,7 @@ const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXE
 const sensor = (camera) => (horizontal(camera) ? 36 : 24);
 const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
 const subframe = (world) => world.animation.time.frame - Math.floor(world.animation.time.frame);
+const notPBR = (material) => material.getClassName() !== 'PBRMaterial';
 const synced = (binding, sync = true) => ({ ...(typeof binding === 'function' ? { get: binding } : binding), sync });
 const quaternion = (ob) => !!ob.rotationQuaternion;
 // A setting of an editor's space data (SpaceText, SpaceConsole), which redraws it.
@@ -350,9 +351,10 @@ const STRUCTS = {
       ['Volume', 'NodeSocketShader', null]]]),
     use_backface_culling: synced(settable('backFaceCulling')),
     // A node material has no cutoff of its own: Blender's default.
-    alpha_threshold: synced({ ...settable('alphaCutOff'), get: (material) => material.alphaCutOff ?? 0.5 }),
+    // A PBR material's transparency is its Principled BSDF's alpha, as glTF has it (principled-gltf.js).
+    alpha_threshold: synced({ ...settable('alphaCutOff'), get: (material) => material.alphaCutOff ?? 0.5 }, notPBR),
     surface_render_method: synced({ get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
-      set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }),
+      set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }, notPBR),
   },
   Modifier: (owner) => ({
     name: modifierFlag('name'),

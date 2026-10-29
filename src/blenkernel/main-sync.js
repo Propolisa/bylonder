@@ -30,7 +30,8 @@ import { MultiMaterial } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
-import { createMainView, ID_GR, ID_MA, ID_WO, ID_RECALC_GEOMETRY, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { createMainView, mainPBR, ID_GR, ID_MA, ID_WO, ID_RECALC_GEOMETRY, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { differencesPBR } from './material/principled-gltf.js';
 
 const ID_TE = 0x4554;
 
@@ -313,11 +314,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       blender.setFakeUser(record.ma, !!material.metadata?.wbFakeUser);
     }
   }
-  // A material's or world's first state in Main, from Babylon's: its values, its node tree and (a material) its kind.
+  // A material's or world's first state in Main, from Babylon's: its values, its node tree and (a material) its kind;
+  // then Babylon's is drawn from it, as from then on.
   function enter(record, owner, struct) {
     push(record, owner);
     blender.setNodeTree(record.ptr, shaderTree(rna.pointer(struct, owner).node_tree));
     if (struct === 'Material') keepMaterial(record, owner);
+    mainView.drawShading(record, owner, struct);
   }
   // What only Babylon has of a material, for a round trip: its kind, and a node material's graph as Babylon saves it.
   function keepMaterial(record, material) {
@@ -555,7 +558,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const label = `Material "${material.name}"`;
       if (!sameName(material.name, blender.name(record.ma))) diffs.push(`${label}.name: Main "${blender.name(record.ma)}"`);
       compare(label, record, material);
-      compareTree(label, record.ma, rna.pointer('Material', material));
+      const pbr = world.materials.type(material) === 'pbr' && mainPBR(blender, record.ma);
+      if (pbr) diffs.push(...differencesPBR(material, pbr).map((diff) => `${label}.${diff}`));
+      else compareTree(label, record.ma, rna.pointer('Material', material));
     }
     for (const [id, record] of worlds) {
       const entry = world.worlds.byId(id);
