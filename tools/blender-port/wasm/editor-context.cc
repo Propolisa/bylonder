@@ -55,6 +55,7 @@
 
 #include "WM_api.hh"
 #include "wm_event_system.hh"
+#include "wm_gizmo_intern.hh"
 #include "gizmo/WM_gizmo_api.hh"
 #include "gizmo/WM_gizmo_types.hh"
 #include "WM_types.hh"
@@ -362,10 +363,11 @@ static std::string gizmo_group_shown;
 static std::string gizmo_groups_requested;
 static BMElem *preselected = nullptr;
 
+/* An empty map, so that Blender's code reading it (the window's event handling, wm_event_system.cc) finds no groups. */
 static wmGizmoMap *gizmo_map_standin()
 {
-  static char standin;
-  return reinterpret_cast<wmGizmoMap *>(&standin);
+  static wmGizmoMap standin = {};
+  return &standin;
 }
 
 EXPORT(edit_context_gizmo_group_set) void edit_context_gizmo_group_set(const char *idname) { gizmo_group_shown = idname; }
