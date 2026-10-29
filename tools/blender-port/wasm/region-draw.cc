@@ -782,13 +782,6 @@ void block_draw(const bContext *C, Block *block)
 
 }  // namespace blender::ui
 
-EXPORT(region_draw_end) const char *region_draw_end()
-{
-  static std::string json;
-  json = "{\"draw\":[" + rec.draw + "],\"buttons\":[" + rec.buttons + "],\"iconColors\":{" + rec.icon_colors + "}}";
-  return json.c_str();
-}
-
 /* Starts recording a region's draw, `winx` by `winy` pixels; the last draw's blocks go. */
 EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
 {
