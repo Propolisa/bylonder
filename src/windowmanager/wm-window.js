@@ -106,4 +106,10 @@ export class Window {
     const json = withArrays([numbers], ([p]) => withStrings([code, key, text], ([c, k, t]) => cString(x.wm_event(this.C, KINDS[kind], p, c, k, t, time))));
     return JSON.parse(json);
   }
+  // Whether the window has timers to run (panel animations, operators' timers): then tick() each animation frame,
+  // which handles the due ones and returns what event() does.
+  get timersActive() { return !!x.wm_timers_active(this.C); }
+  tick() { return JSON.parse(cString(x.wm_tick(this.C))); }
+  // The gestures running (box, circle, lasso) as wm-gesture.cc's wm_gestures gives them, to draw, in page pixels.
+  get gestures() { return JSON.parse(cString(x.wm_gestures(this.C))); }
 }

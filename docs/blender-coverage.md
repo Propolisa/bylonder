@@ -97,7 +97,7 @@ The edge ring under the pointer is Blender's preselection (`EDBM_preselect_edger
 The gizmo (`MESH_GGT_spin`) draws two buttons per enabled axis around the 3D cursor; a click spins about the axis. Spin asks for its redo gizmo (`MESH_GGT_spin_redo`), a dial at the spin's center whose drag adjusts the angle through Adjust Last Operation. The gizmos are Bylonder's drawing; the operator is Blender's.
 
 ## 3D View Tool: Edit Mesh, Poly Build > *
-The preselection is `gizmo_preselect_elem_test_select` run in the module (`edit_mesh_preselect_elem`), so on a closed mesh it picks vertices as Blender does. The macros' operators read it through `ED_view3d_gizmo_mesh_preselect_get_active`.
+Not in Edit Mode on Main yet: its operators read the preselection gizmo's element (`ED_view3d_gizmo_mesh_preselect_get_active`), which Main's stand-in gizmo map does not have.
 
 ## 3D View Tool: Edit Mesh, Extrude Manifold > *
 Blender's macro runs in the module, its move with `use_automerge_and_split`, so faces the move dissolves into their neighbors are merged and split as in Blender.

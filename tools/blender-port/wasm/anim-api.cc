@@ -927,15 +927,60 @@ static wmOperatorStatus gesture_start(bContext *C, wmOperator *op, Gesture gestu
   WM_event_add_modal_handler(C, op);
   return OPERATOR_RUNNING_MODAL;
 }
-wmOperatorStatus WM_gesture_box_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/) { return gesture_start(C, op, GESTURE_BOX); }
-wmOperatorStatus WM_gesture_circle_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/) { return gesture_start(C, op, GESTURE_CIRCLE); }
-wmOperatorStatus WM_gesture_lasso_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/) { return gesture_start(C, op, GESTURE_LASSO); }
-wmOperatorStatus WM_gesture_box_modal(bContext * /*C*/, wmOperator * /*op*/, const wmEvent * /*event*/) { return OPERATOR_PASS_THROUGH; }
-wmOperatorStatus WM_gesture_circle_modal(bContext * /*C*/, wmOperator * /*op*/, const wmEvent * /*event*/) { return OPERATOR_PASS_THROUGH; }
-wmOperatorStatus WM_gesture_lasso_modal(bContext * /*C*/, wmOperator * /*op*/, const wmEvent * /*event*/) { return OPERATOR_PASS_THROUGH; }
-void WM_gesture_box_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
-void WM_gesture_circle_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
-void WM_gesture_lasso_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
+/* While the page's window handles an event (wm_window_handling), the gestures are Blender's (wm-gesture.cc). */
+bool wm_window_handling();
+wmOperatorStatus wmg_WM_gesture_box_invoke(bContext *C, wmOperator *op, const wmEvent *event);
+wmOperatorStatus wmg_WM_gesture_circle_invoke(bContext *C, wmOperator *op, const wmEvent *event);
+wmOperatorStatus wmg_WM_gesture_lasso_invoke(bContext *C, wmOperator *op, const wmEvent *event);
+wmOperatorStatus wmg_WM_gesture_box_modal(bContext *C, wmOperator *op, const wmEvent *event);
+wmOperatorStatus wmg_WM_gesture_circle_modal(bContext *C, wmOperator *op, const wmEvent *event);
+wmOperatorStatus wmg_WM_gesture_lasso_modal(bContext *C, wmOperator *op, const wmEvent *event);
+void wmg_WM_gesture_box_cancel(bContext *C, wmOperator *op);
+void wmg_WM_gesture_circle_cancel(bContext *C, wmOperator *op);
+void wmg_WM_gesture_lasso_cancel(bContext *C, wmOperator *op);
+Array<int2> wmg_WM_gesture_lasso_path_to_array(bContext *C, wmOperator *op);
+wmOperatorStatus WM_gesture_box_invoke(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return wm_window_handling() ? wmg_WM_gesture_box_invoke(C, op, event) : gesture_start(C, op, GESTURE_BOX);
+}
+wmOperatorStatus WM_gesture_circle_invoke(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return wm_window_handling() ? wmg_WM_gesture_circle_invoke(C, op, event) : gesture_start(C, op, GESTURE_CIRCLE);
+}
+wmOperatorStatus WM_gesture_lasso_invoke(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return wm_window_handling() ? wmg_WM_gesture_lasso_invoke(C, op, event) : gesture_start(C, op, GESTURE_LASSO);
+}
+wmOperatorStatus WM_gesture_box_modal(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return op->customdata ? wmg_WM_gesture_box_modal(C, op, event) : OPERATOR_PASS_THROUGH;
+}
+wmOperatorStatus WM_gesture_circle_modal(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return op->customdata ? wmg_WM_gesture_circle_modal(C, op, event) : OPERATOR_PASS_THROUGH;
+}
+wmOperatorStatus WM_gesture_lasso_modal(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return op->customdata ? wmg_WM_gesture_lasso_modal(C, op, event) : OPERATOR_PASS_THROUGH;
+}
+void WM_gesture_box_cancel(bContext *C, wmOperator *op)
+{
+  if (op->customdata) {
+    wmg_WM_gesture_box_cancel(C, op);
+  }
+}
+void WM_gesture_circle_cancel(bContext *C, wmOperator *op)
+{
+  if (op->customdata) {
+    wmg_WM_gesture_circle_cancel(C, op);
+  }
+}
+void WM_gesture_lasso_cancel(bContext *C, wmOperator *op)
+{
+  if (op->customdata) {
+    wmg_WM_gesture_lasso_cancel(C, op);
+  }
+}
 namespace ui {
 std::string operator_props_layout(bContext *C, wmOperator *op);
 }
@@ -1046,18 +1091,16 @@ wmOperatorStatus WM_generic_select_invoke(bContext *C, wmOperator *op, const wmE
 
 /* A circle gesture runs its exec once, when it ends: it has no wmGesture, so wm_gesture.cc's
  * WM_gesture_is_modal_first answers that it is the first call. */
-Array<int2> WM_gesture_lasso_path_to_array(bContext * /*C*/, wmOperator * /*op*/) { return Array<int2>(lasso_path.as_span()); }
+Array<int2> WM_gesture_lasso_path_to_array(bContext *C, wmOperator *op)
+{
+  return op->customdata ? wmg_WM_gesture_lasso_path_to_array(C, op) : Array<int2>(lasso_path.as_span());
+}
 
-/* port-override: the pointer's shape and timers are Bylonder's window manager's. */
+/* port-override: the pointer's shape is Bylonder's window manager's. */
 bool WM_cursor_modal_is_set_ok(const wmWindow * /*win*/) { return true; }
 void WM_cursor_modal_set(wmWindow * /*win*/, int /*val*/) {}
 void WM_cursor_modal_restore(wmWindow * /*win*/) {}
 void WM_cursor_wait(bool /*val*/) {}
-wmTimer *WM_event_timer_add(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmEventType /*event_type*/, double /*time_step*/)
-{
-  return nullptr;
-}
-void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
 
 /* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
  * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with

@@ -1,27 +1,16 @@
-// Edit Mode in Blender's own code (tools/blender-port/wasm, built by wasm_module.py): Blender's edit mesh lives in the
-// module, in a scene with its object in Edit Mode, and is the only one. Operators, selection and transforms change it;
-// drawing and picking read the Mesh arrays extracted from it, as Blender's draw cache extracts its buffers from the
-// BMesh.
+// Blender's own code (tools/blender-port/wasm, built by wasm_module.py): Main (BlenderMain) and its operators, and
+// Mesh arrays extracted as Blender's draw cache extracts its buffers.
 import { instantiate, files } from '../port/wasm.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { BMESH_WASM } from './bmesh-module.js';
-import { FLAGS, moduleMesh } from './module-mesh.js';
+import { moduleMesh } from './module-mesh.js';
 
 const { exports: x } = await instantiate(BMESH_WASM);
-const { withArrays, cString, withString, bytes, meshArrays, extractedMesh, attachedMesh, setModifiers, evaluateModifiers } = moduleMesh(x, createMesh);
+const { withArrays, cString, withString, meshArrays, extractedMesh, attachedMesh, setModifiers, evaluateModifiers } = moduleMesh(x, createMesh);
 // A detached extraction ({counts, buffers}) as the Mesh it was; Blender's modifier stack on a Mesh (modifier-api.cc),
 // whose result's arrays are valid until the next evaluation, with each modifier's error or null.
 export { attachedMesh, evaluateModifiers };
 
-// Reads the ints an export writes into a scratch array.
-const ints = (length, fn) => withArrays([new Int32Array(length)], ([p]) => { fn(p); return Array.from(new Int32Array(x.memory.buffer, p, length)); });
-
-// The BMesh of a Mesh with its UV map and flags, in a select mode (SCE_SELECT_*).
-function bmFromMesh(mesh, selectmode) {
-  const flags = FLAGS.map(([name]) => bytes(mesh.attribute(name)));
-  return withArrays([...meshArrays(mesh), ...flags], ([p, e, f, cv, ce, uv, ...flagPointers]) =>
-    withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_from_arrays(mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv, table, selectmode)));
-}
 
 // Blender's mesh operators by Python idname (mesh.subdivide for MESH_OT_subdivide), registered by their own functions.
 const operatorTypes = new Map(Array.from({ length: x.operator_count() }, (_, i) => {
@@ -141,196 +130,6 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
   withArrays([Float32Array.from(positions), Int32Array.from(face_offsets), Int32Array.from(corner_verts)], ([p, f, c]) =>
     ownedMesh(extractedMesh(x.mesh_from_faces(positions.length / 3, p, face_offsets.length - 1, f, c) >>> 0)));
 
-const freeing = new FinalizationRegistry((context) => x.edit_context_free(context));
-
-// Blender's edit mesh (BMEditMesh) and the context its operators run in. Elements are named by type (BM_VERT, BM_EDGE,
-// BM_FACE) and index, in the order toMesh() writes them. free() releases it; one left to the garbage collector is
-// released then.
-// Preselection geometry from the module (edit_mesh_preselect_*): edges and preview lines as pairs of points, vertices,
-// preview triangles, as arrays of [x, y, z].
-function preselection(p) {
-  const [edges, verts, tris, lines] = new Float32Array(x.memory.buffer, p, 4);
-  let at = p + 16;
-  const points = (count) => {
-    const data = new Float32Array(x.memory.buffer, at, count * 3);
-    at += count * 12;
-    return Array.from({ length: count }, (_, i) => Array.from(data.subarray(i * 3, i * 3 + 3)));
-  };
-  return { edges: points(edges * 2), verts: points(verts), tris: points(tris * 3), lines: points(lines * 2) };
-}
-
-export class EditMesh {
-  #context;
-  #C;
-  #object_to_world = null;
-
-  constructor(bm) {
-    this.#context = x.edit_context_new(bm);
-    this.#C = x.edit_context_C(this.#context);
-    freeing.register(this, this.#context, this);
-  }
-
-  // The edit mesh of a Mesh with its UV map and flags, in a select mode (SCE_SELECT_*).
-  static fromMesh(mesh, selectmode) {
-    return new EditMesh(bmFromMesh(mesh, selectmode));
-  }
-
-  get #bm() { return x.edit_context_bmesh(this.#context); }
-
-  free() {
-    freeing.unregister(this);
-    x.edit_context_free(this.#context);
-    this.#context = 0;
-  }
-
-  // A copy in the same element order, with the selection history and the object's placement.
-  copy() {
-    const copy = new EditMesh(x.bm_copy(this.#bm));
-    if (this.#object_to_world) copy.objectToWorld = this.#object_to_world;
-    return copy;
-  }
-
-  // Replaces the BMesh with one of a Mesh, or with a copy of another edit mesh's, as loading an undo step does.
-  replace(source) {
-    x.edit_context_bmesh_set(this.#context, source instanceof EditMesh ? x.bm_copy(source.#bm) : bmFromMesh(source, this.selectmode));
-  }
-
-  get selectmode() { return x.edit_context_selectmode(this.#context); }
-  set selectmode(selectmode) { x.edit_context_selectmode_set(this.#context, selectmode); }
-
-  // The object's matrix (column-major, Blender's axes), for what operators do in world space (the 3D cursor).
-  set objectToWorld(matrix) {
-    this.#object_to_world = matrix;
-    withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_object_matrix_set(this.#context, p));
-  }
-
-  // The 3D View the operators act in: its view and window matrices (column-major, Blender's axes), size in pixels and
-  // projection, as regionView3D (editors/space_view3d/view3d-project.js) gives them.
-  set view({ viewmat, winmat, winx, winy, persp }) {
-    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.edit_context_view_set(this.#context, v, w, winx, winy, persp));
-  }
-
-  // The scene's 3D cursor (Blender world), which operators place things at.
-  set cursor(location) { new Float32Array(x.memory.buffer, x.edit_context_cursor(this.#context) >>> 0, 3).set(location); }
-
-  // What the last operator showed in the view's header, or ''.
-  get status() { const p = x.edit_context_status(this.#context); return p ? cString(p) : ''; }
-
-  // Invokes an operator with an event in the view (type and value by Blender's identifiers, x and y in region pixels
-  // with y up, modifier flags): its status, and when it runs modally the operator to give the next events to with
-  // modal(), and its modal keymap's name. An operator that ended leaves the values it ran with in `lastValues`.
-  invoke(idname, props, event) {
-    const op = newOperator(idname, props);
-    const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
-    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0;
-    if (!modal) { const report = operatorReport(op); this.#end(op); return { status, report }; }
-    return { status, op, keymap: cString(x.operator_modal_keymap(op)) };
-  }
-  // Gives a running operator an event (`modal`: a modal keymap item's value): its status; it is freed once it ends.
-  modal(op, event) {
-    const status = x.operator_modal(this.#C, op, wmEvent(this.#C, event));
-    if (!(status & OPERATOR_RUNNING_MODAL)) this.#end(op);
-    return status;
-  }
-  #end(op) {
-    this.lastValues = JSON.parse(cString(x.operator_values(op)));
-    x.operator_free(op);
-  }
-  // A running straight line gesture of an operator (Bisect's), in region pixels with y up: { active, start, end,
-  // side, flip }, or null.
-  gesture(op) {
-    const p = x.gesture_straightline(op) >>> 0;
-    if (!p) return null;
-    const [active, x0, y0, x1, y1, side, flip] = new Int32Array(x.memory.buffer, p, 7);
-    return { active: !!active, start: [x0, y0], end: [x1, y1], side: !!side, flip: !!flip };
-  }
-  // The point (region pixels, y up) a running operator draws a dashed line from to the mouse (Inset, Bevel), or null.
-  get mouseLine() {
-    const p = x.region_mouse_line() >>> 0;
-    return p ? Array.from(new Float32Array(x.memory.buffer, p, 2)) : null;
-  }
-  // The gizmo group of the active tool, as the module's operators see the gizmo map ('' for none).
-  set gizmoGroup(idname) { withString(idname, (p) => x.edit_context_gizmo_group_set(p)); }
-  // The gizmo groups operators asked for since the last call (their redo gizmos: MESH_GGT_spin_redo).
-  gizmoRequested() { return cString(x.edit_context_gizmo_requested()).split('\n').filter(Boolean); }
-  // The Loop Cut tool's preview of the edge ring from an edge with `cuts` cuts, in object space (Blender's axes).
-  preselectEdgeRing(edge, cuts) { return preselection(x.edit_mesh_preselect_edgering(this.#context, edge, cuts) >>> 0); }
-  // The Poly Build tool's preselection under the mouse (region pixels, y up; modifier flags), which its operators then
-  // act on, with its preview.
-  preselectElem(mx, my, modifier) { return preselection(x.edit_mesh_preselect_elem(this.#context, Math.round(mx), Math.round(my), modifier) >>> 0); }
-  // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
-  modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
-
-  get totals() {
-    const [totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop] = ints(7, (p) => x.bm_totals(this.#bm, p));
-    return { totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop };
-  }
-
-  // The edit mesh's Mesh as Blender's draw cache extracts it, refilling what changed since the last extraction (EXTRACT_*).
-  // Its arrays are views of buffers the edit mesh owns, so it is valid until the next extraction; toMesh() copies.
-  extract(what) {
-    return extractedMesh(x.edit_mesh_extract(this.#context, what) >>> 0);
-  }
-
-  // The object's modifiers evaluated on the edit mesh, as evaluateModifiers takes them: the final Mesh, valid until the
-  // next evaluation (null without modifiers), and each modifier's error or null.
-  evaluate(modifiers) {
-    const { errors } = setModifiers(x.edit_context_object(this.#context), modifiers);
-    const header = x.edit_mesh_eval(this.#context) >>> 0;
-    return { mesh: header ? extractedMesh(header) : null, errors: errors() };
-  }
-
-  // A Mesh of the edit mesh that is its own: arrays, UV map and flags.
-  toMesh() {
-    return ownedMesh(this.extract(EXTRACT_ALL));
-  }
-
-  // Runs a Blender operator's exec on the edit mesh, as runOperator takes it.
-  run(idname, props = {}) { return runOperator(this.#C, idname, props); }
-
-  // Whether an operator polls for this edit mesh.
-  poll(idname) { return pollOperator(this.#C, idname); }
-
-  // An enum property's items as the operator's UI lists them for this edit mesh.
-  enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
-
-  // The selection history (BMesh.selected), oldest first, as { htype, index }.
-  get history() {
-    const bm = this.#bm;
-    return withArrays([new Int32Array(1)], ([htype]) => Array.from({ length: x.bm_select_history_len(bm) }, (_, i) => {
-      const index = x.bm_select_history_get(bm, i, htype);
-      return { htype: new Int32Array(x.memory.buffer, htype, 1)[0], index };
-    }));
-  }
-  set history(history) {
-    withArrays([Int32Array.from(history, (ese) => ese.htype), Int32Array.from(history, (ese) => ese.index)],
-      ([htypes, indices]) => x.bm_select_history_set(this.#bm, htypes, indices, history.length));
-  }
-
-  // A click on an element (index -1 for none) with a select operation (eSelectOp), as EDBM_select_pick applies it.
-  selectPick(htype, index, sel_op, deselect_all) {
-    return !!x.edit_mesh_select_pick(this.#context, htype, index, sel_op, deselect_all);
-  }
-
-  // Selects or deselects elements of one type in order; selectFlush() afterwards flushes by the select mode.
-  selectElements(htype, indices, selects) {
-    withArrays([Int32Array.from(indices), Uint8Array.from(selects, Boolean)], ([i, s]) => x.bm_select_elements(this.#bm, htype, i, s, indices.length));
-  }
-  selectFlush() { x.edit_mesh_select_flush(this.#context); }
-
-  // Selects an element and records it in the selection history, as Blender's fixture scripts do.
-  select(htype, index) { x.bm_select(this.#bm, htype, index); }
-  // Clears the selection and its history and sets the select mode.
-  selectClear(selectmode) {
-    x.bm_select_clear(this.#bm, selectmode);
-    this.selectmode = selectmode;
-  }
-
-  // Moves vertices to object-space coordinates (three per vertex).
-  setCoords(indices, coords) {
-    withArrays([Int32Array.from(indices), Float32Array.from(coords)], ([i, c]) => x.bm_vert_coords_set(this.#bm, i, c, indices.length));
-  }
-}
 
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
@@ -352,6 +151,8 @@ const SOCKET_TYPES = { NodeSocketFloat: [0, 0], NodeSocketFloatFactor: [0, 15], 
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 const ATTRIBUTE_TYPE_NAMES = new Map(Object.entries(ATTRIBUTE_TYPES).map(([name, [code]]) => [code, name]));
 const DOMAIN_NAMES = Object.keys(DOMAINS);
+// Bylonder's Mesh attribute names that Blender 5.2's Mesh names otherwise.
+const MAIN_NAMES = new Map([['.uv_seam', 'uv_seam']]), OWN_NAMES = new Map([...MAIN_NAMES].map(([own, main]) => [main, own]));
 
 // Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
 // selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and
@@ -420,7 +221,7 @@ export class BlenderMain {
       x.object_mesh_set(ob, mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce));
     for (const [name, { domain, type, data }] of mesh.attributes) {
       const [code, Type] = ATTRIBUTE_TYPES[type] ?? [];
-      if (Type) withString(name, (p) => withArrays([Type.from(data)], ([values]) => x.object_mesh_attribute_add(ob, p, DOMAINS[domain], code, values)));
+      if (Type) withString(MAIN_NAMES.get(name) ?? name, (p) => withArrays([Type.from(data)], ([values]) => x.object_mesh_attribute_add(ob, p, DOMAINS[domain], code, values)));
     }
   }
   // A copy of a mesh object's Mesh with its attributes of the types Bylonder's meshes hold (mesh_attributes_list).
@@ -430,7 +231,7 @@ export class BlenderMain {
     const mesh = extractedMesh(x.object_mesh_extract(this.#context, ob) >>> 0);
     mesh.attributes = new Map(listed.map(([name, { domain, type }]) => {
       const [, Type, size] = ATTRIBUTE_TYPES[type], pointer = withString(name, (p) => x.object_mesh_attribute(ob, p)) >>> 0;
-      return [name, { domain, type, data: new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size) }];
+      return [OWN_NAMES.get(name) ?? name, { domain, type, data: new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size) }];
     }));
     return ownedMesh(mesh);
   }
@@ -636,6 +437,18 @@ export class BlenderMain {
 // The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.
 let shared = null;
 export const blenderMain = () => (shared ??= new BlenderMain());
+// Runs fn on a Main apart from the scene's, for geometry Blender's operators make, its context the one operator
+// properties are set in meanwhile.
+let scratch;
+export function inScratchMain(fn) {
+  scratch ??= new BlenderMain();
+  x.rna_context_set(scratch.C);
+  try {
+    return fn(scratch);
+  } finally {
+    x.rna_context_set(blenderMain().C);
+  }
+}
 
 // What subsystems with exports of their own (blenkernel/curve) reach the module through.
 export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems, operatorMenuProperty };

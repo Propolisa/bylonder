@@ -27,7 +27,7 @@ const world = { scene, objects, animation: createAnimationModel() };
 world.sceneSettings = createSceneSettings(world);
 world.renderSettings = createRenderSettings(world);
 world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
-// Edit Mode as editors/object/object-edit.js gives it.
+// Edit Mode as editors/object/edit-modes.js gives it.
 world.editMode = { object: null, selectmode: 1, get active() { return !!this.object; }, get stats() { return this.object && { verts: [8, 8], edges: [12, 12], faces: [6, 6] }; } };
 const selection = createSelection(scene, objects);
 const updates = [], undo = [];
