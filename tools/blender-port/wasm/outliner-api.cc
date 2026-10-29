@@ -1,7 +1,7 @@
-/* The Outliner: a ScrArea whose SpaceOutliner and regions are Blender's (made by the space type's own create), whose
- * tree Blender's own code builds, draws, selects and edits (editors/space_outliner) over the module's Main. Its main
- * region draws through region-draw.cc; its operators run in its context (outliner_context_set) by editor-context's
- * invoke and exec. */
+/* The Outliner: an area of Blender's window (wm_area_new) whose SpaceOutliner and regions are Blender's, whose tree
+ * Blender's own code builds, draws, selects and edits (editors/space_outliner) over the module's Main. Its main region
+ * draws through wm_region_draw; its operators run in its context (wm_area_context_set) by editor-context's invoke and
+ * exec. */
 #include "BKE_context.hh"
 #include "BKE_layer.hh"
 #include "BKE_lib_remap.hh"
@@ -50,46 +50,12 @@ void ui_init()
 
 static ARegion *main_region(ScrArea *area) { return BKE_area_find_region_type(area, RGN_TYPE_WINDOW); }
 
-/* The Outliner areas, which IDs Blender's code removes or remaps are remapped in, as WM_main_remap_editor_id_reference
- * remaps the window manager's areas (through each space type's id_remap). */
-static Vector<ScrArea *> &areas()
-{
-  static Vector<ScrArea *> list;
-  return list;
-}
-static void areas_id_remap(const bke::id::IDRemapper &mappings)
-{
-  for (ScrArea *area : areas()) {
-    for (SpaceLink &sl : area->spacedata) {
-      if (SpaceType *st = BKE_spacetype_from_id(sl.spacetype); st && st->id_remap) {
-        st->id_remap(area, &sl, mappings);
-      }
-    }
-  }
-}
 static SpaceOutliner *space(ScrArea *area) { return static_cast<SpaceOutliner *>(area->spacedata.first); }
 
-/* An Outliner area, as ED_area_newspace makes one: its space from the space type's create, which also makes its
- * regions. */
-EXPORT(outliner_new) ScrArea *outliner_new(bContext *C)
-{
-  SpaceType *st = BKE_spacetype_from_id(SPACE_OUTLINER);
-  ScrArea *area = MEM_new<ScrArea>(__func__);
-  area->spacetype = SPACE_OUTLINER;
-  area->type = st;
-  SpaceLink *sl = st->create(area, CTX_data_scene(C));
-  /* port-override: Bylonder's Outliner stands for the one of the file it opens, which syncs its selection from the
-   * view layer's only once that changes, rather than for one made at runtime, which syncs at once. */
-  reinterpret_cast<SpaceOutliner *>(sl)->sync_select_dirty = 0;
-  BLI_addhead(&area->spacedata, sl);
-  BLI_movelisttolist(&area->regionbase, &sl->regionbase);
-  for (ARegion &region : area->regionbase) {
-    region.runtime->type = BKE_regiontype_from_id(st, region.regiontype);
-  }
-  areas().append(area);
-  BKE_library_callback_remap_editor_id_reference_set(areas_id_remap);
-  return area;
-}
+/* An Outliner area (wm_area_new's) set up as Bylonder's. port-override: Bylonder's Outliner stands for the one of the
+ * file it opens, which syncs its selection from the view layer's only once that changes, rather than for one made at
+ * runtime, which syncs at once. */
+EXPORT(outliner_area_init) void outliner_area_init(ScrArea *area) { space(area)->sync_select_dirty = 0; }
 
 EXPORT(outliner_space) SpaceOutliner *outliner_space(ScrArea *area) { return space(area); }
 EXPORT(outliner_region) ARegion *outliner_region(ScrArea *area) { return main_region(area); }
@@ -116,17 +82,6 @@ EXPORT(outliner_region_size) void outliner_region_size(ScrArea *area, int x, int
   WM_event_add_dropbox_handler(&region->runtime->handlers,
                                WM_dropboxmap_find("Outliner", SPACE_OUTLINER, RGN_TYPE_WINDOW));
 }
-
-/* Makes the Outliner and its main region the context's area and region, as the window manager does for its handlers. */
-EXPORT(outliner_context_set) void outliner_context_set(bContext *C, ScrArea *area)
-{
-  CTX_wm_area_set(C, area);
-  CTX_wm_region_set(C, area ? main_region(area) : nullptr);
-}
-
-/* The main region as its type draws it (outliner_main_region_draw), as wm_region_draw records it. */
-extern "C" const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay);
-EXPORT(outliner_draw) const char *outliner_draw(bContext *C, ScrArea *area) { return wm_region_draw(C, area, RGN_TYPE_WINDOW, false); }
 
 /* Marks the Outliner for a sync of its selection from the view layer's, as the editors that change the selection do
  * (ED_outliner_select_sync_from_object_tag). */
