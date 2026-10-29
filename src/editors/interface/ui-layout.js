@@ -77,15 +77,3 @@ export function drawMenu(idname, ui) {
 // Whether Bylonder runs an entry, or something in a submenu.
 export const runs = (item) => item !== '-' && (item.items ? subitems(item).some(runs) : item.supported?.() ?? true);
 export const subitems = (item) => (typeof item.items === 'function' ? item.items() : item.items);
-
-// The Blender ids of what a menu shows that Bylonder runs, its own and its entries' and submenus', for the Blender
-// coverage view.
-export function menuCoverage(idname, ui) {
-  const ids = new Set([idname]);
-  const visit = (items) => items.filter(runs).forEach((item) => {
-    ids.add(item.blender);
-    if (item.items) visit(subitems(item));
-  });
-  visit(drawMenu(idname, ui));
-  return [...ids];
-}

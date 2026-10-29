@@ -3,6 +3,8 @@ import { BlenderMain, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { blendData, setContextPointer, pointerStruct, structFind } from '../src/python/bpy_rna.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/editors/animation/anim-area.js';
+import { createTopbarArea } from '../src/editors/space_topbar/topbar-area.js';
+import { kw } from '../src/windowmanager/wm-operators.js';
 import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, buttonOperator, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 // Blender's Properties editor laid out by Blender's uiLayout in the module, its panels Blender's Python registered as
@@ -86,4 +88,18 @@ const menu = area.inContext(RGN_TYPE_WINDOW, (C) => menuTree(C, 'OBJECT_MT_modif
 assert.equal(menu.kind, 'menu');
 const enumMenu = buttons(header[0]).find((b) => b.opens);
 if (enumMenu) assert.equal(area.inContext(RGN_TYPE_HEADER, (C) => buttonMenu(C, enumMenu)).kind, 'menu');
+// The Top Bar's menus for the app page (topbar-area.js): Blender's bar, with an app operator Blender lacks appended.
+globalThis.innerWidth ??= 1200;
+const topbarArea = createTopbarArea(blender, null);
+assert.deepEqual(topbarArea.bar().map(({ menu }) => menu), ['TOPBAR_MT_blender', 'TOPBAR_MT_file', 'TOPBAR_MT_edit', 'TOPBAR_MT_render', 'TOPBAR_MT_window', 'TOPBAR_MT_help']);
+let opened = 0;
+topbarArea.host({ 'bylonder.project_open': { run: () => { opened++; } } },
+  [['TOPBAR_MT_file', 'append', ({ layout }) => layout.operator('bylonder.project_open', kw({ text: 'Open Project...' }))]], ['General']);
+const fileMenu = buttons(topbarArea.menu('TOPBAR_MT_file'));
+const entry = fileMenu.find((b) => b.text === 'Open Project...');
+assert.equal(entry?.operator, 'bylonder.project_open', 'the appended entry is in Blender\'s File menu');
+topbarArea.ui.run(entry.operator, entry.properties ?? {});
+assert.equal(opened, 1, 'and runs the app operator');
+const templates = topbarArea.ui.inContext((C) => buttonMenu(C, fileMenu.find((b) => b.menu === 'TOPBAR_MT_file_new')));
+assert.ok(buttons(templates).some((b) => b.text === 'General'), 'File > New lists the templates');
 console.log(`Blender's uiLayout: ${drawn.length} panels, the header and menus as trees`);
