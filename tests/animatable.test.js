@@ -6,7 +6,9 @@ import { NullEngine, Scene, NodeMaterial, InputBlock, Color3 } from '@babylonjs/
 import { createAnimationModel, address } from '../src/blenkernel/animation/model.js';
 import { customProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { bindGraph } from '../src/nodes/bindings.js';
-import { channelButton } from '../src/editors/animation/keyframing-button.js';
+import '../src/python/bpy_interface.js';
+import { channelButton, hoverButton, leaveButton } from '../src/editors/animation/keyframing-button.js';
+import { invokeOperator } from '../src/windowmanager/wm-operators.js';
 
 const close = (a, b, label) => assert.ok(Math.abs(a - b) < 1e-4, `${label}: ${a} != ${b}`);
 const scene = new Scene(new NullEngine());
@@ -43,8 +45,13 @@ assert.equal(animation.state(red), 'animated');
 const button = channelButton(animation, fields[0].refs);
 const labels = () => button.items().filter((item) => item.label).map((item) => item.label);
 assert.deepEqual(labels(), ['Insert Keyframe', 'Clear Keyframes', 'Copy Data Path']);
+assert.equal(button.items()[0].keys, 'I', "the User Interface keymap's shortcut");
 tint.value.g = 0.25;
-assert.ok(button.run('anim.keyframe_insert_button'));
+// I over the row runs the User Interface keymap's operator on the hovered button.
+hoverButton(button);
+assert.equal(invokeOperator('anim.keyframe_insert_button', {}), 'FINISHED');
+leaveButton(button);
+assert.equal(invokeOperator('anim.keyframe_insert_button', {}), false, 'no button under the pointer');
 assert.deepEqual(anim.fcurves(ma).map((f) => f.rna_path).sort(), ['["Tint.b"]', '["Tint.g"]', '["Tint.r"]']);
 assert.equal(animation.state(red), 'keyed');
 assert.deepEqual(labels(), ['Replace Keyframe', 'Delete Keyframe', 'Clear Keyframes', 'Copy Data Path']);
