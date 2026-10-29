@@ -1,10 +1,12 @@
 // Blender's Python (bpy_interface.cc): Blender's scripts, transpiled whole (src/bl_py, tools/blender-ui/tree.py), loaded
 // and started as Blender starts them, which registers their classes. Bylonder draws and runs those classes by name.
 import { loadRNAUI } from '../makesrna/rna.js';
-import { invokeOperator, runOperator, pollOperator, hasOperator, registerFallback, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
-import { hasOperator as blenderHasOperator } from '../bmesh/bmesh-wasm.js';
+import { invokeOperator, runOperator, pollOperator, hasOperator, runsOperator, ownsOperator, registerFallback, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
+import { hasOperator as blenderHasOperator, newOperator, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { set, bool, __class__, __get__ } from '../bl_py/org.transcrypt.__runtime__.js';
-import { registerClass, inPythonContext, contextPointer } from './bpy_rna.js';
+import { registerClass, inPythonContext, contextPointer, inClassCall } from './bpy_rna.js';
+
+const { exports: x, withString, cString } = blenderModule;
 
 
 // Blender's scripts read RNA's enums as they load. Vite serves JSON as a module, without Node's import attribute.
@@ -12,14 +14,36 @@ await loadRNAUI(import.meta.env ? () => import('../makesrna/rna-ui.json') : unde
 await import('../bl_py/__main__.js');
 const _bpy = globalThis.__py_modules._bpy;
 
-// bpy.ops (the boundary's _bpy.ops) runs Blender's operators by idname in Bylonder's registry: invoked or executed as
-// the execution context says, returning Blender's result set.
+// bpy.ops (the boundary's _bpy.ops, bpy_operator.cc): an operator Bylonder runs its own way, or any its registry has
+// outside Blender's callbacks (a script's, with the scene made current around it), runs in the registry; the others go
+// through Blender's WM_operator_call_py in the context Python runs in, so an invoke gets the window's current event and
+// a modal operator keeps running in the window. Each returns Blender's result set.
+const CALL_CONTEXTS = ['INVOKE_DEFAULT', 'INVOKE_REGION_WIN', 'INVOKE_REGION_CHANNELS', 'INVOKE_REGION_PREVIEW', 'INVOKE_AREA', 'INVOKE_SCREEN',
+  'EXEC_DEFAULT', 'EXEC_REGION_WIN', 'EXEC_REGION_CHANNELS', 'EXEC_REGION_PREVIEW', 'EXEC_AREA', 'EXEC_SCREEN'];
+const STATUS = [[1, 'RUNNING_MODAL'], [2, 'CANCELLED'], [4, 'FINISHED'], [8, 'PASS_THROUGH'], [16, 'INTERFACE']];
+const inRegistry = (idname) => ownsOperator(idname) || (!inClassCall() && runsOperator(idname));
 globalThis.__bylonder_operators__ = {
-  poll: (...args) => pollOperator(...args),
+  poll(idname, props, context = 'EXEC_DEFAULT') {
+    if (inRegistry(idname)) return pollOperator(idname, props);
+    return !!withString(idname, (p) => x.bpy_operator_poll(contextPointer(), p, CALL_CONTEXTS.indexOf(context)));
+  },
   call(idname, props, context) {
-    if (!pollOperator(idname, props)) throw Error(`${idname}.poll() failed, context is incorrect`);
-    const result = context.startsWith('INVOKE') ? invokeOperator(idname, props, null) : runOperator(idname, props);
-    return set([typeof result === 'string' ? result : 'FINISHED']);
+    if (inRegistry(idname)) {
+      if (!pollOperator(idname, props)) throw Error(`${idname}.poll() failed, context is incorrect`);
+      const result = context.startsWith('INVOKE') ? invokeOperator(idname, props, null) : runOperator(idname, props);
+      return set([typeof result === 'string' ? result : 'FINISHED']);
+    }
+    const op = newOperator(idname, props);
+    let status;
+    try {
+      status = x.bpy_operator_call(contextPointer(), op, CALL_CONTEXTS.indexOf(context));
+    } finally {
+      x.operator_free(op);
+    }
+    if (status < 0) throw Error(`Operator bpy.ops.${idname}.poll() failed, context is incorrect`);
+    const error = cString(x.bpy_operator_call_error());
+    if (error) throw Error(error);
+    return set(STATUS.filter(([bit]) => status & bit).map(([, name]) => name));
   },
 };
 

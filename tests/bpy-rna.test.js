@@ -3,7 +3,7 @@ import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { registered } from '../src/python/bpy_interface.js';
 import { blendData, contextStruct, setContextPointer, registerClass, structFind, structRna, inPythonContext } from '../src/python/bpy_rna.js';
 import { api } from '../src/python/pyodide.js';
-import { __class__, __kwargtrans__ } from '../src/bl_py/org.transcrypt.__runtime__.js';
+import { __class__, __kwargtrans__, set } from '../src/bl_py/org.transcrypt.__runtime__.js';
 
 // Blender's data and types as bpy gives them to Python, over the module's RNA (bpy_rna.js, rna-bridge.cc).
 const blender = new BlenderMain();
@@ -95,5 +95,25 @@ const locations = api.foreachGet(data.objects, 'location');
 assert.deepEqual([...locations], [...ob.location]);
 api.foreachSet(data.objects, 'location', locations.map((v) => v + 1));
 assert.equal(ob.location[0], locations[0] + 1, 'foreach_set writes each item');
+
+// bpy.ops in a callback Blender runs goes through Blender's window manager (WM_operator_call_py): an exec, and an
+// invoke with the window's event, which leaves a modal operator running in the window.
+const { Window, SPACE_VIEW3D, RGN_TYPE_WINDOW } = await import('../src/windowmanager/wm-window.js');
+const ops = globalThis.__py_modules.bpy.ops, calls = [];
+registerClass(__class__('TEST_OT_call_ops', [types.Operator], {
+  bl_idname: 'test.call_ops',
+  bl_label: 'Call Operators',
+  execute: () => {
+    calls.push([...ops.object.select_all(__kwargtrans__({ action: 'DESELECT' }))]);
+    calls.push([...ops.transform.translate('INVOKE_DEFAULT')]);
+    return set(['FINISHED']);
+  },
+}));
+ob.select_set(true);
+const view = new Window(blender).area(SPACE_VIEW3D);
+view.layout({ x: 0, y: 0, width: 800, height: 600 }, { [RGN_TYPE_WINDOW]: { x: 0, y: 0, width: 800, height: 600 } });
+view.inContext(RGN_TYPE_WINDOW, () => blender.run('test.call_ops'));
+assert.deepEqual(calls, [['FINISHED'], ['RUNNING_MODAL']], 'an exec finishes; an invoke of a modal operator keeps running');
+assert.equal(ob.select_get(), false, 'what the exec did is in Main');
 
 console.log('bpy over the module: properties, collections, functions, context and registration');

@@ -558,7 +558,11 @@ provided.bpy_class_validate = (id, type, owner, data, haveFunction) => {
 // bpy_class_call: a callback of a registered class, on an instance over the struct (kept with the data where the type
 // keeps one, an operator's), or on the class for a class method; its result written to the function's output.
 // bpy.context is the callback's context while it runs (bpy_context_set), for scripts that read it.
+// Whether Python runs in a callback Blender called (bpy_class_call), where bpy.ops calls go to Blender's window manager.
+let classCalls = 0;
+export const inClassCall = () => classCalls > 0;
 provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => inPythonContext(CPointer, () => {
+  classCalls++;
   const ptr = [type >>> 0, owner >>> 0, data >>> 0], cls = classes[x.bpy_struct_class(ptr[0])];
   const { flag, parameters } = functionInfo(func >>> 0);
   try {
@@ -573,6 +577,8 @@ provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => inPython
   } catch (error) {
     console.error(`Python: ${cls?.__name__}.${functionName(func >>> 0)}:`, pythonError(error));
     return -1;
+  } finally {
+    classCalls--;
   }
 });
 provided.bpy_class_free = (id) => {

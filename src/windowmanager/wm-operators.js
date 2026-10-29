@@ -45,6 +45,8 @@ export function registerOperators(table, space = null) {
 const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.get(idname)) ?? operators.get(idname);
 // Whether Bylonder's registry runs an operator (its own way, or Blender's with the scene made current around it).
 export const runsOperator = (idname) => !!operatorFor(idname);
+// Whether Bylonder runs an operator its own way, not Blender's behind it (`blender: true`).
+export const ownsOperator = (idname) => runsOperator(idname) && !operatorFor(idname).blender;
 
 // A finished operator reports its call (wm-reports.js).
 const finished = (idname, props, result) => {
