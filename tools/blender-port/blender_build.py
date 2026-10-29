@@ -30,6 +30,9 @@ SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles
 # Host flags that have no meaning for wasm32 or name host paths.
 DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_TBB$|-DWITH_TBB=|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
+# Sources built as a Blender with a window draws them, though the configure is headless: the interface, whose drawing
+# the API records (its icons are registered only then, icons_init).
+HEADED = re.compile(r'source/blender/editors/interface/')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
          '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
          '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
@@ -87,6 +90,8 @@ def wasm_command(entry, extra):
         # A host include directory given as two arguments (-isystem /usr/include/OpenImageIO).
         if arg in ('-I', '-isystem') and i + 2 < len(args) and args[i + 2].startswith('/usr/'):
             skip = True
+            continue
+        if arg == '-DWITH_HEADLESS' and HEADED.search(entry['file']):
             continue
         if arg == entry['file'] or arg.endswith(os.path.basename(entry['file'])) and os.path.isabs(arg) or DROP.match(arg) or arg == '-MD':
             continue
