@@ -126,7 +126,7 @@ assert.deepEqual(sync.check(), []);
 // A sequence of edits from both sides, each an undo step, then undone and redone: after every one the models are equal
 // (sync.debug checks after each flush and run, check() once more here).
 const ID_GR = 0x5247;
-const history = createHistory(objects, () => {}, { main: sync, capture: () => world.collections.capture() ?? null, restore: (state) => world.collections.apply(state ?? undefined) });
+const history = createHistory(objects, () => world.modifiers.refresh(), { main: sync, capture: () => world.collections.capture() ?? null, restore: (state) => world.collections.apply(state ?? undefined) });
 // Blender's code changing Main as its operators and buttons do: by its API, and DNA without a recalc tag.
 const blenderSide = (fn) => sync.run(fn);
 const steps = [
@@ -217,8 +217,8 @@ const writes = sync.writes;
 sync.flush();
 assert.equal(sync.writes, writes, 'no echo into Main');
 
-// Blender's undo: each step loads Main's state of that step and the view draws it.
-const last = shown();
+// Blender's undo: each step loads Main's state of that step and the view draws it (what the Outliner did after the
+// last step was not one, and is undone with it).
 for (let i = 0; i < steps.length; i++) {
   history.undo();
   sync.flush();
@@ -229,7 +229,7 @@ for (const [i, [name]] of steps.entries()) {
   history.redo();
   sync.flush();
   assert.deepEqual(sync.check(), [], `after redoing ${name}`);
-  assert.equal(shown(), i === steps.length - 1 ? last : states[i + 1], `redoing ${name} shows its step`);
+  assert.equal(shown(), states[i + 1], `redoing ${name} shows its step`);
 }
 
 // docs/lava-material.md: a node material's Blender nodes are its node tree in Main, with their values and links; a

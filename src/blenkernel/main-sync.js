@@ -121,7 +121,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       babylon: (node) => objects.get(node.parent)?.ob ?? 0,
       main: (ob) => blender.parent(ob),
       set: (ob, parent) => blender.setParent(ob, parent),
-      apply: (node, parent) => node.setParent(nodeOf(parent)),
+      // Its transform stays the one relative to its parent, as Main's (its parent inverse folded in).
+      apply: (node, parent) => { node.parent = nodeOf(parent); },
     },
     material_slots: {
       applies: (entry) => entry.type === 'MESH',
@@ -219,9 +220,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Relations, by RNA name: what both models hold that is not a DNA value.
   function pushObject(entry) {
     const { node, ob } = entry, data = rna.pointer('Object', node);
+    // A name is Blender's, unique among its IDs ("Cube.001" for a second "Cube").
     if (node.name !== entry.babylonName) {
       blender.rename(ob, node.name);
-      [entry.babylonName, entry.name] = [node.name, blender.name(ob)];
+      node.name = entry.babylonName = entry.name = blender.name(ob);
     }
     pushRelations(entry);
     // An armature's mode is Blender's: its Edit and Pose Modes are entered by Blender's operators in Main.
