@@ -1,7 +1,6 @@
 import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { drawMenu, menuCoverage } from '../editors/interface/ui-layout.js';
 import { registerOperators, appendMenu, prependMenu, kw, menuUI } from '../windowmanager/wm-operators.js';
-import { menus as blenderMenus, module } from '../python/bpy_interface.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
 import { fullDate, timeAgo } from './relative-time.js';
@@ -95,24 +94,29 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   appendMenu('TOPBAR_MT_render', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); });
   appendMenu('TOPBAR_MT_window', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_code', 'Toggle Project Code'); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); });
   appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
-  // Open Recent is a menu Blender defines in C (wm_files.cc): the recent files, here the recent projects.
-  const TOPBAR_MT_file_open_recent = Object.assign(() => ({
-    draw() { for (const project of recent) this.layout.operator('wm.open_mainfile', kw({ text: project.name, icon: 'FILE_BLEND' })).filepath = project.id; },
-  }), { bl_label: 'Open Recent' });
-  // The examples as Blender's application templates, which File > New lists (bpy.utils.app_template_paths).
-  module('os.path')._mount('/blender/scripts/startup/bl_app_templates_system', examples.map((example) => example.title));
-  const context = () => ({
-    area: { show_menus: true }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
-    scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},
-  });
-  const ui = topbarUI = menuUI({ menus: { ...blenderMenus, TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
-  // The menus of Blender's topbar (TOPBAR_MT_editor_menus), the Blender menu shown as the logo.
-  for (const item of drawMenu('TOPBAR_MT_editor_menus', ui)) {
-    const logo = item.blender === 'TOPBAR_MT_blender';
-    const items = () => { refreshRecent(); return item.items(); };
-    menus.append(menuButton(logo ? '' : item.label, items, { blender: item.blender, icon: logo ? 'bylonder' : item.icon }));
-  }
-  bar.querySelector('.bl-logo').remove();
+  // Blender's menus, from its Python tree (bpy_interface.js): loaded once the scene's window has started, so that the
+  // tree is not evaluated before the scene is (loadMenus).
+  const loadMenus = async () => {
+    const { menus: blenderMenus, module } = await import('../python/bpy_interface.js');
+    // Open Recent is a menu Blender defines in C (wm_files.cc): the recent files, here the recent projects.
+    const TOPBAR_MT_file_open_recent = Object.assign(() => ({
+      draw() { for (const project of recent) this.layout.operator('wm.open_mainfile', kw({ text: project.name, icon: 'FILE_BLEND' })).filepath = project.id; },
+    }), { bl_label: 'Open Recent' });
+    // The examples as Blender's application templates, which File > New lists (bpy.utils.app_template_paths).
+    module('os.path')._mount('/blender/scripts/startup/bl_app_templates_system', examples.map((example) => example.title));
+    const context = () => ({
+      area: { show_menus: true }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
+      scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},
+    });
+    const ui = topbarUI = menuUI({ menus: { ...blenderMenus, TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
+    // The menus of Blender's topbar (TOPBAR_MT_editor_menus), the Blender menu shown as the logo.
+    for (const item of drawMenu('TOPBAR_MT_editor_menus', ui)) {
+      const logo = item.blender === 'TOPBAR_MT_blender';
+      const items = () => { refreshRecent(); return item.items(); };
+      menus.append(menuButton(logo ? '' : item.label, items, { blender: item.blender, icon: logo ? 'bylonder' : item.icon }));
+    }
+    bar.querySelector('.bl-logo').remove();
+  };
   const tabs = $('workspace-tabs');
   for (const { id, name } of workspaces) {
     const b = document.createElement('button');
@@ -178,6 +182,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     sync,
     screen,
     splash,
+    loadMenus,
     status({ hints: list = [], stats: text = '', viewLayers }) {
       if (viewLayers) {
         viewLayer.replaceChildren(...viewLayers.list.map(([value, textContent]) => Object.assign(document.createElement('option'), { value, textContent })));

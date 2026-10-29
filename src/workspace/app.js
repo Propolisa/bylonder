@@ -6,7 +6,6 @@ import { RUNTIME_LAYOUT_KEY } from "../editors/screen/model.js";
 import "./workspace.css";
 import { mountTopbar } from "./topbar.js";
 import { examples } from "./examples.js";
-import { monaco, language, setupIntelligence } from "./intelligence";
 import { openOPFS } from "./opfs";
 import { createRepository } from "./repository";
 import { defaultFiles, blendProjectSource } from "./default-project";
@@ -29,6 +28,7 @@ await preloadIcons();
 const reveal = () => document.body.classList.remove("bl-loading");
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
+let topbarMenus;
 const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
 let repo,
   project,
@@ -52,26 +52,115 @@ const snapshotRequests = new Map();
 // Inactive scenes kept loaded (Keep Scenes Loaded); the active scene's viewport is `frame`.
 const parked = new Map();
 let suppress = false;
-const editor = monaco.editor.create($("editor-container"), {
-  theme: "vs-dark",
-  automaticLayout: true,
-  minimap: { enabled: false },
-  fontSize: 13,
-  tabSize: 4,
-  scrollBeyondLastLine: false,
-  wordWrap: "off",
-  padding: { top: 8 },
-  bracketPairColorization: { enabled: true },
-  suggest: { preview: true },
-  inlineSuggest: { enabled: true },
-});
-const diff = monaco.editor.createDiffEditor($("diff-container"), {
-  theme: "vs-dark",
-  automaticLayout: true,
-  readOnly: true,
-  minimap: { enabled: false },
-  renderSideBySide: true,
-});
+// The code editor (Monaco) and its type service, loaded when the code is first needed or once the scene runs: not before
+// the scene, which the window shows first.
+let monaco, language, editor, diff, intelligencePromise, codeLoading;
+const code = () => (codeLoading ??= import("./intelligence").then((intelligence) => {
+  ({ monaco, language } = intelligence);
+  const { setupIntelligence } = intelligence;
+  editor = monaco.editor.create($("editor-container"), {
+    theme: "vs-dark",
+    automaticLayout: true,
+    minimap: { enabled: false },
+    fontSize: 13,
+    tabSize: 4,
+    scrollBeyondLastLine: false,
+    wordWrap: "off",
+    padding: { top: 8 },
+    bracketPairColorization: { enabled: true },
+    suggest: { preview: true },
+    inlineSuggest: { enabled: true },
+  });
+  diff = monaco.editor.createDiffEditor($("diff-container"), {
+    theme: "vs-dark",
+    automaticLayout: true,
+    readOnly: true,
+    minimap: { enabled: false },
+    renderSideBySide: true,
+  });
+  intelligencePromise = setupIntelligence((status) => {
+    $("type-status").textContent = status.split("\n")[0];
+    $("types-content").textContent = status;
+  }).catch((e) => {
+    failure(e);
+    $("type-status").textContent = "Type service unavailable";
+    return null;
+  });
+  monaco.editor.onDidChangeMarkers(() => {
+    const markers = monaco.editor
+      .getModelMarkers({})
+      .filter(
+        (m) =>
+          m.resource.toString().startsWith("file:///workspace/") &&
+          !m.resource.path.includes("__"),
+      );
+    $("problem-count").textContent = markers.length;
+    $("problems-content").replaceChildren();
+    for (const marker of markers.slice(0, 100)) {
+      const b = document.createElement("button");
+      b.className = "problem";
+      const path = decodeURIComponent(
+        marker.resource.path.replace("/workspace/", ""),
+      );
+      b.textContent =
+        path +
+        ":" +
+        marker.startLineNumber +
+        ":" +
+        marker.startColumn +
+        " " +
+        marker.message;
+      b.onclick = () => {
+        openFile(path);
+        editor.setPosition({
+          lineNumber: marker.startLineNumber,
+          column: marker.startColumn,
+        });
+        editor.revealLineInCenter(marker.startLineNumber);
+      };
+      $("problems-content").append(b);
+    }
+  });
+  monaco.editor.registerEditorOpener({
+    openCodeEditor(source, resource, selection) {
+      const path = decodeURIComponent(resource.path.replace("/workspace/", ""));
+      if (project?.files[path]) openFile(path);
+      else {
+        let model = monaco.editor.getModel(resource);
+        if (!model) {
+          const lib =
+            monaco.languages.typescript.typescriptDefaults.getExtraLibs()[
+              resource.toString()
+            ];
+          if (!lib) return false;
+          model = monaco.editor.createModel(
+            lib.content,
+            language(resource.path),
+            resource,
+          );
+        }
+        editor.setModel(model);
+        editor.updateOptions({ readOnly: true });
+        $("active-file").textContent = resource.path;
+      }
+      if (selection) {
+        const position =
+          "startLineNumber" in selection
+            ? {
+                lineNumber: selection.startLineNumber,
+                column: selection.startColumn,
+              }
+            : selection;
+        editor.setPosition(position);
+        editor.revealLineInCenter(position.lineNumber);
+      }
+      return true;
+    },
+  });
+  syncModels();
+  if (project) openFile(active);
+  scheduleTypes();
+}).catch(failure));
 let diffModels = [];
 function log(text, level = "log") {
   const row = document.createElement("div");
@@ -98,18 +187,10 @@ const action =
       failure(e);
     }
   };
-const intelligencePromise = setupIntelligence((status) => {
-  $("type-status").textContent = status.split("\n")[0];
-  $("types-content").textContent = status;
-}).catch((e) => {
-  failure(e);
-  $("type-status").textContent = "Type service unavailable";
-  return null;
-});
 function scheduleTypes() {
   clearTimeout(typeTimer);
   typeTimer = setTimeout(async () => {
-    const intelligence = await intelligencePromise;
+    const intelligence = await intelligencePromise?.catch(() => null);
     if (intelligence && project)
       try {
         await intelligence.acquire(project);
@@ -132,6 +213,7 @@ function markDirty(source = true) {
   }
 }
 function syncModels() {
+  if (!monaco) return;
   suppress = true;
   for (const [path, model] of models)
     if (!project.files[path] || project.files[path].kind !== "text") {
@@ -169,6 +251,15 @@ function openFile(path) {
     );
     return;
   }
+  if (!editor) {
+    active = path;
+    if (!tabs.includes(path)) tabs.push(path);
+    $("active-file").textContent = path;
+    renderTabs();
+    renderTree();
+    code();
+    return;
+  }
   closeDiff();
   if (editor.getModel()) viewStates.set(active, editor.saveViewState());
   active = path;
@@ -183,7 +274,7 @@ function openFile(path) {
 }
 function renderTabs() {
   $("tabs").replaceChildren();
-  for (const path of tabs.filter((p) => models.has(p))) {
+  for (const path of tabs.filter((p) => project.files[p]?.kind === "text")) {
     const button = document.createElement("button");
     button.className = path === active ? "active" : "";
     button.textContent = path.split("/").pop();
@@ -452,6 +543,7 @@ async function run({ keepParked = false } = {}) {
   frame.allow = "fullscreen; clipboard-write; web-share";
   frame.src = APP_BASE + "viewport.html?channel=" + encodeURIComponent(channel);
   $("frame-host").append(frame);
+  topbarMenus ??= topbar.loadMenus().catch(failure);
   $("run-status").textContent = "Running createScene…";
   if (old) removeRun(old.base).catch(console.warn);
 }
@@ -503,7 +595,7 @@ window.addEventListener("message", (e) => {
       location.origin,
     );
   if (type === "text") textChanged(payload);
-  if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(reveal));
+  if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(() => { reveal(); setTimeout(code, 0); }));
   if (type === "running") { $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
   if (type === "run-error") {
     $("run-status").textContent = "Run failed";
@@ -562,6 +654,7 @@ async function showHistory() {
   }
 }
 async function showDiff(version) {
+  await code();
   diffVersion = version;
   const past = await repo.load(project.id, version.rev);
   const old = past.files[active]?.content || "",
@@ -579,6 +672,7 @@ async function showDiff(version) {
   diff.layout();
 }
 function closeDiff(clear = true) {
+  if (!diff) return;
   diff.setModel(null);
   diffModels.forEach((m) => m.dispose());
   diffModels = [];
@@ -711,7 +805,7 @@ document.addEventListener('dock-reset', () => {
   try { localStorage.removeItem(RUNTIME_LAYOUT_KEY); } catch {}
   frame?.contentWindow.postMessage({channel,type:'reset-layout'},location.origin);
 });
-document.querySelectorAll('[data-code-action]').forEach(button => button.onclick = () => { editor.focus(); editor.trigger('toolbar',button.dataset.codeAction,null); });
+document.querySelectorAll('[data-code-action]').forEach(button => button.onclick = () => code().then(() => { editor.focus(); editor.trigger('toolbar',button.dataset.codeAction,null); }));
 document.querySelectorAll('#app-more button').forEach(button => button.addEventListener('click', () => { $("app-more").open = false; }));
 const sharing = setupSharing({
   async capture(includeOverrides) {
@@ -872,77 +966,6 @@ for (const name of ["console", "problems", "types"])
     }
   };
 $("clear-console").onclick = () => $("console-content").replaceChildren();
-monaco.editor.onDidChangeMarkers(() => {
-  const markers = monaco.editor
-    .getModelMarkers({})
-    .filter(
-      (m) =>
-        m.resource.toString().startsWith("file:///workspace/") &&
-        !m.resource.path.includes("__"),
-    );
-  $("problem-count").textContent = markers.length;
-  $("problems-content").replaceChildren();
-  for (const marker of markers.slice(0, 100)) {
-    const b = document.createElement("button");
-    b.className = "problem";
-    const path = decodeURIComponent(
-      marker.resource.path.replace("/workspace/", ""),
-    );
-    b.textContent =
-      path +
-      ":" +
-      marker.startLineNumber +
-      ":" +
-      marker.startColumn +
-      " " +
-      marker.message;
-    b.onclick = () => {
-      openFile(path);
-      editor.setPosition({
-        lineNumber: marker.startLineNumber,
-        column: marker.startColumn,
-      });
-      editor.revealLineInCenter(marker.startLineNumber);
-    };
-    $("problems-content").append(b);
-  }
-});
-monaco.editor.registerEditorOpener({
-  openCodeEditor(source, resource, selection) {
-    const path = decodeURIComponent(resource.path.replace("/workspace/", ""));
-    if (project?.files[path]) openFile(path);
-    else {
-      let model = monaco.editor.getModel(resource);
-      if (!model) {
-        const lib =
-          monaco.languages.typescript.typescriptDefaults.getExtraLibs()[
-            resource.toString()
-          ];
-        if (!lib) return false;
-        model = monaco.editor.createModel(
-          lib.content,
-          language(resource.path),
-          resource,
-        );
-      }
-      editor.setModel(model);
-      editor.updateOptions({ readOnly: true });
-      $("active-file").textContent = resource.path;
-    }
-    if (selection) {
-      const position =
-        "startLineNumber" in selection
-          ? {
-              lineNumber: selection.startLineNumber,
-              column: selection.startColumn,
-            }
-          : selection;
-      editor.setPosition(position);
-      editor.revealLineInCenter(position.lineNumber);
-    }
-    return true;
-  },
-});
 window.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
