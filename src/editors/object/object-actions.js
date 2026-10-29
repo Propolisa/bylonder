@@ -2,25 +2,13 @@ import { askText } from "../interface/props-dialog.js";
 import { nodeId } from "./identity.js";
 import { openMenu } from "../interface/menu.js";
 import { runOperator } from "../../windowmanager/wm-operators.js";
-import { registerCollectionMenus } from "./object-collection.js";
 // Object Mode's actions, by the Blender operators they run (object-operators.js registers them), and Bylonder's own
 // (rename, group, ungroup) for its Object menu entries.
 export function createObjectActions({ world, editor, commands, creator }) {
   let pointer = { x: innerWidth / 2, y: innerHeight / 2 };
   addEventListener("pointermove", (e) => (pointer = { x: e.clientX, y: e.clientY }));
   const ids = () => editor.selection.nodes.filter((n) => world.objects.includes(n)).map(nodeId);
-  const cols = world.collections, collectionMenus = registerCollectionMenus(cols);
-  // object.move_to_collection and object.link_to_collection: into the collection given, or a new one in it (named as
-  // its invoke asks), else its menu.
-  const toCollection = (menu, put) => ({ collection_uid = -1, is_new = false, new_collection_name } = {}) => {
-    if (collection_uid < 0) return world.callMenu(menu, pointer);
-    const parent = collectionMenus.idOf(collection_uid), objects = ids();
-    const into = (name) => put(objects, cols.create({ parent, name: name || "Collection" }).id);
-    if (!is_new) return put(objects, parent);
-    if (new_collection_name !== undefined) return into(new_collection_name);
-    // object_move_to_collection's invoke asks for the new collection's name.
-    askText("Move to Collection", "Name", "Collection", pointer).then((name) => name !== null && into(name));
-  };
+  const cols = world.collections;
   // collection.objects_remove's enum: the collections the selected objects are in.
   const memberships = () => [...new Set(ids().flatMap((id) => cols.memberships(id)))]
     .map((id) => [id, id === cols.MASTER ? "Scene Collection" : cols.byId(id).name, "", "OUTLINER_COLLECTION"]);
@@ -40,8 +28,6 @@ export function createObjectActions({ world, editor, commands, creator }) {
     { id: "hide-others", blender: "object.hide_view_set", enabled: has, run: () => commands.hide(true) },
     { id: "show-all", blender: "object.hide_view_clear", run: () => commands.showAll() },
     { id: "isolate", blender: "view3d.localview", enabled: has, run: () => commands.isolate() },
-    { id: "move-to-collection", blender: ["OBJECT_MT_move_to_collection", "object.move_to_collection"], enabled: has, run: toCollection("OBJECT_MT_move_to_collection", (objects, id) => cols.move(objects, id)) },
-    { id: "link-to-collection", blender: ["OBJECT_MT_link_to_collection", "object.link_to_collection"], enabled: has, run: toCollection("OBJECT_MT_link_to_collection", (objects, id) => cols.link(objects, id)) },
     // Ctrl G creates the collection inside the active collection (Blender leaves it unlinked from the scene) and moves the selection into it.
     { id: "new-collection", blender: "collection.create", enabled: has, run: finished(() => cols.create({ objects: ids(), move: true })) },
     // Its invoke is an enum menu (WM_menu_invoke).

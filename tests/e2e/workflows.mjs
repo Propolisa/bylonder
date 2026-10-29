@@ -23,15 +23,16 @@ const workflows = {
   async "edit-model"() {
     await keys("Tab", "3");
     await app.page.mouse.click(...(await screenOf([0, 0, 1])));
-    await keys("i", "0", ".", "2", "Enter", "e", "1", "Enter", "Tab", "Control+2");
+    await keys("i", "0", ".", "2", "Enter", "e", "1", "Enter", "g", "z", "0", ".", "5", "Enter", "Tab", "Control+2");
     await contextMenu("Shade Smooth");
   },
   async organize() {
     await add("Mesh", "Monkey");
     await keys("g", "y", "3", "Enter", "Shift+d", "x", "3", "Enter", "m");
     await pick("New Collection");
-    await app.locator('[role="dialog"][aria-label="Move to Collection"] input').fill("Props");
-    await app.page.keyboard.press("Enter");
+    const dialog = app.locator('[role="dialog"][aria-label="Move to New Collection"]');
+    await dialog.getByRole("textbox").fill("Props");
+    await dialog.getByRole("button", { name: "Create" }).click();
     await outlinerClick("Suzanne");
     await outlinerClick("Cube", { modifiers: ["Control"] });
     await keys("Control+p");

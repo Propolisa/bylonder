@@ -46,7 +46,7 @@ import { createEditMode } from "./editors/object/object-edit.js";
 import { createEditModes } from "./editors/object/edit-modes.js";
 import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
 import { createCurveObjects } from "./editors/curve/curve-objects.js";
-import { registerObjectOperators } from "./editors/object/object-operators.js";
+import { registerObjectOperators, openModulePopup } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
@@ -607,6 +607,7 @@ registerOperators({
     poll: (props) => editor.selection.size > 0 || !!props.cursor_transform,
     run: (props, event) => {
       creator.finish();
+      if (world.editMode.kind === "MESH" && !props.cursor_transform) return world.editMode.module(idname, props, event);
       const point = event && (props.cursor_transform ? dragStart(event) : event);
       editor.start(type, { point, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
     },
@@ -670,9 +671,13 @@ const view3dKeys = keymapHandler(
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {
   get space() { return activeView(); },
+  // Blender's Python menus, else those its C defines (drawn by the module).
   menu: (name) => {
     const menu = activeView()?.menu(name);
-    return menu && ((event) => openMenu(menu.items(), event ?? editor.pointer, menu.title));
+    if (menu) return (event) => openMenu(menu.items(), event ?? editor.pointer, menu.title);
+    world.mainSync.flush();
+    const popup = world.mainSync.blender.menu(name);
+    return popup && ((event) => openModulePopup(world.mainSync, popup, event ?? editor.pointer));
   },
 };
 const blenderKeymaps = (event) => inArea(view3dArea, () => view3dKeys(event));

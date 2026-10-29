@@ -400,6 +400,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   return {
     get active() { return !!em; },
+    // One of Blender's operators run modally in the module's 3D View, as its window manager runs it (moduleOperator).
+    module: (idname, props, event) => moduleOperator(idname, props, event),
     gizmoStats: () => (em ? gizmoStats() : null),
     // The Loop Cut tool's edge ring under the mouse with `cuts` cuts (VIEW3D_GGT_mesh_preselect_edgering), and the
     // Poly Build tool's element under it, which its operators then act on, with its preview

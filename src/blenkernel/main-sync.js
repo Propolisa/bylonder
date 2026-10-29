@@ -631,6 +631,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
           node.setEnabled(false);
           objects.delete(node);
           dirty.delete(entry);
+          filled.delete(entry);
           entry.unwatch();
           ids.forget(entry.key);
           continue;

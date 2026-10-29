@@ -11,7 +11,6 @@
 .anim-sidebar[hidden]{display:none}
 .anim-sidebar .bl-region-panels{flex:1;min-width:0;overflow:auto;padding-top:calc(var(--bl-row)*.2)}
 /* An operator's properties popup (WM_operator_props_popup), at the pointer. */
-.anim-popup{position:fixed;z-index:1000;display:flex;flex-direction:column;gap:var(--bl-row-gap);min-width:calc(var(--bl-row)*10);padding:calc(var(--bl-row)*.3);border-radius:var(--bl-radius);background:var(--bl-menu-back);color:var(--bl-text);font:var(--bl-widget-font);outline:none}
 /* Block layouts a region's draw makes (the channel filter row), placed where the draw laid them. */
 .anim-channel-layouts{position:absolute;top:0;left:0;pointer-events:none}
 .anim-block-layout{position:absolute;pointer-events:auto}

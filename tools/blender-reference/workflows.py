@@ -75,7 +75,8 @@ def block_out():
 
 
 def edit_model():
-    """Tab, 3 (face select), click the top face, I 0.2, E 1; Tab; Ctrl 2 (Subdivision Surface level 2); Shade Smooth."""
+    """Tab, 3 (face select), click the top face, I 0.2, E 1, G Z 0.5; Tab; Ctrl 2 (Subdivision Surface level 2); Shade
+    Smooth."""
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_mode(type='FACE')
     bpy.ops.mesh.select_all(action='DESELECT')
@@ -84,6 +85,7 @@ def edit_model():
     bmesh.update_edit_mesh(bpy.context.object.data)
     bpy.ops.mesh.inset(thickness=0.2)
     bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={'value': (0, 0, 1), 'orient_type': 'NORMAL', 'constraint_axis': (False, False, True)})
+    bpy.ops.transform.translate(value=(0, 0, 0.5), constraint_axis=(False, False, True))
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.subdivision_set(level=2, relative=False)
     bpy.ops.object.shade_smooth()

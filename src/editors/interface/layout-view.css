@@ -107,4 +107,5 @@
 .bl-popover-title{color:var(--bl-menu-back-text)}
 .bl-tool-icon{width:var(--bl-row);height:var(--bl-row)}
 /* An operator popup (windowmanager/wm-popups.js): its properties with OK. */
+.wm-popup-title{padding:0 calc(var(--bl-row)*.2)}
 .wm-popup{position:fixed;z-index:1000;display:flex;flex-direction:column;gap:var(--bl-row-gap);min-width:calc(var(--bl-row)*10);padding:calc(var(--bl-row)*.3);border-radius:var(--bl-radius);background:var(--bl-menu-back);color:var(--bl-text);font:var(--bl-widget-font);outline:none}

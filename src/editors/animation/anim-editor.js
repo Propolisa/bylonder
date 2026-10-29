@@ -8,10 +8,11 @@ import { AnimArea, iconName, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WI
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
 import { regionDrawing, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
-import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
+import { newOperator, operatorNames, blenderMain } from '../../bmesh/bmesh-wasm.js';
+import { openPopup as openModulePopup } from '../../windowmanager/wm-popups.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI, kw } from '../../windowmanager/wm-operators.js';
+import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI } from '../../windowmanager/wm-operators.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
@@ -21,9 +22,7 @@ import { drawSidebarPanels } from './anim-buttons.js';
 import { drawRecording, buttonAt } from '../interface/region-draw.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
-import { propBinding, operatorProperties } from '../../makesrna/rna-bylonder.js';
-import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
-import { UILayout } from '../interface/layout.js';
+import { propBinding } from '../../makesrna/rna-bylonder.js';
 import { createContext } from '../../blenkernel/context.js';
 import { createApp, h, reactive, markRaw, shallowRef } from 'vue';
 import { layoutTree } from '../space_buttons/modifier-panel.js';
@@ -275,49 +274,15 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     return { x: r.left + (event?.region === RGN_TYPE_CHANNELS ? 0 : size.channels) + (event?.x ?? 0), y: r.top + size.height - (event?.y ?? 0) };
   };
 
-  // An invoke's popup (wm_operators.cc): a confirmation's one button, or the items of the enum property it asks for.
+  // An invoke's popup (wm-popups.js): a confirmation, an enum's items, the operator's properties, or a menu Blender's
+  // code built.
   function openPopup(idname, event) {
-    const { type, title, text } = area.popup, finish = (props) => { after(area.finishPopup(props)); redraw(); };
-    if (type === 'PROPS') return openPropsPopup(idname, title, event, finish);
-    const items = type === 'CONFIRM' ? [{ label: text, run: () => finish({}) }]
-      : ui.enumItems(idname, text).map(([value, label, , icon]) => ({ label, icon: icon && icon !== 'NONE' ? icon : undefined, run: () => finish({ [text]: value }) }));
-    const menu = openMenu(items, screenPoint(event), title);
-    new MutationObserver((_, observer) => { if (!menu.isConnected) { observer.disconnect(); if (area.popup) area.finishPopup(null); } }).observe(menu.parentNode ?? document.body, { childList: true });
-  }
-
-  // WM_operator_props_popup: the operator's properties, drawn by the shared layout renderer, with OK to run it.
-  function openPropsPopup(idname, title, event, finish) {
-    const values = {}, state = reactive({ revision: 0 });
-    const props = operatorProperties(idname, values, { update: () => { state.revision++; } });
-    const popup = Object.assign(document.createElement('div'), { className: 'bl-ui anim-popup' });
-    const at = screenPoint(event);
-    Object.assign(popup.style, { left: at.x + 'px', top: at.y + 'px' });
-    const close = (run) => {
-      app.unmount();
-      popup.remove();
-      removeEventListener('pointerdown', outside, true);
-      run ? finish({ ...values }) : area.finishPopup(null);
-    };
-    const outside = (e) => { if (!popup.contains(e.target)) close(false); };
-    const popupUI = markRaw({ ...layoutUI, get revision() { return state.revision; }, undoPush: () => { state.revision++; } });
-    const app = createApp({ render: () => {
-      void state.revision;
-      const layout = new UILayout('root');
-      layout.label(kw({ text: title }));
-      for (const name of Object.keys(rnaOperators[idname]?.properties ?? {})) layout.prop(props, name);
-      return [h(LayoutView, { layout, ui: popupUI }),
-        h('button', { type: 'button', class: 'bl-tool flex h-unit w-full items-center justify-center rounded-md px-1.5 text-xs', onClick: () => close(true) }, 'OK')];
-    } });
-    app.mount(popup);
-    popup.addEventListener('keydown', (e) => {
-      e.stopPropagation();
-      if (e.key === 'Escape') close(false);
-      if (e.key === 'Enter' && !e.target.closest('input')) close(true);
+    openModulePopup(area.popup, {
+      idname, at: screenPoint(event), C: blenderMain().C,
+      finish: (props) => { if (!area.popup) return; const status = area.finishPopup(props); if (props) after(status); redraw(); },
+      run: (id, values) => runFromMenu(id, values),
+      enumItems: (prop) => ui.enumItems(idname, prop),
     });
-    document.body.append(popup);
-    addEventListener('pointerdown', outside, true);
-    popup.tabIndex = -1;
-    popup.focus();
   }
 
   // Gestures (wm_gesture_ops.cc): box, circle and lasso, drawn here; on release their operator's properties are set

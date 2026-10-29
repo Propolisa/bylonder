@@ -10,7 +10,7 @@
 import { Camera, Color3, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
-import { mesh_serialize } from '../blenkernel/mesh/mesh.js';
+import { mesh_deserialize, mesh_serialize } from '../blenkernel/mesh/mesh.js';
 import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct, operatorIdname, defineStructProperties } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
@@ -698,7 +698,8 @@ const textLine = (text, i, r) => rna('TextLine', {
 // from Babylon's side when read (docs/blender-boundary.md, Who owns what, point 5). `co` reads and writes per vertex
 // (MeshVertex, made when read) or whole through foreach_get and foreach_set; a write rebuilds the object's mesh.
 function meshElements(ob, r) {
-  const mesh = objectMesh(ob), positions = mesh.vert_positions;
+  // A copy JS owns: a primitive's Mesh can be views of the module's memory, which growing it detaches.
+  const mesh = mesh_deserialize(mesh_serialize(objectMesh(ob))), positions = mesh.vert_positions;
   const write = () => {
     const recipe = { mesh: mesh_serialize(mesh) };
     ob.metadata = { ...ob.metadata, wbCreation: recipe };

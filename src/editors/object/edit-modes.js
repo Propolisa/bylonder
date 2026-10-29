@@ -17,6 +17,7 @@ export function createEditModes(mesh, curve) {
     setSelectMode: (...args) => mesh.setSelectMode(...args),
     keymap: (event) => (curve.active ? curve.keymap(event) : mesh.active ? mesh.keymap(event) : curve.keymap(event) || mesh.keymap(event)),
     transform: (...args) => current().transform(...args),
+    module: (...args) => mesh.module(...args),
     selectOperator: (...args) => current().selectOperator(...args),
     selectBox: (...args) => current().selectBox(...args),
     selectRegion: (...args) => current().selectRegion(...args),

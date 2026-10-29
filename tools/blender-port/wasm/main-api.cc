@@ -158,6 +158,8 @@ void main_view_set(BlenderMain *ctx, const float *viewmat, const float *winmat, 
   CTX_wm_area_set(ctx->C, &area);
   CTX_wm_region_set(ctx->C, &ctx->region);
 }
+/* What the last operator showed in the view's header (ED_area_status_text), or ''. */
+EXPORT(main_status) const char *main_status(BlenderMain *ctx) { return ctx->view_area.status.c_str(); }
 EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }

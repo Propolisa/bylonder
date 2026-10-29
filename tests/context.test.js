@@ -137,12 +137,12 @@ assert.equal(propBinding(host)(c.space_data.overlay, 'show_floor'), null, 'unbou
 assert.deepEqual(undo, ['Show Overlays']);
 assert.ok(['Object.location', 'Scene.frame_current', 'ToolSettings.mesh_select_mode', 'View3DOverlay.show_overlays'].every((u) => updates.includes(u)));
 
-// Blender's Object menu runs Bylonder's actions by the operators they name, and leaves out what they do not run.
+// Blender's Object menu runs Bylonder's actions by the operators they name, and greys out what nothing runs (Blender's
+// own object operators register with the scene's Main, absent here).
 const ran = [];
 const action = (id, blender, keys = []) => ({ id, blender, label: id, keys, run: () => ran.push(id) });
 const registry = {
-  actions: [action('delete', 'object.delete', ['X', 'Delete']), action('parent', ['object.parent_set', 'object.parent_set:OBJECT'], ['Ctrl+P']),
-    action('hide', 'object.hide_view_set'), action('hide-others', 'object.hide_view_set'), action('rename', 'TOPBAR_PT_name'),
+  actions: [action('hide', 'object.hide_view_set'), action('hide-others', 'object.hide_view_set'), action('rename', 'TOPBAR_PT_name'),
     action('group'), action('ungroup'), action('edit-text'), action('creation', 'screen.redo_last')],
   invoke(id) { this.actions.find((a) => a.id === id).run(); },
 };
@@ -151,14 +151,12 @@ const keymaps = () => ['Object Mode', 'Object Non-modal', '3D View', '3D View Ge
 const objectMenu = drawMenu('VIEW3D_MT_object', menuUI({ menus, context, prop: propBinding(host), keymaps }));
 const entry = (items, label) => items.find((item) => item.label === label);
 assert.equal(entry(objectMenu, 'Delete').keys, 'X');
-assert.equal(entry(objectMenu, 'Delete Global').enabled(), false, 'use_global is not run: shown, greyed out');
+assert.equal(entry(objectMenu, 'Delete Global').enabled(), false, 'shown, greyed out');
 assert.deepEqual(['Join', 'Delete Global', 'Apply', 'Link/Transfer Data'].map((label) => entry(objectMenu, label).keys), ['Ctrl J', 'Shift X', 'Ctrl A', 'Ctrl L'], "shortcuts from Blender's keymap");
 assert.equal(entry(objectMenu, 'Join').enabled(), false, 'what Bylonder lacks is shown, greyed out');
-const parentMenu = entry(objectMenu, 'Parent').items();
-entry(parentMenu, 'Object').run();
 entry(entry(objectMenu, 'Show/Hide').items(), 'Hide Unselected').run();
 entry(objectMenu, 'group').run();
-assert.deepEqual(ran, ['parent', 'hide-others', 'group']);
+assert.deepEqual(ran, ['hide-others', 'group']);
 
 // Blender's keymaps, transpiled, equal Blender's own, and events run the operator the first matching item names, with
 // its properties.

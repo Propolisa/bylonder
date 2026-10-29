@@ -914,6 +914,9 @@ wmOperatorStatus WM_gesture_lasso_modal(bContext * /*C*/, wmOperator * /*op*/, c
 void WM_gesture_box_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 void WM_gesture_circle_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 void WM_gesture_lasso_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
+namespace ui {
+std::string operator_props_layout(bContext *C, wmOperator *op);
+}
 static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text)
 {
   popup_opened = popup;
@@ -939,17 +942,20 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
   return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
 }
 
-/* A properties popup (wm_operators.cc): Bylonder's window manager shows the operator's properties with OK. */
-wmOperatorStatus WM_operator_props_popup(bContext * /*C*/, wmOperator *op, const wmEvent * /*event*/)
-{
-  return popup_open(POPUP_PROPS, op->type->name, op->type->idname);
-}
-/* The properties dialogs (wm_operators.cc), the same popup with their title. */
-wmOperatorStatus WM_operator_props_dialog_popup(bContext * /*C*/, wmOperator *op, int /*width*/, std::optional<std::string> title,
-                                                std::optional<std::string> /*confirm_text*/, bool /*cancel_default*/,
+/* The properties popups and dialogs (wm_operators.cc): Bylonder's window manager shows the operator's properties as
+ * the module records them (operator_props_layout, JSON with the confirm button's text), the operator kept until the
+ * user confirms, which runs its exec, or cancels. */
+wmOperatorStatus WM_operator_props_dialog_popup(bContext *C, wmOperator *op, int /*width*/, std::optional<std::string> title,
+                                                std::optional<std::string> confirm_text, bool /*cancel_default*/,
                                                 std::optional<std::string> /*message*/, bool /*show_icon*/)
 {
-  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, op->type->idname);
+  const std::string confirm = confirm_text.value_or(IFACE_("OK"));
+  const std::string text = "{\"confirm\":\"" + confirm + "\",\"layout\":" + ui::operator_props_layout(C, op) + "}";
+  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str());
+}
+wmOperatorStatus WM_operator_props_popup(bContext *C, wmOperator *op, const wmEvent * /*event*/)
+{
+  return WM_operator_props_dialog_popup(C, op, 300);
 }
 wmOperatorStatus WM_operator_props_popup_confirm_ex(bContext *C, wmOperator *op, const wmEvent * /*event*/, std::optional<std::string> title,
                                                     std::optional<std::string> confirm_text, bool cancel_default,

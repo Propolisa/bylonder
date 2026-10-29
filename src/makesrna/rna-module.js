@@ -6,6 +6,7 @@ import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { rna } from './rna.js';
 import structs from './rna-structs.json' with { type: 'json' };
 import fcurve from './dna-fcurve.json' with { type: 'json' };
+import rnaOperators from './rna-operators.json' with { type: 'json' };
 
 const { exports: x, withString, cString } = blenderModule;
 const TABLES = { ...fcurve };
@@ -44,4 +45,28 @@ export function moduleStruct(struct, [type, id, data], { C, changed = () => {} }
     bindings[name] = { get, set, enumerable: true };
   }
   return rna(struct, Object.defineProperties({}, bindings));
+}
+
+// An operator's properties in the module (a running operator's, as its dialog's recorded layout points to them), by its
+// RNA (rna-operators.json): strings and enums by text, the rest by number; a set runs in `C`, then `changed()`.
+export function moduleOperatorProperties(idname, [type, id, data], { C, changed = () => {} }) {
+  const at = (name, fn) => withString(name, (p) => fn(p));
+  const bindings = {};
+  for (const [name, { type: kind }] of Object.entries(rnaOperators[idname]?.properties ?? {})) {
+    const text = kind === 'STRING' || kind === 'ENUM';
+    const length = () => at(name, (p) => x.rna_length(type, id, data, p));
+    const element = (i) => at(name, (p) => x.rna_get(type, id, data, p, i));
+    const get = text ? () => at(name, (p) => cString(x.rna_string_get(type, id, data, p)))
+      : () => {
+        const n = length(), cast = kind === 'BOOLEAN' ? Boolean : Number;
+        return n > 0 ? Array.from({ length: n }, (_, i) => cast(element(i))) : cast(element(0));
+      };
+    const set = (value) => {
+      if (text) at(name, (p) => withString(String(value), (v) => x.rna_string_set(C, type, id, data, p, v)));
+      else [value].flat().forEach((v, i) => at(name, (p) => x.rna_set(C, type, id, data, p, i, Number(v))));
+      changed();
+    };
+    bindings[name] = { get, set, enumerable: true };
+  }
+  return rna(idname.split('.')[0].toUpperCase() + '_OT_' + idname.split('.')[1], Object.defineProperties({}, bindings));
 }

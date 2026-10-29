@@ -1,6 +1,7 @@
 /* Blender's modifier panels (each MOD_*.cc's panel_draw and its sub-panels) without Blender's interface: ui::Layout
  * records what a panel draws as a tree, which JS reads as JSON and draws with its own widgets. The panels read and
  * write the modifier through RNA, which reads and writes its DNA (operator-properties.cc). */
+#include <functional>
 #include <map>
 #include <set>
 #include <sstream>
@@ -45,6 +46,8 @@ struct Node {
   /* An operator item's properties (button_operator_ptr_ensure), which the code drawing it sets through the pointer
    * Layout::op returns. */
   std::optional<PointerRNA> op_properties;
+  /* A layout's context pointers (context_ptr_set), which the menus it holds draw with. */
+  std::map<std::string, PointerRNA> context;
   const Layout *layout = nullptr;
   std::vector<std::unique_ptr<Node>> children;
   ~Node()
@@ -133,7 +136,18 @@ void Layout::use_property_split_set(bool value) { nodes.at(this)->split = value;
 void Layout::use_property_decorate_set(bool value) { nodes.at(this)->decorate = value; }
 void Layout::emboss_set(EmbossType emboss) { nodes.at(this)->emboss_none = emboss == EmbossType::None; }
 void Layout::operator_context_set(wm::OpCallContext /*opcontext*/) {}
-void Layout::context_ptr_set(StringRef /*name*/, const PointerRNA * /*ptr*/) {}
+void Layout::context_ptr_set(StringRef name, const PointerRNA *ptr)
+{
+  if (ptr) {
+    nodes.at(this)->context[name] = *ptr;
+  }
+}
+const PointerRNA *Layout::context_ptr_get(const StringRef name, const StructRNA *type) const
+{
+  const auto &context = nodes.at(this)->context;
+  const auto found = context.find(name);
+  return found != context.end() && (!type || RNA_struct_is_a(found->second.type, type)) ? &found->second : nullptr;
+}
 
 void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, std::optional<StringRef> name, int icon)
 {
@@ -171,15 +185,52 @@ void Layout::label(StringRef name, int icon)
   node.text = name;
   node.icon = icon;
 }
-/* A sub-menu its code makes when opened (menu_fn): recorded as its callback, by index, which layout_submenu_draw runs. */
-static Vector<std::pair<MenuCreateFunc, void *>> submenus;
-void Layout::menu_fn(StringRefNull name, int icon, MenuCreateFunc func, void *arg)
+/* A sub-menu its code draws when opened (menu_fn, or a menu type of Blender's C): recorded as what draws it, by index,
+ * which layout_submenu_draw runs. A menu Blender's Python defines is drawn by JS, by its name. */
+static Vector<std::function<void(bContext *, Layout &)>> submenus;
+static Node &submenu_add(Layout *parent, StringRef name, int icon, std::function<void(bContext *, Layout &)> draw)
 {
-  Node &node = add(this, "menu");
+  Node &node = add(parent, "menu");
   node.text = name;
   node.icon = icon;
   node.index = submenus.size();
-  submenus.append({func, arg});
+  submenus.append(std::move(draw));
+  return node;
+}
+void Layout::menu_fn(StringRefNull name, int icon, MenuCreateFunc func, void *arg)
+{
+  submenu_add(this, name, icon, [func, arg](bContext *C, Layout &layout) { func(C, &layout, arg); });
+}
+/* Draws a menu type into a layout, with the context pointers it is opened with. */
+static void menu_type_draw_into(bContext *C, MenuType *mt, Layout &layout, const std::map<std::string, PointerRNA> &context)
+{
+  nodes.at(&layout)->context = context;
+  Menu menu = {mt, &layout};
+  mt->draw(C, &menu);
+}
+void Layout::menu(MenuType *mt, std::optional<StringRef> name, int icon)
+{
+  if (!mt->draw) {
+    Node &node = add(this, "menu");
+    node.prop = mt->idname;
+    node.text = name ? std::string(*name) : std::string(mt->label);
+    node.icon = icon;
+    return;
+  }
+  Node &node = submenu_add(this, name ? *name : StringRef(mt->label), icon,
+                           [mt, context = nodes.at(this)->context](bContext *C, Layout &layout) { menu_type_draw_into(C, mt, layout, context); });
+  node.prop = mt->idname;
+}
+void Layout::menu(StringRef menuname, std::optional<StringRef> name, int icon)
+{
+  if (MenuType *mt = WM_menutype_find(menuname, false)) {
+    this->menu(mt, name, icon);
+    return;
+  }
+  Node &node = add(this, "menu");
+  node.prop = menuname;
+  node.text = name ? std::string(*name) : std::string("\x01");
+  node.icon = icon;
 }
 
 /* Operators are recorded by name; the properties a panel sets on them go nowhere. */
@@ -465,15 +516,58 @@ void layout_record_clear()
   layouts.clear();
 }
 
+/* An operator's properties as its dialog draws them (uiTemplateOperatorPropertyButs): its type's ui, else each of its
+ * properties that is not hidden. The properties' pointer is the operator's own, which JS edits in place. */
+std::string operator_props_layout(bContext *C, wmOperator *op)
+{
+  Layout &layout = layout_record_begin("column");
+  layout.use_property_split_set(true);
+  layout.use_property_decorate_set(false);
+  if (op->type->ui) {
+    op->layout = &layout;
+    op->type->ui(C, op);
+    op->layout = nullptr;
+  }
+  else {
+    RNA_STRUCT_BEGIN (op->ptr, prop) {
+      if (!(RNA_property_flag(prop) & PROP_HIDDEN) && !STREQ(RNA_property_identifier(prop), "rna_type")) {
+        layout.prop(op->ptr, prop, -1, 0, UI_ITEM_NONE, std::nullopt, 0);
+      }
+    }
+    RNA_STRUCT_END;
+  }
+  return layout_record_json(layout);
+}
+
 /* What a recorded sub-menu (Layout::menu_fn) draws, as its recorded layout's JSON. */
 EXPORT(layout_submenu_draw) const char *layout_submenu_draw(bContext *C, int index)
 {
   static std::string json;
   Layout &layout = layout_record_begin("column");
-  const auto [func, arg] = submenus[index];
-  func(C, &layout, arg);
+  submenus[index](C, layout);
   json = layout_record_json(layout);
   return json.c_str();
+}
+
+/* What a menu type of Blender's C draws (one an operator called, WM_menu_name_call), as its recorded layout's JSON,
+ * or an empty string for one it does not define. */
+EXPORT(menu_type_draw) const char *menu_type_draw(bContext *C, const char *name)
+{
+  static std::string json;
+  MenuType *mt = WM_menutype_find(name, false);
+  if (!mt || !mt->draw) {
+    return "";
+  }
+  submenus.clear();
+  Layout &layout = layout_record_begin("column");
+  menu_type_draw_into(C, mt, layout, {});
+  json = layout_record_json(layout);
+  return json.c_str();
+}
+EXPORT(menu_type_label) const char *menu_type_label(const char *name)
+{
+  MenuType *mt = WM_menutype_find(name, false);
+  return mt ? mt->label : "";
 }
 
 /* port-override: a popup menu Blender's code builds (popup_menu_begin to popup_menu_end) is drawn by Bylonder's window

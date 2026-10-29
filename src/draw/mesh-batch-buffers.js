@@ -14,6 +14,7 @@ export function mesh_batch_cache_vertex_buffers(mesh) {
       normals[c * 3] = n[i]; normals[c * 3 + 1] = n[i + 2]; normals[c * 3 + 2] = n[i + 1];
     }
   }
+  // Copies, as Babylon keeps them: a Mesh's arrays can be views of the module's memory, which growing it detaches.
   const uvs = mesh.attribute('UVMap');
-  return { positions, normals, indices: mesh.corner_tris(), ...(uvs && { uvs }) };
+  return { positions, normals, indices: Uint32Array.from(mesh.corner_tris()), ...(uvs && { uvs: Float32Array.from(uvs) }) };
 }

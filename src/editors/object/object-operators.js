@@ -2,8 +2,7 @@
 // (object-actions.js) as the Blender operators they name, so Blender's own 3D View menus and keymaps run them. An
 // operator Bylonder runs with some properties only picks its action by them. Actions Blender lacks are `bylonder.*`
 // operators, added to Blender's Object menu as an add-on would.
-import { registerOperator, appendMenu, kw, runOperator } from '../../windowmanager/wm-operators.js';
-import { takePopup, openPopup } from '../../windowmanager/wm-popups.js';
+import { registerOperator, appendMenu, kw, invokeOperator } from '../../windowmanager/wm-operators.js';
 
 const BY_PROPS = {
   'object.select_all': ({ action }) => ({ SELECT: 'select-all', DESELECT: 'deselect', INVERT: 'invert' })[action],
@@ -22,16 +21,23 @@ const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 const modifierOf = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
 // Runs an operator as one undo step, with the selected objects' geometry given to it: invoked with the event that ran
 // it, else its exec. Returns its status and report. An operator that changed the data of a light or camera, which
-// Bylonder keeps itself, changes nothing. A popup its invoke opened runs it again by exec with what it chose.
+// Bylonder keeps itself, changes nothing. A popup its invoke opened runs it again by exec with what it chose, or, for a
+// properties dialog, runs the operator it kept.
 function runBlenderOperator(sync, idname, props, options) {
-  const { transaction, notify, keying, event } = options;
-  let result, popup = null;
+  const { event } = options;
+  const result = inMain(sync, options, () => (event ? sync.blender.invoke(idname, props, { type: String(event.type).toUpperCase(), value: event.value ?? 'PRESS', modifier: modifierOf(event) })
+    : sync.blender.run(idname, props)));
+  if (result.menu) invokeOperator('wm.call_menu', { name: result.menu }, event);
+  const finish = result.op ? (chosen) => (chosen ? inMain(sync, options, () => sync.blender.finishPopup(result.op, true)) : sync.blender.finishPopup(result.op, false))
+    : (chosen) => chosen && runBlenderOperator(sync, idname, { ...result.values, ...chosen }, { ...options, event: null });
+  if (result.popup) openModulePopup(sync, result.popup, event, { idname, finish });
+  return result;
+}
+// Runs Blender's code on Main as one undo step, its report shown.
+function inMain(sync, { transaction, notify, keying }, run) {
+  let result;
   transaction(() => sync.run(() => {
-    keying(() => {
-      result = event ? sync.blender.invoke(idname, props, { type: String(event.type).toUpperCase(), value: event.value ?? 'PRESS', modifier: modifierOf(event) })
-        : sync.blender.run(idname, props);
-    });
-    popup = event ? takePopup() : null;
+    keying(() => { result = run(); });
     const unheld = sync.geometryTagged().find(({ node }) => !sync.holdsData(node));
     if (unheld) {
       sync.revert();
@@ -39,13 +45,20 @@ function runBlenderOperator(sync, idname, props, options) {
     }
   }, { meshes: sync.selected() }));
   if (result.report) notify(result.report);
-  if (popup) openPopup(popup, {
-    idname, at: { x: event.clientX ?? innerWidth / 2, y: event.clientY ?? innerHeight / 2 },
-    finish: (chosen) => chosen && runBlenderOperator(sync, idname, { ...result.values, ...chosen }, { ...options, event: null }),
-    run: (id, values) => runOperator(id, values),
-    enumItems: (prop) => sync.blender.enumItems(idname, prop),
-  });
   return result;
+}
+
+// Opens a popup the module's operators or menus made (wm-popups.js) at an event's pointer; its menu items are invoked
+// as Blender's menus call them, with that event.
+export function openModulePopup(sync, popup, event, { idname, finish = () => {} } = {}) {
+  const at = { x: event?.clientX ?? event?.x ?? innerWidth / 2, y: event?.clientY ?? event?.y ?? innerHeight / 2 };
+  import('../../windowmanager/wm-popups.js').then(({ openPopup }) => openPopup(popup, {
+    idname, at, finish,
+    run: (id, values) => invokeOperator(id, values, { type: 'NONE', value: 'NOTHING', clientX: at.x, clientY: at.y }),
+    C: sync.blender.C,
+    submenu: (index) => sync.blender.submenu(index),
+    enumItems: (prop) => sync.blender.enumItems(idname, prop),
+  }));
 }
 const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 

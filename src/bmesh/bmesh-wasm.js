@@ -104,6 +104,8 @@ const EVT_MODAL_MAP = 0x5022;
 // The event an operator gets (wm_event_set): { type, value } by identifier or number, or { modal } for a modal keymap
 // item; x and y in region pixels, y up; modifier (KM_SHIFT | KM_CTRL | KM_ALT | KM_OSKEY); text; a drag's `press`
 // ([x, y]), else its own place.
+// The popups an invoke opens (operator_popup), by number.
+const POPUPS = [null, 'CONFIRM', 'ENUM_MENU', 'PROPS', 'LAYOUT'];
 function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifier = 0, text = '', prevType = type, prevValue = value, press }) {
   const code = (table, v) => (typeof v === 'number' ? v : table.get(v) ?? 0);
   const [t, v] = modal === undefined ? [code(EVENT_TYPES, type), code(EVENT_VALUES, value)] : [EVT_MODAL_MAP, modal];
@@ -561,18 +563,49 @@ export class BlenderMain {
   operators() { return execOperators(); }
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   // Invokes an operator with an event, as wmEvent takes it: its status, report and the values it ran with. One whose
-  // invoke opened a popup (takePopup in wm-popups.js) has not run; the popup's choice runs it again by exec.
+  // invoke opened a popup ({ type, title, text }: windowmanager/wm-popups.js draws it) has not run; the popup's
+  // choice runs it again by exec, but a properties dialog keeps the operator (`op`), whose properties it edits, for
+  // finishPopup. A menu it called (WM_menu_name_call) is a popup of its layout when Blender's C defines it, else
+  // `menu`, its name.
   invoke(idname, props, event) {
     const op = newOperator(idname, props);
+    let kept = false;
     try {
-      const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
-      return { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
+      const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event)), type = POPUPS[x.operator_popup()];
+      const result = { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
+      if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
+      if (type === 'PROPS') result.op = op, kept = true;
+      const menu = cString(x.operator_menu_called());
+      if (menu) {
+        const popup = this.menu(menu);
+        if (popup) result.popup = popup;
+        else result.menu = menu;
+      }
+      return result;
     } finally {
-      x.operator_free(op);
+      if (!kept) x.operator_free(op);
     }
   }
   poll(idname) { return pollOperator(this.#C, idname); }
   enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
+  // Ends a properties dialog's operator (invoke's `op`): its exec when confirmed, as `run` reports it; then freed.
+  finishPopup(op, confirmed) {
+    try {
+      if (!confirmed) return { status: OPERATOR_CANCELLED };
+      return { status: x.operator_exec(this.#C, op), report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
+    } finally {
+      x.operator_free(op);
+    }
+  }
+  // The context properties edited in a popup run in.
+  get C() { return this.#C; }
+  // A menu type Blender's C defines, as a popup of its layout ({ type, title, text }), or null.
+  menu(name) {
+    const text = withString(name, (p) => cString(x.menu_type_draw(this.#C, p)));
+    return text ? { type: 'LAYOUT', title: withString(name, (p) => cString(x.menu_type_label(p))), text } : null;
+  }
+  // What a sub-menu of the last popup menu draws (layout_submenu_draw), as its recorded layout's JSON.
+  submenu(index) { return cString(x.layout_submenu_draw(this.#C, index)); }
 }
 
 // The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.

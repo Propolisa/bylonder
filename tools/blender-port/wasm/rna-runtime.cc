@@ -242,7 +242,15 @@ EXPORT(rna_string_get) const char *rna_string_get(StructRNA *type, ID *id, void 
   static std::string value;
   PointerRNA ptr = js_pointer(type, id, data);
   PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
-  value = prop ? RNA_property_string_get(&ptr, prop) : "";
+  const char *identifier = nullptr;
+  if (prop && RNA_property_type(prop) == PROP_ENUM) {
+    /* An enum by its item's identifier. */
+    RNA_property_enum_identifier(nullptr, &ptr, prop, RNA_property_enum_get(&ptr, prop), &identifier);
+    value = identifier ? identifier : "";
+  }
+  else {
+    value = prop ? RNA_property_string_get(&ptr, prop) : "";
+  }
   return value.c_str();
 }
 
@@ -250,7 +258,13 @@ EXPORT(rna_string_set) void rna_string_set(bContext *C, StructRNA *type, ID *id,
 {
   PointerRNA ptr = js_pointer(type, id, data);
   if (PropertyRNA *prop = RNA_struct_find_property(&ptr, name)) {
-    RNA_property_string_set(&ptr, prop, value);
+    int item;
+    if (RNA_property_type(prop) != PROP_ENUM) {
+      RNA_property_string_set(&ptr, prop, value);
+    }
+    else if (RNA_property_enum_value(C, &ptr, prop, value, &item)) {
+      RNA_property_enum_set(&ptr, prop, item);
+    }
     RNA_property_update(C, &ptr, prop);
   }
 }
