@@ -22,6 +22,7 @@ import { Color3, FreeCamera, Material, Mesh, PBRMaterial, StandardMaterial, Tran
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { readTexture } from './texture/texture.js';
 import { armature_draw } from '../draw/overlay-armature.js';
+import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
@@ -230,18 +231,19 @@ export function createMainView(state) {
     // Bylonder's material of that name (the project's code built it) is the one a project's .blend saved.
     const own = world.materials?.all().find((material) => material.name === name && !materials.has(material));
     if (own) {
-      materials.set(own, { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true });
+      const record = { struct: 'Material', ma, ptr: ma, shadow: new Map() };
+      materials.set(own, record);
+      drawShading(record, own, 'Material');
       return;
     }
     const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : kind === 'standard' ? new StandardMaterial(name, scene)
       : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
     material.name = name;
     material.metadata = { ...material.metadata, wbId: name };
-    const record = { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true };
+    const record = { struct: 'Material', ma, ptr: ma, shadow: new Map() };
     materials.set(material, record);
     ids.adopted.set(material, ma);
-    pull(record, material);
-    if (!graph) pullTree(ma, rna.pointer('Material', material), name, warnings);
+    drawShading(record, material, 'Material', warnings);
   }
   // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
   function adoptWorld(wo, scene, warnings) {
@@ -251,14 +253,27 @@ export function createMainView(state) {
     if (background && background.inputs.Strength !== 1) warnings.push(`World "${blender.name(wo)}": its strength opens as 1`);
     ids.adopted.set('world', wo);
   }
-  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types, where they differ.
-  function pullTree(id, data, label, warnings = []) {
+  // A material's or world's values and node tree from Main. A PBR material is its Principled BSDF as Blender's glTF
+  // exporter and Babylon's loader convert it (principled-gltf.js); a node material's graph is Babylon's (Main holds a
+  // stand-in of it).
+  function drawShading(record, owner, struct, warnings = []) {
+    pull(record, owner);
+    const type = struct === 'Material' ? world.materials?.type(owner) : null;
+    if (type === 'node') return;
+    const pbr = type === 'pbr' && mainPBR(blender, record.ptr);
+    if (pbr) applyPBR(owner, pbr);
+    pullTree(record.ptr, rna.pointer(struct, owner), owner.name, warnings, !pbr);
+  }
+  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types, where they differ
+  // (when `values`); a warning names the node types it has no binding for.
+  function pullTree(id, data, label, warnings = [], values = true) {
     const held = blender.nodeTree(id).nodes, mapped = new Set(['ShaderNodeOutputMaterial', 'ShaderNodeOutputWorld']);
     const visit = (node) => {
       mapped.add(node[INFO].struct);
       const from = held.find((h) => h.idname === node[INFO].struct);
       for (const input of node.inputs) {
         if (input.is_linked) { visit(input.links[0].from_node); continue; }
+        if (!values) continue;
         const value = from?.inputs[input.identifier];
         if (value !== undefined && input[INFO].bound.has('default_value') && !same(plain(input.default_value), plain(value))) input.default_value = value;
       }
@@ -339,17 +354,8 @@ export function createMainView(state) {
 
   // Materials and worlds as Main holds them: their values and their node trees' inputs, Babylon's derived from them.
   function pullShading() {
-    const owners = [...[...materials].map(([material, record]) => [record, record.ma, material, 'Material']),
-      ...[...worlds].map(([id, record]) => [record, record.wo, world.worlds.byId(id), 'World'])];
-    for (const [record, id, owner, struct] of owners) {
-      if (!owner) continue;
-      pull(record, owner);
-      const data = rna.pointer(struct, owner);
-      // A node material's graph is Babylon's; Main holds a stand-in of it.
-      if (struct === 'Material' && world.materials?.type(owner) === 'node') continue;
-      pullTree(id, data);
-      record.tree = state.treeSignature(data);
-    }
+    for (const [material, record] of materials) drawShading(record, material, 'Material');
+    for (const [id, record] of worlds) if (world.worlds.byId(id)) drawShading(record, world.worlds.byId(id), 'World');
   }
   // Babylon drawn from Main's evaluated values (after a frame change evaluated Blender's animation), by kind: every
   // object's and its data's values (a light's, a camera's), an armature's pose, materials' and worlds' values and node
@@ -370,6 +376,12 @@ export function createMainView(state) {
   }
 
   return {
-    pull, view, adopt, adoptScene, drawData, evaluated,
+    pull, view, adopt, adoptScene, drawData, drawShading, evaluated,
   };
+}
+
+// A Material's Principled BSDF in Main as PBRMaterial properties, null without one.
+export function mainPBR(blender, ma) {
+  const principled = blender.nodeTree(ma).nodes.find((node) => node.idname === 'ShaderNodeBsdfPrincipled');
+  return principled && principledPBR(principled.inputs, { use_backface_culling: dnaGet('Material', ma, 'use_backface_culling') });
 }

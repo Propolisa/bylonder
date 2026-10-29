@@ -30,7 +30,8 @@ import { MultiMaterial } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
-import { createMainView, ID_GR, ID_MA, ID_WO, ID_RECALC_GEOMETRY, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { createMainView, mainPBR, ID_GR, ID_MA, ID_WO, ID_RECALC_GEOMETRY, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { differencesPBR } from './material/principled-gltf.js';
 
 const ID_TE = 0x4554;
 
@@ -294,34 +295,38 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
 
   // Main's ID of a name that no record holds yet (a project's .blend, an undo step's): the one a record of that name takes.
   const unclaimed = (code, name, records, field) => blender.ids(code).find((id) => blender.name(id) === name && ![...records.values()].some((record) => record[field] === id));
-  // Materials and worlds: an ID for each of Bylonder's, its values through the mapping.
+  // Materials and worlds are Main's: one Babylon has that Main does not hold yet (the project's code made it, or
+  // Bylonder's material library) goes in once, its values and node tree as Blender's; from then on the view derives
+  // the Babylon one from Main. A node material's graph is Babylon's, held in Main as a stand-in.
   function pushMaterials() {
     const all = new Set(world.materials?.all() ?? []);
     for (const [material, record] of materials) if (!all.has(material)) { blender.removeID(record.ma); materials.delete(material); }
     for (const material of all) {
-      if (!materials.has(material)) materials.set(material, { struct: 'Material', ma: ids.adopted.get(material) ?? unclaimed(ID_MA, material.name, materials, 'ma') ?? blender.addMaterial(material.name), shadow: new Map() });
+      if (!materials.has(material)) {
+        const held = ids.adopted.get(material) ?? unclaimed(ID_MA, material.name, materials, 'ma');
+        const record = { struct: 'Material', ma: held ?? blender.addMaterial(material.name), shadow: new Map() };
+        record.ptr = record.ma;
+        materials.set(material, record);
+        if (!held) enter(record, material, 'Material');
+      }
       const record = materials.get(material);
-      record.ptr = record.ma;
       if (blender.name(record.ma) !== material.name && record.babylonName !== material.name) { blender.rename(record.ma, material.name); record.babylonName = material.name; }
       blender.setFakeUser(record.ma, !!material.metadata?.wbFakeUser);
-      if (!record.kept) keepMaterial(record, material);
-      push(record, material);
-      pushTree(record, record.ma, rna.pointer('Material', material));
     }
+  }
+  // A material's or world's first state in Main, from Babylon's: its values, its node tree and (a material) its kind;
+  // then Babylon's is drawn from it, as from then on.
+  function enter(record, owner, struct) {
+    push(record, owner);
+    blender.setNodeTree(record.ptr, shaderTree(rna.pointer(struct, owner).node_tree));
+    if (struct === 'Material') keepMaterial(record, owner);
+    mainView.drawShading(record, owner, struct);
   }
   // What only Babylon has of a material, for a round trip: its kind, and a node material's graph as Babylon saves it.
   function keepMaterial(record, material) {
     const type = world.materials.type(material);
     blender.setProperty(record.ma, PROPERTIES.material, type);
     if (type === 'node') blender.setProperty(record.ma, PROPERTIES.graph, JSON.stringify(material.serialize()));
-    record.kept = true;
-  }
-  // An ID's node tree, built again when the RNA of Bylonder's changed.
-  function pushTree(record, id, data) {
-    const tree = shaderTree(data.node_tree), signature = JSON.stringify(tree);
-    if (signature === record.tree) return;
-    blender.setNodeTree(id, tree);
-    record.tree = signature;
   }
   // Textures (blenkernel/texture/textures.js): a Tex for each record, its settings written where they differ.
   function pushTextures() {
@@ -339,13 +344,16 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const all = world.worlds?.all() ?? [], kept = new Set(all.map((entry) => entry.id));
     for (const [id, record] of worlds) if (!kept.has(id)) { blender.removeID(record.wo); worlds.delete(id); }
     for (const entry of all) {
-      if (!worlds.has(entry.id)) worlds.set(entry.id, { struct: 'World', wo: ids.adopted.get(entry.id) ?? unclaimed(ID_WO, entry.name, worlds, 'wo') ?? blender.addWorld(entry.name), shadow: new Map() });
+      if (!worlds.has(entry.id)) {
+        const held = ids.adopted.get(entry.id) ?? unclaimed(ID_WO, entry.name, worlds, 'wo');
+        const record = { struct: 'World', wo: held ?? blender.addWorld(entry.name), shadow: new Map() };
+        record.ptr = record.wo;
+        worlds.set(entry.id, record);
+        if (!held) enter(record, entry, 'World');
+      }
       const record = worlds.get(entry.id);
-      record.ptr = record.wo;
       if (record.babylonName !== entry.name) { blender.rename(record.wo, entry.name); record.babylonName = entry.name; }
       blender.setFakeUser(record.wo, !!entry.fakeUser);
-      push(record, entry);
-      pushTree(record, record.wo, rna.pointer('World', entry));
     }
   }
 
@@ -550,7 +558,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const label = `Material "${material.name}"`;
       if (!sameName(material.name, blender.name(record.ma))) diffs.push(`${label}.name: Main "${blender.name(record.ma)}"`);
       compare(label, record, material);
-      compareTree(label, record.ma, rna.pointer('Material', material));
+      const pbr = world.materials.type(material) === 'pbr' && mainPBR(blender, record.ma);
+      if (pbr) diffs.push(...differencesPBR(material, pbr).map((diff) => `${label}.${diff}`));
+      else compareTree(label, record.ma, rna.pointer('Material', material));
     }
     for (const [id, record] of worlds) {
       const entry = world.worlds.byId(id);
@@ -602,7 +612,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       ...[...collections.values()].flatMap((c) => [c, c.layer])];
     records.forEach((record) => record.shadow.clear());
     for (const entry of objects.values()) [entry.babylonName, entry.modifiers, entry.id] = [undefined, undefined, undefined];
-    for (const record of [...materials.values(), ...worlds.values()]) record.tree = undefined;
     collectionsSynced = '';
     flush();
   }
@@ -673,7 +682,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, forget, treeSignature: (data) => JSON.stringify(shaderTree(data.node_tree)),
+    sceneRecords, readCollections, relations, nodeOf, forget,
   };
   const mainView = createMainView(state);
   // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with

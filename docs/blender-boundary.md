@@ -53,6 +53,16 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   Main once and stays there; Babylon draws it. A mesh Babylon built itself (a MeshBuilder's, an import) keeps its
   geometry: Main holds a stand-in (`bylonder_standin`), filled from it when Blender's code needs it, until Blender's
   code changes it, which makes it Main's.
+- **Materials and worlds are Main's**: a Material or World ID and its node tree, edited by Blender's Properties
+  editor and animated by Blender's animation system. The view draws a Principled BSDF into a PBRMaterial as Blender's
+  glTF exporter writes it and Babylon's glTF loader reads it, both copied as tables
+  (`src/blenkernel/material/principled-gltf.js`, checked against the exporter's output in
+  `tests/fixtures/materials-gltf.json`, written by `tools/blender-reference/material-fixtures.py`, and against the
+  loader in `tests/principled-gltf.test.js`). A Standard material or a world's Background takes its node inputs
+  through the RNA mapping. The Viewport Display values
+  (`diffuse_color`, a world's `color`) stay Main's. One Babylon makes that Main does not hold yet (the project's code,
+  Bylonder's material library) goes into Main once, as Blender's node tree. A Node Material's graph is Babylon's: Main
+  holds a stand-in Material with the graph in `bylonder_node_material`.
 - **Undo is Blender's** (`tools/blender-port/wasm/undo-api.cc`): the window manager's undo stack with Blender's undo
   types, memfile steps of Main (and edit-mode steps once Edit Mode is Main's). The history
   (`src/editors/undo/storage.js`) keeps one list: each step is a Blender step with what Babylon owns at that moment
@@ -67,10 +77,15 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   (rows of objects' transforms) opens once through the old path and saves in the new form.
 - **What still crosses from Babylon to Main**, until every editor writes Main through the module's RNA: the values and
   relations Bylonder's own editors write on Babylon's objects (`main-sync.js`, by setter hooks and a flush before
-  Blender's code runs and before every undo push), the document slices' state (materials, worlds, textures,
-  collections, scene settings), Bylonder's modifier stack, curve data while a curve is edited, an armature's record,
-  and a material's or world's node tree when Bylonder's own material library changes it. Edit Mode still edits a
-  separate edit mesh (`EditMesh`) and writes its Mesh data into Main on each step.
+  Blender's code runs and before every undo push), the document slices' state (textures, collections, scene
+  settings, which materials and worlds exist and their names), Bylonder's modifier stack, curve data while a curve is
+  edited, and an armature's record.
+- **Edit Mode.** Blender's Edit Mode on Main's object works underneath: `object.mode_set` gives the Mesh its
+  BMEditMesh, Blender's mesh operators edit it on Main's context, the view draws it and its overlay
+  (`view-api.cc` `view_edit_mesh_extract`), and undo loads Blender's edit-mode steps. `src/editors/mesh/editmesh-mode.js`
+  is the editor's mode over it, picking as in X-ray (`view_xray_picking`: the module has no GPU select buffer, so
+  there is no occlusion). The app still uses the separate edit mesh (`EditMesh`, `object-edit.js`), which writes its
+  Mesh data into Main on each step, until Blender's window handles Edit Mode input.
 
 ### .blend files
 

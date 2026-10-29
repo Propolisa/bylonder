@@ -25,6 +25,7 @@ import '../src/editors/interface/region-draw.js';
 import { OutlinerArea } from '../src/editors/space_outliner/outliner-area.js';
 import { shaderNodeClasses } from '../src/nodes/blender/shader-nodes.js';
 import { createTextures } from '../src/blenkernel/texture/textures.js';
+import { idStruct } from '../src/python/bpy_rna.js';
 
 const scene = new Scene(new NullEngine());
 const objects = [];
@@ -88,19 +89,21 @@ assert.equal(location(cube)[0], 5, 'a write to a Babylon vector reaches Main at 
 lamp.intensity = 2;
 await null;
 assert(close([dnaGet('PointLight', blender.data(ob(lamp)), 'energy')], [8 * Math.PI]), "a Babylon light's intensity is Blender's watts as the glTF exporter converts them (W / 4π)");
-material.albedoColor.g = 0.5;
-sync.flush();
-assert(close(dnaGet('Material', sync.materialOf(material), 'diffuse_color'), [0.8, 0.5, 0.1, 1]));
 assert.equal(blender.materials(ob(cube))[0], sync.materialOf(material), "the cube's slot holds its material in Main");
-// Materials are Principled BSDF node trees in Main, built from the same RNA the Properties editor draws.
+// A material Babylon made goes into Main once, as a Principled BSDF node tree; from then on it is Main's, edited as
+// Blender's Properties editor edits it, and the view derives the Babylon material.
 const tree = blender.nodeTree(sync.materialOf(material));
 assert.deepEqual(tree.nodes.map((node) => node.idname), ['ShaderNodeOutputMaterial', 'ShaderNodeBsdfPrincipled']);
 assert.deepEqual(tree.links, [['Principled BSDF', 'BSDF', 'Material Output', 'Surface']]);
 const principled = tree.nodes[1].inputs;
-assert(close(principled['Base Color'], [0.8, 0.5, 0.1, 1]) && Math.abs(principled.Metallic - 0.2) < 1e-6 && Math.abs(principled.Roughness - 0.4) < 1e-6);
-material.roughness = 0.9;
+assert(close(principled['Base Color'], [0.8, 0.1, 0.1, 1]) && Math.abs(principled.Metallic - 0.2) < 1e-6 && Math.abs(principled.Roughness - 0.4) < 1e-6);
+const inputs = idStruct(sync.materialOf(material)).node_tree.nodes.get('Principled BSDF').inputs;
+inputs.get('Base Color').default_value = [0.8, 0.5, 0.1, 1];
+inputs.get('Roughness').default_value = 0.9;
+sync.view();
+assert(close(material.albedoColor.asArray(), [0.8, 0.5, 0.1]) && Math.abs(material.roughness - 0.9) < 1e-6, "Main's Base Color and Roughness drawn");
 sync.flush();
-assert(Math.abs(blender.nodeTree(sync.materialOf(material)).nodes[1].inputs.Roughness - 0.9) < 1e-6);
+assert.deepEqual(blender.nodeTree(sync.materialOf(material)).nodes.map((node) => node.name), ['Material Output', 'Principled BSDF'], 'the tree is not built again');
 assert.deepEqual(blender.nodeTree(blender.world).nodes.map((node) => node.idname), ['ShaderNodeOutputWorld', 'ShaderNodeBackground'], "the scene's world is a Background");
 assert.deepEqual(sync.check(), []);
 
@@ -136,7 +139,9 @@ const steps = [
   ['rename to a taken name', () => { empty.name = 'Cube'; }],
   ['hide in renders and viewport', () => { cube.metadata = { ...cube.metadata, wbHideRender: true }; empty.setEnabled(false); }],
   ['light and camera values', () => { spot.diffuse.set(0.2, 0.4, 0.6); spot.angle = 0.8; camera.fov = 0.6; camera.maxZ = 500; }],
-  ['world color', () => world.worlds.set(world.worlds.active(), 'background.color', [0.1, 0.2, 0.3], false)],
+  ['Blender: world color', () => blenderSide(() => { idStruct(blender.world).node_tree.nodes.get('Background').inputs.get('Color').default_value = [0.1, 0.2, 0.3, 1]; }),
+    () => assert.deepEqual(world.worlds.active().background.color.map((v) => Math.round(v * 1e4) / 1e4), [0.1, 0.2, 0.3], "Main's Background drawn")],
+  ['Blender: base color', () => blenderSide(() => { idStruct(sync.materialOf(material)).node_tree.nodes.get('Principled BSDF').inputs.get('Base Color').default_value = [0.2, 0.3, 0.4, 1]; })],
   ['new collection', () => { world.collections.create({ name: 'Props', objects: [nodeId(lamp)], move: true }); }],
   ['exclude a collection', () => { world.collections.setLayer(world.collections.state.collections.at(-1).id, { exclude: true }); }],
   ['a modifier', () => { addModifier(other, 'SUBSURF', { levels: 2 }); world.modifiers.refresh(); sync.changed(); }],
@@ -163,6 +168,8 @@ const shown = () => JSON.stringify({
     node.getTotalVertices?.() ?? 0, round([node.getVerticesData?.("position")?.reduce((sum, v) => sum + Math.abs(v), 0) ?? 0])]),
   selected: selection.nodes.map((node) => node.name),
   spot: [round(spot.diffuse.asArray()), round([spot.angle, camera.fov, camera.maxZ])],
+  world: round(world.worlds.active().background.color),
+  material: round([...material.albedoColor.asArray(), material.roughness]),
   collections: world.collections.state.collections.map((c) => [c.name, c.objects, !!c.hideRender]),
   time: [animation.time.frame, animation.time.state.frameStart, animation.time.state.frameEnd],
 });
