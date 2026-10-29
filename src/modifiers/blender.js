@@ -11,6 +11,9 @@ import { fieldLayout, writeValues, readValues } from './dna-write.js';
 // The types that evaluate on a mesh alone; the rest need other objects, vertex groups, bind data or simulation.
 const MESH_ONLY = ['ARRAY', 'BEVEL', 'BUILD', 'DECIMATE', 'EDGE_SPLIT', 'MIRROR', 'REMESH', 'SCREW', 'SKIN', 'SOLIDIFY', 'SUBSURF', 'TRIANGULATE',
   'WELD', 'WIREFRAME', 'CAST', 'DISPLACE', 'SIMPLE_DEFORM', 'SMOOTH', 'CORRECTIVE_SMOOTH', 'LAPLACIANSMOOTH', 'WAVE', 'WEIGHTED_NORMAL'];
+// The types that deform by another object of the scene (ArmatureModifier.object), which they are evaluated with in
+// Main (main-sync.js).
+const SCENE = ['ARMATURE'];
 const UNITS = { LENGTH: 'length', ROTATION: 'angle' };
 // Enum items Bylonder does not offer yet, by type and property.
 const NOT_OFFERED = { REMESH: { mode: ['BLOCKS', 'SMOOTH', 'SHARP'] } };
@@ -44,7 +47,10 @@ function definition(id) {
   const located = dna[struct].properties;
   // A Texture pointer (MappingInfoModifierData's), stored as the texture's id (textures.js).
   const textured = properties.texture?.fixed_type === 'Texture';
-  const fields = { ...schema(properties, located, NOT_OFFERED[id]), ...(textured && { texture: { label: 'Texture', default: null, id: 'Texture', animatable: false } }) };
+  // The object a scene modifier deforms by, stored as its Bylonder id.
+  const scene = SCENE.includes(id);
+  const fields = { ...schema(properties, located, NOT_OFFERED[id]), ...(textured && { texture: { label: 'Texture', default: null, id: 'Texture', animatable: false } }),
+    ...(scene && { object: { label: 'Object', default: null, id: 'Object', animatable: false } }) };
   // The DNA layouts of the properties a stack entry's settings name, which is all writing them needs.
   const layouts = (values) => Object.fromEntries(Object.keys(values).map((path) => path.match(/^\w+/)[0])
     .filter((prop) => located[prop] && properties[prop] && located[prop].kind !== 'pointer').map((prop) => [prop, fieldLayout(located[prop], properties[prop])]));
@@ -55,11 +61,13 @@ function definition(id) {
     id, name, description, icon, category: 'Generate', blender: `object.modifier_add:${id}`,
     schema: fields,
     defaults: () => Object.fromEntries(Object.entries(fields).map(([path, entry]) => [path, entry.default])),
-    mesh: { type, write, read, layouts, textured },
+    mesh: { type, write, read, layouts, textured, scene, object: scene && located.object.offset },
   };
 }
 
 export const blenderModifierDefinitions = MESH_ONLY.map(definition);
+export const sceneModifierDefinitions = SCENE.map(definition);
+const definitions = [...blenderModifierDefinitions, ...sceneModifierDefinitions];
 // Any Blender modifier type's definition, for stacks Bylonder evaluates itself (curve and text objects).
 export const blenderModifierDefinition = definition;
 // A modifier's pointer properties (CurveModifier.object) at their DNA offsets.
@@ -70,7 +78,7 @@ export const modifierPointers = (id) => Object.fromEntries(Object.entries(dna[rn
 // Array where its settings are the Array modifier's (a line of copies, without rotation, scale or randomness); null
 // when Blender has none like it.
 export function asBlenderModifier(modifier) {
-  if (blenderModifierDefinitions.some((d) => d.id === modifier.type)) return modifier;
+  if (definitions.some((d) => d.id === modifier.type)) return modifier;
   const v = modifier.values;
   const line = modifier.type === 'GN_ARRAY' && v.shape === 'Line' && v.countMethod === 'Count' && !v.randomize &&
     ['x', 'y', 'z'].every((axis) => v[`rotation.${axis}`] === 0 && v[`scale.${axis}`] === 1);
@@ -84,12 +92,22 @@ export function asBlenderModifier(modifier) {
 }
 
 // Stack entries ({type, values, texture}: a textured modifier's texture settings) as the module takes them; `texture`
-// gives the Tex a modifier points at, by default one outside Main with the entry's settings.
+// gives the Tex a modifier points at, by default one outside Main with the entry's settings, and `object` the Object
+// of Main a scene modifier deforms by. An entry's showViewport and showRender are its ModifierMode.
 const entryTexture = (entry) => (entry.texture ? moduleTexture(entry.texture) : 0);
-export const moduleModifiers = (modifiers, texture = entryTexture) => modifiers.map((entry) => {
-  const { mesh: { type: value, write, textured } } = blenderModifierDefinitions.find((d) => d.id === entry.type);
-  const tex = textured ? texture(entry) : 0;
-  return { type: value, write: (view, md) => { write(entry.values)(view, md); if (textured) blenderModule.exports.modifier_texture_set(md, tex); } };
+const MODE = dna.Modifier.properties.show_viewport.offset, MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
+export const moduleModifiers = (modifiers, texture = entryTexture, object = () => 0) => modifiers.map((entry) => {
+  const { mesh: { type: value, write, textured, scene, object: objectOffset } } = definitions.find((d) => d.id === entry.type);
+  const tex = textured ? texture(entry) : 0, target = scene ? object(entry) : 0;
+  return { type: value, write: (view, md) => {
+    write(entry.values)(view, md);
+    if (textured) blenderModule.exports.modifier_texture_set(md, tex);
+    if (scene) view.setUint32(md + objectOffset, target, true);
+    if ('showViewport' in entry) {
+      const mode = view.getInt32(md + MODE, true) & ~(MODIFIER_REALTIME | MODIFIER_RENDER);
+      view.setInt32(md + MODE, mode | (entry.showViewport ? MODIFIER_REALTIME : 0) | (entry.showRender ? MODIFIER_RENDER : 0), true);
+    }
+  } };
 });
 // Runs fn on the module's evaluation of a stack, then frees the textures no modifier uses any more.
 const withTextures = (fn) => { try { return fn(); } finally { freeUnusedTextures(); } };

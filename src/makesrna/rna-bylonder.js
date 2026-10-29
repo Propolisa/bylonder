@@ -93,9 +93,9 @@ const dimensions = (ob) => {
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
 const lightType = (light) => lightRecord(light)?.type ?? (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
 const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
-const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve' };
+const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve', ARMATURE: () => 'Armature' };
 const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
-  ?? (ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY'));
+  ?? (ob.metadata?.wbCreation?.armature ? 'ARMATURE' : ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY'));
 const editing = (ob, r) => !!ob && r.world.editMode?.object === ob;
 const editTotals = (ob, r) => (editing(ob, r) && r.world.editMode.stats) || { verts: [0], edges: [0], faces: [0] };
 
@@ -271,7 +271,8 @@ const STRUCTS = {
   Object: {
     name: { get: (ob) => ob.name, set: (ob, name) => { ob.name = name; } },
     type: objectType,
-    mode: (ob, r) => (editing(ob, r) ? 'EDIT' : 'OBJECT'),
+    // An armature's mode is Blender's (main-sync.js keeps it on the object).
+    mode: (ob, r) => (editing(ob, r) ? 'EDIT' : ob.metadata?.wbMode ?? 'OBJECT'),
     data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)]?.(ob), ob),
     location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position'), sync: true },
     rotation_mode: synced((ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ')),
@@ -365,6 +366,11 @@ const STRUCTS = {
     ...('texture' in owner.modifier.values && { texture: {
       get: ({ modifier }, r) => texturePointer(r, r.world.textures?.byId(modifier.values.texture)),
       set: ({ node, modifier }, value, r) => r.world.modifiers.set(node, modifier.id, 'texture', value?.[INFO].owner.id ?? null, { finish: false }),
+    } }),
+    // The object a modifier deforms by (an Armature modifier's armature), held by its id.
+    ...('object' in owner.modifier.values && { object: {
+      get: ({ modifier }, r) => r.pointer('Object', r.objects().find((ob) => nodeId(ob) === modifier.values.object)),
+      set: ({ node, modifier }, value, r) => r.world.modifiers.set(node, modifier.id, 'object', value ? nodeId(value[INFO].owner) : null, { finish: false }),
     } }),
   }),
   // A texture of the textures slice (blenkernel/texture/textures.js): the settings of its type's Tex.

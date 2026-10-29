@@ -2,12 +2,12 @@ import { Matrix, Vector3, VertexData } from '@babylonjs/core';
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
 import { nodeId, deleted, hasMesh } from '../editors/object/identity.js';
 import { arrayDefinition, realize } from './array.js';
-import { blenderModifierDefinitions, evaluation, estimatedFaces } from './blender.js';
+import { blenderModifierDefinitions, sceneModifierDefinitions, evaluation, estimatedFaces } from './blender.js';
 import { evaluateHere } from './evaluator.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { mesh_batch_cache_vertex_data } from '../draw/mesh-batch-cache.js';
 import { mesh_serialize } from '../blenkernel/mesh/mesh.js';
-export const modifierDefinitions=new Map([...blenderModifierDefinitions,arrayDefinition].map(d=>[d.id,d]));
+export const modifierDefinitions=new Map([...blenderModifierDefinitions,...sceneModifierDefinitions,arrayDefinition].map(d=>[d.id,d]));
 export function registerModifier(definition){if(!definition.id||!definition.schema||!definition.evaluate)throw Error('Invalid modifier definition');modifierDefinitions.set(definition.id,definition);}
 export const modifierStack=node=>node.metadata?.wbModifiers||[];
 const valid=(value,def)=>{
@@ -86,6 +86,8 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     const leading=definitions.findIndex(d=>!d.mesh),count=leading<0?visible.length:leading;
     if(definitions.slice(count).some(d=>d.mesh))throw Error('Blender modifiers go before '+definitions[count].name+' in the stack.');
     const after=visible.slice(count);
+    // Modifiers deforming by other objects (an Armature's pose) evaluate with them, in Main.
+    const inMain=definitions.slice(0,count).some(d=>d.mesh.scene);
     const finish=mesh=>{
       // Bylonder's modifiers take serialized data; drawing takes typed arrays, which serializing a big mesh is slow to leave.
       const data=mesh&&mesh_batch_cache_vertex_data(mesh);
@@ -93,6 +95,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
       for(const modifier of after)result=modifierDefinitions.get(modifier.type).evaluate(result,modifier,context(node,modifier));
       return result;
     };
+    if(inMain)return finish(world.mainSync.evaluatedMesh(node));
     return count?then(objectWork(node,visible.slice(0,count))(signal,job),finish):finish(null);
   }
   // The Mesh's loose edges draw as a line child (mesh_batch_cache_apply); modifiers draw their result instead.
@@ -119,7 +122,9 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     drawnListeners.forEach(fn=>fn(node));
   }
   function signature(node){
-    return JSON.stringify([modifierStack(node),modifierStack(node).map(m=>{const c=context(node,m);return [c.objectMatrix?.asArray(),c.curvePaths,textureOf(m)];})]);
+    // An object a modifier deforms by changes its result with its data and placement.
+    const by=m=>{const other=m.values.object&&target(m.values.object);return other?[other.metadata?.wbCreation,other.computeWorldMatrix(true).asArray(),node.computeWorldMatrix(true).asArray()]:null;};
+    return JSON.stringify([modifierStack(node),modifierStack(node).map(m=>{const c=context(node,m);return [c.objectMatrix?.asArray(),c.curvePaths,textureOf(m),by(m)];})]);
   }
   function report(node,error){const text=error.message;if(errors.get(nodeId(node))!==text){errors.set(nodeId(node),text);notify(text);emit();}}
   // Goes back to the stack that evaluated last, as an undo step. When that is the stack as it is (the geometry made
@@ -211,7 +216,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     // modifiers it shows are Blender's.
     live(node){
       const stack=modifierStack(node).filter(m=>m.showViewport),definitions=stack.map(m=>modifierDefinitions.get(m.type)?.mesh);
-      if(!stack.length||!definitions.every(Boolean))return null;
+      if(!stack.length||!definitions.every(d=>d&&!d.scene))return null;
       const mesh=objectMesh(node,VertexData.Parse(base(node)));
       return {mesh,modifiers:stack.map((m,i)=>({id:m.id,kind:m.type,type:definitions[i].type,values:structuredClone(m.values),layouts:definitions[i].layouts(m.values)}))};
     },

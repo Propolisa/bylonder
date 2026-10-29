@@ -52,7 +52,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // scene.tool_settings.mesh_select_mode, kept across Edit Mode sessions as in Blender.
   let selectmode = SCE_SELECT_VERTEX;
 
-  const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.curve && !node.metadata?.group;
+  const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.curve && !node.metadata?.wbCreation?.armature && !node.metadata?.group;
 
   // Extracts what changed of the edit mesh (`extract`, EXTRACT_*), redraws and, for an operator, records an undo step
   // (or, with `amend`, replaces the last one).

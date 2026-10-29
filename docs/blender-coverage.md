@@ -105,3 +105,8 @@ Blender's own primitive operators fill the curve, in the module (`ED_curve_add_n
 
 ## object.text_add
 Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.
+
+## object.armature_add
+Armatures are Blender's: their bones, Edit Mode, Pose Mode, the evaluated pose and the Armature modifier run in the
+module; Bylonder draws the bones as Octahedral bones from Blender's evaluated matrices. Bone picking finds the bone with
+Bylonder's own picking (the module has no GPU selection buffer). See `docs/armatures.md`.

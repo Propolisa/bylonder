@@ -47,6 +47,7 @@ import { createEditModes } from "./editors/object/edit-modes.js";
 import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
 import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators, openModulePopup, runBlenderOperator } from "./editors/object/object-operators.js";
+import { createArmatureModes } from "./editors/armature/armature-modes.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
@@ -367,7 +368,7 @@ const blenderRNA = createRNA({ world, selection: editor.selection, update: () =>
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
-const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? "OBJECT");
+const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? world.armatureModes?.contextMode ?? "OBJECT");
 // Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
 const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
 const applyTool = () => {
@@ -394,6 +395,8 @@ world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
 const objectOperatorHost = { transaction: commands.transaction, notify, keying: (run) => animation.keying(run), commit, wm: () => world.wm,
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
+// An armature's Edit and Pose Modes, Blender's in Main.
+world.armatureModes = createArmatureModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
 registerAddOperators(creator);
 world.dock = viewportDock;
 world.outliner = createOutliner({ world, editor, commands, sync: world.mainSync, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
@@ -592,7 +595,7 @@ registerOperators({
   "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },
   // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
-  "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : editor).selectOperator(event, props) },
+  "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : world.armatureModes.mode() ? world.armatureModes : editor).selectOperator(event, props) },
   "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
   "view3d.select_lasso": {
     poll: (props, event) => inView(event),
@@ -665,12 +668,12 @@ const bylonderKeys = createKeymap([
   { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve or Font), then the
+// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve, Font, Armature or Pose), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
 const view3dKeys = keymapHandler(
-  (event) => [...world.toolsystem.keymaps(contextMode(), gizmoState(event)), "Object Mode", "Mesh", "Curve", "Font", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE",
-    Font: world.editMode.kind === "FONT" })[name] ?? true,
+  (event) => [...world.toolsystem.keymaps(contextMode(), gizmoState(event)), "Object Mode", "Mesh", "Curve", "Font", ...world.armatureModes.keymaps, "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => (({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE",
+    Font: world.editMode.kind === "FONT" })[name] ?? true) && world.armatureModes.keymapActive(name),
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {

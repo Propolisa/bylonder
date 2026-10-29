@@ -56,7 +56,7 @@ export function apply(objects, data, { partial = false } = {}) {
     if (!node) {
       if (row.kind === "group" || row.kind === "transform")
         node = new TransformNode(row.name || row.id, scene);
-      else if (row.creation?.builder || row.creation?.operator || row.creation?.mesh || row.creation?.curve)
+      else if (row.creation?.builder || row.creation?.operator || row.creation?.mesh || row.creation?.curve || row.creation?.armature)
         node = buildMesh(scene, row.name || row.id, row.creation);
       else if (row.creation?.vertices) {
         node = new Mesh(row.name || row.id, scene);
@@ -73,7 +73,7 @@ export function apply(objects, data, { partial = false } = {}) {
         objects.push(node);
       }
     } else if (
-      (row.creation?.builder || row.creation?.operator || row.creation?.mesh || row.creation?.curve) &&
+      (row.creation?.builder || row.creation?.operator || row.creation?.mesh || row.creation?.curve || row.creation?.armature) &&
       JSON.stringify(row.creation) !== JSON.stringify(node.metadata?.wbCreation)
     )
       rebuildMesh(node, row.creation);
