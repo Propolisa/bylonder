@@ -40,6 +40,9 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
   const toolHeader = Object.assign(document.createElement('div'), { className: 'bl-ui bl-tool-header' });
   const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui bl-sidebar' });
   sidebar.setAttribute('aria-label', 'Sidebar');
+  // Shown as the view's state says from the first draw (draw() keeps them so).
+  toolHeader.hidden = !view.state.show_region_tool_header;
+  sidebar.hidden = !view.state.show_region_ui;
   const state = reactive({ category: null, open: {}, revision: 0, ready: false });
   const panels = panelState(state);
   const regionTypes = {};
