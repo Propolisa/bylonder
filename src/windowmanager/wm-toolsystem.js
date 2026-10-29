@@ -11,8 +11,9 @@ const { exports: x, cString } = blenderModule;
 // WM_toolsystem_default_tool for the 3D View's modes Bylonder has (OBJECT, EDIT_MESH, EDIT_CURVE, EDIT_TEXT), and
 // whether Blender's startup file also has it as the fallback tool (Select Text is in no select group, so has none).
 const defaultTool = (mode) => (mode === 'EDIT_TEXT' ? ['builtin.select_text', [false]] : ['builtin.select_box', [false, true]]);
-// The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo.
-const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_gizmo_context', 'VIEW3D_GGT_xform_extrude', 'MESH_GGT_spin', 'MESH_GGT_spin_redo',
+// The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo
+// (wm_toolsystem.cc keeps a fallback keymap only for those, by the flag editor-context.cc gives them).
+const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_gizmo_context', 'VIEW3D_GGT_xform_cage', 'VIEW3D_GGT_xform_shear', 'VIEW3D_GGT_xform_extrude', 'MESH_GGT_spin', 'MESH_GGT_spin_redo',
   'VIEW3D_GGT_mesh_preselect_elem', 'VIEW3D_GGT_mesh_preselect_edgering', 'VIEW3D_GGT_tool_generic_handle_normal', 'VIEW3D_GGT_tool_generic_handle_free']);
 const { activate_by_id, activate_by_id_or_cycle, item_from_flat_index, item_from_index_active, ToolSelectPanelHelper } = module('bl_ui.space_toolsystem_common');
 const { VIEW3D_PT_tools_active } = registered;
@@ -56,12 +57,12 @@ export function createToolSystem({ inContext, mode: editMode, changed = () => {}
     // startup) or the active tool.
     get workspace_tool_type() { return python((context) => context.scene.tool_settings.workspace_tool_type); },
     // The keymaps the active tool adds before the region's own (wm_event_get_keymap_from_toolsystem_ex): its own, and
-    // the fallback tool's for a tool that asks for it or whose gizmo group gives it, first while the gizmo shows and
+    // the fallback tool's where Blender kept it (a tool asking for it, or its gizmo group), first while the gizmo shows and
     // the pointer is not on it. `gizmo` tells { visible, highlight } for the view.
     keymaps(mode, gizmo = {}) {
       const tool = system.active(mode);
       if (!tool) return [];
-      const fallback = tool.keymap_fallback && system.workspace_tool_type === 'FALLBACK' && (tool.fallback_keymap || FALLBACK_GIZMOS.has(tool.gizmo_group));
+      const fallback = tool.keymap_fallback && system.workspace_tool_type === 'FALLBACK';
       const keymaps = [tool.keymap, fallback && tool.keymap_fallback].filter(Boolean);
       return FALLBACK_GIZMOS.has(tool.gizmo_group) && gizmo.visible && !gizmo.highlight ? keymaps.reverse() : keymaps;
     },

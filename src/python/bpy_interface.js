@@ -53,9 +53,12 @@ export const registered = _bpy.registered;
 // Blender's panels, menus, headers, lists and operators become Blender's types in the module, in the order the scripts
 // register them, as register_class makes them (bpy_rna.js), so Blender's regions lay them out and its window manager
 // runs them.
+// Property groups are registered too, before the classes whose properties hold them (node.add_node's NodeSetting).
 const REGISTERED_TYPES = /_(PT|MT|HT|UL)_|\./;
+const PropertyGroup = globalThis.__py_modules['_bpy.types'].PropertyGroup;
+const isPropertyGroup = (cls) => cls === PropertyGroup || (cls?.__bases__ ?? []).some(isPropertyGroup);
 for (const [idname, cls] of Object.entries(registered)) {
-  if (!REGISTERED_TYPES.test(idname)) continue;
+  if (!REGISTERED_TYPES.test(idname) && !isPropertyGroup(cls)) continue;
   try {
     registerClass(cls);
   } catch (error) {
