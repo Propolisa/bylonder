@@ -68,9 +68,10 @@ import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
 import { exportScene } from "./io_scene_babylon/export.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
-import { createTexts } from "./blenkernel/texts.js";
+import { createTextFiles } from "./blenkernel/text-files.js";
+import { setContextPointer } from "./python/bpy_rna.js";
+import * as blenderAreas from "./windowmanager/wm-areas.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
-import { registerTextOperators } from "./editors/space_text/text-ops.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
@@ -318,10 +319,11 @@ animation.setCommit(()=>history.commit());
 const capture = windowCapture(notify);
 // Blender's window takes the 3D Views' input in Object Mode (made once Main is, below).
 let view3dWindow = null;
+// The editors that are Blender's own (editors/screen/blender-area.js) take theirs.
 const blenderWindow = {
-  takes: (native, view) => !!view3dWindow?.takes(native, view),
-  send: (...args) => view3dWindow.send(...args),
-  pressHandled: () => view3dWindow.pressHandled(),
+  takes: (native, view) => blenderAreas.takes(native) || !!view3dWindow?.takes(native, view),
+  send: (kind, data, strings, view, native) => (blenderAreas.takes(native) ? blenderAreas.send(native, kind, data, strings) : view3dWindow.send(kind, data, strings, view)),
+  pressHandled: () => blenderAreas.blenderWindow().pressHandled(),
 };
 world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow });
 const editor = createEditor(
@@ -361,8 +363,9 @@ world.onModeChange = () => {
 };
 world.beforeSelection = () => creator.finish();
 world.objectActions = createObjectActions({ world, editor, commands, creator });
-// bpy.data.texts: the project's text files, each edit saved with the project.
-world.texts = createTexts({ files: input.texts, save: (name, content) => send("text", { name, content }) });
+// bpy.data.texts: the project's text files, as Main's Texts.
+setContextPointer(blenderMain().C);
+world.texts = createTextFiles({ files: input.texts, save: (name, content) => send("text", { name, content }) });
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit, notify });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
@@ -439,11 +442,10 @@ const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, docu
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!world.wm?.modal) {editor.selection.sync();refreshUI();} });
 // The Scripting workspace's editors: Text Editor, Python Console and Info.
-registerTextOperators(world.texts);
 registerConsoleOperators();
 const scriptingEditors = [
   // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
-  mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), rna: blenderRNA, texts: world.texts, beforeRun: () => creator.finish() }),
+  mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), files: world.texts, context: () => createContext(blenderRNA, { area: "TEXT_EDITOR" }), beforeRun: () => creator.finish() }),
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
   mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info"), rna: blenderRNA }),
 ];
@@ -697,8 +699,8 @@ const gizmoState = (event) => (world.editMode.active || !TOOL_GIZMOS[world.tools
 const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight) || tools.keymap(event);
 const keyLayers = () => {
   const view = activeView();
-  if (!view || view.state.cameraView) return [blenderKeymaps, bylonderKeys];
-  return [gizmoKeys, world.editMode.keymap, blenderKeymaps, bylonderKeys];
+  if (!view || view.state.cameraView) return [blenderAreas.areaKeys, blenderKeymaps, bylonderKeys];
+  return [blenderAreas.areaKeys, gizmoKeys, world.editMode.keymap, blenderKeymaps, bylonderKeys];
 };
 
 let last = 0;

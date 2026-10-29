@@ -6,14 +6,14 @@
 // calls back here (bpy_class_call), on an instance of the class over the struct Blender passes.
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { provided } from '../port/wasm.js';
-import { set, tuple, AttributeError, py_TypeError, ValueError, KeyError, IndexError, Exception } from '../bl_py/org.transcrypt.__runtime__.js';
+import { set, tuple, bool, AttributeError, py_TypeError, ValueError, KeyError, IndexError, Exception } from '../bl_py/org.transcrypt.__runtime__.js';
 
 const { exports: x } = blenderModule;
 const encoder = new TextEncoder(), decoder = new TextDecoder();
 
 // PropertyType, FunctionFlag, ParameterFlag and bpy_property_info's flags (RNA_types.hh, rna-bridge.cc).
 const BOOLEAN = 0, INT = 1, FLOAT = 2, STRING = 3, ENUM = 4, POINTER = 5, COLLECTION = 6;
-const FUNC_NO_SELF = 1, FUNC_USE_SELF_TYPE = 2, FUNC_REGISTER = 32, FUNC_REGISTER_OPTIONAL = 32 | 64;
+const FUNC_NO_SELF = 1, FUNC_REGISTER_OPTIONAL = 32 | 64;
 const PARM_REQUIRED = 1, PARM_OUTPUT = 2;
 const PROP_REGISTER_OPTIONAL = 16 | 32;
 const INFO_ENUM_FLAG = 1, INFO_EDITABLE = 2;
@@ -210,7 +210,8 @@ const structHandler = {
         return true;
       }
     }
-    return Reflect.set(target, key, value, receiver);
+    if (!Reflect.set(target, key, value, receiver)) throw AttributeError(`bpy_struct: attribute "${key}" from "${structIdentifier(target[POINTER_RNA][0])}" is read-only`);
+    return true;
   },
   has(target, key) {
     if (typeof key !== 'string' || key.startsWith('_') || key in target) return key in target;
@@ -326,6 +327,8 @@ function propArray(ptr, prop) {
   });
 }
 
+const OWNED_FIRST = new Set(['add', 'remove', 'clear', 'move']);
+
 // Collections (bpy_prop_collection): items by index and by name, and the functions and properties of the collection's
 // own struct (bpy.data.objects.new) over its owner.
 function propCollection(ptr, prop) {
@@ -371,6 +374,9 @@ function propCollection(ptr, prop) {
       if (key === POINTER_RNA) return pointerOf(owner());
       if (key === 'length') return length();
       if (typeof key === 'string' && /^\d+$/.test(key)) return at(+key);
+      // The collection's own functions (BlendDataObjects.remove) come first, as pyrna_prop_collection_getattro looks
+      // them up: the generic add, remove and clear are an ID property collection's.
+      if (OWNED_FIRST.has(key) && owner() && findFunction(pointerOf(owner())[0], key)) return owner()[key];
       if (key in target) return target[key];
       if (typeof key === 'string' && key.startsWith('py_') && rnaName(key) in target) return target[rnaName(key)];
       return typeof key === 'string' ? owner()?.[key] : undefined;
@@ -390,10 +396,11 @@ function pythonArguments(args) {
 }
 const keyword = (keywords, name) => keywords[name] ?? keywords['py_' + name] ?? (name === 'type' ? keywords.py_metatype : undefined);
 
-function setParameter(parms, index, [, kind, flags], value) {
+function setParameter(parms, index, [, kind, flags, , length], value) {
   switch (kind) {
     case BOOLEAN: case INT: case FLOAT: {
-      const list = numberList(value);
+      // A boolean is Python's truth of the value (poll returning the object it found).
+      const list = kind === BOOLEAN && !length ? [Number(bool(value))] : numberList(value);
       ensureNumbers(list.length);
       numbers().set(list);
       x.bpy_param_numbers_set(parms, index, numbersPointer, list.length);

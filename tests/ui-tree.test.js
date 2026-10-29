@@ -58,13 +58,22 @@ assert.ok(!find(drawn, 'OBJECT_PT_transform').parts.some((part) => part.part ===
 const array = ob.modifiers.new('Array', 'ARRAY');
 array.use_relative_offset = false;
 spaceOf(area).context = 'MODIFIER';
-const modifierPanels = panels().filter((panel) => panel.id.includes('Array'));
+const modifierPanels = panels().filter((panel) => /array/i.test(panel.id));
 assert.equal(modifierPanels.length, 1, 'one instanced panel per modifier');
-const arrayButtons = panelButtons(modifierPanels[0]).filter((b) => b.rna);
-assert.deepEqual(arrayButtons.filter((b) => b.rna.owner === 'ArrayModifier').map((b) => b.rna.prop).slice(0, 3).includes('count'), true);
+const part = (panel, name) => buttons(panel.parts.find((p) => p.part === name).layout).filter((b) => b.rna).map((b) => b.rna.prop);
+assert.deepEqual(part(modifierPanels[0], 'body').slice(0, 2), ['fit_type', 'count'], 'MOD_array.cc panel_draw');
+assert.ok(part(modifierPanels[0], 'header').includes('show_viewport'), 'modifier_panel_header');
 const relative = modifierPanels[0].children.find((child) => child.id.endsWith('relative_offset'));
 assert.ok(relative, 'the Relative Offset sub-panel');
 assert.equal(panelButtons(relative).find((b) => b.type === 'CHECKBOX')?.rna.prop, 'use_relative_offset');
+
+// The Displace panel: its texture's selector with Blender's New operator, its coordinates active once it has one.
+const displace = ob.modifiers.new('Displace', 'DISPLACE');
+const displaceButtons = () => panels().filter((panel) => /displace/i.test(panel.id)).flatMap(panelButtons);
+assert.ok(displaceButtons().some((b) => b.operator === 'texture.new'), 'template_ID offers New');
+assert.equal(displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, true);
+displace.texture = blendData().textures.new('Texture', 'CLOUDS');
+assert.ok(!displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, 'active with a texture');
 
 // The header (PROPERTIES_HT_header) and a menu of Blender's Python, its items operators with their properties.
 const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C));

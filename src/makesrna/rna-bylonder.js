@@ -7,6 +7,7 @@
 // RNA names (blenkernel/main-sync.js): the same declaration reads and writes both ways.
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
+import { blendData } from '../python/bpy_rna.js';
 import { Camera, Color3, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
@@ -21,7 +22,6 @@ import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
-import { isSyntaxHighlightSupported } from '../editors/space_text/text-format.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
 import { isBlenderLight, lightRecord, deriveBabylonLight, lightingMode, intensityOf, wattsOf } from '../blenkernel/light/light-home.js';
 import { lightFields } from '../blenkernel/light/light-fields.js';
@@ -624,46 +624,6 @@ const STRUCTS = {
     operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
     gizmo_group_properties: (ref, r) => (idname) => gizmoGroupProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
   },
-  // A Text data-block (blenkernel/texts.js) and its lines; an edit saves the text with the project.
-  Text: {
-    name: { get: (text) => text.name, set: (text, name, r) => r.world.texts.rename(text, name) },
-    filepath: (text) => text.filepath,
-    is_in_memory: () => true,
-    is_dirty: () => false,
-    is_modified: () => false,
-    indentation: { get: (text) => (text.tabsToSpaces ? 'SPACES' : 'TABS'), set: (text, value, r) => { text.tabsToSpaces = value === 'SPACES'; r.world.texts.edited(text); } },
-    lines: (text, r) => collection(text.lines.map((_, i) => textLine(text, i, r))),
-    current_line: (text, r) => textLine(text, text.curl, r),
-    select_end_line: (text, r) => textLine(text, text.sell, r),
-    ...Object.fromEntries([['current_line_index', 'curl'], ['current_character', 'curc'], ['select_end_line_index', 'sell'], ['select_end_character', 'selc']].map(([name, key]) => [name,
-      { get: (text) => text[key], set: (text, value, r) => { text[key] = value; r.world.texts.edited(text); } }])),
-    clear: (text, r) => () => { text.setContent(''); r.world.texts.edited(text); },
-    write: (text, r) => (value) => { text.moveEof(false); text.insert(value); r.world.texts.edited(text); },
-    from_string: (text, r) => (value) => { text.setContent(value); r.world.texts.edited(text); },
-    as_string: (text) => () => text.content,
-    cursor_set: (text, r) => (...list) => {
-      const { line, character = 0, select = false } = pyArgs(list, ['line', 'character', 'select']);
-      text.moveTo(line, character, !!select);
-      r.world.texts.edited(text);
-    },
-    select_set: (text, r) => (...list) => {
-      const { line_start, char_start, line_end, char_end } = pyArgs(list, ['line_start', 'char_start', 'line_end', 'char_end']);
-      text.moveTo(line_start, char_start, false);
-      text.moveTo(line_end, char_end, true);
-      r.world.texts.edited(text);
-    },
-  },
-  // The Text Editor (editors/space_text): its text and settings.
-  SpaceTextEditor: {
-    type: () => 'TEXT_EDITOR',
-    text: { get: (st, r) => r.pointer('Text', st.text), set: (st, value) => st.setText(value?.[INFO].owner ?? null) },
-    ...Object.fromEntries(['show_line_numbers', 'show_word_wrap', 'show_syntax_highlight', 'show_line_highlight', 'show_margin', 'margin_column', 'font_size', 'tab_width',
-      'show_region_ui', 'show_region_footer', 'use_live_edit', 'use_match_case', 'use_find_wrap', 'use_find_all', 'find_text', 'replace_text'].map((name) => [name, spaceSetting(name)])),
-    top: { get: (st) => st.top, set: (st, value) => st.scrollTo(value) },
-    visible_lines: (st) => st.visibleLines(),
-    use_overwrite: (st) => st.settings.overwrite,
-    is_syntax_highlight_supported: (st) => () => isSyntaxHighlightSupported(st.text),
-  },
   // The Python Console (editors/space_console): its lines, prompt and language.
   SpaceConsole: {
     type: () => 'CONSOLE',
@@ -700,12 +660,6 @@ const STRUCTS = {
     { get: () => space[name], set: (owner, value) => { space[name] = value; } }])) }),
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', material: 'MATERIAL', rendered: 'RENDERED' };
-// One of a text's lines (TextLine); writing its body edits the text.
-const textLine = (text, i, r) => rna('TextLine', {
-  get body() { return text.lines[i] ?? ''; },
-  set body(value) { text.lines[i] = String(value); r.world.texts.edited(text); },
-  format: '',
-});
 // Mesh.vertices, edges and polygons: the object's Mesh (objectMesh, its Blender topology in Blender's axes), filled
 // from Babylon's side when read (docs/blender-boundary.md, Who owns what, point 5). `co` reads and writes per vertex
 // (MeshVertex, made when read) or whole through foreach_get and foreach_set; a write rebuilds the object's mesh.
@@ -852,15 +806,8 @@ export function createRNA(host) {
     host,
     world: host.world,
     objects: () => host.world.objects.filter((ob) => !deleted(ob)),
-    // bpy.data.texts: the project's texts, with new and remove (py_new as Transcrypt names it).
-    texts() {
-      const texts = host.world.texts;
-      if (!texts) return collection();
-      const add = (...list) => r.pointer('Text', texts.new(pyArgs(list, ['name']).name ?? 'Text'));
-      return Object.assign(collection(texts.all.map((text) => r.pointer('Text', text))), {
-        new: add, py_new: add, remove: (...list) => texts.remove(pyArgs(list, ['text']).text?.[INFO].owner),
-      });
-    },
+    // bpy.data.texts: Main's (blenkernel/text-files.js).
+    texts: () => blendData().texts,
     // bpy.data.textures, with new(name, type).
     textures() {
       const textures = host.world.textures;

@@ -6,6 +6,7 @@
  * tagged for redrawing. */
 #include "BKE_context.hh"
 #include "BKE_global.hh"
+#include "BKE_lib_remap.hh"
 #include "BKE_main.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
@@ -20,6 +21,7 @@
 #include "DNA_windowmanager_types.h"
 #include "ED_screen.hh"
 #include "ED_space_api.hh"
+#include "ED_util.hh"
 #include "GPU_context.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
@@ -54,6 +56,20 @@ std::string operator_popup_json();
 void screen_area_spacelink_add(const Scene *scene, ScrArea *area, eSpace_Type space_type);
 ScrVert *screen_geom_vertex_add(bScreen *screen, short x, short y);
 
+/* IDs Blender's code removes or remaps are remapped in the editors (WM_main_remap_editor_id_reference, through each
+ * space type's id_remap), Main's screens' and the window's, which is outside Main. */
+static void editor_id_remap(const bke::id::IDRemapper &mappings)
+{
+  WM_main_remap_editor_id_reference(mappings);
+  for (wmWindow &win : static_cast<wmWindowManager *>(G_MAIN->wm.first)->windows) {
+    for (ScrArea &area : WM_window_get_active_screen(&win)->areabase) {
+      for (SpaceLink &sl : area.spacedata) {
+        ED_spacedata_id_remap(&area, &sl, mappings);
+      }
+    }
+  }
+}
+
 /* The window manager as WM_init sets it up for its window (wm_window_ghostwindow_ensure, WM_keyconfig_init): the
  * key configurations with the keymaps Blender's C defines (their items come from keyconfig data, wm_keymap_item_new),
  * the window's GHOST window and its handlers. */
@@ -68,6 +84,7 @@ void wm_init(bContext *C)
   ED_spacetypes_keymap(wm->runtime->defaultconf);
   wm->runtime->defaultconf->flag |= KEYCONF_INIT_DEFAULT;
 
+  BKE_library_callback_remap_editor_id_reference_set(editor_id_remap);
   win->runtime->ghostwin = ghost_window_new(1, 1);
   wmKeyMap *keymap = WM_keymap_ensure(wm->runtime->defaultconf, "Window", SPACE_EMPTY, RGN_TYPE_WINDOW);
   WM_event_add_keymap_handler(&win->runtime->handlers, keymap);
@@ -78,72 +95,7 @@ void wm_init(bContext *C)
   WM_event_add_dropbox_handler(&win->runtime->handlers, WM_dropboxmap_find("Window", SPACE_EMPTY, RGN_TYPE_WINDOW));
 }
 
-/* Keyconfig data (keymap_data/blender_default.py's) into the default key configuration, as Python's
- * keyconfig_init_from_data does through KeyMaps.new and KeyMapItems.new (rna_wm_api.cc), with enum items by
- * identifier. */
-static int enum_value(const EnumPropertyItem *items, const char *identifier)
-{
-  int value = 0;
-  RNA_enum_value_from_id(items, identifier, &value);
-  return value;
-}
-
-EXPORT(wm_keymap_new) wmKeyMap *wm_keymap_new(bContext *C, const char *name, const char *space_type, const char *region_type, bool modal)
-{
-  wmKeyConfig *keyconf = CTX_wm_manager(C)->runtime->defaultconf;
-  return modal ? WM_modalkeymap_ensure(keyconf, name, nullptr)
-               : WM_keymap_ensure(keyconf, name, enum_value(rna_enum_space_type_items, space_type),
-                                  enum_value(rna_enum_region_type_items, region_type));
-}
-
-static int16_t modifier_flag(bool any, const int *modifiers)
-{
-  if (any) {
-    return KM_ANY;
-  }
-  const int flags[] = {KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY, KM_HYPER};
-  int16_t modifier = 0;
-  for (int i = 0; i < 5; i++) {
-    modifier |= modifiers[i] == KM_MOD_HELD ? flags[i] : modifiers[i] == KM_ANY ? KMI_PARAMS_MOD_TO_ANY(flags[i]) : 0;
-  }
-  return modifier;
-}
-
-/* An item: an operator's (by Python idname) in a keymap, a modal item's value (by identifier) in a modal keymap.
- * modifiers: shift, ctrl, alt, oskey and hyper, each KM_MOD_HELD, KM_ANY or 0. */
-EXPORT(wm_keymap_item_new)
-wmKeyMapItem *wm_keymap_item_new(wmKeyMap *km, const char *idname, const char *type, const char *value, bool any,
-                                 const int *modifiers, const char *keymodifier, const char *direction, bool repeat)
-{
-  KeyMapItem_Params params{};
-  params.type = int16_t(enum_value(rna_enum_event_type_items, type));
-  params.value = int8_t(enum_value(rna_enum_event_value_items, value));
-  params.modifier = modifier_flag(any, modifiers);
-  params.keymodifier = int16_t(keymodifier[0] ? enum_value(rna_enum_event_type_items, keymodifier) : 0);
-  params.direction = int8_t(direction[0] ? enum_value(rna_enum_event_direction_items, direction) : KM_ANY);
-  wmKeyMapItem *kmi;
-  if (km->flag & KEYMAP_MODAL) {
-    kmi = km->modal_items ? WM_modalkeymap_add_item(km, &params, enum_value(static_cast<const EnumPropertyItem *>(km->modal_items), idname))
-                          : WM_modalkeymap_add_item_str(km, &params, idname);
-  }
-  else {
-    char idname_bl[OP_MAX_TYPENAME];
-    WM_operator_bl_idname(idname_bl, idname);
-    kmi = WM_keymap_add_item(km, idname_bl, &params);
-  }
-  if (!repeat) {
-    kmi->flag |= KMI_REPEAT_IGNORE;
-  }
-  return kmi;
-}
-
-/* One of an item's operator properties (kmi.properties), as operator_set sets an operator's. */
-EXPORT(wm_keymap_item_property_set)
-bool wm_keymap_item_property_set(wmKeyMapItem *kmi, const char *name, const double *numbers, int len, const char *text)
-{
-  return kmi->ptr && operator_property_set(kmi->ptr, name, numbers, len, text);
-}
-
+/* Keyconfig data is loaded by Blender's Python (bl_keymap_utils.io, through rna-bridge.cc). */
 /* After loading: the user key configuration is made from the default one before the next event (WM_keyconfig_update). */
 EXPORT(wm_keyconfig_loaded) void wm_keyconfig_loaded() { WM_keyconfig_update_tag(nullptr, nullptr); }
 
@@ -156,8 +108,9 @@ EXPORT(wm_window_size_set) void wm_window_size_set(bContext *C, int width, int h
 }
 
 /* An area of a space type (SPACE_VIEW3D, ...) in the window's screen, as ED_area_newspace makes one: the space its
- * type creates, holding the space's regions. */
-EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype)
+ * type creates for the sub-type asked for (Area.ui_type within the space: a SpaceAction's mode; -1 for its default),
+ * holding the space's regions. */
+EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype, int subtype)
 {
   wmWindow *win = CTX_wm_window(C);
   bScreen *screen = WM_window_get_active_screen(win);
@@ -167,7 +120,12 @@ EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype)
   area->v3 = screen_geom_vertex_add(screen, 1, 1);
   area->v4 = screen_geom_vertex_add(screen, 1, 0);
   area->spacetype = char(spacetype);
+  area->butspacetype_subtype = short(std::max(subtype, 0));
   screen_area_spacelink_add(WM_window_get_active_scene(win), area, eSpace_Type(spacetype));
+  ED_area_and_region_types_init(area);
+  if (area->type->space_subtype_set && subtype >= 0) {
+    area->type->space_subtype_set(area, subtype);
+  }
   BLI_addtail(&screen->areabase, area);
   return area;
 }
@@ -206,7 +164,7 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
   area->v2->vec = {short(total.xmin), short(total.ymax)};
   area->v3->vec = {short(total.xmax), short(total.ymax)};
   area->v4->vec = {short(total.xmax), short(total.ymin)};
-  if (area->type == nullptr) {
+  if (!std::exchange(reinterpret_cast<BylonderArea *>(area)->initialized, true)) {
     ED_area_init(C, win, area);
   }
   area->totrct = total;
@@ -222,6 +180,8 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
     SET_FLAG_FROM_TEST(region.flag, !shown, RGN_FLAG_HIDDEN);
     region.runtime->visible = shown != nullptr;
     if (!shown) {
+      /* As region_rect_recursive leaves a hidden region: no rectangle, so no event finds it. */
+      BLI_rcti_init(&region.winrct, 0, 0, 0, 0);
       continue;
     }
     region.winrct = window_rect(win, shown);

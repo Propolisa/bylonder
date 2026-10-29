@@ -5,9 +5,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { BlenderMain, newOperator, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
-import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, ACTION_MODES, GRAPH_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
+import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_UI, ACTION_MODES, GRAPH_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
 import { FCURVE } from '../src/blenkernel/animation/anim-blender.js';
-import { moduleStruct } from '../src/makesrna/rna-module.js';
+import { pointerStruct, setContextPointer } from '../src/python/bpy_rna.js';
+import { regionPanels, categorySet, buttonApplied, buttonPress } from '../src/editors/interface/ui-tree.js';
 
 const dir = new URL('./fixtures/anim/', import.meta.url);
 const close = (a, b, label) => assert.ok(Math.abs(a - b) < 2e-3, `${label}: ${a} != ${b}`);
@@ -56,6 +57,8 @@ function setup(fixture, name) {
   const area = new AnimArea(main, fixture.space === 'GRAPH_EDITOR' ? SPACE_GRAPH : SPACE_ACTION);
   if (area.spacetype === SPACE_ACTION) area.subtype = ACTION_MODES.DOPESHEET;
   area.layout(RGN_TYPE_WINDOW, 0, 0, fixture.view.width, fixture.view.height);
+  area.layout(RGN_TYPE_UI, fixture.view.width, 0, 280, fixture.view.height);
+  setContextPointer(main.C);
   const [[xmin, ymin], [xmax, ymax]] = [fixture.view.min, fixture.view.max];
   area.v2d().cur = { xmin, xmax, ymin, ymax };
   return { anim, ob, area };
@@ -78,7 +81,22 @@ for (const file of cases) {
 // The Graph Editor's Active Keyframe panel (graph_buttons.cc, recorded) edits the active key: co_ui through its raw
 // buttons, whose update callbacks sort the keys and recalculate handles, other properties through the module's RNA
 // and then FCurve.update(), as the fixtures set them.
-const recordedNodes = (node, out = []) => { out.push(node); (node.children ?? []).forEach((child) => recordedNodes(child, out)); return out; };
+// The sidebar's panels as Blender's region lays them out, in every tab, and their buttons (ui-tree.cc).
+const buttonsOf = (node) => (node.kind === 'button' ? [node] : (node.children ?? []).flatMap(buttonsOf));
+const panelButtons = (panel) => [...panel.parts.flatMap((part) => buttonsOf(part.layout)), ...panel.children.flatMap(panelButtons)];
+const sidebar = (area) => area.inContext(RGN_TYPE_UI, (C) => regionPanels(C).categories.flatMap((category) => {
+  categorySet(C, category);
+  return regionPanels(C).panels.map((panel) => ({ category, panel, buttons: panelButtons(panel) }));
+}));
+const sidebarButtons = (area) => sidebar(area).flatMap(({ buttons }) => buttons);
+// The buttons of one tab, drawn last so they can be pressed (a region's buttons last until its next layout).
+const tabButtons = (area, category) => area.inContext(RGN_TYPE_UI, (C) => { categorySet(C, category); return regionPanels(C).panels.flatMap(panelButtons); });
+// The structs a sidebar's property buttons edit, by their RNA owner, in order.
+const structsOf = (buttons, owner) => {
+  const seen = new Map();
+  for (const b of buttons) if (b.rna?.owner === owner && !seen.has(b.rna.pointer[2])) seen.set(b.rna.pointer[2], b.rna.pointer);
+  return [...seen.values()].map((pointer) => pointerStruct(...pointer));
+};
 for (const file of panels) {
   const name = file.replace('.json', ''), fixture = read(name), [curve, key, prop, value] = fixture.panel;
   const view = { width: 800, height: 400, min: [0, -5], max: [40, 5] };
@@ -90,17 +108,16 @@ for (const file of panels) {
   fcurve.flag |= FCURVE.ACTIVE | FCURVE.SELECTED;
   select(true);
   fcurve.active_key = key;
-  const nodes = area.sidebarPanels().flatMap(({ panel }) => recordedNodes(panel));
-  const buttons = nodes.filter((n) => n.button?.prop === prop).map((n) => n.button);
+  const all = sidebarButtons(area), { category } = sidebar(area).find(({ buttons: b }) => b.some((button) => button.rna?.prop === prop)) ?? {};
+  const buttons = category ? tabButtons(area, category).filter((b) => b.rna?.prop === prop) : [];
   if (prop === 'co_ui') {
     assert.equal(buttons.length, 2, `${name}: the panel's Key Frame and Value buttons`);
     for (const button of buttons) {
-      const keyframe = moduleStruct(button.owner, button.pointer, { C: area.main.C, changed: () => area.panelButtonApplied(button.index) });
-      keyframe[prop] = keyframe[prop].map((v, i) => (i === button.element ? value[i] : v));
+      pointerStruct(...button.rna.pointer)[prop][button.rna.index] = value[button.rna.index];
+      area.inContext(RGN_TYPE_UI, (C) => buttonApplied(C, button));
     }
   } else {
-    const { owner, pointer } = nodes.find((n) => n.owner === 'Keyframe' && n.pointer);
-    moduleStruct(owner, pointer, { C: area.main.C })[prop] = value;
+    structsOf(all, 'Keyframe')[0][prop] = value;
     blenderModule.exports.rna_fcurve_update(area.main.C, ob, fcurve.pointer);
   }
   select(false);
@@ -111,7 +128,6 @@ for (const file of panels) {
 // F-Modifiers added by graph.fmodifier_add to the active F-Curve, then set as their panels (fmodifier_ui.cc, recorded) set
 // them through the module's RNA (rna_fcurve.cc's set functions and updates): their properties and the F-Curve's values.
 const near = (a, b) => (Array.isArray(a) ? a.length === b.length && a.every((v, i) => near(v, b[i])) : typeof a === 'number' ? Math.abs(a - b) < 2e-3 : a === b);
-const recordedPointer = (node) => node.pointer ? node : node.children?.map(recordedPointer).find(Boolean);
 for (const file of fmods) {
   const name = file.replace('.json', ''), fixture = read(name);
   const view = { width: 800, height: 400, min: [0, -5], max: [40, 5] };
@@ -121,10 +137,8 @@ for (const file of fmods) {
   for (const type of fixture.modifiers) {
     assert.ok(area.run(newOperator('graph.fmodifier_add', { type, only_active: true }), RGN_TYPE_WINDOW) & OPERATOR_FINISHED, `${name}: add ${type}`);
   }
-  const modifiers = area.sidebarPanels().filter(({ data }) => data).map(({ panel }) => {
-    const { owner, pointer } = recordedPointer(panel);
-    return moduleStruct(owner, pointer, { C: area.main.C });
-  });
+  const modifiers = sidebar(area).filter(({ panel }) => panel.id.includes('_PT_FModifier') || /^GRAPH_PT_[A-Z]/.test(panel.id) && panel.id !== 'GRAPH_PT_modifiers')
+    .map(({ buttons }) => structsOf(buttons.filter((b) => b.rna?.owner.startsWith('FModifier')), buttons.find((b) => b.rna?.owner.startsWith('FModifier'))?.rna.owner)[0]).filter(Boolean);
   for (const [index, prop, value] of fixture.edits) modifiers[index][prop] = value;
   fixture.after.forEach((expected, i) => {
     for (const [prop, value] of Object.entries(expected)) assert.ok(near(modifiers[i][prop], value), `${name}: modifier ${i} ${prop}: ${modifiers[i][prop]} != ${value}`);
@@ -145,15 +159,14 @@ for (const file of drivers) {
   area.subtype = GRAPH_MODES.DRIVERS;
   const fcurve = anim.addDriver(ob, ...fixture.driver, 0);
   fcurve.flag |= FCURVE.ACTIVE | FCURVE.SELECTED;
-  // The panel's nodes, and the structs its properties show by owner, in the panel's order.
-  const panel = () => area.sidebarPanels().filter(({ category }) => category === 'Drivers').flatMap(({ panel: p }) => recordedNodes(p));
-  const structs = (owner) => {
-    const seen = new Map();
-    for (const node of panel()) if (node.owner === owner && node.pointer && !seen.has(node.pointer[2])) seen.set(node.pointer[2], node.pointer);
-    return [...seen.values()].map((pointer) => moduleStruct(owner, pointer, { C: area.main.C }));
-  };
+  // The Drivers tab's buttons, and the structs its properties show by owner, in the panel's order.
+  const panel = () => tabButtons(area, 'Drivers');
+  const structs = (owner) => structsOf(panel(), owner);
   for (const [kind, ...edit] of fixture.edits) {
-    if (kind === 'add_variable') area.pressPanelButton(panel().find((n) => n.button?.text === 'Add Input Variable').button.index);
+    if (kind === 'add_variable') {
+      const add = panel().find((b) => b.text === 'Add Input Variable');
+      area.inContext(RGN_TYPE_UI, (C) => buttonPress(C, add));
+    }
     else if (kind === 'driver') structs('Driver')[0][edit[0]] = edit[1];
     else if (kind === 'var') structs('DriverVariable')[edit[0]][edit[1]] = edit[2];
     else structs('DriverTarget')[edit[0] + edit[1]][edit[2]] = edit[3];

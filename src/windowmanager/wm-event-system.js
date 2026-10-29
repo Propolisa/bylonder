@@ -72,12 +72,12 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   function toBlender(native, kind, data, strings = {}) {
     const view = viewAt(native.clientX === undefined ? null : native);
     if (modal.length || !blender?.takes(native, view)) return false;
-    const result = blender.send(kind, data, strings, view);
+    const result = blender.send(kind, data, strings, view, native);
     blenderModal = result.modal;
     for (const event of result.unhandled) {
       if (event.value === 'RELEASE' && !event.type.endsWith('mouse')) continue;
       const handled = dispatch(unhandled(native, event));
-      if (handled && event.value === 'PRESS' && event.type.endsWith('mouse')) blender.pressHandled();
+      if (handled && event.value === 'PRESS') blender.pressHandled();
       if (handled) native.preventDefault?.();
     }
     if (result.finished.length || result.modal) native.preventDefault?.();

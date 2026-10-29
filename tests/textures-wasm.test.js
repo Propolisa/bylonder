@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
 import { createMesh } from '../src/blenkernel/mesh/mesh.js';
-import { evaluateBlenderModifiers, modifierPanel } from '../src/modifiers/blender.js';
+import { evaluateBlenderModifiers } from '../src/modifiers/blender.js';
 import { blenderModule } from '../src/bmesh/bmesh-wasm.js';
-import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview, moduleTexture } from '../src/blenkernel/texture/texture.js';
+import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview } from '../src/blenkernel/texture/texture.js';
 import { createTextures } from '../src/blenkernel/texture/textures.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -68,16 +68,8 @@ assert.deepEqual(off, [], 'Displaced positions that differ from Blender (largest
 // Textures outside Main are freed once no modifier uses them.
 evaluateBlenderModifiers(sphere, []);
 
-// The Displace panel draws its texture's selector with Blender's New operator, and its coordinates active with one.
-const find = (node, test) => (test(node) ? node : node.children.map((child) => find(child, test)).find(Boolean));
-const panel = (texture) => modifierPanel({ type: 'DISPLACE', values: { texture: texture ? 'tex' : null } }, () => texture);
-const template = find(panel(0), (n) => n.kind === 'template');
-assert.deepEqual([template.text, template.prop, template.new], ['template_id', 'texture', 'texture.new']);
-const coordinates = (texture) => find(panel(texture), (n) => n.kind === 'column' && n.children.some((c) => c.prop === 'texture_coords')).active;
 const textures = createTextures({ objects: [] });
 const lava = textures.create();
-assert.equal(coordinates(0), false);
-assert.equal(coordinates(moduleTexture(lava.values)), true);
 
 // The textures slice: Blender's names, a setting as RNA writes it, undo restores it.
 assert.equal(textures.create().name, 'Texture.001');

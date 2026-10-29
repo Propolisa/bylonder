@@ -3,9 +3,32 @@
 // banner, copy as script) run Blender's own _console_python in CPython (python/pyodide.js); bl_operators/console.py,
 // which Blender registers for them, only looks that module up by the console's language.
 import { registerOperators, contextArea, runOperator } from '../../windowmanager/wm-operators.js';
-import { jumpDelim } from '../../blenkernel/texts.js';
 import { readClipboard, setClipboard } from '../../makesrna/rna-bylonder.js';
 import { consoleCall, pythonLoaded } from '../../python/pyodide.js';
+
+// cursor_delim_type_unicode (string_cursor_utf8.cc): the class a character jumps with.
+const DELIMS = [[',.\u2026\u3002\uff0c\uff61', 'punct'], ['{}[]()\u3010\u3011\uff08\uff09', 'brace'], ['+-=~%/<>^*&|\u2014\u300a\u300b\uff0f\uff5e', 'operator'],
+  ['\'"`\u00b4\u2018\u2019\u201c\u201d', 'quote'], [' \t\n', 'whitespace'], ['\\@#$:;?!\u00a3\u0080\u3001\uff01\uff64\uff65\uff1a\uff1b\uff1f', 'other']];
+const delimType = (ch) => DELIMS.find(([chars]) => chars.includes(ch))?.[1] ?? 'alphanumeric';
+
+// BLI_str_cursor_step_utf8 with STRCUR_JUMP_DELIM: from `pos`, one step (with initStep), then on over characters of
+// the class next to it.
+function jumpDelim(line, pos, forward, initStep = true) {
+  const orig = pos;
+  if (forward) {
+    if (initStep) pos = Math.min(line.length, pos + 1);
+    const type = pos < line.length ? delimType(line[pos]) : null;
+    while (pos < line.length) if (++pos === line.length || type !== delimType(line[pos])) break;
+    return pos;
+  }
+  if (initStep) pos = Math.max(0, pos - 1);
+  const type = pos > 0 ? delimType(line[pos - 1]) : null;
+  while (pos > 0) {
+    const prev = pos--;
+    if (type !== delimType(line[pos])) { if (orig - pos >= 1) pos = prev; break; }
+  }
+  return pos;
+}
 
 const TAB_LENGTH = 4;
 // U.scrollback: the lines the scrollback keeps.

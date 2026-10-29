@@ -23,10 +23,14 @@ const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1);
 
 export const modifierOf = (event) => (event.shift ? KM_SHIFT : 0) | (event.ctrl ? KM_CTRL : 0) | (event.alt ? KM_ALT : 0) | (event.oskey ? KM_OSKEY : 0);
 
+// Blender's space and region types (eSpace_Type, eRegion_Type).
+const SPACE_OUTLINER = 3, RGN_TYPE_WINDOW = 0;
+
 export class OutlinerArea {
   constructor(main) {
     this.main = main;
-    this.pointer = x.outliner_new(main.C) >>> 0;
+    this.pointer = x.wm_area_new(main.C, SPACE_OUTLINER, -1) >>> 0;
+    x.outliner_area_init(this.pointer);
     this.space = dnaStruct('SpaceOutliner', x.outliner_space(this.pointer) >>> 0);
     this.size = [0, 0];
     this.modal = null;
@@ -37,16 +41,16 @@ export class OutlinerArea {
     x.outliner_region_size(this.pointer, 0, 0, width, height);
   }
   // The main region's draw (region-draw.cc's recording).
-  draw() { return JSON.parse(cString(x.outliner_draw(this.main.C, this.pointer))); }
+  draw() { return JSON.parse(cString(x.wm_region_draw(this.main.C, this.pointer, RGN_TYPE_WINDOW, false))); }
   // The selection changed elsewhere: the Outliner syncs its own from the view layer's when it next draws.
   selectionChanged() { x.outliner_select_sync_from_objects(this.pointer); }
 
   inContext(fn) {
-    x.outliner_context_set(this.main.C, this.pointer);
+    x.wm_area_context_set(this.main.C, this.pointer, RGN_TYPE_WINDOW);
     try {
       return fn(this.main.C);
     } finally {
-      x.outliner_context_set(this.main.C, 0);
+      x.wm_area_context_set(this.main.C, 0, 0);
       // The module's scene is not in Main's scenes, which BKE_main_collection_sync resyncs after IDs change.
       this.main.syncCollections();
     }

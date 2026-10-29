@@ -74,11 +74,14 @@ export function computeCoverage(surface, implemented, notesMarkdown = '', availa
     if (scope) (qualified.get(key) ?? qualified.set(key, new Set()).get(key)).add(scope);
     else plain.add(key);
   }
-  const has = (key, ancestors) => plain.has(key) || ancestors.some((a) => qualified.get(key)?.has(a.id));
+  // Operators by prefix (`text.*`): all of an editor that is Blender's own.
+  const prefixes = [...plain].filter((key) => key.endsWith('.*')).map((key) => key.slice(0, -1));
+  const prefixed = (key) => prefixes.some((prefix) => key.startsWith(prefix));
+  const has = (key, ancestors) => plain.has(key) || prefixed(key) || ancestors.some((a) => qualified.get(key)?.has(a.id));
   // A binding in a keymap Bylonder dispatches from Blender's own (`*` scoped to it) counts when what it runs is there:
   // its operator registered (`@registry`, or at run time), or the menu or panel it calls (named by the binding) one
   // Bylonder's source names.
-  const runs = (id, ancestors) => (/_(MT|PT)_/.test(id) ? plain.has(id) : !!qualified.get(id)?.has(REGISTRY) || available({ k: 'op', id }, ancestors));
+  const runs = (id, ancestors) => (/_(MT|PT)_/.test(id) ? plain.has(id) : prefixed(id) || !!qualified.get(id)?.has(REGISTRY) || available({ k: 'op', id }, ancestors));
   const dispatched = (node, ancestors) => runs(node.id, ancestors) && has(DISPATCHED, ancestors);
   const implementedNode = (node, ancestors) => (node.k === 'key'
     ? has(node.id + '|' + normalizeKeys(node.x), ancestors) || dispatched(node, ancestors)
@@ -121,5 +124,5 @@ export function computeCoverage(surface, implemented, notesMarkdown = '', availa
 
 // Ids in our source that Blender does not have: usually typos.
 function unmatchedIds(implemented, known) {
-  return [...new Set(implemented.map((e) => e.split(/[@|]/)[0]))].filter((id) => id !== DISPATCHED && !known.has(id.split(':')[0]));
+  return [...new Set(implemented.map((e) => e.split(/[@|]/)[0]))].filter((id) => id !== DISPATCHED && !id.endsWith('.*') && !known.has(id.split(':')[0]));
 }

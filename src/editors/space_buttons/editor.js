@@ -6,7 +6,7 @@
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { blenderMain } from '../../bmesh/bmesh-wasm.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../animation/anim-area.js';
-import { regionPanels, regionHeader, menuTree, panelClosedSet, categorySet } from '../interface/ui-tree.js';
+import { regionPanels, regionHeader, menuTree, panelClosedSet } from '../interface/ui-tree.js';
 import { BlockView, PanelsView, treeMenu } from '../interface/block-view.js';
 import { panelState } from '../interface/layout-view.js';
 import { openMenu } from '../interface/menu.js';
@@ -109,7 +109,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
       const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C)) ?? [];
       const nav = area.inContext(RGN_TYPE_NAV_BAR, (C) => regionPanels(C));
       const main = area.inContext(RGN_TYPE_WINDOW, (C) => regionPanels(C));
-      tabs = navigationTabs(nav);
+      tabs = navigationTabs(nav, space());
       const headerView = h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, header.map((tree) => h(BlockView, { tree, ui: ui[RGN_TYPE_HEADER] })));
       const tab = space().context;
       return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES', tabindex: -1, onKeydown,
@@ -142,9 +142,10 @@ export function mountProperties(host, { world, editor, history, systems, propert
 }
 
 // The tabs the navigation bar's buttons offer (prop_tabs_enum of SpaceProperties.context), in order.
-function navigationTabs(nav) {
-  const tabs = [];
-  const visit = (node) => (node.kind === 'button' ? node.rna?.prop === 'context' && node.type === 'TAB' && tabs.push(node.value) : node.children?.forEach(visit));
+function navigationTabs(nav, space) {
+  const values = [];
+  const visit = (node) => (node.kind === 'button' ? node.rna?.prop === 'context' && values.push(node.value) : node.children?.forEach(visit));
   nav.panels.forEach((panel) => panel.parts.forEach((part) => visit(part.layout)));
-  return tabs.map((value) => [...pointerStruct(structFind('SpaceProperties'), 0, 0)?.bl_rna?.properties?.get('context')?.enum_items ?? []].find((item) => item.value === value)?.identifier).filter(Boolean);
+  const items = [...space.bl_rna.properties.get('context').enum_items];
+  return values.map((value) => items.find((item) => item.value === value)?.identifier).filter(Boolean);
 }
