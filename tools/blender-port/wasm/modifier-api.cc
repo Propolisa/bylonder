@@ -36,7 +36,6 @@
 #include "BLO_readfile.hh"
 #include "BLT_translation.hh"
 #include "DEG_depsgraph.hh"
-#include "DNA_armature_types.h"
 #include "DNA_image_types.h"
 #include "DNA_mesh_types.h"
 #include "DNA_modifier_types.h"
@@ -349,8 +348,6 @@ IDTypeInfo IDType_ID_IM = id_type_without_data(ID_IM, FILTER_ID_IM, INDEX_ID_IM,
                                                BLT_I18NCONTEXT_ID_IMAGE, IDTYPE_FLAGS_NO_ANIMDATA | IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 IDTypeInfo IDType_ID_SO = id_type_without_data(ID_SO, FILTER_ID_SO, INDEX_ID_SO, sizeof(bSound), "Sound", "sounds",
                                                BLT_I18NCONTEXT_ID_SOUND, IDTYPE_FLAGS_NO_ANIMDATA | IDTYPE_FLAGS_APPEND_IS_REUSABLE);
-IDTypeInfo IDType_ID_AR = id_type_without_data(ID_AR, FILTER_ID_AR, INDEX_ID_AR, sizeof(bArmature), "Armature", "armatures",
-                                               BLT_I18NCONTEXT_ID_ARMATURE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 /* The module's one window manager is its context's, outside Main. */
 IDTypeInfo IDType_ID_WM = id_type_without_data(ID_WM, FILTER_ID_WM, INDEX_ID_WM, sizeof(wmWindowManager), "WindowManager",
                                                "window_managers", BLT_I18NCONTEXT_ID_WINDOWMANAGER,

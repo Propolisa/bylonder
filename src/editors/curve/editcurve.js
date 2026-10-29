@@ -215,7 +215,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     get object() { return ed?.node ?? null; },
     // CURVE or FONT while editing.
     get kind() { return ed?.kind ?? null; },
-    editable,
+    editable: (node = activeObject()) => editable(node),
     enter,
     exit,
     toggle: () => (ed ? exit() : enter()),

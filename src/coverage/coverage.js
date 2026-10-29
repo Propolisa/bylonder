@@ -37,6 +37,30 @@ function matches(path, node, ancestors) {
 }
 
 export const DISPATCHED = '*';
+const REGISTRY = 'registry';
+
+// What the scene window provides from Blender's own code (window.__bylonder.coverage()) counts where it has the editor
+// and mode: operators it registers, those registered for a space type only in that space's editors, and the menus and
+// panels it draws from Blender's scripts.
+const EDITORS = new Set(['TOPBAR', 'VIEW_3D', 'OUTLINER', 'PROPERTIES', 'TIMELINE', 'DOPESHEET', 'FCURVES', 'DRIVERS', 'ShaderNodeTree',
+  'CompositorNodeTree', 'SEQUENCE_EDITOR', 'TEXT_EDITOR', 'CONSOLE', 'INFO']);
+const MODES = new Set(['VIEW_3D:OBJECT', 'VIEW_3D:EDIT']);
+// A space type's editors, as the surface names them (by ui_type).
+const SPACE_AREAS = { DOPESHEET_EDITOR: ['TIMELINE', 'DOPESHEET'], GRAPH_EDITOR: ['FCURVES', 'DRIVERS'] };
+
+export function runtimeAvailable({ operators = [], spaceOperators = {}, classes = [] } = {}) {
+  const ui = new Set(classes), everywhere = new Set(operators), inSpaces = new Set(Object.values(spaceOperators).flat()), byArea = {};
+  for (const [space, ids] of Object.entries(spaceOperators)) for (const area of SPACE_AREAS[space] ?? [space]) ids.forEach((id) => (byArea[area] ??= new Set()).add(id));
+  // The Top Bar holds the keymaps editors share (Markers, View2D): a binding there runs in the editors that register
+  // its operator.
+  const shared = (area, ancestors, id) => area === 'TOPBAR' && ancestors.some((a) => a.k === 'keymap') && inSpaces.has(id);
+  return (node, ancestors) => {
+    const area = ancestors.find((a) => a.k === 'area')?.id, mode = ancestors.find((a) => a.k === 'mode')?.id;
+    if (!EDITORS.has(area) || (mode && !MODES.has(mode))) return false;
+    if (node.k !== 'op') return (node.k === 'menu' || node.k === 'panel') && ui.has(node.id);
+    return everywhere.has(node.id) || !!byArea[area]?.has(node.id) || shared(area, ancestors, node.id);
+  };
+}
 
 // `available(node, ancestors)` tells what Bylonder provides at run time from Blender's own code: operators it runs and
 // menus and panels it draws from Blender's scripts, which the scan of its source cannot see.
@@ -51,8 +75,11 @@ export function computeCoverage(surface, implemented, notesMarkdown = '', availa
     else plain.add(key);
   }
   const has = (key, ancestors) => plain.has(key) || ancestors.some((a) => qualified.get(key)?.has(a.id));
-  // A binding in a keymap Bylonder dispatches from Blender's own (`*` scoped to it) counts when its operator runs.
-  const dispatched = (node, ancestors) => (plain.has(node.id) || available({ k: 'op', id: node.id }, ancestors)) && has(DISPATCHED, ancestors);
+  // A binding in a keymap Bylonder dispatches from Blender's own (`*` scoped to it) counts when what it runs is there:
+  // its operator registered (`@registry`, or at run time), or the menu or panel it calls (named by the binding) one
+  // Bylonder's source names.
+  const runs = (id, ancestors) => (/_(MT|PT)_/.test(id) ? plain.has(id) : !!qualified.get(id)?.has(REGISTRY) || available({ k: 'op', id }, ancestors));
+  const dispatched = (node, ancestors) => runs(node.id, ancestors) && has(DISPATCHED, ancestors);
   const implementedNode = (node, ancestors) => (node.k === 'key'
     ? has(node.id + '|' + normalizeKeys(node.x), ancestors) || dispatched(node, ancestors)
     : has(node.id, ancestors) || available(node, ancestors));

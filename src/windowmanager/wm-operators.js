@@ -19,6 +19,21 @@ export function registerOperator(idname, operator, space = null) {
   else operators.set(idname, operator);
 }
 
+// Registers Blender's own operator behind one Bylonder registered: Bylonder's runs the calls it supports and polls
+// (object.mode_set into a mesh's Edit Mode), Blender's the others (an armature's Pose Mode), and the enum items are
+// Blender's.
+export function registerFallback(idname, fallback) {
+  const own = operators.get(idname);
+  if (!own) return registerOperator(idname, fallback);
+  const takes = (props, event) => (own.supports?.(props) ?? true) && (own.poll?.(props, event) ?? true);
+  registerOperator(idname, {
+    ...fallback,
+    poll: (props, event) => takes(props, event) || (fallback.poll?.(props, event) ?? true),
+    run: (props, event) => (takes(props, event) ? own : fallback).run(props, event),
+    enumItems: (prop) => fallback.enumItems?.(prop) ?? own.enumItems?.(prop),
+  });
+}
+
 export function registerOperators(table, space = null) {
   for (const [idname, operator] of Object.entries(table)) registerOperator(idname, operator, space);
 }
@@ -33,6 +48,7 @@ const finished = (idname, props, result) => {
 export const runOperator = (idname, props = {}) => finished(idname, props, operatorFor(idname).run(props));
 export const hasOperator = (idname) => operators.has(idname);
 export const operatorIds = () => [...operators.keys()];
+export const spaceOperatorIds = () => Object.fromEntries([...spaceOperators].map(([space, table]) => [space, [...table.keys()]]));
 // Whether an operator is registered and can run now with those properties (WM_operator_poll).
 export const pollOperator = (idname, props = {}) => { const operator = operatorFor(idname); return !!operator && (operator.supports?.(props) ?? true) && (operator.poll?.(props) ?? true); };
 

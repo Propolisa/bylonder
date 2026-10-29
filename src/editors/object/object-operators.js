@@ -2,7 +2,8 @@
 // (object-actions.js) as the Blender operators they name, so Blender's own 3D View menus and keymaps run them. An
 // operator Bylonder runs with some properties only picks its action by them. Actions Blender lacks are `bylonder.*`
 // operators, added to Blender's Object menu as an add-on would.
-import { registerOperator, appendMenu, kw, invokeOperator } from '../../windowmanager/wm-operators.js';
+import { registerOperator, registerFallback, appendMenu, kw, invokeOperator } from '../../windowmanager/wm-operators.js';
+import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { runModal } from '../space_view3d/view3d-modal.js';
 import { regionView3D } from '../space_view3d/view3d-project.js';
 import { OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
@@ -88,9 +89,15 @@ const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 //   keying(run): runs an operator that may insert keys (auto keying), for the animation to take them.
 export function registerObjectOperators(registry, { sync, transaction, notify, keying = (fn) => fn(), ...host } = {}) {
   const options = { transaction, notify, keying, ...host };
-  if (sync) for (const idname of blenderOperators(sync.blender)) registerOperator(idname, {
+  if (sync) for (const idname of blenderOperators(sync.blender)) registerFallback(idname, {
     poll: () => { sync.flush(); return sync.blender.poll(idname); },
     run: (props, event) => runBlenderOperator(sync, idname, props, { ...options, event }),
+    // Blender's items in context (object_mode_set_itemf: the active object's modes), with RNA's names and icons.
+    enumItems: (prop) => {
+      sync.flush();
+      const items = rnaOperators[idname]?.properties[prop]?.items ?? [];
+      return sync.blender.enumItems(idname, prop).map(([id, name]) => items.find(([item]) => item === id) ?? [id, name]);
+    },
   });
   const named = (action) => [action.blender ?? []].flat();
   for (const idname of new Set(registry.actions.flatMap(named).filter(isOperator))) {

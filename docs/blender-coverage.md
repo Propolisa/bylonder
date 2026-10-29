@@ -62,13 +62,18 @@ Typed values, the Global and Local cycling of repeated axis keys and the header 
 ## node.add_node
 Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with search as you type. It adds the Blender nodes Bylonder runs (Math, Mix, Color Balance so far); Babylon's blocks are in a Babylon sub-menu of each category. See `docs/node-editors.md`.
 
-## DOPESHEET_EDITOR > *
-Status: partial
+## TIMELINE > *
 The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). Markers are the scene's (Scene.timeline_markers in the module), saved with the animation. The header's mode menu switches between the Dope Sheet, Action Editor, Shape Key Editor, Grease Pencil, Mask and Cache File modes through rna_space.cc's own mode update; Bylonder has no shape keys, Grease Pencil, masks or cache files yet, so those modes list nothing. A Dope Sheet keeps the Timeline's collapsed summary wherever it is opened, as when Blender switches the Timeline's area, so in another area it differs from Blender's new Dope Sheet.
 
-## GRAPH_EDITOR > *
-Status: partial
+## DOPESHEET > *
+As the Timeline: the same space in its Dope Sheet modes.
+
+## FCURVES > *
 Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Its sidebar is Blender's own C panels (`graph_buttons.cc`, `fmodifier_ui.cc`), drawn in the module and recorded. The Drivers editor is the same space in its Drivers mode (Editor Type > Drivers). Adding a driver from a property's context menu, and driver values reaching Babylon's objects, are not done yet.
+
+## DRIVERS > *
+As the Graph Editor: the same space in its Drivers mode.
+
 ## OUTLINER > *
 Status: partial
 Blender's `space_outliner` code in the module, drawn on a canvas from its own draw calls; see `docs/blender-boundary.md` (Outliner). View Layer display mode only; other display modes, context menus on IDs that are not objects or collections, and scroll bars are not shown yet.
@@ -105,3 +110,8 @@ Blender's own primitive operators fill the curve, in the module (`ED_curve_add_n
 
 ## object.text_add
 Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.
+
+## object.armature_add
+Armatures are Blender's: their bones, Edit Mode, Pose Mode, the evaluated pose and the Armature modifier run in the
+module; Bylonder draws the bones as Octahedral bones from Blender's evaluated matrices. Bone picking finds the bone with
+Bylonder's own picking (the module has no GPU selection buffer). See `docs/armatures.md`.

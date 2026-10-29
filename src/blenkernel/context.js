@@ -10,7 +10,7 @@ const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER
   CONSOLE: 'SpaceConsole', INFO: 'SpaceInfo' };
 const REGION_DATA = { VIEW_3D: 'RegionView3D' };
 // CTX_data_mode_enum for an object in Edit Mode, by its type.
-const EDIT_MODES = { MESH: 'EDIT_MESH', CURVE: 'EDIT_CURVE', FONT: 'EDIT_TEXT' };
+const EDIT_MODES = { MESH: 'EDIT_MESH', CURVE: 'EDIT_CURVE', FONT: 'EDIT_TEXT', ARMATURE: 'EDIT_ARMATURE' };
 
 export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region: regionType = 'WINDOW', space = null, members } = {}) {
   const { world, host } = r;
@@ -24,7 +24,9 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
   const region = rna('Region', { type: region_type, ...size, view2d: rna('View2D', { region_to_view: (x, y) => [x, y] }) });
   const screen = rna('Screen', { areas: collection([area]) });
   const window = rna('Window', { scene, view_layer, screen });
-  const editObject = () => world.editMode?.object ?? null;
+  // An armature's modes are Blender's, kept on the object (main-sync.js).
+  const armatureIn = (mode) => { const ob = host.selection?.nodes.at(-1); return ob?.metadata?.wbCreation?.armature && ob.metadata.wbMode === mode ? ob : null; };
+  const editObject = () => world.editMode?.object ?? armatureIn('EDIT');
   // Bylonder's active object is the last selected, or the one in Edit Mode.
   const activeObject = () => editObject() ?? host.selection?.nodes.at(-1) ?? null;
   const selected = () => r.objects().filter((ob) => host.selection?.has(ob));
@@ -40,10 +42,11 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
     blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects, get texts() { return r.texts(); }, get textures() { return r.textures(); } }),
     // The Text Editor's text (CTX_data_edit_text).
     get edit_text() { return space_data.text ?? null; },
-    get mode() { const ob = editObject(); return ob ? EDIT_MODES[object(ob).type] ?? 'OBJECT' : 'OBJECT'; },
+    get mode() { const ob = editObject(); return ob ? EDIT_MODES[object(ob).type] ?? 'OBJECT' : armatureIn('POSE') ? 'POSE' : 'OBJECT'; },
     get object() { return object(activeObject()); },
     get active_object() { return object(activeObject()); },
     get edit_object() { return object(editObject()); },
+    get pose_object() { return object(armatureIn('POSE')); },
     get selected_objects() { return selected().map(object); },
     get selected_editable_objects() { return editable(selected()).map(object); },
     get visible_objects() { return visible().map(object); },
