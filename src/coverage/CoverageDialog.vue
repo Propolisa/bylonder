@@ -24,9 +24,9 @@ const scene = () => [...document.querySelectorAll("iframe")].map((f) => f.conten
 
 // Menus drawn from Blender's scripts count by what they show, found by drawing them.
 Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw"), import("../editors/space_view3d/view3d-menus-edit-mesh.js"),
-  import("../editors/space_buttons/modifier-add-menu.js"), import("../workspace/topbar.js")])
-  .then(([surface, implemented, notes, menus, modifierMenus, topbar]) => (data.value = computeCoverage(surface.default,
-    [...implemented.default, ...menus.editMeshMenuCoverage(), ...modifierMenus.modifierMenuCoverage(), ...topbar.topbarMenuCoverage()],
+  import("../workspace/topbar.js")])
+  .then(([surface, implemented, notes, menus, topbar]) => (data.value = computeCoverage(surface.default,
+    [...implemented.default, ...menus.editMeshMenuCoverage(), ...topbar.topbarMenuCoverage()],
     notes.default, runtimeAvailable(scene()?.coverage()))));
 
 const FILTERS = {
