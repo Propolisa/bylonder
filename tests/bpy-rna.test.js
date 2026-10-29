@@ -48,6 +48,8 @@ ob.select_set(true);
 const empty = data.objects.new('Empty', null);
 assert.equal(empty.type, 'EMPTY');
 assert.equal(data.objects.length, 2);
+data.objects.remove(empty);
+assert.equal(data.objects.length, 1, 'a collection\'s own remove (BlendDataObjects.remove) over the generic one');
 
 // Context members.
 assert.equal(context.scene.name, 'Scene');

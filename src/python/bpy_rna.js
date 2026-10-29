@@ -326,6 +326,8 @@ function propArray(ptr, prop) {
   });
 }
 
+const OWNED_FIRST = new Set(['add', 'remove', 'clear', 'move']);
+
 // Collections (bpy_prop_collection): items by index and by name, and the functions and properties of the collection's
 // own struct (bpy.data.objects.new) over its owner.
 function propCollection(ptr, prop) {
@@ -371,6 +373,9 @@ function propCollection(ptr, prop) {
       if (key === POINTER_RNA) return pointerOf(owner());
       if (key === 'length') return length();
       if (typeof key === 'string' && /^\d+$/.test(key)) return at(+key);
+      // The collection's own functions (BlendDataObjects.remove) come first, as pyrna_prop_collection_getattro looks
+      // them up: the generic add, remove and clear are an ID property collection's.
+      if (OWNED_FIRST.has(key) && owner() && findFunction(pointerOf(owner())[0], key)) return owner()[key];
       if (key in target) return target[key];
       if (typeof key === 'string' && key.startsWith('py_') && rnaName(key) in target) return target[rnaName(key)];
       return typeof key === 'string' ? owner()?.[key] : undefined;
