@@ -10,12 +10,15 @@
 #include <vector>
 
 #include "BKE_context.hh"
+#include "BKE_global.hh"
 #include "BKE_report.hh"
 #include "BLI_array.hh"
 #include "BLI_listbase_iterator.hh"
 #include "BLI_string.h"
 #include "MEM_guardedalloc.h"
+#include "DNA_ID.h"
 #include "RNA_access.hh"
+#include "RNA_path.hh"
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
 #include "RNA_prototypes.hh"
@@ -387,6 +390,53 @@ bool bpy_pointer_set(bContext *C, StructRNA *type, ID *id, void *data, PropertyR
   return ok;
 }
 
+/* bpy_struct's own methods (pyrna_struct_path_resolve, is_property_set, path_from_id, keys). */
+
+/* A path from a struct: 0 when it does not resolve, 1 for a struct (into `out`), 2 for a property (its struct, then the
+ * property and index, into `out`). */
+EXPORT(bpy_path_resolve) int bpy_path_resolve(StructRNA *type, ID *id, void *data, const char *path)
+{
+  PointerRNA ptr = pointer(type, id, data), r_ptr;
+  PropertyRNA *prop;
+  int index = -1;
+  if (!RNA_path_resolve_full_maybe_null(&ptr, path, &r_ptr, &prop, &index)) {
+    return 0;
+  }
+  put(r_ptr);
+  out[3] = uintptr_t(prop);
+  out[4] = uintptr_t(index);
+  return prop ? 2 : 1;
+}
+EXPORT(bpy_property_is_set) bool bpy_property_is_set(StructRNA *type, ID *id, void *data, PropertyRNA *prop)
+{
+  PointerRNA ptr = pointer(type, id, data);
+  return RNA_property_is_set(&ptr, prop);
+}
+EXPORT(bpy_property_unset) void bpy_property_unset(StructRNA *type, ID *id, void *data, PropertyRNA *prop)
+{
+  PointerRNA ptr = pointer(type, id, data);
+  RNA_property_unset(&ptr, prop);
+}
+/* The path from the struct's ID to it, or to its property `prop` when given; null when there is none. */
+EXPORT(bpy_path_from_id) const char *bpy_path_from_id(StructRNA *type, ID *id, void *data, PropertyRNA *prop)
+{
+  PointerRNA ptr = pointer(type, id, data);
+  const std::optional<std::string> path = prop ? RNA_path_from_ID_to_property(&ptr, prop) : RNA_path_from_ID_to_struct(&ptr);
+  return path ? text(*path) : nullptr;
+}
+/* The names of a struct's custom properties (its ID properties), as a JSON array. */
+EXPORT(bpy_idprop_keys) const char *bpy_idprop_keys(StructRNA *type, ID *id, void *data)
+{
+  PointerRNA ptr = pointer(type, id, data);
+  std::string json = "[";
+  if (IDProperty *group = RNA_struct_idprops(&ptr, false)) {
+    for (IDProperty *prop = static_cast<IDProperty *>(group->data.group.first); prop; prop = prop->next) {
+      json += (json.size() > 1 ? "," : "") + json_string(prop->name);
+    }
+  }
+  return text(json + "]");
+}
+
 /* Collections. */
 
 EXPORT(bpy_collection_length) int bpy_collection_length(StructRNA *type, ID *id, void *data, PropertyRNA *prop)
@@ -707,7 +757,7 @@ EXPORT(bpy_register) StructRNA *bpy_register(bContext *C, StructRNA *base, int c
   }
   ReportList reports;
   BKE_reports_init(&reports, RPT_STORE);
-  StructRNA *srna = reg(CTX_data_main(C), &reports, reinterpret_cast<void *>(intptr_t(cls)), identifier, class_validate, class_call, class_free);
+  StructRNA *srna = reg(C ? CTX_data_main(C) : G_MAIN, &reports, reinterpret_cast<void *>(intptr_t(cls)), identifier, class_validate, class_call, class_free);
   char *message = BKE_reports_string(&reports, RPT_ERROR);
   register_error = message ? message : "";
   MEM_SAFE_DELETE(message);
@@ -720,7 +770,7 @@ EXPORT(bpy_register) StructRNA *bpy_register(bContext *C, StructRNA *base, int c
 EXPORT(bpy_unregister) void bpy_unregister(bContext *C, StructRNA *srna)
 {
   if (StructUnregisterFunc unreg = RNA_struct_unregister(srna)) {
-    unreg(CTX_data_main(C), srna);
+    unreg(C ? CTX_data_main(C) : G_MAIN, srna);
   }
 }
 

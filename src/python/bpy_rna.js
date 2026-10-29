@@ -150,20 +150,57 @@ function contextMember(C, name) {
   }
 }
 
+// A property's value from a path (path_resolve): coerced to its Python value, or its element at an index.
+function resolvePath(ptr, path) {
+  const kind = withText([path], (p) => x.bpy_path_resolve(...ptr, p));
+  if (!kind) throw ValueError(`${structIdentifier(ptr[0])}.path_resolve("${path}") could not be resolved`);
+  const owner = outStruct(), [, , , prop, index] = out();
+  if (kind === 1) return struct(...owner);
+  const value = propertyGet(owner, prop);
+  return index !== 0xffffffff && value?.__getitem__ ? value.__getitem__(index) : value;
+}
+const idpropKeys = (ptr) => JSON.parse(cString(x.bpy_idprop_keys(...ptr)));
+const quoted = (key) => `["${String(key).replace(/["\\]/g, '\\$&')}"]`;
+
+// bpy_struct's own methods (bpy_rna.cc's pyrna_struct_methods), under the class's: custom properties by key, paths and
+// whether a property is set.
+const STRUCT_METHODS = {
+  path_resolve: (ptr) => (path) => resolvePath(ptr, path),
+  is_property_set: (ptr) => (name) => { const prop = findProperty(ptr, name); return !!prop && x.bpy_property_is_set(...ptr, prop); },
+  property_unset: (ptr) => (name) => { const prop = findProperty(ptr, name); if (prop) x.bpy_property_unset(...ptr, prop); },
+  path_from_id: (ptr) => (name) => cString(x.bpy_path_from_id(...ptr, name ? findProperty(ptr, name) : 0)),
+  as_pointer: (ptr) => () => ptr[2],
+  id_data: (ptr) => (ptr[1] ? idStruct(ptr[1]) : null),
+  keys: (ptr) => () => idpropKeys(ptr),
+  values: (ptr) => () => idpropKeys(ptr).map((key) => resolvePath(ptr, quoted(key))),
+  items: (ptr) => () => idpropKeys(ptr).map((key) => tuple([key, resolvePath(ptr, quoted(key))])),
+  get: (ptr) => (key, fallback = null) => (idpropKeys(ptr).includes(key) ? resolvePath(ptr, quoted(key)) : fallback),
+  __getitem__: (ptr) => (key) => { if (!idpropKeys(ptr).includes(key)) throw KeyError(`bpy_struct[key]: key "${key}" not found`); return resolvePath(ptr, quoted(key)); },
+  __contains__: (ptr) => (key) => idpropKeys(ptr).includes(key),
+  __eq__: (ptr) => (other) => { const o = pointerOf(other); return !!o && o[0] === ptr[0] && o[2] === ptr[2]; },
+  __ne__: (ptr) => (other) => { const o = pointerOf(other); return !o || o[0] !== ptr[0] || o[2] !== ptr[2]; },
+  __hash__: (ptr) => () => ptr[2],
+};
+
+const isContext = (ptr) => structIdentifier(ptr[0]) === 'Context';
+
 const structHandler = {
   get(target, key, receiver) {
-    if (typeof key !== 'string' || key.startsWith('_')) return Reflect.get(target, key, receiver);
+    if (typeof key !== 'string' || (key.startsWith('_') && !(key in STRUCT_METHODS))) return Reflect.get(target, key, receiver);
     const ptr = target[POINTER_RNA], name = rnaName(key);
-    const prop = findProperty(ptr, name);
-    if (prop) return propertyGet(ptr, prop);
-    const func = findFunction(ptr[0], name);
-    if (func && functionInfo(func).defined) return (...args) => callFunction(ptr, func, args);
-    if (structIdentifier(ptr[0]) === 'Context') {
-      const member = contextMember(ptr[2], name);
-      if (member !== undefined) return member;
+    if (!key.startsWith('_')) {
+      const prop = findProperty(ptr, name);
+      if (prop) return propertyGet(ptr, prop);
+      const func = findFunction(ptr[0], name);
+      if (func && functionInfo(func).defined) return (...args) => callFunction(ptr, func, args);
+      if (isContext(ptr)) {
+        const member = contextMember(ptr[2], name);
+        if (member !== undefined) return member;
+      }
+      if (name === 'bl_rna') return structRna(ptr[0]);
     }
-    if (name === 'bl_rna') return structRna(ptr[0]);
-    return Reflect.get(target, key, receiver);
+    if (key in target || !(name in STRUCT_METHODS)) return Reflect.get(target, key, receiver);
+    return STRUCT_METHODS[name](ptr);
   },
   set(target, key, value, receiver) {
     if (typeof key === 'string' && !key.startsWith('_')) {
@@ -178,7 +215,8 @@ const structHandler = {
   has(target, key) {
     if (typeof key !== 'string' || key.startsWith('_') || key in target) return key in target;
     const ptr = target[POINTER_RNA], name = rnaName(key);
-    return !!findProperty(ptr, name) || !!findFunction(ptr[0], name);
+    return !!findProperty(ptr, name) || !!findFunction(ptr[0], name) || name in STRUCT_METHODS
+      || (isContext(ptr) && contextMember(ptr[2], name) !== undefined);
   },
 };
 
@@ -211,8 +249,8 @@ function propertyGet(ptr, prop) {
   return null;
 }
 
-// A number, or a sequence of them (a mathutils value keeps its own in `values`).
-const numberList = (value) => (typeof value === 'number' || typeof value === 'boolean' ? [Number(value)]
+// A number, or a sequence of them (a mathutils value keeps its own in `values`); None is false.
+const numberList = (value) => (value == null || typeof value === 'number' || typeof value === 'boolean' ? [Number(value ?? 0)]
   : Array.from(Array.isArray(value?.values) ? value.values : value, Number));
 const enumText = (value) => (typeof value === 'string' ? value : Array.from(value).join(','));
 
@@ -329,6 +367,8 @@ function propCollection(ptr, prop) {
   };
   return new Proxy(methods, {
     get(target, key) {
+      // As a struct (a parameter's data), the collection is its own struct over its owner (LayerObjects).
+      if (key === POINTER_RNA) return pointerOf(owner());
       if (key === 'length') return length();
       if (typeof key === 'string' && /^\d+$/.test(key)) return at(+key);
       if (key in target) return target[key];
@@ -419,6 +459,9 @@ function callFunction(ptr, func, args) {
   }
 }
 
+// A Python exception as Python prints it, its class and message, with the JS stack it was raised at.
+const pythonError = (error) => (error?.__args__ ? `${error.__class__?.__name__}: ${error.__args__[0]}\n${error.stack ?? ''}` : error);
+
 // ---- Registration (pyrna_register_class and its callbacks, bpy_class_validate and bpy_class_call).
 const registrable = new Map();
 const registrableOf = (type) => registrable.get(type) ?? registrable.set(type, JSON.parse(cString(x.bpy_struct_registrable(type)))).get(type);
@@ -457,16 +500,18 @@ provided.bpy_class_validate = (id, type, owner, data, haveFunction) => {
     }
     return 0;
   } catch (error) {
-    console.error(`Python: registering ${cls?.__name__}`, error);
+    console.error(`Python: registering ${cls?.__name__}:`, pythonError(error));
     return -1;
   }
 };
 
 // bpy_class_call: a callback of a registered class, on an instance over the struct (kept with the data where the type
 // keeps one, an operator's), or on the class for a class method; its result written to the function's output.
+// bpy.context is the callback's context while it runs (bpy_context_set), for scripts that read it.
 provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => {
-  const previous = C;
+  const previous = C, _bpy = globalThis.__py_modules?._bpy;
   C = CPointer >>> 0;
+  _bpy?._context_push(contextStruct(C), blendData(C));
   const ptr = [type >>> 0, owner >>> 0, data >>> 0], cls = classes[x.bpy_struct_class(ptr[0])];
   const { flag, parameters } = functionInfo(func >>> 0);
   try {
@@ -479,9 +524,10 @@ provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => {
     else outputs.forEach((index, i) => setParameter(parms >>> 0, index, parameters[index], result[i]));
     return 0;
   } catch (error) {
-    console.error(`Python: ${cls?.__name__}.${functionName(func >>> 0)}`, error);
+    console.error(`Python: ${cls?.__name__}.${functionName(func >>> 0)}:`, pythonError(error));
     return -1;
   } finally {
+    _bpy?._context_pop();
     C = previous;
   }
 };

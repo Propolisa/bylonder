@@ -1189,9 +1189,6 @@ wmPaintCursor *WM_paint_cursor_activate(short /*space_type*/, short /*region_typ
 }
 bool WM_paint_cursor_end(wmPaintCursor * /*handle*/) { return true; }
 
-/* port-override: Bylonder lays out the editors' panels (JS), so panel types are not kept. */
-bool WM_paneltype_add(PanelType * /*pt*/) { return true; }
-
 /* port-override: the editors' redo panel (the HUD region) is Bylonder's. */
 ARegionType *ui::ED_area_type_hud(int /*space_type*/)
 {
