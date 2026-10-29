@@ -105,7 +105,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     // The examples as Blender's application templates, which File > New lists (bpy.utils.app_template_paths).
     module('os.path')._mount('/blender/scripts/startup/bl_app_templates_system', examples.map((example) => example.title));
     const context = () => ({
-      area: { show_menus: true }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
+      area: { show_menus: true }, workspace: { use_filter_by_owner: false }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
       scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},
     });
     const ui = topbarUI = menuUI({ menus: { ...blenderMenus, TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
