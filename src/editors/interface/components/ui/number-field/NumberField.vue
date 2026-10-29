@@ -31,6 +31,8 @@ const root = ref(null), input = ref(null), mode = ref("idle"), draft = ref(""), 
 let press = null;
 
 const isInt = computed(() => props.meta.type === "I");
+// The field's name: its label without the colon Blender's layout adds to a number's label (item_name_add_colon).
+const name = computed(() => props.label.replace(/:\s*$/, "") || props.meta.name);
 const hard = computed(() => [props.meta.min ?? -Infinity, props.meta.max ?? Infinity]);
 const soft = computed(() => [Math.max(hard.value[0], props.meta.soft_min ?? -Infinity), Math.min(hard.value[1], props.meta.soft_max ?? Infinity)]);
 const clamp = (value) => Math.min(hard.value[1], Math.max(hard.value[0], isInt.value ? Math.round(value) : value));
@@ -181,7 +183,7 @@ const arrows = computed(() => !props.slider && hovered.value && mode.value === "
     )"
     :title="error || meta.description"
     role="spinbutton"
-    :aria-label="label || meta.name"
+    :aria-label="name"
     :aria-valuenow="modelValue"
     :aria-disabled="disabled"
     @pointerdown="onPointerDown"
