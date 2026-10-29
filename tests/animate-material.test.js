@@ -7,6 +7,7 @@ import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { sceneMain } from './scene-main.js';
+import { idStruct, pointerOf } from '../src/python/bpy_rna.js';
 
 const close = (a, b, label) => assert.ok(a.every((v, i) => Math.abs(v - b[i]) < 1e-3), `${label}: ${a} != ${b}`);
 const scene = new Scene(new NullEngine()), objects = [];
@@ -23,19 +24,22 @@ const sync = sceneMain(world);
 animation.evaluateMain = (frame) => sync.frameChanged(frame);
 const { blender } = sync, { anim } = animation;
 sync.flush();
-const ma = sync.materialOf(paint), baseColor = 'node_tree.nodes["Principled BSDF"].inputs[0].default_value';
+// The Base Color socket's F-Curve is on the Material's node tree (an embedded ID), as keying the socket's button puts it.
+const ma = sync.materialOf(paint), [, tree] = pointerOf(idStruct(ma).node_tree), baseColor = 'nodes["Principled BSDF"].inputs[0].default_value';
 
 // Keyed at frames 1 and 21 as the Properties editor keys the color under the pointer: the value Main holds then.
+const principled = () => [...idStruct(ma).node_tree.nodes].find((node) => node.name === 'Principled BSDF');
 const keyAt = (frame, color) => {
   sync.frameChanged(frame);
-  paint.albedoColor = color;
-  sync.flush();
-  assert.equal(anim.keyInsert(ma, baseColor), 4, `Base Color keyed at frame ${frame}`);
+  principled().inputs[0].default_value = color;
+  idStruct(ma).diffuse_color = color;
+  assert.equal(anim.keyInsert(tree, baseColor), 4, `Base Color keyed at frame ${frame}`);
   assert.equal(anim.keyInsert(ma, 'diffuse_color'), 4, `diffuse_color keyed at frame ${frame}`);
 };
-keyAt(1, new Color3(1, 0, 0));
-keyAt(21, new Color3(0, 0, 1));
-assert.deepEqual([...new Set(anim.fcurves(ma).map((f) => f.rna_path))], [baseColor, 'diffuse_color']);
+keyAt(1, [1, 0, 0, 1]);
+keyAt(21, [0, 0, 1, 1]);
+assert.deepEqual([...new Set(anim.fcurves(tree).map((f) => f.rna_path))], [baseColor]);
+assert.deepEqual([...new Set(anim.fcurves(ma).map((f) => f.rna_path))], ['diffuse_color']);
 
 // The frame between: Blender's animation evaluates Main, the view draws the albedo.
 animation.seek(11);
