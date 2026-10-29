@@ -78,8 +78,14 @@ assert.equal(displaceButtons().find((b) => b.rna?.prop === 'texture_coords').ina
 const textureNew = displaceButtons().find((b) => b.operator === 'texture.new');
 assert.equal(area.inContext(RGN_TYPE_WINDOW, (C) => buttonOperator(C, textureNew)) & 4, 4, 'texture.new finished');
 assert.ok(displace.texture, 'and its texture is the modifier\'s');
-displace.texture.type = 'CLOUDS';
 assert.ok(!displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, 'active with a texture');
+// The Texture tab's Type menu: the item picked is the texture's type.
+spaceOf(area).context = 'TEXTURE';
+const typeMenu = panels().flatMap(panelButtons).find((b) => b.rna?.prop === 'type' && b.rna.owner === 'ImageTexture');
+const clouds = buttons(area.inContext(RGN_TYPE_WINDOW, (C) => buttonMenu(C, typeMenu))).find((b) => b.text === 'Clouds');
+area.inContext(RGN_TYPE_WINDOW, (C) => buttonPress(C, clouds));
+assert.equal(displace.texture.type, 'CLOUDS');
+spaceOf(area).context = 'MODIFIER';
 
 // The header (PROPERTIES_HT_header) and a menu of Blender's Python, its items operators with their properties.
 const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C));

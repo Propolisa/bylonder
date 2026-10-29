@@ -418,11 +418,19 @@ static Vector<Block *> &owned(int kind)
   static Vector<Block *> lists[3];
   return lists[kind];
 }
+/* The popup handles of menus opened from a button (popup_block_create's): an enum menu's items return their value
+ * through it to the button that opened it. */
+static Map<const Block *, std::unique_ptr<PopupBlockHandle>> &menu_handles()
+{
+  static Map<const Block *, std::unique_ptr<PopupBlockHandle>> handles;
+  return handles;
+}
 enum { OWNED_MENU = 0, OWNED_PANELS = 1, OWNED_POPUP = 2 };
 static void owned_free(const bContext *C, int kind)
 {
   for (Block *block : owned(kind)) {
     recorded.erase(block);
+    menu_handles().remove(block);
     block_free(C, block);
   }
   owned(kind).clear();
@@ -442,6 +450,7 @@ static void menu_free(const bContext *C, const StringRef root)
       return false;
     }
     menu_roots().remove(block);
+    menu_handles().remove(block);
     recorded.erase(block);
     block_free(C, block);
     return true;
@@ -720,6 +729,12 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
   }
   else if (but->menu_create_func) {
     Block *block = menu_block_new(C, but->str.c_str(), EmbossType::Pulldown, root);
+    if (but->type == ButtonType::Menu && but->rnaprop && RNA_property_type(but->rnaprop) == PROP_ENUM) {
+      auto handle = std::make_unique<PopupBlockHandle>();
+      handle->popup_create_vars.but = but;
+      block->handle = handle.get();
+      menu_handles().add(block, std::move(handle));
+    }
     /* The button's context goes with what it opens (ui_popup_menu_create_block): a collection's sub-menu of Move to
      * Collection reads its collection from it. */
     Layout &layout = menu_layout(C, block);
@@ -778,8 +793,20 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
   else if (ELEM(but->type, ButtonType::Row, ButtonType::ListRow, ButtonType::Tab)) {
     button_value_set(but, but->hardmax);
   }
+  else if (but->type == ButtonType::ButMenu) {
+    button_value_set(but, double(but->retval));
+  }
   button_applied(C, but);
   button_update(but);
+  /* A menu item's value goes to the menu button that opened it (handle_button_return_submenu). */
+  if (but->type == ButtonType::ButMenu && but->block->handle) {
+    Button *opener = but->block->handle->popup_create_vars.but;
+    if (opener && opener->type == ButtonType::Menu) {
+      button_value_set(opener, double(but->block->handle->retvalue));
+      button_applied(C, opener);
+      button_update(opener);
+    }
+  }
   return (but->flag & UI_SELECT) ? 1 : 0;
 }
 /* An operator button pressed, as ui_apply_but_funcs_after runs it: its operator in the button's context with the button

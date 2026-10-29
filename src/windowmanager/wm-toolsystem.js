@@ -18,9 +18,9 @@ const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_giz
 const { activate_by_id, activate_by_id_or_cycle, item_from_flat_index, item_from_index_active, ToolSelectPanelHelper } = module('bl_ui.space_toolsystem_common');
 const { VIEW3D_PT_tools_active } = registered;
 
-// A struct's set properties as values (a tool's stored operator settings), nested groups as objects, enum flags as
-// lists of their items.
-const plain = (value) => (pointerOf(value) && typeof value.keys === 'function' ? Object.fromEntries(value.keys().map((key) => [key, plain(value.get(key))]))
+// A struct's set properties as RNA reads them (a tool's stored operator settings: enums by identifier), nested groups
+// as objects, enum flags as lists of their items.
+const plain = (value) => (pointerOf(value) && typeof value.keys === 'function' ? Object.fromEntries(value.keys().map((key) => [key, plain(value[key])]))
   : value?.__class__?.__name__ === 'set' ? [...value] : value);
 
 //   inContext(fn(C), view): fn in the context of a 3D View's window region (the given view's toolbar region with one);
