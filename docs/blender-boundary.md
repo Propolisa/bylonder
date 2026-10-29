@@ -33,6 +33,7 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 
 The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answer the context as Blender does, run operators by their own exec (`operator_exec` on a `bContext`) and take their properties through `operator-properties.cc`, which gives operators and DNA structs RNA by identifier.
 
+- **An edit mesh outside Main** (`editor-context.cc`, JS `EditMesh`): a Scene with one Object in Edit Mode, whose edit mesh (BMesh) lives in the module, for primitives made by Blender's operators and a modifier stack's edit-mode result. Edit Mode itself is Main's (see Who owns what).
 - **Blender's data** (`main-api.cc`, JS `BlenderMain`): a `Main` holding objects and their data, one Scene with ToolSettings and one ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers context members through Blender's own `screen_context.cc` (`selected_editable_objects`, `active_object`, ...). Blender's `layer.cc` runs on these Bases. The depsgraph is a stand-in: each ID is its own evaluated copy, `main_evaluate` computes world matrices parents first (`BKE_object_where_is_calc`), and `DEG_id_tag_update` leaves its tags on the ID (`recalc`).
 
 ### Who owns what
@@ -191,8 +192,8 @@ Decided 2026-10-29 (docs/model.md, principle 5). Blender's window manager runs t
   RNA bridge registers them as operator types).
 - **In the app** (`editors/space_view3d/view3d-window.js`), the 3D Views in Object Mode are areas of the window: their
   input goes to Blender first, with the scene flushed into Main before an operator and viewed after, the selected meshes'
-  geometry given to it while it runs; a modal handler of the page (a gesture, a tool) takes the events before it. Mesh
-  Edit Mode's input goes there too.
+  geometry given to it while it runs; a modal handler of the page (a gesture, a tool) takes the events before it. Edit
+  Mode keeps its own context until it is Main's (`EditMesh`, `runModal`).
 - **Checked.** `tests/wm-wasm.test.js`: G, mouse moves and a click move an object through Blender's transform modal
   handler, Escape cancels, an operator the page runs passes its event on, and Blender makes the click.
 
@@ -390,8 +391,8 @@ Decided 2026-10-28. A tool is what Blender's is: its keymap, its gizmo group and
 - Gizmo map: `windowmanager/wm-gizmo-map.js` shows the active tool's gizmo group, highlights the part under the pointer and runs the group's handler before the region's keymaps, as `wm_gizmo_map.cc` does. Its state (shown, highlighted) feeds the tool system's keymap order. The groups are ports: `VIEW3D_GGT_ruler`, `VIEW3D_GGT_placement`, `VIEW3D_GGT_tool_generic_handle_free` and `_normal` (a handle runs the tool's own keymap, as `gz->keymap` does) and `VIEW3D_GGT_xform_extrude`. Babylon's gizmos stay the transform gizmos. Gizmos, rulers, annotations and the placement grid draw on one 2D canvas per view (`draw/overlay-tool.js`) in the theme's colors.
 - Object Mode tools: `editors/space_view3d/view3d-tools.js` registers `view3d.cursor3d` (`view3d-cursor.js`, with Blender's surface depth and orientations), `transform.from_gizmo`, `view3d.ruler_add` and `view3d.ruler_remove` (`view3d-gizmo-ruler.js`), `gpencil.annotate` (`editors/gpencil/annotate.js`, all four modes) and `view3d.interactive_add` (`view3d-placement.js`). The cursor is `scene.cursor` (`View3DCursor`), drawn by `draw/overlay-cursor.js`.
 - Annotations are Blender's data model in a document slice (`blenkernel/gpencil/annotations.js`): layers holding frames of strokes. Rulers are strokes of the hidden `RulerData3D` layer, as Blender stores them.
-- Gizmo bridge: the module's regions have a stand-in gizmo map with no groups (`editor-context.cc`); the gizmos are Bylonder's (`view3d-gizmo-mesh.js`), each group type's properties a struct named after it (`GIZMO_GROUP_PROPERTIES` in `rna-bylonder.js`), so tool settings draw them. Edit Mode on Main has no preselection gizmo yet, so Poly Build and the Loop Cut preview do not run, and the redo gizmos operators ask for (Spin's, Bisect's) are not shown.
-- Straight-line gestures are `wm_gesture_ops.cc`'s (`gesture-api.cc`); in Edit Mode on Main Bylonder does not draw their line, or the mouse line of Inset and Bevel, yet.
+- Gizmo bridge: the module's region has a stand-in gizmo map (`editor-context.cc`). `WM_gizmomap_group_find` answers for the group Bylonder shows (`edit_context_gizmo_group_set`, set from the tool's gizmo group on every hover and press), and `ED_view3d_gizmo_mesh_preselect_get_active` gives the element `edit_mesh_preselect_elem` found. Gizmo group types an operator asks for (`WM_gizmo_group_type_ensure`, Spin's and Bisect's redo gizmos) are recorded and read by `EditMesh.gizmoRequested()`, so Bylonder's gizmo map shows them after the operator. The groups' drawing is Bylonder's (`view3d-gizmo-mesh.js`): the edge ring and element preselection, `MESH_GGT_spin` and `MESH_GGT_spin_redo`. Each group type's properties are a struct named after it (`GIZMO_GROUP_PROPERTIES` in `rna-bylonder.js`), so tool settings draw them.
+- Straight-line gestures are `wm_gesture_ops.cc`'s (`gesture-api.cc`); Bylonder draws the line from `EditMesh.gesture(op)`, and the mouse line of Inset and Bevel from `ED_region_draw_mouse_line_cb`'s center.
 - A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting). An operator returning `FINISHED|PASS_THROUGH` (Set 3D Cursor) handles a press as Blender's `WM_HANDLER_HANDLED` does: no click follows, a drag still can.
 - `tests/tools-wasm.test.js` drags the Edit Mode tools on Blender's startup cube as `tools/blender-reference/tool-fixtures.py` drags them in Blender (real input, Drag: Active Tool) and compares the meshes.
 

@@ -1,20 +1,17 @@
-// The 3D View's Edit Mode tools that run Blender's modal operators on Main in WebAssembly, used as in Blender 5.2: each
+// The 3D View's Edit Mode tools that run Blender's modal operators in WebAssembly, used as in Blender 5.2: each
 // fixture (tools/blender-reference/tool-fixtures.py) gives Blender's startup cube, the view and the input, the tool's
 // keymap gives the operator, its modal keymap the modal events, and the edit mesh must end as Blender's did.
 // ONLY=prefix runs the fixtures whose tools start with it.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { meshFromFaces, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED } from '../src/bmesh/bmesh-wasm.js';
-import { editOnMain } from './edit-main.js';
+import { EditMesh, meshFromFaces, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { defaultKeymaps, modalItem } from '../src/windowmanager/keyconfig.js';
 import { dragDirection, WM_DRAG_THRESHOLD_MOUSE } from '../src/windowmanager/wm-event-system.js';
 import { SCE_SELECT_VERTEX } from '../src/bmesh/intern/bmesh-marking.js';
 
-// Poly Build acts on the element its preselect gizmo has under the mouse, which Main's gizmo map does not have yet.
-const LACKING = ['builtin.poly_build'];
 const fixtures = JSON.parse(await readFile(new URL('./fixtures/tools/edit-mesh.json', import.meta.url), 'utf8'))
-  .filter(({ tool }) => tool.startsWith(process.env.ONLY ?? '') && !LACKING.includes(tool));
+  .filter(({ tool }) => tool.startsWith(process.env.ONLY ?? ''));
 const keymaps = new Map(defaultKeymaps().map(([name, , { items }]) => [name, items]));
 // The tools' keymaps, as their definitions in Blender's toolbar name them.
 const TOOL_KEYMAPS = {
@@ -31,7 +28,7 @@ const keymapOf = (tool) => (tool === 'builtin.shear' ? '3D View Tool: Shear' : `
 // becomes CLICK_DRAG where it passes it; an event the tool's keymap takes invokes its operator (a macro's in turn), a
 // running operator gets the events after (its modal keymap's items as items), and a mouse move once it starts
 // (WM_event_add_mousemove). Events carry the previous button or key event (wm_event_prev_values_set). The tools'
-// gizmos stand in as Bylonder's do: Loop Cut's gives the edge Blender's had
+// gizmos stand in as Bylonder's do: Poly Build's preselects under the mouse, Loop Cut's gives the edge Blender's had
 // under it (`gizmo.edge`), and a click on a Spin button spins about its axis (`gizmo.spinAxis`). Returns the last
 // operator's status.
 function replay(edit, tool, events, gizmo) {
@@ -67,6 +64,10 @@ function replay(edit, tool, events, gizmo) {
   for (const [type, value, x, y] of events) {
     const event = wmEvent(type, value, x, y);
     if (type === 'LEFTMOUSE' && value === 'PRESS') press = { x, y, dragged: false };
+    if (!op && tool === 'builtin.poly_build' && type === 'MOUSEMOVE') {
+      edit.gizmoGroup = 'VIEW3D_GGT_mesh_preselect_elem';
+      edit.preselectElem(x, y, 0);
+    }
     if (!op && gizmo.spinAxis && type === 'LEFTMOUSE' && value === 'PRESS') run([['mesh.spin', { axis: gizmo.spinAxis }]], event);
     else if (op) modal(event);
     else if (type === 'MOUSEMOVE' && press && !press.dragged && Math.hypot(x - press.x, y - press.y) >= WM_DRAG_THRESHOLD_MOUSE) {
@@ -102,7 +103,7 @@ function gizmoOf({ tool, gizmo, edge, operator }, edit) {
 const failures = [];
 for (const fixture of fixtures) {
   const { vert_positions, face_offsets, corner_verts } = fixture.start;
-  const edit = editOnMain(meshFromFaces(vert_positions, face_offsets, corner_verts), SCE_SELECT_VERTEX);
+  const edit = EditMesh.fromMesh(meshFromFaces(vert_positions, face_offsets, corner_verts), SCE_SELECT_VERTEX);
   try {
     edit.view = fixture.view;
     edit.run('mesh.select_all', { action: fixture.select ? 'DESELECT' : 'SELECT' });

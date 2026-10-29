@@ -42,7 +42,7 @@ second model kept equal both ways.
 - **A project** is its code, its `.blend` (Main) and its Babylon-native data. Project code builds the scene the first
   time; afterwards an object whose id is in the `.blend` takes Blender's state from it, and code adds what is new.
 - **Modes** (Edit, Pose, Sculpt, paint) are Blender's, on Main's objects. There is one context, Main's; the separate
-  Edit Mode context is gone.
+  Edit Mode context (`EditMesh`) goes.
 - **Editors read and write Main through the module's RNA.** `rna-bylonder.js` keeps bindings only for Babylon-native
   structs.
 - **Export** (`.babylon`, JS) is derived from the Babylon view, as before.

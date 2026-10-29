@@ -1,14 +1,19 @@
-// Blender's Edit Mode operators on Main's edit mesh in WebAssembly, against Blender 5.2's results: every fixture must
-// match exactly, UVs, sharp faces and selection included. ONLY=prefix runs the fixtures whose names start with it.
+// The editor's Edit Mode operators (meshOperator in src/editors/mesh/editmesh-tools.js) on Blender's edit mesh in
+// WebAssembly, against Blender 5.2's results: every fixture must match exactly, UVs, sharp faces and selection
+// included, and the modal tools' previews must show what running them gives. ONLY=prefix runs the fixtures whose
+// names start with it.
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
-import { hasOperator } from '../src/bmesh/bmesh-wasm.js';
-import { editOnMain } from './edit-main.js';
+import { EditMesh, EXTRACT_ALL } from '../src/bmesh/bmesh-wasm.js';
+import { hasMeshOperator, meshOperator, operatorPreview } from '../src/editors/mesh/editmesh-tools.js';
 
 const dir = new URL('./fixtures/mesh/', import.meta.url);
 // Select mode (SCE_SELECT_*) and element type (BM_*) per fixture select mode.
 const SELECT = { VERT: [1, 1], EDGE: [2, 2], FACE: [4, 8] };
+// Modal tools, whose previews must show what running them gives.
+const PREVIEWED = /^mesh\.(bevel|inset)$/;
+const MESH_ARRAYS = ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges'];
 // What a fixture cannot check: Blender's mesh.loopcut needs a 3D Viewport, so its fixtures come from a stand-in whose
 // selection is not Blender's (loopcut() in tools/blender-reference/mesh-fixtures.py).
 const UNCHECKED = { 'mesh.loopcut': ['selection'] };
@@ -28,8 +33,14 @@ function geometry(positions, edges, face_offsets, corner_verts) {
   return JSON.stringify({ verts: verts.sort(), edges: pairs.sort(), faces: faces.sort() });
 }
 
+// Moves the selected vertices, as the fixtures' follow-up translate does.
+function translateSelected(edit, offset) {
+  const mesh = edit.toMesh(), verts = selected(mesh, '.select_vert');
+  edit.setCoords(verts, verts.flatMap((v) => offset.map((d, a) => mesh.vert_positions[v * 3 + a] + d)));
+}
+
 const failures = [];
-let matched = 0, geometric = 0;
+let matched = 0, geometric = 0, previewed = 0;
 // What of a fixture's result differs from Blender's; an error (a Blender function not in the module) is its difference.
 function differences(fixture) {
   const base = primitive_add(fixture.operator, fixture.props), { seams = [], move } = fixture.edit;
@@ -38,7 +49,7 @@ function differences(fixture) {
     for (const e of seams) data[e] = 1;
     base.attributes.set('.uv_seam', { domain: 'EDGE', type: 'BOOLEAN', data });
   }
-  const edit = editOnMain(base, SELECT[fixture.edit.select_mode][0]);
+  const edit = EditMesh.fromMesh(base, SELECT[fixture.edit.select_mode][0]);
   const found = [];
   try {
     for (const step of [fixture.edit.pre, fixture.edit].filter(Boolean)) {
@@ -46,9 +57,15 @@ function differences(fixture) {
       edit.selectClear(mode);
       for (const i of step.select) edit.select(htype, i);
       edit.selectFlush();
-      edit.run(step.operator, step.props);
+      const preview = PREVIEWED.test(step.operator) && operatorPreview(edit, step.operator)(step.props).mesh;
+      meshOperator(edit, step.operator, step.props);
+      if (preview) {
+        const result = edit.toMesh();
+        if (MESH_ARRAYS.some((key) => JSON.stringify(Array.from(preview[key])) !== JSON.stringify(Array.from(result[key])))) found.push('preview');
+        previewed++;
+      }
     }
-    if (move) edit.run('transform.translate', { value: move });
+    if (move) translateSelected(edit, move);
   } catch (error) {
     edit.free();
     if (process.env.STACK) console.error(error.stack);
@@ -57,7 +74,7 @@ function differences(fixture) {
   const mesh = edit.toMesh();
   // What the editor draws, extracted as Blender's edit mode draws it: the BMesh's triangles and normals agree with the
   // Mesh's own, except at zero-area faces, whose BMesh normal stays zero.
-  const live = edit.extract(), normals = live.face_normals(), own = mesh.face_normals();
+  const live = edit.extract(EXTRACT_ALL), normals = live.face_normals(), own = mesh.face_normals();
   if (JSON.stringify(Array.from(live.corner_tris())) !== JSON.stringify(Array.from(mesh.corner_tris()))) found.push('extracted triangles');
   if (normals.some((n, i) => normals[i - (i % 3)] ** 2 + normals[i - (i % 3) + 1] ** 2 + normals[i - (i % 3) + 2] ** 2 > 0.5 && !near(n, own[i]))) found.push('extracted normals');
   edit.free();
@@ -84,7 +101,7 @@ for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(new URL(file, dir), 'utf8'));
   if (process.env.ONLY && !file.startsWith(process.env.ONLY)) continue;
   if (!fixture.edit) continue;
-  const missing = [fixture.edit, fixture.edit.pre].find((step) => step && !hasOperator(step.operator));
+  const missing = [fixture.edit, fixture.edit.pre].find((step) => step && !hasMeshOperator(step.operator));
   if (missing) { failures.push(`${file}: no operator ${missing.operator}`); continue; }
   const { operator } = fixture.edit;
   const differs = differences(fixture).filter((what) => !UNCHECKED[operator]?.includes(what));
@@ -92,6 +109,6 @@ for (const file of await readdir(dir)) {
   else if (!differs.length && !fixture.edit.move) matched++;
 }
 assert.deepEqual(failures, [], `Edit Mode fixtures differ from Blender:\n${failures.join('\n')}`);
-assert.ok(process.env.ONLY || (matched >= 106 && geometric >= 7));
-console.log(`Edit Mode: ${matched} operator results match Blender 5.2 exactly, ${geometric} extrudes match as geometry (Blender's order there varies by run)`);
+assert.ok(process.env.ONLY || (matched >= 106 && geometric >= 7 && previewed >= 20));
+console.log(`Edit Mode: ${matched} operator results match Blender 5.2 exactly, ${geometric} extrudes match as geometry (Blender's order there varies by run), ${previewed} modal previews match their result`);
 
