@@ -128,7 +128,8 @@ export const menuUI = ({ menus, context, prop, keymaps = () => ['Window', 'Scree
   prop,
   supported: (idname, props) => !!operatorFor(idname) && (operatorFor(idname).supports?.(props) ?? true),
   poll: (idname, props) => operatorFor(idname)?.poll?.(props) ?? true,
-  run: runOperator,
+  // An entry that invokes its operator (an invoke call context, event.invoke) has its popups open.
+  run: (idname, props, event) => (event?.invoke ? invokeOperator(idname, props, event) : runOperator(idname, props)),
   // An operator button's shortcut, as Blender's buttons find it: a binding whose properties are the ones the button sets.
   keys: (idname, props) => ownKeys(operatorFor(idname), setProperties(idname, props)) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props, true),
   enumItems: (idname, prop) => operatorFor(idname)?.enumItems?.(prop) ?? rnaOperators[idname]?.properties[prop]?.items ?? [],

@@ -302,6 +302,17 @@ static Set<const wmOperatorType *> &allowed_operators()
   return allowed;
 }
 
+/* An operator is allowed, or a step of a macro that is (its steps are the macro's). */
+static bool operator_allowed(const wmOperator *op)
+{
+  for (; op; op = op->opm) {
+    if (allowed_operators().contains(op->type)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 struct OperatorCalls {
   decltype(wmOperatorType::invoke) invoke;
   decltype(wmOperatorType::exec) exec;
@@ -313,7 +324,7 @@ static Map<wmOperatorType *, OperatorCalls> &operator_calls()
 }
 static wmOperatorStatus page_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 {
-  if (!allowed_operators().contains(op->type)) {
+  if (!operator_allowed(op)) {
     unhandled_event(C, event, nullptr);
     return OPERATOR_CANCELLED;
   }
@@ -321,7 +332,7 @@ static wmOperatorStatus page_invoke(bContext *C, wmOperator *op, const wmEvent *
 }
 static wmOperatorStatus page_exec(bContext *C, wmOperator *op)
 {
-  if (!allowed_operators().contains(op->type)) {
+  if (!operator_allowed(op)) {
     unhandled_event(C, CTX_wm_window(C)->runtime->eventstate, nullptr);
     return OPERATOR_CANCELLED;
   }
