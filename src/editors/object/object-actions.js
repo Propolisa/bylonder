@@ -22,7 +22,6 @@ export function createObjectActions({ world, editor, commands, creator }) {
   };
   const finished = (run) => () => { creator.finish(); run(); };
   const actions = [
-    { id: "duplicate", blender: "object.duplicate_move", enabled: has, run: () => commands.duplicate() },
     { id: "rename", blender: "TOPBAR_PT_name", label: "Rename…", enabled: has, run: rename },
     { id: "hide", blender: "object.hide_view_set", enabled: has, run: () => commands.hide() },
     { id: "hide-others", blender: "object.hide_view_set", enabled: has, run: () => commands.hide(true) },

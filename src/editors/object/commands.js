@@ -56,15 +56,6 @@ export function createObjectCommands(world, editor, history, refresh) {
         node.name = name.trim();
       });
     },
-    remove() {
-      transaction(() => {
-        for (const node of roots().flatMap(family)) {
-          node.metadata = { ...node.metadata, wbDeleted: true };
-          node.setEnabled(false);
-        }
-        editor.selection.replace([]);
-      });
-    },
     hide(others = false) {
       transaction(() => {
         const chosen = new Set(roots().flatMap(family));
@@ -123,54 +114,6 @@ export function createObjectCommands(world, editor, history, refresh) {
             );
         }
       });
-    },
-    duplicate() {
-      const result = [];
-      transaction(() => {
-        const originals = [...objects];
-        const copy = (source, parent) => {
-          const name = unique(source.name);
-          let clone;
-          if (source instanceof Mesh) {
-            clone = source.clone(name, parent, true);
-            clone.makeGeometryUnique();
-          } else {
-            clone = new TransformNode(name, scene);
-            clone.parent = parent;
-            clone.position.copyFrom(source.position);
-            clone.rotation.copyFrom(source.rotation);
-            clone.rotationQuaternion =
-              source.rotationQuaternion?.clone() || null;
-            clone.scaling.copyFrom(source.scaling);
-          }
-          clone.metadata = {
-            editable: true,
-            wbId: crypto.randomUUID(),
-            group: !!source.metadata?.group,
-            ...(source.metadata?.wbModifiers?{wbModifiers:structuredClone(source.metadata.wbModifiers).map(m=>({...m,id:crypto.randomUUID()})),wbModifierBase:world.modifiers.source(source)}:{}),
-            ...(source.metadata?.wbCurve?{wbCurve:structuredClone(source.metadata.wbCurve)}:{}),
-          };
-          // Mesh data and Blender primitives keep their recipe, which also redraws their loose edges.
-          if (clone instanceof Mesh && (source.metadata?.wbCreation?.operator || source.metadata?.wbCreation?.mesh) && !source.metadata.wbModifiers)
-            rebuildMesh(clone, structuredClone(source.metadata.wbCreation));
-          else if (clone instanceof Mesh)
-            clone.metadata.wbCreation = {
-              ...(source.metadata?.wbCreation?.text ? {text:structuredClone(source.metadata.wbCreation.text)} : {}),
-              vertices: world.modifiers?.source(source) || VertexData.ExtractFromMesh(clone).serialize(),
-              material: clone.material?.name || null,
-            };
-          clone.setEnabled(true);
-          clone.isPickable = true;
-          objects.push(clone);
-          originals
-            .filter((n) => n.parent === source && !deleted(n))
-            .forEach((n) => copy(n, clone));
-          return clone;
-        };
-        for (const node of roots()) result.push(copy(node, node.parent));
-        editor.selection.replace(result);
-      });
-      if (result.length) editor.start("move");
     },
   };
 }

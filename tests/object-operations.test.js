@@ -37,19 +37,17 @@ const commands = createObjectCommands(
   history,
   () => {},
 );
-selection.replace([authored]);
-commands.duplicate();
-const copy = selection.nodes[0];
-assert.notEqual(copy.geometry, authored.geometry);
+// An object added (as Blender's code adds one through the scene sync), then renamed, undone and redone.
+const copy = buildMesh(scene, "copy", { operator: "mesh.primitive_cube_add", options: {} });
+copy.metadata = { editable: true, wbId: "copy", wbCreation: { operator: "mesh.primitive_cube_add", options: {} } };
+objects.push(copy);
+history.commit();
+selection.replace([copy]);
 commands.rename(copy, "renamed");
-commands.remove();
-assert(copy.metadata.wbDeleted);
-history.undo();
-editor.reconcile();
-assert(!copy.metadata.wbDeleted);
 assert.equal(copy.name, "renamed");
 history.undo();
-assert.notEqual(copy.name, "renamed");
+editor.reconcile();
+assert.equal(copy.name, "copy");
 history.redo();
 assert.equal(copy.name, "renamed");
 const persisted = snapshot(objects);
@@ -60,7 +58,7 @@ apply(restored, persisted, { partial: true });
 assert.equal(restored.length, 2);
 assert(restored.find((n) => n.name === "renamed").getTotalVertices() > 0);
 selection.replace([authored]);
-commands.remove();
+commands.hide();
 assert(!authored.isEnabled());
 history.undo();
 assert(authored.isEnabled());

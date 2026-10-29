@@ -723,9 +723,12 @@ EXPORT(operator_invoke) int operator_invoke(bContext *C, wmOperator *op, const w
 
 /* The name of an operator's modal keymap ("Transform Modal Map"), whose items Bylonder's window manager matches events
  * to, or an empty string. */
+/* The operator whose modal keymap applies: a macro's running operator (wm_event_modalkeymap_ensure). */
+static wmOperator *modal_operator(wmOperator *op) { return op->opm ? op->opm : op; }
 EXPORT(operator_modal_keymap) const char *operator_modal_keymap(wmOperator *op)
 {
-  return op->type->modalkeymap ? op->type->modalkeymap->idname : "";
+  wmKeyMap *keymap = modal_operator(op)->type->modalkeymap;
+  return keymap ? keymap->idname : "";
 }
 
 /* An operator's type flags (wmOperatorTypeFlag: OPTYPE_UNDO when a run is an undo step). */
@@ -740,6 +743,7 @@ EXPORT(operator_modal) int operator_modal(bContext *C, wmOperator *op, const wmE
  * item by identifier (-1 when it has none). */
 EXPORT(operator_modal_item) int operator_modal_item(wmOperator *op, const char *identifier)
 {
+  op = modal_operator(op);
   wmKeyMap *keymap = op->type->modalkeymap;
   if (!keymap || !keymap->modal_items) {
     return -1;
@@ -771,6 +775,11 @@ void WM_menu_name_call(bContext * /*C*/, const char *menu_name, wm::OpCallContex
 /* port-override: Bylonder's window manager keeps the modal handler (JS); it learns of it by operator_modal_added. */
 wmEventHandler_Op *WM_event_add_modal_handler(bContext * /*C*/, wmOperator *op)
 {
+  /* As wm_event_system.cc does for a macro's operator: the handler runs the mother macro, whose opm is the one running. */
+  if (op->opm) {
+    op->opm->opm = op;
+    op = op->opm;
+  }
   modal_added = op;
   return reinterpret_cast<wmEventHandler_Op *>(op);
 }

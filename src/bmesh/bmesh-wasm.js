@@ -564,8 +564,8 @@ export class BlenderMain {
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   // Invokes an operator with an event, as wmEvent takes it: its status, report and the values it ran with. One whose
   // invoke opened a popup ({ type, title, text }: windowmanager/wm-popups.js draws it) has not run; the popup's
-  // choice runs it again by exec, but a properties dialog keeps the operator (`op`), whose properties it edits, for
-  // finishPopup. A menu it called (WM_menu_name_call) is a popup of its layout when Blender's C defines it, else
+  // choice runs it again by exec, but a properties dialog keeps the operator (`dialog`), whose properties it edits,
+  // for finishPopup. One that runs modally is kept (`op`, with its modal `keymap`) for modal(). A menu it called (WM_menu_name_call) is a popup of its layout when Blender's C defines it, else
   // `menu`, its name.
   invoke(idname, props, event) {
     const op = newOperator(idname, props);
@@ -574,7 +574,7 @@ export class BlenderMain {
       const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event)), type = POPUPS[x.operator_popup()];
       const result = { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
       if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
-      if (type === 'PROPS') result.op = op, kept = true;
+      if (type === 'PROPS') result.dialog = op, kept = true;
       if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
       const menu = cString(x.operator_menu_called());
       if (menu) {

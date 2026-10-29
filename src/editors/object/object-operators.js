@@ -3,6 +3,9 @@
 // operator Bylonder runs with some properties only picks its action by them. Actions Blender lacks are `bylonder.*`
 // operators, added to Blender's Object menu as an add-on would.
 import { registerOperator, appendMenu, kw, invokeOperator } from '../../windowmanager/wm-operators.js';
+import { runModal } from '../space_view3d/view3d-modal.js';
+import { regionView3D } from '../space_view3d/view3d-project.js';
+import { OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
 
 const BY_PROPS = {
   'object.select_all': ({ action }) => ({ SELECT: 'select-all', DESELECT: 'deselect', INVERT: 'invert' })[action],
@@ -17,21 +20,40 @@ const ENUMS = {};
 const blenderOperators = (blender) => blender.operators().filter((idname) => idname.startsWith('object.'));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
-// wmEventModifierFlag of a window manager event.
-const modifierOf = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
-// Runs an operator as one undo step, with the selected objects' geometry given to it: invoked with the event that ran
-// it, else its exec. Returns its status and report. An operator that changed the data of a light or camera, which
-// Bylonder keeps itself, changes nothing. A popup its invoke opened runs it again by exec with what it chose, or, for a
-// properties dialog, runs the operator it kept.
-function runBlenderOperator(sync, idname, props, options) {
-  const { event } = options;
-  const result = inMain(sync, options, () => (event ? sync.blender.invoke(idname, props, { type: String(event.type).toUpperCase(), value: event.value ?? 'PRESS', modifier: modifierOf(event) })
-    : sync.blender.run(idname, props)));
-  if (result.menu) invokeOperator('wm.call_menu', { name: result.menu }, event);
-  const finish = result.op ? (chosen) => (chosen ? inMain(sync, options, () => sync.blender.finishPopup(result.op, true)) : sync.blender.finishPopup(result.op, false))
-    : (chosen) => chosen && runBlenderOperator(sync, idname, { ...result.values, ...chosen }, { ...options, event: null });
-  if (result.popup) openModulePopup(sync, result.popup, event, { idname, finish });
-  return result;
+//   host: commit() an undo step, wm() the window manager, pointer() its last pointer event, view() the 3D View under it.
+// Runs an operator on Main with the selected objects' geometry given to it, as one undo step: its exec, or invoked with
+// the event that ran it in the 3D View, as Blender's window manager runs it (view3d-modal.js), so a modal operator or
+// a macro (object.duplicate_move) runs on with the following events, written back as it goes. An operator that
+// changed the data of a light or camera, which Bylonder keeps itself, changes nothing. A popup its invoke opened runs
+// it again by exec with what it chose, or, for a properties dialog, runs the operator it kept.
+export function runBlenderOperator(sync, idname, props, options) {
+  const { event, keying, notify, commit, wm, pointer } = options;
+  if (!event) return inMain(sync, options, () => sync.blender.run(idname, props));
+  const view = event.view ?? options.view();
+  if (!view) return inMain(sync, options, () => sync.blender.run(idname, props));
+  let invoked = {};
+  const keyed = (run) => { let result; keying(() => { result = run(); }); return result; };
+  const target = {
+    invoke: (...args) => (invoked = keyed(() => sync.blender.invoke(...args))),
+    modal: (...args) => keyed(() => sync.blender.modal(...args)),
+    modalItem: (...args) => sync.blender.modalItem(...args),
+    get status() { return sync.blender.status; },
+  };
+  sync.begin({ meshes: sync.selected() });
+  sync.blender.view = regionView3D(view);
+  return runModal({
+    wm: wm(), view, pointer: pointer(), target, idname, props, event, notify,
+    step: () => sync.writeBack(),
+    end: (status) => {
+      sync.end();
+      if (status & OPERATOR_FINISHED) commit();
+      if (invoked.menu) invokeOperator('wm.call_menu', { name: invoked.menu }, event);
+      const finish = invoked.dialog
+        ? (chosen) => (chosen ? inMain(sync, options, () => sync.blender.finishPopup(invoked.dialog, true)) : sync.blender.finishPopup(invoked.dialog, false))
+        : (chosen) => chosen && runBlenderOperator(sync, idname, { ...invoked.values, ...chosen }, { ...options, event: null });
+      if (invoked.popup) openModulePopup(sync, invoked.popup, event, { idname, finish });
+    },
+  }).status;
 }
 // Runs Blender's code on Main as one undo step, its report shown.
 function inMain(sync, { transaction, notify, keying }, run) {
@@ -64,10 +86,11 @@ const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 
 //   sync: the scene's (createMainSync); transaction(fn): an undo step around a change; notify(text): a report;
 //   keying(run): runs an operator that may insert keys (auto keying), for the animation to take them.
-export function registerObjectOperators(registry, { sync, transaction, notify, keying = (fn) => fn() } = {}) {
+export function registerObjectOperators(registry, { sync, transaction, notify, keying = (fn) => fn(), ...host } = {}) {
+  const options = { transaction, notify, keying, ...host };
   if (sync) for (const idname of blenderOperators(sync.blender)) registerOperator(idname, {
     poll: () => { sync.flush(); return sync.blender.poll(idname); },
-    run: (props, event) => runBlenderOperator(sync, idname, props, { transaction, notify, keying, event }),
+    run: (props, event) => runBlenderOperator(sync, idname, props, { ...options, event }),
   });
   const named = (action) => [action.blender ?? []].flat();
   for (const idname of new Set(registry.actions.flatMap(named).filter(isOperator))) {

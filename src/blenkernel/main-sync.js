@@ -202,7 +202,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         if (!MAKERS[type] && type !== 'MESH' && !CURVE_TYPES.includes(type)) { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
         if (lightType === 'AREA') warnings.push(`"${name}": an Area light opens as a point light`);
         const node = type === 'MESH' ? adoptMesh(scene, name, ob) : CURVE_TYPES.includes(type) ? adoptCurve(scene, name, ob, type) : MAKERS[type](scene, name, lightType);
-        node.metadata = { ...node.metadata, editable: true, wbId: blender.property(ob, PROPERTIES.id) ?? name };
+        // A copy Blender's code made (object.duplicate) carries its original's id: it gets one of its own.
+        const id = blender.property(ob, PROPERTIES.id) ?? name, taken = [...objects.keys()].some((other) => nodeId(other) === id);
+        node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id };
         made.push(adoptEntry(node, ob, type));
       }
       for (const entry of made) pullRelations(entry);
@@ -656,6 +658,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       }
       const { nodes: added } = adopt();
       world.objects.push(...added);
+      for (const node of added) {
+        const base = blender.base(objects.get(node).ob);
+        if (base?.selected) (base.active ? active : chosen).push(node);
+      }
       selection.replace([...chosen, ...active]);
       for (const [material, record] of materials) pull(record, material);
       for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
@@ -799,6 +805,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // For editors that run Blender's code over several events (the Outliner's modal operators and drags): what it
     // changed, written back.
     writeBack: () => { writeBack(); flush(); if (api.debug) assertEqual('writeBack'); },
+    // A run over several events (a modal operator's): Main made Babylon's with the meshes' geometry, until end writes
+    // back what it changed and releases the geometry.
+    begin({ meshes = [] } = {}) { flush(); fill(meshes); },
+    end() { try { api.writeBack(); } finally { release(); } },
     geometryTagged,
     revert,
     check,
