@@ -194,7 +194,7 @@ export class AnimArea {
   run(op, regionType, event = null) {
     this.cancelModal();
     const status = this.inContext(regionType, (C) => (event ? x.operator_invoke(C, op, this.#event(C, event)) : x.operator_exec(C, op)));
-    const modal = x.operator_modal_added() >>> 0, gesture = GESTURES[x.operator_gesture()], undo = !!(x.operator_type_flag(op) & OPTYPE_UNDO);
+    const modal = x.operator_modal_added(this.main.C) >>> 0, gesture = GESTURES[x.operator_gesture()], undo = !!(x.operator_type_flag(op) & OPTYPE_UNDO);
     const popup = POPUPS[x.operator_popup()];
     this.undo = undo;
     if (popup) {

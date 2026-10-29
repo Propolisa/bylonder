@@ -1,6 +1,6 @@
-/* Blender's data outside Edit Mode, without a window manager: a Main holding Bylonder's objects and their data, one
- * Scene with one ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers
- * context members as Blender's screen context does (screen_context.cc). Bylonder owns the data: before an operator the
+/* Blender's data outside Edit Mode: a Main holding Bylonder's objects and their data, one Scene with one ViewLayer
+ * whose Bases hold the selection and the active object, and Main's window manager with one window whose screen
+ * answers context members as Blender's screen context does (screen_context.cc) and runs its events (wm-api.cc). Bylonder owns the data: before an operator the
  * editor writes the objects' transforms, parents, bases and data here, and afterwards reads back what the operator
  * tagged (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec, on main_C).
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
@@ -82,6 +82,7 @@ using namespace blender;
 
 void types_ensure();
 namespace blender {
+void wm_init(bContext *C);
 int ed_screen_context(const bContext *C, const char *member, bContextDataResult *result);
 }
 
@@ -91,7 +92,7 @@ struct BlenderMain {
   /* Main's one scene, as BKE_scene_add makes it, and its view layer. */
   Scene *scene;
   ViewLayer *view_layer;
-  wmWindowManager wm = {};
+  wmWindowManager *wm;
   wmWindow window = {};
   wmEvent eventstate = {};
   WorkSpaceInstanceHook workspace_hook = {};
@@ -130,12 +131,15 @@ EXPORT(main_new) BlenderMain *main_new()
   /* The window's event state, which buttons and operators read the held keys from. */
   ctx->window.runtime = MEM_new<bke::WindowRuntime>(__func__);
   ctx->window.runtime->eventstate = &ctx->eventstate;
-  ctx->wm.runtime = MEM_new<bke::WindowManagerRuntime>(__func__);
-  BLI_addtail(&ctx->wm.windows, &ctx->window);
+  /* As wm_add_default makes it: Main's window manager, where Blender's code finds it (G_MAIN->wm), with its window. */
+  ctx->wm = static_cast<wmWindowManager *>(BKE_libblock_alloc(ctx->bmain, ID_WM, "WinMan", 0));
+  ctx->wm->runtime = MEM_new<bke::WindowManagerRuntime>(__func__);
+  BLI_addtail(&ctx->wm->windows, &ctx->window);
   ctx->C = CTX_create();
   CTX_data_main_set(ctx->C, ctx->bmain);
-  CTX_wm_manager_set(ctx->C, &ctx->wm);
+  CTX_wm_manager_set(ctx->C, ctx->wm);
   CTX_wm_window_set(ctx->C, &ctx->window);
+  wm_init(ctx->C);
   collections_synced(ctx);
   return ctx;
 }
@@ -620,9 +624,10 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int 
     BlendFileReadParams params = {};
     params.skip_flags = BLO_READ_SKIP_USERDEF;
     G.fileflags |= G_FILE_NO_UI;
-    /* The Main the file replaces, which setting it up frees. */
+    /* The Main the file replaces, which setting it up frees, keeping its window manager (wm_file_read_setup_wm_init). */
     G_MAIN = ctx->bmain;
-    BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, nullptr, &read_report, false, nullptr);
+    BlendFileReadWMSetupData wm_setup_data = {ctx->wm};
+    BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, &wm_setup_data, &read_report, false, nullptr);
     ctx->bmain = G_MAIN;
     ctx->scene = CTX_data_scene(ctx->C);
     ctx->view_layer = BKE_view_layer_default_view(ctx->scene);

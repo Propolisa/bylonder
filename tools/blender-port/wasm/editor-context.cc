@@ -54,6 +54,7 @@
 #include "ED_transform.hh"
 
 #include "WM_api.hh"
+#include "wm_event_system.hh"
 #include "gizmo/WM_gizmo_api.hh"
 #include "gizmo/WM_gizmo_types.hh"
 #include "WM_types.hh"
@@ -99,6 +100,7 @@ struct EditContext {
    * area, space and window region; without a region type, as in Blender's background mode, nothing is drawn. */
   BylonderArea view_area;
   wmWindow window = {};
+  wmEvent eventstate = {};
   WorkSpaceInstanceHook workspace_hook = {};
   WorkSpaceLayout layout = {};
   bScreen screen = {};
@@ -139,6 +141,9 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   ctx->scene.toolsettings = &ctx->tool_settings;
 
   ctx->region.runtime = MEM_new<bke::ARegionRuntime>(__func__);
+  /* The window's event state and the modal handlers an invoke adds (operator_modal_added). */
+  ctx->window.runtime = MEM_new<bke::WindowRuntime>(__func__);
+  ctx->window.runtime->eventstate = &ctx->eventstate;
 
   ctx->C = CTX_create();
   CTX_wm_region_set(ctx->C, &ctx->region);
@@ -162,6 +167,7 @@ EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
     BKE_modifier_free(md);
   }
   MEM_delete(ctx->region.runtime);
+  MEM_delete(ctx->window.runtime);
   MEM_delete(ctx->view_layer.runtime->object_bases_hash);
   MEM_delete(ctx->view_layer.runtime);
   BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
@@ -290,11 +296,7 @@ EXPORT(edit_mesh_eval) const ExtractionHeader *edit_mesh_eval(EditContext *ctx)
 /* port-override: the 3D View the editor shows (ED_view3d_update_viewmat with Babylon's camera as its matrices): its view
  * and window matrices (Blender's axes, column-major), its size in pixels and whether it is a perspective view. Operators
  * then act in it as in Blender's window region, projecting the mouse as it does. */
-static wmGizmoMap *gizmo_map_standin();
-/* A 3D View's window region given its view (edit_context_view_set, main_view_set): area, space and region linked
- * once, the region's view set each time. */
-void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx,
-                       int winy, bool is_persp)
+void view3d_matrices_set(RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
 {
   std::copy_n(viewmat, 16, &rv3d.viewmat[0][0]);
   std::copy_n(winmat, 16, &rv3d.winmat[0][0]);
@@ -308,6 +310,14 @@ void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D
   const float v1[3] = {rv3d.persmat[0][0], rv3d.persmat[1][0], rv3d.persmat[2][0]};
   const float v2[3] = {rv3d.persmat[0][1], rv3d.persmat[1][1], rv3d.persmat[2][1]};
   rv3d.pixsize = (2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)))) / float(std::max(winx, winy));
+}
+static wmGizmoMap *gizmo_map_standin();
+/* A 3D View's window region given its view (edit_context_view_set, main_view_set): area, space and region linked
+ * once, the region's view set each time. */
+void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx,
+                       int winy, bool is_persp)
+{
+  view3d_matrices_set(rv3d, viewmat, winmat, winx, winy, is_persp);
   region.regiondata = &rv3d;
   region.regiontype = RGN_TYPE_WINDOW;
   region.winx = short(winx);
@@ -705,13 +715,19 @@ wmEvent *wm_event_set(bContext *C, int type, int val, int x, int y, int modifier
   return &event;
 }
 
-/* The operator a modal handler was added for since the last call (WM_event_add_modal_handler), or null. */
-static wmOperator *modal_added = nullptr;
-EXPORT(operator_modal_added) wmOperator *operator_modal_added()
+/* The operator the last invoke added a modal handler for (WM_event_add_modal_handler), or null: its handler leaves the
+ * window, as JS gives it its events (operator_modal). */
+EXPORT(operator_modal_added) wmOperator *operator_modal_added(bContext *C)
 {
-  wmOperator *op = modal_added;
-  modal_added = nullptr;
-  return op;
+  wmWindow *win = CTX_wm_window(C);
+  for (wmEventHandler &handler : win->runtime->modalhandlers) {
+    if (handler.type == WM_HANDLER_TYPE_OP) {
+      wmOperator *op = reinterpret_cast<wmEventHandler_Op *>(&handler)->op;
+      WM_event_remove_modal_handler(&win->runtime->modalhandlers, op, false);
+      return op;
+    }
+  }
+  return nullptr;
 }
 
 /* Polls and runs an operator's invoke (or its exec when it has none) with an event: its wmOperatorStatus flags, or 0
@@ -776,18 +792,6 @@ namespace blender {
 /* port-override: Blender's menus are drawn by Bylonder's window manager (JS), which opens the menu named here. */
 void WM_menu_name_call(bContext * /*C*/, const char *menu_name, wm::OpCallContext /*context*/) { menu_called = menu_name; }
 
-/* port-override: Bylonder's window manager keeps the modal handler (JS); it learns of it by operator_modal_added. */
-wmEventHandler_Op *WM_event_add_modal_handler(bContext * /*C*/, wmOperator *op)
-{
-  /* As wm_event_system.cc does for a macro's operator: the handler runs the mother macro, whose opm is the one running. */
-  if (op->opm) {
-    op->opm->opm = op;
-    op = op->opm;
-  }
-  modal_added = op;
-  return reinterpret_cast<wmEventHandler_Op *>(op);
-}
-
 /* As wm_keymap.cc defines them for modal keymaps, which keep their items' enum here; the items' keys are Blender's
  * keymap data in JS, which matches events to them. */
 static Vector<std::unique_ptr<wmKeyMap>> &modal_keymaps()
@@ -813,7 +817,9 @@ wmKeyMap *WM_modalkeymap_ensure(wmKeyConfig *keyconf, const char *idname, const 
     STRNCPY(keymap->idname, idname);
     keymap->flag = KEYMAP_MODAL;
   }
-  keymap->modal_items = items;
+  if (items) {
+    keymap->modal_items = items;
+  }
   return keymap;
 }
 void WM_modalkeymap_assign(wmKeyMap *km, const char *opname)
@@ -822,7 +828,6 @@ void WM_modalkeymap_assign(wmKeyMap *km, const char *opname)
     ot->modalkeymap = km;
   }
 }
-wmKeyMap *WM_keymap_active(const wmWindowManager * /*wm*/, wmKeyMap *keymap) { return keymap; }
 
 /* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
 Object *ed::object::context_object(const bContext *C)
@@ -1004,7 +1009,6 @@ void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}
 
 /* No window or view to update. */
 void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}
-void ED_region_tag_redraw(ARegion * /*region*/) {}
 /* port-override: no depsgraph to flush tags through, so they stay on the ID (`recalc`), where the editor reads what an
  * operator changed. */
 void DEG_id_tag_update(ID *id, unsigned int flags)
@@ -1014,8 +1018,5 @@ void DEG_id_tag_update(ID *id, unsigned int flags)
   }
 }
 void DEG_id_tag_update_ex(Main * /*bmain*/, ID *id, unsigned int flags) { DEG_id_tag_update(id, flags); }
-void WM_main_add_notifier(uint /*type*/, void * /*reference*/) {}
-void WM_event_add_notifier(const bContext * /*C*/, uint /*type*/, void * /*reference*/) {}
-void WM_event_add_notifier_ex(wmWindowManager * /*wm*/, const wmWindow * /*win*/, uint /*type*/, void * /*reference*/) {}
 
 }  // namespace blender

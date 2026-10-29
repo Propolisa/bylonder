@@ -893,11 +893,6 @@ void ED_area_status_text(ScrArea *area, const char *str)
   }
 }
 
-/* port-override: Bylonder redraws its editors after each operator and each event an operator handles. */
-void ED_area_tag_redraw(ScrArea * /*area*/) {}
-void ED_area_tag_redraw_no_rebuild(ScrArea * /*area*/) {}
-void ED_area_tag_refresh(ScrArea * /*area*/) {}
-void ED_region_tag_redraw_no_rebuild(ARegion * /*region*/) {}
 
 static wmOperatorStatus gesture_start(bContext *C, wmOperator *op, Gesture gesture)
 {
@@ -1025,37 +1020,11 @@ bool WM_cursor_modal_is_set_ok(const wmWindow * /*win*/) { return true; }
 void WM_cursor_modal_set(wmWindow * /*win*/, int /*val*/) {}
 void WM_cursor_modal_restore(wmWindow * /*win*/) {}
 void WM_cursor_wait(bool /*val*/) {}
-void WM_event_add_mousemove(wmWindow * /*win*/) {}
 wmTimer *WM_event_timer_add(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmEventType /*event_type*/, double /*time_step*/)
 {
   return nullptr;
 }
 void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
-
-/* port-override: keys come from Bylonder's keymaps (keyconfig.js), so a region's init adds no keymap handlers. */
-wmKeyMap *WM_keymap_ensure(wmKeyConfig * /*keyconf*/, const char * /*idname*/, int /*spaceid*/, int /*regionid*/)
-{
-  static wmKeyMap keymap = {};
-  return &keymap;
-}
-wmEventHandler_Keymap *WM_event_add_keymap_handler(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
-{
-  return nullptr;
-}
-wmEventHandler_Keymap *WM_event_add_keymap_handler_poll(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/,
-                                                        EventHandlerPoll /*poll*/)
-{
-  return nullptr;
-}
-wmEventHandler_Keymap *WM_event_add_keymap_handler_v2d_mask(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
-{
-  return nullptr;
-}
-bool WM_event_handler_region_v2d_mask_no_marker_poll(const wmWindow * /*win*/, const ScrArea * /*area*/,
-                                                     const ARegion * /*region*/, const wmEvent * /*event*/)
-{
-  return true;
-}
 
 /* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
  * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with
@@ -1173,9 +1142,8 @@ int WM_operator_smooth_viewtx_get(const wmOperator *op)
   return (op->flag & OP_IS_INVOKE && !(U.uiflag & USER_REDUCE_MOTION)) ? U.smooth_viewtx : 0;
 }
 
-/* port-override: Bylonder redraws its status bar and editors itself; its 3D View navigates in JS, so transform has no
+/* port-override: no message bus (its subscribers are the UI's); the 3D View navigates in JS, so transform has no
  * 3D View navigation to pass events to. */
-void WM_window_status_area_tag_redraw(wmWindow * /*win*/) {}
 void WM_msg_publish_rna_params(wmMsgBus * /*mbus*/, const wmMsgParams_RNA * /*msg_key_params*/) {}
 ViewOpsData *ED_view3d_navigation_init(bContext * /*C*/, const wmKeyMapItem * /*kmi_merge*/) { return nullptr; }
 
