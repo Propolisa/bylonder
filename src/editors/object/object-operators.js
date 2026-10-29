@@ -18,7 +18,7 @@ const BY_PROPS = {
 const ENUMS = {};
 // Blender's Object Mode operators, run by Blender's code in the module (tests/objects-wasm.test.js) where Bylonder has no
 // action of its own for them.
-const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh)\./.test(idname));
+const blenderOperators = (blender) => blender.operators().filter((idname) => idname.startsWith('object.'));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
 //   host: commit() an undo step, wm() the window manager, pointer() its last pointer event, view() the 3D View under it.

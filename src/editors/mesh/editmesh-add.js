@@ -7,8 +7,9 @@ import { bmo_call } from '../../bmesh/intern/bmesh-operators.js';
 import { BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { bmo_create_grid_exec, bmo_create_cube_exec, bmo_create_circle_exec, bmo_create_cone_exec } from '../../bmesh/operators/bmo-primitive.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
-import { scratchMain, meshFromFaces } from '../../bmesh/bmesh-wasm.js';
+import { EditMesh, meshFromFaces } from '../../bmesh/bmesh-wasm.js';
 import { module } from '../../python/bpy_interface.js';
+import { createMesh } from '../../blenkernel/mesh/mesh.js';
 import { SCE_SELECT_VERTEX, BM_mesh_elem_hflag_enable_all, BM_mesh_select_mode_flush_ex } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_VERT, BM_ELEM_SELECT } from '../../bmesh/intern/bmesh-class.js';
 
@@ -61,19 +62,15 @@ function torus_add(p) {
 }
 primitiveOperators['mesh.primitive_torus_add'] = torus_add;
 
-// A primitive whose builder has no JS port: Blender's operator adds it to an empty mesh object's edit mesh, as in Edit
-// Mode, in a Main of its own.
+// A primitive whose builder has no JS port: Blender's operator adds it to an empty edit mesh, as in Edit Mode.
 function operator_add(idname, props) {
-  const main = scratchMain(), ob = main.add('MESH', 'Primitive');
+  const edit = EditMesh.fromMesh(createMesh({ vert_positions: [], edges: [], face_offsets: [0], corner_verts: [], corner_edges: [] }), SCE_SELECT_VERTEX);
   try {
-    main.setBase(ob, { select: true, active: true });
-    main.run('object.mode_set', { mode: 'EDIT' });
-    const { report } = main.run(idname, props);
+    const { report } = edit.run(idname, props);
     if (report) throw new Error(report);
-    main.run('object.mode_set', { mode: 'OBJECT' });
-    return main.mesh(ob);
+    return edit.toMesh();
   } finally {
-    main.remove(ob);
+    edit.free();
   }
 }
 

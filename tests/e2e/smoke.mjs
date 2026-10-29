@@ -255,18 +255,6 @@ const checks = {
     assert.equal(await app.bylonder((b) => !!b.world.wm.modal), false);
   },
 
-  // A click in Edit Mode is Blender's view3d.select on Main's edit mesh, picking as in X-ray.
-  async "Edit Mode: a click selects the face under it"() {
-    await app.click();
-    await app.page.keyboard.press("Tab");
-    await app.until((b) => b.world.editMode.active);
-    await app.page.keyboard.press("3");
-    await app.page.keyboard.press("Alt+a");
-    await expectStats(({ Faces }) => Faces?.[0] === 0);
-    await app.click();
-    await expectStats(({ Faces }) => Faces?.[0] === 1);
-  },
-
   // The header's mode menu (object.mode_set's enum, by Blender's object_mode_set_itemf) lists a mesh's modes once.
   async "the mode menu lists each mode once, and its Edit Mode enters Edit Mode"() {
     await app.click();

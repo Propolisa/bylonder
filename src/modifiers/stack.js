@@ -73,8 +73,8 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
   const jobName=(node,modifiers)=>node.name+' | '+modifiers.map(m=>m.name).join(', ');
   const blenderModifiers=stack=>stack.filter(m=>m.showViewport&&modifierDefinitions.get(m.type)?.mesh);
   // Work running Blender's modifiers on a Mesh, copied now. It asks first when they would make very many faces.
-  function blenderWork(mesh,modifiers){
-    const input=evaluation(mesh,modifiers.map(withTexture)),faces=estimatedFaces(mesh,modifiers);
+  function blenderWork(mesh,modifiers,selectmode){
+    const input=evaluation(mesh,modifiers.map(withTexture),selectmode),faces=estimatedFaces(mesh,modifiers);
     const question=`About ${Math.round(faces).toLocaleString('en-US')} faces, which can take very long or run out of memory`;
     return (signal,job)=>then(faces>ASK_FACES?job?.ask(question):null,()=>evaluator(input,signal));
   }
@@ -176,6 +176,17 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
         if(blender){node.metadata.wbModifierBase=mesh_batch_cache_vertex_data(result).serialize();node.metadata.wbCreation={mesh:mesh_serialize(result)};}
         else{const data=realize(result.data,result.matrices);node.metadata.wbModifierBase=data;node.metadata.wbCreation={vertices:data,material:node.material?.name||null};}
         node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);cache.delete(node);api.refresh();commit();emit();
+      });
+    },
+    // An object's Blender modifiers in Edit Mode, on a Mesh of its edit mesh in a select mode: the final Mesh, null
+    // without modifiers or when they fail, or undefined when a newer evaluation replaced this one; a promise with jobs.
+    editFinal(node,mesh,selectmode){
+      const stack=structuredClone(modifierStack(node)),modifiers=blenderModifiers(stack),name=jobName(node,modifiers);
+      if(!modifiers.length)return null;
+      return settle(()=>run(node,name,blenderWork(mesh,modifiers,selectmode)),final=>{good.set(node,stack);return final;},error=>{
+        if(error.by==='superseded')return undefined;
+        if(reverts(error))revert(node,name,error);else notify(error.message);
+        return null;
       });
     },
     copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&hasMesh(other))api.add(other,m.type,structuredClone(m.values));},

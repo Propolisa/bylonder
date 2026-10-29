@@ -636,15 +636,6 @@ export class BlenderMain {
 // The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.
 let shared = null;
 export const blenderMain = () => (shared ??= new BlenderMain());
-// A Main apart from the scene's, for geometry Blender's operators make; RNA's context stays the scene's.
-let scratch;
-export function scratchMain() {
-  if (!scratch) {
-    scratch = new BlenderMain();
-    if (shared) x.rna_context_set(shared.C);
-  }
-  return scratch;
-}
 
 // What subsystems with exports of their own (blenkernel/curve) reach the module through.
 export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems, operatorMenuProperty };
