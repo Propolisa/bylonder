@@ -250,11 +250,8 @@ export function createMainView(state) {
   // Modifiers Blender's code added, removed or changed (Add Modifier, Ctrl 2, a panel's value) become the stack's: a
   // changed list is taken whole, changed values in place, keeping a target (texture, object) Main has not been given yet.
   const modifiersOf = (entry) => JSON.stringify(mainModifiers(entry, [], false));
-  // Main's stacks as the page last gave them to it (before Blender's code runs), so that a view takes only what that
-  // code changed.
-  function modifiersSynced() {
-    for (const entry of objects.values()) if (entry.type === 'MESH') entry.modifiersSynced = modifiersOf(entry);
-  }
+  // Main's stack as the page last gave it, so that a view takes only what Blender's code changed after.
+  const modifiersSynced = (entry) => { entry.modifiersSynced = modifiersOf(entry); };
   function pullModifiers(entry) {
     const synced = modifiersOf(entry);
     if (synced === (entry.modifiersSynced ??= synced)) return;

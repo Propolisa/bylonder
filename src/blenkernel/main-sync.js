@@ -276,6 +276,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     entry.modifiers = signature;
     // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
     blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0, target));
+    mainView.modifiersSynced(entry);
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
   function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
@@ -456,7 +457,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
     if (!all) return;
     blender.evaluate();
-    mainView.modifiersSynced();
     if (api.debug) assertEqual('flush');
   }
 
