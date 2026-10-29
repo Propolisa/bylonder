@@ -22,12 +22,9 @@ const logo = import.meta.env.BASE_URL + "logo/bylonder.svg";
 
 const scene = () => [...document.querySelectorAll("iframe")].map((f) => f.contentWindow?.__bylonder).find((b) => b?.coverage);
 
-// Menus drawn from Blender's scripts count by what they show, found by drawing them.
-Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw"), import("../editors/space_view3d/view3d-menus-edit-mesh.js"),
-  import("../workspace/topbar.js")])
-  .then(([surface, implemented, notes, menus, topbar]) => (data.value = computeCoverage(surface.default,
-    [...implemented.default, ...menus.editMeshMenuCoverage(), ...topbar.topbarMenuCoverage()],
-    notes.default, runtimeAvailable(scene()?.coverage()))));
+Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw")])
+  .then(([surface, implemented, notes]) => (data.value = computeCoverage(surface.default, implemented.default, notes.default,
+    runtimeAvailable(scene()?.coverage()))));
 
 const FILTERS = {
   all: { label: "All", test: () => true },
