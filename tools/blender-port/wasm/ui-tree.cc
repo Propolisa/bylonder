@@ -709,8 +709,56 @@ EXPORT(menu_type_label) const char *menu_type_label(const char *name)
 /* What a button opens (a menu, a popover, an enum's items, a block), drawn by the button's own function as Blender's
  * popup does (popup_block_create's create functions), as a menu tree. Menus opened before from the same menu stay,
  * as sub-menus stay open. */
+/* Whether a button JS names is still one of a live block's: the context region's, any region of the window's screen,
+ * or a menu's or popup's. A layout drawn again frees the buttons a page may still show, so a click on one is dropped
+ * rather than read from freed memory. */
+static bool button_live(const bContext *C, const Button *but)
+{
+  const auto holds = [&](const Block *block) {
+    for (const std::unique_ptr<Button> &held : block->buttons_ptrs) {
+      if (held.get() == but) {
+        return true;
+      }
+    }
+    return false;
+  };
+  const auto in_region = [&](const ARegion &region) {
+    for (const Block &block : region.runtime->uiblocks) {
+      if (holds(&block)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  if (const ARegion *region = CTX_wm_region(C); region && in_region(*region)) {
+    return true;
+  }
+  if (wmWindow *win = CTX_wm_window(C)) {
+    if (const bScreen *screen = WM_window_get_active_screen(win)) {
+      for (const ScrArea &area : screen->areabase) {
+        for (const ARegion &region : area.regionbase) {
+          if (in_region(region)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  for (const int kind : {OWNED_MENU, OWNED_PANELS, OWNED_POPUP}) {
+    for (const Block *block : owned(kind)) {
+      if (holds(block)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
 {
+  if (!button_live(C, but)) {
+    return "";
+  }
   static std::string json;
   const std::string root = menu_root(but->block);
   if (PanelType *pt = button_paneltype_get(but)) {
@@ -786,6 +834,9 @@ static void button_applied(bContext *C, Button *but)
 }
 EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
 {
+  if (!button_live(C, but)) {
+    return 0;
+  }
   if (is_toggle(but)) {
     const bool on = value < 0 ? button_value_get(but) == 0.0 : value != 0;
     button_value_set(but, on ? 1.0 : 0.0);
@@ -814,6 +865,9 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
  * operator's wmOperatorStatus. */
 EXPORT(ui_button_operator) int ui_button_operator(bContext *C, Button *but)
 {
+  if (!button_live(C, but)) {
+    return int(OPERATOR_CANCELLED);
+  }
   const bContextStore *previous = CTX_store_get(C);
   if (but->context) {
     CTX_store_set(C, but->context);
@@ -826,15 +880,26 @@ EXPORT(ui_button_operator) int ui_button_operator(bContext *C, Button *but)
   return int(status);
 }
 /* After JS set a property button's value through RNA: its functions, as after a press. */
-EXPORT(ui_button_applied) void ui_button_applied(bContext *C, Button *but) { button_applied(C, but); }
+EXPORT(ui_button_applied) void ui_button_applied(bContext *C, Button *but)
+{
+  if (button_live(C, but)) {
+    button_applied(C, but);
+  }
+}
 /* A number or text button without RNA (a value of Blender's code, but->poin): set as the button sets it. */
 EXPORT(ui_button_value_set) void ui_button_value_set(bContext *C, Button *but, double value)
 {
+  if (!button_live(C, but)) {
+    return;
+  }
   button_value_set(but, value);
   button_applied(C, but);
 }
 EXPORT(ui_button_text_set) void ui_button_text_set(bContext *C, Button *but, const char *text)
 {
+  if (!button_live(C, but)) {
+    return;
+  }
   const std::string old = but->poin ? but->poin : "";
   if (but->rnaprop || but->poin) {
     button_string_set(C, but, text);
