@@ -24,6 +24,8 @@ import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
 const W = 'bl-widget';
 const struct = ({ pointer }) => pointerStruct(...pointer);
+// The enum item a row or tab button sets, from its property's RNA.
+const enumItem = (b) => (b.rna ? [...struct(b.rna).bl_rna.properties.get(b.rna.prop).enum_items].find((item) => item.value === b.value) : undefined);
 
 // The corners a button squares where it is aligned with its neighbours (ui_block_align_calc).
 function corners(aligned = '') {
@@ -165,8 +167,12 @@ function widgetNode(b, env) {
       return h('button', { type: 'button', class: 'bl-decorator flex h-unit w-unit shrink-0 items-center justify-center', 'aria-label': b.tip || 'Decorator', title: b.tip,
         disabled: common.disabled, onClick: () => press(b, ui) }, icon(iconName));
     case 'LISTBOX': return null;
-    case 'ROW': case 'LISTROW': case 'TAB':
-      return withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, className: 'flex-1', onClick: () => press(b, ui) }));
+    case 'ROW': case 'LISTROW': case 'TAB': {
+      const item = b.type === 'LISTROW' ? undefined : enumItem(b);
+      const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, className: 'flex-1',
+        value: item?.identifier, onClick: () => press(b, ui) }));
+      return b.type === 'TAB' ? cloneVNode(vnode, { role: 'tab', 'aria-selected': String(!!b.selected), 'aria-label': shown || item?.name || b.tip }) : vnode;
+    }
     default:
       if (TOGGLES.has(b.type)) {
         return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, onClick: () => press(b, ui) }));
