@@ -1087,11 +1087,6 @@ void BKE_ptcache_ids_from_object(ListBaseT<PTCacheID> *lb, Object * /*ob*/, Scen
 /* port-override: Bylonder lays an area's regions out on its next draw, from their flags. */
 void ED_region_visibility_change_update(bContext * /*C*/, ScrArea * /*area*/, ARegion * /*region*/) {}
 
-/* port-override: Bylonder's undo steps are made by the editor that ran a button or operator (its commit), not by
- * Blender's undo stack. */
-void ED_undo_push(bContext * /*C*/, const char * /*str*/) {}
-
-
 /* As area.cc gives it for a region no other region overlaps. */
 const rcti *ED_region_visible_rect(ARegion *region)
 {

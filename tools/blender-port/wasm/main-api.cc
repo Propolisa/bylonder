@@ -605,6 +605,17 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
   return prop ? IDP_string_get(prop) : nullptr;
 }
 
+/* The context's Main, scene and view layer after Blender's code replaced or re-read them (reading a file, loading an
+ * undo step). */
+EXPORT(main_context_refresh) void main_context_refresh(BlenderMain *ctx)
+{
+  ctx->bmain = CTX_data_main(ctx->C);
+  ctx->scene = CTX_data_scene(ctx->C);
+  ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
+  ctx->window.scene = ctx->scene;
+  collections_synced(ctx);
+}
+
 /* A .blend opened as Blender's File > Open does without its UI (wm_file_read_post with G_FILE_NO_UI): read
  * (BLO_read_from_memory) and set up as the Main (BKE_blendfile_read_setup_readfile), whose scene and view layer become
  * the context's. Returns the warnings Blender reported, one per line, or null when the file could not be read. */
@@ -624,11 +635,7 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int 
     /* The Main the file replaces, which setting it up frees. */
     G_MAIN = ctx->bmain;
     BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, nullptr, &read_report, false, nullptr);
-    ctx->bmain = G_MAIN;
-    ctx->scene = CTX_data_scene(ctx->C);
-    ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
-    ctx->window.scene = ctx->scene;
-    collections_synced(ctx);
+    main_context_refresh(ctx);
   }
   for (const Report &report : reports.list.items_mutable()) {
     if (report.type >= RPT_WARNING) {
