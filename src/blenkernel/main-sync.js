@@ -266,17 +266,19 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     curveObject(entry).data = data;
   }
   // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings.
+  // A modifier deforming by another object (an Armature's) points at its Object in Main.
+  const modifierTarget = ({ values }) => [...objects.values()].find(({ node }) => nodeId(node) === values.object)?.ob ?? 0;
+  const blenderStack = (entry) => modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
+  const modifiersSignature = (stack) => JSON.stringify(stack.map((m) => [m.type, m.values, m.showViewport, m.showRender, textures.get(m.values.texture)?.tex, modifierTarget(m)]));
+  // Whether the page changed an object's stack since it last wrote it to Main (its next flush writes it).
+  const modifiersPending = (entry) => modifiersSignature(blenderStack(entry)) !== entry.modifiers;
   function pushModifiers(entry) {
     if (entry.type !== 'MESH') return;
-    const stack = modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
-    // A modifier deforming by another object (an Armature's) points at its Object in Main.
-    const target = ({ values }) => [...objects.values()].find(({ node }) => nodeId(node) === values.object)?.ob ?? 0;
-    const signature = JSON.stringify(stack.map((m) => [m.type, m.values, m.showViewport, m.showRender, textures.get(m.values.texture)?.tex, target(m)]));
+    const stack = blenderStack(entry), signature = modifiersSignature(stack), target = modifierTarget;
     if (signature === entry.modifiers) return;
     entry.modifiers = signature;
     // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
     blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0, target));
-    mainView.modifiersSynced(entry);
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
   function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
@@ -683,7 +685,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, forget,
+    sceneRecords, readCollections, relations, nodeOf, forget, modifiersPending,
+    // The stack as Main holds it is the page's now (after a view took Blender's changes).
+    modifiersTaken: (entry) => { entry.modifiers = modifiersSignature(blenderStack(entry)); },
   };
   const mainView = createMainView(state);
   // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with
