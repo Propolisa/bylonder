@@ -156,6 +156,7 @@ async function instantiate(url) {
   const instance = await WebAssembly.instantiate(await compile(url), { wasi_snapshot_preview1: wasiFor(() => memory), env: missing });
   memory = instance.exports.memory;
   instance.exports._initialize?.();
+  instance.exports.blender_init?.();
   return new Heap(instance.exports);
 }
 var size = (array) => array.byteLength + 7 & ~7;

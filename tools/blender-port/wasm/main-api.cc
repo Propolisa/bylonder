@@ -644,13 +644,43 @@ EXPORT(node_add) bNode *node_add(ID *owner, const char *idname, const char *name
   return node;
 }
 
-/* A socket of a type (eNodeSocketDatatype) and subtype (PropertySubType), with its value: what Blender's socket type,
- * registered with the node types, would allocate. */
+/* A socket's value, in the default value its type allocates. */
+static void socket_value_set(bNodeSocket &sock, const float *value, int count)
+{
+  switch (sock.type) {
+    case SOCK_FLOAT:
+      if (count) {
+        sock.default_value_typed<bNodeSocketValueFloat>()->value = value[0];
+      }
+      break;
+    case SOCK_RGBA:
+      for (int i = 0; i < count && i < 4; i++) {
+        sock.default_value_typed<bNodeSocketValueRGBA>()->value[i] = value[i];
+      }
+      break;
+    case SOCK_VECTOR:
+      for (int i = 0; i < count && i < 4; i++) {
+        sock.default_value_typed<bNodeSocketValueVector>()->value[i] = value[i];
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+/* A socket of a type (eNodeSocketDatatype) and subtype (PropertySubType), with its value. A node type's declared
+ * socket of that identifier is the one, as Blender makes them with the node; any other is added as a static socket,
+ * with the value Blender's socket type would allocate. */
 EXPORT(node_socket_add)
 bNodeSocket *node_socket_add(ID *owner, bNode *node, bool output, int type, int subtype, const char *identifier, const char *name,
                              const float *value, int count)
 {
-  bNodeSocket *sock = bke::node_add_static_socket(tree_of(owner), *node, output ? SOCK_OUT : SOCK_IN, type, subtype, identifier, name);
+  const eNodeSocketInOut in_out = output ? SOCK_OUT : SOCK_IN;
+  if (bNodeSocket *declared = bke::node_find_socket(*node, in_out, UString(identifier))) {
+    socket_value_set(*declared, value, count);
+    return declared;
+  }
+  bNodeSocket *sock = bke::node_add_static_socket(tree_of(owner), *node, in_out, type, subtype, identifier, name);
   switch (type) {
     case SOCK_FLOAT: {
       bNodeSocketValueFloat *data = MEM_new<bNodeSocketValueFloat>(__func__);
