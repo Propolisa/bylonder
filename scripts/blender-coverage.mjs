@@ -48,6 +48,11 @@ export function scanSource(source, found = new Set()) {
     if (call === 'createKeymap') keymaps.push(...strings(node.arguments[1]));
     if (call === 'keymapHandler') dispatches(node.arguments[0]);
     if (call === 'areaUI' && ts.isObjectLiteralExpression(node.arguments[0])) dispatches(property(node.arguments[0], 'keymaps'));
+    // An editor that is Blender's own dispatches its keymaps and runs every operator of its prefix (`text.*`).
+    if (call === 'mountBlenderArea' && ts.isObjectLiteralExpression(node.arguments[1])) {
+      dispatches(property(node.arguments[1], 'keymaps'));
+      strings(property(node.arguments[1], 'operators')).forEach((prefix) => found.add(prefix + '*').add(prefix + '*@registry'));
+    }
     const registered = (id) => !id.startsWith('bylonder.') && found.add(id).add(id + '@registry');
     // Operators registered for a space type count at run time, in that space's editors.
     if (call === 'registerOperator' && node.arguments.length < 3) strings(node.arguments[0]).forEach(registered);
@@ -71,7 +76,7 @@ export async function scanImplemented(root = 'src') {
   const found = new Set();
   for (const path of await files(root)) {
     const source = await readFile(path, 'utf8');
-    if (/_(MT|PT|HT)_|blender:/.test(source)) scanSource(source, found);
+    if (/_(MT|PT|HT)_|blender:|mountBlenderArea\(/.test(source)) scanSource(source, found);
   }
   return [...found].sort();
 }
