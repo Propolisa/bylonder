@@ -574,6 +574,9 @@ EXPORT(wm_region_draw) const char *wm_region_draw(bContext *C, ScrArea *area, in
   return region_draw_end();
 }
 
+/* port-override: the page's title is the page's; the window has no GHOST system to give a title or path to. */
+void WM_window_title_refresh(wmWindowManager * /*wm*/, wmWindow * /*win*/) {}
+
 /* port-override: the GPU module is past the seam (the browser draws), so the window has no GPU context to make
  * current around the handlers. */
 void GPU_render_begin() {}
