@@ -9,23 +9,32 @@ const { exports: x, withArrays, withString, cString } = blenderModule;
 export { EVENT_TYPES, EVENT_VALUES } from '../../bmesh/bmesh-wasm.js';
 export const PROPERTY_SUBTYPES = enumTable(2);
 export const PROPERTY_TYPES = { BOOLEAN: 0, INT: 1, FLOAT: 2, STRING: 3, ENUM: 4, POINTER: 5, COLLECTION: 6 };
-const ID_CODES = { OB: 0x424f, SC: 0x4353, WO: 0x4f57, MA: 0x414d, LA: 0x414c, CA: 0x4143 };
-
-// Blender's RNA of the animatable properties (rna-animated.json), defined once in the module's RNA, which resolves and
-// names F-Curve paths from it as Blender's does.
-for (const { code, properties } of Object.values(rnaAnimated)) {
-  for (const [identifier, { type, subtype, length, name }] of Object.entries(properties)) {
-    withString(identifier, (id) => withString(name, (n) => x.rna_id_property_define(ID_CODES[code], id, PROPERTY_TYPES[type], PROPERTY_SUBTYPES.get(subtype) ?? 0, length, n)));
-  }
-}
 export const animatedProperty = (struct, identifier) => rnaAnimated[struct]?.properties[identifier];
-// A custom property path (`["name"]`) Bylonder animates, with its PropertyType and UI name, as an ID property is in
-// Blender: the editors name its channel and Blender's keying treats it by type.
-const customProperties = new Set();
-export function defineCustomProperty(path, type, name) {
-  if (customProperties.has(path)) return;
-  customProperties.add(path);
-  withString(path, (p) => withString(name, (n) => x.rna_custom_property_define(p, PROPERTY_TYPES[type], n)));
+
+// Custom properties (ID properties, `["name"]` paths), which Babylon-native data is animated through: a number, a
+// boolean or an array of numbers on any ID, with an RNA subtype (COLOR) and a description (anim_id_property_set).
+// A name is at most 63 characters, as Blender's are: a longer one keeps its start and a hash of the whole.
+const MAX_NAME = 63;
+export function customPropertyName(name) {
+  if (name.length <= MAX_NAME) return name;
+  let hash = 0;
+  for (const c of name) hash = (Math.imul(hash, 31) + c.codePointAt(0)) >>> 0;
+  return name.slice(0, MAX_NAME - 9) + '~' + hash.toString(16).padStart(8, '0');
+}
+export const customPropertyPath = (name) => `["${name.replace(/["\\]/g, (c) => '\\' + c)}"]`;
+export function setCustomProperty(id, name, value, { subtype = 'NONE', description = '' } = {}) {
+  const values = [value].flat(), type = typeof values[0] === 'boolean' ? 'BOOLEAN' : 'FLOAT';
+  withArrays([Float64Array.from(values, Number)], ([v]) => withString(name, (n) => withString(description, (d) =>
+    x.anim_id_property_set(id, n, PROPERTY_TYPES[type], v, Array.isArray(value) ? values.length : 0, PROPERTY_SUBTYPES.get(subtype) ?? 0, d))));
+}
+// A custom property's value (a number, or an array of them), or undefined when the ID has no number property of that name.
+export function customProperty(id, name, capacity = 16) {
+  return withArrays([new Float64Array(capacity)], ([p]) => {
+    const count = withString(name, (n) => x.anim_id_property_get(id, n, p, capacity));
+    if (count < 0) return undefined;
+    const values = Array.from(new Float64Array(x.memory.buffer, p, Math.max(count, 1)));
+    return count ? values : values[0];
+  });
 }
 
 // FCurve and BezTriple field offsets (anim_layout).
@@ -177,6 +186,12 @@ export class BlenderAnimation {
   remove(id, fcurve) { x.anim_fcurve_remove(id, fcurve.pointer); }
   // Inserts a key as Blender's keying does.
   insert(fcurve, frame, value, flags = INSERTKEY_NOFLAGS) { return x.anim_keyframe_insert(this.main.scene, fcurve.pointer, frame, value, flags); }
+  // Keys an ID's RNA path at the scene's frame with its value now, as keyframe_insert() does (every element of an array
+  // for index -1), into a channel group (Blender's default for an empty one): the keys inserted. keyDelete and
+  // keyClear remove the key at the frame and the whole F-Curves, as keyframe_delete() and Clear Keyframes do.
+  keyInsert(id, path, index = -1, group = '') { return withString(path, (p) => withString(group, (g) => x.anim_path_keyframe_insert(this.main.C, id, p, index, g))); }
+  keyDelete(id, path, index = -1) { return withString(path, (p) => x.anim_path_keyframe_delete(this.main.C, id, p, index)); }
+  keyClear(id, path, index = -1) { return withString(path, (p) => x.anim_path_keyframe_clear(this.main.C, id, p, index)); }
   // The scene's time and keying settings the editors read.
   setTime({ frame, start, end, previewStart, previewEnd, preview, fps, keyframeType = 'KEYFRAME', autoKey = false }) {
     const cfra = Math.floor(frame);

@@ -302,8 +302,7 @@ def main():
 
 
 # Bylonder's own path resolution for its custom properties (rna-runtime.cc).
-WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS_11PropertyRNAE',
-           '_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE']
+WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE']
 
 
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,

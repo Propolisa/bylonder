@@ -245,8 +245,8 @@ void anim_id_property_set(ID *id, const char *name, int type, const double *valu
     }
   }
 }
-/* A custom property's values written to r_values (at most capacity of them): their count (1 for a single value), or
- * -1 when the ID has no number property of that name. */
+/* A custom property's values written to r_values (at most capacity of them): the count of an array's, 0 for a single
+ * value, or -1 when the ID has no number property of that name. */
 EXPORT(anim_id_property_get) int anim_id_property_get(ID *id, const char *name, double *r_values, int capacity)
 {
   const IDProperty *prop = id->properties ? IDP_GetPropertyFromGroup(id->properties, name) : nullptr;
@@ -254,9 +254,9 @@ EXPORT(anim_id_property_get) int anim_id_property_get(ID *id, const char *name, 
     return -1;
   }
   switch (prop->type) {
-    case IDP_DOUBLE: r_values[0] = IDP_double_get(prop); return 1;
-    case IDP_FLOAT: r_values[0] = IDP_float_get(prop); return 1;
-    case IDP_INT: case IDP_BOOLEAN: r_values[0] = IDP_int_get(prop); return 1;
+    case IDP_DOUBLE: r_values[0] = IDP_double_get(prop); return 0;
+    case IDP_FLOAT: r_values[0] = IDP_float_get(prop); return 0;
+    case IDP_INT: case IDP_BOOLEAN: r_values[0] = IDP_int_get(prop); return 0;
     case IDP_ARRAY: {
       const int count = std::min(prop->len, capacity);
       for (int i = 0; i < count; i++) {
