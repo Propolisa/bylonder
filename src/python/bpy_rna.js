@@ -183,6 +183,16 @@ const STRUCT_METHODS = {
 };
 
 const isContext = (ptr) => structIdentifier(ptr[0]) === 'Context';
+// An operator's own properties read and written on the operator, as _bpy_types.Operator's __getattribute__ and
+// __setattr__ give them (Transcrypt has neither hook).
+const operatorTypes = new Map();
+const isOperator = (type) => operatorTypes.get(type) ?? operatorTypes.set(type, x.bpy_struct_is_a(type, structFind('Operator'))).get(type);
+function operatorProperty(ptr, name) {
+  if (!isOperator(ptr[0])) return null;
+  const properties = pointerOf(propertyGet(ptr, findProperty(ptr, 'properties')));
+  const prop = properties && findProperty(properties, name);
+  return prop ? [properties, prop] : null;
+}
 
 const structHandler = {
   get(target, key, receiver) {
@@ -191,6 +201,8 @@ const structHandler = {
     if (!key.startsWith('_')) {
       const prop = findProperty(ptr, name);
       if (prop) return propertyGet(ptr, prop);
+      const own = operatorProperty(ptr, name);
+      if (own) return propertyGet(...own);
       const func = findFunction(ptr[0], name);
       if (func && functionInfo(func).defined) return (...args) => callFunction(ptr, func, args);
       if (isContext(ptr)) {
@@ -205,8 +217,9 @@ const structHandler = {
   set(target, key, value, receiver) {
     if (typeof key === 'string' && !key.startsWith('_')) {
       const ptr = target[POINTER_RNA], prop = findProperty(ptr, rnaName(key));
-      if (prop) {
-        propertySet(ptr, prop, value, rnaName(key));
+      const own = prop ? [ptr, prop] : operatorProperty(ptr, rnaName(key));
+      if (own) {
+        propertySet(...own, value, rnaName(key));
         return true;
       }
     }
@@ -550,14 +563,28 @@ function functionName(func) {
   return functionNames.get(func);
 }
 
-// The instance a callback runs on: kept with the data when its type keeps one (RNA_struct_instance), else the struct.
+// The instance a callback runs on: kept with the data when its type keeps one (an operator's, RNA_struct_instance), for
+// its next callbacks (invoke, then modal), else the struct.
+const kept = [null];
 function instance(ptr, cls) {
-  const kept = x.bpy_instance(...ptr);
-  if (kept) return classes[kept] ?? struct(...ptr);
+  const id = x.bpy_instance(...ptr);
+  if (id > 0) return kept[id];
   const self = struct(...ptr);
   if (cls.__init__ && cls.__init__ !== bpyTypes().bpy_struct?.__init__) cls.__init__(self);
+  if (id === 0) x.bpy_instance_set(...ptr, kept.push(self) - 1);
   return self;
 }
+
+// An operator class's declared properties go on its operator's properties (bpy_operator_wrap.cc's
+// operator_properties_init), its bl_property its main one.
+const definedByType = new Set();
+provided.bpy_class_define = (id, srna, ot) => {
+  const cls = classes[id];
+  definedByType.add(cls);
+  defineProperties(srna >>> 0, cls);
+  const main = Object.getOwnPropertyDescriptor(cls, 'bl_property')?.value;
+  if (typeof main === 'string') withText([main], (p) => x.bpy_operator_property_set(ot, p));
+};
 
 // Registers a class as Blender's register_class does; returns its type.
 export function registerClass(cls) {
@@ -570,7 +597,7 @@ export function registerClass(cls) {
     throw ValueError(`register_class(...): ${cString(x.bpy_register_error())}`);
   }
   typeOfClass.set(cls, type);
-  defineProperties(type, cls);
+  if (!definedByType.has(cls)) defineProperties(type, cls);
   return type;
 }
 export function unregisterClass(cls) {
