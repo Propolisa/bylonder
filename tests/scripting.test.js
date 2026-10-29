@@ -1,10 +1,10 @@
 // The Scripting workspace's editors without a browser: the Python Console's lines and history through its keymap and
-// bpy.ops, the Info editor's operator reports, and Blender's headers and menus of both drawn over their contexts (the
-// Text Editor is Blender's own: tests/text-wasm.test.js). CPython (Pyodide) runs in the browser only (tests/e2e/smoke.mjs).
+// bpy.ops, operator reports, and Blender's header and menus of the Console drawn over its context (the Text Editor and
+// Info are Blender's own: tests/text-wasm.test.js). CPython (Pyodide) runs in the browser only (tests/e2e/smoke.mjs).
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
 import { ConsoleSpace, registerConsoleOperators } from '../src/editors/space_console/console-ops.js';
-import { operatorPystring, reports } from '../src/windowmanager/wm-reports.js';
+import { operatorPystring, subscribeReports } from '../src/windowmanager/wm-reports.js';
 import { keymapHandler } from '../src/windowmanager/keyconfig.js';
 import { inArea, runOperator, registerOperator } from '../src/windowmanager/wm-operators.js';
 import { createRNA, propBinding } from '../src/makesrna/rna-bylonder.js';
@@ -59,16 +59,16 @@ const consoleKeys = keymapHandler(['Console', 'Screen', 'Window']);
 {
   assert.equal(operatorPystring('mesh.primitive_cube_add', { size: 2, align: 'WORLD', location: [0, 0, 0.5] }),
     "bpy.ops.mesh.primitive_cube_add(size=2, align='WORLD', location=(0, 0, 0.5))");
+  const reported = [];
+  subscribeReports((r) => reported.push(r));
   registerOperator('mesh.primitive_cube_add', { run: () => {} });
   runOperator('mesh.primitive_cube_add', { size: 2 });
-  assert.equal(reports.at(-1).type, 'OPERATOR');
-  assert.equal(reports.at(-1).message, 'bpy.ops.mesh.primitive_cube_add(size=2)');
+  assert.deepEqual(reported, [{ type: 'OPERATOR', message: 'bpy.ops.mesh.primitive_cube_add(size=2)' }]);
 }
 
-// ---- Blender's headers and menus of the Console and Info draw over their contexts.
+// ---- Blender's header and menus of the Console draw over its context.
 {
-  const info = { settings: {}, changed() {} };
-  for (const [space, data, header] of [['CONSOLE', sc, 'CONSOLE_HT_header'], ['INFO', info, 'INFO_HT_header']]) {
+  for (const [space, data, header] of [['CONSOLE', sc, 'CONSOLE_HT_header']]) {
     const context = () => createContext(r, { area: space, space: data });
     const layout = headerLayout(context(), (l) => Object.assign(headers[header](), { layout: l }).draw(context()));
     assert.ok(layout.children.length, `${header} draws`);

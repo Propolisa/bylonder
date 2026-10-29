@@ -21,7 +21,8 @@ import { createWorlds } from "../blenkernel/scene/world.js";
 import { createRenderSettings } from "../blenkernel/scene/render.js";
 import { createCollections } from "../blenkernel/scene/collections.js";
 import { createSequenceEditor } from "../sequencer/sequence-editor.js";
-import { snapshot, apply } from "../editors/undo/storage.js";
+import { apply } from "../editors/undo/storage.js";
+import { openProject } from "./project-state.js";
 registerModifier(geometryNodesDefinition);
 
 // Builds the scene world from a run payload: runs the project's createScene, identifies editable objects
@@ -103,9 +104,10 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   }
   objects.scene = scene;
   const world = { engine, scene, objects, animation, notify };
-  const baseline = snapshot(objects);
-  if (input.remember && input.overrides?.transforms)
-    apply(objects, input.overrides.transforms, { partial: true });
+  // Saved scene edits: Main's .blend with what Babylon owns (project-state.js); a project saved before keeps its
+  // objects' rows, which are applied once and saved in the new form.
+  if (input.remember && input.overrides?.blend) openProject(world, animation.ids, input.overrides);
+  else if (input.remember && input.overrides?.transforms) apply(objects, input.overrides.transforms, { partial: true });
   registerObjects(animation, objects);
   const documentState = createDocument();
   world.materials = documentState.register("materials", createMaterialLibrary(world, { commit, asset: (path) => sdk.asset(path), files: input.files || [] }));
@@ -150,7 +152,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   world.modifiers.refresh();
   if (input.animation) animation.load(input.animation);
   return {
-    world, sdk, animation, scene, objects, baseline, documentState,
+    world, sdk, animation, scene, objects, documentState,
     get authoredCamera() { return authoredCamera; },
   };
 }

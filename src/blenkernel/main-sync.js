@@ -189,6 +189,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       entry.data = { struct: dataStruct(node), ptr: blender.data(entry.ob), shadow: new Map() };
       entry.name = blender.name(entry.ob);
       entry.unwatch = watchObject(node, () => changed(entry));
+      if (type === 'MESH' && !meshData(node)) blender.setProperty(ob, PROPERTIES.standin, '1');
       dirty.add(entry);
       objects.set(node, entry);
     }
@@ -243,6 +244,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (entry.type !== 'MESH' || creation === entry.creation || !meshData(entry.node)) return;
     blender.setMesh(entry.ob, objectMesh(entry.node));
     [entry.creation, entry.owned] = [creation, true];
+    blender.setProperty(entry.ob, PROPERTIES.standin, '');
   }
   // An armature object's bones and pose (its edit bones in Edit Mode), live in Main as in Babylon, drawn as Blender
   // evaluates them.
@@ -290,12 +292,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     blender.world = worlds.get(world.worlds?.active()?.id)?.wo;
   }
 
+  // Main's ID of a name that no record holds yet (a project's .blend, an undo step's): the one a record of that name takes.
+  const unclaimed = (code, name, records, field) => blender.ids(code).find((id) => blender.name(id) === name && ![...records.values()].some((record) => record[field] === id));
   // Materials and worlds: an ID for each of Bylonder's, its values through the mapping.
   function pushMaterials() {
     const all = new Set(world.materials?.all() ?? []);
     for (const [material, record] of materials) if (!all.has(material)) { blender.removeID(record.ma); materials.delete(material); }
     for (const material of all) {
-      if (!materials.has(material)) materials.set(material, { struct: 'Material', ma: ids.adopted.get(material) ?? blender.addMaterial(material.name), shadow: new Map() });
+      if (!materials.has(material)) materials.set(material, { struct: 'Material', ma: ids.adopted.get(material) ?? unclaimed(ID_MA, material.name, materials, 'ma') ?? blender.addMaterial(material.name), shadow: new Map() });
       const record = materials.get(material);
       record.ptr = record.ma;
       if (blender.name(record.ma) !== material.name && record.babylonName !== material.name) { blender.rename(record.ma, material.name); record.babylonName = material.name; }
@@ -324,7 +328,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const all = world.textures?.all() ?? [], ids = new Set(all.map((entry) => entry.id));
     for (const [id, record] of textures) if (!ids.has(id)) { blender.removeID(record.tex); textures.delete(id); }
     for (const entry of all) {
-      if (!textures.has(entry.id)) textures.set(entry.id, { tex: mainTexture(blender.bmain, entry.name, entry.values), values: entry.values });
+      if (!textures.has(entry.id)) textures.set(entry.id, { tex: unclaimed(ID_TE, entry.name, textures, 'tex') ?? mainTexture(blender.bmain, entry.name, entry.values), values: entry.values });
       const record = textures.get(entry.id);
       if (record.babylonName !== entry.name) { blender.rename(record.tex, entry.name); record.babylonName = entry.name; }
       blender.setFakeUser(record.tex, entry.fakeUser);
@@ -335,7 +339,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const all = world.worlds?.all() ?? [], kept = new Set(all.map((entry) => entry.id));
     for (const [id, record] of worlds) if (!kept.has(id)) { blender.removeID(record.wo); worlds.delete(id); }
     for (const entry of all) {
-      if (!worlds.has(entry.id)) worlds.set(entry.id, { struct: 'World', wo: ids.adopted.get(entry.id) ?? blender.addWorld(entry.name), shadow: new Map() });
+      if (!worlds.has(entry.id)) worlds.set(entry.id, { struct: 'World', wo: ids.adopted.get(entry.id) ?? unclaimed(ID_WO, entry.name, worlds, 'wo') ?? blender.addWorld(entry.name), shadow: new Map() });
       const record = worlds.get(entry.id);
       record.ptr = record.wo;
       if (record.babylonName !== entry.name) { blender.rename(record.wo, entry.name); record.babylonName = entry.name; }
@@ -631,6 +635,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     },
     // The scene as a .blend file (its bytes), written by Blender's writer from Main.
     writeBlend: (filepath) => api.withMeshes(() => blender.writeBlend(filepath)),
+    // Main as a project saves it: meshes Babylon built keep their stand-ins as they are (the project's code builds them).
+    projectBlend: () => { flush(); return blender.writeBlend('/project.blend'); },
     // A .blend's data read into Main and made Babylon's in `scene` (the view's adopt); returns the Babylon objects it
     // made and Blender's and Bylonder's warnings. Its scene settings and collections follow when the scene sync of the
     // world starts (ids.read).
@@ -662,6 +668,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     sceneRecords, readCollections, relations, nodeOf, forget,
   };
   const mainView = createMainView(state);
+  // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with
+  // Main's selection; then a read file's scene settings and collections.
+  const { nodes, revived } = mainView.adopt();
+  world.objects.push(...nodes);
+  const selected = [...nodes, ...revived].filter((node) => blender.base(objects.get(node).ob)?.selected);
+  if (selected.length) selection?.replace(selected.sort((a, b) => blender.base(objects.get(a).ob).active - blender.base(objects.get(b).ob).active));
   if (ids.read && world.collections) {
     mainView.adoptScene();
     ids.read = false;

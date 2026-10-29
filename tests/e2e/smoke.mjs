@@ -526,7 +526,7 @@ const checks = {
   // Editor runs a script; Info reports the operator.
   async "Scripting: the console adds a cube, a script moves the object"() {
     await app.page.click('[data-workspace="scripting"]');
-    const pythonConsole = app.locator(".bl-console"), textEditor = app.locator(".bl-text-editor");
+    const pythonConsole = app.locator(".bl-console"), textEditor = app.locator('[data-blender="TEXT_EDITOR"]');
     await pythonConsole.waitFor();
     await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console").textContent), null, 180000);
     const before = await app.bylonder((b) => b.world.objects.length);

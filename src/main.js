@@ -31,7 +31,8 @@ import { createView3D } from "./editors/space_view3d/view3d.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createEditor } from "./editors/object/editor";
-import { createHistory, snapshot } from "./editors/undo/storage";
+import { createHistory } from "./editors/undo/storage";
+import { projectState } from "./runtime/project-state.js";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./editors/render/host.js";
 import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
@@ -68,6 +69,7 @@ import { createRunningJobs } from "./editors/interface/running-jobs.js";
 import { exportScene } from "./io_scene_babylon/export.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
+import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { setContextPointer } from "./python/bpy_rna.js";
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
@@ -184,7 +186,7 @@ try {
   send("run-error", { message: String(error.stack || error) });
   throw error;
 }
-const { world, sdk, animation, scene, objects, baseline, documentState } = built;
+const { world, sdk, animation, scene, objects, documentState } = built;
 const authored = () => built.authoredCamera;
 // Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
 const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
@@ -232,16 +234,7 @@ window.__bylonder ={ world, renderHost, runOperator,
   coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
-const currentOverrides = () => {
-  const transforms = snapshot(objects)
-    .filter((row) => !(row.deleted && row.creation))
-    .filter(
-      (row) =>
-        JSON.stringify(row) !==
-        JSON.stringify(baseline.find((b) => b.id === row.id)),
-    );
-  return { transforms, stores: sdk.values(), ...documentState.capture({ save: true }) };
-};
+const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });
 saveOverrides = () => {
   if (!remember || creator?.pending || animation.evaluating || animation.playing) return;
   const state = currentOverrides();
@@ -456,7 +449,7 @@ const scriptingEditors = [
   // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
   mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), files: world.texts, context: () => createContext(blenderRNA, { area: "TEXT_EDITOR" }), beforeRun: () => creator.finish() }),
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
-  mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info"), rna: blenderRNA }),
+  mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info") }),
 ];
 let inspectorBusy = false;
 async function inspector() {
