@@ -215,13 +215,21 @@ export function createMainView(state) {
   const fcurvePaths = (id) => state.animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
   // An object's modifiers as Main holds them, in the terms of Bylonder's stack; the types Bylonder does not have are
   // left out.
-  function mainModifiers(entry, warnings) {
+  // `resolve`: targets as the stack names them (a texture record, an object's id), else as Main's pointers.
+  function mainModifiers(entry, warnings, resolve = true) {
     const view = new DataView(blenderModule.exports.memory.buffer);
     return blender.modifiers(entry.ob).flatMap(({ type, name, mode, md }) => {
       const definition = blenderModifierDefinitions.find((d) => d.mesh.type === type);
       if (!definition) { warnings.push(`"${entry.node.name}": its modifier "${name}" is not opened`); return []; }
       const values = definition.mesh.read(view, md);
-      if (definition.mesh.textured) values.texture = textureId(view.getUint32(md + definition.mesh.texture, true));
+      if (definition.mesh.textured) {
+        const tex = view.getUint32(md + definition.mesh.texture, true);
+        values.texture = resolve ? textureId(tex) : tex;
+      }
+      if (definition.mesh.scene) {
+        const ob = view.getUint32(md + definition.mesh.object, true), target = state.nodeOf(ob);
+        values.object = resolve ? (target ? nodeId(target) : null) : ob;
+      }
       return [{ type: definition.id, name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER), values }];
     });
   }
@@ -239,14 +247,30 @@ export function createMainView(state) {
   function adoptModifiers(entry, warnings) {
     for (const { type, values, ...shown } of mainModifiers(entry, warnings)) Object.assign(addModifier(entry.node, type, values), shown);
   }
-  // Modifiers Blender's code added, removed or changed (Add Modifier, Ctrl 2) become the stack's.
+  // Modifiers Blender's code added, removed or changed (Add Modifier, Ctrl 2, a panel's value) become the stack's: a
+  // changed list is taken whole, changed values in place, keeping a target (texture, object) Main has not been given yet.
+  const modifiersOf = (entry) => JSON.stringify(mainModifiers(entry, [], false));
+  // Main's stacks as the page last gave them to it (before Blender's code runs), so that a view takes only what that
+  // code changed.
+  function modifiersSynced() {
+    for (const entry of objects.values()) if (entry.type === 'MESH') entry.modifiersSynced = modifiersOf(entry);
+  }
   function pullModifiers(entry) {
-    const stack = modifierStack(entry.node), main = mainModifiers(entry, []);
-    const same = stack.length === main.length && main.every((m, i) => stack[i].type === m.type && stack[i].name === m.name
-      && stack[i].showViewport === m.showViewport && Object.entries(m.values).every(([key, value]) => JSON.stringify(stack[i].values[key]) === JSON.stringify(value)));
-    if (same) return;
-    if (entry.node.metadata) entry.node.metadata.wbModifiers = [];
-    adoptModifiers(entry, []);
+    const synced = modifiersOf(entry);
+    if (synced === (entry.modifiersSynced ??= synced)) return;
+    entry.modifiersSynced = synced;
+    const main = mainModifiers(entry, []), stack = modifierStack(entry.node);
+    if (stack.length !== main.length || main.some((m, i) => stack[i].type !== m.type || stack[i].name !== m.name)) {
+      if (entry.node.metadata) entry.node.metadata.wbModifiers = [];
+      adoptModifiers(entry, []);
+      return;
+    }
+    main.forEach(({ values, showViewport, showRender }, i) => {
+      const modifier = stack[i];
+      for (const key of ['texture', 'object']) if (values[key] === null && modifier.values[key] != null) values[key] = modifier.values[key];
+      Object.assign(modifier, { showViewport, showRender });
+      for (const [key, value] of Object.entries(values)) if (JSON.stringify(modifier.values[key]) !== JSON.stringify(value)) modifier.values[key] = value;
+    });
   }
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
@@ -402,7 +426,7 @@ export function createMainView(state) {
   }
 
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, evaluated,
+    pull, view, adopt, adoptScene, drawData, drawShading, evaluated, modifiersSynced,
   };
 }
 

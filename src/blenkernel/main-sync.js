@@ -456,6 +456,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
     if (!all) return;
     blender.evaluate();
+    mainView.modifiersSynced();
     if (api.debug) assertEqual('flush');
   }
 
