@@ -76,7 +76,6 @@ export function mountProperties(host, { world, editor, history, systems, propert
       startFilter: () => host.querySelector('.bl-properties-header input')?.focus(),
       clearFilter: () => { space().search_filter = ''; refresh(); },
       canAddModifier: () => space().context === 'MODIFIER' && !!ob() && hasMesh(ob()),
-      newTexture: () => world.textures?.create(null),
       materials: () => {
         const node = ob(), library = world.materials;
         if (!node?.getTotalVertices || !library) return null;
