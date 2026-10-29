@@ -76,7 +76,7 @@ export async function scanImplemented(root = 'src') {
   const found = new Set();
   for (const path of await files(root)) {
     const source = await readFile(path, 'utf8');
-    if (/_(MT|PT|HT)_|blender:|mountBlenderArea\(/.test(source)) scanSource(source, found);
+    if (/_(MT|PT|HT)_|blender:|mountBlenderArea\(|keymapHandler\(|areaUI\(/.test(source)) scanSource(source, found);
   }
   return [...found].sort();
 }
