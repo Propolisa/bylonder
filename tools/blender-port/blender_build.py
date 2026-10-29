@@ -35,7 +35,7 @@ DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_TBB$|-DWITH_TBB=|-DEIGEN_HAS_TBB|-DWIT
 HEADED = re.compile(r'source/blender/editors/interface/')
 # Sources whose Python path is kept: typed values are evaluated as expressions (BPY_run_string_as_number, which the
 # module answers with Blender's Python-like expression evaluator, wasm/platform.cc), so their units apply.
-PYTHON_EXPRESSIONS = re.compile(r'source/blender/editors/util/numinput\.cc$')
+PYTHON_EXPRESSIONS = re.compile(r'source/blender/editors/(util/numinput|space_text/text_ops)\.cc$')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
          '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
          '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
