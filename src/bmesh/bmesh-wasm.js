@@ -8,7 +8,7 @@ import { BMESH_WASM } from './bmesh-module.js';
 import { FLAGS, moduleMesh } from './module-mesh.js';
 
 const { exports: x } = await instantiate(BMESH_WASM);
-const { withArrays, cString, withString, bytes, meshArrays, extractedMesh, attachedMesh, setModifiers, evaluateModifiers, modifierObject } = moduleMesh(x, createMesh);
+const { withArrays, cString, withString, bytes, meshArrays, extractedMesh, attachedMesh, setModifiers, evaluateModifiers } = moduleMesh(x, createMesh);
 // A detached extraction ({counts, buffers}) as the Mesh it was; Blender's modifier stack on a Mesh (modifier-api.cc),
 // whose result's arrays are valid until the next evaluation, with each modifier's error or null.
 export { attachedMesh, evaluateModifiers };

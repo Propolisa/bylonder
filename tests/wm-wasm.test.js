@@ -1,11 +1,14 @@
 // Blender's window manager in the module: browser input as GHOST events into Main's window, whose 3D View area runs
 // Blender's own keymaps (loaded from Blender's keyconfig data) and its modal transform handler. G moves the selected
-// object with the mouse until a click confirms, as in Blender. A top orthographic view of 100 pixels per unit.
+// object with the mouse until a click confirms, as in Blender. A top orthographic view of 100 pixels per unit. Then a
+// Graph Editor area of the same window moves keys the same way.
 import assert from 'node:assert/strict';
 import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
 import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
-import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
+import { Window, Area, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
+import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
+import { AnimArea, SPACE_GRAPH } from '../src/editors/animation/anim-area.js';
 
 const TOP = { viewmat: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -10, 1], winmat: [0.2, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, -0.02, 0, 0, 0, 0, 1], persp: false };
 const round = (values) => Array.from(values, (v) => Math.round(v * 1e4) / 1e4 + 0);
@@ -54,4 +57,25 @@ assert.deepEqual([...press.unhandled, ...release.unhandled].map(({ type, value, 
   [['LEFTMOUSE', 'PRESS', 1000, 300], ['LEFTMOUSE', 'RELEASE', 1000, 300], ['LEFTMOUSE', 'CLICK', 1000, 300]], 'Blender makes the click');
 assert.deepEqual(confirmed.finished, [{ idname: 'TRANSFORM_OT_translate', undo: true }], 'a finished move is an undo step');
 
-console.log('window manager: G, mouse moves and a click move the object through Blender\'s own handlers');
+// The Graph Editor below the 3D View, 10 pixels a frame: G moves the selected keys 10 frames for 100 pixels.
+const anim = new BlenderAnimation(main);
+anim.setTime({ frame: 1, start: 1, end: 250, previewStart: 0, previewEnd: 0, preview: false, fps: 24 });
+const { type, subtype } = animatedProperty('Object', 'location');
+const fc = anim.fcurve(ob, 'location', 0, { group: 'Object Transforms', type, subtype });
+anim.insert(fc, 1, 0);
+anim.insert(fc, 11, 1);
+fc.keys = fc.keys.map((k) => ({ ...k, select: [true, true, true] }));
+const graph = new AnimArea(main, SPACE_GRAPH);
+const top = { x: 200, y: 0, width: 1000, height: 500 }, bottom = { x: 200, y: 500, width: 1000, height: 500 };
+view.layout(top, { [RGN_TYPE_WINDOW]: top });
+Area.prototype.layout.call({ window, pointer: graph.pointer }, bottom, { [RGN_TYPE_WINDOW]: bottom });
+graph.v2d().cur = { xmin: 0, xmax: 100, ymin: -5, ymax: 5 };
+move(400, 750);
+const gg = key('KeyG', 'g');
+assert.equal(gg.modal, true, 'G in the Graph Editor runs Move modally');
+move(500, 750);
+click();
+assert.deepEqual(anim.fcurves(ob)[0].keys.map((k) => Math.round(k.co[0])), [11, 21], 'the keys moved 10 frames');
+graph.dispose();
+
+console.log('window manager: G, mouse moves and a click move an object in a 3D View and keys in a Graph Editor through Blender\'s own handlers');

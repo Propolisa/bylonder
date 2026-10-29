@@ -77,7 +77,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     for (const event of result.unhandled) {
       if (event.value === 'RELEASE' && !event.type.endsWith('mouse')) continue;
       const handled = dispatch(unhandled(native, event));
-      if (handled && event.value === 'PRESS' && event.type.endsWith('mouse')) blender.pressHandled();
+      if (handled && event.value === 'PRESS') blender.pressHandled();
       if (handled) native.preventDefault?.();
     }
     if (result.finished.length || result.modal) native.preventDefault?.();

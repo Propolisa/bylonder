@@ -1,5 +1,5 @@
-// An animation editor's area in the module (AnimArea in tools/blender-port/wasm/anim-api.cc): Blender's ScrArea with
-// the SpaceGraph or SpaceAction its space type creates, and that space's regions, in a BlenderMain's context.
+// An animation editor's area in the module: an area of Blender's window (wm_area_new, wm-api.cc) with the SpaceGraph
+// or SpaceAction its space type creates, and that space's regions, in a BlenderMain's context (AnimArea in anim-api.cc).
 // Operators run in it, in one of its regions, as Blender's handlers run them; drawing reads what it lists.
 import { blenderModule, setOperatorProperties, pollOperator } from '../../bmesh/bmesh-wasm.js';
 import { FCurve, Action, EVENT_TYPES, EVENT_VALUES } from '../../blenkernel/animation/anim-blender.js';
@@ -60,12 +60,12 @@ export class AnimArea {
   constructor(main, spacetype, subtype = -1) {
     this.main = main;
     this.spacetype = spacetype;
-    this.pointer = x.anim_area_new(main.C, spacetype, subtype) >>> 0;
+    this.pointer = x.wm_area_new(main.C, spacetype, subtype) >>> 0;
     this.modal = null;
   }
   dispose() {
     this.cancelModal();
-    x.anim_area_free(this.pointer);
+    x.wm_area_free(this.main.C, this.pointer);
   }
   region(type) { return x.anim_area_region(this.pointer, type) >>> 0; }
   v2d(type = RGN_TYPE_WINDOW) { return new View2D(x.anim_region_v2d(this.region(type)) >>> 0); }
@@ -76,7 +76,7 @@ export class AnimArea {
   }
   sync() { x.anim_area_sync(this.pointer); }
   // A region drawn by its own draw callback, or its overlay's, as region-draw.cc records it ({ draw, buttons }).
-  draw(type, overlay = false) { return JSON.parse(cString(x.anim_region_draw(this.main.C, this.pointer, type, overlay))); }
+  draw(type, overlay = false) { return JSON.parse(cString(x.wm_region_draw(this.main.C, this.pointer, type, overlay))); }
   // A button of a region's last draw pressed as Blender's handlers apply it (a toggle flipped), with the keys held.
   press(type, index, modifier = 0) { return this.inContext(type, (C) => x.region_button_press(C, index, -1, modifier)); }
   // The space's dope sheet: its filter text (DopeSheet.filter_text) and flag (ADS_FLAG_*).
@@ -101,11 +101,11 @@ export class AnimArea {
   get status() { const text = x.anim_area_status(this.pointer); return text ? cString(text) : ''; }
   // Runs fn with the context in this area and one of its regions.
   inContext(regionType, fn) {
-    x.anim_context_set(this.main.C, this.pointer, this.region(regionType));
+    x.wm_area_context_set(this.main.C, this.pointer, regionType);
     try {
       return fn(this.main.C);
     } finally {
-      x.anim_context_set(this.main.C, 0, 0);
+      x.wm_area_context_set(this.main.C, 0, 0);
     }
   }
   // What the space's refresh does before drawing (the Graph Editor's curve colors).
