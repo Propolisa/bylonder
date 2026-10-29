@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
+import { BlenderMain, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
-import { blendData, setContextPointer } from '../src/python/bpy_rna.js';
+import { blendData, setContextPointer, pointerStruct, structFind } from '../src/python/bpy_rna.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/editors/animation/anim-area.js';
 import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
@@ -15,9 +15,10 @@ setContextPointer(blender.C);
 const ob = blendData().objects.get('Cube');
 
 const area = new AnimArea(blender, SPACE_PROPERTIES);
+const spaceOf = (a) => pointerStruct(structFind('SpaceProperties'), 0, blenderModule.exports.anim_area_space(a.pointer) >>> 0);
 area.layout(RGN_TYPE_WINDOW, 0, 0, 400, 800);
 area.layout(RGN_TYPE_HEADER, 0, 800, 400, 26);
-const panels = () => area.inContext(RGN_TYPE_WINDOW, (C) => regionPanels(C));
+const panels = () => area.inContext(RGN_TYPE_WINDOW, (C) => regionPanels(C)).panels;
 const buttons = (node) => (node.kind === 'button' ? [node] : (node.children ?? []).flatMap(buttons));
 const panelButtons = (panel) => panel.parts.flatMap((part) => buttons(part.layout));
 const find = (list, id) => list.find((panel) => panel.id === id);
@@ -51,6 +52,19 @@ area.inContext(RGN_TYPE_WINDOW, (C) => panelClosedSet(C, 'OBJECT_PT_transform', 
 drawn = panels();
 assert.equal(find(drawn, 'OBJECT_PT_transform').closed, true);
 assert.ok(!find(drawn, 'OBJECT_PT_transform').parts.some((part) => part.part === 'body'));
+
+// The Modifiers tab: Blender's template_modifiers lays out each modifier of Main's object as its instanced panel
+// (panel_draw in MOD_*.cc), sub-panels with their header's checkbox.
+const array = ob.modifiers.new('Array', 'ARRAY');
+array.use_relative_offset = false;
+spaceOf(area).context = 'MODIFIER';
+const modifierPanels = panels().filter((panel) => panel.id.includes('Array'));
+assert.equal(modifierPanels.length, 1, 'one instanced panel per modifier');
+const arrayButtons = panelButtons(modifierPanels[0]).filter((b) => b.rna);
+assert.deepEqual(arrayButtons.filter((b) => b.rna.owner === 'ArrayModifier').map((b) => b.rna.prop).slice(0, 3).includes('count'), true);
+const relative = modifierPanels[0].children.find((child) => child.id.endsWith('relative_offset'));
+assert.ok(relative, 'the Relative Offset sub-panel');
+assert.equal(panelButtons(relative).find((b) => b.type === 'CHECKBOX')?.rna.prop, 'use_relative_offset');
 
 // The header (PROPERTIES_HT_header) and a menu of Blender's Python, its items operators with their properties.
 const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C));

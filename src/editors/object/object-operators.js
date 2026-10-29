@@ -79,7 +79,6 @@ export function openModulePopup(sync, popup, event, { idname, finish = () => {} 
     idname, at, finish,
     run: (id, values) => invokeOperator(id, values, { type: 'NONE', value: 'NOTHING', clientX: at.x, clientY: at.y }),
     C: sync.blender.C,
-    submenu: (index) => sync.blender.submenu(index),
     enumItems: (prop) => sync.blender.enumItems(idname, prop),
   }));
 }

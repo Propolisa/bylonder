@@ -16,16 +16,16 @@ import { inArea, contextArea, registerOperator, registerOperators, runOperator, 
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
-import { headerLayout, drawPanels, panelTypes, drawType } from '../interface/panels.js';
-import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
-import { drawSidebarPanels } from './anim-buttons.js';
+import { headerLayout, drawPanels, drawType } from '../interface/panels.js';
+import { LayoutView } from '../interface/layout-view.js';
+import { BlockView, PanelsView } from '../interface/block-view.js';
+import { regionPanels, panelClosedSet, categorySet } from '../interface/ui-tree.js';
 import { drawRecording, buttonAt } from '../interface/region-draw.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import { createContext } from '../../blenkernel/context.js';
 import { createApp, h, reactive, markRaw, shallowRef } from 'vue';
-import { layoutTree } from '../space_buttons/modifier-panel.js';
 import { operatorIdname } from '../../makesrna/rna.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
@@ -167,33 +167,27 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   });
   const drawHeaderType = (type) => (layout) => drawType(type, layout, context());
 
-  // The sidebar (RGN_TYPE_UI): its tabs (the panels' categories) and the active tab's panels whose poll passes, the
-  // Graph Editor's drawn by Blender's C code in the module (anim-buttons.js), the Dope Sheet's from Blender's scripts.
-  const sidebarTypes = graph ? null : panelTypes([{ classes: Object.values(PANEL_TYPES) }], { space, region: 'UI' });
-  const sidebarState = reactive({ category: null, open: {} });
-  const sidebarPanels = panelState(sidebarState);
-  const sidebarContext = () => createContext(rna, { area: space, uiType, space: editor, region: 'UI', members: () => ({
-    get active_action() { const action = area.activeAction(); return action ? rna.pointer('Action', action) : null; },
-  }) });
-  const sidebarUI = markRaw({ ...layoutUI, isOpen: sidebarPanels.isOpen, toggle: (id, event, closed) => { sidebarPanels.toggle(id, event, closed); headerState.revision++; } });
-  const recordedSidebar = (ctx) => drawSidebarPanels(area, { isOpen: sidebarPanels.isOpen, changed: () => layoutUI.undoPush(),
-    bound: (struct) => ({ SpaceGraphEditor: ctx.space_data, Scene: ctx.scene })[struct] ?? null });
-  const scriptedSidebar = (ctx) => {
-    const polls = (type) => { try { return !type.poll || !!type.poll(ctx); } catch { return false; } };
-    const roots = sidebarTypes.roots.filter(({ type }) => polls(type));
-    return { categories: [...new Set(roots.map(({ type }) => type.bl_category))],
-      panels: (category) => drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen }) };
-  };
+  // The sidebar (RGN_TYPE_UI): Blender's region lays out its panels (graph_buttons.cc's, the F-Modifiers' instanced
+  // ones, Blender's Python's) in the tab shown, and its tabs (the panels' categories); block-view.js draws them.
+  const regionUI = (type) => markRaw({
+    inContext: (fn) => { sync(); return area.inContext(type, fn); },
+    refresh: () => { after(0); },
+    undoPush: () => { after(0); commit(); },
+    report: (error) => rna.host.notify?.(error.message ?? String(error)),
+    run: (idname, props) => ui.run(idname, props),
+    keys: (idname, props) => ui.keys(idname, props),
+    panelClosed: (id, closed) => area.inContext(type, (C) => panelClosedSet(C, id, closed)),
+  });
+  const sidebarUI = regionUI(RGN_TYPE_UI);
   const sidebarApp = createApp({ render: () => {
     void headerState.revision;
     if (!headerState.ready || sidebar.hidden) return null;
-    sync();
-    const ctx = sidebarContext(), { categories, panels } = (graph ? recordedSidebar : scriptedSidebar)(ctx);
-    const category = categories.includes(sidebarState.category) ? sidebarState.category : categories[0];
+    const { category, categories, panels } = sidebarUI.inContext((C) => regionPanels(C));
     return [
-      h(RegionView, { panels: category ? panels(category) : [], ui: sidebarUI }),
+      h(PanelsView, { panels, ui: sidebarUI }),
       h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
-        type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category), onClick: () => { sidebarState.category = name; },
+        type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category),
+        onClick: () => { area.inContext(RGN_TYPE_UI, (C) => categorySet(C, name)); headerState.revision++; },
       }, name))),
     ];
   } });
@@ -202,14 +196,13 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   // The channel region's block layouts (ED_time_scrub_channel_search_draw), over its canvas where the draw laid them.
   const channelLayouts = shallowRef([]);
   const channelOverlay = Object.assign(document.createElement('div'), { className: 'bl-ui anim-channel-layouts' });
-  const recordedOwner = (struct) => (struct === 'DopeSheet' ? rna.pointer('DopeSheet', editor) : null);
-  const withIconNames = (node) => ({ ...node, ...(node.icon ? { icon: iconName(node.icon) } : {}), children: (node.children ?? []).map(withIconNames) });
+  const channelUI = regionUI(RGN_TYPE_CHANNELS);
   const channelLayoutsApp = createApp({ render: () => {
     void headerState.revision;
     if (!headerState.ready) return null;
-    return channelLayouts.value.map(({ at: [x, y, width], layout }) => h('div', {
-      class: 'anim-block-layout', style: { left: x + 'px', top: size.height - y + 'px', width: width + 'px' },
-    }, [h(LayoutView, { layout: layoutTree(withIconNames(layout), recordedOwner, space), ui: layoutUI })]));
+    return channelLayouts.value.map(({ rect: [x0, , x1, y1], layout }) => h('div', {
+      class: 'anim-block-layout', style: { left: x0 + 'px', top: size.height - y1 + 'px', width: x1 - x0 + 'px' },
+    }, layout.map((tree) => h(BlockView, { tree, ui: channelUI }))));
   } });
   channelLayoutsApp.mount(channelOverlay);
   for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup', 'wheel']) channelOverlay.addEventListener(type, (e) => e.stopPropagation());

@@ -3,8 +3,8 @@
 // { kind, align, active, enabled, alert, alignment, emboss, scale_x, scale_y, w, h, children } and its buttons
 // { kind: 'button', type (BUT, NUM, TOGGLE, ROW, MENU, PULLDOWN, ...), id, text, display, icon, tip, w, h, flags,
 //   rna: { pointer, owner, prop, index }, value, operator, properties, menu, popover, opens }, sizes in UI units.
-// A region's panels are { kind: 'panel', id, text, closed, hide_header, parts: [{ part, layout }], layout_panels,
-// children }. Trees stay valid until the next draw of what holds them.
+// A region's panels are { category, categories, panels: [{ kind: 'panel', id, text, closed, hide_header, category,
+// parts: [{ part, layout }], layout_panels, children }] }. Trees stay valid until the next draw of what holds them.
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import './region-draw.js';
 
@@ -16,6 +16,7 @@ export const regionHeader = (C) => json(x.ui_region_header(C));
 export const menuTree = (C, name) => withString(name, (p) => json(x.ui_menu(C, p)));
 export const menuLabel = (name) => withString(name, (p) => cString(x.menu_type_label(p)));
 export const buttonMenu = (C, button) => json(x.ui_button_menu(C, button.id));
+export const categorySet = (C, name) => withString(name, (p) => x.ui_category_set(C, p));
 export const panelClosedSet = (C, idname, closed) => withString(idname, (p) => x.ui_panel_closed_set(C, p, closed));
 
 // A toggle flipped (or set to `value`, 0 or 1), a row button's value set, any other button's functions run.

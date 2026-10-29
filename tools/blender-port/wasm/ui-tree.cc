@@ -505,8 +505,8 @@ static void panel_json(std::ostringstream &out, Panel *panel)
 }
 
 /* The context region's panels as Blender's region lays them out (its type's layout: buttons_main_region_layout for
- * the Properties editor, ED_region_panels_layout for a sidebar), in their order: a JSON array. Blocks stay until the
- * region's next layout. */
+ * the Properties editor, ED_region_panels_layout for a sidebar), in their order, with the region's categories (a
+ * sidebar's tabs) and the one shown: { category, categories, panels }. Blocks stay until the region's next layout. */
 EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
 {
   static std::string json;
@@ -520,14 +520,29 @@ EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
   }
   std::stable_sort(panels.begin(), panels.end(), [](Panel *a, Panel *b) { return a->sortorder < b->sortorder; });
   std::ostringstream out;
-  out << '[';
+  out << "{\"category\":";
+  quote(out, region->runtime->category ? region->runtime->category : "");
+  out << ",\"categories\":[";
+  bool first = true;
+  for (const PanelCategoryDyn &category : region->runtime->panels_category) {
+    out << (first ? "" : ",");
+    quote(out, category.idname);
+    first = false;
+  }
+  out << "],\"panels\":[";
   for (const int64_t i : panels.index_range()) {
     out << (i ? "," : "");
     panel_json(out, panels[i]);
   }
-  out << ']';
+  out << "]}";
   json = out.str();
   return json.c_str();
+}
+
+/* Shows a category (a sidebar's tab) of the context region, as clicking its tab does. */
+EXPORT(ui_category_set) void ui_category_set(bContext *C, const char *idname)
+{
+  panel_category_active_set(CTX_wm_region(C), idname);
 }
 
 /* Opens or closes a panel of the context region (as clicking its header does), by its type's idname. */
@@ -702,96 +717,6 @@ EXPORT(ui_button_text_set) void ui_button_text_set(bContext *C, Button *but, con
   button_applied(C, but);
 }
 
-/* Recorded panels (anim_sidebar_panels: a region's registered panel types drawn one by one) and modifier panels. */
-
-/* A registered panel type with its header and sub-panels, drawing `ptr` (an instanced panel's custom data), as
- * ed_panel_draw draws them, as a panel tree. */
-static void draw_panel(const bContext *C, PanelType *pt, Panel &panel, std::ostringstream &out, bool header)
-{
-  Block *block = block_new(C, pt->idname, EmbossType::Emboss, OWNED_PANELS);
-  panel.type = pt;
-  panel.runtime->block = block;
-  block->panel = &panel;
-  const uiStyle *style = style_get_dpi();
-  if (header && pt->draw_header && !(pt->flag & PANEL_TYPE_NO_HEADER)) {
-    panel.layout = &block_layout(block, LayoutDirection::Horizontal, LayoutType::Header, 0, 0, UI_UNIT_Y, 1, 0, style);
-    pt->draw_header(C, &panel);
-    block_layout_resolve(block);
-  }
-  panel.layout = &block_layout(block, LayoutDirection::Vertical, LayoutType::Panel, 0, 0, 15 * UI_UNIT_X, 20, 0, style);
-  pt->draw(C, &panel);
-  block_layout_resolve(block);
-  panel.layout = nullptr;
-  block_end(C, block);
-  block->panel = nullptr;
-  out << "{\"kind\":\"panel\",\"id\":";
-  quote(out, pt->idname);
-  key(out, "text");
-  quote(out, pt->label);
-  out << ",\"parts\":[";
-  auto found = recorded.find(block);
-  for (const int64_t i : found->second.index_range()) {
-    const bool is_header = found->second.size() > 1 && i == 0;
-    out << (i ? "," : "") << "{\"part\":\"" << (is_header ? "header" : "body") << "\",\"layout\":";
-    node_json(out, found->second[i].node);
-    out << '}';
-  }
-  recorded.erase(found);
-  out << "],\"children\":[";
-  bool first = true;
-  for (LinkData &link : pt->children) {
-    PanelType *child = static_cast<PanelType *>(link.data);
-    if (child->poll && !child->poll(C, child)) {
-      continue;
-    }
-    out << (first ? "" : ",");
-    Panel child_panel = {};
-    child_panel.runtime = MEM_new<Panel_Runtime>(__func__);
-    child_panel.runtime->custom_data_ptr = panel.runtime->custom_data_ptr;
-    draw_panel(C, child, child_panel, out, true);
-    MEM_delete(child_panel.runtime);
-    first = false;
-  }
-  out << "]}";
-}
-
-static std::string panel_tree(const bContext *C, PanelType *type, const PointerRNA &ptr)
-{
-  Panel panel = {};
-  panel.runtime = MEM_new<Panel_Runtime>(__func__);
-  PointerRNA custom = ptr;
-  panel.runtime->custom_data_ptr = ptr.data ? &custom : nullptr;
-  std::ostringstream out;
-  draw_panel(C, type, panel, out, false);
-  MEM_delete(panel.runtime);
-  return out.str();
-}
-
-/* anim-api.cc's sidebar: a new set of recorded panels (the last set's blocks go), then each panel recorded. */
-Block *panel_block_new()
-{
-  owned_free(nullptr, OWNED_PANELS);
-  return nullptr;
-}
-std::string panel_record(const bContext *C, PanelType *type, const PointerRNA &ptr, Block * /*block*/)
-{
-  return panel_tree(C, type, ptr);
-}
-
-/* port-override: a region's instanced panels (the F-Modifiers' that ANIM_fmodifier_panels adds) are not kept: the
- * sidebar records them after the panel that adds them (anim_sidebar_panels), so adding one only frees its data. */
-bool panel_list_matches_data(ARegion * /*region*/, ListBase * /*data*/, ListPanelIDFromDataFunc /*panel_idname_func*/)
-{
-  return false;
-}
-void panels_free_instanced(const bContext * /*C*/, ARegion * /*region*/) {}
-Panel *panel_add_instanced(const bContext * /*C*/, ARegion * /*region*/, ListBaseT<Panel> * /*panels*/,
-                           const char * /*panel_idname*/, PointerRNA *custom_data)
-{
-  MEM_delete(custom_data);
-  return nullptr;
-}
-
 /* Popups. */
 
 void popup_layout_open(const std::string &title, const std::string &layout);
@@ -842,29 +767,3 @@ std::string operator_props_layout(bContext *C, wmOperator *op)
 }
 
 }  // namespace blender::ui
-
-/* The modifier panels' types, as the Properties editor's region registers them, each type's when first drawn. */
-static ARegionType &modifier_region(ModifierType type)
-{
-  static ARegionType region = {};
-  static std::set<int> registered;
-  const ModifierTypeInfo *info = BKE_modifier_get_info(type);
-  if (info && info->panel_register && registered.insert(type).second) {
-    info->panel_register(&region);
-  }
-  return region;
-}
-
-/* What a modifier's panel and its sub-panels draw, as a panel tree, valid until the next call. */
-EXPORT(modifier_panel_draw) const char *modifier_panel_draw(Object *ob, ModifierData *md)
-{
-  static bContext *C = CTX_create();
-  static std::string json;
-  char idname[BKE_ST_MAXNAME];
-  BKE_modifier_type_panel_id(ModifierType(md->type), idname);
-  PanelType *type = static_cast<PanelType *>(
-      BLI_findstring(&modifier_region(ModifierType(md->type)).paneltypes, idname, offsetof(PanelType, idname)));
-  ui::panel_block_new();
-  json = type ? ui::panel_tree(C, type, RNA_pointer_create_discrete(&ob->id, *BKE_modifier_get_info(ModifierType(md->type))->srna, md)) : "null";
-  return json.c_str();
-}
