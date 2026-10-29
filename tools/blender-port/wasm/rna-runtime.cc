@@ -202,29 +202,6 @@ std::string operator_values_json(PointerRNA *ptr)
   return json + "}";
 }
 
-/* Custom properties (`["name"]` paths) Bylonder animates, by path: an ID property named as the editors show the channel.
- * port-override: Blender stores them on the ID, by a name of at most 63 characters; Bylonder's paths are longer, so they
- * resolve here (the wrapped RNA_path_resolve_property below), to a property the animation editors name and type. */
-static std::map<std::string, IDProperty *> &custom_properties()
-{
-  static std::map<std::string, IDProperty *> properties;
-  return properties;
-}
-
-EXPORT(rna_custom_property_define) void rna_custom_property_define(const char *path, int type, const char *name)
-{
-  IDProperty *&prop = custom_properties()[path];
-  if (prop) {
-    IDP_FreeProperty(prop);
-  }
-  prop = type == PROP_BOOLEAN ? bke::idprop::create_bool(name, false).release()
-         : type == PROP_INT   ? bke::idprop::create(name, 0).release()
-                              : bke::idprop::create(name, 0.0).release();
-}
-
-/* Blender's RNA defines every ID type's properties itself. */
-EXPORT(rna_id_property_define) void rna_id_property_define(short, const char *, int, int, int, const char *) {}
-
 EXPORT(rna_struct_find) StructRNA *rna_struct_find(const char *identifier) { return RNA_struct_find(identifier); }
 
 static PointerRNA js_pointer(StructRNA *type, ID *id, void *data) { return RNA_pointer_create_discrete(id, type, data); }
@@ -296,21 +273,3 @@ EXPORT(rna_string_set) void rna_string_set(bContext *C, StructRNA *type, ID *id,
 }
 
 }  // namespace blender
-
-/* port-override (above): a custom property's path resolves to its property, other paths as Blender resolves them.
- * Linked with --wrap of the mangled name. */
-using namespace blender;
-#define RESOLVE _ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS_11PropertyRNAE
-#define WRAP_(prefix, name) prefix##name
-#define WRAP(prefix, name) WRAP_(prefix, name)
-extern "C" bool WRAP(__real_, RESOLVE)(const PointerRNA *ptr, const char *path, PointerRNA *r_ptr, PropertyRNA **r_prop);
-extern "C" bool WRAP(__wrap_, RESOLVE)(const PointerRNA *ptr, const char *path, PointerRNA *r_ptr, PropertyRNA **r_prop)
-{
-  auto custom = custom_properties().find(path);
-  if (custom == custom_properties().end()) {
-    return WRAP(__real_, RESOLVE)(ptr, path, r_ptr, r_prop);
-  }
-  *r_ptr = *ptr;
-  *r_prop = reinterpret_cast<PropertyRNA *>(custom->second);
-  return true;
-}

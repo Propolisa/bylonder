@@ -43,7 +43,9 @@ export function graphFields(graph, kind) {
   });
 }
 
-export function bindGraph(animation, { id, title, graph, kind, onChange = () => {} }) {
+// owner: the Main ID standing for the graph's owner (a Material for a node material), whose custom properties hold its
+// inputs' channels.
+export function bindGraph(animation, { id, title, graph, kind, owner, onChange = () => {} }) {
   const live = () => (typeof graph === 'function' ? graph() : graph);
   const find = key => graphFields(live(), kind).find(f => f.key === key);
   const fields = graphFields(live(), kind);
@@ -51,7 +53,7 @@ export function bindGraph(animation, { id, title, graph, kind, onChange = () => 
     const paths = field.components ? field.components.map(c => [field.key + '.' + c, c]) : [[field.key, null]];
     for (const [path, component] of paths)
       animation.register({
-        id, path, label: field.label + (component ? ' ' + component.toUpperCase() : ''), group: title,
+        id, path, label: field.label + (component ? ' ' + component.toUpperCase() : ''), group: title, owner,
         available: () => !!live() && !!find(field.key),
         get: () => { const f = find(field.key); const v = f?.block[f.prop]; return component ? v?.[component] : v; },
         set: v => {

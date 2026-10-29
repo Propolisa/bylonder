@@ -14,6 +14,7 @@
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
 #include "BKE_fcurve.hh"
+#include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
 #include "BLT_translation.hh"
 #include "BKE_lib_id.hh"
@@ -41,6 +42,7 @@
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_enum_types.hh"
+#include "RNA_path.hh"
 #include "UI_interface_icons.hh"
 #include "UI_interface_c.hh"
 #include "UI_resources.hh"
@@ -49,6 +51,8 @@
 #include "area.hh"
 #include "WM_api.hh"
 #include "WM_types.hh"
+
+#include "interface_intern.hh"
 
 #include <string>
 
@@ -156,6 +160,134 @@ EXPORT(anim_fcurve_keys_set) void anim_fcurve_keys_set(FCurve *fcu, const BezTri
 }
 
 EXPORT(anim_fcurve_evaluate) float anim_fcurve_evaluate(FCurve *fcu, float frame) { return evaluate_fcurve(fcu, frame); }
+
+/* Keying any RNA path of an ID, as keyframe_insert(), keyframe_delete() and the Clear Keyframes button do: Blender's
+ * keying (animrig::insert_keyframes) at the scene's frame with its keyframe type and keying flags. An index < 0 keys
+ * every element of an array; a group names the channel group of new F-Curves (Blender's default when empty). */
+static RNAPath rna_path_of(const char *path, int index)
+{
+  return {path, std::nullopt, index < 0 ? std::nullopt : std::optional<int>(index)};
+}
+EXPORT(anim_path_keyframe_insert) int anim_path_keyframe_insert(bContext *C, ID *id, const char *path, int index, const char *group)
+{
+  Scene *scene = CTX_data_scene(C);
+  PointerRNA id_ptr = RNA_id_pointer_create(id), ptr;
+  PropertyRNA *prop;
+  if (!RNA_path_resolve_property(&id_ptr, path, &ptr, &prop)) {
+    return 0;
+  }
+  const AnimationEvalContext context = BKE_animsys_eval_context_construct(CTX_data_depsgraph_pointer(C), BKE_scene_frame_get(scene));
+  const std::optional<StringRefNull> channel_group = group[0] ? std::optional<StringRefNull>(group)
+                                                              : animrig::default_channel_group_for_path(&ptr, RNA_property_identifier(prop));
+  const animrig::CombinedKeyingResult result = animrig::insert_keyframes(
+      CTX_data_main(C), &id_ptr, channel_group, {rna_path_of(path, index)}, std::nullopt, context,
+      eBezTriple_KeyframeType(scene->toolsettings->keyframe_type), animrig::get_keyframing_flags(scene));
+  return result.get_count(animrig::SingleKeyingResult::SUCCESS);
+}
+EXPORT(anim_path_keyframe_delete) int anim_path_keyframe_delete(bContext *C, ID *id, const char *path, int index)
+{
+  return animrig::delete_keyframe(CTX_data_main(C), nullptr, id, rna_path_of(path, index), BKE_scene_frame_get(CTX_data_scene(C)));
+}
+EXPORT(anim_path_keyframe_clear) int anim_path_keyframe_clear(bContext *C, ID *id, const char *path, int index)
+{
+  return animrig::clear_keyframe(CTX_data_main(C), nullptr, id, rna_path_of(path, index));
+}
+
+/* Custom properties (ID properties, `["name"]` paths) on an ID, which Babylon-native data is animated through: set to
+ * `length` values (a single value for 0) of a PropertyType (BOOLEAN, INT or FLOAT), made again when its type or length
+ * changed, with an RNA subtype (COLOR for a color) and a description. Blender's animation keys and evaluates them as any
+ * custom property; anim_id_property_get reads the values back. */
+static bool same_kind(const IDProperty *prop, char type, char subtype, int length)
+{
+  return length ? prop->type == IDP_ARRAY && prop->subtype == subtype && prop->len == length : prop->type == type;
+}
+EXPORT(anim_id_property_set)
+void anim_id_property_set(ID *id, const char *name, int type, const double *values, int length, int subtype, const char *description)
+{
+  const char idp_type = type == PROP_BOOLEAN ? IDP_BOOLEAN : type == PROP_INT ? IDP_INT : IDP_DOUBLE;
+  IDProperty *group = IDP_EnsureProperties(id);
+  IDProperty *prop = IDP_GetPropertyFromGroup(group, name);
+  if (!prop || !same_kind(prop, idp_type, idp_type, length)) {
+    std::unique_ptr<IDProperty, bke::idprop::IDPropertyDeleter> made;
+    if (!length) {
+      made = idp_type == IDP_BOOLEAN ? bke::idprop::create_bool(name, false)
+             : idp_type == IDP_INT   ? bke::idprop::create(name, int32_t(0))
+                                     : bke::idprop::create(name, 0.0);
+    }
+    else if (idp_type == IDP_DOUBLE) {
+      made = bke::idprop::create(name, Span<double>(values, length));
+    }
+    else {
+      made = bke::idprop::create(name, Array<int32_t>(length, 0).as_span());
+    }
+    made->flag |= IDP_FLAG_OVERRIDABLE_LIBRARY;
+    prop = made.release();
+    IDP_ReplaceInGroup(group, prop);
+  }
+  IDPropertyUIData *ui_data = IDP_ui_data_ensure(prop);
+  ui_data->rna_subtype = subtype;
+  MEM_SAFE_DELETE(ui_data->description);
+  ui_data->description = BLI_strdup(description);
+  for (int i = 0; i < std::max(length, 1); i++) {
+    if (!length) {
+      if (idp_type == IDP_DOUBLE) {
+        IDP_double_set(prop, values[0]);
+      }
+      else {
+        IDP_int_set(prop, int(values[0]));
+      }
+    }
+    else if (idp_type == IDP_DOUBLE) {
+      static_cast<double *>(IDP_array_voidp_get(prop))[i] = values[i];
+    }
+    else {
+      static_cast<int *>(IDP_array_voidp_get(prop))[i] = int(values[i]);
+    }
+  }
+}
+/* A custom property's values written to r_values (at most capacity of them): the count of an array's, 0 for a single
+ * value, or -1 when the ID has no number property of that name. */
+EXPORT(anim_id_property_get) int anim_id_property_get(ID *id, const char *name, double *r_values, int capacity)
+{
+  const IDProperty *prop = id->properties ? IDP_GetPropertyFromGroup(id->properties, name) : nullptr;
+  if (!prop) {
+    return -1;
+  }
+  switch (prop->type) {
+    case IDP_DOUBLE: r_values[0] = IDP_double_get(prop); return 0;
+    case IDP_FLOAT: r_values[0] = IDP_float_get(prop); return 0;
+    case IDP_INT: case IDP_BOOLEAN: r_values[0] = IDP_int_get(prop); return 0;
+    case IDP_ARRAY: {
+      const int count = std::min(prop->len, capacity);
+      for (int i = 0; i < count; i++) {
+        r_values[i] = prop->subtype == IDP_DOUBLE ? IDP_array_double_get(prop)[i]
+                      : prop->subtype == IDP_FLOAT ? IDP_array_float_get(prop)[i]
+                                                   : IDP_array_int_get(prop)[i];
+      }
+      return count;
+    }
+    default: return -1;
+  }
+}
+
+/* A button of the context region as the region's active one (or none for null), as hovering makes it: the button
+ * operators (ANIM_OT_keyframe_insert_button and the rest) act on it, as on the button a decorator keys
+ * (button_anim_decorate_cb, which marks it the same way). */
+EXPORT(ui_button_active_set) void ui_button_active_set(bContext *C, ui::Button *active)
+{
+  for (ui::Block &block : CTX_wm_region(C)->runtime->uiblocks) {
+    for (ui::Button &but : block.buttons()) {
+      SET_FLAG_FROM_TEST(but.flag, &but == active, ui::BUT_ACTIVE_OVERRIDE);
+    }
+  }
+}
+/* A button's context menu (ui_popup_context_menu_for_button: its keyframe, driver, reset and copy items), opened as
+ * the popup an invoke opens (operator_popup, POPUP_LAYOUT). Returns whether the button has one. */
+EXPORT(ui_button_context_menu) bool ui_button_context_menu(bContext *C, ui::Button *but)
+{
+  ui_button_active_set(C, but);
+  return ui::popup_context_menu_for_button(C, but, CTX_wm_window(C)->runtime->eventstate);
+}
 
 /* Where an FCurve's and a BezTriple's fields are, for JS to read and write them in place (offsets in bytes). */
 EXPORT(anim_layout) const int *anim_layout()

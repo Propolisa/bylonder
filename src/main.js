@@ -5,7 +5,7 @@ import { report } from "./windowmanager/wm-reports.js";
 import { syncLightDirections } from "./runtime/object-transform.js";
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
-import { registerObjects, objectRefs } from './blenkernel/animation/bindings.js';
+import { registerObjects } from './blenkernel/animation/bindings.js';
 import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim-editor.js';
 import { mountRuntimeLayout } from "./editors/screen/runtime.js";
 import { createViewportTouch } from "./windowmanager/input/viewport-touch.js";
@@ -434,7 +434,6 @@ world.openNodeEditor = (type) => { nodeEditor.setType(type); viewportDock.show("
 for (const source of [documentState, world.particles, world.modifiers]) source.subscribe(() => nodeEditor.refresh());
 world.modifiers.subscribe(() => world.editMode.modifiersChanged());
 viewportDock.setFactory('properties',(host,id)=>ui.create(host,id));
-const insertKeys = () => {registerObjects(animation, objects);animation.insert(objectRefs(editor.selection.roots));};
 // The Timeline, Dope Sheet and Graph Editor: Blender's animation editors, each area its own space (editors/animation).
 registerAnimOperators(animation);
 const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['DOPESHEET_EDITOR', 'DOPESHEET'], graph: ['GRAPH_EDITOR', 'FCURVES'], drivers: ['GRAPH_EDITOR', 'DRIVERS'] };
@@ -578,8 +577,11 @@ const selectRegion = (view, region, mode) => (world.editMode.active ? world.edit
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
 const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
 registerOperators({
-  "anim.keyframe_insert": { run: () => insertKeys() },
-  "anim.keyframe_delete_v3d": { run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
+  // Blender's keying of the selected objects (keyframing.cc, with the scene's keying set), on Main.
+  ...Object.fromEntries(["anim.keyframe_insert", "anim.keyframe_delete_v3d"].map((idname) => [idname, {
+    blender: true,
+    run: (props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }),
+  }])),
   "view3d.rotate": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.rotate(event) },
   "view3d.move": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.move(event) },
   "view3d.zoom": { supports: ({ delta }) => !!delta, poll: () => !!activeView(), run: ({ delta }, event) => (event?.view ?? activeView()).nav.wheelZoom(delta) },

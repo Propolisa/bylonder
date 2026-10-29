@@ -10,8 +10,9 @@
 //   h(PanelsView, { panels, ui })       a region's panels (ui-tree.js regionPanels)
 //   treeMenu(tree, ui)                  a menu tree as menu.js entries
 // `ui`: { inContext(fn(C)): runs fn with the region's context, refresh(), undoPush(name), run(idname, props, event),
-//   keys(idname, props): a shortcut, panelClosed(id, closed), report(error) }
-import { defineComponent, h } from 'vue';
+//   keys(idname, props): a shortcut, panelClosed(id, closed), report(error), button(b): a property button as the
+//   active button its keymap and context menu act on (keyframing-button.js blenderButton) }
+import { cloneVNode, defineComponent, h } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
@@ -19,6 +20,7 @@ import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonPress, buttonApplied, buttonValueSet, buttonTextSet } from './ui-tree.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
+import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
 const W = 'bl-widget';
 const struct = ({ pointer }) => pointerStruct(...pointer);
@@ -119,7 +121,17 @@ function number(b, env) {
 
 const TOGGLES = new Set(['TOGGLE', 'TOGGLE_N', 'ICON_TOGGLE', 'ICON_TOGGLE_N', 'BUT_TOGGLE']);
 
+// A property button is the region's active button while the pointer is over it, and its right click opens Blender's
+// context menu of it.
 function buttonNode(b, env) {
+  const vnode = widgetNode(b, env);
+  if (!vnode || !b.rna || !env.ui.button) return vnode;
+  const button = env.ui.button(b);
+  return cloneVNode(vnode, { onPointerenter: () => hoverButton(button), onPointerleave: () => leaveButton(button),
+    onContextmenu: (e) => { e.preventDefault(); button.menu(e); } });
+}
+
+function widgetNode(b, env) {
   const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
   // A scaled layout's buttons (scale_y) keep the height Blender gave them.
   const style = { ...corners(b.aligned), ...(b.h > 1 && { height: `calc(var(--bl-row) * ${b.h})` }) };

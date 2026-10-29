@@ -1,12 +1,14 @@
 // Bylonder's animation: Blender's F-Curves in the module's Blender world are the data (anim-blender.js), on the IDs
 // that stand for what they animate (blender-ids.js): an object's channels are its Object's RNA paths in Blender's axes
-// and units, every other channel a custom property of the Scene in a group named after its owner. Bylonder's
-// channels (registered here with get and set) take the values Blender's evaluate_fcurve gives.
+// and units, every other channel a custom property (an ID property, `["name"]`) of the ID that stands for its owner
+// (`owner()`, the Scene when it has none), in a group named after it. A channel (registered here with get and set,
+// `animatable(owner, path, { get, set })`) takes the value Blender's animation gives its property once Main is
+// evaluated for a frame (`evaluateMain`, the scene sync's), else the value its F-Curve evaluates to.
 import { AnimationGroup } from '@babylonjs/core/Animations/animationGroup.js';
 import { Animation } from '@babylonjs/core/Animations/animation.js';
 import { createSceneTime } from '../scene/time.js';
 import { createBlenderIDs } from '../blender-ids.js';
-import { BlenderAnimation, FCURVE, PROPERTY_TYPES, animatedProperty, defineCustomProperty } from './anim-blender.js';
+import { BlenderAnimation, FCURVE, animatedProperty, customProperty, customPropertyName, customPropertyPath, setCustomProperty } from './anim-blender.js';
 import { address, INTERPOLATIONS, KEY_FIELDS, LIMIT, parseAnimation, validateAction } from './saved.js';
 
 export { address, normalizeAnimation, parseAnimation, validateAction } from './saved.js';
@@ -18,26 +20,16 @@ const clone = value => structuredClone(value);
 // Babylon's axes is one about Blender's negated (docs/blender-boundary.md).
 const AXES = { x: 0, y: 2, z: 1 };
 const OBJECT_PATHS = { position: ['location', 1], rotation: ['rotation_euler', -1], scaling: ['scale', 1] };
-export function blenderPath(id, path) {
+const objectPath = (id, path) => {
   const [property, axis] = path.split('.');
-  if (id.startsWith('object:') && OBJECT_PATHS[property] && axis in AXES) {
-    const [rna_path, factor] = OBJECT_PATHS[property];
-    return { object: true, rna_path, index: AXES[axis], factor };
-  }
-  return { object: false, rna_path: `["${JSON.stringify([id, path]).replace(/["\\]/g, (c) => '\\' + c)}"]`, index: 0, factor: 1 };
-}
-function bylonderPath(rna_path, index, ownerId) {
-  for (const [property, [path, factor]] of Object.entries(OBJECT_PATHS)) {
-    if (rna_path === path) {
-      const axis = Object.keys(AXES).find((a) => AXES[a] === index);
-      return axis && { id: ownerId, path: `${property}.${axis}`, factor };
-    }
-  }
-  const custom = /^\["(.*)"\]$/.exec(rna_path);
-  if (!custom) return null;
-  const [id, path] = JSON.parse(custom[1].replace(/\\(["\\])/g, '$1'));
-  return { id, path, factor: 1 };
-}
+  if (!id.startsWith('object:') || !OBJECT_PATHS[property] || !(axis in AXES)) return null;
+  const [rna_path, factor] = OBJECT_PATHS[property];
+  return { rna_path, index: AXES[axis], factor };
+};
+const transformChannel = (rna_path, index) => {
+  const property = Object.keys(OBJECT_PATHS).find((p) => OBJECT_PATHS[p][0] === rna_path), axis = Object.keys(AXES).find((a) => AXES[a] === index);
+  return property && axis && { path: `${property}.${axis}`, factor: OBJECT_PATHS[property][1] };
+};
 
 
 // Legacy aliases on the action (start, end, fps, frame, loop, autoKey) read scene time; kept for user code.
@@ -52,15 +44,26 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
   let name = 'Action', evaluating = false, quiet = false, commit = () => {}, revision = 0, curves = null;
   const notify = () => { revision++; listeners.forEach(fn => fn()); };
 
-  const ownerID = (id, create) => (id.startsWith('object:') ? (create ? ids.object(id) : ids.find(id)) : ids.scene);
+  // The channels with F-Curves or that may get them: registered, keyed or loaded.
+  const known = new Set();
+  // Where a channel's F-Curve is: an object's transform on its Object in Blender's axes, any other channel a custom
+  // property on its owner's ID named by its path, or on the Scene named by its owner and path.
+  const placeOf = (ref, create = false) => {
+    const [id, path] = JSON.parse(ref), transform = objectPath(id, path);
+    if (transform) return { owner: create ? ids.object(id) : ids.find(id), ...transform };
+    const owner = channels.get(ref)?.owner, property = customPropertyName(owner ? path : `${id} ${path}`);
+    // An owner not in Main yet holds no channels.
+    return { owner: owner ? owner() : ids.scene, property, rna_path: customPropertyPath(property), index: 0, factor: 1 };
+  };
   // Every F-Curve with the Bylonder channel it animates.
-  const tracks = () => curves ??= [...new Set([ids.scene, ...ids.entries().map((e) => e.ob)])].flatMap((owner) => {
-    const key = ids.entries().find((e) => e.ob === owner)?.key;
-    return anim.fcurves(owner).map((fcurve) => {
-      const channel = bylonderPath(fcurve.rna_path, fcurve.array_index, key);
-      return channel && { ...channel, ref: address(channel.id, channel.path), owner, fcurve };
-    }).filter(Boolean);
-  });
+  const tracks = () => curves ??= (() => {
+    const byOwner = new Map(), fcurvesOf = (owner) => byOwner.get(owner) ?? byOwner.set(owner, anim.fcurves(owner)).get(owner);
+    return [...known].flatMap((ref) => {
+      const place = placeOf(ref), [id, path] = JSON.parse(ref);
+      const fcurve = place.owner && fcurvesOf(place.owner).find((f) => f.rna_path === place.rna_path && f.array_index === place.index);
+      return fcurve ? [{ id, path, ref, ...place, fcurve }] : [];
+    });
+  })();
   const trackFor = (ref) => tracks().find((t) => t.ref === ref);
   const optionsOf = (ref) => channels.get(ref)?.options;
   const discreteKind = (ref, value) => (typeof value === 'boolean' ? 'BOOLEAN' : typeof value === 'string' ? 'ENUM' : 'FLOAT');
@@ -83,12 +86,14 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     return value / factor;
   };
   const fcurveFor = (ref, sample) => {
+    known.add(ref);
     const found = trackFor(ref);
     if (found) return found;
-    const [id, path] = JSON.parse(ref), { object, rna_path, index } = blenderPath(id, path), channel = channels.get(ref);
-    const rna = object ? animatedProperty('Object', rna_path) : { type: discreteKind(ref, sample), subtype: 'NONE' };
-    if (!object) defineCustomProperty(rna_path, rna.type, channel?.label ?? path);
-    anim.fcurve(ownerID(id, true), rna_path, index, { group: object ? 'Object Transforms' : channel?.group ?? id, type: rna.type, subtype: rna.subtype });
+    const channel = channels.get(ref), [id, path] = JSON.parse(ref), place = placeOf(ref, true);
+    if (!place.owner) return null;
+    const rna = place.property ? { type: discreteKind(ref, sample), subtype: 'NONE' } : animatedProperty('Object', place.rna_path);
+    if (place.property) setCustomProperty(place.owner, place.property, toCurve(ref, sample ?? 0, 1), { description: channel?.label ?? path });
+    anim.fcurve(place.owner, place.rna_path, place.index, { group: place.property ? channel?.group ?? id : 'Object Transforms', type: rna.type, subtype: rna.subtype });
     curves = null;
     return trackFor(ref);
   };
@@ -98,6 +103,8 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
       handle_left: [k.handle_left[0], k.handle_left[1] / track.factor], handle_right: [k.handle_right[0], k.handle_right[1] / track.factor] }));
   };
   const valueAt = (track, frame) => fromCurve(track.ref, track.fcurve.evaluate(frame), track.factor, channels.get(track.ref)?.get());
+  // A custom property's value as Blender's animation evaluated it in Main.
+  const evaluatedValue = (track) => fromCurve(track.ref, customProperty(track.owner, track.property), 1, channels.get(track.ref)?.get());
 
   const liveTracks = () => tracks().map((track) => ({ track, channel: channels.get(track.ref) }))
     .filter(({ track, channel }) => channel?.available() && track.fcurve.length && !(track.fcurve.flag & FCURVE.MUTED));
@@ -105,8 +112,11 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
   const evaluate = () => {
     evaluating = true;
     try {
+      api.evaluateMain?.(time.frame);
       for (const { track, channel } of liveTracks()) {
-        const value = valueAt(track, time.frame);
+        // Main evaluated: an object's transform is the view's, a custom property holds its channel's value.
+        if (api.evaluateMain && !track.property) continue;
+        const value = api.evaluateMain ? evaluatedValue(track) : valueAt(track, time.frame);
         if (typeof value === typeof channel.get()) channel.set(value);
         pose.set(track.ref, channel.get());
       }
@@ -127,6 +137,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     if (track.values) strings.set(ref, [...track.values]);
     const sample = track.keys[0]?.value;
     const found = fcurveFor(ref, sample);
+    if (!found) return;
     if (track.keys.some((k) => k.handle_left)) {
       found.fcurve.keys = track.keys.map((k) => ({ ...k, co: [k.frame, toCurve(ref, k.value, found.factor)],
         handle_left: [k.handle_left[0], k.handle_left[1] * found.factor], handle_right: [k.handle_right[0], k.handle_right[1] * found.factor] }));
@@ -149,14 +160,22 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     setCommit(fn) { commit = fn; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     // target and property: the Babylon object and property path the channel animates, when it has one (exports).
-    register({ id, path, label = path, group = id, get, set, available = () => true, transform = false, options, target, property }) {
+    // owner: the Main ID that stands for the channel's owner (its custom property holds the channel), else the Scene.
+    register({ id, path, label = path, group = id, get, set, available = () => true, transform = false, options, target, property, owner }) {
       const ref = address(id, path);
-      if (channels.has(ref)) { Object.assign(channels.get(ref), { label, group, get, set, available, transform, options, target, property }); return ref; }
+      if (channels.has(ref)) { Object.assign(channels.get(ref), { label, group, get, set, available, transform, options, target, property, owner }); curves = null; return ref; }
       if (!scalar(get())) throw Error('Animation channels must be scalar: ' + ref);
-      channels.set(ref, { id, path, label, group, get, set, available, transform, options, target, property }); pose.set(ref, clone(get())); notify(); return ref;
+      channels.set(ref, { id, path, label, group, get, set, available, transform, options, target, property, owner }); known.add(ref); curves = null; pose.set(ref, clone(get())); notify(); return ref;
     },
+    // A Babylon-native value made animatable: its owner (a Bylonder id, 'store:lighting'), its path under it, and
+    // { get, set, label, group, owner: () => the Main ID standing for the owner, options, available }.
+    animatable(id, path, options) { return api.register({ id, path, ...options }); },
+    // Evaluates Main's animation for a frame (the scene sync's), after which custom properties hold channels' values.
+    evaluateMain: null,
     removeTarget(id) { for (const [ref, ch] of channels) if (ch.id === id) { channels.delete(ref); pose.delete(ref); } notify(); },
     track(ref) { const t = trackFor(ref); return t && { id: t.id, path: t.path, keys: keysOf(t) }; },
+    // A channel's RNA path from its owner's ID (`["name"]` for a custom property), as Copy Data Path gives it.
+    dataPath: (ref) => placeOf(ref).rna_path,
     state(ref) {
       const channel = channels.get(ref), track = trackFor(ref);
       if (!channel?.available()) return 'unavailable';
@@ -173,6 +192,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
         const next = value === undefined ? clone(channel.get()) : value;
         if (!scalar(next) || typeof next !== typeof channel.get()) throw Error('Invalid animation value');
         const track = fcurveFor(ref, next);
+        if (!track) continue;
         anim.insert(track.fcurve, frame, toCurve(ref, next, track.factor));
       }
       changed(); commit();
@@ -272,6 +292,5 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     evaluate,
     dispose() { listeners.clear(); channels.clear(); },
   };
-  void PROPERTY_TYPES;
   return api;
 }
