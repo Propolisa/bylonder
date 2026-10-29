@@ -91,6 +91,16 @@ extendMenus((idname, side, draw) => {
   if (typeof own?.value === 'function') Object.defineProperty(cls, 'draw', { get() { return __get__(this, own.value); }, configurable: true });
 });
 
+// A menu type of Bylonder's, as an add-on registers a Menu: `draw(layout, context)`.
+export function registerMenu(bl_idname, bl_label, draw) {
+  if (registered[bl_idname]) return;
+  registered[bl_idname] = __class__(bl_idname, [globalThis.__py_modules['_bpy.types'].Menu], {
+    bl_idname, bl_label,
+    get draw() { return __get__(this, (self, context) => draw(self.layout, context)); },
+  });
+  registerClass(registered[bl_idname]);
+}
+
 const ofKind = (kind) => Object.fromEntries(Object.entries(registered).filter(([idname]) => idname.includes(kind)));
 export const menus = ofKind('_MT_');
 export const panels = ofKind('_PT_');

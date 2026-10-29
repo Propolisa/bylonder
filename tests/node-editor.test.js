@@ -5,7 +5,7 @@ import { NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3 } from '@baby
 import { createNodeTree } from '../src/editors/space_node/node-tree.js';
 import { createNodeEditorController } from '../src/editors/space_node/node-editor-controller.js';
 import { addMenuEntries, addMenuItems } from '../src/editors/space_node/node-add-menu.js';
-import { subitems } from '../src/editors/interface/ui-layout.js';
+const subitems = (item) => item.items();
 import { keymapHandler } from '../src/windowmanager/keyconfig.js';
 import { inArea } from '../src/windowmanager/wm-operators.js';
 import { blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';

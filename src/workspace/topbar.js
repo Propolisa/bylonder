@@ -1,5 +1,5 @@
 import { menuButton, openMenu } from '../editors/interface/menu.js';
-import { treeMenu } from '../editors/interface/block-view.js';
+import { treeMenu } from '../editors/interface/tree-menu.js';
 import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
