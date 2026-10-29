@@ -104,16 +104,16 @@ registerClass(__class__('TEST_OT_call_ops', [types.Operator], {
   bl_idname: 'test.call_ops',
   bl_label: 'Call Operators',
   execute: () => {
-    calls.push([...ops.object.select_all(__kwargtrans__({ action: 'DESELECT' }))]);
+    calls.push([...ops.object.select_all(__kwargtrans__({ action: 'SELECT' }))]);
     calls.push([...ops.transform.translate('INVOKE_DEFAULT')]);
     return set(['FINISHED']);
   },
 }));
-ob.select_set(true);
+ob.select_set(false);
 const view = new Window(blender).area(SPACE_VIEW3D);
 view.layout({ x: 0, y: 0, width: 800, height: 600 }, { [RGN_TYPE_WINDOW]: { x: 0, y: 0, width: 800, height: 600 } });
 view.inContext(RGN_TYPE_WINDOW, () => blender.run('test.call_ops'));
 assert.deepEqual(calls, [['FINISHED'], ['RUNNING_MODAL']], 'an exec finishes; an invoke of a modal operator keeps running');
-assert.equal(ob.select_get(), false, 'what the exec did is in Main');
+assert.equal(ob.select_get(), true, 'what the exec did is in Main, and the invoke moves what it selected');
 
 console.log('bpy over the module: properties, collections, functions, context and registration');

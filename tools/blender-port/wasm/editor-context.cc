@@ -2,6 +2,7 @@
  * own invoke, modal and exec on a context (Main's, main-api.cc), the 3D View they act in, and the stand-ins they read
  * of what the window manager and screen would give. */
 #include "BLI_listbase.h"
+#include "BLI_set.hh"
 #include "BLI_math_matrix.h"
 #include "BLI_math_matrix.hh"
 #include "BLI_math_rotation.h"
@@ -149,13 +150,28 @@ const ListBaseT<wmGizmoGroup> *WM_gizmomap_group_list(wmGizmoMap * /*gzmap*/)
   return &none;
 }
 
-/* port-override: gizmo group types by name only, so an operator's request for one reaches JS, which draws it. */
+/* port-override: gizmo group types by name only, so an operator's request for one reaches JS, which draws it, with
+ * the flag of those whose tools drag with the fallback tool off the gizmo (the tool system keeps its keymap). */
 wmGizmoGroupType *WM_gizmogrouptype_find(StringRef idname, bool /*quiet*/)
 {
+  static const Set<StringRef> fallback_keymap = {"VIEW3D_GGT_xform_gizmo",
+                                                 "VIEW3D_GGT_xform_gizmo_context",
+                                                 "VIEW3D_GGT_xform_cage",
+                                                 "VIEW3D_GGT_xform_shear",
+                                                 "VIEW3D_GGT_xform_extrude",
+                                                 "MESH_GGT_spin",
+                                                 "MESH_GGT_spin_redo",
+                                                 "VIEW3D_GGT_mesh_preselect_elem",
+                                                 "VIEW3D_GGT_mesh_preselect_edgering",
+                                                 "VIEW3D_GGT_tool_generic_handle_normal",
+                                                 "VIEW3D_GGT_tool_generic_handle_free"};
   static Map<std::string, std::unique_ptr<wmGizmoGroupType>> types;
   return types.lookup_or_add_cb(idname, [&]() {
     auto type = std::make_unique<wmGizmoGroupType>();
     type->idname = BLI_strdupn(idname.data(), idname.size());
+    if (fallback_keymap.contains(idname)) {
+      type->flag |= WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP;
+    }
     return type;
   }).get();
 }
