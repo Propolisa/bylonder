@@ -12,13 +12,15 @@ const SPACE_TEXT = 9;
 // The project's entry point, which the Text Editor shows first and cannot unlink.
 const ENTRY = 'index.js';
 
-export function mountTextEditor(section, { header, files, context, beforeRun = () => {} }) {
-  const editor = { beforeRun, context };
+export function mountTextEditor(section, { header, files, context, beforeRun = () => {}, afterRun = () => {} }) {
+  const editor = { beforeRun, afterRun, context };
   const area = mountBlenderArea(section, { spacetype: SPACE_TEXT, name: 'TEXT_EDITOR', operators: 'text.', keymaps: ['Text Generic', 'Text'], header, footer: true,
     finished: () => files.flush(), report: (error) => report('ERROR', error.message ?? String(error)), context: { textEditor: editor } });
   editor.area = { space: 'TEXT_EDITOR' };
   editor.space = () => pointerStruct(structFind('Area'), 0, area.area.pointer).spaces.active;
   editor.refresh = area.refresh;
+  // A script runs in this area's context, as Blender runs it in the Text Editor's.
+  editor.inContext = area.inContext;
   editor.dispose = area.dispose;
   const texts = blendData().texts;
   editor.space().text = texts.get(ENTRY) ?? texts[0] ?? null;
@@ -48,6 +50,7 @@ const chooseFile = () => new Promise((resolve) => {
 async function runScript(t, e, jump) {
   e.beforeRun();
   const result = await runText(t.name, t.as_string(), e);
+  e.afterRun();
   if (result.error) {
     report('ERROR', result.error);
     if (jump && result.line > 0) { t.cursor_set(result.line - 1); e.refresh(); }
