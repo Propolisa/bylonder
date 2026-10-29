@@ -804,6 +804,14 @@ EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
   rec.ortho = {0.0f, float(winx), 0.0f, float(winy)};
 }
 
+/* The recording since region_draw_begin, as JSON: what was drawn, the buttons, and the colors of multicolor icons. */
+EXPORT(region_draw_end) const char *region_draw_end()
+{
+  static std::string json;
+  json = "{\"draw\":[" + rec.draw + "],\"buttons\":[" + rec.buttons + "],\"iconColors\":{" + rec.icon_colors + "}}";
+  return json.c_str();
+}
+
 /* The window's event state while a button applies: what its function reads of the keys held (Ctrl isolates, Shift sets
  * children). */
 static void event_modifier_set(bContext *C, int modifier)
