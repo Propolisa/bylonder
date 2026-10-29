@@ -70,7 +70,7 @@ setClipboardText('pasted');
 key('KeyV', 'v', ['ctrl']);
 assert.equal(text.as_string(), 'pasted', 'Ctrl V pastes the clipboard');
 let ran = null;
-provided.bpy_run_text = (C, t, jump) => { ran = [idStruct(t).as_string(), jump]; };
+provided.bpy_run_text = (C, t, jump) => { ran = [idStruct(t).as_string(), !!jump]; };
 key('KeyP', 'p', ['alt']);
 assert.deepEqual(ran, ['pasted', true], "Alt P is Blender's text.run_script, which runs the Text in the page's Python");
 assert.equal(text.as_string(), 'pasted', 'Alt P types nothing');
