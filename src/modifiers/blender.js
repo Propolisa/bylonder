@@ -3,7 +3,7 @@
 // ModifierData at the DNA fields RNA names (dna-modifiers.json).
 import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
-import { evaluateModifiers, drawModifierPanel, meshData, EditMesh, blenderModule } from '../bmesh/bmesh-wasm.js';
+import { evaluateModifiers, meshData, EditMesh, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { moduleTexture, freeUnusedTextures } from '../blenkernel/texture/texture.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { fieldLayout, writeValues, readValues } from './dna-write.js';
@@ -155,6 +155,3 @@ const GROWTH = {
 // About how many faces a stack makes of a Mesh, for asking before an evaluation that would take very long.
 export const estimatedFaces = (mesh, modifiers) =>
   modifiers.reduce((faces, { type, values }) => faces * (GROWTH[type]?.(values) ?? 1), mesh.faces_num || mesh.edges_num);
-
-// What Blender's panel for a stack entry draws with its values (drawModifierPanel), its texture Main's (`texture(id)`).
-export const modifierPanel = (modifier, texture = () => 0) => drawModifierPanel(moduleModifiers([modifier], (entry) => texture(entry.values.texture))[0]);

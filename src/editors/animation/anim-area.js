@@ -135,13 +135,6 @@ export class AnimArea {
       return fcurve ? { fcurve: new FCurve(fcurve), name: cString(name), icon: cString(x.anim_icon_name(new Int32Array(x.memory.buffer, icon, 1)[0])) } : null;
     }));
   }
-  // The sidebar's panels as Blender's code draws them, recorded by panel-layout.cc (anim_sidebar_panels):
-  // [{ idname, label, category, flag, data (an instanced panel's F-Modifier), panel (the recorded tree) }].
-  // pressPanelButton presses one of their raw buttons; panelButtonApplied runs a property button's functions after its
-  // value was set.
-  sidebarPanels() { return this.inContext(RGN_TYPE_UI, (C) => JSON.parse(cString(x.anim_sidebar_panels(C)))); }
-  pressPanelButton(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_press(C, index, -1, 0)); }
-  panelButtonApplied(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_applied(C, index)); }
   // A property of the space set as Blender's RNA sets it (rna_space.cc: its update runs in this area), by number: the
   // Dope Sheet's mode (SpaceDopeSheetEditor.ui_mode).
   setSpaceProperty(struct, name, value) {
