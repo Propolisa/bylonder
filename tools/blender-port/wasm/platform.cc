@@ -4,7 +4,9 @@
 #include <cstdlib>
 #include <new>
 
+#include "BLI_expr_pylike_eval.h"
 #include "BLI_threads.h"
+#include "BPY_extern_run.hh"
 
 void *operator new(std::size_t n)
 {
@@ -66,3 +68,17 @@ WEAK void imb_exitopenexr() {}
 WEAK void imb_init_dds() {}
 }  // namespace blender
 #undef WEAK
+
+namespace blender {
+/* port-override: Python is past the seam: a typed value's expression (numinput.cc) is evaluated by Blender's
+ * Python-like expression evaluator (expr_pylike_eval.cc, which simple driver expressions use): numbers, operators,
+ * comparisons and the math functions and constants. */
+bool BPY_run_string_as_number(bContext * /*C*/, const char * /*imports*/[], const char *expr, BPy_RunErrInfo * /*err_info*/,
+                              double *r_value)
+{
+  ExprPyLike_Parsed *parsed = BLI_expr_pylike_parse(expr, nullptr, 0);
+  const bool success = BLI_expr_pylike_is_valid(parsed) && BLI_expr_pylike_eval(parsed, nullptr, 0, r_value) == EXPR_PYLIKE_SUCCESS;
+  BLI_expr_pylike_free(parsed);
+  return success;
+}
+}  // namespace blender

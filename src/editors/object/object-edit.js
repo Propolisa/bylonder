@@ -5,14 +5,14 @@ import { Matrix, Ray, Vector3 } from '@babylonjs/core';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
-import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from '../../bmesh/bmesh-wasm.js';
+import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS, OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
 import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { do_mesh_region_select, boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
 import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix } from '../transform/transform.js';
 import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js';
-import { modalItem } from '../../windowmanager/keyconfig.js';
+import { runModal, modifierFlags } from '../space_view3d/view3d-modal.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperator, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
@@ -25,15 +25,12 @@ import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { editMeshMenus, editMeshActions } from '../space_view3d/view3d-menus-edit-mesh.js';
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
-import { drawCallbackAdd, tagRedraw, css, THEME } from '../../draw/overlay-tool.js';
+import { drawCallbackAdd, css, THEME } from '../../draw/overlay-tool.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
-// Blender's event types where they differ from the window manager's (wm-event-system.js), and its modifier flags.
-const EVENT_TYPES = { SPACEBAR: 'SPACE' };
 // Operators a macro invokes with its event, since they act where the mouse is.
 // Operators whose invoke reads the mouse or the view, run with their event as Blender's window manager runs them.
 const MOUSE_OPERATORS = new Set(['mesh.knife_tool', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_delete_at_cursor', 'mesh.spin', 'mesh.bisect']);
-const modifierFlags = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
 
 const MESH_MODES = ['OBJECT', 'EDIT', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT'];
 
@@ -193,23 +190,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     place();
     const before = commit && em.edit.copy();
     const view = event?.view ?? views.input, r = viewProjection(view);
-    const blenderEvent = (e) => {
-      const [x, y] = r.toBlenderRegion([e.x, e.y]), type = e.type.toUpperCase();
-      const press = e.value === 'CLICK_DRAG' && e.press ? r.toBlenderRegion([e.press.x, e.press.y]) : undefined;
-      return { type: EVENT_TYPES[type] ?? type, value: e.value, x, y, modifier: modifierFlags(e), text: e.native?.key?.length === 1 ? e.native.key : '', press };
-    };
-    const end = (status) => {
-      selectmode = em.edit.selectmode;
-      notify('');
-      removeDraw();
-      if (commit && (status & OPERATOR_FINISHED || keep)) sync();
-      else sync({ commit: false });
-      if (commit && status & OPERATOR_FINISHED) {
-        adjustLast(idname, before, em.edit.lastValues);
-        if (adjustLast.apply) adjustLast.apply.gizmos = em.edit.gizmoRequested();
-      } else if (before) before.free();
-      then(status);
-    };
     // What the operator draws while it runs: its gesture's line (Bisect's), or the line from its center to the mouse
     // (Inset's and Bevel's, ED_region_draw_mouse_line_cb).
     let running = null;
@@ -220,29 +200,30 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       const line = gesture?.active ? [toCanvas(gesture.start), toCanvas(gesture.end)] : from && [toCanvas(from), mouse];
       if (line) drawDashedLine(ctx, line);
     });
-    const { status, op, keymap, report } = em.edit.invoke(idname, props, blenderEvent(event ?? { ...editor.pointer, type: 'mousemove', value: 'NOTHING' }));
-    if (report) notify(report);
-    if (!op) { end(status); return status; }
-    running = op;
-    sync({ commit: false });
-    let remove = () => {};
-    const handle = (e) => {
-      const item = keymap && modalItem(keymap, e, (id) => em.edit.modalItem(op, id) >= 0);
-      const result = em.edit.modal(op, item ? { ...blenderEvent(e), modal: em.edit.modalItem(op, item) } : blenderEvent(e));
-      if (result & OPERATOR_RUNNING_MODAL) {
-        sync({ commit: false });
-        notify(em.edit.status);
-      } else { running = null; remove(); endTool = () => {}; end(result); }
-      tagRedraw();
-      return !(result & OPERATOR_PASS_THROUGH);
-    };
     endTool();
-    remove = wm().addModal({ keymap: handle, mousemove: handle, passthrough: (e) => e.type === 'middlemouse' || e.type.startsWith('wheel'), cancel: () => handle({ ...editor.pointer, type: 'esc', value: 'PRESS' }) });
-    endTool = () => handle({ ...editor.pointer, type: 'esc', value: 'PRESS' });
-    // The window manager gives a modal operator the pointer's place at once (WM_event_add_mousemove).
-    handle({ ...(event ?? editor.pointer), type: 'mousemove', value: 'NOTHING' });
-    return status;
+    const run = runModal({
+      wm: wm(), view, pointer: editor.pointer, target: em.edit, idname, props, event, notify,
+      start: (op) => { running = op; },
+      step: () => sync({ commit: false }),
+      end: (status) => {
+        running = null;
+        endTool = () => {};
+        selectmode = em.edit.selectmode;
+        notify('');
+        removeDraw();
+        if (commit && (status & OPERATOR_FINISHED || keep)) sync();
+        else sync({ commit: false });
+        if (commit && status & OPERATOR_FINISHED) {
+          adjustLast(idname, before, em.edit.lastValues);
+          if (adjustLast.apply) adjustLast.apply.gizmos = em.edit.gizmoRequested();
+        } else if (before) before.free();
+        then(status);
+      },
+    });
+    if (running) endTool = run.cancel;
+    return run.status;
   }
+
   // A macro (wmOperatorTypeMacro): its operators in turn, each invoked with the event as Blender's macro invokes
   // them (`exec` runs one by its exec, as Loop Cut runs from the tool's preselected edge), the last one modal; one
   // undo step, kept when that one is cancelled.

@@ -47,6 +47,9 @@ import { createEditModes } from "./editors/object/edit-modes.js";
 import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
 import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators, openModulePopup } from "./editors/object/object-operators.js";
+import { runModal } from "./editors/space_view3d/view3d-modal.js";
+import { OPERATOR_FINISHED } from "./bmesh/bmesh-wasm.js";
+import { regionView3D } from "./editors/space_view3d/view3d-project.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
@@ -608,6 +611,7 @@ registerOperators({
     run: (props, event) => {
       creator.finish();
       if (world.editMode.kind === "MESH" && !props.cursor_transform) return world.editMode.module(idname, props, event);
+      if (!world.editMode.active && !props.cursor_transform) return objectTransform(idname, props, event);
       const point = event && (props.cursor_transform ? dragStart(event) : event);
       editor.start(type, { point, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
     },
@@ -668,6 +672,17 @@ const view3dKeys = keymapHandler(
   (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE",
     Font: world.editMode.kind === "FONT" })[name] ?? true,
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
+// Object Mode's transforms are Blender's, run modally in Main's 3D View: what they move comes back as it moves, one
+// undo step when confirmed.
+function objectTransform(idname, props, event) {
+  const sync = world.mainSync, view = event?.view ?? activeView();
+  if (!view) return;
+  sync.flush();
+  sync.blender.view = regionView3D(view);
+  runModal({ wm: world.wm, view, pointer: editor.pointer, target: sync.blender, idname, props, event, notify,
+    step: () => sync.writeBack(),
+    end: (status) => { sync.writeBack(); if (status & OPERATOR_FINISHED) commit(); } });
+}
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {
   get space() { return activeView(); },

@@ -575,6 +575,7 @@ export class BlenderMain {
       const result = { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
       if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
       if (type === 'PROPS') result.op = op, kept = true;
+      if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
       const menu = cString(x.operator_menu_called());
       if (menu) {
         const popup = this.menu(menu);
@@ -597,6 +598,20 @@ export class BlenderMain {
       x.operator_free(op);
     }
   }
+  // Gives a running operator an event (`modal`: a modal keymap item's value): its status; it is freed once it ends.
+  modal(op, event) {
+    const status = x.operator_modal(this.#C, op, wmEvent(this.#C, event));
+    if (!(status & OPERATOR_RUNNING_MODAL)) x.operator_free(op);
+    return status;
+  }
+  // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
+  modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
+  // The 3D View Object Mode's operators act in (main_view_set), as regionView3D gives it.
+  set view({ viewmat, winmat, winx, winy, persp }) {
+    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.main_view_set(this.#context, v, w, winx, winy, persp));
+  }
+  // What the last operator showed in the view's header, or ''.
+  get status() { return cString(x.main_status(this.#context)); }
   // The context properties edited in a popup run in.
   get C() { return this.#C; }
   // A menu type Blender's C defines, as a popup of its layout ({ type, title, text }), or null.

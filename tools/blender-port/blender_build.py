@@ -33,6 +33,9 @@ DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_TBB$|-DWITH_TBB=|-DEIGEN_HAS_TBB|-DWIT
 # Sources built as a Blender with a window draws them, though the configure is headless: the interface, whose drawing
 # the API records (its icons are registered only then, icons_init).
 HEADED = re.compile(r'source/blender/editors/interface/')
+# Sources whose Python path is kept: typed values are evaluated as expressions (BPY_run_string_as_number, which the
+# module answers with Blender's Python-like expression evaluator, wasm/platform.cc), so their units apply.
+PYTHON_EXPRESSIONS = re.compile(r'source/blender/editors/util/numinput\.cc$')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
          '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
          '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
@@ -96,6 +99,8 @@ def wasm_command(entry, extra):
         if arg == entry['file'] or arg.endswith(os.path.basename(entry['file'])) and os.path.isabs(arg) or DROP.match(arg) or arg == '-MD':
             continue
         keep.append(arg)
+    if PYTHON_EXPRESSIONS.search(entry['file']):
+        keep += ['-DWITH_PYTHON', '-I' + entry['file'].split('source/blender/')[0] + 'source/blender/python']
     compiler = 'clang' if args[0].endswith(('clang', 'cc', 'gcc')) and entry['file'].endswith('.c') else 'clang++'
     return [compiler, *extra, *keep, *FLAGS]
 
