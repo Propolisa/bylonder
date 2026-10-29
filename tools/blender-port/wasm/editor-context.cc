@@ -632,6 +632,11 @@ EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int typ
   int total = 0;
   bool free = false;
   text.clear();
+  /* So the items function gets the context, as the UI's operator enum menus do (uiItemsFullEnumO): an owner ID
+   * (WM_operator_properties_create_ptr's window manager, the context's here) and no PROP_ENUM_NO_CONTEXT. */
+  wmWindowManager *wm = CTX_wm_manager(C);
+  op->ptr->owner_id = wm ? &wm->id : &CTX_data_scene(C)->id;
+  WM_operator_properties_sanitize(op->ptr, false);
   if (prop) {
     RNA_property_enum_items(C, op->ptr, prop, &items, &total, &free);
   }

@@ -88,6 +88,8 @@ const curveMesh = (recipe) => evaluateCurve(recipe.curve) ?? meshData({ vert_pos
   face_offsets: new Int32Array([0]), corner_verts: new Int32Array(0), corner_edges: new Int32Array(0) });
 
 export function buildMesh(scene, name, recipe) {
+  // An armature's bones are drawn as Blender evaluates them, once the scene sync has its data in Main.
+  if (recipe.armature) return new Mesh(name, scene);
   if (recipe.curve) {
     const node = new Mesh(name, scene);
     mesh_batch_cache_apply(curveMesh(recipe), node);
@@ -130,7 +132,7 @@ export function shadeSmooth(node, smooth = true) {
 export function rebuildMesh(mesh, recipe) {
   if (recipe.curve) mesh_batch_cache_apply(curveMesh(recipe), mesh);
   else if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
-  else {
+  else if (!recipe.armature) {
     const temp = buildMesh(mesh.getScene(), "__previewGeometry", recipe);
     try {
       mesh.makeGeometryUnique();

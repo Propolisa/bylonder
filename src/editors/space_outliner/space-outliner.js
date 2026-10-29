@@ -46,12 +46,14 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   // bpy.context in the Outliner, for its header, popover and menus.
   const space = area.space;
   const context = () => createContext(rna, { area: 'OUTLINER', space });
-  const ui = menuUI({ menus, context, prop: propBinding(rna.host), keymaps: () => KEYMAPS });
   // The Outliner as the context area: its operators act on it, and wm.call_menu opens its menus.
-  const outlinerArea = { outliner: true, menu: (name) => (menus[name] ? (event) => openOutlinerMenu(name, event) : null) };
+  const outlinerArea = { space: 'OUTLINER', menu: (name) => (menus[name] ? (event) => openOutlinerMenu(name, event) : null) };
+  const inOutliner = (fn) => (...args) => inArea(outlinerArea, () => fn(...args));
+  const ui = menuUI({ menus, context, prop: propBinding(rna.host), keymaps: () => KEYMAPS });
+  Object.assign(ui, { run: inOutliner(ui.run), supported: inOutliner(ui.supported), poll: inOutliner(ui.poll), keys: inOutliner(ui.keys) });
 
   const keys = keymapHandler(KEYMAPS);
-  const dispatch = (event) => inArea(outlinerArea, () => keys(event));
+  const dispatch = inOutliner((event) => keys(event));
 
   // Main made current; the Outliner syncs its selection from the view layer's when Bylonder's changed.
   let selection = '';
@@ -92,11 +94,12 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     if (area.gesture) return startGesture(props, event?.value === 'CLICK_DRAG' ? { x: event.clientX, y: event.clientY } : null);
     return finished(result);
   }
+  // View2D's operators act on the region they run in: the Outliner's run in the Outliner only.
   for (const idname of operatorNames().filter((name) => /^(outliner|view2d)\./.test(name))) {
     registerOperator(idname, {
       run: (props, event) => run(idname, props, event),
       poll: () => area.inContext((C) => pollOperator(C, idname)),
-    });
+    }, idname.startsWith('view2d.') ? 'OUTLINER' : null);
   }
 
   // Menus: one an operator called (WM_menu_name_call), or wm.call_menu's, at the pointer.
@@ -276,13 +279,13 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     get revision() { return headerState.revision; },
     undoPush: () => { commands.transaction(() => {}); draw(); },
     report: (error) => rna.host.notify?.(error.message),
-    run: (idname, props) => inArea(outlinerArea, () => ui.run(idname, props)),
-    supported: (idname, props) => inArea(outlinerArea, () => ui.supported(idname, props)),
-    poll: (idname, props) => inArea(outlinerArea, () => ui.poll(idname, props)),
+    run: ui.run,
+    supported: ui.supported,
+    poll: ui.poll,
     isOpen: () => true,
     toggle: () => {},
     ids: () => [],
-    drawMenu: (idname) => inArea(outlinerArea, () => drawMenu(idname, ui)),
+    drawMenu: inOutliner((idname) => drawMenu(idname, ui)),
     menuLabel: (idname) => menus[idname]?.bl_label,
     menuContents: (idname) => menus[idname] && markRaw(headerLayout(context(), drawInto(menus[idname]))),
     popover: (id) => {

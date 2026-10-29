@@ -232,6 +232,18 @@ const checks = {
     assert.equal(await app.bylonder((b) => !!b.world.wm.modal), false);
   },
 
+  // The header's mode menu (object.mode_set's enum, by Blender's object_mode_set_itemf) lists a mesh's modes once.
+  async "the mode menu lists each mode once, and its Edit Mode enters Edit Mode"() {
+    await app.click();
+    await app.frame().locator("button", { hasText: "Object Mode" }).first().click();
+    const items = await app.frame().getByRole("menuitem").allTextContents();
+    assert.deepEqual(items.filter((item, i) => items.indexOf(item) !== i), [], `listed twice: ${items}`);
+    await app.frame().getByRole("menuitem", { name: "Edit Mode" }).click();
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => !b.world.editMode.active);
+  },
+
   async "Add Modifier > Subdivision Surface subdivides the cube"() {
     await app.click();
     const { Verts: before } = await app.stats();
@@ -585,11 +597,13 @@ async function expectStats(test, timeout = 10000) {
 }
 
 const filter = process.argv[2];
+// SHARD=i/n runs every n-th check from the i-th (scripts/gates.mjs runs shards in parallel).
+const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
 const server = await startServer();
 const browser = await chromium.launch();
 let failed = 0;
 try {
-  for (const [name, check] of Object.entries(checks)) {
+  for (const [name, check] of Object.entries(checks).filter((_, i) => i % shards === shard)) {
     if (filter && !name.includes(filter)) continue;
     const started = Date.now();
     try {

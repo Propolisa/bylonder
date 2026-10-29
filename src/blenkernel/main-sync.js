@@ -37,6 +37,8 @@ import { BlenderAnimation } from './animation/anim-blender.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Mesh, MultiMaterial, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
+import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
+import { armature_draw } from '../draw/overlay-armature.js';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
 const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d;
@@ -199,9 +201,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         if (nodeOf(ob)) continue;
         const type = dnaGet('Object', ob, 'type'), name = blender.name(ob), data = blender.data(ob);
         const lightType = type === 'LIGHT' ? dnaGet('Light', data, 'type') : null;
-        if (!MAKERS[type] && type !== 'MESH' && !CURVE_TYPES.includes(type)) { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
+        if (!MAKERS[type] && !DATA_MAKERS[type] && !CURVE_TYPES.includes(type)) { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
         if (lightType === 'AREA') warnings.push(`"${name}": an Area light opens as a point light`);
-        const node = type === 'MESH' ? adoptMesh(scene, name, ob) : CURVE_TYPES.includes(type) ? adoptCurve(scene, name, ob, type) : MAKERS[type](scene, name, lightType);
+        const node = DATA_MAKERS[type] ? DATA_MAKERS[type](scene, name, ob) : CURVE_TYPES.includes(type) ? adoptCurve(scene, name, ob, type) : MAKERS[type](scene, name, lightType);
         // A copy Blender's code made (object.duplicate) carries its original's id: it gets one of its own.
         const id = blender.property(ob, PROPERTIES.id) ?? name, taken = [...objects.keys()].some((other) => nodeId(other) === id);
         node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id };
@@ -218,8 +220,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         pull(entry, node);
         if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
         if (entry.type === 'MESH') adoptModifiers(entry, warnings);
-        else if (blender.modifiers(ob).length) warnings.push(`"${node.name}": the modifiers of curve and text objects are not opened`);
+        else if (blender.modifiers(ob).length) warnings.push(`"${node.name}": the modifiers of ${entry.type.toLowerCase()} objects are not opened`);
         if (CURVE_TYPES.includes(entry.type)) drawCurve(node);
+        if (entry.type === 'ARMATURE') pullArmature(entry);
         if (blender.materials(ob).length > 1) warnings.push(`"${node.name}": its faces show its first material`);
         for (const path of new Set(fcurvePaths(ob))) if (!['location', 'rotation_euler', 'scale'].includes(path)) warnings.push(`"${node.name}": its ${path} keys are not opened`);
         if (blender.camera === ob) scene.activeCamera = node;
@@ -242,7 +245,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     objects.set(node, entry);
     return entry;
   }
-  // A read Mesh's geometry goes to Babylon, which owns it from then on.
+  // Objects made of their data in Main: a read Mesh's geometry goes to Babylon, which owns it from then on; an
+  // armature's bones are held by its Babylon object too, as a curve's splines are, and drawn as Blender evaluates them.
+  const DATA_MAKERS = {
+    MESH: adoptMesh,
+    ARMATURE: (scene, name, ob) => Object.assign(new Mesh(name, scene), { metadata: { wbCreation: { armature: armatureData(ob) } } }),
+  };
   function adoptMesh(scene, name, ob) {
     blender.readAttributes(ob);
     const creation = { mesh: mesh_serialize(blender.mesh(ob)) }, node = buildMesh(scene, name, creation);
@@ -398,12 +406,32 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       [entry.babylonName, entry.name] = [node.name, blender.name(ob)];
     }
     pushRelations(entry);
-    blender.setMode(ob, data.mode);
+    // An armature's mode is Blender's: its Edit and Pose Modes are entered by Blender's operators in Main.
+    if (entry.type !== 'ARMATURE') blender.setMode(ob, data.mode);
     if (entry.id !== nodeId(node)) blender.setProperty(ob, PROPERTIES.id, (entry.id = nodeId(node)));
     push(entry, node);
     if (entry.data.ptr && entry.data.struct) push(entry.data, node);
     pushModifiers(entry);
     pushCurve(entry);
+    pushArmature(entry);
+  }
+  // An armature object's bones and pose (its edit bones in Edit Mode), live in Main as in Babylon, drawn as Blender
+  // evaluates them.
+  function pushArmature(entry) {
+    const data = entry.type === 'ARMATURE' && entry.node.metadata?.wbCreation?.armature, signature = JSON.stringify(data);
+    if (!data || signature === entry.armature) return;
+    entry.armature = signature;
+    setArmatureData(blender.bmain, entry.ob, data);
+    blender.evaluate();
+    armature_draw(armatureDrawn(entry.ob), entry.node);
+  }
+  // What Blender's code changed of an armature (bones, pose, its mode), after Main is evaluated.
+  function pullArmature(entry) {
+    const { node, ob } = entry, data = armatureData(ob), signature = JSON.stringify(data), mode = dnaGet('Object', ob, 'mode');
+    if (signature === entry.armature && mode === node.metadata.wbMode) return;
+    entry.armature = signature;
+    node.metadata = { ...node.metadata, wbCreation: { armature: data }, wbMode: mode };
+    armature_draw(armatureDrawn(ob), node);
   }
   // A curve or text object's Curve data, live in Main as in Babylon (the edit data in Edit Mode).
   function pushCurve(entry) {
@@ -417,11 +445,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   function pushModifiers(entry) {
     if (entry.type !== 'MESH') return;
     const stack = modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
-    const signature = JSON.stringify(stack.map(({ type, values, showViewport, showRender }) => [type, values, showViewport, showRender, textures.get(values.texture)?.tex]));
+    // A modifier deforming by another object (an Armature's) points at its Object in Main.
+    const target = ({ values }) => [...objects.values()].find(({ node }) => nodeId(node) === values.object)?.ob ?? 0;
+    const signature = JSON.stringify(stack.map((m) => [m.type, m.values, m.showViewport, m.showRender, textures.get(m.values.texture)?.tex, target(m)]));
     if (signature === entry.modifiers) return;
     entry.modifiers = signature;
     // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
-    blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0));
+    blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0, target));
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
   function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
@@ -607,17 +637,23 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Fills meshes' geometry, the one large buffer Main holds only while Blender's code needs it, from Babylon's (the
   // edit mesh's in Edit Mode), and releases it after.
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
+  // Returns the entries it filled, which were not filled already.
   function fill(nodes) {
+    const made = [];
     for (const node of nodes) {
       const entry = objects.get(node);
       if (!entry || filled.has(entry) || entry.type !== 'MESH') continue;
       blender.setMesh(entry.ob, world.editMode?.meshOf?.(node) ?? objectMesh(node));
       filled.add(entry);
+      made.push(entry);
     }
+    return made;
   }
-  function release() {
-    for (const entry of filled) blender.clearMesh(entry.ob);
-    filled.clear();
+  function release(entries = [...filled]) {
+    for (const entry of entries) {
+      blender.clearMesh(entry.ob);
+      filled.delete(entry);
+    }
   }
 
   // Main into Babylon, after Blender's code: what it changed, with geometry it changed of the meshes it was given.
@@ -667,6 +703,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       pullTextures();
       for (const record of sceneRecords()) pull(record, world);
       blender.evaluate();
+      for (const entry of objects.values()) if (entry.type === 'ARMATURE') pullArmature(entry);
     } finally {
       applying = false;
     }
@@ -716,6 +753,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (base && base.selected !== selection.has(node)) diffs.push(`${label}: selected ${selection.has(node)}, Main ${base.selected}`);
       if (base && base.active !== (node === active) && base.selected) diffs.push(`${label}: active differs`);
       if (CURVE_TYPES.includes(entry.type) && world.curves && !holdsAll(curveObject(entry).data, world.curves.data(node))) diffs.push(`${label}: curve data differs`);
+      if (entry.type === 'ARMATURE' && !holdsAll(armatureData(entry.ob), node.metadata?.wbCreation?.armature)) diffs.push(`${label}: armature data differs`);
       if (filled.has(entry)) {
         const mesh = blender.mesh(entry.ob), own = objectMesh(node);
         if (!same(Array.from(mesh.vert_positions), Array.from(own.vert_positions)) || !same(Array.from(mesh.corner_verts), Array.from(own.corner_verts)))
@@ -772,13 +810,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   }
 
   // A mesh object's Mesh with its modifiers applied, as Blender evaluates it (for export): filled, evaluated, released.
+  // Releases only what it filled: a modal operator's geometry stays filled while it runs (the modifier stack evaluates
+  // here as an armature it deforms by moves).
   function evaluatedMesh(node) {
     flush();
-    fill([node]);
+    const made = fill([node]);
     try {
       return blender.evaluatedMesh(objects.get(node).ob);
     } finally {
-      release();
+      release(made);
     }
   }
 
@@ -833,7 +873,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     adopt,
     // Whether Blender's code may change an object's data: its geometry is filled for it (lights and cameras are
     // Bylonder's objects of their own kind).
-    holdsData: (node) => ['MESH', 'EMPTY', ...CURVE_TYPES].includes(objects.get(node)?.type),
+    holdsData: (node) => ['MESH', 'EMPTY', 'ARMATURE', ...CURVE_TYPES].includes(objects.get(node)?.type),
     // The selected objects, whose geometry operators on the selection are given.
     selected: () => selection.nodes.filter((node) => objects.has(node)),
     objectOf: (node) => objects.get(node)?.ob ?? null,

@@ -4,6 +4,7 @@
  * editor writes the objects' transforms, parents, bases and data here, and afterwards reads back what the operator
  * tagged (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec, on main_C).
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
+#include "BKE_armature.hh"
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
 #include "BKE_idprop.hh"
@@ -70,7 +71,6 @@
 #include "WM_api.hh"
 
 #include "extraction.hh"
-#include "transform_convert.hh"
 
 #include <algorithm>
 #include <cfloat>
@@ -453,10 +453,11 @@ static void where_is_calc(Depsgraph *depsgraph, Scene *scene, Object *ob, Set<Ob
     where_is_calc(depsgraph, scene, ob->parent, done);
   }
   BKE_object_where_is_calc(depsgraph, scene, ob);
+  BKE_pose_where_is(depsgraph, scene, ob);
 }
 
 /* What the depsgraph does once the editor has written the objects or an operator has changed them: each object's
- * world matrix, parents first, and the tags cleared. */
+ * world matrix, parents first, an armature's pose, and the tags cleared. */
 EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx)
 {
   Depsgraph *depsgraph = CTX_data_depsgraph_pointer(ctx->C);
@@ -928,11 +929,6 @@ void pre_save_assets(Main * /*bmain*/) {}
 
 /* port-override: the module has no file browser, whose bookmarks and recent directories a saved file updates. */
 void ED_file_read_bookmarks() {}
-
-/* As transform_convert_armature.cc defines them, without its conversions: the module has no armatures, so transform
- * never picks them. */
-ed::transform::TransConvertTypeInfo ed::transform::TransConvertType_EditArmature = {};
-ed::transform::TransConvertTypeInfo ed::transform::TransConvertType_Pose = {};
 
 /* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
 bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }

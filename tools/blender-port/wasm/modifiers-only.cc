@@ -8,6 +8,7 @@
 #include "BKE_idtype.hh"
 #include "BLO_readfile.hh"
 #include "BLT_translation.hh"
+#include "DNA_armature_types.h"
 #include "DNA_node_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_userdef_types.h"
@@ -31,6 +32,10 @@ IDTypeInfo IDType_ID_SCE = id_type_without_data(ID_SCE, FILTER_ID_SCE, INDEX_ID_
                                                 BLT_I18NCONTEXT_ID_SCENE, 0);
 IDTypeInfo IDType_ID_NT = id_type_without_data(ID_NT, FILTER_ID_NT, INDEX_ID_NT, sizeof(bNodeTree), "NodeTree", "node_groups",
                                                BLT_I18NCONTEXT_ID_NODETREE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
+/* Armatures, without armature.cc's ID callbacks. Not in modifier-api.cc: a stand-in's initializer there would write
+ * over the scene module's real armature type (armature.cc), whose definition wins the link. */
+IDTypeInfo IDType_ID_AR = id_type_without_data(ID_AR, FILTER_ID_AR, INDEX_ID_AR, sizeof(bArmature), "Armature", "armatures",
+                                               BLT_I18NCONTEXT_ID_ARMATURE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 
 LEFT_OUT_MODIFIER(Boolean);
 LEFT_OUT_MODIFIER(Cloth);

@@ -1,8 +1,17 @@
 // Edit Mode by the object's type, as object.mode_set enters it: the mesh editor (object-edit.js) for meshes, the curve
 // and text editor (curve/editcurve.js) for curve and text objects. One is active at a time; `kind` is the edited
 // object's type (MESH, CURVE or FONT).
+import { registerOperator } from '../../windowmanager/wm-operators.js';
 export function createEditModes(mesh, curve) {
   const current = () => (curve.active ? curve : mesh);
+  const active = () => mesh.active || curve.active;
+  // Edit Mode of the meshes, curves and text Bylonder edits; Blender's object.mode_set on Main runs the other calls
+  // (registerFallback): an armature's modes, Object Mode from them.
+  registerOperator('object.mode_set', {
+    supports: ({ mode }) => mode === 'OBJECT' || mode === 'EDIT',
+    poll: ({ mode }) => active() || (mode === 'EDIT' && (mesh.editable() || curve.editable())),
+    run: ({ mode }) => (mode === 'EDIT' ? active() || curve.enter() || mesh.enter() : current().exit()),
+  });
   return {
     get active() { return mesh.active || curve.active; },
     get object() { return current().object; },
