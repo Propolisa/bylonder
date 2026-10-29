@@ -58,10 +58,11 @@ assert.ok(!find(drawn, 'OBJECT_PT_transform').parts.some((part) => part.part ===
 const array = ob.modifiers.new('Array', 'ARRAY');
 array.use_relative_offset = false;
 spaceOf(area).context = 'MODIFIER';
-const modifierPanels = panels().filter((panel) => panel.id.includes('Array'));
+const modifierPanels = panels().filter((panel) => /array/i.test(panel.id));
 assert.equal(modifierPanels.length, 1, 'one instanced panel per modifier');
-const arrayButtons = panelButtons(modifierPanels[0]).filter((b) => b.rna);
-assert.deepEqual(arrayButtons.filter((b) => b.rna.owner === 'ArrayModifier').map((b) => b.rna.prop).slice(0, 3).includes('count'), true);
+const part = (panel, name) => buttons(panel.parts.find((p) => p.part === name).layout).filter((b) => b.rna).map((b) => b.rna.prop);
+assert.deepEqual(part(modifierPanels[0], 'body').slice(0, 2), ['fit_type', 'count'], 'MOD_array.cc panel_draw');
+assert.ok(part(modifierPanels[0], 'header').includes('show_viewport'), 'modifier_panel_header');
 const relative = modifierPanels[0].children.find((child) => child.id.endsWith('relative_offset'));
 assert.ok(relative, 'the Relative Offset sub-panel');
 assert.equal(panelButtons(relative).find((b) => b.type === 'CHECKBOX')?.rna.prop, 'use_relative_offset');

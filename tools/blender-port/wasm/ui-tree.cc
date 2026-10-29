@@ -511,7 +511,13 @@ EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
 {
   static std::string json;
   ARegion *region = region_drawn(C);
-  region->runtime->type->layout(C, region);
+  /* A region type without a layout callback lays its panels out in its draw (graph_buttons_region_draw), as this. */
+  if (region->runtime->type->layout) {
+    region->runtime->type->layout(C, region);
+  }
+  else {
+    ED_region_panels_layout(C, region);
+  }
   Vector<Panel *> panels;
   for (Panel &panel : region->panels) {
     if (panel.type && panel_is_active(&panel) && panel.runtime->block) {
