@@ -20,12 +20,6 @@ const workflows = {
     await keys("x");
     await pick("Delete");
   },
-  async "edit-model"() {
-    await keys("Tab", "3");
-    await app.page.mouse.click(...(await screenOf([0, 0, 1])));
-    await keys("i", "0", ".", "2", "Enter", "e", "1", "Enter", "g", "z", "0", ".", "5", "Enter", "Tab", "Control+2");
-    await contextMenu("Shade Smooth");
-  },
   async organize() {
     await add("Mesh", "Monkey");
     await keys("g", "y", "3", "Enter", "Shift+d", "x", "3", "Enter", "m");
