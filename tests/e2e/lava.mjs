@@ -22,7 +22,8 @@ export async function displacedSphere(app) {
   await app.locator('[role="tab"][aria-label="Texture"]').click();
   await app.frame().getByRole("button", { name: "Image or Movie" }).click();
   await app.frame().getByRole("menuitem", { name: "Clouds" }).click();
-  await app.until((b) => b.world.textures.all()[0]?.values.type === "CLOUDS");
+  // Main's Tex is the texture (Blender's texture.new made it); its Type button shows what RNA reads.
+  await app.frame().getByRole("button", { name: "Clouds" }).waitFor();
 }
 
 // The Shading workspace, New Material, and the lava nodes added with Shift A and linked by dragging: Texture Coordinate's
