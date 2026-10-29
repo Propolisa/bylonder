@@ -28,6 +28,12 @@ second model kept equal both ways.
    Python, is laid out by Blender's `uiLayout` and leaves the module as one layout tree (containers with alignment and
    scale, buttons by kind with their RNA property or operator, text and icon; no coordinates). The browser draws the
    tree with one component per button kind, so a new menu or panel needs no code.
+7. **Everything with a data path is animatable, by Blender's animation system.** What Blender owns is keyed and
+   evaluated by Blender (actions and F-Curves on its RNA paths, evaluated by the depsgraph), and the view carries the
+   evaluated values to Babylon. A Babylon-native value that can be animated has a data path too: a custom property on
+   the ID that stands for its owner, keyed by the same F-Curves, its evaluated value given back to Babylon. Every
+   property widget, Blender's buttons and Babylon-only panels alike, keys through the same path, and Blender's
+   animation editors show every channel.
 
 ## Consequences
 
