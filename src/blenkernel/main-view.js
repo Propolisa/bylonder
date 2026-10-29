@@ -9,7 +9,7 @@ import { INFO } from '../makesrna/rna.js';
 import { createLight } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
 import { blenderModifierDefinitions } from '../modifiers/blender.js';
-import { addModifier } from '../modifiers/stack.js';
+import { addModifier, modifierStack } from '../modifiers/stack.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { buildMesh, rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
@@ -213,15 +213,40 @@ export function createMainView(state) {
     }
   }
   const fcurvePaths = (id) => state.animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
-  // A read object's modifiers, as Bylonder's stack holds Blender's; the types Bylonder does not have are left out.
-  function adoptModifiers(entry, warnings) {
-    const view = () => new DataView(blenderModule.exports.memory.buffer);
-    for (const { type, name, mode, md } of blender.modifiers(entry.ob)) {
+  // An object's modifiers as Main holds them, in the terms of Bylonder's stack; the types Bylonder does not have are
+  // left out.
+  function mainModifiers(entry, warnings) {
+    const view = new DataView(blenderModule.exports.memory.buffer);
+    return blender.modifiers(entry.ob).flatMap(({ type, name, mode, md }) => {
       const definition = blenderModifierDefinitions.find((d) => d.mesh.type === type);
-      if (!definition) { warnings.push(`"${entry.node.name}": its modifier "${name}" is not opened`); continue; }
-      const modifier = addModifier(entry.node, definition.id, definition.mesh.read(view(), md));
-      Object.assign(modifier, { name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER) });
-    }
+      if (!definition) { warnings.push(`"${entry.node.name}": its modifier "${name}" is not opened`); return []; }
+      const values = definition.mesh.read(view, md);
+      if (definition.mesh.textured) values.texture = textureId(view.getUint32(md + definition.mesh.texture, true));
+      return [{ type: definition.id, name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER), values }];
+    });
+  }
+  // The texture record of a Tex in Main, made for one Blender's code created (texture.new); null for none.
+  function textureId(tex) {
+    if (!tex) return null;
+    const known = [...textures].find(([, record]) => record.tex === tex);
+    if (known) return known[0];
+    const entry = world.textures.create(null, { finish: false });
+    entry.name = blender.name(tex);
+    world.textures.assign(entry, readTexture(tex));
+    textures.set(entry.id, { tex, values: entry.values });
+    return entry.id;
+  }
+  function adoptModifiers(entry, warnings) {
+    for (const { type, values, ...shown } of mainModifiers(entry, warnings)) Object.assign(addModifier(entry.node, type, values), shown);
+  }
+  // Modifiers Blender's code added, removed or changed (Add Modifier, Ctrl 2) become the stack's.
+  function pullModifiers(entry) {
+    const stack = modifierStack(entry.node), main = mainModifiers(entry, []);
+    const same = stack.length === main.length && main.every((m, i) => stack[i].type === m.type && stack[i].name === m.name
+      && stack[i].showViewport === m.showViewport && Object.entries(m.values).every(([key, value]) => JSON.stringify(stack[i].values[key]) === JSON.stringify(value)));
+    if (same) return;
+    if (entry.node.metadata) entry.node.metadata.wbModifiers = [];
+    adoptModifiers(entry, []);
   }
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
@@ -326,6 +351,7 @@ export function createMainView(state) {
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL);
+        if (entry.type === 'MESH') pullModifiers(entry);
         if (entry.type === 'MESH' && drawEditMode(entry)) continue;
         if (changed && entry.type === 'MESH') drawMesh(entry, blender);
         else if (changed && entry.type !== 'ARMATURE') drawData(entry);

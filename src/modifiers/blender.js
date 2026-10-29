@@ -61,7 +61,7 @@ function definition(id) {
     id, name, description, icon, category: 'Generate', blender: `object.modifier_add:${id}`,
     schema: fields,
     defaults: () => Object.fromEntries(Object.entries(fields).map(([path, entry]) => [path, entry.default])),
-    mesh: { type, write, read, layouts, textured, scene, object: scene && located.object.offset },
+    mesh: { type, write, read, layouts, textured, texture: textured && located.texture.offset, scene, object: scene && located.object.offset },
   };
 }
 
