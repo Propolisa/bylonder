@@ -38,118 +38,46 @@ The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answe
 
 ### Who owns what
 
-Decided 2026-10-28 (replaces the mirror made per operator). Bylonder's Babylon scene is the source of truth and
-renders; Blender's Main runs in parallel as a second, always accurate model of the same scene, so Blender's code
-(operators, editors, depsgraph, `.blend` writing) works on real data at any time. Each model holds what the other has
-no counterpart for; the overlap is kept equal both ways.
+Decided 2026-10-29: `model.md`. Blender's Main owns what Blender has a type for, with its undo and its file; Babylon
+draws Main's state and owns only what Blender has no type for. It replaces the two-way model of 2026-10-28, where
+Babylon was the truth and Main a second model kept equal both ways. Where the code stands:
 
-1. **One mapping, both directions.** Every synced property is declared once, by its RNA name, with its Babylon
-   accessor (`rna-bylonder.js` and the subsystem's bindings), in Blender's axes (Babylon's (x, y, z) is Blender's
-   (x, z, y)). The same declaration reads and writes in both directions; no subsystem has sync code of its own.
-2. **Babylon to Blender, by setter hooks.** A write to a synced Babylon value (an object's transform, a mesh's
-   geometry, a light's color) goes to Main at once, through the mapping. Objects and data that come or go in Babylon
-   are added to or removed from Main the same way.
-3. **Blender to Babylon, by recalc tags.** After Blender's code runs, what it tagged (`ID_RECALC_TRANSFORM`,
-   `_GEOMETRY`, `_SHADING`, `_SELECT`, ...) is written to Babylon through the same mapping, inside the operator's
-   undo step. Writing back does not echo to Main.
-4. **Both models are accurate at every moment.** Everything but large buffers (point 5) is held live on both sides
-   and kept equal through the mapping: transforms and settings, curve and text data, modifiers, collections, textures,
-   material settings, animation. Babylon's own data (node materials, GPU effects, what project code builds) is in Main
-   as custom properties where a round trip needs it; Blender's own data is on the Babylon side in RNA's terms, on the
-   object or scene it belongs to, so Bylonder's undo and project save carry it. No state is filled in only on demand
-   except large buffers, so neither model is ever stale.
-   **Animation is Blender's.** Blender's animation system is the richer one, so Actions (layered, with slots, F-Curves,
-   F-Modifiers, drivers) are edited and evaluated by Blender's code in Main (`animrig`, `evaluate_fcurve`); the Babylon
-   side mirrors them live as their RNA record (for undo and save) and as Babylon Animations and AnimationGroups made
-   from them, so Babylon-native playback and export work without Blender's runtime. The viewport shows Blender's
-   evaluation; Babylon's animations are exactly derived from it, never edited on their own.
-   Decided 2026-10-28.
-4a. **Similar is not equivalent; every object has a home.** A Blender light and a Babylon spot light are not the
-   same thing, and the mapping between them can lose information. So each object, and each property of it, belongs
-   to one world, the one whose native type it is, and is stored in that world's own rich representation in the
-   Bylonder project: a Blender light keeps all of Blender's light settings, a Babylon spot light all of Babylon's. The
-   other world gets the nearest equivalent through the mapping, marked as derived, and an edit there writes back
-   only what maps exactly; the rest stays as the owner has it. Where both worlds hold the same data exactly
-   (animation, transforms), the property belongs to both. Shared representations (mesh buffers) carry what both
-   use without mixing the source objects' own properties. Converting between worlds happens on export and import
-   (`.babylon`, JS, `.blend`), by the least lossy mapping, with user settings for the tradeoffs, and every loss is
-   reported in Blender's Info editor (a Babylon spot light written as a Blender spot light: its exponent and its
-   angle falloff approximated). Decided 2026-10-28. Done for lights (`blenkernel/light/light-home.js`, converted as
-   Blender's glTF exporter does) and worlds: a Blender world's linear color lights the scene evenly, a code scene's
-   clear color is Babylon's background only (`blenkernel/scene/world-babylon.js`).
-5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
-   scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
-   needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
-   after, and what the code changed goes back to Babylon. Edit Mode is the exception Blender itself makes: while a mesh
-   is edited, its BMEditMesh in the module owns it, Babylon's mesh is only drawn from it, and Babylon owns it again
-   on leaving Edit Mode.
-6. **Checked.** A test mode compares the overlap of both models after every operator and edit; a difference is a bug.
-
-What this is for:
-- **Save a `.blend`** from Main with Blender's own writer, which renders well in desktop Blender.
-- **Export for Babylon:** a `.babylon` file, or JS initialization code per object, that runs anywhere Babylon does.
-  Modifiers are applied, as Blender's glTF exporter applies them; later, a polyfill of just the modifier kernels
-  can evaluate them live without the rest of Blender.
-
-### The scene sync
-
-`src/blenkernel/main-sync.js` (`createMainSync({ rna, ids })`, one per world, `world.mainSync`) is the one sync; Object
-Mode's operators, the Outliner, the animation editors and Edit Mode go through it, and nothing else writes Main from
-Babylon.
-
-- **The mapping.** A binding in `rna-bylonder.js` with `sync: true` (or a test of its owner, as `rotation_euler` is
-  synced unless the node has a quaternion) is written in Main at the DNA field Blender's RNA names for that property
-  (`dna-struct.js` over `dna-outliner.json` and `dna-data.json`, from `modifier_dna.py`). `syncBindings(r, struct,
-  owner)` lists them. Synced: Object `location`, `rotation_mode`, `rotation_euler`/`rotation_quaternion`, `scale`,
-  `hide_select`, `hide_render`, `hide_viewport`; Light `type`, `color`, `energy`, `shadow_soft_size`, `use_shadow`,
-  `spot_size`, `spot_blend`; Camera `type`, `sensor_fit`, `lens`, `lens_unit`, `clip_start`, `clip_end`; Material
-  `diffuse_color`, `metallic`, `roughness`, `use_backface_culling`, `alpha_threshold`, `surface_render_method`; World
-  `color`; Scene `frame_current`, `frame_subframe`, the frame ranges, `use_gravity`, `gravity`; RenderSettings `fps`,
-  resolution and motion blur; UnitSettings; ToolSettings `use_keyframe_insert_auto`; Collection and LayerCollection
-  flags. An enum whose items Blender makes per call (`length_unit`) stays Main's own.
-- **Relations** have no DNA value and are written by the sync under the same RNA names: ID names (Blender's unique
-  name, "Cube.001" for a second "Cube", counts as equal), `parent`, `mode`, the object's data of its type, bases
-  (selection, active, hidden), material slots, the modifier stack (Blender's modifiers, `dna-modifiers.json`),
-  collections and their objects and children, the scene's camera and world, and node trees: a Material is the
-  Principled BSDF tree and a World the Background tree its RNA `node_tree` binding describes (`shaderTree`), built by
-  idname (`BlenderMain.setNodeTree`); Blender's node types take them over when the file is read.
-- **The rule for relations.** An object's RNA pointer or collection property is one entry in `RELATIONS`
-  (`main-sync.js`): the IDs Babylon says it should hold (`babylon`), what Main holds (`main`), a `set` that calls the
-  BKE function Blender's RNA setter calls (`object_parent_set`, `BKE_object_material_array_assign`), and an `apply`
-  when Blender's code may change it. Push, write-back and `check()` go through that table, so a new kind adds no code
-  elsewhere. Debt: the modifier stack, bases, collections and node trees still have their own routines, and the module
-  has no RNA runtime to call Blender's generated setters by path.
-- **Babylon to Main.** `main-sync-hooks.js` wraps the setters an object's synced bindings read (a vector's or
-  quaternion's dirty flag, a color's channels, `name`, `parent`, `metadata`, a light's or camera's fields, the enabled
-  state): a write marks the object, and a microtask flushes the marked ones (`flush(false)`). `flush()` writes
-  everything that differs from what was last synced, and runs before any of Blender's code; slices without hooks
-  (collections, materials, worlds, modifiers) call `changed()`.
-- **Main to Babylon.** `run(fn, { meshes })` flushes, fills the geometry of `meshes`, runs `fn` (Blender's code), then
-  writes back: geometry tagged `ID_RECALC_GEOMETRY`, and every synced value that differs from what was last synced
-  (this also catches what Blender's buttons write without a tag), through the bindings' setters, with hooks muted so
-  nothing echoes. Editors that run Blender's code over several events call `flush()` before and `writeBack()` after.
-  `revert()` makes Main Babylon's again (an operator Bylonder refuses).
-  Values Blender evaluates in Main (drivers, later) reach Babylon the same way: `pull(record, owner)` sets each synced
-  binding whose Main value changed.
-- **Geometry** (point 5): Main's Meshes are empty at rest, the only data Main holds on demand. `run`'s `meshes`,
-  `withMeshes(fn)` and `evaluatedMesh(node)` fill them from Babylon's Mesh data (`wbCreation.mesh`, or the edit mesh's
-  while in Edit Mode, `editMode.meshOf`) and release them after. A curve's or text's Curve data is live in Main like any
-  value (`pushCurve`, from `world.curves`), and comes back when Blender's code tags its geometry.
-- **For exporters:** `sync.evaluatedMesh(node)` is an object's Mesh with Blender's modifiers applied (Main's stack,
-  `mesh_create_eval_final`), in Blender's axes. Bylonder's Geometry Nodes Array is applied there as Blender's Array
-  where its settings map (below); Bylonder's other modifier types are not Blender's and are not applied.
-- **Custom properties** keep what only Babylon has: `bylonder_id` on objects, `bylonder_material` (the material's
-  kind) and `bylonder_node_material` (a node material's graph, as Babylon serializes it) on materials.
-- **Checked.** `check()` lists the differences of the overlap (values, names, parents, bases, slots, node tree inputs,
-  collections, curve and text data, and geometry where Main holds it). With `debug` (`?sync-check` in the app) it throws after every full
-  flush and run. `tests/main-sync.test.js` runs edits from both sides, undoes and redoes them, and checks each step.
+- **The view** (`src/blenkernel/main-view.js`) draws Main into Babylon after Blender's code ran, after an undo step
+  loaded and after a frame change: every object's values through the RNA mapping (the `sync` bindings of
+  `rna-bylonder.js`, at their DNA fields), its relations, base (selection, hidden) and name, the data Blender tagged (a
+  mesh's geometry, a curve's or text's Curve data, an armature's bones), materials and worlds with their node trees'
+  inputs, textures, the scene's settings and collections. An object Main holds without a Babylon object is linked to
+  the one its `bylonder_id` names (the project's code built it, or an undo brought it back), else made of its type;
+  one Main no longer holds is deleted, its children without it.
+- **Geometry is Main's.** A mesh object's Mesh data (Bylonder's recipe of Mesh data or a Blender primitive) goes into
+  Main once and stays there; Babylon draws it. A mesh Babylon built itself (a MeshBuilder's, an import) keeps its
+  geometry: Main holds a stand-in (`bylonder_standin`), filled from it when Blender's code needs it, until Blender's
+  code changes it, which makes it Main's.
+- **Undo is Blender's** (`tools/blender-port/wasm/undo-api.cc`): the window manager's undo stack with Blender's undo
+  types, memfile steps of Main (and edit-mode steps once Edit Mode is Main's). The history
+  (`src/editors/undo/storage.js`) keeps one list: each step is a Blender step with what Babylon owns at that moment
+  (objects' native data, the document slices, the animation model, stores). Undo loads the Blender step, the view
+  draws it, then Babylon's part is restored. A push that changes nothing in Main leaves Blender's stack as it was.
+- **Frames.** `sync.frameChanged(frame)` sets the scene's frame and evaluates every ID's animation and drivers into it
+  (`view-api.cc` `view_frame_set`, as a new frame's evaluation does without a graph), the matrices after, and the view
+  writes the evaluated values by kind.
+- **A project** saves its `.blend` (Main, gzipped) and its objects' native data (`src/runtime/project-state.js`). The
+  project's code builds the scene, then the `.blend` is read: an object whose id it holds takes Blender's state from
+  it, one the code built that it no longer holds stays deleted, and objects it adds are made. A project saved before
+  (rows of objects' transforms) opens once through the old path and saves in the new form.
+- **What still crosses from Babylon to Main**, until every editor writes Main through the module's RNA: the values and
+  relations Bylonder's own editors write on Babylon's objects (`main-sync.js`, by setter hooks and a flush before
+  Blender's code runs and before every undo push), the document slices' state (materials, worlds, textures,
+  collections, scene settings), Bylonder's modifier stack, curve data while a curve is edited, an armature's record,
+  and a material's or world's node tree when Bylonder's own material library changes it. Edit Mode still edits a
+  separate edit mesh (`EditMesh`) and writes its Mesh data into Main on each step.
 
 ### .blend files
 
 File > Save As runs Blender's `wm.save_as_mainfile` (`wm_files.cc`, `writefile.cc` and the `blend_write` callbacks of
-each ID type) on Main, through `sync.writeBlend(path)`, which fills every object's geometry for the write and releases
-it after; `src/windowmanager/wm-files.js` downloads the bytes as `<project>.blend`. Bylonder's project is still saved
-as its own (File > Save Project As).
+each ID type) on Main, through `sync.writeBlend(path)`, which fills the stand-ins of meshes Babylon built first;
+`src/windowmanager/wm-files.js` downloads the bytes as `<project>.blend`. A project keeps its own `.blend` too (Who owns
+what).
 
 - **SDNA.** The module builds `makesdna` for wasm32 and runs it under Node's WASI (`sdna()` in `wasm_module.py`), so the
   file's struct layouts are the module's own: 4-byte pointers (Blender reads such files, as it reads 32-bit ones).
@@ -166,11 +94,10 @@ as its own (File > Save Project As).
   (`BLO_read_from_memory`, zstd-compressed too) and `BKE_blendfile_read_setup_readfile` makes it the Main, as
   `wm_file_read_post` does without UI (`main_open`). The file's scene, settings, view layers and collections are then
   Main's. The ID types the module does not build (images, sounds, the window manager) are read as their ID alone, and sequencer strips are left out.
-- **Adopting.** `sync.adopt()` makes Babylon's what Main holds and the sync does not, through the same mapping (`pull`
-  with nothing synced yet) and `RELATIONS`: objects of their type (a mesh's geometry goes to Babylon once and Main's is
-  released; a curve's or text's Curve data is kept on both sides), materials of Bylonder's kind with their Principled
-  BSDF inputs, modifiers into Bylonder's stack, rotation modes in Bylonder's order, the scene camera and the world's
-  color; the scene's settings and collections follow once the world's slices exist. Objects Blender's code adds come
+- **Adopting.** The view's `adopt()` draws what Main holds that Babylon does not, through the same mapping and
+  `RELATIONS`: objects of their type (Main keeps their data), materials of Bylonder's kind with their Principled BSDF
+  inputs, modifiers into Bylonder's stack, rotation modes in Bylonder's order, the scene camera and the world's color;
+  the scene's settings and collections follow once the world's slices exist. Objects Blender's code adds come
   the same way. What Bylonder cannot show is reported to the Info editor as warnings: other object types, Area lights
   (opened as point lights), modifiers and node types Bylonder lacks, keys on other properties, a world's strength,
   several materials on one mesh.
@@ -189,7 +116,7 @@ as its own (File > Save Project As).
 
 - Its Blender sources go in the module's `libraries` (`tools/blender-port/manifest.json`); operators defined in a source listed under `operators` are registered by their own functions. A source that needs header directories of its own lists them as the library's `includes`, so the rest of the build stays cached.
 - Its IDs go in the same Main: data of its own (an Action, a node tree) with `BKE_*_add(main_bmain(), name)` in an export of its API file, object data through `object_data(ob)`. `ID_code_to_RNA_type` in `operator-properties.cc` names the module's ID types for context pointers; add the new type there.
-- Its values cross through the same RNA names: a binding in `rna-bylonder.js` marked `sync` (with its struct in `dna-data.json`, `modifier_dna.py`), which the scene sync writes and reads back; what is not a value goes in the sync's relations. Its operators run through `sync.run` (or `flush` and `writeBack`); it keeps no copy of its own.
+- Its values cross through the same RNA names: a binding in `rna-bylonder.js` marked `sync` (with its struct in `dna-data.json`, `modifier_dna.py`), which the scene sync writes and reads back; what is not a value goes in the sync's relations. Its operators run through `sync.run` (or `flush` and `view`); it keeps no copy of its own.
 
 ### Known limits
 
@@ -201,7 +128,7 @@ alpha and emission color.
 
 Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling (meshes, empties, text, curves, cameras and lights, the Objects Object Mode mirrors) are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel, a Babylon-native value (a node material's input, a store value, a render effect's setting, what project code binds with `animate`), is a custom property (an ID property, `["path"]`) of the ID that stands for its owner (a node material's Material) or of the Scene (`["<owner> <path>"]`), registered with `animatable(owner, path, { get, set, owner })`. Any RNA path of any ID is keyed by Blender's keying (`animrig::insert_keyframes`, `delete_keyframe`, `clear_keyframe`: `BlenderAnimation.keyInsert`, `keyDelete`, `keyClear`), and a channel's keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings. Once Main is evaluated for a frame (`evaluateMain`), a channel takes its custom property's evaluated value; until then it takes its F-Curve's (`evaluate_fcurve`). Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`), and the 3D View's I and Alt I are Blender's `anim.keyframe_insert` and `anim.keyframe_delete_v3d`.
 
-The button under the pointer is the region's active button, as in Blender (`editors/animation/keyframing-button.js`): the User Interface keymap (I, Alt I, Shift Alt I) runs `keyframing.cc`'s button operators on it. A property button of Blender's layout trees runs them in the module with the button marked active (`ui_button_active_set`), and its right click opens Blender's own button context menu (`ui_popup_context_menu_for_button`, `ui_button_context_menu`); a Babylon-only panel's property row keys its channels through the same operators and lists the same items. The scene's time is in Main through the scene sync (`Scene.frame_current` and the rest); what the animation editors' operators change of it, and of the selection, comes back through its `writeBack`.
+The button under the pointer is the region's active button, as in Blender (`editors/animation/keyframing-button.js`): the User Interface keymap (I, Alt I, Shift Alt I) runs `keyframing.cc`'s button operators on it. A property button of Blender's layout trees runs them in the module with the button marked active (`ui_button_active_set`), and its right click opens Blender's own button context menu (`ui_popup_context_menu_for_button`, `ui_button_context_menu`); a Babylon-only panel's property row keys its channels through the same operators and lists the same items. The scene's time is in Main through the scene sync (`Scene.frame_current` and the rest); what the animation editors' operators change of it, and of the selection, comes back through its view (`sync.view`).
 
 The Timeline, Dope Sheet, Graph Editor and Drivers editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph` with its `FCURVES` and `DRIVERS` modes), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus, operator properties), draws the sidebar's panels with the shared panel renderer, and the scene's markers, and draws the main regions as SVG with the theme's colors (`anim-draw.js` on `svg-context.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). The channel region is Blender's own draw (`action_channel_region_draw`, `graph_channel_region_draw`) and the main region's overlay (the current frame, scrollers and the Graph Editor's value scale) its `draw_overlay`, both recorded by `region-draw.cc` (`anim_region_draw`) and replayed by `region-draw.js`: the channels' toggles are its buttons, pressed as Blender's handlers press them, and the block layout of the channel search row (`ED_time_scrub_channel_search_draw`, the DopeSheet's `filter_text` and `use_filter_invert`) is recorded by `panel-layout.cc` and drawn by the shared layout renderer over the region. Each layout runs the region type's `init`, so scrollers, view settings and the regions' keymap handlers are Blender's; the editors' keys still come from Bylonder's keymaps until their areas take Blender's window events (see Window manager). The Graph Editor's sidebar is Blender's C panels: `anim_sidebar_panels` draws each panel type of the region whose poll passes (`graph_buttons.cc`'s Active F-Curve, Active Keyframe, Modifiers, View, Driven Property and Driver panels), header and sub-panels included, and after the Modifiers panel each F-Modifier's instanced panel (`fmodifier_ui.cc`), into `panel-layout.cc`'s recording; `drawSidebarPanels` (`anim-buttons.js`) shows them by category. Raw buttons are recorded where Blender's block puts them (its current layout, `uiItemL_respect_property_split`'s value column): a property's button (`uiDefButR`) is drawn as that property with its unit (`button_unit_type_set`, so a location key's value shows metres and a rotation's degrees) and runs its functions after a set (`panel_button_applied`); the others are pressed (`panel_button_press`: the delete buttons, an Envelope's control points, Add Input Variable). Their properties are read and written through the module's RNA (`makesrna/rna-module.js`, `rna_get` and `rna_set`, a button's clamping to its range): the DNA fields `modifier_dna.py` finds (`dna-fcurve.json` for FCurve, Keyframe, the F-Modifiers, Driver, DriverVariable and DriverTarget, with the struct a modifier's `data` points to and the item tables other RNA files define; `dna-anim.json` for the spaces), and the get, set, range and update functions of `rna_fcurve.cc`'s runtime part, which the module compiles (`wasm/rna-fcurve.cc`) and gives each property by name (`rna_fcurve_funcs.inc`). The spaces' own RNA functions are rna_space.cc's runtime part (`wasm/rna-space.cc`, `rna_space_funcs.inc` from `dna-anim.json`): the Dope Sheet's mode menu sets `ui_mode` with its update. Drivers are made with Blender's `ANIM_add_driver` (`BlenderAnimation.addDriver`); scripted expressions use `expr_pylike_eval.cc`, built without floating point exception flags, which WebAssembly lacks (a division by zero gives infinity rather than an error). Driver values do not reach Babylon's objects yet: that belongs to the one mapping. Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
 
@@ -210,7 +137,7 @@ The Timeline, Dope Sheet, Graph Editor and Drivers editor are Blender's spaces (
 Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outliner/tree` in the module, over the same Main: Blender's code builds the tree (`tree_display_view_layer.cc`, `tree_element_*.cc`), lays it out and draws it (`outliner_draw.cc`), and runs every Outliner operator (`outliner_select.cc`, `outliner_tools.cc`, `outliner_dragdrop.cc`, `outliner_edit.cc`, `outliner_collections.cc`). `tools/blender-port/wasm/outliner-api.cc` makes the area as `ED_area_newspace` does (the space type's own `create`), sets up its main region as `outliner_main_region_init` does, and draws it; JS `editors/space_outliner/outliner-area.js` holds it and `space-outliner.js` is its window manager.
 
 - **Collections are Blender's.** The scene sync keeps Bylonder's collections in Main (children, objects, exclude and visibility flags, the active layer collection), so the View Layer tree, the exclude checkbox and the restriction toggles are Blender's own `layer.cc` results. What an operator changed comes back through `collections.assign`.
-- **Objects come back through the sync** after each operator or button (`writeBack`): the selection and active object from the bases, hidden, the synced flags, names, parents, and objects Blender's code deleted (`outliner.delete`), which are deleted in Bylonder and leave the Scene Collection (`main_collection_master_clean`, since the module's scene is not one of Main's).
+- **Objects come back through the view** after each operator or button (`sync.view`): the selection and active object from the bases, hidden, the synced flags, names, parents, and objects Blender's code deleted (`outliner.delete`), which are deleted in Bylonder and leave the Scene Collection (`main_collection_master_clean`, since the module's scene is not one of Main's).
 - **DNA by name.** `tools/blender-port/modifier_dna.py` also writes `src/makesrna/dna-outliner.json` (Object, Base, Collection, LayerCollection and SpaceOutliner fields, with their RNA icons and enum items), read in place by `makesrna/dna-struct.js`. The header's `space_data` is the module's SpaceOutliner through it.
 - **Drawing.** `region-draw.cc` stands in for the GPU module, BLF and the button layer: `imm*`, the round box, text and icons are recorded as JSON with Blender's coordinates, text is measured by JS (`region_text_width`), and `editors/interface/region-draw.js` draws the recording as SVG (`editors/interface/svg-context.js`): shapes as paths, text in the theme's font, and Blender's SVG icons, a monochrome one as a luminance mask in its color (its coverage, as `blf_glyph_cache_add_svg` gives it). No region is drawn on a canvas and nothing rasterizes icons: the browser does. Buttons (the toggles, the rename field) are recorded with their rectangles; a press runs `ui_apply_but` as Blender's handlers do (`region_button_press`, `region_button_text`), and dragging over a toggle column sets them alike.
 - **Events.** The region makes Blender's event values (PRESS, RELEASE, CLICK, DOUBLE_CLICK within 350 ms, CLICK_DRAG past 3 px) and runs the keymaps of the main region (`Outliner`, `View2D Buttons List`, `Screen`, `Window`) with the Outliner as the context area. Box gestures run through `startGestureBox`; a menu an operator calls (`WM_menu_name_call`, port-override) opens through `drawMenu`.
