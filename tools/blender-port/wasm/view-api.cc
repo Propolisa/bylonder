@@ -14,6 +14,7 @@
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
+#include "DNA_view3d_types.h"
 #include "extraction.hh"
 
 #include <memory>
@@ -69,3 +70,21 @@ EXPORT(view_edit_mesh_extract) const ExtractionHeader *view_edit_mesh_extract(Ob
 }
 /* Its select mode (SCE_SELECT_*), as its overlay draws it. */
 EXPORT(view_edit_mesh_selectmode) int view_edit_mesh_selectmode(Object *ob) { return BKE_editmesh_from_object(ob)->selectmode; }
+
+/* port-override: the module has no GPU select buffer (DRW_select_buffer_*), so the 3D View in the context picks and
+ * selects regions of an edit mesh as Blender does in X-ray, through the view's projection of each element
+ * (mesh_foreachScreenVert and the rest), without occlusion. */
+EXPORT(view_xray_picking) void view_xray_picking(bContext *C)
+{
+  if (View3D *v3d = CTX_wm_view3d(C)) {
+    v3d->shading.flag |= V3D_SHADING_XRAY | V3D_SHADING_XRAY_WIREFRAME;
+  }
+}
+
+namespace blender {
+/* port-override: the GPU module is past the seam (the browser draws), so an operator that sets the region's viewport
+ * and matrices before it projects (view3d_operator_needs_gpu) has none to set: it projects by the view's own. */
+void wmViewport(const rcti * /*winrct*/) {}
+void GPU_matrix_projection_set(const float (*/*m*/)[4]) {}
+void GPU_matrix_set(const float (*/*m*/)[4]) {}
+}  // namespace blender

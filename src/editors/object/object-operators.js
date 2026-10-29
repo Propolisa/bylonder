@@ -42,6 +42,7 @@ export function runBlenderOperator(sync, idname, props, options) {
   };
   sync.begin({ meshes: sync.selected() });
   sync.blender.view = regionView3D(view);
+  options.inView?.();
   return runModal({
     wm: wm(), view, pointer: pointer(), target, idname, props, event, notify,
     step: () => sync.view(),
