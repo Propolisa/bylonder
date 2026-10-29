@@ -812,7 +812,11 @@ static wmOperatorStatus popup_open(Popup popup, const char *title, const char *t
   popup_opened = popup;
   popup_title = title;
   popup_text = text;
-  popup_idname = op ? op->idname : "";
+  char idname[OP_MAX_TYPENAME] = "";
+  if (op) {
+    WM_operator_py_idname(idname, op->idname);
+  }
+  popup_idname = idname;
   popup_values = op ? operator_values_json(op->ptr) : "{}";
   return OPERATOR_INTERFACE;
 }

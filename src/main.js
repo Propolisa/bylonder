@@ -408,7 +408,7 @@ const objectOperatorHost = { transaction: commands.transaction, notify, keying: 
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !world.editMode.active, host: objectOperatorHost,
-  menu: (name, at) => world.callMenu(name, at) });
+  menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 // An armature's Edit and Pose Modes, Blender's in Main.
 world.armatureModes = createArmatureModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
 registerAddOperators(creator);
