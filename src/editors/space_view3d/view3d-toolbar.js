@@ -2,12 +2,10 @@
 // the active mode's tools, which are drawn as Blender draws them: one icon column (two, or icons with their labels,
 // as the region widens), groups whose button shows its last used tool and a corner triangle, opening the group's
 // tools (WM_MT_toolsystem_submenu) on press and hold or drag, the active tool depressed, and tooltips with the tool's
-// description and shortcuts. Buttons run wm.tool_set_by_id.
+// description and shortcuts. Buttons run wm.tool_set_by_id. Its scripts run in the toolbar region's context in Blender's
+// window (the tool system's python()).
 import { pyArgs } from '../../makesrna/rna.js';
-import { drawMenu } from '../interface/ui-layout.js';
-import { useContext } from '../interface/layout.js';
 import { openMenu, closeMenus } from '../interface/menu.js';
-import { registered } from '../../python/bpy_interface.js';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { toolIconUrl } from '../interface/icon.js';
@@ -42,23 +40,22 @@ class ToolbarLayout {
   }
 }
 
-// `context(width)` gives bpy.context for the toolbar at a width, `ui` what drawMenu needs for the flyouts (menuUI),
-// `run(idname, props)` runs an operator, `keys(idname, props, strict)` its shortcut in Blender's keymaps.
-export function createToolbar({ panel, context, ui, run, keys, width = TOOLBAR_SNAP[0], resized = () => {} }) {
+// `python(fn(context))` runs Blender's scripts in the toolbar region's context (wm-toolsystem.js), `run(idname, props)`
+// runs an operator, `keys(idname, props, strict)` its shortcut in Blender's keymaps.
+export function createToolbar({ panel, python, run, keys, width = TOOLBAR_SNAP[0], resized = () => {} }) {
   const el = Object.assign(document.createElement('nav'), { className: 'bl-toolbar' });
   el.setAttribute('aria-label', 'Toolbar');
   const tooltip = Object.assign(document.createElement('div'), { className: 'bl-tooltip', hidden: true });
   const edge = Object.assign(document.createElement('div'), { className: 'bl-region-edge' });
   let tooltipTimer = 0;
 
-  const draw = () => {
-    const ctx = context(width), layout = new ToolbarLayout('column');
-    useContext(ctx);
-    panel.draw_cls(layout, ctx);
+  const draw = () => python((ctx) => {
+    const layout = new ToolbarLayout('column');
     el.style.width = width + 'px';
+    panel.draw_cls(layout, ctx);
     el.classList.toggle('bl-toolbar-text', layout.children.some((c) => c.children?.some((b) => b.text)));
     el.replaceChildren(...layout.children.map((node) => element(node, ctx)), edge);
-  };
+  });
 
   const element = (node, ctx) => {
     if (node.kind === 'label') return Object.assign(document.createElement('span'), { className: 'bl-tool-blank' });
@@ -78,22 +75,21 @@ export function createToolbar({ panel, context, ui, run, keys, width = TOOLBAR_S
     if (node.icon) b.append(Object.assign(document.createElement('img'), { src: toolIconUrl(node.icon), alt: '', draggable: false }));
     if (node.text) b.append(Object.assign(document.createElement('span'), { className: 'bl-tool-label', textContent: node.text }));
     if (node.menu) b.append(Object.assign(document.createElement('span'), { className: 'bl-tool-hold' }));
-    pressable(b, node, ctx);
-    b.onpointerenter = () => { clearTimeout(tooltipTimer); tooltipTimer = setTimeout(() => showTooltip(b, item, ctx), TOOLTIP_DELAY); };
+    pressable(b, node);
+    b.onpointerenter = () => { clearTimeout(tooltipTimer); tooltipTimer = setTimeout(() => python((context) => showTooltip(b, item, context)), TOOLTIP_DELAY); };
     b.onpointerleave = () => { clearTimeout(tooltipTimer); tooltip.hidden = true; };
     return b;
   };
 
   // A click sets the tool; a group's button opens its tools after a hold or once dragged (ui_handle_button_event's
   // hold_action_timer), and a release over one of them sets it.
-  const pressable = (b, node, ctx) => {
+  const pressable = (b, node) => {
     let press = null;
     const open = () => {
       press.opened = true;
       clearTimeout(press.timer);
       tooltip.hidden = true;
-      const items = drawMenu('WM_MT_toolsystem_submenu', { ...ui, menus: { WM_MT_toolsystem_submenu: registered.WM_MT_toolsystem_submenu }, context: () => ({ ...ctx, button_operator: node.props }) });
-      openMenu(items, b, '', { side: true, scale: 2, hold: true });
+      openMenu(python((context) => groupItems(context, node.props.name)), b, '', { side: true, scale: 2, hold: true });
     };
     b.onpointerdown = (e) => {
       if (e.button) return;
@@ -114,6 +110,11 @@ export function createToolbar({ panel, context, ui, run, keys, width = TOOLBAR_S
     };
     b.onclick = (e) => { if (!e.detail) run('wm.tool_set_by_id', { name: node.props.name }); };
   };
+
+  // WM_MT_toolsystem_submenu: the tools of the group a tool is in, with their icons, each setting its tool.
+  const groupItems = (ctx, name) => [...(panel._tool_get_group_by_id(ctx, name, { coerce: true, __kwargtrans__: null }) ?? [])].map((item) => (item
+    ? { label: item.label, image: toolIconUrl(panel._icon_value_from_icon_handle(item.icon)), blender: 'wm.tool_set_by_id:' + item.idname, run: () => run('wm.tool_set_by_id', { name: item.idname }) }
+    : '-'));
 
   // tooltip_data_from_tool: the label (icon-only buttons), the description (description_from_id: the tool's own, else
   // its operator's or its keymap's first operator's), the shortcut setting the tool and the one cycling its group.
@@ -153,9 +154,8 @@ export function createToolbar({ panel, context, ui, run, keys, width = TOOLBAR_S
 
   // wm.toolbar: the tools with their labels in a popup at the mouse (draw_cls without layout detection).
   const popup = (at) => {
-    const ctx = context(width), layout = new ToolbarLayout('column');
-    useContext(ctx);
-    panel.draw_cls(layout, ctx, { detect_layout: false, scale_y: 1, __kwargtrans__: null });
+    const layout = new ToolbarLayout('column');
+    python((ctx) => panel.draw_cls(layout, ctx, { detect_layout: false, scale_y: 1, __kwargtrans__: null }));
     const items = layout.children.flatMap((column) => ['-', ...column.children.filter((b) => b.kind === 'button').map((b) => ({
       label: b.text, image: toolIconUrl(b.icon), checked: undefined, blender: 'wm.tool_set_by_id:' + b.props.name,
       run: () => run('wm.tool_set_by_id', { name: b.props.name }),

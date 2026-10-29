@@ -650,6 +650,27 @@ static Layout &menu_layout(const bContext *C, Block *block)
   return block_layout(block, LayoutDirection::Vertical, LayoutType::Menu, 0, 0, 200, 0, UI_MENU_PADDING, style_get_dpi());
 }
 
+/* How the next menus are laid out: for a search, as menu search lays out each menu it lists
+ * (interface_template_search_menu.cc: the context's is_menu_search, which menus that draw differently in a search
+ * read), and as a popup (wm.call_menu), whose operators execute (ui_popup_menu_create_block). */
+enum { MENU_SEARCH = 1 << 0, MENU_POPUP = 1 << 1 };
+static int menu_mode = 0;
+EXPORT(ui_menu_mode_set) void ui_menu_mode_set(int mode) { menu_mode = mode; }
+static void menu_draw_context(bContext *C, FunctionRef<void()> draw)
+{
+  static const bContextStore search_store = [] {
+    bContextStore store;
+    store.entries.append({"is_menu_search", true});
+    return store;
+  }();
+  const bContextStore *previous = CTX_store_get(C);
+  if (menu_mode & MENU_SEARCH) {
+    CTX_store_set(C, &search_store);
+  }
+  draw();
+  CTX_store_set(C, previous);
+}
+
 /* A menu type drawn as its menu shows it (menutype_draw: its poll, draw and the draw functions added to it), or an
  * empty string for a menu type Blender does not have. The menus before it go. */
 EXPORT(ui_menu) const char *ui_menu(bContext *C, const char *name)
@@ -661,7 +682,11 @@ EXPORT(ui_menu) const char *ui_menu(bContext *C, const char *name)
   }
   menu_free(C, name);
   Block *block = menu_block_new(C, name, EmbossType::Pulldown, name);
-  menutype_draw(C, mt, &menu_layout(C, block));
+  Layout &layout = menu_layout(C, block);
+  if (menu_mode & MENU_POPUP) {
+    layout.operator_context_set(wm::OpCallContext::ExecRegionWin);
+  }
+  menu_draw_context(C, [&] { menutype_draw(C, mt, &layout); });
   block_layout_resolve(block);
   json = menu_json(C, block);
   return json.c_str();
@@ -686,13 +711,13 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
     Panel panel = {};
     panel.type = pt;
     panel.layout = &layout;
-    pt->draw(C, &panel);
+    menu_draw_context(C, [&] { pt->draw(C, &panel); });
     block_layout_resolve(block);
     json = menu_json(C, block);
   }
   else if (but->menu_create_func) {
     Block *block = menu_block_new(C, but->str.c_str(), EmbossType::Pulldown, root);
-    but->menu_create_func(C, &menu_layout(C, block), but->poin);
+    menu_draw_context(C, [&] { but->menu_create_func(C, &menu_layout(C, block), but->poin); });
     block_layout_resolve(block);
     json = menu_json(C, block);
   }

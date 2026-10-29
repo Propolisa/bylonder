@@ -8,7 +8,7 @@
 // API, for any editor that draws Blender's trees:
 //   h(BlockView, { tree, ui })          a layout tree
 //   h(PanelsView, { panels, ui })       a region's panels (ui-tree.js regionPanels)
-//   treeMenu(tree, ui)                  a menu tree as menu.js entries
+//   treeMenu(tree, ui)                  a menu tree as menu.js entries (tree-menu.js)
 // `ui`: { inContext(fn(C)): runs fn with the region's context, refresh(), undoPush(name), run(idname, props, event),
 //   keys(idname, props): a shortcut, panelClosed(id, closed), report(error), button(b): a property button as the
 //   active button its keymap and context menu act on (keyframing-button.js blenderButton) }
@@ -18,8 +18,8 @@ import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
-import { buttonMenu, buttonPress, buttonApplied, buttonValueSet, buttonTextSet, buttonOperator } from './ui-tree.js';
-import { runsOperator } from '../../windowmanager/wm-operators.js';
+import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet } from './ui-tree.js';
+import { treeMenu, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
@@ -53,11 +53,6 @@ function setRna(b, value, ui, finish = true) {
     ui.report?.(error);
   }
 }
-const press = (b, ui, value = -1) => {
-  ui.inContext((C) => buttonPress(C, b, value));
-  ui.undoPush(b.text || b.tip || b.type);
-  ui.refresh();
-};
 
 // What a button opens, laid out by the module: a popover's panel below the button, else a menu.
 function open(b, ui, event) {
@@ -67,35 +62,6 @@ function open(b, ui, event) {
   openMenu(treeMenu(tree, ui), event.currentTarget, b.type === 'MENU' ? b.text : undefined);
 }
 
-// A menu tree's items as menu.js entries: operators, toggles and enum items, labels as headings, separators and
-// sub-menus, opened when shown.
-export function treeMenu(tree, ui) {
-  const items = [];
-  const visit = (node) => {
-    if (node.kind !== 'button') return node.children?.forEach(visit);
-    // A menu's entry shows its shortcut after UI_SEP_CHAR (ui_menu_block_set_keymaps).
-    const [text, shortcut] = (node.text || node.display || '').split('|');
-    const iconName = node.icon && node.icon !== 'NONE' ? node.icon : undefined;
-    switch (node.type) {
-      case 'SEPR': case 'SEPR_LINE': items.push('-'); break;
-      case 'SEPR_SPACER': break;
-      case 'LABEL': if (text) items.push({ heading: text }); break;
-      case 'PULLDOWN': case 'MENU': case 'POPOVER': case 'BLOCK':
-        items.push({ label: text, icon: iconName, blender: node.menu, items: () => treeMenu(ui.inContext((C) => buttonMenu(C, node)) ?? { children: [] }, ui) });
-        break;
-      default:
-        items.push({
-          label: text, icon: iconName, title: node.tip, blender: node.operator,
-          enabled: () => !node.disabled,
-          ...(['TOGGLE', 'TOGGLE_N', 'ICON_TOGGLE', 'ICON_TOGGLE_N', 'CHECKBOX', 'CHECKBOX_N', 'ROW'].includes(node.type) && { checked: () => !!node.selected }),
-          ...(node.operator && { keys: shortcut ?? ui.keys?.(node.operator, node.properties ?? {}) }),
-          run: (event) => (node.operator ? runOperator(node, ui, event) : press(node, ui)),
-        });
-    }
-  };
-  visit(tree);
-  return items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && i < all.length - 1));
-}
 
 // A popover's panel, below the button that opened it; a press outside closes it.
 function openPopover(tree, ui, owner) {
@@ -136,14 +102,6 @@ function buttonNode(b, env) {
     onContextmenu: (e) => { e.preventDefault(); button.menu(e); } });
 }
 
-// An operator button: run by Bylonder's registry where it has the operator, else by Blender's handlers in the module,
-// the button active (template_ID's New assigns what it makes).
-const OPERATOR_FINISHED = 4;
-function runOperator(b, ui, event) {
-  if (runsOperator(b.operator)) return ui.run(b.operator, b.properties ?? {}, event);
-  const status = ui.inContext((C) => buttonOperator(C, b));
-  return status & OPERATOR_FINISHED ? ui.undoPush(b.tip || b.operator) : ui.refresh();
-}
 
 function widgetNode(b, env) {
   const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
@@ -246,6 +204,8 @@ function layoutPanelHeader(node, env) {
 }
 
 const rootEnv = (ui, extra = {}) => ({ ui, active: true, enabled: true, root: true, ...extra });
+
+export { treeMenu };
 
 export const BlockView = defineComponent({
   name: 'BlockView',

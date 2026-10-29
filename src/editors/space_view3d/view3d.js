@@ -9,7 +9,7 @@ import { menus } from '../../python/bpy_interface.js';
 import { view_3d, user_interface, cssColor } from '../interface/userdef-default-theme.js';
 import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
-import { treeMenu } from '../interface/block-view.js';
+import { treeMenu } from '../interface/tree-menu.js';
 import { menuTree, menuLabel } from '../interface/ui-tree.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
@@ -112,8 +112,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   // The toolbar region, Blender's tool system's.
   const toolbar = createToolbar({
-    panel: world.toolsystem.panel, ui: blender, run: blender.run,
-    context: (width) => world.blenderContext(view, { type: 'TOOLS', width }),
+    panel: world.toolsystem.panel, run: blender.run, python: (fn) => world.toolsystem.python(fn, view),
     keys: (idname, props, strict) => blenderKeys(['Object Mode', 'Mesh', ...KEYMAPS], idname, props, strict),
   });
   section.append(toolbar.el);

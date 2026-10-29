@@ -15,6 +15,18 @@ export const regionPanels = (C) => json(x.ui_region_panels(C));
 export const regionHeader = (C) => json(x.ui_region_header(C));
 export const menuTree = (C, name) => withString(name, (p) => json(x.ui_menu(C, p)));
 export const menuLabel = (name) => withString(name, (p) => cString(x.menu_type_label(p)));
+// `fn` with the menus it lays out drawn for a menu search (the context's is_menu_search) or as a popup (wm.call_menu).
+export const MENU_SEARCH = 1, MENU_POPUP = 2;
+let menuMode = 0;
+export function inMenuMode(mode, fn) {
+  const previous = menuMode;
+  x.ui_menu_mode_set(menuMode = mode);
+  try {
+    return fn();
+  } finally {
+    x.ui_menu_mode_set(menuMode = previous);
+  }
+}
 export const buttonMenu = (C, button) => json(x.ui_button_menu(C, button.id));
 export const categorySet = (C, name) => withString(name, (p) => x.ui_category_set(C, p));
 export const panelClosedSet = (C, idname, closed) => withString(idname, (p) => x.ui_panel_closed_set(C, p, closed));

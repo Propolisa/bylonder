@@ -156,6 +156,15 @@ bool operator_property_set(PointerRNA *ptr, const char *name, const double *numb
   return true;
 }
 
+static std::string json_quoted(const std::string &text)
+{
+  std::string json = "\"";
+  for (const char c : text) {
+    json += c == '"' || c == '\\' ? std::string{'\\', c} : std::string{c};
+  }
+  return json + "\"";
+}
+
 std::string operator_values_json(PointerRNA *ptr)
 {
   std::string json = "{";
@@ -171,7 +180,7 @@ std::string operator_values_json(PointerRNA *ptr)
     const PropertyType type = RNA_property_type(prop);
     json += (json.size() > 1 ? ",\"" : "\"") + std::string(RNA_property_identifier(prop)) + "\":";
     if (type == PROP_STRING) {
-      json += "\"" + std::string(RNA_property_string_get(ptr, prop)) + "\"";
+      json += json_quoted(RNA_property_string_get(ptr, prop));
     }
     else if (type == PROP_POINTER) {
       if (STREQ(RNA_property_identifier(prop), "rna_type")) {
@@ -181,6 +190,15 @@ std::string operator_values_json(PointerRNA *ptr)
       /* A macro's operator's properties. */
       PointerRNA values = RNA_property_pointer_get(ptr, prop);
       json += values.data ? operator_values_json(&values) : "null";
+    }
+    else if (type == PROP_COLLECTION) {
+      /* A CollectionProperty's items (node.add_node's settings). */
+      json += "[";
+      RNA_PROP_BEGIN (ptr, item, prop) {
+        json += (json.back() == '[' ? "" : ",") + operator_values_json(&item);
+      }
+      RNA_PROP_END;
+      json += "]";
     }
     else if (type == PROP_ENUM) {
       const char *identifier = nullptr;

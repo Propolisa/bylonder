@@ -1,12 +1,12 @@
 // The Top Bar's menus (space_topbar.py's TOPBAR_MT_editor_menus) laid out by Blender in a Top Bar area of the scene
-// window, where Main is, for the app page's topbar (workspace/topbar.js), which draws them as block-view.js's menus with
+// window, where Main is, for the app page's topbar (workspace/topbar.js), which draws them as tree-menu.js's menus with
 // this area's `ui`.
 // The app page's own operators and menu entries come in through host(): its operators Blender and the scene lack
 // become the scene's (and so Blender's operator types), and its draw functions are Menu.append's.
 import { markRaw } from 'vue';
 import { AnimArea, RGN_TYPE_HEADER } from '../animation/anim-area.js';
 import { menuTree } from '../interface/ui-tree.js';
-import { treeMenu } from '../interface/block-view.js';
+import { treeMenu } from '../interface/tree-menu.js';
 import { invokeOperator, registerOperator, runsOperator, appendMenu, prependMenu } from '../../windowmanager/wm-operators.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 
