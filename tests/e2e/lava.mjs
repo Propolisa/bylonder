@@ -46,9 +46,11 @@ export async function lavaMaterial(app) {
     await app.page.keyboard.type(name);
     await app.frame().locator(".bl-menu.searching").getByRole("menuitem", { name }).first().waitFor();
     await app.page.keyboard.press("Enter");
+    // The new node follows the mouse until a click places it; a click before it exists would be lost.
+    await app.frame().locator("[data-node]").nth(count).waitFor();
+    await app.settled();
     await app.page.mouse.move(at[0] + 4, at[1] + 4);
     await app.page.mouse.click(at[0] + 4, at[1] + 4);
-    await app.frame().locator("[data-node]").nth(count).waitFor();
     await app.settled();
   };
   await add("Texture Coordinate", 0.02, 0.2);
