@@ -305,8 +305,7 @@ export function createMainView(state) {
         if (base?.selected) (base.active ? active : chosen).push(node);
       }
       selection.replace([...chosen, ...active]);
-      for (const [material, record] of materials) pull(record, material);
-      for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
+      pullShading();
       pullTextures();
       for (const record of state.sceneRecords()) pull(record, world);
       blender.evaluate();
@@ -319,6 +318,20 @@ export function createMainView(state) {
     world.modifiers?.refresh();
   }
 
+  // Materials and worlds as Main holds them: their values and their node trees' inputs, Babylon's derived from them.
+  function pullShading() {
+    const owners = [...[...materials].map(([material, record]) => [record, record.ma, material, 'Material']),
+      ...[...worlds].map(([id, record]) => [record, record.wo, world.worlds.byId(id), 'World'])];
+    for (const [record, id, owner, struct] of owners) {
+      if (!owner) continue;
+      pull(record, owner);
+      const data = rna.pointer(struct, owner);
+      // A node material's graph is Babylon's; Main holds a stand-in of it.
+      if (struct === 'Material' && world.materials?.type(owner) === 'node') continue;
+      pullTree(id, data);
+      record.tree = state.treeSignature(data);
+    }
+  }
   // Babylon drawn from Main's evaluated values (after a frame change evaluated Blender's animation), by kind: every
   // object's and its data's values (a light's, a camera's), an armature's pose, materials' and worlds' values and node
   // tree inputs, the scene's settings. Nothing comes or goes, and no geometry changes.
@@ -330,15 +343,7 @@ export function createMainView(state) {
         if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
         if (entry.type === 'ARMATURE') pullArmature(entry);
       }
-      const trees = [...[...materials].map(([material, record]) => [record, record.ma, material, 'Material']),
-        ...[...worlds].map(([id, record]) => [record, record.wo, world.worlds.byId(id), 'World'])];
-      for (const [record, id, owner, struct] of trees) {
-        if (!owner) continue;
-        pull(record, owner);
-        const data = rna.pointer(struct, owner);
-        pullTree(id, data);
-        record.tree = state.treeSignature(data);
-      }
+      pullShading();
       for (const record of state.sceneRecords()) pull(record, world);
     } finally {
       state.applying = false;
