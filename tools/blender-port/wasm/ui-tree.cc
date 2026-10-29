@@ -235,7 +235,7 @@ static void button_json(std::ostringstream &out, Button *but)
         << (align & BUT_ALIGN_LEFT ? "L" : "") << (align & BUT_ALIGN_RIGHT ? "R" : "") << '"';
   }
   if (but->rnaprop) {
-    rna_json(out, "rna", but->rnapoin, but->rnaprop, but->rnaindex);
+    rna_json(out, "rna", but->rnapoin, but->rnaprop, RNA_property_array_check(but->rnaprop) ? but->rnaindex : -1);
     if (ELEM(but->type, ButtonType::Row, ButtonType::ListRow)) {
       out << ",\"value\":" << but->hardmax;
     }

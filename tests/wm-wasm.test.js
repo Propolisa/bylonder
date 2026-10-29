@@ -63,6 +63,12 @@ assert.deepEqual(confirmed.finished, [{ idname: 'TRANSFORM_OT_translate', undo: 
 const moveTo = main.invoke('object.move_to_collection', {}, { type: 'M', value: 'PRESS', x: 10, y: 10 }).popup;
 assert.equal(moveTo?.title, 'Move to Collection');
 assert.ok(moveTo.text.includes('New Collection') && !moveTo.text.includes('"disabled":true'), 'its items poll');
+const uid = Number(moveTo.text.match(/collection_uid\D+(\d+)/)[1]);
+const newCollection = main.invoke('object.move_to_collection', { collection_uid: uid, is_new: true }, { type: 'M', value: 'PRESS' });
+const nameButton = JSON.parse(newCollection.popup.text).layout.children.flatMap(function buttons(node) { return [node, ...(node.children ?? []).flatMap(buttons)]; })
+  .find((node) => node.type === 'TEXT');
+assert.equal(nameButton.rna.index, -1, "the name field's property is no array, so the page sets it whole");
+main.finishPopup(newCollection.dialog, false);
 
 // The view Object Mode's operators act in (main.view) is an area of the window's screen too, whose gizmo map stands in
 // for the page's: Blender's event handling reads it after a press it checked for a drag (Ctrl, then P's click).
