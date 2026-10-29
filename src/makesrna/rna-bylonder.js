@@ -275,7 +275,13 @@ const STRUCTS = {
     mode: (ob, r) => (editing(ob, r) ? 'EDIT' : ob.metadata?.wbMode ?? 'OBJECT'),
     data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)]?.(ob), ob),
     location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position'), sync: true },
-    rotation_mode: synced((ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ')),
+    // Babylon has a quaternion or its own Euler order (Blender's YXZ), so setting it switches between the two only.
+    rotation_mode: synced({ get: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ'), set: (ob, mode) => {
+      if ((mode === 'QUATERNION') === !!ob.rotationQuaternion) return;
+      const rotation = babylonQuaternion(ob);
+      ob.rotationQuaternion = mode === 'QUATERNION' ? rotation : null;
+      if (!ob.rotationQuaternion) ob.rotation.copyFrom(rotation.toEulerAngles());
+    } }),
     rotation_euler: { ...array((ob) => (looksAlongZ(ob) ? lookingRotation.get(ob) : eulerFromBabylon(babylonEuler(ob))), (ob, value) => {
       if (looksAlongZ(ob)) return lookingRotation.set(ob, value);
       const { x, y, z } = eulerToBabylon(value);

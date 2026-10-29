@@ -65,17 +65,17 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     selection = next;
   }
 
-  // What Blender's code changed, back into the scene.
-  function writeBack() {
-    scene.writeBack();
+  // What Blender's code changed, drawn.
+  function drawn() {
+    scene.view();
     selection = selected();
   }
 
   // An operator's run ended: what it changed comes back, as one undo step when its type makes one.
   function finished({ status, undo }) {
     if (status & OPERATOR_FINISHED) {
-      if (undo) commands.transaction(writeBack);
-      else writeBack();
+      if (undo) commands.transaction(drawn);
+      else drawn();
     }
     openCalledMenu();
     draw();
@@ -228,7 +228,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     sync();
     const value = area.press(button.index, { modifier: modifierOf(wmEvent(e, 'LEFTMOUSE', 'PRESS')) });
     if (button.flag & BUT_DRAG_LOCK) dragToggle = { value, type: button.type, column: button.rect[0], pressed: new Set([button.index]) };
-    commands.transaction(writeBack);
+    commands.transaction(drawn);
     draw();
   }
   function continueDragToggle(e) {
@@ -238,7 +238,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     if (button.selected !== dragToggle.value) {
       sync();
       area.press(button.index, { value: Number(dragToggle.value) });
-      commands.transaction(writeBack);
+      commands.transaction(drawn);
       draw();
     }
   }
@@ -266,7 +266,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     field.remove();
     sync();
     area.editText(Number(field.dataset.index), apply ? field.value : null);
-    if (apply) commands.transaction(writeBack);
+    if (apply) commands.transaction(drawn);
     draw();
     view.focus({ preventScroll: true });
   }

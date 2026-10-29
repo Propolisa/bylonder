@@ -44,7 +44,7 @@ export function runBlenderOperator(sync, idname, props, options) {
   sync.blender.view = regionView3D(view);
   return runModal({
     wm: wm(), view, pointer: pointer(), target, idname, props, event, notify,
-    step: () => sync.writeBack(),
+    step: () => sync.view(),
     end: (status) => {
       sync.end();
       if (status & OPERATOR_FINISHED) commit();

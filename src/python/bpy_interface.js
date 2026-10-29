@@ -4,6 +4,7 @@ import { loadRNAUI } from '../makesrna/rna.js';
 import { invokeOperator, runOperator, pollOperator, hasOperator, registerOperator } from '../windowmanager/wm-operators.js';
 import { report } from '../windowmanager/wm-reports.js';
 import { set } from '../bl_py/org.transcrypt.__runtime__.js';
+import { registerClass } from './bpy_rna.js';
 
 
 // Blender's scripts read RNA's enums as they load. Vite serves JSON as a module, without Node's import attribute.
@@ -24,6 +25,18 @@ globalThis.__bylonder_operators__ = {
 
 // Registered classes by Blender's idname (VIEW3D_MT_object, PROPERTIES_PT_context_object, OBJECT_OT_...).
 export const registered = _bpy.registered;
+
+// Blender's panels, menus, headers and lists become Blender's types in the module, in the order the scripts register
+// them, as register_class makes them (bpy_rna.js), so Blender's regions lay them out.
+const REGISTERED_TYPES = /_(PT|MT|HT|UL)_/;
+for (const [idname, cls] of Object.entries(registered)) {
+  if (!REGISTERED_TYPES.test(idname)) continue;
+  try {
+    registerClass(cls);
+  } catch (error) {
+    console.error(`Python: register_class(${idname}):`, error.__args__?.[0] ?? error);
+  }
+}
 const ofKind = (kind) => Object.fromEntries(Object.entries(registered).filter(([idname]) => idname.includes(kind)));
 export const menus = ofKind('_MT_');
 export const panels = ofKind('_PT_');
