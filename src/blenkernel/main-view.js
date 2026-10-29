@@ -233,8 +233,8 @@ export function createMainView(state) {
     if (background && background.inputs.Strength !== 1) warnings.push(`World "${blender.name(wo)}": its strength opens as 1`);
     ids.adopted.set('world', wo);
   }
-  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types.
-  function pullTree(id, data, label, warnings) {
+  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types, where they differ.
+  function pullTree(id, data, label, warnings = []) {
     const held = blender.nodeTree(id).nodes, mapped = new Set(['ShaderNodeOutputMaterial', 'ShaderNodeOutputWorld']);
     const visit = (node) => {
       mapped.add(node[INFO].struct);
@@ -242,7 +242,7 @@ export function createMainView(state) {
       for (const input of node.inputs) {
         if (input.is_linked) { visit(input.links[0].from_node); continue; }
         const value = from?.inputs[input.identifier];
-        if (value !== undefined && input[INFO].bound.has('default_value')) input.default_value = value;
+        if (value !== undefined && input[INFO].bound.has('default_value') && !same(plain(input.default_value), plain(value))) input.default_value = value;
       }
     };
     visit(data.node_tree.get_output_node());
@@ -319,7 +319,33 @@ export function createMainView(state) {
     world.modifiers?.refresh();
   }
 
+  // Babylon drawn from Main's evaluated values (after a frame change evaluated Blender's animation), by kind: every
+  // object's and its data's values (a light's, a camera's), an armature's pose, materials' and worlds' values and node
+  // tree inputs, the scene's settings. Nothing comes or goes, and no geometry changes.
+  function evaluated() {
+    state.applying = true;
+    try {
+      for (const entry of objects.values()) {
+        pull(entry, entry.node);
+        if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
+        if (entry.type === 'ARMATURE') pullArmature(entry);
+      }
+      const trees = [...[...materials].map(([material, record]) => [record, record.ma, material, 'Material']),
+        ...[...worlds].map(([id, record]) => [record, record.wo, world.worlds.byId(id), 'World'])];
+      for (const [record, id, owner, struct] of trees) {
+        if (!owner) continue;
+        pull(record, owner);
+        const data = rna.pointer(struct, owner);
+        pullTree(id, data);
+        record.tree = state.treeSignature(data);
+      }
+      for (const record of state.sceneRecords()) pull(record, world);
+    } finally {
+      state.applying = false;
+    }
+  }
+
   return {
-    pull, view, adopt, adoptScene, drawData,
+    pull, view, adopt, adoptScene, drawData, evaluated,
   };
 }
