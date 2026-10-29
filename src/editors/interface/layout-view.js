@@ -4,7 +4,7 @@
 // sub-panels and open state as interface_panel.cc does.
 //
 // API, for any editor that draws Blender's layouts:
-//   h(LayoutView, { layout, ui })           a recorded layout tree (a UILayout, or a C++ panel's tree, modifier-panel.js)
+//   h(LayoutView, { layout, ui })           a recorded layout tree (a UILayout)
 //   h(PanelView, { panel, ui })            a panel drawPanels() drew, with its sub-panels
 //   h(RegionView, { panels, ui })          a region's panels, in order
 // `ui` is what the widgets need from the editor:

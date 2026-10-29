@@ -9,6 +9,8 @@ import { menus } from '../../python/bpy_interface.js';
 import { view_3d, user_interface, cssColor } from '../interface/userdef-default-theme.js';
 import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
+import { treeMenu } from '../interface/block-view.js';
+import { menuTree, menuLabel } from '../interface/ui-tree.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 import { createToolOverlay } from '../../draw/overlay-tool.js';
@@ -126,15 +128,20 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
   // A Blender menu's items in this view's mode: Mesh Edit Mode's are its own; its Add menu adds Bylonder's primitives.
   const menuItems = (idname) => (!editMesh() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname));
-  // A Blender menu for wm.call_menu in this view: its items and title, or null without one.
-  view.menu = (idname) => (blender.menus[idname] ? { items: () => menuItems(idname), title: blender.menus[idname].bl_label ?? '' } : null);
+  // A Blender menu for wm.call_menu in this view: its items and title, or null without one. Blender lays it out in the
+  // view's area outside mesh Edit Mode.
+  view.menu = (idname) => {
+    if (editMesh()) return blender.menus[idname] ? { items: () => menuItems(idname), title: blender.menus[idname].bl_label ?? '' } : null;
+    const ui = regions.blenderUI, tree = ui.inContext((C) => menuTree(C, idname));
+    return tree ? { items: () => treeMenu(tree, ui), title: menuLabel(idname) } : null;
+  };
   const headerUI = {
     ...blender,
     run: (idname, props, event) => (idname === 'mesh.select_mode' ? world.editMode.setSelectMode(props.type, !!event?.shiftKey) : blender.run(idname, props)),
     supported: (idname, props) => idname === 'mesh.select_mode' || blender.supported(idname, props),
   };
   const regions = createRegions({
-    view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
+    view, area: (layout) => world.view3dArea(view, layout), scene: world.mainSync, legacy: editMesh, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
     ui: headerUI,
     menu: menuItems,
     templates: { template_header_3D_mode: () => (editMesh() ? selectModeLayout(world.editMode.selectmode) : null) },

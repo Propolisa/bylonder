@@ -41,6 +41,9 @@ void buttons_context_compute(const bContext *C, SpaceProperties *sbuts);
 
 namespace blender::ui {
 
+/* A popup menu's laid out block, as the running invoke's popup (anim-api.cc). */
+void popup_layout_open(const std::string &title, const std::string &layout);
+
 /* What interface_layout.cc's ButtonItem and LayoutRoot hold (it defines the structs privately). */
 struct RecordedItem : public Item {
   Button *but;
@@ -603,9 +606,10 @@ EXPORT(ui_region_header) const char *ui_region_header(bContext *C)
 
 /* Menus and popovers. */
 
-static std::string menu_json(Block *block)
+/* The block ended in the context it was made in, where its operator buttons poll. */
+static std::string menu_json(const bContext *C, Block *block)
 {
-  block_end(nullptr, block);
+  block_end(C, block);
   return block_json(block, "menu");
 }
 
@@ -628,7 +632,7 @@ EXPORT(ui_menu) const char *ui_menu(bContext *C, const char *name)
   Block *block = block_new(C, name, EmbossType::Pulldown, OWNED_MENU);
   menutype_draw(C, mt, &menu_layout(C, block));
   block_layout_resolve(block);
-  json = menu_json(block);
+  json = menu_json(C, block);
   return json.c_str();
 }
 EXPORT(menu_type_label) const char *menu_type_label(const char *name)
@@ -652,13 +656,13 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
     panel.layout = &layout;
     pt->draw(C, &panel);
     block_layout_resolve(block);
-    json = menu_json(block);
+    json = menu_json(C, block);
   }
   else if (but->menu_create_func) {
     Block *block = block_new(C, but->str.c_str(), EmbossType::Pulldown, OWNED_MENU);
     but->menu_create_func(C, &menu_layout(C, block), but->poin);
     block_layout_resolve(block);
-    json = menu_json(block);
+    json = menu_json(C, block);
   }
   else if (but->block_create_func) {
     Block *block = but->block_create_func(C, CTX_wm_region(C), but->poin ? static_cast<void *>(but->poin) : but->func_argN);
@@ -666,7 +670,7 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
     if (block_layout_needs_resolving(block)) {
       block_layout_resolve(block);
     }
-    json = menu_json(block);
+    json = menu_json(C, block);
   }
   else {
     json = "";
@@ -711,6 +715,22 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
   button_update(but);
   return (but->flag & UI_SELECT) ? 1 : 0;
 }
+/* An operator button pressed, as ui_apply_but_funcs_after runs it: its operator in the button's context with the button
+ * active (template_ID's New assigns what it makes to the template's property), then the button's functions. Returns the
+ * operator's wmOperatorStatus. */
+EXPORT(ui_button_operator) int ui_button_operator(bContext *C, Button *but)
+{
+  const bContextStore *previous = CTX_store_get(C);
+  if (but->context) {
+    CTX_store_set(C, but->context);
+  }
+  but->flag |= BUT_ACTIVE_OVERRIDE;
+  const wmOperatorStatus status = WM_operator_name_call_ptr(C, but->optype, but->opcontext, but->opptr, nullptr);
+  but->flag &= ~BUT_ACTIVE_OVERRIDE;
+  CTX_store_set(C, previous);
+  button_applied(C, but);
+  return int(status);
+}
 /* After JS set a property button's value through RNA: its functions, as after a press. */
 EXPORT(ui_button_applied) void ui_button_applied(bContext *C, Button *but) { button_applied(C, but); }
 /* A number or text button without RNA (a value of Blender's code, but->poin): set as the button sets it. */
@@ -736,7 +756,6 @@ EXPORT(ui_button_text_set) void ui_button_text_set(bContext *C, Button *but, con
 
 /* Popups. */
 
-void popup_layout_open(const std::string &title, const std::string &layout);
 
 /* port-override: a popup menu Blender's code builds (popup_menu_begin to popup_menu_end) is drawn by Bylonder's window
  * manager: its block is laid out by Blender and handed over as the invoke's popup. */
@@ -753,10 +772,10 @@ PopupMenu *popup_menu_begin_ex(bContext *C, const char *title, const char *block
 }
 PopupMenu *popup_menu_begin(bContext *C, const char *title, int icon) { return popup_menu_begin_ex(C, title, __func__, icon); }
 Layout *popup_menu_layout(PopupMenu *pup) { return pup->layout; }
-void popup_menu_end(bContext * /*C*/, PopupMenu *pup)
+void popup_menu_end(bContext *C, PopupMenu *pup)
 {
   block_layout_resolve(pup->block);
-  popup_layout_open(pup->title, menu_json(pup->block));
+  popup_layout_open(pup->title, menu_json(C, pup->block));
   MEM_delete(pup);
 }
 bool popup_menu_end_or_cancel(bContext *C, PopupMenu *pup)
@@ -780,7 +799,7 @@ std::string operator_props_layout(bContext *C, wmOperator *op)
   layout.use_property_decorate_set(false);
   uiTemplateOperatorPropertyButs(C, &layout, op, BUT_LABEL_ALIGN_NONE, 0);
   block_layout_resolve(block);
-  return menu_json(block);
+  return menu_json(C, block);
 }
 
 }  // namespace blender::ui

@@ -113,6 +113,29 @@ const checks = {
     for (const item of ["Insert Keyframes", "Reset All to Default Values", "Copy Data Path"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
   },
 
+  // docs/model.md 7: I over a material's color in the Properties editor (Viewport Display's Color, diffuse_color)
+  // keys it in Main with the button operator on the button under the pointer, at the frames the Timeline sets.
+  // (Drawing the evaluated albedo waits for Main-owned materials: Babylon's albedo follows the Principled BSDF's Base
+  // Color, which the Surface panel shows once Main's node trees are Blender's own; tests/animate-material.test.js.)
+  async "I over a material's color in the Properties editor keys it at the Timeline's frames"() {
+    await app.click();
+    const properties = app.locator("#properties-section"), tabs = properties.locator('[data-blender="context"]');
+    const viewport = properties.locator('[data-blender="MATERIAL_PT_viewport"]');
+    for (let i = (await tabs.count()) - 1; i >= 0 && !(await viewport.count()); i--) await tabs.nth(i).click();
+    await viewport.locator("header").click();
+    const color = properties.locator('[data-blender="diffuse_color"]').first();
+    const keyAt = async (frame) => {
+      await typeInto('[role="spinbutton"][aria-label="Current Frame"]', String(frame));
+      await color.hover();
+      await app.page.keyboard.press("i");
+    };
+    await keyAt(1);
+    await keyAt(21);
+    const keys = await app.bylonder((b) => b.world.animation.anim.fcurves(b.world.mainSync.materialOf(b.world.scene.getMeshByName("Cube").material))
+      .map((f) => `${f.rna_path}[${f.array_index}] ${f.keys.map((k) => k.co[0]).join(",")}`));
+    assert.deepEqual(keys, [0, 1, 2, 3].map((i) => `diffuse_color[${i}] 1,21`));
+  },
+
   // The HUD region's panel draws the operator's RNA properties; a change re-runs it.
   async "Add > Cylinder shows Adjust Last Operation, whose Vertices rebuild it"() {
     await app.click(0.3, 0.3);
@@ -534,7 +557,7 @@ const checks = {
     await app.page.keyboard.type("bpy.ops.mesh.primitive_cube_add()");
     await app.page.keyboard.press("Enter");
     await app.until((b, n) => b.world.objects.length > n, before);
-    await app.until(() => /bpy\.ops\.mesh\.primitive_cube_add\(/.test(document.querySelector(".bl-info").textContent));
+    await app.until(() => /bpy\.ops\.mesh\.primitive_cube_add\(/.test(document.querySelector('[data-blender="INFO"]').textContent));
     await textEditor.hover();
     await app.page.keyboard.press("Alt+n");
     await app.page.keyboard.type("import bpy\nbpy.context.object.location.x = 2\n");
@@ -568,6 +591,13 @@ async function screenOf([bx, by, bz]) {
     return [p.x / width, p.y / height];
   }, [bx, by, bz]);
   return app.point(fx, fy);
+}
+
+async function typeInto(selector, value) {
+  await app.locator(selector).first().click();
+  await app.page.keyboard.press("Control+A");
+  await app.page.keyboard.type(value);
+  await app.page.keyboard.press("Enter");
 }
 
 async function rightClick(x, y) {

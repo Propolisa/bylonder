@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { registered } from '../src/python/bpy_interface.js';
-import { blendData, contextStruct, setContextPointer, registerClass, structFind, structRna } from '../src/python/bpy_rna.js';
+import { blendData, contextStruct, setContextPointer, registerClass, structFind, structRna, inPythonContext } from '../src/python/bpy_rna.js';
+import { api } from '../src/python/pyodide.js';
 import { __class__, __kwargtrans__ } from '../src/bl_py/org.transcrypt.__runtime__.js';
 
 // Blender's data and types as bpy gives them to Python, over the module's RNA (bpy_rna.js, rna-bridge.cc).
@@ -79,4 +80,20 @@ ob.select_set(false);
 const { status } = blender.run('object.select_pattern', { pattern: 'Bo*' });
 assert.equal(status & 4, 4, 'object.select_pattern finished');
 assert.equal(ob.select_get(), true);
+// bpy.context and bpy.data are Main's, for the interface and for CPython (pyodide.js's bridge).
+const bpy = globalThis.__py_modules._bpy;
+assert.ok(bpy.data.objects.get(ob.name) === ob, 'bpy.data is Main');
+assert.ok(bpy.context.view_layer.objects.active === ob, 'bpy.context is the window manager context');
+assert.ok(inPythonContext(blender.C, () => bpy.context.scene) === context.scene);
+assert.equal(api.getattr(api.getattr(bpy, 'data'), 'objects').length, 1);
+assert.equal(api.repr(ob), "bpy.data.objects['Box']");
+assert.match(api.repr(context.scene.render), /^<bpy_struct, RenderSettings at 0x/);
+assert.ok(api.dir(ob).includes('location') && api.dir(ob).includes('select_get'));
+assert.throws(() => api.getattr(ob, 'no_such'), /AttributeError: 'Object' object has no attribute 'no_such'/);
+assert.ok(api.isCollection(data.objects));
+const locations = api.foreachGet(data.objects, 'location');
+assert.deepEqual([...locations], [...ob.location]);
+api.foreachSet(data.objects, 'location', locations.map((v) => v + 1));
+assert.equal(ob.location[0], locations[0] + 1, 'foreach_set writes each item');
+
 console.log('bpy over the module: properties, collections, functions, context and registration');

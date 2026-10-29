@@ -3,8 +3,8 @@
 // Blender's keymaps for the region under the pointer, as its handlers run them, with this editor as the context area,
 // and Blender's operators run there in Blender's C, modal ones (transform, frame change, view panning) getting the
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
-// the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
-import { AnimArea, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
+// the header and menus are Blender's scripts' (space_graph.py, space_dopesheet.py, space_time.py) laid out by Blender.
+import { AnimArea, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
 import { regionDrawing, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
@@ -15,16 +15,10 @@ import { keyType } from '../../windowmanager/input/keymap.js';
 import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI } from '../../windowmanager/wm-operators.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
-import { drawMenu } from '../interface/ui-layout.js';
-import { headerLayout, drawPanels, drawType } from '../interface/panels.js';
-import { LayoutView } from '../interface/layout-view.js';
-import { BlockView, PanelsView } from '../interface/block-view.js';
-import { regionPanels, panelClosedSet, categorySet } from '../interface/ui-tree.js';
+import { BlockView, PanelsView, treeMenu } from '../interface/block-view.js';
+import { regionPanels, regionHeader, menuTree, menuLabel, panelClosedSet, categorySet } from '../interface/ui-tree.js';
 import { drawRecording, buttonAt } from '../interface/region-draw.js';
-import { loadRNAUI } from '../../makesrna/rna.js';
-import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
-import { propBinding } from '../../makesrna/rna-bylonder.js';
-import { createContext } from '../../blenkernel/context.js';
+import { contextStruct } from '../../python/bpy_rna.js';
 import { createApp, h, reactive, markRaw, shallowRef } from 'vue';
 import { operatorIdname } from '../../makesrna/rna.js';
 import '../interface/layout-view.css';
@@ -43,7 +37,8 @@ const KEYMAPS = {
     [RGN_TYPE_CHANNELS]: ['View2D', 'Frames', 'Animation Channels', 'Dopesheet Generic', 'Screen', 'Window'],
   },
 };
-const HEADERS = { GRAPH_EDITOR: 'GRAPH_HT_header', DOPESHEET_EDITOR: 'DOPESHEET_HT_header' };
+// HEADERY: a header region's height in pixels at 1x scale.
+const HEADER_HEIGHT = 26;
 const SPACE_TYPES = { GRAPH_EDITOR: SPACE_GRAPH, DOPESHEET_EDITOR: SPACE_ACTION };
 // The channel region's width (its region type's prefsizex): the Graph Editor's leaves room for its scroll bar.
 // The editors' own keymaps, which the marker strip's events skip.
@@ -71,7 +66,7 @@ export function registerAnimOperators(animation) {
     for (const [idname, steps] of Object.entries(MACROS)) registerOperator(idname, { run: (props, event) => animEditor().macro(steps, event) }, space);
     registerOperators({
       'wm.context_toggle': { supports: ({ data_path }) => /^(space_data|tool_settings|scene)\./.test(data_path ?? ''), run: ({ data_path }) => animEditor().toggle(data_path) },
-      'wm.call_menu_pie': { supports: ({ name }) => !!MENUS[name], run: ({ name }, event) => animEditor().menu(name)(event) },
+      'wm.call_menu_pie': { run: ({ name }, event) => animEditor().menu(name)(event) },
     }, space);
   }
   const time = animation.time;
@@ -93,7 +88,7 @@ const modifiers = (e) => (e.shiftKey ? KM_SHIFT : 0) | (e.ctrlKey ? KM_CTRL : 0)
 
 //   section: the area's element; header: its header element; space: GRAPH_EDITOR or DOPESHEET_EDITOR; uiType: the
 //   Dope Sheet's (TIMELINE or DOPESHEET); animation: the scene's (blenkernel/animation/model.js); rna: createRNA(host)
-//   for the header's context; sync: the scene's Main (blenkernel/main-sync.js), made current before Blender's code;
+//   for reports; sync: the scene's Main (blenkernel/main-sync.js), made current before Blender's code;
 //   commit(): an undo step.
 // A module operator's status as the registry's operators return it: the event goes on after a pass through or a cancel.
 const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' : status === OPERATOR_CANCELLED ? 'CANCELLED' : 'FINISHED');
@@ -132,40 +127,12 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     area, space, uiType, rna,
     changed: () => redraw(),
   };
-  // This editor as the context area: its space for its operators, and Blender's menus it has for wm.call_menu.
-  const contextAreaOf = { animEditor: null, space, menu: (name) => (MENUS[name] ? (event) => openMenu(() => menuItems(name), screenPoint(event), MENUS[name].bl_label ?? '') : null) };
-
-  // The header's and menus' bpy.context: this area, its space's RNA and the scene's.
-  const context = () => createContext(rna, { area: space, uiType, space: editor });
-  const ui = menuUI({ menus: MENUS, context, prop: propBinding(rna.host), keymaps: () => KEYMAPS[space][RGN_TYPE_WINDOW] });
+  // This editor as the context area: its space for its operators, and Blender's menus for wm.call_menu.
+  const contextAreaOf = { animEditor: null, space, menu: (name) => (event) => openAreaMenu(name, screenPoint(event)) };
+  const ui = menuUI({ keymaps: () => KEYMAPS[space][RGN_TYPE_WINDOW] });
   const inThisArea = (fn) => (...args) => inArea(contextAreaOf, () => fn(...args));
   Object.assign(ui, { run: inThisArea((idname, props) => (MODULE_OPERATOR.test(idname) || MACROS[idname] ? runFromMenu(idname, props) : runOperator(idname, props))), supported: inThisArea(ui.supported), poll: inThisArea(ui.poll), keys: inThisArea(ui.keys) });
-  const menuItems = (name) => inArea(contextAreaOf, () => drawMenu(name, ui));
-
-  // The header (DOPESHEET_HT_header, GRAPH_HT_header) drawn by the shared layout renderer; its popovers draw their panels.
-  const headerState = reactive({ revision: 0, ready: false });
-  const layoutUI = markRaw({
-    get revision() { return headerState.revision; },
-    undoPush: () => { animation.edited(); commit(); redraw(); },
-    report: (error) => rna.host.notify?.(error.message),
-    run: (idname, props) => ui.run(idname, props),
-    supported: (idname, props) => ui.supported(idname, props),
-    poll: (idname, props) => ui.poll(idname, props),
-    isOpen: () => true,
-    toggle: () => {},
-    ids: () => [],
-    drawMenu: (idname) => menuItems(idname),
-    enumItems: (idname, property) => ui.enumItems(idname, property),
-    menuLabel: (idname) => MENUS[idname]?.bl_label,
-    menuContents: (idname) => MENUS[idname] && markRaw(headerLayout(context(), drawHeaderType(MENUS[idname]))),
-    popover: (id) => {
-      const type = PANEL_TYPES[id];
-      if (!type) return null;
-      const [drawn] = drawPanels({ roots: [{ type, children: [] }] }, context(), { contexts: [type.bl_context].filter(Boolean) });
-      return drawn?.body && { label: drawn.label, layout: drawn.body, units: type.bl_ui_units_x };
-    },
-  });
-  const drawHeaderType = (type) => (layout) => drawType(type, layout, context());
+  const headerState = reactive({ revision: 0 });
 
   // The sidebar (RGN_TYPE_UI): Blender's region lays out its panels (graph_buttons.cc's, the F-Modifiers' instanced
   // ones, Blender's Python's) in the tab shown, and its tabs (the panels' categories); block-view.js draws them.
@@ -178,10 +145,15 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     keys: (idname, props) => ui.keys(idname, props),
     panelClosed: (id, closed) => area.inContext(type, (C) => panelClosedSet(C, id, closed)),
   });
-  const sidebarUI = regionUI(RGN_TYPE_UI);
+  const sidebarUI = regionUI(RGN_TYPE_UI), headerUI = regionUI(RGN_TYPE_HEADER);
+  // A menu Blender lays out (wm.call_menu, a pie's), opened at a page point.
+  function openAreaMenu(name, at) {
+    const tree = headerUI.inContext((C) => menuTree(C, name));
+    if (tree) openMenu(treeMenu(tree, headerUI), at, menuLabel(name));
+  }
   const sidebarApp = createApp({ render: () => {
     void headerState.revision;
-    if (!headerState.ready || sidebar.hidden) return null;
+    if (sidebar.hidden) return null;
     const { category, categories, panels } = sidebarUI.inContext((C) => regionPanels(C));
     return [
       h(PanelsView, { panels, ui: sidebarUI }),
@@ -199,7 +171,6 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const channelUI = regionUI(RGN_TYPE_CHANNELS);
   const channelLayoutsApp = createApp({ render: () => {
     void headerState.revision;
-    if (!headerState.ready) return null;
     return channelLayouts.value.map(({ rect: [x0, , x1, y1], layout }) => h('div', {
       class: 'anim-block-layout', style: { left: x0 + 'px', top: size.height - y1 + 'px', width: x1 - x0 + 'px' },
     }, layout.map((tree) => h(BlockView, { tree, ui: channelUI }))));
@@ -209,20 +180,20 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   section.append(channelOverlay);
   const headerApp = createApp({ render: () => {
     void headerState.revision;
-    return headerState.ready ? h(LayoutView, { layout: headerLayout(context(), drawHeaderType(HEADER_TYPES[HEADERS[space]])), ui: layoutUI }) : null;
+    area.layout(RGN_TYPE_HEADER, 0, size.height, menus.clientWidth || section.clientWidth, menus.clientHeight || HEADER_HEIGHT);
+    return (headerUI.inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: headerUI, header: true }));
   } });
   headerApp.mount(menus);
-  loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { headerState.ready = true; });
 
   // Before Blender's code reads them: the scene (its time, the objects' bases) made current in Main.
   function sync() {
     scene.flush();
   }
-  // After it ran: the keys it changed reach the channels, what else it changed (the frame, the range, the selection)
-  // reaches the scene, and a finished operator that is an undo step makes one.
+  // After it ran: what it changed (the frame, the range, the selection) reaches the scene, then the keys it changed
+  // reach the channels (at the new frame, Main evaluated for it), and a finished operator that is an undo step makes one.
   function after(status) {
-    animation.edited();
     scene.view();
+    animation.edited();
     if (status & OPERATOR_FINISHED && area.undo) commit();
     redraw();
     return status;
@@ -249,7 +220,8 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   };
   // wm.context_toggle on this editor's context (space_data.show_handles).
   editor.toggle = (path) => {
-    const parts = path.split('.'), owner = parts.slice(0, -1).reduce((data, key) => data?.[key], context()), name = parts.at(-1);
+    const parts = path.split('.'), name = parts.at(-1);
+    const owner = area.inContext(RGN_TYPE_WINDOW, () => parts.slice(0, -1).reduce((data, key) => data?.[key], contextStruct()));
     if (owner && typeof owner[name] === 'boolean') owner[name] = !owner[name];
     redraw();
   };

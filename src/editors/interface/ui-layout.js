@@ -61,8 +61,8 @@ function entries(node, ui, enabled = true) {
 }
 
 // A menu's entries, separators tidied where entries Bylonder lacks left them doubled or at an end.
-// Draw functions added to a menu (`Menu.prepend` and `Menu.append`, as add-ons extend Blender's menus) run around its
-// own, with the menu as `self`.
+// Draw functions a menu's caller adds (`ui.extensions`, the Babylon node categories) run around its own, with the
+// menu as `self`; Menu.append's are in its draw.
 export function drawMenu(idname, ui) {
   const menu = ui.menus[idname](), context = ui.context(), extend = ui.extensions?.(idname);
   const layout = new UILayout('root', null, { operator_context: ui.operatorContext ?? 'INVOKE_REGION_WIN' });
@@ -77,15 +77,3 @@ export function drawMenu(idname, ui) {
 // Whether Bylonder runs an entry, or something in a submenu.
 export const runs = (item) => item !== '-' && (item.items ? subitems(item).some(runs) : item.supported?.() ?? true);
 export const subitems = (item) => (typeof item.items === 'function' ? item.items() : item.items);
-
-// The Blender ids of what a menu shows that Bylonder runs, its own and its entries' and submenus', for the Blender
-// coverage view.
-export function menuCoverage(idname, ui) {
-  const ids = new Set([idname]);
-  const visit = (items) => items.filter(runs).forEach((item) => {
-    ids.add(item.blender);
-    if (item.items) visit(subitems(item));
-  });
-  visit(drawMenu(idname, ui));
-  return [...ids];
-}

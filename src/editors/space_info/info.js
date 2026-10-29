@@ -7,6 +7,6 @@ const SPACE_INFO = 7;
 
 export function mountInfo(section, { header }) {
   const area = mountBlenderArea(section, { spacetype: SPACE_INFO, name: 'INFO', operators: 'info.', keymaps: ['Info'], header });
-  subscribeReports(() => area.refresh());
-  return area;
+  const unsubscribe = subscribeReports(() => area.refresh());
+  return { ...area, dispose() { unsubscribe(); area.dispose(); } };
 }

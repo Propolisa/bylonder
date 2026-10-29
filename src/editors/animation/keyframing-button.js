@@ -6,7 +6,6 @@
 import { registerOperators } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { openMenu } from '../interface/menu.js';
 import { blenderModule, newOperator } from '../../bmesh/bmesh-wasm.js';
 import { OPERATOR_FINISHED } from './anim-area.js';
 
@@ -83,7 +82,8 @@ export function channelButton(animation, refs, reset) {
       return true;
     },
     // Its context menu, with the items ui_popup_context_menu_for_button lists for a property.
-    menu(event) {
+    async menu(event) {
+      const { openMenu } = await import('../interface/menu.js');
       openMenu(this.items(), { x: event.clientX, y: event.clientY });
     },
     items() {

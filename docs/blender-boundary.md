@@ -312,8 +312,9 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
   (`bpy.context = ...`) calls its `__py_setattr__`; cycles become JS namespace imports; `__import__` and `globals()`
   look modules up in the registry.
 - `bpy.context` and `bpy.data` are proxies over what Bylonder pushes (`_bpy._context_push(context, data)`), as Blender
-  sets the window manager's context; with none pushed, Blender's RNA defaults (`makesrna/rna.js`). `bl_rna` is
-  `blRna(struct)` from the same RNA data.
+  sets the window manager's context. Below them are the module's Context and Main (`setContextPointer` in
+  `python/bpy_rna.js`); `inPythonContext(C, fn)` makes an area's context current while Python runs or draws in it
+  (registered classes' callbacks, Run Script, the Python Console). `bl_rna` is `blRna(struct)` from the same RNA data.
 - Python's library modules Transcrypt lacks are at the boundary (`boundary/`), as small as Blender's scripts need;
   values Blender's C reports (`bpy.app`, handlers, translation contexts, file extensions) are copied from the
   reference binary. `os` is a read-only file system of Blender's scripts in Blender's layout (`_files`).

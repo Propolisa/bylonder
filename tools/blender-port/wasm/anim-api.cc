@@ -944,7 +944,11 @@ static wmOperatorStatus popup_open(Popup popup, const char *title, const char *t
   popup_opened = popup;
   popup_title = title;
   popup_text = text;
-  popup_idname = op ? op->idname : "";
+  char idname[OP_MAX_TYPENAME] = "";
+  if (op) {
+    WM_operator_py_idname(idname, op->idname);
+  }
+  popup_idname = idname;
   popup_values = op ? operator_values_json(op->ptr) : "{}";
   return OPERATOR_INTERFACE;
 }
@@ -1191,8 +1195,10 @@ ARegionType *ui::ED_area_type_hud(int /*space_type*/)
 
 }  // namespace blender
 
-/* A popup menu's recorded layout (panel-layout.cc's popup_menu_end) as the running invoke's popup. */
+/* A popup menu's recorded layout (ui-tree.cc's popup_menu_end) as the running invoke's popup. */
+namespace blender::ui {
 void popup_layout_open(const std::string &title, const std::string &layout)
 {
   blender::popup_open(POPUP_LAYOUT, title.c_str(), layout.c_str());
 }
+}  // namespace blender::ui

@@ -71,6 +71,7 @@ import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
 import { setContextPointer } from "./python/bpy_rna.js";
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
+import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
@@ -228,7 +229,10 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Handle for debugging and the browser tests, which run against the production build.
+let topbarArea = null;
 window.__bylonder ={ world, renderHost, runOperator,
+  // The Top Bar's menus, laid out here for the app page's topbar.
+  get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
   coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
@@ -392,6 +396,8 @@ const tools = createView3DTools({
 // Blender's Main, which owns the scene and its undo, drawn by Babylon (blenkernel/main-sync.js, main-view.js). Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
+// A frame change evaluates Main with Blender's animation system and draws it (main-sync.js frameChanged).
+animation.evaluateMain = (frame) => world.mainSync.frameChanged(frame);
 for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
 world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
 history.start();
@@ -400,7 +406,8 @@ const objectOperatorHost = { transaction: commands.transaction, notify, keying: 
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !world.editMode.active, host: objectOperatorHost,
-  menu: (name, at) => world.callMenu(name, at) });
+  menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
+world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
 // An armature's Edit and Pose Modes, Blender's in Main.
 world.armatureModes = createArmatureModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
 registerAddOperators(creator);
@@ -445,7 +452,7 @@ const unsubscribeAnimation = animation.subscribe(() => { if (!world.wm?.modal) {
 registerConsoleOperators();
 const scriptingEditors = [
   // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
-  mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), files: world.texts, context: () => createContext(blenderRNA, { area: "TEXT_EDITOR" }), beforeRun: () => creator.finish() }),
+  mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), files: world.texts, context: () => createContext(blenderRNA, { area: "TEXT_EDITOR" }), beforeRun: () => creator.finish(), afterRun: () => world.mainSync.view() }),
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
   mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info") }),
 ];

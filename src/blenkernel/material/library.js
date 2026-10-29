@@ -56,7 +56,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
       const paths = field.color ? ['r', 'g', 'b'].map(c => [field.path + '.' + c, field.label + ' ' + c.toUpperCase()]) : [[field.path, field.label]];
       if (value === undefined || value === null) continue;
       for (const [path, label] of paths) animation.register({
-        id: 'material:' + id, path, label, group: material.name, options: field.options,
+        id: 'material:' + id, path, label, group: material.name, options: field.options, owner: () => world.mainSync?.materialOf(material),
         available: () => !material.isDisposed?.() && !material.metadata?.wbRemoved && scene.materials.includes(material),
         get: () => { const { owner, key } = resolve(material, path); return owner?.[key]; },
         set: v => { const { owner, key } = resolve(material, path); if (owner) owner[key] = v; },

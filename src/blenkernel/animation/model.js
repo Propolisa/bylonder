@@ -51,9 +51,9 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
   const placeOf = (ref, create = false) => {
     const [id, path] = JSON.parse(ref), transform = objectPath(id, path);
     if (transform) return { owner: create ? ids.object(id) : ids.find(id), ...transform };
-    const owner = channels.get(ref)?.owner, property = customPropertyName(owner ? path : `${id} ${path}`);
-    // An owner not in Main yet holds no channels.
-    return { owner: owner ? owner() : ids.scene, property, rna_path: customPropertyPath(property), index: 0, factor: 1 };
+    // Without its owner in Main (a player without the scene sync), on the Scene.
+    const own = channels.get(ref)?.owner?.(), property = customPropertyName(own ? path : `${id} ${path}`);
+    return { owner: own || ids.scene, property, rna_path: customPropertyPath(property), index: 0, factor: 1 };
   };
   // Every F-Curve with the Bylonder channel it animates.
   const tracks = () => curves ??= (() => {

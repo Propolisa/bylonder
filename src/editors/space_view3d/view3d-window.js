@@ -14,16 +14,20 @@ const pageRect = (rect) => ({ x: rect.left, y: rect.top, width: rect.width, heig
 
 //   sync: the scene's (createMainSync); views(): the 3D Views; takes(): whether Blender's window takes input now (Object
 //   Mode); host: runBlenderOperator's options (transaction, notify, keying, commit, wm, pointer, view), menu(name, event)
-//   opening a menu of the page.
-export function createView3DWindow({ sync, views, takes, host, menu }) {
+//   opening a menu of the page; before(): what the page finishes before an operator runs (a pending Add).
+export function createView3DWindow({ sync, views, takes, host, menu, before = () => {} }) {
   const window = new Window(sync.blender);
   const areas = new Map();
   let running = false;
 
-  function area(view) {
+  // A view's area, laid out from the page (unless `layout` is false: as it last was).
+  function area(view, layout = true) {
+    configureWindow(window);
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
+    else if (!layout) return areas.get(view);
+    window.size = { width: innerWidth, height: innerHeight };
     const a = areas.get(view), rect = pageRect(view.canvas.getBoundingClientRect());
-    a.layout(rect, { [RGN_TYPE_WINDOW]: rect });
+    a.layout(rect, { [RGN_TYPE_WINDOW]: rect, ...view.regions?.rects() });
     a.view3d = regionView3D(view);
     return a;
   }
@@ -31,17 +35,20 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
   function popup({ menu: name, type, title, text, idname, values }, event) {
     if (name) return menu(name, event);
     if (POPUPS[type] === 'PROPS') return;
-    const finish = (chosen) => chosen && runBlenderOperator(sync, idname, { ...values, ...(chosen === true ? {} : chosen) }, { ...host, event: null });
+    // The values it was invoked with, but rna_type, which is no value to set.
+    const set = Object.fromEntries(Object.entries(values).filter(([, value]) => value !== null));
+    const finish = (chosen) => chosen && runBlenderOperator(sync, idname, { ...set, ...(chosen === true ? {} : chosen) }, { ...host, event: null });
     openModulePopup(sync, { type: POPUPS[type], title, text }, event, { idname, finish });
   }
 
   function send(kind, data, strings, view) {
-    configureWindow(window);
-    window.size = { width: innerWidth, height: innerHeight };
     for (const v of views()) area(v);
     const acting = kind !== 'pointermove' || running;
     // An operator may start: Main gets the scene, and the selected meshes' geometry while it runs.
-    if (acting && !running) sync.begin({ meshes: sync.selected() });
+    if (acting && !running) {
+      before();
+      sync.begin({ meshes: sync.selected() });
+    }
     let result;
     host.keying(() => { result = window.event(kind, data, strings); });
     if (!acting) return result;
@@ -59,6 +66,8 @@ export function createView3DWindow({ sync, views, takes, host, menu }) {
   return {
     takes: (native, view) => running || (takes() && !!view && native.pointerType !== 'touch'),
     send,
+    // A view's area, laid out from its elements (its header, tool header and sidebar are view.regions').
+    area,
     pressHandled: () => window.pressHandled(),
   };
 }

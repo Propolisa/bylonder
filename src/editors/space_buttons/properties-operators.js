@@ -2,7 +2,6 @@
 // "Property Editor" keymap in the editor's context area (editor.js), and on the operator buttons its panels draw. The
 // area is { properties: the editor, modifier(): the modifier panel under the pointer or the active one, ... }.
 import { registerOperators, contextArea } from '../../windowmanager/wm-operators.js';
-import { templateIDButton } from '../interface/layout-view.js';
 
 const editor = () => contextArea()?.properties;
 const modifier = () => contextArea()?.modifier?.();
@@ -19,8 +18,6 @@ registerOperators({
     run: (props, event) => contextArea().menu('OBJECT_MT_modifier_add')(event),
   },
   'material.new': { supports: () => !!editor()?.materials(), run: () => editor().materials().newMaterial() },
-  // render_shading.cc's TEXTURE_OT_new, for the data-block selector that runs it.
-  'texture.new': { supports: () => !!editor(), run: () => editor().newTexture(templateIDButton()) },
   'object.material_slot_add': { supports: () => !!editor()?.materials(), run: () => editor().materials().add() },
   'object.material_slot_remove': { supports: () => !!editor()?.materials()?.count(), run: () => editor().materials().remove() },
   'object.material_slot_move': { supports: () => (editor()?.materials()?.count() ?? 0) > 1, run: ({ direction = 'UP' }) => editor().materials().move(direction === 'UP' ? -1 : 1) },

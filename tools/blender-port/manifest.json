@@ -41,7 +41,7 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "armature-api.cc", "view3d-api.cc", "gesture-api.cc", "no-depsgraph.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "clipboard.cc", "reports.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "ui-tree.cc", "rna-fcurve.cc", "rna-space.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "armature-api.cc", "view3d-api.cc", "gesture-api.cc", "no-depsgraph.cc", "texture-api.cc", "wm-api.cc", "ghost-window.cc", "undo-api.cc", "rna-bridge.cc", "rna-operator.cc", "view-api.cc", "clipboard.cc", "reports.cc", "python.cc"],
       "check": "tools/blender-port/check-bmesh.mjs",
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],

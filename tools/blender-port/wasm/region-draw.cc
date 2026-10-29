@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "BKE_context.hh"
+#include "BKE_screen.hh"
 #include "BLF_api.hh"
 #include "BLI_math_color.h"
 #include "BLI_math_geom.h"
@@ -17,6 +18,7 @@
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
+#include "BLI_listbase_iterator.hh"
 #include "DNA_screen_types.h"
 #include "DNA_userdef_types.h"
 #include "GPU_framebuffer.hh"
@@ -684,8 +686,21 @@ static struct {
   ARegion *region = nullptr;
 } drawn;
 
-/* port-override: JS applies a button within the event that pressed it, so none stays active, nor shows a tooltip. */
-Button *context_active_but_get(const bContext * /*C*/) { return nullptr; }
+/* port-override: JS applies a button within the event that pressed it, so the active button is only the one marked for
+ * the operators it runs (BUT_ACTIVE_OVERRIDE, which context_button_active looks for first), and none shows a tooltip. */
+Button *context_active_but_get(const bContext *C)
+{
+  if (ARegion *region = CTX_wm_region(C)) {
+    for (Block &block : region->runtime->uiblocks) {
+      for (Button &but : block.buttons()) {
+        if (but.flag & BUT_ACTIVE_OVERRIDE) {
+          return &but;
+        }
+      }
+    }
+  }
+  return nullptr;
+}
 void button_tooltip_timer_remove(bContext * /*C*/, Button * /*but*/) {}
 
 /* port-override: JS edits a text button in its own field until it applies or cancels the edit. */

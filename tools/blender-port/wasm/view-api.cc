@@ -40,7 +40,7 @@ EXPORT(mesh_attributes_list) const char *mesh_attributes_list(const Object *ob)
 }
 
 /* The scene at a frame (BKE_scene_graph_update_for_newframe without a graph to evaluate): the frame set, then every
- * ID's animation and drivers evaluated into it (BKE_animsys_evaluate_animdata), each ID being its own evaluated copy;
+ * ID's animation and drivers evaluated into it, embedded node trees' included (BKE_animsys_evaluate_animdata), each ID being its own evaluated copy;
  * the objects' matrices follow (main_evaluate). */
 EXPORT(view_frame_set) void view_frame_set(bContext *C, float frame)
 {
@@ -48,13 +48,10 @@ EXPORT(view_frame_set) void view_frame_set(bContext *C, float frame)
   Scene *scene = CTX_data_scene(C);
   BKE_scene_frame_set(scene, frame);
   const AnimationEvalContext context = BKE_animsys_eval_context_construct(CTX_data_depsgraph_pointer(C), BKE_scene_ctime_get(scene));
-  ID *id;
-  FOREACH_MAIN_ID_BEGIN (bmain, id) {
-    if (AnimData *adt = BKE_animdata_from_id(id)) {
-      BKE_animsys_evaluate_animdata(id, adt, &context, ADT_RECALC_ALL, false);
-    }
-  }
-  FOREACH_MAIN_ID_END;
+  /* Embedded IDs too (a material's node tree), as the depsgraph has a node for each. */
+  BKE_animdata_main_cb(bmain, [&](ID *id, AnimData *adt) {
+    BKE_animsys_evaluate_animdata(id, adt, &context, ADT_RECALC_ALL, false);
+  });
 }
 
 /* An object Main holds in Edit Mode: its edit mesh's arrays as the draw cache extracts them (extraction.hh), the parts

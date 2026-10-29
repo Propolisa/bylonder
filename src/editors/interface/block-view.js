@@ -18,12 +18,15 @@ import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
-import { buttonMenu, buttonPress, buttonApplied, buttonValueSet, buttonTextSet } from './ui-tree.js';
+import { buttonMenu, buttonPress, buttonApplied, buttonValueSet, buttonTextSet, buttonOperator } from './ui-tree.js';
+import { runsOperator } from '../../windowmanager/wm-operators.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
 const W = 'bl-widget';
 const struct = ({ pointer }) => pointerStruct(...pointer);
+// The enum item a row or tab button sets, from its property's RNA.
+const enumItem = (b) => (b.rna ? [...struct(b.rna).bl_rna.properties.get(b.rna.prop).enum_items].find((item) => item.value === b.value) : undefined);
 
 // The corners a button squares where it is aligned with its neighbours (ui_block_align_calc).
 function corners(aligned = '') {
@@ -39,8 +42,9 @@ function rnaValue(b) {
 }
 function setRna(b, value, ui, finish = true) {
   try {
-    const data = struct(b.rna);
-    if (b.rna.index >= 0) data[b.rna.prop][b.rna.index] = value;
+    // A button of a property that is not an array may still carry index 0 (rnaindex), as rnaValue reads it.
+    const data = struct(b.rna), array = b.rna.index >= 0 && data[b.rna.prop]?.__getitem__;
+    if (array) data[b.rna.prop][b.rna.index] = value;
     else data[b.rna.prop] = value;
     ui.inContext((C) => buttonApplied(C, b));
     if (finish) ui.undoPush(b.tip || b.rna.prop);
@@ -69,7 +73,8 @@ export function treeMenu(tree, ui) {
   const items = [];
   const visit = (node) => {
     if (node.kind !== 'button') return node.children?.forEach(visit);
-    const text = node.text || node.display || '';
+    // A menu's entry shows its shortcut after UI_SEP_CHAR (ui_menu_block_set_keymaps).
+    const [text, shortcut] = (node.text || node.display || '').split('|');
     const iconName = node.icon && node.icon !== 'NONE' ? node.icon : undefined;
     switch (node.type) {
       case 'SEPR': case 'SEPR_LINE': items.push('-'); break;
@@ -83,8 +88,8 @@ export function treeMenu(tree, ui) {
           label: text, icon: iconName, title: node.tip, blender: node.operator,
           enabled: () => !node.disabled,
           ...(['TOGGLE', 'TOGGLE_N', 'ICON_TOGGLE', 'ICON_TOGGLE_N', 'CHECKBOX', 'CHECKBOX_N', 'ROW'].includes(node.type) && { checked: () => !!node.selected }),
-          ...(node.operator && { keys: ui.keys?.(node.operator, node.properties ?? {}) }),
-          run: (event) => (node.operator ? ui.run(node.operator, node.properties ?? {}, event) : press(node, ui)),
+          ...(node.operator && { keys: shortcut ?? ui.keys?.(node.operator, node.properties ?? {}) }),
+          run: (event) => (node.operator ? runOperator(node, ui, event) : press(node, ui)),
         });
     }
   };
@@ -131,6 +136,15 @@ function buttonNode(b, env) {
     onContextmenu: (e) => { e.preventDefault(); button.menu(e); } });
 }
 
+// An operator button: run by Bylonder's registry where it has the operator, else by Blender's handlers in the module,
+// the button active (template_ID's New assigns what it makes).
+const OPERATOR_FINISHED = 4;
+function runOperator(b, ui, event) {
+  if (runsOperator(b.operator)) return ui.run(b.operator, b.properties ?? {}, event);
+  const status = ui.inContext((C) => buttonOperator(C, b));
+  return status & OPERATOR_FINISHED ? ui.undoPush(b.tip || b.operator) : ui.refresh();
+}
+
 function widgetNode(b, env) {
   const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
   // A scaled layout's buttons (scale_y) keep the height Blender gave them.
@@ -165,14 +179,18 @@ function widgetNode(b, env) {
       return h('button', { type: 'button', class: 'bl-decorator flex h-unit w-unit shrink-0 items-center justify-center', 'aria-label': b.tip || 'Decorator', title: b.tip,
         disabled: common.disabled, onClick: () => press(b, ui) }, icon(iconName));
     case 'LISTBOX': return null;
-    case 'ROW': case 'LISTROW': case 'TAB':
-      return withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, className: 'flex-1', onClick: () => press(b, ui) }));
+    case 'ROW': case 'LISTROW': case 'TAB': {
+      const item = b.type === 'LISTROW' ? undefined : enumItem(b);
+      const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, className: 'flex-1',
+        value: item?.identifier, onClick: () => press(b, ui) }));
+      return b.type === 'TAB' ? cloneVNode(vnode, { role: 'tab', 'aria-selected': String(!!b.selected), 'aria-label': shown || item?.name || b.tip }) : vnode;
+    }
     default:
       if (TOGGLES.has(b.type)) {
         return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, onClick: () => press(b, ui) }));
       }
       return withStyle(button({ text: shown, iconName, kind: 'tool', ...common, iconOnly: !shown && !!iconName, emboss: !flat, pressed: !!b.selected, className: 'flex-1',
-        onClick: (event) => (b.operator ? ui.run(b.operator, b.properties ?? {}, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
+        onClick: (event) => (b.operator ? runOperator(b, ui, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
   }
 }
 
@@ -231,8 +249,9 @@ const rootEnv = (ui, extra = {}) => ({ ui, active: true, enabled: true, root: tr
 
 export const BlockView = defineComponent({
   name: 'BlockView',
-  props: { tree: Object, ui: Object },
-  setup: (props) => () => (props.tree ? layoutNode(props.tree, rootEnv(props.ui)) : null),
+  // header: a header region's block, whose menus are pulldowns and whose buttons keep their widths.
+  props: { tree: Object, ui: Object, header: Boolean },
+  setup: (props) => () => (props.tree ? layoutNode(props.tree, rootEnv(props.ui, { header: props.header })) : null),
 });
 
 // A region's panel as interface_panel.cc draws it: its header (disclosure, draw_header's layout, label, preset), then
