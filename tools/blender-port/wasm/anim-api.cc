@@ -234,20 +234,11 @@ EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int su
 
 /* A region drawn by its own draw callback (the region type's draw: action_channel_region_draw,
  * graph_channel_region_draw, ...), or its overlay's (graph_main_region_draw_overlay: the current frame, scrollers and
- * value scale), recorded by region-draw.cc: returns the recording's JSON. */
-extern "C" void region_draw_begin(int winx, int winy);
-extern "C" const char *region_draw_end();
+ * value scale), as wm_region_draw records it. */
+extern "C" const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay);
 EXPORT(anim_region_draw) const char *anim_region_draw(bContext *C, AnimArea *a, int regiontype, bool overlay)
 {
-  ARegion *region = BKE_area_find_region_type(&a->area, regiontype);
-  CTX_wm_area_set(C, &a->area);
-  CTX_wm_region_set(C, region);
-  region_draw_begin(region->winx, region->winy);
-  ui::theme::theme_set(a->area.spacetype, regiontype);
-  (overlay ? region->runtime->type->draw_overlay : region->runtime->type->draw)(C, region);
-  CTX_wm_area_set(C, nullptr);
-  CTX_wm_region_set(C, nullptr);
-  return region_draw_end();
+  return wm_region_draw(C, &a->area, regiontype, overlay);
 }
 
 /* The space's dope sheet filter text (bDopeSheet.searchstr, DopeSheet.filter_text) and flag (ADS_FLAG_*). */
@@ -801,12 +792,41 @@ EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int c
 enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS, POPUP_LAYOUT };
 static Popup popup_opened = POPUP_NONE;
 static std::string popup_title, popup_text;
+/* The operator that opened it, by idname, and the values it was invoked with, for running it from the popup. */
+static std::string popup_idname, popup_values;
 
 /* The popup the last invoke opened (Popup), cleared by asking: its title, and its confirm button's text, the enum
  * property's identifier or the recorded layout of a popup menu (panel-layout.cc). */
 EXPORT(operator_popup) int operator_popup() { return std::exchange(popup_opened, POPUP_NONE); }
 EXPORT(operator_popup_title) const char *operator_popup_title() { return popup_title.c_str(); }
 EXPORT(operator_popup_text) const char *operator_popup_text() { return popup_text.c_str(); }
+
+static std::string json_string(const std::string &text)
+{
+  std::string out = "\"";
+  for (const char c : text) {
+    out += c == '"' ? "\\\"" : c == '\\' ? "\\\\" : c == '\n' ? "\\n" : std::string(1, c);
+  }
+  return out + "\"";
+}
+extern "C" const char *operator_menu_called();
+namespace blender {
+/* The popup the last operator opened or the menu it called, as JSON for an event's result (wm-api.cc), cleared:
+ * { type, title, text, idname, values } (type as operator_popup's numbers), { menu }, or null. */
+std::string operator_popup_json()
+{
+  const std::string menu = operator_menu_called();
+  if (!menu.empty()) {
+    return "{\"menu\":" + json_string(menu) + "}";
+  }
+  const Popup popup = std::exchange(popup_opened, POPUP_NONE);
+  if (popup == POPUP_NONE) {
+    return "null";
+  }
+  return "{\"type\":" + std::to_string(popup) + ",\"title\":" + json_string(popup_title) + ",\"text\":" +
+         json_string(popup_text) + ",\"idname\":" + json_string(popup_idname) + ",\"values\":" + popup_values + "}";
+}
+}  // namespace blender
 
 /* What the editors reach of Blender's window manager and screen, which are Bylonder's (JS). */
 
@@ -820,11 +840,6 @@ void ED_area_status_text(ScrArea *area, const char *str)
   }
 }
 
-/* port-override: Bylonder redraws its editors after each operator and each event an operator handles. */
-void ED_area_tag_redraw(ScrArea * /*area*/) {}
-void ED_area_tag_redraw_no_rebuild(ScrArea * /*area*/) {}
-void ED_area_tag_refresh(ScrArea * /*area*/) {}
-void ED_region_tag_redraw_no_rebuild(ARegion * /*region*/) {}
 
 static wmOperatorStatus gesture_start(bContext *C, wmOperator *op, Gesture gesture)
 {
@@ -844,17 +859,19 @@ void WM_gesture_lasso_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 namespace ui {
 std::string operator_props_layout(bContext *C, wmOperator *op);
 }
-static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text)
+static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text, wmOperator *op = nullptr)
 {
   popup_opened = popup;
   popup_title = title;
   popup_text = text;
+  popup_idname = op ? op->idname : "";
+  popup_values = op ? operator_values_json(op->ptr) : "{}";
   return OPERATOR_INTERFACE;
 }
 wmOperatorStatus WM_operator_confirm_ex(bContext * /*C*/, wmOperator *op, const char *title, const char * /*message*/,
                                         const char *confirm_text, ui::AlertIcon /*icon*/, bool /*cancel_default*/)
 {
-  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"));
+  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"), op);
 }
 /* As wm_operators.cc defines it, the menu being Bylonder's. */
 wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/)
@@ -866,7 +883,7 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
   if (RNA_property_is_set(op->ptr, prop)) {
     return op->type->exec(C, op);
   }
-  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
+  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop), op);
 }
 
 /* The properties popups and dialogs (wm_operators.cc): Bylonder's window manager shows the operator's properties as
@@ -878,7 +895,7 @@ wmOperatorStatus WM_operator_props_dialog_popup(bContext *C, wmOperator *op, int
 {
   const std::string confirm = confirm_text.value_or(IFACE_("OK"));
   const std::string text = "{\"confirm\":\"" + confirm + "\",\"layout\":" + ui::operator_props_layout(C, op) + "}";
-  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str());
+  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str(), op);
 }
 wmOperatorStatus WM_operator_props_popup(bContext *C, wmOperator *op, const wmEvent * /*event*/)
 {
@@ -952,37 +969,11 @@ bool WM_cursor_modal_is_set_ok(const wmWindow * /*win*/) { return true; }
 void WM_cursor_modal_set(wmWindow * /*win*/, int /*val*/) {}
 void WM_cursor_modal_restore(wmWindow * /*win*/) {}
 void WM_cursor_wait(bool /*val*/) {}
-void WM_event_add_mousemove(wmWindow * /*win*/) {}
 wmTimer *WM_event_timer_add(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmEventType /*event_type*/, double /*time_step*/)
 {
   return nullptr;
 }
 void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
-
-/* port-override: keys come from Bylonder's keymaps (keyconfig.js), so a region's init adds no keymap handlers. */
-wmKeyMap *WM_keymap_ensure(wmKeyConfig * /*keyconf*/, const char * /*idname*/, int /*spaceid*/, int /*regionid*/)
-{
-  static wmKeyMap keymap = {};
-  return &keymap;
-}
-wmEventHandler_Keymap *WM_event_add_keymap_handler(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
-{
-  return nullptr;
-}
-wmEventHandler_Keymap *WM_event_add_keymap_handler_poll(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/,
-                                                        EventHandlerPoll /*poll*/)
-{
-  return nullptr;
-}
-wmEventHandler_Keymap *WM_event_add_keymap_handler_v2d_mask(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
-{
-  return nullptr;
-}
-bool WM_event_handler_region_v2d_mask_no_marker_poll(const wmWindow * /*win*/, const ScrArea * /*area*/,
-                                                     const ARegion * /*region*/, const wmEvent * /*event*/)
-{
-  return true;
-}
 
 /* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
  * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with
@@ -1013,11 +1004,6 @@ void BKE_ptcache_ids_from_object(ListBaseT<PTCacheID> *lb, Object * /*ob*/, Scen
 
 /* port-override: Bylonder lays an area's regions out on its next draw, from their flags. */
 void ED_region_visibility_change_update(bContext * /*C*/, ScrArea * /*area*/, ARegion * /*region*/) {}
-
-/* port-override: Bylonder's undo steps are made by the editor that ran a button or operator (its commit), not by
- * Blender's undo stack. */
-void ED_undo_push(bContext * /*C*/, const char * /*str*/) {}
-
 
 /* As area.cc gives it for a region no other region overlaps. */
 const rcti *ED_region_visible_rect(ARegion *region)
@@ -1100,9 +1086,8 @@ int WM_operator_smooth_viewtx_get(const wmOperator *op)
   return (op->flag & OP_IS_INVOKE && !(U.uiflag & USER_REDUCE_MOTION)) ? U.smooth_viewtx : 0;
 }
 
-/* port-override: Bylonder redraws its status bar and editors itself; its 3D View navigates in JS, so transform has no
+/* port-override: no message bus (its subscribers are the UI's); the 3D View navigates in JS, so transform has no
  * 3D View navigation to pass events to. */
-void WM_window_status_area_tag_redraw(wmWindow * /*win*/) {}
 void WM_msg_publish_rna_params(wmMsgBus * /*mbus*/, const wmMsgParams_RNA * /*msg_key_params*/) {}
 ViewOpsData *ED_view3d_navigation_init(bContext * /*C*/, const wmKeyMapItem * /*kmi_merge*/) { return nullptr; }
 

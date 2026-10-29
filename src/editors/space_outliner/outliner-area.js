@@ -62,7 +62,7 @@ export class OutlinerArea {
     this.cancel();
     const op = newOperator(idname, props);
     const status = this.inContext((C) => (event ? x.operator_invoke(C, op, this.#event(C, event)) : x.operator_exec(C, op)));
-    const modal = x.operator_modal_added() >>> 0, gesture = GESTURES[x.operator_gesture()], undo = !!(x.operator_type_flag(op) & OPTYPE_UNDO);
+    const modal = x.operator_modal_added(this.main.C) >>> 0, gesture = GESTURES[x.operator_gesture()], undo = !!(x.operator_type_flag(op) & OPTYPE_UNDO);
     if (status & OPERATOR_RUNNING_MODAL && modal && gesture) this.gesture = { type: gesture, op, undo };
     else if (status & OPERATOR_RUNNING_MODAL && modal) this.modal = { op, undo };
     else x.operator_free(op);

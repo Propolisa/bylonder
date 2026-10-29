@@ -118,20 +118,60 @@ export function apply(objects, data, { partial = false } = {}) {
       node.isPickable = row.pickable !== false && !row.locked;
   }
 }
-export function createHistory(objects, onChange, extras = {}) {
-  const capture = () => ({objects:snapshot(objects), extra:extras.capture?.()});
-  const restore = entry => {apply(objects,entry.objects);extras.restore?.(entry.extra);};
-  let entries = [capture()],
+// What Babylon owns of each object, which Main does not hold (docs/model.md): its Babylon-built geometry's recipe,
+// particles, Bylonder's modifier stack and its base geometry, transform locks and SDK curve paths. Main's undo carries
+// the rest.
+const NATIVE = { group: 'group', particles: 'wbParticles', modifierBase: 'wbModifierBase', modifiers: 'wbModifiers', transformLocks: 'wbTransformLocks', curve: 'wbCurve' };
+const babylonBuilt = (creation) => !!(creation?.builder || creation?.vertices);
+export const nativeSnapshot = (objects) => objects.map((node) => ({
+  id: nodeId(node),
+  ...Object.fromEntries(Object.entries(NATIVE).filter(([, field]) => node.metadata?.[field] !== undefined).map(([key, field]) => [key, structuredClone(node.metadata[field])])),
+  ...(babylonBuilt(node.metadata?.wbCreation) ? { creation: node.metadata.wbCreation } : {}),
+}));
+export function applyNative(objects, rows) {
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  for (const node of objects) {
+    const row = byId.get(nodeId(node));
+    if (!row) continue;
+    const metadata = { ...node.metadata };
+    for (const [key, field] of Object.entries(NATIVE)) metadata[field] = row[key] === undefined ? undefined : structuredClone(row[key]);
+    node.metadata = metadata;
+    if (row.creation && JSON.stringify(row.creation) !== JSON.stringify(node.metadata.wbCreation)) {
+      if (row.creation.builder) rebuildMesh(node, row.creation);
+      else {
+        node.makeGeometryUnique();
+        VertexData.Parse(row.creation.vertices).applyToMesh(node);
+        node.metadata = { ...node.metadata, wbCreation: row.creation };
+      }
+    }
+  }
+}
+
+// One undo history (docs/model.md): each step is a step of Blender's undo stack, Main's state (main-sync.js undoPush,
+// undo-api.cc), with what Babylon owns at that moment: its objects' native data and the extras' capture. Undo and redo
+// load Blender's step, which the view draws, then restore Babylon's.
+//   main: the scene sync; extras: capture() and restore(state) of other Babylon-owned state, beforeCommit().
+export function createHistory(objects, onChange, { main, capture = () => null, restore = () => {}, beforeCommit = () => {} } = {}) {
+  main.undoInit();
+  const take = (name) => ({ step: main.undoPush(name), objects: nativeSnapshot(objects), extra: capture() });
+  const unchanged = (a, b) => a.step === b.step && JSON.stringify([a.objects, a.extra]) === JSON.stringify([b.objects, b.extra]);
+  let entries = [take('Original')],
     index = 0,
     revision = 0;
+  const load = (entry) => {
+    if (!main.undoLoad(entry.step)) return false;
+    applyNative(objects, entry.objects);
+    restore(entry.extra);
+    return true;
+  };
   return {
     get revision() {
       return revision;
     },
-    commit() {
-      extras.beforeCommit?.();
-      const next = capture();
-      if (JSON.stringify(next) === JSON.stringify(entries[index])) return;
+    commit(name = 'Edit') {
+      beforeCommit();
+      const next = take(name);
+      if (unchanged(next, entries[index])) return;
       entries = entries.slice(0, index + 1);
       entries.push(next);
       if (entries.length > 100) entries.shift();
@@ -140,22 +180,22 @@ export function createHistory(objects, onChange, extras = {}) {
       onChange();
     },
     // Replaces the latest step, for an operator re-run from the redo panel.
-    amend() {
-      extras.beforeCommit?.();
-      entries[index] = capture();
+    amend(name = 'Edit') {
+      beforeCommit();
+      entries[index] = take(name);
       revision++;
       onChange();
     },
     undo() {
-      if (index > 0) {
-        restore(entries[--index]);
+      if (index > 0 && load(entries[index - 1])) {
+        index--;
         revision++;
         onChange();
       }
     },
     redo() {
-      if (index < entries.length - 1) {
-        restore(entries[++index]);
+      if (index < entries.length - 1 && load(entries[index + 1])) {
+        index++;
         revision++;
         onChange();
       }

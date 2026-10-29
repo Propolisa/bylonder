@@ -112,6 +112,10 @@ static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double va
   }
 }
 
+/* The context properties are set in, for enums whose items depend on it, as bpy's BPY_context_get. */
+static bContext *property_context = nullptr;
+EXPORT(rna_context_set) void rna_context_set(bContext *C) { property_context = C; }
+
 bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *text)
 {
   /* A macro's operator's property, as "TRANSFORM_OT_translate.value". */
@@ -143,7 +147,7 @@ bool operator_property_set(PointerRNA *ptr, const char *name, const double *numb
     if (identifier.empty()) {
       continue;
     }
-    if (!RNA_property_enum_value(nullptr, ptr, prop, identifier.c_str(), &item)) {
+    if (!RNA_property_enum_value(property_context, ptr, prop, identifier.c_str(), &item)) {
       return false;
     }
     value |= item;
@@ -180,7 +184,7 @@ std::string operator_values_json(PointerRNA *ptr)
     }
     else if (type == PROP_ENUM) {
       const char *identifier = nullptr;
-      RNA_property_enum_identifier(nullptr, ptr, prop, RNA_property_enum_get(ptr, prop), &identifier);
+      RNA_property_enum_identifier(property_context, ptr, prop, RNA_property_enum_get(ptr, prop), &identifier);
       json += identifier ? "\"" + std::string(identifier) + "\"" : number(type, RNA_property_enum_get(ptr, prop));
     }
     else if (RNA_property_array_check(prop)) {

@@ -52,7 +52,7 @@ export function newOperator(idname, props = {}) {
 // keymap item's [name, value] pairs, by their paths ("TRANSFORM_OT_translate.value"). A transpiled Python dict's
 // methods are not properties.
 const isPairs = (value) => Array.isArray(value) && value.length > 0 && value.every((v) => Array.isArray(v) && typeof v[0] === 'string');
-const flatProperties = (props, prefix = '') => Object.entries(props).filter(([, value]) => typeof value !== 'function').flatMap(([name, value]) =>
+export const flatProperties = (props, prefix = '') => Object.entries(props).filter(([, value]) => typeof value !== 'function').flatMap(([name, value]) =>
   (isPairs(value) || (value && typeof value === 'object' && !Array.isArray(value)) ? flatProperties(isPairs(value) ? Object.fromEntries(value) : value, `${prefix}${name}.`)
     : [[prefix + name, value]]));
 export function setOperatorProperties(op, props) {
@@ -61,7 +61,7 @@ export function setOperatorProperties(op, props) {
     const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
     // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).
     const ok = withString(name, (namePointer) => items !== null
-      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item) || (typeof value === 'string' && (x.operator_string_set(op, namePointer, item), true)))
+      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
       : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
     if (!ok) throw new Error(`no property ${name} = ${value}`);
   }
@@ -229,7 +229,7 @@ export class EditMesh {
   invoke(idname, props, event) {
     const op = newOperator(idname, props);
     const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
-    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0;
+    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0;
     if (!modal) { const report = operatorReport(op); this.#end(op); return { status, report }; }
     return { status, op, keymap: cString(x.operator_modal_keymap(op)) };
   }
@@ -357,8 +357,8 @@ const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num',
 const SOCKET_TYPES = { NodeSocketFloat: [0, 0], NodeSocketFloatFactor: [0, 15], NodeSocketVector: [1, 0], NodeSocketVectorDirection: [1, 22],
   NodeSocketColor: [2, 0], NodeSocketShader: [3, 0] };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
-// The attributes of a read Mesh that Bylonder's meshes keep: flat shading's.
-const READ_ATTRIBUTES = [['sharp_face', { domain: 'FACE', type: 'BOOLEAN' }], ['sharp_edge', { domain: 'EDGE', type: 'BOOLEAN' }]];
+const ATTRIBUTE_TYPE_NAMES = new Map(Object.entries(ATTRIBUTE_TYPES).map(([name, [code]]) => [code, name]));
+const DOMAIN_NAMES = Object.keys(DOMAINS);
 
 // Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
 // selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and
@@ -367,14 +367,13 @@ const READ_ATTRIBUTES = [['sharp_face', { domain: 'FACE', type: 'BOOLEAN' }], ['
 export class BlenderMain {
   #context = x.main_new();
   #C = x.main_C(this.#context);
-  #attributes = new Map();
+  #undo = false;
+
+  constructor() { x.rna_context_set(this.#C); }
 
   // An object of a type (EMPTY, MESH, CURVE, FONT, LIGHT, CAMERA) with new data of its type.
   add(type, name) { return withString(name, (p) => x.main_object_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
-  remove(ob) {
-    this.#attributes.delete(ob);
-    x.main_object_remove(this.#context, ob);
-  }
+  remove(ob) { x.main_object_remove(this.#context, ob); }
 
   // Its base in the view layer: whether its collection shows it, whether it is hidden, unselectable, selected or active.
   setBase(ob, { visible = true, hidden = false, hide_select = false, select = false, active = false }) {
@@ -424,32 +423,21 @@ export class BlenderMain {
   setMesh(ob, mesh) {
     withArrays(meshArrays(mesh).slice(0, 5), ([p, e, f, cv, ce]) =>
       x.object_mesh_set(ob, mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce));
-    const attributes = [...mesh.attributes].filter(([, { type }]) => ATTRIBUTE_TYPES[type]);
-    for (const [name, { domain, type, data }] of attributes) {
-      const [code, Type] = ATTRIBUTE_TYPES[type];
-      withString(name, (p) => withArrays([Type.from(data)], ([values]) => x.object_mesh_attribute_add(ob, p, DOMAINS[domain], code, values)));
+    for (const [name, { domain, type, data }] of mesh.attributes) {
+      const [code, Type] = ATTRIBUTE_TYPES[type] ?? [];
+      if (Type) withString(name, (p) => withArrays([Type.from(data)], ([values]) => x.object_mesh_attribute_add(ob, p, DOMAINS[domain], code, values)));
     }
-    this.#attributes.set(ob, attributes.map(([name, { domain, type }]) => [name, { domain, type }]));
   }
-  // A Mesh Main read from a file: the attributes Bylonder keeps that it has, for mesh() to copy.
-  readAttributes(ob) {
-    this.#attributes.set(ob, READ_ATTRIBUTES.filter(([name]) => withString(name, (p) => x.object_mesh_attribute(ob, p))));
-  }
-  // A copy of a mesh object's Mesh, with the attributes setMesh gave it.
+  // A copy of a mesh object's Mesh with its attributes of the types Bylonder's meshes hold (mesh_attributes_list).
   mesh(ob) {
+    const listed = cString(x.mesh_attributes_list(ob)).split('\n').filter(Boolean).map((line) => line.split('\t'))
+      .map(([name, domain, type]) => [name, { domain: DOMAIN_NAMES[domain], type: ATTRIBUTE_TYPE_NAMES.get(Number(type)) }]).filter(([, { type }]) => type);
     const mesh = extractedMesh(x.object_mesh_extract(this.#context, ob) >>> 0);
-    mesh.attributes = new Map((this.#attributes.get(ob) ?? []).map(([name, { domain, type }]) => {
+    mesh.attributes = new Map(listed.map(([name, { domain, type }]) => {
       const [, Type, size] = ATTRIBUTE_TYPES[type], pointer = withString(name, (p) => x.object_mesh_attribute(ob, p)) >>> 0;
       return [name, { domain, type, data: new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size) }];
     }));
     return ownedMesh(mesh);
-  }
-
-  // Empties a mesh object's Mesh of its geometry, keeping its material slots: Main holds geometry only while Blender's
-  // code needs it.
-  clearMesh(ob) {
-    x.object_mesh_clear(ob);
-    this.#attributes.delete(ob);
   }
   // A mesh object's Mesh with its modifiers applied, as Blender's viewport evaluates it: a Mesh that is its own.
   evaluatedMesh(ob) { return ownedMesh(extractedMesh(x.object_mesh_eval(this.#context, ob) >>> 0)); }
@@ -539,9 +527,23 @@ export class BlenderMain {
     if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
     return bytes;
   }
+  // Blender's undo stack (undo-api.cc): started from Main as it is, a step of Main's state pushed (returns it), and a
+  // step loaded, undoing or redoing to it (false when the stack no longer holds it).
+  undoInit() {
+    x.undo_stack_init(this.#C);
+    this.#undo = true;
+  }
+  undoPush(name) { return withString(name, (p) => x.undo_push(this.#C, p)) >>> 0; }
+  undoLoad(step) {
+    const loaded = x.undo_load(this.#C, step);
+    x.main_context_refresh(this.#context);
+    return loaded;
+  }
   // A .blend opened as the Main, as Blender opens one (main_open): returns its warnings; throws when it cannot be read.
+  // The undo stack starts again from the file, as reading one starts it (wm_file_read_post).
   readBlend(bytes) {
     const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
+    if (this.#undo) this.undoInit();
     if (!report) throw new Error('Not a .blend file Blender can read');
     // A file without a screen is opened without its UI, which Bylonder never opens.
     return cString(report).split('\n').filter((line) => line && line !== 'Library file, loading empty scene');
@@ -582,7 +584,7 @@ export class BlenderMain {
       const result = { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
       if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
       if (type === 'PROPS') result.dialog = op, kept = true;
-      if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
+      if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
       const menu = cString(x.operator_menu_called());
       if (menu) {
         const popup = this.menu(menu);
