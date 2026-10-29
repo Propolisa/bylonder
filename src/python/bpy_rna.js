@@ -59,10 +59,29 @@ const outPointer = x.bpy_out() >>> 0;
 const out = () => new Uint32Array(x.memory.buffer, outPointer, 5);
 const outStruct = () => { const o = out(); return [o[0], o[1], o[2]]; };
 
-// The context RNA calls and updates run in (BPY_context_get), set by whoever draws or runs Python.
+// The context RNA calls and updates run in (BPY_context_get), set by whoever draws or runs Python. With nothing else
+// set, bpy.context and bpy.data are this context's, as Blender's window manager context is.
 let C = 0;
-export const setContextPointer = (pointer) => { C = pointer; };
+const bpy = () => globalThis.__py_modules?._bpy;
+export function setContextPointer(pointer) {
+  C = pointer;
+  const _bpy = bpy();
+  if (_bpy) [_bpy._contexts[0], _bpy._datas[0]] = [contextStruct(C), blendData(C)];
+}
 export const contextPointer = () => C;
+
+// fn() with bpy.context and bpy.data those of the context C (bpy_context_set), for Python run or drawn in it.
+export function inPythonContext(CPointer, fn) {
+  const previous = C, _bpy = bpy();
+  C = CPointer >>> 0;
+  _bpy?._context_push(contextStruct(C), blendData(C));
+  try {
+    return fn();
+  } finally {
+    _bpy?._context_pop();
+    C = previous;
+  }
+}
 
 // Transcrypt renames Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
@@ -72,6 +91,12 @@ const identifiers = new Map();
 export const structIdentifier = (type) => identifiers.get(type) ?? identifiers.set(type, cString(x.bpy_struct_identifier(type))).get(type);
 export const structFind = (name) => withText([name], (p) => x.rna_struct_find(p) >>> 0);
 const baseOf = (type) => x.bpy_struct_base(type) >>> 0;
+// A struct's type and its bases, by identifier (Object, ID).
+export function structNames(value) {
+  const names = [];
+  for (let type = pointerOf(value)?.[0]; type; type = baseOf(type)) names.push(structIdentifier(type));
+  return names;
+}
 
 // Registered classes by the id their type keeps (RNA_struct_py_type_get), and each class's type.
 const classes = [null];
@@ -341,6 +366,10 @@ function propArray(ptr, prop) {
 }
 
 const OWNED_FIRST = new Set(['add', 'remove', 'clear', 'move']);
+const PROP_COLLECTION = Symbol('bpy_prop_collection');
+export const isCollection = (value) => !!value?.[PROP_COLLECTION];
+// A struct's name (RNA_struct_name_get_alloc: its name property), '' without one.
+export const structName = (value) => cString(x.bpy_struct_name(...pointerOf(value)));
 
 // Collections (bpy_prop_collection): items by index and by name, and the functions and properties of the collection's
 // own struct (bpy.data.objects.new) over its owner.
@@ -350,7 +379,7 @@ function propCollection(ptr, prop) {
   const at = (i) => (x.bpy_collection_index(type, id, data, prop, i) ? fromOut() : null);
   const byName = (key) => withText([key], (p) => x.bpy_collection_key(type, id, data, prop, p)) ? fromOut() : null;
   const all = () => Array.from({ length: length() }, (_, i) => at(i));
-  const nameOf = (item) => { const [t, i, d] = pointerOf(item); return cString(x.bpy_struct_name(t, i, d)); };
+  const nameOf = structName;
   let functionsStruct;
   const owner = () => (functionsStruct ??= x.bpy_collection_functions(type, id, data, prop) ? fromOut() : null);
   const methods = {
@@ -385,6 +414,7 @@ function propCollection(ptr, prop) {
     get(target, key) {
       // As a struct (a parameter's data), the collection is its own struct over its owner (LayerObjects).
       if (key === POINTER_RNA) return pointerOf(owner());
+      if (key === PROP_COLLECTION) return true;
       if (key === 'length') return length();
       if (typeof key === 'string' && /^\d+$/.test(key)) return at(+key);
       // The collection's own functions (BlendDataObjects.remove) come first, as pyrna_prop_collection_getattro looks
@@ -528,10 +558,7 @@ provided.bpy_class_validate = (id, type, owner, data, haveFunction) => {
 // bpy_class_call: a callback of a registered class, on an instance over the struct (kept with the data where the type
 // keeps one, an operator's), or on the class for a class method; its result written to the function's output.
 // bpy.context is the callback's context while it runs (bpy_context_set), for scripts that read it.
-provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => {
-  const previous = C, _bpy = globalThis.__py_modules?._bpy;
-  C = CPointer >>> 0;
-  _bpy?._context_push(contextStruct(C), blendData(C));
+provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => inPythonContext(CPointer, () => {
   const ptr = [type >>> 0, owner >>> 0, data >>> 0], cls = classes[x.bpy_struct_class(ptr[0])];
   const { flag, parameters } = functionInfo(func >>> 0);
   try {
@@ -546,11 +573,8 @@ provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => {
   } catch (error) {
     console.error(`Python: ${cls?.__name__}.${functionName(func >>> 0)}:`, pythonError(error));
     return -1;
-  } finally {
-    _bpy?._context_pop();
-    C = previous;
   }
-};
+});
 provided.bpy_class_free = (id) => {
   typeOfClass.delete(classes[id]);
   classes[id] = null;

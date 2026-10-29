@@ -7,6 +7,7 @@ import * as runtime from '../bl_py/org.transcrypt.__runtime__.js';
 import { INFO, baseOf } from '../makesrna/rna.js';
 import { useContext } from '../editors/interface/layout.js';
 import { inArea } from '../windowmanager/wm-operators.js';
+import { contextPointer, contextStruct, inPythonContext, isCollection, pointerOf, structName, structNames, structRna } from './bpy_rna.js';
 
 export const PYODIDE_VERSION = '0.29.5';
 const PYODIDE_URL = `https://cdn.jsdelivr.net/npm/pyodide@${PYODIDE_VERSION}/`;
@@ -37,11 +38,22 @@ let nextId = 1;
 // The repr of a struct as Blender's (pyrna_struct_repr): an ID by its path in bpy.data, other structs by type.
 const ID_COLLECTIONS = { Object: 'objects', Mesh: 'meshes', Scene: 'scenes', Text: 'texts', Material: 'materials', Light: 'lights', Camera: 'cameras',
   World: 'worlds', Collection: 'collections', Curve: 'curves', Image: 'images', Action: 'actions', NodeTree: 'node_groups', WorkSpace: 'workspaces' };
-const idCollection = (struct) => { for (let s = struct; s; s = baseOf(s)) if (ID_COLLECTIONS[s]) return ID_COLLECTIONS[s]; return null; };
-function structRepr(obj, info) {
-  const collection = idCollection(info.struct), name = obj.name;
+// A struct's type and its bases: Blender's RNA's (bpy_rna.js), else Bylonder's bindings' (rna-bylonder.js).
+function typeNames(obj) {
+  const names = structNames(obj);
+  if (names.length || !obj?.[INFO]) return names;
+  for (let s = obj[INFO].struct; s; s = baseOf(s)) names.push(s);
+  return names;
+}
+function structRepr(obj, names) {
+  const collection = names.map((s) => ID_COLLECTIONS[s]).find(Boolean), name = pointerOf(obj) ? structName(obj) || null : obj.name;
   if (collection && typeof name === 'string') return `bpy.data.${collection}['${name}']`;
-  return `<bpy_struct, ${info.struct}${typeof name === 'string' ? `("${name}")` : ''} at 0x${identity(obj).toString(16).padStart(12, '0')}>`;
+  return `<bpy_struct, ${names[0]}${typeof name === 'string' ? `("${name}")` : ''} at 0x${identity(obj).toString(16).padStart(12, '0')}>`;
+}
+// A struct's attributes as dir() lists them (pyrna_struct_dir): its properties and functions.
+function structDir(obj) {
+  const rna = structRna(pointerOf(obj)[0]);
+  return [...rna.properties].map((p) => p.identifier).concat([...rna.functions].map((f) => f.identifier));
 }
 function identity(value) {
   if (!ids.has(value)) ids.set(value, nextId++);
@@ -53,7 +65,7 @@ export const api = {
   module: (name) => modules()[name],
   hasModule: (name) => name in modules(),
   isPackage: (name) => Object.keys(modules()).some((other) => other.startsWith(name + '.')),
-  isCollection: (value) => Array.isArray(value) && typeof value.find === 'function' && typeof value.get === 'function',
+  isCollection: (value) => isCollection(value) || (Array.isArray(value) && typeof value.find === 'function' && typeof value.get === 'function'),
   isModule: (value) => value?.[Symbol.toStringTag] === 'Module',
   moduleName: (value) => Object.entries(modules()).find(([, module]) => module === value)?.[0] ?? '',
   exported: (module) => (module.__all__ ? [...module.__all__] : Object.keys(module).filter((key) => !key.startsWith('_'))),
@@ -66,7 +78,7 @@ export const api = {
     const value = obj[name];
     if (value !== undefined) return out(value);
     if (typeof target.__getattr__ === 'function') return out(runtime.__call__(target.__getattr__, obj, name));
-    throw error('AttributeError', `'${obj?.[INFO]?.struct ?? obj?.constructor?.name ?? typeof obj}' object has no attribute '${name}'`);
+    throw error('AttributeError', `'${typeNames(obj)[0] ?? obj?.constructor?.name ?? typeof obj}' object has no attribute '${name}'`);
   },
   setattr(obj, name, value) {
     const alias = ALIASES[name];
@@ -98,12 +110,21 @@ export const api = {
   iterate: (obj) => (Array.isArray(obj) ? [...obj] : runtime.list(obj)),
   contains: (obj, value) => (typeof value === 'string' && Array.isArray(obj) && typeof obj.get === 'function' ? obj.get(value) != null : runtime.__in__(value, obj)),
   truth: (obj) => !!runtime.bool(obj),
-  repr: (obj) => (obj?.[INFO] ? structRepr(obj, obj[INFO]) : typeof obj?.idname_py === 'function' ? `bpy.ops.${obj.idname_py()}()` : runtime.repr(obj)),
-  str: (obj) => (obj?.[INFO] ? structRepr(obj, obj[INFO]).replace(/^bpy\.data\.\w+\['(.*)'\]$/, `<bpy_struct, ${obj[INFO].struct}("$1")>`) : runtime.str(obj)),
+  repr(obj) {
+    const names = typeNames(obj);
+    return names.length ? structRepr(obj, names) : typeof obj?.idname_py === 'function' ? `bpy.ops.${obj.idname_py()}()` : runtime.repr(obj);
+  },
+  str(obj) {
+    const names = typeNames(obj);
+    return names.length ? structRepr(obj, names).replace(/^bpy\.data\.\w+\['(.*)'\]$/, `<bpy_struct, ${names[0]}("$1")>`) : runtime.str(obj);
+  },
   dir(obj) {
     if (typeof obj?.__dir__ === 'function') return [...obj.__dir__()];
     const names = new Set(), info = obj?.[INFO];
-    if (info) {
+    if (pointerOf(obj) && !isCollection(obj)) {
+      structDir(obj).forEach((name) => names.add(name));
+      ['bl_rna', 'rna_type'].forEach((name) => names.add(name));
+    } else if (info) {
       info.bound.forEach((name) => names.add(name));
       for (const p of globalThis.__py_modules?.['_bpy.types']?.[info.struct]?.bl_rna?.properties ?? []) names.add(p.identifier);
       ['bl_rna', 'rna_type'].forEach((name) => names.add(name));
@@ -182,7 +203,7 @@ export const pythonLoaded = () => !!loaded;
 // A script run in an editor's context (its area for operators, its bpy.context): { error, line } on failure.
 export async function runText(name, source, editor) {
   const bridge = await loadPython();
-  const result = inArea(editor.area, () => { useContext(editor.context()); return bridge.run_text(name, source); });
+  const result = inArea(editor.area, () => inEditorContext(editor, () => bridge.run_text(name, source)));
   if (!result) return {};
   const [message, line] = result.toJs();
   result.destroy();
@@ -192,8 +213,12 @@ export async function runText(name, source, editor) {
 // A function of the console's language module (_console_python), once CPython has loaded, in the console's context.
 export function consoleCall(editor, name, ...args) {
   return inArea(editor.area, () => {
+    if (editor.inContext) return inEditorContext(editor, () => loaded.console(name, contextStruct(contextPointer()), ...args));
     const context = editor.context();
     useContext(context);
     return loaded.console(name, context, ...args);
   });
 }
+
+// fn() with bpy.context the editor's area in Blender's window (its inContext), else the window's.
+const inEditorContext = (editor, fn) => (editor.inContext ? editor.inContext((C) => inPythonContext(C, fn)) : inPythonContext(contextPointer(), fn));

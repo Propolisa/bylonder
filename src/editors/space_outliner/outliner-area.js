@@ -25,6 +25,7 @@ export const modifierOf = (event) => (event.shift ? KM_SHIFT : 0) | (event.ctrl 
 
 // Blender's space and region types (eSpace_Type, eRegion_Type).
 const SPACE_OUTLINER = 3, RGN_TYPE_WINDOW = 0;
+export const RGN_TYPE_HEADER = 1;
 
 export class OutlinerArea {
   constructor(main) {
@@ -45,8 +46,11 @@ export class OutlinerArea {
   // The selection changed elsewhere: the Outliner syncs its own from the view layer's when it next draws.
   selectionChanged() { x.outliner_select_sync_from_objects(this.pointer); }
 
-  inContext(fn) {
-    x.wm_area_context_set(this.main.C, this.pointer, RGN_TYPE_WINDOW);
+  // The header region's size in pixels.
+  layoutHeader(width, height) { x.anim_region_layout(this.main.C, x.anim_area_region(this.pointer, RGN_TYPE_HEADER), 0, 0, width, height); }
+
+  inContext(fn, regiontype = RGN_TYPE_WINDOW) {
+    x.wm_area_context_set(this.main.C, this.pointer, regiontype);
     try {
       return fn(this.main.C);
     } finally {
