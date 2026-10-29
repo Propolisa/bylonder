@@ -1,6 +1,6 @@
 /* A region drawn without a GPU. What Blender's drawing code draws (immediate mode, round boxes, text, SVG icons) is
- * recorded in region pixels (y up), and the buttons its blocks define are kept, both written as JSON that JS draws on a
- * canvas and hit-tests (src/editors/interface/region-draw.js). Interface code above these calls is Blender's own:
+ * recorded in region pixels (y up), and the buttons its blocks define are listed, both written as JSON that JS draws and
+ * hit-tests (src/editors/interface/region-draw.js). Interface code above these calls is Blender's own:
  * resources.cc gives the theme, interface_style.cc the fonts' styles, interface_icons.cc the icons' sizes and colors.
  * Text is measured by JS, which draws it with the browser's fonts. */
 #include <cstring>
@@ -11,9 +11,12 @@
 #include "BKE_context.hh"
 #include "BLF_api.hh"
 #include "BLI_math_color.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "DNA_screen_types.h"
 #include "DNA_userdef_types.h"
 #include "GPU_framebuffer.hh"
@@ -30,8 +33,9 @@
 #include "WM_api.hh"
 
 #include "BKE_wm_runtime.hh"
+#include "BLI_set.hh"
 #include "WM_types.hh"
-#include "rna-runtime.hh"
+#include "interface_intern.hh"
 
 using namespace blender;
 
@@ -41,6 +45,7 @@ using namespace blender;
 /* Text metrics of the browser's font at a size in pixels. */
 IMPORT(region_text_width) float region_text_width(const char *str, int len, float size);
 IMPORT(region_font_ascender) float region_font_ascender(float size);
+IMPORT(region_mono_width) float region_mono_width(float size);
 IMPORT(region_font_descender) float region_font_descender(float size);
 
 /* The JSON of what one region draw recorded. */
@@ -177,6 +182,17 @@ static Vector<rctf> &projections()
 }
 void GPU_matrix_push_projection() { projections().append(rec.ortho); }
 void GPU_matrix_pop_projection() { rec.ortho = projections().pop_last(); }
+/* The projection (the ortho rectangle) as a matrix, which blocks take their aspect from; the model-view's identity. */
+const float (*(GPU_matrix_projection_get)(float m[4][4]))[4]
+{
+  orthographic_m4(m, rec.ortho.xmin, rec.ortho.xmax, rec.ortho.ymin, rec.ortho.ymax, -100.0f, 100.0f);
+  return m;
+}
+const float (*(GPU_matrix_model_view_get)(float m[4][4]))[4]
+{
+  unit_m4(m);
+  return m;
+}
 void GPU_blend(GPUBlend /*blend*/) {}
 GPUBlend GPU_blend_get() { return GPU_BLEND_ALPHA; }
 void GPU_line_smooth(bool /*enable*/) {}
@@ -556,6 +572,29 @@ void BLF_draw(int fontid, const char *str, size_t str_len, ResultBLF * /*r_info*
   }
   s += '}';
 }
+/* Monospace text (the Text Editor's, the Console's): one cell of `cwidth` per column, a tab to the next multiple of
+ * `tab_columns`, as blf_font_draw_mono lays it out; returns the columns drawn. */
+int BLF_draw_mono(int fontid, const char *str, size_t str_len, int cwidth, int tab_columns)
+{
+  const Font &f = font(fontid);
+  std::string cells;
+  int columns = 0;
+  for (const char *c = str, *end = str + text_length(str, str_len); c < end; c = BLI_str_find_next_char_utf8(c, end)) {
+    const int width = *c == '\t' ? tab_columns - columns % tab_columns : 1;
+    cells.append(*c == '\t' ? std::string(width, ' ') : std::string(c, BLI_str_find_next_char_utf8(c, end) - c));
+    columns += width;
+  }
+  std::string &s = command("text");
+  string_json(s += ",\"text\":", cells);
+  points_json(s, "at", {f.pos});
+  number(s += ",\"size\":", f.size);
+  number(s += ",\"mono\":", cwidth);
+  color_json(s += ",\"color\":", f.color);
+  s += '}';
+  return columns;
+}
+float BLF_fixed_width(int fontid) { return region_mono_width(font(fontid).size); }
+
 void BLF_draw_default(float x, float y, float z, const char *str, size_t str_len)
 {
   BLF_position(BLF_default(), x, y, z);
@@ -624,372 +663,41 @@ void BLF_draw_svg_icon(uint icon_id,
 
 }  // namespace blender
 
-/* Blocks and buttons: what a region's code defines, kept for one draw. JS draws text buttons being edited with its own
- * field and sends presses and edits back (region_button_press, region_button_text). */
+/* Blocks and buttons are Blender's (interface.cc), defined by a region's code. Drawing a block draws the icon buttons
+ * a region's code defines (button_draw) and records each button with its rectangle, which JS hit-tests and presses
+ * (region_button_press, region_button_text); a block laid out by Blender's layout (the channel search row) is
+ * recorded as its layout tree (ui-tree.cc), drawn by the shared layout renderer over the region. JS draws text
+ * buttons being edited with its own field. */
 
 namespace blender::ui {
 
-/* As interface_intern.hh's ButtonFlagInternal. */
-enum { UI_SELECT = 1 << 0, UI_HOVER = 1 << 2, UI_HAS_ICON = 1 << 3 };
+std::string block_layout_json(const Block *block, rctf *r_rect);
 
-struct Button {
-  ButtonType type;
-  Block *block;
-  std::string str, tip;
-  rctf rect;
-  int icon = ICON_NONE, iconadd = 0, flag = 0, drawflag = 0, retval = 0;
-  EmbossType emboss;
-  float alpha_factor = 1.0f, min = 0.0f, max = 0.0f;
-  PointerRNA rnapoin = {};
-  PropertyRNA *rnaprop = nullptr;
-  int rnaindex = -1;
-  void *poin = nullptr;
-  ButPointerType pointype = ButPointerType::None;
-  int bit_index = -1;
-  ButtonHandleFunc func = nullptr;
-  void *func_arg1 = nullptr, *func_arg2 = nullptr;
-  ButtonHandleNFunc funcN = nullptr;
-  void *func_argN = nullptr;
-  ButtonArgNFree func_argN_free_fn = nullptr;
-  ButtonArgNCopy func_argN_copy_fn = nullptr;
-  wmOperatorType *optype = nullptr;
-  PointerRNA *opptr = nullptr;
-  std::function<void(bContext &C, StringRefNull oldname)> rename_func;
-  bool active_only = false;
-  /* The unit its number shows (button_unit_type_set: B_UNIT_*), or none for its property's. */
-  int unit_type = 0;
-};
-
-struct Block {
-  std::string name;
-  EmbossType emboss;
-  int flag = 0;
-  rctf ortho;
-  Vector<std::unique_ptr<Button>> buttons;
-  /* A panel's block whose buttons panel-layout.cc records into the panel's layouts (panel_block_new). */
-  bool recorded_layout = false;
-  /* What runs after any of its buttons applies (block_func_handle_set), with the button's return value. */
-  BlockHandleFunc handle_func = nullptr;
-  void *handle_arg = nullptr;
-};
-
-void layout_record_button(Block *block, int index);
-
-}  // namespace blender::ui
-
-static Vector<std::unique_ptr<ui::Block>> &blocks()
+/* The buttons the last draw drew, by their index in it, and the region they are in, whose blocks go at the next draw. */
+static Vector<Button *> &buttons()
 {
-  static Vector<std::unique_ptr<ui::Block>> list;
+  static Vector<Button *> list;
   return list;
 }
-
-/* What the last draw's buttons are, by their index in it. */
-static Vector<ui::Button *> &buttons()
-{
-  static Vector<ui::Button *> list;
-  return list;
-}
-
-EXPORT(region_draw_end) const char *region_draw_end()
-{
-  static std::string json;
-  json = "{\"draw\":[" + rec.draw + "],\"buttons\":[" + rec.buttons + "],\"iconColors\":{" + rec.icon_colors + "}}";
-  return json.c_str();
-}
-
-namespace blender::ui {
-
-Block *block_begin(const bContext * /*C*/, ARegion * /*region*/, std::string name, EmbossType emboss)
-{
-  blocks().append(std::make_unique<Block>());
-  Block *block = blocks().last().get();
-  block->name = std::move(name);
-  block->emboss = emboss;
-  block->ortho = rec.ortho;
-  return block;
-}
-
-void block_emboss_set(Block *block, EmbossType emboss) { block->emboss = emboss; }
-void block_flag_enable(Block *block, int flag) { block->flag |= flag; }
-void block_lock_clear(Block * /*block*/) {}
-
-static Button *button_add(Block *block, ButtonType type, int icon, StringRef str, int x, int y, short width, short height,
-                          std::optional<StringRef> tip)
-{
-  block->buttons.append(std::make_unique<Button>());
-  Button *but = block->buttons.last().get();
-  but->type = type;
-  but->block = block;
-  but->icon = icon;
-  but->str = str;
-  but->tip = tip.value_or("");
-  but->rect = {float(x), float(x + width), float(y), float(y + height)};
-  but->emboss = block->emboss;
-  if (block->recorded_layout) {
-    layout_record_button(block, int(block->buttons.size()) - 1);
-  }
-  return but;
-}
-
-Button *uiDefBut(Block *block, ButtonTypeWithPointerType but_and_ptr_type, StringRef str, int x, int y, short width,
-                 short height, void *poin, float min, float max, std::optional<StringRef> tip)
-{
-  Button *but = button_add(block, but_and_ptr_type.but_type, ICON_NONE, str, x, y, width, height, tip);
-  but->poin = poin;
-  but->pointype = but_and_ptr_type.pointer_type;
-  but->bit_index = bool(but->pointype & ButPointerType::Bit) ? but_and_ptr_type.bit_index : -1;
-  but->min = min;
-  but->max = max;
-  return but;
-}
-
-Button *uiDefIconBut(Block *block, ButtonTypeWithPointerType but_and_ptr_type, int icon, int x, int y, short width,
-                     short height, void *poin, float min, float max, std::optional<StringRef> tip)
-{
-  Button *but = uiDefBut(block, but_and_ptr_type, "", x, y, width, height, poin, min, max, tip);
-  but->icon = icon;
-  return but;
-}
-
-Button *uiDefIconButR_prop(Block *block, ButtonType type, int icon, int x, int y, short width, short height,
-                           PointerRNA *ptr, PropertyRNA *prop, int index, float min, float max,
-                           std::optional<StringRef> tip)
-{
-  Button *but = button_add(block, type, icon ? icon : RNA_property_ui_icon(prop), "", x, y, width, height, tip);
-  but->rnapoin = *ptr;
-  but->rnaprop = prop;
-  but->rnaindex = index;
-  but->min = min;
-  but->max = max;
-  return but;
-}
-
-Button *uiDefButR(Block *block, ButtonType type, std::optional<StringRef> str, int x, int y, short width, short height,
-                  PointerRNA *ptr, StringRefNull propname, int index, float min, float max, std::optional<StringRef> tip)
-{
-  PropertyRNA *prop = RNA_struct_find_property(ptr, propname.c_str());
-  Button *but = uiDefIconButR_prop(block, type, ICON_NONE, x, y, width, height, ptr, prop, index, min, max, tip);
-  but->icon = ICON_NONE;
-  but->str = str.value_or(prop ? RNA_property_ui_name(prop) : "");
-  return but;
-}
-
-/* An operator's button, run by its idname when pressed (JS runs it as the button's operator). */
-Button *uiDefIconButO(Block *block, ButtonType type, StringRefNull opname, wm::OpCallContext /*opcontext*/, int icon, int x,
-                      int y, short width, short height, std::optional<StringRef> tip)
-{
-  Button *but = button_add(block, type, icon, "", x, y, width, height, tip);
-  but->optype = WM_operatortype_find(opname.c_str(), false);
-  return but;
-}
-PointerRNA *button_operator_ptr_ensure(Button *but)
-{
-  if (!but->opptr) {
-    but->opptr = MEM_new<PointerRNA>(__func__, WM_operator_properties_create_ptr(but->optype));
-  }
-  return but->opptr;
-}
-
-void button_funcN_set(Button *but, ButtonHandleNFunc funcN, void *argN, void *arg2, ButtonArgNFree func_argN_free_fn,
-                      ButtonArgNCopy func_argN_copy_fn)
-{
-  but->funcN = funcN;
-  but->func_argN = argN;
-  but->func_arg2 = arg2;
-  but->func_argN_free_fn = func_argN_free_fn;
-  but->func_argN_copy_fn = func_argN_copy_fn;
-}
-
-/* A block's layout (block_layout): recorded by panel-layout.cc, and written into the draw where the block lays it out,
- * for JS to draw with the shared layout renderer. */
-Layout &layout_record_begin(const char *kind);
-void layout_record_align_set(const Layout &layout, bool align);
-std::string layout_record_json(const Layout &layout);
-void layout_record_clear();
-struct BlockLayout {
-  Layout *layout;
-  int x, y, size;
-};
-static Vector<BlockLayout> block_layouts;
-Layout &block_layout(Block * /*block*/, LayoutDirection /*dir*/, LayoutType type, int x, int y, int size, int /*em*/,
-                     int /*padding*/, const uiStyle * /*style*/)
-{
-  /* As interface_layout.cc's block_layout: a header's root lays its items out in a row. */
-  Layout &layout = layout_record_begin(type == LayoutType::Header ? "row" : "column");
-  block_layouts.append({&layout, x, y, size});
-  return layout;
-}
-void block_layout_set_current(Block * /*block*/, Layout * /*layout*/) {}
-/* The block's alignment, recorded on the layout its items go into. */
-void block_align_begin(Block * /*block*/)
-{
-  if (!block_layouts.is_empty()) {
-    layout_record_align_set(*block_layouts.last().layout, true);
-  }
-}
-void block_align_end(Block * /*block*/) {}
-void block_bounds_set_normal(Block * /*block*/, int /*addval*/) {}
-int2 block_layout_resolve(Block * /*block*/)
-{
-  for (const BlockLayout &block_layout : block_layouts) {
-    std::string &s = command("layout");
-    s += ",\"at\":[";
-    number(s, block_layout.x);
-    s += ',';
-    number(s, block_layout.y);
-    s += ',';
-    number(s, block_layout.size);
-    s += "],\"layout\":" + layout_record_json(*block_layout.layout) + '}';
-  }
-  block_layouts.clear();
-  return {0, 0};
-}
-
-void button_func_set(Button *but, ButtonHandleFunc func, void *arg1, void *arg2)
-{
-  but->func = func;
-  but->func_arg1 = arg1;
-  but->func_arg2 = arg2;
-}
-void text_button_func_rename_set(Button *but, std::function<void(bContext &C, StringRefNull oldname)> rename_func)
-{
-  but->rename_func = std::move(rename_func);
-}
-void button_flag_enable(Button *but, int flag) { but->flag |= flag; }
-void button_flag_disable(Button *but, int flag) { but->flag &= ~flag; }
-void button_drawflag_enable(Button *but, int flag) { but->drawflag |= flag; }
-void button_label_alpha_factor_set(Button *but, float alpha_factor) { but->alpha_factor = alpha_factor; }
-void button_retval_set(Button *but, int retval) { but->retval = retval; }
-void button_unit_type_set(Button *but, int unit_type) { but->unit_type = uchar(RNA_SUBTYPE_UNIT_VALUE(unit_type)); }
-void block_func_handle_set(Block *block, BlockHandleFunc func, void *arg)
-{
-  block->handle_func = func;
-  block->handle_arg = arg;
-}
-Button *uiDefIconTextBut(Block *block, ButtonTypeWithPointerType but_and_ptr_type, int icon, StringRef str, int x, int y,
-                         short width, short height, void *poin, std::optional<StringRef> tip)
-{
-  Button *but = uiDefBut(block, but_and_ptr_type, str, x, y, width, height, poin, 0.0f, 0.0f, tip);
-  but->icon = icon;
-  return but;
-}
-void button_disable(Button *but, const char * /*disabled_hint*/) { but->flag |= BUT_DISABLED; }
+static struct {
+  const bContext *C = nullptr;
+  ARegion *region = nullptr;
+} drawn;
 
 /* port-override: JS applies a button within the event that pressed it, so none stays active, nor shows a tooltip. */
 Button *context_active_but_get(const bContext * /*C*/) { return nullptr; }
 void button_tooltip_timer_remove(bContext * /*C*/, Button * /*but*/) {}
 
-/* Whether a text button is being edited: JS edits it in its own field until it applies or cancels the edit. */
+/* port-override: JS edits a text button in its own field until it applies or cancels the edit. */
+static Set<const Button *> editing;
 static bool text_edit_cancelled = false;
 bool button_active_only(const bContext * /*C*/, ARegion * /*region*/, Block * /*block*/, Button *but)
 {
-  but->active_only = !std::exchange(text_edit_cancelled, false);
-  return but->active_only;
-}
-
-/* A button's value: its RNA property's, or its pointer's (a bit of it, for a bit button). */
-static double button_value(const Button *but)
-{
-  if (but->rnaprop) {
-    PointerRNA ptr = but->rnapoin;
-    switch (RNA_property_type(but->rnaprop)) {
-      case PROP_BOOLEAN:
-        return RNA_property_array_check(but->rnaprop) ?
-                   RNA_property_boolean_get_index(&ptr, but->rnaprop, but->rnaindex) :
-                   RNA_property_boolean_get(&ptr, but->rnaprop);
-      case PROP_INT:
-        return RNA_property_int_get(&ptr, but->rnaprop);
-      case PROP_ENUM:
-        return RNA_property_enum_get(&ptr, but->rnaprop);
-      default:
-        return RNA_property_float_get(&ptr, but->rnaprop);
-    }
+  const bool active = !std::exchange(text_edit_cancelled, false);
+  if (active) {
+    editing.add(but);
   }
-  if (!but->poin) {
-    return 0.0;
-  }
-  const ButPointerType type = but->pointype & ~ButPointerType::Bit;
-  const long long word = type == ButPointerType::Char  ? *static_cast<const char *>(but->poin) :
-                         type == ButPointerType::Short ? *static_cast<const short *>(but->poin) :
-                         type == ButPointerType::Int   ? *static_cast<const int *>(but->poin) :
-                                                         0;
-  if (type == ButPointerType::Float) {
-    return *static_cast<const float *>(but->poin);
-  }
-  return but->bit_index >= 0 ? double((word >> but->bit_index) & 1) : double(word);
-}
-
-static void button_value_set(Button *but, double value)
-{
-  if (but->rnaprop) {
-    PointerRNA ptr = but->rnapoin;
-    if (RNA_property_array_check(but->rnaprop)) {
-      RNA_property_boolean_set_index(&ptr, but->rnaprop, but->rnaindex, value != 0.0);
-    }
-    else if (RNA_property_type(but->rnaprop) == PROP_BOOLEAN) {
-      RNA_property_boolean_set(&ptr, but->rnaprop, value != 0.0);
-    }
-    else {
-      RNA_property_int_set(&ptr, but->rnaprop, int(value));
-    }
-    return;
-  }
-  const ButPointerType type = but->pointype & ~ButPointerType::Bit;
-  auto store = [&](auto *p) {
-    using T = std::remove_reference_t<decltype(*p)>;
-    *p = but->bit_index >= 0 ? T(value != 0.0 ? (*p | (1 << but->bit_index)) : (*p & ~(1 << but->bit_index))) : T(value);
-  };
-  if (type == ButPointerType::Char) {
-    store(static_cast<char *>(but->poin));
-  }
-  else if (type == ButPointerType::Short) {
-    store(static_cast<short *>(but->poin));
-  }
-  else if (type == ButPointerType::Int) {
-    store(static_cast<int *>(but->poin));
-  }
-}
-
-static bool button_is_toggle(const Button *but)
-{
-  return ELEM(but->type, ButtonType::IconToggle, ButtonType::IconToggleN, ButtonType::Toggle, ButtonType::ToggleN,
-              ButtonType::Checkbox, ButtonType::CheckboxN);
-}
-
-/* As interface.cc's but_update_select_flag and but_update_ex set them for toggles: selected when on, and the icon
- * that shows it. */
-static void button_update(Button *but)
-{
-  if (!button_is_toggle(but)) {
-    return;
-  }
-  const bool on = button_value(but) != 0.0;
-  const bool negative = ELEM(but->type, ButtonType::IconToggleN, ButtonType::ToggleN, ButtonType::CheckboxN);
-  SET_FLAG_FROM_TEST(but->flag, on != negative, UI_SELECT);
-  if (ELEM(but->type, ButtonType::IconToggle, ButtonType::IconToggleN) &&
-      (!but->rnaprop || (RNA_property_flag(but->rnaprop) & PROP_ICONS_CONSECUTIVE)))
-  {
-    if (but->rnaprop && (RNA_property_flag(but->rnaprop) & PROP_ICONS_REVERSE)) {
-      but->drawflag |= BUT_ICON_REVERSE;
-    }
-    but->iconadd = (but->flag & UI_SELECT) ? 1 : 0;
-  }
-}
-
-/* As interface_query.cc's button_icon. */
-static int button_icon(const Button *but)
-{
-  return (but->drawflag & BUT_ICON_REVERSE) ? but->icon - but->iconadd : but->icon + but->iconadd;
-}
-
-void block_end(const bContext * /*C*/, Block *block)
-{
-  for (std::unique_ptr<Button> &but : block->buttons) {
-    if (but->icon) {
-      but->flag |= UI_HAS_ICON;
-    }
-    button_update(but.get());
-  }
+  return active;
 }
 
 /* port-override: interface_widgets.cc's draw_button for the icon buttons a region's code defines (WidgetStyle::Icon,
@@ -1014,7 +722,7 @@ static void button_draw(const Button *but)
   }
   float alpha = wcol.text[3] / 255.0f;
   if (but->type == ButtonType::Label) {
-    alpha *= but->alpha_factor;
+    alpha *= static_cast<const ButtonLabel *>(but)->alpha_factor;
   }
   const float aspect = UI_INV_SCALE_FAC;
   const float height = ICON_DEFAULT_HEIGHT / aspect;
@@ -1030,113 +738,71 @@ static void button_draw(const Button *but)
   icon_draw_ex(xs, ys, icon, aspect, alpha, 0.0f, color, outline, nullptr);
 }
 
-void block_draw(const bContext * /*C*/, Block *block)
+/* port-override: a block's draw is recorded: its icon buttons, every button with its rectangle, and its layout's tree. */
+void block_draw(const bContext *C, Block *block)
 {
-  const rctf ortho = std::exchange(rec.ortho, block->ortho);
-  for (std::unique_ptr<Button> &but : block->buttons) {
-    button_draw(but.get());
+  drawn = {C, CTX_wm_region(C)};
+  rctf layout_rect;
+  const std::string layout = block_layout_json(block, &layout_rect);
+  if (!layout.empty()) {
+    std::string &s = command("layout");
+    points_json(s, "rect", {{layout_rect.xmin, layout_rect.ymin}, {layout_rect.xmax, layout_rect.ymax}});
+    s += ",\"layout\":" + layout + '}';
+  }
+  for (Button &but : block->buttons()) {
+    button_draw(&but);
     std::string &s = rec.buttons;
     if (!s.empty()) {
       s += ',';
     }
     char head[96];
-    SNPRINTF(head, "{\"index\":%d,\"type\":%d,\"flag\":%d,\"retval\":%d", int(buttons().size()), int(but->type), but->flag, but->retval);
+    SNPRINTF(head, "{\"index\":%d,\"type\":%d,\"flag\":%d,\"retval\":%d", int(buttons().size()), int(but.type), but.flag, but.retval);
     s += head;
-    points_json(s, "rect", {{but->rect.xmin, but->rect.ymin}, {but->rect.xmax, but->rect.ymax}});
-    if (!but->tip.empty()) {
-      string_json(s += ",\"tip\":", but->tip);
+    points_json(s, "rect", {{but.rect.xmin, but.rect.ymin}, {but.rect.xmax, but.rect.ymax}});
+    if (!but.tip.is_empty()) {
+      string_json(s += ",\"tip\":", but.tip);
     }
-    if (but->type == ButtonType::Text) {
-      string_json(s += ",\"text\":", but->poin ? static_cast<const char *>(but->poin) : but->str.c_str());
-      number(s += ",\"maxlength\":", but->max);
+    if (but.type == ButtonType::Text) {
+      string_json(s += ",\"text\":", but.poin ? StringRef(but.poin) : StringRef(but.str));
+      number(s += ",\"maxlength\":", but.hardmax);
     }
-    if (but->active_only) {
+    if (editing.contains(&but)) {
       s += ",\"active\":true";
     }
-    if (but->optype) {
-      string_json(s += ",\"operator\":", but->optype->idname);
+    if (but.optype) {
+      string_json(s += ",\"operator\":", but.optype->idname);
     }
-    if (button_is_toggle(but.get())) {
-      s += (but->flag & UI_SELECT) ? ",\"selected\":true" : ",\"selected\":false";
+    if (button_is_toggle(&but)) {
+      s += (but.flag & UI_SELECT) ? ",\"selected\":true" : ",\"selected\":false";
     }
     s += '}';
-    buttons().append(but.get());
+    buttons().append(&but);
   }
-  rec.ortho = ortho;
 }
 
 }  // namespace blender::ui
 
-/* What a button owns: its function's argument and its operator's properties. */
-static void button_free(ui::Button *but)
-{
-  if (but->func_argN && but->func_argN_free_fn) {
-    but->func_argN_free_fn(but->func_argN);
-  }
-  if (but->opptr) {
-    WM_operator_properties_free(but->opptr);
-    MEM_delete(but->opptr);
-  }
-}
-
-/* The block of the panels last recorded (panel-layout.cc's panel_record), whose buttons stay until the next ones. */
-static std::unique_ptr<ui::Block> panel_block;
-namespace blender::ui {
-Block *panel_block_new()
-{
-  if (panel_block) {
-    for (std::unique_ptr<Button> &but : panel_block->buttons) {
-      button_free(but.get());
-    }
-  }
-  panel_block = std::make_unique<Block>();
-  panel_block->emboss = EmbossType::Emboss;
-  panel_block->recorded_layout = true;
-  return panel_block.get();
-}
-/* A recorded panel's button as JSON: its type, icon, text, tooltip and operator. */
-std::string panel_button_json(int index)
-{
-  const Button &but = *panel_block->buttons[index];
-  std::string s;
-  char head[96];
-  /* Its width in UI units: a button one unit wide shows its icon or box alone, its text clipped. */
-  SNPRINTF(head, "{\"index\":%d,\"type\":%d,\"icon\":%d,\"units\":%.2f", index, int(but.type), but.icon,
-           BLI_rctf_size_x(&but.rect) / UI_UNIT_X);
-  s += head;
-  string_json(s += ",\"text\":", but.str);
-  if (!but.tip.empty()) {
-    string_json(s += ",\"tip\":", but.tip);
-  }
-  if (but.optype) {
-    string_json(s += ",\"operator\":", but.optype->idname);
-  }
-  if (but.rnaprop) {
-    /* A property's button (uiDefButR): its struct type, owner ID and data, property and element, and unit. */
-    char rna[160];
-    SNPRINTF(rna, ",\"pointer\":[%lu,%lu,%lu],\"owner\":\"%s\",\"element\":%d,\"unit\":%d", (unsigned long)uintptr_t(but.rnapoin.type),
-             (unsigned long)uintptr_t(but.rnapoin.owner_id), (unsigned long)uintptr_t(but.rnapoin.data),
-             RNA_struct_identifier(but.rnapoin.type), but.rnaindex, but.unit_type);
-    s += rna;
-    string_json(s += ",\"prop\":", RNA_property_identifier(but.rnaprop));
-  }
-  return s + '}';
-}
-}  // namespace blender::ui
-
-/* Starts recording a region's draw, `winx` by `winy` pixels; the last draw's buttons go. */
+/* Starts recording a region's draw, `winx` by `winy` pixels; the last draw's blocks go. */
 EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
 {
-  for (ui::Button *but : buttons()) {
-    button_free(but);
+  if (ui::drawn.region) {
+    ui::blocklist_free(ui::drawn.C, ui::drawn.region);
+    ui::drawn = {};
   }
-  ui::layout_record_clear();
-  buttons().clear();
-  blocks().clear();
+  ui::editing.clear();
+  ui::buttons().clear();
   rec = {};
   rec.winx = winx;
   rec.winy = winy;
   rec.ortho = {0.0f, float(winx), 0.0f, float(winy)};
+}
+
+/* The recording since region_draw_begin, as JSON: what was drawn, the buttons, and the colors of multicolor icons. */
+EXPORT(region_draw_end) const char *region_draw_end()
+{
+  static std::string json;
+  json = "{\"draw\":[" + rec.draw + "],\"buttons\":[" + rec.buttons + "],\"iconColors\":{" + rec.icon_colors + "}}";
+  return json.c_str();
 }
 
 /* The window's event state while a button applies: what its function reads of the keys held (Ctrl isolates, Shift sets
@@ -1149,70 +815,24 @@ static void event_modifier_set(bContext *C, int modifier)
   }
 }
 
-/* As interface_handlers.cc applies a button: its new value, its function, then its RNA property's update. A toggle
- * takes `value` (0 or 1), or flips when it is -1. Returns the toggle's value after. */
-static int button_press(bContext *C, ui::Button *but, int value, int modifier)
-{
-  event_modifier_set(C, modifier);
-  if (ui::button_is_toggle(but)) {
-    const bool negative = ELEM(but->type, ui::ButtonType::IconToggleN, ui::ButtonType::ToggleN, ui::ButtonType::CheckboxN);
-    const bool on = value < 0 ? !(but->flag & ui::UI_SELECT) : value != 0;
-    ui::button_value_set(but, on != negative);
-  }
-  if (but->func) {
-    but->func(C, but->func_arg1, but->func_arg2);
-  }
-  if (but->funcN) {
-    but->funcN(C, but->func_argN, but->func_arg2);
-  }
-  if (but->block->handle_func) {
-    but->block->handle_func(C, but->block->handle_arg, but->retval);
-  }
-  if (but->rnaprop) {
-    RNA_property_update(C, &but->rnapoin, but->rnaprop);
-  }
-  ui::button_update(but);
-  event_modifier_set(C, 0);
-  return (but->flag & ui::UI_SELECT) ? 1 : 0;
-}
+extern "C" int ui_button_press(bContext *C, ui::Button *but, int value);
+extern "C" void ui_button_text_set(bContext *C, ui::Button *but, const char *text);
+
+/* A drawn button pressed, as Blender applies it (ui-tree.cc's ui_button_press), with keys held. */
 EXPORT(region_button_press) int region_button_press(bContext *C, int index, int value, int modifier)
 {
-  return button_press(C, buttons()[index], value, modifier);
-}
-/* A button of the panels last recorded, pressed. */
-EXPORT(panel_button_press) int panel_button_press(bContext *C, int index, int value, int modifier)
-{
-  return button_press(C, panel_block->buttons[index].get(), value, modifier);
-}
-/* What runs after a recorded panel's property button set its value (rna_set): its functions and its block's. */
-EXPORT(panel_button_applied) void panel_button_applied(bContext *C, int index)
-{
-  ui::Button *but = panel_block->buttons[index].get();
-  if (but->func) {
-    but->func(C, but->func_arg1, but->func_arg2);
-  }
-  if (but->funcN) {
-    but->funcN(C, but->func_argN, but->func_arg2);
-  }
-  if (but->block->handle_func) {
-    but->block->handle_func(C, but->block->handle_arg, but->retval);
-  }
+  event_modifier_set(C, modifier);
+  const int state = ui_button_press(C, ui::buttons()[index], value);
+  event_modifier_set(C, 0);
+  return state;
 }
 
 /* Applies a text button's edit (its new text), or cancels it (null), as its text editing ends. */
 EXPORT(region_button_text) void region_button_text(bContext *C, int index, const char *text)
 {
-  ui::Button *but = buttons()[index];
   if (!text) {
     ui::text_edit_cancelled = true;
     return;
   }
-  const std::string oldname = static_cast<const char *>(but->poin);
-  BLI_strncpy(static_cast<char *>(but->poin), text, size_t(but->max));
-  if (but->rename_func) {
-    but->rename_func(*C, oldname);
-  }
-  if (but->func) {
-    but->func(C, but->func_arg1, but->func_arg2);
-  }
+  ui_button_text_set(C, ui::buttons()[index], text);
 }

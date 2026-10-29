@@ -234,20 +234,11 @@ EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int su
 
 /* A region drawn by its own draw callback (the region type's draw: action_channel_region_draw,
  * graph_channel_region_draw, ...), or its overlay's (graph_main_region_draw_overlay: the current frame, scrollers and
- * value scale), recorded by region-draw.cc: returns the recording's JSON. */
-extern "C" void region_draw_begin(int winx, int winy);
-extern "C" const char *region_draw_end();
+ * value scale), as wm_region_draw records it. */
+extern "C" const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay);
 EXPORT(anim_region_draw) const char *anim_region_draw(bContext *C, AnimArea *a, int regiontype, bool overlay)
 {
-  ARegion *region = BKE_area_find_region_type(&a->area, regiontype);
-  CTX_wm_area_set(C, &a->area);
-  CTX_wm_region_set(C, region);
-  region_draw_begin(region->winx, region->winy);
-  ui::theme::theme_set(a->area.spacetype, regiontype);
-  (overlay ? region->runtime->type->draw_overlay : region->runtime->type->draw)(C, region);
-  CTX_wm_area_set(C, nullptr);
-  CTX_wm_region_set(C, nullptr);
-  return region_draw_end();
+  return wm_region_draw(C, &a->area, regiontype, overlay);
 }
 
 /* The space's dope sheet filter text (bDopeSheet.searchstr, DopeSheet.filter_text) and flag (ADS_FLAG_*). */
@@ -505,79 +496,6 @@ EXPORT(anim_active_fcurve) FCurve *anim_active_fcurve(bContext *C, char *r_name,
   *r_icon = icon ? *icon : (ale->id ? RNA_struct_ui_icon(ID_code_to_RNA_type(GS(ale->id->name))) : ICON_NONE);
   MEM_delete(ale);
   return fcu;
-}
-
-namespace blender::ui {
-std::string panel_record(const bContext *C, PanelType *type, const PointerRNA &ptr, Block *block);
-Block *panel_block_new();
-}  // namespace blender::ui
-
-/* The struct type of an F-Modifier, as rna_FModifierType_refine gives it. */
-static StructRNA *fmodifier_srna(const FModifier &fcm)
-{
-  switch (fcm.type) {
-    case FMODIFIER_TYPE_GENERATOR: return RNA_FModifierGenerator;
-    case FMODIFIER_TYPE_FN_GENERATOR: return RNA_FModifierFunctionGenerator;
-    case FMODIFIER_TYPE_ENVELOPE: return RNA_FModifierEnvelope;
-    case FMODIFIER_TYPE_CYCLES: return RNA_FModifierCycles;
-    case FMODIFIER_TYPE_NOISE: return RNA_FModifierNoise;
-    case FMODIFIER_TYPE_LIMITS: return RNA_FModifierLimits;
-    case FMODIFIER_TYPE_STEPPED: return RNA_FModifierStepped;
-    case FMODIFIER_TYPE_SMOOTH: return RNA_FModifierSmooth;
-    default: return RNA_FModifier;
-  }
-}
-
-/* A recorded panel as an element of a JSON array: its type's idname, label, category and flag, its F-Modifier's address
- * for an instanced one, and what it draws. */
-static void panel_json(std::string &json, const bContext *C, PanelType *type, const PointerRNA &ptr, ui::Block *block)
-{
-  json += json.size() > 1 ? "," : "";
-  json += "{\"idname\":\"" + std::string(type->idname) + "\",\"label\":\"" + type->label + "\",\"category\":\"" +
-          type->category + "\",\"flag\":" + std::to_string(type->flag) + ",\"data\":" + std::to_string(uintptr_t(ptr.data)) +
-          ",\"panel\":" + ui::panel_record(C, type, ptr, block) + '}';
-}
-
-/* The context's active F-Curve's F-Modifier panels, as graph_panel_modifiers adds them (ANIM_fmodifier_panels, with
- * graph_fmodifier_panel_id's names). */
-static void fmodifier_panels_json(std::string &json, const bContext *C, ARegionType *art, ui::Block *block)
-{
-  bAnimContext ac;
-  bAnimListElem *ale = ANIM_animdata_get_context(C, &ac) ? get_active_fcurve_channel(&ac) : nullptr;
-  if (!ale) {
-    return;
-  }
-  for (FModifier &fcm : static_cast<FCurve *>(ale->data)->modifiers) {
-    const FModifierTypeInfo *fmi = get_fmodifier_typeinfo(fcm.type);
-    char idname[BKE_ST_MAXNAME];
-    SNPRINTF(idname, "GRAPH_PT_%s", fmi ? fmi->name : "");
-    if (PanelType *type = static_cast<PanelType *>(BLI_findstring(&art->paneltypes, idname, offsetof(PanelType, idname)))) {
-      panel_json(json, C, type, RNA_pointer_create_discrete(ale->fcurve_owner_id, fmodifier_srna(fcm), &fcm), block);
-    }
-  }
-  MEM_delete(ale);
-}
-
-/* The context region's panels (the sidebar's: graph_buttons.cc's), each registered type whose poll passes in
- * registration order with its sub-panels, the instanced F-Modifier panels after the Modifiers panel, as recorded by
- * panel-layout.cc: a JSON array (panel_json). Their buttons stay pressable (panel_button_press) until the next call. */
-EXPORT(anim_sidebar_panels) const char *anim_sidebar_panels(bContext *C)
-{
-  static std::string json;
-  json = "[";
-  ARegionType *art = CTX_wm_region(C)->runtime->type;
-  ui::Block *block = ui::panel_block_new();
-  for (PanelType &type : art->paneltypes) {
-    if (type.parent || (type.flag & PANEL_TYPE_INSTANCED) || (type.poll && !type.poll(C, &type))) {
-      continue;
-    }
-    panel_json(json, C, &type, PointerRNA_NULL, block);
-    if (STREQ(type.idname, "GRAPH_PT_modifiers")) {
-      fmodifier_panels_json(json, C, art, block);
-    }
-  }
-  json += ']';
-  return json.c_str();
 }
 
 /* The header text an operator shows while it runs (ED_area_status_text), or null. */
@@ -874,12 +792,41 @@ EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int c
 enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS, POPUP_LAYOUT };
 static Popup popup_opened = POPUP_NONE;
 static std::string popup_title, popup_text;
+/* The operator that opened it, by idname, and the values it was invoked with, for running it from the popup. */
+static std::string popup_idname, popup_values;
 
 /* The popup the last invoke opened (Popup), cleared by asking: its title, and its confirm button's text, the enum
  * property's identifier or the recorded layout of a popup menu (panel-layout.cc). */
 EXPORT(operator_popup) int operator_popup() { return std::exchange(popup_opened, POPUP_NONE); }
 EXPORT(operator_popup_title) const char *operator_popup_title() { return popup_title.c_str(); }
 EXPORT(operator_popup_text) const char *operator_popup_text() { return popup_text.c_str(); }
+
+static std::string json_string(const std::string &text)
+{
+  std::string out = "\"";
+  for (const char c : text) {
+    out += c == '"' ? "\\\"" : c == '\\' ? "\\\\" : c == '\n' ? "\\n" : std::string(1, c);
+  }
+  return out + "\"";
+}
+extern "C" const char *operator_menu_called();
+namespace blender {
+/* The popup the last operator opened or the menu it called, as JSON for an event's result (wm-api.cc), cleared:
+ * { type, title, text, idname, values } (type as operator_popup's numbers), { menu }, or null. */
+std::string operator_popup_json()
+{
+  const std::string menu = operator_menu_called();
+  if (!menu.empty()) {
+    return "{\"menu\":" + json_string(menu) + "}";
+  }
+  const Popup popup = std::exchange(popup_opened, POPUP_NONE);
+  if (popup == POPUP_NONE) {
+    return "null";
+  }
+  return "{\"type\":" + std::to_string(popup) + ",\"title\":" + json_string(popup_title) + ",\"text\":" +
+         json_string(popup_text) + ",\"idname\":" + json_string(popup_idname) + ",\"values\":" + popup_values + "}";
+}
+}  // namespace blender
 
 /* What the editors reach of Blender's window manager and screen, which are Bylonder's (JS). */
 
@@ -912,17 +859,19 @@ void WM_gesture_lasso_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 namespace ui {
 std::string operator_props_layout(bContext *C, wmOperator *op);
 }
-static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text)
+static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text, wmOperator *op = nullptr)
 {
   popup_opened = popup;
   popup_title = title;
   popup_text = text;
+  popup_idname = op ? op->idname : "";
+  popup_values = op ? operator_values_json(op->ptr) : "{}";
   return OPERATOR_INTERFACE;
 }
 wmOperatorStatus WM_operator_confirm_ex(bContext * /*C*/, wmOperator *op, const char *title, const char * /*message*/,
                                         const char *confirm_text, ui::AlertIcon /*icon*/, bool /*cancel_default*/)
 {
-  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"));
+  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"), op);
 }
 /* As wm_operators.cc defines it, the menu being Bylonder's. */
 wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/)
@@ -934,7 +883,7 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
   if (RNA_property_is_set(op->ptr, prop)) {
     return op->type->exec(C, op);
   }
-  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
+  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop), op);
 }
 
 /* The properties popups and dialogs (wm_operators.cc): Bylonder's window manager shows the operator's properties as
@@ -946,7 +895,7 @@ wmOperatorStatus WM_operator_props_dialog_popup(bContext *C, wmOperator *op, int
 {
   const std::string confirm = confirm_text.value_or(IFACE_("OK"));
   const std::string text = "{\"confirm\":\"" + confirm + "\",\"layout\":" + ui::operator_props_layout(C, op) + "}";
-  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str());
+  return popup_open(POPUP_PROPS, title ? title->c_str() : op->type->name, text.c_str(), op);
 }
 wmOperatorStatus WM_operator_props_popup(bContext *C, wmOperator *op, const wmEvent * /*event*/)
 {
@@ -1151,9 +1100,6 @@ wmPaintCursor *WM_paint_cursor_activate(short /*space_type*/, short /*region_typ
   return reinterpret_cast<wmPaintCursor *>(&cursor);
 }
 bool WM_paint_cursor_end(wmPaintCursor * /*handle*/) { return true; }
-
-/* port-override: Bylonder lays out the editors' panels (JS), so panel types are not kept. */
-bool WM_paneltype_add(PanelType * /*pt*/) { return true; }
 
 /* port-override: the editors' redo panel (the HUD region) is Bylonder's. */
 ARegionType *ui::ED_area_type_hud(int /*space_type*/)

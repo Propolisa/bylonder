@@ -30,8 +30,6 @@ using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
-extern "C" void region_draw_begin(int winx, int winy);
-extern "C" const char *region_draw_end();
 
 /* As WM_init initializes the interface (UI_init): the resolution WM_window_dpi_set_userdef sets at Blender's default
  * scale of 1, the default theme (userdef_default_theme.c), the default style and the icons. */
@@ -126,20 +124,9 @@ EXPORT(outliner_context_set) void outliner_context_set(bContext *C, ScrArea *are
   CTX_wm_region_set(C, area ? main_region(area) : nullptr);
 }
 
-/* Draws the main region as outliner_main_region_draw does, but its overflow indication and scrollbars, which JS draws
- * with the region-draw recording: returns its JSON. */
-EXPORT(outliner_draw) const char *outliner_draw(bContext *C, ScrArea *area)
-{
-  ARegion *region = main_region(area);
-  outliner_context_set(C, area);
-  region_draw_begin(region->winx, region->winy);
-  ui::theme::theme_set(SPACE_OUTLINER, RGN_TYPE_WINDOW);
-  ui::theme::frame_buffer_clear(TH_BACK);
-  ed::outliner::draw_outliner(C, true);
-  ui::view2d_view_restore(C);
-  outliner_context_set(C, nullptr);
-  return region_draw_end();
-}
+/* The main region as its type draws it (outliner_main_region_draw), as wm_region_draw records it. */
+extern "C" const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay);
+EXPORT(outliner_draw) const char *outliner_draw(bContext *C, ScrArea *area) { return wm_region_draw(C, area, RGN_TYPE_WINDOW, false); }
 
 /* Marks the Outliner for a sync of its selection from the view layer's, as the editors that change the selection do
  * (ED_outliner_select_sync_from_object_tag). */

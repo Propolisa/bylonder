@@ -20,6 +20,7 @@ import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
 import { windowCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
+import { createView3DWindow } from "./editors/space_view3d/view3d-window.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -323,7 +324,14 @@ history = createHistory(world.objects, () => {
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();},main:()=>world.mainSync});
 animation.setCommit(()=>history.commit());
 const capture = windowCapture(notify);
-world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e) });
+// Blender's window takes the 3D Views' input in Object Mode (made once Main is, below).
+let view3dWindow = null;
+const blenderWindow = {
+  takes: (native, view) => !!view3dWindow?.takes(native, view),
+  send: (...args) => view3dWindow.send(...args),
+  pressHandled: () => view3dWindow.pressHandled(),
+};
+world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow });
 const editor = createEditor(
   world,
   views,
@@ -395,6 +403,8 @@ history.start();
 const objectOperatorHost = { transaction: commands.transaction, notify, keying: (run) => animation.keying(run), commit, wm: () => world.wm,
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
+view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !world.editMode.active, host: objectOperatorHost,
+  menu: (name, at) => world.callMenu(name, at) });
 // An armature's Edit and Pose Modes, Blender's in Main.
 world.armatureModes = createArmatureModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
 registerAddOperators(creator);
@@ -608,6 +618,7 @@ registerOperators({
   // A transform starts at the mouse (initTransInfo), the 3D cursor's at a drag's press; release_confirm ends it on
   // release, cursor_transform moves the 3D cursor.
   ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
+    blender: true,
     poll: (props) => editor.selection.size > 0 || !!props.cursor_transform,
     run: (props, event) => {
       creator.finish();

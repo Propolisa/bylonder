@@ -61,7 +61,7 @@ export function setOperatorProperties(op, props) {
     const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
     // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).
     const ok = withString(name, (namePointer) => items !== null
-      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item) || (typeof value === 'string' && (x.operator_string_set(op, namePointer, item), true)))
+      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
       : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
     if (!ok) throw new Error(`no property ${name} = ${value}`);
   }
@@ -124,14 +124,6 @@ function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifi
 // What changed since the last extraction (ExtractFlag in extraction.hh): topology, which refills everything, positions
 // (with normals and triangles), flags, or the UV map.
 export const EXTRACT_TOPOLOGY = 1, EXTRACT_POSITIONS = 2, EXTRACT_FLAGS = 4, EXTRACT_UV = 8, EXTRACT_ALL = 15;
-
-// What Blender's panel of a modifier (as setModifiers takes it) draws with its settings: a tree of layouts and the
-// properties, labels and sub-panels in them (panel-layout.cc).
-export function drawModifierPanel(modifier) {
-  const object = x.modifier_object(modifierObject());
-  const { added: [md] } = setModifiers(object, [modifier]);
-  return JSON.parse(cString(x.modifier_panel_draw(object, md)));
-}
 
 // A copy of a Mesh's arrays and attributes, as createMesh takes them, that can be posted to another realm.
 export function meshData(mesh) {
@@ -369,6 +361,8 @@ export class BlenderMain {
   #C = x.main_C(this.#context);
   #undo = false;
 
+  constructor() { x.rna_context_set(this.#C); }
+
   // An object of a type (EMPTY, MESH, CURVE, FONT, LIGHT, CAMERA) with new data of its type.
   add(type, name) { return withString(name, (p) => x.main_object_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
   remove(ob) { x.main_object_remove(this.#context, ob); }
@@ -572,8 +566,8 @@ export class BlenderMain {
   // Invokes an operator with an event, as wmEvent takes it: its status, report and the values it ran with. One whose
   // invoke opened a popup ({ type, title, text }: windowmanager/wm-popups.js draws it) has not run; the popup's
   // choice runs it again by exec, but a properties dialog keeps the operator (`dialog`), whose properties it edits,
-  // for finishPopup. One that runs modally is kept (`op`, with its modal `keymap`) for modal(). A menu it called (WM_menu_name_call) is a popup of its layout when Blender's C defines it, else
-  // `menu`, its name.
+  // for finishPopup. One that runs modally is kept (`op`, with its modal `keymap`) for modal(). A menu it called (WM_menu_name_call) is a popup of its layout
+  // when Blender has it, else `menu`, its name.
   invoke(idname, props, event) {
     const op = newOperator(idname, props);
     let kept = false;
@@ -621,13 +615,11 @@ export class BlenderMain {
   get status() { return cString(x.main_status(this.#context)); }
   // The context properties edited in a popup run in.
   get C() { return this.#C; }
-  // A menu type Blender's C defines, as a popup of its layout ({ type, title, text }), or null.
+  // A menu type (Blender's C's or its Python's), as a popup of its layout tree ({ type, title, text }: ui-tree.cc), or null.
   menu(name) {
-    const text = withString(name, (p) => cString(x.menu_type_draw(this.#C, p)));
+    const text = withString(name, (p) => cString(x.ui_menu(this.#C, p)));
     return text ? { type: 'LAYOUT', title: withString(name, (p) => cString(x.menu_type_label(p))), text } : null;
   }
-  // What a sub-menu of the last popup menu draws (layout_submenu_draw), as its recorded layout's JSON.
-  submenu(index) { return cString(x.layout_submenu_draw(this.#C, index)); }
 }
 
 // The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.

@@ -79,7 +79,6 @@ export function openModulePopup(sync, popup, event, { idname, finish = () => {} 
     idname, at, finish,
     run: (id, values) => invokeOperator(id, values, { type: 'NONE', value: 'NOTHING', clientX: at.x, clientY: at.y }),
     C: sync.blender.C,
-    submenu: (index) => sync.blender.submenu(index),
     enumItems: (prop) => sync.blender.enumItems(idname, prop),
   }));
 }
@@ -90,6 +89,7 @@ const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 export function registerObjectOperators(registry, { sync, transaction, notify, keying = (fn) => fn(), ...host } = {}) {
   const options = { transaction, notify, keying, ...host };
   if (sync) for (const idname of blenderOperators(sync.blender)) registerFallback(idname, {
+    blender: true,
     poll: () => { sync.flush(); return sync.blender.poll(idname); },
     run: (props, event) => runBlenderOperator(sync, idname, props, { ...options, event }),
     // Blender's items in context (object_mode_set_itemf: the active object's modes), with RNA's names and icons.
