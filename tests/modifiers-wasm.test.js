@@ -5,7 +5,7 @@ import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { evaluateBlenderModifiers, evaluated, moduleModifiers, evaluation, estimatedFaces } from '../src/modifiers/blender.js';
 import { evaluateHere } from '../src/modifiers/evaluator.js';
 import { createJobs } from '../src/windowmanager/wm-jobs.js';
-import { scratchMain, evaluateModifiers } from '../src/bmesh/bmesh-wasm.js';
+import { BlenderMain, evaluateModifiers } from '../src/bmesh/bmesh-wasm.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createMesh, createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
@@ -44,7 +44,7 @@ assert.deepEqual(failed, [], 'Modifier results that differ from Blender');
 assert.equal(known.length, Object.keys(KNOWN).length, 'A known difference is gone: remove it from KNOWN');
 
 // In Edit Mode on Main: the same modifiers on the edit mesh give Blender's result.
-const main = scratchMain(), ob = main.add('MESH', 'Cube');
+const main = new BlenderMain(), ob = main.add('MESH', 'Cube');
 const subsurf = JSON.parse(fs.readFileSync(new URL('subsurf.json', dir)));
 main.setMesh(ob, primitive_add('mesh.primitive_cube_add'));
 main.setModifiers(ob, moduleModifiers(subsurf.stack));
