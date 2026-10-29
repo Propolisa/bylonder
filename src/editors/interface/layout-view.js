@@ -90,11 +90,11 @@ function headerPropWidth(node, prop, unit) {
 const W = 'bl-widget';
 // A tool's icon, which bpy.app.icons names (icon_value), as an image.
 const toolIcon = (name) => (typeof name === 'string' ? h('img', { class: 'bl-tool-icon', src: toolIconUrl(name), alt: '' }) : null);
-const label = (text, { iconName, iconValue, className = '', align = 'left' } = {}) => h('div', {
+export const label = (text, { iconName, iconValue, className = '', align = 'left' } = {}) => h('div', {
   class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', !text && iconName && 'bl-icon-only', className],
 }, [toolIcon(iconValue), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
-function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value }) {
+export function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value }) {
   return h('button', {
     type: 'button', title, disabled, 'aria-pressed': pressed, 'aria-label': text || title, 'data-value': value,
     class: [W, `bl-${kind} flex h-unit min-w-0 items-center justify-center gap-1 rounded-md px-1.5 text-xs`, emboss ? '' : 'bl-flat',
@@ -103,14 +103,14 @@ function button({ text, iconName, kind = 'tool', pressed = false, disabled = fal
   }, [icon(iconName), text && !iconOnly ? h('span', { class: 'truncate' }, text) : null]);
 }
 
-const checkbox = ({ checked, text, disabled, inactive, onChange, title }) => h('label', {
+export const checkbox = ({ checked, text, disabled, inactive, onChange, title }) => h('label', {
   class: ['bl-option flex h-unit min-w-0 items-center gap-1.5 text-xs', inactive && 'opacity-50', disabled && 'pointer-events-none'], title,
 }, [
   h('input', { type: 'checkbox', class: [W, 'bl-check'], checked, disabled, 'aria-label': text || title, onChange: (e) => onChange(e.target.checked) }),
   text ? h('span', { class: 'truncate' }, text) : null,
 ]);
 
-function textField({ value, iconName, disabled, inactive, onChange, title, placeholder }) {
+export function textField({ value, iconName, disabled, inactive, onChange, title, placeholder }) {
   return h('label', { class: [W, 'bl-text flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md px-1.5 text-xs', inactive && 'opacity-50'], title }, [
     icon(iconName),
     h('input', { class: 'min-w-0 flex-1 bg-transparent outline-none', value, disabled, placeholder, 'aria-label': title,
@@ -132,7 +132,7 @@ const operatorEnumMenu = (node, ui) => (ui.enumItems?.(node.operator, node.prope
 });
 
 // A menu in a header (ui_item_menu in a header layout): a pull-down, flat until hovered, without a drop-down arrow.
-const pulldown = ({ text, iconName, items, disabled, menu }) => h('button', {
+export const pulldown = ({ text, iconName, items, disabled, menu }) => h('button', {
   type: 'button', disabled, 'aria-label': text, 'aria-haspopup': 'menu', 'data-blender': menu, class: 'bl-pulldown bl-fit', onClick: (e) => openMenu(items, e.currentTarget),
 }, [icon(iconName), text ? h('span', text) : null]);
 
@@ -170,7 +170,7 @@ const popover = (panels, node, env, iconName = node.icon ?? node.icon_value, ico
   panels, text: node.text, iconName, iconOnly, arrowOnly: node.text === '' && !iconName, disabled: !env.enabled || !env.active, env,
 });
 
-function colorSwatch({ value, disabled, inactive, onChange, title }) {
+export function colorSwatch({ value, disabled, inactive, onChange, title }) {
   const hex = '#' + [...value].slice(0, 3).map((c) => Math.round(Math.min(1, Math.max(0, c)) ** (1 / 2.2) * 255).toString(16).padStart(2, '0')).join('');
   return h('label', { class: [W, 'bl-color relative flex h-unit min-w-0 flex-1 overflow-hidden rounded-md', inactive && 'opacity-50'], title, style: { background: hex } }, [
     h('input', { type: 'color', class: 'absolute inset-0 size-full cursor-pointer opacity-0', value: hex, disabled, 'aria-label': title,
