@@ -539,6 +539,15 @@ export class BlenderMain {
     if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
     return bytes;
   }
+  // Blender's undo stack (undo-api.cc): started from Main as it is, a step of Main's state pushed (returns it), and a
+  // step loaded, undoing or redoing to it (false when the stack no longer holds it).
+  undoInit() { x.undo_stack_init(this.#C); }
+  undoPush(name) { return withString(name, (p) => x.undo_push(this.#C, p)) >>> 0; }
+  undoLoad(step) {
+    const loaded = x.undo_load(this.#C, step);
+    x.main_context_refresh(this.#context);
+    return loaded;
+  }
   // A .blend opened as the Main, as Blender opens one (main_open): returns its warnings; throws when it cannot be read.
   readBlend(bytes) {
     const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
