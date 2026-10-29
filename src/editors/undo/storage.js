@@ -150,16 +150,25 @@ export function applyNative(objects, rows) {
 // One undo history (docs/model.md): each step is a step of Blender's undo stack, Main's state (main-sync.js undoPush,
 // undo-api.cc), with what Babylon owns at that moment: its objects' native data and the extras' capture. Undo and redo
 // load Blender's step, which the view draws, then restore Babylon's.
-//   main: the scene sync; extras: capture() and restore(state) of other Babylon-owned state, beforeCommit().
-export function createHistory(objects, onChange, { main, capture = () => null, restore = () => {}, beforeCommit = () => {} } = {}) {
-  main.undoInit();
-  const take = (name) => ({ step: main.undoPush(name), objects: nativeSnapshot(objects), extra: capture() });
+//   main: the scene sync, or a function giving it once it exists (the history starts from the scene as it is then);
+//   extras: capture() and restore(state) of other Babylon-owned state, beforeCommit().
+export function createHistory(objects, onChange, { main: given, capture = () => null, restore = () => {}, beforeCommit = () => {} } = {}) {
+  const main = () => (typeof given === 'function' ? given() : given);
+  const take = (name) => ({ step: main().undoPush(name), objects: nativeSnapshot(objects), extra: capture() });
   const unchanged = (a, b) => a.step === b.step && JSON.stringify([a.objects, a.extra]) === JSON.stringify([b.objects, b.extra]);
-  let entries = [take('Original')],
+  let entries = null,
     index = 0,
     revision = 0;
+  const started = () => {
+    if (!entries) {
+      main().undoInit();
+      entries = [take('Original')];
+    }
+    return entries;
+  };
+  if (typeof given !== 'function') started();
   const load = (entry) => {
-    if (!main.undoLoad(entry.step)) return false;
+    if (!main().undoLoad(entry.step)) return false;
     applyNative(objects, entry.objects);
     restore(entry.extra);
     return true;
@@ -168,7 +177,10 @@ export function createHistory(objects, onChange, { main, capture = () => null, r
     get revision() {
       return revision;
     },
+    // Starts the history from the scene as it is, if it has not started.
+    start: () => void started(),
     commit(name = 'Edit') {
+      started();
       beforeCommit();
       const next = take(name);
       if (unchanged(next, entries[index])) return;
@@ -181,12 +193,14 @@ export function createHistory(objects, onChange, { main, capture = () => null, r
     },
     // Replaces the latest step, for an operator re-run from the redo panel.
     amend(name = 'Edit') {
+      started();
       beforeCommit();
       entries[index] = take(name);
       revision++;
       onChange();
     },
     undo() {
+      started();
       if (index > 0 && load(entries[index - 1])) {
         index--;
         revision++;
@@ -194,6 +208,7 @@ export function createHistory(objects, onChange, { main, capture = () => null, r
       }
     },
     redo() {
+      started();
       if (index < entries.length - 1 && load(entries[index + 1])) {
         index++;
         revision++;

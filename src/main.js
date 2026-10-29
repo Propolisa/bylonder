@@ -320,7 +320,7 @@ history = createHistory(world.objects, () => {
   for(const [ref,value] of Object.entries(data?.properties||{}))animation.channels.get(ref)?.set(value);
   world.modifiers.refresh();
   animation.load(data?.animation,{apply:false});
-},beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
+},beforeCommit:()=>{world.collections.adopt();animation.captureEdits();},main:()=>world.mainSync});
 animation.setCommit(()=>history.commit());
 const capture = windowCapture(notify);
 world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e) });
@@ -385,11 +385,12 @@ const tools = createView3DTools({
   toolSettings: () => blenderRNA.pointer("ToolSettings", world),
   addPreset: (idname, placement) => creator.add(creator.catalog.find((preset) => preset.operator === idname), placement),
 });
-// Blender's Main, kept equal to the scene both ways (blenkernel/main-sync.js), which Blender's code runs on. Slices hooks
+// Blender's Main, which owns the scene and its undo, drawn by Babylon (blenkernel/main-sync.js, main-view.js). Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
 for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
 world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
+history.start();
 // What Object Mode's operators run in: the scene's Main, undo steps, the window manager and the 3D View under the pointer.
 const objectOperatorHost = { transaction: commands.transaction, notify, keying: (run) => animation.keying(run), commit, wm: () => world.wm,
   pointer: () => editor.pointer, view: () => activeView() };
