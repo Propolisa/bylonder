@@ -1,5 +1,4 @@
-// Edit Mode by the object's type, as object.mode_set enters it: the mesh editor (object-edit.js, or Blender's on Main,
-// mesh/editmesh-mode.js) for meshes, the curve and text editor (curve/editcurve.js) for curve and text objects. One is active at a time; `kind` is the edited
+// Edit Mode by the object's type, as object.mode_set enters it: Blender's on Main (mesh/editmesh-mode.js) for meshes, the curve and text editor (curve/editcurve.js) for curve and text objects. One is active at a time; `kind` is the edited
 // object's type (MESH, CURVE or FONT).
 import { registerOperator } from '../../windowmanager/wm-operators.js';
 export function createEditModes(mesh, curve) {
@@ -19,7 +18,6 @@ export function createEditModes(mesh, curve) {
     get selectmode() { return mesh.selectmode; },
     set selectmode(mode) { mesh.selectmode = mode; },
     get stats() { return current().stats; },
-    get menus() { return mesh.menus; },
     enter: (node) => curve.enter(node) || mesh.enter(node),
     exit: () => current().exit(),
     toggle: () => (curve.active || mesh.active ? current().exit() : curve.enter() || mesh.enter()),
@@ -28,7 +26,8 @@ export function createEditModes(mesh, curve) {
     module: (...args) => current().module(...args),
     selectOperator: (...args) => current().selectOperator(...args),
     selectBox: (...args) => current().selectBox(...args),
-    selectRegion: (...args) => current().selectRegion(...args),
+    selectRegion: (...args) => curve.selectRegion(...args),
+    selectGesture: (...args) => mesh.selectGesture(...args),
     modifiersChanged: () => mesh.modifiersChanged(),
     // Edit Mesh's: the edited Mesh, the tools' gizmo center and normal, and a primitive added by its operator.
     get mesh() { return mesh.mesh; },
