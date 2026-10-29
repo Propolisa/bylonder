@@ -434,6 +434,8 @@ export class BlenderMain {
     }));
     return ownedMesh(mesh);
   }
+  // The 3D View the context's operators run in picks as in X-ray (view-api.cc's seam: no GPU select buffer).
+  xrayPicking() { x.view_xray_picking(this.#C); }
   // The edit mesh of an object in Edit Mode (its Mesh's BMEditMesh), as the draw cache extracts it (view-api.cc), valid
   // until its next extraction, and its select mode (SCE_SELECT_*); null outside Edit Mode.
   editMesh(ob, what = EXTRACT_ALL) {

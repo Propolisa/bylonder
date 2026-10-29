@@ -181,7 +181,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const headerApp = createApp({ render: () => {
     void headerState.revision;
     area.layout(RGN_TYPE_HEADER, 0, size.height, menus.clientWidth || section.clientWidth, menus.clientHeight || HEADER_HEIGHT);
-    return (headerUI.inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: headerUI }));
+    return (headerUI.inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: headerUI, header: true }));
   } });
   headerApp.mount(menus);
 
