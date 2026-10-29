@@ -19,8 +19,10 @@ using namespace blender;
 
 static UndoStack *stack_of(bContext *C) { return CTX_wm_manager(C)->runtime->undo_stack; }
 
-/* The window manager as Blender keeps it, an ID in Main, where undo finds it (ED_undo_stack_get,
- * ED_editors_init_for_undo) and memfile undo carries it from one Main to the next (IDTYPE_FLAGS_NO_MEMFILE_UNDO). */
+/* The window manager as Blender keeps it, Main's first one, where undo finds it (ED_undo_stack_get,
+ * ED_editors_init_for_undo) and memfile undo carries it from one Main to the next (IDTYPE_FLAGS_NO_MEMFILE_UNDO). It
+ * leaves Main while a file is read or written, as its windows are not a file's (a read file's own window manager
+ * stays, after it). */
 EXPORT(wm_main_link) void wm_main_link(bContext *C, bool linked)
 {
   Main *bmain = CTX_data_main(C);
@@ -30,12 +32,13 @@ EXPORT(wm_main_link) void wm_main_link(bContext *C, bool linked)
     wm->id.tag |= ID_TAG_NO_MAIN;
     BKE_lib_libblock_session_uid_ensure(&wm->id);
   }
-  if (linked) {
-    BKE_libblock_management_main_add(bmain, wm);
-  }
-  else {
+  if (!linked) {
     BKE_libblock_management_main_remove(bmain, wm);
+    return;
   }
+  BKE_libblock_management_main_add(bmain, wm);
+  BLI_remlink(&bmain->wm, wm);
+  BLI_addhead(&bmain->wm, wm);
 }
 
 /* A new undo stack from Main as it is, as reading a file starts one (wm_file_read_post). */

@@ -1,5 +1,6 @@
-// The scene sync (blenkernel/main-sync.js): Bylonder's Babylon scene and Blender's Main stay equal where they overlap,
-// through edits from both sides: Babylon writes, Blender's operators, undo and redo.
+// The scene sync (blenkernel/main-sync.js) and the view (main-view.js): Main owns the scene, Babylon draws it; what
+// Bylonder's editors write on Babylon's objects reaches Main, what Blender's code changes and Blender's undo restores
+// is drawn, through edits from both sides, undone and redone.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, MeshBuilder, TransformNode, Vector3, Quaternion, PointLight, SpotLight, FreeCamera, PBRMaterial, Color3 } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -107,15 +108,14 @@ assert.deepEqual(sync.check(), []);
 assert.equal(blender.property(ob(cube), 'bylonder_id'), 'cube');
 assert.equal(blender.property(sync.materialOf(material), 'bylonder_material'), 'pbr');
 
-// Main holds no geometry at rest; Blender's code gets it filled.
-assert.equal(blender.mesh(ob(cube)).verts_num, 0, "Main's Mesh is empty at rest");
+// Main owns the geometry of Bylonder's Mesh data.
+assert.equal(blender.mesh(ob(cube)).verts_num, 8, "Main's Mesh holds the cube");
 
 // Blender to Babylon: an operator's changes come back through the same mapping.
 selection.replace([cube]);
 const { status } = sync.run(() => blender.run('object.location_clear'), { meshes: [cube] });
 assert.equal(status, OPERATOR_FINISHED);
 assert.deepEqual(cube.position.asArray(), [0, 0, 0]);
-assert.equal(blender.mesh(ob(cube)).verts_num, 0, 'the geometry is released after the run');
 selection.replace([cube, other]);
 cube.scaling = new Vector3(2, 1, 1);
 sync.run(() => blender.run('object.transform_apply', { location: false, rotation: false, scale: true }), { meshes: [cube, other] });
@@ -126,7 +126,7 @@ assert.deepEqual(sync.check(), []);
 // A sequence of edits from both sides, each an undo step, then undone and redone: after every one the models are equal
 // (sync.debug checks after each flush and run, check() once more here).
 const ID_GR = 0x5247;
-const history = createHistory(objects, () => {}, { capture: () => world.collections.capture() ?? null, restore: (state) => world.collections.apply(state ?? undefined) });
+const history = createHistory(objects, () => {}, { main: sync, capture: () => world.collections.capture() ?? null, restore: (state) => world.collections.apply(state ?? undefined) });
 // Blender's code changing Main as its operators and buttons do: by its API, and DNA without a recalc tag.
 const blenderSide = (fn) => sync.run(fn);
 const steps = [
@@ -155,12 +155,25 @@ const steps = [
   ['Blender: the frame and range', () => blenderSide(() => { dnaSet('Scene', blender.scene, 'frame_current', 7); dnaSet('Scene', blender.scene, 'frame_start', 3); }),
     () => assert.deepEqual([animation.time.frame, animation.time.state.frameStart], [7, 3], "Blender's frame and range come back")],
 ];
+// What each step leaves, as the scene shows it: undo and redo must show the same.
+const round = (values) => values.map((v) => Math.round(v * 1e4) / 1e4);
+const shown = () => JSON.stringify({
+  objects: objects.filter((node) => !node.metadata?.wbDeleted).map((node) => [node.name, node.parent?.name ?? null, round(node.position.asArray()),
+    round((node.rotationQuaternion ?? node.rotation).asArray()), round(node.scaling.asArray()), node.isEnabled(false), !!node.metadata?.wbHideRender,
+    node.getTotalVertices?.() ?? 0]),
+  selected: selection.nodes.map((node) => node.name),
+  spot: [round(spot.diffuse.asArray()), round([spot.angle, camera.fov, camera.maxZ])],
+  collections: world.collections.state.collections.map((c) => [c.name, c.objects, !!c.hideRender]),
+  time: [animation.time.frame, animation.time.state.frameStart, animation.time.state.frameEnd],
+});
+const states = [shown()];
 for (const [name, edit, expect] of steps) {
   edit();
   sync.flush();
   assert.deepEqual(sync.check(), [], `after ${name}`);
   expect?.();
   history.commit();
+  states.push(shown());
 }
 assert.equal(lamp.name, 'Lamp Renamed', "Blender's rename comes back");
 assert.equal(spot.metadata.wbLocked, true, "Blender's hide_select comes back without a tag");
@@ -176,44 +189,47 @@ assert.equal(dnaGet('Object', ob(other), 'rotation_mode'), 'QUATERNION');
   sync.flush();
   const rowOf = (name) => { const row = area.draw().draw.find((c) => c.op === 'text' && c.text === name); return [row.at[0] + 5, row.at[1] + 4]; };
   area.run('outliner.item_activate', { deselect_all: true }, { type: 'LEFTMOUSE', value: 'CLICK', region: rowOf('Added'), modifier: 0 });
-  sync.writeBack();
+  sync.view();
   assert.deepEqual(selection.nodes.map((node) => node.name), ['Added'], 'an Outliner click selects');
   sync.flush();
   const event = (type, value, region) => ({ type, value, region, modifier: 0 });
   area.run('outliner.item_drag_drop', {}, event('LEFTMOUSE', 'CLICK_DRAG', rowOf('Added')));
   area.dragUpdate(event('MOUSEMOVE', 'NOTHING', rowOf('Scene Collection')));
   area.drop(event('LEFTMOUSE', 'RELEASE', rowOf('Scene Collection')));
-  sync.writeBack();
+  sync.view();
   assert(world.collections.state.scene.objects.includes('added'), 'dropping on the Scene Collection moves it there');
   sync.flush();
   // The Outliner redraws when the collections change, which writing back does.
   const unsubscribe = world.collections.subscribe(() => area.draw());
   area.run('outliner.delete', {});
-  sync.writeBack();
+  sync.view();
   assert(objects.find((node) => node.name === 'Added').metadata.wbDeleted, 'the Outliner deletes');
   assert.deepEqual(sync.check(), []);
   unsubscribe();
   area.cancel();
 }
 
-// The mesh an exporter writes: Blender's modifiers applied, from Main's stack, the geometry released after.
+// The mesh an exporter writes: Blender's modifiers applied, from Main's stack.
 assert.equal(sync.evaluatedMesh(other).faces_num, 6 * 16, 'Subdivision Surface at level 2');
-assert.equal(blender.mesh(ob(other)).verts_num, 0);
 
 // Writing back does not echo: the flush after it writes nothing more into Main.
 const writes = sync.writes;
 sync.flush();
 assert.equal(sync.writes, writes, 'no echo into Main');
 
+// Blender's undo: each step loads Main's state of that step and the view draws it.
+const last = shown();
 for (let i = 0; i < steps.length; i++) {
   history.undo();
   sync.flush();
   assert.deepEqual(sync.check(), [], `after undoing ${steps.at(-1 - i)[0]}`);
+  assert.equal(shown(), states.at(-2 - i), `undoing ${steps.at(-1 - i)[0]} shows the step before`);
 }
-for (const [name] of steps) {
+for (const [i, [name]] of steps.entries()) {
   history.redo();
   sync.flush();
   assert.deepEqual(sync.check(), [], `after redoing ${name}`);
+  assert.equal(shown(), i === steps.length - 1 ? last : states[i + 1], `redoing ${name} shows its step`);
 }
 
 // docs/lava-material.md: a node material's Blender nodes are its node tree in Main, with their values and links; a
@@ -248,7 +264,7 @@ world.textures.apply(before);
 await null;
 assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 5);
 dnaSet('CloudsTexture', tex, 'noise_depth', 3);
-sync.writeBack();
+sync.view();
 assert.equal(world.textures.byId(clouds.id).values.noise_depth, 3);
 assert.deepEqual(sync.check(), []);
 

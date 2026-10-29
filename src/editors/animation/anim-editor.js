@@ -229,7 +229,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   // reaches the scene, and a finished operator that is an undo step makes one.
   function after(status) {
     animation.edited();
-    scene.writeBack();
+    scene.view();
     if (status & OPERATOR_FINISHED && area.undo) commit();
     redraw();
     return status;
