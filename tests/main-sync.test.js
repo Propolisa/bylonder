@@ -275,6 +275,25 @@ sync.view();
 assert.equal(world.textures.byId(clouds.id).values.noise_depth, 3);
 assert.deepEqual(sync.check(), []);
 
+// Modifiers both ways, by who changed them last: Blender's operator's stack is the page's, the page's own unwritten
+// change stays the page's, Blender's reorder reaches the page, and an Armature keeps its target.
+const stackOf = (node) => (node.metadata?.wbModifiers ?? []).map((m) => m.type);
+selection.replace([cube]);
+sync.run(() => blender.run('object.modifier_add', { type: 'SUBSURF' }));
+assert.deepEqual(stackOf(cube), ['SUBSURF'], "Blender's Add Modifier is the page's stack");
+addModifier(cube, 'BEVEL');
+sync.view();
+assert.deepEqual(stackOf(cube), ['SUBSURF', 'BEVEL'], "the page's unwritten modifier survives a view");
+sync.flush();
+sync.run(() => blender.run('object.modifier_move_down', { modifier: blender.modifiers(ob(cube))[0].name }));
+assert.deepEqual(stackOf(cube), ['BEVEL', 'SUBSURF'], "Blender's reorder reaches the page");
+addModifier(other, 'ARMATURE', {});
+other.metadata.wbModifiers.at(-1).values.object = nodeId(empty);
+sync.flush();
+sync.run(() => blender.run('object.location_clear'));
+assert.equal(other.metadata.wbModifiers.at(-1).values.object, nodeId(empty), 'a scene modifier keeps its target through a view');
+assert.deepEqual(sync.check(), []);
+
 // Hooks keep a transform drag cheap: one changed object among many reaches Main without the others being read.
 for (let i = 0; i < 300; i++) box('Many ' + i, [i, 0, 0]);
 sync.flush();
