@@ -2,42 +2,36 @@
 // (object-actions.js) as the Blender operators they name, so Blender's own 3D View menus and keymaps run them. An
 // operator Bylonder runs with some properties only picks its action by them. Actions Blender lacks are `bylonder.*`
 // operators, added to Blender's Object menu as an add-on would.
-import { registerOperator, appendMenu, kw } from '../../windowmanager/wm-operators.js';
+import { registerOperator, appendMenu, kw, runOperator } from '../../windowmanager/wm-operators.js';
+import { takePopup, openPopup } from '../../windowmanager/wm-popups.js';
 
 const BY_PROPS = {
   'object.select_all': ({ action }) => ({ SELECT: 'select-all', DESELECT: 'deselect', INVERT: 'invert' })[action],
   'object.hide_view_set': ({ unselected }) => (unselected ? 'hide-others' : 'hide'),
-  'object.parent_set': ({ type = 'OBJECT' }) => type === 'OBJECT' && 'parent',
   'object.parent_clear': ({ type = 'CLEAR' }) => type === 'CLEAR' && 'unparent',
-  'object.delete': ({ use_global }) => !use_global && 'delete',
-};
-// Operators that ask before running from a key, as their invoke does (object_add.cc).
-const CONFIRM = { 'object.delete': { title: 'Delete selected objects?', button: 'Delete' } };
-// Operators whose invoke asks with a menu when called without the property that picks what they do.
-const MENUS = {
-  // parent_set_invoke_menu (object_relations.cc), for the parents Bylonder has: objects.
-  'object.parent_set': (props) => !('type' in props) && { title: 'Set Parent To', items: [
-    ['Object', 'object.parent_set', { type: 'OBJECT', keep_transform: false }, 'object_data'],
-    ['Object (Keep Transform)', 'object.parent_set', { type: 'OBJECT', keep_transform: true }],
-    ['Object (Without Inverse)', 'object.parent_no_inverse_set', { keep_transform: false }],
-    ['Object (Keep Transform Without Inverse)', 'object.parent_no_inverse_set', { keep_transform: true }]] },
 };
 // Enum items Blender makes from the context (parent_set_enum_itemf in object_relations.cc); the rest are Blender's
 // static items (rna-operators.json).
-const ENUMS = {
-  'object.parent_set': { type: [['OBJECT', 'Object']] },
-};
+const ENUMS = {};
 // Blender's Object Mode operators, run by Blender's code in the module (tests/objects-wasm.test.js) where Bylonder has no
 // action of its own for them.
 const blenderOperators = (blender) => blender.operators().filter((idname) => idname.startsWith('object.'));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
-// Runs an operator's exec as one undo step, with the selected objects' geometry given to it; returns its status and
-// report. An operator that changed the data of a light or camera, which Bylonder keeps itself, changes nothing.
-function runBlenderOperator(sync, idname, props, { transaction, notify, keying }) {
-  let result;
+// wmEventModifierFlag of a window manager event.
+const modifierOf = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
+// Runs an operator as one undo step, with the selected objects' geometry given to it: invoked with the event that ran
+// it, else its exec. Returns its status and report. An operator that changed the data of a light or camera, which
+// Bylonder keeps itself, changes nothing. A popup its invoke opened runs it again by exec with what it chose.
+function runBlenderOperator(sync, idname, props, options) {
+  const { transaction, notify, keying, event } = options;
+  let result, popup = null;
   transaction(() => sync.run(() => {
-    keying(() => { result = sync.blender.run(idname, props); });
+    keying(() => {
+      result = event ? sync.blender.invoke(idname, props, { type: String(event.type).toUpperCase(), value: event.value ?? 'PRESS', modifier: modifierOf(event) })
+        : sync.blender.run(idname, props);
+    });
+    popup = event ? takePopup() : null;
     const unheld = sync.geometryTagged().find(({ node }) => !sync.holdsData(node));
     if (unheld) {
       sync.revert();
@@ -45,6 +39,12 @@ function runBlenderOperator(sync, idname, props, { transaction, notify, keying }
     }
   }, { meshes: sync.selected() }));
   if (result.report) notify(result.report);
+  if (popup) openPopup(popup, {
+    idname, at: { x: event.clientX ?? innerWidth / 2, y: event.clientY ?? innerHeight / 2 },
+    finish: (chosen) => chosen && runBlenderOperator(sync, idname, { ...result.values, ...chosen }, { ...options, event: null }),
+    run: (id, values) => runOperator(id, values),
+    enumItems: (prop) => sync.blender.enumItems(idname, prop),
+  });
   return result;
 }
 const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
@@ -54,7 +54,7 @@ const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 export function registerObjectOperators(registry, { sync, transaction, notify, keying = (fn) => fn() } = {}) {
   if (sync) for (const idname of blenderOperators(sync.blender)) registerOperator(idname, {
     poll: () => { sync.flush(); return sync.blender.poll(idname); },
-    run: (props) => runBlenderOperator(sync, idname, props, { transaction, notify, keying }),
+    run: (props, event) => runBlenderOperator(sync, idname, props, { transaction, notify, keying, event }),
   });
   const named = (action) => [action.blender ?? []].flat();
   for (const idname of new Set(registry.actions.flatMap(named).filter(isOperator))) {
@@ -64,8 +64,6 @@ export function registerObjectOperators(registry, { sync, transaction, notify, k
       supports: (props) => !!action(props),
       poll: (props) => action(props)?.enabled?.() ?? true,
       enumItems: (prop) => action()?.enumItems?.(prop) ?? ENUMS[idname]?.[prop],
-      confirm: CONFIRM[idname],
-      menu: MENUS[idname],
       run: (props) => registry.invoke(action(props).id, props),
     });
   }

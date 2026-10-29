@@ -171,7 +171,16 @@ void Layout::label(StringRef name, int icon)
   node.text = name;
   node.icon = icon;
 }
-void Layout::menu_fn(StringRefNull name, int /*icon*/, MenuCreateFunc /*func*/, void * /*arg*/) { add(this, "menu").text = name; }
+/* A sub-menu its code makes when opened (menu_fn): recorded as its callback, by index, which layout_submenu_draw runs. */
+static Vector<std::pair<MenuCreateFunc, void *>> submenus;
+void Layout::menu_fn(StringRefNull name, int icon, MenuCreateFunc func, void *arg)
+{
+  Node &node = add(this, "menu");
+  node.text = name;
+  node.icon = icon;
+  node.index = submenus.size();
+  submenus.append({func, arg});
+}
 
 /* Operators are recorded by name; the properties a panel sets on them go nowhere. */
 PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int icon, wm::OpCallContext /*context*/,
@@ -456,6 +465,17 @@ void layout_record_clear()
   layouts.clear();
 }
 
+/* What a recorded sub-menu (Layout::menu_fn) draws, as its recorded layout's JSON. */
+EXPORT(layout_submenu_draw) const char *layout_submenu_draw(bContext *C, int index)
+{
+  static std::string json;
+  Layout &layout = layout_record_begin("column");
+  const auto [func, arg] = submenus[index];
+  func(C, &layout, arg);
+  json = layout_record_json(layout);
+  return json.c_str();
+}
+
 /* port-override: a popup menu Blender's code builds (popup_menu_begin to popup_menu_end) is drawn by Bylonder's window
  * manager: its layout is recorded and handed over as the invoke's popup. */
 struct PopupMenu {
@@ -464,6 +484,8 @@ struct PopupMenu {
 };
 PopupMenu *popup_menu_begin_ex(bContext * /*C*/, const char *title, const char * /*block_name*/, int /*icon*/)
 {
+  /* One popup is open at a time: the sub-menus recorded before it are gone. */
+  submenus.clear();
   return MEM_new<PopupMenu>(__func__, &layout_record_begin("column"), title);
 }
 PopupMenu *popup_menu_begin(bContext *C, const char *title, int icon) { return popup_menu_begin_ex(C, title, __func__, icon); }

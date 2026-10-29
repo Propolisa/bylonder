@@ -40,17 +40,9 @@ export const pollOperator = (idname, props = {}) => { const operator = operatorF
 // false when it did not run, else what run returned, as Blender's operators do: 'FINISHED' (or nothing),
 // 'CANCELLED' or 'PASS_THROUGH', after which the event goes on to the next handler. run and poll get the event too.
 // An operator with `confirm: { title, button }` asks first, as WM_operator_confirm_ex does, unless its confirm property
-// (default from Blender's RNA) is off. One whose `menu(props)` gives { title, items: [[label, idname, props, icon]] }
-// opens that menu instead, as an invoke that asks with a popup menu does; its items that poll run by exec.
+// (default from Blender's RNA) is off.
 export function invokeOperator(idname, props, event) {
   const operator = operatorFor(idname);
-  const menu = operator?.menu?.(props);
-  if (menu) {
-    const items = menu.items.filter(([, id, p]) => pollOperator(id, p)).map(([label, id, p, icon]) => ({ label, icon, run: () => runOperator(id, p) }));
-    if (!items.length) return false;
-    import('../editors/interface/menu.js').then(({ openMenu }) => openMenu(items, event, menu.title));
-    return 'FINISHED';
-  }
   if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
   const confirm = operator.confirm && (props.confirm ?? rnaOperators[idname]?.properties.confirm?.default ?? true);
   if (!confirm) return finished(idname, props, operator.run(props, event)) ?? 'FINISHED';

@@ -560,6 +560,17 @@ export class BlenderMain {
   // Blender's operators that run without a modal session, by idname.
   operators() { return execOperators(); }
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
+  // Invokes an operator with an event, as wmEvent takes it: its status, report and the values it ran with. One whose
+  // invoke opened a popup (takePopup in wm-popups.js) has not run; the popup's choice runs it again by exec.
+  invoke(idname, props, event) {
+    const op = newOperator(idname, props);
+    try {
+      const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
+      return { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
+    } finally {
+      x.operator_free(op);
+    }
+  }
   poll(idname) { return pollOperator(this.#C, idname); }
   enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
 }
