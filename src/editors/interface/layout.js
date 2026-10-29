@@ -1,7 +1,6 @@
 // Blender's UILayout (UI_interface_layout.hh, as bpy exposes it) for Blender's scripts compiled by Transcrypt
 // (src/bl_py): a draw records what it lays out as a tree, which menus (ui-layout.js) and panels (layout-view.js) draw.
-// The modifier panels drawn by Blender's C++ in the module record the same tree (tools/blender-port/wasm/panel-layout.cc,
-// read by modifier-panel.js).
+// What Blender's area regions show is laid out by Blender's own uiLayout instead (ui-tree.js, block-view.js).
 //
 // A layout node is { kind, children, ...its settings }: kind is column, row, split, box, grid_flow, column_flow,
 // panel (a layout panel: header and body) or root. An item node is { kind, ... }: prop, prop_enum, prop_search,
