@@ -67,6 +67,14 @@ const relative = modifierPanels[0].children.find((child) => child.id.endsWith('r
 assert.ok(relative, 'the Relative Offset sub-panel');
 assert.equal(panelButtons(relative).find((b) => b.type === 'CHECKBOX')?.rna.prop, 'use_relative_offset');
 
+// The Displace panel: its texture's selector with Blender's New operator, its coordinates active once it has one.
+const displace = ob.modifiers.new('Displace', 'DISPLACE');
+const displaceButtons = () => panels().filter((panel) => /displace/i.test(panel.id)).flatMap(panelButtons);
+assert.ok(displaceButtons().some((b) => b.operator === 'texture.new'), 'template_ID offers New');
+assert.equal(displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, true);
+displace.texture = blendData().textures.new('Texture', 'CLOUDS');
+assert.ok(!displaceButtons().find((b) => b.rna?.prop === 'texture_coords').inactive, 'active with a texture');
+
 // The header (PROPERTIES_HT_header) and a menu of Blender's Python, its items operators with their properties.
 const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C));
 assert.ok(header.length && buttons(header[0]).length, 'the header lays out');
