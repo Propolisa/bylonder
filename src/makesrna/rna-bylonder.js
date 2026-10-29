@@ -8,7 +8,7 @@
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
 import { blendData } from '../python/bpy_rna.js';
-import { Camera, Color3, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
+import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { mesh_deserialize, mesh_serialize } from '../blenkernel/mesh/mesh.js';
@@ -210,10 +210,6 @@ function blenderNodeTree(r, material) {
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
 // A Babylon material's inputs as Principled BSDF sockets: a PBR material's own, a Standard material's color and alpha.
 const color3 = (owner, key) => owner[key] && ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
-const baseColor = (material) => (material.getClassName() === 'PBRMaterial' ? material.albedoColor : material.diffuseColor ?? new Color3(0.8, 0.8, 0.8));
-// A PBR material's value, which other materials do without (Blender's default when read).
-const pbrValue = (key, fallback) => ({ get: (material) => (material.getClassName() === 'PBRMaterial' ? material[key] ?? fallback : fallback),
-  set: (material, value) => { if (material.getClassName() === 'PBRMaterial') material[key] = value; } });
 const materialValue = (material, path) => {
   const keys = path.split('.'), key = keys.pop(), owner = () => keys.reduce((o, k) => o?.[k], material);
   return owner()?.[key] === undefined ? null : { get: () => owner()[key], set: (value) => { owner()[key] = value; } };
@@ -357,11 +353,6 @@ const STRUCTS = {
     alpha_threshold: synced({ ...settable('alphaCutOff'), get: (material) => material.alphaCutOff ?? 0.5 }),
     surface_render_method: synced({ get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
       set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }),
-    // Viewport Display: the surface's color, metalness and roughness, as Blender's Solid shading shows a material.
-    diffuse_color: synced(array((material) => [...baseColor(material).asArray(), material.alpha ?? 1],
-      (material, [red, green, blue, alpha]) => { baseColor(material).set(red, green, blue); material.alpha = alpha; }, 'rgba')),
-    metallic: synced(pbrValue('metallic', 0)),
-    roughness: synced(pbrValue('roughness', 0.5)),
   },
   Modifier: (owner) => ({
     name: modifierFlag('name'),
@@ -532,7 +523,6 @@ const STRUCTS = {
   // A world datablock of the worlds slice (blenkernel/scene/world.js): its Background and volume as Blender's nodes.
   World: (entry) => ({
     name: { get: () => entry.name, set: (owner, name, r) => r.world.worlds.rename(entry, name) },
-    color: synced(array(() => entry.background.color, (owner, value, r) => r.world.worlds.set(entry, 'background.color', value, false), 'rgb')),
     use_nodes: () => true,
     node_tree: (owner, r) => nodeTree(r, ['World Output', 'ShaderNodeOutputWorld', [
       ['Surface', 'NodeSocketShader', ['Background', 'ShaderNodeBackground', [

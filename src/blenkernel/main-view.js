@@ -230,14 +230,17 @@ export function createMainView(state) {
     // Bylonder's material of that name (the project's code built it) is the one a project's .blend saved.
     const own = world.materials?.all().find((material) => material.name === name && !materials.has(material));
     if (own) {
-      materials.set(own, { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true });
+      const record = { struct: 'Material', ma, ptr: ma, shadow: new Map() };
+      materials.set(own, record);
+      pull(record, own);
+      if (world.materials.type(own) !== 'node') pullTree(ma, rna.pointer('Material', own));
       return;
     }
     const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : kind === 'standard' ? new StandardMaterial(name, scene)
       : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
     material.name = name;
     material.metadata = { ...material.metadata, wbId: name };
-    const record = { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true };
+    const record = { struct: 'Material', ma, ptr: ma, shadow: new Map() };
     materials.set(material, record);
     ids.adopted.set(material, ma);
     pull(record, material);
@@ -348,7 +351,6 @@ export function createMainView(state) {
       // A node material's graph is Babylon's; Main holds a stand-in of it.
       if (struct === 'Material' && world.materials?.type(owner) === 'node') continue;
       pullTree(id, data);
-      record.tree = state.treeSignature(data);
     }
   }
   // Babylon drawn from Main's evaluated values (after a frame change evaluated Blender's animation), by kind: every

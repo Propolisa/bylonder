@@ -53,6 +53,12 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   Main once and stays there; Babylon draws it. A mesh Babylon built itself (a MeshBuilder's, an import) keeps its
   geometry: Main holds a stand-in (`bylonder_standin`), filled from it when Blender's code needs it, until Blender's
   code changes it, which makes it Main's.
+- **Materials and worlds are Main's**: a Material or World ID and its node tree, edited by Blender's Properties
+  editor and animated by Blender's animation system. A Principled BSDF or Background the view draws into the Babylon
+  material or world by its inputs (Base Color into `albedoColor`, and so on); the Viewport Display values
+  (`diffuse_color`, a world's `color`) stay Main's. One Babylon makes that Main does not hold yet (the project's code,
+  Bylonder's material library) goes into Main once, as Blender's node tree. A Node Material's graph is Babylon's: Main
+  holds a stand-in Material with the graph in `bylonder_node_material`.
 - **Undo is Blender's** (`tools/blender-port/wasm/undo-api.cc`): the window manager's undo stack with Blender's undo
   types, memfile steps of Main (and edit-mode steps once Edit Mode is Main's). The history
   (`src/editors/undo/storage.js`) keeps one list: each step is a Blender step with what Babylon owns at that moment
@@ -67,9 +73,9 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   (rows of objects' transforms) opens once through the old path and saves in the new form.
 - **What still crosses from Babylon to Main**, until every editor writes Main through the module's RNA: the values and
   relations Bylonder's own editors write on Babylon's objects (`main-sync.js`, by setter hooks and a flush before
-  Blender's code runs and before every undo push), the document slices' state (materials, worlds, textures,
-  collections, scene settings), Bylonder's modifier stack, curve data while a curve is edited, an armature's record,
-  and a material's or world's node tree when Bylonder's own material library changes it.
+  Blender's code runs and before every undo push), the document slices' state (textures, collections, scene
+  settings, which materials and worlds exist and their names), Bylonder's modifier stack, curve data while a curve is
+  edited, and an armature's record.
 - **Edit Mode.** Blender's Edit Mode on Main's object works underneath: `object.mode_set` gives the Mesh its
   BMEditMesh, Blender's mesh operators edit it on Main's context, the view draws it and its overlay
   (`view-api.cc` `view_edit_mesh_extract`), and undo loads Blender's edit-mode steps. `src/editors/mesh/editmesh-mode.js`
