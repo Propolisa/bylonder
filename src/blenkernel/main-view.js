@@ -29,7 +29,8 @@ export const ID_RECALC_GEOMETRY = 1 << 1;
 const ID_RECALC_SYNC_TO_EVAL = 1 << 13;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
-export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material' };
+// `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
+export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
 // eRotationModes, and ModifierMode's viewport and render bits.
 export const ROTATION_MODES = { QUATERNION: 0, XYZ: 1, XZY: 2, YXZ: 3, YZX: 4, ZXY: 5, ZYX: 6, AXIS_ANGLE: -1 };
 const MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
@@ -57,6 +58,7 @@ const MAKERS = {
 export function drawMesh(entry, blender) {
   rebuildMesh(entry.node, { mesh: mesh_serialize(blender.mesh(entry.ob)) });
   [entry.creation, entry.owned] = [entry.node.metadata.wbCreation, true];
+  blender.setProperty(entry.ob, PROPERTIES.standin, '');
 }
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
@@ -100,7 +102,10 @@ export function createMainView(state) {
   // An object's data as Main holds it: a mesh's geometry, a curve's or text's Curve data, an armature's bones.
   function drawData(entry) {
     const { node, type } = entry;
-    if (type === 'MESH') drawMesh(entry, blender);
+    if (type === 'MESH') {
+      if (blender.property(entry.ob, PROPERTIES.standin) === '1') entry.owned = false;
+      else drawMesh(entry, blender);
+    }
     else if (CURVE_TYPES.includes(type)) {
       const data = curveObject(entry).data;
       if (world.curves) {
@@ -123,7 +128,8 @@ export function createMainView(state) {
 
   // An object's entry, as the sync makes one, for an Object Main holds.
   function link(node, ob, type) {
-    const entry = { struct: 'Object', ptr: ob, node, key: 'object:' + nodeId(node), type, ob, shadow: new Map(), babylonName: node.name, name: blender.name(ob) };
+    node.name = blender.name(ob);
+    const entry = { struct: 'Object', ptr: ob, node, key: 'object:' + nodeId(node), type, ob, shadow: new Map(), babylonName: node.name, name: node.name };
     entry.data = { struct: rna.pointer('Object', node).data?.[INFO].struct ?? null, ptr: blender.data(ob), shadow: new Map() };
     // The data's type is the Babylon object's own (a light's class).
     if (entry.data.struct === 'Light') entry.data.shadow.set('type', dnaGet('Light', entry.data.ptr, 'type'));
@@ -134,8 +140,8 @@ export function createMainView(state) {
     return entry;
   }
 
-  // Main's objects that have no Babylon object: the one their id names when Bylonder deleted it (an undo brought it
-  // back), else a new one of their type. Returns the new objects, the revived ones and what Bylonder cannot show.
+  // Main's objects that have no Babylon object: the one their id names (the project's code built it, or Bylonder deleted
+  // it and an undo brought it back), else a new one of their type. Returns the new objects, the revived ones and what Bylonder cannot show.
   function adopt(scene = world.scene) {
     const warnings = [], made = [], revived = [], was = state.applying;
     state.applying = true;
@@ -145,7 +151,7 @@ export function createMainView(state) {
         if (state.nodeOf(ob)) continue;
         const type = dnaGet('Object', ob, 'type'), name = blender.name(ob), id = blender.property(ob, PROPERTIES.id) ?? name;
         if (!MAKERS[type]) { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
-        const kept = world.objects.find((node) => deleted(node) && !objects.has(node) && nodeId(node) === id);
+        const kept = world.objects.find((node) => !objects.has(node) && nodeId(node) === id);
         if (kept) {
           kept.metadata = { ...kept.metadata, wbDeleted: false };
           kept.setEnabled(!blender.base(ob)?.hidden);
@@ -181,7 +187,7 @@ export function createMainView(state) {
         if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
       }
       const wo = blender.world;
-      if (wo && !ids.adopted.has('world')) adoptWorld(wo, scene, warnings);
+      if (wo && !world.worlds && !ids.adopted.has('world')) adoptWorld(wo, scene, warnings);
       return { nodes: made.map(({ node }) => node), revived: revived.map(({ node }) => node), warnings };
     } finally {
       state.applying = was;
@@ -203,6 +209,12 @@ export function createMainView(state) {
   // Bylonder wrote keeps), its values and its Principled BSDF inputs.
   function adoptMaterial(ma, scene, warnings) {
     const name = blender.name(ma), kind = blender.property(ma, PROPERTIES.material), graph = blender.property(ma, PROPERTIES.graph);
+    // Bylonder's material of that name (the project's code built it) is the one a project's .blend saved.
+    const own = world.materials?.all().find((material) => material.name === name && !materials.has(material));
+    if (own) {
+      materials.set(own, { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true });
+      return;
+    }
     const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : kind === 'standard' ? new StandardMaterial(name, scene)
       : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
     material.name = name;
@@ -279,8 +291,10 @@ export function createMainView(state) {
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
-        const changed = (tags.object & ID_RECALC_GEOMETRY) || (tags.data & (ID_RECALC_GEOMETRY | ID_RECALC_SYNC_TO_EVAL));
-        if (changed && entry.type !== 'ARMATURE') drawData(entry);
+        // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
+        const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL);
+        if (changed && entry.type === 'MESH') drawMesh(entry, blender);
+        else if (changed && entry.type !== 'ARMATURE') drawData(entry);
       }
       const { nodes: added, revived } = adopt();
       world.objects.push(...added);

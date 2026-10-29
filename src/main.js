@@ -31,7 +31,8 @@ import { createView3D } from "./editors/space_view3d/view3d.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createEditor } from "./editors/object/editor";
-import { createHistory, snapshot } from "./editors/undo/storage";
+import { createHistory } from "./editors/undo/storage";
+import { projectState } from "./runtime/project-state.js";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./editors/render/host.js";
 import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
@@ -184,7 +185,7 @@ try {
   send("run-error", { message: String(error.stack || error) });
   throw error;
 }
-const { world, sdk, animation, scene, objects, baseline, documentState } = built;
+const { world, sdk, animation, scene, objects, documentState } = built;
 const authored = () => built.authoredCamera;
 // Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
 const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
@@ -232,16 +233,7 @@ window.__bylonder ={ world, renderHost, runOperator,
   coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
-const currentOverrides = () => {
-  const transforms = snapshot(objects)
-    .filter((row) => !(row.deleted && row.creation))
-    .filter(
-      (row) =>
-        JSON.stringify(row) !==
-        JSON.stringify(baseline.find((b) => b.id === row.id)),
-    );
-  return { transforms, stores: sdk.values(), ...documentState.capture({ save: true }) };
-};
+const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });
 saveOverrides = () => {
   if (!remember || creator?.pending || animation.evaluating || animation.playing) return;
   const state = currentOverrides();
