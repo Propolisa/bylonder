@@ -120,7 +120,9 @@ function number(b, env) {
 const TOGGLES = new Set(['TOGGLE', 'TOGGLE_N', 'ICON_TOGGLE', 'ICON_TOGGLE_N', 'BUT_TOGGLE']);
 
 function buttonNode(b, env) {
-  const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon, style = corners(b.aligned);
+  const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
+  // A scaled layout's buttons (scale_y) keep the height Blender gave them.
+  const style = { ...corners(b.aligned), ...(b.h > 1 && { height: `calc(var(--bl-row) * ${b.h})` }) };
   const common = { disabled: b.disabled || !env.enabled, inactive: b.inactive || !env.active, title: b.tip };
   const flat = b.emboss === 'NONE' || b.emboss === 'NONE_OR_STATUS' || env.emboss === 'NONE';
   const withStyle = (vnode) => { if (vnode) vnode.props = { ...vnode.props, style: { ...vnode.props?.style, ...style }, 'data-blender': b.operator ?? b.rna?.prop }; return vnode; };

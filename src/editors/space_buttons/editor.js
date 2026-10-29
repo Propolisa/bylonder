@@ -47,7 +47,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
 
   // What a region's buttons need: its context, and after a change the scene made current and redrawn (an undo step at
   // the end of an edit).
-  const refresh = () => { sync?.writeBack(); state.revision++; };
+  const refresh = () => { sync?.view(); state.revision++; };
   const regionUI = (type) => markRaw({
     inContext: (fn) => area.inContext(type, fn),
     refresh,

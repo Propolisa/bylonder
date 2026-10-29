@@ -69,6 +69,7 @@ import { exportScene } from "./io_scene_babylon/export.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
 import { setContextPointer } from "./python/bpy_rna.js";
+import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";

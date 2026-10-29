@@ -86,7 +86,7 @@
 .bl-list-item.is-active{background:var(--bl-wcol-list-sel);color:var(--bl-text-sel)}
 .bl-list-item:hover:not(.is-active){background:var(--bl-wcol-hover)}
 /* The Properties editor's navigation bar (prop_tabs_enum at 1.4 scale): tabs that join the main region when active. */
-.bl-navigation-bar{width:calc(var(--bl-row)*1.45);background:var(--bl-navigation-bar);align-items:flex-end!important}
+.bl-navigation-bar{width:calc(var(--bl-row)*1.6);background:var(--bl-navigation-bar)}
 .bl-tabs{align-items:flex-end;padding:calc(var(--bl-row)*.4) 0}
 .bl-tab{display:flex;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.35);height:calc(var(--bl-row)*1.4);border:0;border-radius:calc(var(--bl-row)*.2) 0 0 calc(var(--bl-row)*.2);background:var(--bl-wcol-tab);color:var(--bl-text);cursor:pointer}
 .bl-tab .bl-icon{width:calc(var(--bl-row)*.8);height:calc(var(--bl-row)*.8)}
