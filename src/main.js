@@ -232,14 +232,14 @@ const renderHost = createRenderHost({
 });
 // Handle for debugging and the browser tests, which run against the production build.
 let topbarArea = null;
-// Test builds only (VITE_TEST_HOOKS): resolves once what the last input started is done (Blender's code and the
-// views it changed, modifier evaluations, a drawn frame), so a test acts next without polling or waiting.
-const settled = import.meta.env.VITE_TEST_HOOKS && (async () => {
+// Resolves once what the last input started is done (Blender's code and the views it changed, modifier evaluations,
+// a drawn frame), so a test acts next without polling or waiting. Nothing runs unless something awaits it.
+const settled = async () => {
   await world.modifiers.settled();
   await nextTick();
   await new Promise((done) => requestAnimationFrame(() => done()));
   await world.modifiers.settled();
-});
+};
 window.__bylonder ={ world, renderHost, runOperator, settled,
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
