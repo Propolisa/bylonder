@@ -711,13 +711,22 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
     Panel panel = {};
     panel.type = pt;
     panel.layout = &layout;
+    if (but->context) {
+      layout.context_copy(but->context);
+    }
     menu_draw_context(C, [&] { pt->draw(C, &panel); });
     block_layout_resolve(block);
     json = menu_json(C, block);
   }
   else if (but->menu_create_func) {
     Block *block = menu_block_new(C, but->str.c_str(), EmbossType::Pulldown, root);
-    menu_draw_context(C, [&] { but->menu_create_func(C, &menu_layout(C, block), but->poin); });
+    /* The button's context goes with what it opens (ui_popup_menu_create_block): a collection's sub-menu of Move to
+     * Collection reads its collection from it. */
+    Layout &layout = menu_layout(C, block);
+    if (but->context) {
+      layout.context_copy(but->context);
+    }
+    menu_draw_context(C, [&] { but->menu_create_func(C, &layout, but->poin); });
     block_layout_resolve(block);
     json = menu_json(C, block);
   }
