@@ -554,11 +554,18 @@ static void panel_json(std::ostringstream &out, Panel *panel)
 /* The context region's panels as Blender's region lays them out (its type's layout: buttons_main_region_layout for
  * the Properties editor, ED_region_panels_layout for a sidebar), in their order, with the region's categories (a
  * sidebar's tabs) and the one shown: { category, categories, panels }. Blocks stay until the region's next layout. */
+/* A region without a size yet (one a view just made, before the page sized it) is not laid out, as Blender draws no
+ * such region: its layout would divide by its size. */
+static bool region_sized(const bContext *C)
+{
+  const ARegion *region = CTX_wm_region(C);
+  return region && region->winx > 0 && region->winy > 0;
+}
+
 EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
 {
   static std::string json;
-  /* A region without a size yet (one an area split just made) is not laid out, as Blender draws no such region. */
-  if (const ARegion *region = CTX_wm_region(C); !region || region->winx < 1 || region->winy < 1) {
+  if (!region_sized(C)) {
     return "{\"category\":\"\",\"categories\":[],\"panels\":[]}";
   }
   ARegion *region = region_drawn(C);

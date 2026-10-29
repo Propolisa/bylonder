@@ -150,10 +150,13 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     ];
   };
 
+  // Blender lays the tool settings out in the tool header region once the view's area has it (a split's new view has
+  // none on its first draw).
+  const toolSettings = () => (view.canvas.clientWidth && toolHeader.isConnected && !toolHeader.hidden ? blenderHeader(RGN_TYPE_TOOL_HEADER) : []);
   const apps = [
     mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header)), () => blenderHeader(RGN_TYPE_HEADER)),
     // The tool settings are the workspace's tools' (WorkSpace.tools) in every mode.
-    mount(toolHeader, () => blenderHeader(RGN_TYPE_TOOL_HEADER), () => blenderHeader(RGN_TYPE_TOOL_HEADER)),
+    mount(toolHeader, () => toolSettings(), () => toolSettings()),
     mount(sidebar, sidebarRegion, () => (sidebar.hidden ? null : blenderSidebar())),
   ];
 
