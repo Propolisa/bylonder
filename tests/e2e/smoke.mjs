@@ -597,11 +597,13 @@ async function expectStats(test, timeout = 10000) {
 }
 
 const filter = process.argv[2];
+// SHARD=i/n runs every n-th check from the i-th (scripts/gates.mjs runs shards in parallel).
+const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);
 const server = await startServer();
 const browser = await chromium.launch();
 let failed = 0;
 try {
-  for (const [name, check] of Object.entries(checks)) {
+  for (const [name, check] of Object.entries(checks).filter((_, i) => i % shards === shard)) {
     if (filter && !name.includes(filter)) continue;
     const started = Date.now();
     try {
