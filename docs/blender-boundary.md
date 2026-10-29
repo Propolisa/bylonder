@@ -33,7 +33,7 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 
 The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answer the context as Blender does, run operators by their own exec (`operator_exec` on a `bContext`) and take their properties through `operator-properties.cc`, which gives operators and DNA structs RNA by identifier.
 
-- **Edit Mode** (`editor-context.cc`, JS `EditMesh`): a Scene with one Object in Edit Mode, whose edit mesh (BMesh) lives in the module and is the truth while editing.
+- **An edit mesh outside Main** (`editor-context.cc`, JS `EditMesh`): a Scene with one Object in Edit Mode, whose edit mesh (BMesh) lives in the module, for primitives made by Blender's operators and a modifier stack's edit-mode result. Edit Mode itself is Main's (see Who owns what).
 - **Blender's data** (`main-api.cc`, JS `BlenderMain`): a `Main` holding objects and their data, one Scene with ToolSettings and one ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers context members through Blender's own `screen_context.cc` (`selected_editable_objects`, `active_object`, ...). Blender's `layer.cc` runs on these Bases. The depsgraph is a stand-in: each ID is its own evaluated copy, `main_evaluate` computes world matrices parents first (`BKE_object_where_is_calc`), and `DEG_id_tag_update` leaves its tags on the ID (`recalc`).
 
 ### Who owns what
@@ -80,12 +80,12 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   Blender's code runs and before every undo push), the document slices' state (textures, collections, scene
   settings, which materials and worlds exist and their names), Bylonder's modifier stack, curve data while a curve is
   edited, and an armature's record.
-- **Edit Mode.** Blender's Edit Mode on Main's object works underneath: `object.mode_set` gives the Mesh its
-  BMEditMesh, Blender's mesh operators edit it on Main's context, the view draws it and its overlay
-  (`view-api.cc` `view_edit_mesh_extract`), and undo loads Blender's edit-mode steps. `src/editors/mesh/editmesh-mode.js`
-  is the editor's mode over it, picking as in X-ray (`view_xray_picking`: the module has no GPU select buffer, so
-  there is no occlusion). The app still uses the separate edit mesh (`EditMesh`, `object-edit.js`), which writes its
-  Mesh data into Main on each step, until Blender's window handles Edit Mode input.
+- **Edit Mode** is Blender's on Main's object: `object.mode_set` gives the Mesh its BMEditMesh, Blender's window runs
+  the Mesh keymap and its mesh operators on Main's context, Blender's menus and header are drawn, the view draws the
+  edit mesh and its overlay (`view-api.cc` `view_edit_mesh_extract`), and undo loads Blender's edit-mode steps.
+  `src/editors/mesh/editmesh-mode.js` is the editor's mode over it. A click and the region selections run Blender's
+  `view3d.select`, `select_box`, `select_lasso` and `select_circle` from the page, picking as in X-ray
+  (`view_xray_picking`: the module has no GPU select buffer, so there is no occlusion).
 
 ### .blend files
 
@@ -391,7 +391,6 @@ Decided 2026-10-28. A tool is what Blender's is: its keymap, its gizmo group and
 - Gizmo map: `windowmanager/wm-gizmo-map.js` shows the active tool's gizmo group, highlights the part under the pointer and runs the group's handler before the region's keymaps, as `wm_gizmo_map.cc` does. Its state (shown, highlighted) feeds the tool system's keymap order. The groups are ports: `VIEW3D_GGT_ruler`, `VIEW3D_GGT_placement`, `VIEW3D_GGT_tool_generic_handle_free` and `_normal` (a handle runs the tool's own keymap, as `gz->keymap` does) and `VIEW3D_GGT_xform_extrude`. Babylon's gizmos stay the transform gizmos. Gizmos, rulers, annotations and the placement grid draw on one 2D canvas per view (`draw/overlay-tool.js`) in the theme's colors.
 - Object Mode tools: `editors/space_view3d/view3d-tools.js` registers `view3d.cursor3d` (`view3d-cursor.js`, with Blender's surface depth and orientations), `transform.from_gizmo`, `view3d.ruler_add` and `view3d.ruler_remove` (`view3d-gizmo-ruler.js`), `gpencil.annotate` (`editors/gpencil/annotate.js`, all four modes) and `view3d.interactive_add` (`view3d-placement.js`). The cursor is `scene.cursor` (`View3DCursor`), drawn by `draw/overlay-cursor.js`.
 - Annotations are Blender's data model in a document slice (`blenkernel/gpencil/annotations.js`): layers holding frames of strokes. Rulers are strokes of the hidden `RulerData3D` layer, as Blender stores them.
-- Edit Mode tools run Blender's modal operators in the module. The edit context has a 3D View (`edit_context_view_set`: window, screen, area, View3D, window region and a RegionView3D from the Babylon camera), so operators project the mouse as in Blender. `EditMesh.invoke` and `modal` give them events, and Bylonder's window manager matches the operator's modal keymap (`object-edit.js` `moduleOperator`). This runs Shrink/Fatten, Push/Pull, To Sphere, Shear, Vertex Slide, Edge Slide, Smooth and Randomize (the generic value modal), Inset, Bevel, Rip, Spin, Bisect, Knife, Extrude to Cursor and Poly Build. Macros (Extrude Region, Extrude Manifold, Loop Cut and Slide, Poly Build's) run as Blender's macro does, each operator invoked with the event and the last one modal (`macro` in `object-edit.js`, steps from `MACROS` in `view3d-menus-edit-mesh.js`). Move, Rotate and Scale are Blender's transform operators too, in Object Mode on Main (`runBlenderOperator`), on the 3D cursor (the scene's `View3DCursor`, synced as a DNA record) and in Edit Curve; Ctrl R's Loop Cut preview is a JS port, as `ringcut_invoke` draws its own preview, which the module does not pass on yet.
 - Gizmo bridge: the module's region has a stand-in gizmo map (`editor-context.cc`). `WM_gizmomap_group_find` answers for the group Bylonder shows (`edit_context_gizmo_group_set`, set from the tool's gizmo group on every hover and press), and `ED_view3d_gizmo_mesh_preselect_get_active` gives the element `edit_mesh_preselect_elem` found. Gizmo group types an operator asks for (`WM_gizmo_group_type_ensure`, Spin's and Bisect's redo gizmos) are recorded and read by `EditMesh.gizmoRequested()`, so Bylonder's gizmo map shows them after the operator. The groups' drawing is Bylonder's (`view3d-gizmo-mesh.js`): the edge ring and element preselection, `MESH_GGT_spin` and `MESH_GGT_spin_redo`. Each group type's properties are a struct named after it (`GIZMO_GROUP_PROPERTIES` in `rna-bylonder.js`), so tool settings draw them.
 - Straight-line gestures are `wm_gesture_ops.cc`'s (`gesture-api.cc`); Bylonder draws the line from `EditMesh.gesture(op)`, and the mouse line of Inset and Bevel from `ED_region_draw_mouse_line_cb`'s center.
 - A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting). An operator returning `FINISHED|PASS_THROUGH` (Set 3D Cursor) handles a press as Blender's `WM_HANDLER_HANDLED` does: no click follows, a drag still can.
@@ -434,7 +433,7 @@ The Shader Editor and Compositor build on the same foundations: Blender's node d
 
 ## Next
 
-- The 3D View's Object Mode Select and Object menus are Blender's, over `createContext`, running Bylonder's actions by the operators they name (`editors/object/object-operators.js`). Next: View and Add, and the Edit Mode menus (`view3d-menus-edit-mesh.js`, which builds its own context).
+- The 3D View's Object Mode Select and Object menus are Blender's, over `createContext`, running Bylonder's actions by the operators they name (`editors/object/object-operators.js`). Next: View and Add.
 - Properties editor: popovers in panels other than the 3D View's, template_list filtering and sorting, multi-drag of number fields, light type changes (Bylonder replaces the Babylon light), the Collection tab for the master collection.
 - The topbar's scene properties across windows (decision 7).
 - Mesh element collections, Preferences.

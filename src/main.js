@@ -45,7 +45,7 @@ import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
 import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequencer/editor.js";
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
-import { createEditMode } from "./editors/object/object-edit.js";
+import { createMeshEditMode } from "./editors/mesh/editmesh-mode.js";
 import { createEditModes } from "./editors/object/edit-modes.js";
 import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
 import { createCurveObjects } from "./editors/curve/curve-objects.js";
@@ -323,7 +323,7 @@ history = createHistory(world.objects, () => {
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();},main:()=>world.mainSync});
 animation.setCommit(()=>history.commit());
 const capture = windowCapture(notify);
-// Blender's window takes the 3D Views' input in Object Mode (made once Main is, below).
+// Blender's window takes the 3D Views' input in Object Mode and mesh Edit Mode (made once Main is, below).
 let view3dWindow = null;
 // The editors that are Blender's own (editors/screen/blender-area.js) take theirs.
 const blenderWindow = {
@@ -359,7 +359,7 @@ commands.setBefore(() => creator.finish());
 world.curves = createCurveObjects(world);
 const editModeOptions = { world, editor, views, history, notify, changed: () => { refreshUI(); tagRedraw(); views.wake(); } };
 const editCurve = createEditCurve({ ...editModeOptions, curves: world.curves });
-world.editMode = createEditModes(createEditMode(editModeOptions), editCurve);
+world.editMode = createEditModes(createMeshEditMode({ world, selection: editor.selection, host: () => objectOperatorHost }), editCurve);
 registerCurveAddOperators({ editor, history, commands, curves: world.curves, editCurve });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
@@ -410,7 +410,7 @@ const objectOperatorHost = { transaction: commands.transaction, notify, keying: 
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
-view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !world.editMode.active, host: objectOperatorHost,
+view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost,
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
 // An armature's Edit and Pose Modes, Blender's in Main.
@@ -585,6 +585,8 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area');
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event?.view;
+// Mesh Edit Mode's gestures are Blender's (editmesh-mode.js); the other modes select in the page.
+const meshGesture = (idname, props, event) => world.editMode.kind === "MESH" && (world.editMode.selectGesture(idname, props, event), true);
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
 const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
@@ -616,11 +618,12 @@ registerOperators({
   "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
   "view3d.select_lasso": {
     poll: (props, event) => inView(event),
-    run: ({ mode = "SET" }, event) => { startGestureLasso(world.wm, { begin: event, select: (path) => selectRegion(event.view, lassoRegion(path), mode) }); },
+    run: ({ mode = "SET" }, event) => { if (!meshGesture("view3d.select_lasso", { mode }, event)) startGestureLasso(world.wm, { begin: event, select: (path) => selectRegion(event.view, lassoRegion(path), mode) }); },
   },
   "view3d.select_circle": {
     poll: (props, event) => !!(event?.view ?? activeView()),
     run: ({ mode = "SET", radius = 25, wait_for_input = true }, event) => {
+      if (meshGesture("view3d.select_circle", { mode, radius, wait_for_input }, event)) return;
       startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
     },
   },

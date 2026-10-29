@@ -3,7 +3,7 @@
 // ModifierData at the DNA fields RNA names (dna-modifiers.json).
 import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
-import { evaluateModifiers, meshData, EditMesh, blenderModule } from '../bmesh/bmesh-wasm.js';
+import { evaluateModifiers, meshData, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { moduleTexture, freeUnusedTextures } from '../blenkernel/texture/texture.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { fieldLayout, writeValues, readValues } from './dna-write.js';
@@ -128,22 +128,11 @@ export function evaluated({ mesh, errors }) {
 // Evaluates Blender modifiers on a Mesh.
 export const evaluateBlenderModifiers = (mesh, modifiers) => withTextures(() => evaluated(evaluateModifiers(mesh, moduleModifiers(modifiers))));
 
-// An evaluation that can be posted to another realm: a Mesh's data, stack entries, and for Edit Mode the select mode
-// of the edit mesh the Mesh was extracted from.
-export const evaluation = (mesh, modifiers, selectmode) =>
-  ({ mesh: meshData(mesh), modifiers: modifiers.map(({ type, values, texture }) => ({ type, values, texture })), selectmode });
+// An evaluation that can be posted to another realm: a Mesh's data and stack entries.
+export const evaluation = (mesh, modifiers) => ({ mesh: meshData(mesh), modifiers: modifiers.map(({ type, values, texture }) => ({ type, values, texture })) });
 
 // Runs an evaluation in this realm's module: the evaluated Mesh detached from it.
-export const evaluate = ({ mesh, modifiers, selectmode }) => withTextures(() => {
-  const input = createMesh(mesh), stack = moduleModifiers(modifiers);
-  if (selectmode === undefined) return evaluated(evaluateModifiers(input, stack)).detach();
-  const edit = EditMesh.fromMesh(input, selectmode);
-  try {
-    return evaluated(edit.evaluate(stack)).detach();
-  } finally {
-    edit.free();
-  }
-});
+export const evaluate = ({ mesh, modifiers }) => withTextures(() => evaluated(evaluateModifiers(createMesh(mesh), moduleModifiers(modifiers))).detach());
 
 // How many times the faces it takes a modifier makes, where its settings say so up front.
 const GROWTH = {
