@@ -33,7 +33,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 WASM = os.path.join(HERE, 'wasm')
 # Header directories the editors' and RNA's sources include beyond those the converter parses with.
 EDITOR_INCLUDES = ('blenloader', 'modifiers', 'modifiers/intern', 'modifiers/intern/lineart', 'sequencer', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
-                   'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie', 'editors/transform')
+                   'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie', 'editors/transform', 'python')
 BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
 
 
