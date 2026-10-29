@@ -7,6 +7,7 @@ import { Window, configureWindow, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../wi
 import { regionView3D } from './view3d-project.js';
 import { openModulePopup, runBlenderOperator } from '../object/object-operators.js';
 import { tagRedraw } from '../../draw/overlay-tool.js';
+import { ticking } from '../../windowmanager/wm-areas.js';
 
 // The popups an invoke opens (operator_popup's numbers).
 const POPUPS = [null, 'CONFIRM', 'ENUM_MENU', 'PROPS', 'LAYOUT'];
@@ -60,6 +61,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     if (result.finished.some(({ undo }) => undo)) host.commit();
     if (result.popup) popup(result.popup, host.pointer());
     tagRedraw();
+    ticking();
     return result;
   }
 

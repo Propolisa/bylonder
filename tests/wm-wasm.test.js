@@ -10,6 +10,7 @@ import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, Area, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { AnimArea, SPACE_GRAPH } from '../src/editors/animation/anim-area.js';
+import { regionPanels, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 const TOP = { viewmat: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -10, 1], winmat: [0.2, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, -0.02, 0, 0, 0, 0, 1], persp: false };
 const round = (values) => Array.from(values, (v) => Math.round(v * 1e4) / 1e4 + 0);
@@ -100,6 +101,23 @@ assert.equal(gg.modal, true, 'G in the Graph Editor runs Move modally');
 move(500, 750);
 click();
 assert.deepEqual(anim.fcurves(ob)[0].keys.map((k) => Math.round(k.co[0])), [11, 21], 'the keys moved 10 frames');
+
+// A drag from empty space is Blender's box gesture (wm_gesture_ops.cc), drawn by the page as the window gives it, which
+// selects the keys inside it when the button comes up.
+window.allow(['transform.translate', 'graph.select_all', 'graph.select_box', 'graph.clickselect']);
+const selected = () => anim.fcurves(ob)[0].keys.map((k) => k.select[1]);
+window.event('keydown', [0], { code: 'AltLeft', key: 'Alt' });
+key('KeyA', 'a');
+window.event('keyup', [0], { code: 'AltLeft', key: 'Alt' });
+assert.deepEqual(selected(), [false, false], 'Alt A deselects the keys');
+move(290, 720);
+window.event('buttondown', [0]);
+move(300, 730);
+move(330, 780);
+assert.deepEqual(window.gestures, [{ type: 'BOX', rect: [290, 720, 330, 780] }], 'the box runs from the press to the pointer');
+window.event('buttonup', [0]);
+assert.deepEqual(window.gestures, [], 'the box ends with the button');
+assert.deepEqual(selected(), [true, false], 'the key inside the box is selected');
 graph.dispose();
 
 // A Text Editor in its place: Alt S matches text.save, an operator the page runs, so the event goes to the page and stops
@@ -120,5 +138,25 @@ window.event('keyup', [0], { code: 'AltLeft', key: 'Alt' });
 assert.equal(text.as_string(), 'a', 'Alt S types nothing');
 assert.deepEqual(save.unhandled.map(({ type, value, modifier }) => [type, value, modifier]), [['S', 'PRESS', 4]], 'Alt S goes to the page');
 textArea.free();
+
+// The window's timers run when it ticks: a Properties editor's panel closed animates (a timer and a modal panel
+// handler, as in Blender) until its time is up.
+const SPACE_PROPERTIES = 4, RGN_TYPE_NAV_BAR = 9;
+const properties = new AnimArea(main, SPACE_PROPERTIES);
+properties.layout(RGN_TYPE_NAV_BAR, 0, 0, 30, 600);
+properties.layout(RGN_TYPE_WINDOW, 30, 0, 270, 600);
+const drawPanels = () => properties.inContext(RGN_TYPE_WINDOW, (C) => regionPanels(C));
+drawPanels();
+properties.inContext(RGN_TYPE_WINDOW, (C) => panelClosedSet(C, 'OBJECT_PT_transform', true));
+drawPanels();
+properties.layout(RGN_TYPE_WINDOW, 30, 0, 200, 300);
+drawPanels();
+assert.equal(window.timersActive, true, 'the panels animate');
+for (let i = 0; i < 10 && window.timersActive; i++) {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  window.tick();
+}
+assert.equal(window.timersActive, false, 'the animation ends, its timer and handler gone');
+properties.dispose();
 
 console.log('window manager: G, mouse moves and a click move an object in a 3D View and keys in a Graph Editor through Blender\'s own handlers');
