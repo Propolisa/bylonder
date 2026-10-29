@@ -392,6 +392,8 @@ const tools = createView3DTools({
 // Blender's Main, which owns the scene and its undo, drawn by Babylon (blenkernel/main-sync.js, main-view.js). Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
+// A frame change evaluates Main with Blender's animation system and draws it (main-sync.js frameChanged).
+animation.evaluateMain = (frame) => world.mainSync.frameChanged(frame);
 for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
 world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
 history.start();
