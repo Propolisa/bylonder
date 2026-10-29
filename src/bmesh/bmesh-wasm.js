@@ -52,7 +52,7 @@ export function newOperator(idname, props = {}) {
 // keymap item's [name, value] pairs, by their paths ("TRANSFORM_OT_translate.value"). A transpiled Python dict's
 // methods are not properties.
 const isPairs = (value) => Array.isArray(value) && value.length > 0 && value.every((v) => Array.isArray(v) && typeof v[0] === 'string');
-const flatProperties = (props, prefix = '') => Object.entries(props).filter(([, value]) => typeof value !== 'function').flatMap(([name, value]) =>
+export const flatProperties = (props, prefix = '') => Object.entries(props).filter(([, value]) => typeof value !== 'function').flatMap(([name, value]) =>
   (isPairs(value) || (value && typeof value === 'object' && !Array.isArray(value)) ? flatProperties(isPairs(value) ? Object.fromEntries(value) : value, `${prefix}${name}.`)
     : [[prefix + name, value]]));
 export function setOperatorProperties(op, props) {
@@ -229,7 +229,7 @@ export class EditMesh {
   invoke(idname, props, event) {
     const op = newOperator(idname, props);
     const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
-    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0;
+    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0;
     if (!modal) { const report = operatorReport(op); this.#end(op); return { status, report }; }
     return { status, op, keymap: cString(x.operator_modal_keymap(op)) };
   }
@@ -591,7 +591,7 @@ export class BlenderMain {
       const result = { status, report: operatorReport(op), values: JSON.parse(cString(x.operator_values(op))) };
       if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
       if (type === 'PROPS') result.dialog = op, kept = true;
-      if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
+      if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
       const menu = cString(x.operator_menu_called());
       if (menu) {
         const popup = this.menu(menu);

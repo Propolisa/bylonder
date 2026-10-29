@@ -307,7 +307,7 @@ export class CurveObject {
     this.cancelModal();
     const op = newOperator(idname, props);
     const status = this.#inRegion(region, (C) => x.operator_invoke(C, op, this.#event(C, event)));
-    if (status & 1 && x.operator_modal_added()) this.running = op;
+    if (status & 1 && x.operator_modal_added(this.main.C)) this.running = op;
     else x.operator_free(op);
     return status;
   }
