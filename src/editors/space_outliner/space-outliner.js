@@ -5,22 +5,18 @@
 // Blender's handlers apply it, the rest runs Blender's keymaps on the Outliner's operators, registered by idname and
 // run in the Outliner as the context area. After each, what Blender's code changed comes back to the scene.
 import { blenderModule, operatorNames, pollOperator } from '../../bmesh/bmesh-wasm.js';
-import { createContext } from '../../blenkernel/context.js';
-import { keymapHandler } from '../../windowmanager/keyconfig.js';
+import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { inArea, menuUI, registerOperator } from '../../windowmanager/wm-operators.js';
+import { inArea, invokeOperator, registerOperator } from '../../windowmanager/wm-operators.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
-import { drawMenu } from '../interface/ui-layout.js';
 import { openMenu } from '../interface/menu.js';
 import { buttonAt, drawRecording } from '../interface/region-draw.js';
 import { SvgContext } from '../interface/svg-context.js';
-import { headerLayout, drawPanels, drawType } from '../interface/panels.js';
-import { LayoutView } from '../interface/layout-view.js';
-import { menus, headers, panels } from '../../python/bpy_interface.js';
-import { propBinding } from '../../makesrna/rna-bylonder.js';
+import { BlockView, treeMenu } from '../interface/block-view.js';
+import { regionHeader, menuTree, menuLabel } from '../interface/ui-tree.js';
 import { createApp, h, reactive, markRaw } from 'vue';
 import '../interface/layout-view.css';
-import { OutlinerArea, modifierOf, OPERATOR_FINISHED, OPERATOR_CANCELLED, OPERATOR_PASS_THROUGH } from './outliner-area.js';
+import { OutlinerArea, modifierOf, OPERATOR_FINISHED, OPERATOR_CANCELLED, OPERATOR_PASS_THROUGH, RGN_TYPE_HEADER } from './outliner-area.js';
 import './space-outliner.css';
 
 const { exports: x, cString } = blenderModule;
@@ -28,6 +24,8 @@ const { exports: x, cString } = blenderModule;
 const KEYMAPS = ['Outliner', 'View2D Buttons List', 'Screen', 'Window'];
 // U.dbl_click_time in milliseconds, U.drag_threshold_mouse in pixels.
 const DOUBLE_CLICK_TIME = 350, DRAG_THRESHOLD = 3;
+// HEADERY: a header region's height in pixels at 1x scale.
+const HEADER_HEIGHT = 26;
 const BUTTONS = ['LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE', 'BUTTON4MOUSE', 'BUTTON5MOUSE'];
 // The ui::ButtonType values of the buttons the Outliner defines.
 const BUT_TEXT = 3, BUT_LABEL = 21, BUT_DRAG_LOCK = 1 << 12;
@@ -43,14 +41,9 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   region.replaceChildren(view);
   let recording = { draw: [], buttons: [] }, textField = null, pointer = [0, 0];
 
-  // bpy.context in the Outliner, for its header, popover and menus.
-  const space = area.space;
-  const context = () => createContext(rna, { area: 'OUTLINER', space });
   // The Outliner as the context area: its operators act on it, and wm.call_menu opens its menus.
-  const outlinerArea = { space: 'OUTLINER', menu: (name) => (menus[name] ? (event) => openOutlinerMenu(name, event) : null) };
+  const outlinerArea = { space: 'OUTLINER', menu: (name) => (event) => openOutlinerMenu(name, event) };
   const inOutliner = (fn) => (...args) => inArea(outlinerArea, () => fn(...args));
-  const ui = menuUI({ menus, context, prop: propBinding(rna.host), keymaps: () => KEYMAPS });
-  Object.assign(ui, { run: inOutliner(ui.run), supported: inOutliner(ui.supported), poll: inOutliner(ui.poll), keys: inOutliner(ui.keys) });
 
   const keys = keymapHandler(KEYMAPS);
   const dispatch = inOutliner((event) => keys(event));
@@ -104,12 +97,14 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
 
   // Menus: one an operator called (WM_menu_name_call), or wm.call_menu's, at the pointer.
   function openOutlinerMenu(name, at = lastClient) {
-    openMenu(drawMenu(name, ui), { x: at.clientX ?? at.x, y: at.clientY ?? at.y }, menus[name].bl_label);
+    const tree = area.inContext((C) => menuTree(C, name), RGN_TYPE_HEADER);
+    if (!tree) return 'CANCELLED';
+    openMenu(treeMenu(tree, headerUI), { x: at.clientX ?? at.x, y: at.clientY ?? at.y }, menuLabel(name));
     return 'FINISHED';
   }
   function openCalledMenu() {
     const name = cString(x.operator_menu_called());
-    if (name && menus[name]) openOutlinerMenu(name);
+    if (name) openOutlinerMenu(name);
   }
 
   // The box gesture an invoke started (WM_gesture_box_invoke), run by Bylonder's window manager: from a drag it has
@@ -271,35 +266,23 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     view.focus({ preventScroll: true });
   }
 
-  // The header: OUTLINER_HT_header from Blender's script, drawn by the shared layout renderer, with its popovers'
-  // panels (OUTLINER_PT_filter).
+  // The header: OUTLINER_HT_header laid out by Blender in the header region, drawn by block-view.js.
   const headerState = reactive({ revision: 0 });
-  const drawInto = (type) => (layout) => drawType(type, layout, context());
-  const layoutUI = markRaw({
-    get revision() { return headerState.revision; },
-    undoPush: () => { commands.transaction(() => {}); draw(); },
-    report: (error) => rna.host.notify?.(error.message),
-    run: ui.run,
-    supported: ui.supported,
-    poll: ui.poll,
-    isOpen: () => true,
-    toggle: () => {},
-    ids: () => [],
-    drawMenu: inOutliner((idname) => drawMenu(idname, ui)),
-    menuLabel: (idname) => menus[idname]?.bl_label,
-    menuContents: (idname) => menus[idname] && markRaw(headerLayout(context(), drawInto(menus[idname]))),
-    popover: (id) => {
-      const type = panels[id];
-      if (!type) return null;
-      const [drawn] = drawPanels({ roots: [{ type, children: [] }] }, context(), { contexts: [type.bl_context].filter(Boolean) });
-      return drawn?.body && { label: drawn.label, layout: drawn.body, units: type.bl_ui_units_x };
-    },
+  const headerUI = markRaw({
+    inContext: (fn) => area.inContext(fn, RGN_TYPE_HEADER),
+    refresh: () => draw(),
+    undoPush: () => commands.transaction(drawn),
+    report: (error) => rna.host.notify?.(error.message ?? String(error)),
+    run: (idname, props, event) => { inOutliner(() => invokeOperator(idname, props, event))(); draw(); },
+    keys: (idname, props) => blenderKeys(KEYMAPS, idname, props),
   });
-  const headerHost = Object.assign(document.createElement('div'), { className: 'bl-ui bl-outliner-header' });
+  const headerHost = Object.assign(document.createElement('div'), { className: 'bl-ui bl-outliner-header flex min-w-0 flex-1 items-center' });
   header?.append(headerHost);
   const headerApp = createApp({ render: () => {
     void headerState.revision;
-    return h(LayoutView, { layout: headerLayout(context(), drawInto(headers.OUTLINER_HT_header)), ui: layoutUI });
+    area.layoutHeader(headerHost.clientWidth || region.clientWidth, headerHost.clientHeight || HEADER_HEIGHT);
+    sync();
+    return (headerUI.inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: headerUI }));
   } });
   headerApp.mount(headerHost);
   const drawHeader = () => { headerState.revision++; };
