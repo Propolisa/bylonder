@@ -22,6 +22,7 @@ import { Color3, FreeCamera, Material, Mesh, PBRMaterial, StandardMaterial, Tran
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { readTexture } from './texture/texture.js';
 import { armature_draw } from '../draw/overlay-armature.js';
+import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const ID_RECALC_GEOMETRY = 1 << 1;
@@ -124,6 +125,23 @@ export function createMainView(state) {
     entry.armature = signature;
     node.metadata = { ...node.metadata, wbCreation: { armature: data }, wbMode: mode };
     armature_draw(armatureDrawn(ob), node);
+  }
+
+  // A mesh object in Blender's Edit Mode in Main: its edit mesh drawn, shaded and as the edit overlay, its mode Main's;
+  // leaving it, the Mesh Blender wrote is drawn. Returns whether it is in Edit Mode.
+  function drawEditMode(entry) {
+    const edit = blender.editMesh(entry.ob), { node } = entry;
+    if (!edit && !entry.overlay) return false;
+    node.metadata = { ...node.metadata, wbMode: edit ? 'EDIT' : 'OBJECT' };
+    if (!edit) {
+      entry.overlay.dispose();
+      entry.overlay = null;
+      drawMesh(entry, blender);
+      return false;
+    }
+    mesh_batch_cache_apply(edit.mesh, node, { topology: true });
+    (entry.overlay ??= createEditMeshOverlay(node)).update(edit.mesh, { selectmode: edit.selectmode });
+    return true;
   }
 
   // An object's entry, as the sync makes one, for an Object Main holds.
@@ -293,6 +311,7 @@ export function createMainView(state) {
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL);
+        if (entry.type === 'MESH' && drawEditMode(entry)) continue;
         if (changed && entry.type === 'MESH') drawMesh(entry, blender);
         else if (changed && entry.type !== 'ARMATURE') drawData(entry);
       }
