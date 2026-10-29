@@ -4,7 +4,7 @@
 // keymaps; the page only gives the regions their rectangles, from the editor's elements.
 import { createApp, h, reactive, markRaw, Teleport } from 'vue';
 import { blenderMain, operatorNames } from '../../bmesh/bmesh-wasm.js';
-import { RGN_TYPE_WINDOW, RGN_TYPE_HEADER, allowOperators } from '../../windowmanager/wm-window.js';
+import { RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_FOOTER, allowOperators } from '../../windowmanager/wm-window.js';
 import { blenderWindow, registerArea } from '../../windowmanager/wm-areas.js';
 import { hasOperator, inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
@@ -23,18 +23,20 @@ const pageRect = (element) => {
 //   spacetype: eSpace_Type; name: the editor's Blender identifier (TEXT_EDITOR); operators: the prefix of Blender's
 //   operators it runs (text.), but those the page registered; keymaps: the page's keymaps for what
 //   Blender leaves unhandled (the page's own operators, on Main's data); header: where the header goes; finished(ops):
-//   after operators finished in it; context: the page's context area while its own operators run (wm-operators.js).
-export function mountBlenderArea(section, { spacetype, name, operators, keymaps, header: headerHost, finished = () => {}, report = () => {}, context = {} }) {
+//   after operators finished in it; footer: whether it shows its footer region; context: the page's context area while its own operators run (wm-operators.js).
+export function mountBlenderArea(section, { spacetype, name, operators, keymaps, header: headerHost, finished = () => {}, report = () => {}, context = {}, footer = false }) {
   const area = markRaw(blenderWindow().area(spacetype));
   allowOperators(blenderWindow(), operatorNames().filter((idname) => idname.startsWith(operators) && !hasOperator(idname)));
   const state = reactive({ revision: 0 });
   const svg = document.createElementNS(SVG, 'svg');
-  let headerElement = null, main = null;
+  // The header's and footer's elements, by region type.
+  const bars = {};
+  let main = null;
 
   const layout = () => {
     if (!main) return;
     const regions = { [RGN_TYPE_WINDOW]: pageRect(main) };
-    if (headerElement) regions[RGN_TYPE_HEADER] = pageRect(headerElement);
+    for (const [type, element] of Object.entries(bars)) if (element) regions[type] = pageRect(element);
     area.layout(pageRect(section), regions);
   };
   const drawMain = () => {
@@ -53,25 +55,28 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
     area.inContext(RGN_TYPE_WINDOW, () => blenderMain().invoke(idname, props, event ?? {}));
     refresh();
   };
-  const ui = markRaw({
-    inContext: (fn) => area.inContext(RGN_TYPE_HEADER, fn),
+  const ui = (type) => markRaw({
+    inContext: (fn) => area.inContext(type, fn),
     refresh,
     undoPush: refresh,
     run,
     keys: (idname, props) => blenderKeys([...keymaps, 'Window'], idname, props),
     report,
   });
+  const barUI = { [RGN_TYPE_HEADER]: ui(RGN_TYPE_HEADER), [RGN_TYPE_FOOTER]: ui(RGN_TYPE_FOOTER) };
+  // A header or footer region as Blender lays it out (ED_region_header_layout).
+  const bar = (type) => h('div', { class: 'bl-ui bl-area-header flex min-w-0 flex-1 items-center', ref: (el) => { bars[type] = el; } },
+    (bars[type] ? area.inContext(type, (C) => regionHeader(C)) ?? [] : []).map((tree) => h(BlockView, { tree, ui: barUI[type] })));
 
   const app = createApp({
     render() {
       void state.revision;
       layout();
-      const trees = headerElement ? area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C)) ?? [] : [];
-      const headerView = h('div', { class: 'bl-ui bl-area-header flex min-w-0 flex-1 items-center', ref: (el) => { headerElement = el; } },
-        trees.map((tree) => h(BlockView, { tree, ui })));
+      const headerView = bar(RGN_TYPE_HEADER);
       return h('div', { class: 'bl-ui flex h-full min-h-0 flex-col', 'data-blender': name }, [
         headerHost ? h(Teleport, { to: headerHost }, [headerView]) : headerView,
         h('div', { class: 'bl-area-main min-h-0 flex-1 overflow-hidden', ref: (el) => { if (el && el !== main) { main = el; el.append(svg); } } }),
+        footer ? h('div', { class: 'bl-area-footer flex h-(--bl-header-h) shrink-0 bg-header px-[calc(var(--bl-row)*.4)]' }, [bar(RGN_TYPE_FOOTER)]) : null,
       ]);
     },
   });
@@ -90,7 +95,7 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
     element: section,
     area,
     layout,
-    redraw: (regions) => (regions.includes(RGN_TYPE_HEADER) ? refresh() : drawMain()),
+    redraw: (regions) => (regions.some((type) => type in bars) ? refresh() : drawMain()),
     finished: (operators) => { finished(operators); state.revision++; },
     keys,
   });

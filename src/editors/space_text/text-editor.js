@@ -13,7 +13,7 @@ const ENTRY = 'index.js';
 
 export function mountTextEditor(section, { header, files, context, beforeRun = () => {} }) {
   const editor = { beforeRun, context };
-  const area = mountBlenderArea(section, { spacetype: SPACE_TEXT, name: 'TEXT_EDITOR', operators: 'text.', keymaps: ['Text Generic', 'Text'], header,
+  const area = mountBlenderArea(section, { spacetype: SPACE_TEXT, name: 'TEXT_EDITOR', operators: 'text.', keymaps: ['Text Generic', 'Text'], header, footer: true,
     finished: () => files.flush(), report: (error) => report('ERROR', error.message ?? String(error)), context: { textEditor: editor } });
   editor.area = { space: 'TEXT_EDITOR' };
   editor.space = () => pointerStruct(structFind('Area'), 0, area.area.pointer).spaces.active;
