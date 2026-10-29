@@ -428,11 +428,42 @@ static void owned_free(const bContext *C, int kind)
   owned(kind).clear();
 }
 
+/* Menus by the menu they were opened from: opening a menu frees only its own last blocks and their sub-menus, so a
+ * menu still open elsewhere (the topbar's, while a header draws its own) keeps its buttons. */
+static Map<Block *, std::string> &menu_roots()
+{
+  static Map<Block *, std::string> roots;
+  return roots;
+}
+static void menu_free(const bContext *C, const StringRef root)
+{
+  owned(OWNED_MENU).remove_if([&](Block *block) {
+    if (menu_roots().lookup_default(block, "") != root) {
+      return false;
+    }
+    menu_roots().remove(block);
+    recorded.erase(block);
+    block_free(C, block);
+    return true;
+  });
+}
+
 static Block *block_new(const bContext *C, const char *name, EmbossType emboss, int kind)
 {
   Block *block = block_begin(C, C ? CTX_data_scene(C) : nullptr, C ? CTX_wm_window(C) : nullptr, nullptr, name, emboss);
   owned(kind).append(block);
   return block;
+}
+
+static Block *menu_block_new(const bContext *C, const char *name, EmbossType emboss, const StringRef root)
+{
+  Block *block = block_new(C, name, emboss, OWNED_MENU);
+  menu_roots().add(block, root);
+  return block;
+}
+static std::string menu_root(const Block *block)
+{
+  return menu_roots().lookup_default(const_cast<Block *>(block), block->name);
 }
 
 /* Panels. */
@@ -649,8 +680,8 @@ EXPORT(ui_menu) const char *ui_menu(bContext *C, const char *name)
   if (!mt) {
     return "";
   }
-  owned_free(C, OWNED_MENU);
-  Block *block = block_new(C, name, EmbossType::Pulldown, OWNED_MENU);
+  menu_free(C, name);
+  Block *block = menu_block_new(C, name, EmbossType::Pulldown, name);
   Layout &layout = menu_layout(C, block);
   if (menu_mode & MENU_POPUP) {
     layout.operator_context_set(wm::OpCallContext::ExecRegionWin);
@@ -672,8 +703,9 @@ EXPORT(menu_type_label) const char *menu_type_label(const char *name)
 EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
 {
   static std::string json;
+  const std::string root = menu_root(but->block);
   if (PanelType *pt = button_paneltype_get(but)) {
-    Block *block = block_new(C, pt->idname, EmbossType::Emboss, OWNED_MENU);
+    Block *block = menu_block_new(C, pt->idname, EmbossType::Emboss, root);
     Layout &layout = block_layout(block, LayoutDirection::Vertical, LayoutType::Panel, 0, 0, UI_POPOVER_WIDTH_UNITS * UI_UNIT_X, 0,
                                   0, style_get_dpi());
     Panel panel = {};
@@ -684,7 +716,7 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
     json = menu_json(C, block);
   }
   else if (but->menu_create_func) {
-    Block *block = block_new(C, but->str.c_str(), EmbossType::Pulldown, OWNED_MENU);
+    Block *block = menu_block_new(C, but->str.c_str(), EmbossType::Pulldown, root);
     menu_draw_context(C, [&] { but->menu_create_func(C, &menu_layout(C, block), but->poin); });
     block_layout_resolve(block);
     json = menu_json(C, block);
@@ -692,6 +724,7 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
   else if (but->block_create_func) {
     Block *block = but->block_create_func(C, CTX_wm_region(C), but->poin ? static_cast<void *>(but->poin) : but->func_argN);
     owned(OWNED_MENU).append(block);
+    menu_roots().add(block, root);
     if (block_layout_needs_resolving(block)) {
       block_layout_resolve(block);
     }
