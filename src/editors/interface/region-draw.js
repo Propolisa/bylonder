@@ -10,19 +10,22 @@ const { exports: x } = blenderModule;
 const decoder = new TextDecoder();
 
 const fontFamily = () => (globalThis.document && getComputedStyle(document.documentElement).getPropertyValue('--bl-font-family').trim()) || 'sans-serif';
-const fontOf = (size) => `${size}px ${fontFamily()}`;
+const monoFamily = () => (globalThis.document && getComputedStyle(document.documentElement).getPropertyValue('--bl-font-mono').trim()) || 'monospace';
+const fontOf = (size, mono = false) => `${size}px ${mono ? monoFamily() : fontFamily()}`;
 let measurer;
 const measure = () => (measurer ??= globalThis.OffscreenCanvas ? new OffscreenCanvas(1, 1).getContext('2d') : null);
 // Without a canvas (Node), text measures as a fixed share of its size per character.
-const metrics = (text, size) => {
+const metrics = (text, size, mono = false) => {
   const ctx = measure();
-  if (!ctx) return { width: text.length * size * 0.55, ascent: size * 0.73, descent: size * 0.21 };
-  ctx.font = fontOf(size);
+  if (!ctx) return { width: text.length * size * (mono ? 0.6 : 0.55), ascent: size * 0.73, descent: size * 0.21 };
+  ctx.font = fontOf(size, mono);
   const m = ctx.measureText(text);
   return { width: m.width, ascent: m.fontBoundingBoxAscent ?? size * 0.73, descent: m.fontBoundingBoxDescent ?? size * 0.21 };
 };
 provided.region_text_width = (pointer, length, size) => metrics(decoder.decode(new Uint8Array(x.memory.buffer, pointer, length)), size).width;
 provided.region_font_ascender = (size) => metrics('', size).ascent;
+// BLF_fixed_width: a monospace cell, whole pixels as Blender truncates it.
+provided.region_mono_width = (size) => Math.floor(metrics('0', size, true).width);
 provided.region_font_descender = (size) => -metrics('', size).descent;
 
 const css = ([r, g, b, a]) => `rgb(${Math.round(r * 255)} ${Math.round(g * 255)} ${Math.round(b * 255)} / ${a})`;
@@ -100,9 +103,11 @@ export function drawRecording(ctx, { draw, iconColors = {} }, { height }) {
         ctx.rect(x0, y(y1), x1 - x0, y1 - y0);
         ctx.clip();
       }
-      ctx.font = fontOf(op.size);
+      ctx.font = fontOf(op.size, !!op.mono);
       ctx.fillStyle = css(op.color);
-      ctx.fillText(op.text, Math.round(op.at[0]), Math.round(y(op.at[1])));
+      // Monospace text in Blender's cells: each character at its column.
+      if (op.mono) [...op.text].forEach((c, i) => c !== ' ' && ctx.fillText(c, Math.round(op.at[0] + i * op.mono), Math.round(y(op.at[1]))));
+      else ctx.fillText(op.text, Math.round(op.at[0]), Math.round(y(op.at[1])));
     } else if (op.op === 'icon') {
       const source = iconSvg(op.icon);
       if (source) {

@@ -14,6 +14,7 @@
 #include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "DNA_screen_types.h"
 #include "DNA_userdef_types.h"
 #include "GPU_framebuffer.hh"
@@ -41,6 +42,7 @@ using namespace blender;
 /* Text metrics of the browser's font at a size in pixels. */
 IMPORT(region_text_width) float region_text_width(const char *str, int len, float size);
 IMPORT(region_font_ascender) float region_font_ascender(float size);
+IMPORT(region_mono_width) float region_mono_width(float size);
 IMPORT(region_font_descender) float region_font_descender(float size);
 
 /* The JSON of what one region draw recorded. */
@@ -556,6 +558,29 @@ void BLF_draw(int fontid, const char *str, size_t str_len, ResultBLF * /*r_info*
   }
   s += '}';
 }
+/* Monospace text (the Text Editor's, the Console's): one cell of `cwidth` per column, a tab to the next multiple of
+ * `tab_columns`, as blf_font_draw_mono lays it out; returns the columns drawn. */
+int BLF_draw_mono(int fontid, const char *str, size_t str_len, int cwidth, int tab_columns)
+{
+  const Font &f = font(fontid);
+  std::string cells;
+  int columns = 0;
+  for (const char *c = str, *end = str + text_length(str, str_len); c < end; c = BLI_str_find_next_char_utf8(c, end)) {
+    const int width = *c == '\t' ? tab_columns - columns % tab_columns : 1;
+    cells.append(*c == '\t' ? std::string(width, ' ') : std::string(c, BLI_str_find_next_char_utf8(c, end) - c));
+    columns += width;
+  }
+  std::string &s = command("text");
+  string_json(s += ",\"text\":", cells);
+  points_json(s, "at", {f.pos});
+  number(s += ",\"size\":", f.size);
+  number(s += ",\"mono\":", cwidth);
+  color_json(s += ",\"color\":", f.color);
+  s += '}';
+  return columns;
+}
+float BLF_fixed_width(int fontid) { return region_mono_width(font(fontid).size); }
+
 void BLF_draw_default(float x, float y, float z, const char *str, size_t str_len)
 {
   BLF_position(BLF_default(), x, y, z);
