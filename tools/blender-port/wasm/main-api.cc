@@ -123,7 +123,9 @@ EXPORT(main_new) BlenderMain *main_new()
   ctx->scene->toolsettings->autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
-  /* As BKE_workspace_add makes it: transforms clear its status when they end. */
+  /* As BKE_workspace_add makes it: an ID (RNA's WorkSpace, its tools for the scripts) whose status transforms clear when
+   * they end. */
+  STRNCPY(ctx->workspace.id.name, "WSLayout");
   ctx->workspace.runtime = MEM_new<bke::WorkSpaceRuntime>(__func__);
   ctx->workspace_hook = {&ctx->workspace, &ctx->layout};
   ctx->window.scene = ctx->scene;

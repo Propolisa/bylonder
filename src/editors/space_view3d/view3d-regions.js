@@ -151,7 +151,7 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header)), () => blenderHeader(RGN_TYPE_HEADER)),
     // The tool settings stay the JS layout's until the window's workspace has Blender's tools (WorkSpace.tools).
     mount(toolHeader, () => header('TOOL_HEADER', drawHeaderType(headers.VIEW3D_HT_tool_header))),
-    mount(sidebar, sidebarRegion, blenderSidebar),
+    mount(sidebar, sidebarRegion, () => (sidebar.hidden ? null : blenderSidebar())),
   ];
 
   loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { state.ready = true; draw(); });
