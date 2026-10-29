@@ -619,6 +619,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // draws what it changed.
     begin({ meshes = [] } = {}) { flush(); fill(meshes); },
     end: () => api.view(),
+    // The scene at a frame: Main evaluated for it as the depsgraph evaluates a new frame (animation and drivers, then
+    // matrices), and its evaluated values drawn (main-view.js evaluated).
+    frameChanged(frame) {
+      flush();
+      blender.frame = frame;
+      blender.evaluate();
+      mainView.evaluated();
+    },
     // Blender's undo stack, started from Main as it is (the scene's first state), its steps pushed and loaded.
     undoInit: () => { flush(); blender.undoInit(); },
     undoPush,
@@ -665,7 +673,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, forget,
+    sceneRecords, readCollections, relations, nodeOf, forget, treeSignature: (data) => JSON.stringify(shaderTree(data.node_tree)),
   };
   const mainView = createMainView(state);
   // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with

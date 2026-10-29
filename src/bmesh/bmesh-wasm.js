@@ -411,6 +411,8 @@ export class BlenderMain {
 
   // World matrices, parents first, as the depsgraph evaluates them; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }
+  // The scene's frame, its animation and drivers evaluated for it (view-api.cc view_frame_set).
+  set frame(frame) { x.view_frame_set(this.#C, frame); }
 
   // A mesh object's Mesh, with the attributes Blender's Mesh has types for.
   setMesh(ob, mesh) {
