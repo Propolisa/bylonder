@@ -43,7 +43,7 @@ const withStrings = (strings, fn, pointers = []) => (strings.length
 export class Area {
   constructor(window, spacetype) {
     this.window = window;
-    this.pointer = x.wm_area_new(window.C, spacetype) >>> 0;
+    this.pointer = x.wm_area_new(window.C, spacetype, -1) >>> 0;
   }
   // Its rectangle and those of the regions it shows ({ [regiontype]: rect }), in page pixels ({ x, y, width, height }
   // from the page's top left); the regions left out are hidden.

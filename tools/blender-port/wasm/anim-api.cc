@@ -210,37 +210,6 @@ struct AnimArea : BylonderArea {};
 static ARegion *area_region(AnimArea *a, int regiontype) { return BKE_area_find_region_type(&a->area, regiontype); }
 
 
-/* An area of a space type (SPACE_GRAPH, SPACE_ACTION), as ED_area_newspace makes one. */
-EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int subtype)
-{
-  AnimArea *a = MEM_new<AnimArea>(__func__);
-  SpaceType *st = BKE_spacetype_from_id(spacetype);
-  /* As ED_area_newspace: the space is made for the sub-type the area asks for, then set to it. */
-  a->area.butspacetype_subtype = short(subtype);
-  SpaceLink *sl = st->create(&a->area, CTX_data_scene(C));
-  BLI_addtail(&a->area.spacedata, sl);
-  a->area.spacetype = char(spacetype);
-  a->area.type = st;
-  a->area.regionbase = sl->regionbase;
-  BLI_listbase_clear(&sl->regionbase);
-  for (ARegion &region : a->area.regionbase) {
-    region.runtime->type = BKE_regiontype_from_id(st, region.regiontype);
-  }
-  if (st->space_subtype_set && subtype >= 0) {
-    st->space_subtype_set(&a->area, subtype);
-  }
-  return a;
-}
-
-/* A region drawn by its own draw callback (the region type's draw: action_channel_region_draw,
- * graph_channel_region_draw, ...), or its overlay's (graph_main_region_draw_overlay: the current frame, scrollers and
- * value scale), as wm_region_draw records it. */
-extern "C" const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay);
-EXPORT(anim_region_draw) const char *anim_region_draw(bContext *C, AnimArea *a, int regiontype, bool overlay)
-{
-  return wm_region_draw(C, &a->area, regiontype, overlay);
-}
-
 /* The space's dope sheet filter text (bDopeSheet.searchstr, DopeSheet.filter_text) and flag (ADS_FLAG_*). */
 static bDopeSheet *space_dopesheet(SpaceLink *sl);
 extern "C" SpaceLink *anim_area_space(AnimArea *a);
@@ -258,20 +227,6 @@ EXPORT(anim_region_flag_set) void anim_region_flag_set(ARegion *region, int flag
 /* The Graph Editor's 2D cursor value (SpaceGraph.cursorVal), the View panel's Cursor Y. */
 EXPORT(anim_graph_cursor) float anim_graph_cursor(AnimArea *a) { return static_cast<SpaceGraph *>(a->area.spacedata.first)->cursorVal; }
 EXPORT(anim_graph_cursor_set) void anim_graph_cursor_set(AnimArea *a, float value) { static_cast<SpaceGraph *>(a->area.spacedata.first)->cursorVal = value; }
-
-EXPORT(anim_area_free) void anim_area_free(AnimArea *a)
-{
-  while (ARegion *region = static_cast<ARegion *>(BLI_pophead(&a->area.regionbase))) {
-    BKE_area_region_free(a->area.type, region);
-    MEM_delete(region);
-  }
-  SpaceLink *sl = static_cast<SpaceLink *>(a->area.spacedata.first);
-  if (a->area.type->free) {
-    a->area.type->free(sl);
-  }
-  BLI_freelistN(&a->area.spacedata);
-  MEM_delete(a);
-}
 
 EXPORT(anim_area_space) SpaceLink *anim_area_space(AnimArea *a) { return static_cast<SpaceLink *>(a->area.spacedata.first); }
 
@@ -317,13 +272,6 @@ EXPORT(anim_area_sync) void anim_area_sync(AnimArea *a)
 {
   ARegion *region = BKE_area_find_region_type(&a->area, RGN_TYPE_WINDOW);
   ui::view2d_sync(nullptr, &a->area, &region->v2d, V2D_LOCK_COPY);
-}
-
-/* Puts the context in an area's region, as the window manager does before running a region's handlers. */
-EXPORT(anim_context_set) void anim_context_set(bContext *C, AnimArea *a, ARegion *region)
-{
-  CTX_wm_area_set(C, a ? &a->area : nullptr);
-  CTX_wm_region_set(C, region);
 }
 
 /* What the space's refresh does before drawing (the Graph Editor's curve colors). */

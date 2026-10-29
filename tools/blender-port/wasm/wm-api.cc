@@ -6,6 +6,7 @@
  * tagged for redrawing. */
 #include "BKE_context.hh"
 #include "BKE_global.hh"
+#include "BKE_lib_remap.hh"
 #include "BKE_main.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
@@ -20,6 +21,7 @@
 #include "DNA_windowmanager_types.h"
 #include "ED_screen.hh"
 #include "ED_space_api.hh"
+#include "ED_util.hh"
 #include "GPU_context.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
@@ -54,6 +56,20 @@ std::string operator_popup_json();
 void screen_area_spacelink_add(const Scene *scene, ScrArea *area, eSpace_Type space_type);
 ScrVert *screen_geom_vertex_add(bScreen *screen, short x, short y);
 
+/* IDs Blender's code removes or remaps are remapped in the editors (WM_main_remap_editor_id_reference, through each
+ * space type's id_remap), Main's screens' and the window's, which is outside Main. */
+static void editor_id_remap(const bke::id::IDRemapper &mappings)
+{
+  WM_main_remap_editor_id_reference(mappings);
+  for (wmWindow &win : static_cast<wmWindowManager *>(G_MAIN->wm.first)->windows) {
+    for (ScrArea &area : WM_window_get_active_screen(&win)->areabase) {
+      for (SpaceLink &sl : area.spacedata) {
+        ED_spacedata_id_remap(&area, &sl, mappings);
+      }
+    }
+  }
+}
+
 /* The window manager as WM_init sets it up for its window (wm_window_ghostwindow_ensure, WM_keyconfig_init): the
  * key configurations with the keymaps Blender's C defines (their items come from keyconfig data, wm_keymap_item_new),
  * the window's GHOST window and its handlers. */
@@ -68,6 +84,7 @@ void wm_init(bContext *C)
   ED_spacetypes_keymap(wm->runtime->defaultconf);
   wm->runtime->defaultconf->flag |= KEYCONF_INIT_DEFAULT;
 
+  BKE_library_callback_remap_editor_id_reference_set(editor_id_remap);
   win->runtime->ghostwin = ghost_window_new(1, 1);
   wmKeyMap *keymap = WM_keymap_ensure(wm->runtime->defaultconf, "Window", SPACE_EMPTY, RGN_TYPE_WINDOW);
   WM_event_add_keymap_handler(&win->runtime->handlers, keymap);
@@ -156,8 +173,9 @@ EXPORT(wm_window_size_set) void wm_window_size_set(bContext *C, int width, int h
 }
 
 /* An area of a space type (SPACE_VIEW3D, ...) in the window's screen, as ED_area_newspace makes one: the space its
- * type creates, holding the space's regions. */
-EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype)
+ * type creates for the sub-type asked for (Area.ui_type within the space: a SpaceAction's mode; -1 for its default),
+ * holding the space's regions. */
+EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype, int subtype)
 {
   wmWindow *win = CTX_wm_window(C);
   bScreen *screen = WM_window_get_active_screen(win);
@@ -167,7 +185,12 @@ EXPORT(wm_area_new) ScrArea *wm_area_new(bContext *C, int spacetype)
   area->v3 = screen_geom_vertex_add(screen, 1, 1);
   area->v4 = screen_geom_vertex_add(screen, 1, 0);
   area->spacetype = char(spacetype);
+  area->butspacetype_subtype = short(std::max(subtype, 0));
   screen_area_spacelink_add(WM_window_get_active_scene(win), area, eSpace_Type(spacetype));
+  ED_area_and_region_types_init(area);
+  if (area->type->space_subtype_set && subtype >= 0) {
+    area->type->space_subtype_set(area, subtype);
+  }
   BLI_addtail(&screen->areabase, area);
   return area;
 }
@@ -206,7 +229,7 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
   area->v2->vec = {short(total.xmin), short(total.ymax)};
   area->v3->vec = {short(total.xmax), short(total.ymax)};
   area->v4->vec = {short(total.xmax), short(total.ymin)};
-  if (area->type == nullptr) {
+  if (!std::exchange(reinterpret_cast<BylonderArea *>(area)->initialized, true)) {
     ED_area_init(C, win, area);
   }
   area->totrct = total;
