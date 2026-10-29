@@ -362,7 +362,7 @@ function mesh_batch_cache_vertex_buffers(mesh) {
     }
   }
   const uvs = mesh.attribute("UVMap");
-  return { positions, normals, indices: mesh.corner_tris(), ...uvs && { uvs } };
+  return { positions, normals, indices: Uint32Array.from(mesh.corner_tris()), ...uvs && { uvs: Float32Array.from(uvs) } };
 }
 
 // src/io_scene_babylon/polyfill/evaluate.js
