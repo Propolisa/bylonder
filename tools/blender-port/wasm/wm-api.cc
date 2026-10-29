@@ -290,27 +290,26 @@ static void unhandled_handler_ensure(wmWindow *win)
 /* port-override: until Bylonder's own operators are Blender's operator types, an event runs only the operators the page
  * allows (wm_operators_allow, those whose Bylonder registration runs Blender's). A keymap item of another operator
  * handles its event as Blender's would, but by passing it on to the page, whose keymaps run that operator
- * (unhandled_events): its invoke (or exec) is wrapped to do so while the window handles an event. */
+ * (unhandled_events): while the window handles an event, the types' invoke (or exec) are wrapped to do so. The wrapping
+ * lasts only that long, so types registered or copied at any other time see their own functions. */
 static Set<const wmOperatorType *> &allowed_operators()
 {
   static Set<const wmOperatorType *> allowed;
   return allowed;
 }
-static bool handling = false;
-static bool operator_blocked(const wmOperatorType *ot) { return handling && !allowed_operators().contains(ot); }
 
 struct OperatorCalls {
   decltype(wmOperatorType::invoke) invoke;
   decltype(wmOperatorType::exec) exec;
 };
-static Map<const wmOperatorType *, OperatorCalls> &operator_calls()
+static Map<wmOperatorType *, OperatorCalls> &operator_calls()
 {
-  static Map<const wmOperatorType *, OperatorCalls> calls;
+  static Map<wmOperatorType *, OperatorCalls> calls;
   return calls;
 }
 static wmOperatorStatus page_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 {
-  if (operator_blocked(op->type)) {
+  if (!allowed_operators().contains(op->type)) {
     unhandled_event(C, event, nullptr);
     return OPERATOR_CANCELLED;
   }
@@ -318,30 +317,39 @@ static wmOperatorStatus page_invoke(bContext *C, wmOperator *op, const wmEvent *
 }
 static wmOperatorStatus page_exec(bContext *C, wmOperator *op)
 {
-  if (operator_blocked(op->type)) {
+  if (!allowed_operators().contains(op->type)) {
     unhandled_event(C, CTX_wm_window(C)->runtime->eventstate, nullptr);
     return OPERATOR_CANCELLED;
   }
   return operator_calls().lookup(op->type).exec(C, op);
 }
+static void operator_calls_unwrap();
+/* Unwrapped first, in case an exception left the last event's wrapping in place. */
 static void operator_calls_wrap()
 {
+  operator_calls_unwrap();
   for (wmOperatorType *ot : WM_operatortypes_registered_get()) {
-    if (operator_calls().add(ot, {ot->invoke, ot->exec})) {
-      if (ot->invoke) {
-        ot->invoke = page_invoke;
-      }
-      else if (ot->exec) {
-        ot->exec = page_exec;
-      }
+    operator_calls().add_new(ot, {ot->invoke, ot->exec});
+    if (ot->invoke) {
+      ot->invoke = page_invoke;
+    }
+    else if (ot->exec) {
+      ot->exec = page_exec;
     }
   }
+}
+static void operator_calls_unwrap()
+{
+  for (auto [ot, calls] : operator_calls().items()) {
+    ot->invoke = calls.invoke;
+    ot->exec = calls.exec;
+  }
+  operator_calls().clear();
 }
 
 /* The operators an event may run, by Python idname, one per line. */
 EXPORT(wm_operators_allow) void wm_operators_allow(const char *idnames)
 {
-  operator_calls_wrap();
   allowed_operators().clear();
   const std::string lines = idnames;
   for (size_t start = 0, end; start < lines.size(); start = end + 1) {
@@ -411,10 +419,10 @@ const char *wm_event(bContext *C, int kind, const int *data, const char *code, c
   unhandled_handler_ensure(win);
   unhandled_events.clear();
   ghost_event_add(wm, win, kind, data, code, key, text, uint64_t(time));
-  handling = true;
+  operator_calls_wrap();
   wm_event_do_handlers(C);
   wm_event_do_notifiers(C);
-  handling = false;
+  operator_calls_unwrap();
   CTX_wm_window_set(C, win);
   return event_result(win, registered);
 }

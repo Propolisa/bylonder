@@ -64,6 +64,17 @@ const moveTo = main.invoke('object.move_to_collection', {}, { type: 'M', value: 
 assert.equal(moveTo?.title, 'Move to Collection');
 assert.ok(moveTo.text.includes('New Collection') && !moveTo.text.includes('"disabled":true'), 'its items poll');
 
+// The view Object Mode's operators act in (main.view) is an area of the window's screen too, whose gizmo map stands in
+// for the page's: Blender's event handling reads it after a press it checked for a drag (Ctrl, then P's click).
+main.view = { ...TOP, winx: 1000, winy: 1000 };
+window.allow(['object.parent_set']);
+window.event('keydown', [0], { code: 'ControlLeft', key: 'Control' });
+window.event('keydown', [0], { code: 'KeyP', key: 'p', text: 'p' });
+const released = window.event('keyup', [0], { code: 'KeyP', key: 'p' });
+window.event('keyup', [0], { code: 'ControlLeft', key: 'Control' });
+assert.ok(released.unhandled.some(({ type, value }) => type === 'P' && value === 'CLICK'), 'the release of Ctrl P is handled');
+window.allow(['transform.translate']);
+
 // The Graph Editor below the 3D View, 10 pixels a frame: G moves the selected keys 10 frames for 100 pixels.
 const anim = new BlenderAnimation(main);
 anim.setTime({ frame: 1, start: 1, end: 250, previewStart: 0, previewEnd: 0, preview: false, fps: 24 });
