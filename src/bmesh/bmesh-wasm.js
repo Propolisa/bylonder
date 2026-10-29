@@ -284,8 +284,6 @@ export class EditMesh {
   }
 
   // Runs a Blender operator's exec on the edit mesh, as runOperator takes it.
-  // Blender's operators that run without a modal session, by idname.
-  operators() { return execOperators(); }
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
 
   // Whether an operator polls for this edit mesh.
@@ -559,6 +557,8 @@ export class BlenderMain {
   }
   parent(ob) { return x.object_parent(ob) >>> 0; }
 
+  // Blender's operators that run without a modal session, by idname.
+  operators() { return execOperators(); }
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   poll(idname) { return pollOperator(this.#C, idname); }
   enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }

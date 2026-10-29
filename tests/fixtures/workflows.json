@@ -1,0 +1,605 @@
+{
+ "animate": {
+  "collections": {
+   "Collection": [
+    "Camera",
+    "Cube",
+    "Light"
+   ]
+  },
+  "frame": 30,
+  "materials": {
+   "Material": {
+    "base_color": [
+     0.8,
+     0.8,
+     0.8,
+     1.0
+    ]
+   }
+  },
+  "objects": {
+   "Camera": {
+    "hide_viewport": false,
+    "location": [
+     7.3589,
+     -6.9258,
+     4.9583
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     1.1093,
+     0.0,
+     0.8149
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "CAMERA"
+   },
+   "Cube": {
+    "hide_viewport": false,
+    "keys": {
+     "location[0]": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       30.0,
+       0.0
+      ]
+     ],
+     "location[1]": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       30.0,
+       0.0
+      ]
+     ],
+     "location[2]": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       30.0,
+       2.0
+      ]
+     ]
+    },
+    "location": [
+     0.0,
+     0.0,
+     2.0
+    ],
+    "materials": [
+     "Material"
+    ],
+    "mesh": {
+     "edges": 12,
+     "faces": 6,
+     "vertices": 8
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Light": {
+    "hide_viewport": false,
+    "location": [
+     4.0762,
+     1.0055,
+     5.9039
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.6503,
+     0.0552,
+     1.8664
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "LIGHT"
+   }
+  }
+ },
+ "block-out": {
+  "collections": {
+   "Collection": [
+    "Camera",
+    "Cube",
+    "Cylinder",
+    "Sphere"
+   ]
+  },
+  "frame": 1,
+  "materials": {
+   "Material": {
+    "base_color": [
+     0.8,
+     0.8,
+     0.8,
+     1.0
+    ]
+   }
+  },
+  "objects": {
+   "Camera": {
+    "hide_viewport": false,
+    "location": [
+     7.3589,
+     -6.9258,
+     4.9583
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     1.1093,
+     0.0,
+     0.8149
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "CAMERA"
+   },
+   "Cube": {
+    "hide_viewport": false,
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "materials": [
+     "Material"
+    ],
+    "mesh": {
+     "edges": 12,
+     "faces": 6,
+     "vertices": 8
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Cylinder": {
+    "hide_viewport": false,
+    "location": [
+     0.0,
+     -3.0,
+     0.0
+    ],
+    "materials": [],
+    "mesh": {
+     "edges": 96,
+     "faces": 34,
+     "vertices": 64
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.7854
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Sphere": {
+    "hide_viewport": false,
+    "location": [
+     3.0,
+     0.0,
+     0.0
+    ],
+    "materials": [],
+    "mesh": {
+     "edges": 992,
+     "faces": 512,
+     "vertices": 482
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "type": "MESH"
+   }
+  }
+ },
+ "edit-model": {
+  "collections": {
+   "Collection": [
+    "Camera",
+    "Cube",
+    "Light"
+   ]
+  },
+  "frame": 1,
+  "materials": {
+   "Material": {
+    "base_color": [
+     0.8,
+     0.8,
+     0.8,
+     1.0
+    ]
+   }
+  },
+  "objects": {
+   "Camera": {
+    "hide_viewport": false,
+    "location": [
+     7.3589,
+     -6.9258,
+     4.9583
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     1.1093,
+     0.0,
+     0.8149
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "CAMERA"
+   },
+   "Cube": {
+    "hide_viewport": false,
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "materials": [
+     "Material"
+    ],
+    "mesh": {
+     "edges": 96,
+     "faces": 48,
+     "vertices": 52
+    },
+    "modifiers": [
+     [
+      "Subdivision",
+      "SUBSURF"
+     ]
+    ],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Light": {
+    "hide_viewport": false,
+    "location": [
+     4.0762,
+     1.0055,
+     5.9039
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.6503,
+     0.0552,
+     1.8664
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "LIGHT"
+   }
+  }
+ },
+ "material": {
+  "collections": {
+   "Collection": [
+    "Camera",
+    "Cube",
+    "Light"
+   ]
+  },
+  "frame": 1,
+  "materials": {
+   "Material.001": {
+    "base_color": [
+     0.8,
+     0.05,
+     0.05,
+     1.0
+    ]
+   }
+  },
+  "objects": {
+   "Camera": {
+    "hide_viewport": false,
+    "location": [
+     7.3589,
+     -6.9258,
+     4.9583
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     1.1093,
+     0.0,
+     0.8149
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "CAMERA"
+   },
+   "Cube": {
+    "hide_viewport": false,
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "materials": [
+     "Material.001"
+    ],
+    "mesh": {
+     "edges": 12,
+     "faces": 6,
+     "vertices": 8
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Light": {
+    "hide_viewport": false,
+    "location": [
+     4.0762,
+     1.0055,
+     5.9039
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.6503,
+     0.0552,
+     1.8664
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "LIGHT"
+   }
+  }
+ },
+ "organize": {
+  "collections": {
+   "Collection": [
+    "Camera",
+    "Cube",
+    "Light",
+    "Suzanne"
+   ],
+   "Props": [
+    "Suzanne.001"
+   ]
+  },
+  "frame": 1,
+  "materials": {
+   "Material": {
+    "base_color": [
+     0.8,
+     0.8,
+     0.8,
+     1.0
+    ]
+   }
+  },
+  "objects": {
+   "Camera": {
+    "hide_viewport": false,
+    "location": [
+     7.3589,
+     -6.9258,
+     4.9583
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     1.1093,
+     0.0,
+     0.8149
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "CAMERA"
+   },
+   "Cube": {
+    "hide_viewport": false,
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "materials": [
+     "Material"
+    ],
+    "mesh": {
+     "edges": 12,
+     "faces": 6,
+     "vertices": 8
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Light": {
+    "hide_viewport": false,
+    "location": [
+     4.0762,
+     1.0055,
+     5.9039
+    ],
+    "materials": [],
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.6503,
+     0.0552,
+     1.8664
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "LIGHT"
+   },
+   "Suzanne": {
+    "hide_viewport": false,
+    "location": [
+     0.0,
+     3.0,
+     0.0
+    ],
+    "materials": [],
+    "mesh": {
+     "edges": 1005,
+     "faces": 500,
+     "vertices": 507
+    },
+    "modifiers": [],
+    "parent": "Cube",
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   },
+   "Suzanne.001": {
+    "hide_viewport": true,
+    "location": [
+     3.0,
+     3.0,
+     0.0
+    ],
+    "materials": [],
+    "mesh": {
+     "edges": 1005,
+     "faces": 500,
+     "vertices": 507
+    },
+    "modifiers": [],
+    "parent": null,
+    "rotation_euler": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "MESH"
+   }
+  }
+ }
+}
