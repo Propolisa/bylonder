@@ -2,7 +2,8 @@
 // many at a time as there are cores (JOBS=n to change it), slowest first by the last run's times. Prints each test's
 // last line and time, and a failing test's whole output.
 import { spawn } from 'node:child_process';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { availableParallelism } from 'node:os';
 
 const TIMES = 'node_modules/.cache/test-times.json';
@@ -32,6 +33,7 @@ const worker = async () => {
   }
 };
 await Promise.all(Array.from({ length: Number(process.env.JOBS) || availableParallelism() }, worker));
+mkdirSync(dirname(TIMES), { recursive: true });
 writeFileSync(TIMES, JSON.stringify(times, null, 1));
 for (const { test, output } of failed) console.log(`\n--- ${test}\n${output}`);
 console.log(`${tests.length - failed.length} of ${tests.length} passed`);
