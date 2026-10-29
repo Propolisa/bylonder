@@ -9,13 +9,14 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
   through `tools/blender-port/wasm/armature-api.cc`: `armature_bones_get` reads the bones (the edit bones in Edit Mode)
   with their pose channels and what Blender draws of each, `armature_bones_set` replaces them, outside Edit Mode as
   leaving Edit Mode makes bones (`ED_armature_from_edit`) with the pose rebuilt.
-- The Babylon side holds the same data in RNA's terms in the object's creation recipe (`metadata.wbCreation.armature`),
-  as a curve holds its splines, so undo, saving and duplicating carry it: each bone's `name`, `parent`, `head`, `tail`,
-  `roll`, envelope settings and EditBone booleans, and its `pose` (`location`, `rotation_mode`, `rotation_quaternion`,
-  `rotation_euler`, `scale`, `select`, `hide`). See `src/blenkernel/armature/armature.js`.
-- The scene sync (`main-sync.js`) pushes the record when Babylon changes it (an undo step) and reads it back after
-  Blender's code ran, with the object's mode (`metadata.wbMode`), which Blender's operators set. Objects Blender's code
-  adds (Add > Armature, `object.armature_add`) are adopted as Babylon objects of their kind.
+- Main owns the bones: undo is Blender's (memfile steps) and a project saves them in its `.blend` (`model.md`). The
+  view (`main-view.js`) writes what Main holds into the object's record in RNA's terms
+  (`metadata.wbCreation.armature`), as it writes a curve's splines, after Blender's code ran, an undo step loaded or a
+  frame changed, with the object's mode (`metadata.wbMode`): each bone's `name`, `parent`, `head`, `tail`, `roll`,
+  envelope settings and EditBone booleans, and its `pose` (`location`, `rotation_mode`, `rotation_quaternion`,
+  `rotation_euler`, `scale`, `select`, `hide`). See `src/blenkernel/armature/armature.js`. The scene sync writes a
+  record Bylonder's own code sets into Main. Objects Blender's code adds (Add > Armature, `object.armature_add`) are
+  made as Babylon objects of their kind.
 - The module had Armature as an ID type without data: `modifier-api.cc`'s stand-in, whose initializer wrote over
   `armature.cc`'s type though Blender's definition won the link. The stand-in is now only in the modifiers module
   (`modifiers-only.cc`).
@@ -69,7 +70,6 @@ on a module without `armature-api.cc`.
   `ARMATURE`), is not taken into Bylonder's stack; the object field of its panel is not checked yet.
 - A stack evaluated in Main applies every Blender modifier of the object there, so a Geometry Nodes Array after the
   Armature modifier that Main holds as Blender's Array applies twice.
-- The mode is not part of an undo step: undo restores the bones and pose but leaves the mode as Main has it.
 - Edit Mode's modifier preview (`editFinal`) evaluates in a worker without the armature.
 - Bone properties panels (`BONE_PT_*`), bone collections, constraints in the UI, the Armature tab's settings
   (`pose_position`, display type), and keying pose bones (the animation channels are the object's).

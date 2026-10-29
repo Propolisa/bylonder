@@ -8,6 +8,8 @@ import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { BlenderAnimation } from '../src/blenkernel/animation/anim-blender.js';
 import { sceneMain } from './scene-main.js';
+import { shaderTree } from '../src/blenkernel/main-sync.js';
+import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 
 const scene = new Scene(new NullEngine()), objects = [];
@@ -37,4 +39,13 @@ assert(lamp.intensity > 0 && Math.abs(lamp.intensity * 4 * Math.PI - 20) < 1e-3,
 sync.frameChanged(11);
 assert(Math.abs(cube.position.x - 4) < 1e-4);
 assert.deepEqual(sync.check(), []);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind");
+
+// A material's Principled BSDF in Main, as Blender's Properties editor edits it, is the Babylon material's: the view
+// derives its base color.
+const tree = shaderTree(createRNA({ world }).pointer('Material', cube.material).node_tree);
+tree.nodes.find((node) => node.idname === 'ShaderNodeBsdfPrincipled').inputs.find((input) => input.identifier === 'Base Color').value = [0.1, 0.6, 0.2, 1];
+blender.setNodeTree(sync.materialOf(cube.material), tree);
+sync.view();
+assert(Math.abs(cube.material.albedoColor.g - 0.6) < 1e-4, `the base color Main holds: ${cube.material.albedoColor.asArray()}`);
+assert.deepEqual(sync.check(), []);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main");
