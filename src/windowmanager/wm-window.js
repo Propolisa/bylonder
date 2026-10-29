@@ -56,6 +56,17 @@ export class Area {
   set view3d({ viewmat, winmat, persp }) {
     withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.wm_view3d_set(this.pointer, v, w, persp));
   }
+  // A region drawn by its type (or its overlay), as region-draw.cc records it.
+  draw(regiontype, overlay = false) { return JSON.parse(cString(x.wm_region_draw(this.window.C, this.pointer, regiontype, overlay))); }
+  // Runs fn(C) with this area's region as the context's.
+  inContext(regiontype, fn) {
+    x.wm_area_context_set(this.window.C, this.pointer, regiontype);
+    try {
+      return fn(this.window.C);
+    } finally {
+      x.wm_area_context_set(this.window.C, 0, 0);
+    }
+  }
   // What its operator shows in its header (ED_area_status_text), or ''.
   get status() { return cString(x.wm_area_status(this.pointer)); }
   free() { x.wm_area_free(this.window.C, this.pointer); }

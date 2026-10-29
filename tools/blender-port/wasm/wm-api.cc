@@ -417,6 +417,14 @@ const char *wm_event(bContext *C, int kind, const int *data, const char *code, c
   return event_result(win, registered);
 }
 
+/* Puts the context in an area's region (regiontype), as the window manager does before running a region's handlers;
+ * a null area clears both. */
+EXPORT(wm_area_context_set) void wm_area_context_set(bContext *C, ScrArea *area, int regiontype)
+{
+  CTX_wm_area_set(C, area);
+  CTX_wm_region_set(C, area ? BKE_area_find_region_type(area, regiontype) : nullptr);
+}
+
 /* A region of an area drawn by its type's draw callback (or its overlay's, draw_overlay), with the area and region the
  * context's as wm_draw.cc draws them, recorded by region-draw.cc: returns the recording's JSON. */
 EXPORT(wm_region_draw) const char *wm_region_draw(bContext *C, ScrArea *area, int regiontype, bool overlay)
