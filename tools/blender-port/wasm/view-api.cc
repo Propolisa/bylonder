@@ -1,10 +1,12 @@
 /* What the view (src/blenkernel/main-view.js) reads of Main besides RNA's values and the extracted geometry: a Mesh's
- * attributes, so a mesh is drawn whole whoever made it (Bylonder, a read file or an undo step); and Main evaluated
- * for a frame, as the depsgraph evaluates a new frame, for the view to draw. */
+ * attributes, so a mesh is drawn whole whoever made it (Bylonder, a read file or an undo step), an object's edit mesh
+ * in Edit Mode, and Main evaluated for a frame, as the depsgraph evaluates a new frame. */
 #include "BKE_anim_data.hh"
 #include "BKE_animsys.h"
 #include "BKE_attribute.hh"
 #include "BKE_context.hh"
+#include "BKE_editmesh.hh"
+#include "BLI_map.hh"
 #include "BKE_lib_query.hh"
 #include "BKE_main.hh"
 #include "BKE_mesh.hh"
@@ -12,6 +14,9 @@
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
+#include "extraction.hh"
+
+#include <memory>
 
 #include <string>
 
@@ -47,3 +52,20 @@ EXPORT(view_frame_set) void view_frame_set(bContext *C, float frame)
     BKE_animsys_evaluate_animdata(id, adt, &context, ADT_RECALC_ALL, false);
   });
 }
+
+/* An object Main holds in Edit Mode: its edit mesh's arrays as the draw cache extracts them (extraction.hh), the parts
+ * that changed (ExtractFlag) refilled, valid until its next extraction; null when it is not in Edit Mode. */
+EXPORT(view_edit_mesh_extract) const ExtractionHeader *view_edit_mesh_extract(Object *ob, int what)
+{
+  static Map<const Object *, std::unique_ptr<Extraction>> extractions;
+  BMEditMesh *em = BKE_editmesh_from_object(ob);
+  if (!em) {
+    extractions.remove(ob);
+    return nullptr;
+  }
+  Extraction &extraction = *extractions.lookup_or_add_cb(ob, [] { return std::make_unique<Extraction>(); });
+  extraction_update(em->bm, extraction, what);
+  return &extraction.header;
+}
+/* Its select mode (SCE_SELECT_*), as its overlay draws it. */
+EXPORT(view_edit_mesh_selectmode) int view_edit_mesh_selectmode(Object *ob) { return BKE_editmesh_from_object(ob)->selectmode; }

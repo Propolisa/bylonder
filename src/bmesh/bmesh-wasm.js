@@ -434,6 +434,12 @@ export class BlenderMain {
     }));
     return ownedMesh(mesh);
   }
+  // The edit mesh of an object in Edit Mode (its Mesh's BMEditMesh), as the draw cache extracts it (view-api.cc), valid
+  // until its next extraction, and its select mode (SCE_SELECT_*); null outside Edit Mode.
+  editMesh(ob, what = EXTRACT_ALL) {
+    const header = x.view_edit_mesh_extract(ob, what) >>> 0;
+    return header ? { mesh: extractedMesh(header), selectmode: x.view_edit_mesh_selectmode(ob) } : null;
+  }
   // A mesh object's Mesh with its modifiers applied, as Blender's viewport evaluates it: a Mesh that is its own.
   evaluatedMesh(ob) { return ownedMesh(extractedMesh(x.object_mesh_eval(this.#context, ob) >>> 0)); }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
