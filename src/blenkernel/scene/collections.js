@@ -135,10 +135,10 @@ export function createCollections(world, { commit = () => {} } = {}) {
       sync();
     },
     refresh: sync,
-    // A whole state from Blender's code (main-sync.js), as one edit.
+    // A whole state from Main after Blender's code ran (main-view.js), whose undo step is that code's.
     assign(next) {
       if (JSON.stringify(next) === JSON.stringify(state)) return;
-      state = clone(next); changed();
+      state = clone(next); sync();
     },
     // A render's world shows what renders show.
     useRenderVisibility() { render = true; sync(); },
