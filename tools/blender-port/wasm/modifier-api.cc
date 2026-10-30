@@ -225,11 +225,8 @@ const ExtractionHeader *mesh_from_faces(int verts_num, const float3 *positions, 
 
 namespace blender {
 
-/* Modifier types the module leaves out (Geometry Nodes needs file streams, Line Art Grease Pencil), as stand-ins
- * modifier_add refuses (modifier-standins.hh). */
+/* What a modifier type a module leaves out reports (modifier-standins.hh): always disabled. */
 bool modifier_left_out_is_disabled(const Scene * /*scene*/, ModifierData * /*md*/, bool /*use_render_params*/) { return true; }
-LEFT_OUT_MODIFIER(Nodes);
-LEFT_OUT_MODIFIER(GreasePencilLineart);
 
 /* port-override: no GPU in the module, so subdivision is evaluated on the CPU. */
 GPUBackendType GPU_backend_get_type() { return GPU_BACKEND_NONE; }

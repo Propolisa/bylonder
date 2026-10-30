@@ -10,6 +10,8 @@ import { createMesh, createPrimitive, shadeSmooth } from '../src/editors/object/
 import { hasMesh } from '../src/editors/object/identity.js';
 import { mesh_deserialize } from '../src/blenkernel/mesh/mesh.js';
 import { sceneMain } from './scene-main.js';
+import { blendData, setContextPointer } from '../src/python/bpy_rna.js';
+import { __kwargtrans__ } from '../src/bl_py/org.transcrypt.__runtime__.js';
 
 // Blender's modifiers evaluated by Blender's code in the module, against Blender 5.2's result on a default cube
 // (tools/blender-reference/modifier-fixtures.py).
@@ -54,6 +56,21 @@ const final = main.evaluatedMesh(ob);
 assert.deepEqual(Array.from(final.corner_verts), subsurf.corner_verts);
 main.run('object.mode_set', { mode: 'OBJECT' });
 main.remove(ob);
+
+// Geometry Nodes: a node group built through bpy, Blender's Subdivide Mesh between its Geometry input and output,
+// evaluated by the Nodes modifier in Main's depsgraph.
+setContextPointer(main.C);
+const nodesCube = main.add('MESH', 'Nodes');
+main.setMesh(nodesCube, primitive_add('mesh.primitive_cube_add'));
+const group = blendData().node_groups.new('Subdivide', 'GeometryNodeTree');
+for (const in_out of ['INPUT', 'OUTPUT']) group.interface.new_socket(__kwargtrans__({ name: 'Geometry', in_out, socket_type: 'NodeSocketGeometry' }));
+const [groupInput, groupOutput, subdivide] = ['NodeGroupInput', 'NodeGroupOutput', 'GeometryNodeSubdivideMesh'].map((idname) => group.nodes.new(idname));
+group.links.new(groupInput.outputs[0], subdivide.inputs[0]);
+group.links.new(subdivide.outputs[0], groupOutput.inputs[0]);
+blendData().objects.get('Nodes').modifiers.new('GeometryNodes', 'NODES').node_group = group;
+main.evaluate();
+assert.equal(main.evaluatedMesh(nodesCube).faces_num, 24, "Blender's Geometry Nodes subdivide the cube once");
+main.remove(nodesCube);
 
 // In the stack: Main's depsgraph evaluates Blender's modifiers, the object draws the result, and Apply keeps it.
 const engine = new NullEngine(), scene = new Scene(engine), box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
@@ -109,4 +126,4 @@ scene.dispose();
 engine.dispose();
 console.log(`Modifiers: ${known.length} results differ where known (${Object.values(KNOWN).join('; ')})`);
 console.log(`Modifiers: ${Object.keys(SKIPPED).length} stacks not offered yet (${[...new Set(Object.values(SKIPPED))].join('; ')})`);
-console.log(`Modifiers: ${fs.readdirSync(dir).length - known.length - Object.keys(SKIPPED).length} stacks of Blender's modifiers match Blender 5.2, in Object and Edit Mode, evaluated by Main's depsgraph and applied`);
+console.log(`Modifiers: ${fs.readdirSync(dir).length - known.length - Object.keys(SKIPPED).length} stacks of Blender's modifiers match Blender 5.2, in Object and Edit Mode, evaluated by Main's depsgraph and applied; Geometry Nodes evaluate`);

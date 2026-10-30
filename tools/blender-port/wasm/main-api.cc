@@ -977,34 +977,6 @@ void nodes::node_tree_shader_default(const bContext * /*C*/, Main * /*bmain*/, I
 /* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
 void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}
 
-/* port-override: node_tree_update.cc, which updates node trees by their node types' declarations: the module has no
- * node types (Blender's are in its nodes module), so its node trees hold what Bylonder built and nothing updates them;
- * Blender's node types take them over when a .blend is read. */
-void BKE_ntree_update_tag_all(bNodeTree *) {}
-void BKE_ntree_update_tag_node_property(bNodeTree *, bNode *) {}
-void BKE_ntree_update_tag_node_new(bNodeTree *, bNode *) {}
-void BKE_ntree_update_tag_node_removed(bNodeTree *) {}
-void BKE_ntree_update_tag_node_mute(bNodeTree *, bNode *) {}
-void BKE_ntree_update_tag_node_internal_link(bNodeTree *, bNode *) {}
-void BKE_ntree_update_tag_node_type(bNodeTree *, bNode *) {}
-void BKE_ntree_update_tag_socket_property(bNodeTree *, bNodeSocket *) {}
-void BKE_ntree_update_tag_socket_new(bNodeTree *, bNodeSocket *) {}
-void BKE_ntree_update_tag_socket_type(bNodeTree *, bNodeSocket *) {}
-void BKE_ntree_update_tag_socket_availability(bNodeTree *, bNodeSocket *) {}
-void BKE_ntree_update_tag_socket_removed(bNodeTree *) {}
-void BKE_ntree_update_tag_link_changed(bNodeTree *) {}
-void BKE_ntree_update_tag_link_removed(bNodeTree *) {}
-void BKE_ntree_update_tag_link_added(bNodeTree *, bNodeLink *) {}
-void BKE_ntree_update_tag_link_mute(bNodeTree *, bNodeLink *) {}
-void BKE_ntree_update_tag_active_output_changed(bNodeTree *) {}
-void BKE_ntree_update_tag_missing_runtime_data(bNodeTree *) {}
-void BKE_ntree_update_tag_parent_change(bNodeTree *, bNode *) {}
-void BKE_ntree_update_tag_id_changed(Main *, ID *) {}
-void BKE_ntree_update_tag_image_user_changed(bNodeTree *, ImageUser *) {}
-void BKE_ntree_update(Main & /*bmain*/, std::optional<Span<bNodeTree *>> /*modified_trees*/, const NodeTreeUpdateExtraParams & /*params*/) {}
-void BKE_ntree_update_after_single_tree_change(Main & /*bmain*/, bNodeTree & /*modified_tree*/, const NodeTreeUpdateExtraParams & /*params*/) {}
-void BKE_ntree_update_without_main(bNodeTree & /*tree*/) {}
-
 /* port-override: the module has no zlib (its calls would not link), so a gzip-compressed file is one it cannot
  * read, as when zlib reports an error; it reads no files anyway. */
 FileReader *BLI_filereader_new_gzip(FileReader * /*base*/) { return nullptr; }
@@ -1071,13 +1043,7 @@ void IMB_colormanagement_working_space_convert(Main * /*bmain*/, const Main * /*
 /* port-override: the module has no asset libraries, whose import method a read file is checked against. */
 void AS_asset_library_import_method_ensure_valid(Main & /*bmain*/) {}
 
-/* port-override: the module has no node types (nodes module), so it leaves a read file's nodes as the file has them
- * (node.cc would mark every one it does not know undefined) for the next file Blender reads to know them. */
-void bke::node_tree_update_all_new(Main & /*main*/) {}
 
-/* port-override: the module has no node types (nodes module), so a read node tree keeps the sockets the file has;
- * the scene sync reads the inputs it maps. */
-void node_verify_sockets(Main * /*bmain*/, bNodeTree * /*ntree*/, bNode * /*node*/, bool /*do_id_user*/) {}
 
 /* port-override: a read file's scenes are freed without the sequencer, sound or depsgraphs the module does not have;
  * Bylonder's scene keeps neither strips nor sounds. */
@@ -1135,4 +1101,3 @@ bool ED_operator_objectmode(bContext *C)
 }
 
 }  // namespace blender
-

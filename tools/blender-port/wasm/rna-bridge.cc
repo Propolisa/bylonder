@@ -513,10 +513,12 @@ EXPORT(bpy_function_info) const char *bpy_function_info(FunctionRNA *func)
   return text(json + "]}");
 }
 
-/* Strings and pointers a call's parameters point to, kept until the call ends. */
+/* Strings and pointers a call's parameters point to, kept until the call ends, and the ID that owns the struct it is
+ * called on (whose data an enum parameter's items may depend on, as a node tree's socket types). */
 struct CallData {
   std::vector<std::unique_ptr<std::string>> strings;
   std::vector<std::unique_ptr<PointerRNA>> pointers;
+  ID *owner = nullptr;
 };
 static std::map<ParameterList *, CallData> call_data;
 
@@ -525,6 +527,7 @@ EXPORT(bpy_call_begin) ParameterList *bpy_call_begin(StructRNA *type, ID *id, vo
   PointerRNA ptr = pointer(type, id, data);
   ParameterList *parms = MEM_new<ParameterList>(__func__);
   RNA_parameter_list_create(parms, &ptr, func);
+  call_data[parms].owner = ptr.owner_id;
   return parms;
 }
 /* Runs the function; returns its error reports as text, or null. */
@@ -563,7 +566,11 @@ static PropertyRNA *parameter(ParameterList *parms, int index, void **r_data)
   RNA_parameter_list_end(&iter);
   return parm;
 }
-static PointerRNA function_pointer(ParameterList *parms) { return RNA_pointer_create_discrete(nullptr, RNA_Function, parms->func); }
+/* The function's pointer as bpy gives it to its parameters, owned by the ID the call is on (pyrna_func_call). */
+static PointerRNA function_pointer(ParameterList *parms)
+{
+  return RNA_pointer_create_discrete(call_data[parms].owner, RNA_Function, parms->func);
+}
 
 /* A number or array parameter (a dynamic array's own allocation, which RNA_parameter_list_free frees). */
 EXPORT(bpy_param_numbers_set) void bpy_param_numbers_set(ParameterList *parms, int index, const double *values, int len)

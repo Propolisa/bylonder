@@ -37,6 +37,10 @@ IDTypeInfo IDType_ID_NT = id_type_without_data(ID_NT, FILTER_ID_NT, INDEX_ID_NT,
 IDTypeInfo IDType_ID_AR = id_type_without_data(ID_AR, FILTER_ID_AR, INDEX_ID_AR, sizeof(bArmature), "Armature", "armatures",
                                                BLT_I18NCONTEXT_ID_ARMATURE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 
+/* Not in modifier-api.cc: a stand-in's initializer there would write over the scene module's real Geometry Nodes and
+ * Line Art types, whose definitions win the link. */
+LEFT_OUT_MODIFIER(Nodes);
+LEFT_OUT_MODIFIER(GreasePencilLineart);
 LEFT_OUT_MODIFIER(Boolean);
 LEFT_OUT_MODIFIER(Cloth);
 LEFT_OUT_MODIFIER(Collision);
