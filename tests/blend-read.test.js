@@ -49,7 +49,6 @@ async function makeWorld(build) {
   world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
   world.curves = createCurveObjects(world);
   registerObjects(animation, objects);
-  world.collections.adopt();
   const selection = createSelection(scene, objects);
   const sync = createMainSync({ rna: createRNA({ world, selection }), ids: animation.ids });
   sync.debug = true;

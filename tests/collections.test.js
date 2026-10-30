@@ -4,6 +4,7 @@ import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createCollections, MASTER } from '../src/blenkernel/scene/collections.js';
 import { createRenderSettings } from '../src/blenkernel/scene/render.js';
 import { createSceneTime } from '../src/blenkernel/scene/time.js';
+import { sceneMain } from './scene-main.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const [a, b, c] = ['A', 'B', 'C'].map(n => { const m = MeshBuilder.CreateBox(n, {}, scene); m.metadata = { wbId: n }; return m; });
@@ -11,7 +12,9 @@ c.isVisible = false;
 const objects = [a, b, c]; objects.scene = scene;
 const world = { scene, objects, animation: createAnimationModel() };
 let commits = 0;
-const cols = createCollections(world, { commit: () => commits++ });
+const cols = world.collections = createCollections(world, { commit: () => commits++ });
+// Main holds the collections; the slice's edits are Blender's functions on them.
+const sync = sceneMain(world);
 assert.equal(cols.capture(), undefined, 'untouched collections save nothing');
 const [startup] = cols.all();
 assert.deepEqual(cols.state.scene.children, [startup.id], 'the Scene Collection holds one Collection, as in Blender\'s startup file');
@@ -51,10 +54,13 @@ cols.apply(undefined);
 assert.equal(b.isVisible, true); assert.equal(cols.all().length, 1);
 cols.apply(saved);
 assert.equal(b.isVisible, false);
+// A collection hidden in the view layer is never the active one (BKE_layer_collection_sync), so in a layer that shows it.
+cols.setViewLayer('ViewLayer');
+cols.setActive(child.id);
 const d = MeshBuilder.CreateBox('D', {}, scene); d.metadata = { wbId: 'D' }; objects.push(d);
-cols.setActive(child.id); cols.adopt();
+sync.flush();
 assert.deepEqual(cols.memberships('D'), [child.id], 'new objects go to the active collection');
-cols.setViewLayer('ViewLayer'); cols.set(child.id, { hideRender: true });
+cols.set(child.id, { hideRender: true });
 assert.equal(d.isVisible, true, 'Disable in Renders leaves the viewports alone');
 cols.useRenderVisibility();
 assert.equal(d.isVisible, false, 'and hides the collection in renders');

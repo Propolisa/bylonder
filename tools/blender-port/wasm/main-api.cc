@@ -201,12 +201,13 @@ static void collections_synced(BlenderMain *ctx)
 }
 EXPORT(main_collections_sync) void main_collections_sync(BlenderMain *ctx) { collections_synced(ctx); }
 
-/* An object of a type (ObjectType) with new data of its type, as BKE_object_add makes it, in the Scene Collection. */
+/* An object of a type (ObjectType) with new data of its type, as BKE_object_add makes it, in the active collection. */
 EXPORT(main_object_add) Object *main_object_add(BlenderMain *ctx, int type, const char *name)
 {
   Object *ob = BKE_object_add_only_object(ctx->bmain, ObjectType(type), name);
   ob->data = static_cast<ID *>(BKE_object_obdata_add_from_type(ctx->bmain, ObjectType(type), name));
-  BKE_collection_object_add(ctx->bmain, ctx->scene->master_collection, ob);
+  BKE_view_layer_synced_ensure(*ctx->bmain, ctx->scene, ctx->view_layer);
+  BKE_collection_object_add(ctx->bmain, BKE_view_layer_active_collection_get(ctx->view_layer)->collection, ob);
   collections_synced(ctx);
   return ob;
 }
@@ -254,9 +255,10 @@ EXPORT(main_collection_add) Collection *main_collection_add(BlenderMain *ctx, Co
   collections_synced(ctx);
   return collection;
 }
+/* Blender's Delete: its objects and children go to its parents (BKE_collection_delete, not its hierarchy). */
 EXPORT(main_collection_remove) void main_collection_remove(BlenderMain *ctx, Collection *collection)
 {
-  BKE_id_free(ctx->bmain, &collection->id);
+  BKE_collection_delete(ctx->bmain, collection, false);
   collections_synced(ctx);
 }
 /* The Scene Collection. */

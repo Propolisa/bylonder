@@ -17,6 +17,7 @@
 import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
+import { pointerStruct, structFind } from '../python/bpy_rna.js';
 import { INFO } from '../makesrna/rna.js';
 import { mainDefinition, writeModifier, createMainModifiers } from '../modifiers/main-modifiers.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
@@ -181,18 +182,28 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const field = dnaProperty(struct, name);
     if (!field || field.kind === 'pointer' || field.kind === 'struct') return null;
     const record = owner === world ? sceneRecords().find((r) => r.struct === struct)
-      : struct === 'Object' ? objects.get(owner) : objects.get(owner)?.data;
+      : struct === 'Object' ? objects.get(owner) : COLLECTION_RECORDS[struct]?.(owner) ?? objects.get(owner)?.data;
     return record?.struct === struct && record.ptr && !record.unheld?.has(name) ? record : null;
   }
-  // RNA writes into a record of Main's, as Blender's RNA updates tag them, then evaluated and drawn; false (nothing
-  // written) when Main cannot hold one of them.
+  // A collection's records by the slice's entry (collections.js): its Collection and its LayerCollection in the view layer.
+  const COLLECTION_RECORDS = {
+    Collection: (entry) => collections.get(entry?.id),
+    LayerCollection(entry) {
+      const record = collections.get(entry?.id);
+      if (record) record.layer.ptr = blender.layerCollection(record.ptr);
+      return record?.layer;
+    },
+  };
+  // RNA writes into a record of Main's by Blender's RNA (its setters and updates, which tag the depsgraph), then
+  // evaluated and drawn; false (nothing written) when Main cannot hold one of them.
   function write(record, values) {
     const entries = Object.entries(values).map(([name, value]) => [name, plain(value)]);
     if (!entries.every(([name, value]) => holds(dnaProperty(record.struct, name), value))) return false;
     flush(false);
-    for (const [name, value] of entries) dnaSet(record.struct, record.ptr, name, value);
-    blender.tag(record.holder ?? record.ptr, recalcOf(record.struct, Object.keys(values)));
+    const struct = pointerStruct(structFind(record.struct), record.holder ?? record.ptr, record.ptr);
+    for (const [name, value] of entries) struct[name] = value;
     evaluate();
+    if (COLLECTION_RECORDS[record.struct]) readCollections();
     return true;
   }
   // What the depsgraph evaluates again after values were written, as Blender's RNA updates tag them: an object's
@@ -201,10 +212,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     : ID_RECALC_TRANSFORM | ID_RECALC_SYNC_TO_EVAL);
   // Objects: one per Bylonder object, with data of its type; one made again when its type changed. A deleted one is
   // deleted in Main, which undo brings back; one that left the scene keeps its keys (blender-ids.js).
+  // Returns whether objects came or went.
   function syncObjects() {
     const nodes = live(), alive = new Set(nodes);
+    let came = false;
     for (const [node, entry] of objects) {
       if (alive.has(node) && objectType(node) === entry.type) continue;
+      came = true;
       objects.delete(node);
       dirty.delete(entry);
       entry.unwatch();
@@ -215,6 +229,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
     for (const node of nodes) {
       if (objects.has(node)) continue;
+      came = true;
       const type = objectType(node), ob = ids.object(key(node), type, node.name);
       const entry = { struct: 'Object', ptr: ob, node, key: key(node), type, ob, shadow: new Map() };
       entry.data = { struct: dataStruct(node), ptr: blender.data(entry.ob), shadow: new Map() };
@@ -224,6 +239,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       dirty.add(entry);
       objects.set(node, entry);
     }
+    return came;
   }
   // An object Main no longer holds (Blender's code deleted it, or an undo step does not have it): deleted, its children
   // without it, as Main's are.
@@ -429,7 +445,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (!cols) return;
     const ids = [cols.MASTER, ...cols.state.collections.map((c) => c.id)], byId = new Map([...objects.values()].map((e) => [nodeId(e.node), e.ob]));
     const members = ids.map((id) => cols.objects(id).map((objectId) => byId.get(objectId)).filter(Boolean));
-    const signature = JSON.stringify([cols.state, members]);
+    // Only a state the slice holds that Main does not (a project's, another view layer's) is written.
+    const signature = JSON.stringify(cols.state);
     if (signature === collectionsSynced) return;
     collectionsSynced = signature;
     const kept = new Set(cols.state.collections.map((c) => c.id)), alive = new Set(blender.ids(ID_GR));
@@ -456,6 +473,49 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     blender.syncCollections();
     blender.activeCollection = collectionPointer(cols.active);
   }
+  // The collections slice's edits (collections.js) by Blender's functions on Main's collections, after which the slice
+  // holds Main's state again.
+  const objectsOf = (ids) => ids.map(modifierLinks.object).filter(Boolean);
+  const pointers = () => [blender.masterCollection, ...blender.ids(ID_GR)];
+  function collectionsEdit(fn) {
+    flush();
+    const result = fn();
+    blender.syncCollections();
+    blender.relationsChanged();
+    evaluate();
+    readCollections();
+    return result;
+  }
+  const setObjects = (pointer, fn) => blender.setCollectionObjects(pointer, fn(blender.collectionObjects(pointer)));
+  const unlinkEverywhere = (obs) => pointers().forEach((pointer) => setObjects(pointer, (list) => list.filter((ob) => !obs.includes(ob))));
+  const flagsOf = (patch, names) => Object.fromEntries(Object.entries(patch).map(([key, value]) => [names[key], value]));
+  const collectionEdits = {
+    create({ parent, name, objects: ids, move }) {
+      const made = collectionsEdit(() => {
+        const obs = objectsOf(ids), pointer = blender.addCollection(collectionPointer(parent), name);
+        if (move) unlinkEverywhere(obs);
+        blender.setCollectionObjects(pointer, obs);
+        return pointer;
+      });
+      return [...collections].find(([, record]) => record.ptr === made)?.[0];
+    },
+    remove: (id) => collectionsEdit(() => blender.removeCollection(collectionPointer(id))),
+    rename: (id, name) => collectionsEdit(() => blender.rename(collectionPointer(id), name)),
+    link: (ids, id) => collectionsEdit(() => setObjects(collectionPointer(id), (list) => [...list, ...objectsOf(ids)])),
+    unlink: (ids, id) => collectionsEdit(() => setObjects(collectionPointer(id), (list) => list.filter((ob) => !objectsOf(ids).includes(ob)))),
+    move: (ids, id) => collectionsEdit(() => {
+      unlinkEverywhere(objectsOf(ids));
+      setObjects(collectionPointer(id), (list) => [...list, ...objectsOf(ids)]);
+    }),
+    moveCollection: (id, parent) => collectionsEdit(() => {
+      const child = collectionPointer(id);
+      for (const pointer of pointers()) blender.setCollectionChildren(pointer, blender.collectionChildren(pointer).filter((c) => c !== child));
+      blender.setCollectionChildren(collectionPointer(parent), [...blender.collectionChildren(collectionPointer(parent)), child]);
+    }),
+    setActive: (id) => collectionsEdit(() => { blender.activeCollection = collectionPointer(id); }),
+    set: (id, patch) => write(collections.get(id), flagsOf(patch, FLAGS)),
+    setLayer: (id, patch) => write(COLLECTION_RECORDS.LayerCollection({ id }), flagsOf(patch, LAYER_FLAGS)),
+  };
   // The slice's state as Main holds it: collections Blender's code made get new ids, removed ones go.
   function readCollections(newId = () => crypto.randomUUID()) {
     const cols = slice(), pointers = blender.ids(ID_GR);
@@ -487,7 +547,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       record.layer.ptr = blender.layerCollection(record.ptr);
       for (const [key, name] of Object.entries(LAYER_FLAGS)) record.layer.shadow.set(name, layers[c.id][key]);
     }
-    collectionsSynced = '';
+    collectionsSynced = JSON.stringify(cols.state);
   }
 
   // Babylon into Main: what hooks marked changed, or `all` of it before Blender's code runs (so what no hook sees, the
@@ -496,8 +556,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   function flush(all = true) {
     if (state.applying) return;
     // Objects come and go by the world's list and by deleting (metadata, which hooks see).
+    let came = false;
     if (all || world.objects.length !== listed || [...dirty].some(({ node, type }) => deleted(node) || objectType(node) !== type)) {
-      syncObjects();
+      came = syncObjects();
       listed = world.objects.length;
     }
     if (all || sceneChanged) {
@@ -515,6 +576,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       pushScene();
       sceneChanged = false;
     }
+    // Main put new objects in the active collection, as Blender adds them, and deleted ones left theirs.
+    if (came && world.collections) readCollections();
     evaluate();
     if (all && api.debug) assertEqual('flush');
   }
@@ -641,7 +704,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (blender.name(record.ptr) !== c.name) diffs.push(`Collection "${c.name}".name: Main "${blender.name(record.ptr)}"`);
       compare(`Collection "${c.name}"`, record, c);
       const objectsOf = blender.collectionObjects(record.ptr).map(nodeOf).filter(Boolean).map(nodeId);
-      if (!same(objectsOf, cols.objects(c.id))) diffs.push(`Collection "${c.name}".objects differ`);
+      if (!same(objectsOf, cols.objects(c.id))) diffs.push(`Collection "${c.name}".objects: Babylon ${cols.objects(c.id)}, Main ${objectsOf}`);
     }
     return diffs;
   }
@@ -682,6 +745,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       flush(false);
     },
     edit,
+    collectionEdits,
     // An object's world matrix as Main evaluated it, in Babylon's axes; null for one Main does not hold.
     worldMatrix: (node) => (objects.has(node) ? babylonMatrix(blender.transform(objects.get(node).ob).matrix_world) : null),
     // An object placed at a world matrix (Babylon's axes) as Blender's transform applies one, then evaluated and drawn.

@@ -74,11 +74,20 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   project's code builds the scene, then the `.blend` is read: an object whose id it holds takes Blender's state from
   it, one the code built that it no longer holds stays deleted, and objects it adds are made. A project saved before
   (rows of objects' transforms) opens once through the old path and saves in the new form.
-- **What still crosses from Babylon to Main**, until every editor writes Main through the module's RNA: the values and
-  relations Bylonder's own editors write on Babylon's objects (`main-sync.js`, by setter hooks and a flush before
-  Blender's code runs and before every undo push), the document slices' state (textures, collections, scene
-  settings, which materials and worlds exist and their names), Bylonder's modifier stack, curve data while a curve is
-  edited, and an armature's record.
+- **Writes go to Main.** A bound value Main holds (an object's transform and flags, its light's or camera's settings,
+  the scene's settings, a collection's and layer collection's flags) is read from Main and written by Blender's own
+  RNA (setter and update, through the module's bpy), then evaluated and drawn back (`main-sync.js` `held`, `write`).
+  A gizmo's move places each object with `BKE_object_apply_mat4`, which keeps its rotation mode and parent. The
+  collections slice is Main's collections read back: its edits are Blender's functions on them (`collectionEdits`),
+  new objects go to the active collection as `BKE_object_add` puts them, and it keeps only the view layers but Main's
+  own. Select All, Hide, Reveal and Clear Parent are Blender's operators on Main.
+- **What still crosses from Babylon to Main**, until every editor writes Main: what code writes on Babylon's objects
+  directly (`main-sync.js`, by setter hooks and a flush before Blender's code runs and before every undo push), the
+  slices' state (scene settings, which materials and worlds exist and their names, other view layers' flags),
+  Bylonder's modifier stack, curve data while a curve is edited, and an armature's record.
+- **Undo between pushes.** Bylonder can change Main after the last step without a push of its own; loading a step from
+  the last one pushes Main as it is first (`undo-api.cc`), so the memfile step reuses only the data-blocks unchanged
+  from it, as Blender's editors make sure by pushing after every change.
 - **Edit Mode** is Blender's on Main's object: `object.mode_set` gives the Mesh its BMEditMesh, Blender's window runs
   the Mesh keymap and its mesh operators on Main's context, Blender's menus and header are drawn, the view draws the
   edit mesh and its overlay (`view-api.cc` `view_edit_mesh_extract`), and undo loads Blender's edit-mode steps.
@@ -150,7 +159,7 @@ The Timeline, Dope Sheet, Graph Editor and Drivers editor are Blender's spaces (
 
 Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outliner/tree` in the module, over the same Main: Blender's code builds the tree (`tree_display_view_layer.cc`, `tree_element_*.cc`), lays it out and draws it (`outliner_draw.cc`), and runs every Outliner operator (`outliner_select.cc`, `outliner_tools.cc`, `outliner_dragdrop.cc`, `outliner_edit.cc`, `outliner_collections.cc`). `tools/blender-port/wasm/outliner-api.cc` makes the area as `ED_area_newspace` does (the space type's own `create`), sets up its main region as `outliner_main_region_init` does, and draws it; JS `editors/space_outliner/outliner-area.js` holds it and `space-outliner.js` is its window manager.
 
-- **Collections are Blender's.** The scene sync keeps Bylonder's collections in Main (children, objects, exclude and visibility flags, the active layer collection), so the View Layer tree, the exclude checkbox and the restriction toggles are Blender's own `layer.cc` results. What an operator changed comes back through `collections.assign`.
+- **Collections are Blender's.** Main holds them (children, objects, exclude and visibility flags, the active layer collection), so the View Layer tree, the exclude checkbox and the restriction toggles are Blender's own `layer.cc` results. The collections slice reads them back after every change (`collections.assign`).
 - **Objects come back through the view** after each operator or button (`sync.view`): the selection and active object from the bases, hidden, the synced flags, names, parents, and objects Blender's code deleted (`outliner.delete`), which are deleted in Bylonder and leave the Scene Collection (`main_collection_master_clean`, since the module's scene is not one of Main's).
 - **DNA by name.** `tools/blender-port/modifier_dna.py` also writes `src/makesrna/dna-outliner.json` (Object, Base, Collection, LayerCollection and SpaceOutliner fields, with their RNA icons and enum items), read in place by `makesrna/dna-struct.js`. The header's `space_data` is the module's SpaceOutliner through it.
 - **Drawing.** `region-draw.cc` stands in for the GPU module, BLF and the button layer: `imm*`, the round box, text and icons are recorded as JSON with Blender's coordinates, text is measured by JS (`region_text_width`), and `editors/interface/region-draw.js` draws the recording as SVG (`editors/interface/svg-context.js`): shapes as paths, text in the theme's font, and Blender's SVG icons, a monochrome one as a luminance mask in its color (its coverage, as `blf_glyph_cache_add_svg` gives it). No region is drawn on a canvas and nothing rasterizes icons: the browser does. Buttons (the toggles, the rename field) are recorded with their rectangles; a press runs `ui_apply_but` as Blender's handlers do (`region_button_press`, `region_button_text`), and dragging over a toggle column sets them alike.

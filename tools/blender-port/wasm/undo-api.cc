@@ -73,6 +73,12 @@ EXPORT(undo_load) bool undo_load(bContext *C, UndoStep *step)
     return false;
   }
   if (step != ustack->step_active) {
+    /* Main as the editor left it after the last step, which may have changed since (between pushes), pushed first: the
+     * step loaded then keeps only the data-blocks unchanged from it (memfile steps reuse them). A push after an undo
+     * would drop the steps ahead. */
+    if (ustack->step_active == ustack->steps.last && ustack->step_active->type == BKE_UNDOSYS_TYPE_MEMFILE) {
+      undo_push(C, "Edit");
+    }
     BKE_undosys_step_load_data(ustack, C, step);
   }
   return true;

@@ -323,7 +323,7 @@ history = createHistory(world.objects, () => {
   for(const [ref,value] of Object.entries(data?.properties||{}))animation.channels.get(ref)?.set(value);
   world.modifiers.refresh();
   animation.load(data?.animation,{apply:false});
-},beforeCommit:()=>{world.collections.adopt();animation.captureEdits();},main:()=>world.mainSync});
+},beforeCommit:()=>{animation.captureEdits();},main:()=>world.mainSync});
 animation.setCommit(()=>history.commit());
 const capture = windowCapture(notify);
 // Blender's window takes the 3D Views' input in Object Mode and mesh Edit Mode (made once Main is, below).

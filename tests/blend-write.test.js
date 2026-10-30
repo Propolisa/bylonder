@@ -81,7 +81,6 @@ registerObjects(animation, objects);
 animation.insert([animation.ref('object:cube', 'position.x')], 1);
 cube.position.x = 3;
 animation.insert([animation.ref('object:cube', 'position.x')], 20);
-world.collections.adopt();
 world.collections.create({ name: 'Props', objects: ['cube'], move: true });
 
 const bytes = sync.writeBlend('/test.blend');
