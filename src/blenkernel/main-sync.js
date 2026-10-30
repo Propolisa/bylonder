@@ -279,7 +279,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const objectNamed = (name) => (name ? [...objects.values()].find((e) => e.node.name === name) ?? null : null);
   function pushCurve(entry) {
     const data = CURVE_TYPES.includes(entry.type) && curveData(entry.node);
-    if (!data) return;
+    // In Edit Mode its edit data is Main's own, which Blender's editors change.
+    if (!data || entry.node.metadata?.editing) return;
     const followed = [...CURVE_TARGETS.map((name) => data.targets?.[name]), ...(data.modifiers ?? []).flatMap((m) => Object.values(m.targets ?? {}))];
     const signature = JSON.stringify([data, followed.map((name) => objectNamed(name)?.ob)]);
     if (signature === entry.curve) return;
@@ -670,6 +671,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // Babylon drawn from Main after Blender's code ran (main-view.js), for editors that run it over several events (the
     // Outliner's modal operators and drags).
     view: () => { mainView.view(); flush(); if (api.debug) assertEqual('view'); },
+    // What Blender's code changed of an object's data, evaluated and drawn (an edit of Edit Mode's data).
+    redraw: () => evaluate(),
     // A run over several events (a modal operator's): Main made current with the meshes' stand-ins filled, until end
     // draws what it changed.
     begin({ meshes = [] } = {}) { flush(); fill(meshes); },

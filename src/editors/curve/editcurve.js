@@ -9,8 +9,6 @@ import { openMenu } from '../interface/menu.js';
 import { CurveObject, View3DRegion, SEL_OP_SET, SEL_OP_XOR } from '../../blenkernel/curve/curve.js';
 import { createEditCurveOverlay } from '../../draw/overlay-edit-curve.js';
 import { createEditTextOverlay } from '../../draw/overlay-edit-text.js';
-import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
-import { createMesh } from '../../blenkernel/mesh/mesh.js';
 import { regionView3D, toBlenderView } from '../space_view3d/view3d-project.js';
 import { runModal } from '../space_view3d/view3d-modal.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
@@ -18,9 +16,6 @@ import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
 import { curveData } from './curve-objects.js';
-
-const EMPTY = () => createMesh({ vert_positions: new Float32Array(0), edges: new Int32Array(0), face_offsets: new Int32Array([0]),
-  corner_verts: new Int32Array(0), corner_edges: new Int32Array(0) });
 
 // Blender's window matrix (GL, right-handed) for a Babylon camera, as RegionView3D.winmat.
 function winmat(camera, aspect) {
@@ -48,11 +43,12 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     return rect;
   }
 
-  // Draws the edit data and keeps it as the node's data; an operator's change is an undo step.
+  // Main's depsgraph evaluates the edit data and the view draws it; the page keeps it as the node's data. An operator's
+  // change is an undo step.
   function sync({ commit = true } = {}) {
     const { node, object } = ed;
     // Evaluating lays the text out, which places the cursor and selection the overlay draws.
-    mesh_batch_cache_apply(object.evaluate() ?? EMPTY(), node);
+    world.mainSync.redraw();
     const data = object.data;
     node.metadata = { ...node.metadata, wbCreation: { curve: data } };
     if (ed.text) ed.text.update(data.text);
@@ -66,12 +62,9 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     if (ed || !editable(node)) return false;
     editor.setMode('select');
     const object = curves.object(node);
-    // What it follows, evaluated as they are, for the edit object to follow too.
-    const followed = Object.entries(object.targets).map(([name, target]) => [name, curves.byName(target)]).filter(([, t]) => t)
-      .map(([name, target]) => { const other = curves.object(target); other.evaluate(); object.target(name, other); return other; });
     object.enter();
     const text = object.type === 'FONT';
-    ed = { node, object, followed, kind: object.type, overlay: text ? null : createEditCurveOverlay(node), text: text ? createEditTextOverlay(node) : null };
+    ed = { node, object, kind: object.type, overlay: text ? null : createEditCurveOverlay(node), text: text ? createEditTextOverlay(node) : null };
     node.metadata = { ...node.metadata, editing: true };
     curves.editing = { node, data: () => object.data, update(fn) { const data = object.data; fn(data); object.data = data; sync(); } };
     sync({ commit: false });
@@ -81,13 +74,11 @@ export function createEditCurve({ world, editor, views, history, notify, changed
 
   function exit() {
     if (!ed) return;
-    const { node, object, followed } = ed;
+    const { node, object } = ed;
     curves.editing = null;
     object.exit();
     const data = object.data;
     (ed.overlay ?? ed.text).dispose();
-    object.free();
-    followed.forEach((other) => other.free());
     ed = null;
     node.metadata = { ...node.metadata, editing: false };
     curves.set(node, data);

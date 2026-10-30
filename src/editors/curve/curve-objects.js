@@ -9,14 +9,6 @@ import { deleted } from '../object/identity.js';
 export const curveData = (node) => node?.metadata?.wbCreation?.curve ?? null;
 export const isCurveObject = (node) => !!curveData(node);
 
-// An object's world transform as Object RNA gives it in Blender's axes: (x, y, z) of Babylon's (x, z, y), and the
-// quaternion (w, -x, -z, -y) of Babylon's (decision 2 of docs/blender-boundary.md).
-export function blenderTransform(node) {
-  node.computeWorldMatrix(true);
-  const { absolutePosition: p, absoluteRotationQuaternion: q, absoluteScaling: s } = node;
-  return { location: [p.x, p.z, p.y], rotation_mode: 'QUATERNION', rotation_quaternion: [q.w, -q.x, -q.z, -q.y], scale: [s.x, s.z, s.y] };
-}
-
 export function createCurveObjects(world) {
   // The object in Edit Mode, whose data is its edit data: { node, data(), update(fn) } (editcurve.js).
   let editing = null;
@@ -39,12 +31,10 @@ export function createCurveObjects(world) {
       node.metadata = { ...node.metadata, wbCreation: { curve: data } };
       world.mainSync?.objectChanged(node);
     },
-    // A module object holding the node's data, for Edit Mode and operators; free() it after.
+    // Main's curve or text object of the node, for Edit Mode and operators.
     object(node) {
-      const object = new CurveObject(curveData(node).type, node.name);
-      object.data = curveData(node);
-      object.transform = blenderTransform(node);
-      return object;
+      world.mainSync.flush(false);
+      return new CurveObject(curveData(node).type, node.name, world.mainSync.objectOf(node), world.mainSync.blender);
     },
     byName,
     // A new curve or text object of Curve data in the scene, which Main evaluates and draws.

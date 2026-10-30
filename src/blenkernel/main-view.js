@@ -379,9 +379,8 @@ export function createMainView(state) {
       state.applying = was;
     }
   }
-  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds (in Edit Mode too) and a curve or text outside Edit
-  // Mode.
-  const drawsGeometry = ({ type, owned, node }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) && !node.metadata?.editing);
+  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds and a curve or text, in Edit Mode too.
+  const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type));
   function drawGeometry({ node, ob }) {
     const mesh = blender.evaluatedMesh(ob);
     if (!mesh) return;

@@ -255,6 +255,44 @@ const checks = {
     assert.equal(await app.bylonder((b) => !!b.world.wm.modal), false);
   },
 
+  // Edit Mode on a curve or a text object is Blender's on Main's own object, whose evaluation the view draws: a Bézier
+  // curve's points extrude, and a text takes typed characters.
+  async "Edit Curve extrudes a Bézier curve's points, Edit Text types into a text object"() {
+    const named = (prefix) => app.bylonder((b, prefix) => {
+      const node = b.world.objects.find((n) => n.name.startsWith(prefix) && !n.metadata?.wbDeleted);
+      return node && { points: node.metadata.wbCreation.curve.splines?.flatMap((s) => s.bezier_points ?? s.points).length, body: node.metadata.wbCreation.curve.text?.body,
+        drawn: node.getTotalVertices() + node.getChildMeshes(true).reduce((n, c) => n + c.getTotalVertices(), 0) };
+    }, prefix);
+    await app.bylonder((b) => b.runOperator("curve.primitive_bezier_curve_add"));
+    await app.until((b) => b.world.objects.some((n) => n.name.startsWith("BézierCurve")));
+    await app.hover();
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.press("a");
+    await expectStats(({ Verts }) => Verts?.[0] === 2 && Verts[1] === 2);
+    await app.page.keyboard.press("e");
+    await app.hover(0.6, 0.3);
+    await app.click(0.6, 0.3);
+    // Both selected ends extrude, as in Blender.
+    await expectStats(({ Verts }) => Verts?.[1] === 4);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => !b.world.editMode.active);
+    const curve = await named("BézierCurve");
+    assert.equal(curve.points, 4, "the extruded points are the curve's");
+    assert.ok(curve.drawn > 0, "the curve is drawn");
+    await app.bylonder((b) => b.runOperator("object.text_add"));
+    await app.until((b) => b.world.objects.some((n) => n.name.startsWith("Text")));
+    const before = (await named("Text")).drawn;
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.type("X");
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => !b.world.editMode.active);
+    const text = await named("Text");
+    assert.equal(text.body, "TextX");
+    assert.ok(text.drawn > before, `the new letter is drawn: ${before} to ${text.drawn}`);
+  },
+
   // A click in Edit Mode is Blender's view3d.select on Main's edit mesh, picking as in X-ray.
   async "Edit Mode: a click selects the face under it"() {
     await app.click();
