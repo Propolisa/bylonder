@@ -1,7 +1,7 @@
 """Blender built as Blender builds itself, for wasm32: the compile commands of Blender's own CMake configure (a host
 build directory configured with CMAKE_EXPORT_COMPILE_COMMANDS), each retargeted to wasm32-wasi with the module's
 compatibility headers, grouped by the CMake library they belong to. Libraries on the far side of Bylonder's seams
-(docs/blender-boundary.md: window system, GPU and drawing, Python's C API, Cycles, audio and video) are left out.
+(docs/blender-boundary.md: window system, GPU and drawing, Python's C API, Cycles, audio) are left out.
 
 Usage: tools/blender-port/blender_build.py HOST_BUILD [--report FILE]   (HOST_BUILD: tools/blender-port/configure_host.sh)
   Compiles every other library, links them, and reports per library what does not compile and which symbols nothing
@@ -24,7 +24,7 @@ import wasm_weaken
 from wasm_module import WASM, demangle
 
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
-SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace|bf_imbuf_movie|bf_imbuf_openexr'
+SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace|bf_imbuf_openexr'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Host flags that have no meaning for wasm32 or name host paths.
