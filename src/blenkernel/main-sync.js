@@ -18,7 +18,7 @@ import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
-import { mainDefinition, readModifier, writeModifier } from '../modifiers/main-modifiers.js';
+import { mainDefinition, writeModifier, createMainModifiers } from '../modifiers/main-modifiers.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
@@ -313,15 +313,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const { type, values, showViewport, showRender } of given) writeModifier(blender.addModifier(entry.ob, mainDefinition(type).mesh.type), type, { values, showViewport, showRender }, modifierLinks);
     blender.relationsChanged();
   }
-  // An edit of an object's Blender modifiers by Blender's own functions, then evaluated and drawn: fn(ob, md(name)).
-  function editModifiers(node, fn) {
+  // Blender's code changing an object (its modifiers, its Mesh data, which becomes Main's), then evaluated and drawn: fn(ob).
+  // What it points at (a texture, an object) is a relation of the depsgraph's.
+  function edit(node, fn) {
     flush(false);
     const entry = objects.get(node);
     if (!entry) return undefined;
     ownMesh(entry);
-    const result = fn(entry.ob, (name) => blender.modifiers(entry.ob).find((m) => m.name === name)?.md ?? 0);
+    const result = fn(entry.ob);
     blender.tag(entry.ob, ID_RECALC_GEOMETRY);
-    // What a modifier points at (a texture, an object) is a relation of the depsgraph's.
     blender.relationsChanged();
     evaluate();
     return result;
@@ -693,30 +693,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       sceneChanged = true;
       flush(false);
     },
-    // A mesh object's Blender modifiers as Main holds them, and their edits: one added (with settings and modes), a
-    // change of one's (values, modes, name), one removed, moved to an index, copied after itself or applied to the
-    // object's Mesh. Modifiers are named by their name, unique in the stack; each edit is evaluated and drawn.
-    modifiers(node) {
-      const entry = objects.get(node);
-      return entry ? blender.modifiers(entry.ob).map((m) => readModifier(m, modifierLinks)).filter(Boolean) : [];
-    },
-    addModifier: (node, type, change = {}) => editModifiers(node, (ob) => {
-      const md = blender.addModifier(ob, mainDefinition(type).mesh.type);
-      writeModifier(md, type, change, modifierLinks);
-      return blender.modifiers(ob).find((m) => m.md === md)?.name;
-    }),
-    setModifier: (node, name, { name: rename, ...change }) => editModifiers(node, (ob, md) => {
-      const modifier = md(name);
-      if (!modifier) return null;
-      writeModifier(modifier, api.modifiers(node).find((m) => m.name === name).type, change, modifierLinks);
-      if (rename) blender.renameModifier(ob, modifier, rename);
-      return blender.modifiers(ob).find((m) => m.md === modifier).name;
-    }),
-    removeModifier: (node, name) => editModifiers(node, (ob, md) => blender.removeModifier(ob, md(name))),
-    moveModifier: (node, name, index) => editModifiers(node, (ob, md) => blender.moveModifier(ob, md(name), index)),
-    copyModifier: (node, name) => editModifiers(node, (ob, md) => blender.copyModifier(ob, md(name))),
-    // Its result becomes the object's Mesh data, the page's record of it too.
-    applyModifier: (node, name) => editModifiers(node, (ob, md) => blender.applyModifier(ob, md(name)) && mainView.keepMesh(objects.get(node))),
+    edit,
+    // What Main's modifiers point at, by the page's ids (main-modifiers.js).
+    links: modifierLinks,
+    // A mesh object's Mesh as Main holds it is its recipe again (after Blender's code changed it).
+    keepMesh: (node) => mainView.keepMesh(objects.get(node)),
     // A mesh object's Mesh with its modifiers as the depsgraph evaluated it, valid until the next evaluation.
     evaluatedMesh(node) {
       flush();
@@ -769,6 +750,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     sceneRecords, readCollections, relations, nodeOf, forget, evaluate,
   };
   const mainView = createMainView(state);
+  api.modifiers = createMainModifiers(api);
   // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with
   // Main's selection; then a read file's scene settings and collections.
   const { nodes, revived } = mainView.adopt();

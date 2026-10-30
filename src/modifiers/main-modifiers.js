@@ -37,3 +37,37 @@ export function writeModifier(md, type, { values = {}, showViewport, showRender 
     view().setInt32(md + MODE, shown ? mode | bit : mode & ~bit, true);
   }
 }
+
+// An object's Blender modifiers in Main (sync: main-sync.js), and their edits by Blender's own editor functions, each
+// evaluated and drawn: one added (with settings and modes), a change of one's (values, modes, name), one removed, moved
+// to an index, copied after itself or applied to the object's Mesh. Modifiers are named by their name, unique in the
+// stack; an edit returns the name the modifier has after it.
+export function createMainModifiers(sync) {
+  const { blender, links } = sync;
+  const listed = (ob) => blender.modifiers(ob);
+  const mdOf = (ob, name) => listed(ob).find((m) => m.name === name) ?? null;
+  const nameOf = (ob, md) => listed(ob).find((m) => m.md === md)?.name;
+  return {
+    of(node) {
+      const ob = sync.objectOf(node);
+      return ob ? listed(ob).map((m) => readModifier(m, links)).filter(Boolean) : [];
+    },
+    add: (node, type, change = {}) => sync.edit(node, (ob) => {
+      const md = blender.addModifier(ob, mainDefinition(type).mesh.type);
+      writeModifier(md, type, change, links);
+      return nameOf(ob, md);
+    }),
+    set: (node, name, { name: rename, ...change }) => sync.edit(node, (ob) => {
+      const modifier = mdOf(ob, name);
+      if (!modifier) return null;
+      writeModifier(modifier.md, definitionOfCode(modifier.type).id, change, links);
+      if (rename) blender.renameModifier(ob, modifier.md, rename);
+      return nameOf(ob, modifier.md);
+    }),
+    remove: (node, name) => sync.edit(node, (ob) => blender.removeModifier(ob, mdOf(ob, name)?.md ?? 0)),
+    move: (node, name, index) => sync.edit(node, (ob) => blender.moveModifier(ob, mdOf(ob, name)?.md ?? 0, index)),
+    copy: (node, name) => sync.edit(node, (ob) => blender.copyModifier(ob, mdOf(ob, name)?.md ?? 0)),
+    // Its result becomes the object's Mesh data, the page's record of it too.
+    apply: (node, name) => sync.edit(node, (ob) => blender.applyModifier(ob, mdOf(ob, name)?.md ?? 0)) && sync.keepMesh(node),
+  };
+}

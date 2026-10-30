@@ -41,7 +41,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
   const target=id=>world.objects.find(n=>nodeId(n)===id&&!deleted(n));
   const main=()=>world.mainSync;
   const inMain=(node,modifier)=>!!mainDefinition(modifier.type)&&!modifierStack(node).includes(modifier);
-  const stack=node=>[...(main()?.modifiers(node)??[]),...modifierStack(node)];
+  const stack=node=>[...(main()?.modifiers.of(node)??[]),...modifierStack(node)];
   const find=(node,id)=>stack(node).find(m=>m.id===id);
   function registerChannels(node,modifier){
     const definition=modifierDefinitions.get(modifier.type);if(!definition)return;
@@ -121,7 +121,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
       node.metadata||={};
       let modifier;
       if(mainDefinition(type)&&main()){
-        const name=main().addModifier(node,type,{values:checked});modifier=find(node,name);
+        const name=main().modifiers.add(node,type,{values:checked});modifier=find(node,name);
       }else{
         const id=crypto.randomUUID(),used=stack(node).map(m=>m.name);let name=definition.name,n=1;while(used.includes(name))name=definition.name+'.'+String(n++).padStart(3,'0');
         modifier={id,type,name,showViewport:true,showRender:true,values:{...definition.defaults(),...checked}};
@@ -131,38 +131,38 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
     },
     set(node,id,path,value,{finish=true}={}){
       const modifier=find(node,id);if(!modifier)return;const def=modifierDefinitions.get(modifier.type)?.schema[path];if(!def)throw Error('Unknown modifier property');
-      if(inMain(node,modifier))main().setModifier(node,id,{values:{[path]:valid(value,def)}});
+      if(inMain(node,modifier))main().modifiers.set(node,id,{values:{[path]:valid(value,def)}});
       else{modifier.values[path]=valid(value,def);changed();}
       done(finish);
     },
     // Its name and whether it shows in the viewport and in renders.
     update(node,id,patch){
       const modifier=find(node,id);if(!modifier)return;
-      if(inMain(node,modifier))main().setModifier(node,id,patch);else{Object.assign(modifier,patch);changed();}
+      if(inMain(node,modifier))main().modifiers.set(node,id,patch);else{Object.assign(modifier,patch);changed();}
       done();
     },
     remove(node,id){
       const modifier=find(node,id);if(!modifier)return;
-      if(inMain(node,modifier))main().removeModifier(node,id);else{node.metadata.wbModifiers=modifierStack(node).filter(m=>m!==modifier);changed();}
+      if(inMain(node,modifier))main().modifiers.remove(node,id);else{node.metadata.wbModifiers=modifierStack(node).filter(m=>m!==modifier);changed();}
       done();
     },
     // To an index among its own kind: Blender's go first, Bylonder's after them.
     move(node,id,index){
       const modifier=find(node,id);if(!modifier)return;
-      if(inMain(node,modifier))main().moveModifier(node,id,Math.max(0,Math.min(main().modifiers(node).length-1,index)));
+      if(inMain(node,modifier))main().modifiers.move(node,id,Math.max(0,Math.min(main().modifiers.of(node).length-1,index)));
       else{const own=modifierStack(node),old=own.indexOf(modifier);own.splice(Math.max(0,Math.min(own.length-1,index-(stack(node).length-own.length))),0,own.splice(old,1)[0]);changed();}
       done();
     },
     duplicate(node,id){
       const source=find(node,id);if(!source)return;
-      if(inMain(node,source)){main().copyModifier(node,id);done();return stack(node)[stack(node).findIndex(m=>m.id===id)+1];}
+      if(inMain(node,source)){main().modifiers.copy(node,id);done();return stack(node)[stack(node).findIndex(m=>m.id===id)+1];}
       const copy=api.add(node,source.type,structuredClone(source.values));api.move(node,copy.id,stack(node).indexOf(source)+1);return copy;
     },
     // Applies a modifier: one of Blender's as Blender's Apply does (its result alone becomes the object's Mesh), one of
     // Bylonder's its geometry, realized.
     apply(node,id){
       const modifier=find(node,id);if(!modifier)return;
-      if(inMain(node,modifier)){main().applyModifier(node,id);done();return;}
+      if(inMain(node,modifier)){main().modifiers.apply(node,id);done();return;}
       const result=evaluate(node,[{...modifier,showViewport:true}]),data=realize(result.data,result.matrices);
       node.metadata.wbModifierBase=data;node.metadata.wbCreation={vertices:data,material:node.material?.name||null};
       node.metadata.wbModifiers=modifierStack(node).filter(m=>m!==modifier);cache.delete(node);evaluated.delete(node);changed();main()?.objectChanged(node);done();
