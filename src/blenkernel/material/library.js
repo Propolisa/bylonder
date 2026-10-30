@@ -125,8 +125,12 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
     },
     makeSingleUser(mesh, index = active(mesh)) { const material = slots(mesh)[index]; if (material && users(material) > 1) api.assign(mesh, index, api.duplicate(material, false)); },
     unlink(mesh, index = active(mesh)) { api.assign(mesh, index, null); },
-    rename(material, name) { if (!name?.trim()) return; material.name = unique(name.trim(), material); changed(); },
-    toggleFakeUser(material) { material.metadata = { ...material.metadata, wbFakeUser: !material.metadata?.wbFakeUser }; changed(); },
+    rename(material, name) { if (!name?.trim()) return; material.name = world.mainSync?.renameID(material, name.trim()) ?? unique(name.trim(), material); changed(); },
+    toggleFakeUser(material) {
+      material.metadata = { ...material.metadata, wbFakeUser: !material.metadata?.wbFakeUser };
+      world.mainSync?.setFakeUser(material, material.metadata.wbFakeUser);
+      changed();
+    },
     remove(material) {
       replace(material, null);
       if (material.metadata?.wbCreated) material.dispose(false, false);

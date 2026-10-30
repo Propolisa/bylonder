@@ -398,10 +398,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         record.ptr = record.ma;
         materials.set(material, record);
         if (!held) enter(record, material, 'Material');
+        blender.setFakeUser(record.ma, !!material.metadata?.wbFakeUser);
       }
       const record = materials.get(material);
       if (blender.name(record.ma) !== material.name && record.babylonName !== material.name) { blender.rename(record.ma, material.name); record.babylonName = material.name; }
-      blender.setFakeUser(record.ma, !!material.metadata?.wbFakeUser);
     }
   }
   // A material's or world's first state in Main, from Babylon's: its values, its node tree and (a material) its kind;
@@ -428,10 +428,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         record.ptr = record.wo;
         worlds.set(entry.id, record);
         if (!held) enter(record, entry, 'World');
+        blender.setFakeUser(record.wo, !!entry.fakeUser);
       }
       const record = worlds.get(entry.id);
       if (record.babylonName !== entry.name) { blender.rename(record.wo, entry.name); record.babylonName = entry.name; }
-      blender.setFakeUser(record.wo, !!entry.fakeUser);
     }
   }
 
@@ -764,6 +764,18 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       flush(false);
       rename(objects.get(node), name);
       return true;
+    },
+    // A material's or world's name and fake user, Main's for one it holds (Blender names it, unique among its IDs):
+    // the name it gets, or null for one Main does not hold.
+    renameID(owner, name) {
+      const record = materials.get(owner) ?? worlds.get(owner?.id);
+      if (!record) return null;
+      blender.rename(record.ptr, name);
+      return (record.babylonName = blender.name(record.ptr));
+    },
+    setFakeUser(owner, value) {
+      const record = materials.get(owner) ?? worlds.get(owner?.id);
+      if (record) blender.setFakeUser(record.ptr, value);
     },
     // A mesh object's material slots as Main holds them (Blender's, each a Material or empty), then drawn; false for an
     // object Main does not hold.

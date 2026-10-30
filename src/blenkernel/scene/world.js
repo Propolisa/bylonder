@@ -83,8 +83,8 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
       state.worlds.push(entry); state.active = entry.id; changed();
       return entry;
     },
-    rename(entry, name) { if (name?.trim()) { entry.name = unique(name.trim(), entry); changed(); } },
-    toggleFakeUser(entry) { entry.fakeUser = !entry.fakeUser; changed(); },
+    rename(entry, name) { if (name?.trim()) { entry.name = world.mainSync?.renameID(entry, name.trim()) ?? unique(name.trim(), entry); changed(); } },
+    toggleFakeUser(entry) { entry.fakeUser = !entry.fakeUser; world.mainSync?.setFakeUser(entry, entry.fakeUser); changed(); },
     set(entry, path, value, finish = true) {
       const { owner, key } = resolve(entry, path);
       owner[key] = Array.isArray(value) ? [...value] : value;
