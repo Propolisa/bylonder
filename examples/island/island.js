@@ -14,8 +14,12 @@ export function heightAt(x, z) {
   return base + volcano - crater + 0.25 * land * Math.sin(x * 1.3 + 1) * Math.cos(z * 1.1);
 }
 
-// The asteroid's crater: a bowl blasted out of the far coast, its centre in the sea (story.js STRIKE).
-const crater = (x, z, at) => (at ? 2.4 * Math.max(0, 1 - ((x - at.x) ** 2 + (z - at.z) ** 2) / 4.6 ** 2) ** 1.5 : 0);
+// The asteroid's crater: a furrow ploughed from the sea up onto the far coast along its heading (story.js STRIKE).
+const crater = (x, z, at) => {
+  if (!at) return 0;
+  const dx = x - at.x, dz = z - at.z, along = dx * Math.cos(at.heading) + dz * Math.sin(at.heading) - 1.2, across = dz * Math.cos(at.heading) - dx * Math.sin(at.heading);
+  return 2.4 * Math.max(0, 1 - (along / 6.4) ** 2 - (across / 3.9) ** 2) ** 1.5;
+};
 
 // The island as one low-poly mesh: a grid jittered so its faces are irregular, in Blender's axes (Z up). With `struck`
 // (a point), the island after the strike, its far coast blasted away.

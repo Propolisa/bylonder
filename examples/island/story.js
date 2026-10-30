@@ -63,10 +63,15 @@ export const NEST = (() => {
 // frame. It grows through the film, fast in its last nights, then falls at sunset into the sea just off the island's
 // far side, behind the volcano from the nest.
 export const OMEN = (() => { const a = 4.75, e = 0.3; return { x: Math.cos(a) * Math.cos(e), y: Math.sin(e), z: Math.sin(a) * Math.cos(e) }; })();
-export const STRIKE = (() => { const angle = NEST.angle + Math.PI, r = 8; return { angle, r, x: Math.cos(angle) * r, z: Math.sin(angle) * r }; })();
-// It comes in low out of the omen's side, so its wave is no ring: it runs farthest and highest downrange, weakest back
-// toward where it came from, its crest lumpy all round (lobes: [harmonic, amount, phase] round the strike).
-export const WAVE = { downrange: Math.atan2(-OMEN.z, -OMEN.x), lobes: [[1, 0.38, 0], [2, 0.12, 1.1], [3, 0.08, 2.4], [5, 0.05, 0.4], [8, 0.03, 4.1], [13, 0.02, 1.7]],
+// It comes in low out of the omen's side, heading downrange, and strikes glancingly: just off the far side's shoulder,
+// ploughing up onto the coast rather than at the island's heart.
+export const STRIKE = (() => {
+  const angle = NEST.angle + Math.PI - 0.5, r = 6.4;
+  return { angle, r, x: Math.cos(angle) * r, z: Math.sin(angle) * r, heading: Math.atan2(-OMEN.z, -OMEN.x) };
+})();
+// Its wave is no ring: it runs farthest and highest downrange, weakest back toward where the asteroid came from, its
+// crest lumpy all round (lobes: [harmonic, amount, phase] round the strike).
+export const WAVE = { downrange: STRIKE.heading, lobes: [[1, 0.38, 0], [2, 0.12, 1.1], [3, 0.08, 2.4], [5, 0.05, 0.4], [8, 0.03, 4.1], [13, 0.02, 1.7]],
   // The wave train behind the leading crest: [how far it has run, as part of the first's run; its height].
   train: [[1, 1], [0.8, 0.55], [0.63, 0.3]] };
 export const waveReach = (side) => 1 + WAVE.lobes.reduce((sum, [k, amount, phase]) => sum + amount * Math.cos(k * (side - WAVE.downrange) + phase), 0);
@@ -124,12 +129,12 @@ export const SHOTS = [
   // The flying lesson; it tries and fails; its mother comforts it.
   [99, 'nest', 1.1, 3.6, 2.0, 1.9, 0.6, 4.2], [104.5, 'nest', 0.3, 1.35, 2.3, 1.75, 0.5, 1.5],
   // The star grows night by night, over the volcano from the nest; the flock leaves; the island waits.
-  [110, 'island', 1.4, 22, 4, 3.5, 1.6, 25], [113.5, 'nest', 1.61, 1.8, 2.95, 2.4, 1.75, 2.25], [119, 'nest', 0.4, 5.5, 0.6, 2.4, 0.2, 6.5],
+  [110, 'island', 1.4, 22, 4, 3.5, 1.6, 25], [113.5, 'nest', 1.61, 2.4, 1.3, 2.4, 1.75, 3.0], [119, 'nest', 0.4, 5.5, 0.6, 2.4, 0.2, 6.5],
   [124, 'island', 1.6, 16, 3, 2.5, 1.4, 18],
   // At sunset it falls. The family watch it come; it strikes the sea beyond the volcano.
-  [127.5, 'nest', 1.61, 2.4, 3.35, 2.8, 1.75, 2.7], [131.5, 'island', 1.0, 32, 6, 3, 0.9, 36],
+  [127.5, 'nest', 1.61, 3.2, 1.2, 2.8, 1.75, 3.6], [131.5, 'island', 0.25, 34, 6, 3, 0.1, 38],
   // The far side burnt to glass and cratered, the wave racing out; the family alive in the lee of the volcano.
-  [139, 'island', 4.07, 30, 8, 2, 4.35, 27], [143, 'nest', 0.6, 1.65, 2.3, 1.75, 0.8, 1.95],
+  [139, 'island', 4.3, 30, 8, 2, 4.6, 27], [143, 'nest', 0.6, 1.65, 2.3, 1.75, 0.8, 1.95],
   // Burning debris lights the forest above the nest; the fire comes down; the chick tries again and fails.
   [147, 'nest', 0.55, 7.5, 1.8, 1.8, 0.85, 6.2], [150, 'nest', 1.35, 2.47, 2.3, 1.75, 1.05, 2.17],
   // The climax: the tree catches fire, the chick is pushed and flies, the tree falls with its mother.
