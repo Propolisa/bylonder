@@ -14,6 +14,9 @@ export const containers = {
   MKV: { label: 'Matroska', mime: 'video/x-matroska', ext: 'mkv', codecs: ['H264', 'H265', 'AV1', 'WEBM'] },
   WEBM: { label: 'WebM', mime: 'video/webm', ext: 'webm', codecs: ['WEBM', 'AV1'] },
 };
+// Blender's ffmpeg.audio_codec values the browser encodes; the containers that hold them; audio_channels as counts.
+const audioCodecs = { AAC: { label: 'AAC', id: 'aac', containers: ['MPEG4', 'QUICKTIME', 'MKV'] }, OPUS: { label: 'Opus', id: 'opus', containers: ['MPEG4', 'MKV', 'WEBM'] } };
+const channelCounts = { MONO: 1, STEREO: 2, SURROUND4: 4, SURROUND51: 6, SURROUND71: 8 };
 export const videoCodecs = { H264: { label: 'H.264', id: 'avc' }, H265: { label: 'H.265 / HEVC', id: 'hevc' }, AV1: { label: 'AV1', id: 'av1' }, WEBM: { label: 'VP9', id: 'vp9' } };
 // Blender's Output Quality (constant_rate_factor) levels as mediabunny quality presets; Constant Bitrate uses the
 // bitrate (kbit/s).
@@ -30,7 +33,14 @@ export function outputSpec(render) {
   const bitrate = ffmpeg.constant_rate_factor === 'NONE' ? ffmpeg.video_bitrate * 1000 : qualities[ffmpeg.constant_rate_factor];
   if (!bitrate) throw Error('Unknown output quality ' + ffmpeg.constant_rate_factor);
   return { kind: 'video', container: ffmpeg.format, mime: container.mime, ext: container.ext, codec: codec.id, bitrate,
-    latencyMode: ffmpeg.ffmpeg_preset === 'REALTIME' ? 'realtime' : 'quality', gopsize: ffmpeg.gopsize };
+    latencyMode: ffmpeg.ffmpeg_preset === 'REALTIME' ? 'realtime' : 'quality', gopsize: ffmpeg.gopsize, audio: audioSpec(ffmpeg, container) };
+}
+function audioSpec(ffmpeg, container) {
+  if (ffmpeg.audio_codec === 'NONE') return null;
+  const codec = audioCodecs[ffmpeg.audio_codec];
+  if (!codec) throw Error('Unknown audio codec ' + ffmpeg.audio_codec);
+  if (!codec.containers.includes(ffmpeg.format)) throw Error(`${container.label} cannot hold ${codec.label} audio`);
+  return { codec: codec.id, bitrate: ffmpeg.audio_bitrate * 1000, channels: channelCounts[ffmpeg.audio_channels], rate: ffmpeg.audio_mixrate, volume: ffmpeg.audio_volume };
 }
 // Video encoders need even dimensions (4:2:0 chroma).
 export const encodeSize = ({ width, height }, video) => (video ? { width: width + (width % 2), height: height + (height % 2) } : { width, height });

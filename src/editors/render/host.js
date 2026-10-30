@@ -60,7 +60,7 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
       source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size);
-      const audio = spec.kind === 'video' ? await source.audio?.(signal) : null;
+      const audio = spec.audio ? await source.audio?.(signal) : null;
       writer = await createWriter(spec, { ...size, fps: time.fps, name: name(), frames: frames.length, audio });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {

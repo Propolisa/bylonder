@@ -56,6 +56,14 @@ static const EnumPropertyItem speeds[] = {
     {0, nullptr, 0, nullptr, nullptr},
 };
 
+/* The sequencer's mixed sound, encoded as WebCodecs encodes audio. */
+static const EnumPropertyItem audio_codecs[] = {
+    {FFMPEG_CODEC_ID_NONE, "NONE", 0, "No Audio", "Disables audio output, for video-only renders"},
+    {FFMPEG_CODEC_ID_AAC, "AAC", 0, "AAC", ""},
+    {FFMPEG_CODEC_ID_OPUS, "OPUS", 0, "Opus", ""},
+    {0, nullptr, 0, nullptr, nullptr},
+};
+
 static FFMpegCodecData &codec_data(PointerRNA *ptr) { return *static_cast<FFMpegCodecData *>(ptr->data); }
 
 template<int FFMpegCodecData::*field> static int field_get(PointerRNA *ptr, PropertyRNA *) { return codec_data(ptr).*field; }
@@ -80,6 +88,9 @@ static void define_int(StructRNA *srna, const char *identifier, const char *name
   RNA_def_property_ui_text(prop, name, "");
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
 }
+
+static float volume_get(PointerRNA *ptr, PropertyRNA *) { return codec_data(ptr).audio_volume; }
+static void volume_set(PointerRNA *ptr, PropertyRNA *, float value) { codec_data(ptr).audio_volume = value; }
 
 static int crf_get(PointerRNA *ptr, PropertyRNA *) { return codec_data(ptr).constant_rate_factor; }
 static void crf_set(PointerRNA *ptr, PropertyRNA *, int value) { codec_data(ptr).constant_rate_factor = eFFMpegCrf(value); }
@@ -139,4 +150,12 @@ void movie_init()
              field_set<&FFMpegCodecData::video_bitrate>);
   define_int(srna, "gopsize", "Keyframe Interval", 0, 500, field_get<&FFMpegCodecData::gop_size>,
              field_set<&FFMpegCodecData::gop_size>);
+  define_enum(srna, "audio_codec", "Audio Codec", audio_codecs, field_get<&FFMpegCodecData::audio_codec>,
+              field_set<&FFMpegCodecData::audio_codec>);
+  define_int(srna, "audio_bitrate", "Bitrate", 32, 384, field_get<&FFMpegCodecData::audio_bitrate>,
+             field_set<&FFMpegCodecData::audio_bitrate>);
+  PropertyRNA *volume = RNA_def_property(srna, "audio_volume", PROP_FLOAT, PROP_NONE);
+  RNA_def_property_float_funcs_runtime(volume, volume_get, volume_set, nullptr, nullptr, nullptr);
+  RNA_def_property_range(volume, 0.0f, 1.0f);
+  RNA_def_property_ui_text(volume, "Volume", "Audio volume");
 }

@@ -4,7 +4,7 @@ import { zipSync } from 'fflate';
 // unmodified as a dependency); images through canvas encoding. An animation in an image format becomes a ZIP
 // of numbered frames, as Blender writes one file per frame.
 //   spec: outputSpec(render) from formats.js; size: even dimensions for video
-//   audio: { samples: Float32Array[] per channel, sampleRate } mixed by the sequencer, for video formats
+//   audio: { samples: Float32Array[] per channel, sampleRate } mixed by the sequencer, for video formats with an audio codec
 export async function createWriter(spec, { width, height, fps, name, frames = 1, audio = null }) {
   if (spec.kind === 'image') {
     const files = {};
@@ -27,7 +27,7 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1,
   const output = new mb.Output({ format, target });
   const source = new mb.VideoSampleSource({ codec: spec.codec, bitrate, latencyMode: spec.latencyMode, keyFrameInterval: Math.max(1, spec.gopsize) / fps, sizeChangeBehavior: 'deny' });
   output.addVideoTrack(source, { frameRate: fps });
-  const sound = audio && await audioTrack(mb, output, spec, audio);
+  const sound = audio && spec.audio && await audioTrack(mb, output, spec, audio);
   await output.start();
   await sound?.();
   let index = 0;
@@ -46,13 +46,20 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1,
   };
 }
 
-// Adds the sequencer's mixed audio; skipped when the browser cannot encode the container's audio codec.
+// Adds the sequencer's mixed audio as the output's audio settings ask (spec.audio): its codec and bitrate, mixed to
+// their channels and sample rate at their volume. Fails when the browser cannot encode them.
 async function audioTrack(mb, output, spec, { samples, sampleRate }) {
-  const codec = spec.container === 'WEBM' ? 'opus' : 'aac';
-  if (!samples.length || !(await mb.canEncodeAudio(codec, { numberOfChannels: samples.length, sampleRate }))) return null;
-  const source = new mb.AudioBufferSource({ codec, bitrate: mb.QUALITY_HIGH });
+  const { codec, bitrate, channels, rate, volume } = spec.audio;
+  if (!samples.length) return null;
+  if (!(await mb.canEncodeAudio(codec, { numberOfChannels: channels, sampleRate: rate, bitrate }))) throw Error(`This browser cannot encode ${codec.toUpperCase()} audio with ${channels} channels at ${rate} Hz. Change Properties > Output > Encoding > Audio.`);
+  const mix = new AudioBuffer({ length: samples[0].length, numberOfChannels: samples.length, sampleRate });
+  samples.forEach((channel, i) => mix.copyToChannel(channel, i));
+  const context = new OfflineAudioContext(channels, Math.ceil(mix.duration * rate), rate);
+  const node = new AudioBufferSourceNode(context, { buffer: mix }), gain = new GainNode(context, { gain: volume });
+  node.connect(gain).connect(context.destination);
+  node.start();
+  const source = new mb.AudioBufferSource({ codec, bitrate });
   output.addAudioTrack(source);
-  const buffer = new AudioBuffer({ length: samples[0].length, numberOfChannels: samples.length, sampleRate });
-  samples.forEach((channel, i) => buffer.copyToChannel(channel, i));
+  const buffer = await context.startRendering();
   return () => source.add(buffer);
 }

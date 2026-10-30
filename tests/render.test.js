@@ -32,8 +32,12 @@ assert.deepEqual(authored.capture(), { eevee: { taaRenderSamples: 8 } });
 authored.dispose();
 
 // Formats: Blender's output settings map to browser outputs; impossible pairs are rejected.
-const video = { image_settings: { file_format: 'FFMPEG' }, ffmpeg: { format: 'MKV', codec: 'H264', constant_rate_factor: 'MEDIUM', ffmpeg_preset: 'GOOD', video_bitrate: 6000, gopsize: 18 } };
-assert.deepEqual(outputSpec(video), { kind: 'video', container: 'MKV', mime: 'video/x-matroska', ext: 'mkv', codec: 'avc', bitrate: 'QUALITY_HIGH', latencyMode: 'quality', gopsize: 18 });
+const video = { image_settings: { file_format: 'FFMPEG' }, ffmpeg: { format: 'MKV', codec: 'H264', constant_rate_factor: 'MEDIUM', ffmpeg_preset: 'GOOD', video_bitrate: 6000, gopsize: 18,
+  audio_codec: 'NONE', audio_bitrate: 192, audio_channels: 'STEREO', audio_mixrate: 48000, audio_volume: 1 } };
+assert.deepEqual(outputSpec(video), { kind: 'video', container: 'MKV', mime: 'video/x-matroska', ext: 'mkv', codec: 'avc', bitrate: 'QUALITY_HIGH', latencyMode: 'quality', gopsize: 18, audio: null });
+// The sequencer's mix as the Audio panel sets it.
+assert.deepEqual(outputSpec({ ...video, ffmpeg: { ...video.ffmpeg, audio_codec: 'AAC', audio_channels: 'MONO', audio_volume: 0.5 } }).audio, { codec: 'aac', bitrate: 192000, channels: 1, rate: 48000, volume: 0.5 });
+assert.throws(() => outputSpec({ ...video, ffmpeg: { ...video.ffmpeg, format: 'WEBM', codec: 'WEBM', audio_codec: 'AAC' } }), /WebM cannot hold AAC audio/);
 assert.equal(outputSpec({ ...video, ffmpeg: { ...video.ffmpeg, constant_rate_factor: 'NONE' } }).bitrate, 6000000, 'Constant Bitrate in kbit/s');
 assert.throws(() => outputSpec({ ...video, ffmpeg: { ...video.ffmpeg, format: 'WEBM' } }), /WebM cannot hold H.264/);
 assert.equal(outputSpec({ image_settings: { file_format: 'JPEG', quality: 80 } }).quality, 0.8);
