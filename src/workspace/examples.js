@@ -15,6 +15,7 @@ const files = (id) => {
 export const examples = [
   { id: "cube", title: "Default Cube" },
   { id: "still-life", title: "Still Life" },
+  { id: "island", title: "Volcanic Island" },
   { id: "coast", title: "Dusk Coast" },
   { id: "orrery", title: "Orrery" },
   { id: "lumen", title: "Lumen" },

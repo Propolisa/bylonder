@@ -47,8 +47,9 @@ export function createWorldRenderer(scene, { asset = path => path, studio } = {}
     worldLight.intensity = rendered ? 1 : 0;
     scene.fogEnabled = rendered;
   };
-  const setSkybox = (key, tex, background) => {
-    useAuthored = !!tex && key === 'scene' && authoredSkyboxes.length > 0;
+  // The scene's own sky meshes show for its own world: lit by its environment, or without one (a shader sky).
+  const setSkybox = (key, tex, background, authoredWorld) => {
+    useAuthored = authoredSkyboxes.length > 0 && (tex ? key === 'scene' : authoredWorld);
     if (!tex || useAuthored || skyboxKey !== key) { skybox?.dispose(false, true); skybox = null; skyboxKey = ''; }
     if (!tex || useAuthored) return;
     if (!skybox) {
@@ -106,7 +107,7 @@ export function createWorldRenderer(scene, { asset = path => path, studio } = {}
       scene.clearColor = Color4.FromColor3(color.toGammaSpace().clampToRef(0, 1, new Color3()));
       worldLight.diffuse = world?.home === 'BLENDER' && !env ? color : Color3.Black();
       worldLight.groundColor = worldLight.diffuse.clone();
-      setSkybox(background?.image, env && world.visibility.camera ? env : null, background);
+      setSkybox(background?.image, env && world.visibility.camera ? env : null, background, world?.home === 'BABYLON' && world.visibility.camera);
       if (preview) {
         Object.assign(preview, { env: scene.environmentTexture, intensity: scene.environmentIntensity });
         applyPreview();

@@ -80,9 +80,11 @@ export function setEvaluatedMatrix(node, matrix) {
       };
     } else if (node._getViewMatrix) {
       node._isSynchronizedViewMatrix = () => false;
+      // A camera locked on a target (Babylon's lockedTarget, a point or a node) looks at it from where Main puts it.
       node._getViewMatrix = () => {
-        const m = evaluatedMatrices.get(node), eye = m.getTranslation();
-        Matrix.LookAtLHToRef(eye, eye.add(Vector3.TransformNormal(BLENDER_FORWARD, m)), Vector3.TransformNormal(BLENDER_UP, m), node._viewMatrix);
+        const m = evaluatedMatrices.get(node), eye = m.getTranslation(), target = node.lockedTarget?.getAbsolutePosition?.() ?? node.lockedTarget;
+        if (target) Matrix.LookAtLHToRef(eye, target, node.upVector ?? Vector3.Up(), node._viewMatrix);
+        else Matrix.LookAtLHToRef(eye, eye.add(Vector3.TransformNormal(BLENDER_FORWARD, m)), Vector3.TransformNormal(BLENDER_UP, m), node._viewMatrix);
         return node._viewMatrix;
       };
     }
