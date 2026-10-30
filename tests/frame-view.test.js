@@ -99,4 +99,26 @@ assert(Math.abs(lattice.getWorldMatrix().getTranslation().z - 3) < 1e-5, 'the la
 const surface = objects.find((node) => node.metadata?.wbType === 'SURFACE');
 assert(surface?.getTotalVertices() > 100, `the surface's evaluated mesh: ${surface?.getTotalVertices()}`);
 assert.deepEqual(sync.check(), []);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type; a metaball, a NURBS surface and a lattice");
+// Instancing on vertices: a plane draws its child at each of its vertices, as Blender's draw engines draw the instances.
+sync.run(() => blender.run('mesh.primitive_plane_add', { size: 4, location: [0, 0, 10] }));
+blendData().objects.get('Dice').parent = blendData().objects.get('Plane');
+blendData().objects.get('Plane').instance_type = 'VERTS';
+sync.view();
+const carrier = scene.meshes.find((mesh) => mesh.name.startsWith('__instances'));
+assert.equal(carrier?.thinInstanceCount, 4, 'one instance at each vertex');
+assert(carrier.thinInstanceGetWorldMatrices().every((m) => Math.abs(m.getTranslation().y - 10) < 1e-4), "at the plane's height");
+blendData().objects.get('Plane').instance_type = 'NONE';
+sync.view();
+assert(!scene.meshes.some((mesh) => mesh.name.startsWith('__instances')), 'no instances once it instances nothing');
+// A collection instance: an empty draws the collection's objects where it is.
+const set = blendData().collections.new('Set');
+set.objects.link(blendData().objects.get('Dice'));
+const holder = blendData().objects.new('Holder', null);
+blendData().scenes.get('Scene').collection.objects.link(holder);
+Object.assign(holder, { instance_type: 'COLLECTION', instance_collection: set, location: [5, 0, 0] });
+sync.view();
+const instances = scene.meshes.filter((mesh) => mesh.name.startsWith('__instances'));
+assert.deepEqual(instances.map((mesh) => mesh.thinInstanceCount), [1], 'one instance of the dice');
+const at = instances[0].thinInstanceGetWorldMatrices()[0].getTranslation();
+assert(Math.abs(at.x - 5) < 1e-3, `where the empty is: ${at}`);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type; a metaball, a NURBS surface and a lattice; instancing on vertices and collection instances");

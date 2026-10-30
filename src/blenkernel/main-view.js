@@ -357,8 +357,33 @@ export function createMainView(state) {
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
       if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
+      if (updates.size) drawInstances();
     } finally {
       state.applying = was;
+    }
+  }
+  // The instances objects make (a collection instance, instancing on vertices or faces), drawn as Blender's draw engines
+  // draw them: for each instancer and object it instances, the object's evaluated geometry and materials as thin
+  // instances at their world matrices, on a mesh of the view's own.
+  const instanced = new Map();
+  function drawInstances() {
+    const groups = Map.groupBy(blender.instances(), ({ instancer, ob }) => `${instancer}:${ob}`), byOb = new Map([...objects.values()].map((e) => [e.ob, e.node]));
+    for (const [key, carrier] of instanced) if (!groups.has(key)) { carrier.dispose(); instanced.delete(key); }
+    for (const [key, list] of groups) {
+      const source = byOb.get(list[0].ob);
+      if (!source?.geometry) continue;
+      let carrier = instanced.get(key);
+      if (!carrier) {
+        carrier = new Mesh('__instances ' + key, source.getScene());
+        carrier.isPickable = false;
+        carrier.alwaysSelectAsActiveMesh = true;
+        instanced.set(key, carrier);
+      }
+      source.geometry.applyToMesh(carrier);
+      carrier.material = source.material;
+      const buffer = new Float32Array(list.length * 16);
+      list.forEach(({ matrix_world }, i) => babylonMatrix(matrix_world).copyToArray(buffer, i * 16));
+      carrier.thinInstanceSetBuffer('matrix', buffer, 16, false);
     }
   }
   // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the

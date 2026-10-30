@@ -226,6 +226,14 @@ export class BlenderMain {
   evaluate() { x.main_evaluate(this.#context); }
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
+  // The instances Main's objects make by their Instancing (main-api.cc): { instancer, ob (the instanced object),
+  // matrix_world (column-major, Blender's axes) } each.
+  instances() {
+    return Array.from({ length: x.main_instances(this.#context) }, (_, i) => {
+      const at = x.main_instance(i) >>> 0, [instancer, ob] = new Uint32Array(x.memory.buffer, at, 2);
+      return { instancer, ob, matrix_world: Array.from(new Float32Array(x.memory.buffer, at + 8, 16)) };
+    });
+  }
   // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.
   updates() { return Array.from({ length: x.main_updates() }, (_, i) => ({ id: x.main_update(i) >>> 0, recalc: x.main_update_recalc(i) >>> 0 })); }
 

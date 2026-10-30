@@ -7,6 +7,7 @@
 #include "BKE_armature.hh"
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
+#include "BKE_duplilist.hh"
 #include "BKE_curve_to_mesh.hh"
 #include "BKE_curves.hh"
 #include "BKE_geometry_set.hh"
@@ -595,6 +596,37 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   mesh_extraction(*mesh, ctx->extraction);
   return &ctx->extraction;
 }
+
+/* The instances Main's objects make by their Instancing (a collection, their vertices or faces), as Blender's draw
+ * engines draw them (object_duplilist): each one's instancer, the object it instances and its world matrix, valid until
+ * the next call; returns their count. */
+struct Instance {
+  Object *instancer, *ob;
+  float matrix[4][4];
+};
+static Vector<Instance> instances;
+EXPORT(main_instances) int main_instances(BlenderMain *ctx)
+{
+  instances.clear();
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  for (Object &ob : ctx->bmain->objects) {
+    Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
+    if (!evaluated || evaluated == &ob || !(evaluated->transflag & OB_DUPLI)) {
+      continue;
+    }
+    DupliList duplis;
+    object_duplilist(depsgraph, evaluated, nullptr, duplis);
+    for (const DupliObject &dupli : duplis) {
+      if (!dupli.no_draw) {
+        Instance instance = {&ob, DEG_get_original(dupli.ob)};
+        copy_m4_m4(instance.matrix, dupli.mat);
+        instances.append(instance);
+      }
+    }
+  }
+  return instances.size();
+}
+EXPORT(main_instance) const Instance *main_instance(int index) { return &instances[index]; }
 
 /* The last extracted Mesh's material slot of each face (its material_index, 0-based), or null when all are the first. */
 EXPORT(extracted_material_index) const int *extracted_material_index()
