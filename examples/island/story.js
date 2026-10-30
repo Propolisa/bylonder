@@ -64,6 +64,12 @@ export const NEST = (() => {
 // far side, behind the volcano from the nest.
 export const OMEN = (() => { const a = 4.75, e = 0.3; return { x: Math.cos(a) * Math.cos(e), y: Math.sin(e), z: Math.sin(a) * Math.cos(e) }; })();
 export const STRIKE = (() => { const angle = NEST.angle + Math.PI, r = 8; return { angle, r, x: Math.cos(angle) * r, z: Math.sin(angle) * r }; })();
+// It comes in low out of the omen's side, so its wave is no ring: it runs farthest and highest downrange, weakest back
+// toward where it came from, its crest lumpy all round (lobes: [harmonic, amount, phase] round the strike).
+export const WAVE = { downrange: Math.atan2(-OMEN.z, -OMEN.x), lobes: [[1, 0.38, 0], [2, 0.12, 1.1], [3, 0.08, 2.4], [5, 0.05, 0.4], [8, 0.03, 4.1], [13, 0.02, 1.7]],
+  // The wave train behind the leading crest: [how far it has run, as part of the first's run; its height].
+  train: [[1, 1], [0.8, 0.55], [0.63, 0.3]] };
+export const waveReach = (side) => 1 + WAVE.lobes.reduce((sum, [k, amount, phase]) => sum + amount * Math.cos(k * (side - WAVE.downrange) + phase), 0);
 export const omen = (time) => (0.1 + 0.12 * smoothstep(0, BEAT.omen, time) + 0.55 * smoothstep(BEAT.omen, BEAT.leave, time) + 0.23 * smoothstep(BEAT.leave, BEAT.streak, time)) * (1 - smoothstep(BEAT.streak, BEAT.streak + 0.6, time));
 export const falling = (time) => (time < BEAT.streak || time > BEAT.impact ? 0 : (time - BEAT.streak) / (BEAT.impact - BEAT.streak));
 // Seconds since the strike, and how far its blast has spread across the land then (it races out and slows).

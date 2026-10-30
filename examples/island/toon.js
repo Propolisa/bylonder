@@ -1,4 +1,4 @@
-import { NEST, IMPACT, STRIKE } from './story.js';
+import { NEST, IMPACT, STRIKE, WAVE } from './story.js';
 
 // Toon shading: faceted surfaces lit in hard bands by the sun, the moon and a fire light (the meteor, the burning
 // forest) over a sky and ground ambient, with a rim of sky light, fading into the air's haze with distance. The terrain,
@@ -133,8 +133,10 @@ void main() {
   gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + glow), 1.0);
 }`;
 
+const reachGlsl = `1.0${WAVE.lobes.map(([k, amount, phase]) => ` + ${amount.toFixed(3)} * cos(${k.toFixed(1)} * (side - ${WAVE.downrange.toFixed(4)}) + ${phase.toFixed(2)})`).join('')}`;
 // The sea: deep blue, turquoise over the reef, rings of foam running in to the shore. After the strike, the great wave
-// races out from it as a ring of foam with rough water behind it, and the sea where it struck boils white.
+// races out from it in a train of lumpy crests, highest downrange, with rough water behind, and the sea where it struck
+// boils white.
 const sea = `${lighting}
 uniform float day, blast;
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
@@ -146,13 +148,15 @@ void main() {
   color = mix(color, vec3(0.95, 1.0, 1.0), foam);
   float struck = length(vWorld.xz - vec2(${STRIKE.x.toFixed(4)}, ${STRIKE.z.toFixed(4)}));
   if (blast >= 0.0) {
-    float crest = 1.0 + 16.0 * pow(blast, 0.75), behind = crest - struck, fade = exp(-blast / 14.0);
-    float front = (1.0 - smoothstep(0.0, 0.8, abs(behind))) * fade;
-    float swell = behind * 0.4 - blast * 0.5, side = atan(vWorld.z - ${STRIKE.z.toFixed(4)}, vWorld.x - ${STRIKE.x.toFixed(4)});
+    float side = atan(vWorld.z - ${STRIKE.z.toFixed(4)}, vWorld.x - ${STRIKE.x.toFixed(4)}), reach = ${reachGlsl};
+    float travelled = 16.0 * pow(blast, 0.75) * reach, behind = 1.0 + travelled - struck, fade = exp(-blast / 14.0), front = 0.0;
+    ${WAVE.train.map(([lag, height]) => `front = max(front, (1.0 - smoothstep(0.0, ${(0.3 + 0.5 * height).toFixed(2)}, abs(1.0 + travelled * ${lag.toFixed(2)} - struck))) * ${height.toFixed(2)});`).join('\n    ')}
+    front *= fade * min(1.0, reach);
+    float swell = behind * 0.4 - blast * 0.5;
     float rough = step(0.0, behind) * step(0.82, fract(swell)) * step(0.45, hash(vec2(floor(swell), floor(side * 14.0)))) * exp(-behind / 12.0) * fade;
     float boil = (1.0 - smoothstep(3.0, 7.0, struck)) * exp(-blast / 25.0);
     color = mix(color, vec3(0.04, 0.22, 0.42), 0.5 * step(0.0, behind) * fade);
-    color = mix(color, vec3(0.92, 0.97, 1.0), max(front, max(rough * 0.6, boil * step(0.4, fract(struck * 1.7 - blast * 2.0)))));
+    color = mix(color, vec3(0.92, 0.97, 1.0), max(front, max(rough * 0.6, boil * step(0.5, hash(vec2(floor(struck * 1.3 + 0.7 * sin(side * 5.0 + blast)), floor(side * 9.0 + struck * 0.6) + floor(blast * 4.0) * 17.0))))));
   }
   vec3 v = normalize(cameraPosition - vWorld);
   float glint = 0.6 * smoothstep(0.99965, 0.99985, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), sunDir));

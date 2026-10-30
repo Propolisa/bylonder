@@ -2,10 +2,10 @@
 // side to glass and sends a great wave racing out; the burning debris it throws over the ridge, which lights the forest
 // above the nest; all as layers of particles, with the fire light that moves with them.
 import { createMesh } from '@workbench/sdk';
-import { createParticles, together, pop, swell, glowOf, direction } from './particles.js';
+import { createParticles, together, pop, swell, glowOf, direction, rnd } from './particles.js';
 import { createPuffs, setMatrices, place } from './sky.js';
 import { heightAt } from './island.js';
-import { BEAT, OMEN, STRIKE, IMPACT, NEST, smoothstep, falling, fireFront, fireAngle, burning, flash, sinceStrike } from './story.js';
+import { BEAT, OMEN, STRIKE, WAVE, waveReach, IMPACT, NEST, smoothstep, falling, fireFront, fireAngle, burning, flash, sinceStrike } from './story.js';
 
 const { Vector3, Color3, Quaternion } = BABYLON;
 const HIDDEN = [new Vector3(0, -100, 0), 0];
@@ -19,9 +19,12 @@ const onFire = (r, across) => {
   const a = fireAngle(r) + across / Math.max(r, 0.5), x = Math.cos(a) * r, z = Math.sin(a) * r;
   return new Vector3(x, heightAt(x, z), z);
 };
-// The great wave: its crest's distance from the strike and its height, a few seconds on (the sea's foam ring agrees).
-export const waveRadius = (age) => 1 + 16 * Math.max(0, age) ** 0.75;
-const waveHeight = (age) => (age < 0 ? 0 : 1.4 * Math.exp(-age / 6) * Math.min(1, age * 3));
+// The great wave at a side of the strike: its crest's distance and height, a few seconds on (the sea's foam agrees).
+const waveRadius = (age, side) => 1 + 16 * Math.max(0, age) ** 0.75 * waveReach(side);
+const waveHeight = (age, side) => (age < 0 ? 0 : 1.4 * Math.exp(-age / 6) * Math.min(1, age * 3) * Math.max(0, waveReach(side)) ** 1.2);
+// Thrown out of the strike, more of it downrange.
+const DOWNRANGE = new Vector3(Math.cos(WAVE.downrange), 0, Math.sin(WAVE.downrange));
+const thrown = (r, up, speed) => direction(r, up).add(DOWNRANGE.scale(0.6)).normalize().scale(speed);
 const around = (radius, angle, y) => new Vector3(STRIKE.x + Math.cos(angle) * radius, y, STRIKE.z + Math.sin(angle) * radius);
 
 // The asteroid: a white-hot core in yellow and orange shells, flame shed behind it in three layers, a smoke trail that
@@ -54,9 +57,9 @@ function createBlast(scene, toon) {
   });
   flashBall.material.setColor3('glow', glowOf(3, 2.8, 2.4));
   const billow = (name, glow, count, speed, peak, life, seed) => createParticles(scene, toon, { name, color: '#000000', glow: glowOf(...glow), seed, start: T, end: T + 0.3, rate: count / 0.3, life,
-    origin: at, velocity: (r) => direction(r, 0.25).scale(speed * (0.5 + r(3))), drag: 1.6, gravity: 3, turbulence: 0.5, size: swell(peak * 0.3, peak) });
+    origin: at, velocity: (r) => thrown(r, 0.25, speed * (0.5 + r(3))), drag: 1.6, gravity: 3, turbulence: 0.5, size: swell(peak * 0.3, peak) });
   const DEBRIS = 80, TRAIL = 6, debrisAt = (j, age) => {
-    const r = (k) => Math.abs(Math.sin(j * 12.9898 + k * 78.233) * 43758.5453) % 1, a = r(1) * 2 * Math.PI, out = 5 + 9 * r(2), up = 7 + 10 * r(3);
+    const r = (k) => Math.abs(Math.sin(j * 12.9898 + k * 78.233) * 43758.5453) % 1, a = r(1) * 2 * Math.PI, out = (5 + 9 * r(2)) * waveReach(a) ** 2, up = 7 + 10 * r(3);
     const p = STRIKE_AT.add(new Vector3(Math.cos(a) * out * age, up * age - 4.9 * age * age, Math.sin(a) * out * age));
     return { p, landed: p.y < Math.max(0, heightAt(p.x, p.z)) && age > 0.3, size: 0.15 + 0.25 * r(4) };
   };
@@ -73,7 +76,7 @@ function createBlast(scene, toon) {
     billow('Blast Fire Hot', [2.6, 2.2, 1.0], 70, 8, 1.8, [1.2, 2.5], 21), billow('Blast Fire', [2.4, 0.9, 0.12], 110, 11, 2.4, [2, 3.6], 22),
     billow('Blast Fire Red', [1.4, 0.22, 0.04], 120, 14, 2.9, [2.5, 4.5], 23),
     createParticles(scene, toon, { name: 'Blast Sparks', color: '#000000', glow: glowOf(2.8, 2.4, 1.2), seed: 25, start: T, end: T + 0.15, rate: 1200, life: [0.8, 2],
-      origin: at, velocity: (r) => direction(r, 0.3).scale(12 + 14 * r(3)), gravity: -9.8, drag: 0.4, size: pop(0.12) }),
+      origin: at, velocity: (r) => thrown(r, 0.3, 12 + 14 * r(3)), gravity: -9.8, drag: 0.4, size: pop(0.12) }),
     createParticles(scene, toon, { name: 'Strike Column', color: '#3c3843', underglow: glowOf(1.4, 0.45, 0.08), seed: 26, start: T + 0.2, end: T + 12, rate: 40, life: [6, 9],
       origin: at, velocity: (r) => new Vector3((2 * r(32) - 1) * 0.8, 6 + 3 * r(3), (2 * r(33) - 1) * 0.8), drag: 0.35, gravity: 0.6,
       wind: new Vector3(-0.4, 0, -0.2), turbulence: 0.4, size: swell(0.6, 2.2), strength: (birth) => 1 - smoothstep(T + 6, T + 12, birth) }),
@@ -93,26 +96,30 @@ function createWater(scene, toon) {
   segment.material = toon.plain('Wave', '#bfe6f7');
   const buffer = setMatrices(segment, SEGMENTS);
   const wave = (day, time) => {
-    const age = time - T, R = waveRadius(age), h = waveHeight(age), length = (2 * Math.PI * R) / SEGMENTS * 1.08;
+    // The leading crest, in segments that follow its lobes, each a little higher or lower (the sea draws the train behind).
+    const age = time - T;
     for (let i = 0; i < SEGMENTS; i++) {
-      const a = (i / SEGMENTS) * 2 * Math.PI, turn = Quaternion.RotationAxis(Vector3.Up(), -a + Math.PI / 2);
+      const a = (i / SEGMENTS) * 2 * Math.PI, R = waveRadius(age, a), j = rnd(66, i, 0);
+      const h = waveHeight(age, a) * (0.8 + 0.4 * j) * (0.9 + 0.1 * Math.sin(age * (2 + 3 * j) + 6.28 * j));
+      const length = (2 * Math.PI * R) / SEGMENTS * (1.2 + 0.15 * j), lean = Math.atan2(waveRadius(age, a + 0.01) - waveRadius(age, a - 0.01), 0.02 * R);
+      const turn = Quaternion.RotationAxis(Vector3.Up(), -a + Math.PI / 2 - lean);
       place(buffer, i, around(R, a, -0.05), h > 0.02 ? new Vector3(length, h, 2.5 + 1.5 * h) : new Vector3(1e-4, 1e-4, 1e-4), turn);
     }
     segment.thinInstanceBufferUpdated('matrix');
   };
   return together(wave,
     createParticles(scene, toon, { name: 'Water Column', color: '#e6f4ff', seed: 61, start: T + 0.05, end: T + 0.6, rate: 500, life: [3, 5],
-      origin: at, velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a) * (2 + 4 * r(4)), 14 + 14 * r(3), Math.sin(a) * (2 + 4 * r(4))); },
+      origin: at, velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a) * (2 + 4 * r(4)), 14 + 14 * r(3), Math.sin(a) * (2 + 4 * r(4))).add(DOWNRANGE.scale(4 + 3 * r(5))); },
       gravity: -9.8, drag: 0.15, size: swell(0.2, 0.75) }),
     createParticles(scene, toon, { name: 'Water Spray', color: '#ffffff', seed: 62, start: T + 0.05, end: T + 1.2, rate: 500, life: [1.5, 3],
-      origin: at, velocity: (r) => direction(r, 0.3).scale(14 + 12 * r(3)), gravity: -9.8, drag: 0.3, size: pop(0.18) }),
+      origin: at, velocity: (r) => thrown(r, 0.3, 14 + 12 * r(3)), gravity: -9.8, drag: 0.3, size: pop(0.18) }),
     createParticles(scene, toon, { name: 'Shock Vapor', color: '#dfe7f2', seed: 63, start: T + 0.05, end: T + 0.2, rate: 1100, life: [2, 3.5],
-      origin: (r) => STRIKE_AT.add(new Vector3(0, 0.3 + r(5), 0)), velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a), 0.05, Math.sin(a)).scale(20 + 8 * r(3)); },
+      origin: (r) => STRIKE_AT.add(new Vector3(0, 0.3 + r(5), 0)), velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a), 0.05, Math.sin(a)).scale((20 + 8 * r(3)) * waveReach(a)); },
       drag: 1.3, gravity: 0.4, size: swell(0.4, 1.1) }),
     createParticles(scene, toon, { name: 'Wave Foam', color: '#ffffff', seed: 64, start: T + 0.3, end: T + 22, rate: 260, life: [0.6, 1.2],
-      origin: (r, birth) => around(waveRadius(birth - T), r(11) * 2 * Math.PI, waveHeight(birth - T) * 0.9),
-      velocity: (r) => new Vector3((2 * r(32) - 1) * 0.6, 1.5 + 1.5 * r(3), (2 * r(33) - 1) * 0.6), gravity: -5, size: pop(0.28),
-      strength: (birth) => Math.min(1, waveHeight(birth - T) / 0.6) }),
+      origin: (r, birth) => { const a = r(11) * 2 * Math.PI; return around(waveRadius(birth - T, a), a, waveHeight(birth - T, a) * 0.9); },
+      velocity: (r) => new Vector3((2 * r(32) - 1) * 0.6, 1.5 + 1.5 * r(3), (2 * r(33) - 1) * 0.6), gravity: -5,
+      size: (age, r) => pop(0.28)(age, r) * Math.min(1, Math.max(0, waveReach(r(11) * 2 * Math.PI)) ** 1.5), strength: (birth) => Math.min(1, waveHeight(birth - T, WAVE.downrange) / 0.6) }),
     createParticles(scene, toon, { name: 'Strike Steam', color: '#f2f5fa', seed: 65, start: T + 0.5, end: BEAT.heal + 4, rate: 14, life: [5, 8],
       origin: (r) => STRIKE_AT.add(new Vector3(2 * r(30) - 1, 0, 2 * r(31) - 1).scale(4.5)), velocity: (r) => new Vector3(0, 2 + r(3), 0), drag: 0.5, gravity: 0.6,
       wind: new Vector3(-0.3, 0, -0.15), turbulence: 0.4, size: swell(0.3, 1.4), strength: (birth) => 1 - smoothstep(BEAT.sea, BEAT.heal + 4, birth) }));
