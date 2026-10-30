@@ -261,7 +261,10 @@ export class BlenderMain {
   // draws it), valid until the next call, or null when it has none.
   evaluatedMesh(ob) {
     const header = x.object_mesh_eval(this.#context, ob) >>> 0;
-    return header ? extractedMesh(header) : null;
+    if (!header) return null;
+    const mesh = extractedMesh(header), slots = x.extracted_material_index() >>> 0;
+    if (slots) mesh.attributes.set('material_index', { domain: 'FACE', type: 'INT', get data() { return new Int32Array(x.memory.buffer, slots, mesh.faces_num); } });
+    return mesh;
   }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
   setModifiers(ob, modifiers) {

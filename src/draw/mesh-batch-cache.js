@@ -8,6 +8,7 @@ import { CreateLineSystem } from '@babylonjs/core/Meshes/Builders/linesBuilder.j
 import { Color3 } from '@babylonjs/core/Maths/math.color.js';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
+import { SubMesh } from '@babylonjs/core/Meshes/subMesh.js';
 import { mesh_batch_cache_vertex_buffers } from './mesh-batch-buffers.js';
 
 // VertexData's field of each vertex buffer kind it can hold.
@@ -17,6 +18,16 @@ const babylonPoint = (p, v) => new Vector3(p[v * 3], p[v * 3 + 2], p[v * 3 + 1])
 const WIRE = Color3.Black();
 
 export const mesh_batch_cache_vertex_data = (mesh) => Object.assign(new VertexData(), mesh_batch_cache_vertex_buffers(mesh));
+
+// One submesh per material slot its faces use (a MultiMaterial's index), else one for all: a single submesh would keep
+// its old index count when an edit changes the topology.
+function setSubMeshes(babylonMesh, groups) {
+  if (!babylonMesh.subMeshes) return;
+  if (!groups) return babylonMesh._createGlobalSubMesh(true);
+  babylonMesh.subMeshes = [];
+  const vertices = babylonMesh.getTotalVertices();
+  for (const { slot, start, count } of groups) new SubMesh(slot, 0, vertices, start, count, babylonMesh);
+}
 
 // The bounding box, for the mesh and its one submesh (which picking tests), from the Mesh's own bounds: Babylon's
 // refresh reads the vertex buffer back.
@@ -110,8 +121,7 @@ export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = 
   for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) if (BUFFERS[kind] && !data[BUFFERS[kind]]) babylonMesh.removeVerticesData(kind);
   data.applyToMesh(babylonMesh, true);
   faceEdges.set(babylonMesh, face_edge_corners(mesh));
-  // A single submesh would keep its old index count when an edit changes the topology.
-  if (babylonMesh.subMeshes?.length <= 1) babylonMesh._createGlobalSubMesh(true);
+  setSubMeshes(babylonMesh, data.groups);
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
   if (loose.length) {

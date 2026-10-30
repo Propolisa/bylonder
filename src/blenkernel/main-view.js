@@ -185,7 +185,6 @@ export function createMainView(state) {
           if (fcurvePaths(ob).includes('rotation_euler')) warnings.push(`"${node.name}": its rotation keys are in another rotation order than Bylonder's`);
           blender.setRotationMode(ob, ROTATION_MODES[wanted]);
         }
-        if (blender.materials(ob).length > 1) warnings.push(`"${node.name}": its faces show its first material`);
         for (const path of new Set(fcurvePaths(ob))) if (!['location', 'rotation_euler', 'scale'].includes(path)) warnings.push(`"${node.name}": its ${path} keys are not opened`);
         if (blender.camera === ob) scene.activeCamera = node;
       }

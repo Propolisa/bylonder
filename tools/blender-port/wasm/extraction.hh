@@ -41,6 +41,8 @@ void extraction_update(BMesh *bm, Extraction &extraction, int what);
 
 /* Points the header at an evaluated Mesh's own arrays (the flags stay null: they exist in Edit Mode only). */
 void mesh_extraction(const Mesh &mesh, ExtractionHeader &header);
+/* The Mesh the last mesh_extraction read (an evaluated Mesh, or the one its subdivision made). */
+extern const Mesh *extracted_mesh;
 
 /* A Mesh outside Main from the arrays bm_from_arrays takes; a UV map, when given, as Blender's default "UVMap". */
 Mesh *mesh_from_arrays(int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num, const int *face_offsets,

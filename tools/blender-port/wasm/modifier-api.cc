@@ -162,9 +162,12 @@ Mesh *blender::mesh_from_arrays(int verts_num, const float3 *positions, int edge
 }
 
 /* Subdivision Surface last in the stack defers to the wrapper, which holds the subdivided mesh. */
+const Mesh *blender::extracted_mesh = nullptr;
+
 void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
 {
   const Mesh *mesh = BKE_mesh_wrapper_ensure_subdivision(&evaluated);
+  extracted_mesh = mesh;
   BKE_mesh_wrapper_ensure_mdata(const_cast<Mesh *>(mesh));
   h = {};
   h.verts_num = mesh->verts_num;

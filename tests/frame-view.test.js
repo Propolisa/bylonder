@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import { NullEngine, Scene, Vector3, PointLight, PBRMaterial, Color3, FreeCamera } from '@babylonjs/core';
 import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
+import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
+import { mesh_serialize } from '../src/blenkernel/mesh/mesh.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { BlenderAnimation } from '../src/blenkernel/animation/anim-blender.js';
 import { sceneMain } from './scene-main.js';
@@ -68,4 +70,16 @@ blendData().objects.get('Camera').constraints.new('TRACK_TO').target = blendData
 sync.view();
 const looking = Vector3.TransformNormal(new Vector3(0, 0, 1), camera.getViewMatrix(true).clone().invert()).normalize();
 assert(Vector3.Distance(looking, cube.getAbsolutePosition().subtract(camera.position).normalize()) < 1e-3, `the camera looks at the cube: ${looking}`);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them");
+// Faces of two material slots draw as one submesh per slot, each with its slot's material.
+const twoTone = primitive_add('mesh.primitive_cube_add');
+twoTone.attributes.set('material_index', { domain: 'FACE', type: 'INT', data: Int32Array.from([0, 1, 0, 1, 0, 1]) });
+const recipe = { mesh: mesh_serialize(twoTone) }, dice = buildMesh(scene, 'Dice', recipe);
+dice.metadata = { wbId: 'dice', wbCreation: recipe };
+objects.push(dice);
+world.materials.assign(dice, 0, cube.material);
+world.materials.assign(dice, 1, Object.assign(new PBRMaterial('Ink', scene), { albedoColor: new Color3(0, 0, 0) }));
+world.materials.sync();
+sync.flush();
+assert.deepEqual(dice.subMeshes.map((s) => [s.materialIndex, s.indexCount]), [[0, 18], [1, 18]], 'a submesh per slot');
+assert.deepEqual(dice.material.subMaterials.map((m) => m.name), ['Paint', 'Ink']);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials");

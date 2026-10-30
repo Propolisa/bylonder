@@ -593,6 +593,22 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   return &ctx->extraction;
 }
 
+/* The last extracted Mesh's material slot of each face (its material_index, 0-based), or null when all are the first. */
+EXPORT(extracted_material_index) const int *extracted_material_index()
+{
+  static Array<int> materialized;
+  const VArray<int> values = *extracted_mesh->attributes().lookup<int>("material_index", bke::AttrDomain::Face);
+  if (!values) {
+    return nullptr;
+  }
+  if (values.is_span()) {
+    return values.get_internal_span().data();
+  }
+  materialized.reinitialize(values.size());
+  values.materialize(materialized);
+  return materialized.data();
+}
+
 /* An object's modifier stack, edited as Blender's modifier operators edit it (object_modifier.cc): a modifier added
  * last (type: ModifierType; with what some types need, such as a Skin's vertices), removed, moved to an index, renamed
  * (unique in the stack), copied after itself, and applied to the object's data, the result Blender's evaluation of
