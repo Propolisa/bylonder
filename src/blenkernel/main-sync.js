@@ -175,6 +175,24 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
     if (written.size) blender.tag(record.holder ?? record.ptr, recalcOf(record.struct, written));
   }
+  // The record Main holds a page struct's RNA value in (an object's, its data's, the scene's), which the struct reads and
+  // writes instead of Babylon's: Main's value is drawn back (pull). Null for a value only Babylon holds.
+  function held(struct, owner, name) {
+    const field = dnaProperty(struct, name);
+    if (!field || field.kind === 'pointer' || field.kind === 'struct') return null;
+    const record = owner === world ? sceneRecords().find((r) => r.struct === struct)
+      : struct === 'Object' ? objects.get(owner) : objects.get(owner)?.data;
+    return record?.struct === struct && record.ptr && !record.unheld?.has(name) ? record : null;
+  }
+  // An RNA write into Main, as Blender's RNA updates tag it, then evaluated and drawn; false for a value Main cannot hold.
+  function write(record, name, value) {
+    if (!holds(dnaProperty(record.struct, name), plain(value))) return false;
+    flush(false);
+    dnaSet(record.struct, record.ptr, name, plain(value));
+    blender.tag(record.holder ?? record.ptr, recalcOf(record.struct, [name]));
+    evaluate();
+    return true;
+  }
   // What the depsgraph evaluates again after values were written, as Blender's RNA updates tag them: an object's
   // transform alone (rna_Object_internal_update), else the whole of its struct's ID.
   const recalcOf = (struct, names) => (struct !== 'Object' ? 0 : [...names].every((name) => TRANSFORM.has(name)) ? ID_RECALC_TRANSFORM
@@ -661,6 +679,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       flush(false);
     },
     edit,
+    held,
+    read: (record, name) => dnaGet(record.struct, record.ptr, name),
+    write,
     // What Main's modifiers point at, by the page's ids (main-modifiers.js).
     links: modifierLinks,
     // A mesh object's Mesh as Main holds it is its recipe again (after Blender's code changed it).

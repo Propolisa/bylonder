@@ -4,7 +4,7 @@
 // armature's bones; Main's objects without a Babylon object get one, linked by id (`bylonder_id`), and objects Main
 // no longer holds are deleted. Materials, worlds, scene settings and collections are read the same way.
 import { dnaGet, dnaProperty } from '../makesrna/dna-struct.js';
-import { syncBindings } from '../makesrna/rna-bylonder.js';
+import { syncBindings, LIGHT_STRUCTS } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
 import { createLight } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
@@ -390,7 +390,7 @@ export function createMainView(state) {
   // old one's place: its name, ids, parent, children and selection.
   function retype(entry) {
     const type = dnaGet('Light', entry.data.ptr, 'type'), old = entry.node;
-    if (rna.pointer('Object', old).data?.type === type) return;
+    if (entry.data.struct === LIGHT_STRUCTS[type]) return;
     const node = MAKERS.LIGHT(old.getScene(), old.name, entry.ob, blender);
     const { wbLight, wbHome, ...metadata } = old.metadata ?? {};
     node.metadata = { ...node.metadata, ...metadata };

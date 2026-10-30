@@ -68,21 +68,20 @@ const lookingRotation = {
   set: (ob, value) => setRotation(ob, matrixQuaternion(lookingFrame(matrixXYZ(value)))),
 };
 
-// A number or boolean array (bpy_prop_array): a copy whose elements write through, with x, y, z (or w, x, y, z).
-function array(get, set, names = 'xyz') {
+// A number or boolean array (bpy_prop_array), its elements named x, y, z (or w, x, y, z): bind gives a copy whose elements
+// write through.
+const array = (get, set, names = 'xyz') => ({ get, set: set && ((owner, value, r) => set(owner, [...value], r)), names });
+function elements(values, names, set) {
   const index = (key) => (key.length === 1 && names.includes(key) ? names.indexOf(key) : key);
-  return {
-    get: (owner, r) => new Proxy(get(owner, r), {
-      get: (values, key) => values[typeof key === 'string' ? index(key) : key],
-      set(values, key, value) {
-        if (!set) return false;
-        values[index(key)] = value;
-        set(owner, [...values], r);
-        return true;
-      },
-    }),
-    set: set && ((owner, value, r) => set(owner, [...value], r)),
-  };
+  return new Proxy(Array.from(values), {
+    get: (copy, key) => copy[typeof key === 'string' ? index(key) : key],
+    set(copy, key, value) {
+      if (!set) return false;
+      copy[index(key)] = value;
+      set([...copy]);
+      return true;
+    },
+  });
 }
 
 const dimensions = (ob) => {
@@ -91,7 +90,7 @@ const dimensions = (ob) => {
 };
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
 const lightType = (light) => lightRecord(light)?.type ?? (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
-const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
+export const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
 const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve', ARMATURE: () => 'Armature' };
 // An object the view made for a type of Blender's it draws only as evaluated (a surface, a metaball, a lattice) keeps it.
 const objectType = (ob) => (ob.metadata?.wbType ?? (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
@@ -756,12 +755,16 @@ export function createRNA(host) {
   };
   function bind(struct, owner) {
     const data = {}, items = {}, channels = {};
-    for (const [name, { get, set, items: enumItems, channel }] of Object.entries(bindingsOf(struct, owner))) {
-      Object.defineProperty(data, name, {
-        enumerable: true,
-        get: () => get(owner, r),
-        set: set && ((value) => { set(owner, value, r); host.update?.(struct, name, owner); }),
+    for (const [name, { get, set, sync, names, items: enumItems, channel }] of Object.entries(bindingsOf(struct, owner))) {
+      // A value Main holds is read and written there, and drawn back to Babylon (main-sync.js).
+      const held = () => ((typeof sync === 'function' ? sync(owner) : sync) && host.world.mainSync?.held(struct, owner, name)) || null;
+      const value = () => { const record = held(); return record ? host.world.mainSync.read(record, name) : get(owner, r); };
+      const write = set && ((v) => {
+        const record = held();
+        if (!record || !host.world.mainSync.write(record, name, v)) set(owner, v, r);
+        host.update?.(struct, name, owner);
       });
+      Object.defineProperty(data, name, { enumerable: true, get: () => (names === undefined ? value() : elements(value(), names, write)), set: write });
       if (enumItems) items[name] = () => enumItems(owner, r);
       if (channel) channels[name] = (index) => channel(owner, index);
     }
