@@ -137,7 +137,7 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
 
 
 // IDRecalcFlag: what the depsgraph evaluates again of an ID tagged with it (0 for all of it).
-export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13;
+export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13, ID_RECALC_ALL = 0xffffffff;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 // A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
@@ -270,10 +270,13 @@ export class BlenderMain {
     this.relationsChanged();
     return errors;
   }
-  // An object's modifiers as Main holds them: each one's type (ModifierType), name, mode (ModifierMode) and address.
+  // An object's modifiers as Main holds them: each one's type (ModifierType), name, mode (ModifierMode), address and
+  // the error it reported in its last evaluation (or null).
   modifiers(ob) {
     const list = [];
-    for (let md; (md = x.object_modifier(ob, list.length) >>> 0);) list.push({ type: x.modifier_type(md), name: cString(x.modifier_name(md)), mode: x.modifier_mode(md), md });
+    for (let md; (md = x.object_modifier(ob, list.length) >>> 0);) {
+      list.push({ type: x.modifier_type(md), name: cString(x.modifier_name(md)), mode: x.modifier_mode(md), md, error: x.modifier_error(md) ? cString(x.modifier_error(md)) : null });
+    }
     return list;
   }
   // Changes an object's rotation mode (eRotationModes), keeping its rotation.

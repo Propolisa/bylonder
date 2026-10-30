@@ -23,8 +23,8 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
 
 ## Evaluation and drawing
 
-- `main_evaluate` runs `BKE_pose_where_is` for each armature after its world matrix, as the depsgraph's pose
-  evaluation does (constraints and IK included).
+- Blender's depsgraph evaluates each armature's pose after its world matrix (constraints and IK included), when
+  `main_evaluate` runs it.
 - The armature object's Babylon mesh is its bones drawn as Blender's overlay draws Octahedral bones
   (`src/draw/overlay-armature.js`): an octahedron per bone placed by the matrix Blender evaluated (the edit bone's in
   Edit Mode, else the pose's), scaled by the bone's length. Main is authoritative; Babylon draws.

@@ -11,14 +11,13 @@ import { createWorld } from './scene/world.js';
 import { blenderModifierDefinitions, sceneModifierDefinitions } from '../modifiers/blender.js';
 import { addModifier, modifierStack } from '../modifiers/stack.js';
 import { mesh_serialize } from './mesh/mesh.js';
-import { buildMesh, rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { CurveObject, evaluateCurve } from './curve/curve.js';
 import { blenderTransform } from '../editors/curve/curve-objects.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject } from '../runtime/object-transform.js';
-import { blenderModule, ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
-import { Color3, FreeCamera, Material, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { blenderModule, ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
+import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { readTexture } from './texture/texture.js';
 import { armature_draw } from '../draw/overlay-armature.js';
@@ -28,6 +27,8 @@ import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 const MODIFIER_DEFINITIONS = [...blenderModifierDefinitions, ...sceneModifierDefinitions];
 export const CURVE_TYPES = ['CURVE', 'FONT'];
+// The objects drawn from what the depsgraph evaluated.
+const DRAWN = ['MESH', 'EMPTY'];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
@@ -54,12 +55,17 @@ const MAKERS = {
   FONT: (scene, name) => new Mesh(name, scene),
 };
 
-// A mesh object's Mesh drawn as Main holds it, Main owning it (its recipe is the Mesh data, for saving).
-export function drawMesh(entry, blender) {
-  rebuildMesh(entry.node, { mesh: mesh_serialize(blender.mesh(entry.ob)) });
+// A mesh object's Mesh as Main holds it is its recipe (its Mesh data, for saving), Main owning it; the view draws it as
+// the depsgraph evaluates it.
+function keepMesh(entry, blender) {
+  entry.node.metadata = { ...entry.node.metadata, wbCreation: { mesh: mesh_serialize(blender.mesh(entry.ob)) } };
   [entry.creation, entry.owned] = [entry.node.metadata.wbCreation, true];
   blender.setProperty(entry.ob, PROPERTIES.standin, '');
 }
+
+// Blender's matrix (column-major, Z up) as Babylon's (row-major, Y up): Babylon's (x, y, z) is Blender's (x, z, y).
+const AXIS = [0, 2, 1, 3];
+const babylonMatrix = (m) => Matrix.FromArray(Array.from({ length: 16 }, (_, i) => m[AXIS[i >> 2] * 4 + AXIS[i & 3]]));
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
 //   textures, sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.
@@ -104,7 +110,7 @@ export function createMainView(state) {
     const { node, type } = entry;
     if (type === 'MESH') {
       if (blender.property(entry.ob, PROPERTIES.standin) === '1') entry.owned = false;
-      else drawMesh(entry, blender);
+      else keepMesh(entry, blender);
     }
     else if (CURVE_TYPES.includes(type)) {
       const data = curveObject(entry).data;
@@ -127,7 +133,7 @@ export function createMainView(state) {
   }
 
   // A mesh object in Blender's Edit Mode in Main: its edit mesh drawn, shaded and as the edit overlay, its mode Main's;
-  // leaving it, the Mesh Blender wrote is drawn. Returns whether it is in Edit Mode.
+  // leaving it, the Mesh Blender wrote is kept (and drawn as evaluated). Returns whether it is in Edit Mode.
   function drawEditMode(entry) {
     const edit = blender.editMesh(entry.ob), { node } = entry;
     if (!edit && !entry.overlay) return false;
@@ -135,7 +141,8 @@ export function createMainView(state) {
     if (!edit) {
       entry.overlay.dispose();
       entry.overlay = null;
-      drawMesh(entry, blender);
+      keepMesh(entry, blender);
+      entry.drawn = false;
       return false;
     }
     mesh_batch_cache_apply(edit.mesh, node, { topology: true });
@@ -369,7 +376,7 @@ export function createMainView(state) {
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL);
         if (entry.type === 'MESH' && !state.modifiersPending(entry)) pullModifiers(entry);
         if (entry.type === 'MESH' && drawEditMode(entry)) continue;
-        if (changed && entry.type === 'MESH') drawMesh(entry, blender);
+        if (changed && entry.type === 'MESH') keepMesh(entry, blender);
         else if (changed && entry.type !== 'ARMATURE') drawData(entry);
       }
       const { nodes: added, revived } = adopt();
@@ -384,7 +391,7 @@ export function createMainView(state) {
       pullShading();
       pullTextures();
       for (const record of state.sceneRecords()) pull(record, world);
-      blender.evaluate();
+      state.evaluate();
       for (const entry of objects.values()) if (entry.type === 'ARMATURE') pullArmature(entry);
     } finally {
       state.applying = false;
@@ -392,6 +399,34 @@ export function createMainView(state) {
     // Last, as the collections' subscribers (the Outliner) draw from Main as soon as they change.
     if (world.collections) state.readCollections();
     world.modifiers?.refresh();
+  }
+
+  // What the depsgraph updated, drawn (docs/model.md): a mesh object's or empty's evaluated world matrix, and a mesh
+  // object's evaluated mesh where Main holds its Mesh (outside Edit Mode, which draws the edit mesh), with its
+  // modifiers' errors. An object not drawn yet is drawn whole.
+  function drawEvaluated() {
+    const updates = new Map(blender.updates().map(({ id, recalc }) => [id, recalc]));
+    const was = state.applying;
+    state.applying = true;
+    try {
+      for (const entry of objects.values()) {
+        if (!DRAWN.includes(entry.type)) continue;
+        const recalc = entry.drawn ? updates.get(entry.ob) ?? 0 : ID_RECALC_ALL;
+        if (!recalc) continue;
+        entry.drawn = true;
+        entry.node.freezeWorldMatrix(babylonMatrix(blender.transform(entry.ob).matrix_world));
+        if (entry.type === 'MESH' && entry.owned && !entry.overlay && recalc & ID_RECALC_GEOMETRY) drawGeometry(entry);
+      }
+    } finally {
+      state.applying = was;
+    }
+  }
+  function drawGeometry({ node, ob }) {
+    const mesh = blender.evaluatedMesh(ob);
+    if (!mesh) return;
+    const errors = blender.modifiers(ob).map(({ error }) => error);
+    if (world.modifiers) world.modifiers.draw(node, mesh, errors);
+    else mesh_batch_cache_apply(mesh, node);
   }
 
   // Materials and worlds as Main holds them: their values and their node trees' inputs, Babylon's derived from them.
@@ -418,7 +453,7 @@ export function createMainView(state) {
   }
 
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, evaluated,
+    pull, view, adopt, adoptScene, drawData, drawShading, evaluated, drawEvaluated,
   };
 }
 

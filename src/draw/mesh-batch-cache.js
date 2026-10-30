@@ -10,6 +10,8 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
 import { mesh_batch_cache_vertex_buffers } from './mesh-batch-buffers.js';
 
+// VertexData's field of each vertex buffer kind it can hold.
+const BUFFERS = { [VertexBuffer.PositionKind]: 'positions', [VertexBuffer.NormalKind]: 'normals', [VertexBuffer.UVKind]: 'uvs', [VertexBuffer.ColorKind]: 'colors', [VertexBuffer.TangentKind]: 'tangents' };
 const babylonPoint = (p, v) => new Vector3(p[v * 3], p[v * 3 + 2], p[v * 3 + 1]);
 // Object Mode wire color of Blender's default theme.
 const WIRE = Color3.Black();
@@ -103,7 +105,10 @@ export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = 
     return;
   }
   babylonMesh.makeGeometryUnique?.();
-  mesh_batch_cache_vertex_data(mesh).applyToMesh(babylonMesh, true);
+  const data = mesh_batch_cache_vertex_data(mesh);
+  // A buffer the mesh no longer has (a UV map an evaluation left out) goes, so every buffer has its vertex count.
+  for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) if (BUFFERS[kind] && !data[BUFFERS[kind]]) babylonMesh.removeVerticesData(kind);
+  data.applyToMesh(babylonMesh, true);
   faceEdges.set(babylonMesh, face_edge_corners(mesh));
   // A single submesh would keep its old index count when an edit changes the topology.
   if (babylonMesh.subMeshes?.length <= 1) babylonMesh._createGlobalSubMesh(true);

@@ -4,11 +4,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { NullEngine, Scene, MeshBuilder, FreeCamera, Vector3, VertexBuffer } from '@babylonjs/core';
+import { NullEngine, Scene, FreeCamera, Vector3, VertexBuffer } from '@babylonjs/core';
+import { createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { registerObjects } from '../src/blenkernel/animation/bindings.js';
 import { createRenderSettings } from '../src/blenkernel/scene/render.js';
+import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
+import { sceneMain } from './scene-main.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
 import { bundleWorker } from '../scripts/modifiers-polyfill.mjs';
@@ -27,17 +30,21 @@ const engine = new NullEngine(), scene = new Scene(engine);
 const camera = new FreeCamera('Camera', new Vector3(0, 5, -20), scene);
 const STACKS = [['Subdivision', 'SUBSURF', { levels: 2 }], ['Array', 'ARRAY', { count: 3 }], ['Bevel', 'BEVEL', { width: 0.2, segments: 3 }],
   ['Mirror', 'MIRROR', { use_mirror_merge: false }], ['Solidify', 'SOLIDIFY', { thickness: 0.3 }]];
+// Shaded smooth: the polyfill takes a Mesh without its sharp faces, which Main's evaluation keeps.
 const cubes = STACKS.map(([name], i) => {
-  const cube = MeshBuilder.CreateBox(name, { size: 2 }, scene);
-  cube.metadata = { wbId: name, wbCreation: { operator: 'mesh.primitive_cube_add', options: {} } };
+  const cube = shadeSmooth(createPrimitive(name, 'mesh.primitive_cube_add', { size: 2 }, scene));
+  cube.metadata.wbId = name;
   cube.position.x = i * 4;
   return cube;
 });
 const animation = createAnimationModel();
 const objects = Object.assign([...cubes, asObject(camera)], { scene });
-const world = { scene, objects, animation, sceneSettings: { camera: () => camera, state: { name: 'Scene' } } };
+const world = { scene, objects, animation };
+world.sceneSettings = createSceneSettings(world, { cameras: { list: () => [camera], get: () => camera, set: () => {} } });
 world.renderSettings = createRenderSettings(world);
 world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
+// Blender's modifiers evaluate in Main.
+sceneMain(world);
 registerObjects(animation, objects);
 const added = STACKS.map(([, type, values], i) => world.modifiers.add(cubes[i], type, values));
 // The Solidify thickness, keyed from 0.1 to 0.5 over the scene range.

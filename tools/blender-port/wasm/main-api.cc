@@ -523,11 +523,23 @@ void object_mesh_set(Object *ob, int verts_num, const float3 *positions, int edg
 /* Adds an attribute of a domain (AttrDomain) and type (AttrType) to a mesh object's Mesh, from one value per element. */
 EXPORT(object_mesh_attribute_add) bool object_mesh_attribute_add(Object *ob, const char *name, int domain, int type, const void *data)
 {
-  bke::MutableAttributeAccessor attributes = id_cast<Mesh *>(ob->data)->attributes_for_write();
+  Mesh *mesh = id_cast<Mesh *>(ob->data);
+  bke::MutableAttributeAccessor attributes = mesh->attributes_for_write();
   const CPPType &cpp_type = bke::attribute_type_to_cpp_type(bke::AttrType(type));
   const GSpan values(cpp_type, data, attributes.domain_size(bke::AttrDomain(domain)));
   DEG_id_tag_update(ob->data, ID_RECALC_GEOMETRY);
-  return attributes.add(name, bke::AttrDomain(domain), bke::AttrType(type), bke::AttributeInitVArray(GVArray::from_span(values)));
+  if (!attributes.add(name, bke::AttrDomain(domain), bke::AttrType(type), bke::AttributeInitVArray(GVArray::from_span(values)))) {
+    return false;
+  }
+  /* A 2D vector per face corner is a UV map: the first one the Mesh has is its active and default, as Blender's
+   * Mesh.uv_layers.new makes it. */
+  if (bke::AttrDomain(domain) == bke::AttrDomain::Corner && bke::AttrType(type) == bke::AttrType::Float2 &&
+      mesh->active_or_default_uv_map_name().is_empty())
+  {
+    mesh->uv_maps_active_set(name);
+    mesh->uv_maps_default_set(name);
+  }
+  return true;
 }
 
 /* A mesh object's Mesh, read through the header until the next call. */

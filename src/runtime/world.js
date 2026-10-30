@@ -1,8 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { asObject } from "./object-transform.js";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
-import { createWorkerEvaluator } from "../modifiers/evaluator.js";
-import { createJobs } from "../windowmanager/wm-jobs.js";
 import { geometryNodesDefinition } from "../nodes/geometry-nodes.js";
 import { createCompositor } from "../compositor/compositor.js";
 import { createParticles } from "../nodes/particles.js";
@@ -31,10 +29,9 @@ registerModifier(geometryNodesDefinition);
 //   input: run payload (base, importmap, files, animation, remember, overrides, scene: { id, name, builder })
 //   hooks: commit() for undo steps, saveOverrides() for scene edits, onAnimation(data), notify(text),
 //          setCamera(next) when the scene camera changes (the host decides what camera view means),
-//          renameScene(name) when the scene is renamed in Properties, jobs (wm-jobs.js) that evaluate modifiers
-//          off the main thread
+//          renameScene(name) when the scene is renamed in Properties
 export async function createWorld({ input, engine, canvas, hooks = {} }) {
-  const { commit = () => {}, saveOverrides = () => {}, onAnimation = () => {}, notify = console.warn, setCamera = () => {}, renameScene = () => {}, jobs = createJobs() } = hooks;
+  const { commit = () => {}, saveOverrides = () => {}, onAnimation = () => {}, notify = console.warn, setCamera = () => {}, renameScene = () => {} } = hooks;
   const sdk = createSDK(input.base, input.overrides, () => saveOverrides(), onAnimation);
   const animation = sdk.animation;
   Object.assign(globalThis, { BABYLON: { ...BABYLON }, engine, canvas, workbench: sdk });
@@ -148,7 +145,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   world.particles.refresh();
   if (input.remember) documentState.apply(input.overrides);
   if (input.remember) for (const [ref, value] of Object.entries(input.overrides?.channels || {})) animation.channels.get(ref)?.set(value);
-  world.modifiers = createModifierSystem(world, { commit, notify, jobs, evaluate: createWorkerEvaluator() });
+  world.modifiers = createModifierSystem(world, { commit, notify });
   world.modifiers.refresh();
   if (input.animation) animation.load(input.animation);
   return {

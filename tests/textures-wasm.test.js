@@ -7,6 +7,7 @@ import { blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview } from '../src/blenkernel/texture/texture.js';
 import { createTextures } from '../src/blenkernel/texture/textures.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
+import { sceneMain } from './scene-main.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 
 // Blender's textures sampled and displacing by Blender's code in the module (BKE_texture_get_value, multitex, BLI noise),
@@ -89,6 +90,8 @@ objects.scene = scene;
 const world = { scene, objects, animation: createAnimationModel() };
 world.textures = createTextures(world);
 world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
+// Blender's modifiers evaluate in Main.
+sceneMain(world);
 const clouds = world.textures.create();
 world.textures.set(clouds, 'type', 'CLOUDS');
 const height = () => box.getVerticesData('position').reduce((sum, v) => sum + Math.abs(v), 0);

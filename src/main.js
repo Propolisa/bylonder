@@ -66,8 +66,6 @@ import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
-import { createJobs } from "./windowmanager/wm-jobs.js";
-import { createRunningJobs } from "./editors/interface/running-jobs.js";
 import { exportScene } from "./io_scene_babylon/export.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
@@ -164,15 +162,11 @@ function refreshUI() {
   ui?.refresh();
   for (const view of viewports()) view.regions?.draw();
 }
-// Modifier evaluations off the main thread, shown with Cancel once they take long, asking before enormous ones.
-const jobs = createJobs({ ask: true });
-const runningJobs = createRunningJobs(document.body.appendChild(document.createElement("div")), jobs);
 let built;
 try {
   performance.mark("bl:world");
   built = await createWorld({ input, engine, canvas, hooks: {
     commit,
-    jobs,
     saveOverrides: () => saveOverrides(),
     onAnimation: (data) => send("animation", data),
     notify,
@@ -763,8 +757,6 @@ function dispose() {
   sequencerAdapter.dispose();
   unsubscribeAnimation();
   world.modifiers.dispose();
-  jobs.dispose();
-  runningJobs.dispose();
   sdk.dispose();
   creator.dispose();
   world.hud.dispose();

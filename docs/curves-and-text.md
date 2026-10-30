@@ -11,7 +11,7 @@ Blender's Curve and Text objects (`OB_CURVES_LEGACY`, `OB_FONT`) in Bylonder: Bl
 ## Evaluation
 
 - `curve_object_eval` runs `BKE_displist_make_curveTypes` as the depsgraph does: text through `BKE_vfont_to_curve` (layout, size, shear, spacing, alignment, text boxes and overflow, offset, underline, small caps, kerning), deform modifiers on the control points, tessellation, bevel, extrude, taper, profile, fill and twist, then the other modifiers on the mesh. A filled, extruded or beveled curve gives a mesh; otherwise the wire of its evaluated curves (`curve_to_wire_mesh`, as Object > Convert makes it), which Bylonder draws as loose edges.
-- Objects a curve follows are evaluated first, with their world matrices (`editors/curve/curve-objects.js`); a change to one evaluates its followers again. The module has no depsgraph to say which curves need a path, so every curve gets one (`DEG_get_eval_flags_for_id`, a `port-override`).
+- Objects a curve follows are evaluated first, with their world matrices (`editors/curve/curve-objects.js`); a change to one evaluates its followers again.
 - Text along a path: `follow_curve` (Blender's text on a curve) and the Curve modifier (`MOD_curve.cc`, deforming the text's points before tessellation) both run Blender's code.
 
 ## Fonts

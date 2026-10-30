@@ -8,9 +8,11 @@ import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { registerObjects, bindProperties } from '../src/blenkernel/animation/bindings.js';
 import { createRenderSettings } from '../src/blenkernel/scene/render.js';
+import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { serializeScene } from '../src/io_scene_babylon/babylon-export.js';
 import { exportModule } from '../src/io_scene_babylon/js-export.js';
+import { sceneMain } from './scene-main.js';
 
 // A Default Cube with Subdivision Surface, a PBR material whose color is keyed, a point light and the scene camera,
 // next to Bylonder's helpers: an overlay mesh, an editor camera and the cube's loose-edge line child.
@@ -31,9 +33,12 @@ Object.assign(wire, { parent: cube, metadata: { drawOwner: cube } });
 
 const animation = createAnimationModel();
 const objects = Object.assign([cube, asObject(light), asObject(camera)], { scene });
-const world = { scene, objects, animation, sceneSettings: { camera: () => camera, state: { name: 'Scene' } } };
+const world = { scene, objects, animation };
+world.sceneSettings = createSceneSettings(world, { cameras: { list: () => [camera], get: () => camera, set: () => {} } });
 world.renderSettings = createRenderSettings(world);
 world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
+// Blender's modifiers evaluate in Main.
+sceneMain(world);
 registerObjects(animation, objects);
 const material = bindProperties(animation, paint, { id: 'material', properties: { albedoColor: {} } });
 animation.time.configure({ frameStart: 1, frameEnd: 20 });

@@ -3,9 +3,8 @@
 // ModifierData at the DNA fields RNA names (dna-modifiers.json).
 import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
-import { evaluateModifiers, meshData, blenderModule } from '../bmesh/bmesh-wasm.js';
+import { evaluateModifiers, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { moduleTexture, freeUnusedTextures } from '../blenkernel/texture/texture.js';
-import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { fieldLayout, writeValues, readValues } from './dna-write.js';
 
 // The types that evaluate on a mesh alone; the rest need other objects, vertex groups, bind data or simulation.
@@ -128,19 +127,3 @@ export function evaluated({ mesh, errors }) {
 // Evaluates Blender modifiers on a Mesh.
 export const evaluateBlenderModifiers = (mesh, modifiers) => withTextures(() => evaluated(evaluateModifiers(mesh, moduleModifiers(modifiers))));
 
-// An evaluation that can be posted to another realm: a Mesh's data and stack entries.
-export const evaluation = (mesh, modifiers) => ({ mesh: meshData(mesh), modifiers: modifiers.map(({ type, values, texture }) => ({ type, values, texture })) });
-
-// Runs an evaluation in this realm's module: the evaluated Mesh detached from it.
-export const evaluate = ({ mesh, modifiers }) => withTextures(() => evaluated(evaluateModifiers(createMesh(mesh), moduleModifiers(modifiers))).detach());
-
-// How many times the faces it takes a modifier makes, where its settings say so up front.
-const GROWTH = {
-  SUBSURF: (v) => 4 ** v.levels,
-  ARRAY: (v) => (v.fit_type === 'FIXED_COUNT' ? v.count : 1),
-  SCREW: (v) => v.steps * v.iterations,
-  BEVEL: (v) => v.segments,
-};
-// About how many faces a stack makes of a Mesh, for asking before an evaluation that would take very long.
-export const estimatedFaces = (mesh, modifiers) =>
-  modifiers.reduce((faces, { type, values }) => faces * (GROWTH[type]?.(values) ?? 1), mesh.faces_num || mesh.edges_num);

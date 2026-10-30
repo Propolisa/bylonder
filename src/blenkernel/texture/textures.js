@@ -19,7 +19,7 @@ export function createTextures(world, { commit = () => {} } = {}) {
     for (let i = 1; ; i++) { const next = `${stem}.${String(i).padStart(3, '0')}`; if (!taken.has(next)) return next; }
   };
   const changed = (finish = true) => {
-    world.modifiers?.refresh();
+    world.mainSync?.sceneChanged();
     if (finish) commit();
     emit();
   };
@@ -50,7 +50,7 @@ export function createTextures(world, { commit = () => {} } = {}) {
     capture: () => clone(state),
     apply(input) {
       state = clone(input ?? baseline);
-      world.modifiers?.refresh();
+      world.mainSync?.sceneChanged();
       emit();
     },
   };

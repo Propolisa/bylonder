@@ -2,15 +2,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { NullEngine, Scene, MeshBuilder, Matrix } from '@babylonjs/core';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
-import { evaluateBlenderModifiers, evaluated, moduleModifiers, evaluation, estimatedFaces } from '../src/modifiers/blender.js';
-import { evaluateHere } from '../src/modifiers/evaluator.js';
-import { createJobs } from '../src/windowmanager/wm-jobs.js';
-import { BlenderMain, evaluateModifiers } from '../src/bmesh/bmesh-wasm.js';
+import { evaluateBlenderModifiers, moduleModifiers } from '../src/modifiers/blender.js';
+import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createMesh, createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
 import { hasMesh } from '../src/editors/object/identity.js';
 import { mesh_deserialize } from '../src/blenkernel/mesh/mesh.js';
+import { sceneMain } from './scene-main.js';
 
 // Blender's modifiers evaluated by Blender's code in the module, against Blender 5.2's result on a default cube
 // (tools/blender-reference/modifier-fixtures.py).
@@ -56,12 +55,17 @@ assert.deepEqual(Array.from(final.corner_verts), subsurf.corner_verts);
 main.run('object.mode_set', { mode: 'OBJECT' });
 main.remove(ob);
 
-// In the stack: Blender's modifiers draw on the object, and Apply keeps the evaluated Mesh.
+// In the stack: Main's depsgraph evaluates Blender's modifiers, the object draws the result, and Apply keeps it.
 const engine = new NullEngine(), scene = new Scene(engine), box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
 box.metadata = { wbId: 'cube', wbCreation: { operator: 'mesh.primitive_cube_add', options: {} } };
-const objects = [box];
-objects.scene = scene;
-const modifiers = createModifierSystem({ scene, objects, animation: createAnimationModel() }, { notify: (message) => { throw Error(message); } });
+// A world whose objects' Mesh data is Main's, and its modifier stacks.
+const mainWorld = (objects) => {
+  const world = { scene, objects: Object.assign(objects, { scene }), animation: createAnimationModel() };
+  const stacks = world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
+  sceneMain(world);
+  return stacks;
+};
+const modifiers = mainWorld([box]);
 const subsurfModifier = modifiers.add(box, 'SUBSURF');
 assert.equal(box.getTotalIndices(), 24 * 2 * 3);
 modifiers.set(box, subsurfModifier.id, 'levels', 2);
@@ -70,51 +74,6 @@ modifiers.apply(box, subsurfModifier.id);
 assert.equal(box.metadata.wbCreation.mesh.face_offsets.length - 1, 96);
 modifiers.dispose();
 
-// Evaluations posted to another realm (a worker) give the same Mesh.
-const cubeMesh = primitive_add('mesh.primitive_cube_add');
-const posted = evaluateHere(structuredClone(evaluation(cubeMesh, subsurf.stack)));
-const direct = evaluated(evaluateModifiers(cubeMesh, moduleModifiers(subsurf.stack)));
-assert.deepEqual([posted.corner_verts, posted.vert_positions].map((a) => Array.from(a)), [direct.corner_verts, direct.vert_positions].map((a) => Array.from(a)));
-assert.ok(estimatedFaces(primitive_add('mesh.primitive_cube_add'), [{ type: 'SUBSURF', values: { levels: 11 } }]) > 4e6);
-
-// With jobs, evaluations run off the main thread (a timer stands in for the worker; levels from 5 never finish): the
-// last result stays drawn meanwhile, a slow one shows with Cancel, which goes back to what evaluated last as an undo
-// step, and an enormous one asks first.
-const slow = (evaluation, signal) => new Promise((resolve, reject) => {
-  const timer = evaluation.modifiers[0].values.levels < 5 && setTimeout(() => resolve(evaluateHere(evaluation)), 5);
-  signal.addEventListener('abort', () => { clearTimeout(timer); reject(signal.reason); }, { once: true });
-});
-const jobs = createJobs({ delay: 20, ask: true }), notes = [];
-let commits = 0;
-const guarded = createModifierSystem({ scene, objects, animation: createAnimationModel() }, { commit: () => commits++, notify: (text) => notes.push(text), jobs, evaluate: slow });
-const tick = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const level = guarded.add(box, 'SUBSURF', { levels: 1 });
-await guarded.settled();
-const levelOne = box.getTotalIndices();
-guarded.set(box, level.id, 'levels', 3);
-guarded.set(box, level.id, 'levels', 2);
-assert.equal(box.getTotalIndices(), levelOne, 'The last result stays drawn');
-await guarded.settled();
-assert.equal(box.getTotalIndices(), levelOne * 4);
-guarded.set(box, level.id, 'levels', 6);
-await tick(40);
-assert.deepEqual(jobs.shown.map((job) => [job.name, job.question]), [['Cube | Subdivision Surface', null]]);
-const before = commits;
-jobs.stop(jobs.shown[0]);
-await tick(0);
-assert.equal(guarded.stack(box).at(-1).values.levels, 2, 'Cancel goes back to what evaluated last');
-assert.equal(commits, before + 1);
-assert.equal(box.getTotalIndices(), levelOne * 4);
-guarded.set(box, level.id, 'levels', 11);
-await tick(0);
-assert.match(jobs.shown[0].question, /faces/);
-jobs.stop(jobs.shown[0]);
-await tick(0);
-assert.equal(guarded.stack(box).at(-1).values.levels, 2);
-assert.deepEqual(notes, ['Cube | Subdivision Surface: cancelled', 'Cube | Subdivision Surface: cancelled']);
-guarded.dispose();
-jobs.dispose();
-console.log('Modifiers: jobs keep the last result drawn, Cancel goes back to it as an undo step, and an enormous stack asks first');
 // Mesh data from code (Mesh.from_pydata): a profile of loose edges is a mesh object Screw turns into faces, and Shade
 // Smooth draws a primitive's subdivided faces with vertex normals.
 const profile = [[0.3, 0, 0], [0.5, 0, 0.4], [0.2, 0, 1]];
@@ -123,7 +82,7 @@ vase.metadata.wbId = 'vase';
 assert.ok(hasMesh(vase) && vase.getTotalVertices() === 0, 'loose edges only');
 const cube = shadeSmooth(createPrimitive('Smooth', 'mesh.primitive_cube_add', { size: 2 }, scene));
 assert.equal(mesh_deserialize(cube.metadata.wbCreation.mesh).attribute('sharp_face'), undefined);
-const lathe = createModifierSystem({ scene, objects: [vase], animation: createAnimationModel() });
+const lathe = mainWorld([vase]);
 lathe.add(vase, 'SCREW', { steps: 8 });
 await lathe.settled();
 assert.equal(vase.getTotalIndices(), 8 * 2 * 6, 'Screw makes two quads per step');
@@ -136,7 +95,7 @@ engine.getCaps().instancedArrays = true;
 const studs = createPrimitive('Studs', 'mesh.primitive_cube_add', { size: 0.2 }, scene);
 studs.metadata.wbId = 'studs';
 studs.thinInstanceAdd([0, 1, 2].map((x) => Matrix.Translation(x, 0, 0)));
-const placed = createModifierSystem({ scene, objects: [studs], animation: createAnimationModel() });
+const placed = mainWorld([studs]);
 const bevel = placed.add(studs, 'BEVEL', { width: 0.02 });
 await placed.settled();
 assert.equal(studs.thinInstanceCount, 3, 'instances survive the evaluation');
@@ -150,4 +109,4 @@ scene.dispose();
 engine.dispose();
 console.log(`Modifiers: ${known.length} results differ where known (${Object.values(KNOWN).join('; ')})`);
 console.log(`Modifiers: ${Object.keys(SKIPPED).length} stacks not offered yet (${[...new Set(Object.values(SKIPPED))].join('; ')})`);
-console.log(`Modifiers: ${fs.readdirSync(dir).length - known.length - Object.keys(SKIPPED).length} stacks of Blender's modifiers match Blender 5.2, in Object and Edit Mode, in the stack and applied`);
+console.log(`Modifiers: ${fs.readdirSync(dir).length - known.length - Object.keys(SKIPPED).length} stacks of Blender's modifiers match Blender 5.2, in Object and Edit Mode, evaluated by Main's depsgraph and applied`);

@@ -21,12 +21,13 @@ import { INFO } from '../makesrna/rna.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { moduleModifiers, asBlenderModifier } from '../modifiers/blender.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
+import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
 import { CurveObject } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
-import { MultiMaterial } from '@babylonjs/core';
+import { MultiMaterial, VertexData } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
@@ -92,11 +93,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
-  // A struct of the scene's (not an ID), whose writes tag the scene.
-  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, offset, ptr: blender.scene + offset, get id() { return blender.scene; }, shadow: new Map() }; };
+  // A struct of the scene's (not an ID): its holder, the scene, is tagged when it is written.
+  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, offset, ptr: blender.scene + offset, get holder() { return blender.scene; }, shadow: new Map() }; };
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings'), cursor = sceneStruct('View3DCursor');
   const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
-  const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), get id() { return blender.scene; }, shadow: new Map() };
+  const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), get holder() { return blender.scene; }, shadow: new Map() };
   // The scene's records, over the world: the scene, its render, unit and tool settings and 3D cursor, those whose slices it has.
   const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units, cursor] : []), tools, display];
   // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
@@ -172,7 +173,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       record.shadow.set(name, dnaGet(record.struct, record.ptr, name));
       api.writes++;
     }
-    if (api.writes !== written) blender.tag(record.id ?? record.ptr, record.struct === 'Object' ? ID_RECALC_TRANSFORM | ID_RECALC_SYNC_TO_EVAL : 0);
+    if (api.writes !== written) blender.tag(record.holder ?? record.ptr, record.struct === 'Object' ? ID_RECALC_TRANSFORM | ID_RECALC_SYNC_TO_EVAL : 0);
   }
   // Objects: one per Bylonder object, with data of its type; one made again when its type changed. A deleted one is
   // deleted in Main, which undo brings back; one that left the scene keeps its keys (blender-ids.js).
@@ -212,9 +213,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     ids.forget(entry.key);
   }
   // A hook saw an object change (or, without one, something no hook sees): it goes to Main at the end of the task.
+  // Until Main evaluates it, the object and its children draw at the transform Babylon computes from the page's values.
   function changed(entry) {
     if (state.applying) return;
-    if (entry) dirty.add(entry);
+    if (entry) {
+      dirty.add(entry);
+      for (const node of [entry.node, ...entry.node.getDescendants(false)]) node.unfreezeWorldMatrix?.();
+    }
     else {
       for (const e of objects.values()) dirty.add(e);
       sceneChanged = true;
@@ -270,7 +275,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     entry.curve = signature;
     curveObject(entry).data = data;
   }
-  // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings.
+  // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings, which Main's
+  // depsgraph evaluates on Mesh data of Main's: a mesh Babylon built gets its geometry as its Mesh data then.
   // A modifier deforming by another object (an Armature's) points at its Object in Main.
   const modifierTarget = ({ values }) => [...objects.values()].find(({ node }) => nodeId(node) === values.object)?.ob ?? 0;
   const blenderStack = (entry) => modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
@@ -283,6 +289,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const stack = blenderStack(entry), signature = modifiersSignature(stack), target = modifierTarget;
     if (signature === entry.modifiers) return;
     entry.modifiers = signature;
+    if (stack.length && !entry.owned) {
+      const { node } = entry;
+      node.metadata.wbCreation = { mesh: mesh_serialize(objectMesh(node, node.metadata.wbModifierBase && VertexData.Parse(node.metadata.wbModifierBase))) };
+      pushGeometry(entry);
+    }
     // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
     blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0, target));
   }
@@ -350,7 +361,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const record = textures.get(entry.id);
       if (record.babylonName !== entry.name) { blender.rename(record.tex, entry.name); record.babylonName = entry.name; }
       blender.setFakeUser(record.tex, entry.fakeUser);
-      if (record.values !== entry.values) { writeTexture(record.tex, entry.values); record.values = entry.values; }
+      if (record.values !== entry.values) { writeTexture(record.tex, entry.values); blender.tag(record.tex); record.values = entry.values; }
     }
   }
   function pushWorlds() {
@@ -390,7 +401,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       collections.delete(id);
     }
     for (const c of cols.state.collections) {
-      if (!collections.has(c.id)) collections.set(c.id, { struct: 'Collection', ptr: blender.addCollection(null, c.name), shadow: new Map(), layer: { struct: 'LayerCollection', id: blender.scene, shadow: new Map() } });
+      if (!collections.has(c.id)) collections.set(c.id, { struct: 'Collection', ptr: blender.addCollection(null, c.name), shadow: new Map(), layer: { struct: 'LayerCollection', holder: blender.scene, shadow: new Map() } });
       const record = collections.get(c.id);
       if (blender.name(record.ptr) !== c.name) blender.rename(record.ptr, c.name);
       push(record, c);
@@ -414,7 +425,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const pointer of pointers) if (!byPointer.has(pointer)) {
       const id = newId(pointer);
       byPointer.set(pointer, id);
-      collections.set(id, { struct: 'Collection', ptr: pointer, shadow: new Map(), layer: { struct: 'LayerCollection', id: blender.scene, shadow: new Map() } });
+      collections.set(id, { struct: 'Collection', ptr: pointer, shadow: new Map(), layer: { struct: 'LayerCollection', holder: blender.scene, shadow: new Map() } });
     }
     for (const [id, record] of collections) if (!pointers.includes(record.ptr)) collections.delete(id);
     const idOf = (pointer) => (pointer === blender.masterCollection ? cols.MASTER : byPointer.get(pointer));
@@ -467,8 +478,13 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       pushScene();
       sceneChanged = false;
     }
-    blender.evaluate();
+    evaluate();
     if (all && api.debug) assertEqual('flush');
+  }
+  // Main evaluated by its depsgraph and what it updated drawn (main-view.js).
+  function evaluate() {
+    blender.evaluate();
+    mainView.drawEvaluated();
   }
 
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
@@ -607,14 +623,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (diffs.length) throw new Error(`Babylon and Main differ after ${when}:\n  ${diffs.join('\n  ')}`);
   }
 
-  // A mesh object's Mesh with its modifiers applied, as Blender evaluates it (for export, and the stacks that evaluate
-  // in Main).
-  function evaluatedMesh(node) {
-    flush();
-    fill([node]);
-    return blender.evaluatedMesh(objects.get(node).ob);
-  }
-
   // What Blender's code tagged so far: the objects whose geometry it changed, with their types.
   const geometryTagged = () => [...objects.values()].filter(({ ob }) => { const tags = blender.tags(ob); return (tags.object | tags.data) & ID_RECALC_GEOMETRY; })
     .map(({ node, type }) => ({ node, type }));
@@ -645,7 +653,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     frameChanged(frame) {
       flush();
       blender.frame = frame;
-      blender.evaluate();
+      mainView.drawEvaluated();
       mainView.evaluated();
     },
     // Blender's undo stack, started from Main as it is (the scene's first state), its steps pushed and loaded.
@@ -655,7 +663,22 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     geometryTagged,
     revert,
     check,
-    evaluatedMesh,
+    // A change of the scene's data no hook sees (a texture's settings): Main takes it, evaluates and draws it.
+    sceneChanged() {
+      sceneChanged = true;
+      flush(false);
+    },
+    // A mesh object's Mesh with its modifiers as the depsgraph evaluated it, valid until the next evaluation.
+    evaluatedMesh(node) {
+      flush();
+      return blender.evaluatedMesh(objects.get(node).ob);
+    },
+    // A change of an object no hook sees (its modifier stack): Main takes it, evaluates and draws it.
+    objectChanged(node) {
+      const entry = objects.get(node);
+      if (entry) dirty.add(entry);
+      flush(false);
+    },
     // For code that reads Main's geometry: fn runs with the stand-ins filled.
     withMeshes(fn, nodes) {
       flush();
@@ -694,7 +717,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, forget, modifiersPending,
+    sceneRecords, readCollections, relations, nodeOf, forget, modifiersPending, evaluate,
     // The stack as Main holds it is the page's now (after a view took Blender's changes).
     modifiersTaken: (entry) => { entry.modifiers = modifiersSignature(blenderStack(entry)); },
   };
@@ -710,6 +733,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     ids.read = false;
   }
   // Evaluated from the start, as Blender's window evaluates Main after each event.
-  blender.evaluate();
+  evaluate();
+  world.mainSync = api;
   return api;
 }
