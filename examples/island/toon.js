@@ -66,10 +66,14 @@ void main() {
   gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + underglow * smoothstep(0.0, -0.6, n.y)) + glow, 1.0);
 }`;
 
+// Ink: a flat color, unlit and clear of the haze, for the comic marks drawn over the scene (marks.js).
+const ink = `${lighting}
+uniform vec3 color;
+void main() { gl_FragColor = vec4(color, 1.0); }`;
+
 // The island's ground by the story's day: volcanic rock and beaches, lava running down five channels from the crater
 // and cooling to basalt, then soil and grass spreading from the shore up the slopes. Long after, a meteor strikes the
-// slope and a fire burns a path down through the forest past the nest tree (its front at fireFront from the centre);
-// then the ground heals.
+// slope and a fire burns a path down through the forest past the nest tree (its front at fireFront from the centre).
 const terrain = `${lighting}
 uniform float day, fireFront, fireHeat, blast, blastReach;
 float fireAngle(float r) { return ${NEST.angle.toFixed(4)} + 0.12 * (sin(r * 1.9 + 1.0) - sin(${(NEST.r * 1.9 + 1).toFixed(4)})); }
@@ -272,6 +276,7 @@ export function createToon(scene) {
       water?.setFloat('blast', blast);
     },
     sky: skyMaterial,
+    ink: (name, color) => Object.assign(make(name, ink, ['color']).setColor3('color', BABYLON.Color3.FromHexString(color)), { backFaceCulling: false }),
     plain: (name, color) => make(name, plain, ['color', 'underglow', 'glow']).setColor3('color', BABYLON.Color3.FromHexString(color)).setColor3('underglow', BABYLON.Color3.Black()).setColor3('glow', BABYLON.Color3.Black()),
     terrain: () => (ground = make('Ground', terrain, ['day', 'fireFront', 'fireHeat', 'blast', 'blastReach'])),
     sea: () => (water = make('Water', sea, ['day', 'blast'])),

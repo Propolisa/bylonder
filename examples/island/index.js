@@ -4,6 +4,7 @@ import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
 import { createForest } from './forest.js';
 import { daylight, createClouds, createSmoke, meteorAt } from './sky.js';
+import { createMarks } from './marks.js';
 import { createBombs, createSteam, createWhales, createBirds, createFireflies, createTurtle } from './life.js';
 import { createFamily } from './family.js';
 import { createMeteor, fireLight, fireballAt } from './meteor.js';
@@ -42,6 +43,7 @@ export const createScene = async function () {
   const camera = new BABYLON.TargetCamera('Camera', new Vector3(14, 6, -10), scene);
   Object.assign(camera, { fov: 0.95, minZ: 0.1, maxZ: 1000, lockedTarget: new Vector3(0, 1.6, 0) });
   moving.push(await createAudio(scene, camera, animation.time));
+  moving.push(createMarks(scene, toon, camera));
   // Lava, fire and the meteor glow past white, which bloom spreads.
   const lens = new BABYLON.DefaultRenderingPipeline('Lens', true, scene, [camera]);
   Object.assign(lens, { bloomEnabled: true, bloomThreshold: 1.4, bloomWeight: 0.85, bloomKernel: 64 });

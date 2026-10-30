@@ -31,6 +31,11 @@ beach, rubble floats on the sea, the far side is black glass, and the lee is sti
   debris, sparks, water column, spray, vapor ring, steam and a wave that the island breaks, with foam and surf, the
   strike's smoke column, the forest fire, ash, embers and the rubble left floating on the sea (`meteor.js`), and steam where the first lava meets the
   sea (`life.js`).
+- **Marks.** `marks.js` draws comic marks over the film in flat ink with an outline, each kind its own shape: jagged
+  red spikes burst from a bird's head when it calls in alarm, wide arcs swell out from a whale's song and blow, a
+  starburst pops at each great impact and the tree's crash, and speed lines stream behind every falling rock. They
+  face the camera at a constant size on screen and come from the cue sheet and the rocks' paths, so they land with the
+  sounds.
 - **Life.** `forest.js` grows clumps of trees with bushes, ferns and flowering vines between, sways and burns them;
   `life.js` has the flock, the whales, fireflies and the turtle.
 - **Sound.** `sounds.js` makes every sound from noise and tones; `audio.js` holds the cue sheet and plays it in

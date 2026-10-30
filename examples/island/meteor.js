@@ -73,6 +73,12 @@ const PIECES = FRAGMENTS.map((f) => {
   return { ...f, split, from: fireballAt(split), to: new Vector3(f.x, 0.1, f.z) };
 });
 const fragmentAt = (f, time) => Vector3.Lerp(f.from, f.to, Math.min(1, Math.max(0, (time - f.split) / (f.land - f.split))) ** 1.6);
+// Every rock falling through the air now: the asteroid and its fragments, where each is and which way it moves.
+export function fallingRocks(time) {
+  const rock = (at, size) => ({ position: at(time), velocity: at(time + 0.05).subtract(at(time - 0.05)).scale(10), size });
+  return [...(time >= BEAT.streak && time < BEAT.impact ? [rock(fireballAt, 1)] : []),
+    ...PIECES.filter((f) => time >= f.split && time < f.land).map((f) => rock((t) => fragmentAt(f, t), f.size))];
+}
 // The fragments in the air: burning rocks in glowing shells, the large ones nearly the asteroid's size, each its own
 // streamer of flame and smoke, with sparks where it shears off.
 function createFragments(scene, toon) {
