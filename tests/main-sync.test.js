@@ -293,9 +293,10 @@ assert.deepEqual(sync.check(), []);
 // Hooks keep a transform drag cheap: one changed object among many reaches Main without the others being read.
 for (let i = 0; i < 300; i++) box('Many ' + i, [i, 0, 0]);
 sync.flush();
-const start = performance.now();
+// This process's own CPU time, which other tests running alongside do not stretch.
+const start = process.cpuUsage();
 for (let i = 0; i < 100; i++) { cube.position.x = i; await null; }
-const perEdit = (performance.now() - start) / 100;
+const { user, system } = process.cpuUsage(start), perEdit = (user + system) / 1000 / 100;
 assert.equal(location(cube)[0], 99);
 assert(perEdit < 10, `an edit takes ${perEdit.toFixed(2)} ms to reach Main`);
 

@@ -352,25 +352,26 @@ export function createMainView(state) {
     const was = state.applying;
     state.applying = true;
     try {
-      const known = new Set([blender.scene]);
+      // The updated IDs the view draws; any other is a node tree of a material or world.
+      const drawn = new Set();
       for (const entry of objects.values()) {
-        known.add(entry.ob).add(entry.data.ptr);
-        if (updates.has(entry.ob) || updates.has(entry.data.ptr)) {
+        const object = updates.get(entry.ob), data = entry.data.ptr ? updates.get(entry.data.ptr) : undefined;
+        if (object !== undefined || data !== undefined) {
+          drawn.add(entry.ob).add(entry.data.ptr);
           pull(entry, entry.node);
           if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
           if (entry.type === 'ARMATURE') pullArmature(entry);
         }
-        if (!DRAWN.includes(entry.type)) continue;
-        const recalc = entry.drawn ? updates.get(entry.ob) ?? 0 : ID_RECALC_ALL;
-        if (!recalc) continue;
+        const recalc = entry.drawn ? object : ID_RECALC_ALL;
+        if (!recalc || !DRAWN.includes(entry.type)) continue;
         entry.drawn = true;
         const matrix = babylonMatrix(blender.transform(entry.ob).matrix_world);
         if (entry.node.freezeWorldMatrix) entry.node.freezeWorldMatrix(matrix);
         else setEvaluatedMatrix(entry.node, matrix);
         if (recalc & ID_RECALC_GEOMETRY && drawsGeometry(entry)) drawGeometry(entry);
       }
-      // A material's or world's own update, or one of an ID the view does not know (its node tree).
-      const nodeTrees = [...updates.keys()].some((id) => !known.has(id));
+      const shading = [...materials.values()].map((record) => record.ma).concat([...worlds.values()].map((record) => record.wo));
+      const nodeTrees = [...updates.keys()].some((id) => !drawn.has(id) && id !== blender.scene && !shading.includes(id));
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
       if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);

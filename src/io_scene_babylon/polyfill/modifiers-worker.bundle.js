@@ -368,7 +368,21 @@ function mesh_batch_cache_vertex_buffers(mesh) {
     }
   }
   const uvs = mesh.attribute("UVMap");
-  return { positions, normals, indices: Uint32Array.from(mesh.corner_tris()), ...uvs && { uvs: Float32Array.from(uvs) } };
+  return { positions, normals, ...trianglesBySlot(mesh), ...uvs && { uvs: Float32Array.from(uvs) } };
+}
+function trianglesBySlot(mesh) {
+  const tris = mesh.corner_tris(), slots = mesh.attribute("material_index");
+  if (!slots?.some(Boolean)) return { indices: Uint32Array.from(tris) };
+  const tri_faces = mesh.corner_tri_faces(), count = tri_faces.length, order = Array.from({ length: count }, (_, i) => i);
+  order.sort((a, b) => slots[tri_faces[a]] - slots[tri_faces[b]] || a - b);
+  const indices = new Uint32Array(count * 3), groups = [];
+  order.forEach((tri, i) => {
+    indices.set(tris.subarray(tri * 3, tri * 3 + 3), i * 3);
+    const slot = slots[tri_faces[tri]];
+    if (groups.at(-1)?.slot !== slot) groups.push({ slot, start: i * 3, count: 0 });
+    groups.at(-1).count += 3;
+  });
+  return { indices, groups };
 }
 
 // src/io_scene_babylon/polyfill/evaluate.js
