@@ -121,8 +121,9 @@ export function createMainView(state) {
     armature_draw(armatureDrawn(ob), node);
   }
 
-  // A mesh object in Blender's Edit Mode in Main: its edit mesh drawn, shaded and as the edit overlay, its mode Main's;
-  // leaving it, the Mesh Blender wrote is kept (and drawn as evaluated). Returns whether it is in Edit Mode.
+  // A mesh object in Blender's Edit Mode in Main: its edit mesh drawn as the edit overlay over its evaluated mesh (which
+  // the depsgraph evaluates from the edit mesh, its modifiers shown in Edit Mode included), its mode Main's; leaving it,
+  // the Mesh Blender wrote is kept. Returns whether it is in Edit Mode.
   function drawEditMode(entry) {
     const edit = blender.editMesh(entry.ob), { node } = entry;
     if (!edit && !entry.overlay) return false;
@@ -134,7 +135,6 @@ export function createMainView(state) {
       entry.drawn = false;
       return false;
     }
-    mesh_batch_cache_apply(edit.mesh, node, { topology: true });
     (entry.overlay ??= createEditMeshOverlay(node)).update(edit.mesh, { selectmode: edit.selectmode });
     return true;
   }
@@ -426,8 +426,9 @@ export function createMainView(state) {
       state.applying = was;
     }
   }
-  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds and a curve or text, outside Edit Mode.
-  const drawsGeometry = ({ type, owned, overlay, node }) => (type === 'MESH' ? owned && !overlay : CURVE_TYPES.includes(type) && !node.metadata?.editing);
+  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds (in Edit Mode too) and a curve or text outside Edit
+  // Mode.
+  const drawsGeometry = ({ type, owned, node }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) && !node.metadata?.editing);
   function drawGeometry({ node, ob }) {
     const mesh = blender.evaluatedMesh(ob);
     if (!mesh) return;
