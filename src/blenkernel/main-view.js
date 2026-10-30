@@ -12,7 +12,7 @@ import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
-import { asObject } from '../runtime/object-transform.js';
+import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { armatureData, armatureDrawn } from './armature/armature.js';
@@ -24,7 +24,7 @@ import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // The objects drawn from what the depsgraph evaluated.
-const DRAWN = ['MESH', 'EMPTY', ...CURVE_TYPES];
+const DRAWN = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA', ...CURVE_TYPES];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
@@ -342,10 +342,10 @@ export function createMainView(state) {
   }
 
   // What the depsgraph updated, drawn (docs/model.md): every updated object's and its data's values (a light's, a
-  // camera's, an armature's pose), materials' and worlds' values and node trees, the scene's settings; a mesh, curve,
-  // text object's or empty's evaluated world matrix,
-  // and the evaluated mesh of a mesh object whose Mesh Main holds or of a curve or text, with its modifiers' errors
-  // (outside Edit Mode, which draws the edit data). An object not drawn yet is drawn whole.
+  // camera's, an armature's pose), materials' and worlds' values and node trees, the scene's settings; an object's
+  // evaluated world matrix (a light's and camera's where Babylon reads them), and the evaluated mesh of a mesh object
+  // whose Mesh Main holds or of a curve or text, with its modifiers' errors (outside Edit Mode, which draws the edit
+  // data). An object not drawn yet is drawn whole.
   // `scene`: whether the scene's values are drawn, by default when it was tagged (always for a new frame; not before the
   // page's are in Main).
   function drawEvaluated({ scene } = {}) {
@@ -365,7 +365,9 @@ export function createMainView(state) {
         const recalc = entry.drawn ? updates.get(entry.ob) ?? 0 : ID_RECALC_ALL;
         if (!recalc) continue;
         entry.drawn = true;
-        entry.node.freezeWorldMatrix(babylonMatrix(blender.transform(entry.ob).matrix_world));
+        const matrix = babylonMatrix(blender.transform(entry.ob).matrix_world);
+        if (entry.node.freezeWorldMatrix) entry.node.freezeWorldMatrix(matrix);
+        else setEvaluatedMatrix(entry.node, matrix);
         if (recalc & ID_RECALC_GEOMETRY && drawsGeometry(entry)) drawGeometry(entry);
       }
       // A material's or world's own update, or one of an ID the view does not know (its node tree).

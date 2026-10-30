@@ -54,3 +54,29 @@ export function syncLightDirections(scene) {
     }
   });
 }
+
+// Blender's light and camera point along their local -Z with +Y up: Babylon's (x, z, y) of them.
+const BLENDER_FORWARD = new Vector3(0, -1, 0), BLENDER_UP = new Vector3(0, 0, 1);
+const evaluatedMatrices = new WeakMap();
+// A light or camera drawn at the world matrix Blender evaluated (its constraints, drivers and parents; Babylon's axes),
+// as Babylon reads it: a light's position and direction in the world, a camera's view.
+export function setEvaluatedMatrix(node, matrix) {
+  if (!evaluatedMatrices.has(node)) {
+    if (node.computeTransformedInformation) {
+      node.computeTransformedInformation = () => {
+        const m = evaluatedMatrices.get(node);
+        node.transformedPosition = m.getTranslation();
+        if (node.direction) node.transformedDirection = Vector3.TransformNormal(BLENDER_FORWARD, m).normalize();
+        return true;
+      };
+    } else if (node._getViewMatrix) {
+      node._isSynchronizedViewMatrix = () => false;
+      node._getViewMatrix = () => {
+        const m = evaluatedMatrices.get(node), eye = m.getTranslation();
+        Matrix.LookAtLHToRef(eye, eye.add(Vector3.TransformNormal(BLENDER_FORWARD, m)), Vector3.TransformNormal(BLENDER_UP, m), node._viewMatrix);
+        return node._viewMatrix;
+      };
+    }
+  }
+  evaluatedMatrices.set(node, matrix);
+}

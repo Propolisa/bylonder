@@ -2,7 +2,7 @@
 // view_frame_set) and the view draws the evaluated values by kind: an object's transform, a light's data. (Material
 // paths wait for the module's RNA to resolve them.)
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, Vector3, PointLight, PBRMaterial, Color3 } from '@babylonjs/core';
+import { NullEngine, Scene, Vector3, PointLight, PBRMaterial, Color3, FreeCamera } from '@babylonjs/core';
 import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { asObject } from '../src/runtime/object-transform.js';
@@ -11,6 +11,7 @@ import { sceneMain } from './scene-main.js';
 import { shaderTree } from '../src/blenkernel/main-sync.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
+import { blendData, setContextPointer } from '../src/python/bpy_rna.js';
 
 const scene = new Scene(new NullEngine()), objects = [];
 objects.scene = scene;
@@ -48,4 +49,23 @@ blender.setNodeTree(sync.materialOf(cube.material), tree);
 sync.view();
 assert(Math.abs(cube.material.albedoColor.g - 0.6) < 1e-4, `the base color Main holds: ${cube.material.albedoColor.asArray()}`);
 assert.deepEqual(sync.check(), []);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main");
+
+// A constraint Blender evaluates: the light copies the animated cube's location, drawn where the depsgraph puts it.
+setContextPointer(blender.C);
+const copy = blendData().objects.get(lamp.name).constraints.new('COPY_LOCATION');
+copy.target = blendData().objects.get(cube.name);
+sync.view();
+sync.frameChanged(6);
+lamp.computeTransformedInformation();
+assert(Vector3.Distance(lamp.transformedPosition, cube.getAbsolutePosition()) < 1e-4, `the light at the cube: ${lamp.transformedPosition}`);
+assert.equal(lamp.position.y, 4, "its own location is still Main's");
+// A camera tracking the cube (Track To) looks at it.
+const camera = asObject(new FreeCamera('Camera', new Vector3(0, 0, -10), scene));
+camera.metadata = { wbId: 'camera' };
+objects.push(camera);
+sync.flush();
+blendData().objects.get('Camera').constraints.new('TRACK_TO').target = blendData().objects.get(cube.name);
+sync.view();
+const looking = Vector3.TransformNormal(new Vector3(0, 0, 1), camera.getViewMatrix(true).clone().invert()).normalize();
+assert(Vector3.Distance(looking, cube.getAbsolutePosition().subtract(camera.position).normalize()) < 1e-3, `the camera looks at the cube: ${looking}`);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them");
