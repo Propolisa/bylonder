@@ -73,12 +73,20 @@ function surfaceFor(width, height, samples) {
 // Frame the scene state was last advanced to, so sequential final frames pre-roll only once.
 let simulated = null;
 
-async function drawFinalFrame(frame, width, height) {
+async function drawFinalFrame(frame, width, height, progress) {
   const q = quality(), job = { ...q, width, height };
   const { out, ctx, accumulator } = surfaceFor(width, height, q.samples);
-  // Pre-roll from the start frame so code that integrates time (physics, deltaTime) reaches the same state a
-  // full animation render would.
-  for (let f = simulated !== null && simulated < frame ? simulated + 1 : q.start; f < frame; f++) await renderSample(f, [0, 0], job);
+  // A scene with physics pre-rolls from the start frame, so it reaches the state a full animation render would; its
+  // frames are thrown away, so they draw at the smallest size. Without physics a frame is its time alone.
+  const from = !built.scene.isPhysicsEnabled() ? frame : simulated !== null && simulated < frame ? simulated + 1 : q.start;
+  if (from < frame) {
+    resize(2, 2);
+    for (let f = from; f < frame; f++) {
+      await renderSample(f, [0, 0], { ...job, width: 2, height: 2 });
+      progress?.(f - from + 1, frame - from);
+    }
+    resize(width, height);
+  }
   const times = sampleTimes(frame, q.samples, q);
   accumulator?.reset();
   for (let s = 0; s < q.samples; s++) {
@@ -92,10 +100,11 @@ async function drawFinalFrame(frame, width, height) {
 }
 
 // One frame for a scene strip: a single sample for previews, full quality for final renders.
-async function renderFrame({ frame, width, height, camera, quality: kind = 'preview' }) {
+// progress(done, total) hears of a final frame's pre-roll.
+async function renderFrame({ frame, width, height, camera, quality: kind = 'preview', progress }) {
   resize(width, height);
   await useCamera(camera);
-  if (kind === 'final') return createImageBitmap(await drawFinalFrame(frame, width, height));
+  if (kind === 'final') return createImageBitmap(await drawFinalFrame(frame, width, height, progress));
   simulated = null;
   const { start, fps } = quality();
   await renderSample(frame, [0, 0], { start, fps, width, height });
@@ -125,20 +134,25 @@ async function renderSample(t, offset, { start, fps, width, height }) {
 // The scene's sound over the frames it was opened for, as its camera hears it (Blender's mixdown of a scene): its own
 // Babylon audio engines play into the offline audio context while the scene steps a frame at a time, the audio
 // pausing at each frame for the scene to move its sources and listener there. Null for a scene that makes no sound.
-async function renderAudio() {
+// progress(done, total) hears of each frame.
+async function renderAudio(progress = () => {}) {
   if (!built.audible) return null;
   const { frameStart, frameEnd, fps, context } = sound, { animation, scene } = built, start = animation.time.state.frameStart;
   await useCamera();
   animation.time.play();
+  // A frame that fails stops the mix with its error rather than leaving it suspended.
+  let failed;
+  const stopped = new Promise((resolve, reject) => { failed = reject; });
   for (let frame = frameStart; frame <= frameEnd; frame++) {
     context.suspend((frame - frameStart) / fps).then(() => {
       clock.set(frameMs(frame, start, fps));
       animation.time.configure({ frameCurrent: frame }, { record: false });
       scene.render();
-      context.resume();
-    });
+      progress(frame - frameStart + 1, frameEnd - frameStart + 1);
+      return context.resume();
+    }).catch(failed);
   }
-  const buffer = await context.startRendering();
+  const buffer = await Promise.race([context.startRendering(), stopped]);
   animation.time.pause();
   return { samples: Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c)), sampleRate: buffer.sampleRate };
 }

@@ -17,7 +17,8 @@ const toBase64 = (bytes) => {
 const fromBase64 = (text) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 
 // The scene's state to save: Main's .blend and every object's native data, deleted ones included (their ids).
-export const projectState = (world) => ({ blend: toBase64(gzipSync(world.mainSync.projectBlend())), objects: nativeSnapshot(world.objects) });
+// Without gzip's time stamp, the same scene saves as the same text.
+export const projectState = (world) => ({ blend: toBase64(gzipSync(world.mainSync.projectBlend(), { mtime: 0 })), objects: nativeSnapshot(world.objects) });
 
 // Opens a saved state over the objects the project's code built, before the scene sync starts: Main becomes the
 // .blend's, its objects the ones of the ids they carry (blender-ids.js), and the saved native data is applied.

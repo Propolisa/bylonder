@@ -222,10 +222,17 @@ const mainScene = () => pointerStruct(structFind("Scene"), world.mainSync.blende
 // Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
 // Render jobs and scene strips render from a snapshot of the scene, whether or not scene edits are remembered.
 const liveSnapshot = () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() });
+// The last mixdown of the scene's sound for a render, kept while the scene, its frames and rates stay the same.
+let mixed = null;
+const mixdown = (payload, range, options) => {
+  const key = JSON.stringify([sceneState(payload), range]);
+  if (mixed?.key !== key) mixed = { key, audio: renderSceneAudio(payload, { ...range, ...options }).catch((error) => { mixed = null; throw error; }) };
+  return mixed.audio;
+};
 const renderHost = createRenderHost({
   world,
   snapshot: liveSnapshot,
-  sceneAudio: (range) => renderSceneAudio(liveSnapshot(), { ...range, fps: frameRate(animation.time.state) }),
+  sceneAudio: (range, options) => mixdown(liveSnapshot(), { ...range, fps: frameRate(animation.time.state) }, options),
   sequencer: { hasStrips: () => strips(world.sequenceEditor.state).length > 0, openCompositor: (range) => sequencerAdapter.openCompositor(range) },
   name: () => world.sceneSettings.state.name || "render",
 });

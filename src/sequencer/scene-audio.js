@@ -7,11 +7,14 @@ import { openRenderContext } from '../render/render-context.js';
 const SAMPLE_RATE = 48000;
 
 // The sound of a run payload over frames frameStart..frameEnd at fps: { samples: Float32Array per channel, sampleRate },
-// or null if the scene makes none.
-export async function renderSceneAudio(payload, { frameStart, frameEnd, fps, sampleRate = SAMPLE_RATE }) {
+// or null if the scene makes none. progress(done, total) hears of each frame; `signal` aborts it.
+export async function renderSceneAudio(payload, { frameStart, frameEnd, fps, sampleRate = SAMPLE_RATE, progress, signal }) {
   const { context, dispose } = await openRenderContext(payload, { width: 2, height: 2 }, { audio: { frameStart, frameEnd, fps, sampleRate } });
   try {
-    const audio = await context.renderAudio();
+    const audio = await new Promise((resolve, reject) => {
+      signal?.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true });
+      context.renderAudio(progress).then(resolve, reject);
+    });
     // Copied out of the render context's window, which goes with it.
     return audio && { samples: audio.samples.map((channel) => new Float32Array(channel)), sampleRate: audio.sampleRate };
   } finally {

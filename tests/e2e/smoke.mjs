@@ -694,6 +694,39 @@ const checks = {
     assert.deepEqual(await fps(), [24, 1, 24]);
   },
 
+  // Video with sound mixes the scene's sound first, with a progress bar; a second render of the same scene reuses the
+  // mix, and Cancel stops a mix at once.
+  "Render Animation to video mixes the scene's sound with progress, once": { open: { example: "Volcanic Island", node: "Island" }, async run() {
+    await app.bylonder((b) => {
+      b.world.animation.time.configure({ frameEnd: 24 });
+      Object.assign(b.mainScene.render.image_settings, { media_type: "VIDEO", file_format: "FFMPEG" });
+      Object.assign(b.mainScene.render.ffmpeg, { format: "WEBM", codec: "WEBM", audio_codec: "OPUS" });
+    });
+    const statuses = [], progress = [];
+    app.page.on("console", (m) => /MIXKEY/.test(m.text()) && console.log(m.text()));
+    const watch = () => app.frame().evaluate(() => [document.querySelector(".render-result [data-status]").textContent, getComputedStyle(document.querySelector(".render-result-progress")).display !== "none"]);
+    const renderAndWatch = async () => {
+      statuses.length = 0;
+      await menu("TOPBAR_MT_render", "Render Animation");
+      while (true) {
+        const [status, bar] = await watch();
+        statuses.push(status); progress.push(bar);
+        if (/^(Finished|Render failed|Render cancelled)/.test(status)) return status;
+        await app.page.waitForTimeout(100);
+      }
+    };
+    assert.match(await renderAndWatch(), /^Finished 24 frames/);
+    assert.ok(statuses.some((s) => /^Mixing scene sound \| \d+ \/ 24/.test(s)), "the mix shows its progress");
+    assert.ok(progress.some(Boolean), "with a progress bar");
+    assert.match(await renderAndWatch(), /^Finished 24 frames/);
+    assert.ok(!statuses.some((s) => s.startsWith("Mixing")), "a second render of the same scene reuses the mix");
+    await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 400 }));
+    await menu("TOPBAR_MT_render", "Render Animation");
+    await app.until((b, selector) => /^Mixing/.test(document.querySelector(selector).textContent), renderStatus, 60000);
+    await app.page.click(".render-result [data-cancel]");
+    await app.until((b, selector) => document.querySelector(selector).textContent === "Render cancelled", renderStatus, 5000);
+  } },
+
   // The island makes its sound with Babylon's audio; a Scene Audio strip carries it into the sequencer's mix.
   "Add > Scene Audio puts the scene's sound in the edit": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     const out = await app.bylonder(async (b) => {

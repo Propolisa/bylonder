@@ -7,6 +7,9 @@
 .render-result-view { flex: 1; min-height: 0; display: grid; place-items: center; background: var(--bl-back) repeating-conic-gradient(#0000 0 25%, #ffffff0a 0 50%) 0 0 / 16px 16px; overflow: hidden; }
 .render-result-view canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
 .render-result footer [data-status] { color: var(--bl-text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.render-result-progress { height: 3px; background: var(--bl-status-track); }
+.render-result-progress[hidden] { display: none; }
+.render-result-progress > div { height: 100%; width: 0; background: var(--bl-status-done); transition: width 0.2s linear; }
 .render-result-actions { display: flex; gap: 4px; }
 .render-result-actions button { background: var(--bl-widget); color: var(--bl-text); border: 1px solid var(--bl-widget-line); border-radius: var(--bl-radius); padding: 2px 10px; cursor: pointer; }
 .render-result-actions button:hover { background: var(--bl-widget-hi); }

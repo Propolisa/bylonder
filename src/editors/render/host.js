@@ -19,19 +19,23 @@ const untilCancelled = (promise, signal) => new Promise((resolve, reject) => {
 // result in a Render Result window, like Blender's render window.
 //   snapshot() -> run payload with the current scene edits and animation, independent of Remember Scene Edits
 //   sequencer: { hasStrips(), openCompositor({ frameStart, frameEnd, width, height }) } for Post Processing > Sequencer
-//   sceneAudio({ frameStart, frameEnd, sampleRate }) -> the scene's sound over those frames, for video with audio
+//   sceneAudio({ frameStart, frameEnd, sampleRate }, { progress(done, total), signal }) -> the scene's sound over those
+//   frames, for video with audio
 export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name = () => 'render' }) {
   let job = null, last = null;
   const win = document.createElement('section');
   win.className = 'render-result';
   win.hidden = true;
   win.setAttribute('aria-label', 'Render Result');
-  win.innerHTML = '<header><span>Render Result</span><button data-close title="Close (Esc)" aria-label="Close">×</button></header><div class="render-result-view"><canvas></canvas></div><footer><span data-status></span><span class="render-result-actions"><button data-cancel>Cancel</button><button data-save>Save As…</button></span></footer>';
+  win.innerHTML = '<header><span>Render Result</span><button data-close title="Close (Esc)" aria-label="Close">×</button></header><div class="render-result-view"><canvas></canvas></div><div class="render-result-progress" hidden><div></div></div><footer><span data-status></span><span class="render-result-actions"><button data-cancel>Cancel</button><button data-save>Save As…</button></span></footer>';
   document.body.append(win);
   const view = win.querySelector('canvas'), status = win.querySelector('[data-status]');
   const cancelButton = win.querySelector('[data-cancel]'), saveButton = win.querySelector('[data-save]');
   const show = () => { win.hidden = false; };
   const setStatus = text => { status.textContent = text; };
+  const bar = win.querySelector('.render-result-progress');
+  // How far the job is (0 to 1), or null to hide the bar.
+  const setProgress = (part) => { bar.hidden = part === null; bar.firstChild.style.width = `${(part ?? 0) * 100}%`; };
   const sync = () => { cancelButton.hidden = !job; saveButton.hidden = !!job || !last; };
   const draw = bitmap => { view.width = bitmap.width; view.height = bitmap.height; view.getContext('2d').drawImage(bitmap, 0, 0); bitmap.close(); };
   const download = ({ blob, filename }) => {
@@ -58,21 +62,25 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
     job = { controller, kind };
     last = null; sync(); show();
     setStatus('Preparing render…');
+    setProgress(0);
     let source = null, writer = null;
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
       source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames, spec.audio?.rate);
-      const audio = spec.audio ? await source.audio?.(signal) : null;
+      const mixing = (done, total) => { setStatus(`Mixing scene sound | ${done} / ${total} | ${clock(started)}`); setProgress(done / total); };
+      const audio = spec.audio ? await source.audio?.(signal, mixing) : null;
       writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
         if (signal.aborted) throw cancelled();
-        const image = await untilCancelled(source.renderFrame(frames[index]), signal);
+        const catchingUp = (done, total) => { setStatus(`Frame ${frames[index]} | catching up ${done} / ${total} | ${clock(started)}`); if (frames.length === 1) setProgress(done / total); };
+        const image = await untilCancelled(source.renderFrame(frames[index], catchingUp), signal);
         ctx.drawImage(image, 0, 0, size.width, size.height);
         image.close?.();
         draw(await createImageBitmap(out));
         if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / frameRate(time)) }));
         else await writer.add(out, frames[index]);
+        setProgress((index + 1) / frames.length);
         setStatus(`Frame ${frames[index]} | ${index + 1} / ${frames.length} | ${size.width} x ${size.height} | ${source.label} | ${clock(started)}`);
       }
       last = await writer.finish();
@@ -85,6 +93,7 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
       if (error.name !== 'AbortError') console.error(error);
     } finally {
       source?.dispose();
+      setProgress(null);
       job = null; sync();
     }
   }
@@ -92,8 +101,8 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
   // The scene camera through the compositor, rendered in an isolated render context, with the scene's sound.
   async function cameraSource(size, frames, sampleRate) {
     const { context, opened, dispose } = await openRenderContext(snapshot(), size);
-    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, dispose, renderFrame: (frame) => context.renderFrame({ frame, ...size, quality: 'final' }),
-      audio: () => sceneAudio?.({ frameStart: frames[0], frameEnd: frames.at(-1), sampleRate }) };
+    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, dispose, renderFrame: (frame, progress) => context.renderFrame({ frame, ...size, quality: 'final', progress }),
+      audio: (signal, progress) => sceneAudio?.({ frameStart: frames[0], frameEnd: frames.at(-1), sampleRate }, { signal, progress }) };
   }
 
   cancelButton.onclick = () => job?.controller.abort();
