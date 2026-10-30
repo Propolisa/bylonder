@@ -24,9 +24,8 @@ const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 //   host: commit() an undo step, wm() the window manager, pointer() its last pointer event, view() the 3D View under it.
 // Runs an operator on Main with the selected objects' geometry given to it, as one undo step: its exec, or invoked with
 // the event that ran it in the 3D View, as Blender's window manager runs it (view3d-modal.js), so a modal operator or
-// a macro (object.duplicate_move) runs on with the following events, written back as it goes. An operator that
-// changed the data of a light or camera, which Bylonder keeps itself, changes nothing. A popup its invoke opened runs
-// it again by exec with what it chose, or, for a properties dialog, runs the operator it kept.
+// a macro (object.duplicate_move) runs on with the following events, written back as it goes. A popup its invoke opened
+// runs it again by exec with what it chose, or, for a properties dialog, runs the operator it kept.
 export function runBlenderOperator(sync, idname, props, options) {
   const { event, keying, notify, commit, wm, pointer } = options;
   if (!event) return inMain(sync, options, () => sync.blender.run(idname, props));
@@ -60,14 +59,7 @@ export function runBlenderOperator(sync, idname, props, options) {
 // Runs Blender's code on Main as one undo step, its report shown.
 function inMain(sync, { transaction, notify, keying }, run) {
   let result;
-  transaction(() => sync.run(() => {
-    keying(() => { result = run(); });
-    const unheld = sync.geometryTagged().find(({ node }) => !sync.holdsData(node));
-    if (unheld) {
-      sync.revert();
-      result = { status: 0, report: `Bylonder does not apply this to ${unheld.type.toLowerCase()} objects yet` };
-    }
-  }, { meshes: sync.selected() }));
+  transaction(() => sync.run(() => keying(() => { result = run(); }), { meshes: sync.selected() }));
   if (result.report) notify(result.report);
   return result;
 }

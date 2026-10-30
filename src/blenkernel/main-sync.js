@@ -650,19 +650,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (diffs.length) throw new Error(`Babylon and Main differ after ${when}:\n  ${diffs.join('\n  ')}`);
   }
 
-  // What Blender's code tagged so far: the objects whose geometry it changed, with their types.
-  const geometryTagged = () => [...objects.values()].filter(({ ob }) => { const tags = blender.tags(ob); return (tags.object | tags.data) & ID_RECALC_GEOMETRY; })
-    .map(({ node, type }) => ({ node, type }));
-  // Main made Babylon's again, undoing what Blender's code changed that Bylonder does not take.
-  function revert() {
-    const records = [scene, render, units, tools, view, display, ...objects.values(), ...[...objects.values()].map((e) => e.data), ...materials.values(), ...worlds.values(),
-      ...[...collections.values()].flatMap((c) => [c, c.layer])];
-    records.forEach((record) => record.shadow.clear());
-    for (const entry of objects.values()) [entry.babylonName, entry.modifiers, entry.id] = [undefined, undefined, undefined];
-    collectionsSynced = '';
-    flush();
-  }
-
   const api = {
     blender,
     ids,
@@ -688,8 +675,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     undoInit: () => { flush(); blender.undoInit(); },
     undoPush,
     undoLoad,
-    geometryTagged,
-    revert,
     check,
     // A change of the scene's data no hook sees (a texture's settings): Main takes it, evaluates and draws it.
     sceneChanged() {
@@ -732,9 +717,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       return { nodes, warnings: [...read, ...warnings] };
     },
     adopt: (scene) => mainView.adopt(scene),
-    // Whether Blender's code may change an object's data: its geometry is filled for it (lights and cameras are
-    // Bylonder's objects of their own kind).
-    holdsData: (node) => ['MESH', 'EMPTY', 'ARMATURE', ...CURVE_TYPES].includes(objects.get(node)?.type),
     // The selected objects, whose geometry operators on the selection are given.
     selected: () => selection.nodes.filter((node) => objects.has(node)),
     objectOf: (node) => objects.get(node)?.ob ?? null,
