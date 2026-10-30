@@ -293,6 +293,15 @@ const checks = {
     assert.ok(text.drawn > before, `the new letter is drawn: ${before} to ${text.drawn}`);
   },
 
+  // Blender's Add Light makes an Area light Babylon draws as its rectangular area light, of Blender's size.
+  async "Add Light > Area draws a rectangular area light"() {
+    await app.bylonder((b) => b.runOperator("object.light_add", { type: "AREA" }));
+    await app.until((b) => b.world.scene.lights.some((l) => l.getClassName() === "RectAreaLight"));
+    await app.settled();
+    const size = await app.bylonder((b) => { const l = b.world.scene.lights.find((l) => l.getClassName() === "RectAreaLight"); return [l.width, l.height]; });
+    assert.deepEqual(size, [1, 1], "Blender's default size");
+  },
+
   // A click in Edit Mode is Blender's view3d.select on Main's edit mesh, picking as in X-ray.
   async "Edit Mode: a click selects the face under it"() {
     await app.click();

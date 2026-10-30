@@ -62,7 +62,16 @@ const evaluatedMatrices = new WeakMap();
 // as Babylon reads it: a light's position and direction in the world, a camera's view.
 export function setEvaluatedMatrix(node, matrix) {
   if (!evaluatedMatrices.has(node)) {
-    if (node.computeTransformedInformation) {
+    if (node._computeTransformedInformation) {
+      // An area light: its rectangle in Blender's local XY plane, lighting along its -Z.
+      node._computeTransformedInformation = () => {
+        const m = evaluatedMatrices.get(node);
+        m.getTranslationToRef(node._pointTransformedPosition);
+        Vector3.TransformNormalToRef(new Vector3(node.width, 0, 0), m, node._pointTransformedWidth);
+        Vector3.TransformNormalToRef(new Vector3(0, 0, -node.height), m, node._pointTransformedHeight);
+        return true;
+      };
+    } else if (node.computeTransformedInformation) {
       node.computeTransformedInformation = () => {
         const m = evaluatedMatrices.get(node);
         node.transformedPosition = m.getTranslation();

@@ -2,7 +2,7 @@
 // all of Blender's Light settings in RNA's terms (`metadata.wbLight`), and its Babylon light is derived from them; a
 // light project code made is Babylon's, and Blender's Light is derived from it. Derivation follows Blender's glTF
 // exporter (io_scene_gltf2 blender/exp/lights.py and light_spots.py), the conversion Blender itself ships to Babylon.
-import { DirectionalLight, Light, PointLight, SpotLight, Vector3 } from '@babylonjs/core';
+import { DirectionalLight, Light, PointLight, RectAreaLight, SpotLight, Vector3 } from '@babylonjs/core';
 import { asObject } from '../../runtime/object-transform.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { lightFields, lightStruct } from './light-fields.js';
@@ -25,10 +25,12 @@ export function intensityOf(type, watts, mode) {
 export const wattsOf = (type, intensity, mode) => intensity / intensityOf(type, 1, mode);
 
 // A Blender light of a type in a scene (bpy.data.lights.new with its object): the Babylon light nearest it, made
-// Blender's with the settings given. An Area light is a point light in Babylon.
+// Blender's with the settings given. An Area light is Babylon's rectangular one (a disk or ellipse its bounding
+// rectangle).
 export function createLight(name, type, settings = {}, scene) {
   const light = asObject(type === 'SPOT' ? new SpotLight(name, Vector3.Zero(), new Vector3(0, 0, 1), Math.PI / 4, 1, scene)
-    : type === 'SUN' ? new DirectionalLight(name, new Vector3(0, 0, 1), scene) : new PointLight(name, Vector3.Zero(), scene));
+    : type === 'SUN' ? new DirectionalLight(name, new Vector3(0, 0, 1), scene) : type === 'AREA' ? new RectAreaLight(name, Vector3.Zero(), 1, 1, scene)
+      : new PointLight(name, Vector3.Zero(), scene));
   makeBlenderLight(light, type, settings);
   return light;
 }
@@ -55,6 +57,10 @@ export function deriveBabylonLight(light) {
     light.angle = record.spot_size;
     light.innerAngle = (1 - record.spot_blend) * record.spot_size;
   }
+  if (record.type === 'AREA') {
+    light.width = record.size;
+    light.height = ['RECTANGLE', 'ELLIPSE'].includes(record.shape) ? record.size_y : record.size;
+  }
 }
 
 // What the other world does not show of a light, for Info when it is exported or saved: a Blender light as Babylon's,
@@ -63,7 +69,7 @@ export function lightLosses(light) {
   const name = `"${light.name}"`;
   if (isBlenderLight(light)) {
     const r = lightRecord(light), lost = [];
-    if (r.type === 'AREA') lost.push(`an Area light (${r.shape.toLowerCase()} shape) shown as a point light`);
+    if (r.type === 'AREA' && ['DISK', 'ELLIPSE'].includes(r.shape)) lost.push(`an Area light's ${r.shape.toLowerCase()} shape, shown as its rectangle`);
     if (r.use_temperature) lost.push('its color temperature');
     if (r.type === 'SUN' && r.angle > 0) lost.push('the sun\'s angle (soft shadows)');
     if (r.use_soft_falloff === false) lost.push('hard falloff');

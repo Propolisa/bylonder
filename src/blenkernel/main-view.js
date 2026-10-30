@@ -167,7 +167,6 @@ export function createMainView(state) {
           revived.push(link(kept, ob, type));
           continue;
         }
-        if (type === 'LIGHT' && dnaGet('Light', blender.data(ob), 'type') === 'AREA') warnings.push(`"${name}": an Area light opens as a point light`);
         const node = MAKERS[type](scene, name, ob, blender);
         // A copy Blender's code made (object.duplicate) carries its original's id: it gets one of its own.
         const taken = world.objects.some((other) => !deleted(other) && nodeId(other) === id) || [...objects.keys()].some((other) => nodeId(other) === id);
