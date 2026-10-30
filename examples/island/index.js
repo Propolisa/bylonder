@@ -1,5 +1,5 @@
 import { animate, animation, renderSettings } from '@workbench/sdk';
-import { FRAMES, FPS, LENGTH, BEAT, OMEN, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, tremor, omen, fireFront, burning, healing } from './story.js';
+import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, tremor, omen, fireFront, burning, healing, sinceStrike, blastRadius } from './story.js';
 import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
 import { createForest } from './forest.js';
@@ -11,13 +11,15 @@ import { createMeteor, fireLight, fireballAt } from './meteor.js';
 const { Vector3, Color3 } = BABYLON;
 const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
 
-// A volcanic island in time-lapse, two minutes long. The volcano pours lava down its slopes, the lava cools to soil and
-// a forest grows. A seabird finds the island, and her mate; they raise a chick in a blossom tree. Low in the sky an odd
-// star has been there from the start, with a faint trail; it grows, night after night, until late one day it falls. Its
-// fire runs down through the forest to the nest tree. The mother pushes the chick, who cannot yet fly, from the
-// burning branch; it flies, and she falls with the tree. Through the night the father and the chick keep out at sea;
-// the island heals, and at sunrise they come home to the sapling growing where the tree stood. Low poly and toon
-// shaded: the look is in toon.js, the story's clock in story.js, the effects are layers of particles (particles.js).
+// A volcanic island in time-lapse, three minutes long. The volcano pours lava down its slopes, the lava cools to soil
+// and a forest grows. A seabird finds the island, and her mate; they raise a chick in a blossom tree. Over the island's
+// far side an odd star has been there from the start, with a faint trail; it grows, night after night, until at sunset
+// it falls into the sea beyond the volcano. The far side is blasted to glass and a great wave races out, but the
+// volcano shelters the nest; burning debris over the ridge lights the forest above it. The mother pushes the chick,
+// who cannot yet fly, from the burning branch; it flies, and she falls with the tree. Through the night the father and
+// the chick keep out at sea; the island heals, and at first light they come home to the sapling growing where the
+// tree stood. Low poly and toon shaded: the look is in toon.js, the story's clock in story.js, the family in family.js,
+// the effects are layers of particles (particles.js).
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
@@ -27,7 +29,9 @@ export const createScene = function () {
 
   const dome = BABYLON.MeshBuilder.CreateSphere('Sky', { diameter: 400, segments: 24, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
   Object.assign(dome, { material: toon.sky, infiniteDistance: true, isPickable: false });
-  createIsland(scene).material = toon.terrain();
+  // The island, and the island after the strike with its far coast blasted away, shown from that moment.
+  const ground = toon.terrain(), island = createIsland(scene), struck = createIsland(scene, STRIKE);
+  island.material = struck.material = ground;
   createSea(scene).material = toon.sea();
   const forest = createForest(scene, toon);
   const moving = [forest, createClouds(scene, toon), createSmoke(scene, toon), createBombs(scene, toon), createSteam(scene, toon), createWhales(scene, toon),
@@ -49,7 +53,9 @@ export const createScene = function () {
     const frame = animation.time.frame, day = days(frame), time = seconds(frame);
     const light = grade(daylight(day, speed(frame)), time), fire = fireLight(time);
     toon.light(light, day, time, meteorAt(frame), air(light, fire, time, camera.globalPosition));
-    toon.fire({ front: fireFront(time), heat: time >= BEAT.impact ? burning(time) : 0, healed: healing(time), impact: flash(time) * 2 + smoothstep(BEAT.impact, BEAT.impact + 1, time) * (1 - smoothstep(BEAT.sea, BEAT.heal, time)) * 0.5 });
+    island.isVisible = time < BEAT.impact;
+    struck.isVisible = !island.isVisible;
+    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, healed: healing(time), blast: time >= BEAT.impact ? sinceStrike(time) : -1, blastReach: blastRadius(time) });
     for (const move of moving) move(day, time);
   });
 

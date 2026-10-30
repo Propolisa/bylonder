@@ -1,7 +1,8 @@
 import { createMesh } from '@workbench/sdk';
+import { blob } from './forest.js';
 import { random } from './random.js';
 import { shore } from './island.js';
-import { smoothstep, eruption, BEAT, shotAngle, frameAt, days } from './story.js';
+import { smoothstep, eruption, BEAT, LENGTH as FILM, shotAngle, frameAt, days } from './story.js';
 import { createParticles, together, pop, swell, glowOf, direction } from './particles.js';
 import { setMatrices, place, createPuffs } from './sky.js';
 
@@ -72,8 +73,8 @@ export function createWhales(scene, toon) {
   mesh.material = toon.plain('Whale', '#34507e');
   const SWIMS = [
     { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
-    { start: 117.4, angle: 0.45, distance: 11, size: 1.0 }, { start: 117.7, angle: 0.49, distance: 12, size: 0.45 },
-  ].map((swim) => ({ ...swim, angle: shotAngle(frameAt(Math.min(119.5, swim.start + 1.3))) + swim.angle }));
+    { start: BEAT.home + 2, angle: 0.45, distance: 11, size: 1.0 }, { start: BEAT.home + 2.3, angle: 0.49, distance: 12, size: 0.45 },
+  ].map((swim) => ({ ...swim, angle: shotAngle(frameAt(Math.min(FILM - 0.5, swim.start + 1.3))) + swim.angle }));
   const buffer = setMatrices(mesh, SWIMS.length), LENGTH = 3.2, R = 3.2;
   // Where a swim is at time t: on a circle of radius R below the sea, travelling along the shore.
   const pose = ({ start, angle, distance, size }, time) => {
@@ -102,30 +103,50 @@ export function createWhales(scene, toon) {
   };
 }
 
-// Birds of one color, any number: a body and two wings, posed each frame as flying (flapping or gliding) or perched
-// with their wings folded.
+// Birds of one color, any number: a body, two wings and a head with a beak and eyes, posed each frame as flying
+// (flapping or gliding) or perched with their wings folded. The head turns to look at a point, within what a neck
+// allows, or tucks back under a wing to sleep.
+const NECK = new Vector3(0.13, 0.05, 0), TUCKED = new Vector3(0.05, 0.055, 0);
 export function createBirdKit(scene, toon, name, color, count) {
-  const part = (suffix, vertices, faces) => {
+  const part = (suffix, vertices, faces, tint = color) => {
     const mesh = createMesh(`${name} ${suffix}`, { vertices, faces }, scene);
-    mesh.material = toon.plain(`${name} ${suffix}`, color);
+    mesh.material = toon.plain(`${name} ${suffix}`, tint);
     return { mesh, buffer: setMatrices(mesh, count) };
   };
   const body = part('Body', [[0.14, 0, 0], [-0.12, 0, 0.02], [0, 0.03, 0.03], [0, -0.03, 0.03], [0, 0, -0.03], [0.17, 0, 0.012]], [[0, 2, 1], [0, 1, 3], [0, 3, 4], [0, 4, 2], [1, 2, 4], [1, 4, 3], [0, 5, 2], [0, 3, 5]]);
   const left = part('Wing L', [[0.05, 0, 0], [-0.05, 0, 0], [-0.02, 0.28, 0.02]], [[0, 1, 2], [0, 2, 1]]);
   const right = part('Wing R', [[0.05, 0, 0], [-0.05, 0, 0], [-0.02, -0.28, 0.02]], [[0, 2, 1], [0, 1, 2]]);
-  const materials = [body, left, right].map(({ mesh }) => mesh.material);
+  const head = part('Head', blob(0.042, [0, 0, 0]).vertices, blob(0.042, [0, 0, 0]).faces);
+  const beak = part('Beak', [[0.03, 0.013, 0.004], [0.03, -0.013, 0.004], [0.03, 0, 0.016], [0.03, 0, -0.01], [0.088, 0, 0]],
+    [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [0, 1, 2], [0, 3, 1]], '#f2a54a');
+  const eyes = part('Eyes', [...blob(0.011, [0.022, 0.031, 0.014]).vertices, ...blob(0.011, [0.022, -0.031, 0.014]).vertices],
+    [...blob(0.011, [0, 0, 0]).faces, ...blob(0.011, [0, 0, 0]).faces.map((f) => f.map((v) => v + 14))], '#1d1a2b');
+  const materials = [body, left, right, head].map(({ mesh }) => mesh.material);
+  const turned = (q, v) => v.rotateByQuaternionToRef(q, new Vector3());
   return {
     materials,
-    // wings: an angle up from level (each beat), or `null` for folded.
-    pose(i, position, size, heading, { bank = 0, pitch = 0, wings = 0 } = {}) {
+    // wings: an angle up from level (each beat), or `null` for folded. look: a point to look at; tuck: 0 to 1 asleep.
+    pose(i, position, size, heading, { bank = 0, pitch = 0, wings = 0, look = null, tuck = 0, nod = 0 } = {}) {
       const turn = Quaternion.RotationAxis(Vector3.Up(), heading).multiply(Quaternion.RotationAxis(Vector3.Right(), bank)).multiply(Quaternion.RotationAxis(new Vector3(0, 0, 1), pitch));
-      const scale = new Vector3(1, 1, 1).scale(Math.max(1e-4, size)), folded = wings === null;
+      const s = Math.max(1e-4, size), scale = new Vector3(s, s, s), folded = wings === null;
       place(body.buffer, i, position, scale, turn);
       const wing = (side) => turn.multiply(Quaternion.RotationAxis(Vector3.Right(), folded ? side * 1.35 : -side * wings)).multiply(Quaternion.RotationAxis(Vector3.Up(), folded ? 0.5 : 0));
       place(left.buffer, i, position, folded ? scale.scale(0.7) : scale, wing(1));
       place(right.buffer, i, position, folded ? scale.scale(0.7) : scale, wing(-1));
+      // The head: its yaw and pitch toward what it looks at, in the body's frame, within the neck's reach.
+      const neck = position.add(turned(turn, Vector3.Lerp(NECK, TUCKED, tuck).scale(s)));
+      let yaw = 0, rise = 0;
+      if (look) {
+        const local = turned(Quaternion.Inverse(turn), look.subtract(neck));
+        yaw = Math.max(-2.3, Math.min(2.3, Math.atan2(-local.z, local.x)));
+        rise = Math.max(-1.2, Math.min(1.1, Math.atan2(local.y, Math.hypot(local.x, local.z))));
+      }
+      yaw += (2.7 * Math.sign(yaw || 1) - yaw) * tuck;
+      rise += (-0.5 - rise) * tuck + nod;
+      const gaze = turn.multiply(Quaternion.RotationAxis(Vector3.Up(), yaw)).multiply(Quaternion.RotationAxis(new Vector3(0, 0, 1), rise));
+      for (const p of [head, beak, eyes]) place(p.buffer, i, neck, scale, gaze);
     },
-    update() { for (const { mesh } of [body, left, right]) mesh.thinInstanceBufferUpdated('matrix'); },
+    update() { for (const { mesh } of [body, left, right, head, beak, eyes]) mesh.thinInstanceBufferUpdated('matrix'); },
   };
 }
 // The heading that points a bird along a direction.

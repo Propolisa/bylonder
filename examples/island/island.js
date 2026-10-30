@@ -14,19 +14,23 @@ export function heightAt(x, z) {
   return base + volcano - crater + 0.25 * land * Math.sin(x * 1.3 + 1) * Math.cos(z * 1.1);
 }
 
-// The island as one low-poly mesh: a grid jittered so its faces are irregular, in Blender's axes (Z up).
-export function createIsland(scene) {
+// The asteroid's crater: a bowl blasted out of the far coast, its centre in the sea (story.js STRIKE).
+const crater = (x, z, at) => (at ? 2.4 * Math.max(0, 1 - ((x - at.x) ** 2 + (z - at.z) ** 2) / 4.6 ** 2) ** 1.5 : 0);
+
+// The island as one low-poly mesh: a grid jittered so its faces are irregular, in Blender's axes (Z up). With `struck`
+// (a point), the island after the strike, its far coast blasted away.
+export function createIsland(scene, struck = null) {
   const N = 56, SIZE = 17, rand = random(3), vertices = [], faces = [];
   for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) {
     const edge = i === 0 || j === 0 || i === N || j === N, jitter = edge ? 0 : 0.35 * (SIZE / N);
     const x = -SIZE / 2 + (i * SIZE) / N + (rand() - 0.5) * jitter, z = -SIZE / 2 + (j * SIZE) / N + (rand() - 0.5) * jitter;
-    vertices.push([x, z, heightAt(x, z)]);
+    vertices.push([x, z, heightAt(x, z) - crater(x, z, struck)]);
   }
   for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
     const a = j * (N + 1) + i, b = a + 1, c = a + N + 1, d = c + 1;
     faces.push(...((i + j) % 2 ? [[a, b, d], [a, d, c]] : [[a, b, c], [b, d, c]]));
   }
-  return createMesh('Island', { vertices, faces }, scene);
+  return createMesh(struck ? 'Island Struck' : 'Island', { vertices, faces }, scene);
 }
 
 // The sea: Blender's Circle primitive, filled.
