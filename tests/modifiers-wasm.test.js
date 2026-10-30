@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { NullEngine, Scene, MeshBuilder, Matrix } from '@babylonjs/core';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { evaluateBlenderModifiers, moduleModifiers } from '../src/modifiers/blender.js';
-import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
+import { BlenderMain, OPERATOR_FINISHED } from '../src/bmesh/bmesh-wasm.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createMesh, createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
@@ -70,6 +70,12 @@ group.links.new(subdivide.outputs[0], groupOutput.inputs[0]);
 blendData().objects.get('Nodes').modifiers.new('GeometryNodes', 'NODES').node_group = group;
 main.evaluate();
 assert.equal(main.evaluatedMesh(nodesCube).faces_num, 24, "Blender's Geometry Nodes subdivide the cube once");
+// Blender's New (node.new_geometry_nodes_modifier) adds a Nodes modifier with its default group, which passes the mesh on.
+main.setBase(nodesCube, { select: true, active: true });
+main.run('object.modifier_remove', { modifier: 'GeometryNodes' });
+assert.ok(main.run('node.new_geometry_nodes_modifier').status & OPERATOR_FINISHED);
+main.evaluate();
+assert.equal(main.evaluatedMesh(nodesCube).faces_num, 6, "Blender's default Geometry Nodes group passes the cube through");
 main.remove(nodesCube);
 
 // In the stack: Main's depsgraph evaluates Blender's modifiers, the object draws the result, and Apply keeps it.

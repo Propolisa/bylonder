@@ -51,6 +51,11 @@ assert.equal(empty.type, 'EMPTY');
 assert.equal(data.objects.length, 2);
 data.objects.remove(empty);
 assert.equal(data.objects.length, 1, 'a collection\'s own remove (BlendDataObjects.remove) over the generic one');
+const tree = data.node_groups.new('Geometry', 'GeometryNodeTree');
+const frame = tree.nodes.new('NodeFrame');
+frame.location = [10, 20];
+assert.deepEqual([...frame.location], [10, 20], 'a returned struct is owned by the ID the call is on (its setter reads the tree)');
+data.node_groups.remove(tree);
 
 // Context members.
 assert.equal(context.scene.name, 'Scene');

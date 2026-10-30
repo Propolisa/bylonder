@@ -691,7 +691,7 @@ EXPORT(bpy_param_pointer_get) bool bpy_param_pointer_get(ParameterList *parms, i
   else {
     StructRNA *ptype = RNA_property_pointer_type(&funcptr, parm);
     void *target = *static_cast<void **>(data);
-    value = RNA_struct_is_ID(ptype) ? RNA_id_pointer_create(static_cast<ID *>(target)) : pointer(ptype, nullptr, target);
+    value = RNA_struct_is_ID(ptype) ? RNA_id_pointer_create(static_cast<ID *>(target)) : pointer(ptype, call_data[parms].owner, target);
   }
   put(value);
   return value.data != nullptr;
