@@ -345,6 +345,7 @@ export class BlenderMain {
       const a = made.get(from), b = made.get(to);
       x.node_link_add(owner, a.node, a.sockets.get('out:' + output), b.node, b.sockets.get('in:' + input));
     }
+    x.node_tree_updated(this.#context, owner);
     this.tag(owner, ID_RECALC_SHADING);
     this.relationsChanged();
   }

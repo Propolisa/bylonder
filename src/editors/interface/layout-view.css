@@ -58,6 +58,10 @@
 .bl-row>.bl-fit{flex:0 0 auto}
 .bl-icon-only{flex:0 0 var(--bl-row)!important;width:var(--bl-row)}
 .bl-emboss-none .bl-widget{background:none;box-shadow:none}
+/* An overlap layout (a list row's): its items in one cell, the later on top; a flat text over the row lets clicks reach it. */
+.bl-overlap>*{grid-area:1/1}
+.bl-overlap>:first-child .bl-icon-only{flex:1 1 0!important;width:auto}
+.bl-overlap .bl-text.bl-flat{pointer-events:none}
 /* Aligned layouts: widgets touch, sharing their outline, with square corners where they meet. */
 .bl-align-col>*+*{margin-top:-1px}
 .bl-align-row>*+*{margin-left:-1px}

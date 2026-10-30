@@ -119,7 +119,7 @@ function widgetNode(b, env) {
     case 'CHECKBOX': case 'CHECKBOX_N':
       return checkbox({ checked: !!b.selected, text: shown, ...common, onChange: () => press(b, ui) });
     case 'TEXT':
-      return withStyle(textField({ value: b.rna ? String(rnaValue(b) ?? '') : b.value ?? shown, iconName, ...common,
+      return withStyle(textField({ value: b.rna ? String(rnaValue(b) ?? '') : b.value ?? shown, iconName, ...common, flat,
         onChange: (v) => (b.rna ? setRna(b, v, ui) : (ui.inContext((C) => buttonTextSet(C, b, v)), ui.refresh())) }));
     case 'COLOR':
       return withStyle(colorSwatch({ value: b.rna ? [...struct(b.rna)[b.rna.prop]] : [0, 0, 0], ...common, onChange: (v, finish) => setRna({ ...b, rna: { ...b.rna, index: -1 } }, v, ui, finish) }));

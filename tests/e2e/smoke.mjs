@@ -137,6 +137,38 @@ const checks = {
   },
 
   // The HUD region's panel draws the operator's RNA properties; a change re-runs it.
+  // Blender's material panels over Main's node tree: the slot list's rows, the Surface panel's Principled BSDF and its
+  // Base Color, which the Babylon material draws.
+  async "the Material tab shows the slot list and the Principled BSDF, whose Base Color reaches the material"() {
+    await app.click();
+    const properties = app.locator("#properties-section"), tabs = properties.locator('[data-blender="context"]');
+    const surface = properties.locator('[data-blender="EEVEE_MATERIAL_PT_surface"]');
+    for (let i = (await tabs.count()) - 1; i >= 0 && !(await surface.count()); i--) await tabs.nth(i).click();
+    const row = properties.locator(".bl-overlap").first(), [select, name] = [row.locator("> *").first(), row.locator("> *").nth(1)];
+    const [a, b] = [await select.boundingBox(), await name.boundingBox()];
+    assert.ok(Math.abs(a.y - b.y) < 2 && a.width > b.width / 2, "a slot's name lies over its row");
+    await surface.getByRole("button", { name: "Principled BSDF" }).waitFor();
+    await surface.locator('input[type="color"]').first().evaluate((e) => {
+      e.value = "#ff0000";
+      for (const type of ["input", "change"]) e.dispatchEvent(new Event(type, { bubbles: true }));
+    });
+    await app.until((b) => { const c = b.world.scene.getMeshByName("Cube").material.albedoColor; return c.r > 0.99 && c.g < 0.01; });
+  },
+
+  // anim.change_frame runs as Blender's modal operator: the frame follows the pointer until the button is released.
+  async "dragging across the Timeline's frame numbers scrubs the frame"() {
+    const box = await app.locator(".anim-editor").first().boundingBox(), frame = () => app.bylonder((b) => b.world.animation.time.frame);
+    const y = box.y + 8;
+    await app.page.mouse.move(box.x + 100, y);
+    await app.page.mouse.down();
+    const start = await frame();
+    await app.page.mouse.move(box.x + 400, y, { steps: 8 });
+    const dragging = await frame();
+    await app.page.mouse.up();
+    assert.ok(dragging > start + 10, `the frame follows the drag: ${start} to ${dragging}`);
+    await typeInto('[role="spinbutton"][aria-label="Current Frame"]', "1");
+  },
+
   async "Add > Cylinder shows Adjust Last Operation, whose Vertices rebuild it"() {
     await app.click(0.3, 0.3);
     await app.page.keyboard.press("Shift+a");

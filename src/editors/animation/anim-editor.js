@@ -327,7 +327,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   function modalEvent(event) {
     const keymap = area.modal.keymap, item = keymap && modalItem(keymap, event, (id) => area.modalItem(id) >= 0);
     const status = area.handle(item ? { ...blenderEvent(event), modal: area.modalItem(item) } : blenderEvent(event));
-    if (area.modal) { animation.edited(); redraw(); }
+    if (area.modal) { scene.drawScene(); animation.edited(); redraw(); }
     else after(status);
     return true;
   }

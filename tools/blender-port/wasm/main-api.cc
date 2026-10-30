@@ -24,6 +24,7 @@
 #include "BKE_world.h"
 #include "BKE_node.hh"
 #include "BKE_node_runtime.hh"
+#include "BKE_main_invariants.hh"
 #include "BKE_node_tree_update.hh"
 #include "DNA_light_types.h"
 #include "DNA_material_types.h"
@@ -924,6 +925,14 @@ bNodeSocket *node_socket_add(ID *owner, bNode *node, bool output, int type, int 
 EXPORT(node_link_add) void node_link_add(ID *owner, bNode *from, bNodeSocket *from_socket, bNode *to, bNodeSocket *to_socket)
 {
   bke::node_add_link(tree_of(owner), *from, *from_socket, *to, *to_socket);
+}
+
+/* After the editor built an ID's node tree: Blender's tree update (link validity, socket availability), as editing it
+ * through RNA runs it. */
+EXPORT(node_tree_updated) void node_tree_updated(BlenderMain *ctx, ID *owner)
+{
+  BKE_ntree_update_tag_all(&tree_of(owner));
+  BKE_main_ensure_invariants(*ctx->bmain, tree_of(owner).id);
 }
 
 /* An ID's node tree as JSON: each node's idname and name with its inputs' identifiers and values (numbers, or null),
