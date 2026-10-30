@@ -3,8 +3,9 @@
 // flying. The asteroid's blast is broken by the volcano, but its burning debris lights the forest above them. When the
 // fire reaches the tree, the mother pushes the chick, who has not yet flown, off the branch; she watches it fall and
 // catch the air before she opens her wings, and the tree falls with her. The chick turns back for her and sits on the
-// beach below calling up at the tree until the father brings it away. They come home when the island has healed, to
-// the sapling growing where the tree stood. Their heads say what they feel: where they look,
+// beach below calling up at the tree through the night, the father beside it. At first light a faint call comes from
+// up the slope: the falling crown threw her into an old lava tube, and the fire passed over her. She limps out, a wing
+// bent and her face scarred, and the three, sooty from the fire, huddle together. Their heads say what they feel: where they look,
 // how they bow, sleep, nuzzle and look back.
 import { createMesh } from '@workbench/sdk';
 import { KINDS, cone, blob, grow, createTreeFire } from './forest.js';
@@ -12,7 +13,7 @@ import { createBirdKit, headingOf } from './life.js';
 import { createParticles, together, pop, glowOf, direction } from './particles.js';
 import { setMatrices, place, createPuffs } from './sky.js';
 import { heightAt } from './island.js';
-import { BEAT, NEST, OMEN, IMPACT, MOURN, LENGTH, smoothstep, lerp, tremor, gust, fireFront, fireAngle } from './story.js';
+import { BEAT, NEST, OMEN, IMPACT, MOURN, CAVE, HUDDLE, LENGTH, smoothstep, lerp, tremor, gust, fireFront, fireAngle } from './story.js';
 import { fireballAt } from './meteor.js';
 
 const { Vector3, Quaternion, Color3 } = BABYLON;
@@ -23,9 +24,6 @@ const OUT = NEST.angle, around = (a, d, dy = 0) => NEST_AT.add(new Vector3(Math.
 // Perches on the nest's rim.
 const PERCH_A = around(OUT + 2.2, 0.22, 0.14), PERCH_B = around(OUT - 1.1, 0.22, 0.14);
 const sea = (a, d, y) => new Vector3(Math.cos(a) * d, y, Math.sin(a) * d);
-const SAPLING = 0.85, SAPLING_TOP = BASE.add(new Vector3(0, 0.95 * SAPLING, 0));
-const HOME_B = SAPLING_TOP.add(new Vector3(Math.cos(OUT + 1.6) * 0.13, 0.08, Math.sin(OUT + 1.6) * 0.13));
-const HOME_C = SAPLING_TOP.add(new Vector3(Math.cos(OUT - 1.6) * 0.13, 0.08, Math.sin(OUT - 1.6) * 0.13));
 // The tree falls away downhill, out toward the sea.
 const FALL_AXIS = Vector3.Cross(Vector3.Up(), new Vector3(Math.cos(OUT), 0, Math.sin(OUT))).normalize();
 const treeFall = (time) => 1.5 * smoothstep(BEAT.fall, BEAT.fall + 0.75, time) ** 2;
@@ -93,34 +91,62 @@ const FATHER = flight([
   [134.6, PERCH_B, 'sit'], [135, PERCH_B.add(new Vector3(Math.cos(OUT) * 0.8, -0.5, Math.sin(OUT) * 0.8))], [135.8, around(OUT - 1.1, 1.3, -0.6)],
   [136.8, around(OUT - 0.3, 1, 0.6)], [137.6, PERCH_B, 'sit'], [BEAT.embers, PERCH_B, 'sit'], [BEAT.embers + 0.6, circling(BEAT.embers + 0.6)],
 ]);
+// The ground under a point, where a bird stands on it.
+const onGround = (v) => new Vector3(v.x, heightAt(v.x, v.z) + 0.08, v.z);
 // The beach below where they mourn, each facing the fallen tree.
-const ground = (a, d) => { const x = MOURN.x + Math.cos(a) * d, z = MOURN.z + Math.sin(a) * d; return new Vector3(x, heightAt(x, z) + 0.08, z); };
-const ROCK_C = ground(0, 0), ROCK_F = ground(MOURN.angle + Math.PI / 2, 0.32), TO_TREE = headingOf(BASE.subtract(ROCK_C));
-// After the fall: the father follows the chick down to the beach; they leave at last, out over the sea through the
-// night, then home.
+const ROCK_C = onGround(new Vector3(MOURN.x, 0, MOURN.z)), ROCK_F = onGround(ROCK_C.add(new Vector3(-Math.sin(MOURN.angle), 0, Math.cos(MOURN.angle)).scale(0.32)));
+const TO_TREE = headingOf(BASE.subtract(ROCK_C));
+// The lava tube's mouth, down the slope from the cave; and the huddle: the chick between them, its mother facing it
+// from the cave's side, the father at its shoulder.
+const CAVE_AT = new Vector3(CAVE.x, CAVE.ground, CAVE.z), DOWN = new Vector3(Math.cos(CAVE.angle), 0, Math.sin(CAVE.angle));
+const INSIDE = onGround(CAVE_AT.add(DOWN.scale(0.1))), MOUTH = onGround(CAVE_AT.add(DOWN.scale(0.42)));
+const HUD = new Vector3(HUDDLE.x, 0, HUDDLE.z), TOWARD = CAVE_AT.subtract(HUD).multiplyByFloats(1, 0, 1).normalize(), SIDE = new Vector3(-TOWARD.z, 0, TOWARD.x);
+const HC = onGround(HUD), HM = onGround(HUD.add(TOWARD.scale(0.3))), HF = onGround(HUD.add(SIDE.scale(0.24)).add(TOWARD.scale(-0.12)));
+const MEETING = onGround(Vector3.Lerp(ROCK_C, HC, 0.55));
+// After the fall: the father follows the chick down to the beach and stays beside it through the night; in the
+// morning he goes to her.
 const ESCAPE = flight([
   [155.4, circling(155.4)], [156.2, NEST_AT.add(new Vector3(Math.cos(OUT) * 1.4, -0.9, Math.sin(OUT) * 1.4))], [157.2, sea(OUT + 0.05, 6.5, 2.2)],
-  [159.2, sea(MOURN.angle + 0.1, 9.5, 2.8)], [160.8, ROCK_F.add(new Vector3(0.4, 0.6, 0.2))], [161.6, ROCK_F, 'sit'], [171.2, ROCK_F, 'sit'],
-  [173, sea(OUT + 0.2, 11, 3)], [175, sea(OUT + 0.5, 15, 3.6)], [177, sea(OUT + 0.85, 16, 4)], [180, sea(OUT + 1.3, 15, 4)], [183, sea(OUT + 0.9, 13, 3.8)],
-  [186, sea(OUT + 0.6, 9, 3.4)], [187.6, SAPLING_TOP.add(new Vector3(1.6, 1.0, -0.8))], [188.5, HOME_B, 'sit'], [195, HOME_B, 'sit'],
+  [159.2, sea(MOURN.angle + 0.1, 9.5, 2.8)], [160.8, ROCK_F.add(new Vector3(0.4, 0.6, 0.2))], [161.6, ROCK_F, 'sit'], [176.8, ROCK_F, 'sit'],
+  [178.8, HF, 'sit'], [LENGTH + 1, HF, 'sit'],
 ]);
-// The chick wheels back toward the tree, comes down on the beach, and stays until the father lifts off; it follows him.
+// The chick wheels back toward the tree and comes down on the beach. At the call it starts up the slope, stops, unsure,
+// then runs to her.
 const BESIDE = new Vector3(-Math.sin(OUT) * 0.45, -0.12, Math.cos(OUT) * 0.45);
 const MOURNING = flight([
   [157.2, sea(OUT + 0.05, 6.5, 2.2).add(BESIDE)], [158.6, sea(OUT - 0.25, 7.5, 2.7)], [159.8, sea(MOURN.angle - 0.1, 7.2, 1.4)], [160.6, ROCK_C, 'sit'],
-  [171.8, ROCK_C, 'sit'], [173, sea(OUT + 0.2, 11, 3).add(BESIDE)],
+  [175.2, ROCK_C, 'sit'], [176.2, MEETING, 'sit'], [177.2, MEETING, 'sit'], [178.6, HC, 'sit'], [LENGTH + 1, HC, 'sit'],
 ]);
+// The mother, saved: out of the dark of the tube, limping on her bent wing's side down to them.
+const SAVED = flight([
+  [175.4, INSIDE, 'sit'], [176.2, MOUTH, 'sit'], [176.9, MOUTH, 'sit'], [178.6, HM, 'sit'], [LENGTH + 1, HM, 'sit'],
+]);
+// Walking: a hop at each step.
+const walking = (path, time, rate = 14) => {
+  const point = path.pointAt(time), velocity = path.velocityAt(time), pose = path.poseAt(time);
+  const walks = pose === 'sit' && velocity.length() > 0.05;
+  return { point: walks ? point.add(new Vector3(0, 0.025 * Math.abs(Math.sin(time * rate)), 0)) : point, pose, velocity: walks || pose !== 'sit' ? velocity : null };
+};
+const facing = (from, to) => headingOf(to.subtract(from));
+const motherAt = (time) => {
+  if (time < BEAT.found) {
+    const point = MOTHER.pointAt(time);
+    return { point: time > BEAT.fall ? onTree(point, time) : point, pose: MOTHER.poseAt(time), velocity: MOTHER.velocityAt(time) };
+  }
+  // Slow and uneven on her hurt side.
+  const step = walking(SAVED, time, 8);
+  return { ...step, heading: step.velocity ? undefined : facing(HM, HC), bent: 0.3, scarred: true };
+};
 const fatherAt = (time) => {
   // In the star's last nights he turns on his branch to face it.
   if (time > 112.5 && time < BEAT.leave) return { point: PERCH_B, pose: 'sit', heading: headingOf(new Vector3(OMEN.x, 0, OMEN.z)) };
   if (time < BEAT.embers + 0.6) return { point: FATHER.pointAt(time), pose: FATHER.poseAt(time), velocity: FATHER.velocityAt(time), tumble: time > 134.6 && time < 135.4 ? (time - 134.6) * 6 : 0 };
   if (time < 155.4) return { point: circling(time), pose: 'fly', velocity: circling(time + 0.05).subtract(circling(time - 0.05)).scale(10) };
-  const pose = ESCAPE.poseAt(time);
-  return { point: ESCAPE.pointAt(time), pose, velocity: ESCAPE.velocityAt(time), heading: pose === 'sit' && time < BEAT.sea ? TO_TREE : undefined };
+  const step = walking(ESCAPE, time);
+  return { ...step, heading: step.velocity ? undefined : time < BEAT.found ? TO_TREE : facing(HF, HM) };
 };
 // The chick: in the nest beside its mother, begging when food comes, flapping to practise; it tries after the lesson
-// and fails, tries again as the fire comes and fails; pushed, it falls, then flies at the father's side. It is grown by
-// the time they come home.
+// and fails, tries again as the fire comes and fails; pushed, it falls, then flies at the father's side.
 const NESTLING = SEAT.add(new Vector3(Math.cos(OUT) * 0.11, -0.02, Math.sin(OUT) * 0.11));
 const chickAt = (time) => {
   const hop = (t0, h, drift = 0) => { const u = (time - t0) / 0.8; return u > 0 && u < 1 ? new Vector3(Math.cos(OUT) * drift * u, h * Math.sin(Math.PI * u), Math.sin(OUT) * drift * u) : null; };
@@ -133,20 +159,17 @@ const chickAt = (time) => {
   // Pushed off the nest's edge: it tumbles and falls, then its wings catch and it rises to the father.
   const u = time - BEAT.climax, edge = NESTLING.add(new Vector3(Math.cos(OUT) * 0.35, 0.05, Math.sin(OUT) * 0.35));
   const fall = edge.add(new Vector3(Math.cos(OUT) * 0.5 * u, -4.2 * u * u, Math.sin(OUT) * 0.5 * u));
-  if (time > 157.2 && time < 173) {
-    const pose = MOURNING.poseAt(time);
-    return { point: MOURNING.pointAt(time), pose, velocity: pose === 'sit' ? null : MOURNING.velocityAt(time), heading: pose === 'sit' ? TO_TREE : undefined, wings: 1 };
+  if (time > 157.2) {
+    const step = walking(MOURNING, time);
+    return { ...step, wings: 1, heading: step.velocity ? undefined : time < BEAT.found ? TO_TREE : facing(HC, HM) };
   }
   const caught = smoothstep(0.55, 1.3, u), father = fatherAt(time);
-  const beside = father.point.add(BESIDE);
-  const flying = u < 0.55 ? fall : Vector3.Lerp(edge.add(new Vector3(Math.cos(OUT) * 0.27, -1.27, Math.sin(OUT) * 0.27)), beside, caught);
-  const point = Vector3.Lerp(flying, HOME_C, smoothstep(BEAT.home - 1, BEAT.home + 0.3, time));
-  return { point, pose: time > BEAT.home ? 'sit' : 'fly', tumble: u < 0.6 ? u * 9 : 0, wings: 1, velocity: time > BEAT.home ? null : father.velocity };
+  const flying = u < 0.55 ? fall : Vector3.Lerp(edge.add(new Vector3(Math.cos(OUT) * 0.27, -1.27, Math.sin(OUT) * 0.27)), father.point.add(BESIDE), caught);
+  return { point: flying, pose: 'fly', tumble: u < 0.6 ? u * 9 : 0, wings: 1, velocity: father.velocity };
 };
 
-// Where each of the family is at a second: the mother riding the falling tree, the father, the chick.
-export const whereIs = (who, time) => (who === 'mother' ? (time > BEAT.fall ? onTree(MOTHER.pointAt(time), time) : MOTHER.pointAt(time))
-  : who === 'father' ? fatherAt(time).point : chickAt(time).point);
+// Where each of the family is at a second: the mother riding the falling tree, then saved; the father; the chick.
+export const whereIs = (who, time) => (who === 'mother' ? motherAt(time) : who === 'father' ? fatherAt(time) : chickAt(time)).point;
 // Where each looks, when: [from second, to second, what], what(time, birds) giving { look: a point, tuck, nod }; at the
 // start of a span the head turns from where it looked over a third of a second.
 function gaze(spans) {
@@ -159,7 +182,7 @@ function gaze(spans) {
     return { look: Vector3.Lerp(now.look, before.look, k), tuck: lerp(now.tuck, before.tuck, k), nod: lerp(now.nod, before.nod, k) };
   };
 }
-const SUNRISE = sea(0.49, 60, 3), STAR = new Vector3(OMEN.x, OMEN.y, OMEN.z).scale(60).add(NEST_AT), ABOVE = sea(OUT, 20, 12), BEYOND = new Vector3(0, 8, 0);
+const STAR = new Vector3(OMEN.x, OMEN.y, OMEN.z).scale(60).add(NEST_AT), ABOVE = sea(OUT, 20, 12), BEYOND = new Vector3(0, 8, 0);
 const head = (bird) => bird.point.add(new Vector3(0, 0.1, 0));
 const fireAt = (time) => {
   const r = Math.max(IMPACT.r, fireFront(time) - 0.3), a = fireAngle(r), x = Math.cos(a) * r, z = Math.sin(a) * r;
@@ -176,23 +199,25 @@ const MOTHER_GAZE = gaze([
   [86, 90, at('father')], [90, 93.6, at('chick')], [99, 106.8, at('chick')], [107.3, 109, at('chick', (t) => ({ nod: -0.35 + 0.1 * Math.sin(t * 4) }))],
   [114, 118.5, at('chick', { nod: -0.2 })], [121, 123, look(ABOVE)], [128, 134, (t, b) => ({ look: b.fireball })], [134, 136, look(BEYOND)],
   [136, 143, at('chick', { nod: -0.3 })], [143, 154.8, (t, b) => ({ look: t % 3 < 1.6 ? fireAt(t) : head(b.chick) })], [154.8, 155.05, at('chick', { nod: -0.5 })],
-  [155.05, 157, at('chick')],
+  [155.05, 157, at('chick')], [175.4, 176.9, at('chick', { nod: 0.15 })], [176.9, 178.6, at('chick')],
+  [178.6, 186, at('chick', (t) => ({ nod: -0.35 + 0.12 * Math.sin(t * 2.2), tuck: 0.2 }))], [186, LENGTH + 1, at('chick', { nod: -0.25, tuck: 0.2 })],
 ]);
 const FATHER_GAZE = gaze([
   [47.6, 49.6, at('mother')], [49.6, 55.4, at('mother', (t) => ({ nod: 0.25 * Math.sin(t * 3 + 1) }))], [55.4, 56.6, at('mother', { nod: -0.2 })],
   [64, 66, look(NESTLING, { nod: -0.3 })], [66, 78, asleep], [82.5, 84.6, at('chick', { nod: -0.3 })], [87.75, 90.5, at('chick', (t) => ({ nod: -0.45 + 0.15 * Math.sin(t * 8) }))],
   [99, 108.5, (t, b) => ({ look: head(t < 102.6 ? b.mother : b.chick) })], [112.5, 121, look(STAR)], [121, 123, look(ABOVE)], [128, 134, (t, b) => ({ look: b.fireball })],
   [137.6, 143, look(BEYOND)], [143, 155.4, (t) => ({ look: fireAt(t) })], [155.4, 157, (t) => ({ look: onTree(SEAT, t) })], [157, 162, at('chick')],
-  [162, 165, (t) => ({ look: onTree(SEAT, t) })], [165, 171, at('chick', { nod: -0.3 })], [171, 188.5, at('chick')],
-  [188.5, 189.6, at('chick', { nod: -0.2 })], [189.6, 195, look(SUNRISE)],
+  [162, 165, (t) => ({ look: onTree(SEAT, t) })], [165, 171, at('chick', { nod: -0.3 })], [171, 174.6, at('chick')],
+  [174.6, 176.8, look(MOUTH)], [176.8, 182, at('mother', { nod: -0.25 })], [182, LENGTH + 1, at('mother', { nod: -0.4, tuck: 0.3 })],
 ]);
 const CHICK_GAZE = gaze([
   [82.6, 86, at('mother', { nod: 0.3 })], [86, 87.75, at('mother')], [87.75, 90.5, at('father', { nod: 0.5 })], [90.5, 105.4, at('mother')],
   [106.3, 107.3, look(NEST_AT.add(new Vector3(0, -1, 0)), { nod: -0.6 })], [107.3, 109, at('mother', { nod: 0.2 })], [114, 118.5, look(STAR)], [121, 123, look(ABOVE)],
   [128, 134, (t, b) => ({ look: b.fireball })], [134, 140, at('mother', { nod: 0.3 })], [143, 154.8, (t, b) => ({ look: t % 2.6 < 1.3 ? fireAt(t) : head(b.mother) })],
   [154.8, 155.6, at('mother')], [155.6, 157, (t) => ({ look: onTree(SEAT, t) })], [157.6, 166, (t) => ({ look: onTree(SEAT, t) })],
-  [166, 167.6, at('father')], [167.6, 170.6, (t) => ({ look: onTree(SEAT, t), nod: -0.5 })], [170.6, 172.4, (t) => ({ look: onTree(SEAT, t) })],
-  [172.4, 188.6, at('father')], [188.6, 189.6, at('father', { nod: -0.25 })], [189.6, 195, look(SUNRISE)],
+  [166, 167.6, at('father')], [167.6, 170.6, (t) => ({ look: onTree(SEAT, t), nod: -0.5 })], [170.6, 173.8, (t) => ({ look: onTree(SEAT, t) })],
+  [173.8, 174.3, at('father')], [174.3, 175.8, look(MOUTH)], [175.8, 178.6, at('mother', { nod: 0.2 })],
+  [178.6, 186, at('mother', (t) => ({ nod: 0.25 + 0.1 * Math.sin(t * 3), tuck: 0.25 }))], [186, LENGTH + 1, at('mother', { nod: 0.2, tuck: 0.3 })],
 ]);
 
 export function createFamily(scene, toon) {
@@ -200,16 +225,22 @@ export function createFamily(scene, toon) {
   const tree = KINDS.blossom.map(([name, data, color]) => {
     const mesh = createMesh(`Nest ${name}`, data, scene);
     mesh.material = toon.plain(`Nest ${name}`, color);
-    return { mesh, buffer: setMatrices(mesh, 2) };
+    return { mesh, buffer: setMatrices(mesh, 1) };
   });
   const nest = createMesh('Nest', cone(8, 0.17, 0, 0.25, 0.11), scene);
   nest.material = toon.plain('Nest', '#7a5235');
   const nestBuffer = setMatrices(nest, 1);
+  // The old lava tube: a hump of dark rock on the slope, its mouth facing down toward the beach.
+  const tube = [['Lava Tube', blob(0.42, [0, 0, 0]), '#4f4659', 1, 0], ['Lava Tube Mouth', blob(0.2, [0, 0, 0]), '#120d18', 1, 0.36]].map(([name, data, color, , out]) => {
+    const mesh = createMesh(name, data, scene);
+    mesh.material = toon.plain(name, color);
+    return { mesh, buffer: setMatrices(mesh, 1), out };
+  });
   const egg = createMesh('Egg', blob(0.055, [0, 0, 0.055]), scene);
   egg.material = toon.plain('Egg', '#f7f0e3');
   const eggBuffer = setMatrices(egg, 1);
+  const white = Color3.FromHexString('#fdf9f2'), grey = Color3.FromHexString('#b9b3c6'), DINGY = Color3.FromHexString('#8a8178');
   const parents = createBirdKit(scene, toon, 'Parent', '#fdf9f2', 2), chick = createBirdKit(scene, toon, 'Chick', '#b9b3c6', 1);
-  const grey = Color3.FromHexString('#b9b3c6'), white = Color3.FromHexString('#fdf9f2');
 
   // A bird's pose: along its flight when flying, its wings as the pose says, its head as it looks; breathing when still.
   const pose = (kit, i, { point, pose: p, velocity, heading, wings = 1, tumble = 0 }, size, time, phase, eyes) => {
@@ -229,21 +260,21 @@ export function createFamily(scene, toon) {
     return [SEAT.add(new Vector3(Math.cos(a) * 0.25 * u, 0.25 * u - 1.2 * u * u, Math.sin(a) * 0.25 * u)), u > 0 && u < 0.45 ? 0.025 : 0];
   }));
 
-  // When they come home, petals drift from the sapling's first blossom.
-  const petals = createParticles(scene, toon, { name: 'Petals', color: '#ffb6d3', seed: 62, start: BEAT.home - 0.4, end: LENGTH + 1, rate: 10, life: [2.5, 4],
-    origin: (r) => SAPLING_TOP.add(new Vector3((2 * r(30) - 1) * 0.3, -0.1, (2 * r(31) - 1) * 0.3)), velocity: (r) => direction(r, 0.2).scale(0.3),
-    gravity: -0.22, drag: 1.2, wind: new Vector3(0.25, 0, 0.1), turbulence: 0.3, size: pop(0.035, 0.1) });
-  return together(fire, sparks, shells, petals, (day, time) => {
-    // The tree, swaying and shaking, falling and burning away; the sapling.
+  return together(fire, sparks, shells, (day, time) => {
+    // The tree, swaying and shaking, falling and burning away.
     const shaking = tremor(time), lean = 0.025 * Math.sin(time * 2) + 0.1 * shaking * Math.sin(time * 29);
-    const fallen = treeFall(time), ash = 1 - smoothstep(BEAT.fall + 1.6, BEAT.sea, time);
+    const fallen = treeFall(time), ash = 1 - smoothstep(BEAT.fall + 1.6, BEAT.dawn, time);
     const turn = Quaternion.RotationAxis(FALL_AXIS, -fallen).multiply(Quaternion.RotationAxis(new Vector3(0.6, 0, 0.8), lean));
-    const sapling = SAPLING * grow((time - BEAT.sapling) / 2.6);
     for (const { buffer } of tree) {
       place(buffer, 0, BASE, new Vector3(1, 1, 1).scale(Math.max(1e-4, NEST.size * grow((day - 6.4) / 1.4) * ash)), turn);
-      place(buffer, 1, BASE, new Vector3(1, 1, 1).scale(Math.max(1e-4, sapling)), 0.6 + 0.03 * Math.sin(time * 2.4));
     }
     for (const { mesh } of tree) mesh.thinInstanceBufferUpdated('matrix');
+    const cooled = smoothstep(2.6, 3.2, day), along = Quaternion.RotationAxis(Vector3.Up(), headingOf(DOWN));
+    for (const { mesh, buffer, out } of tube) {
+      const at = CAVE_AT.add(DOWN.scale(out)).add(new Vector3(0, out ? 0.1 : -0.12, 0));
+      place(buffer, 0, at, (out ? new Vector3(0.45, 0.9, 1.2) : new Vector3(1.1, 0.75, 1.1)).scale(Math.max(1e-4, cooled)), along);
+      mesh.thinInstanceBufferUpdated('matrix');
+    }
     // The nest and the egg, carried down with the tree.
     const built = smoothstep(BEAT.nest, BEAT.nest + 6, time) * ash, nestAt = onTree(NEST_AT, time);
     place(nestBuffer, 0, nestAt, new Vector3(1, 1, 1).scale(Math.max(1e-4, built)), Quaternion.RotationAxis(FALL_AXIS, -fallen));
@@ -253,18 +284,18 @@ export function createFamily(scene, toon) {
     egg.thinInstanceBufferUpdated('matrix');
 
     // The family: where each is, then how each holds itself and looks. The mother rides the falling tree on her nest
-    // until it is gone.
-    const mother = { point: MOTHER.pointAt(time), pose: MOTHER.poseAt(time), velocity: MOTHER.velocityAt(time) };
-    if (time > BEAT.fall) mother.point = onTree(mother.point, time);
-    const father = fatherAt(time), young = chickAt(time), birds = { mother, father, chick: young, fireball: fireballAt(time) };
-    const shown = smoothstep(35.5, 36.5, time) * (time < BEAT.gone ? 1 : 0);
-    pose(parents, 0, mother, 1.6 * shown, time, 0, MOTHER_GAZE(time, birds));
-    pose(parents, 1, father, 1.6 * smoothstep(43.5, 44.5, time), time, 1.7, FATHER_GAZE(time, birds));
+    // until it is gone, and is not seen again until she comes out of the cave.
+    const mother = motherAt(time), father = fatherAt(time), young = chickAt(time), birds = { mother, father, chick: young, fireball: fireballAt(time) };
+    const shown = smoothstep(35.5, 36.5, time) * (time < BEAT.gone || time > BEAT.found ? 1 : 0);
+    // Sooty from the fire's night: smudged and a little dingy all over.
+    const dirty = time > BEAT.dawn;
+    for (const [kit, color] of [[parents, white], [chick, grey]]) for (const material of kit.materials) material.setColor3('color', dirty ? Color3.Lerp(color, DINGY, 0.35) : color);
+    pose(parents, 0, mother, 1.6 * shown, time, 0, { ...MOTHER_GAZE(time, birds), bent: mother.bent, scarred: mother.scarred, dirty });
+    pose(parents, 1, father, 1.6 * smoothstep(43.5, 44.5, time), time, 1.7, { ...FATHER_GAZE(time, birds), dirty });
     parents.update();
-    // The chick: grey and small, white and grown when they come home.
-    const hatched = smoothstep(BEAT.hatch, BEAT.hatch + 0.4, time), grown = smoothstep(BEAT.heal, BEAT.home - 0.6, time);
-    pose(chick, 0, young, hatched * lerp(0.65 + 0.4 * smoothstep(BEAT.hatch, BEAT.lesson, time), 1.55, grown), time, 3.1, CHICK_GAZE(time, birds));
+    // The chick: grey and small.
+    const hatched = smoothstep(BEAT.hatch, BEAT.hatch + 0.4, time);
+    pose(chick, 0, young, hatched * (0.65 + 0.4 * smoothstep(BEAT.hatch, BEAT.lesson, time)), time, 3.1, { ...CHICK_GAZE(time, birds), dirty });
     chick.update();
-    for (const material of chick.materials) material.setColor3('color', Color3.Lerp(grey, white, grown));
   });
 }

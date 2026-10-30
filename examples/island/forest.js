@@ -75,7 +75,7 @@ const SWAY = { palm: 0.07, broadleaf: 0.03, blossom: 0.03, conifer: 0.02, bush: 
 // between, spaced so their crowns do not run into each other; bushes, ferns and flowering vines fill the ground between.
 // Each springs up from nothing once the grass has reached it, sways in the wind and shakes when the ground does. Those
 // in the fire's path catch as it reaches them, burn and fall; the asteroid's blast throws everything on the far side
-// flat and burns it away. New ones grow as the ground heals. The nest tree stands alone (family.js).
+// flat and burns it away. The nest tree stands alone (family.js).
 export function createForest(scene, toon) {
   const rand = random(7), plants = [];
   const land = (x, z) => {
@@ -109,9 +109,9 @@ export function createForest(scene, toon) {
     const { x, z } = p.at, r = Math.hypot(x, z), d = fromStrike(x, z);
     if (d < 6.1) {
       const away = new Vector3(x - STRIKE.x, 0, z - STRIKE.z).normalize();
-      Object.assign(p, { burns: BEAT.impact - Math.log(1 - d / 6.2) / 2.2, thrown: true, fallAxis: Vector3.Cross(Vector3.Up(), away), reborn: BEAT.heal + 1 + rand() * 4 });
+      Object.assign(p, { burns: BEAT.impact - Math.log(1 - d / 6.2) / 2.2, thrown: true, fallAxis: Vector3.Cross(Vector3.Up(), away) });
     } else if (fromFire(x, z) < 0.75 && r > IMPACT.r - 0.3) {
-      Object.assign(p, { burns: fireReaches(r) - 0.2, thrown: false, fallAxis: new Vector3(rand() - 0.5, 0, rand() - 0.5).normalize(), reborn: BEAT.heal + 0.8 + rand() * 3 });
+      Object.assign(p, { burns: fireReaches(r) - 0.2, thrown: false, fallAxis: new Vector3(rand() - 0.5, 0, rand() - 0.5).normalize() });
     }
   }
   const parts = Object.entries(KINDS).map(([kind, meshes]) => {
@@ -122,13 +122,12 @@ export function createForest(scene, toon) {
       return { mesh, buffer: setMatrices(mesh, Math.max(1, planted.length)) };
     }) };
   });
-  // A burning plant's size and lean: thrown flat at once by the blast or toppling as it burns, gone, then grown anew.
+  // A burning plant's size and lean: thrown flat at once by the blast or toppling as it burns, then gone.
   const burnt = (p, time) => {
     const age = time - p.burns;
     if (p.burns === undefined || age < 0) return null;
     const fall = p.thrown ? 1.45 * smoothstep(0, 0.12, age) : 1.45 * smoothstep(1.2, 1.7, age) ** 2;
-    const gone = 1 - smoothstep(p.thrown ? 0.6 : 2.2, p.thrown ? 1.8 : 3.4, age), again = grow((time - p.reborn) / 1.4);
-    return again > 0 ? { scale: again * 0.8, fall: 0 } : { scale: gone, fall };
+    return { scale: 1 - smoothstep(p.thrown ? 0.6 : 2.2, p.thrown ? 1.8 : 3.4, age), fall };
   };
   const forest = (day, time) => {
     const shaking = tremor(time), blown = gust(time);

@@ -1,10 +1,10 @@
 import { animate, animation, renderSettings } from '@workbench/sdk';
-import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, shake, omen, fireFront, burning, healing, sinceStrike, blastRadius } from './story.js';
+import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, shake, omen, fireFront, burning, sinceStrike, blastRadius } from './story.js';
 import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
 import { createForest } from './forest.js';
 import { daylight, createClouds, createSmoke, meteorAt } from './sky.js';
-import { createBombs, createSteam, createWhales, createBirds, createFireflies } from './life.js';
+import { createBombs, createSteam, createWhales, createBirds, createFireflies, createTurtle } from './life.js';
 import { createFamily } from './family.js';
 import { createMeteor, fireLight, fireballAt } from './meteor.js';
 import { createAudio } from './audio.js';
@@ -36,7 +36,7 @@ export const createScene = async function () {
   island.material = struck.material = ground;
   createSea(scene).material = toon.sea();
   const forest = createForest(scene, toon);
-  const moving = [forest, createClouds(scene, toon), createSmoke(scene, toon), createBombs(scene, toon), createSteam(scene, toon), createWhales(scene, toon),
+  const moving = [forest, createClouds(scene, toon), createSmoke(scene, toon), createBombs(scene, toon), createSteam(scene, toon), createWhales(scene, toon), createTurtle(scene, toon),
     createBirds(scene, toon), createFireflies(scene, toon, forest.spots), createFamily(scene, toon), createMeteor(scene, toon)];
 
   const camera = new BABYLON.TargetCamera('Camera', new Vector3(14, 6, -10), scene);
@@ -58,7 +58,7 @@ export const createScene = async function () {
     toon.light(light, day, time, meteorAt(frame), air(light, fire, time, camera.globalPosition));
     island.isVisible = time < BEAT.impact;
     struck.isVisible = !island.isVisible;
-    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, healed: healing(time), blast: sinceStrike(time), blastReach: blastRadius(time) });
+    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, blast: sinceStrike(time), blastReach: blastRadius(time) });
     for (const move of moving) move(day, time);
   });
 
@@ -88,8 +88,8 @@ export const createScene = async function () {
 function grade(light, time) {
   const uneasy = smoothstep(BEAT.omen, BEAT.streak - 2, time) * (1 - smoothstep(BEAT.streak, BEAT.streak + 1, time));
   const coming = smoothstep(BEAT.streak - 6, BEAT.impact - 1, time) * (1 - smoothstep(BEAT.impact, BEAT.impact + 4, time));
-  const burning = falling(time) ** 1.5, F = flash(time), smoke = smoothstep(BEAT.impact + 0.5, BEAT.impact + 5, time) * (1 - smoothstep(BEAT.sea + 1, BEAT.heal + 1.5, time));
-  const dawn = smoothstep(BEAT.home - 3, LENGTH, time), white = new Color3(1, 1, 1);
+  const burning = falling(time) ** 1.5, F = flash(time), smoke = smoothstep(BEAT.impact + 0.5, BEAT.impact + 5, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.found + 2, time));
+  const dawn = smoothstep(BEAT.found - 1, BEAT.found + 3, time), white = new Color3(1, 1, 1);
   let { skyTop, skyHorizon, sunColor, skyLight, groundLight } = light;
   skyTop = mix(skyTop, new Color3(0.26, 0.2, 0.46), 0.3 * uneasy);
   skyHorizon = mix(skyHorizon, new Color3(0.5, 0.78, 0.72), 0.22 * uneasy);
@@ -111,12 +111,12 @@ function grade(light, time) {
 // The air: the fire light, the haze (thicker with smoke), shafts of light, the aurora as the meteor nears, its star
 // and the contrail it burns across the sky.
 function air(light, fire, time, eye) {
-  const smoke = smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.sea + 1, BEAT.heal + 2, time));
+  const smoke = smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.found + 2, time));
   const from = fireballAt(BEAT.streak), head = fireballAt(Math.min(time, BEAT.impact - 0.01));
   return {
     firePosition: fire.position, fireColor: fire.color,
     fogColor: mix(light.skyHorizon, new Color3(0.35, 0.24, 0.24), 0.5 * smoke), fogDensity: 0.004 + 0.012 * smoke,
-    rays: 1 + 0.8 * smoothstep(BEAT.home - 4, LENGTH, time),
+    rays: 1 + 0.8 * smoothstep(BEAT.found - 1, BEAT.found + 3, time),
     omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.omen + 4, BEAT.leave, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
     trail: smoothstep(BEAT.streak, BEAT.streak + 0.6, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),
     trailTail: from.subtract(eye).normalize(), trailHead: head.subtract(eye).normalize(),

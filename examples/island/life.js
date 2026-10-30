@@ -1,8 +1,8 @@
 import { createMesh } from '@workbench/sdk';
 import { blob } from './forest.js';
 import { random } from './random.js';
-import { shore } from './island.js';
-import { smoothstep, eruption, BEAT, LENGTH as FILM, shotAngle, frameAt, days } from './story.js';
+import { shore, heightAt } from './island.js';
+import { smoothstep, lerp, eruption, BEAT, TURTLE, LENGTH as FILM, shotAngle, frameAt, days } from './story.js';
 import { createParticles, together, pop, swell, glowOf, direction } from './particles.js';
 import { setMatrices, place, createPuffs } from './sky.js';
 
@@ -67,10 +67,10 @@ function whaleMesh() {
 }
 
 // The whales' swims, each surfacing along the shore in the shot it is seen in: a whale early on, then a whale and her
-// calf when the family comes home.
+// calf as the film ends.
 export const WHALES = [
   { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
-  { start: BEAT.home + 2, angle: 0.45, distance: 11, size: 1.0 }, { start: BEAT.home + 2.3, angle: 0.49, distance: 12, size: 0.45 },
+  { start: FILM - 5.5, angle: 0.45, distance: 17, size: 1.0 }, { start: FILM - 5.2, angle: 0.49, distance: 18, size: 0.45 },
 ].map((swim) => {
   const angle = shotAngle(frameAt(Math.min(FILM - 0.5, swim.start + 1.3))) + swim.angle;
   return { ...swim, angle, at: new Vector3(Math.cos(angle) * swim.distance, 0, Math.sin(angle) * swim.distance) };
@@ -125,6 +125,11 @@ export function createBirdKit(scene, toon, name, color, count) {
   const head = part('Head', blob(0.042, [0, 0, 0]).vertices, blob(0.042, [0, 0, 0]).faces);
   const beak = part('Beak', [[0.03, 0.013, 0.004], [0.03, -0.013, 0.004], [0.03, 0, 0.016], [0.03, 0, -0.01], [0.088, 0, 0]],
     [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [0, 1, 2], [0, 3, 1]], '#f2a54a');
+  // Marks painted on a part's faces: soot smudged on the body and head, and a scar across the left side of the face.
+  const HEAD = blob(0.042, [0, 0, 0]), BODY = [[0.14, 0, 0], [-0.12, 0, 0.02], [0, 0.03, 0.03], [0, -0.03, 0.03], [0, 0, -0.03], [0.17, 0, 0.012]];
+  const soot = part('Soot', ...decals(BODY, [[0, 2, 1, 0.65, 0.2], [0, 1, 3, 0.55, -0.3], [1, 4, 3, 0.55, 0.4], [0, 3, 4, 0.5, 0.5]]), '#6e6670');
+  const headSoot = part('Head Soot', ...decals(HEAD.vertices, [[...faceToward(HEAD, [-0.3, -0.7, 0.6]), 0.6, 0.4], [...faceToward(HEAD, [0.2, 0.3, 0.9]), 0.45, -0.5]]), '#6e6670');
+  const scar = part('Scar', ...stripe(HEAD, [0.45, 0.85, 0.3]), '#9a4256');
   const eyes = part('Eyes', [...blob(0.011, [0.022, 0.031, 0.014]).vertices, ...blob(0.011, [0.022, -0.031, 0.014]).vertices],
     [...blob(0.011, [0, 0, 0]).faces, ...blob(0.011, [0, 0, 0]).faces.map((f) => f.map((v) => v + 14))], '#1d1a2b');
   const materials = [body, left, right, head].map(({ mesh }) => mesh.material);
@@ -132,13 +137,15 @@ export function createBirdKit(scene, toon, name, color, count) {
   return {
     materials,
     // wings: an angle up from level (each beat), or `null` for folded. look: a point to look at; tuck: 0 to 1 asleep.
-    pose(i, position, size, heading, { bank = 0, pitch = 0, wings = 0, look = null, tuck = 0, nod = 0 } = {}) {
+    // bent: how far the right wing hangs from a break; scarred: the scar shows; dirty: the soot shows.
+    pose(i, position, size, heading, { bank = 0, pitch = 0, wings = 0, look = null, tuck = 0, nod = 0, bent = 0, scarred = false, dirty = false } = {}) {
       const turn = Quaternion.RotationAxis(Vector3.Up(), heading).multiply(Quaternion.RotationAxis(Vector3.Right(), bank)).multiply(Quaternion.RotationAxis(new Vector3(0, 0, 1), pitch));
       const s = Math.max(1e-4, size), scale = new Vector3(s, s, s), folded = wings === null;
       place(body.buffer, i, position, scale, turn);
+      place(soot.buffer, i, position, dirty ? scale : HIDDEN, turn);
       const wing = (side) => turn.multiply(Quaternion.RotationAxis(Vector3.Right(), folded ? side * 1.35 : -side * wings)).multiply(Quaternion.RotationAxis(Vector3.Up(), folded ? 0.5 : 0));
       place(left.buffer, i, position, folded ? scale.scale(0.7) : scale, wing(1));
-      place(right.buffer, i, position, folded ? scale.scale(0.7) : scale, wing(-1));
+      place(right.buffer, i, position, folded ? scale.scale(0.7) : scale, wing(-1).multiply(Quaternion.RotationAxis(new Vector3(1, 0, 0.4).normalize(), bent)));
       // The head: its yaw and pitch toward what it looks at, in the body's frame, within the neck's reach.
       const neck = position.add(turned(turn, Vector3.Lerp(NECK, TUCKED, tuck).scale(s)));
       let yaw = 0, rise = 0;
@@ -151,16 +158,85 @@ export function createBirdKit(scene, toon, name, color, count) {
       rise += (-0.5 - rise) * tuck + nod;
       const gaze = turn.multiply(Quaternion.RotationAxis(Vector3.Up(), yaw)).multiply(Quaternion.RotationAxis(new Vector3(0, 0, 1), rise));
       for (const p of [head, beak, eyes]) place(p.buffer, i, neck, scale, gaze);
+      place(scar.buffer, i, neck, scarred ? scale : HIDDEN, gaze);
+      place(headSoot.buffer, i, neck, dirty ? scale : HIDDEN, gaze);
     },
-    update() { for (const { mesh } of [body, left, right, head, beak, eyes]) mesh.thinInstanceBufferUpdated('matrix'); },
+    update() { for (const { mesh } of [body, left, right, head, beak, eyes, scar, soot, headSoot]) mesh.thinInstanceBufferUpdated('matrix'); },
+  };
+}
+const HIDDEN = new Vector3(1e-4, 1e-4, 1e-4);
+const sub = (a, b) => a.map((v, k) => v - b[k]), dot = (a, b) => a.reduce((sum, v, k) => sum + v * b[k], 0);
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const unit = (a) => a.map((v) => v / Math.hypot(...a));
+// A face's centre and outward normal (the mesh's centre is near its origin).
+const faceFrame = (vertices, [a, b, c]) => {
+  const centre = [0, 1, 2].map((k) => (vertices[a][k] + vertices[b][k] + vertices[c][k]) / 3);
+  const normal = unit(cross(sub(vertices[b], vertices[a]), sub(vertices[c], vertices[a])));
+  return { centre, normal: dot(normal, centre) < 0 ? normal.map((v) => -v) : normal };
+};
+// The face of a mesh that most faces a direction.
+const faceToward = ({ vertices, faces }, direction) => faces.reduce((best, f) => (dot(faceFrame(vertices, f).normal, direction) > dot(faceFrame(vertices, best).normal, direction) ? f : best));
+// Marks painted on faces: each [a, b, c, size, twist] a smaller copy of the face, turned in its plane, lying just on it.
+function decals(vertices, marks) {
+  const out = [], faces = [];
+  for (const [a, b, c, size, twist] of marks) {
+    const { centre, normal } = faceFrame(vertices, [a, b, c]), turn = (v) => {
+      const d = sub(v, centre).map((x) => x * size), t = cross(normal, d);
+      return d.map((x, k) => centre[k] + x * Math.cos(twist) + t[k] * Math.sin(twist) + normal[k] * 0.0008);
+    };
+    const base = out.length;
+    out.push(turn(vertices[a]), turn(vertices[b]), turn(vertices[c]));
+    faces.push(dot(cross(sub(out[base + 1], out[base]), sub(out[base + 2], out[base])), normal) > 0 ? [base, base + 1, base + 2] : [base, base + 2, base + 1]);
+  }
+  return [out, faces];
+}
+// A thin mark across the face of a mesh that most faces a direction, painted on it.
+function stripe(mesh, direction) {
+  const f = faceToward(mesh, direction), { centre, normal } = faceFrame(mesh.vertices, f);
+  const lift = (v) => v.map((x, k) => x + normal[k] * 0.0008);
+  const [p, q] = [mesh.vertices[f[0]], mesh.vertices[f[1]]].map((v) => centre.map((x, k) => x + (v[k] - x) * 0.75));
+  const across = unit(cross(normal, sub(q, p))).map((x) => x * 0.0022);
+  const out = [p.map((x, k) => x + across[k]), p.map((x, k) => x - across[k]), q.map((x, k) => x - across[k] * 0.4), q.map((x, k) => x + across[k] * 0.4)].map(lift);
+  const facing = dot(cross(sub(out[1], out[0]), sub(out[2], out[0])), normal) > 0;
+  return [out, facing ? [[0, 1, 2], [0, 2, 3]] : [[0, 2, 1], [0, 3, 2]]];
+}
+// A sea turtle hauling itself out of the sea up the beach below the family: a stroke of both front flippers, a heave
+// forward, a rest; its shell rides up out of the water as the beach rises under it.
+export function createTurtle(scene, toon) {
+  // Its parts in its own frame (Blender's axes, facing +X, Z up), sized to stand out among the birds.
+  const SIZE = 1.7, scaled = ({ vertices, faces }, [sx, sy, sz], [dx, dy, dz] = [0, 0, 0]) => ({ vertices: vertices.map(([x, y, z]) => [(x * sx + dx) * SIZE, (y * sy + dy) * SIZE, (z * sz + dz) * SIZE]), faces });
+  const flipper = (side, along, length) => ({ vertices: [[along + 0.05, side * 0.1, 0.08], [along - 0.05, side * 0.1, 0.08], [along - 0.08, side * (0.1 + length), 0.04], [along + 0.02, side * (0.1 + length * 0.9), 0.05]],
+    faces: [[0, 1, 2], [0, 2, 3], [0, 2, 1], [0, 3, 2]] });
+  const part = (name, data, color) => {
+    const mesh = createMesh(name, data, scene);
+    mesh.material = toon.plain(name, color);
+    return { mesh, buffer: setMatrices(mesh, 1) };
+  };
+  const shell = part('Turtle Shell', scaled(blob(0.2, [0, 0, 0]), [1.15, 0.95, 0.55], [0, 0, 0.1]), '#4a5730');
+  const head = part('Turtle Head', scaled(blob(0.065, [0, 0, 0]), [1.3, 1, 0.9], [0.27, 0, 0.1]), '#a3ad74');
+  const fins = [[1, 0.08, 0.26], [-1, 0.08, 0.26], [1, -0.15, 0.13], [-1, -0.15, 0.13]].map(([side, along, length], k) => ({ side, front: along > 0, ...part(`Turtle Flipper ${k + 1}`, scaled(flipper(side, along, length), [1, 1, 1]), '#8a955e') }));
+  const inward = new Vector3(-Math.cos(TURTLE.angle), 0, -Math.sin(TURTLE.angle)), heading = headingOf(inward);
+  // A stroke of the front flippers every 1.6 s heaves it forward; the back ones push.
+  const crawl = (time) => {
+    const strokes = (time - TURTLE.start) / 1.6, done = Math.floor(strokes);
+    return Math.max(0, done + smoothstep(0.15, 0.6, strokes - done)) / ((TURTLE.end - TURTLE.start) / 1.6);
+  };
+  return (day, time) => {
+    const shown = time > TURTLE.start ? 1 : 1e-4, r = shore(TURTLE.angle) * lerp(TURTLE.from, TURTLE.to, Math.min(1, crawl(time)));
+    const x = Math.cos(TURTLE.angle) * r, z = Math.sin(TURTLE.angle) * r, at = new Vector3(x, Math.max(-0.1, heightAt(x, z)), z);
+    const stroke = Math.sin(((time - TURTLE.start) / 1.6) * 2 * Math.PI), turn = Quaternion.RotationAxis(Vector3.Up(), heading), scale = new Vector3(1, 1, 1).scale(shown);
+    place(shell.buffer, 0, at, scale, turn);
+    place(head.buffer, 0, at.add(new Vector3(0, 0.012 * SIZE * stroke, 0)), scale, turn);
+    for (const { side, front, buffer } of fins) place(buffer, 0, at, scale, turn.multiply(Quaternion.RotationAxis(Vector3.Up(), (front ? 0.35 : 0.2) * side * stroke)));
+    for (const { mesh } of [shell, head, ...fins]) mesh.thinInstanceBufferUpdated('matrix');
   };
 }
 // The heading that points a bird along a direction.
 export const headingOf = (along) => Math.atan2(-along.z, along.x);
 
 // The flock: arrives once the forest has grown and circles the volcano, gliding and flapping in bursts. It leaves out
-// to sea as the new star grows, and comes home at the end.
-const flockAway = (time) => smoothstep(BEAT.leave - 1, BEAT.leave + 4, time) * (1 - smoothstep(BEAT.home - 3, BEAT.home + 1, time));
+// to sea as the new star grows.
+const flockAway = (time) => smoothstep(BEAT.leave - 1, BEAT.leave + 4, time);
 // Where the flock is, roughly: circling over the island, or far out while it is away.
 export const flockAt = (time) => { const out = 4.7 + 40 * flockAway(time) ** 1.5, a = time * 0.55; return new Vector3(Math.cos(a) * out, 4.8 + 3 * flockAway(time), Math.sin(a) * out); };
 export function createBirds(scene, toon) {

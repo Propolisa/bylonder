@@ -11,11 +11,11 @@ export const lerp = (a, b, t) => a + (b - a) * t;
 export const BEAT = {
   arrive: 40, mate: 47, court: 51, nest: 57, egg: 64, hatch: 82.5, feed: 86, lesson: 99, tryFly: 105.5,
   omen: 109, leave: 121, streak: 128, impact: 134, embers: 143, climax: 155, fall: 155.8, gone: 156.6,
-  mourn: 161.5, sea: 174, heal: 179, sapling: 182, home: 188.5,
+  mourn: 161.5, dawn: 171, found: 174, reunion: 178.6, after: 186,
 };
-export const FPS = 24, LENGTH = 194;
+export const FPS = 24, LENGTH = 200;
 // Slow motion: [first story second, last, story seconds a second of film shows there], eased in and out over 0.6 s.
-const SLOW = [[133.4, 136.2, 0.3], [154.7, 157.2, 0.35]];
+const SLOW = [[133.4, 136.2, 0.3], [154.7, 157.2, 0.35], [178.2, 179.4, 0.5]];
 export const rateAt = (s) => SLOW.reduce((rate, [a, b, slow]) => Math.min(rate, lerp(1, slow, smoothstep(a - 0.6, a, s) * (1 - smoothstep(b, b + 0.6, s)))), 1);
 // Film seconds at each step of story time, and back.
 const STEP = 1 / 240, FILM = new Float64Array(Math.ceil(LENGTH / STEP) + 2);
@@ -36,13 +36,12 @@ export const frameAt = (s) => Math.round(filmAt(s) * FPS) + 1;
 // only in short bursts between the story's moments; within one the sun barely moves. The bursts' speeds are solved in
 // turn so they court in the morning, the egg comes one morning, its vigil and the star's last night are at night, the
 // chick hatches at dawn, the lesson is in the morning, the flock leaves at dawn, the asteroid strikes just after sunset,
-// and they come home at first light.
-const keys = ([morning, build, vigil, dawn, grow, night, leave, dusk, home]) => [
+// and the night of mourning ends at sunrise.
+const keys = ([morning, build, vigil, dawn, grow, night, leave, dusk, after]) => [
   [0, 0.12], [5, 0.135], [10, 0.16], [15, 0.215], [20, 0.29], [25, 0.38], [30, 0.5], [35, morning], [40, morning], [43, 0.005], [56, 0.005],
   [58, build], [62, build], [64, 0.006], [66, vigil], [75, vigil], [77, 0.3], [79, dawn], [80.5, 0.003], [85, 0.003], [86.5, 0.005], [92, 0.005],
   [93.5, grow], [97.5, grow], [99, 0.004], [109, 0.004], [111, 0.3], [113, night], [115, 0.006], [117, 0.006], [119, leave], [121, 0.006],
-  [123, 0.06], [125, dusk], [127, 0.004], [140, 0.003], [148, 0.004], [172, 0.003], [176, 0.03], [178, 0.3], [180, home], [185, home],
-  [187.5, 0.06], [189, 0.02], [194, 0.015],
+  [123, 0.06], [125, dusk], [127, 0.004], [140, 0.003], [148, 0.004], [169, 0.003], [170.5, after], [172.5, after], [173.5, 0.004], [200, 0.004],
 ];
 const speedOf = (k, t) => {
   const i = k.findIndex(([s], j) => t >= s && t <= (k[j + 1]?.[0] ?? Infinity));
@@ -57,7 +56,7 @@ const integrate = (k) => {
 // Each speed in turn brings the day at its moment to a time of day (a fraction), the speed nearest a guess: the day is
 // linear in it, and later speeds do not change earlier moments.
 const TIMES = [[48, 0.3, 0.3], [BEAT.egg, 0.1, 0.25], [70, 0.75, 0.05], [81.5, 0.02, 0.3], [BEAT.lesson, 0.06, 0.5], [116, 0.75, 0.3], [BEAT.leave, 0.02, 0.15],
-  [BEAT.impact, 0.475, 0.2], [BEAT.home, 0.97, 0.6]];
+  [BEAT.impact, 0.475, 0.2], [BEAT.found, 0.03, 0.15]];
 const SPEEDS = keys(TIMES.reduce((solved, [second, fraction, near], i) => {
   const at = (v) => integrate(keys([...solved, v, ...TIMES.slice(i + 1).map(([, , n]) => n)]))[Math.round(second * FPS) + 1];
   const a = at(0), slope = at(1) - a, n = Math.round(a + near * slope - fraction);
@@ -83,6 +82,21 @@ export const MOURN = (() => {
   const angle = NEST.angle - 0.7, r = 0.82 * shore(angle), x = Math.cos(angle) * r, z = Math.sin(angle) * r;
   return { angle, x, z, ground: heightAt(x, z) };
 })();
+// The mouth of an old lava tube on the slope below the nest, where the tree's crown lands as it falls: it throws the
+// mother in, and the fire passes over her. It faces down the slope.
+export const CAVE = (() => {
+  const angle = NEST.angle - 0.18, r = NEST.r + 1.45, x = Math.cos(angle) * r, z = Math.sin(angle) * r;
+  return { angle, x, z, ground: heightAt(x, z) };
+})();
+// Where the three come together, on the slope's foot between the beach and the cave.
+export const HUDDLE = (() => {
+  const x = lerp(MOURN.x, CAVE.x, 0.35), z = lerp(MOURN.z, CAVE.z, 0.35);
+  return { angle: Math.atan2(z, x), x, z, ground: heightAt(x, z) };
+})();
+// Up the slope from the huddle, toward the cave.
+const UPHILL = Math.atan2(CAVE.z - HUDDLE.z, CAVE.x - HUDDLE.x);
+// The turtle's crawl up out of the sea onto the beach below them: [from, to] as parts of the shore's radius.
+export const TURTLE = (() => { const angle = HUDDLE.angle; return { angle, from: 0.97, to: 0.86, start: BEAT.after - 3, end: LENGTH }; })();
 // The asteroid: an odd-colored star with a faint trail, in the sky over the far side of the island from the first
 // frame. It grows through the film, fast in its last nights, then falls in the dusk just after sunset onto the island's
 // far shoulder, behind the volcano from the nest.
@@ -163,10 +177,8 @@ export const fromFire = (x, z) => {
   const r = Math.hypot(x, z), d = Math.atan2(z, x) - fireAngle(r);
   return Math.abs(Math.atan2(Math.sin(d), Math.cos(d))) * r;
 };
-// The burning: hot until the night falls, embers after.
-export const burning = (time) => 1 - smoothstep(BEAT.sea, BEAT.heal + 0.5, time);
-// The burnt ground heals and grass grows back, after the night.
-export const healing = (time) => smoothstep(BEAT.heal, BEAT.heal + 5, time);
+// The burning: hot through the night, out by the morning after.
+export const burning = (time) => 1 - smoothstep(BEAT.mourn + 4, BEAT.found + 1, time);
 
 // The camera, shot by shot: [start second, center ('island' or 'nest'), angle round it, distance, height, look-at height,
 // angle at the end, distance at the end]. Each shot eases from its start to its end framing and cuts to the next.
@@ -197,12 +209,16 @@ export const SHOTS = [
   // answers; the father comes down beside it; the night goes on.
   [159.4, 'shore', MOURN.angle + 0.35, 4.6, 0.7, 0.35, MOURN.angle + 0.15, 3.6], [164.5, 'shore', MOURN.angle - 0.3, 1.1, 0.3, 0.15, MOURN.angle - 0.15, 0.85],
   [168.5, 'island', MOURN.angle - 0.25, 12, 1.6, 1.3, MOURN.angle - 0.1, 13.5],
-  // They leave at last; the night at sea; the island heals; home.
-  [173, 'island', 1.35, 15.5, 3.3, 2.6, 1.55, 17], [178, 'island', 0.6, 20, 9, 1.4, 0.9, 16], [185, 'nest', 0.9, 2.3, 0.8, 0.7, 1.05, 2.8],
-  // Sunrise over the healed island; the flock home, a whale and her calf.
-  [190.5, 'island', 1.05, 12, 2.4, 1.8, 1.0, 19],
+  // Sunrise. A faint call from up the slope: out of the cave she comes, a wing bent and her face scarred, and the three
+  // huddle together.
+  [173.5, 'shore', MOURN.angle - 0.3, 1.1, 0.3, 0.15, MOURN.angle - 0.2, 0.95], [175.4, 'cave', CAVE.angle - 0.25, 1.5, 0.45, 0.15, CAVE.angle - 0.1, 1.25],
+  [177, 'huddle', UPHILL - 2.4, 2.0, 0.5, 0.15, UPHILL - 2.1, 1.7], [178.6, 'huddle', UPHILL - 1.85, 1.05, 0.35, 0.18, UPHILL - 1.6, 0.9],
+  // The camera draws back over them and up: a turtle hauls out on the beach below; the wasted island, the sea strewn
+  // with floating rubble, the lee still green, a whale and her calf out beyond.
+  [BEAT.after, 'huddle', UPHILL + Math.PI + 0.3, 1.4, 0.4, 0.15, UPHILL + Math.PI + 0.1, 4], [190.5, 'island', STRIKE.angle - 0.8, 15, 7.5, 0.8, STRIKE.angle - 0.3, 27],
 ];
-const CENTERS = { nest: { x: NEST.x, y: NEST.ground, z: NEST.z }, shore: { x: MOURN.x, y: MOURN.ground, z: MOURN.z }, island: { x: 0, y: 0, z: 0 } };
+const at = ({ x, z, ground }) => ({ x, y: ground, z });
+const CENTERS = { nest: at({ ...NEST }), shore: at(MOURN), cave: at(CAVE), huddle: at(HUDDLE), island: { x: 0, y: 0, z: 0 } };
 // The camera's place and target at a second of film, and the end of the shot it is in.
 export function shotAt(time) {
   // By frame, so a shot starts on the frame its second rounds to.
@@ -210,7 +226,8 @@ export function shotAt(time) {
   const end = SHOTS[i + 1]?.[0] ?? LENGTH, t = smoothstep(0, 1, (time - start) / (end - start)) * 0.9 + 0.1 * (time - start) / (end - start);
   const c = CENTERS[center], angle = lerp(a0, a1, t), distance = lerp(d0, d1, t);
   const x = c.x + Math.cos(angle) * distance, z = c.z + Math.sin(angle) * distance;
-  return { position: [x, Math.max(c.y + height, heightAt(x, z) + 0.6), z], target: [c.x, c.y + look, c.z], end };
+  // Clear of the ground: as far above it as the shot's own height, up to 0.6.
+  return { position: [x, Math.max(c.y + height, heightAt(x, z) + Math.min(0.6, height)), z], target: [c.x, c.y + look, c.z], end };
 }
 // The camera's angle round the island at a frame.
 export const shotAngle = (frame) => { const { position: [x, , z] } = shotAt(seconds(frame)); return Math.atan2(z, x); };

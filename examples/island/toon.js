@@ -71,7 +71,7 @@ void main() {
 // slope and a fire burns a path down through the forest past the nest tree (its front at fireFront from the centre);
 // then the ground heals.
 const terrain = `${lighting}
-uniform float day, fireFront, fireHeat, healed, blast, blastReach;
+uniform float day, fireFront, fireHeat, blast, blastReach;
 float fireAngle(float r) { return ${NEST.angle.toFixed(4)} + 0.12 * (sin(r * 1.9 + 1.0) - sin(${(NEST.r * 1.9 + 1).toFixed(4)})); }
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
 float channel(float a, float r) {
@@ -112,24 +112,20 @@ void main() {
   float grown = step(3.4 + 2.0 * inland + front + 0.3, day) * land * step(0.18, patches + 0.4 * grain);
   color = mix(mix(color, soil, soiled), grass, grown);
   glow *= 1.0 - soiled;
-  // The fire's path, burnt and glowing with embers; it greens over again in patches as the ground heals.
+  // The fire's path, burnt and glowing with embers.
   float off = abs(mod(a - fireAngle(r) + 3.14159, 6.28318) - 3.14159) * r, passed = fireFront - r;
   float scorched = step(${IMPACT.r.toFixed(4)}, r + 0.3) * step(s, 0.86) * step(0.0, passed + 0.35) * (1.0 - step(0.55 + 0.35 * wander, off));
-  float back = step(1.0 - healed, 0.6 * patches + 0.4 * grain) * land;
   vec3 ash = mix(vec3(0.24, 0.22, 0.26), vec3(0.33, 0.3, 0.33), grain);
-  color = mix(color, ash, scorched * (1.0 - back));
-  color = mix(color, grass, back * scorched);
+  color = mix(color, ash, scorched);
   // The asteroid's blast across the far side: the land burnt to black glass where it reached, molten in cracks that
-  // cool over the following seconds; only part of it greens again.
+  // cool over the following seconds.
   float struck = length(p.xz - vec2(${STRIKE.x.toFixed(4)}, ${STRIKE.z.toFixed(4)})), blasted = step(struck, blastReach + 0.6 * (wander - 0.5)) * step(0.0, blast);
   vec3 glass = mix(vec3(0.07, 0.05, 0.09), vec3(0.16, 0.12, 0.17), grain);
-  float regrown = step(1.0 - healed * 0.75, 0.6 * patches + 0.4 * grain) * land;
-  color = mix(color, glass, blasted * (1.0 - regrown));
-  color = mix(color, grass, blasted * regrown);
+  color = mix(color, glass, blasted);
   float cracks = step(0.55, hash(floor(p.xz * 4.0))) * (1.0 - smoothstep(0.0, 9.0, blast - struck * 0.08));
-  glow += blasted * (1.0 - regrown) * (cracks * mix(vec3(2.4, 0.5, 0.05), vec3(2.6, 1.3, 0.2), grain) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
+  glow += blasted * (cracks * mix(vec3(2.4, 0.5, 0.05), vec3(2.6, 1.3, 0.2), grain) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
   float embers = scorched * step(0.62, hash(p.xz * 5.3)) * (0.4 + 0.6 * (1.0 - smoothstep(0.0, 1.5, passed)));
-  glow += (embers * fireHeat * mix(vec3(1.4, 0.25, 0.03), vec3(2.4, 0.8, 0.08), 0.5 + 0.5 * sin(day * 60.0 + grain * 9.0))) * (1.0 - back);
+  glow += (embers * fireHeat * mix(vec3(1.4, 0.25, 0.03), vec3(2.4, 0.8, 0.08), 0.5 + 0.5 * sin(day * 60.0 + grain * 9.0)));
   gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + glow), 1.0);
 }`;
 
@@ -271,13 +267,13 @@ export function createToon(scene) {
   let ground = null, water = null;
   return {
     // The fire's state in the ground.
-    fire({ front, heat, healed, blast, blastReach }) {
-      ground?.setFloat('fireFront', front).setFloat('fireHeat', heat).setFloat('healed', healed).setFloat('blast', blast).setFloat('blastReach', blastReach);
+    fire({ front, heat, blast, blastReach }) {
+      ground?.setFloat('fireFront', front).setFloat('fireHeat', heat).setFloat('blast', blast).setFloat('blastReach', blastReach);
       water?.setFloat('blast', blast);
     },
     sky: skyMaterial,
     plain: (name, color) => make(name, plain, ['color', 'underglow', 'glow']).setColor3('color', BABYLON.Color3.FromHexString(color)).setColor3('underglow', BABYLON.Color3.Black()).setColor3('glow', BABYLON.Color3.Black()),
-    terrain: () => (ground = make('Ground', terrain, ['day', 'fireFront', 'fireHeat', 'healed', 'blast', 'blastReach'])),
+    terrain: () => (ground = make('Ground', terrain, ['day', 'fireFront', 'fireHeat', 'blast', 'blastReach'])),
     sea: () => (water = make('Water', sea, ['day', 'blast'])),
     // The light of the moment, in every toon material and the sky; `air` is the story's: the fire light, the haze, and
     // what the meteor draws on the sky.

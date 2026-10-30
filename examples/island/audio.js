@@ -40,12 +40,14 @@ const CALLS = [
   ['peep', 'chick', 148.8], ['peep', 'chick', 150.6], ['sad', 'chick', 151.3], ['mother', 'mother', 152.7], ['peep', 'chick', 153.9],
   // She pushes it; it falls, and flies; her last call as the tree goes.
   ['mother', 'mother', 154.85], ['sad', 'chick', 155.15], ['peep', 'chick', 155.5], ['mother', 'mother', 156.0], ['father', 'father', 156.6], ['peep', 'chick', 157.2],
-  // It calls for her from the beach, and nothing answers; the father's low call; they leave.
+  // It calls for her from the beach, and nothing answers; the father's low call.
   ['peep', 'chick', 158.3], ['peep', 'chick', 159.1], ['sad', 'chick', 160.9], ['peep', 'chick', 162.4], ['peep', 'chick', 164.9, 0.8],
-  ['sad', 'chick', 167.1, 0.8], ['coo', 'father', 168], ['peep', 'chick', 169.9, 0.5], ['coo', 'father', 171.3], ['peep', 'chick', 172.6, 0.6],
-  // The night at sea, and home.
-  ['father', 'father', 174.4, 0.8], ['peep', 'chick', 175.1, 0.8], ['coo', 'father', 180.5], ['peep', 'chick', 181.2, 0.7], ['father', 'father', 185.6],
-  ['father', 'father', 187.8], ['mother', 'chick', 188.3], ['father', 'father', 188.9], ['coo', 'father', 189.8], ['coo', 'chick', 190.3],
+  ['sad', 'chick', 167.1, 0.8], ['coo', 'father', 168], ['peep', 'chick', 169.9, 0.5], ['coo', 'father', 171.3],
+  // Morning: a faint call from the cave, and again; she comes out; they huddle.
+  ['mother', 'mother', 174.1, 0.25], ['peep', 'chick', 174.6], ['mother', 'mother', 175.3, 0.45], ['peep', 'chick', 175.9], ['father', 'father', 176.4],
+  ['mother', 'mother', 176.9, 0.8], ['peep', 'chick', 177.4], ['peep', 'chick', 177.8], ['peep', 'chick', 178.2], ['coo', 'mother', 179],
+  ['coo', 'chick', 179.6], ['coo', 'father', 180.4], ['coo', 'mother', 181.8, 0.7], ['peep', 'chick', 183.1, 0.5], ['coo', 'mother', 184.6, 0.6],
+
 ];
 
 // How loud each sound is against the others: tones carry far more than rumbles of the same peak.
@@ -62,11 +64,11 @@ export function cues() {
     { sound: 'eruption', bed: true, place: () => new Vector3(0, 4, 0), near: 12, volume: (day) => LEVEL.eruption * eruption(day) * smoothstep(0.1, 0.4, day) },
     { sound: 'steam', bed: true, place: () => new Vector3(0, 0.3, 0), near: 8, volume: (day) => 0.6 * smoothstep(1.45, 1.65, day) * (1 - smoothstep(2.4, 2.9, day)) },
     { sound: 'insects', bed: true, place: () => new Vector3(0, 1, 0), near: 8,
-      volume: (day, time) => 0.35 * night(day) * smoothstep(5.6, 6.2, day) * (1 - smoothstep(BEAT.streak - 2, BEAT.streak, time) * (1 - smoothstep(BEAT.heal, BEAT.heal + 3, time))) },
+      volume: (day, time) => 0.35 * night(day) * smoothstep(5.6, 6.2, day) * (1 - smoothstep(BEAT.streak - 2, BEAT.streak, time)) },
     { sound: 'fire', bed: true, place: (time) => fireLight(time).position, near: 6, volume: (day, time) => (time >= BEAT.embers ? LEVEL.fire * burning(time) : 0) },
     ...CALLS.map(([sound, who, second, volume = 1]) => at(sound, second, (time) => whereIs(who, time), volume)),
     flock(flockIn), flock(flockIn + 3.5), ...Array.from({ length: Math.floor((BEAT.leave - flockIn - 8) / 9) }, (_, k) => flock(flockIn + 9 * (k + 1), 0.35)),
-    flock(BEAT.leave), flock(BEAT.leave + 1.4), flock(BEAT.leave + 3), flock(BEAT.home - 1.8), flock(BEAT.home - 0.2), flock(BEAT.home + 1.6), flock(BEAT.home + 3.2, 0.4),
+    flock(BEAT.leave), flock(BEAT.leave + 1.4), flock(BEAT.leave + 3),
     ...WHALES.flatMap(({ start, at: place, size }) => [at('song', start + 0.2, () => place, size, 10), at('spout', start + 0.9, () => place, size, 10)]),
     at('creak', BEAT.fall - 0.25, () => TREE, 0.8), at('crash', BEAT.fall + 0.5, () => TREE, 1, 4),
     at('roar', BEAT.impact - 6.2, (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), 1, 30),
