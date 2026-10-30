@@ -363,7 +363,6 @@ world.curves = createCurveObjects(world);
 const editModeOptions = { world, editor, views, history, notify, changed: () => { refreshUI(); tagRedraw(); views.wake(); } };
 const editCurve = createEditCurve({ ...editModeOptions, curves: world.curves });
 world.editMode = createEditModes(createMeshEditMode({ world, selection: editor.selection, host: () => objectOperatorHost }), editCurve);
-registerCurveAddOperators({ editor, history, commands, curves: world.curves, editCurve });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
@@ -412,6 +411,7 @@ history.start();
 const objectOperatorHost = { transaction: commands.transaction, notify, keying: (run) => animation.keying(run), commit, wm: () => world.wm,
   pointer: () => editor.pointer, view: () => activeView() };
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
+registerCurveAddOperators({ sync: world.mainSync, host: objectOperatorHost, editCurve });
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost,
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });

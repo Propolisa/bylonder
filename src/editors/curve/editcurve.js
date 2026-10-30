@@ -6,7 +6,8 @@
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { hasOperator, OPERATOR_FINISHED, moduleAccess } from '../../bmesh/bmesh-wasm.js';
 import { openMenu } from '../interface/menu.js';
-import { CurveObject, View3DRegion, SEL_OP_SET, SEL_OP_XOR } from '../../blenkernel/curve/curve.js';
+import { View3DRegion, SEL_OP_SET, SEL_OP_XOR } from '../../blenkernel/curve/curve.js';
+import { runBlenderOperator } from '../object/object-operators.js';
 import { createEditCurveOverlay } from '../../draw/overlay-edit-curve.js';
 import { createEditTextOverlay } from '../../draw/overlay-edit-text.js';
 import { regionView3D, toBlenderView } from '../space_view3d/view3d-project.js';
@@ -240,41 +241,18 @@ export function createEditCurve({ world, editor, views, history, notify, changed
   };
 }
 
-// Adding curve and text objects (curvesurf_prim_add, object.text_add): in Object Mode a new object, whose Curve
-// Blender's operator fills in Edit Mode as it does for a new object; in Edit Curve mode the primitive joins the edit
-// object. A new curve is a 3D curve with a path: curvesurf_prim_add sets both when `type & CU_PRIM_PATH`, which every
-// primitive's type passes (CU_PRIM_PATH is 0x700).
-const PRIMITIVES = {
-  'curve.primitive_bezier_curve_add': 'BézierCurve', 'curve.primitive_bezier_circle_add': 'BézierCircle', 'curve.primitive_nurbs_curve_add': 'NurbsCurve',
-  'curve.primitive_nurbs_circle_add': 'NurbsCircle', 'curve.primitive_nurbs_path_add': 'NurbsPath',
-};
-const NEW_OBJECT = { use_path: true, dimensions: '3D' };
+// Adding curve and text objects (curvesurf_prim_add, object.text_add): in Object Mode Blender's operator adds the object
+// to Main, which the view draws; in Edit Curve mode the primitive joins the edit object.
+const PRIMITIVES = ['curve.primitive_bezier_curve_add', 'curve.primitive_bezier_circle_add', 'curve.primitive_nurbs_curve_add',
+  'curve.primitive_nurbs_circle_add', 'curve.primitive_nurbs_path_add'];
 
-export function registerCurveAddOperators({ editor, history, commands, curves, editCurve }) {
-  const create = (type, name, fill) => {
-    const object = new CurveObject(type, name);
-    try {
-      fill?.(object);
-      editor.selection.replace([curves.add(commands.unique(name), object.data)]);
-      editor.reconcile();
-      history.commit();
-    } finally {
-      object.free();
-    }
-  };
-  for (const [idname, name] of Object.entries(PRIMITIVES)) {
+//   host: what Object Mode's operators run in (object-operators.js).
+export function registerCurveAddOperators({ sync, host, editCurve }) {
+  for (const idname of PRIMITIVES) {
     registerOperator(idname, {
       poll: () => !editCurve.active || editCurve.kind === 'CURVE',
-      run: (props) => {
-        if (editCurve.active) return editCurve.exec(idname, props);
-        create('CURVE', name, (object) => {
-          object.enter();
-          object.run(idname, props);
-          object.exit();
-          object.settings = NEW_OBJECT;
-        });
-      },
+      run: (props) => (editCurve.active ? editCurve.exec(idname, props) : runBlenderOperator(sync, idname, props, host)),
     });
   }
-  registerOperator('object.text_add', { poll: () => !editCurve.active, run: () => create('FONT', 'Text') });
+  registerOperator('object.text_add', { poll: () => !editCurve.active, run: (props) => runBlenderOperator(sync, 'object.text_add', props, host) });
 }
