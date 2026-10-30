@@ -33,7 +33,7 @@ function createFireball(scene, toon) {
   return together(...shells,
     flame('Trail Flame Hot', [2.6, 2.1, 0.9], 90, [0.12, 0.25], 0.45), flame('Trail Flame', [2.4, 0.9, 0.12], 70, [0.25, 0.5], 0.6), flame('Trail Flame Red', [1.6, 0.25, 0.04], 50, [0.4, 0.8], 0.75),
     createParticles(scene, toon, { name: 'Trail Smoke', color: '#58525e', underglow: glowOf(0.9, 0.3, 0.06), seed: 4, start: T0, end: T1 - 0.4, rate: 60, life: [4, 6],
-      origin: path, velocity: (r) => direction(r).scale(0.4), drag: 0.6, gravity: 0.05, turbulence: 0.12, size: swell(0.3, 1.4), strength: (birth) => 1 - falling(birth) ** 3 }),
+      origin: path, velocity: (r) => direction(r).scale(0.4), drag: 0.6, gravity: 0.05, turbulence: 0.12, size: swell(0.15, 0.8), strength: (birth) => 1 - falling(birth) ** 3 }),
     createParticles(scene, toon, { name: 'Trail Sparks', color: '#000000', glow: glowOf(2.6, 2.0, 0.8), seed: 5, start: T0, end: T1, rate: 80, life: [0.5, 1.1],
       origin: path, velocity: (r) => direction(r).scale(2 + 3 * r(3)), gravity: -6, size: pop(0.07), strength: near }));
 }
@@ -69,17 +69,17 @@ function createImpact(scene, toon) {
     billow('Impact Fire Red', [1.4, 0.22, 0.04], 50, 7.5, 2.3, [1.5, 2.6], 23),
     createParticles(scene, toon, { name: 'Shockwave Dust', color: '#b8a690', seed: 24, ...burst(90 / 0.1, 0.1), life: [2.5, 4],
       origin: (r) => IMPACT_AT.add(new Vector3((2 * r(30) - 1) * 0.3, 0, (2 * r(31) - 1) * 0.3)),
-      velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a), 0.06, Math.sin(a)).scale(11 + 6 * r(3)); },
-      drag: 2.4, gravity: 0.25, ground: 0.12, size: swell(0.25, 1.3) }),
+      velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a), 0.06, Math.sin(a)).scale(7 + 4 * r(3)); },
+      drag: 2.8, gravity: 0.25, ground: 0.12, size: swell(0.12, 0.6) }),
     createParticles(scene, toon, { name: 'Impact Sparks', color: '#000000', glow: glowOf(2.8, 2.4, 1.2), seed: 25, ...burst(900, 0.1), life: [0.6, 1.5],
       origin: at, velocity: (r) => direction(r, 0.4).scale(7 + 8 * r(3)), gravity: -9.8, drag: 0.4, size: pop(0.06) }),
-    createParticles(scene, toon, { name: 'Smoke Column', color: '#3c3843', underglow: glowOf(1.2, 0.4, 0.08), seed: 26, start: T + 0.1, end: BEAT.sea - 1, rate: 45, life: [3.5, 5],
+    createParticles(scene, toon, { name: 'Smoke Column', color: '#3c3843', underglow: glowOf(1.2, 0.4, 0.08), seed: 26, start: T + 0.1, end: BEAT.sea - 1, rate: 90, life: [3.5, 5],
       origin: (r) => IMPACT_AT.add(new Vector3((2 * r(30) - 1) * 0.5, 0.2, (2 * r(31) - 1) * 0.5)),
       velocity: (r) => new Vector3((2 * r(32) - 1) * 0.4, 2 + 1.5 * r(3), (2 * r(33) - 1) * 0.4), drag: 0.35, gravity: 0.25,
-      wind: new Vector3(-0.35, 0, -0.2), turbulence: 0.25, size: swell(0.12, 0.75), strength: (birth) => 1 - smoothstep(BEAT.sea - 3, BEAT.sea, birth) }),
-    createParticles(scene, toon, { name: 'Smoke Column Pale', color: '#6e6977', seed: 27, start: T + 0.4, end: BEAT.sea - 2, rate: 18, life: [4, 5.5],
+      wind: new Vector3(-0.35, 0, -0.2), turbulence: 0.25, size: swell(0.08, 0.5), strength: (birth) => 1 - smoothstep(BEAT.sea - 3, BEAT.sea, birth) }),
+    createParticles(scene, toon, { name: 'Smoke Column Pale', color: '#6e6977', seed: 27, start: T + 0.4, end: BEAT.sea - 2, rate: 36, life: [4, 5.5],
       origin: (r) => IMPACT_AT.add(new Vector3(0, 1.5 + r(3), 0)), velocity: (r) => new Vector3(0, 1.6 + r(4), 0), drag: 0.3, gravity: 0.2,
-      wind: new Vector3(-0.5, 0, -0.25), turbulence: 0.35, size: swell(0.2, 0.95), strength: (birth) => 1 - smoothstep(BEAT.sea - 4, BEAT.sea, birth) }));
+      wind: new Vector3(-0.5, 0, -0.25), turbulence: 0.35, size: swell(0.12, 0.65), strength: (birth) => 1 - smoothstep(BEAT.sea - 4, BEAT.sea, birth) }));
 }
 
 // The fire running down the slope: flames in three colors along its front, smoke, and embers rising.

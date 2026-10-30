@@ -21,7 +21,8 @@ const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
-  renderSettings({ eevee: { taaRenderSamples: 16 } });
+  // Blender's Color Management look gives the film its contrast.
+  renderSettings({ eevee: { taaRenderSamples: 16 }, viewSettings: { look: 'MEDIUM_HIGH_CONTRAST' } });
   const toon = createToon(scene);
 
   const dome = BABYLON.MeshBuilder.CreateSphere('Sky', { diameter: 400, segments: 24, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
@@ -37,6 +38,10 @@ export const createScene = function () {
   // Lava, fire and the meteor glow past white, which bloom spreads.
   const lens = new BABYLON.DefaultRenderingPipeline('Lens', true, scene, [camera]);
   Object.assign(lens, { bloomEnabled: true, bloomThreshold: 1.4, bloomWeight: 0.85, bloomKernel: 64 });
+  // The lens: richer color and a soft vignette.
+  const curves = new BABYLON.ColorCurves();
+  Object.assign(curves, { globalSaturation: 35, shadowsSaturation: 20, shadowsHue: 250, shadowsDensity: 15 });
+  Object.assign(lens.imageProcessing, { colorCurvesEnabled: true, colorCurves: curves, vignetteEnabled: true, vignetteWeight: 1.6, vignetteStretch: 0.4, vignetteColor: new BABYLON.Color4(0.05, 0.02, 0.1, 0) });
 
   // Everything that changes follows the frame, so playback and renders agree.
   // Island time (days) runs at the story's speed; wind, wings and particles keep the film's own time.
@@ -98,7 +103,7 @@ function air(light, fire, time, eye) {
     firePosition: fire.position, fireColor: fire.color,
     fogColor: mix(light.skyHorizon, new Color3(0.35, 0.24, 0.24), 0.5 * smoke), fogDensity: 0.004 + 0.012 * smoke,
     rays: 1 + 0.8 * smoothstep(BEAT.home - 4, LENGTH, time),
-    omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.leave, BEAT.streak - 1, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
+    omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.omen + 4, BEAT.leave, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
     trail: smoothstep(BEAT.streak, BEAT.streak + 0.6, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),
     trailTail: from.subtract(eye).normalize(), trailHead: head.subtract(eye).normalize(),
   };

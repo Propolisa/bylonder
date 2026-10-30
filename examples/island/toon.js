@@ -139,7 +139,7 @@ void main() {
   float foam = max(waves, 1.0 - smoothstep(1.0, 1.04, s));
   color = mix(color, vec3(0.95, 1.0, 1.0), foam);
   vec3 v = normalize(cameraPosition - vWorld);
-  float glint = 0.6 * smoothstep(0.9975, 0.999, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), sunDir));
+  float glint = 0.6 * smoothstep(0.99965, 0.99985, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), sunDir));
   // The fire's light on the water, a broken path of glints toward it.
   vec3 toFire = fireLight - vWorld;
   float fireGlint = smoothstep(0.985, 0.995, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), normalize(toFire))) * step(0.45, fract(s * 9.0 + day * 3.0));
@@ -152,9 +152,10 @@ void main() {
 const skyVertex = `
 precision highp float;
 attribute vec3 position;
-uniform mat4 worldViewProjection;
+uniform mat4 world, worldViewProjection;
 varying vec3 vDirection;
-void main() { vDirection = position; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
+// In the world's axes: the dome may be mirrored or turned (its world matrix), the sky's directions are the world's.
+void main() { vDirection = mat3(world) * position; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
 const sky = `
 precision highp float;
 varying vec3 vDirection;
@@ -206,7 +207,7 @@ void main() {
   float tailGlow = (1.0 - smoothstep(0.0, 0.004 + 0.02 * omen * tail.y, tail.x)) * (1.0 - tail.y);
   // An odd color for a star: cyan at the core, a violet coma, a sea-green tail; faint by day, vivid by night.
   float seen = 0.75 + 0.25 * stars;
-  color += omen * seen * (vec3(0.75, 1.0, 0.95) * core * 2.2 + vec3(0.6, 0.45, 1.0) * coma * 0.8 + vec3(0.35, 0.95, 0.75) * tailGlow * 0.7);
+  color += seen * (vec3(0.25, 0.85, 0.65) * core * (0.7 + 1.3 * omen) * step(0.01, omen) + (0.35 + omen) * (vec3(0.55, 0.3, 1.0) * coma * 0.9 + vec3(0.2, 0.9, 0.6) * tailGlow * 0.8));
   color += omen * vec3(0.5, 0.8, 1.0) * 0.05 * shafts(d, omenDir, 0.06);
   // The contrail: a white-hot line behind the fireball cooling to orange and smoke as it lingers, then fading.
   vec2 t = segment(d, trailTail, trailHead);
@@ -226,7 +227,7 @@ export function createToon(scene) {
     return material;
   };
   const skyMaterial = new BABYLON.ShaderMaterial('Sky', scene, { vertexSource: skyVertex, fragmentSource: sky }, {
-    attributes: ['position'], uniforms: ['worldViewProjection', 'sunDir', 'moonDir', 'skyTop', 'skyHorizon', 'stars', 'time', 'meteor', 'meteorHead', 'meteorTail',
+    attributes: ['position'], uniforms: ['world', 'worldViewProjection', 'sunDir', 'moonDir', 'skyTop', 'skyHorizon', 'stars', 'time', 'meteor', 'meteorHead', 'meteorTail',
       'omenDir', 'omen', 'aurora', 'trail', 'trailHead', 'trailTail', 'rays'],
   });
   skyMaterial.backFaceCulling = false;

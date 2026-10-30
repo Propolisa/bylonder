@@ -33,9 +33,9 @@ export function createSteam(scene, toon) {
   const END = 45, wind = new Vector3(0.35, 0, 0.12);
   return together(
     createParticles(scene, toon, { name: 'Steam Billow', color: '#f4f7ff', seed: 51, start: 0, end: END, rate: 34, life: [1.8, 3], origin: mouth,
-      velocity: (r) => new Vector3(0, 0.8 + 0.6 * r(3), 0), drag: 0.6, gravity: 0.5, wind, turbulence: 0.2, size: swell(0.12, 0.7), strength: hot }),
+      velocity: (r) => new Vector3(0, 0.8 + 0.6 * r(3), 0), drag: 0.6, gravity: 0.5, wind, turbulence: 0.2, size: swell(0.06, 0.35), strength: hot }),
     createParticles(scene, toon, { name: 'Steam Mist', color: '#dde5f1', seed: 52, start: 0, end: END, rate: 16, life: [3, 5], origin: (r) => mouth(r).add(new Vector3(0, 0.6, 0)),
-      velocity: (r) => new Vector3(0, 1 + 0.5 * r(3), 0), drag: 0.4, gravity: 0.4, wind: wind.scale(1.6), turbulence: 0.3, size: swell(0.4, 1.35), strength: hot }),
+      velocity: (r) => new Vector3(0, 1 + 0.5 * r(3), 0), drag: 0.4, gravity: 0.4, wind: wind.scale(1.6), turbulence: 0.3, size: swell(0.2, 0.7), strength: hot }),
     createParticles(scene, toon, { name: 'Steam Spray', color: '#ffffff', seed: 53, start: 0, end: END, rate: 40, life: [0.4, 0.9], origin: mouth,
       velocity: (r) => direction(r, 0.5).scale(1.5 + 1.5 * r(3)), gravity: -6, size: pop(0.05), strength: hot }),
     createParticles(scene, toon, { name: 'Steam Glow', color: '#000000', glow: glowOf(2.2, 0.6, 0.06), seed: 54, start: 0, end: END, rate: 24, life: [0.3, 0.6], origin: mouth,
@@ -142,7 +142,7 @@ export function createBirds(scene, toon) {
       const a = phase + time * speed, out = radius + 40 * away ** 1.5;
       const position = new Vector3(Math.cos(a) * out, height + 0.3 * Math.sin(time * 1.3 + phase) + 3 * away, Math.sin(a) * out);
       const flapping = Math.max(away, smoothstep(0.2, 0.5, Math.sin(time * 0.9 + phase * 3)));
-      kit.pose(i, position, here * 3.5 * (1 - smoothstep(0.85, 1, away)), headingOf(new Vector3(-Math.sin(a), 0, Math.cos(a))), { bank: 0.35, wings: flapping * 0.7 * Math.sin(time * 14 + phase) });
+      kit.pose(i, position, here * 2.4 * (1 - smoothstep(0.85, 1, away)), headingOf(new Vector3(-Math.sin(a), 0, Math.cos(a))), { bank: 0.35, wings: flapping * 0.7 * Math.sin(time * 14 + phase) });
     });
     kit.update();
   };

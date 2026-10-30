@@ -49,8 +49,8 @@ export const days = (frame) => DAYS[Math.min(DAYS.length - 1, Math.max(1, Math.r
 export const eruption = (day) => 1 - smoothstep(2.2, 3, day);
 // The meteor: an odd-colored star with a faint trail, low in the sky behind the island from the first frame, that
 // grows through the film and fast in the nights before it falls, then a fireball streaking down late in the day.
-export const OMEN = (() => { const a = 2.4, e = 0.1; return { x: Math.cos(a) * Math.cos(e), y: Math.sin(e), z: Math.sin(a) * Math.cos(e) }; })();
-export const omen = (time) => (0.1 + 0.12 * smoothstep(0, BEAT.omen, time) + 0.78 * smoothstep(BEAT.omen, BEAT.streak, time) ** 2) * (1 - smoothstep(BEAT.streak, BEAT.streak + 0.6, time));
+export const OMEN = (() => { const a = 2.38, e = 0.07; return { x: Math.cos(a) * Math.cos(e), y: Math.sin(e), z: Math.sin(a) * Math.cos(e) }; })();
+export const omen = (time) => (0.1 + 0.12 * smoothstep(0, BEAT.omen, time) + 0.55 * smoothstep(BEAT.omen, BEAT.leave, time) + 0.23 * smoothstep(BEAT.leave, BEAT.streak, time)) * (1 - smoothstep(BEAT.streak, BEAT.streak + 0.6, time));
 export const falling = (time) => (time < BEAT.streak || time > BEAT.impact ? 0 : (time - BEAT.streak) / (BEAT.impact - BEAT.streak));
 // The ground shaking: the fireball's roar as it comes, the blow when it strikes.
 export const tremor = (time) => 0.25 * smoothstep(BEAT.streak + 1, BEAT.impact, time) * (time < BEAT.impact ? 1 : 0)
@@ -93,21 +93,22 @@ export const healing = (time) => smoothstep(BEAT.heal, BEAT.heal + 4, time);
 // The camera, shot by shot: [start second, center ('island' or 'nest'), angle round it, distance, height, look-at height,
 // angle at the end, distance at the end]. Each shot eases from its start to its end framing and cuts to the next.
 export const SHOTS = [
-  [0, 'island', -0.6, 27, 11, 1.2, -0.15, 21], [4.6, 'island', -0.15, 21, 7, 1.6, 0.55, 15], [8.75, 'island', 0.55, 15, 2.6, 2.4, 1.05, 18],
+  [0, 'island', -0.6, 27, 8, 2.2, -0.15, 21], [4.6, 'island', -0.15, 21, 7, 1.6, 0.55, 15], [8.75, 'island', 0.55, 15, 2.6, 2.4, 1.05, 18],
   [12.5, 'island', 1.05, 18, 5, 1.8, 1.7, 13], [17.5, 'island', 1.7, 13, 15, 0.5, 2.5, 19], [22, 'island', 2.5, 19, 5.5, 1.4, 3.6, 22],
   // A bird comes to the young island.
   [30, 'island', 0.2, 24, 8, 2, 0.7, 17], [37.5, 'nest', 1.6, 6.5, 2.2, 1.4, 1.2, 5.2],
   // The pair, the nest, the egg; a night under the trees.
-  [44, 'nest', -0.3, 4.2, 1.2, 1.5, 0.2, 3.6], [50, 'island', 0.9, 19, 9, 1.6, 1.5, 21], [56, 'nest', 2.4, 3.2, 1.6, 1.6, 2.0, 2.8],
+  [44, 'nest', -0.3, 2.6, 1.8, 1.75, 0.1, 2.2], [50, 'island', 0.9, 19, 9, 1.6, 1.5, 21], [56, 'nest', 1.6, 2.1, 2.6, 1.7, 1.9, 1.9],
   // The chick, its first meal, a flying lesson and its first try, which fails.
-  [62, 'nest', 0.5, 2.6, 0.9, 1.7, 0.9, 3.2], [68, 'island', 1.6, 12, 2.2, 1.2, 2.3, 14], [74, 'nest', 1.1, 3.0, 1.0, 1.7, 0.6, 3.6],
+  [62, 'nest', 0.6, 2.0, 2.6, 1.7, 0.9, 2.4], [68, 'island', 1.6, 12, 2.2, 1.2, 2.3, 14], [74, 'nest', 1.1, 3.6, 2.0, 1.9, 0.6, 4.2],
   // The star grows night by night; the flock leaves; late in the day it falls, seen from where the film began.
-  [80, 'island', 0.1, 23, 6, 2.5, -0.2, 26], [87, 'nest', 0.4, 5.5, 0.6, 2.4, 0.2, 6.5], [91.5, 'island', -0.5, 24, 2.6, 3.2, -0.72, 21],
+  [79.5, 'island', 0.1, 23, 6, 2.5, -0.2, 26], [81, 'nest', -0.69, 2.4, 1.4, 1.85, -0.85, 3.0], [84.5, 'nest', 0.4, 5.5, 0.6, 2.4, 0.2, 6.5],
+  [88.5, 'island', 1.2, 18, 4, 2.2, 1.0, 20], [91.5, 'island', -0.5, 24, 2.6, 3.2, -0.72, 21],
   [96.2, 'nest', 0.55, 7.5, 1.8, 1.8, 0.85, 6.2], [99.5, 'nest', 1.35, 3.3, 1.7, 1.75, 1.05, 2.9],
   // The climax: the tree catches fire, the chick is pushed and flies, the tree falls.
-  [103, 'nest', 3.35, 3.4, 2.5, 1.65, 3.15, 3.7], [105.7, 'nest', 1.5, 7.5, 2.2, 1.0, 1.3, 9.5],
+  [103, 'nest', 2.45, 3.6, 1.2, 1.75, 2.6, 4.2], [106.6, 'nest', 1.5, 7.5, 2.2, 1.0, 1.3, 9.5],
   // The night after; the island heals; home.
-  [109, 'island', 1.2, 26, 4, 2.0, 1.0, 30], [113, 'island', 0.6, 20, 9, 1.4, 0.9, 16], [116.5, 'nest', 0.9, 2.3, 0.8, 0.7, 1.05, 2.8],
+  [109, 'island', 1.35, 15.5, 3.3, 2.6, 1.55, 17], [113, 'island', 0.6, 20, 9, 1.4, 0.9, 16], [116.5, 'nest', 0.9, 2.3, 0.8, 0.7, 1.05, 2.8],
   // Sunrise over the healed island; the flock home, a whale and her calf.
   [118.8, 'island', 1.05, 12, 2.4, 1.8, 1.0, 17],
 ];
