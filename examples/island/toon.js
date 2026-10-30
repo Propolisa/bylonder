@@ -1,5 +1,8 @@
-// Toon shading: faceted surfaces lit in hard bands by the sun and the moon over a sky and ground ambient, with a rim of
-// sky light. The terrain, the sea and the sky add their own color in the same light.
+import { NEST, IMPACT } from './story.js';
+
+// Toon shading: faceted surfaces lit in hard bands by the sun, the moon and a fire light (the meteor, the burning
+// forest) over a sky and ground ambient, with a rim of sky light, fading into the air's haze with distance. The terrain,
+// the sea and the sky add their own color in the same light.
 
 const vertex = `
 precision highp float;
@@ -19,13 +22,14 @@ void main() {
   gl_Position = viewProjection * w;
 }`;
 
-const LIGHT = ['sunDir', 'sunColor', 'moonDir', 'moonColor', 'skyLight', 'groundLight', 'cameraPosition'];
+const LIGHT = ['sunDir', 'sunColor', 'moonDir', 'moonColor', 'skyLight', 'groundLight', 'cameraPosition', 'fireLight', 'fireColor', 'fogColor', 'fogDensity'];
 const lighting = `
 precision highp float;
 varying vec3 vWorld;
 varying vec3 vNormal;
 flat varying vec3 vFace;
-uniform vec3 sunDir, sunColor, moonDir, moonColor, skyLight, groundLight, cameraPosition;
+uniform vec3 sunDir, sunColor, moonDir, moonColor, skyLight, groundLight, cameraPosition, fireLight, fireColor, fogColor;
+uniform float fogDensity;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p), f = fract(p);
@@ -37,26 +41,38 @@ vec3 facet() {
   vec3 n = normalize(cross(dFdx(vWorld), dFdy(vWorld)));
   return dot(n, vNormal) < 0.0 ? -n : n;
 }
-vec3 toon(vec3 albedo, vec3 n) {
+vec3 toon(vec3 albedo, vec3 n, float lit) {
   float d = dot(n, sunDir);
   float sun = 0.55 * smoothstep(0.0, 0.05, d) + 0.45 * smoothstep(0.45, 0.5, d);
   float moon = smoothstep(0.0, 0.05, dot(n, moonDir));
   vec3 ambient = mix(groundLight, skyLight, 0.5 + 0.5 * n.y);
   float rim = smoothstep(0.6, 0.65, 1.0 - max(dot(n, normalize(cameraPosition - vWorld)), 0.0));
-  return albedo * (ambient + sunColor * sun + moonColor * moon + 0.25 * rim * skyLight);
+  // The fire light in two hard bands that reach out as it brightens, and its rim on edges turned from it.
+  vec3 toFire = fireLight - vWorld;
+  float reach = lit * dot(fireColor, vec3(0.33)) / (1.0 + 0.3 * dot(toFire, toFire)), facing = dot(n, normalize(toFire));
+  float fire = (0.6 * smoothstep(0.1, 0.13, reach) + 0.4 * smoothstep(0.4, 0.45, reach)) * smoothstep(-0.05, 0.05, facing);
+  float fireRim = rim * smoothstep(0.08, 0.11, reach);
+  return albedo * (ambient + sunColor * sun + moonColor * moon + 0.25 * rim * skyLight) + albedo * normalize(fireColor + 1e-4) * (1.6 * fire + 0.9 * fireRim);
+}
+// The air between: distance fades to the haze's color.
+vec3 atmosphere(vec3 color) {
+  return mix(color, fogColor, 1.0 - exp(-max(0.0, length(cameraPosition - vWorld) - 6.0) * fogDensity));
 }`;
 
 const plain = `${lighting}
 uniform vec3 color, underglow, glow;
 void main() {
   vec3 n = facet();
-  gl_FragColor = vec4(toon(color, n) + underglow * smoothstep(0.0, -0.6, n.y) + glow, 1.0);
+  gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + underglow * smoothstep(0.0, -0.6, n.y)) + glow, 1.0);
 }`;
 
 // The island's ground by the story's day: volcanic rock and beaches, lava running down five channels from the crater
-// and cooling to basalt, then soil and grass spreading from the shore up the slopes.
+// and cooling to basalt, then soil and grass spreading from the shore up the slopes. Long after, a meteor strikes the
+// slope and a fire burns a path down through the forest past the nest tree (its front at fireFront from the centre);
+// then the ground heals.
 const terrain = `${lighting}
-uniform float day;
+uniform float day, fireFront, fireHeat, healed, impact;
+float fireAngle(float r) { return ${NEST.angle.toFixed(4)} + 0.12 * (sin(r * 1.9 + 1.0) - sin(${(NEST.r * 1.9 + 1).toFixed(4)})); }
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
 float channel(float a, float r) {
   float best = 0.0;
@@ -95,7 +111,21 @@ void main() {
   float soiled = step(2.8 + 1.6 * inland + front, day) * land;
   float grown = step(3.4 + 2.0 * inland + front + 0.3, day) * land * step(0.18, patches + 0.4 * grain);
   color = mix(mix(color, soil, soiled), grass, grown);
-  gl_FragColor = vec4(toon(color, n) + glow * (1.0 - soiled), 1.0);
+  glow *= 1.0 - soiled;
+  // The meteor's crater and the fire's path, burnt and glowing with embers; both green over again in patches as the
+  // ground heals.
+  float off = abs(mod(a - fireAngle(r) + 3.14159, 6.28318) - 3.14159) * r, passed = fireFront - r;
+  float hole = length(p.xz - vec2(${IMPACT.x.toFixed(4)}, ${IMPACT.z.toFixed(4)})) - 0.55 - 0.2 * wander;
+  float crater2 = step(hole, 0.0) * step(0.5, fireFront);
+  float scorched = max(crater2, step(${IMPACT.r.toFixed(4)}, r + 0.3) * step(s, 0.86) * step(0.0, passed + 0.35) * (1.0 - step(0.55 + 0.35 * wander, off)));
+  float back = step(1.0 - healed, 0.6 * patches + 0.4 * grain) * land;
+  vec3 ash = mix(vec3(0.24, 0.22, 0.26), vec3(0.33, 0.3, 0.33), grain);
+  color = mix(color, mix(ash, basalt, crater2), scorched * (1.0 - back));
+  color = mix(color, grass, back * scorched);
+  float embers = scorched * step(0.62, hash(p.xz * 5.3)) * (0.4 + 0.6 * (1.0 - smoothstep(0.0, 1.5, passed)));
+  glow += (embers * fireHeat * mix(vec3(1.4, 0.25, 0.03), vec3(2.4, 0.8, 0.08), 0.5 + 0.5 * sin(day * 60.0 + grain * 9.0))) * (1.0 - back);
+  glow += (1.0 - smoothstep(-0.1, 0.25, hole)) * step(-0.25, hole) * impact * vec3(2.6, 1.2, 0.2);
+  gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + glow), 1.0);
 }`;
 
 // The sea: deep blue, turquoise over the reef, rings of foam running in to the shore.
@@ -110,10 +140,15 @@ void main() {
   color = mix(color, vec3(0.95, 1.0, 1.0), foam);
   vec3 v = normalize(cameraPosition - vWorld);
   float glint = 0.6 * smoothstep(0.9975, 0.999, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), sunDir));
-  gl_FragColor = vec4(toon(color, vec3(0.0, 1.0, 0.0)) + glint * sunColor, 1.0);
+  // The fire's light on the water, a broken path of glints toward it.
+  vec3 toFire = fireLight - vWorld;
+  float fireGlint = smoothstep(0.985, 0.995, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), normalize(toFire))) * step(0.45, fract(s * 9.0 + day * 3.0));
+  gl_FragColor = vec4(atmosphere(toon(color, vec3(0.0, 1.0, 0.0), 0.0) + glint * sunColor + fireGlint * fireColor * 0.5), 1.0);
 }`;
 
-// The sky: day blue, a warm sunset band, deep night with stars; a hard sun disc and the moon opposite it.
+// The sky: day blue, a warm sunset band, deep night with stars; a small far sun with shafts of light, the moon opposite
+// it. The meteor's story is drawn on it too: the new star with its coma and a tail turned from the sun, aurora curtains
+// as it nears, and the burning contrail it leaves across the sky as it falls.
 const skyVertex = `
 precision highp float;
 attribute vec3 position;
@@ -123,9 +158,24 @@ void main() { vDirection = position; gl_Position = worldViewProjection * vec4(po
 const sky = `
 precision highp float;
 varying vec3 vDirection;
-uniform vec3 sunDir, moonDir, skyTop, skyHorizon, meteorHead, meteorTail;
-uniform float time, meteor, stars;
+uniform vec3 sunDir, moonDir, skyTop, skyHorizon, meteorHead, meteorTail, omenDir, trailHead, trailTail;
+uniform float time, meteor, stars, omen, aurora, trail, rays;
 float hash(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+float hash1(float x) { return fract(sin(x * 91.17) * 43758.5453); }
+float noise1(float x) { float i = floor(x), f = fract(x); return mix(hash1(i), hash1(i + 1.0), f * f * (3.0 - 2.0 * f)); }
+// Distance on the dome from d to the arc from a to b, and how far along it.
+vec2 segment(vec3 d, vec3 a, vec3 b) {
+  vec3 ab = b - a;
+  float k = clamp(dot(d - a, ab) / max(dot(ab, ab), 1e-6), 0.0, 1.0);
+  return vec2(length(d - a - ab * k), k);
+}
+// Hard-edged shafts of light round a direction, turning slowly.
+float shafts(vec3 d, vec3 to, float width) {
+  vec3 side = normalize(cross(to, vec3(0.0, 1.0, 0.0))), up = cross(side, to);
+  float angle = atan(dot(d, up), dot(d, side)), along = dot(d, to);
+  float beam = step(0.55, noise1(angle * 9.0 + time * 0.05)) * step(0.0, along);
+  return beam * smoothstep(1.0 - width, 1.0, along);
+}
 void main() {
   vec3 d = normalize(vDirection);
   float up = clamp(d.y, 0.0, 1.0);
@@ -135,15 +185,33 @@ void main() {
   color += vec3(0.12, 0.06, 0.0) * toward * (1.0 - up) * smoothstep(-0.3, 0.1, sunDir.y) * (1.0 - smoothstep(0.1, 0.5, sunDir.y));
   vec3 cell = floor(d * 140.0);
   float star = step(0.9975, hash(cell)) * stars * smoothstep(0.05, 0.3, d.y) * (0.45 + 0.35 * sin(time * 4.0 + hash(cell + 7.0) * 40.0));
-  // A shooting star: a streak from its tail to its head, brightest at the head.
-  vec3 along = meteorHead - meteorTail;
-  float k = clamp(dot(d - meteorTail, along) / dot(along, along), 0.0, 1.0);
-  star += meteor * k * (1.0 - smoothstep(0.0015, 0.004, length(d - meteorTail - along * k)));
-  // A small, soft sun and a faint moon, far off.
-  float sun = smoothstep(0.99935, 0.9996, dot(d, sunDir)), halo = smoothstep(0.994, 0.9995, dot(d, sunDir)) * 0.12;
+  vec2 m = segment(d, meteorTail, meteorHead);
+  star += meteor * m.y * (1.0 - smoothstep(0.0015, 0.004, m.x));
+  // A small, soft sun with shafts when it is low, and a faint moon, far off.
+  float sunDot = dot(d, sunDir), sun = smoothstep(0.99935, 0.9996, sunDot), halo = smoothstep(0.994, 0.9995, sunDot) * 0.12;
+  float low = 1.0 - smoothstep(0.15, 0.45, sunDir.y);
+  color += vec3(1.0, 0.75, 0.45) * 0.06 * rays * low * smoothstep(-0.2, 0.05, sunDir.y) * shafts(d, sunDir, 0.25);
   float moon = smoothstep(0.99955, 0.9997, dot(d, moonDir)) * stars;
   color = mix(color, vec3(1.0, 0.95, 0.8), sun * 0.6) + halo * vec3(1.0, 0.85, 0.6) + star;
   color = mix(color, vec3(0.88, 0.9, 1.0), moon * 0.45);
+  // Aurora: curtains of green fading to violet above, rippling slowly, in hard vertical bands.
+  float az = atan(d.z, d.x), base = 0.22 + 0.06 * sin(az * 3.0 + time * 0.15) + 0.03 * sin(az * 7.0 - time * 0.3);
+  float curtain = smoothstep(base - 0.02, base, d.y) * (1.0 - smoothstep(base, base + 0.22, d.y)) * step(0.35, noise1(az * 40.0 + time * 0.6));
+  color += aurora * stars * curtain * mix(vec3(0.15, 0.9, 0.5), vec3(0.55, 0.25, 0.9), smoothstep(base, base + 0.2, d.y)) * 0.55;
+  // The new star: a core, its coma and a tail pointing away from the sun, ever larger.
+  float o = dot(d, omenDir);
+  vec3 away = normalize(omenDir - sunDir * dot(omenDir, sunDir) + vec3(0.0, 1e-3, 0.0));
+  vec2 tail = segment(d, omenDir, normalize(omenDir + away * (0.04 + 0.22 * omen)));
+  float core = smoothstep(1.0 - 0.00008 - 0.0004 * omen, 1.0, o), coma = smoothstep(1.0 - 0.0009 - 0.004 * omen, 1.0, o);
+  float tailGlow = (1.0 - smoothstep(0.0, 0.004 + 0.02 * omen * tail.y, tail.x)) * (1.0 - tail.y);
+  // An odd color for a star: cyan at the core, a violet coma, a sea-green tail; faint by day, vivid by night.
+  float seen = 0.75 + 0.25 * stars;
+  color += omen * seen * (vec3(0.75, 1.0, 0.95) * core * 2.2 + vec3(0.6, 0.45, 1.0) * coma * 0.8 + vec3(0.35, 0.95, 0.75) * tailGlow * 0.7);
+  color += omen * vec3(0.5, 0.8, 1.0) * 0.05 * shafts(d, omenDir, 0.06);
+  // The contrail: a white-hot line behind the fireball cooling to orange and smoke as it lingers, then fading.
+  vec2 t = segment(d, trailTail, trailHead);
+  float line = 1.0 - smoothstep(0.002, 0.006 + 0.01 * (1.0 - t.y), t.x);
+  color += trail * line * mix(vec3(0.9, 0.35, 0.1), vec3(2.0, 1.6, 1.0), t.y * t.y);
   gl_FragColor = vec4(color, 1.0);
 }`;
 
@@ -158,23 +226,31 @@ export function createToon(scene) {
     return material;
   };
   const skyMaterial = new BABYLON.ShaderMaterial('Sky', scene, { vertexSource: skyVertex, fragmentSource: sky }, {
-    attributes: ['position'], uniforms: ['worldViewProjection', 'sunDir', 'moonDir', 'skyTop', 'skyHorizon', 'stars', 'time', 'meteor', 'meteorHead', 'meteorTail'],
+    attributes: ['position'], uniforms: ['worldViewProjection', 'sunDir', 'moonDir', 'skyTop', 'skyHorizon', 'stars', 'time', 'meteor', 'meteorHead', 'meteorTail',
+      'omenDir', 'omen', 'aurora', 'trail', 'trailHead', 'trailTail', 'rays'],
   });
   skyMaterial.backFaceCulling = false;
+  let ground = null;
   return {
+    // The fire's state in the ground.
+    fire({ front, heat, healed, impact }) { ground?.setFloat('fireFront', front).setFloat('fireHeat', heat).setFloat('healed', healed).setFloat('impact', impact); },
     sky: skyMaterial,
     plain: (name, color) => make(name, plain, ['color', 'underglow', 'glow']).setColor3('color', BABYLON.Color3.FromHexString(color)).setColor3('underglow', BABYLON.Color3.Black()).setColor3('glow', BABYLON.Color3.Black()),
-    terrain: () => make('Ground', terrain, ['day']),
+    terrain: () => (ground = make('Ground', terrain, ['day', 'fireFront', 'fireHeat', 'healed', 'impact'])),
     sea: () => make('Water', sea, ['day']),
-    // The light of the moment, in every toon material and the sky.
-    light({ sunDir, sunColor, moonDir, moonColor, skyLight, groundLight, skyTop, skyHorizon, stars }, day, time, meteor) {
+    // The light of the moment, in every toon material and the sky; `air` is the story's: the fire light, the haze, and
+    // what the meteor draws on the sky.
+    light({ sunDir, sunColor, moonDir, moonColor, skyLight, groundLight, skyTop, skyHorizon, stars }, day, time, meteor, air) {
       for (const material of materials) {
         material.setVector3('sunDir', sunDir).setColor3('sunColor', sunColor).setVector3('moonDir', moonDir).setColor3('moonColor', moonColor);
         material.setColor3('skyLight', skyLight).setColor3('groundLight', groundLight).setFloat('day', day);
+        material.setVector3('fireLight', air.firePosition).setColor3('fireColor', air.fireColor).setColor3('fogColor', air.fogColor).setFloat('fogDensity', air.fogDensity);
       }
       skyMaterial.setVector3('sunDir', sunDir).setVector3('moonDir', moonDir).setFloat('time', time);
       skyMaterial.setColor3('skyTop', skyTop).setColor3('skyHorizon', skyHorizon).setFloat('stars', stars);
       skyMaterial.setFloat('meteor', meteor.strength).setVector3('meteorHead', meteor.head).setVector3('meteorTail', meteor.tail);
+      skyMaterial.setVector3('omenDir', air.omenDir).setFloat('omen', air.omen).setFloat('aurora', air.aurora).setFloat('rays', air.rays);
+      skyMaterial.setFloat('trail', air.trail).setVector3('trailHead', air.trailHead).setVector3('trailTail', air.trailTail);
     },
   };
 }

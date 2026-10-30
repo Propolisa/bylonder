@@ -1,16 +1,23 @@
 import { animate, animation, renderSettings } from '@workbench/sdk';
-import { FRAMES, FPS, days, speed, SHOTS } from './story.js';
+import { FRAMES, FPS, LENGTH, BEAT, OMEN, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, tremor, omen, fireFront, burning, healing } from './story.js';
 import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
 import { createForest } from './forest.js';
 import { daylight, createClouds, createSmoke, meteorAt } from './sky.js';
-import { createBombs, createSteam, createWhale, createBirds, createFireflies } from './life.js';
+import { createBombs, createSteam, createWhales, createBirds, createFireflies } from './life.js';
+import { createFamily } from './family.js';
+import { createMeteor, fireLight, fireballAt } from './meteor.js';
 
-// A volcanic island in time-lapse: the volcano pours lava down its slopes, the lava cools to basalt and weathers to
-// soil, grass spreads up from the beaches and a forest grows, palms first. Days turn to nights ever faster, the clouds
-// racing round the horizon to show it. Lava bombs fly and steam rises where the lava meets the sea; a whale surfaces;
-// birds arrive with the forest, fireflies blink in it at night, and a shooting star crosses one night. Low poly and
-// toon shaded, the film's look is in toon.js.
+const { Vector3, Color3 } = BABYLON;
+const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
+
+// A volcanic island in time-lapse, two minutes long. The volcano pours lava down its slopes, the lava cools to soil and
+// a forest grows. A seabird finds the island, and her mate; they raise a chick in a blossom tree. Low in the sky an odd
+// star has been there from the start, with a faint trail; it grows, night after night, until late one day it falls. Its
+// fire runs down through the forest to the nest tree. The mother pushes the chick, who cannot yet fly, from the
+// burning branch; it flies, and she falls with the tree. Through the night the father and the chick keep out at sea;
+// the island heals, and at sunrise they come home to the sapling growing where the tree stood. Low poly and toon
+// shaded: the look is in toon.js, the story's clock in story.js, the effects are layers of particles (particles.js).
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
@@ -22,35 +29,78 @@ export const createScene = function () {
   createIsland(scene).material = toon.terrain();
   createSea(scene).material = toon.sea();
   const forest = createForest(scene, toon);
-  const moving = [forest, createClouds(scene, toon), createSmoke(scene, toon), createBombs(scene, toon), createSteam(scene, toon), createWhale(scene, toon),
-    createBirds(scene, toon), createFireflies(scene, toon, forest.spots)];
+  const moving = [forest, createClouds(scene, toon), createSmoke(scene, toon), createBombs(scene, toon), createSteam(scene, toon), createWhales(scene, toon),
+    createBirds(scene, toon), createFireflies(scene, toon, forest.spots), createFamily(scene, toon), createMeteor(scene, toon)];
 
-  const camera = new BABYLON.TargetCamera('Camera', new BABYLON.Vector3(14, 6, -10), scene);
-  Object.assign(camera, { fov: 0.95, minZ: 0.1, maxZ: 1000, lockedTarget: new BABYLON.Vector3(0, 1.6, 0) });
-  // Lava glows past white, which bloom spreads.
+  const camera = new BABYLON.TargetCamera('Camera', new Vector3(14, 6, -10), scene);
+  Object.assign(camera, { fov: 0.95, minZ: 0.1, maxZ: 1000, lockedTarget: new Vector3(0, 1.6, 0) });
+  // Lava, fire and the meteor glow past white, which bloom spreads.
   const lens = new BABYLON.DefaultRenderingPipeline('Lens', true, scene, [camera]);
-  Object.assign(lens, { bloomEnabled: true, bloomThreshold: 1.6, bloomWeight: 0.8, bloomKernel: 48 });
+  Object.assign(lens, { bloomEnabled: true, bloomThreshold: 1.4, bloomWeight: 0.85, bloomKernel: 64 });
 
   // Everything that changes follows the frame, so playback and renders agree.
-  // Island time (days) runs ever faster; wind, wings and fireflies keep the film's own time.
+  // Island time (days) runs at the story's speed; wind, wings and particles keep the film's own time.
   scene.onBeforeRenderObservable.add(() => {
-    const frame = animation.time.frame, day = days(frame), time = (frame - 1) / FPS;
-    toon.light(daylight(day, speed(frame)), day, time, meteorAt(frame));
+    const frame = animation.time.frame, day = days(frame), time = seconds(frame);
+    const light = grade(daylight(day, speed(frame)), time), fire = fireLight(time);
+    toon.light(light, day, time, meteorAt(frame), air(light, fire, time, camera.globalPosition));
+    toon.fire({ front: fireFront(time), heat: time >= BEAT.impact ? burning(time) : 0, healed: healing(time), impact: flash(time) * 2 + smoothstep(BEAT.impact, BEAT.impact + 1, time) * (1 - smoothstep(BEAT.sea, BEAT.heal, time)) * 0.5 });
     for (const move of moving) move(day, time);
   });
 
-  // The camera's shots (story.js), keyed.
+  // The camera's shots (story.js) as keys: linear along each shot, held on its last frame, so each shot cuts to the
+  // next. While the ground shakes, the camera does.
   const shot = animate(camera, { id: 'camera', title: 'Camera', properties: { position: { label: 'Location' }, lockedTarget: { label: 'Look At' } } });
   if (!animation.action.tracks.length) {
-    for (const [frame, angle, distance, height, target] of SHOTS) {
-      const key = (path, value) => animation.insert([shot.ref(path)], frame, value);
-      key('position.x', Math.cos(angle) * distance);
-      key('position.y', height);
-      key('position.z', Math.sin(angle) * distance);
-      key('lockedTarget.y', target);
+    const PATHS = ['position.x', 'position.y', 'position.z', 'lockedTarget.x', 'lockedTarget.y', 'lockedTarget.z'];
+    const tracks = PATHS.map((path) => ({ id: 'camera', path, keys: [] }));
+    for (let frame = 1; frame <= FRAMES;) {
+      const time = seconds(frame), { position, target, end } = shotAt(time), last = Math.min(FRAMES, frameAt(end) - 1), shake = tremor(time);
+      const jolt = (k) => shake * 0.12 * Math.sin(time * 37 + k * 2.1) * Math.sin(time * 11 + k);
+      [...position.map((v, k) => v + jolt(k)), ...target].forEach((value, k) => tracks[k].keys.push({ frame, value, interpolation: frame >= last ? 'CONSTANT' : 'LINEAR' }));
+      frame = frame >= last ? frame + 1 : Math.min(last, frame + (shake > 0.02 ? 2 : 6));
     }
-    animation.time.configure({ frameStart: 1, frameEnd: FRAMES, fps: FPS });
+    const markers = Object.entries(BEAT).map(([name, second]) => ({ name: name[0].toUpperCase() + name.slice(1), frame: frameAt(second) }));
+    animation.load({ version: 3, action: { name: 'Island', tracks }, time: { frameStart: 1, frameEnd: FRAMES, fps: FPS, frameCurrent: 1 }, markers });
   }
   animation.seek(animation.time.state.frameStart);
   return scene;
 };
+
+// The story's grade over the day's light: unease under the growing star, the sky burning as the fireball comes, the
+// strike's white flash, smoke dimming the sun after, and gold on the last sunrise.
+function grade(light, time) {
+  const uneasy = smoothstep(BEAT.omen, BEAT.streak - 2, time) * (1 - smoothstep(BEAT.streak, BEAT.streak + 1, time));
+  const burning = falling(time) ** 1.5, F = flash(time), smoke = smoothstep(BEAT.impact + 0.5, BEAT.impact + 5, time) * (1 - smoothstep(BEAT.sea + 1, BEAT.heal + 1.5, time));
+  const dawn = smoothstep(BEAT.home - 3, LENGTH, time), white = new Color3(1, 1, 1);
+  let { skyTop, skyHorizon, sunColor, skyLight, groundLight } = light;
+  skyTop = mix(skyTop, new Color3(0.26, 0.2, 0.46), 0.3 * uneasy);
+  skyHorizon = mix(skyHorizon, new Color3(0.5, 0.78, 0.72), 0.22 * uneasy);
+  skyTop = mix(skyTop, new Color3(0.45, 0.12, 0.2), 0.5 * burning);
+  skyHorizon = mix(skyHorizon, new Color3(1.0, 0.45, 0.18), 0.65 * burning);
+  skyLight = mix(skyLight, new Color3(0.7, 0.35, 0.25), 0.4 * burning);
+  skyTop = mix(skyTop, new Color3(0.14, 0.08, 0.12), 0.55 * smoke);
+  skyHorizon = mix(skyHorizon, new Color3(0.75, 0.3, 0.14), 0.5 * smoke);
+  sunColor = sunColor.scale(1 - 0.55 * smoke);
+  skyLight = mix(skyLight, new Color3(0.38, 0.24, 0.24), 0.4 * smoke);
+  skyHorizon = mix(skyHorizon, new Color3(1.0, 0.78, 0.5), 0.35 * dawn);
+  sunColor = mix(sunColor, new Color3(1.0, 0.78, 0.5).scale(0.75), 0.4 * dawn);
+  return { ...light, skyTop: skyTop.add(white.scale(0.6 * F)), skyHorizon: skyHorizon.add(white.scale(0.8 * F)), sunColor: sunColor.add(white.scale(0.7 * F)),
+    skyLight: skyLight.add(white.scale(0.5 * F)), groundLight: groundLight.add(white.scale(0.3 * F)), stars: light.stars * (1 - 0.5 * smoke) };
+}
+
+// The air: the fire light, the haze (thicker with smoke), shafts of light, the aurora as the meteor nears, its star
+// and the contrail it burns across the sky.
+function air(light, fire, time, eye) {
+  const smoke = smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.sea + 1, BEAT.heal + 2, time));
+  const from = fireballAt(BEAT.streak), head = fireballAt(Math.min(time, BEAT.impact - 0.01));
+  return {
+    firePosition: fire.position, fireColor: fire.color,
+    fogColor: mix(light.skyHorizon, new Color3(0.35, 0.24, 0.24), 0.5 * smoke), fogDensity: 0.004 + 0.012 * smoke,
+    rays: 1 + 0.8 * smoothstep(BEAT.home - 4, LENGTH, time),
+    omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.leave, BEAT.streak - 1, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
+    trail: smoothstep(BEAT.streak, BEAT.streak + 0.6, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),
+    trailTail: from.subtract(eye).normalize(), trailHead: head.subtract(eye).normalize(),
+  };
+}
+
