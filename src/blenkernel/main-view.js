@@ -390,15 +390,26 @@ export function createMainView(state) {
     world.modifiers?.refresh();
   }
 
-  // What the depsgraph updated, drawn (docs/model.md): a mesh, curve, text object's or empty's evaluated world matrix,
+  // What the depsgraph updated, drawn (docs/model.md): every updated object's and its data's values (a light's, a
+  // camera's, an armature's pose), materials' and worlds' values and node trees, the scene's settings; a mesh, curve,
+  // text object's or empty's evaluated world matrix,
   // and the evaluated mesh of a mesh object whose Mesh Main holds or of a curve or text, with its modifiers' errors
   // (outside Edit Mode, which draws the edit data). An object not drawn yet is drawn whole.
-  function drawEvaluated() {
+  // `scene`: whether the scene's values are drawn, by default when it was tagged (always for a new frame; not before the
+  // page's are in Main).
+  function drawEvaluated({ scene } = {}) {
     const updates = new Map(blender.updates().map(({ id, recalc }) => [id, recalc]));
     const was = state.applying;
     state.applying = true;
     try {
+      const known = new Set([blender.scene]);
       for (const entry of objects.values()) {
+        known.add(entry.ob).add(entry.data.ptr);
+        if (updates.has(entry.ob) || updates.has(entry.data.ptr)) {
+          pull(entry, entry.node);
+          if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
+          if (entry.type === 'ARMATURE') pullArmature(entry);
+        }
         if (!DRAWN.includes(entry.type)) continue;
         const recalc = entry.drawn ? updates.get(entry.ob) ?? 0 : ID_RECALC_ALL;
         if (!recalc) continue;
@@ -406,6 +417,11 @@ export function createMainView(state) {
         entry.node.freezeWorldMatrix(babylonMatrix(blender.transform(entry.ob).matrix_world));
         if (recalc & ID_RECALC_GEOMETRY && drawsGeometry(entry)) drawGeometry(entry);
       }
+      // A material's or world's own update, or one of an ID the view does not know (its node tree).
+      const nodeTrees = [...updates.keys()].some((id) => !known.has(id));
+      for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
+      for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
+      if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
     } finally {
       state.applying = was;
     }
@@ -425,26 +441,8 @@ export function createMainView(state) {
     for (const [material, record] of materials) drawShading(record, material, 'Material');
     for (const [id, record] of worlds) if (world.worlds.byId(id)) drawShading(record, world.worlds.byId(id), 'World');
   }
-  // Babylon drawn from Main's evaluated values (after a frame change evaluated Blender's animation), by kind: every
-  // object's and its data's values (a light's, a camera's), an armature's pose, materials' and worlds' values and node
-  // tree inputs, the scene's settings. Nothing comes or goes, and no geometry changes.
-  function evaluated() {
-    state.applying = true;
-    try {
-      for (const entry of objects.values()) {
-        pull(entry, entry.node);
-        if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
-        if (entry.type === 'ARMATURE') pullArmature(entry);
-      }
-      pullShading();
-      for (const record of state.sceneRecords()) pull(record, world);
-    } finally {
-      state.applying = false;
-    }
-  }
-
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, evaluated, drawEvaluated,
+    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated,
   };
 }
 

@@ -92,13 +92,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const key = (node) => 'object:' + nodeId(node);
   // Each synced owner's record: its RNA struct, its Main address and what was last synced, by RNA name.
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
-  const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
+  // The scene's records follow Main's scene, which a read file or an undo step replaces.
+  const scene = { struct: 'Scene', get ptr() { return blender.scene; }, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
   // A struct of the scene's (not an ID): its holder, the scene, is tagged when it is written.
-  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, offset, ptr: blender.scene + offset, get holder() { return blender.scene; }, shadow: new Map() }; };
+  const sceneStruct = (name) => { const { offset } = dnaProperty('Scene', SCENE_STRUCTS[name]); return { struct: name, get ptr() { return blender.scene + offset; }, get holder() { return blender.scene; }, shadow: new Map() }; };
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings'), cursor = sceneStruct('View3DCursor');
   const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
-  const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), get holder() { return blender.scene; }, shadow: new Map() };
+  const tools = { struct: 'ToolSettings', get ptr() { return dnaGet('Scene', blender.scene, 'tool_settings'); }, get holder() { return blender.scene; }, shadow: new Map() };
   // The scene's records, over the world: the scene, its render, unit and tool settings and 3D cursor, those whose slices it has.
   const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units, cursor] : []), tools, display];
   // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
@@ -532,12 +533,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     api.view();
     return true;
   }
-  // The records of what an undo step's Main read again at another address (an ID it brought back, the scene's
-  // settings), found again by name; one that is gone is made again when Babylon still has it.
+  // The records of what an undo step's Main read again at another address (an ID it brought back), found again by
+  // name; one that is gone is made again when Babylon still has it.
   function relink() {
-    scene.ptr = blender.scene;
-    for (const record of [render, units, cursor, view, display]) record.ptr = blender.scene + record.offset;
-    tools.ptr = dnaGet('Scene', blender.scene, 'tool_settings');
     const byName = (code) => new Map(blender.ids(code).map((id) => [blender.name(id), id]));
     const again = (records, code, field, nameOf) => {
       const held = byName(code), alive = new Set(held.values());
@@ -663,12 +661,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     begin({ meshes = [] } = {}) { flush(); fill(meshes); },
     end: () => api.view(),
     // The scene at a frame: Main evaluated for it as the depsgraph evaluates a new frame (animation and drivers, then
-    // matrices), and its evaluated values drawn (main-view.js evaluated).
+    // matrices), and what it updated drawn (main-view.js drawEvaluated).
     frameChanged(frame) {
       flush();
       blender.frame = frame;
-      mainView.drawEvaluated();
-      mainView.evaluated();
+      mainView.drawEvaluated({ scene: true });
     },
     // Blender's undo stack, started from Main as it is (the scene's first state), its steps pushed and loaded.
     undoInit: () => { flush(); blender.undoInit(); },
@@ -746,8 +743,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     mainView.adoptScene();
     ids.read = false;
   }
-  // Evaluated from the start, as Blender's window evaluates Main after each event.
-  evaluate();
+  // Evaluated from the start, as Blender's window evaluates Main after each event, and what Main already holds drawn; the
+  // scene's settings are the page's until a read file's are adopted.
+  blender.evaluate();
+  mainView.drawEvaluated({ scene: false });
   world.mainSync = api;
   return api;
 }
