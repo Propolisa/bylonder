@@ -723,7 +723,7 @@ const checks = {
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 400 }));
     await menu("TOPBAR_MT_render", "Render Animation");
     await app.until((b, selector) => /^Mixing/.test(document.querySelector(selector).textContent), renderStatus, 60000);
-    await app.page.click(".render-result [data-cancel]");
+    await app.locator(".render-result [data-cancel]").click();
     await app.until((b, selector) => document.querySelector(selector).textContent === "Render cancelled", renderStatus, 5000);
   } },
 
