@@ -299,6 +299,7 @@ export class BlenderMain {
   removeID(id) { x.main_id_remove(this.#context, id); }
   users(id) { return x.id_users(id); }
   setFakeUser(id, fake) { x.id_fake_user_set(id, fake); }
+  fakeUser(id) { return !!x.id_fake_user(id); }
   get world() { return x.main_scene_world(this.#context) >>> 0; }
   set world(world) { x.main_scene_world_set(this.#context, world ?? 0); }
   // An object's material slots (0 for an empty one), set whole on its data.

@@ -257,22 +257,19 @@ assert.deepEqual(lavaTree.nodes.map((node) => node.idname).sort(), ['ShaderNodeB
 assert.deepEqual(lavaTree.links.sort(), [['Noise Texture', 'Fac', 'Principled BSDF', 'Emission Strength'], ['Principled BSDF', 'BSDF', 'Material Output', 'Surface']]);
 assert(Math.abs(lavaTree.nodes.find((node) => node.idname === 'ShaderNodeTexNoise').inputs.W - 1.3) < 1e-6);
 assert.deepEqual(sync.check(), []);
-// Main's Tex and the texture's record stay equal: an edit and its undo reach the Tex, and what Blender's code writes
-// into the Tex comes back to the record, which project saves and undo carry.
-const tex = sync.textureOf(clouds.id);
+// A texture is Main's Tex: an edit is the Tex's, Blender's undo restores it, and what Blender's code writes into it is
+// the texture's.
+const tex = clouds.tex, named = () => world.textures.all().find((entry) => entry.name === clouds.name);
 assert.equal(dnaGet('Texture', tex, 'type'), 'CLOUDS');
 world.textures.set(clouds, 'noise_depth', 5);
-const before = world.textures.capture();
-world.textures.subscribe(() => sync.changed());
+history.commit();
 world.textures.set(clouds, 'noise_depth', 1);
-await null;
-assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 1, 'an edit reaches Main by the end of the task');
-world.textures.apply(before);
-await null;
-assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 5);
-dnaSet('CloudsTexture', tex, 'noise_depth', 3);
-sync.view();
-assert.equal(world.textures.byId(clouds.id).values.noise_depth, 3);
+assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 1, "an edit is the Tex's");
+history.commit();
+history.undo();
+assert.equal(named().values.noise_depth, 5, "Blender's undo restores it");
+dnaSet('CloudsTexture', named().tex, 'noise_depth', 3);
+assert.equal(named().values.noise_depth, 3);
 assert.deepEqual(sync.check(), []);
 
 // Modifiers are Main's: Blender's Add Modifier and the page's add edit one stack, Blender's reorder is the page's, and

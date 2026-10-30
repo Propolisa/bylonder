@@ -5,6 +5,7 @@ import { createMesh } from '../src/blenkernel/mesh/mesh.js';
 import { evaluateBlenderModifiers } from '../src/modifiers/blender.js';
 import { blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview } from '../src/blenkernel/texture/texture.js';
+import { dnaGet } from '../src/makesrna/dna-struct.js';
 import { createTextures } from '../src/blenkernel/texture/textures.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { sceneMain } from './scene-main.js';
@@ -69,18 +70,17 @@ assert.deepEqual(off, [], 'Displaced positions that differ from Blender (largest
 // Textures outside Main are freed once no modifier uses them.
 evaluateBlenderModifiers(sphere, []);
 
-const textures = createTextures({ objects: [] });
+// The textures slice is Main's Tex IDs: Blender's names, a setting as RNA writes it.
+const sliceWorld = { scene: new Scene(new NullEngine()), objects: [] };
+sliceWorld.objects.scene = sliceWorld.scene;
+const textures = sliceWorld.textures = createTextures(sliceWorld);
+sceneMain(sliceWorld);
 const lava = textures.create();
-
-// The textures slice: Blender's names, a setting as RNA writes it, undo restores it.
-assert.equal(textures.create().name, 'Texture.001');
+assert.equal(textures.create().name, lava.name + '.001');
 textures.set(lava, 'type', 'CLOUDS');
 textures.set(lava, 'noise_depth', 4);
 assert.deepEqual([lava.values.type, lava.values.noise_depth, lava.values.noise_scale], ['CLOUDS', 4, Math.fround(0.25)], 'a new type takes its DNA defaults');
-const saved = textures.capture();
-textures.set(lava, 'noise_depth', 1);
-textures.apply(saved);
-assert.equal(textures.byId(lava.id).values.noise_depth, 4);
+assert.equal(dnaGet('CloudsTexture', lava.tex, 'noise_depth'), 4, "the setting is the Tex's");
 
 // In the stack: a Displace modifier's texture displaces the object, and editing the texture evaluates it again.
 const engine = new NullEngine(), scene = new Scene(engine), box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);

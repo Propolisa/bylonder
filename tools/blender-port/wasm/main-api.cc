@@ -410,6 +410,7 @@ void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool
   if (!base) {
     return; /* Linked only to collections excluded from the view layer. */
   }
+  const short flag = base->flag, from_collection = base->flag_from_collection, visibility = ob->visibility_flag;
   /* Its collections' visibility is the view layer's sync's; an object they show can still be kept out of view. */
   if (!visible) {
     base->flag_from_collection = BASE_ENABLED_RENDER;
@@ -419,7 +420,9 @@ void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool
   SET_FLAG_FROM_TEST(ob->visibility_flag, hide_select, OB_HIDE_SELECT);
   BKE_base_eval_flags(base);
   ob->base_flag = base->flag;
-  DEG_id_tag_update(&ctx->scene->id, ID_RECALC_BASE_FLAGS);
+  if (base->flag != flag || base->flag_from_collection != from_collection || ob->visibility_flag != visibility) {
+    DEG_id_tag_update(&ctx->scene->id, ID_RECALC_BASE_FLAGS);
+  }
   if (active) {
     ctx->view_layer->basact = base;
   }
@@ -674,6 +677,7 @@ EXPORT(main_world_add) World *main_world_add(BlenderMain *ctx, const char *name)
 }
 EXPORT(main_id_remove) void main_id_remove(BlenderMain *ctx, ID *id) { BKE_id_delete(ctx->bmain, id); }
 EXPORT(id_users) int id_users(const ID *id) { return id->us; }
+EXPORT(id_fake_user) bool id_fake_user(const ID *id) { return ID_FAKE_USERS(id); }
 EXPORT(id_fake_user_set) void id_fake_user_set_export(ID *id, bool fake)
 {
   if (fake) {

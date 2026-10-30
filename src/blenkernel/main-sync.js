@@ -27,14 +27,12 @@ import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { MultiMaterial, VertexData } from '@babylonjs/core';
-import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
 import { createMainView, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
 import { ID_RECALC_TRANSFORM, ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
 
-const ID_TE = 0x4554;
 const TRANSFORM = new Set(['location', 'rotation_mode', 'rotation_euler', 'rotation_quaternion', 'scale']);
 
 const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, MEDIAN_POINT: 3, ACTIVE_ELEMENT: 4 };
@@ -90,7 +88,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const blender = ids.blender;
   const key = (node) => 'object:' + nodeId(node);
   // Each synced owner's record: its RNA struct, its Main address and what was last synced, by RNA name.
-  const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
+  const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map();
   // The scene's records follow Main's scene, which a read file or an undo step replaces.
   const scene = { struct: 'Scene', get ptr() { return blender.scene; }, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
@@ -292,10 +290,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   }
   // A mesh object's Blender modifiers are Main's (main-modifiers.js), which its depsgraph evaluates on Mesh data of
   // Main's: a mesh Babylon built gets its geometry as its Mesh data then. A textured modifier points at Main's Tex of
-  // its texture record (textures.js), a modifier deforming by another object (an Armature's) at its Object in Main.
+  // its texture's entry (textures.js: the Tex's address), a modifier deforming by another object (an Armature's) at its
+  // Object in Main.
   const modifierLinks = {
-    textureId: (tex) => mainView.textureId(tex),
-    texture: (id) => textures.get(id)?.tex ?? 0,
+    textureId: (tex) => (tex ? String(tex) : null),
+    texture: (id) => Number(id ?? 0),
     nodeId: (ob) => { const node = nodeOf(ob); return node ? nodeId(node) : null; },
     object: (id) => [...objects.values()].find(({ node }) => nodeId(node) === id)?.ob ?? 0,
   };
@@ -381,18 +380,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const type = world.materials.type(material);
     blender.setProperty(record.ma, PROPERTIES.material, type);
     if (type === 'node') blender.setProperty(record.ma, PROPERTIES.graph, JSON.stringify(material.serialize()));
-  }
-  // Textures (blenkernel/texture/textures.js): a Tex for each record, its settings written where they differ.
-  function pushTextures() {
-    const all = world.textures?.all() ?? [], ids = new Set(all.map((entry) => entry.id));
-    for (const [id, record] of textures) if (!ids.has(id)) { blender.removeID(record.tex); textures.delete(id); }
-    for (const entry of all) {
-      if (!textures.has(entry.id)) textures.set(entry.id, { tex: unclaimed(ID_TE, entry.name, textures, 'tex') ?? mainTexture(blender.bmain, entry.name, entry.values), values: entry.values });
-      const record = textures.get(entry.id);
-      if (record.babylonName !== entry.name) { blender.rename(record.tex, entry.name); record.babylonName = entry.name; }
-      blender.setFakeUser(record.tex, entry.fakeUser);
-      if (record.values !== entry.values) { writeTexture(record.tex, entry.values); blender.tag(record.tex); record.values = entry.values; }
-    }
   }
   function pushWorlds() {
     const all = world.worlds?.all() ?? [], kept = new Set(all.map((entry) => entry.id));
@@ -493,7 +480,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       listed = world.objects.length;
     }
     if (all || sceneChanged) {
-      pushTextures();
       pushMaterials();
       pushWorlds();
     }
@@ -563,7 +549,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     };
     again(materials, ID_MA, 'ma', (material) => material.name);
     again(worlds, ID_WO, 'wo', (id) => world.worlds.byId(id)?.name);
-    again(textures, ID_TE, 'tex', (id) => world.textures.byId(id)?.name);
     again(collections, ID_GR, 'ptr', (id) => world.collections.byId(id)?.name);
     collectionsSynced = '';
   }
@@ -622,12 +607,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!entry) continue;
       compare(`World "${entry.name}"`, record, entry);
       compareTree(`World "${entry.name}"`, record.wo, rna.pointer('World', entry));
-    }
-    for (const [id, { tex }] of textures) {
-      const entry = world.textures.byId(id), values = readTexture(tex);
-      if (!entry) continue;
-      if (!sameName(entry.name, blender.name(tex))) diffs.push(`Texture "${entry.name}".name: Main "${blender.name(tex)}"`);
-      for (const [name, value] of Object.entries(entry.values)) if (!same(value, values[name])) diffs.push(`Texture "${entry.name}".${name}: Babylon ${JSON.stringify(value)}, Main ${JSON.stringify(values[name])}`);
     }
     for (const record of sceneRecords()) compare(record.struct, record, world);
     if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) {
@@ -722,7 +701,6 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     objectOf: (node) => objects.get(node)?.ob ?? null,
     nodeOf,
     materialOf: (material) => materials.get(material)?.ma ?? null,
-    textureOf: (id) => textures.get(id)?.tex ?? null,
     entryOf,
     // A change Babylon makes that no hook sees (a slice's state): the next flush writes everything.
     changed: () => changed(null),
@@ -731,7 +709,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     writes: 0,
   };
   const state = {
-    rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
+    rna, world, selection, blender, ids, objects, materials, worlds, animationData, applying: false,
     sceneRecords, readCollections, relations, nodeOf, forget, evaluate,
   };
   const mainView = createMainView(state);

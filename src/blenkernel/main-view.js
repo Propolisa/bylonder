@@ -2,7 +2,7 @@
 // an undo step loaded, every object's values come from Main through the RNA mapping (rna-bylonder.js `sync`
 // bindings at their DNA fields), its relations and base, the geometry Blender tagged, a curve's Curve data and an
 // armature's bones; Main's objects without a Babylon object get one, linked by id (`bylonder_id`), and objects Main
-// no longer holds are deleted. Materials, worlds, textures, scene settings and collections are read the same way.
+// no longer holds are deleted. Materials, worlds, scene settings and collections are read the same way.
 import { dnaGet, dnaProperty } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
@@ -16,7 +16,6 @@ import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { armatureData, armatureDrawn } from './armature/armature.js';
-import { readTexture } from './texture/texture.js';
 import { armature_draw } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
@@ -67,9 +66,9 @@ const AXIS = [0, 2, 1, 3];
 const babylonMatrix = (m) => Matrix.FromArray(Array.from({ length: 16 }, (_, i) => m[AXIS[i >> 2] * 4 + AXIS[i & 3]]));
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
-//   textures, sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.
+//   sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.
 export function createMainView(state) {
-  const { rna, world, selection, blender, ids, objects, materials, worlds, textures } = state;
+  const { rna, world, selection, blender, ids, objects, materials, worlds } = state;
 
   // A record's values Main holds that Babylon does not yet, written to Babylon. A new rotation mode changes which
   // rotation is synced: that one is read again.
@@ -202,17 +201,6 @@ export function createMainView(state) {
     }
   }
   const fcurvePaths = (id) => state.animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
-  // The texture record of a Tex in Main, made for one Blender's code created (texture.new); null for none.
-  function textureId(tex) {
-    if (!tex) return null;
-    const known = [...textures].find(([, record]) => record.tex === tex);
-    if (known) return known[0];
-    const entry = world.textures.create(null, { finish: false });
-    entry.name = blender.name(tex);
-    world.textures.assign(entry, readTexture(tex));
-    textures.set(entry.id, { tex, values: entry.values });
-    return entry.id;
-  }
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
   // Bylonder wrote keeps), its values and its Principled BSDF inputs.
@@ -272,14 +260,6 @@ export function createMainView(state) {
     const unmapped = [...new Set(held.map((h) => h.idname).filter((idname) => !mapped.has(idname)))];
     if (unmapped.length) warnings.push(`Material "${label}": its ${unmapped.join(', ')} nodes are not opened`);
   }
-  // What Blender's code changed of a Tex goes back to its record.
-  function pullTextures() {
-    for (const [id, record] of textures) {
-      const entry = world.textures.byId(id), values = readTexture(record.tex);
-      if (entry && !Object.entries(values).every(([name, value]) => same(value, entry.values[name]))) world.textures.assign(entry, values);
-      if (entry) record.values = entry.values;
-    }
-  }
   // A read file's scene, once the slices it sets exist: its settings, world and collections.
   function adoptScene() {
     state.applying = true;
@@ -296,7 +276,7 @@ export function createMainView(state) {
   }
 
   // Babylon drawn from Main, after Blender's code ran: what it deleted is deleted, every object's values, relations,
-  // base and tagged geometry, objects it added made, then materials, worlds, textures and the scene.
+  // base and tagged geometry, objects it added made, then materials, worlds and the scene.
   function view() {
     state.applying = true;
     try {
@@ -330,7 +310,6 @@ export function createMainView(state) {
       }
       selection.replace([...chosen, ...active]);
       pullShading();
-      pullTextures();
       for (const record of state.sceneRecords()) pull(record, world);
       state.evaluate();
       for (const entry of objects.values()) if (entry.type === 'ARMATURE') pullArmature(entry);
@@ -418,7 +397,7 @@ export function createMainView(state) {
     for (const [id, record] of worlds) if (world.worlds.byId(id)) drawShading(record, world.worlds.byId(id), 'World');
   }
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated, textureId,
+    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated,
     keepMesh: (entry) => { keepMesh(entry, blender); return true; },
   };
 }
