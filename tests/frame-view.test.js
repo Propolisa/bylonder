@@ -82,4 +82,11 @@ world.materials.sync();
 sync.flush();
 assert.deepEqual(dice.subMeshes.map((s) => [s.materialIndex, s.indexCount]), [[0, 18], [1, 18]], 'a submesh per slot');
 assert.deepEqual(dice.material.subMaterials.map((m) => m.name), ['Paint', 'Ink']);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials");
+// A light's Type that Blender changes is a Babylon light of that type in its place.
+blendData().objects.get(lamp.name).data.type = 'SPOT';
+sync.view();
+const retyped = objects.find((node) => node.metadata?.wbId === 'lamp');
+assert.equal(retyped.getClassName(), 'SpotLight');
+assert(lamp.isDisposed() && !objects.includes(lamp), 'the point light it was is gone');
+assert.deepEqual(sync.check(), []);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type");

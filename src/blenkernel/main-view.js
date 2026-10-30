@@ -356,6 +356,7 @@ export function createMainView(state) {
         const object = updates.get(entry.ob), data = entry.data.ptr ? updates.get(entry.data.ptr) : undefined;
         if (object !== undefined || data !== undefined) {
           drawn.add(entry.ob).add(entry.data.ptr);
+          if (entry.type === 'LIGHT') retype(entry);
           pull(entry, entry.node);
           if (entry.data.ptr && entry.data.struct) pull(entry.data, entry.node);
           if (entry.type === 'ARMATURE') pullArmature(entry);
@@ -376,6 +377,25 @@ export function createMainView(state) {
     } finally {
       state.applying = was;
     }
+  }
+  // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the
+  // old one's place: its name, ids, parent, children and selection.
+  function retype(entry) {
+    const type = dnaGet('Light', entry.data.ptr, 'type'), old = entry.node;
+    if (rna.pointer('Object', old).data?.type === type) return;
+    const node = MAKERS.LIGHT(old.getScene(), old.name, entry.ob, blender);
+    const { wbLight, wbHome, ...metadata } = old.metadata ?? {};
+    node.metadata = { ...node.metadata, ...metadata };
+    node.parent = old.parent;
+    for (const child of old.getChildren(undefined, true)) child.parent = node;
+    world.objects.splice(world.objects.indexOf(old), 1, node);
+    objects.delete(old);
+    objects.set(node, Object.assign(entry, { node, drawn: false }));
+    entry.data = { struct: rna.pointer('Object', node).data?.[INFO].struct ?? null, ptr: entry.data.ptr, shadow: new Map() };
+    if (selection.has(old)) selection.replace(selection.nodes.map((n) => (n === old ? node : n)));
+    entry.unwatch();
+    entry.unwatch = () => {};
+    old.dispose();
   }
   // Main's evaluated geometry is drawn for a mesh whose Mesh it holds and a curve or text, in Edit Mode too.
   const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type));
