@@ -10,11 +10,11 @@
 // Settings are written at their DNA offsets (dna-curves.json, from rna_curve.cc) as RNA's setters would.
 import rna from '../../makesrna/rna-curves.json' with { type: 'json' };
 import dna from '../../makesrna/dna-curves.json' with { type: 'json' };
-import { blenderMain, moduleAccess, newOperator } from '../../bmesh/bmesh-wasm.js';
+import { blenderMain, moduleAccess, newOperator, ID_RECALC_GEOMETRY } from '../../bmesh/bmesh-wasm.js';
 import { EVENT_TYPES, EVENT_VALUES } from '../animation/anim-blender.js';
 import { blenderModifierDefinition, modifierPointers } from '../../modifiers/blender.js';
 
-const { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems } = moduleAccess;
+const { x, withArrays, withString, cString, ownedMesh, runOperator, pollOperator, operatorEnumItems } = moduleAccess;
 
 const CU_BEZIER = 1, CU_NURBS = 4;
 const SPLINE_TYPES = Object.fromEntries(rna.Spline.properties.type.items.map(([id, , , value]) => [value, id]));
@@ -163,7 +163,7 @@ export class CurveObject {
   get data() {
     const view = new DataView(x.memory.buffer), curve = this.#curve;
     const settings = Object.fromEntries(settingNames(this.type).map((name) => [name, readSetting(view, curve, name)]));
-    const data = { type: this.type, settings, ...readSplines(x.curve_nurbs_get(this.ob) >>> 0), targets: { ...this.targets } };
+    const data = { type: this.type, settings, ...readSplines(x.curve_nurbs_get(this.ob) >>> 0), targets: { ...this.#pointed(view, curve), ...this.targets } };
     if (this.type === 'FONT') data.text = this.text;
     return data;
   }
@@ -176,10 +176,17 @@ export class CurveObject {
     if (text) this.text = text;
   }
 
+  // The objects its pointers name in Main, by name.
+  #pointed(view, curve) {
+    return Object.fromEntries(CURVE_TARGETS.map((name) => [name, view.getUint32(curve + located(name).offset, true)]).filter(([, ob]) => ob)
+      .map(([name, ob]) => [name, this.main.name(ob)]));
+  }
+
   set settings(settings) {
     const view = new DataView(x.memory.buffer), curve = this.#curve;
     for (const [name, v] of Object.entries(settings)) writeSetting(view, curve, name, v);
     if ('bevel_mode' in settings || 'bevel_resolution' in settings) x.curve_bevel_profile_update(this.ob);
+    this.main.tag(curve, ID_RECALC_GEOMETRY);
   }
 
   set splines({ splines, active = [0, 0] }) {
@@ -239,6 +246,8 @@ export class CurveObject {
       mesh.write(values)(new DataView(x.memory.buffer), md);
       for (const [name, target] of Object.entries(targets)) new DataView(x.memory.buffer).setUint32(md + pointers[name], target?.ob ?? 0, true);
     }
+    this.main.tag(this.ob, ID_RECALC_GEOMETRY);
+    this.main.relationsChanged();
   }
 
   // Sets a property by its RNA path (setCurvePath), then updates as RNA does: a point's spline gets its handles
@@ -260,11 +269,11 @@ export class CurveObject {
     this.main.evaluate();
   }
 
-  // The mesh Blender draws for it (its modifiers included), valid until the next evaluation, or null; the objects it
-  // follows are evaluated first.
+  // The mesh Blender draws for it (its modifiers included) as Main's depsgraph evaluates it with what it follows, valid
+  // until the next evaluation, or null.
   evaluate() {
-    const header = x.curve_object_eval(this.main.C, this.ob) >>> 0;
-    return header ? extractedMesh(header) : null;
+    this.main.evaluate();
+    return this.main.evaluatedMesh(this.ob);
   }
 
   // Edit Mode: the object in it, active, with its edit data made; exit() loads the edit data back.

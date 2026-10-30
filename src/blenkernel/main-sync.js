@@ -24,7 +24,7 @@ import { objectMesh } from '../editors/object/object-mesh.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
-import { CurveObject } from './curve/curve.js';
+import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { MultiMaterial, VertexData } from '@babylonjs/core';
@@ -36,6 +36,7 @@ import { ID_RECALC_TRANSFORM, ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_S
 import { differencesPBR } from './material/principled-gltf.js';
 
 const ID_TE = 0x4554;
+const TRANSFORM = new Set(['location', 'rotation_mode', 'rotation_euler', 'rotation_quaternion', 'scale']);
 
 const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, MEDIAN_POINT: 3, ACTIVE_ELEMENT: 4 };
 const FLAGS = { hideSelect: 'hide_select', hideViewport: 'hide_viewport', hideRender: 'hide_render' };
@@ -158,7 +159,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // A record's values from Babylon into Main, where they differ from what was last synced; what Main holds is kept. The
   // ID written into is tagged for the depsgraph (an object's transform and flags, any other ID whole).
   function push(record, owner) {
-    const written = api.writes;
+    const written = new Set();
     for (const [name, binding] of syncBindings(rna, record.struct, owner)) {
       const field = dnaProperty(record.struct, name);
       if (!field || field.kind === 'pointer' || field.kind === 'struct') continue;
@@ -171,10 +172,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       }
       dnaSet(record.struct, record.ptr, name, value);
       record.shadow.set(name, dnaGet(record.struct, record.ptr, name));
+      written.add(name);
       api.writes++;
     }
-    if (api.writes !== written) blender.tag(record.holder ?? record.ptr, record.struct === 'Object' ? ID_RECALC_TRANSFORM | ID_RECALC_SYNC_TO_EVAL : 0);
+    if (written.size) blender.tag(record.holder ?? record.ptr, recalcOf(record.struct, written));
   }
+  // What the depsgraph evaluates again after values were written, as Blender's RNA updates tag them: an object's
+  // transform alone (rna_Object_internal_update), else the whole of its struct's ID.
+  const recalcOf = (struct, names) => (struct !== 'Object' ? 0 : [...names].every((name) => TRANSFORM.has(name)) ? ID_RECALC_TRANSFORM
+    : ID_RECALC_TRANSFORM | ID_RECALC_SYNC_TO_EVAL);
   // Objects: one per Bylonder object, with data of its type; one made again when its type changed. A deleted one is
   // deleted in Main, which undo brings back; one that left the scene keeps its keys (blender-ids.js).
   function syncObjects() {
@@ -267,13 +273,21 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     blender.evaluate();
     armature_draw(armatureDrawn(entry.ob), entry.node);
   }
-  // A curve or text object's Curve data, live in Main as in Babylon (the edit data in Edit Mode).
+  // A curve or text object's Curve data, live in Main as in Babylon (the edit data in Edit Mode), with the objects its
+  // data and modifiers follow, which Main's depsgraph evaluates it with.
+  const curveData = (node) => world.curves?.data(node) ?? node.metadata?.wbCreation?.curve;
+  const objectNamed = (name) => (name ? [...objects.values()].find((e) => e.node.name === name) ?? null : null);
   function pushCurve(entry) {
-    if (!CURVE_TYPES.includes(entry.type) || !world.curves) return;
-    const data = world.curves.data(entry.node), signature = JSON.stringify(data);
+    const data = CURVE_TYPES.includes(entry.type) && curveData(entry.node);
+    if (!data) return;
+    const followed = [...CURVE_TARGETS.map((name) => data.targets?.[name]), ...(data.modifiers ?? []).flatMap((m) => Object.values(m.targets ?? {}))];
+    const signature = JSON.stringify([data, followed.map((name) => objectNamed(name)?.ob)]);
     if (signature === entry.curve) return;
     entry.curve = signature;
-    curveObject(entry).data = data;
+    const object = curveObject(entry);
+    object.data = data;
+    for (const name of CURVE_TARGETS) object.target(name, objectNamed(data.targets?.[name]));
+    object.modifiers = (data.modifiers ?? []).map((m) => ({ ...m, targets: Object.fromEntries(Object.entries(m.targets ?? {}).map(([k, name]) => [k, objectNamed(name)])) }));
   }
   // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings, which Main's
   // depsgraph evaluates on Mesh data of Main's: a mesh Babylon built gets its geometry as its Mesh data then.
@@ -564,7 +578,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const base = blender.base(entry.ob);
       if (base && base.selected !== selection.has(node)) diffs.push(`${label}: selected ${selection.has(node)}, Main ${base.selected}`);
       if (base && base.active !== (node === active) && base.selected) diffs.push(`${label}: active differs`);
-      if (CURVE_TYPES.includes(entry.type) && world.curves && !holdsAll(curveObject(entry).data, world.curves.data(node))) diffs.push(`${label}: curve data differs`);
+      if (CURVE_TYPES.includes(entry.type) && !holdsAll(curveObject(entry).data, curveData(node))) diffs.push(`${label}: curve data differs`);
       if (entry.type === 'ARMATURE' && !holdsAll(armatureData(entry.ob), node.metadata?.wbCreation?.armature)) diffs.push(`${label}: armature data differs`);
       if (entry.owned) {
         const mesh = blender.mesh(entry.ob), own = objectMesh(node);

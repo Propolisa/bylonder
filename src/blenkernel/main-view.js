@@ -12,8 +12,7 @@ import { blenderModifierDefinitions, sceneModifierDefinitions } from '../modifie
 import { addModifier, modifierStack } from '../modifiers/stack.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
-import { CurveObject, evaluateCurve } from './curve/curve.js';
-import { blenderTransform } from '../editors/curve/curve-objects.js';
+import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject } from '../runtime/object-transform.js';
 import { blenderModule, ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
@@ -28,7 +27,7 @@ export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 const MODIFIER_DEFINITIONS = [...blenderModifierDefinitions, ...sceneModifierDefinitions];
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // The objects drawn from what the depsgraph evaluated.
-const DRAWN = ['MESH', 'EMPTY'];
+const DRAWN = ['MESH', 'EMPTY', ...CURVE_TYPES];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
@@ -100,11 +99,6 @@ export function createMainView(state) {
     }
   }
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
-  const drawCurve = (node) => {
-    const data = node.metadata.wbCreation.curve;
-    const mesh = evaluateCurve(data, { transform: blenderTransform(node), modifiers: data.modifiers ?? [], targets: {} });
-    if (mesh) mesh_batch_cache_apply(mesh, node);
-  };
   // An object's data as Main holds it: a mesh's geometry, a curve's or text's Curve data, an armature's bones.
   function drawData(entry) {
     const { node, type } = entry;
@@ -113,14 +107,9 @@ export function createMainView(state) {
       else keepMesh(entry, blender);
     }
     else if (CURVE_TYPES.includes(type)) {
-      const data = curveObject(entry).data;
-      if (world.curves) {
-        world.curves.set(node, data);
-        entry.curve = JSON.stringify(world.curves.data(node));
-      } else {
-        node.metadata = { ...node.metadata, wbCreation: { curve: data } };
-        drawCurve(node);
-      }
+      // Its recipe; the depsgraph's evaluation draws it.
+      node.metadata = { ...node.metadata, wbCreation: { curve: { ...curveObject(entry).data, modifiers: node.metadata?.wbCreation?.curve?.modifiers } } };
+      entry.drawn = false;
     } else if (type === 'ARMATURE') pullArmature(entry, true);
   }
   // What Blender's code changed of an armature (bones, pose, its mode), after Main is evaluated.
@@ -401,9 +390,9 @@ export function createMainView(state) {
     world.modifiers?.refresh();
   }
 
-  // What the depsgraph updated, drawn (docs/model.md): a mesh object's or empty's evaluated world matrix, and a mesh
-  // object's evaluated mesh where Main holds its Mesh (outside Edit Mode, which draws the edit mesh), with its
-  // modifiers' errors. An object not drawn yet is drawn whole.
+  // What the depsgraph updated, drawn (docs/model.md): a mesh, curve, text object's or empty's evaluated world matrix,
+  // and the evaluated mesh of a mesh object whose Mesh Main holds or of a curve or text, with its modifiers' errors
+  // (outside Edit Mode, which draws the edit data). An object not drawn yet is drawn whole.
   function drawEvaluated() {
     const updates = new Map(blender.updates().map(({ id, recalc }) => [id, recalc]));
     const was = state.applying;
@@ -415,12 +404,14 @@ export function createMainView(state) {
         if (!recalc) continue;
         entry.drawn = true;
         entry.node.freezeWorldMatrix(babylonMatrix(blender.transform(entry.ob).matrix_world));
-        if (entry.type === 'MESH' && entry.owned && !entry.overlay && recalc & ID_RECALC_GEOMETRY) drawGeometry(entry);
+        if (recalc & ID_RECALC_GEOMETRY && drawsGeometry(entry)) drawGeometry(entry);
       }
     } finally {
       state.applying = was;
     }
   }
+  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds and a curve or text, outside Edit Mode.
+  const drawsGeometry = ({ type, owned, overlay, node }) => (type === 'MESH' ? owned && !overlay : CURVE_TYPES.includes(type) && !node.metadata?.editing);
   function drawGeometry({ node, ob }) {
     const mesh = blender.evaluatedMesh(ob);
     if (!mesh) return;

@@ -89,8 +89,8 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     object.free();
     followed.forEach((other) => other.free());
     ed = null;
-    node.metadata = { ...node.metadata, editing: false, wbCreation: { curve: data } };
-    curves.apply(node);
+    node.metadata = { ...node.metadata, editing: false };
+    curves.set(node, data);
     editor.reconcile();
     history.commit();
     changed();

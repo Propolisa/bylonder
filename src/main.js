@@ -578,7 +578,6 @@ ownObservers = observerCount() - userObservers;
 function undoRedo(redo) {
   creator.finish();
   redo ? history.redo() : history.undo();
-  world.curves.refresh();
   editor.reconcile();
   world.editMode.reload();
 }

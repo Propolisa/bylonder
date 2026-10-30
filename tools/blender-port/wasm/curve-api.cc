@@ -1,6 +1,6 @@
 /* Blender's Curve and Text objects in the module's Main (main-api.cc makes them with main_object_add, OB_CURVES_LEGACY
- * or OB_FONT): their splines and text in and out, evaluation as the depsgraph evaluates them (BKE_displist_make_curveTypes,
- * BKE_vfont_to_curve for text) to the mesh Blender draws, and Edit Mode with Blender's own curve and font editors
+ * or OB_FONT): their splines and text in and out, which Main's depsgraph evaluates to the mesh Blender draws
+ * (main-api.cc object_mesh_eval), and Edit Mode with Blender's own curve and font editors
  * (editcurve.cc, editfont.cc), whose operators run on the Main's context. Settings are written by JS at their DNA
  * offsets (dna-curves.json). Fonts are VFont IDs in the Main, Blender's built-in font (bfont.pfb, embedded as
  * Blender's datatoc embeds it) or a font file's bytes packed into one. */
@@ -324,26 +324,6 @@ EXPORT(curve_object_pointer_set) void curve_object_pointer_set(Object *ob, int o
   *reinterpret_cast<Object **>(reinterpret_cast<char *>(ob->data) + offset) = target;
   data_changed(ob);
   DEG_relations_tag_update(G_MAIN);
-}
-
-/* Evaluates a curve or text object as the depsgraph does in the viewport (its modifiers included; objects it follows
- * are evaluated first, by the caller) and extracts the mesh Blender draws, valid until the next evaluation: the mesh
- * of a filled, extruded or beveled curve, or the wire of its evaluated curves (curve_to_wire_mesh, as Object > Convert
- * makes it); null when it has neither. */
-EXPORT(curve_object_eval) const ExtractionHeader *curve_object_eval(bContext *C, Object *ob)
-{
-  static ExtractionHeader header;
-  BKE_displist_make_curveTypes(CTX_data_depsgraph_pointer(C), CTX_data_scene(C), ob, false);
-  bke::GeometrySet &geometry = *ob->runtime->geometry_set_eval;
-  if (!geometry.has_mesh() && geometry.has_curves()) {
-    geometry.replace_mesh(bke::curve_to_wire_mesh(geometry.get_curves()->geometry.wrap()));
-  }
-  const Mesh *mesh = geometry.get_mesh();
-  if (!mesh) {
-    return nullptr;
-  }
-  mesh_extraction(*mesh, header);
-  return &header;
 }
 
 /* Edit Mode data, as object.editmode_toggle makes it (ED_curve_editnurb_make, ED_curve_editfont_make) and loads it

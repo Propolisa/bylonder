@@ -7,6 +7,9 @@
 #include "BKE_armature.hh"
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
+#include "BKE_curve_to_mesh.hh"
+#include "BKE_curves.hh"
+#include "BKE_geometry_set.hh"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
 #include "AS_asset_library.hh"
@@ -573,7 +576,13 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
 {
   Depsgraph *depsgraph = depsgraph_of(ctx);
   BKE_scene_graph_evaluated_ensure(depsgraph, ctx->bmain);
-  const Mesh *mesh = BKE_object_get_evaluated_mesh(DEG_get_evaluated(depsgraph, ob));
+  Object *evaluated = DEG_get_evaluated(depsgraph, ob);
+  /* A curve without a surface draws as the wire of its evaluated curves (curve_to_wire_mesh, as Convert makes it). */
+  bke::GeometrySet *geometry = ELEM(ob->type, OB_CURVES_LEGACY, OB_FONT) ? evaluated->runtime->geometry_set_eval : nullptr;
+  if (geometry && !geometry->has_mesh() && geometry->has_curves()) {
+    geometry->replace_mesh(bke::curve_to_wire_mesh(geometry->get_curves()->geometry.wrap()));
+  }
+  const Mesh *mesh = geometry ? geometry->get_mesh() : BKE_object_get_evaluated_mesh(evaluated);
   if (!mesh) {
     return nullptr;
   }

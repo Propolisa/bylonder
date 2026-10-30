@@ -4,10 +4,9 @@ import reflected from "./builder-schema.json" with { type: "json" };
 import rna from "../../makesrna/rna-operators.json" with { type: "json" };
 import { primitiveOperators, primitive_add } from "../mesh/editmesh-add.js";
 import { mesh_batch_cache_apply } from "../../draw/mesh-batch-cache.js";
-import { createMesh as meshData, mesh_deserialize, mesh_serialize } from "../../blenkernel/mesh/mesh.js";
+import { mesh_deserialize, mesh_serialize } from "../../blenkernel/mesh/mesh.js";
 import { mesh_from_pydata, mesh_shade } from "../../blenkernel/mesh/mesh-from-pydata.js";
 import { objectMesh } from "./object-mesh.js";
-import { evaluateCurve } from "../../blenkernel/curve/curve.js";
 
 const n = (value, min = 0.01, max = 100, step = 0.1) => ({ default: value, min, max, step });
 const detail = (value) => n(value, 3, 128, 1);
@@ -82,19 +81,10 @@ const recipeMesh = (recipe) => {
   return primitive_add(recipe.operator, recipe.options);
 };
 
-// A curve or text object's mesh from its Curve data alone; the objects it follows join when the scene evaluates it
-// (editors/curve/curve-objects.js).
-const curveMesh = (recipe) => evaluateCurve(recipe.curve) ?? meshData({ vert_positions: new Float32Array(0), edges: new Int32Array(0),
-  face_offsets: new Int32Array([0]), corner_verts: new Int32Array(0), corner_edges: new Int32Array(0) });
-
 export function buildMesh(scene, name, recipe) {
-  // An armature's bones are drawn as Blender evaluates them, once the scene sync has its data in Main.
-  if (recipe.armature) return new Mesh(name, scene);
-  if (recipe.curve) {
-    const node = new Mesh(name, scene);
-    mesh_batch_cache_apply(curveMesh(recipe), node);
-    return node;
-  }
+  // An armature's bones, a curve's or text's mesh: drawn as Blender evaluates them, once the scene sync has the data in
+  // Main.
+  if (recipe.armature || recipe.curve) return new Mesh(name, scene);
   if (recipe.mesh || recipe.operator) {
     const node = new Mesh(name, scene);
     mesh_batch_cache_apply(recipeMesh(recipe), node);
@@ -130,9 +120,8 @@ export function shadeSmooth(node, smooth = true) {
 }
 
 export function rebuildMesh(mesh, recipe) {
-  if (recipe.curve) mesh_batch_cache_apply(curveMesh(recipe), mesh);
-  else if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
-  else if (!recipe.armature) {
+  if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
+  else if (!recipe.armature && !recipe.curve) {
     const temp = buildMesh(mesh.getScene(), "__previewGeometry", recipe);
     try {
       mesh.makeGeometryUnique();
