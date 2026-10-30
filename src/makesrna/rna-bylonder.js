@@ -93,8 +93,9 @@ const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
 const lightType = (light) => lightRecord(light)?.type ?? (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
 const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
 const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve', ARMATURE: () => 'Armature' };
-const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
-  ?? (ob.metadata?.wbCreation?.armature ? 'ARMATURE' : ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY'));
+// An object the view made for a type of Blender's it draws only as evaluated (a surface, a metaball, a lattice) keeps it.
+const objectType = (ob) => (ob.metadata?.wbType ?? (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
+  ?? (ob.metadata?.wbCreation?.armature ? 'ARMATURE' : ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY')));
 const editing = (ob, r) => !!ob && r.world.editMode?.object === ob;
 const editTotals = (ob, r) => (editing(ob, r) && r.world.editMode.stats) || { verts: [0], edges: [0], faces: [0] };
 

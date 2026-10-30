@@ -23,8 +23,11 @@ import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
+// Types of Blender's the view draws only as the depsgraph evaluates them: as their evaluated mesh, or placed where they
+// are (what they do, a lattice's deform or a speaker's sound, is Blender's).
+const EVALUATED = ['SURFACE', 'META'], PLACED = ['LATTICE', 'SPEAKER', 'LIGHT_PROBE'];
 // The objects drawn from what the depsgraph evaluated.
-const DRAWN = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA', ...CURVE_TYPES];
+const DRAWN = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA', ...CURVE_TYPES, ...EVALUATED, ...PLACED];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
@@ -37,8 +40,7 @@ export const plain = (value) => (value && typeof value === 'object' ? Array.from
 const close = (a, b) => Math.abs(a - b) <= 1e-5 * Math.max(1, Math.abs(a), Math.abs(b));
 export const same = (a, b) => (Array.isArray(a) ? Array.isArray(b) && a.length === b.length && a.every((v, i) => same(v, b[i]))
   : typeof a === 'number' && typeof b === 'number' ? close(a, b) : a === b);
-// The Babylon objects a read Object becomes, by its type; a light of a type Babylon has no light for becomes the
-// nearest, with a warning.
+// The Babylon objects an Object of Main's becomes, by its type.
 const MAKERS = {
   EMPTY: (scene, name) => new TransformNode(name, scene),
   CAMERA: (scene, name) => asObject(new FreeCamera(name, Vector3.Zero(), scene)),
@@ -48,6 +50,8 @@ const MAKERS = {
   ARMATURE: (scene, name) => new Mesh(name, scene),
   CURVE: (scene, name) => new Mesh(name, scene),
   FONT: (scene, name) => new Mesh(name, scene),
+  ...Object.fromEntries(EVALUATED.map((type) => [type, (scene, name) => Object.assign(new Mesh(name, scene), { metadata: { wbType: type } })])),
+  ...Object.fromEntries(PLACED.map((type) => [type, (scene, name) => Object.assign(new TransformNode(name, scene), { metadata: { wbType: type } })])),
 };
 
 // A mesh object's Mesh as Main holds it is its recipe (its Mesh data, for saving), Main owning it; the view draws it as
@@ -397,8 +401,9 @@ export function createMainView(state) {
     entry.unwatch = () => {};
     old.dispose();
   }
-  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds and a curve or text, in Edit Mode too.
-  const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type));
+  // Main's evaluated geometry is drawn for a mesh whose Mesh it holds, a curve or text, in Edit Mode too, and the types
+  // drawn only as evaluated.
+  const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) || EVALUATED.includes(type));
   function drawGeometry({ node, ob }) {
     const mesh = blender.evaluatedMesh(ob);
     if (!mesh) return;

@@ -89,4 +89,14 @@ const retyped = objects.find((node) => node.metadata?.wbId === 'lamp');
 assert.equal(retyped.getClassName(), 'SpotLight');
 assert(lamp.isDisposed() && !objects.includes(lamp), 'the point light it was is gone');
 assert.deepEqual(sync.check(), []);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type");
+// Objects of types drawn only as evaluated: a metaball as its evaluated mesh, a lattice where it is.
+sync.run(() => blender.run('object.metaball_add', { type: 'BALL' }));
+sync.run(() => blender.run('object.add', { type: 'LATTICE', location: [0, 3, 0] }));
+sync.run(() => blender.run('surface.primitive_nurbs_surface_sphere_add', {}));
+const ball = objects.find((node) => node.metadata?.wbType === 'META'), lattice = objects.find((node) => node.metadata?.wbType === 'LATTICE');
+assert(ball?.getTotalVertices() > 100, `the metaball's evaluated mesh: ${ball?.getTotalVertices()}`);
+assert(Math.abs(lattice.getWorldMatrix().getTranslation().z - 3) < 1e-5, 'the lattice where Blender has it');
+const surface = objects.find((node) => node.metadata?.wbType === 'SURFACE');
+assert(surface?.getTotalVertices() > 100, `the surface's evaluated mesh: ${surface?.getTotalVertices()}`);
+assert.deepEqual(sync.check(), []);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type; a metaball, a NURBS surface and a lattice");
