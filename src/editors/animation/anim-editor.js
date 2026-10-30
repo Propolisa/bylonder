@@ -24,6 +24,7 @@ import { operatorIdname } from '../../makesrna/rna.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
 import './anim-editor.css';
+import { frameRate } from '../../blenkernel/scene/time.js';
 
 
 // The keymaps a region's handlers run, in order (ed_default_handlers' then the region type's init), then the window's.
@@ -436,16 +437,16 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     main.ctx.fillRect(0, 0, main.width, main.height);
     if (!drivers) drawFrameRange(main, v2d, range);
     if (graph) {
-      drawGrid(main, v2d, spaceTheme.grid, { values: true, fps: t.fps });
+      drawGrid(main, v2d, spaceTheme.grid, { values: true, fps: frameRate(t) });
       drawCurves(main, v2d, area.curves(), { showHandles: !(settings.flag & (1 << 2)), onlySelectedHandles: !!(settings.flag & (1 << 9)) });
     } else {
-      drawGrid(main, v2d, spaceTheme.grid, { fps: t.fps });
+      drawGrid(main, v2d, spaceTheme.grid, { fps: frameRate(t) });
       const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
     if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
-    if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
+    if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: frameRate(t), fractions: graph });
     drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height });
     main.ctx.flush(mainView);
     if (size.channels) {

@@ -423,7 +423,8 @@ const STRUCTS = {
     use_keyframe_insert_auto: { get: (world) => world.animation.time.state.autoKey, set: (world, value) => world.animation.time.configure({ autoKey: !!value }, { record: false }), sync: true },
   },
   RenderSettings: {
-    fps: { get: (world) => world.animation.time.state.fps, set: (world, fps) => world.animation.time.configure({ fps }, { record: false }), sync: true },
+    ...Object.fromEntries([['fps', 'fps'], ['fps_base', 'fpsBase']].map(([name, key]) => [name,
+      { get: (world) => world.animation.time.state[key], set: (world, value) => world.animation.time.configure({ [key]: value }, { record: false }), sync: true }])),
     ...Object.fromEntries([['resolution_x', 'resolutionX'], ['resolution_y', 'resolutionY'], ['resolution_percentage', 'resolutionPercentage'],
       ['use_motion_blur', 'useMotionBlur'], ['motion_blur_shutter', 'motionBlurShutter'], ['use_sequencer', 'useSequencer']].map(([name, key]) => [name, {
       get: (world) => world.renderSettings?.state.render[key], set: (world, value) => world.renderSettings.set('render.' + key, value, false), sync: name !== 'use_sequencer' }])),

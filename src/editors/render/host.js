@@ -4,6 +4,7 @@ import { outputSpec, encodeSize, fileFormats } from '../../render/formats.js';
 import { outputSize } from '../../blenkernel/scene/render.js';
 import { pointerStruct, structFind } from '../../python/bpy_rna.js';
 import './result.css';
+import { frameRate } from '../../blenkernel/scene/time.js';
 
 const cancelled = () => new DOMException('Render cancelled', 'AbortError');
 // A frame's promise, rejected on Cancel: a frame can wait on modifiers that take very long, and disposing the render
@@ -62,7 +63,7 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
       source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames, spec.audio?.rate);
       const audio = spec.audio ? await source.audio?.(signal) : null;
-      writer = await createWriter(spec, { ...size, fps: time.fps, name: name(), frames: frames.length, audio });
+      writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
         if (signal.aborted) throw cancelled();
@@ -70,7 +71,7 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
         ctx.drawImage(image, 0, 0, size.width, size.height);
         image.close?.();
         draw(await createImageBitmap(out));
-        if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / time.fps) }));
+        if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / frameRate(time)) }));
         else await writer.add(out, frames[index]);
         setStatus(`Frame ${frames[index]} | ${index + 1} / ${frames.length} | ${size.width} x ${size.height} | ${source.label} | ${clock(started)}`);
       }

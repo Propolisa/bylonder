@@ -6,7 +6,7 @@
 // evaluated for a frame (`evaluateMain`, the scene sync's), else the value its F-Curve evaluates to.
 import { AnimationGroup } from '@babylonjs/core/Animations/animationGroup.js';
 import { Animation } from '@babylonjs/core/Animations/animation.js';
-import { createSceneTime } from '../scene/time.js';
+import { createSceneTime, frameRate } from '../scene/time.js';
 import { createBlenderIDs } from '../blender-ids.js';
 import { BlenderAnimation, FCURVE, animatedProperty, customProperty, customPropertyName, customPropertyPath, setCustomProperty } from './anim-blender.js';
 import { address, INTERPOLATIONS, KEY_FIELDS, LIMIT, parseAnimation, validateAction } from './saved.js';
@@ -276,7 +276,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     },
     // A Babylon AnimationGroup sampling each F-Curve at every frame of the scene range.
     toAnimationGroup(scene, groupName = name) {
-      const fps = time.state.fps, [start, end] = [time.state.frameStart, time.state.frameEnd];
+      const fps = frameRate(time.state), [start, end] = [time.state.frameStart, time.state.frameEnd];
       const group = new AnimationGroup(groupName, scene);
       for (const { track, channel } of liveTracks()) {
         const numeric = typeof channel.get() === 'number';

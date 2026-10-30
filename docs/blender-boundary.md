@@ -326,6 +326,9 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
 - Python's library modules Transcrypt lacks are at the boundary (`boundary/`), as small as Blender's scripts need;
   values Blender's C reports (`bpy.app`, handlers, translation contexts, file extensions) are copied from the
   reference binary. `os` is a read-only file system of Blender's scripts in Blender's layout (`_files`).
+- Blender's other presets (`scripts/presets/framerate`, `camera`, `cloth`, ...) ship as their sources, not compiled:
+  `script.execute_preset` runs one with `bpy.utils.execfile` each time it is chosen, and the boundary's `importlib.util`
+  runs its lines (imports and assignments such as `bpy.context.scene.render.fps = 60`) in `_py_eval`.
 
 Consumers and running:
 
@@ -336,7 +339,8 @@ Consumers and running:
   (which then wins); they run as Blender runs one: an instance with its property defaults and the given values,
   `poll`, then `execute` (or `invoke` from an event) in `bpy.context`.
 - `bpy.ops` is Blender's `ops.py` over the boundary's `_bpy.ops`, which calls Bylonder's registry; modules with a
-  module-level `__getattr__` (PEP 562) are seen through it by their importers.
+  module-level `__getattr__` (PEP 562) are seen through it by their importers, also by `getattr` and `hasattr`
+  (`getattr(bpy.types, menu_idname)` finds a registered menu).
 - `eval` and `exec` of a snippet run in the boundary's Python interpreter (`_py_eval`), over the calling function's
   names and its module's; RNA's C functions on structs (`WindowManager.draw_cursor_add`) are in
   `tools/blender-ui/rna_functions.py`.

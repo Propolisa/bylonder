@@ -47,8 +47,11 @@ Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get
     return own;
 } });
 // A module with a module-level __getattr__ (PEP 562, bpy.ops) as its importers see it: its names, then __getattr__ (also
-// for the None tree.py's stub_boundary gives a name it imports: bpy.types' registered classes).
-globalThis.__py_module_getattr__ = (module) => new Proxy (module, { get: (target, key) => (typeof key != 'string' || key.startsWith ('__') || (target [key] ?? null) !== null ? target [key] : target.__getattr__ (key) ?? target [key]) });
+// for the None tree.py's stub_boundary gives a name it imports: bpy.types' registered classes), also to getattr.
+globalThis.__py_module_getattr__ = (module) => new Proxy (module, {
+    get: (target, key) => (typeof key != 'string' || key.startsWith ('__') || (target [key] ?? null) !== null ? target [key] : target.__getattr__ (key) ?? target [key]),
+    has: (target, key) => key in target || (typeof key == 'string' && !key.startsWith ('__') && target.__getattr__ (key) != null),
+});
 // A class attribute's descriptor that can be assigned: a method (a getter) is replaced by the value assigned, on the
 // class or the instance assigned to.
 function __settable__ (attrib, descrip) {

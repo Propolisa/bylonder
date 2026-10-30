@@ -3,11 +3,32 @@ import * as __self__ from './importlib.util.js';
 (globalThis.__py_modules ??= {})['importlib.util'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {_module} from './_modules.js';
-import {modules as _modules_by_path} from './_files.js';
+import {modules as _modules_by_path, scripts as _scripts} from './_files.js';
 import {_globals, _import, _lazy, _member} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = 'importlib.util';
+export var _Script =  __class__ ('_Script', [object], {
+	__module__: __name__,
+});
 export var _Loader =  __class__ ('_Loader', [object], {
 	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, origin) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'origin': var origin = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.origin = origin;
+	});},
 	get exec_module () {return __get__ (this, function (self, module) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -23,7 +44,34 @@ export var _Loader =  __class__ ('_Loader', [object], {
 		}
 		else {
 		}
-		// pass;
+		if (!__in__ (self.origin, _scripts)) {
+			return ;
+		}
+		var names = dict ({});
+		var __iterable0__ = (function () {
+			var __accu0__ = __getitem__ (_scripts, self.origin);
+			return __call__ (__accu0__.splitlines, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var line = __getitem__ (__iterable0__, __index0__);
+			var line = (function () {
+				var __accu0__ = line;
+				return __call__ (__accu0__.strip, __accu0__);
+			}) ();
+			if ((function () {
+				var __accu0__ = line;
+				return __call__ (__accu0__.startswith, __accu0__, 'import ');
+			}) ()) {
+				__setitem__ (names, __getslice__ (line, 7, null, 1), __call__ (_module, null, __getslice__ (line, 7, null, 1)));
+			}
+			else if (line && !((function () {
+				var __accu0__ = line;
+				return __call__ (__accu0__.startswith, __accu0__, '#');
+			}) ())) {
+				__call__ (_py_exec, null, line, names);
+			}
+		}
 	});}
 });
 export var ModuleSpec =  __class__ ('ModuleSpec', [object], {
@@ -44,7 +92,7 @@ export var ModuleSpec =  __class__ ('ModuleSpec', [object], {
 		}
 		else {
 		}
-		var __left0__ = tuple ([py_name, origin, __call__ (_Loader, null)]);
+		var __left0__ = tuple ([py_name, origin, __call__ (_Loader, null, origin)]);
 		self.py_name = __left0__ [0];
 		self.origin = __left0__ [1];
 		self.loader = __left0__ [2];
@@ -92,7 +140,7 @@ export var module_from_spec = function (spec) {
 	}
 	else {
 	}
-	return __call__ (_module, null, __getitem__ (_modules_by_path, spec.origin));
+	return (__in__ (spec.origin, _scripts) ? __call__ (_Script, null) : __call__ (_module, null, __getitem__ (_modules_by_path, spec.origin)));
 };
 export var find_spec = function (py_name, package_) {
 	if (typeof package_ == 'undefined' || (package_ != null && globalThis.Object.hasOwn (package_, "__kwargtrans__"))) {;
@@ -116,10 +164,11 @@ export var find_spec = function (py_name, package_) {
 };
 
 //# sourceMappingURL=importlib.util.map
-export {_globals, _import, _lazy, _member, _module, _modules_by_path};
+export {_globals, _import, _lazy, _member, _module, _modules_by_path, _py_eval, _py_exec, _scripts};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_Script': _Script = value; break;
 		case '_Loader': _Loader = value; break;
 		case 'ModuleSpec': ModuleSpec = value; break;
 		case 'spec_from_file_location': spec_from_file_location = value; break;

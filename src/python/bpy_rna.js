@@ -659,8 +659,9 @@ function annotations(cls, seen = new Map()) {
 
 function defineProperties(type, cls) {
   for (const [name, deferred] of annotations(cls)) {
-    const kind = KINDS[deferred?.function?.name];
-    if (kind !== undefined) defineProperty(type, name, deferred.function.name, kind, deferred.keywords ?? {});
+    // By identity: a built app's functions have minified names.
+    const functionName = Object.keys(KINDS).find((n) => globalThis.__py_modules['_bpy.props'][n] === deferred?.function);
+    if (functionName) defineProperty(type, name, functionName, KINDS[functionName], deferred.keywords ?? {});
   }
   properties.clear();
 }

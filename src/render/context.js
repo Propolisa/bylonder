@@ -6,6 +6,7 @@ import { Engine, Matrix, Camera } from '@babylonjs/core';
 import { installVirtualClock } from './clock.js';
 import { createWorld } from '../runtime/world.js';
 import { jitter, jitterProjection, sampleTimes, createAccumulator } from './sampling.js';
+import { frameRate } from '../blenkernel/scene/time.js';
 
 const clock = installVirtualClock(window);
 const canvas = document.getElementById('render');
@@ -56,9 +57,8 @@ async function open(input, { width, height }, { camera: cameraName, audio } = {}
 
 // The scene's own render settings: final frames use its samples and motion blur.
 function quality() {
-  const { frameStart: start, fps } = built.animation.time.state;
-  const { render, eevee } = built.world.renderSettings.state;
-  return { start, fps, samples: Math.max(1, Math.round(eevee.taaRenderSamples)), motionBlur: render.useMotionBlur, shutter: render.motionBlurShutter };
+  const { state } = built.animation.time, { render, eevee } = built.world.renderSettings.state;
+  return { start: state.frameStart, fps: frameRate(state), samples: Math.max(1, Math.round(eevee.taaRenderSamples)), motionBlur: render.useMotionBlur, shutter: render.motionBlurShutter };
 }
 
 let surface = null;

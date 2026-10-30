@@ -677,6 +677,23 @@ const checks = {
     assert.ok(out.live, "the scene plays its sound live, so its strip is silent in the preview");
   } },
 
+  // Output > Frame Rate runs Blender's preset scripts (scripts/presets/framerate); new scenes start at 60 fps.
+  async "Frame Rate presets set the scene's fps"() {
+    const fps = () => app.bylonder((b) => [b.mainScene.render.fps, +b.mainScene.render.fps_base.toFixed(3), +(b.world.animation.time.state.fps / b.world.animation.time.state.fpsBase).toFixed(2)]);
+    assert.deepEqual(await fps(), [60, 1, 60]);
+    await app.locator('[role="tab"][aria-label="Output"]').click();
+    const choose = async (current, preset) => {
+      await app.frame().locator('section[data-blender="RENDER_PT_format"]').getByRole("button", { name: current }).click();
+      await app.frame().getByRole("menuitem", { name: preset, exact: true }).click();
+    };
+    await choose("60", "29.97");
+    await app.until((b) => b.mainScene.render.fps === 30);
+    assert.deepEqual(await fps(), [30, 1.001, 29.97]);
+    await choose("29.97", "24");
+    await app.until((b) => b.mainScene.render.fps === 24);
+    assert.deepEqual(await fps(), [24, 1, 24]);
+  },
+
   // The island makes its sound with Babylon's audio; a Scene Audio strip carries it into the sequencer's mix.
   "Add > Scene Audio puts the scene's sound in the edit": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     const out = await app.bylonder(async (b) => {

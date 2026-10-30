@@ -220,7 +220,7 @@ Touch viewport controls:
 
 ## Rendering
 
-Properties > Output sets the render size (Resolution X, Y and %), frame rate, frame range and the file format: PNG, JPEG, WebP or FFmpeg Video with a container (MPEG-4, QuickTime, Matroska, WebM), codec (H.264, H.265, AV1, VP9, VP8), output quality and keyframe interval. Properties > Render > Sampling > Render sets how many samples each frame averages.
+Properties > Output sets the render size (Resolution X, Y and %), frame rate (Blender's presets, 60 fps for a new scene), frame range and the file format: PNG, JPEG, WebP or FFmpeg Video with a container (MPEG-4, QuickTime, Matroska, WebM), codec (H.264, H.265, AV1, VP9, VP8), output quality and keyframe interval. Properties > Render > Sampling > Render sets how many samples each frame averages.
 
 **Render > Render Image** (F12) renders the current frame from the scene camera; **Render Animation** (Ctrl F12) renders the frame range and downloads the video, or a ZIP of images for image formats; **View Render** (F11) shows the Render Result window. Escape cancels a running render. Renders run in a hidden copy of the project built from the current scene edits, so the viewport keeps working and nothing needs to be saved first.
 

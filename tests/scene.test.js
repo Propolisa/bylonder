@@ -80,5 +80,9 @@ console.log('Scene: units, scene settings, world datablocks and Babylon mapping 
   every.play(); every.tick(0); every.tick(500);
   assert.equal(every.frame, 2, 'a slow tick still advances one frame');
   assert.throws(() => createSceneTime({ syncMode: 'AUDIO' }), /syncMode/);
+  const ntsc = createSceneTime({ fps: 30, fpsBase: 1.001 });
+  ntsc.play(); ntsc.tick(0); ntsc.tick(1001);
+  assert.ok(Math.abs(ntsc.frame - 31) < 1e-9, '29.97 fps is fps over fps_base: 30 frames in 1.001 s');
+  assert.equal(createSceneTime().state.fps, 60, 'new scenes play at 60 fps');
 }
 console.log('Scene time: playback sync modes passed');

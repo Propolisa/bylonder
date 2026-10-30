@@ -76,7 +76,7 @@ render.apply(undefined);
 assert.equal(scene.imageProcessingConfiguration.toneMappingEnabled, false);
 
 const time = createSceneTime();
-time.configure({ usePreviewRange: true, framePreviewStart: 10, framePreviewEnd: 20, frameStep: 2 });
+time.configure({ fps: 24, usePreviewRange: true, framePreviewStart: 10, framePreviewEnd: 20, frameStep: 2 });
 time.seek(19); time.play(); time.tick(0); time.tick(1000 / 24 * 3);
 assert.equal(time.frame, 12, 'playback loops inside the preview range, stepping by frame step');
 assert.throws(() => time.configure({ frameStart: 300 }), /frame range/);

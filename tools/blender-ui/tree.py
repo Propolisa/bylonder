@@ -29,6 +29,9 @@ import transpile
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(transpile.REPO, 'src', 'bl_py')
 ROOTS = ['scripts/startup', 'scripts/modules', 'scripts/presets/keyconfig']
+# Blender's presets other than keymaps: scripts of assignments (bpy.context.scene.render.fps = 60) that
+# script.execute_preset runs by file each time it is chosen, so they ship as sources the boundary interprets.
+PRESETS = 'scripts/presets'
 # Modules that reach the operating system or the network (downloads, extensions, translations' tooling, the
 # interactive console's completion), which the browser has no use for.
 EXCLUDED = ['_bpy_internal.http*', '_bpy_internal.extensions*', '_bpy_internal.assets.remote_library*', '_bl_i18n_utils*',
@@ -72,6 +75,9 @@ def assemble(build):
         os.makedirs(os.path.dirname(target), exist_ok=True)
         open(target, 'w').write(source)
         FILES[relative] = '/blender/' + path
+    presets = [f for f in transpile.listing(PRESETS) if not f.startswith(ROOTS[2])]
+    with concurrent.futures.ThreadPoolExecutor(16) as pool:
+        scripts = {'/blender/' + path: source for path, source in zip(presets, pool.map(transpile.fetch, presets))}
     for root, _, names in os.walk(build):
         if root != build and '__init__.py' not in names:
             open(os.path.join(root, '__init__.py'), 'w').close()
@@ -81,7 +87,8 @@ def assemble(build):
         shutil.copytree(source, target, dirs_exist_ok=True)
     open(os.path.join(build, '_files.py'), 'w').write(
         "# Blender's scripts as files where Blender has them (written by tree.py), for the boundary's os.\n"
-        f'files = {sorted(FILES.values())!r}\n'
+        f'files = {sorted([*FILES.values(), *scripts])!r}\n'
+        f'scripts = {dict(sorted(scripts.items()))!r}\n'
         f'modules = {dict(sorted((path, rel[:-3].replace("/", ".").removesuffix(".__init__")) for rel, path in FILES.items()))!r}\n')
 
 
