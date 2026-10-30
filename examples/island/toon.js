@@ -1,4 +1,4 @@
-import { NEST, IMPACT, STRIKE, WAVE } from './story.js';
+import { BEAT, NEST, IMPACT, STRIKE, WAVE, IMPACTS, SHADOW_SAMPLES } from './story.js';
 
 // Toon shading: faceted surfaces lit in hard bands by the sun, the moon and a fire light (the meteor, the burning
 // forest) over a sky and ground ambient, with a rim of sky light, fading into the air's haze with distance. The terrain,
@@ -135,29 +135,46 @@ void main() {
 
 const reachGlsl = `1.0${WAVE.lobes.map(([k, amount, phase]) => ` + ${amount.toFixed(3)} * cos(${k.toFixed(1)} * (side - ${WAVE.downrange.toFixed(4)}) + ${phase.toFixed(2)})`).join('')}`;
 // The sea: deep blue, turquoise over the reef, rings of foam running in to the shore. After the strike, the great wave
-// races out from it in a train of lumpy crests, highest downrange, with rough water behind, and the sea where it struck
-// boils white.
+// races out from each impact in a train of lumpy crests, highest downrange, with rough water behind, and the sea where
+// it struck boils white.
 const sea = `${lighting}
 uniform float day, blast;
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
+float landAt(vec2 q) { return 1.0 - smoothstep(0.8, 0.95, length(q) / shore(atan(q.y, q.x))); }
+float islandShadow(vec2 from, vec2 p) {
+  float hidden = 0.0;
+  for (int k = 1; k <= ${SHADOW_SAMPLES}; k++) hidden = max(hidden, landAt(mix(from, p, float(k) / ${(SHADOW_SAMPLES + 1).toFixed(1)})));
+  return hidden;
+}
+// An impact's mark on the sea, \`age\` seconds after it: its whitewater (x) and the dark churned water behind its wave (y).
+// The island hides the sea behind it from the wave, which breaks white where it meets the shore.
+vec2 impactSea(vec2 at, float age, float size) {
+  if (age < 0.0) return vec2(0.0);
+  float struck = length(vWorld.xz - at), side = atan(vWorld.z - at.y, vWorld.x - at.x), reach = ${reachGlsl};
+  float travelled = 16.0 * size * pow(age, 0.75) * reach, behind = 1.0 + travelled - struck, fade = exp(-age / 14.0), front = 0.0;
+  ${WAVE.train.map(([lag, height]) => `front = max(front, (1.0 - smoothstep(0.0, ${(0.3 + 0.5 * height).toFixed(2)} * max(size, 0.5), abs(1.0 + travelled * ${lag.toFixed(2)} - struck))) * ${height.toFixed(2)});`).join('\n  ')}
+  float swell = behind * 0.4 / max(size, 0.4) - age * 0.5;
+  float rough = step(0.0, behind) * step(0.82, fract(swell)) * step(0.45, hash(vec2(floor(swell), floor(side * 14.0)))) * exp(-behind / (12.0 * size));
+  float churn = step(0.0, behind) * fade, wet = max(front * min(1.0, reach), rough * 0.6) * fade;
+  if (churn > 0.0) {
+    float hidden = islandShadow(at, vWorld.xz);
+    wet = wet * (1.0 - hidden) + front * fade * hidden * (1.0 - hidden) * 3.0;
+    churn *= 1.0 - hidden;
+  }
+  float boil = (1.0 - smoothstep(3.0 * size, 7.0 * size, struck)) * exp(-age / 25.0)
+    * step(0.5, hash(vec2(floor(struck * 1.3 + 0.7 * sin(side * 5.0 + age)), floor(side * 9.0 + struck * 0.6) + floor(age * 4.0) * 17.0)));
+  return vec2(max(wet, boil), 0.5 * churn);
+}
 void main() {
   float s = length(vWorld.xz) / shore(atan(vWorld.z, vWorld.x));
   vec3 color = mix(vec3(0.06, 0.45, 0.85), vec3(0.2, 0.9, 0.85), 1.0 - smoothstep(1.0, 1.4, s));
   float waves = step(fract((s - 1.0) * 6.0 + day * 2.5), 0.1) * (1.0 - smoothstep(1.05, 1.5, s));
   float foam = max(waves, 1.0 - smoothstep(1.0, 1.04, s));
   color = mix(color, vec3(0.95, 1.0, 1.0), foam);
-  float struck = length(vWorld.xz - vec2(${STRIKE.x.toFixed(4)}, ${STRIKE.z.toFixed(4)}));
-  if (blast >= 0.0) {
-    float side = atan(vWorld.z - ${STRIKE.z.toFixed(4)}, vWorld.x - ${STRIKE.x.toFixed(4)}), reach = ${reachGlsl};
-    float travelled = 16.0 * pow(blast, 0.75) * reach, behind = 1.0 + travelled - struck, fade = exp(-blast / 14.0), front = 0.0;
-    ${WAVE.train.map(([lag, height]) => `front = max(front, (1.0 - smoothstep(0.0, ${(0.3 + 0.5 * height).toFixed(2)}, abs(1.0 + travelled * ${lag.toFixed(2)} - struck))) * ${height.toFixed(2)});`).join('\n    ')}
-    front *= fade * min(1.0, reach);
-    float swell = behind * 0.4 - blast * 0.5;
-    float rough = step(0.0, behind) * step(0.82, fract(swell)) * step(0.45, hash(vec2(floor(swell), floor(side * 14.0)))) * exp(-behind / 12.0) * fade;
-    float boil = (1.0 - smoothstep(3.0, 7.0, struck)) * exp(-blast / 25.0);
-    color = mix(color, vec3(0.04, 0.22, 0.42), 0.5 * step(0.0, behind) * fade);
-    color = mix(color, vec3(0.92, 0.97, 1.0), max(front, max(rough * 0.6, boil * step(0.5, hash(vec2(floor(struck * 1.3 + 0.7 * sin(side * 5.0 + blast)), floor(side * 9.0 + struck * 0.6) + floor(blast * 4.0) * 17.0))))));
-  }
+  vec2 mark = vec2(0.0);
+  ${IMPACTS.map(({ x, z, time, size }) => `mark = max(mark, impactSea(vec2(${x.toFixed(3)}, ${z.toFixed(3)}), blast - ${(time - BEAT.impact).toFixed(3)}, ${size.toFixed(2)}));`).join('\n  ')}
+  color = mix(color, vec3(0.04, 0.22, 0.42), mark.y);
+  color = mix(color, vec3(0.92, 0.97, 1.0), mark.x);
   vec3 v = normalize(cameraPosition - vWorld);
   float glint = 0.6 * smoothstep(0.99965, 0.99985, dot(reflect(-v, vec3(0.0, 1.0, 0.0)), sunDir));
   // The fire's light on the water, a broken path of glints toward it.

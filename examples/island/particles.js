@@ -19,7 +19,7 @@ export const direction = (r, up = 0) => {
 
 // spec: { name, color, glow (Color3), underglow (Color3), seed, start, end, rate (per second), life: [min, max],
 //   origin(r, birth), velocity(r, birth), gravity (up is +), drag, wind (Vector3), turbulence, ground (stay above it),
-//   size(age 0..1, r), strength(birth) }; r(k) is the particle's k-th random number.
+//   size(age 0..1, r, birth), strength(birth) }; r(k) is the particle's k-th random number.
 export function createParticles(scene, toon, spec) {
   const { rate, life: [shortest, longest], start, end, seed = 1, drag = 0, gravity = 0, turbulence = 0 } = spec;
   const wind = spec.wind ?? Vector3.Zero(), strength = spec.strength ?? (() => 1), capacity = Math.ceil(rate * Math.min(longest, end - start)) + 2;
@@ -40,7 +40,7 @@ export function createParticles(scene, toon, spec) {
     for (let i = first; i <= last; i++) {
       const birth = start + i / rate, r = (k) => rnd(seed, i, k), life = shortest + (longest - shortest) * r(0), age = time - birth;
       if (age < 0 || age >= life) continue;
-      const size = spec.size(age / life, r) * strength(birth);
+      const size = spec.size(age / life, r, birth) * strength(birth);
       if (size > 0) out[i % capacity] = [at(r, birth, age), size];
     }
     return out;

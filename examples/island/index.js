@@ -1,5 +1,5 @@
 import { animate, animation, renderSettings } from '@workbench/sdk';
-import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, tremor, omen, fireFront, burning, healing, sinceStrike, blastRadius } from './story.js';
+import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, shake, omen, fireFront, burning, healing, sinceStrike, blastRadius } from './story.js';
 import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
 import { createForest } from './forest.js';
@@ -55,21 +55,23 @@ export const createScene = function () {
     toon.light(light, day, time, meteorAt(frame), air(light, fire, time, camera.globalPosition));
     island.isVisible = time < BEAT.impact;
     struck.isVisible = !island.isVisible;
-    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, healed: healing(time), blast: time >= BEAT.impact ? sinceStrike(time) : -1, blastReach: blastRadius(time) });
+    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, healed: healing(time), blast: sinceStrike(time), blastReach: blastRadius(time) });
     for (const move of moving) move(day, time);
   });
 
   // The camera's shots (story.js) as keys: linear along each shot, held on its last frame, so each shot cuts to the
-  // next. While the ground shakes, the camera does.
+  // next. The impacts shake it.
   const shot = animate(camera, { id: 'camera', title: 'Camera', properties: { position: { label: 'Location' }, lockedTarget: { label: 'Look At' } } });
   if (!animation.action.tracks.length) {
     const PATHS = ['position.x', 'position.y', 'position.z', 'lockedTarget.x', 'lockedTarget.y', 'lockedTarget.z'];
     const tracks = PATHS.map((path) => ({ id: 'camera', path, keys: [] }));
     for (let frame = 1; frame <= FRAMES;) {
-      const time = seconds(frame), { position, target, end } = shotAt(time), last = Math.min(FRAMES, frameAt(end) - 1), shake = tremor(time);
-      const jolt = (k) => shake * 0.12 * Math.sin(time * 37 + k * 2.1) * Math.sin(time * 11 + k);
-      [...position.map((v, k) => v + jolt(k)), ...target].forEach((value, k) => tracks[k].keys.push({ frame, value, interpolation: frame >= last ? 'CONSTANT' : 'LINEAR' }));
-      frame = frame >= last ? frame + 1 : Math.min(last, frame + (shake > 0.02 ? 2 : 6));
+      const time = seconds(frame), { position, target, end } = shotAt(time), last = Math.min(FRAMES, frameAt(end) - 1);
+      // The shake turns the camera, so a far shot shakes as hard as a near one.
+      const shaking = shake(time, position[0], position[2]), reach = Math.hypot(...position.map((v, k) => v - target[k]));
+      const jolt = (k, scale) => shaking * scale * reach * Math.sin(time * 37 + k * 2.1) * Math.sin(time * 11 + k);
+      [...position.map((v, k) => v + jolt(k, 0.006)), ...target.map((v, k) => v + jolt(k + 3, 0.035))].forEach((value, k) => tracks[k].keys.push({ frame, value, interpolation: frame >= last ? 'CONSTANT' : 'LINEAR' }));
+      frame = frame >= last ? frame + 1 : Math.min(last, frame + (shaking > 0.02 ? 1 : 6));
     }
     const markers = Object.entries(BEAT).map(([name, second]) => ({ name: name[0].toUpperCase() + name.slice(1), frame: frameAt(second) }));
     animation.load({ version: 3, action: { name: 'Island', tracks }, time: { frameStart: 1, frameEnd: FRAMES, fps: FPS, frameCurrent: 1 }, markers });

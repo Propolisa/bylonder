@@ -1,7 +1,7 @@
 // The story's clock and beats. Film time is in seconds; island time in days, a time-lapse whose speed follows the
 // story: it races between the story's moments and slows toward real time as each comes; it stops almost dead as an
 // asteroid falls beside the island, and races once more as the island heals. Everything that happens is a function of these.
-import { heightAt } from './island.js';
+import { heightAt, shore } from './island.js';
 
 export const FPS = 24, LENGTH = 180, FRAMES = LENGTH * FPS;
 export const seconds = (frame) => Math.max(0, frame - 1) / FPS;
@@ -75,12 +75,42 @@ export const WAVE = { downrange: STRIKE.heading, lobes: [[1, 0.38, 0], [2, 0.12,
   // The wave train behind the leading crest: [how far it has run, as part of the first's run; its height].
   train: [[1, 1], [0.8, 0.55], [0.63, 0.3]] };
 export const waveReach = (side) => 1 + WAVE.lobes.reduce((sum, [k, amount, phase]) => sum + amount * Math.cos(k * (side - WAVE.downrange) + phase), 0);
+// The asteroid breaks up as it hits the thick air. Its pieces fall far out to sea on the island's far side, before and
+// after the main chunk, the largest nearly its size: [part of the fall when it breaks off, second it lands, how far
+// downrange and across of the strike, size].
+export const FRAGMENTS = [[0.26, 132.5, -34, 46, 0.85], [0.3, 132.1, -38, 22, 0.4], [0.33, 133.4, 52, 40, 0.9], [0.34, 132.8, -18, 40, 0.5],
+  [0.36, 133.3, 22, 30, 0.55], [0.42, 133.7, -4, 58, 0.4], [0.45, 134.7, 20, 74, 0.8], [0.5, 134.6, 42, 18, 0.6], [0.55, 135.3, 64, 30, 0.45],
+  [0.6, 135.8, 10, 92, 0.35]].map(([part, land, along, across, size]) => {
+  const h = STRIKE.heading;
+  return { part, land, size, x: STRIKE.x + along * Math.cos(h) - across * Math.sin(h), z: STRIKE.z + along * Math.sin(h) + across * Math.cos(h) };
+});
+// Every impact: the main chunk's and the fragments'.
+export const IMPACTS = [{ x: STRIKE.x, z: STRIKE.z, time: BEAT.impact, size: 1 }, ...FRAGMENTS.map(({ x, z, land, size }) => ({ x, z, time: land, size }))];
+// How far the island hides a point of sea from an impact, 0 in open water to 1 behind the land: its waves break on it.
+export const SHADOW_SAMPLES = 8;
+export const landAt = (x, z) => 1 - smoothstep(0.8, 0.95, Math.hypot(x, z) / shore(Math.atan2(z, x)));
+export function islandShadow(from, x, z) {
+  let shadow = 0;
+  for (let k = 1; k <= SHADOW_SAMPLES; k++) { const t = k / (SHADOW_SAMPLES + 1); shadow = Math.max(shadow, landAt(lerp(from.x, x, t), lerp(from.z, z, t))); }
+  return shadow;
+}
 export const omen = (time) => (0.1 + 0.12 * smoothstep(0, BEAT.omen, time) + 0.55 * smoothstep(BEAT.omen, BEAT.leave, time) + 0.23 * smoothstep(BEAT.leave, BEAT.streak, time)) * (1 - smoothstep(BEAT.streak, BEAT.streak + 0.6, time));
 export const falling = (time) => (time < BEAT.streak || time > BEAT.impact ? 0 : (time - BEAT.streak) / (BEAT.impact - BEAT.streak));
 // Seconds since the strike, and how far its blast has spread across the land then (it races out and slows).
 export const sinceStrike = (time) => time - BEAT.impact;
 export const blastRadius = (time) => (time < BEAT.impact ? 0 : 6.2 * (1 - Math.exp(-sinceStrike(time) * 2.2)));
 export const fromStrike = (x, z) => Math.hypot(x - STRIKE.x, z - STRIKE.z);
+// The camera shaking where it stands: the asteroid's roar as it comes, then each impact's blow, reaching it later and
+// weaker the farther away it is.
+const SHOCK_SPEED = 30;
+export function shake(time, x, z) {
+  let sum = 0.12 * smoothstep(BEAT.streak + 2, BEAT.impact, time) * (time < BEAT.impact ? 1 : 0);
+  for (const impact of IMPACTS) {
+    const d = Math.hypot(x - impact.x, z - impact.z), u = time - impact.time - d / SHOCK_SPEED;
+    if (u > 0) sum += (impact.size ** 2 * 1.6 / (1 + d / 15)) * Math.min(1, u * 10) * Math.exp(-u * 1.2);
+  }
+  return sum;
+}
 // The ground shaking: the asteroid's roar as it comes, the blow when it strikes, the wave reaching the shore.
 export const tremor = (time) => 0.25 * smoothstep(BEAT.streak + 2, BEAT.impact, time) * (time < BEAT.impact ? 1 : 0)
   + (time >= BEAT.impact + 0.4 ? 1.2 * Math.exp(-(time - BEAT.impact - 0.4) * 1.1) : 0);
