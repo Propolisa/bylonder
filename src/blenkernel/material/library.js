@@ -38,7 +38,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   const stripped = material => { const json = material.serialize(); for (const slot of textureSlots) delete json[slot]; return json; };
   const tag = (material, extra = {}) => { material.metadata = { ...material.metadata, wbId: crypto.randomUUID(), wbCreated: true, ...extra }; return material; };
 
-  const setSlots = (mesh, list) => {
+  const drawSlots = (mesh, list) => {
     const old = mesh.material instanceof MultiMaterial ? mesh.material : null;
     mesh.metadata = { ...mesh.metadata, wbSlotCount: list.length };
     if (list.length <= 1) { mesh.material = list[0] || null; old?.dispose(false, false); return; }
@@ -46,6 +46,8 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
     multi.subMaterials = list;
     mesh.material = multi;
   };
+  // An object Main holds has Main's slots (main-sync.js), drawn back; another has Babylon's.
+  const setSlots = (mesh, list) => world.mainSync?.setSlots(mesh, list) || drawSlots(mesh, list);
   const active = mesh => Math.min(mesh.metadata?.wbActiveSlot || 0, Math.max(0, slots(mesh).length - 1));
   const register = material => {
     const id = materialId(material), type = materialType(material);
@@ -97,7 +99,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   };
 
   const api = {
-    all, byId, slots, users, active, type: materialType, types: materialTypes,
+    all, byId, slots, users, active, drawSlots, type: materialType, types: materialTypes,
     images: () => files.filter(f => imageFile.test(f)),
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     sync,
@@ -204,7 +206,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
       }
       for (const mesh of meshes()) {
         const ids = state.slots?.[nodeId(mesh)] ?? baseline.slots[nodeId(mesh)];
-        if (ids) setSlots(mesh, ids.map(id => (id ? byId(id) : null)));
+        if (ids) drawSlots(mesh, ids.map(id => (id ? byId(id) : null)));
       }
       sync();
     },

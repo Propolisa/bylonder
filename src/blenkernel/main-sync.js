@@ -139,7 +139,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const slotsOf = (node) => world.materials?.slots(node) ?? (node.material instanceof MultiMaterial ? node.material.subMaterials : node.material ? [node.material] : []);
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   function setSlots(node, list) {
-    if (world.materials) list.forEach((material, index) => world.materials.assign(node, index, material));
+    if (world.materials) world.materials.drawSlots(node, list);
     else if (list.length > 1) {
       const multi = new MultiMaterial('__slots ' + nodeId(node), node.getScene());
       multi.subMaterials = list;
@@ -763,6 +763,17 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!objects.has(node)) return false;
       flush(false);
       rename(objects.get(node), name);
+      return true;
+    },
+    // A mesh object's material slots as Main holds them (Blender's, each a Material or empty), then drawn; false for an
+    // object Main does not hold.
+    setSlots(node, list) {
+      const entry = objects.get(node);
+      if (entry?.type !== 'MESH') return false;
+      flush();
+      blender.setMaterials(entry.ob, list.map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)));
+      evaluate();
+      RELATIONS.material_slots.apply(node, blender.materials(entry.ob));
       return true;
     },
     // Values of an object Main holds (RNA names), written there; false for one it does not hold.
