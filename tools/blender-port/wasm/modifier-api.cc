@@ -61,6 +61,7 @@ using namespace blender;
 void fonts_init();
 void operators_register();
 void ui_init();
+void movie_init();
 
 /* What Blender's main initializes (creator.cc), in its order, without the window system and Python. */
 static void blender_init()
@@ -79,6 +80,7 @@ static void blender_init()
   BKE_callback_global_init();
   IMB_init();
   RNA_init();
+  movie_init();
   RE_texture_rng_init();
   RE_engines_init();
   bke::node_system_init();

@@ -8,8 +8,6 @@ export const renderDefaults = {
     engine: 'BABYLON', useMotionBlur: false, motionBlurShutter: 0.5,
     // Output properties (Blender: Properties > Output, scene.render.*)
     resolutionX: 1920, resolutionY: 1080, resolutionPercentage: 100,
-    imageSettings: { fileFormat: 'PNG', quality: 90 },
-    ffmpeg: { format: 'MPEG4', codec: 'H264', constantRateFactor: 'MEDIUM', gopsize: 18 },
     // Post Processing > Sequencer: with strips in the edit, renders output the edit instead of the camera.
     useSequencer: true,
   },

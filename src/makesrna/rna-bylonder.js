@@ -18,7 +18,6 @@ import { modifierStack } from '../modifiers/stack.js';
 import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
-import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
@@ -428,13 +427,11 @@ const STRUCTS = {
     ...Object.fromEntries([['resolution_x', 'resolutionX'], ['resolution_y', 'resolutionY'], ['resolution_percentage', 'resolutionPercentage'],
       ['use_motion_blur', 'useMotionBlur'], ['motion_blur_shutter', 'motionBlurShutter'], ['use_sequencer', 'useSequencer']].map(([name, key]) => [name, {
       get: (world) => world.renderSettings?.state.render[key], set: (world, value) => world.renderSettings.set('render.' + key, value, false), sync: name !== 'use_sequencer' }])),
-    image_settings: (world, r) => r.pointer('ImageFormatSettings', world),
     // Bylonder renders with Babylon, set up as Blender's EEVEE (render-babylon.js): the engines are Blender's, their
     // choice decides which of Blender's render panels show.
     engine: { ...sliceValue('renderSettings', 'render.blenderEngine'), get: (world) => world.renderSettings?.state.render.blenderEngine ?? 'BLENDER_EEVEE', sync: true,
       items: () => [['BLENDER_EEVEE', 'EEVEE', '', 'NONE'], ['BLENDER_WORKBENCH', 'Workbench', '', 'NONE'], ['CYCLES', 'Cycles', '', 'NONE']] },
     has_multiple_engines: () => true,
-    ffmpeg: (world, r) => r.pointer('FFmpegSettings', world),
   },
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],
     ['length_unit', 'length']].map(([name, key]) => [name, {
@@ -576,16 +573,6 @@ const STRUCTS = {
   },
   ColorManagedDisplaySettings: {
     display_device: { get: () => 'sRGB', items: () => [['sRGB', 'sRGB', '', 'NONE']], sync: true },
-  },
-  ImageFormatSettings: {
-    file_format: { ...sliceValue('renderSettings', 'render.imageSettings.fileFormat'), items: choices(fileFormats) },
-    quality: sliceValue('renderSettings', 'render.imageSettings.quality'),
-  },
-  FFmpegSettings: {
-    format: { ...sliceValue('renderSettings', 'render.ffmpeg.format'), items: choices(containers) },
-    codec: { ...sliceValue('renderSettings', 'render.ffmpeg.codec'), items: (world) => choices(videoCodecs)().filter(([id]) => containers[world.renderSettings.state.render.ffmpeg.format]?.codecs.includes(id)) },
-    constant_rate_factor: { ...sliceValue('renderSettings', 'render.ffmpeg.constantRateFactor'), items: choices(qualities) },
-    gopsize: sliceValue('renderSettings', 'render.ffmpeg.gopsize'),
   },
   // The Properties editor (space_buttons/editor.js): its tab, pinned data and search.
   SpaceProperties: {

@@ -12,13 +12,13 @@ const settings = createRenderSettings({ scene, animation: createAnimationModel()
 assert.equal(settings.capture(), undefined, 'defaults save nothing');
 assert.deepEqual(outputSize(settings.state.render), { width: 1920, height: 1080 });
 settings.set('render.resolutionPercentage', 50);
-settings.set('render.imageSettings.fileFormat', 'FFMPEG');
-assert.deepEqual(outputSize(settings.state.render), { width: 960, height: 540 });
+settings.set('render.resolutionX', 1280);
+assert.deepEqual(outputSize(settings.state.render), { width: 640, height: 540 });
 const saved = settings.capture();
 assert.equal(saved.render.resolutionPercentage, 50);
-assert.equal(saved.render.imageSettings.fileFormat, 'FFMPEG');
+assert.equal(saved.render.resolutionX, 1280);
 settings.apply(undefined);
-assert.equal(settings.state.render.imageSettings.fileFormat, 'PNG', 'apply(undefined) restores defaults');
+assert.equal(settings.state.render.resolutionX, 1920, 'apply(undefined) restores defaults');
 settings.apply(saved);
 assert.equal(settings.state.render.resolutionPercentage, 50);
 
@@ -31,10 +31,13 @@ authored.set('eevee.taaRenderSamples', 8);
 assert.deepEqual(authored.capture(), { eevee: { taaRenderSamples: 8 } });
 authored.dispose();
 
-// Formats: Blender names map to browser outputs; impossible pairs are rejected.
-assert.deepEqual(outputSpec(settings.state.render), { kind: 'video', container: 'MPEG4', mime: 'video/mp4', ext: 'mp4', codec: 'avc', quality: 'QUALITY_HIGH', gopsize: 18 });
-assert.throws(() => outputSpec({ ...settings.state.render, ffmpeg: { ...settings.state.render.ffmpeg, format: 'WEBM', codec: 'H264' } }), /WebM cannot hold H.264/);
-assert.equal(outputSpec({ ...settings.state.render, imageSettings: { fileFormat: 'JPEG', quality: 80 } }).quality, 0.8);
+// Formats: Blender's output settings map to browser outputs; impossible pairs are rejected.
+const video = { image_settings: { file_format: 'FFMPEG' }, ffmpeg: { format: 'MKV', codec: 'H264', constant_rate_factor: 'MEDIUM', ffmpeg_preset: 'GOOD', video_bitrate: 6000, gopsize: 18 } };
+assert.deepEqual(outputSpec(video), { kind: 'video', container: 'MKV', mime: 'video/x-matroska', ext: 'mkv', codec: 'avc', bitrate: 'QUALITY_HIGH', latencyMode: 'quality', gopsize: 18 });
+assert.equal(outputSpec({ ...video, ffmpeg: { ...video.ffmpeg, constant_rate_factor: 'NONE' } }).bitrate, 6000000, 'Constant Bitrate in kbit/s');
+assert.throws(() => outputSpec({ ...video, ffmpeg: { ...video.ffmpeg, format: 'WEBM' } }), /WebM cannot hold H.264/);
+assert.equal(outputSpec({ image_settings: { file_format: 'JPEG', quality: 80 } }).quality, 0.8);
+assert.throws(() => outputSpec({ image_settings: { file_format: 'OPEN_EXR' } }), /cannot write OPEN_EXR/);
 for (const c of Object.values(containers)) assert.ok(c.codecs.length > 0);
 assert.deepEqual(encodeSize({ width: 961, height: 541 }, true), { width: 962, height: 542 }, 'video sizes are even');
 assert.deepEqual(encodeSize({ width: 961, height: 541 }, false), { width: 961, height: 541 });

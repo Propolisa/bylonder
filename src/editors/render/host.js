@@ -2,6 +2,7 @@ import { openRenderContext } from '../../render/render-context.js';
 import { createWriter } from '../../render/output.js';
 import { outputSpec, encodeSize, fileFormats } from '../../render/formats.js';
 import { outputSize } from '../../blenkernel/scene/render.js';
+import { pointerStruct, structFind } from '../../python/bpy_rna.js';
 import './result.css';
 
 const cancelled = () => new DOMException('Render cancelled', 'AbortError');
@@ -42,7 +43,8 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     if (job) return;
     const settings = world.renderSettings.state, time = world.animation.time.state;
     let spec;
-    try { spec = outputSpec(settings.render); } catch (error) { last = null; sync(); show(); setStatus('Render failed: ' + error.message); return; }
+    const scene = world.mainSync.blender.scene;
+    try { spec = outputSpec(pointerStruct(structFind('Scene'), scene, scene).render); } catch (error) { last = null; sync(); show(); setStatus('Render failed: ' + error.message); return; }
     // A still is shown first and saved on request; video formats save stills as PNG, as Blender's Save As does.
     if (kind === 'image' && spec.kind === 'video') spec = { kind: 'image', ...fileFormats.PNG, quality: 1 };
     const size = encodeSize(outputSize(settings.render), spec.kind === 'video');

@@ -21,11 +21,11 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1,
   }
   const mb = await import('mediabunny');
   const format = { MPEG4: () => new mb.Mp4OutputFormat({ fastStart: 'in-memory' }), QUICKTIME: () => new mb.MovOutputFormat({ fastStart: 'in-memory' }), MKV: () => new mb.MkvOutputFormat(), WEBM: () => new mb.WebMOutputFormat() }[spec.container]();
-  const bitrate = mb[spec.quality];
+  const bitrate = typeof spec.bitrate === 'number' ? spec.bitrate : mb[spec.bitrate];
   if (!(await mb.canEncodeVideo(spec.codec, { width, height, bitrate }))) throw Error(`This browser cannot encode ${spec.codec.toUpperCase()} at ${width} x ${height}. Pick another codec in Properties > Output > Encoding.`);
   const target = new mb.BufferTarget();
   const output = new mb.Output({ format, target });
-  const source = new mb.VideoSampleSource({ codec: spec.codec, bitrate, keyFrameInterval: Math.max(1, spec.gopsize) / fps, sizeChangeBehavior: 'deny' });
+  const source = new mb.VideoSampleSource({ codec: spec.codec, bitrate, latencyMode: spec.latencyMode, keyFrameInterval: Math.max(1, spec.gopsize) / fps, sizeChangeBehavior: 'deny' });
   output.addVideoTrack(source, { frameRate: fps });
   const sound = audio && await audioTrack(mb, output, spec, audio);
   await output.start();

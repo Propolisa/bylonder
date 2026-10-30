@@ -306,8 +306,8 @@ WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE']
 
 
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
-# fonts); everywhere else Blender's definition wins over the API's stand-in.
-SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager'}
+# fonts, video); everywhere else Blender's definition wins over the API's stand-in.
+SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie'}
 # The API's seam implementations in other libraries (each a port-override in tools/blender-port/wasm), which win too:
 # what Bylonder's own editor does in Blender's place.
 SEAM_FUNCTIONS = set()

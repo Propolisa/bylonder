@@ -102,3 +102,4 @@ LEFT_OUT_MODIFIER(WeightVGProximity);
 
 /* Text objects and their fonts are not in this module. */
 void fonts_init() {}
+void movie_init() {}
