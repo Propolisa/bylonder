@@ -18,7 +18,7 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 |---|---|---|---|
 | Object | a Babylon node in `world.objects` | `name`, `type` (MESH, EMPTY, CAMERA, LIGHT, FONT, CURVE, ARMATURE), `mode`, `data`, `location`, `rotation_mode`, `rotation_euler`, `rotation_quaternion`, `scale`, `parent`, `children`, `modifiers`, `material_slots`, `active_material`, `hide_select`, and the functions `hide_get`, `hide_set`, `visible_get`, `select_get`, `select_set` | vertex groups, constraints, delta transforms, display settings |
 | Mesh | the same node, which holds its mesh | `name`, `total_vert_sel`, `total_edge_sel`, `total_face_sel`, `count_selected_items()`, from the edit mesh in Edit Mode | element collections (Babylon's split vertices are not Blender's; later from the object's Mesh data) |
-| Modifier | a record of the stack (`metadata.wbModifiers`) | `name`, `type`, `show_viewport`, `show_render`, a Blender modifier's settings by RNA identifier, and `texture` (Displace's: a texture's id in the stack, Main's Tex in Main's modifier) | Bylonder's own types (Array as Geometry Nodes) are `NODES` |
+| Modifier | Blender's: Main's own (`modifiers/main-modifiers.js`); Bylonder's own: a record on the object (`metadata.wbModifiers`) | `name`, `type`, `show_viewport`, `show_render`, a Blender modifier's settings by RNA identifier, and `texture` (Displace's: its Tex) | Bylonder's own types (Array as Geometry Nodes) are `NODES` |
 | Texture | Main's Tex, seen through the textures slice (`blenkernel/texture/textures.js`), which reads and writes it by RNA identifier; Blender's undo and file hold it, and modifiers point at it | `name`, `use_fake_user`, `users`, `type` and its type's settings (CloudsTexture's `noise_scale`, ...) at their DNA fields (`dna-textures.json`) | images (Bylonder has no Image IDs) |
 | Scene | the world | `name`, `frame_current`, `frame_start`, `frame_end`, `frame_step`, `use_preview_range`, `frame_preview_start`, `frame_preview_end`, `sync_mode`, `camera`, `objects`, `use_gravity`, `gravity`, `render`, `unit_settings`, `tool_settings` | keying sets, rigid body world, audio |
 | ToolSettings | the world | `mesh_select_mode`, `use_keyframe_insert_auto` | snapping and proportional editing (Bylonder has no toggles; Ctrl snaps during a transform) |
@@ -119,8 +119,8 @@ what).
   before the world starts, so Bylonder's edits are kept over it as over any project. `tests/blend-read.test.js` opens
   a file Bylonder wrote and a user's file the reference Blender makes (`tools/blender-reference/user-file.py`) and
   checks them against Blender's reading.
-- **Bylonder's Array** (Geometry Nodes) is saved as Blender's Array modifier when its settings are the Array
-  modifier's: a line of copies by relative, constant or endpoint offset, without rotation, scale or randomness.
+- **Bylonder's own modifiers** (Array (Nodes), Babylon Node Geometry) are Babylon-native: a saved file has Blender's
+  modifiers only, which are Main's own.
 
 ### Building Blender as Blender builds itself
 
@@ -134,7 +134,7 @@ what).
 
 ### Known limits
 
-Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; Actions stay Main's, which the animation's own record mirrors. In a saved file, Bylonder's Geometry Nodes Array is missing unless it is a line of copies, a Node Material is a Principled BSDF
+Material textures (Image Texture nodes), an Area light's disk or ellipse shape (drawn as its rectangle), snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; Actions stay Main's, which the animation's own record mirrors. In a saved file, Bylonder's own modifiers are missing, a Node Material is a Principled BSDF
 with Blender's defaults (its graph is kept in `bylonder_node_material`), and a Standard material gives only its color,
 alpha and emission color.
 
@@ -242,7 +242,7 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   `animrig`, `windowmanager`, the interface and the Outliner, blenfont and FreeType, and OpenVDB (built without
   `WITH_OPENVDB`, so Remesh's Voxel mode reports that it is unavailable). Modifier types outside `MESH_ONLY`
   (`src/modifiers/blender.js`) are left out of its `modifiers/intern` as stand-ins (`wasm/modifier-standins.hh`, used
-  by both modules for the types they leave out, Geometry Nodes and Line Art in the scene module): Blender's None type
+  by the kernels module for the types it leaves out): Blender's None type
   under the type's name, a bare ModifierData that is always disabled, which `modifier_add` refuses. Blender's own code
   that makes a left-out type gets a block of the right size. They were empty `ModifierTypeInfo`s, which
   `BKE_modifier_get_info` does not know: `BKE_modifier_init` makes an Armature, Curve and Lattice modifier, read a null
