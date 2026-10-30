@@ -35,6 +35,7 @@
 #include "BKE_lib_id.hh"
 #include "BKE_library.hh"
 #include "BKE_main.hh"
+#include "BKE_modifier.hh"
 #include "BKE_mesh.h"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
@@ -51,6 +52,7 @@
 #include "BLI_map.hh"
 #include "BLI_set.hh"
 #include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_build.hh"
 #include "DEG_depsgraph_query.hh"
@@ -62,6 +64,7 @@
 #include "DNA_windowmanager_types.h"
 #include "DNA_userdef_types.h"
 #include "DNA_workspace_types.h"
+#include "ED_object.hh"
 #include "ED_screen.hh"
 #include "DNA_genfile.h"
 #include "DNA_sequence_types.h"
@@ -588,6 +591,56 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   }
   mesh_extraction(*mesh, ctx->extraction);
   return &ctx->extraction;
+}
+
+/* An object's modifier stack, edited as Blender's modifier operators edit it (object_modifier.cc): a modifier added
+ * last (type: ModifierType; with what some types need, such as a Skin's vertices), removed, moved to an index, renamed
+ * (unique in the stack), copied after itself, and applied to the object's data, the result Blender's evaluation of
+ * it alone. Each tags what it changes. */
+static bool modifier_reported(ReportList &reports, bool done)
+{
+  BKE_reports_free(&reports);
+  return done;
+}
+EXPORT(object_modifier_add) ModifierData *object_modifier_add(BlenderMain *ctx, Object *ob, int type)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  ModifierData *md = ed::object::modifier_add(&reports, ctx->bmain, ctx->scene, ob, nullptr, type);
+  BKE_reports_free(&reports);
+  return md;
+}
+EXPORT(object_modifier_remove) bool object_modifier_remove(BlenderMain *ctx, Object *ob, ModifierData *md)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  return modifier_reported(reports, ed::object::modifier_remove(&reports, ctx->bmain, ctx->scene, ob, md));
+}
+EXPORT(object_modifier_move) bool object_modifier_move(Object *ob, ModifierData *md, int index)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  return modifier_reported(reports, ed::object::modifier_move_to_index(&reports, RPT_WARNING, ob, md, index, true));
+}
+EXPORT(object_modifier_copy) bool object_modifier_copy(BlenderMain *ctx, Object *ob, ModifierData *md)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  return modifier_reported(reports, ed::object::modifier_copy(&reports, ctx->bmain, ctx->scene, ob, md));
+}
+EXPORT(object_modifier_rename) void object_modifier_rename(Object *ob, ModifierData *md, const char *name)
+{
+  STRNCPY_UTF8(md->name, name);
+  BKE_modifier_unique_name(&ob->modifiers, md);
+  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
+}
+EXPORT(object_modifier_apply) bool object_modifier_apply(BlenderMain *ctx, Object *ob, ModifierData *md)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  BKE_scene_graph_evaluated_ensure(depsgraph, ctx->bmain);
+  return modifier_reported(reports, ed::object::modifier_apply(ctx->bmain, &reports, depsgraph, ctx->scene, ob, md, ed::object::MODIFIER_APPLY_DATA, false, false));
 }
 
 /* Data that is not an object's: a Material or a World, whose users are those that use it. */

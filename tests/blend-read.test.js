@@ -18,7 +18,7 @@ import { createRenderSettings } from '../src/blenkernel/scene/render.js';
 import { createCollections } from '../src/blenkernel/scene/collections.js';
 import { createMaterialLibrary } from '../src/blenkernel/material/library.js';
 import { createWorlds } from '../src/blenkernel/scene/world.js';
-import { createModifierSystem, addModifier, modifierStack } from '../src/modifiers/stack.js';
+import { createModifierSystem, addModifier } from '../src/modifiers/stack.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
@@ -96,7 +96,7 @@ for (const name of ['Cube', 'Light', 'Camera']) {
 }
 const cube = opened.world.objects.find((n) => n.name === 'Cube');
 assert.equal(objectMesh(cube).faces_num, 6, 'the geometry is Babylon\'s');
-assert.deepEqual(modifierStack(cube).map((m) => [m.type, m.values.levels]), [['SUBSURF', 2]]);
+assert.deepEqual(opened.world.modifiers.stack(cube).map((m) => [m.type, m.values.levels]), [['SUBSURF', 2]]);
 assert(close(cube.material.albedoColor.asArray(), [0.8, 0.1, 0.1]) && Math.abs(cube.material.metallic - 0.3) < 1e-5, 'the material opens with its values');
 assert.equal(opened.scene.activeCamera?.name, 'Camera');
 opened.sync.flush();
@@ -130,7 +130,7 @@ else {
       const matrix = (n) => n.computeWorldMatrix(true).getRotationMatrix().asArray();
       assert(node.computeWorldMatrix(true) && matrix(node).every(Number.isFinite));
       if (ob.data?.type === 'Mesh') assert.equal(objectMesh(node).faces_num, ob.data.faces, `${name}'s faces`);
-      if (ob.type === 'MESH') assert.deepEqual(modifierStack(node).map((m) => m.type), ob.modifiers.map((m) => m.type), `${name}'s modifiers`);
+      if (ob.type === 'MESH') assert.deepEqual(user.world.modifiers.stack(node).map((m) => m.type), ob.modifiers.map((m) => m.type), `${name}'s modifiers`);
       if (ob.type === 'FONT') assert.equal(node.metadata.wbCreation.curve.text?.body, ob.data.body, `${name}'s text`);
       if (ob.type === 'LIGHT') assert(Math.abs(r.data.energy - ob.data.energy) < 1e-3, `${name}'s energy ${r.data.energy}`);
     }

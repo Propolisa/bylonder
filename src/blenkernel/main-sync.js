@@ -18,8 +18,7 @@ import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
-import { modifierStack } from '../modifiers/stack.js';
-import { moduleModifiers, asBlenderModifier } from '../modifiers/blender.js';
+import { mainDefinition, readModifier, writeModifier } from '../modifiers/main-modifiers.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
@@ -252,7 +251,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     push(entry, node);
     if (entry.data.ptr && entry.data.struct) push(entry.data, node);
     pushGeometry(entry);
-    pushModifiers(entry);
+    enterModifiers(entry);
     pushCurve(entry);
     pushArmature(entry);
   }
@@ -290,27 +289,42 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const name of CURVE_TARGETS) object.target(name, objectNamed(data.targets?.[name]));
     object.modifiers = (data.modifiers ?? []).map((m) => ({ ...m, targets: Object.fromEntries(Object.entries(m.targets ?? {}).map(([k, name]) => [k, objectNamed(name)])) }));
   }
-  // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings, which Main's
-  // depsgraph evaluates on Mesh data of Main's: a mesh Babylon built gets its geometry as its Mesh data then.
-  // A modifier deforming by another object (an Armature's) points at its Object in Main.
-  const modifierTarget = ({ values }) => [...objects.values()].find(({ node }) => nodeId(node) === values.object)?.ob ?? 0;
-  const blenderStack = (entry) => modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
-  const modifiersSignature = (stack) => JSON.stringify(stack.map((m) => [m.type, m.values, m.showViewport, m.showRender, textures.get(m.values.texture)?.tex, modifierTarget(m)]));
-  // Whether the page changed an object's stack since it last wrote it to Main (its next flush writes it); one never
-  // written has none.
-  const modifiersPending = (entry) => modifiersSignature(blenderStack(entry)) !== (entry.modifiers ?? '[]');
-  function pushModifiers(entry) {
-    if (entry.type !== 'MESH') return;
-    const stack = blenderStack(entry), signature = modifiersSignature(stack), target = modifierTarget;
-    if (signature === entry.modifiers) return;
-    entry.modifiers = signature;
-    if (stack.length && !entry.owned) {
-      const { node } = entry;
-      node.metadata.wbCreation = { mesh: mesh_serialize(objectMesh(node, node.metadata.wbModifierBase && VertexData.Parse(node.metadata.wbModifierBase))) };
-      pushGeometry(entry);
-    }
-    // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
-    blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0, target));
+  // A mesh object's Blender modifiers are Main's (main-modifiers.js), which its depsgraph evaluates on Mesh data of
+  // Main's: a mesh Babylon built gets its geometry as its Mesh data then. A textured modifier points at Main's Tex of
+  // its texture record (textures.js), a modifier deforming by another object (an Armature's) at its Object in Main.
+  const modifierLinks = {
+    textureId: (tex) => mainView.textureId(tex),
+    texture: (id) => textures.get(id)?.tex ?? 0,
+    nodeId: (ob) => { const node = nodeOf(ob); return node ? nodeId(node) : null; },
+    object: (id) => [...objects.values()].find(({ node }) => nodeId(node) === id)?.ob ?? 0,
+  };
+  function ownMesh(entry) {
+    if (entry.owned) return;
+    const { node } = entry;
+    node.metadata.wbCreation = { mesh: mesh_serialize(objectMesh(node, node.metadata.wbModifierBase && VertexData.Parse(node.metadata.wbModifierBase))) };
+    pushGeometry(entry);
+  }
+  // The Blender modifiers project code gave an object before it was in Main (addModifier) go into Main once.
+  function enterModifiers(entry) {
+    const { node } = entry, given = node.metadata?.wbModifiers?.filter((m) => mainDefinition(m.type));
+    if (entry.type !== 'MESH' || !given?.length) return;
+    node.metadata.wbModifiers = node.metadata.wbModifiers.filter((m) => !mainDefinition(m.type));
+    ownMesh(entry);
+    for (const { type, values, showViewport, showRender } of given) writeModifier(blender.addModifier(entry.ob, mainDefinition(type).mesh.type), type, { values, showViewport, showRender }, modifierLinks);
+    blender.relationsChanged();
+  }
+  // An edit of an object's Blender modifiers by Blender's own functions, then evaluated and drawn: fn(ob, md(name)).
+  function editModifiers(node, fn) {
+    flush(false);
+    const entry = objects.get(node);
+    if (!entry) return undefined;
+    ownMesh(entry);
+    const result = fn(entry.ob, (name) => blender.modifiers(entry.ob).find((m) => m.name === name)?.md ?? 0);
+    blender.tag(entry.ob, ID_RECALC_GEOMETRY);
+    // What a modifier points at (a texture, an object) is a relation of the depsgraph's.
+    blender.relationsChanged();
+    evaluate();
+    return result;
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
   function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
@@ -679,6 +693,30 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       sceneChanged = true;
       flush(false);
     },
+    // A mesh object's Blender modifiers as Main holds them, and their edits: one added (with settings and modes), a
+    // change of one's (values, modes, name), one removed, moved to an index, copied after itself or applied to the
+    // object's Mesh. Modifiers are named by their name, unique in the stack; each edit is evaluated and drawn.
+    modifiers(node) {
+      const entry = objects.get(node);
+      return entry ? blender.modifiers(entry.ob).map((m) => readModifier(m, modifierLinks)).filter(Boolean) : [];
+    },
+    addModifier: (node, type, change = {}) => editModifiers(node, (ob) => {
+      const md = blender.addModifier(ob, mainDefinition(type).mesh.type);
+      writeModifier(md, type, change, modifierLinks);
+      return blender.modifiers(ob).find((m) => m.md === md)?.name;
+    }),
+    setModifier: (node, name, { name: rename, ...change }) => editModifiers(node, (ob, md) => {
+      const modifier = md(name);
+      if (!modifier) return null;
+      writeModifier(modifier, api.modifiers(node).find((m) => m.name === name).type, change, modifierLinks);
+      if (rename) blender.renameModifier(ob, modifier, rename);
+      return blender.modifiers(ob).find((m) => m.md === modifier).name;
+    }),
+    removeModifier: (node, name) => editModifiers(node, (ob, md) => blender.removeModifier(ob, md(name))),
+    moveModifier: (node, name, index) => editModifiers(node, (ob, md) => blender.moveModifier(ob, md(name), index)),
+    copyModifier: (node, name) => editModifiers(node, (ob, md) => blender.copyModifier(ob, md(name))),
+    // Its result becomes the object's Mesh data, the page's record of it too.
+    applyModifier: (node, name) => editModifiers(node, (ob, md) => blender.applyModifier(ob, md(name)) && mainView.keepMesh(objects.get(node))),
     // A mesh object's Mesh with its modifiers as the depsgraph evaluated it, valid until the next evaluation.
     evaluatedMesh(node) {
       flush();
@@ -728,9 +766,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   };
   const state = {
     rna, world, selection, blender, ids, objects, materials, worlds, textures, animationData, applying: false,
-    sceneRecords, readCollections, relations, nodeOf, forget, modifiersPending, evaluate,
-    // The stack as Main holds it is the page's now (after a view took Blender's changes).
-    modifiersTaken: (entry) => { entry.modifiers = modifiersSignature(blenderStack(entry)); },
+    sceneRecords, readCollections, relations, nodeOf, forget, evaluate,
   };
   const mainView = createMainView(state);
   // Objects Main already holds (a project's .blend, a file the project's code opened) are the ones of their ids, with

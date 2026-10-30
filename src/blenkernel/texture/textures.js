@@ -23,7 +23,7 @@ export function createTextures(world, { commit = () => {} } = {}) {
     if (finish) commit();
     emit();
   };
-  const users = (entry) => world.objects.reduce((n, node) => n + (node.metadata?.wbModifiers ?? []).filter((m) => m.values.texture === entry.id).length, 0)
+  const users = (entry) => world.objects.reduce((n, node) => n + (world.modifiers?.stack(node) ?? []).filter((m) => m.values.texture === entry.id).length, 0)
     + (entry.fakeUser ? 1 : 0);
 
   return {

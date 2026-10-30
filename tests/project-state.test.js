@@ -11,7 +11,7 @@ import { createMainSync } from '../src/blenkernel/main-sync.js';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { createHistory } from '../src/editors/undo/storage.js';
 import { projectState, openProject } from '../src/runtime/project-state.js';
-import { addModifier, modifierStack } from '../src/modifiers/stack.js';
+import { addModifier } from '../src/modifiers/stack.js';
 
 // The project's code: a Blender primitive, a mesh Babylon builds and an empty.
 function build() {
@@ -67,7 +67,7 @@ assert.deepEqual(box.position.asArray(), [1, 2, 3]);
 assert.equal(Math.max(...box.getVerticesData('position').map(Math.abs)), 2, 'the cube has the scale applied to its Mesh');
 assert.equal(named('Knot').position.x, 5);
 assert.equal(named('Knot').getTotalVertices(), knotDrawn, 'the knot keeps its geometry, subdivided');
-assert.deepEqual(modifierStack(named('Knot')).map((m) => m.type), ['SUBSURF'], 'its modifier stack');
+assert.deepEqual(second.mainSync.modifiers(named('Knot')).map((m) => m.type), ['SUBSURF'], 'its modifier stack');
 assert(!named('Ball'), 'the deleted ball stays deleted');
 assert(named('Empty'), "the object Blender's code added");
 assert.deepEqual(second.mainSync.check(), []);

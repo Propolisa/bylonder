@@ -279,6 +279,14 @@ export class BlenderMain {
     }
     return list;
   }
+  // Blender's modifier operators on an object's stack (main-api.cc): add (a ModifierType; its ModifierData), remove,
+  // move to an index, copy after itself, rename (unique in the stack) and apply to its data.
+  addModifier(ob, type) { return x.object_modifier_add(this.#context, ob, type) >>> 0; }
+  removeModifier(ob, md) { return x.object_modifier_remove(this.#context, ob, md); }
+  moveModifier(ob, md, index) { return x.object_modifier_move(ob, md, index); }
+  copyModifier(ob, md) { return x.object_modifier_copy(this.#context, ob, md); }
+  renameModifier(ob, md, name) { withString(name, (p) => x.object_modifier_rename(ob, md, p)); }
+  applyModifier(ob, md) { return x.object_modifier_apply(this.#context, ob, md); }
   // Changes an object's rotation mode (eRotationModes), keeping its rotation.
   setRotationMode(ob, mode) { x.object_rotation_mode_set(ob, mode); }
 

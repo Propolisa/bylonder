@@ -73,28 +73,12 @@ export const blenderModifierDefinition = definition;
 export const modifierPointers = (id) => Object.fromEntries(Object.entries(dna[rna.types[id].struct].properties)
   .filter(([, field]) => field.kind === 'pointer').map(([name, { offset }]) => [name, offset]));
 
-// A stack entry as one of Blender's modifiers: Blender's own as it is, Bylonder's Geometry Nodes Array as Blender's
-// Array where its settings are the Array modifier's (a line of copies, without rotation, scale or randomness); null
-// when Blender has none like it.
-export function asBlenderModifier(modifier) {
-  if (definitions.some((d) => d.id === modifier.type)) return modifier;
-  const v = modifier.values;
-  const line = modifier.type === 'GN_ARRAY' && v.shape === 'Line' && v.countMethod === 'Count' && !v.randomize &&
-    ['x', 'y', 'z'].every((axis) => v[`rotation.${axis}`] === 0 && v[`scale.${axis}`] === 1);
-  if (!line) return null;
-  const relative = v.offsetMethod === 'Relative', step = v.offsetMethod === 'Endpoint' ? 1 / Math.max(1, v.count - 1) : 1;
-  const offset = relative ? 'offset' : 'translation', key = relative ? 'relative_offset_displace' : 'constant_offset_displace';
-  // Babylon's (x, y, z) is Blender's (x, z, y).
-  const values = { count: v.count, use_relative_offset: relative, use_constant_offset: !relative, use_merge_vertices: v.merge, merge_threshold: v.mergeDistance,
-    ...Object.fromEntries(['x', 'z', 'y'].map((axis, i) => [`${key}[${i}]`, v[`${offset}.${axis}`] * (relative ? 1 : step)])) };
-  return { ...modifier, type: 'ARRAY', values };
-}
-
 // Stack entries ({type, values, texture}: a textured modifier's texture settings) as the module takes them; `texture`
 // gives the Tex a modifier points at, by default one outside Main with the entry's settings, and `object` the Object
 // of Main a scene modifier deforms by. An entry's showViewport and showRender are its ModifierMode.
 const entryTexture = (entry) => (entry.texture ? moduleTexture(entry.texture) : 0);
-const MODE = dna.Modifier.properties.show_viewport.offset, MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
+// ModifierData's mode (ModifierMode) and its viewport and render bits.
+export const MODE = dna.Modifier.properties.show_viewport.offset, MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
 export const moduleModifiers = (modifiers, texture = entryTexture, object = () => 0) => modifiers.map((entry) => {
   const { mesh: { type: value, write, textured, scene, object: objectOffset } } = definitions.find((d) => d.id === entry.type);
   const tex = textured ? texture(entry) : 0, target = scene ? object(entry) : 0;

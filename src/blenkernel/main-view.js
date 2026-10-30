@@ -8,14 +8,12 @@ import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
 import { createLight } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
-import { blenderModifierDefinitions, sceneModifierDefinitions } from '../modifiers/blender.js';
-import { addModifier, modifierStack } from '../modifiers/stack.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject } from '../runtime/object-transform.js';
-import { blenderModule, ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
+import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { readTexture } from './texture/texture.js';
@@ -24,16 +22,14 @@ import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
-const MODIFIER_DEFINITIONS = [...blenderModifierDefinitions, ...sceneModifierDefinitions];
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // The objects drawn from what the depsgraph evaluated.
 const DRAWN = ['MESH', 'EMPTY', ...CURVE_TYPES];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
-// eRotationModes, and ModifierMode's viewport and render bits.
+// eRotationModes.
 export const ROTATION_MODES = { QUATERNION: 0, XYZ: 1, XZY: 2, YXZ: 3, YZX: 4, ZXY: 5, ZYX: 6, AXIS_ANGLE: -1 };
-const MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 export const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 // A value as both models compare it: arrays plain, Main's floats being 32-bit.
@@ -189,8 +185,6 @@ export function createMainView(state) {
           if (fcurvePaths(ob).includes('rotation_euler')) warnings.push(`"${node.name}": its rotation keys are in another rotation order than Bylonder's`);
           blender.setRotationMode(ob, ROTATION_MODES[wanted]);
         }
-        if (entry.type === 'MESH') adoptModifiers(entry, warnings);
-        else if (blender.modifiers(ob).length) warnings.push(`"${node.name}": the modifiers of ${entry.type.toLowerCase()} objects are not opened`);
         if (blender.materials(ob).length > 1) warnings.push(`"${node.name}": its faces show its first material`);
         for (const path of new Set(fcurvePaths(ob))) if (!['location', 'rotation_euler', 'scale'].includes(path)) warnings.push(`"${node.name}": its ${path} keys are not opened`);
         if (blender.camera === ob) scene.activeCamera = node;
@@ -207,24 +201,6 @@ export function createMainView(state) {
     }
   }
   const fcurvePaths = (id) => state.animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
-  // An object's modifiers as Main holds them, in the terms of Bylonder's stack; the types Bylonder does not have are
-  // left out.
-  function mainModifiers(entry, warnings) {
-    const view = new DataView(blenderModule.exports.memory.buffer);
-    return blender.modifiers(entry.ob).flatMap(({ type, name, mode, md }) => {
-      const definition = MODIFIER_DEFINITIONS.find((d) => d.mesh.type === type);
-      if (!definition) { warnings.push(`"${entry.node.name}": its modifier "${name}" is not opened`); return []; }
-      const values = definition.mesh.read(view, md);
-      if (definition.mesh.textured) {
-        values.texture = textureId(view.getUint32(md + definition.mesh.texture, true));
-      }
-      if (definition.mesh.scene) {
-        const target = state.nodeOf(view.getUint32(md + definition.mesh.object, true));
-        values.object = target ? nodeId(target) : null;
-      }
-      return [{ type: definition.id, name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER), values }];
-    });
-  }
   // The texture record of a Tex in Main, made for one Blender's code created (texture.new); null for none.
   function textureId(tex) {
     if (!tex) return null;
@@ -235,30 +211,6 @@ export function createMainView(state) {
     world.textures.assign(entry, readTexture(tex));
     textures.set(entry.id, { tex, values: entry.values });
     return entry.id;
-  }
-  function adoptModifiers(entry, warnings) {
-    for (const { type, values, ...shown } of mainModifiers(entry, warnings)) Object.assign(addModifier(entry.node, type, values), shown);
-  }
-  // Modifiers Blender's code added, removed or changed (Add Modifier, Ctrl 2, a panel's value) become the stack's: a
-  // changed list is taken whole, changed values in place, keeping a target (texture, object) Main has not been given yet.
-  // Main's stack, when the page has no change of its own to write (Blender's code added, removed or changed modifiers:
-  // Add Modifier, Ctrl 2, a panel's value): a changed list is taken whole, changed values in place, keeping a target
-  // (texture, object) Main has not been given yet.
-  function pullModifiers(entry) {
-    const main = mainModifiers(entry, []), stack = modifierStack(entry.node);
-    if (stack.length !== main.length || main.some((m, i) => stack[i].type !== m.type || stack[i].name !== m.name)) {
-      if (entry.node.metadata) entry.node.metadata.wbModifiers = [];
-      adoptModifiers(entry, []);
-      state.modifiersTaken(entry);
-      return;
-    }
-    main.forEach(({ values, showViewport, showRender }, i) => {
-      const modifier = stack[i];
-      for (const key of ['texture', 'object']) if (values[key] === null && modifier.values[key] != null) values[key] = modifier.values[key];
-      Object.assign(modifier, { showViewport, showRender });
-      for (const [key, value] of Object.entries(values)) if (JSON.stringify(modifier.values[key]) !== JSON.stringify(value)) modifier.values[key] = value;
-    });
-    state.modifiersTaken(entry);
   }
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
@@ -363,7 +315,6 @@ export function createMainView(state) {
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL);
-        if (entry.type === 'MESH' && !state.modifiersPending(entry)) pullModifiers(entry);
         if (entry.type === 'MESH' && drawEditMode(entry)) continue;
         if (changed && entry.type === 'MESH') keepMesh(entry, blender);
         else if (changed && entry.type !== 'ARMATURE') drawData(entry);
@@ -443,7 +394,8 @@ export function createMainView(state) {
     for (const [id, record] of worlds) if (world.worlds.byId(id)) drawShading(record, world.worlds.byId(id), 'World');
   }
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated,
+    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated, textureId,
+    keepMesh: (entry) => { keepMesh(entry, blender); return true; },
   };
 }
 

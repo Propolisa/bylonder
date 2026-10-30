@@ -101,16 +101,19 @@ const editTotals = (ob, r) => (editing(ob, r) && r.world.editMode.stats) || { ve
 // Bylonder's modifier types that are Blender's keep their type; its own (Array as Geometry Nodes) are Nodes modifiers.
 const modifierType = (modifier) => (modifierTypes.types[modifier.type] ? modifier.type : 'NODES');
 const modifierStruct = (modifier) => modifierTypes.types[modifier.type]?.struct ?? 'NodesModifier';
-const modifierFlag = (key) => ({ get: ({ modifier }) => modifier[key], set: ({ modifier }, value, r) => { modifier[key] = value; r.world.modifiers.refresh(); } });
+// A modifier as its stack holds it now (Main's are read again each time).
+const current = ({ node, modifier }, r) => r.world.modifiers?.stack(node).find((m) => m.id === modifier.id) ?? modifier;
+const modifierFlag = (key) => ({ get: (owner, r) => current(owner, r)[key], set: ({ node, modifier }, value, r) => r.world.modifiers.update(node, modifier.id, { [key]: value }) });
 // A Blender modifier's settings, stored by RNA identifier (`count`, `use_axis[0]`, see modifiers/blender.js).
-function modifierValues({ node, modifier }) {
+function modifierValues(owner) {
+  const { node, modifier } = owner, values = (r) => current(owner, r).values;
   const set = (path, value, r) => r.world.modifiers.set(node, modifier.id, path, value, { finish: false });
   const names = Object.keys(modifier.values).map((path) => path.replace(/\[\d+\]$/, ''));
   return Object.fromEntries([...new Set(names)].filter((name) => modifierTypes.types[modifier.type]?.properties[name]).map((name) => [name,
     name in modifier.values
-      ? { get: () => modifier.values[name], set: (owner, value, r) => set(name, value, r) }
-      : array(() => Object.keys(modifier.values).filter((path) => path.startsWith(name + '[')).map((path) => modifier.values[path]),
-        (owner, values, r) => values.forEach((value, i) => set(`${name}[${i}]`, value, r)))]));
+      ? { get: (o, r) => values(r)[name], set: (o, value, r) => set(name, value, r) }
+      : array((o, r) => Object.entries(values(r)).filter(([path]) => path.startsWith(name + '[')).map(([, value]) => value),
+        (o, list, r) => list.forEach((value, i) => set(`${name}[${i}]`, value, r)))]));
 }
 
 // A texture of the textures slice as its type's struct (CloudsTexture), as RNA refines a Texture.
@@ -301,7 +304,7 @@ const STRUCTS = {
     // The active modifier is the one last made active (object.modifier_set_active, or added), else the last.
     // ObjectModifiers.new(name, type) and remove(modifier).
     modifiers: (ob, r) => {
-      const stack = modifierStack(ob), pointer = (modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier), structs = stack.map(pointer);
+      const stack = r.world.modifiers?.stack(ob) ?? modifierStack(ob), pointer = (modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, `${nodeId(ob)}:${modifier.id}`), structs = stack.map(pointer);
       const add = (...list) => {
         const { name, type } = pyArgs(list, ['name', 'type']), modifier = r.world.modifiers.add(ob, type);
         if (name) r.world.modifiers.update(ob, modifier.id, { name });
@@ -362,12 +365,12 @@ const STRUCTS = {
     show_render: modifierFlag('showRender'),
     ...modifierValues(owner),
     ...('texture' in owner.modifier.values && { texture: {
-      get: ({ modifier }, r) => texturePointer(r, r.world.textures?.byId(modifier.values.texture)),
+      get: (owner, r) => texturePointer(r, r.world.textures?.byId(current(owner, r).values.texture)),
       set: ({ node, modifier }, value, r) => r.world.modifiers.set(node, modifier.id, 'texture', value?.[INFO].owner.id ?? null, { finish: false }),
     } }),
     // The object a modifier deforms by (an Armature modifier's armature), held by its id.
     ...('object' in owner.modifier.values && { object: {
-      get: ({ modifier }, r) => r.pointer('Object', r.objects().find((ob) => nodeId(ob) === modifier.values.object)),
+      get: (owner, r) => r.pointer('Object', r.objects().find((ob) => nodeId(ob) === current(owner, r).values.object)),
       set: ({ node, modifier }, value, r) => r.world.modifiers.set(node, modifier.id, 'object', value ? nodeId(value[INFO].owner) : null, { finish: false }),
     } }),
   }),
@@ -721,7 +724,8 @@ export function syncBindings(r, struct, owner) {
 // The RNA of one host's data: pointer(struct, owner) is the struct over a Bylonder owner (None for none), one per owner
 // so scripts see the same struct each time; `key` is the owner's identity when the owner is made per call.
 export function createRNA(host) {
-  const cache = new WeakMap();
+  // Structs by their owner, or by a name for an owner made per call (a modifier Main holds: its object's id and name).
+  const cache = new WeakMap(), named = new Map();
   const r = {
     host,
     world: host.world,
@@ -743,7 +747,8 @@ export function createRNA(host) {
     texture: (entry) => texturePointer(r, entry),
     pointer(struct, owner, key = owner) {
       if (!owner || !struct) return null;
-      const structs = cache.get(key) ?? cache.set(key, new Map()).get(key);
+      const store = Object(key) === key ? cache : named;
+      const structs = store.get(key) ?? store.set(key, new Map()).get(key);
       if (!structs.has(struct)) structs.set(struct, bind(struct, owner));
       return structs.get(struct);
     },

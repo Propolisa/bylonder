@@ -75,7 +75,7 @@ const row = buildMesh(scene, 'Row', { mesh: cubeMesh });
 row.metadata = { wbId: 'row', wbCreation: { mesh: cubeMesh } };
 row.position = new Vector3(-4, 0, 0);
 objects.push(row);
-addModifier(row, 'GN_ARRAY', { count: 3, 'offset.x': 1.5 });
+addModifier(row, 'ARRAY', { count: 3, 'relative_offset_displace[0]': 1.5 });
 sceneCamera = camera;
 registerObjects(animation, objects);
 animation.insert([animation.ref('object:cube', 'position.x')], 1);
@@ -117,7 +117,7 @@ if (!reference) {
     const close = (a, b, tolerance = 1e-4) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < tolerance);
     const ob = read.objects;
     assert.deepEqual(Object.keys(ob).sort(), ['Camera', 'Cube', 'Light', 'Pivot', 'Row', 'Sun']);
-    assert.deepEqual(ob.Row.modifiers.map((m) => [m.type, m.count, m.relative_offset_displace]), [['ARRAY', 3, [1.5, 0, 0]]], 'Bylonder\'s Array as Blender\'s');
+    assert.deepEqual(ob.Row.modifiers.map((m) => [m.type, m.count, m.relative_offset_displace]), [['ARRAY', 3, [1.5, 0, 0]]], 'Blender\'s Array');
     // At frame 1, where Blender evaluates the location F-Curve to x = 1.
     assert(close(ob.Cube.location, [1, 3, 2]) && ob.Cube.parent === 'Pivot', `Cube in Blender's axes: ${JSON.stringify(ob.Cube)}`);
     assert.equal(ob.Cube.rotation_mode, 'YXZ');
