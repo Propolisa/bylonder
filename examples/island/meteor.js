@@ -6,6 +6,7 @@ import { createMesh } from '@workbench/sdk';
 import { createParticles, together, pop, swell, glowOf, direction, rnd } from './particles.js';
 import { createPuffs, setMatrices, place } from './sky.js';
 import { heightAt } from './island.js';
+import { blob } from './forest.js';
 import { BEAT, OMEN, STRIKE, WAVE, FRAGMENTS, IMPACTS, waveReach, islandShadow, landAt, IMPACT, NEST, smoothstep, lerp, falling, fireFront, fireAngle, burning, flash, sinceStrike } from './story.js';
 
 const { Vector3, Color3, Quaternion } = BABYLON;
@@ -28,23 +29,40 @@ const DOWNRANGE = new Vector3(Math.cos(WAVE.downrange), 0, Math.sin(WAVE.downran
 const thrown = (r, up, speed) => direction(r, up).add(DOWNRANGE.scale(0.6)).normalize().scale(speed);
 const around = (impact, radius, angle, y) => new Vector3(impact.x + Math.cos(angle) * radius, y, impact.z + Math.sin(angle) * radius);
 
-// The asteroid: a white-hot core in yellow and orange shells, flame shed behind it in three layers, a smoke trail that
-// hangs in the sky long after, and sparks.
+// Back up the asteroid's path, the way its flame trails.
+const BACK = new Vector3(OMEN.x, OMEN.y, OMEN.z);
+// Burning rocks: lumps of black glassy stone, rounded by the air they burned through, molten on the face they lead with
+// and tumbling; `at(time)` gives each one's [place, size] (size 0 hides it).
+function createRocks(scene, toon, name, count, at) {
+  const rock = createMesh(name, blob(0.55, [0, 0, 0], blob(0.42, [0.3, 0.15, 0.1], blob(0.4, [-0.28, -0.1, 0.18], blob(0.36, [0.05, 0.3, -0.2])))), scene);
+  rock.material = toon.plain(name, '#1a1316');
+  rock.material.setColor3('underglow', glowOf(2.4, 0.8, 0.9));
+  rock.material.setColor3('glow', glowOf(0.14, 0.03, 0.1));
+  const buffer = setMatrices(rock, count);
+  return (day, time) => {
+    at(time).forEach(([position, size], i) => place(buffer, i, position, new Vector3(1, 1, 1).scale(Math.max(1e-4, size)), Quaternion.RotationYawPitchRoll(time * 0.9 + i, time * 1.3 + 2 * i, i)));
+    rock.thinInstanceBufferUpdated('matrix');
+  };
+}
+
+// The asteroid: a burning rock in a shell of pink and violet glow trailing behind it, flame shed behind it in three
+// layers, a smoke trail that hangs in the sky long after, and sparks.
 function createFireball(scene, toon) {
   const T0 = BEAT.streak, T1 = BEAT.impact, path = (r, birth) => fireballAt(birth).add(new Vector3(2 * r(20) - 1, 2 * r(21) - 1, 2 * r(22) - 1).scale(0.8));
   const near = (birth) => 1 + falling(birth);
-  const shells = [['Asteroid Core', [2.6, 2.5, 2.2], 0.8], ['Asteroid Shell', [2.6, 1.5, 0.35], 1.15], ['Asteroid Glow', [2.2, 0.6, 0.08], 1.5]].map(([name, glow, size]) => {
-    const puff = createPuffs(scene, toon, name, '#000000', 1, (day, time) => [time >= T0 && time < T1 ? [fireballAt(time), size * near(time) * (1 + 0.08 * Math.sin(time * 40))] : HIDDEN]);
+  const rock = createRocks(scene, toon, 'Asteroid', 1, (time) => [[fireballAt(time), time >= T0 && time < T1 ? 0.9 * near(time) : 0]]);
+  const shells = [['Asteroid Shell', [2.6, 1.25, 1.0], 0.75, 0.5], ['Asteroid Glow', [1.1, 0.3, 0.65], 1.2, 1.1]].map(([name, glow, size, behind]) => {
+    const puff = createPuffs(scene, toon, name, '#000000', 1, (day, time) => [time >= T0 && time < T1 ? [fireballAt(time).add(BACK.scale(behind * near(time))), size * near(time) * (1 + 0.08 * Math.sin(time * 40))] : HIDDEN]);
     puff.material.setColor3('glow', glowOf(...glow));
     return puff;
   });
   const flame = (name, glow, rate, life, peak) => createParticles(scene, toon, { name, color: '#000000', glow: glowOf(...glow), seed: rate, start: T0, end: T1, rate, life,
     origin: path, velocity: (r) => direction(r).scale(1.5), drag: 2, gravity: 0.4, size: pop(peak, 0.05), strength: near });
-  return together(...shells,
-    flame('Trail Flame Hot', [2.6, 2.1, 0.9], 90, [0.15, 0.3], 0.8), flame('Trail Flame', [2.4, 0.9, 0.12], 70, [0.3, 0.6], 1.1), flame('Trail Flame Red', [1.6, 0.25, 0.04], 50, [0.5, 1], 1.4),
+  return together(rock, ...shells,
+    flame('Trail Flame Hot', [2.6, 1.6, 1.3], 90, [0.15, 0.3], 0.8), flame('Trail Flame', [2.2, 0.75, 0.8], 70, [0.3, 0.6], 1.1), flame('Trail Flame Outer', [0.9, 0.2, 0.5], 50, [0.5, 1], 1.4),
     createParticles(scene, toon, { name: 'Trail Smoke', color: '#58525e', underglow: glowOf(0.9, 0.3, 0.06), seed: 4, start: T0, end: T1 - 0.4, rate: 60, life: [5, 8],
       origin: path, velocity: (r) => direction(r).scale(0.6), drag: 0.6, gravity: 0.05, turbulence: 0.2, size: swell(0.6, 2.6) }),
-    createParticles(scene, toon, { name: 'Trail Sparks', color: '#000000', glow: glowOf(2.6, 2.0, 0.8), seed: 5, start: T0, end: T1, rate: 120, life: [0.5, 1.2],
+    createParticles(scene, toon, { name: 'Trail Sparks', color: '#000000', glow: glowOf(2.6, 1.7, 1.4), seed: 5, start: T0, end: T1, rate: 120, life: [0.5, 1.2],
       origin: path, velocity: (r) => direction(r).scale(4 + 5 * r(3)), gravity: -6, size: pop(0.14), strength: near }));
 }
 
@@ -54,12 +72,13 @@ const PIECES = FRAGMENTS.map((f) => {
   return { ...f, split, from: fireballAt(split), to: new Vector3(f.x, 0.1, f.z) };
 });
 const fragmentAt = (f, time) => Vector3.Lerp(f.from, f.to, Math.min(1, Math.max(0, (time - f.split) / (f.land - f.split))) ** 1.6);
-// The fragments in the air: a hot head in a glowing shell, the large ones nearly the asteroid's own, each its own
+// The fragments in the air: burning rocks in glowing shells, the large ones nearly the asteroid's size, each its own
 // streamer of flame and smoke, with sparks where it shears off.
 function createFragments(scene, toon) {
   const falling = (f, time) => time >= f.split && time < f.land, near = (f, time) => f.size * (1 + 0.6 * Math.min(1, (time - f.split) / (f.land - f.split)));
-  const heads = [['Fragment Core', [2.6, 2.4, 1.8], 0.8], ['Fragment Shell', [2.6, 1.5, 0.35], 1.15], ['Fragment Glow', [2.3, 0.8, 0.12], 1.5]].map(([name, glow, size]) => {
-    const puff = createPuffs(scene, toon, name, '#000000', PIECES.length, (day, time) => PIECES.map((f) => (falling(f, time) ? [fragmentAt(f, time), size * near(f, time)] : HIDDEN)));
+  const rocks = createRocks(scene, toon, 'Fragment', PIECES.length, (time) => PIECES.map((f) => [fragmentAt(f, time), falling(f, time) ? 0.9 * near(f, time) : 0]));
+  const heads = [['Fragment Shell', [2.6, 1.25, 1.0], 0.75, 0.5], ['Fragment Glow', [1.1, 0.3, 0.65], 1.2, 1.1]].map(([name, glow, size, behind]) => {
+    const puff = createPuffs(scene, toon, name, '#000000', PIECES.length, (day, time) => PIECES.map((f) => (falling(f, time) ? [fragmentAt(f, time).add(BACK.scale(behind * near(f, time))), size * near(f, time)] : HIDDEN)));
     puff.material.setColor3('glow', glowOf(...glow));
     return puff;
   });
@@ -69,13 +88,13 @@ function createFragments(scene, toon) {
   const streamers = PIECES.flatMap((f, k) => {
     const path = (r, birth) => fragmentAt(f, birth).add(new Vector3(2 * r(20) - 1, 2 * r(21) - 1, 2 * r(22) - 1).scale(0.4 * f.size));
     return [
-      createParticles(scene, toon, { name: `Fragment Flame ${k + 1}`, color: '#000000', glow: glowOf(2.4, 0.9, 0.12), seed: 81 + k, start: f.split, end: f.land, rate: 220, life: [0.25, 0.6],
-        origin: path, velocity: (r) => direction(r).scale(0.8), drag: 2, size: pop(1.1 * f.size, 0.05) }),
+      createParticles(scene, toon, { name: `Fragment Flame ${k + 1}`, color: '#000000', glow: glowOf(2.2, 0.75, 0.8), seed: 81 + k, start: f.split, end: f.land, rate: 220, life: [0.25, 0.6],
+        origin: path, velocity: (r) => direction(r).scale(0.8), drag: 2, size: pop(0.75 * f.size, 0.05) }),
       createParticles(scene, toon, { name: `Fragment Smoke ${k + 1}`, color: '#8a8490', underglow: glowOf(0.8, 0.28, 0.06), seed: 91 + k, start: f.split, end: f.land, rate: 70, life: [3, 5],
         origin: path, velocity: (r) => direction(r).scale(0.3), drag: 0.6, turbulence: 0.15, size: swell(0.2 * f.size, 1.1 * f.size) }),
     ];
   });
-  return together(...heads, fracture, ...streamers);
+  return together(rocks, ...heads, fracture, ...streamers);
 }
 
 // An impact on the sea, as large as what struck: a flash; for a large one a fireball billowing up in three layers and
@@ -217,7 +236,7 @@ function createAfter(scene, toon) {
 // front by the nest with a flicker, dying with the night. Its color carries its strength.
 export function fireLight(time) {
   const fall = falling(time), age = sinceStrike(time);
-  if (fall > 0) return { position: fireballAt(time), color: new Color3(2.4, 1.2, 0.35).scale(0.1 + 2 * fall ** 3) };
+  if (fall > 0) return { position: fireballAt(time), color: new Color3(1.5, 0.6, 0.8).scale(0.1 + 1.5 * fall ** 4) };
   if (age < 0) return { position: new Vector3(0, -50, 0), color: Color3.Black() };
   const strike = new Color3(3, 2.6, 2.2).scale(10 * flash(time)).add(new Color3(2.4, 0.9, 0.25).scale(2.5 * Math.exp(-age / 7)));
   const burn = time >= BEAT.embers ? burning(time) : 0, flicker = 0.85 + 0.15 * Math.sin(time * 23) * Math.sin(time * 7.3);

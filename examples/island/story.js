@@ -18,8 +18,9 @@ export const BEAT = {
 };
 
 // Days per second of film: [second, speed] keys, linear between. The time-lapse races between the story's moments and
-// slows toward real time as each comes. Six speeds are solved in turn so they court in the morning, the egg's vigil
-// and the star's last night are at night, the chick hatches at dawn, the asteroid strikes at sunset, and they come home at first light.
+// slows toward real time as each comes. Six speeds are solved in turn so they court in the morning, the egg's vigil and
+// the star's last night are at night, the chick hatches at dawn, the asteroid strikes just after sunset, and they come
+// home at first light.
 const keys = ([morning, vigil, dawn, night, dusk, home]) => [
   [0, 0.12], [5, 0.135], [10, 0.16], [15, 0.215], [20, 0.29], [25, 0.38], [30, 0.5], [35, morning], [40, morning], [44, 0.03], [56, 0.03],
   [58, 0.25], [62, 0.25], [64, 0.04], [66, vigil], [75, vigil], [77, 0.3], [79, dawn], [80.5, 0.012], [85, 0.012], [87, 0.03], [92, 0.03],
@@ -39,7 +40,7 @@ const integrate = (k) => {
 };
 // Each speed in turn brings the day at its moment to a time of day (a fraction), the speed nearest a guess: the day is
 // linear in it, and later speeds do not change earlier moments.
-const TIMES = [[48, 0.3, 0.3], [70, 0.75, 0.05], [81.5, 0.02, 0.3], [116, 0.75, 0.3], [BEAT.impact, 0.45, 0.2], [BEAT.home, 0.97, 0.6]];
+const TIMES = [[48, 0.3, 0.3], [70, 0.75, 0.05], [81.5, 0.02, 0.3], [116, 0.75, 0.3], [BEAT.impact, 0.475, 0.2], [BEAT.home, 0.97, 0.6]];
 const SPEEDS = keys(TIMES.reduce((solved, [second, fraction, near], i) => {
   const at = (v) => integrate(keys([...solved, v, ...TIMES.slice(i + 1).map(([, , n]) => n)]))[frameAt(second)];
   const a = at(0), slope = at(1) - a, n = Math.round(a + near * slope - fraction);
@@ -60,8 +61,8 @@ export const NEST = (() => {
   return { angle, r, x, z, ground: heightAt(x, z) - 0.03, size: 1.75 };
 })();
 // The asteroid: an odd-colored star with a faint trail, in the sky over the far side of the island from the first
-// frame. It grows through the film, fast in its last nights, then falls at sunset into the sea just off the island's
-// far side, behind the volcano from the nest.
+// frame. It grows through the film, fast in its last nights, then falls in the dusk just after sunset onto the island's
+// far shoulder, behind the volcano from the nest.
 export const OMEN = (() => { const a = 4.75, e = 0.3; return { x: Math.cos(a) * Math.cos(e), y: Math.sin(e), z: Math.sin(a) * Math.cos(e) }; })();
 // It comes in low out of the omen's side, heading downrange, and strikes glancingly: just off the far side's shoulder,
 // ploughing up onto the coast rather than at the island's heart.
@@ -102,7 +103,7 @@ export const blastRadius = (time) => (time < BEAT.impact ? 0 : 6.2 * (1 - Math.e
 export const fromStrike = (x, z) => Math.hypot(x - STRIKE.x, z - STRIKE.z);
 // The camera shaking where it stands: the asteroid's roar as it comes, then each impact's blow, reaching it later and
 // weaker the farther away it is.
-const SHOCK_SPEED = 30;
+export const SHOCK_SPEED = 30;
 export function shake(time, x, z) {
   let sum = 0.12 * smoothstep(BEAT.streak + 2, BEAT.impact, time) * (time < BEAT.impact ? 1 : 0);
   for (const impact of IMPACTS) {
@@ -161,7 +162,7 @@ export const SHOTS = [
   // The star grows night by night, over the volcano from the nest; the flock leaves; the island waits.
   [110, 'island', 1.4, 22, 4, 3.5, 1.6, 25], [113.5, 'nest', 1.61, 2.4, 1.3, 2.4, 1.75, 3.0], [119, 'nest', 0.4, 5.5, 0.6, 2.4, 0.2, 6.5],
   [124, 'island', 1.6, 16, 3, 2.5, 1.4, 18],
-  // At sunset it falls. The family watch it come; it strikes the sea beyond the volcano.
+  // Just after sunset it falls. The family watch it come; it strikes the sea beyond the volcano.
   [127.5, 'nest', 1.61, 3.2, 1.2, 2.8, 1.75, 3.6], [131.5, 'island', 0.25, 34, 6, 3, 0.1, 38],
   // The far side burnt to glass and cratered, the wave racing out; the family alive in the lee of the volcano.
   [139, 'island', 4.3, 30, 8, 2, 4.6, 27], [143, 'nest', 0.6, 1.65, 2.3, 1.75, 0.8, 1.95],
