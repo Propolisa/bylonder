@@ -457,6 +457,14 @@ EXPORT(object_parent_inverse_fold) void object_parent_inverse_fold(Object *ob)
   DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
 }
 
+/* An object placed at a world matrix (Blender's axes), its own transform made from it under its parent, as Blender's
+ * transform applies a matrix (BKE_object_apply_mat4, keeping its rotation mode and Euler compatible). */
+EXPORT(object_world_matrix_apply) void object_world_matrix_apply(Object *ob, const float *matrix)
+{
+  BKE_object_apply_mat4(ob, reinterpret_cast<const float(*)[4]>(matrix), true, true);
+  DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
+}
+
 /* Tags an ID for the depsgraph to evaluate again (IDRecalcFlag; 0 for all of it), after the editor wrote its DNA. */
 EXPORT(id_tag_update) void id_tag_update(ID *id, unsigned int flags) { DEG_id_tag_update(id, flags); }
 /* The relations between IDs changed (a parent, a modifier's target), which the depsgraph builds again. */

@@ -59,9 +59,11 @@ export function createAddMesh(world, editor, history, commands, config, notify) 
   const place = (node, preset, values) => {
     const options = Object.fromEntries(Object.entries(values).filter(([key]) => !PLACEMENT.includes(key)));
     rebuildMesh(node, recipeOf(preset, options));
-    node.position.set(values.location[0], values.location[2], values.location[1]);
-    node.rotationQuaternion = null;
-    node.rotation.copyFrom(babylonRotation(values.rotation));
+    if (!world.mainSync?.setObject(node, { location: values.location, rotation_mode: "XYZ", rotation_euler: values.rotation })) {
+      node.position.set(values.location[0], values.location[2], values.location[1]);
+      node.rotationQuaternion = null;
+      node.rotation.copyFrom(babylonRotation(values.rotation));
+    }
     editor.reconcile();
   };
   // Adjust Last Operation: the HUD shows the operator's properties; a change rebuilds the node.

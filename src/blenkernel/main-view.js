@@ -63,7 +63,9 @@ function keepMesh(entry, blender) {
 
 // Blender's matrix (column-major, Z up) as Babylon's (row-major, Y up): Babylon's (x, y, z) is Blender's (x, z, y).
 const AXIS = [0, 2, 1, 3];
-const babylonMatrix = (m) => Matrix.FromArray(Array.from({ length: 16 }, (_, i) => m[AXIS[i >> 2] * 4 + AXIS[i & 3]]));
+const swapped = (m) => Array.from({ length: 16 }, (_, i) => m[AXIS[i >> 2] * 4 + AXIS[i & 3]]);
+export const babylonMatrix = (m) => Matrix.FromArray(swapped(m));
+export const blenderMatrix = (matrix) => swapped(matrix.m);
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
 //   sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.

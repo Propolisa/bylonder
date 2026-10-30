@@ -203,6 +203,8 @@ export class BlenderMain {
     for (const [name, values] of Object.entries(arrays)) fields[name].set(values);
     this.tag(ob, ID_RECALC_TRANSFORM);
   }
+  // Places an object at a world matrix (column-major, Blender's axes) as Blender's transform applies one.
+  applyWorldMatrix(ob, matrix) { withArrays([Float32Array.from(matrix)], ([p]) => x.object_world_matrix_apply(ob, p)); }
   // Folds an object's parent inverse into its own transform, keeping where it is.
   foldParentInverse(ob) { x.object_parent_inverse_fold(ob); }
 

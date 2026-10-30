@@ -142,7 +142,7 @@ assert.ok(['Object.location', 'Scene.frame_current', 'ToolSettings.mesh_select_m
 const ran = [];
 const action = (id, blender, keys = []) => ({ id, blender, label: id, keys, run: () => ran.push(id) });
 const registry = {
-  actions: [action('hide', 'object.hide_view_set'), action('hide-others', 'object.hide_view_set'), action('rename', 'TOPBAR_PT_name'),
+  actions: [action('hide', 'object.hide_view_set'), action('rename', 'TOPBAR_PT_name'),
     action('group'), action('ungroup'), action('edit-text'), action('creation', 'screen.redo_last')],
   invoke(id) { this.actions.find((a) => a.id === id).run(); },
 };
@@ -154,9 +154,9 @@ assert.equal(entry(objectMenu, 'Delete').keys, 'X');
 assert.equal(entry(objectMenu, 'Delete Global').enabled(), false, 'shown, greyed out');
 assert.deepEqual(['Join', 'Delete Global', 'Apply', 'Link/Transfer Data'].map((label) => entry(objectMenu, label).keys), ['Ctrl J', 'Shift X', 'Ctrl A', 'Ctrl L'], "shortcuts from Blender's keymap");
 assert.equal(entry(objectMenu, 'Join').enabled(), false, 'what Bylonder lacks is shown, greyed out');
-entry(entry(objectMenu, 'Show/Hide').items(), 'Hide Unselected').run();
+entry(entry(objectMenu, 'Show/Hide').items(), 'Hide Selected').run();
 entry(objectMenu, 'group').run();
-assert.deepEqual(ran, ['hide-others', 'group']);
+assert.deepEqual(ran, ['hide', 'group']);
 
 // Blender's keymaps, transpiled, equal Blender's own, and events run the operator the first matching item names, with
 // its properties.

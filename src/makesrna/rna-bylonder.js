@@ -318,7 +318,7 @@ const STRUCTS = {
     material_slots: (ob, r) => collection((r.world.materials?.slots(ob) ?? []).map((material, slot_index) =>
       rna('MaterialSlot', { name: material?.name ?? '', material: r.pointer('Material', material), slot_index }))),
     active_material: (ob, r) => r.pointer('Material', r.world.materials?.activeMaterial(ob)),
-    // Disable Selection is Bylonder's lock (commands.lock); Disable in Renders and in Viewports are kept with the object.
+    // Disable Selection is Bylonder's lock; Disable in Renders and in Viewports are kept with the object.
     hide_select: { get: (ob) => ob.isPickable === false || !!ob.metadata?.wbLocked, set: (ob, value) => {
       ob.metadata = { ...ob.metadata, wbLocked: !!value };
       if ('isPickable' in ob) ob.isPickable = !value;

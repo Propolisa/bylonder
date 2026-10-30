@@ -31,7 +31,8 @@ const editor = {
   },
   start() {},
 };
-const history = createHistory(objects, () => {}, { main: sceneMain({ scene, objects }, selection) });
+const main = sceneMain({ scene, objects }, selection);
+const history = createHistory(objects, () => {}, { main });
 const commands = createObjectCommands(
   { scene, objects },
   editor,
@@ -59,7 +60,11 @@ apply(restored, persisted, { partial: true });
 assert.equal(restored.length, 2);
 assert(restored.find((n) => n.name === "renamed").getTotalVertices() > 0);
 selection.replace([authored]);
-commands.hide();
+// Blender's Hide (object.hide_view_set) on Main, drawn back.
+const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+main.blender.view = { viewmat: identity, winmat: identity, winx: 100, winy: 100, persp: false };
+main.run(() => main.blender.run("object.hide_view_set"));
+history.commit();
 assert(!authored.isEnabled());
 history.undo();
 assert(authored.isEnabled());

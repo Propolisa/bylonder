@@ -11,7 +11,7 @@ export function createEditor(world, views, history, changed, capture) {
   const gizmos = new GizmoManager(scene),
     bound = new WeakSet();
   gizmos.usePointerToAttachGizmos = false;
-  const selection = createSelection(scene, objects);
+  const selection = createSelection(scene, objects, world);
   // Draw helpers (loose edge wires) stand for the object that owns them.
   const owner = (m) => m?.metadata?.drawOwner ?? m;
   // One rule for what a click can select: live, unlocked, visible, and selectable through its collections.

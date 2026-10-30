@@ -1,6 +1,6 @@
 import { nodeId, deleted } from "./identity.js";
-import { Quaternion, TransformNode } from "@babylonjs/core";
-export function createSelection(scene, objects) {
+import { Matrix, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
+export function createSelection(scene, objects, world) {
   const ids = new Set();
   const pivot = new TransformNode("__selectionPivot", scene);
   let baseline = null;
@@ -48,24 +48,34 @@ export function createSelection(scene, objects) {
       inverse: pivot.getWorldMatrix().clone().invert(),
       nodes: roots().map((n) => {
         n.computeWorldMatrix(true);
-        return { node: n, world: n.getWorldMatrix().clone(),position:n.position.clone(),rotation:(n.rotationQuaternion?n.rotationQuaternion.toEulerAngles():n.rotation).clone(),scaling:n.scaling.clone() };
+        // Main's world matrix, which may differ from Babylon's by the object's kind (a camera looks along Blender's -Z).
+        const main = world?.mainSync?.worldMatrix(n);
+        return { node: n, world: n.getWorldMatrix().clone(), main: main && main.multiply(n.getWorldMatrix().clone().invert()), position: n.position.clone(), rotation: (n.rotationQuaternion ? n.rotationQuaternion.toEulerAngles() : n.rotation).clone(), scaling: n.scaling.clone() };
       }),
     };
   }
+  // The selected objects moved by the pivot's change since begin, their locked axes kept; Main places one it holds.
   function update() {
     if (!baseline) return;
     const delta = baseline.inverse.multiply(pivot.computeWorldMatrix(true));
-    for (const { node, world,position,rotation,scaling } of baseline.nodes) {
-      let local = world.multiply(delta);
-      if (node.parent)
-        local = local.multiply(
-          node.parent.computeWorldMatrix(true).clone().invert(),
-        );
-      const q = new Quaternion();
-      local.decompose(node.scaling, q, node.position);
+    for (const { node, world: start, main, ...original } of baseline.nodes) {
+      const parent = node.parent?.computeWorldMatrix(true);
+      let local = start.multiply(delta);
+      if (parent) local = local.multiply(parent.clone().invert());
+      const values = { position: new Vector3(), rotation: new Vector3(), scaling: new Vector3() }, q = new Quaternion();
+      local.decompose(values.scaling, q, values.position);
+      values.rotation = q.toEulerAngles();
+      for (const property of Object.keys(values)) for (const axis of ["x", "y", "z"])
+        if (node.metadata?.wbTransformLocks?.[property + "." + axis]) values[property][axis] = original[property][axis];
+      if (main) {
+        const placed = Matrix.Compose(values.scaling, Quaternion.FromEulerVector(values.rotation), values.position);
+        world.mainSync.place(node, main.multiply(parent ? placed.multiply(parent) : placed));
+        continue;
+      }
+      node.position.copyFrom(values.position);
       node.rotationQuaternion = null;
-      node.rotation.copyFrom(q.toEulerAngles());
-      for(const [property,original] of Object.entries({position,rotation,scaling}))for(const axis of ["x","y","z"])if(node.metadata?.wbTransformLocks?.[property+"."+axis])node[property][axis]=original[axis];
+      node.rotation.copyFrom(values.rotation);
+      node.scaling.copyFrom(values.scaling);
       node.computeWorldMatrix(true);
     }
   }

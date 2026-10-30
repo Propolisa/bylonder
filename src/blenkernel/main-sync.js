@@ -29,7 +29,7 @@ import { BlenderAnimation } from './animation/anim-blender.js';
 import { MultiMaterial, VertexData } from '@babylonjs/core';
 import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
-import { createMainView, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
+import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
 import { ID_RECALC_TRANSFORM, ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
 
@@ -184,12 +184,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       : struct === 'Object' ? objects.get(owner) : objects.get(owner)?.data;
     return record?.struct === struct && record.ptr && !record.unheld?.has(name) ? record : null;
   }
-  // An RNA write into Main, as Blender's RNA updates tag it, then evaluated and drawn; false for a value Main cannot hold.
-  function write(record, name, value) {
-    if (!holds(dnaProperty(record.struct, name), plain(value))) return false;
+  // RNA writes into a record of Main's, as Blender's RNA updates tag them, then evaluated and drawn; false (nothing
+  // written) when Main cannot hold one of them.
+  function write(record, values) {
+    const entries = Object.entries(values).map(([name, value]) => [name, plain(value)]);
+    if (!entries.every(([name, value]) => holds(dnaProperty(record.struct, name), value))) return false;
     flush(false);
-    dnaSet(record.struct, record.ptr, name, plain(value));
-    blender.tag(record.holder ?? record.ptr, recalcOf(record.struct, [name]));
+    for (const [name, value] of entries) dnaSet(record.struct, record.ptr, name, value);
+    blender.tag(record.holder ?? record.ptr, recalcOf(record.struct, Object.keys(values)));
     evaluate();
     return true;
   }
@@ -252,14 +254,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
   }
 
+  // A name is Blender's, unique among its IDs ("Cube.001" for a second "Cube").
+  function rename(entry, name) {
+    blender.rename(entry.ob, name);
+    entry.node.name = entry.babylonName = entry.name = blender.name(entry.ob);
+  }
   // Relations, by RNA name: what both models hold that is not a DNA value.
   function pushObject(entry) {
     const { node, ob } = entry, data = rna.pointer('Object', node);
-    // A name is Blender's, unique among its IDs ("Cube.001" for a second "Cube").
-    if (node.name !== entry.babylonName) {
-      blender.rename(ob, node.name);
-      node.name = entry.babylonName = entry.name = blender.name(ob);
-    }
+    if (node.name !== entry.babylonName) rename(entry, node.name);
     pushRelations(entry);
     // An armature's mode is Blender's: its Edit and Pose Modes are entered by Blender's operators in Main.
     if (entry.type !== 'ARMATURE') blender.setMode(ob, data.mode);
@@ -679,9 +682,27 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       flush(false);
     },
     edit,
+    // An object's world matrix as Main evaluated it, in Babylon's axes; null for one Main does not hold.
+    worldMatrix: (node) => (objects.has(node) ? babylonMatrix(blender.transform(objects.get(node).ob).matrix_world) : null),
+    // An object placed at a world matrix (Babylon's axes) as Blender's transform applies one, then evaluated and drawn.
+    place(node, matrix) {
+      flush(false);
+      blender.applyWorldMatrix(objects.get(node).ob, blenderMatrix(matrix));
+      evaluate();
+    },
     held,
     read: (record, name) => dnaGet(record.struct, record.ptr, name),
-    write,
+    write: (record, name, value) => write(record, { [name]: value }),
+    // An object Main holds renamed there, drawn with the name Blender gives it (unique among its IDs); false for one it
+    // does not hold.
+    rename(node, name) {
+      if (!objects.has(node)) return false;
+      flush(false);
+      rename(objects.get(node), name);
+      return true;
+    },
+    // Values of an object Main holds (RNA names), written there; false for one it does not hold.
+    setObject: (node, values) => objects.has(node) && write(objects.get(node), values),
     // What Main's modifiers point at, by the page's ids (main-modifiers.js).
     links: modifierLinks,
     // A mesh object's Mesh as Main holds it is its recipe again (after Blender's code changed it).

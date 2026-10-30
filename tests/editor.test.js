@@ -15,8 +15,10 @@ const a = MeshBuilder.CreateBox("A", {}, scene),
 a.position.x = -2;
 b.position.x = 2;
 const objects = [a, b];
-const selection = createSelection(scene, objects);
-const history = createHistory(objects, () => {}, { main: sceneMain({ scene, objects }, selection) });
+const world = { scene, objects };
+// Moves go into Main, which places the objects as Blender's transform does and draws them back.
+const selection = createSelection(scene, objects, world);
+const history = createHistory(objects, () => {}, { main: sceneMain(world, selection) });
 selection.toggle(a);
 assert.equal(selection.size, 1);
 assert.deepEqual(selection.outlined(), [a]);
@@ -67,7 +69,9 @@ a.computeWorldMatrix(true);
 close(a.getAbsolutePosition().y, 3);
 history.undo();
 assert.equal(a.parent, null);
-assert.deepEqual(snapshot(objects).filter(row=>!row.deleted), before);
+// As JSON: Blender's matrix decomposition may give -0.
+const rows = (list) => JSON.parse(JSON.stringify(list));
+assert.deepEqual(rows(snapshot(objects).filter(row=>!row.deleted)), rows(before));
 apply(objects, grouped);
 assert.equal(a.parent?.metadata.group, true);
 a.computeWorldMatrix(true);

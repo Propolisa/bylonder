@@ -23,9 +23,6 @@ export function createObjectActions({ world, editor, commands, creator }) {
   const finished = (run) => () => { creator.finish(); run(); };
   const actions = [
     { id: "rename", blender: "TOPBAR_PT_name", label: "Rename…", enabled: has, run: rename },
-    { id: "hide", blender: "object.hide_view_set", enabled: has, run: () => commands.hide() },
-    { id: "hide-others", blender: "object.hide_view_set", enabled: has, run: () => commands.hide(true) },
-    { id: "show-all", blender: "object.hide_view_clear", run: () => commands.showAll() },
     { id: "isolate", blender: "view3d.localview", enabled: has, run: () => commands.isolate() },
     // Ctrl G creates the collection inside the active collection (Blender leaves it unlinked from the scene) and moves the selection into it.
     { id: "new-collection", blender: "collection.create", enabled: has, run: finished(() => cols.create({ objects: ids(), move: true })) },
@@ -35,10 +32,6 @@ export function createObjectActions({ world, editor, commands, creator }) {
         ...memberships().map(([id, label, , icon]) => ({ label, icon, blender: "collection.objects_remove", run: () => runOperator("collection.objects_remove", { collection: id }) }))], pointer)) },
     { id: "group", label: "Parent to New Empty", enabled: several, run: finished(() => editor.group()) },
     { id: "ungroup", label: "Clear Empty Parent", enabled: () => editor.selection.roots.some((n) => n.metadata?.group), run: finished(() => editor.ungroup()) },
-    { id: "unparent", blender: ["object.parent_clear", "object.parent_clear:CLEAR"], enabled: has, run: () => commands.parent(null) },
-    { id: "select-all", blender: ["object.select_all", "object.select_all:SELECT"], run: () => commands.selectAll() },
-    { id: "deselect", blender: ["object.select_all", "object.select_all:DESELECT"], run: () => commands.deselect() },
-    { id: "invert", blender: ["object.select_all", "object.select_all:INVERT"], run: () => commands.invert() },
   ];
   const invoke = (id, props) => {
     const action = actions.find((a) => a.id === id);

@@ -27,69 +27,11 @@ export function createObjectCommands(world, editor, history, refresh) {
     setBefore(fn) {
       before = fn;
     },
-    selectAll() {
-      editor.selection.replace(
-        live().filter((n) => n.isEnabled() && !n.metadata?.wbLocked),
-      );
-      editor.reconcile();
-    },
-    deselect() {
-      editor.selection.replace([]);
-      editor.reconcile();
-    },
-    invert() {
-      editor.selection.replace(
-        live().filter(
-          (n) =>
-            n.isEnabled() && !n.metadata?.wbLocked && !editor.selection.has(n),
-        ),
-      );
-      editor.reconcile();
-    },
     rename(node, name) {
       if (!name?.trim()) return;
       transaction(() => {
         identify(node);
-        node.name = name.trim();
-      });
-    },
-    hide(others = false) {
-      transaction(() => {
-        const chosen = new Set(roots().flatMap(family));
-        for (const node of live())
-          if (
-            others
-              ? !chosen.has(node) &&
-                !roots().some((n) => n.isDescendantOf(node))
-              : chosen.has(node)
-          )
-            node.setEnabled(false);
-        if (!others) editor.selection.replace([]);
-      });
-    },
-    showAll() {
-      transaction(() => live().forEach((n) => n.setEnabled(true)));
-    },
-    visibility(node) {
-      transaction(() => node.setEnabled(!node.isEnabled(false)));
-    },
-    hideRender(node) {
-      transaction(() => { node.metadata = { ...node.metadata, wbHideRender: !node.metadata?.wbHideRender }; });
-    },
-    lock(node) {
-      transaction(() => {
-        node.metadata = {
-          ...node.metadata,
-          wbLocked: !node.metadata?.wbLocked,
-        };
-        if ("isPickable" in node) node.isPickable = !node.metadata.wbLocked;
-      });
-    },
-    parent(parent) {
-      transaction(() => {
-        for (const node of roots())
-          if (node !== parent && !parent?.isDescendantOf(node))
-            node.setParent(parent || null);
+        if (!world.mainSync?.rename(node, name.trim())) node.name = name.trim();
       });
     },
     isolate() {
