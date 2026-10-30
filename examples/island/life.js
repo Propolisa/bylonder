@@ -66,16 +66,22 @@ function whaleMesh() {
   return { vertices, faces };
 }
 
+// The whales' swims, each surfacing along the shore in the shot it is seen in: a whale early on, then a whale and her
+// calf when the family comes home.
+export const WHALES = [
+  { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
+  { start: BEAT.home + 2, angle: 0.45, distance: 11, size: 1.0 }, { start: BEAT.home + 2.3, angle: 0.49, distance: 12, size: 0.45 },
+].map((swim) => {
+  const angle = shotAngle(frameAt(Math.min(FILM - 0.5, swim.start + 1.3))) + swim.angle;
+  return { ...swim, angle, at: new Vector3(Math.cos(angle) * swim.distance, 0, Math.sin(angle) * swim.distance) };
+});
+
 // Whales surfacing: each rises on an arc, its back breaking the water, blows a spout, and dives, the flukes lifting
 // last. One early, while the island is young; at the end a mother with her calf beside her.
 export function createWhales(scene, toon) {
   const mesh = createMesh('Whale', whaleMesh(), scene);
   mesh.material = toon.plain('Whale', '#34507e');
-  const SWIMS = [
-    { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
-    { start: BEAT.home + 2, angle: 0.45, distance: 11, size: 1.0 }, { start: BEAT.home + 2.3, angle: 0.49, distance: 12, size: 0.45 },
-  ].map((swim) => ({ ...swim, angle: shotAngle(frameAt(Math.min(FILM - 0.5, swim.start + 1.3))) + swim.angle }));
-  const buffer = setMatrices(mesh, SWIMS.length), LENGTH = 3.2, R = 3.2;
+  const buffer = setMatrices(mesh, WHALES.length), LENGTH = 3.2, R = 3.2;
   // Where a swim is at time t: on a circle of radius R below the sea, travelling along the shore.
   const pose = ({ start, angle, distance, size }, time) => {
     const p = (time - start) / LENGTH;
@@ -85,7 +91,7 @@ export function createWhales(scene, toon) {
     const heading = Math.atan2(-along.z, along.x), pitch = -phi;
     return { position, size, rotation: Quaternion.RotationAxis(Vector3.Up(), heading).multiply(Quaternion.RotationAxis(new Vector3(0, 0, 1), pitch)), p, along };
   };
-  const spouts = createPuffs(scene, toon, 'Spout', '#f2f8ff', SWIMS.length * 6, (day, time) => SWIMS.flatMap((swim) => {
+  const spouts = createPuffs(scene, toon, 'Spout', '#f2f8ff', WHALES.length * 6, (day, time) => WHALES.flatMap((swim) => {
     const at = pose(swim, time);
     return Array.from({ length: 6 }, (_, k) => {
       if (!at) return hidden;
@@ -94,7 +100,7 @@ export function createWhales(scene, toon) {
     });
   }));
   return (day, time) => {
-    SWIMS.forEach((swim, i) => {
+    WHALES.forEach((swim, i) => {
       const at = pose(swim, time);
       place(buffer, i, at ? at.position : new Vector3(0, -50, 0), new Vector3(1, 1, 1).scale(at ? at.size : 1e-4), at ? at.rotation : 0);
     });
@@ -154,11 +160,14 @@ export const headingOf = (along) => Math.atan2(-along.z, along.x);
 
 // The flock: arrives once the forest has grown and circles the volcano, gliding and flapping in bursts. It leaves out
 // to sea as the new star grows, and comes home at the end.
+const flockAway = (time) => smoothstep(BEAT.leave - 1, BEAT.leave + 4, time) * (1 - smoothstep(BEAT.home - 3, BEAT.home + 1, time));
+// Where the flock is, roughly: circling over the island, or far out while it is away.
+export const flockAt = (time) => { const out = 4.7 + 40 * flockAway(time) ** 1.5, a = time * 0.55; return new Vector3(Math.cos(a) * out, 4.8 + 3 * flockAway(time), Math.sin(a) * out); };
 export function createBirds(scene, toon) {
   const COUNT = 7, rand = random(21), flock = Array.from({ length: COUNT }, () => ({ radius: 3.5 + rand() * 2.5, height: 4.3 + rand() * 1.2, speed: 0.45 + rand() * 0.2, phase: rand() * Math.PI * 2 }));
   const kit = createBirdKit(scene, toon, 'Bird', '#fdf8f0', COUNT);
   return (day, time) => {
-    const here = smoothstep(4.6, 5.3, day), away = smoothstep(BEAT.leave - 1, BEAT.leave + 4, time) * (1 - smoothstep(BEAT.home - 3, BEAT.home + 1, time));
+    const here = smoothstep(4.6, 5.3, day), away = flockAway(time);
     flock.forEach(({ radius, height, speed, phase }, i) => {
       const a = phase + time * speed, out = radius + 40 * away ** 1.5;
       const position = new Vector3(Math.cos(a) * out, height + 0.3 * Math.sin(time * 1.3 + phase) + 3 * away, Math.sin(a) * out);

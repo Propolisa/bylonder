@@ -127,6 +127,9 @@ const chickAt = (time) => {
   return { point, pose: time > BEAT.home ? 'sit' : 'fly', tumble: u < 0.6 ? u * 9 : 0, wings: 1, velocity: time > BEAT.home ? null : father.velocity };
 };
 
+// Where each of the family is at a second: the mother riding the falling tree, the father, the chick.
+export const whereIs = (who, time) => (who === 'mother' ? (time > BEAT.fall ? onTree(MOTHER.pointAt(time), time) : MOTHER.pointAt(time))
+  : who === 'father' ? fatherAt(time).point : chickAt(time).point);
 // Where each looks, when: [from second, to second, what], what(time, birds) giving { look: a point, tuck, nod }; at the
 // start of a span the head turns from where it looked over a third of a second.
 function gaze(spans) {

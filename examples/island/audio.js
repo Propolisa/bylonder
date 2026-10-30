@@ -1,51 +1,114 @@
-// The film's sound, in Babylon's spatial audio heard from the camera: the asteroid's roar travelling with it, each
-// impact's boom or thud from where it lands, reaching the camera as late as its shock does, and the surf where the wave
-// breaks on the island. Sounds play with the timeline and stop when it stops; renders are silent.
-import { BEAT, STRIKE, IMPACTS, SHOCK_SPEED } from './story.js';
+// The film's sound, in Babylon's spatial audio heard from the camera. Beds loop under it all, each as loud as the
+// story makes it: the sea, the wind, the eruption and its steam, insects on warm nights, the forest fire. Over them
+// cues play where they happen: the family's calls from where each bird is, the egg cracking, the flock, the whales,
+// the tree falling, and the asteroid's roar travelling with it, each impact heard as late as its shock reaches the
+// camera. Sounds play with the timeline and stop when it stops; renders are silent.
+import { BEAT, NEST, STRIKE, IMPACTS, SHOCK_SPEED, FRAMES, smoothstep, eruption, days, seconds, burning, gust } from './story.js';
 import { createSounds } from './sounds.js';
-import { fireballAt } from './meteor.js';
+import { fireballAt, fireLight } from './meteor.js';
+import { whereIs } from './family.js';
+import { flockAt, WHALES } from './life.js';
 
 const { Vector3 } = BABYLON;
 
-// The cues: a sound, the second it starts at its source, where it is (a point, or one that moves with time), how loud,
-// and the distance it is heard at full loudness.
-function cues() {
-  const surf = new Vector3(STRIKE.x * 0.8, 0.5, STRIKE.z * 0.8);
+// The second the day first reaches `day`.
+const secondOfDay = (day) => { let frame = 1; while (frame < FRAMES && days(frame) < day) frame++; return seconds(frame); };
+const night = (day) => 1 - smoothstep(-0.25, 0, Math.sin(2 * Math.PI * (day + 0.05)));
+const TREE = new Vector3(NEST.x, NEST.ground + 1, NEST.z);
+
+// The family's calls: [sound, who, second, loudness].
+const CALLS = [
+  // She finds the island; he follows; they court, and settle.
+  ['mother', 'mother', 39.6], ['mother', 'mother', 41.6], ['mother', 'mother', 43.4], ['father', 'father', 46.6], ['father', 'father', 48.3],
+  ['mother', 'mother', 48.9], ['father', 'father', 51.3], ['mother', 'mother', 51.9], ['father', 'father', 54.1], ['mother', 'mother', 54.8],
+  ['coo', 'mother', 55.8], ['coo', 'father', 56.3], ['father', 'father', 59.4, 0.6], ['father', 'father', 62.4, 0.6], ['coo', 'mother', 64.5],
+  ['coo', 'mother', 72.1, 0.7],
+  // It hatches and is fed.
+  ['crack', 'chick', 81.7], ['crack', 'chick', 82.2], ['peep', 'chick', 82.8], ['coo', 'mother', 83.3], ['peep', 'chick', 83.6], ['peep', 'chick', 84.4],
+  ['father', 'father', 87.4], ['peep', 'chick', 87.9], ['peep', 'chick', 88.4], ['peep', 'chick', 88.9], ['peep', 'chick', 89.5], ['coo', 'father', 90.2],
+  ['mother', 'mother', 96.6, 0.7], ['peep', 'chick', 97.3], ['peep', 'chick', 97.8],
+  // The lesson; it tries and fails; she comforts it.
+  ['mother', 'mother', 99.7], ['mother', 'mother', 101.1], ['mother', 'mother', 102.4], ['peep', 'chick', 103.1], ['peep', 'chick', 103.6],
+  ['peep', 'chick', 105.6], ['sad', 'chick', 106.4], ['coo', 'mother', 107.5], ['coo', 'mother', 108.3],
+  // The star's last nights; he cannot settle; it comes.
+  ['father', 'father', 113.2, 0.7], ['coo', 'mother', 115], ['father', 'father', 118.4, 0.7], ['father', 'father', 124.9], ['alarm', 'father', 126.2],
+  ['alarm', 'father', 129.6], ['mother', 'mother', 131], ['sad', 'chick', 132.6], ['alarm', 'father', 134.9], ['peep', 'chick', 135.3],
+  ['peep', 'chick', 136.2], ['coo', 'mother', 138.2],
+  // The fire comes down to them; the chick fails again.
+  ...[144, 146.2, 148.1, 150, 151.8, 153.4, 154.4].map((second) => ['alarm', 'father', second]), ['peep', 'chick', 145.3], ['mother', 'mother', 147.2],
+  ['peep', 'chick', 148.8], ['peep', 'chick', 150.6], ['sad', 'chick', 151.3], ['mother', 'mother', 152.7], ['peep', 'chick', 153.9],
+  // She pushes it; it falls, and flies; her last call as the tree goes.
+  ['mother', 'mother', 154.85], ['sad', 'chick', 155.15], ['peep', 'chick', 155.5], ['mother', 'mother', 156.0], ['father', 'father', 156.6], ['peep', 'chick', 157.2],
+  // The night at sea, and home.
+  ['father', 'father', 160.4, 0.8], ['peep', 'chick', 161.1, 0.8], ['coo', 'father', 166.5], ['peep', 'chick', 167.2, 0.7], ['father', 'father', 171.6],
+  ['father', 'father', 173.8], ['mother', 'chick', 174.3], ['father', 'father', 174.9], ['coo', 'father', 175.8], ['coo', 'chick', 176.3],
+];
+
+// How loud each sound is against the others: tones carry far more than rumbles of the same peak.
+const LEVEL = { eruption: 2, steam: 1, insects: 1, fire: 1.2, mother: 0.3, father: 0.3, alarm: 0.3, coo: 0.3, peep: 0.22, sad: 0.28, flock: 0.25, crack: 0.4,
+  song: 0.25, spout: 0.5, creak: 0.6, crash: 1.4, roar: 1.6, boom: 3.2, thud: 1.8, surf: 1 };
+// Every sound: a one-shot plays once from `at` (seconds) where `place(time)` puts it; a bed loops as loud as
+// `volume(day, time)` says. `near` is the distance it is heard at full loudness; with no place it is all around.
+export function cues() {
+  const at = (sound, second, place, volume = 1, near = 3) => ({ sound, at: second, place, volume: volume * LEVEL[sound], near });
+  const flockIn = secondOfDay(4.9), flock = (second, volume = 0.6) => at('flock', second, flockAt, volume, 8);
   return [
-    { sound: 'roar', at: BEAT.impact - 6.2, place: (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), volume: 1, near: 30, moving: true },
-    ...IMPACTS.map(({ x, z, time, size }) => ({ sound: size >= 0.75 ? 'boom' : 'thud', at: time, place: () => new Vector3(x, 1, z), volume: size, near: 25 })),
-    { sound: 'surf', at: BEAT.impact + 1.5, place: () => surf, volume: 0.7, near: 15 },
+    { sound: 'sea', bed: true, volume: () => 0.35 },
+    { sound: 'wind', bed: true, volume: (day, time) => 0.12 + 0.6 * gust(time) },
+    { sound: 'eruption', bed: true, place: () => new Vector3(0, 4, 0), near: 12, volume: (day) => LEVEL.eruption * eruption(day) * smoothstep(0.1, 0.4, day) },
+    { sound: 'steam', bed: true, place: () => new Vector3(0, 0.3, 0), near: 8, volume: (day) => 0.6 * smoothstep(1.45, 1.65, day) * (1 - smoothstep(2.4, 2.9, day)) },
+    { sound: 'insects', bed: true, place: () => new Vector3(0, 1, 0), near: 8,
+      volume: (day, time) => 0.35 * night(day) * smoothstep(5.6, 6.2, day) * (1 - smoothstep(BEAT.streak - 2, BEAT.streak, time) * (1 - smoothstep(BEAT.heal, BEAT.heal + 3, time))) },
+    { sound: 'fire', bed: true, place: (time) => fireLight(time).position, near: 6, volume: (day, time) => (time >= BEAT.embers ? LEVEL.fire * burning(time) : 0) },
+    ...CALLS.map(([sound, who, second, volume = 1]) => at(sound, second, (time) => whereIs(who, time), volume)),
+    flock(flockIn), flock(flockIn + 3.5), ...Array.from({ length: Math.floor((BEAT.leave - flockIn - 8) / 9) }, (_, k) => flock(flockIn + 9 * (k + 1), 0.35)),
+    flock(BEAT.leave), flock(BEAT.leave + 1.4), flock(BEAT.leave + 3), flock(BEAT.home - 1.8), flock(BEAT.home - 0.2), flock(BEAT.home + 1.6), flock(BEAT.home + 3.2, 0.4),
+    ...WHALES.flatMap(({ start, at: place, size }) => [at('song', start + 0.2, () => place, size, 10), at('spout', start + 0.9, () => place, size, 10)]),
+    at('creak', BEAT.fall - 0.25, () => TREE, 0.8), at('crash', BEAT.fall + 0.5, () => TREE, 1, 4),
+    at('roar', BEAT.impact - 6.2, (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), 1, 30),
+    ...IMPACTS.map(({ x, z, time, size }) => ({ ...at(size >= 0.75 ? 'boom' : 'thud', time, () => new Vector3(x, 1, z), size, 25), shock: true })),
+    at('surf', BEAT.impact + 1.5, () => new Vector3(STRIKE.x * 0.8, 0.5, STRIKE.z * 0.8), 0.7, 15),
   ];
 }
+
+// Where in a one-shot the camera hears it now, in seconds (negative before it is heard): an impact's shock takes its
+// time to reach the camera.
+export const heard = (cue, now, ear) => now - cue.at - (cue.shock ? Vector3.Distance(cue.place(now), ear) / SHOCK_SPEED : 0);
 
 export function createAudio(scene, camera, time) {
   // Silent where there is no Web Audio (headless runs).
   if (typeof AudioContext === 'undefined') return () => {};
-  const list = cues(), playing = new Map();
+  const list = cues(), playing = new Set();
   let engine = null, sounds = null, last = null;
   (async () => {
     engine = await BABYLON.CreateAudioEngineAsync();
     engine.listener.attach(camera);
-    const made = createSounds();
-    sounds = await Promise.all(list.map(async (cue, k) => {
-      const { samples, sampleRate } = made[cue.sound], buffer = new AudioBuffer({ length: samples[0].length, numberOfChannels: 1, sampleRate });
-      buffer.copyToChannel(samples[0], 0);
-      return BABYLON.CreateSoundAsync(`${cue.sound} ${k}`, buffer, { volume: cue.volume, spatialEnabled: true, spatialDistanceModel: 'inverse', spatialMinDistance: cue.near, spatialRolloffFactor: 1 });
-    }));
+    const buffers = {};
+    for (const [name, { samples, sampleRate }] of Object.entries(createSounds())) {
+      const pcm = new AudioBuffer({ length: samples[0].length, numberOfChannels: 1, sampleRate });
+      pcm.copyToChannel(samples[0], 0);
+      buffers[name] = await BABYLON.CreateSoundBufferAsync(pcm);
+    }
+    sounds = await Promise.all(list.map((cue, k) => BABYLON.CreateSoundAsync(`${cue.sound} ${k}`, buffers[cue.sound],
+      { volume: cue.bed ? 0 : cue.volume, loop: !!cue.bed, spatialEnabled: !!cue.place, spatialDistanceModel: 'inverse', spatialMinDistance: cue.near ?? 1, spatialRolloffFactor: 1 })));
   })();
   scene.onDisposeObservable.add(() => engine?.dispose());
 
-  // Where in a cue the camera hears it now, in seconds (negative before it is heard), given the shock's way to it.
-  const heard = (cue, now) => now - cue.at - (cue.moving ? 0 : Vector3.Distance(cue.place(now), camera.globalPosition) / SHOCK_SPEED);
-  const stop = () => { for (const sound of playing.values()) sound.stop(); playing.clear(); };
+  const stop = () => { for (const k of playing) sounds[k].stop(); playing.clear(); };
   return (day, now) => {
     if (!sounds) return;
-    // A jump or a pause stops every sound; playing on starts each the moment the camera hears it, from where it is.
+    // A jump or a pause stops every sound; playing on starts each where the camera hears it now.
     if (!time.playing || last === null || now < last || now - last > 0.5) stop();
     if (time.playing) list.forEach((cue, k) => {
-      const sound = sounds[k], offset = heard(cue, now);
-      sound.spatial.position = cue.place(now);
-      if (offset >= 0 && offset < sound.buffer.duration && !playing.has(k)) { sound.play({ startOffset: offset }); playing.set(k, sound); }
+      const sound = sounds[k];
+      if (cue.place) sound.spatial.position = cue.place(now);
+      if (cue.bed) {
+        sound.volume = cue.volume(day, now);
+        if (!playing.has(k)) { sound.play({ startOffset: now % sound.buffer.duration }); playing.add(k); }
+        return;
+      }
+      const offset = heard(cue, now, camera.globalPosition);
+      if (offset >= 0 && offset < sound.buffer.duration && !playing.has(k)) { sound.play({ startOffset: offset }); playing.add(k); }
     });
     last = time.playing ? now : null;
   };

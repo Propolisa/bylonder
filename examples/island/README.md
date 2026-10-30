@@ -27,9 +27,11 @@ the tree stood.
   sea (`life.js`).
 - **Life.** `forest.js` grows clumps of trees with bushes, ferns and flowering vines between, sways, burns and regrows
   them; `life.js` has the flock, the whales and fireflies.
-- **Sound.** `sounds.js` makes the roar, the booms, the distant thuds and the surf from noise; `audio.js` plays them in
-  Babylon's spatial audio, heard from the camera: the roar moves with the asteroid, and each impact is heard from where
-  it lands, as late as its shock reaches the camera. Sound plays with the timeline; renders are silent.
+- **Sound.** `sounds.js` makes every sound from noise and tones; `audio.js` holds the cue sheet and plays it in
+  Babylon's spatial audio, heard from the camera. Beds loop under the film as loud as the story makes them (the sea, the
+  wind, the eruption and its steam, insects on warm nights, the forest fire); over them the family's calls come from
+  where each bird is, with the egg cracking, the flock, the whales, the tree falling, and the asteroid's roar travelling
+  with it, each impact heard as late as its shock reaches the camera. Sound plays with the timeline; renders are silent.
 - **Camera.** Keys on the camera's location and target (channels **Camera**), linear within a shot and held on its last
   frame, so each shot cuts to the next. Each impact shakes it, later and weaker the farther away it is.
 
