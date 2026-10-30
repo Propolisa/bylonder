@@ -9,6 +9,8 @@
 #include <vector>
 
 #include "BKE_context.hh"
+#include "BKE_icons.hh"
+#include "BLI_map.hh"
 #include "BKE_screen.hh"
 #include "BLF_api.hh"
 #include "BLI_math_color.h"
@@ -162,9 +164,36 @@ static const char *icon_names[] = {
 #undef DEF_ICON_BLANK
 };
 
+/* Tools' geometry icons by icon id, as `tools/` and the name of the file Blender reads its triangles from. */
+static blender::Map<int, std::string> &geom_icons()
+{
+  static blender::Map<int, std::string> icons;
+  return icons;
+}
+
 EXPORT(ui_icon_name) const char *ui_icon_name(int icon)
 {
+  if (const std::string *geom = geom_icons().lookup_ptr(icon)) {
+    return geom->c_str();
+  }
   return icon >= 0 && icon < int(ARRAY_SIZE(icon_names)) ? icon_names[icon] : "NONE";
+}
+
+/* bpy.app.icons.new_triangles_from_file (bpy_app_icons.cc): a tool's icon registered in Blender's icon system as a
+ * geometry icon (BKE_icon_geom_ensure), its icon_value Blender's own. port-override: without its triangles, which the
+ * web draws from the SVG made of the same file (tools/blender-ui/icons.py), known by the file's name. */
+EXPORT(icon_geom_new) int icon_geom_new(const char *name)
+{
+  blender::Icon_Geom *geom = MEM_new_zeroed<blender::Icon_Geom>(__func__);
+  const int icon_id = blender::BKE_icon_geom_ensure(geom);
+  geom_icons().add_overwrite(icon_id, std::string("tools/") + name);
+  return icon_id;
+}
+/* bpy.app.icons.release. */
+EXPORT(icon_release) void icon_release(int icon_id)
+{
+  geom_icons().remove(icon_id);
+  blender::BKE_icon_delete(icon_id);
 }
 
 namespace blender {

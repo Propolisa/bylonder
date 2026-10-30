@@ -1,9 +1,12 @@
-# bpy.app.icons: a tool's icon (release/datafiles/icons/NAME.dat, drawn from its triangles) is known by its file's name,
-# which Bylonder's toolbar draws from public/icons/blender/tools/NAME.svg (tools/blender-ui/icons.py converts them).
+# bpy.app.icons (bpy_app_icons.cc): a tool's icon (release/datafiles/icons/NAME.dat) registered in Blender's icon system
+# in the module, so its icon_value is Blender's own; the web draws it from public/icons/blender/tools/NAME.svg
+# (tools/blender-ui/icons.py converts them), by the name the module keeps for it (ui_icon_name).
+__pragma__('js', '{}', '/* js-import {geometryIcon, releaseIcon} from ../python/bpy_icons.js */')
+
+
 def new_triangles_from_file(filepath):
-    name = filepath.split('/').pop()
-    return name[:len(name) - len('.dat')]
+    return geometryIcon(filepath)
 
 
 def release(icon_value):
-    pass
+    releaseIcon(icon_value)

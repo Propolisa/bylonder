@@ -41,7 +41,7 @@ function entries(node, ui, enabled = true) {
   switch (node.kind) {
     // A tool's icon, which bpy.app.icons names.
     case 'operator': return [{ ...entry(ui, enabled, node.operator, node.props, node.text ?? operatorName(node.operator), node.icon),
-      ...(typeof node.icon_value === 'string' && { image: toolIconUrl(node.icon_value) }) }];
+      ...(toolIconUrl(node.icon_value) && { image: toolIconUrl(node.icon_value) }) }];
     case 'operator_enum': return enumEntries();
     case 'operator_menu_enum': return [{ label: node.text ?? operatorName(node.operator), blender: node.operator, items: enumEntries() }];
     case 'menu': {

@@ -14,8 +14,11 @@ export function iconStyle(name) {
   const [width, height] = sizes[name.toLowerCase()] ?? [1600, 1600];
   return { maskImage: `url("${iconUrl(name)}")`, maskSize: `${width / 16}% ${height / 16}%` };
 }
-// A tool's icon (tools/blender-ui/icons.py), by the name bpy.app.icons gives it.
-export const toolIconUrl = (name) => dataUrl(`tools/${name}`) ?? '';
+// Tools' icons (tools/blender-ui/icons.py) by the icon_value bpy.app.icons gives them (python/bpy_icons.js).
+const toolIcons = new Map();
+export const nameToolIcon = (value, name) => toolIcons.set(value, name);
+export const toolIconName = (value) => (toolIcons.has(value) ? `tools/${toolIcons.get(value)}` : undefined);
+export const toolIconUrl = (value) => (toolIcons.has(value) ? dataUrl(toolIconName(value)) ?? '' : '');
 export function iconEl(name, className = '') {
   const el = document.createElement('span');
   el.className = 'bl-icon ' + className;

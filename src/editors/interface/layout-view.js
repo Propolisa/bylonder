@@ -16,7 +16,7 @@
 import { defineComponent, h, ref, Teleport, onBeforeUnmount, cloneVNode } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
-import { iconStyle, toolIconUrl } from './icon.js';
+import { iconStyle, iconUrl, toolIconName } from './icon.js';
 import { rnaProperty, INFO, baseOf } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 import { operatorValues, isLayout, UILayout } from './layout.js';
@@ -25,8 +25,10 @@ import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import themes from './icon-themes.json' with { type: 'json' };
 
 // An icon in its theme color, as Blender draws its monochrome icons.
-export const icon = (name, className = '') => (typeof name === 'string' && name !== 'NONE'
-  ? h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: iconStyle(name), 'aria-hidden': 'true' }) : null);
+// A tool's icon in a layout Blender made (ui_icon_name's `tools/NAME`) is its colored image.
+export const icon = (name, className = '') => (typeof name !== 'string' || name === 'NONE' ? null
+  : name.startsWith('tools/') ? h('img', { class: ['bl-tool-icon', className], src: iconUrl(name), alt: '' })
+  : h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: iconStyle(name), 'aria-hidden': 'true' }));
 
 // ---- Values as Blender shows and parses them (ui_but_string_get, ui_but_string_eval_number).
 const SUFFIX = { CAMERA: ' mm', POWER: ' W', COLOR_TEMPERATURE: ' K', MASS: ' kg', TIME_ABSOLUTE: ' s', VELOCITY: ' m/s', ACCELERATION: ' m/s²', TEMPERATURE: ' K',
@@ -88,11 +90,9 @@ function headerPropWidth(node, prop, unit) {
 
 // ---- Widgets. A widget's class carries its Blender widget type; aligned layouts square the corners where widgets meet.
 const W = 'bl-widget';
-// A tool's icon, which bpy.app.icons names (icon_value), as an image.
-const toolIcon = (name) => (typeof name === 'string' ? h('img', { class: 'bl-tool-icon', src: toolIconUrl(name), alt: '' }) : null);
 export const label = (text, { iconName, iconValue, className = '', align = 'left' } = {}) => h('div', {
   class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', !text && iconName && 'bl-icon-only', className],
-}, [toolIcon(iconValue), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
+}, [icon(toolIconName(iconValue)), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
 export function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value }) {
   return h('button', {
@@ -166,7 +166,7 @@ const Popover = defineComponent({
   },
 });
 // A popover without text or icon is its arrow alone, a unit wide (ui_item_menu).
-const popover = (panels, node, env, iconName = node.icon ?? node.icon_value, iconOnly = !node.text && !!iconName) => h(Popover, {
+const popover = (panels, node, env, iconName = node.icon ?? toolIconName(node.icon_value), iconOnly = !node.text && !!iconName) => h(Popover, {
   panels, text: node.text, iconName, iconOnly, arrowOnly: node.text === '' && !iconName, disabled: !env.enabled || !env.active, env,
 });
 
@@ -478,7 +478,7 @@ function templateImageSettings(node, env) {
   return settings ? layout({ kind: 'column', children: [prop('file_format'), prop('color_mode', { expand: true }), ...quality] }, env) : null;
 }
 
-const TEMPLATES = { template_icon: (node) => toolIcon(node.icon_value), template_image_settings: templateImageSettings, template_ID: templateID, template_list: templateList, template_node_view: templateNodeView,
+const TEMPLATES = { template_icon: (node) => icon(toolIconName(node.icon_value)), template_image_settings: templateImageSettings, template_ID: templateID, template_list: templateList, template_node_view: templateNodeView,
   template_ID_preview: templateID, template_search: templateID };
 
 // ---- Layouts.
