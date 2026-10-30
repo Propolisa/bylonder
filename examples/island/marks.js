@@ -1,12 +1,13 @@
 // Comic marks drawn over the film, flat and inked, each kind with its own shape: an alarm bursts from a bird's head in
 // jagged red spikes; a whale's song and blow swell out in wide slow arcs; a great impact or the tree's crash pops a
-// starburst; a falling rock streams speed lines behind it. They face the camera and keep their size on screen, and come
+// starburst; a falling rock streams speed lines behind it, and the mother's shove streaks after the chick. They face the camera and keep their size on screen, and come
 // from the cue sheet (audio.js) and the rocks' paths (meteor.js), so they land with the sounds.
 import { createMesh } from '@workbench/sdk';
 import { BEAT, NEST, IMPACTS, smoothstep } from './story.js';
 import { cues } from './audio.js';
 import { fallingRocks } from './meteor.js';
 import { WHALES } from './life.js';
+import { whereIs } from './family.js';
 import { setMatrices, place } from './sky.js';
 import { random } from './random.js';
 
@@ -50,12 +51,15 @@ function marksOf() {
     if (urgent) for (let k = 0; k < 5; k++) list.push({ kind: 'spike', start: cue.at, life: 0.55, at: (t) => cue.place(t).add(new Vector3(0, 0.12, 0)), turn: Math.PI / 2 + (k - 2) * 0.5 + (rand() - 0.5) * 0.2, size: 0.11, k });
   }
   // A whale's song as it surfaces, then its blow: three arcs each side, one after another.
-  for (const { start, at, size } of WHALES) for (const second of [start + 0.2, start + 0.9]) for (let j = 0; j < 3; j++) for (const side of [0.5, Math.PI - 0.5]) {
-    list.push({ kind: 'arc', start: second + j * 0.35, life: 1.9, at: () => at.add(new Vector3(0, 0.5 * size, 0)), turn: side, size: 0.12 * size });
+  for (const { start, at, size, length } of WHALES) for (const second of [start + 0.2, start + 0.28 * length]) for (let j = 0; j < 3; j++) for (const side of [0.5, Math.PI - 0.5]) {
+    list.push({ kind: 'arc', start: second + j * 0.45, life: 2.4, at: () => at.add(new Vector3(0, 0.5 * size, 0)), turn: side, size: 0.12 * size });
   }
   const tree = new Vector3(NEST.x, NEST.ground + 1, NEST.z);
   for (const impact of IMPACTS.filter((i) => i.size >= 0.75)) list.push({ kind: 'burst', start: impact.time, life: 0.8, at: () => new Vector3(impact.x, 2 * impact.size, impact.z), turn: rand() * 6.28, size: 0.22 * impact.size });
-  list.push({ kind: 'burst', start: BEAT.fall + 0.5, life: 0.7, at: () => tree, turn: 0.3, size: 0.14 });
+  list.push({ kind: 'burst', start: BEAT.blast, life: 0.8, at: () => tree, turn: 0.3, size: 0.15 });
+  // The shove: lines streaking along it from the mother past the chick, as it goes over the edge.
+  const along = new Vector3(Math.cos(NEST.angle), -0.3, Math.sin(NEST.angle));
+  for (let k = 0; k < 4; k++) list.push({ kind: 'push', start: BEAT.climax - 0.05 + k * 0.04, life: 0.55, at: (t) => whereIs('chick', t), along, k });
   return list;
 }
 
@@ -64,7 +68,7 @@ const easeBack = (u) => { const t = Math.min(1, Math.max(0, u)) - 1; return 1 + 
 export function createMarks(scene, toon, camera) {
   const marks = marksOf(), SPEED_LINES = 48, lines = Array.from({ length: SPEED_LINES }, (_, i) => ({ phase: (i * 0.618) % 1, across: ((i * 0.37) % 1) * 2 - 1, length: 0.6 + 0.4 * ((i * 0.71) % 1) }));
   const kinds = Object.fromEntries(Object.entries(SHAPES).map(([kind, [points, widths]]) => {
-    const count = kind === 'speed' ? SPEED_LINES : Math.max(1, marks.filter((m) => m.kind === kind).length);
+    const count = kind === 'speed' ? SPEED_LINES + marks.filter((m) => m.kind === 'push').length : Math.max(1, marks.filter((m) => m.kind === kind).length);
     const layers = [['', 0], [' Outline', 0.035]].map(([suffix, border], k) => {
       const mesh = createMesh(`Mark ${kind[0].toUpperCase() + kind.slice(1)}${suffix}`, stroke(points, widths, border), scene);
       mesh.material = toon.ink(`Mark ${kind}${suffix}`, STYLES[kind][k]);
@@ -96,16 +100,21 @@ export function createMarks(scene, toon, camera) {
       const at = m.at(time);
       if (m.kind === 'spike') draw('spike', at, m.turn + 0.06 * Math.sin(time * 70 + m.k), m.size * easeBack(u * 5) * (1 - smoothstep(0.7, 1, u)));
       else if (m.kind === 'arc') draw('arc', at, m.turn, m.size * (0.5 + 0.9 * (1 - (1 - u) ** 2)), 1 - smoothstep(0.75, 1, u));
-      else draw('burst', at, m.turn + 0.3 * u, m.size * easeBack(u * 6) * (1 - smoothstep(0.75, 1, u)));
+      else if (m.kind === 'push') {
+        const angle = Math.atan2(Vector3.Dot(m.along, up), Vector3.Dot(m.along, right)) + Math.PI, across = up.scale(Math.cos(angle)).add(right.scale(-Math.sin(angle)));
+        const d = Vector3.Distance(eye, at) * screen;
+        draw('speed', at.add(across.scale((m.k - 1.5) * 0.025 * d)).add(m.along.normalize().scale(-0.03 * d)), angle, 0.2 * (1 - u) * (0.8 + 0.1 * m.k));
+      } else draw('burst', at, m.turn + 0.3 * u, m.size * easeBack(u * 6) * (1 - smoothstep(0.75, 1, u)));
     }
     // Speed lines behind each falling rock, along its path on screen; each slides back and fades as it goes.
     const rocks = fallingRocks(time);
     if (rocks.length) lines.forEach((line, i) => {
       const rock = rocks[i % rocks.length], age = (time * 2.5 + line.phase) % 1;
       const along = rock.velocity, angle = Math.atan2(Vector3.Dot(along, up), Vector3.Dot(along, right)) + Math.PI;
-      const d = Vector3.Distance(eye, rock.position), across = up.scale(Math.cos(angle)).add(right.scale(-Math.sin(angle)));
-      const at = rock.position.add(across.scale(line.across * 0.035 * d * screen * rock.size)).add(along.normalize().scale(-age * 0.06 * d * screen));
-      draw('speed', at, angle, 0.32 * line.length * (0.6 + 0.4 * rock.size) * (1 - age), 1);
+      // As long as a few of the rock's own widths on screen, so a far rock trails short lines and a near one long.
+      const d = Vector3.Distance(eye, rock.position), across = up.scale(Math.cos(angle)).add(right.scale(-Math.sin(angle))), seen = rock.size / (d * screen);
+      const at = rock.position.add(across.scale(line.across * 0.9 * rock.size)).add(along.normalize().scale(-age * 2 * rock.size));
+      draw('speed', at, angle, Math.min(0.3, 7 * seen) * line.length * (1 - age), 1);
     });
     for (const k of Object.values(kinds)) {
       for (const { buffer } of k.layers) for (let i = k.used; i < k.count; i++) place(buffer, i, FAR, NONE);

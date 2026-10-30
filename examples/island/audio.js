@@ -8,7 +8,7 @@ import { BEAT, NEST, STRIKE, IMPACTS, SHOCK_SPEED, FRAMES, smoothstep, eruption,
 import { createSounds } from './sounds.js';
 import { fireballAt, fireLight } from './meteor.js';
 import { whereIs } from './family.js';
-import { flockAt, WHALES } from './life.js';
+import { flockAt, WHALES, WAVES } from './life.js';
 
 const { Vector3 } = BABYLON;
 
@@ -35,24 +35,24 @@ const CALLS = [
   ['father', 'father', 113.2, 0.7], ['coo', 'mother', 115], ['father', 'father', 118.4, 0.7], ['father', 'father', 124.9], ['alarm', 'father', 126.2],
   ['alarm', 'father', 129.6], ['mother', 'mother', 131], ['sad', 'chick', 132.6], ['alarm', 'father', 134.9], ['peep', 'chick', 135.3],
   ['peep', 'chick', 136.2], ['coo', 'mother', 138.2],
-  // The fire comes down to them; the chick fails again.
-  ...[144, 146.2, 148.1, 150, 151.8, 153.4, 154.4].map((second) => ['alarm', 'father', second]), ['peep', 'chick', 145.3], ['mother', 'mother', 147.2],
-  ['peep', 'chick', 148.8], ['peep', 'chick', 150.6], ['sad', 'chick', 151.3], ['mother', 'mother', 152.7], ['peep', 'chick', 153.9],
-  // She pushes it; it falls, and flies; her last call as the tree goes.
-  ['mother', 'mother', 154.85], ['sad', 'chick', 155.15], ['peep', 'chick', 155.5], ['mother', 'mother', 156.0], ['father', 'father', 156.6], ['peep', 'chick', 157.2],
-  // It calls for her from the beach, and nothing answers; the father's low call.
-  ['peep', 'chick', 158.3], ['peep', 'chick', 159.1], ['sad', 'chick', 160.9], ['peep', 'chick', 162.4], ['peep', 'chick', 164.9, 0.8],
-  ['sad', 'chick', 167.1, 0.8], ['coo', 'father', 168], ['peep', 'chick', 169.9, 0.5], ['coo', 'father', 171.3],
-  // Morning: a faint call from the cave, and again; she comes out; they huddle.
-  ['mother', 'mother', 174.1, 0.25], ['peep', 'chick', 174.6], ['mother', 'mother', 175.3, 0.45], ['peep', 'chick', 175.9], ['father', 'father', 176.4],
-  ['mother', 'mother', 176.9, 0.8], ['peep', 'chick', 177.4], ['peep', 'chick', 177.8], ['peep', 'chick', 178.2], ['coo', 'mother', 179],
-  ['coo', 'chick', 179.6], ['coo', 'father', 180.4], ['coo', 'mother', 181.8, 0.7], ['peep', 'chick', 183.1, 0.5], ['coo', 'mother', 184.6, 0.6],
-
+  // The fire comes down to them; the chick fails again. The mountain cracks; she sees it and cries out.
+  ...[144, 146.2, 148.1, 150, 151.8].map((second) => ['alarm', 'father', second]), ['peep', 'chick', 145.3], ['mother', 'mother', 147.2],
+  ['peep', 'chick', 148.8], ['peep', 'chick', 150.6], ['sad', 'chick', 151.3], ['alarm', 'mother', 153.1], ['alarm', 'mother', 153.8], ['alarm', 'father', 154.2],
+  // She shoves it off; it falls, and flies; the blast; the father's cry; the chick's.
+  ['mother', 'mother', 154.85], ['sad', 'chick', 155.15], ['peep', 'chick', 155.5], ['father', 'father', 156.6], ['peep', 'chick', 157.2],
+  // It calls for her from the beach into the smoke, and nothing answers; the father's low call; they sleep.
+  ['peep', 'chick', 158.3], ['peep', 'chick', 159.1], ['sad', 'chick', 160.9], ['peep', 'chick', 162.4], ['peep', 'chick', 164.4, 0.8],
+  ['coo', 'father', 165.7], ['sad', 'chick', 166.2, 0.6], ['coo', 'father', 167.3, 0.5],
+  // Morning. A faint call round the shore; they go to it; she answers; they find her, and come together.
+  ['coo', 'father', 173.6, 0.6], ['sad', 'chick', 174.8, 0.7], ['mother', 'mother', BEAT.call, 0.25], ['peep', 'chick', BEAT.call + 0.5], ['mother', 'mother', BEAT.call + 1.2, 0.35],
+  ['father', 'father', 177.5], ['peep', 'chick', 177.9], ['peep', 'chick', 178.8], ['mother', 'mother', 179.6, 0.5], ['peep', 'chick', 180.1], ['peep', 'chick', 181.2],
+  ['coo', 'mother', 182.3, 0.6], ['peep', 'chick', 182.8], ['father', 'father', 183.4], ['coo', 'father', 185.2, 0.7], ['peep', 'chick', 186.7], ['peep', 'chick', 187.1],
+  ['coo', 'mother', 188.3], ['coo', 'chick', 188.9], ['coo', 'father', 189.6], ['coo', 'mother', 191.2, 0.7], ['peep', 'chick', 192.6, 0.5], ['coo', 'father', 194, 0.6],
 ];
 
 // How loud each sound is against the others: tones carry far more than rumbles of the same peak.
-const LEVEL = { eruption: 2, steam: 1, insects: 1, fire: 1.2, mother: 0.3, father: 0.3, alarm: 0.3, coo: 0.3, peep: 0.22, sad: 0.28, flock: 0.25, crack: 0.4,
-  song: 0.25, spout: 0.5, creak: 0.6, crash: 1.4, roar: 1.6, boom: 3.2, thud: 1.8, surf: 1 };
+const LEVEL = { eruption: 2, steam: 1, insects: 1, fire: 1.3, mother: 0.3, father: 0.3, alarm: 0.32, coo: 0.3, peep: 0.22, sad: 0.28, flock: 0.25, crack: 0.4,
+  song: 0.16, spout: 0.35, creak: 0.6, crash: 1.4, roar: 1.6, boom: 3.4, thud: 2, surf: 1, approach: 2.2, rumble: 2.6, blast: 2.5 };
 // Every sound: a one-shot plays once from `at` (seconds) where `place(time)` puts it; a bed loops as loud as
 // `volume(day, time)` says. `near` is the distance it is heard at full loudness; with no place it is all around.
 export function cues() {
@@ -67,10 +67,12 @@ export function cues() {
       volume: (day, time) => 0.35 * night(day) * smoothstep(5.6, 6.2, day) * (1 - smoothstep(BEAT.streak - 2, BEAT.streak, time)) },
     { sound: 'fire', bed: true, place: (time) => fireLight(time).position, near: 6, volume: (day, time) => (time >= BEAT.embers ? LEVEL.fire * burning(time) : 0) },
     ...CALLS.map(([sound, who, second, volume = 1]) => at(sound, second, (time) => whereIs(who, time), volume)),
-    flock(flockIn), flock(flockIn + 3.5), ...Array.from({ length: Math.floor((BEAT.leave - flockIn - 8) / 9) }, (_, k) => flock(flockIn + 9 * (k + 1), 0.35)),
-    flock(BEAT.leave), flock(BEAT.leave + 1.4), flock(BEAT.leave + 3),
-    ...WHALES.flatMap(({ start, at: place, size }) => [at('song', start + 0.2, () => place, size, 10), at('spout', start + 0.9, () => place, size, 10)]),
-    at('creak', BEAT.fall - 0.25, () => TREE, 0.8), at('crash', BEAT.fall + 0.5, () => TREE, 1, 4),
+    flock(flockIn), flock(flockIn + 3.5), ...Array.from({ length: Math.floor((WAVES[0] - flockIn - 8) / 9) }, (_, k) => flock(flockIn + 9 * (k + 1), 0.35)),
+    ...WAVES.flatMap((second) => [flock(second - 1.5, 0.5), flock(second, 0.8), flock(second + 1.4, 0.6)]),
+    ...WHALES.flatMap(({ start, at: place, size, length }) => [at('song', start + 0.2, () => place, size, 10), at('spout', start + 0.28 * length, () => place, size, 10)]),
+    at('rumble', BEAT.crack, () => TREE, 1, 8), at('creak', BEAT.blast - 0.7, () => TREE, 0.8), at('blast', BEAT.blast, () => TREE, 1, 8),
+    at('crash', BEAT.blast + 1.5, () => new Vector3(Math.cos(NEST.angle) * 7, 0.3, Math.sin(NEST.angle) * 7), 0.8, 6),
+    at('approach', BEAT.streak, (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), 1, 60),
     at('roar', BEAT.impact - 6.2, (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), 1, 30),
     ...IMPACTS.map(({ x, z, time, size }) => ({ ...at(size >= 0.75 ? 'boom' : 'thud', time, () => new Vector3(x, 1, z), size, 25), shock: true })),
     at('surf', BEAT.impact + 1.5, () => new Vector3(STRIKE.x * 0.8, 0.5, STRIKE.z * 0.8), 0.7, 15),
@@ -90,7 +92,7 @@ export async function createAudio(scene, camera, time) {
   // Silent where there is no Web Audio (headless runs).
   if (typeof AudioContext === 'undefined') return () => {};
   const list = cues(), playing = new Set();
-  const engine = await BABYLON.CreateAudioEngineAsync({ volume: 0.6 });
+  const engine = await BABYLON.CreateAudioEngineAsync({ volume: 0.45 });
   scene.onDisposeObservable.add(() => engine.dispose());
   engine.listener.attach(camera);
   const buffers = {};

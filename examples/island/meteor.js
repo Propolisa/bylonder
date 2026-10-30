@@ -5,18 +5,17 @@
 import { createMesh } from '@workbench/sdk';
 import { createParticles, together, pop, swell, glowOf, direction, rnd } from './particles.js';
 import { createPuffs, setMatrices, place } from './sky.js';
-import { heightAt } from './island.js';
+import { heightAt, shore } from './island.js';
 import { blob } from './forest.js';
 import { random } from './random.js';
-import { BEAT, OMEN, STRIKE, WAVE, FRAGMENTS, IMPACTS, waveReach, islandShadow, landAt, IMPACT, NEST, LENGTH, smoothstep, lerp, falling, fireFront, fireAngle, burning, flash, sinceStrike } from './story.js';
+import { BEAT, OMEN, STRIKE, fireballAt, WAVE, FRAGMENTS, IMPACTS, waveReach, islandShadow, landAt, IMPACT, NEST, LENGTH, crackReach, crackAt, crackAngle, smoothstep, lerp, falling, fireFront, fireAngle, burning, flash, sinceStrike } from './story.js';
 
 const { Vector3, Color3, Quaternion } = BABYLON;
 const HIDDEN = [new Vector3(0, -100, 0), 0];
 
 // The asteroid's path: from far out along the star's direction down to the sea, ever faster.
 const STRIKE_AT = new Vector3(STRIKE.x, 0.2, STRIKE.z);
-const FROM = STRIKE_AT.add(new Vector3(OMEN.x, OMEN.y, OMEN.z).scale(150));
-export const fireballAt = (time) => Vector3.Lerp(FROM, STRIKE_AT, falling(time) ** 1.8);
+export { fireballAt };
 // A point on the fire's line `r` from the centre, `across` it.
 const onFire = (r, across) => {
   const a = fireAngle(r) + across / Math.max(r, 0.5), x = Math.cos(a) * r, z = Math.sin(a) * r;
@@ -50,7 +49,8 @@ function createRocks(scene, toon, name, count, at) {
 // layers, a smoke trail that hangs in the sky long after, and sparks.
 function createFireball(scene, toon) {
   const T0 = BEAT.streak, T1 = BEAT.impact, path = (r, birth) => fireballAt(birth).add(new Vector3(2 * r(20) - 1, 2 * r(21) - 1, 2 * r(22) - 1).scale(0.8));
-  const near = (birth) => 1 + falling(birth);
+  // Far out it is a star that swells as it comes: its glow stays as big as a star's to the eye, then outgrows it.
+  const near = (birth) => 1 + falling(birth) + 0.012 * Vector3.Distance(fireballAt(birth), STRIKE_AT);
   const rock = createRocks(scene, toon, 'Asteroid', 1, (time) => [[fireballAt(time), time >= T0 && time < T1 ? 0.9 * near(time) : 0]]);
   const shells = [['Asteroid Shell', [2.6, 1.25, 1.0], 0.75, 0.5], ['Asteroid Glow', [1.1, 0.3, 0.65], 1.2, 1.1]].map(([name, glow, size, behind]) => {
     const puff = createPuffs(scene, toon, name, '#000000', 1, (day, time) => [time >= T0 && time < T1 ? [fireballAt(time).add(BACK.scale(behind * near(time))), size * near(time) * (1 + 0.08 * Math.sin(time * 40))] : HIDDEN]);
@@ -76,7 +76,7 @@ const fragmentAt = (f, time) => Vector3.Lerp(f.from, f.to, Math.min(1, Math.max(
 // Every rock falling through the air now: the asteroid and its fragments, where each is and which way it moves.
 export function fallingRocks(time) {
   const rock = (at, size) => ({ position: at(time), velocity: at(time + 0.05).subtract(at(time - 0.05)).scale(10), size });
-  return [...(time >= BEAT.streak && time < BEAT.impact ? [rock(fireballAt, 1)] : []),
+  return [...(time >= BEAT.streak && time < BEAT.impact ? [rock(fireballAt, 1 + falling(time) + 0.012 * Vector3.Distance(fireballAt(time), STRIKE_AT))] : []),
     ...PIECES.filter((f) => time >= f.split && time < f.land).map((f) => rock((t) => fragmentAt(f, t), f.size))];
 }
 // The fragments in the air: burning rocks in glowing shells, the large ones nearly the asteroid's size, each its own
@@ -215,12 +215,12 @@ function createGroundFire(scene, toon) {
     return onFire(Math.max(IMPACT.r, front - 1.4 * r(30)), (2 * r(31) - 1) * 0.55).add(new Vector3(0, 0.05, 0));
   };
   const strength = (birth) => (birth > BEAT.embers ? burning(birth) : 0);
-  const flame = (name, glow, rate, life, peak, seed) => createParticles(scene, toon, { name, color: '#000000', glow: glowOf(...glow), seed, start: BEAT.embers, end: BEAT.found, rate, life,
+  const flame = (name, glow, rate, life, peak, seed) => createParticles(scene, toon, { name, color: '#000000', glow: glowOf(...glow), seed, start: BEAT.embers, end: BEAT.wake, rate, life,
     origin: along, velocity: (r) => new Vector3((2 * r(32) - 1) * 0.2, 1.2 + r(3), (2 * r(33) - 1) * 0.2), drag: 1.5, gravity: 1.2, turbulence: 0.15, size: pop(peak, 0.2), strength });
   return together(flame('Fire Hot', [2.6, 1.9, 0.6], 40, [0.3, 0.6], 0.22, 31), flame('Fire', [2.3, 0.75, 0.1], 36, [0.5, 0.9], 0.3, 32), flame('Fire Red', [1.3, 0.2, 0.04], 24, [0.7, 1.2], 0.36, 33),
     createParticles(scene, toon, { name: 'Fire Smoke', color: '#46414d', underglow: glowOf(1, 0.32, 0.06), seed: 34, start: BEAT.embers, end: BEAT.dawn, rate: 16, life: [2.5, 4],
       origin: along, velocity: (r) => new Vector3(0, 1 + r(3), 0), drag: 0.5, gravity: 0.3, wind: new Vector3(-0.4, 0, -0.2), turbulence: 0.3, size: swell(0.06, 0.38), strength }),
-    createParticles(scene, toon, { name: 'Fire Embers', color: '#000000', glow: glowOf(2.6, 1.2, 0.2), seed: 35, start: BEAT.embers, end: BEAT.found, rate: 30, life: [1.5, 3],
+    createParticles(scene, toon, { name: 'Fire Embers', color: '#000000', glow: glowOf(2.6, 1.2, 0.2), seed: 35, start: BEAT.embers, end: BEAT.wake, rate: 30, life: [1.5, 3],
       origin: along, velocity: (r) => new Vector3((2 * r(32) - 1) * 0.6, 1.5 + 1.5 * r(3), (2 * r(33) - 1) * 0.6), drag: 0.8, gravity: 0.5, turbulence: 0.5, size: pop(0.045), strength }));
 }
 
@@ -232,8 +232,8 @@ function createAfter(scene, toon) {
     createParticles(scene, toon, { name: 'Ash', color: '#9b97a3', seed: 41, start: BEAT.impact + 2, end: LENGTH, rate: 70, life: [5, 7],
       origin: (r) => new Vector3((2 * r(30) - 1) * 11, 6 + 3 * r(3), (2 * r(31) - 1) * 11),
       velocity: () => new Vector3(0, -0.9, 0), wind: new Vector3(-0.3, 0, -0.15), turbulence: 0.35, size: pop(0.05, 0.1),
-      strength: (birth) => smoothstep(BEAT.impact + 2, BEAT.impact + 6, birth) * (1 - smoothstep(BEAT.dawn, BEAT.found, birth)) }),
-    createParticles(scene, toon, { name: 'Rising Embers', color: '#000000', glow: glowOf(2.4, 1.0, 0.25), seed: 42, start: BEAT.gone, end: BEAT.found, rate: 8, life: [5, 7],
+      strength: (birth) => smoothstep(BEAT.impact + 2, BEAT.impact + 6, birth) * (1 - smoothstep(BEAT.dawn, BEAT.wake, birth)) }),
+    createParticles(scene, toon, { name: 'Rising Embers', color: '#000000', glow: glowOf(2.4, 1.0, 0.25), seed: 42, start: BEAT.gone, end: BEAT.wake, rate: 8, life: [5, 7],
       origin: (r) => top.add(new Vector3((2 * r(30) - 1) * 0.4, 0, (2 * r(31) - 1) * 0.4)),
       velocity: (r) => new Vector3((2 * r(32) - 1) * 0.2, 1.4 + 0.8 * r(3), (2 * r(33) - 1) * 0.2), turbulence: 0.25,
       size: (age, r) => 0.05 * (0.7 + 0.6 * r(1)) * Math.min(1, age * 6) * (1 - age) ** 1.5 }));
@@ -249,6 +249,10 @@ export function fireLight(time) {
   const burn = time >= BEAT.embers ? burning(time) : 0, flicker = 0.85 + 0.15 * Math.sin(time * 23) * Math.sin(time * 7.3);
   const fire = new Color3(2.4, 1.0, 0.3).scale(burn * 0.45 * flicker);
   if (strike.r > fire.r * 2) return { position: STRIKE_AT.add(new Vector3(0, 6, 0)), color: strike };
+  // The blast at the tree's foot outshines the fire for a moment; before it, the fissure lights the slope.
+  const blast = time - BEAT.blast;
+  if (blast > 0 && blast < 3) return { position: new Vector3(NEST.x, NEST.ground + 1.5, NEST.z), color: new Color3(3, 1.6, 0.6).scale(0.5 + 7 * Math.exp(-blast * 2.5)) };
+  if (time > BEAT.crack && blast < 0) return { position: crackAt(time).add(new Vector3(0, 0.8, 0)), color: new Color3(2.4, 0.8, 0.2).scale(0.5 + 0.5 * smoothstep(BEAT.crack, BEAT.blast, time)).add(fire) };
   return { position: onFire(Math.max(IMPACT.r, fireFront(time) - 0.4), 0).add(new Vector3(0, 0.9, 0)), color: fire };
 }
 
@@ -273,6 +277,47 @@ function createRubble(scene, toon) {
   };
 }
 
+// The mountain cracking: a fissure glowing along the slope from high above the nest down to the tree's foot, pulsing
+// as it runs, then the blast where it ends. A flash, a cloud boiling up and rolling out over the sea, rocks hurled
+// after the tree, and the splash where the tree comes down; then smoke over the place all night.
+function createCrack(scene, toon) {
+  const SEGMENTS = 26, base = new Vector3(NEST.x, NEST.ground, NEST.z), seaward = new Vector3(Math.cos(NEST.angle), 0, Math.sin(NEST.angle));
+  const segment = createMesh('Fissure', blob(0.12, [0, 0, 0]), scene);
+  segment.material = toon.plain('Fissure', '#000000');
+  const buffer = setMatrices(segment, SEGMENTS), rand = random(23), from = IMPACT.r - 0.2, to = NEST.r - 0.15;
+  const parts = Array.from({ length: SEGMENTS }, (_, k) => {
+    const r = lerp(from, to, (k + 0.5) / SEGMENTS), a = crackAngle(r) + (rand() - 0.5) * 0.04, x = Math.cos(a) * r, z = Math.sin(a) * r;
+    return { r, at: new Vector3(x, heightAt(x, z) + 0.06, z), yaw: Math.atan2(-Math.sin(a), Math.cos(a)) + (rand() - 0.5) * 0.7 };
+  });
+  const landing = base.add(seaward.scale(shore(NEST.angle) * 1.08 - NEST.r)).multiplyByFloats(1, 0, 1), lands = BEAT.blast + 1.5;
+  const above = base.add(new Vector3(0, 0.4, 0));
+  const blast = (birth) => (birth >= BEAT.blast ? 1 : 0);
+  return together(
+    (day, time) => {
+      const reach = crackReach(time), heat = time < BEAT.crack ? 0 : (0.7 + 0.3 * Math.sin(time * 9)) * (1 - 0.7 * smoothstep(BEAT.blast + 1, BEAT.wake, time));
+      segment.material.setColor3('glow', glowOf(3.2 * heat, 3 * heat, 2.2 * heat));
+      parts.forEach(({ r, at, yaw }, k) => {
+        const open = time < BEAT.crack ? 0 : smoothstep(r - 0.3, r, reach);
+        place(buffer, k, at, new Vector3(6.5, 1, 2.4 + 1.2 * (k % 3) / 2).scale(Math.max(1e-4, open)), yaw);
+      });
+      segment.thinInstanceBufferUpdated('matrix');
+    },
+    createParticles(scene, toon, { name: 'Fissure Smoke', color: '#4a4350', underglow: glowOf(1.2, 0.35, 0.06), seed: 51, start: BEAT.crack, end: BEAT.blast, rate: 30, life: [1.5, 2.5],
+      origin: (r, birth) => crackAt(birth - 0.3 * r(30)), velocity: (r) => new Vector3(0, 0.8 + r(3), 0), drag: 0.6, gravity: 0.3, turbulence: 0.25, size: swell(0.05, 0.3) }),
+    createParticles(scene, toon, { name: 'Blast Fire', color: '#000000', glow: glowOf(2.8, 1.3, 0.35), seed: 52, start: BEAT.blast, end: BEAT.blast + 0.35, rate: 120, life: [0.4, 0.9],
+      origin: () => above, velocity: (r) => direction(r, 0.15).add(seaward.scale(1.2)).normalize().scale(4 + 4 * r(3)), drag: 2.5, gravity: 1, size: pop(0.7, 0.08) }),
+    createParticles(scene, toon, { name: 'Blast Cloud', color: '#5c5460', underglow: glowOf(1.6, 0.5, 0.1), seed: 53, start: BEAT.blast, end: BEAT.blast + 1.4, rate: 50, life: [4, 7],
+      origin: (r) => above.add(direction(r).scale(0.3)), velocity: (r) => direction(r, 0.2).add(seaward.scale(0.9)).scale(2 + 2 * r(3)), drag: 1.1, gravity: 0.35,
+      turbulence: 0.3, size: swell(0.25, 1.0) }),
+    createParticles(scene, toon, { name: 'Blast Rocks', color: '#2a2228', glow: glowOf(1.2, 0.35, 0.05), seed: 54, start: BEAT.blast, end: BEAT.blast + 0.25, rate: 60, life: [1.8, 2.4],
+      origin: () => above, velocity: (r) => seaward.scale(3.5 + 3 * r(3)).add(new Vector3((2 * r(4) - 1) * 2.2, 4 + 3 * r(5), (2 * r(6) - 1) * 2.2)), gravity: -9, size: (age, r) => (0.08 + 0.12 * r(1)) * (age < 0.98 ? 1 : 0), strength: blast }),
+    createParticles(scene, toon, { name: 'Wreck Splash', color: '#f4fbff', seed: 55, start: lands, end: lands + 0.3, rate: 80, life: [0.8, 1.4],
+      origin: (r) => landing.add(direction(r).multiplyByFloats(0.5, 0, 0.5)), velocity: (r) => direction(r, 0.6).scale(2.5 + 3 * r(3)), gravity: -7, size: pop(0.22, 0.1) }),
+    createParticles(scene, toon, { name: 'Blast Smoke', color: '#4a4350', underglow: glowOf(0.5, 0.15, 0.03), seed: 56, start: BEAT.blast + 1, end: BEAT.dawn - 2, rate: 6, life: [6, 9],
+      origin: (r) => above.add(new Vector3((2 * r(30) - 1) * 0.5, 0, (2 * r(31) - 1) * 0.5)), velocity: () => new Vector3(0, 0.6, 0), drag: 0.3, gravity: 0.15,
+      wind: new Vector3(-0.3, 0, -0.15), turbulence: 0.4, size: swell(0.2, 1.4) }));
+}
+
 export function createMeteor(scene, toon) {
-  return together(createRubble(scene, toon), createFireball(scene, toon), createFragments(scene, toon), ...IMPACTS.map((impact, k) => createImpact(scene, toon, impact, k ? `Fragment ${k}` : 'Strike', 200 + 40 * k)), createStrikeSmoke(scene, toon), createEmberRain(scene, toon), createGroundFire(scene, toon), createAfter(scene, toon));
+  return together(createRubble(scene, toon), createCrack(scene, toon), createFireball(scene, toon), createFragments(scene, toon), ...IMPACTS.map((impact, k) => createImpact(scene, toon, impact, k ? `Fragment ${k}` : 'Strike', 200 + 40 * k)), createStrikeSmoke(scene, toon), createEmberRain(scene, toon), createGroundFire(scene, toon), createAfter(scene, toon));
 }

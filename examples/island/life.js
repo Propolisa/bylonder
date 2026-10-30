@@ -2,7 +2,7 @@ import { createMesh } from '@workbench/sdk';
 import { blob } from './forest.js';
 import { random } from './random.js';
 import { shore, heightAt } from './island.js';
-import { smoothstep, lerp, eruption, BEAT, TURTLE, LENGTH as FILM, shotAngle, frameAt, days } from './story.js';
+import { smoothstep, lerp, eruption, BEAT, OMEN, SEA_CAVE, TURTLE, LENGTH as FILM, shotAngle, frameAt, days, dayAt } from './story.js';
 import { createParticles, together, pop, swell, glowOf, direction } from './particles.js';
 import { setMatrices, place, createPuffs } from './sky.js';
 
@@ -66,14 +66,16 @@ function whaleMesh() {
   return { vertices, faces };
 }
 
-// The whales' swims, each surfacing along the shore in the shot it is seen in: a whale early on, then a whale and her
-// calf as the film ends.
+// The whales' swims: a whale early on, surfacing along the shore in the shot it is seen in; at the end a whale and her
+// calf beyond the island from the last shot, rising twice, slow and long. `length` is a swim's seconds.
+const BEYOND = SEA_CAVE.angle - 0.45 + Math.PI;
 export const WHALES = [
   { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
-  { start: FILM - 5.5, angle: 0.45, distance: 17, size: 1.0 }, { start: FILM - 5.2, angle: 0.49, distance: 18, size: 0.45 },
+  ...[FILM - 12, FILM - 6.5].flatMap((start, k) => [{ start, at: BEYOND + 0.35 - 0.1 * k, distance: 17, size: 1.0, length: 5.5 },
+    { start: start + 0.5, at: BEYOND + 0.4 - 0.1 * k, distance: 18, size: 0.42, length: 5.5 }]),
 ].map((swim) => {
-  const angle = shotAngle(frameAt(Math.min(FILM - 0.5, swim.start + 1.3))) + swim.angle;
-  return { ...swim, angle, at: new Vector3(Math.cos(angle) * swim.distance, 0, Math.sin(angle) * swim.distance) };
+  const angle = swim.at ?? shotAngle(frameAt(Math.min(FILM - 0.5, swim.start + 1.3))) + swim.angle;
+  return { length: 3.2, ...swim, angle, at: new Vector3(Math.cos(angle) * swim.distance, 0, Math.sin(angle) * swim.distance) };
 });
 
 // Whales surfacing: each rises on an arc, its back breaking the water, blows a spout, and dives, the flukes lifting
@@ -81,10 +83,10 @@ export const WHALES = [
 export function createWhales(scene, toon) {
   const mesh = createMesh('Whale', whaleMesh(), scene);
   mesh.material = toon.plain('Whale', '#34507e');
-  const buffer = setMatrices(mesh, WHALES.length), LENGTH = 3.2, R = 3.2;
+  const buffer = setMatrices(mesh, WHALES.length), R = 3.2;
   // Where a swim is at time t: on a circle of radius R below the sea, travelling along the shore.
-  const pose = ({ start, angle, distance, size }, time) => {
-    const p = (time - start) / LENGTH;
+  const pose = ({ start, angle, distance, size, length }, time) => {
+    const p = (time - start) / length;
     if (p <= 0 || p >= 1) return null;
     const phi = -0.75 + 1.5 * p, along = new Vector3(-Math.sin(angle), 0, Math.cos(angle)), center = new Vector3(Math.cos(angle) * distance, -R * size + 0.28 * size, Math.sin(angle) * distance);
     const position = center.add(along.scale(Math.sin(phi) * R * size)).add(new Vector3(0, Math.cos(phi) * R * size, 0));
@@ -204,7 +206,7 @@ function stripe(mesh, direction) {
 // forward, a rest; its shell rides up out of the water as the beach rises under it.
 export function createTurtle(scene, toon) {
   // Its parts in its own frame (Blender's axes, facing +X, Z up), sized to stand out among the birds.
-  const SIZE = 1.7, scaled = ({ vertices, faces }, [sx, sy, sz], [dx, dy, dz] = [0, 0, 0]) => ({ vertices: vertices.map(([x, y, z]) => [(x * sx + dx) * SIZE, (y * sy + dy) * SIZE, (z * sz + dz) * SIZE]), faces });
+  const SIZE = 0.9, scaled = ({ vertices, faces }, [sx, sy, sz], [dx, dy, dz] = [0, 0, 0]) => ({ vertices: vertices.map(([x, y, z]) => [(x * sx + dx) * SIZE, (y * sy + dy) * SIZE, (z * sz + dz) * SIZE]), faces });
   const flipper = (side, along, length) => ({ vertices: [[along + 0.05, side * 0.1, 0.08], [along - 0.05, side * 0.1, 0.08], [along - 0.08, side * (0.1 + length), 0.04], [along + 0.02, side * (0.1 + length * 0.9), 0.05]],
     faces: [[0, 1, 2], [0, 2, 3], [0, 2, 1], [0, 3, 2]] });
   const part = (name, data, color) => {
@@ -223,8 +225,10 @@ export function createTurtle(scene, toon) {
   };
   return (day, time) => {
     const shown = time > TURTLE.start ? 1 : 1e-4, r = shore(TURTLE.angle) * lerp(TURTLE.from, TURTLE.to, Math.min(1, crawl(time)));
-    const x = Math.cos(TURTLE.angle) * r, z = Math.sin(TURTLE.angle) * r, at = new Vector3(x, Math.max(-0.1, heightAt(x, z)), z);
-    const stroke = Math.sin(((time - TURTLE.start) / 1.6) * 2 * Math.PI), turn = Quaternion.RotationAxis(Vector3.Up(), heading), scale = new Vector3(1, 1, 1).scale(shown);
+    // Each stroke heaves the shell up and forward a little, then it settles while the flippers reach again.
+    const phase = ((time - TURTLE.start) / 1.6) * 2 * Math.PI, stroke = Math.sin(phase), heave = 0.035 * SIZE * Math.max(0, Math.sin(phase - 0.6));
+    const x = Math.cos(TURTLE.angle) * r, z = Math.sin(TURTLE.angle) * r, at = new Vector3(x, Math.max(-0.1, heightAt(x, z)) + heave, z);
+    const turn = Quaternion.RotationAxis(Vector3.Up(), heading).multiply(Quaternion.RotationAxis(new Vector3(0, 0, 1), -2 * heave)), scale = new Vector3(1, 1, 1).scale(shown);
     place(shell.buffer, 0, at, scale, turn);
     place(head.buffer, 0, at.add(new Vector3(0, 0.012 * SIZE * stroke, 0)), scale, turn);
     for (const { side, front, buffer } of fins) place(buffer, 0, at, scale, turn.multiply(Quaternion.RotationAxis(Vector3.Up(), (front ? 0.35 : 0.2) * side * stroke)));
@@ -234,25 +238,83 @@ export function createTurtle(scene, toon) {
 // The heading that points a bird along a direction.
 export const headingOf = (along) => Math.atan2(-along.z, along.x);
 
-// The flock: arrives once the forest has grown and circles the volcano, gliding and flapping in bursts. It leaves out
-// to sea as the new star grows.
-const flockAway = (time) => smoothstep(BEAT.leave - 1, BEAT.leave + 4, time);
-// Where the flock is, roughly: circling over the island, or far out while it is away.
-export const flockAt = (time) => { const out = 4.7 + 40 * flockAway(time) ** 1.5, a = time * 0.55; return new Vector3(Math.cos(a) * out, 4.8 + 3 * flockAway(time), Math.sin(a) * out); };
-export function createBirds(scene, toon) {
-  const COUNT = 7, rand = random(21), flock = Array.from({ length: COUNT }, () => ({ radius: 3.5 + rand() * 2.5, height: 4.3 + rand() * 1.2, speed: 0.45 + rand() * 0.2, phase: rand() * Math.PI * 2 }));
-  const kit = createBirdKit(scene, toon, 'Bird', '#fdf8f0', COUNT);
+// The flock: nine birds, each living its own days. Each flies in from the sea once the forest has grown; from then on
+// it spends each third of a day at one thing (keeping watch high over the volcano, sitting in a tree, fishing out at
+// sea), flying from one to the next, and roosts at night. As the star grows they grow restless: more keep watch,
+// higher and faster, and they leave out to sea in three waves over its last days, away from it.
+const BIRDS = 9;
+export const WAVES = [111.5, 116.2, BEAT.leave];
+const AWAY = new Vector3(-OMEN.x, 0, -OMEN.z).normalize();
+export const FLOCK = Array.from({ length: BIRDS }, (_, i) => {
+  const r = random(300 + i);
+  return { arrives: 4.85 + 0.09 * i + 0.1 * r(), seed: r(), from: r() * 2 * Math.PI, radius: 3.6 + 2 * r(), height: 4.6 + 1.2 * r(), lap: 0.45 + 0.2 * r(),
+    leaves: WAVES[i % 3] + 0.5 * Math.floor(i / 3) + 0.3 * r(), perch: Math.floor(r() * 1e6), sea: r() * 2 * Math.PI };
+});
+const hash = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); };
+// What a bird does in a third of a day `slot`: roosts at night, else watches, sits or fishes; restless birds watch.
+const doing = (bird, slot, restless) => {
+  const fraction = ((slot / 3) % 1 + 1) % 1, h = hash(bird.seed * 100, slot);
+  if (fraction > 0.55 && fraction < 0.95) return 'roost';
+  return h < 0.35 + 0.5 * restless ? 'watch' : h < 0.7 + 0.15 * restless ? 'sit' : 'fish';
+};
+// Where a bird is at a thing, at a moment: circling, on its tree, or wheeling low over the sea.
+function placeOf(bird, kind, slot, time, spots, restless) {
+  if (kind === 'roost' || kind === 'sit') {
+    const at = spots[(bird.perch + slot * 7) % spots.length];
+    return { point: new Vector3(at.x, heightAt(at.x, at.z) + 1.05, at.z), sitting: true };
+  }
+  const fast = 1 + 0.8 * restless, a = bird.from + time * bird.lap * fast * (kind === 'fish' ? -0.7 : 1);
+  if (kind === 'watch') return { point: new Vector3(Math.cos(a) * bird.radius, bird.height + 1.5 * restless + 0.3 * Math.sin(time * 1.3 + bird.seed * 9), Math.sin(a) * bird.radius) };
+  const out = 9 + 3 * bird.seed, dip = Math.max(0, Math.sin(time * 0.8 + bird.seed * 20)) ** 6;
+  return { point: new Vector3(Math.cos(a + bird.sea) * out, 1.4 - 1.2 * dip, Math.sin(a + bird.sea) * out) };
+}
+// A bird's place at a day and second: arriving, at its thing or flying between, or leaving.
+function birdAt(bird, day, time, spots) {
+  const restless = smoothstep(BEAT.omen - 4, BEAT.leave, time);
+  if (day < bird.arrives - 0.25) return null;
+  const slotOf = (d) => Math.floor(d * 3 + bird.seed * 3), slot = slotOf(day), into = day * 3 + bird.seed * 3 - slot;
+  const here = placeOf(bird, doing(bird, slot, restless), slot, time, spots, restless);
+  let { point } = here, sitting = here.sitting && into > 0.12;
+  if (into < 0.12) {
+    const was = placeOf(bird, doing(bird, slot - 1, restless), slot - 1, time, spots, restless).point, u = smoothstep(0, 0.12, into);
+    point = Vector3.Lerp(was, point, u).add(new Vector3(0, 1.5 * Math.sin(Math.PI * u), 0));
+  }
+  if (day < bird.arrives) {
+    const u = smoothstep(bird.arrives - 0.25, bird.arrives, day), far = new Vector3(Math.cos(bird.from) * 45, 9, Math.sin(bird.from) * 45);
+    point = Vector3.Lerp(far, point, u); sitting = false;
+  }
+  if (time > bird.leaves) {
+    const u = (time - bird.leaves) / 7;
+    if (u >= 1) return null;
+    point = Vector3.Lerp(point, AWAY.scale(55).add(new Vector3(0, 12, 0)), smoothstep(0, 1, u) ** 1.4); sitting = false;
+  }
+  return { point, sitting, restless };
+}
+// Where the flock is, roughly, for its calls: over the island, or with the wave leaving.
+export const flockAt = (time) => {
+  const wave = WAVES.find((w) => time > w - 1 && time < w + 6);
+  return wave ? AWAY.scale(4 + 6 * Math.max(0, time - wave)).add(new Vector3(0, 5 + time - wave, 0)) : new Vector3(Math.cos(time * 0.5) * 4.5, 5, Math.sin(time * 0.5) * 4.5);
+};
+export function createBirds(scene, toon, spots) {
+  const kit = createBirdKit(scene, toon, 'Bird', '#fdf8f0', BIRDS);
   return (day, time) => {
-    const here = smoothstep(4.6, 5.3, day), away = flockAway(time);
-    flock.forEach(({ radius, height, speed, phase }, i) => {
-      const a = phase + time * speed, out = radius + 40 * away ** 1.5;
-      const position = new Vector3(Math.cos(a) * out, height + 0.3 * Math.sin(time * 1.3 + phase) + 3 * away, Math.sin(a) * out);
-      const flapping = Math.max(away, smoothstep(0.2, 0.5, Math.sin(time * 0.9 + phase * 3)));
-      kit.pose(i, position, here * 2.4 * (1 - smoothstep(0.85, 1, away)), headingOf(new Vector3(-Math.sin(a), 0, Math.cos(a))), { bank: 0.35, wings: flapping * 0.7 * Math.sin(time * 14 + phase) });
+    const later = dayAt(time + 0.05);
+    FLOCK.forEach((bird, i) => {
+      const now = birdAt(bird, day, time, spots), next = birdAt(bird, later, time + 0.05, spots);
+      if (!now) { kit.pose(i, new Vector3(0, -50, 0), 1e-4, 0); return; }
+      const velocity = next ? next.point.subtract(now.point).scale(20) : Vector3.Zero(), moving = velocity.length() > 0.3;
+      const climb = moving ? velocity.y / velocity.length() : 0, beat = 14 * (1 + 0.6 * now.restless);
+      // Flapping in bursts and gliding between, more flapping when climbing or uneasy; wings down when sitting.
+      const flapping = Math.max(now.restless * 0.8, climb > 0.15 ? 1 : smoothstep(0.1, 0.5, Math.sin(time * 0.9 + bird.seed * 20)));
+      const wings = now.sitting ? null : flapping * wingBeat(time * beat + bird.seed * 9) * 0.75 + 0.12;
+      kit.pose(i, now.point, 2.4, headingOf(moving ? velocity : new Vector3(Math.cos(bird.from), 0, Math.sin(bird.from))),
+        { bank: moving ? 0.3 : 0, pitch: -climb * 0.4, wings });
     });
     kit.update();
   };
 }
+// A wing's beat: a quick, strong downstroke and a slower recovery, from its phase.
+export const wingBeat = (phase) => { const s = Math.sin(phase); return s > 0 ? s ** 0.6 : -((-s) ** 1.5); };
 
 // Fireflies blinking over the forest at night, once it has grown.
 export function createFireflies(scene, toon, spots) {

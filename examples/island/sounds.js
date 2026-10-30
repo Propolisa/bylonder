@@ -30,14 +30,17 @@ function lowpass(cutoff) {
 // A band of noise between two frequencies.
 const band = (low, high) => { const a = lowpass(high), b = lowpass(low); return (x) => a(x) - b(x); };
 
-// A blow: a crack of bright noise, a body of low noise and a falling sub tone, and a rumble that rolls on. Far away the
-// air takes the crack (`far` 0 near, 1 far).
+// A blow: a crack of bright noise, a body of low noise, a sub tone dropping from 60 Hz into the floor, and a rumble that
+// rolls on and on. Far away the air takes the crack (`far` 0 near, 1 far).
 function blow(seconds, seed, far) {
-  const body = lowpass(lerp(260, 90, far)), rumble = lowpass(55), crack = lowpass(lerp(6000, 600, far));
+  const body = lowpass(lerp(260, 90, far)), rumble = lowpass(55), deep = lowpass(30), crack = lowpass(lerp(6000, 600, far));
+  let phase = 0;
   return sound(seconds, seed, (t, noise) => {
-    const n = noise(), sub = Math.sin(TAU * (34 * t + 18 * (1 - Math.exp(-t * 2)))) * Math.exp(-t / 1.4);
-    return (1 - far) * 0.8 * crack(n) * Math.exp(-t * 28) + 3.2 * body(n) * Math.min(1, t * 60) * Math.exp(-t / 1.8)
-      + 0.5 * sub * Math.min(1, t * 40) + 7 * rumble(n) * Math.min(1, t * 4) * Math.exp(-t / (seconds / 3));
+    const n = noise();
+    phase += (TAU * (24 + 36 * Math.exp(-t * 1.6))) / RATE;
+    const sub = Math.sin(phase) * Math.min(1, t * 30) * Math.exp(-t / (seconds / 4));
+    return (1 - far) * 0.7 * crack(n) * Math.exp(-t * 28) + 3 * body(n) * Math.min(1, t * 60) * Math.exp(-t / 1.8)
+      + 1.3 * sub + 7 * rumble(n) * Math.min(1, t * 4) * Math.exp(-t / (seconds / 3)) + 14 * deep(n) * Math.min(1, t * 2) * Math.exp(-t / (seconds / 2.5));
   });
 }
 
@@ -74,10 +77,15 @@ export function createSounds() {
       const chirp = (t, every, f, offset) => { const u = (t + offset) % every; return u < 0.09 ? Math.sin(TAU * f * t) * (Math.sin((Math.PI * u) / 0.03) > 0 ? 1 : 0.1) : 0; };
       return loop(6, 105, (t) => chirp(t, 0.6, 4600, 0) + 0.7 * chirp(t, 0.75, 5200, 0.2));
     })(),
+    // The fire: a deep roar, flames breathing in a slow mid whoosh over it, and now and then a soft crack of wood.
     fire: (() => {
-      const roar = lowpass(220), snap = band(1200, 6000);
+      const roar = lowpass(110), body = lowpass(260), whoosh = band(250, 800), snap = band(900, 3500);
       let since = 1;
-      return loop(6, 106, (t, noise) => { const n = noise(); since = noise() > 0.9985 ? 0 : since + 1 / RATE; return 2.5 * roar(n) + 3 * snap(n) * Math.exp(-since * 140); });
+      return loop(8, 106, (t, noise) => {
+        const n = noise(), breath = 0.55 + 0.45 * Math.sin((TAU * t) / 1.6) * Math.sin((TAU * t) / 2.9 + 1);
+        since = noise() > 0.9996 ? 0 : since + 1 / RATE;
+        return 3.4 * roar(n) + 1.6 * body(n) * breath + 1.1 * whoosh(n) * breath ** 2 + 0.9 * snap(n) * Math.exp(-since * 60);
+      });
     })(),
     // The birds.
     mother: cry(111, 1),
@@ -112,7 +120,28 @@ export function createSounds() {
         return (0.2 + u * u * 1.8) * (2.5 * low(n) + 0.25 * u * high(n)) + 0.6 * u * crackle;
       });
     })(),
-    boom: blow(9, 81, 0),
+    boom: blow(10, 81, 0),
+    // The asteroid coming: a low drone swelling for twelve seconds, its pitch sinking, a thin howl over it at the end.
+    approach: (() => {
+      const low = lowpass(90), howl = band(300, 900), length = 12;
+      let phase = 0;
+      return sound(length, 85, (t, noise) => {
+        const u = t / length, n = noise();
+        phase += (TAU * (55 - 20 * u)) / RATE;
+        return (0.1 + u ** 2.2) * (3 * low(n) + 0.7 * Math.sin(phase)) + 0.6 * u ** 4 * howl(n);
+      });
+    })(),
+    // The mountain cracking: a deep growl under the ground, building, with rock splitting in it.
+    rumble: (() => {
+      const growl = lowpass(70), grind = band(120, 500), length = 5.2;
+      let since = 1;
+      return sound(length, 86, (t, noise) => {
+        const u = t / length, n = noise();
+        since = noise() > 0.9992 - 0.002 * u ? 0 : since + 1 / RATE;
+        return Math.min(1, t * 2) * (0.3 + u ** 1.5) * (6 * growl(n) + 1.2 * grind(n) * (0.5 + 0.5 * Math.sin(t * 7)) + 2 * grind(n) * Math.exp(-since * 40));
+      });
+    })(),
+    blast: blow(11, 87, 0),
     thud: blow(5, 82, 1),
     // The wave breaking on the shore: swells of hiss over a low wash.
     surf: (() => {

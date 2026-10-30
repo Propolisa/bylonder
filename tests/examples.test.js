@@ -45,4 +45,14 @@ for (const id of readdirSync(root).filter((id) => !SKIPPED[id]).sort()) {
   scene.dispose();
   engine.dispose();
 }
+// The island's cuts: each changes the camera's direction by 30 degrees or its distance by half, so no cut jumps.
+{
+  const { SHOTS, framing, LENGTH } = await import(new URL('island/story.js', root));
+  const view = ([c, angle, distance, height, look]) => ({ yaw: Math.atan2(-Math.sin(angle), -Math.cos(angle)), reach: Math.hypot(distance, height - look), c });
+  for (let i = 0; i + 1 < SHOTS.length; i++) {
+    const cut = SHOTS[i + 1][0], a = view(framing(SHOTS[i], cut - SHOTS[i][0], cut)), b = view(framing(SHOTS[i + 1], 0, SHOTS[i + 2]?.[0] ?? LENGTH));
+    const turn = Math.abs(Math.atan2(Math.sin(a.yaw - b.yaw), Math.cos(a.yaw - b.yaw))), size = Math.max(a.reach, b.reach) / Math.min(a.reach, b.reach);
+    assert.ok(turn >= 0.5 || size >= 1.5, `island: the cut at ${cut} s jumps (${Math.round(turn * 57.3)} degrees, x${size.toFixed(2)})`);
+  }
+}
 console.log('examples ok');

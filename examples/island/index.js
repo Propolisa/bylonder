@@ -13,16 +13,15 @@ import { createAudio } from './audio.js';
 const { Vector3, Color3 } = BABYLON;
 const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
 
-// A volcanic island in time-lapse, three minutes long. The volcano pours lava down its slopes, the lava cools to soil
-// and a forest grows. A seabird finds the island, and her mate; they raise a chick in a blossom tree. Over the island's
-// far side an odd star has been there from the start, with a faint trail; it grows, night after night, until just after
-// sunset it breaks up in the sky, its pieces striking far out to sea and its main chunk the island's far shoulder,
-// glancingly. The far side is blasted to glass and great waves race out, but the volcano shelters the nest; burning
-// debris over the ridge lights the forest above it. The mother pushes the chick, who cannot yet fly, from the burning
-// branch; it flies, and she falls with the tree. Through the night the father and the chick keep out at sea; the island
-// heals, and at first light they come home to the sapling growing where the tree stood. Low poly and toon shaded: the
-// look is in toon.js, the story's clock in story.js, the family in family.js, the effects are layers of particles
-// (particles.js), the sound is Babylon's spatial audio (audio.js).
+// A volcanic island, its story told in time-lapse between its moments. The volcano pours lava down its slopes, the lava
+// cools to soil and a forest grows, and a flock comes to live there. A seabird finds the island, and her mate; they
+// raise a chick in a blossom tree. Over the island's far side an odd star has been there from the start, with a faint
+// trail; it grows night after night, the flock leaves, and just after sunset it falls, breaking up in the sky, its main
+// chunk striking the island's far shoulder glancingly. Burning debris lights the forest above the nest; the mountain
+// cracks, the mother shoves the chick off the branch, and the blast hurls the tree out to sea with her on it. After a
+// night on the beach the father and the chick find her on the wreck in a sea cave, and they are together again. Low
+// poly and toon shaded: the look is in toon.js, the story's clock in story.js, the family in family.js, the effects are
+// layers of particles (particles.js), the sound is Babylon's spatial audio (audio.js).
 export const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
@@ -38,7 +37,7 @@ export const createScene = async function () {
   createSea(scene).material = toon.sea();
   const forest = createForest(scene, toon);
   const moving = [forest, createClouds(scene, toon), createSmoke(scene, toon), createBombs(scene, toon), createSteam(scene, toon), createWhales(scene, toon), createTurtle(scene, toon),
-    createBirds(scene, toon), createFireflies(scene, toon, forest.spots), createFamily(scene, toon), createMeteor(scene, toon)];
+    createBirds(scene, toon, forest.spots), createFireflies(scene, toon, forest.spots), createFamily(scene, toon), createMeteor(scene, toon)];
 
   const camera = new BABYLON.TargetCamera('Camera', new Vector3(14, 6, -10), scene);
   Object.assign(camera, { fov: 0.95, minZ: 0.1, maxZ: 1000, lockedTarget: new Vector3(0, 1.6, 0) });
@@ -90,8 +89,8 @@ export const createScene = async function () {
 function grade(light, time) {
   const uneasy = smoothstep(BEAT.omen, BEAT.streak - 2, time) * (1 - smoothstep(BEAT.streak, BEAT.streak + 1, time));
   const coming = smoothstep(BEAT.streak - 6, BEAT.impact - 1, time) * (1 - smoothstep(BEAT.impact, BEAT.impact + 4, time));
-  const burning = falling(time) ** 1.5, F = flash(time), smoke = smoothstep(BEAT.impact + 0.5, BEAT.impact + 5, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.found + 2, time));
-  const dawn = smoothstep(BEAT.found - 1, BEAT.found + 3, time), white = new Color3(1, 1, 1);
+  const burning = falling(time) ** 1.5, F = flash(time), smoke = smoothstep(BEAT.impact + 0.5, BEAT.impact + 5, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.wake + 2, time));
+  const dawn = smoothstep(BEAT.wake - 1, BEAT.wake + 3, time), white = new Color3(1, 1, 1);
   let { skyTop, skyHorizon, sunColor, skyLight, groundLight } = light;
   skyTop = mix(skyTop, new Color3(0.26, 0.2, 0.46), 0.3 * uneasy);
   skyHorizon = mix(skyHorizon, new Color3(0.5, 0.78, 0.72), 0.22 * uneasy);
@@ -113,12 +112,12 @@ function grade(light, time) {
 // The air: the fire light, the haze (thicker with smoke), shafts of light, the aurora as the meteor nears, its star
 // and the contrail it burns across the sky.
 function air(light, fire, time, eye) {
-  const smoke = smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.found + 2, time));
+  const smoke = smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.wake + 2, time));
   const from = fireballAt(BEAT.streak), head = fireballAt(Math.min(time, BEAT.impact - 0.01));
   return {
     firePosition: fire.position, fireColor: fire.color,
     fogColor: mix(light.skyHorizon, new Color3(0.35, 0.24, 0.24), 0.5 * smoke), fogDensity: 0.004 + 0.012 * smoke,
-    rays: 1 + 0.8 * smoothstep(BEAT.found - 1, BEAT.found + 3, time),
+    rays: 1 + 0.8 * smoothstep(BEAT.wake - 1, BEAT.wake + 3, time),
     omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.omen + 4, BEAT.leave, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
     trail: smoothstep(BEAT.streak, BEAT.streak + 0.6, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),
     trailTail: from.subtract(eye).normalize(), trailHead: head.subtract(eye).normalize(),
