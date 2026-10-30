@@ -18,7 +18,8 @@ const untilCancelled = (promise, signal) => new Promise((resolve, reject) => {
 // result in a Render Result window, like Blender's render window.
 //   snapshot() -> run payload with the current scene edits and animation, independent of Remember Scene Edits
 //   sequencer: { hasStrips(), openCompositor({ frameStart, frameEnd, width, height }) } for Post Processing > Sequencer
-export function createRenderHost({ world, snapshot, sequencer, name = () => 'render' }) {
+//   sceneAudio({ frameStart, frameEnd }) -> the scene's sound over those frames, for video with audio
+export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name = () => 'render' }) {
   let job = null, last = null;
   const win = document.createElement('section');
   win.className = 'render-result';
@@ -59,7 +60,7 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     let source = null, writer = null;
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
-      source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size);
+      source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames);
       const audio = spec.audio ? await source.audio?.(signal) : null;
       writer = await createWriter(spec, { ...size, fps: time.fps, name: name(), frames: frames.length, audio });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
@@ -87,10 +88,11 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     }
   }
 
-  // The scene camera through the compositor, rendered in an isolated render context.
-  async function cameraSource(size) {
+  // The scene camera through the compositor, rendered in an isolated render context, with the scene's sound.
+  async function cameraSource(size, frames) {
     const { context, opened, dispose } = await openRenderContext(snapshot(), size);
-    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, dispose, renderFrame: (frame) => context.renderFrame({ frame, ...size, quality: 'final' }) };
+    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, dispose, renderFrame: (frame) => context.renderFrame({ frame, ...size, quality: 'final' }),
+      audio: () => sceneAudio?.({ frameStart: frames[0], frameEnd: frames.at(-1) }) };
   }
 
   cancelButton.onclick = () => job?.controller.abort();

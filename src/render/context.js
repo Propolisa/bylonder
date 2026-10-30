@@ -35,11 +35,15 @@ async function useCamera(name) {
   return camera;
 }
 
-async function open(input, { width, height }, { camera: cameraName } = {}) {
+// Opens the scene for rendering; with `audio` ({ frameStart, frameEnd, fps, sampleRate }), for rendering its sound
+// over those frames (renderAudio).
+let sound = null;
+async function open(input, { width, height }, { camera: cameraName, audio } = {}) {
   resize(width, height);
   engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false });
   engine.setHardwareScalingLevel(1);
-  built = await createWorld({ input, engine, canvas, hooks: { notify: text => warnings.push(String(text)) } });
+  if (audio) sound = { ...audio, context: new OfflineAudioContext(2, Math.ceil(((audio.frameEnd - audio.frameStart + 1) / audio.fps) * audio.sampleRate), audio.sampleRate) };
+  built = await createWorld({ input, engine, canvas, audioContext: sound?.context, hooks: { notify: text => warnings.push(String(text)) } });
   const { world, scene } = built;
   world.collections.useRenderVisibility();
   engine.setSize(width, height);
@@ -118,6 +122,26 @@ async function renderSample(t, offset, { start, fps, width, height }) {
   engine.endFrame();
 }
 
+// The scene's sound over the frames it was opened for, as its camera hears it (Blender's mixdown of a scene): its own
+// Babylon audio engines play into the offline audio context while the scene steps a frame at a time, the audio
+// pausing at each frame for the scene to move its sources and listener there. Null for a scene that makes no sound.
+async function renderAudio() {
+  if (!built.audible) return null;
+  const { frameStart, frameEnd, fps, context } = sound, { animation, scene } = built, start = animation.time.state.frameStart;
+  await useCamera();
+  animation.time.play();
+  for (let frame = frameStart; frame <= frameEnd; frame++) {
+    context.suspend((frame - frameStart) / fps).then(() => {
+      clock.set(frameMs(frame, start, fps));
+      animation.time.configure({ frameCurrent: frame }, { record: false });
+      scene.render();
+      context.resume();
+    });
+  }
+  const buffer = await context.startRendering();
+  animation.time.pause();
+  return { samples: Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c)), sampleRate: buffer.sampleRate };
+}
 
-window.bylonderRender = { open, renderFrame, warnings, get clock() { return clock.ms; } };
+window.bylonderRender = { open, renderFrame, renderAudio, warnings, get clock() { return clock.ms; } };
 dispatchEvent(new Event('bylonder-render'));

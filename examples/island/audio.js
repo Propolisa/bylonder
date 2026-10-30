@@ -2,7 +2,8 @@
 // story makes it: the sea, the wind, the eruption and its steam, insects on warm nights, the forest fire. Over them
 // cues play where they happen: the family's calls from where each bird is, the egg cracking, the flock, the whales,
 // the tree falling, and the asteroid's roar travelling with it, each impact heard as late as its shock reaches the
-// camera. Sounds play with the timeline and stop when it stops; renders are silent.
+// camera. Sounds play with the timeline and stop when it stops; a render or the Video Sequencer's Scene Audio strip
+// mixes them down the same way.
 import { BEAT, NEST, STRIKE, IMPACTS, SHOCK_SPEED, FRAMES, smoothstep, eruption, days, seconds, burning, gust } from './story.js';
 import { createSounds } from './sounds.js';
 import { fireballAt, fireLight } from './meteor.js';
@@ -75,33 +76,37 @@ export function cues() {
 // time to reach the camera.
 export const heard = (cue, now, ear) => now - cue.at - (cue.shock ? Vector3.Distance(cue.place(now), ear) / SHOCK_SPEED : 0);
 
-export function createAudio(scene, camera, time) {
+// Plays the cue sheet; resolves once every sound is ready, with the frame update. Live it plays to the speakers; in a
+// render context Babylon's engine plays into the job's offline audio context, so the update moves every source and
+// the listener itself rather than leaving it to the browser's animation frames.
+export async function createAudio(scene, camera, time) {
   // Silent where there is no Web Audio (headless runs).
   if (typeof AudioContext === 'undefined') return () => {};
   const list = cues(), playing = new Set();
-  let engine = null, sounds = null, last = null;
-  (async () => {
-    engine = await BABYLON.CreateAudioEngineAsync();
-    engine.listener.attach(camera);
-    const buffers = {};
-    for (const [name, { samples, sampleRate }] of Object.entries(createSounds())) {
-      const pcm = new AudioBuffer({ length: samples[0].length, numberOfChannels: 1, sampleRate });
-      pcm.copyToChannel(samples[0], 0);
-      buffers[name] = await BABYLON.CreateSoundBufferAsync(pcm);
-    }
-    sounds = await Promise.all(list.map((cue, k) => BABYLON.CreateSoundAsync(`${cue.sound} ${k}`, buffers[cue.sound],
-      { volume: cue.bed ? 0 : cue.volume, loop: !!cue.bed, spatialEnabled: !!cue.place, spatialDistanceModel: 'inverse', spatialMinDistance: cue.near ?? 1, spatialRolloffFactor: 1 })));
-  })();
-  scene.onDisposeObservable.add(() => engine?.dispose());
+  const engine = await BABYLON.CreateAudioEngineAsync({ volume: 0.6 });
+  scene.onDisposeObservable.add(() => engine.dispose());
+  engine.listener.attach(camera);
+  const buffers = {};
+  for (const [name, { samples, sampleRate }] of Object.entries(createSounds())) {
+    const pcm = new AudioBuffer({ length: samples[0].length, numberOfChannels: 1, sampleRate });
+    pcm.copyToChannel(samples[0], 0);
+    buffers[name] = await BABYLON.CreateSoundBufferAsync(pcm);
+  }
+  // Babylon makes a sound spatial if it is given any spatial option, so only placed sounds get them.
+  const spatial = (cue) => (cue.place ? { spatialEnabled: true, spatialDistanceModel: 'inverse', spatialMinDistance: cue.near, spatialRolloffFactor: 1 } : {});
+  const sounds = await Promise.all(list.map((cue, k) => BABYLON.CreateSoundAsync(`${cue.sound} ${k}`, buffers[cue.sound], { volume: cue.bed ? 0 : cue.volume, loop: !!cue.bed, ...spatial(cue) })));
 
+  let last = null;
   const stop = () => { for (const k of playing) sounds[k].stop(); playing.clear(); };
   return (day, now) => {
-    if (!sounds) return;
     // A jump or a pause stops every sound; playing on starts each where the camera hears it now.
     if (!time.playing || last === null || now < last || now - last > 0.5) stop();
-    if (time.playing) list.forEach((cue, k) => {
+    last = time.playing ? now : null;
+    if (!time.playing) return;
+    engine.listener.update();
+    list.forEach((cue, k) => {
       const sound = sounds[k];
-      if (cue.place) sound.spatial.position = cue.place(now);
+      if (cue.place) { sound.spatial.position = cue.place(now); sound.spatial.update(); }
       if (cue.bed) {
         sound.volume = cue.volume(day, now);
         if (!playing.has(k)) { sound.play({ startOffset: now % sound.buffer.duration }); playing.add(k); }
@@ -110,6 +115,5 @@ export function createAudio(scene, camera, time) {
       const offset = heard(cue, now, camera.globalPosition);
       if (offset >= 0 && offset < sound.buffer.duration && !playing.has(k)) { sound.play({ startOffset: offset }); playing.add(k); }
     });
-    last = time.playing ? now : null;
   };
 }

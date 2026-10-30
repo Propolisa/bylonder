@@ -30,11 +30,16 @@ registerModifier(geometryNodesDefinition);
 //   hooks: commit() for undo steps, saveOverrides() for scene edits, onAnimation(data), notify(text),
 //          setCamera(next) when the scene camera changes (the host decides what camera view means),
 //          renameScene(name) when the scene is renamed in Properties
-export async function createWorld({ input, engine, canvas, hooks = {} }) {
+//   audioContext: where the scene's Babylon audio engines play (a render job's OfflineAudioContext); the speakers if none
+export async function createWorld({ input, engine, canvas, hooks = {}, audioContext = null }) {
   const { commit = () => {}, saveOverrides = () => {}, onAnimation = () => {}, notify = console.warn, setCamera = () => {}, renameScene = () => {} } = hooks;
   const sdk = createSDK(input.base, input.overrides, () => saveOverrides(), onAnimation);
   const animation = sdk.animation;
-  Object.assign(globalThis, { BABYLON: { ...BABYLON }, engine, canvas, workbench: sdk });
+  const babylon = { ...BABYLON };
+  let audioEngines = 0;
+  // Changes apply at once: Babylon finishes its parameter ramps on animation frames, which an offline render outruns.
+  if (audioContext) babylon.CreateAudioEngineAsync = (options) => { audioEngines++; return BABYLON.CreateAudioEngineAsync({ ...options, audioContext, parameterRampDuration: 0 }); };
+  Object.assign(globalThis, { BABYLON: babylon, engine, canvas, workbench: sdk });
   const root = location.origin + input.base;
   const cache = await caches.open(RUN_CACHE);
   await cache.put(
@@ -151,5 +156,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   return {
     world, sdk, animation, scene, objects, documentState,
     get authoredCamera() { return authoredCamera; },
+    // Whether the scene plays any sound into audioContext.
+    get audible() { return audioEngines > 0; },
   };
 }

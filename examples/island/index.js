@@ -22,7 +22,7 @@ const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
 // heals, and at first light they come home to the sapling growing where the tree stood. Low poly and toon shaded: the
 // look is in toon.js, the story's clock in story.js, the family in family.js, the effects are layers of particles
 // (particles.js), the sound is Babylon's spatial audio (audio.js).
-export const createScene = function () {
+export const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
   // Blender's Color Management look gives the film its contrast.
@@ -41,7 +41,7 @@ export const createScene = function () {
 
   const camera = new BABYLON.TargetCamera('Camera', new Vector3(14, 6, -10), scene);
   Object.assign(camera, { fov: 0.95, minZ: 0.1, maxZ: 1000, lockedTarget: new Vector3(0, 1.6, 0) });
-  moving.push(createAudio(scene, camera, animation.time));
+  moving.push(await createAudio(scene, camera, animation.time));
   // Lava, fire and the meteor glow past white, which bloom spreads.
   const lens = new BABYLON.DefaultRenderingPipeline('Lens', true, scene, [camera]);
   Object.assign(lens, { bloomEnabled: true, bloomThreshold: 1.4, bloomWeight: 0.85, bloomKernel: 64 });

@@ -655,6 +655,27 @@ const checks = {
     await app.page.keyboard.press("Alt+p");
     await app.until((b) => Math.abs(b.editor.selection.nodes.at(-1).position.x - 2) < 1e-6, null, 60000);
   },
+
+  // The island makes its sound with Babylon's audio; a Scene Audio strip carries it into the sequencer's mix.
+  "Add > Scene Audio puts the scene's sound in the edit": { open: { example: "Volcanic Island", node: "Island" }, async run() {
+    const out = await app.bylonder(async (b) => {
+      b.world.animation.time.configure({ frameEnd: 48 });
+      b.world.animation.seek(1);
+      const add = (await b.sequencer.menus()).Add.find((entry) => entry.label === "Scene Audio");
+      await add.items()[0].run();
+      const { items, tracks } = b.world.sequenceEditor.state.edit.timeline, strip = items.find((i) => i.scene);
+      const compositor = await b.sequencer.openCompositor({ frameStart: 1, frameEnd: 48, width: 64, height: 36 });
+      const { samples, sampleRate } = await compositor.audio();
+      compositor.dispose();
+      const rms = (c) => Math.sqrt(c.reduce((sum, v) => sum + v * v, 0) / c.length);
+      return { strip: { type: strip.type, from: strip.from, durationInFrames: strip.durationInFrames, src: strip.src, channel: tracks.find((t) => t.id === strip.trackId).kind },
+        seconds: samples[0].length / sampleRate, channels: samples.length, rms: rms(samples[0]) };
+    });
+    assert.deepEqual(out.strip, { type: "audio", from: 1, durationInFrames: 48, src: "", channel: "audio" });
+    assert.equal(out.seconds, 2);
+    assert.equal(out.channels, 2);
+    assert.ok(out.rms > 0.01, `the scene's sound is in the mix (rms ${out.rms})`);
+  } },
 };
 
 // Edit Mode on the cube with everything selected, and a tool from the toolbar: one in a group from the flyout its

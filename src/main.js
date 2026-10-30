@@ -40,6 +40,7 @@ import { createRenderHost } from "./editors/render/host.js";
 import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
 import { timeDefaults } from "./blenkernel/scene/time.js";
 import { createSceneFrames } from "./sequencer/scene-frames.js";
+import { createSceneAudio, renderSceneAudio } from "./sequencer/scene-audio.js";
 import { strips } from "./sequencer/sequence-editor.js";
 import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
@@ -221,6 +222,7 @@ const liveSnapshot = () => ({ ...input, remember: true, overrides: currentOverri
 const renderHost = createRenderHost({
   world,
   snapshot: liveSnapshot,
+  sceneAudio: (range) => renderSceneAudio(liveSnapshot(), { ...range, fps: animation.time.state.fps }),
   sequencer: { hasStrips: () => strips(world.sequenceEditor.state).length > 0, openCompositor: (range) => sequencerAdapter.openCompositor(range) },
   name: () => world.sceneSettings.state.name || "render",
 });
@@ -238,7 +240,7 @@ window.__bylonder ={ world, renderHost, runOperator, settled,
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
-  coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+  coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });
@@ -538,7 +540,7 @@ const hostScenes = () => sceneRecords().map((record) => {
   const live = record.id === activeSceneId;
   const time = live ? animation.time.state : { ...timeDefaults, ...record.animation?.time };
   const render = live ? world.renderSettings.state.render : { ...renderDefaults.render, ...record.overrides?.render?.render };
-  return { id: record.id, name: live ? world.sceneSettings.state.name : record.name, frameStart: time.frameStart, frameEnd: time.frameEnd, ...outputSize(render) };
+  return { id: record.id, name: live ? world.sceneSettings.state.name : record.name, frameStart: time.frameStart, frameEnd: time.frameEnd, fps: time.fps, ...outputSize(render) };
 });
 // A scene's revision hashes everything its frames depend on (code, builder, scene edits, animation; not the
 // current frame or the sequencer edit), so cached and baked scene frames stay valid until the scene changes.
@@ -548,11 +550,13 @@ const sceneState = ({ builder, overrides, animation: action }) => {
   return [input.code, builder, rest, action && { ...action, time: { ...action.time, frameCurrent: 0 } }];
 };
 const sceneFrames = createSceneFrames({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "" });
+const sceneAudio = createSceneAudio({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "", scenes: hostScenes, notify });
 const updateRevision = async (id, state) => {
   const next = await hash(JSON.stringify(state));
   if (revisions.get(id) === next) return;
   revisions.set(id, next);
   sceneFrames.changed();
+  sceneAudio.changed();
 };
 for (const record of sceneRecords()) if (record.id !== activeSceneId) updateRevision(record.id, sceneState(record));
 sceneChanged = () => updateRevision(activeSceneId, sceneState({ builder: input.scene?.builder, overrides: currentOverrides(), animation: animation.serialize() }));
@@ -564,6 +568,7 @@ const sequencerAdapter = createSequencerAdapter({
   time: animation.time,
   history: { undo: () => undoRedo(false), redo: () => undoRedo(true) },
   frames: sceneFrames,
+  audio: sceneAudio,
   scenes: hostScenes,
   notify,
 });

@@ -41,6 +41,14 @@ Edit > Preferences holds Bylonder's own settings (Keep Scenes Loaded). Blender's
 ## SEQUENCE_EDITOR > *
 The Video Sequencer and File Browser are KubeezCut islands. Their Blender identifiers live in the KubeezCut fork, which this scan does not read yet.
 
+## SEQUENCE_EDITOR > Scene Audio
+Status: partial
+Blender mixes a scene's sound (its speakers and its own sequencer) into a scene strip. Bylonder has no speakers: a
+scene's sound is whatever its code plays through Babylon's spatial audio, heard from its camera. Add > Scene Audio puts
+that sound in the edit as an audio strip of its own; the scene renders it in a render context, on an offline audio
+context, a frame at a time (`src/sequencer/scene-audio.js`, `renderAudio` in `src/render/context.js`), and again when
+the scene changes. Render Animation without the sequencer mixes the same sound into video formats with audio.
+
 ## mesh.primitive_uv_sphere_add
 Blender's operator builds it in the module, with Blender's positions and edges; its face and edge order differs from Blender's after the spin and merge it runs, which the primitive tests note.
 

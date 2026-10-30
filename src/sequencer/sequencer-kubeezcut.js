@@ -3,7 +3,7 @@
 // Bylonder's history and the playhead is the scene frame.
 let loading = null;
 
-export function createSequencerAdapter({ project, sequenceEditor, time, history, frames, scenes, notify = console.warn }) {
+export function createSequencerAdapter({ project, sequenceEditor, time, history, frames, audio, scenes, notify = console.warn }) {
   let syncSceneTime = true;
   const clock = {
     get frame() { return time.frame; },
@@ -28,6 +28,7 @@ export function createSequencerAdapter({ project, sequenceEditor, time, history,
       },
       clock,
       frames,
+      audio,
       scenes,
       notify: (message) => notify(message),
     });
