@@ -1,19 +1,22 @@
 # Volcanic island
 
-A three-minute film at 24 fps, low poly and toon shaded. A volcano rises from the sea and a forest grows on it. A pair
+A film of about three and a half minutes at 24 fps, low poly and toon shaded. A volcano rises from the sea and a forest grows on it. A pair
 of seabirds court and raise a chick in a blossom tree. An odd star with a faint trail has been low in the sky from the
 first frame; it grows night after night, then falls just after sunset, a burning rock in a violet dusk. It breaks up
 in the air, its fragments streaking off to fall far out to sea, the largest striking as hard as it, and the main chunk
 strikes the island's far shoulder glancingly. The strike burns that side to glass and sends a great wave racing out,
 highest downrange, but the volcano shelters the nest; burning debris over the ridge lights the forest above it. The
 mother pushes the chick, who has failed to fly twice, off the burning branch; it flies, and she falls with the tree.
-The father and the chick keep out at sea through the night, and come home at first light to the sapling growing where
-the tree stood.
+The chick turns back for her and sits on the beach below, calling up at the burning tree; nothing answers, and the
+father comes down beside it. At last they leave, keep out at sea through the night, and come home at first light to
+the sapling growing where the tree stood.
 
-- **Story.** `story.js` holds the film's clock: island time runs as a time-lapse whose speed follows the story, slowing
-  toward real time as each key moment comes, and solved so the strike falls at sunset and the homecoming at first light.
-  The beats, the meteor, the fire's path and the camera's shots are all functions of the film's time, so playback and
-  renders agree. The beats are timeline markers.
+- **Story.** `story.js` holds the film's clock. The story is told in story seconds, which the film plays at its own
+  pace: the strike and the mother's fall play in slow motion, as Blender's time remapping plays a scene slower, and
+  sounds heard then play slower and lower. Island time runs as a time-lapse while the island forms and in short bursts
+  between the story's moments; within a moment the sun barely moves. The bursts are solved so each moment has its time
+  of day: the strike just after sunset, the homecoming at first light. The beats, the meteor, the fire's path and the
+  camera's shots are all functions of story time, so playback and renders agree. The beats are timeline markers.
 - **Island.** One low-poly mesh from a height field (`island.js`, `createMesh`). The sea is Blender's Circle primitive.
 - **Look.** `toon.js` shades every surface flat in hard bands of sun, moon and fire light, with a sky rim and distance
   haze. The ground's colors follow the story: rock, lava, basalt, soil, grass, the burnt path and its healing. The sky

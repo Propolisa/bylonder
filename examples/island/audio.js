@@ -4,7 +4,7 @@
 // the tree falling, and the asteroid's roar travelling with it, each impact heard as late as its shock reaches the
 // camera. Sounds play with the timeline and stop when it stops; a render or the Video Sequencer's Scene Audio strip
 // mixes them down the same way.
-import { BEAT, NEST, STRIKE, IMPACTS, SHOCK_SPEED, FRAMES, smoothstep, eruption, days, seconds, burning, gust } from './story.js';
+import { BEAT, NEST, STRIKE, IMPACTS, SHOCK_SPEED, FRAMES, smoothstep, eruption, days, seconds, filmAt, rateAt, burning, gust } from './story.js';
 import { createSounds } from './sounds.js';
 import { fireballAt, fireLight } from './meteor.js';
 import { whereIs } from './family.js';
@@ -40,9 +40,12 @@ const CALLS = [
   ['peep', 'chick', 148.8], ['peep', 'chick', 150.6], ['sad', 'chick', 151.3], ['mother', 'mother', 152.7], ['peep', 'chick', 153.9],
   // She pushes it; it falls, and flies; her last call as the tree goes.
   ['mother', 'mother', 154.85], ['sad', 'chick', 155.15], ['peep', 'chick', 155.5], ['mother', 'mother', 156.0], ['father', 'father', 156.6], ['peep', 'chick', 157.2],
+  // It calls for her from the beach, and nothing answers; the father's low call; they leave.
+  ['peep', 'chick', 158.3], ['peep', 'chick', 159.1], ['sad', 'chick', 160.9], ['peep', 'chick', 162.4], ['peep', 'chick', 164.9, 0.8],
+  ['sad', 'chick', 167.1, 0.8], ['coo', 'father', 168], ['peep', 'chick', 169.9, 0.5], ['coo', 'father', 171.3], ['peep', 'chick', 172.6, 0.6],
   // The night at sea, and home.
-  ['father', 'father', 160.4, 0.8], ['peep', 'chick', 161.1, 0.8], ['coo', 'father', 166.5], ['peep', 'chick', 167.2, 0.7], ['father', 'father', 171.6],
-  ['father', 'father', 173.8], ['mother', 'chick', 174.3], ['father', 'father', 174.9], ['coo', 'father', 175.8], ['coo', 'chick', 176.3],
+  ['father', 'father', 174.4, 0.8], ['peep', 'chick', 175.1, 0.8], ['coo', 'father', 180.5], ['peep', 'chick', 181.2, 0.7], ['father', 'father', 185.6],
+  ['father', 'father', 187.8], ['mother', 'chick', 188.3], ['father', 'father', 188.9], ['coo', 'father', 189.8], ['coo', 'chick', 190.3],
 ];
 
 // How loud each sound is against the others: tones carry far more than rumbles of the same peak.
@@ -72,9 +75,11 @@ export function cues() {
   ];
 }
 
-// Where in a one-shot the camera hears it now, in seconds (negative before it is heard): an impact's shock takes its
-// time to reach the camera.
+// Where in a one-shot the camera hears it now, in story seconds (negative before it is heard): an impact's shock takes
+// its time to reach the camera.
 export const heard = (cue, now, ear) => now - cue.at - (cue.shock ? Vector3.Distance(cue.place(now), ear) / SHOCK_SPEED : 0);
+// A one-shot heard in slow motion plays slower and lower, as a slowed recording would, not as slowly as the picture.
+const pitchAt = (second) => Math.sqrt(rateAt(second));
 
 // Plays the cue sheet; resolves once every sound is ready, with the frame update. Live it plays to the speakers; in a
 // render context Babylon's engine plays into the job's offline audio context, so the update moves every source and
@@ -112,8 +117,8 @@ export async function createAudio(scene, camera, time) {
         if (!playing.has(k)) { sound.play({ startOffset: now % sound.buffer.duration }); playing.add(k); }
         return;
       }
-      const offset = heard(cue, now, camera.globalPosition);
-      if (offset >= 0 && offset < sound.buffer.duration && !playing.has(k)) { sound.play({ startOffset: offset }); playing.add(k); }
+      const start = now - heard(cue, now, camera.globalPosition), pitch = pitchAt(start), offset = (filmAt(now) - filmAt(start)) * pitch;
+      if (offset >= 0 && offset < sound.buffer.duration && !playing.has(k)) { sound.playbackRate = pitch; sound.play({ startOffset: offset }); playing.add(k); }
     });
   };
 }

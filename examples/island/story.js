@@ -1,32 +1,48 @@
-// The story's clock and beats. Film time is in seconds; island time in days, a time-lapse whose speed follows the
-// story: it races between the story's moments and slows toward real time as each comes; it stops almost dead as an
-// asteroid falls beside the island, and races once more as the island heals. Everything that happens is a function of these.
+// The story's clock and beats. The story is told in seconds of story time, which the film plays at its own pace: in
+// slow motion at its hardest moments, as Blender's time remapping plays a scene slower. Island time is in days, a
+// time-lapse only between the story's moments (and while the island forms): within a moment it nearly stops, so its
+// light holds. Everything that happens is a function of these.
 import { heightAt, shore } from './island.js';
-
-export const FPS = 24, LENGTH = 180, FRAMES = LENGTH * FPS;
-export const seconds = (frame) => Math.max(0, frame - 1) / FPS;
-export const frameAt = (s) => Math.round(s * FPS) + 1;
 
 export const smoothstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 export const lerp = (a, b, t) => a + (b - a) * t;
 
-// The story in seconds of film.
+// The story in seconds of story time.
 export const BEAT = {
   arrive: 40, mate: 47, court: 51, nest: 57, egg: 64, hatch: 82.5, feed: 86, lesson: 99, tryFly: 105.5,
   omen: 109, leave: 121, streak: 128, impact: 134, embers: 143, climax: 155, fall: 155.8, gone: 156.6,
-  sea: 160, heal: 165, sapling: 168, home: 174.5,
+  mourn: 161.5, sea: 174, heal: 179, sapling: 182, home: 188.5,
 };
+export const FPS = 24, LENGTH = 194;
+// Slow motion: [first story second, last, story seconds a second of film shows there], eased in and out over 0.6 s.
+const SLOW = [[133.4, 136.2, 0.3], [154.7, 157.2, 0.35]];
+export const rateAt = (s) => SLOW.reduce((rate, [a, b, slow]) => Math.min(rate, lerp(1, slow, smoothstep(a - 0.6, a, s) * (1 - smoothstep(b, b + 0.6, s)))), 1);
+// Film seconds at each step of story time, and back.
+const STEP = 1 / 240, FILM = new Float64Array(Math.ceil(LENGTH / STEP) + 2);
+for (let i = 1; i < FILM.length; i++) FILM[i] = FILM[i - 1] + STEP / rateAt((i - 0.5) * STEP);
+const sample = (table, i) => { const k = Math.min(table.length - 2, Math.max(0, Math.floor(i))); return lerp(table[k], table[k + 1], Math.min(1, i - k)); };
+export const filmAt = (s) => sample(FILM, s / STEP);
+const storyAt = (film) => {
+  let lo = 0, hi = FILM.length - 1;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (FILM[mid] <= film) lo = mid; else hi = mid; }
+  return (lo + Math.min(1, Math.max(0, (film - FILM[lo]) / (FILM[hi] - FILM[lo])))) * STEP;
+};
+export const FRAMES = Math.round(filmAt(LENGTH) * FPS);
+// The story second a frame shows, and the frame that shows a story second.
+export const seconds = (frame) => storyAt(Math.max(0, frame - 1) / FPS);
+export const frameAt = (s) => Math.round(filmAt(s) * FPS) + 1;
 
-// Days per second of film: [second, speed] keys, linear between. The time-lapse races between the story's moments and
-// slows toward real time as each comes. Six speeds are solved in turn so they court in the morning, the egg's vigil and
-// the star's last night are at night, the chick hatches at dawn, the asteroid strikes just after sunset, and they come
-// home at first light.
-const keys = ([morning, vigil, dawn, night, dusk, home]) => [
-  [0, 0.12], [5, 0.135], [10, 0.16], [15, 0.215], [20, 0.29], [25, 0.38], [30, 0.5], [35, morning], [40, morning], [44, 0.03], [56, 0.03],
-  [58, 0.25], [62, 0.25], [64, 0.04], [66, vigil], [75, vigil], [77, 0.3], [79, dawn], [80.5, 0.012], [85, 0.012], [87, 0.03], [92, 0.03],
-  [93.5, 0.5], [97.5, 0.5], [99, 0.02], [109, 0.02], [111, 0.3], [113, night], [115, 0.04], [119, 0.04], [121, 0.1], [123, 0.06],
-  [125, dusk], [127, 0.005], [140, 0.004], [148, 0.005], [158, 0.005], [162, 0.03], [164, 0.3], [166, home], [171, home], [173.5, 0.06],
-  [175, 0.02], [180, 0.015],
+// Days per second of story: [second, speed] keys, linear between. The time-lapse runs while the island forms, then
+// only in short bursts between the story's moments; within one the sun barely moves. The bursts' speeds are solved in
+// turn so they court in the morning, the egg comes one morning, its vigil and the star's last night are at night, the
+// chick hatches at dawn, the lesson is in the morning, the flock leaves at dawn, the asteroid strikes just after sunset,
+// and they come home at first light.
+const keys = ([morning, build, vigil, dawn, grow, night, leave, dusk, home]) => [
+  [0, 0.12], [5, 0.135], [10, 0.16], [15, 0.215], [20, 0.29], [25, 0.38], [30, 0.5], [35, morning], [40, morning], [43, 0.005], [56, 0.005],
+  [58, build], [62, build], [64, 0.006], [66, vigil], [75, vigil], [77, 0.3], [79, dawn], [80.5, 0.003], [85, 0.003], [86.5, 0.005], [92, 0.005],
+  [93.5, grow], [97.5, grow], [99, 0.004], [109, 0.004], [111, 0.3], [113, night], [115, 0.006], [117, 0.006], [119, leave], [121, 0.006],
+  [123, 0.06], [125, dusk], [127, 0.004], [140, 0.003], [148, 0.004], [172, 0.003], [176, 0.03], [178, 0.3], [180, home], [185, home],
+  [187.5, 0.06], [189, 0.02], [194, 0.015],
 ];
 const speedOf = (k, t) => {
   const i = k.findIndex(([s], j) => t >= s && t <= (k[j + 1]?.[0] ?? Infinity));
@@ -34,21 +50,22 @@ const speedOf = (k, t) => {
   return s1 === s0 ? v0 : lerp(v0, v1, (t - s0) / (s1 - s0));
 };
 const integrate = (k) => {
-  const table = new Float64Array(FRAMES + 2);
+  const table = new Float64Array(LENGTH * FPS + 2);
   for (let f = 2; f < table.length; f++) table[f] = table[f - 1] + (speedOf(k, (f - 2) / FPS) + speedOf(k, (f - 1) / FPS)) / (2 * FPS);
   return table;
 };
 // Each speed in turn brings the day at its moment to a time of day (a fraction), the speed nearest a guess: the day is
 // linear in it, and later speeds do not change earlier moments.
-const TIMES = [[48, 0.3, 0.3], [70, 0.75, 0.05], [81.5, 0.02, 0.3], [116, 0.75, 0.3], [BEAT.impact, 0.475, 0.2], [BEAT.home, 0.97, 0.6]];
+const TIMES = [[48, 0.3, 0.3], [BEAT.egg, 0.1, 0.25], [70, 0.75, 0.05], [81.5, 0.02, 0.3], [BEAT.lesson, 0.06, 0.5], [116, 0.75, 0.3], [BEAT.leave, 0.02, 0.15],
+  [BEAT.impact, 0.475, 0.2], [BEAT.home, 0.97, 0.6]];
 const SPEEDS = keys(TIMES.reduce((solved, [second, fraction, near], i) => {
-  const at = (v) => integrate(keys([...solved, v, ...TIMES.slice(i + 1).map(([, , n]) => n)]))[frameAt(second)];
+  const at = (v) => integrate(keys([...solved, v, ...TIMES.slice(i + 1).map(([, , n]) => n)]))[Math.round(second * FPS) + 1];
   const a = at(0), slope = at(1) - a, n = Math.round(a + near * slope - fraction);
   return [...solved, (n + fraction - a) / slope];
 }, []));
 const DAYS = integrate(SPEEDS);
 export const speed = (frame) => speedOf(SPEEDS, seconds(frame));
-export const days = (frame) => DAYS[Math.min(DAYS.length - 1, Math.max(1, Math.round(frame)))];
+export const days = (frame) => sample(DAYS, seconds(frame) * FPS + 1);
 
 // The eruption: lava runs from the crater to the sea over its first day and a half, the crater glows until day three.
 export const eruption = (day) => 1 - smoothstep(2.2, 3, day);
@@ -59,6 +76,12 @@ export const grassDay = (s) => 3.4 + 2 * Math.max(0, 1 - s / 0.85);
 export const NEST = (() => {
   const angle = 0.93, r = 3.0, x = Math.cos(angle) * r, z = Math.sin(angle) * r;
   return { angle, r, x, z, ground: heightAt(x, z) - 0.03, size: 1.75 };
+})();
+// Where the father and the chick come down after the fall: the beach below the nest, aside from the fire's path to
+// the sea, looking up at the fallen tree.
+export const MOURN = (() => {
+  const angle = NEST.angle - 0.7, r = 0.82 * shore(angle), x = Math.cos(angle) * r, z = Math.sin(angle) * r;
+  return { angle, x, z, ground: heightAt(x, z) };
 })();
 // The asteroid: an odd-colored star with a faint trail, in the sky over the far side of the island from the first
 // frame. It grows through the film, fast in its last nights, then falls in the dusk just after sunset onto the island's
@@ -127,7 +150,7 @@ export const IMPACT = (() => {
   const r = 1.3, angle = fireAngle(r), x = Math.cos(angle) * r, z = Math.sin(angle) * r;
   return { r, angle, x, z, ground: heightAt(x, z) };
 })();
-const FIRE = [[BEAT.embers, IMPACT.r], [BEAT.climax - 0.4, NEST.r], [BEAT.sea, 6.4]];
+const FIRE = [[BEAT.embers, IMPACT.r], [BEAT.climax - 0.4, NEST.r], [BEAT.mourn + 6, 6.4]];
 export function fireFront(time) {
   if (time < FIRE[0][0]) return 0;
   const i = time < FIRE[1][0] ? 0 : 1, [t0, r0] = FIRE[i], [t1, r1] = FIRE[i + 1];
@@ -170,18 +193,22 @@ export const SHOTS = [
   [147, 'nest', 0.55, 7.5, 1.8, 1.8, 0.85, 6.2], [150, 'nest', 1.35, 2.47, 2.3, 1.75, 1.05, 2.17],
   // The climax: the tree catches fire, the chick is pushed and flies, the tree falls with its mother.
   [152.5, 'nest', 2.45, 3.6, 1.2, 1.75, 2.6, 4.2], [156.6, 'nest', 1.5, 7.5, 2.2, 1.0, 1.3, 9.5],
-  // The night at sea; the island heals; home.
-  [159, 'island', 1.35, 15.5, 3.3, 2.6, 1.55, 17], [164, 'island', 0.6, 20, 9, 1.4, 0.9, 16], [171, 'nest', 0.9, 2.3, 0.8, 0.7, 1.05, 2.8],
+  // The chick turns back for her and will not leave: on the beach below, it calls up at the burning tree and nothing
+  // answers; the father comes down beside it; the night goes on.
+  [159.4, 'shore', MOURN.angle + 0.35, 4.6, 0.7, 0.35, MOURN.angle + 0.15, 3.6], [164.5, 'shore', MOURN.angle - 0.3, 1.1, 0.3, 0.15, MOURN.angle - 0.15, 0.85],
+  [168.5, 'island', MOURN.angle - 0.25, 12, 1.6, 1.3, MOURN.angle - 0.1, 13.5],
+  // They leave at last; the night at sea; the island heals; home.
+  [173, 'island', 1.35, 15.5, 3.3, 2.6, 1.55, 17], [178, 'island', 0.6, 20, 9, 1.4, 0.9, 16], [185, 'nest', 0.9, 2.3, 0.8, 0.7, 1.05, 2.8],
   // Sunrise over the healed island; the flock home, a whale and her calf.
-  [176.5, 'island', 1.05, 12, 2.4, 1.8, 1.0, 19],
+  [190.5, 'island', 1.05, 12, 2.4, 1.8, 1.0, 19],
 ];
-const centerOf = (name) => (name === 'nest' ? { x: NEST.x, y: NEST.ground, z: NEST.z } : { x: 0, y: 0, z: 0 });
+const CENTERS = { nest: { x: NEST.x, y: NEST.ground, z: NEST.z }, shore: { x: MOURN.x, y: MOURN.ground, z: MOURN.z }, island: { x: 0, y: 0, z: 0 } };
 // The camera's place and target at a second of film, and the end of the shot it is in.
 export function shotAt(time) {
   // By frame, so a shot starts on the frame its second rounds to.
-  const frame = Math.round(time * FPS) + 1, i = SHOTS.findLastIndex(([start]) => frame >= frameAt(start)), [start, center, a0, d0, height, look, a1, d1] = SHOTS[i];
+  const frame = frameAt(time), i = SHOTS.findLastIndex(([start]) => frame >= frameAt(start)), [start, center, a0, d0, height, look, a1, d1] = SHOTS[i];
   const end = SHOTS[i + 1]?.[0] ?? LENGTH, t = smoothstep(0, 1, (time - start) / (end - start)) * 0.9 + 0.1 * (time - start) / (end - start);
-  const c = centerOf(center), angle = lerp(a0, a1, t), distance = lerp(d0, d1, t);
+  const c = CENTERS[center], angle = lerp(a0, a1, t), distance = lerp(d0, d1, t);
   const x = c.x + Math.cos(angle) * distance, z = c.z + Math.sin(angle) * distance;
   return { position: [x, Math.max(c.y + height, heightAt(x, z) + 0.6), z], target: [c.x, c.y + look, c.z], end };
 }
