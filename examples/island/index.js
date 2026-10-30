@@ -1,4 +1,4 @@
-import { animate, animation } from '@workbench/sdk';
+import { animate, animation, renderSettings } from '@workbench/sdk';
 import { FRAMES, FPS, days, speed, SHOTS } from './story.js';
 import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
@@ -13,6 +13,8 @@ import { createBombs, createSteam, createWhale, createBirds, createFireflies } f
 // toon shaded, the film's look is in toon.js.
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
+  // Flat toon shading needs few samples to smooth its edges.
+  renderSettings({ eevee: { taaRenderSamples: 16 } });
   const toon = createToon(scene);
 
   const dome = BABYLON.MeshBuilder.CreateSphere('Sky', { diameter: 400, segments: 24, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
