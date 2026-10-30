@@ -2,6 +2,9 @@
 const KEY = 'bylonder:preferences:v1';
 const defaults = {
   keepScenesLoaded: true,
+  // The Video Sequencer's setup on an empty edit: asked, or the remembered { video, scene, audio }.
+  askSequencerSetup: true,
+  sequencerSetup: null,
 };
 
 function read() {
@@ -46,6 +49,8 @@ export function openPreferences() {
   header.append(Object.assign(document.createElement('span'), { textContent: 'Preferences' }), close);
   dialog.append(header, section('System',
     row('keepScenesLoaded', 'Keep Scenes Loaded', 'Scenes stay loaded after switching away, so switching back is instant. Uses more memory and graphics contexts.'),
+  ), section('Video Sequencer',
+    row('askSequencerSetup', 'Ask to Set Up for Video Editing', 'When the Video Sequencer opens on an empty edit, offer to render video and add the scene; off uses the remembered choice.'),
   ));
   dialog.addEventListener('close', () => dialog.remove());
   dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });

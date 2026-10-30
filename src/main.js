@@ -45,6 +45,7 @@ import { strips } from "./sequencer/sequence-editor.js";
 import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
 import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequencer/editor.js";
+import { offerSequencerSetup } from "./editors/space_sequencer/setup.js";
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createMeshEditMode } from "./editors/mesh/editmesh-mode.js";
@@ -70,7 +71,7 @@ import { createContext } from "./blenkernel/context.js";
 import { exportScene } from "./io_scene_babylon/export.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
-import { setContextPointer } from "./python/bpy_rna.js";
+import { setContextPointer, pointerStruct, structFind } from "./python/bpy_rna.js";
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
@@ -216,6 +217,8 @@ syncLightDirections(scene);
 world.views = views;
 let creator;
 const systems = sdk.systems;
+// Main's scene as Blender's RNA reads it.
+const mainScene = () => pointerStruct(structFind("Scene"), world.mainSync.blender.scene, world.mainSync.blender.scene);
 // Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
 // Render jobs and scene strips render from a snapshot of the scene, whether or not scene edits are remembered.
 const liveSnapshot = () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() });
@@ -240,7 +243,8 @@ window.__bylonder ={ world, renderHost, runOperator, settled,
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
-  coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); } };
+  coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); },
+  get mainScene() { return mainScene(); } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });
@@ -550,7 +554,8 @@ const sceneState = ({ builder, overrides, animation: action }) => {
   return [input.code, builder, rest, action && { ...action, time: { ...action.time, frameCurrent: 0 } }];
 };
 const sceneFrames = createSceneFrames({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "" });
-const sceneAudio = createSceneAudio({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "", scenes: hostScenes, notify });
+// The active scene plays its sound live while the sequencer follows the scene's time (Sync Scene Time).
+const sceneAudio = createSceneAudio({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "", scenes: hostScenes, live: (id) => id === activeSceneId && sequencerAdapter.syncSceneTime, notify });
 const updateRevision = async (id, state) => {
   const next = await hash(JSON.stringify(state));
   if (revisions.get(id) === next) return;
@@ -574,7 +579,15 @@ const sequencerAdapter = createSequencerAdapter({
 });
 world.renderSettings.subscribe(() => sequencerAdapter.setFormat(sequencerFormat()));
 animation.time.subscribe((kind) => { if (kind === "settings" || kind === "load") sequencerAdapter.setFormat(sequencerFormat()); });
-const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-section"), { adapter: sequencerAdapter, header: viewportDock.header("sequencer"), notify });
+// Opening the Video Sequencer on an empty edit offers to set it up for video editing of this scene.
+const addSceneStrip = async (menu, scene) => (await sequencerAdapter.menus()).Add.find((entry) => entry.label === menu).items()[hostScenes().findIndex((s) => s.id === scene.id)].run();
+const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-section"), {
+  adapter: sequencerAdapter, header: viewportDock.header("sequencer"), notify,
+  onOpen: () => offerSequencerSetup({
+    empty: () => !strips(world.sequenceEditor.state).length, scene: hostScenes().find((s) => s.id === activeSceneId), time: animation.time, add: addSceneStrip,
+    render: () => mainScene().render, commit: () => history.commit(),
+  }).catch((error) => notify("Video Sequencer setup: " + (error.message || error.__args__?.[0] || error))),
+});
 const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), { adapter: sequencerAdapter, notify });
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());

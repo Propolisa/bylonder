@@ -46,8 +46,14 @@ Status: partial
 Blender mixes a scene's sound (its speakers and its own sequencer) into a scene strip. Bylonder has no speakers: a
 scene's sound is whatever its code plays through Babylon's spatial audio, heard from its camera. Add > Scene Audio puts
 that sound in the edit as an audio strip of its own; the scene renders it in a render context, on an offline audio
-context, a frame at a time (`src/sequencer/scene-audio.js`, `renderAudio` in `src/render/context.js`), and again when
-the scene changes. Render Animation without the sequencer mixes the same sound into video formats with audio.
+context, a frame at a time at the scene's frame rate (`src/sequencer/scene-audio.js`, `renderAudio` in
+`src/render/context.js`), and again when the scene changes. While the sequencer follows the scene's time, the active
+scene plays its sound live, so its strip is silent in the preview; renders mix it. Render Animation without the
+sequencer mixes the same sound into video formats with audio. Blender's speakers could feed the same source later.
+
+Opening the Video Sequencer on an empty edit offers Blender's video editing setup: FFmpeg output in MPEG-4 (H.264,
+AAC) instead of PNG images, the scene as a strip and its Scene Audio. Remember keeps the choice, and Edit >
+Preferences asks again.
 
 ## mesh.primitive_uv_sphere_add
 Blender's operator builds it in the module, with Blender's positions and edges; its face and edge order differs from Blender's after the spin and merge it runs, which the primitive tests note.

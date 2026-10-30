@@ -656,6 +656,27 @@ const checks = {
     await app.until((b) => Math.abs(b.editor.selection.nodes.at(-1).position.x - 2) < 1e-6, null, 60000);
   },
 
+  // Opening the Video Sequencer on an empty edit offers to set it up; Remember keeps the choice for next time.
+  "opening the Video Sequencer offers to set it up for video": { open: { example: "Volcanic Island", node: "Island" }, async run() {
+    await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 48 }));
+    await app.locator('button[title="Editor Type · Timeline"]').click();
+    await app.frame().getByRole("menuitem", { name: "Video Sequencer" }).click();
+    const dialog = app.frame().getByRole("dialog", { name: "Set Up for Video Editing" });
+    await dialog.getByRole("checkbox").last().click();
+    await dialog.getByRole("button", { name: "Set Up" }).click();
+    await app.until((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length === 2, null, 30000);
+    const out = await app.bylonder((b) => {
+      const { items, tracks } = b.world.sequenceEditor.state.edit.timeline, { image_settings, ffmpeg } = b.mainScene.render;
+      return { strips: items.map((i) => [i.type, i.from, i.durationInFrames, tracks.find((t) => t.id === i.trackId).kind]),
+        output: [image_settings.file_format, ffmpeg.format, ffmpeg.codec, ffmpeg.audio_codec], remembered: JSON.parse(localStorage.getItem("bylonder:preferences:v1")),
+        live: b.sceneAudio.live(b.scenes[0].id) };
+    });
+    assert.deepEqual(out.strips, [["scene", 1, 48, "video"], ["audio", 1, 48, "audio"]]);
+    assert.deepEqual(out.output, ["FFMPEG", "MPEG4", "H264", "AAC"]);
+    assert.deepEqual([out.remembered.askSequencerSetup, out.remembered.sequencerSetup], [false, { video: true, scene: true, audio: true }]);
+    assert.ok(out.live, "the scene plays its sound live, so its strip is silent in the preview");
+  } },
+
   // The island makes its sound with Babylon's audio; a Scene Audio strip carries it into the sequencer's mix.
   "Add > Scene Audio puts the scene's sound in the edit": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     const out = await app.bylonder(async (b) => {

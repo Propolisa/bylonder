@@ -13,7 +13,8 @@ function whenVisible(element, run) {
   return () => observer.disconnect();
 }
 
-export function mountSequencerEditor(section, { adapter, header, notify }) {
+// onOpen(): once, when the area first shows its editors.
+export function mountSequencerEditor(section, { adapter, header, notify, onOpen = () => {} }) {
   const state = { viewType: 'SEQUENCER_PREVIEW', sidebar: false };
   section.classList.add('vse-area');
   section.innerHTML = '<div class="vse-main"><div class="vse-slot vse-preview"></div><div class="vse-slot vse-sequencer"></div></div><div class="vse-slot vse-sidebar"></div><div class="vse-loading">Loading Video Sequencer...</div>';
@@ -34,7 +35,10 @@ export function mountSequencerEditor(section, { adapter, header, notify }) {
     viewLabel.textContent = viewTypes[state.viewType][0];
     if (!started) return;
     const wanted = [...(state.viewType !== 'SEQUENCER' ? ['preview'] : []), ...(state.viewType !== 'PREVIEW' ? ['sequencer'] : []), ...(state.sidebar ? ['properties'] : [])];
-    Promise.all(wanted.map(ensure)).then(() => { loading.hidden = true; if (!menuSlot.childElementCount) showMenus(); });
+    Promise.all(wanted.map(ensure)).then(() => {
+      loading.hidden = true;
+      if (!menuSlot.childElementCount) { showMenus(); onOpen(); }
+    });
   };
   const viewMenu = menuButton('Sequencer & Preview', () => Object.entries(viewTypes).map(([id, [label, icon]]) => ({ label, icon, checked: () => state.viewType === id, run: () => { state.viewType = id; sync(); } })), { icon: 'sequence', className: 'bl-dropdown', title: 'View Type' });
   const viewLabel = viewMenu.querySelector('span:last-child');
