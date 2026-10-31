@@ -448,10 +448,14 @@ EXPORT(object_parent_set) void object_parent_set(Object *ob, Object *parent)
 }
 
 /* An object's mode (eObjectMode). */
+/* An object's mode, tagged only when it changes: the evaluated copy taken again from the original would lose what was
+ * evaluated over time (a simulation's state). */
 EXPORT(object_mode_set) void object_mode_set(Object *ob, int mode)
 {
-  ob->mode = eObjectMode(mode);
-  DEG_id_tag_update(&ob->id, ID_RECALC_SYNC_TO_EVAL);
+  if (ob->mode != eObjectMode(mode)) {
+    ob->mode = eObjectMode(mode);
+    DEG_id_tag_update(&ob->id, ID_RECALC_SYNC_TO_EVAL);
+  }
 }
 
 /* port-override: Bylonder's objects have no parent inverse, so it folds into the object's own transform, keeping its
