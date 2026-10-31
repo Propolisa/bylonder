@@ -62,8 +62,9 @@ WEAK void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
 WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
-/* port-override: WASI has no threads: a thread pool's work (a window manager job's: a point cache bake) runs where it
- * is inserted, to its end; the window then ends the job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). */
+/* port-override: WASI has no threads: a thread pool's work (a window manager job's: a point cache bake, a background
+ * task pool's queue) runs where it is inserted, to its end, which frees its slot for the next; the window then ends a
+ * job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). */
 struct ThreadSlot {
   ThreadSlot *next, *prev;
   void *(*do_thread)(void *);
@@ -78,12 +79,28 @@ void BLI_threadpool_insert(ListBaseT<ThreadSlot> *threadbase, void *callerdata)
       slot.avail = 0;
       slot.callerdata = callerdata;
       slot.do_thread(callerdata);
+      slot.avail = 1;
       return;
     }
   }
 }
 /* port-override: image files are the browser's to decode; OpenImageIO and OpenEXR are past the seam. */
 WEAK void OIIO_init() {}
+/* blender-port: imbuf/intern/format_*.cc and openexr_api.cpp: the file extensions of the image formats whose readers
+ * are past the seam, which the file types (filetype.cc) and so file lists still name. */
+const char *imb_file_extensions_avif[] = {".avif", nullptr};
+const char *imb_file_extensions_bmp[] = {".bmp", ".dib", nullptr};
+const char *imb_file_extensions_cineon[] = {".cin", nullptr};
+const char *imb_file_extensions_dds[] = {".dds", nullptr};
+const char *imb_file_extensions_dpx[] = {".dpx", nullptr};
+const char *imb_file_extensions_hdr[] = {".hdr", nullptr};
+const char *imb_file_extensions_iris[] = {".sgi", ".rgb", ".rgba", ".bw", nullptr};
+const char *imb_file_extensions_jpeg[] = {".jpg", ".jpeg", nullptr};
+const char *imb_file_extensions_openexr[] = {".exr", nullptr};
+const char *imb_file_extensions_png[] = {".png", nullptr};
+const char *imb_file_extensions_psd[] = {".psd", ".pdd", ".psb", nullptr};
+const char *imb_file_extensions_tga[] = {".tga", ".tpic", nullptr};
+const char *imb_file_extensions_tiff[] = {".tif", ".tiff", ".tx", nullptr};
 WEAK void imb_initopenexr() {}
 WEAK void imb_exitopenexr() {}
 WEAK void imb_init_dds() {}
@@ -114,3 +131,14 @@ size_t BLI_mmap_get_length(const BLI_mmap_file * /*file*/) { return 0; }
 bool BLI_mmap_any_io_error(const BLI_mmap_file * /*file*/) { return false; }
 void BLI_mmap_free(BLI_mmap_file * /*file*/) {}
 }  // namespace blender
+
+#define QUEUE_POP _ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE
+#define WRAP_(prefix, name) prefix##name
+#define WRAP(prefix, name) WRAP_(prefix, name)
+extern "C" void *WRAP(__real_, QUEUE_POP)(blender::ThreadQueue *queue);
+/* port-override: with one thread nothing else can add work to a queue being waited on, so an empty queue gives no work
+ * (a background task pool's worker then ends) instead of waiting forever. */
+extern "C" void *WRAP(__wrap_, QUEUE_POP)(blender::ThreadQueue *queue)
+{
+  return blender::BLI_thread_queue_is_empty(queue) ? nullptr : WRAP(__real_, QUEUE_POP)(queue);
+}

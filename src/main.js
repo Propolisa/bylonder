@@ -756,6 +756,8 @@ let last = 0;
 // Once per animation frame, before views decide whether to render.
 const perFrame = engine.onBeginFrameObservable.add(() => {
   animation.tick(performance.now());
+  // Blender's window timers, as its main loop runs them: a job started outside an event (a menu's asset list) ends.
+  blenderAreas.ticking();
   world.modifiers.refresh();
   for (const view of viewports()) if (!view.state.cameraView) view.nav.updateBounds();
   status.tick();

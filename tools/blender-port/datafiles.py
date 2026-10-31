@@ -11,9 +11,11 @@ import shutil
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FILES = ['assets/blender_assets.cats.txt', 'assets/LICENSE', 'assets/nodes/geometry_nodes_essentials.blend',
+FILES = ['assets/blender_assets.cats.txt', 'assets/nodes/geometry_nodes_essentials.blend',
          'assets/nodes/geometry_nodes_dynamics_assets.blend', 'assets/nodes/procedural_hair_node_assets.blend',
          'assets/brushes/essentials_brushes-curve_sculpt.blend']
+# Their license, kept beside them; Blender does not read it.
+LICENSE = 'assets/LICENSE'
 
 
 def main():
@@ -22,7 +24,7 @@ def main():
     source = os.path.join(install, '.'.join(tag.split('.')[:2]), 'datafiles')
     out = os.path.join(REPO, 'src', 'bmesh', 'datafiles')
     shutil.rmtree(out, ignore_errors=True)
-    for name in FILES:
+    for name in FILES + [LICENSE]:
         os.makedirs(os.path.dirname(os.path.join(out, name)), exist_ok=True)
         shutil.copyfile(os.path.join(source, name), os.path.join(out, name))
     # Literal URLs, which the bundler resolves as it resolves the module's own.

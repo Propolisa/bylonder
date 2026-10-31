@@ -36,10 +36,10 @@ function deliver(result) {
   return result;
 }
 
-// The window's timers (panel animations, operators' timers) run each animation frame while it has any.
+// The window's timers (panel animations, operators' timers, jobs) and notifiers run each animation frame while it has any.
 let frame = 0;
 export function ticking() {
-  if (frame || !blenderWindow().timersActive || typeof requestAnimationFrame === 'undefined') return;
+  if (frame || !blenderWindow().pending || typeof requestAnimationFrame === 'undefined') return;
   frame = requestAnimationFrame(() => {
     frame = 0;
     deliver(blenderWindow().tick());

@@ -40,6 +40,7 @@
 #include "DNA_screen_types.h"
 #include "DNA_windowmanager_types.h"
 #include "DNA_workspace_types.h"
+#include "ED_node_c.hh"
 #include "ED_space_api.hh"
 
 #include "BKE_report.hh"
@@ -228,10 +229,12 @@ void gesture_straightline_modal_keymap(wmKeyConfig *keyconf);
 
 static Vector<wmOperatorType *> &operators()
 {
-  /* As WM_init registers them: the window manager's, every space's with their operators and gizmos, then macros. */
+  /* As WM_init registers them: the window manager's, every space's with their operators and gizmos (and the node
+   * types' draw functions), then macros. */
   static Vector<wmOperatorType *> table = [] {
     wm_operatortypes_register();
     ED_spacetypes_init();
+    ED_node_init_butfuncs();
     ED_spacemacros_init();
     ed::transform::keymap_transform(nullptr);
     knifetool_modal_keymap(nullptr);

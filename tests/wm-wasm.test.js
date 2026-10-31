@@ -151,12 +151,12 @@ properties.inContext(RGN_TYPE_WINDOW, (C) => panelClosedSet(C, 'OBJECT_PT_transf
 drawPanels();
 properties.layout(RGN_TYPE_WINDOW, 30, 0, 200, 300);
 drawPanels();
-assert.equal(window.timersActive, true, 'the panels animate');
-for (let i = 0; i < 10 && window.timersActive; i++) {
+assert.equal(window.pending, true, 'the panels animate');
+for (let i = 0; i < 10 && window.pending; i++) {
   await new Promise((resolve) => setTimeout(resolve, 100));
   window.tick();
 }
-assert.equal(window.timersActive, false, 'the animation ends, its timer and handler gone');
+assert.equal(window.pending, false, 'the animation ends, its timer and handler gone');
 properties.dispose();
 
 // A macro the page allows runs its steps too, though they are not allowed alone: Shift D duplicates once, and the

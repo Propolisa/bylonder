@@ -142,13 +142,14 @@ function propertyInfo([type, id, data], prop) {
 const POINTER_RNA = Symbol('PointerRNA');
 export const pointerOf = (struct) => struct?.[POINTER_RNA] ?? null;
 const live = new Map();
-const keyOf = (type, data) => `${type}:${data}`;
+// A PointerRNA is its owner ID, type and data: an evaluated copy at an address an earlier one had is another struct.
+const keyOf = (type, id, data) => `${type}:${id}:${data}`;
 const finalizer = new FinalizationRegistry((key) => { if (!live.get(key)?.deref()) live.delete(key); });
 
 export function struct(type, id, data) {
   if (!data) return null;
   [type, id, data] = [type >>> 0, id >>> 0, data >>> 0];
-  const key = keyOf(type, data), existing = live.get(key)?.deref();
+  const key = keyOf(type, id, data), existing = live.get(key)?.deref();
   if (existing) return existing;
   const cls = classOf(type);
   const target = Object.create(cls, { __class__: { value: cls, enumerable: true, writable: true } });

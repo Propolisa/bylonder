@@ -74,8 +74,13 @@ function openPopover(tree, ui, owner) {
   import('vue').then(({ createApp }) => createApp({ render: () => h(BlockView, { tree, ui }) }).mount(host));
 }
 
-// The RNA property a number button edits, as the interface shows it (its unit, range and precision).
-const meta = (b) => (b.rna ? rnaProperty(b.rna.owner, b.rna.prop) : null) ?? { type: 'F', min: b.min, max: b.max, soft_min: b.soft_min, soft_max: b.soft_max };
+// The RNA property a number button edits, as the interface shows it: its type, subtype, unit and precision as Blender
+// defines it for the data (ui-tree.cc), over the static description.
+const meta = (b) => {
+  if (!b.rna) return { type: 'F' };
+  const { type, subtype, unit, precision } = b.rna;
+  return { ...rnaProperty(b.rna.owner, b.rna.prop), ...(type && { type, subtype, unit, precision }) };
+};
 const unitOf = (m) => (m.unit === 'LENGTH' ? 'length' : m.unit === 'ROTATION' ? 'angle' : null);
 
 function number(b, env) {

@@ -44,8 +44,8 @@ export function createSceneTime(initial) {
     },
     play() { playing = !playing; previous = null; emit('playback'); },
     pause() { if (playing) { playing = false; previous = null; emit('playback'); } },
-    // Frame Dropping advances in real time at fps; Play Every Frame advances one frame step per tick.
-    // frame_step makes playback skip frames like Blender's.
+    // Frame Dropping advances in real time at fps; Play Every Frame advances one frame step per tick. Either shows
+    // whole frames, the clock keeping the rest (screen_animation_step); frame_step makes playback skip frames too.
     tick(now) {
       if (!playing) return;
       if (previous === null) { previous = now; return; }
@@ -53,7 +53,8 @@ export function createSceneTime(initial) {
       clock += state.syncMode === 'NONE' ? state.frameStep : (now - previous) / 1000 * frameRate(state); previous = now;
       if (clock > end) { if (state.loop) clock = start + (clock - start) % (end - start); else { clock = end; api.pause(); } }
       if (clock < start) clock = start;
-      const frame = state.frameStep > 1 ? start + Math.floor((clock - start) / state.frameStep) * state.frameStep : clock;
+      const frame = start + Math.floor((clock - start) / state.frameStep) * state.frameStep;
+      if (frame === state.frameCurrent) return;
       state = { ...state, frameCurrent: frame };
       emit('frame');
     },

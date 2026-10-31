@@ -279,6 +279,8 @@ def main():
         i, n = map(int, shard.split('/'))
         by_target = {t: g for t, g in by_target.items() if zlib.crc32(t.encode()) % n == i}
     print(f'{sum(map(len, by_target.values()))} sources in {len(by_target)} libraries', file=sys.stderr)
+    # The header Blender's build writes as it builds (the configure does not): the checkout's hash, which saved files carry.
+    subprocess.run(['cmake', '--build', host, '--target', 'buildinfo'], check=True, capture_output=True)
     results = {}
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("JOBS", os.cpu_count()))) as pool:
         for target, group in sorted(by_target.items()):
@@ -330,9 +332,10 @@ def main():
 
 
 # Bylonder's own path resolution for its custom properties (rna-runtime.cc).
-WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE']
+WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE']
 
 
+NULL_DATA = os.path.join(WASM, 'null-data.txt')
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
 # fonts, video); everywhere else Blender's definition wins over the API's stand-in.
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie'}
@@ -365,7 +368,9 @@ def link_module(host, out, entries, extra, archives, module_libraries):
         link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
                 *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
-                '-Wl,--allow-undefined', '-o', module]
+                # Undefined functions are imports, which throw when called; undefined data fails the link, as it would read
+                # as null, unless null-data.txt names it.
+                '-Wl,--import-undefined', '-Wl,--unresolved-symbols=report-all', f'-Wl,--allow-undefined-file={NULL_DATA}', '-o', module]
         result = subprocess.run(link, capture_output=True, text=True)
         losers = duplicate_losers(result.stderr, {os.path.basename(a) for a in module_libraries})
         if not losers:

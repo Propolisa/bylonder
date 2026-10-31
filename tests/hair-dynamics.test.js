@@ -22,7 +22,7 @@ const python = (fn) => inPythonContext(blender.C, fn);
 // list (again after Main changes), which the window's ticks finish.
 const openMenu = () => {
   assert(blender.menu('OBJECT_MT_modifier_add_root_catalogs'));
-  for (let ticks = 0; x.wm_timers_active(blender.C); ticks++) {
+  for (let ticks = 0; x.wm_pending(blender.C); ticks++) {
     assert(ticks < 100, 'the asset list loads');
     x.wm_tick(blender.C);
   }

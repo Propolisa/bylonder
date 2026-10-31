@@ -126,6 +126,14 @@ struct BlenderMain {
 static void collections_synced(BlenderMain *ctx);
 static void scene_updated(const DEGEditorUpdateContext *update_ctx, bool updated);
 
+/* As wm_file_read_post ends a file's reading (the startup file's too): the file read, and the asset lists to read
+ * again, which the node tools' registration starts (register_node_group_operators). */
+static void file_read_notify(BlenderMain *ctx)
+{
+  WM_event_add_notifier_ex(ctx->wm, &ctx->window, NC_WM | ND_FILEREAD, nullptr);
+  WM_event_add_notifier_ex(ctx->wm, &ctx->window, NC_ASSET | ND_ASSET_LIST_READING, nullptr);
+}
+
 EXPORT(main_new) BlenderMain *main_new()
 {
   types_ensure();
@@ -161,6 +169,7 @@ EXPORT(main_new) BlenderMain *main_new()
   wm_init(ctx->C);
   DEG_editors_set_update_cb(nullptr, scene_updated);
   collections_synced(ctx);
+  file_read_notify(ctx);
   return ctx;
 }
 
@@ -1164,6 +1173,7 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int 
     BlendFileReadWMSetupData wm_setup_data = {ctx->wm};
     BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, &wm_setup_data, &read_report, false, nullptr);
     main_context_refresh(ctx);
+    file_read_notify(ctx);
   }
   for (const Report &report : reports.list.items_mutable()) {
     if (report.type >= RPT_WARNING) {

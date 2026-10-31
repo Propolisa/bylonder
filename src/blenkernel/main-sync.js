@@ -731,7 +731,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     end: () => api.view(),
     // The scene at a frame: Main evaluated for it as the depsgraph evaluates a new frame (animation and drivers, then
     // matrices), and what it updated drawn (main-view.js drawEvaluated).
+    // The page's edits go to Main, then the frame changes as Blender changes it (view_frame_set: simulations step through
+    // the frames between), not as a value the flush writes and evaluates at once.
     frameChanged(frame) {
+      scene.shadow.set('frame_current', Math.floor(frame)).set('frame_subframe', frame - Math.floor(frame));
       flush();
       blender.frame = frame;
       mainView.drawEvaluated({ scene: true });

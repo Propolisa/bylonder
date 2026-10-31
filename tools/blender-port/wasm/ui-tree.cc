@@ -22,6 +22,7 @@
 #include "DNA_screen_types.h"
 #include "ED_screen.hh"
 #include "MEM_guardedalloc.h"
+#include "RNA_enum_types.hh"
 #include "RNA_access.hh"
 #include "UI_interface_c.hh"
 #include "UI_interface_layout.hh"
@@ -161,7 +162,25 @@ static void rna_json(std::ostringstream &out, const char *name, const PointerRNA
   quote(out, ptr.type ? RNA_struct_identifier(ptr.type) : "");
   out << ",\"prop\":";
   quote(out, RNA_property_identifier(prop));
-  out << ",\"index\":" << index << '}';
+  out << ",\"index\":" << index;
+  /* A number's type, subtype, unit and precision as the property is defined for this data (a node group input's are
+   * its socket's), which the page shows the value by. */
+  const PropertyType type = RNA_property_type(prop);
+  if (ELEM(type, PROP_INT, PROP_FLOAT)) {
+    const char *subtype = "", *unit = "";
+    RNA_enum_identifier(rna_enum_property_subtype_items, RNA_property_subtype(prop), &subtype);
+    RNA_enum_identifier(rna_enum_property_unit_items, RNA_SUBTYPE_UNIT(RNA_property_subtype(prop)), &unit);
+    out << ",\"type\":\"" << (type == PROP_INT ? 'I' : 'F') << "\",\"subtype\":";
+    quote(out, subtype);
+    out << ",\"unit\":";
+    quote(out, unit);
+    if (type == PROP_FLOAT) {
+      float min, max, step, precision;
+      RNA_property_float_ui_range(const_cast<PointerRNA *>(&ptr), prop, &min, &max, &step, &precision);
+      out << ",\"precision\":" << int(precision);
+    }
+  }
+  out << '}';
 }
 
 static const char *button_type_name(ButtonType type)

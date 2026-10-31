@@ -3,6 +3,7 @@
  * system converts its own (here from a DOM KeyboardEvent's `code`, the physical key, and its `key` for letters, as
  * X11 and Wayland take a letter from the keyboard layout). */
 #include "intern/GHOST_ContextNone.cc"
+#include "intern/GHOST_Rect.cc"
 #include "intern/GHOST_Window.cc"
 #include "intern/GHOST_WindowNULL.hh"
 

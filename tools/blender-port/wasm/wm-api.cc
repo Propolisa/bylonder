@@ -88,6 +88,7 @@ void wm_init(bContext *C)
   wm->runtime->defaultconf->flag |= KEYCONF_INIT_DEFAULT;
 
   BKE_library_callback_remap_editor_id_reference_set(editor_id_remap);
+  BKE_library_callback_free_notifier_reference_set(WM_main_remove_notifier_reference);
   win->runtime->ghostwin = ghost_window_new(1, 1);
   wmKeyMap *keymap = WM_keymap_ensure(wm->runtime->defaultconf, "Window", SPACE_EMPTY, RGN_TYPE_WINDOW);
   WM_event_add_keymap_handler(&win->runtime->handlers, keymap);
@@ -531,14 +532,18 @@ const char *wm_event(bContext *C, int kind, const int *data, const char *code, c
   });
 }
 
-/* The window handled with no input, for its timers (each animation frame while it has some, wm_timers_active). */
+/* The window handled with no input, for its timers and notifiers (each animation frame while it has some, wm_pending). */
 EXPORT(wm_tick) const char *wm_tick(bContext *C)
 {
   return wm_window_handle(C, [](wmWindowManager * /*wm*/, wmWindow * /*win*/) {});
 }
-EXPORT(wm_timers_active) bool wm_timers_active(bContext *C)
+/* Whether the window has work its main loop would do without input: notifiers queued (a file read's) or timers due. */
+EXPORT(wm_pending) bool wm_pending(bContext *C)
 {
   wmWindowManager *wm = CTX_wm_manager(C);
+  if (!BLI_listbase_is_empty(&wm->runtime->notifier_queue)) {
+    return true;
+  }
   for (const wmTimer &wt : wm->runtime->timers) {
     if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && wt.event_type != TIMERAUTOSAVE &&
         (wt.event_type == TIMERJOBS || BLI_findindex(&wm->windows, wt.win) != -1))
