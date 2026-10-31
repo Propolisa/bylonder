@@ -133,8 +133,8 @@ void main() {
   vec2 fromStrike = p.xz - vec2(${STRIKE.x.toFixed(4)}, ${STRIKE.z.toFixed(4)});
   float seam = atan(fromStrike.y, fromStrike.x) * 9.0 + 2.5 * wander + 0.8 * sin(struck * 1.7), lane = floor(seam);
   float vein = 1.0 - smoothstep(0.04, 0.16, abs(fract(seam) - 0.5) * (0.6 + 0.8 * hash(vec2(lane, 3.1))));
-  float cools = 3.0 + 40.0 * hash(vec2(lane, 7.7)) * hash(vec2(lane, 1.3)), heat = vein * (1.0 - smoothstep(0.0, cools, blast - struck * 0.08));
-  glow += blasted * (heat * mix(vec3(0.9, 0.12, 0.02), vec3(2.8, 1.5, 0.3), heat * heat) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
+  float cools = 3.0 + 40.0 * hash(vec2(lane, 7.7)) * hash(vec2(lane, 1.3)), molten = vein * (1.0 - smoothstep(0.0, cools, blast - struck * 0.08));
+  glow += blasted * (molten * mix(vec3(0.9, 0.12, 0.02), vec3(2.8, 1.5, 0.3), molten * molten) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
   // Where the strike cut away the volcano's shoulder, its inside shows in section: layers of old flows, and the conduit
   // and the chamber below it still glowing.
   float inside = blasted * (1.0 - smoothstep(2.6, 3.4, r));
