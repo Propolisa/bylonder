@@ -18,11 +18,14 @@ import { BABYLON_TYPES, convert, converts, glslValue, kindOf, socketType } from 
 import { availability, declaration, defaults } from './declarations.js';
 import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, stack } from './node-code.js';
 import { colorRampTable, defaultColorRamp, halfFloats, TABLE_SIZE } from '../../blenkernel/colorband.js';
+import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import '../graph-roots.js';
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
 const sortedStops = (ramp) => [...ramp.elements].sort((a, b) => a.position - b.position);
 
+// g_data as EEVEE's surface shaders fill it (eevee_surf_common.bsl.hh init_globals, init_globals_curves).
+const G_DATA = ['bl_g_data', ['$P', '$N', '$is_strand', '$hair_radius', '$hair_curve_N', '$hair_strand_id'], []];
 // Each node's steps from its properties (see node-code.js), as its C++ GPU function links them. `connected(id)` tells
 // whether an input is linked, `linked(id)` whether an output is (GPUNodeStack's link and hasoutput).
 export const SHADER_NODES = {
@@ -67,8 +70,10 @@ export const SHADER_NODES = {
   ShaderNodeBump: (p, decl, { connected }) => {
     const normal = connected('Normal') ? 'Normal' : '$N';
     if (!connected('Height')) return [['bl_vector_copy', [normal], ['@Normal']]];
-    return [['bl_g_data', ['$P', '$N'], []], ['node_bump', ['Strength', 'Distance', 'Filter Width', 'Height', normal, '$height_xy', p.invert ? -1 : 1], ['@Normal']]];
+    return [G_DATA, ['node_bump', ['Strength', 'Distance', 'Filter Width', 'Height', normal, '$height_xy', p.invert ? -1 : 1], ['@Normal']]];
   },
+  // node_shader_hair_info.cc, node_shader_gpu_hair_info
+  ShaderNodeHairInfo: (p, decl) => [G_DATA, ['node_hair_info', ['$hair_intercept', '$hair_length'], decl.outputs.map((s) => '@' + s.identifier)]],
   // node_shader_emission.cc, node_shader_gpu_emission
   ShaderNodeEmission: (p, decl) => [['bl_node_emission', ['Color', 'Strength', 'Weight'], ['@Emission']]],
 };
@@ -77,11 +82,13 @@ export const SHADER_NODES = {
 // port-override: the shaded point comes from Babylon's geometry and a closure is its radiance, so these stand in.
 export const STAND_INS = {
   // g_data as Blender's code generation fills it, and the derivatives node_bump reads (the film's scale is 1).
-  bl_g_data: `struct GlobalData { vec3 P; vec3 N; };
+  bl_g_data: `struct GlobalData { vec3 P; vec3 N; bool is_strand; float hair_diameter; vec3 curve_N; int hair_strand_id; };
 GlobalData g_data;
 #define FrontFacing gl_FrontFacing
 float derivative_scale_get() { return 1.0; }
-void bl_g_data(vec3 P, vec3 N) { g_data.P = P; g_data.N = N; }`,
+void bl_g_data(vec3 P, vec3 N, float is_strand, float hair_radius, vec3 curve_N, float hair_strand_id) {
+  g_data = GlobalData(P, N, is_strand > 0.5, hair_radius * 2.0, curve_N, int(hair_strand_id));
+}`,
   bl_vector_copy: 'void bl_vector_copy(vec3 v, inout vec3 result) { result = v; }',
   bl_tex_coord: `void bl_tex_coord(vec3 orco, vec3 normal_in, vec3 uv_in, vec3 object_in, vec3 camera_in, vec3 window_in, vec3 reflection_in,
   inout vec3 generated, inout vec3 normal, inout vec3 uv, inout vec3 object, inout vec3 camera, inout vec3 window, inout vec3 reflection) {
@@ -91,9 +98,13 @@ void bl_g_data(vec3 P, vec3 N) { g_data.P = P; g_data.N = N; }`,
   bl_node_emission: 'void bl_node_emission(vec4 color, float strength, float weight, inout vec4 result) { result = vec4(max(color.rgb, 0.0) * max(strength, 0.0), 1.0); }',
 };
 
-// The geometry a node's code reads, as Babylon blocks: an attribute or a system value, by the hidden input's name.
+// The geometry a node's code reads, as Babylon blocks: an attribute, a system value, or what the mesh's geometry block
+// gives (a mesh's position and normal, or a curves vertex's and its curve's values: curves.js CurvesGeometryBlock), by the
+// hidden input's name.
 const GEOMETRY = {
-  __position: ['attribute', 'position', T.Vector3], __normal: ['attribute', 'normal', T.Vector3], __uv: ['attribute', 'uv', T.Vector2],
+  __position: ['geometry', 'position', T.Vector3], __normal: ['geometry', 'normal', T.Vector3], __uv: ['attribute', 'uv', T.Vector2],
+  __hair_intercept: ['geometry', 'intercept', T.Float], __hair_length: ['geometry', 'length', T.Float], __hair_radius: ['geometry', 'radius', T.Float],
+  __hair_curve_N: ['geometry', 'curveN', T.Vector3], __hair_strand_id: ['geometry', 'strandId', T.Float], __is_strand: ['geometry', 'isStrand', T.Float],
   __world: ['system', System.World, T.Matrix], __view: ['system', System.View, T.Matrix], __viewProjection: ['system', System.ViewProjection, T.Matrix],
   __cameraPosition: ['system', System.CameraPosition, T.Vector3],
 };
@@ -102,9 +113,12 @@ const POINT = {
   $P: ['__position', '__world'], $N: ['__normal', '__world'], $orco: ['__position'], $object: ['__position'], $object_normal: ['__normal'],
   $uv: ['__uv'], $camera: ['__position', '__world', '__view'], $window: ['__position', '__world', '__viewProjection'],
   $reflection: ['__position', '__normal', '__world', '__cameraPosition'], $height_xy: [],
+  $is_strand: ['__is_strand'], $hair_radius: ['__hair_radius'], $hair_curve_N: ['__hair_curve_N'], $hair_strand_id: ['__hair_strand_id'],
+  $hair_intercept: ['__hair_intercept'], $hair_length: ['__hair_length'],
 };
+const G_DATA_POINTS = ['$P', '$N', '$is_strand', '$hair_radius', '$hair_curve_N', '$hair_strand_id'];
 const NEEDS = {
-  ShaderNodeTexNoise: ['$orco'], ShaderNodeBump: ['$P', '$N'],
+  ShaderNodeTexNoise: ['$orco'], ShaderNodeBump: G_DATA_POINTS, ShaderNodeHairInfo: [...G_DATA_POINTS, '$hair_intercept', '$hair_length'],
   ShaderNodeTexCoord: ['$orco', '$object_normal', '$uv', '$object', '$camera', '$window', '$reflection'],
 };
 const geometryOf = (idname) => [...new Set((NEEDS[idname] ?? []).flatMap((value) => POINT[value]))];
@@ -120,16 +134,31 @@ function helper(material, name, make) {
   return block;
 }
 // An attribute's block is named as the attribute (Babylon reads it by its name), and shared.
+function attributeBlock(material, value, type) {
+  const found = material.attachedBlocks.find((b) => b.isAttribute && b.name === value);
+  if (found) return found;
+  const block = new InputBlock(value, undefined, type);
+  block.setAsAttribute(value);
+  material.attachedBlocks.push(block);
+  return block;
+}
+// The material's geometry block, its mesh's position and normal into it, and the normal it shades with.
+function curvesGeometry(material) {
+  const geometry = helper(material, '__geometry', (name) => new CurvesGeometryBlock(name));
+  wire(attributeBlock(material, 'position', T.Vector3).output, geometry.getInputByName('meshPosition'));
+  wire(attributeBlock(material, 'normal', T.Vector3).output, geometry.getInputByName('meshNormal'));
+  return geometry;
+}
+function shadingNormal(material) {
+  const geometry = curvesGeometry(material), normal = helper(material, '__shadingNormal', (name) => new CurvesNormalBlock(name));
+  for (const name of ['normal', 'curveN', 'binormal', 'timeWidth', 'radius']) wire(geometry.getOutputByName(name), normal.getInputByName(name));
+  return normal;
+}
 function geometryBlock(material, name) {
   const [kind, value, type] = GEOMETRY[name];
-  if (kind === 'attribute') {
-    const found = material.attachedBlocks.find((b) => b.isAttribute && b.name === value);
-    if (found) return found;
-    const block = new InputBlock(value, undefined, type);
-    block.setAsAttribute(value);
-    material.attachedBlocks.push(block);
-    return block;
-  }
+  if (kind === 'attribute') return attributeBlock(material, value, type);
+  if (name === '__normal') return shadingNormal(material);
+  if (kind === 'geometry') return { output: curvesGeometry(material).getOutputByName(value) };
   return helper(material, name, (full) => Object.assign(new InputBlock(full, undefined, type), { systemValue: value }));
 }
 // Links `from` into `to` unless it already is.
@@ -268,6 +297,8 @@ const blenderShader = (Base) => class extends Base {
           const height = link('Height');
           return declare('bl_height_xy', 'vec2', `vec2(${height}) + ${link('Filter Width')} * vec2(dFdx(${height}), dFdy(${height}))`);
         }
+        // A curve's values (none for a mesh), as the geometry block gives them.
+        case '$is_strand': case '$hair_radius': case '$hair_curve_N': case '$hair_strand_id': case '$hair_intercept': case '$hair_length': return geometry(POINT[id][0]);
         default: throw Error(`${this.name}: no ${id}`);
       }
     };
@@ -368,34 +399,43 @@ function environmentOf(material) {
   return () => material[ENVIRONMENT].texture;
 }
 
-// Babylon's PBR inputs a Principled BSDF's sockets give: the PBR input, the socket, and the conversion.
-const PRINCIPLED = [
-  ['baseColor', 'Base Color', (v) => `${v}.rgb`],
-  ['metallic', 'Metallic', (v) => v],
-  ['roughness', 'Roughness', (v) => v],
-  ['indexOfRefraction', 'IOR', (v) => v],
-];
+// The BSDFs Bylonder shades with Babylon's PBR block, which lights them with Babylon's lights and environment: what
+// each socket gives a PBR input ([PBR input, socket, conversion], or a constant's GLSL), and its alpha, normal and
+// emission sockets. EEVEE shades the hair BSDFs as a diffuse closure of their color (gpu_shader_material_hair.glsl),
+// here a surface without specular reflection (IOR 1), lit along the strand's cylinder normal.
+const rgb = (v) => `${v}.rgb`, same = (v) => v;
+const DIFFUSE = (roughness) => [['baseColor', 'Color', rgb], ['metallic', '0.0'], roughness, ['indexOfRefraction', '1.0']];
+const BSDFS = {
+  ShaderNodeBsdfPrincipled: {
+    inputs: [['baseColor', 'Base Color', rgb], ['metallic', 'Metallic', same], ['roughness', 'Roughness', same], ['indexOfRefraction', 'IOR', same]],
+    alpha: 'Alpha', normal: 'Normal', emission: ['Emission Color', 'Emission Strength'],
+  },
+  ShaderNodeBsdfDiffuse: { inputs: DIFFUSE(['roughness', 'Roughness', same]), normal: 'Normal' },
+  ShaderNodeBsdfHair: { inputs: DIFFUSE(['roughness', '1.0']) },
+  ShaderNodeBsdfHairPrincipled: { inputs: DIFFUSE(['roughness', '1.0']) },
+};
 
-// Principled BSDF (node_shader_bsdf_principled.cc) as Babylon's PBR block, which lights it with Babylon's lights and
-// environment: its base color, metallic, roughness, IOR, alpha and normal are the PBR block's inputs, its emission is
-// added to what it reflects.
-export class ShaderNodeBsdfPrincipled extends blenderShader(PBRMetallicRoughnessBlock) {
-  constructor(name) {
-    super(name || 'Principled BSDF', 'ShaderNodeBsdfPrincipled');
+// A BSDF (node_shader_bsdf_*.cc) as Babylon's PBR block: its inputs from the BSDF's sockets, its emission added to
+// what it reflects.
+class BlenderBsdf extends blenderShader(PBRMetallicRoughnessBlock) {
+  constructor(name, idname) {
+    super(name || declaration('shader', idname).name, idname);
     this.metallic.isOptional = this.roughness.isOptional = true;
     // The PBR inputs given from sockets: connected while they hold a socket's value.
-    for (const point of [this.baseColor, this.metallic, this.roughness, this.indexOfRefraction, this.opacity]) {
-      Object.defineProperty(point, 'isConnected', { get: () => !!point._blenderValue || !!point.connectedPoint });
-    }
+    for (const point of this._pbrInputs) Object.defineProperty(point, 'isConnected', { get: () => !!point._blenderValue || !!point.connectedPoint });
   }
+
+  get _bsdf() { return BSDFS[this.idname]; }
+  get _pbrInputs() { return [this.baseColor, this.metallic, this.roughness, this.indexOfRefraction, this.opacity]; }
 
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
-    for (const point of [this.baseColor, this.metallic, this.roughness, this.indexOfRefraction, this.opacity]) point._blenderValue = null;
+    for (const point of this._pbrInputs) point._blenderValue = null;
     const position = geometryBlock(material, '__position'), world = geometryBlock(material, '__world');
     wire(worldPosition(material).output, this.worldPosition);
-    const normal = transformed(material, '__worldNormal', 0);
+    // In the fragment stage, where the normal is shaded (a strand's: curves.js CurvesNormalBlock).
+    const normal = Object.assign(transformed(material, '__worldNormal', 0), { target: Targets.Fragment });
     wire(geometryBlock(material, '__normal').output, normal.vector);
     wire(world.output, normal.transform);
     wire(normal.output, this.worldNormal);
@@ -407,7 +447,7 @@ export class ShaderNodeBsdfPrincipled extends blenderShader(PBRMetallicRoughness
     wire(world.output, reflection.world);
     wire(reflection.reflection, this.reflection);
     // The Normal socket's source as Babylon's world normal.
-    const source = this.getInputByName('Normal').connectedPoint;
+    const source = this._bsdf.normal && this.getInputByName(this._bsdf.normal).connectedPoint;
     if (!source) this.perturbedNormal.connectedPoint?.disconnectFrom(this.perturbedNormal);
     else {
       const axes = helper(material, `__normal ${this.uniqueId}`, (name) => new BlenderAxesBlock(name));
@@ -418,21 +458,19 @@ export class ShaderNodeBsdfPrincipled extends blenderShader(PBRMetallicRoughness
 
   _buildBlock(state) {
     if (state.target !== Targets.Fragment) return PBRMetallicRoughnessBlock.prototype._buildBlock.call(this, state);
-    const links = this._links(state);
+    const links = this._links(state), { inputs, alpha, emission } = this._bsdf;
     const value = (point, glsl) => { point._blenderValue = glsl; point.associatedVariableName = glsl; };
-    for (const [pbr, socket, as] of PRINCIPLED) value(this[pbr], as(links.get(socket)));
-    if (this.getInputByName('Alpha').isConnected || this.values.Alpha !== 1) value(this.opacity, links.get('Alpha'));
-    const emission = `(${links.get('Emission Color')}.rgb * ${links.get('Emission Strength')})`;
+    for (const [pbr, socket, as] of inputs) value(this[pbr], as ? as(links.get(socket)) : socket);
+    if (alpha && (this.getInputByName(alpha).isConnected || this.values[alpha] !== 1)) value(this.opacity, links.get(alpha));
     PBRMetallicRoughnessBlock.prototype._buildBlock.call(this, state);
-    links.set('@BSDF', `vec4(finalColor.rgb + ${emission}, alpha)`);
+    const emitted = emission ? ` + ${links.get(emission[0])}.rgb * ${links.get(emission[1])}` : '';
+    links.set('@BSDF', `vec4(finalColor.rgb${emitted}, alpha)`);
     this._writeOutputs(state, links);
     return this;
   }
-
-  bind(effect, nodeMaterial, mesh) {
-    super.bind(effect, nodeMaterial, mesh);
-  }
 }
+const bsdfClass = (idname) => ({ [idname]: class extends BlenderBsdf { constructor(name) { super(name, idname); } } })[idname];
+export const ShaderNodeBsdfPrincipled = bsdfClass('ShaderNodeBsdfPrincipled');
 
 // A Blender world vector (Bump's normal) as Babylon's: (x, z, y), w 0.
 export class BlenderAxesBlock extends NodeMaterialBlock {
@@ -508,7 +546,7 @@ function adaptOutput(point, own, socket) {
 }
 
 // The block classes, one per Blender node Bylonder links, registered for Babylon's serialization.
-const OWN_CLASSES = { ShaderNodeBsdfPrincipled, ShaderNodeOutputMaterial };
+const OWN_CLASSES = { ...Object.fromEntries(Object.keys(BSDFS).map((idname) => [idname, idname === 'ShaderNodeBsdfPrincipled' ? ShaderNodeBsdfPrincipled : bsdfClass(idname)])), ShaderNodeOutputMaterial };
 export const shaderNodeClasses = Object.fromEntries([...Object.keys(SHADER_NODES), ...Object.keys(OWN_CLASSES)].map((idname) => {
   const label = declaration('shader', idname).name;
   const Block = OWN_CLASSES[idname] ?? { [idname]: class extends BlenderShaderBlock { constructor(name) { super(name || label, idname); } } }[idname];
@@ -526,13 +564,14 @@ export function blenderDefaultTree(material) {
   material.editorData = { locations: [{ blockId: principled.uniqueId, x: 10, y: -300 }, { blockId: output.uniqueId, x: 300, y: -300 }], frames: [] };
 }
 
-// Babylon drops a build asked for while one waits for its blocks' code, so the latest asks again once that one ends.
+// Babylon drops a build asked for while one waits for its blocks' code, so the latest asks again once that one ends
+// (after its observers: while they run, the build is still in progress).
 const QUEUED = Symbol('queued');
 export function buildMaterial(material) {
   if (!material._buildIsInProgress) return material.build();
   if (material[QUEUED]) return;
   material[QUEUED] = true;
-  const again = () => { if (material[QUEUED]) { material[QUEUED] = false; buildMaterial(material); } };
+  const again = () => queueMicrotask(() => { if (material[QUEUED]) { material[QUEUED] = false; buildMaterial(material); } });
   material.onBuildObservable.addOnce(again);
   material.onBuildErrorObservable.addOnce(again);
 }

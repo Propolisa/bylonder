@@ -73,6 +73,7 @@ import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
 import * as bpyRna from "./python/bpy_rna.js";
 const { setContextPointer, pointerStruct, structFind } = bpyRna;
+import * as shaderNodes from "./nodes/blender/shader-nodes.js";
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
@@ -253,8 +254,8 @@ window.__bylonder ={ world, renderHost, runOperator, settled,
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
   coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); },
   get mainScene() { return mainScene(); },
-  // This window's bpy over the module, for tests (an import of its own would be a second instance).
-  bpyRna };
+  // Modules of this window for tests (an import of the page's own would be a second instance).
+  modules: { bpyRna, shaderNodes } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });

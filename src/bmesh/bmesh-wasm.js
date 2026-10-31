@@ -240,15 +240,18 @@ export class BlenderMain {
   // The curves Main's objects draw (main-api.cc main_curves): particle hair, { ob, system, render (the render engines
   // draw it), viewport (Workbench and, in Wireframe, the overlay do), overlay (the overlay always does: its viewport
   // display is Path), material (slot, 1-based), faces (the Hair shape's faces per segment),
-  // objectToWorld, posRad (each evaluated point's position, object space, and radius), indirection }, the arrays views
+  // objectToWorld, posRad (each evaluated point's position, object space, and radius), indirection, time (each point's
+  // along its curve, 0 to 1), length (each curve's) }, the arrays views
   // into the module's memory valid until the next call.
   curves() {
-    const count = x.main_curves(this.#context), at = x.main_curves_draws() >>> 0, posRad = x.main_curves_pos_rad() >>> 0, indirection = x.main_curves_indirection() >>> 0;
-    const ints = new Int32Array(x.memory.buffer, at, count * 27), floats = new Float32Array(x.memory.buffer, at, count * 27);
+    const count = x.main_curves(this.#context), at = x.main_curves_draws() >>> 0, words = 29, memory = x.memory.buffer;
+    const [posRad, indirection, time, length] = [x.main_curves_pos_rad(), x.main_curves_indirection(), x.main_curves_time(), x.main_curves_length()].map((p) => p >>> 0);
+    const ints = new Int32Array(memory, at, count * words), floats = new Float32Array(memory, at, count * words);
     return Array.from({ length: count }, (_, i) => {
-      const [ob, system, render, viewport, overlay, material, faces, firstPoint, points, firstIndirection, indirections] = ints.subarray(i * 27, i * 27 + 11);
-      return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material, faces, objectToWorld: floats.subarray(i * 27 + 11, i * 27 + 27),
-        posRad: new Float32Array(x.memory.buffer, posRad + firstPoint * 16, points * 4), indirection: new Int32Array(x.memory.buffer, indirection + firstIndirection * 4, indirections) };
+      const [ob, system, render, viewport, overlay, material, faces, firstPoint, points, firstIndirection, indirections, firstCurve, curves] = ints.subarray(i * words, i * words + 13);
+      return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material, faces, objectToWorld: floats.subarray(i * words + 13, i * words + 29),
+        posRad: new Float32Array(memory, posRad + firstPoint * 16, points * 4), indirection: new Int32Array(memory, indirection + firstIndirection * 4, indirections),
+        time: new Float32Array(memory, time + firstPoint * 4, points), length: new Float32Array(memory, length + firstCurve * 4, curves) };
     });
   }
   // The active object's Particle Edit Mode as Blender's overlay draws it (main-api.cc main_particle_edit), or null:

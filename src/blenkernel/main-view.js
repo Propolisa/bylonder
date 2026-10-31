@@ -418,7 +418,7 @@ export function createMainView(state) {
       const mesh = curvesMesh(scene, '__curves ' + key, data, record.faces, kept.mesh);
       Object.assign(mesh.metadata.curves, { render: record.render, viewport: record.viewport });
       const material = emitter.material?.subMaterials ? emitter.material.subMaterials[record.material - 1] : emitter.material;
-      mesh.material = material && CurvesPlugin.of(material) && material;
+      mesh.material = material && CurvesPlugin.draws(material) ? material : null;
       let overlay = kept.overlay;
       if (record.viewport && !rendering) {
         overlay = curvesMesh(scene, '__curves overlay ' + key, data, 0, overlay);

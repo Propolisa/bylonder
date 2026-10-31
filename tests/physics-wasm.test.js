@@ -3,7 +3,9 @@
 // particle's point, an instanced object's geometry, hair paths' segments; a frame jumped to shows what playing up to it shows (view-api.cc view_frame_set), and
 // a cache bakes.
 import assert from 'node:assert/strict';
-import { Material, NullEngine, Scene } from '@babylonjs/core';
+import { Material, NodeMaterial, NullEngine, Scene } from '@babylonjs/core';
+import { shaderNodeClasses, blenderDefaultTree } from '../src/nodes/blender/shader-nodes.js';
+import { CurvesPlugin } from '../src/draw/curves.js';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { blendData, setContextPointer } from '../src/python/bpy_rna.js';
@@ -65,7 +67,27 @@ const [strands] = sync.blender.curves(), [hair] = drawn('__curves');
 assert.equal(strands.posRad.length / 4, 50 * (2 ** settings.display_step + 1), 'every strand point');
 assert.equal(strands.indirection.length, 50 * (2 ** settings.display_step + 2), "a strip's segment per point, and a restart per strand");
 assert.equal(hair.getTotalVertices(), strands.indirection.length * 2);
+// Each point's time along its strand (Hair Info's Intercept) runs from 0 at the root to 1 at the tip, and each strand
+// has its length.
+const pointsPerStrand = strands.time.length / 50;
+assert.deepEqual([strands.time[0], strands.time[pointsPerStrand - 1]], [0, 1]);
+assert.equal(strands.length.length, 50);
+assert(Math.abs(strands.length[0] - settings.hair_length) < 0.05, `a strand's length is its hair length: ${strands.length[0]}`);
 assert.equal(hair.material, emitter.material);
+// A node material draws curves too: Blender's nodes read the curves' geometry, Hair Info its values, and the Hair BSDFs
+// shade as EEVEE's diffuse closure.
+const hairMaterial = new NodeMaterial('Hair', scene);
+blenderDefaultTree(hairMaterial);
+const output = hairMaterial._fragmentOutputNodes[0], surface = output.getInputByName('Surface');
+const info = new shaderNodeClasses.ShaderNodeHairInfo(), bsdf = new shaderNodeClasses.ShaderNodeBsdfHairPrincipled();
+surface.connectedPoint.disconnectFrom(surface);
+info.getOutputByName('Intercept').connectTo(bsdf.getInputByName('Roughness'));
+bsdf.getOutputByName('BSDF').connectTo(surface);
+hairMaterial.attachedBlocks.push(info, bsdf);
+await new Promise((built) => { hairMaterial.onBuildObservable.addOnce(built); hairMaterial.build(); });
+assert(CurvesPlugin.draws(hairMaterial));
+assert.match(hairMaterial._vertexCompilationState._builtCompilationString, /curves_vertex\(/);
+assert.match(hairMaterial._fragmentCompilationState._builtCompilationString, /bl_node_hair_info\(/);
 // Particle Edit Mode draws the edit's strands, as line strips restarting per strand, and, in Point select mode, its
 // keys: inner ones and tips.
 assert.equal(sync.blender.run('object.mode_set', { mode: 'PARTICLE_EDIT' }).status, OPERATOR_FINISHED);

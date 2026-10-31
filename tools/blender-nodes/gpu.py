@@ -29,6 +29,7 @@ ROOTS = [
     'gpu_shader_material_tex_noise.glsl',
     'gpu_shader_common_color_ramp.glsl',
     'gpu_shader_material_bump.glsl',
+    'gpu_shader_material_hair_info.glsl',
     'gpu_shader_material_set.glsl',
     # Curves drawing (particle hair, Curves objects): the curve shape library and the hash its strands vary by.
     'draw_curves_lib.glsl',

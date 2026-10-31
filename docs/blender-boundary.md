@@ -163,7 +163,10 @@ can be maintained on its own:
   info declares.
 - **Babylon's own mechanisms** for drawing them: thin instances (instanced objects, particle shapes, their data in the
   instance buffer), `ShaderMaterial` (the overlay, Workbench), `MaterialPluginBase` (`CurvesPlugin` puts the curves
-  vertex stage into whatever material an object has, for Material Preview and Rendered), `RawTexture` data textures
+  vertex stage and EEVEE's cylinder normal into a PBR or Standard material, for Material Preview and Rendered), node
+  blocks with per-mesh defines (`CurvesGeometryBlock`, `CurvesNormalBlock`: the geometry Blender's nodes read in a
+  node material is the mesh's, or with `CURVES` defined the curves' and EEVEE's curves interface, so one material draws
+  the emitter and its hair), `RawTexture` data textures
   (Blender's buffers) and materials per render pass (Workbench per view).
 - **The drawing modules** (`src/draw`): `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
   Mode as the overlay draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`

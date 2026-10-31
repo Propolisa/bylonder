@@ -745,15 +745,32 @@ EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { retur
  * by Blender's Catmull-Rom evaluation, with the indirection Blender's topology pass makes for its strips or cylinders
  * (draw_curves_topology_comp.glsl, here on the CPU). A curves record is { ob, system, render (drawn by the render
  * engines), viewport (by Workbench, and the overlay in Wireframe), overlay (by the overlay always), material slot, face_per_segment, first point, points, first indirection,
- * indirections, object_to_world (Blender's axes) }. Valid until the next call; returns their count. */
+ * indirections, first curve, curves, object_to_world (Blender's axes) }; each point also has its time along its curve and
+ * each curve its length (draw_curves_length_intercept_comp.glsl), Hair Info's Intercept and Length. Valid until the next call; returns their count. */
 struct CurvesDraw {
   Object *ob;
-  int system, render, viewport, overlay, material, face_per_segment, first_point, points, first_indirection, indirections;
+  int system, render, viewport, overlay, material, face_per_segment, first_point, points, first_indirection, indirections, first_curve, curves;
   float object_to_world[16];
 };
 static Vector<CurvesDraw> curves_draws;
 static Vector<float> curves_pos_rad;
 static Vector<int> curves_indirection;
+static Vector<float> curves_time, curves_length;
+/* blender-port: draw_curves_length_intercept_comp.glsl evaluate_length_and_time, for curves that are not cyclic. */
+static void curves_length_intercept(Span<float3> positions)
+{
+  const int first = curves_time.size();
+  float distance_along_curve = 0.0f;
+  curves_time.append(0.0f);
+  for (int i = 1; i < positions.size(); i++) {
+    distance_along_curve += math::distance(positions[i], positions[i - 1]);
+    curves_time.append(distance_along_curve);
+  }
+  for (int i = 1; i < positions.size(); i++) {
+    curves_time[first + i] /= distance_along_curve;
+  }
+  curves_length.append(distance_along_curve);
+}
 /* blender-port: draw_cache_impl_particles.cc hair_shape_radius (copied from cycles). */
 static float hair_shape_radius(float shape, float root, float tip, float time)
 {
@@ -783,7 +800,7 @@ static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
     /* blender-port: draw_hair.cc hair_sub_pass_setup. */
     const int face_per_segment = scene.r.hair_type == SCE_HAIR_SHAPE_STRAND ? 0 : scene.r.hair_type == SCE_HAIR_SHAPE_CYLINDER ? 3 : 1;
     CurvesDraw draw = {&ob, system, part.ren_as == PART_DRAW_PATH, viewport_as == PART_DRAW_PATH, part.draw_as == PART_DRAW_PATH, part.omat, face_per_segment,
-                       int(curves_pos_rad.size() / 4), 0, int(curves_indirection.size()), 0};
+                       int(curves_pos_rad.size() / 4), 0, int(curves_indirection.size()), 0, int(curves_length.size()), 0};
     copy_m4_m4(reinterpret_cast<float(*)[4]>(draw.object_to_world), evaluated->object_to_world().ptr());
     const float root = part.rad_root * part.rad_scale * 0.5f, tip = part.rad_tip * part.rad_scale * 0.5f;
     const bool close_tip = part.shape_flag & PART_SHAPE_CLOSE_TIP;
@@ -812,6 +829,7 @@ static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
       for (int j = 0; j < evaluated; j++) {
         curves_pos_rad.extend({evaluated_positions[j].x, evaluated_positions[j].y, evaluated_positions[j].z, evaluated_radii[j]});
       }
+      curves_length_intercept(evaluated_positions);
       curves_topology(curve++, evaluated, face_per_segment < 2);
     };
     for (int p = 0; display_parent && psys.pathcache && p < psys.totpart; p++) {
@@ -822,6 +840,7 @@ static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
     }
     draw.points = curves_pos_rad.size() / 4 - draw.first_point;
     draw.indirections = curves_indirection.size() - draw.first_indirection;
+    draw.curves = curves_length.size() - draw.first_curve;
     if (draw.points) {
       curves_draws.append(draw);
     }
@@ -832,6 +851,8 @@ EXPORT(main_curves) int main_curves(BlenderMain *ctx)
   curves_draws.clear();
   curves_pos_rad.clear();
   curves_indirection.clear();
+  curves_time.clear();
+  curves_length.clear();
   Depsgraph *depsgraph = depsgraph_of(ctx);
   for (Object &ob : ctx->bmain->objects) {
     Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
@@ -844,6 +865,8 @@ EXPORT(main_curves) int main_curves(BlenderMain *ctx)
 EXPORT(main_curves_draws) const CurvesDraw *main_curves_draws() { return curves_draws.data(); }
 EXPORT(main_curves_pos_rad) const float *main_curves_pos_rad() { return curves_pos_rad.data(); }
 EXPORT(main_curves_indirection) const int *main_curves_indirection() { return curves_indirection.data(); }
+EXPORT(main_curves_time) const float *main_curves_time() { return curves_time.data(); }
+EXPORT(main_curves_length) const float *main_curves_length() { return curves_length.data(); }
 
 /* Particle Edit Mode as Blender's overlay draws it (overlay_particle.hh edit_object_sync): the edited system's
  * strands from the edit's path cache, each point with its selection (draw_cache_impl_particles.cc
