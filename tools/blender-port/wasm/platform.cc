@@ -1,5 +1,6 @@
 /* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, and
  * the thread count of one thread. */
+#include "BLI_mmap.h"
 #include <cstddef>
 #include <cstdlib>
 #include <new>
@@ -62,7 +63,7 @@ WEAK void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
 WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
 /* port-override: WASI has no threads: a thread pool's work (a window manager job's: a point cache bake) runs where it
- * is inserted, to its end; the job's timer then ends the job (wm-api.cc wm_window_timers_process). */
+ * is inserted, to its end; the window then ends the job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). */
 struct ThreadSlot {
   ThreadSlot *next, *prev;
   void *(*do_thread)(void *);
@@ -101,4 +102,15 @@ bool BPY_run_string_as_number(bContext * /*C*/, const char * /*imports*/[], cons
   BLI_expr_pylike_free(parsed);
   return success;
 }
+}  // namespace blender
+
+namespace blender {
+/* port-override: WASI has no memory mapping, nor the signals BLI_mmap.cc handles a mapped file's read errors with: a file
+ * is never mapped, so Blender's readers read it (blo_core_file_reader.cc falls back to BLI_filereader_new_file). */
+BLI_mmap_file *BLI_mmap_open(int /*fd*/) { return nullptr; }
+bool BLI_mmap_read(BLI_mmap_file * /*file*/, void * /*dest*/, size_t /*offset*/, size_t /*length*/) { return false; }
+void *BLI_mmap_get_pointer(BLI_mmap_file * /*file*/) { return nullptr; }
+size_t BLI_mmap_get_length(const BLI_mmap_file * /*file*/) { return 0; }
+bool BLI_mmap_any_io_error(const BLI_mmap_file * /*file*/) { return false; }
+void BLI_mmap_free(BLI_mmap_file * /*file*/) {}
 }  // namespace blender

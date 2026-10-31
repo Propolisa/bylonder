@@ -738,18 +738,22 @@ EXPORT(main_instances) int main_instances(BlenderMain *ctx)
 }
 EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { return instance_groups.data(); }
 
-/* The curves Main's objects draw as Blender's draw engines draw curves (draw_curves_lib.glsl): their particle systems'
+/* The curves Main's objects draw as Blender's draw engines draw curves (draw_curves_lib.glsl): the curves of their
+ * evaluated geometry (a Curves object's, geometry nodes' output; draw_cache_impl_curves.cc
+ * CurvesEvalCache::ensure_positions, its evaluation Blender's own CurvesGeometry), and their particle systems'
  * hair, by its render type (the render engines') or viewport display (the overlay's and Workbench's), each its
  * strands' points as the draw cache gives them, position (object space) and radius from the settings' root, tip and
  * shape (draw_cache_impl_particles.cc CurvesEvalCache::ensure_positions), subdivided as the scene's Hair settings ask
  * by Blender's Catmull-Rom evaluation, with the indirection Blender's topology pass makes for its strips or cylinders
  * (draw_curves_topology_comp.glsl, here on the CPU). A curves record is { ob, system, render (drawn by the render
- * engines), viewport (by Workbench, and the overlay in Wireframe), overlay (by the overlay always), material slot, face_per_segment, first point, points, first indirection,
+ * engines), viewport (by Workbench, and the overlay in Wireframe), overlay (by the overlay always), material (the slot's), face_per_segment, first point, points, first indirection,
  * indirections, first curve, curves, object_to_world (Blender's axes) }; each point also has its time along its curve and
  * each curve its length (draw_curves_length_intercept_comp.glsl), Hair Info's Intercept and Length. Valid until the next call; returns their count. */
 struct CurvesDraw {
   Object *ob;
-  int system, render, viewport, overlay, material, face_per_segment, first_point, points, first_indirection, indirections, first_curve, curves;
+  int system, render, viewport, overlay;
+  Material *material;
+  int face_per_segment, first_point, points, first_indirection, indirections, first_curve, curves;
   float object_to_world[16];
 };
 static Vector<CurvesDraw> curves_draws;
@@ -787,6 +791,66 @@ static void curves_topology(int curve, int points, bool is_ribbon)
     curves_indirection.append(is_ribbon && i == count - 1 ? end_of_curve : i == 0 ? curve : -i);
   }
 }
+/* blender-port: draw_hair.cc hair_sub_pass_setup, the faces per segment of the scene's hair shape. */
+static int hair_face_per_segment(const Scene &scene)
+{
+  return scene.r.hair_type == SCE_HAIR_SHAPE_STRAND ? 0 : scene.r.hair_type == SCE_HAIR_SHAPE_CYLINDER ? 3 : 1;
+}
+/* A curve's evaluated points (object space) and radii into the buffers, with its time, length and topology. */
+static void curves_append(int curve, Span<float3> positions, Span<float> radii, const int face_per_segment)
+{
+  for (const int j : positions.index_range()) {
+    curves_pos_rad.extend({positions[j].x, positions[j].y, positions[j].z, radii[j]});
+  }
+  curves_length_intercept(positions);
+  curves_topology(curve, positions.size(), face_per_segment < 2);
+}
+static CurvesDraw curves_draw_begin(Object &ob, Object *evaluated, int system, bool render, bool viewport, bool overlay, Material *material, int face_per_segment)
+{
+  CurvesDraw draw = {&ob, system, render, viewport, overlay, material, face_per_segment,
+                     int(curves_pos_rad.size() / 4), 0, int(curves_indirection.size()), 0, int(curves_length.size()), 0};
+  copy_m4_m4(reinterpret_cast<float(*)[4]>(draw.object_to_world), evaluated->object_to_world().ptr());
+  return draw;
+}
+static void curves_draw_end(CurvesDraw &draw)
+{
+  draw.points = curves_pos_rad.size() / 4 - draw.first_point;
+  draw.indirections = curves_indirection.size() - draw.first_indirection;
+  draw.curves = curves_length.size() - draw.first_curve;
+  if (draw.points) {
+    curves_draws.append(draw);
+  }
+}
+/* An object's evaluated curves, drawn by every engine; a cyclic curve's first point again after its last, as Blender's
+ * evaluated buffer holds it (evaluated_point_count_with_cyclic). System is -1. */
+static void curves_geometry(const Scene &scene, Object &ob, Object *evaluated)
+{
+  const bke::GeometrySet *geometry = evaluated->runtime->geometry_set_eval;
+  const Curves *curves_id = geometry ? geometry->get_curves() : nullptr;
+  if (!curves_id) {
+    return;
+  }
+  const bke::CurvesGeometry &curves = curves_id->geometry.wrap();
+  const int face_per_segment = hair_face_per_segment(scene);
+  CurvesDraw draw = curves_draw_begin(ob, evaluated, -1, true, true, false, BKE_object_material_get(evaluated, 1), face_per_segment);
+  curves.ensure_can_interpolate_to_evaluated();
+  const Span<float3> positions = curves.evaluated_positions();
+  Array<float> radii(positions.size());
+  curves.interpolate_to_evaluated(VArraySpan<float>(curves.radius()), radii.as_mutable_span());
+  const OffsetIndices points_by_curve = curves.evaluated_points_by_curve();
+  const VArray<bool> cyclic = curves.cyclic();
+  for (const int curve : curves.curves_range()) {
+    const IndexRange points = points_by_curve[curve];
+    Vector<float3> curve_positions(positions.slice(points));
+    Vector<float> curve_radii(radii.as_span().slice(points));
+    if (cyclic[curve] && points.size() > 1) {
+      curve_positions.append(curve_positions.first());
+      curve_radii.append(curve_radii.first());
+    }
+    curves_append(curve, curve_positions, curve_radii, face_per_segment);
+  }
+  curves_draw_end(draw);
+}
 static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
 {
   int index = 0;
@@ -797,11 +861,9 @@ static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
     if (!psys_check_enabled(evaluated, &psys, false) || (viewport_as != PART_DRAW_PATH && part.ren_as != PART_DRAW_PATH)) {
       continue;
     }
-    /* blender-port: draw_hair.cc hair_sub_pass_setup. */
-    const int face_per_segment = scene.r.hair_type == SCE_HAIR_SHAPE_STRAND ? 0 : scene.r.hair_type == SCE_HAIR_SHAPE_CYLINDER ? 3 : 1;
-    CurvesDraw draw = {&ob, system, part.ren_as == PART_DRAW_PATH, viewport_as == PART_DRAW_PATH, part.draw_as == PART_DRAW_PATH, part.omat, face_per_segment,
-                       int(curves_pos_rad.size() / 4), 0, int(curves_indirection.size()), 0, int(curves_length.size()), 0};
-    copy_m4_m4(reinterpret_cast<float(*)[4]>(draw.object_to_world), evaluated->object_to_world().ptr());
+    const int face_per_segment = hair_face_per_segment(scene);
+    CurvesDraw draw = curves_draw_begin(ob, evaluated, system, part.ren_as == PART_DRAW_PATH, viewport_as == PART_DRAW_PATH, part.draw_as == PART_DRAW_PATH,
+                                        BKE_object_material_get(evaluated, part.omat), face_per_segment);
     const float root = part.rad_root * part.rad_scale * 0.5f, tip = part.rad_tip * part.rad_scale * 0.5f;
     const bool close_tip = part.shape_flag & PART_SHAPE_CLOSE_TIP;
     const int resolution = 1 << scene.r.hair_subdiv;
@@ -826,11 +888,7 @@ static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
         evaluated_positions = positions;
         evaluated_radii = radii;
       }
-      for (int j = 0; j < evaluated; j++) {
-        curves_pos_rad.extend({evaluated_positions[j].x, evaluated_positions[j].y, evaluated_positions[j].z, evaluated_radii[j]});
-      }
-      curves_length_intercept(evaluated_positions);
-      curves_topology(curve++, evaluated, face_per_segment < 2);
+      curves_append(curve++, evaluated_positions, evaluated_radii, face_per_segment);
     };
     for (int p = 0; display_parent && psys.pathcache && p < psys.totpart; p++) {
       strand(psys.pathcache[p]);
@@ -838,12 +896,7 @@ static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
     for (int c = 0; psys.childcache && c < psys.totchild * part.disp / 100; c++) {
       strand(psys.childcache[c]);
     }
-    draw.points = curves_pos_rad.size() / 4 - draw.first_point;
-    draw.indirections = curves_indirection.size() - draw.first_indirection;
-    draw.curves = curves_length.size() - draw.first_curve;
-    if (draw.points) {
-      curves_draws.append(draw);
-    }
+    curves_draw_end(draw);
   }
 }
 EXPORT(main_curves) int main_curves(BlenderMain *ctx)
@@ -857,6 +910,7 @@ EXPORT(main_curves) int main_curves(BlenderMain *ctx)
   for (Object &ob : ctx->bmain->objects) {
     Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
     if (evaluated && evaluated != &ob) {
+      curves_geometry(*ctx->scene, ob, evaluated);
       particle_hair(*ctx->scene, ob, evaluated);
     }
   }

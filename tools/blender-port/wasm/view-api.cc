@@ -9,6 +9,10 @@
 #include "BKE_mesh.hh"
 #include "BKE_scene.hh"
 #include "BKE_pointcache.h"
+#include "BKE_bake_geometry_nodes_modifier.hh"
+#include "BKE_node_runtime.hh"
+#include "DNA_modifier_types.h"
+#include "MOD_nodes.hh"
 #include "BLI_listbase.h"
 #include "DEG_depsgraph_query.hh"
 #include "DNA_mesh_types.h"
@@ -41,9 +45,43 @@ EXPORT(mesh_attributes_list) const char *mesh_attributes_list(const Object *ob)
 
 /* The scene at a frame, evaluated by its depsgraph as Blender evaluates a new frame (animation, drivers and what
  * depends on them). */
-/* The last frame Main's simulations (particles, cloth, soft body, dynamic paint, rigid bodies) were stepped to without
- * a gap since their caches started, as their point caches record it (PointCache.last_exact, which an edit that outdates
- * a cache resets); INT_MAX without one that could step further. */
+/* The last frame a geometry nodes modifier's simulation zones were stepped to, as their caches hold it (the last frame
+ * cached, or the previous state kept), the frame before the start for a zone not simulated yet; baked zones are left out. */
+static void simulation_zones_until(const Object &ob, const int start, int &until)
+{
+  for (const ModifierData &md : ob.modifiers) {
+    const NodesModifierData &nmd = reinterpret_cast<const NodesModifierData &>(md);
+    if (md.type != eModifierType_Nodes || !(md.mode & eModifierMode_Realtime) || !nmd.node_group) {
+      continue;
+    }
+    for (const bNestedNodeRef &ref : nmd.node_group->nested_node_refs_span()) {
+      const bNode *node = nmd.node_group->find_nested_node(ref.id);
+      if (!node || !STREQ(node->idname, "GeometryNodeSimulationOutput")) {
+        continue;
+      }
+      int last = start - 1;
+      if (const bke::bake::ModifierCache *cache = nmd.runtime->cache.get()) {
+        std::lock_guard lock{cache->mutex};
+        if (const std::unique_ptr<bke::bake::SimulationNodeCache> *zone = cache->simulation_cache_by_id.lookup_ptr(ref.id)) {
+          if ((*zone)->cache_status == bke::bake::CacheStatus::Baked) {
+            continue;
+          }
+          if (!(*zone)->bake.frames.is_empty()) {
+            last = (*zone)->bake.frames.last()->frame.frame();
+          }
+          else if ((*zone)->prev_cache) {
+            last = (*zone)->prev_cache->frame.frame();
+          }
+        }
+      }
+      until = std::min(until, last);
+    }
+  }
+}
+
+/* The last frame Main's simulations (particles, cloth, soft body, dynamic paint, rigid bodies, geometry nodes'
+ * simulation zones) were stepped to without a gap since their caches started, as their caches record it
+ * (PointCache.last_exact, which an edit that outdates a cache resets); INT_MAX without one that could step further. */
 static int simulated_until(Depsgraph *depsgraph)
 {
   Scene *scene = DEG_get_evaluated_scene(depsgraph);
@@ -60,6 +98,7 @@ static int simulated_until(Depsgraph *depsgraph)
       }
     }
     BLI_freelistN(&pids);
+    simulation_zones_until(ob, int(scene->r.sfra), until);
   }
   return until;
 }

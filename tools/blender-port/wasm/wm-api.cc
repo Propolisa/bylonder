@@ -427,7 +427,8 @@ static const char *event_result(wmWindow *win, const Set<wmOperator *> &register
 
 /* port-override: wm_window_timers_process (wm_window.cc) for the page's window, which has no GHOST loop to run it: the
  * window timers that are due become TIMER events in its queue (panel animations, tooltips, modal operators' timers),
- * notifier timers add their notifiers and job timers update and end their jobs. Autosave has no timer here. */
+ * notifier timers add their notifiers and job timers update their jobs, as Blender's do whatever their window. Autosave has
+ * no timer here. */
 static void wm_window_timers_process(wmWindowManager *wm)
 {
   const double time = BLI_time_now_seconds();
@@ -435,7 +436,7 @@ static void wm_window_timers_process(wmWindowManager *wm)
     if ((wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) || wt.sleep || wt.time_next >= time) {
       continue;
     }
-    if (wt.event_type != TIMERNOTIFIER && BLI_findindex(&wm->windows, wt.win) == -1) {
+    if (!ELEM(wt.event_type, TIMERNOTIFIER, TIMERJOBS) && BLI_findindex(&wm->windows, wt.win) == -1) {
       continue;
     }
     wt.time_delta = time - wt.time_last;
@@ -510,6 +511,7 @@ static const char *wm_window_handle(bContext *C, FunctionRef<void(wmWindowManage
   }
   unhandled_handler_ensure(win);
   unhandled_events.clear();
+  wm_jobs_handle_finished(C);
   wm_window_timers_process(wm);
   add_events(wm, win);
   operator_calls_wrap();
@@ -539,7 +541,7 @@ EXPORT(wm_timers_active) bool wm_timers_active(bContext *C)
   wmWindowManager *wm = CTX_wm_manager(C);
   for (const wmTimer &wt : wm->runtime->timers) {
     if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && wt.event_type != TIMERAUTOSAVE &&
-        BLI_findindex(&wm->windows, wt.win) != -1)
+        (wt.event_type == TIMERJOBS || BLI_findindex(&wm->windows, wt.win) != -1))
     {
       return true;
     }

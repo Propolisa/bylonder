@@ -1,0 +1,21 @@
+Reading an ID's asset data address from a block head assumes the file's pointer size is the host's; on wasm32 a file
+written with 8 byte pointers needs its address converted as block heads' addresses are (uint32_from_uint64_ptr).
+diff --git a/source/blender/blenloader/intern/readfile.cc b/source/blender/blenloader/intern/readfile.cc
+index c29c9236..3f884780 100644
+--- a/source/blender/blenloader/intern/readfile.cc
++++ b/source/blender/blenloader/intern/readfile.cc
+@@ -831,6 +831,14 @@ short blo_bhead_id_flag(const FileData *fd, const BHead *bhead)
+ AssetMetaData *blo_bhead_id_asset_data_address(const FileData *fd, const BHead *bhead)
+ {
+   BLI_assert(blo_bhead_is_id_valid_type(bhead));
++  if constexpr (sizeof(void *) == 4) {
++    if ((fd->flags & FD_FLAGS_FILE_POINTSIZE_IS_4) == 0) {
++      /* A file written with 8 byte pointers: its address converted as the block heads' are. */
++      const uint64_t *asset_data = blo_bhead_data_at<uint64_t>(bhead, fd->id_asset_data_offset);
++      return asset_data ? reinterpret_cast<AssetMetaData *>(uintptr_t(uint32_from_uint64_ptr(*asset_data))) :
++                          nullptr;
++    }
++  }
+   AssetMetaData *const *asset_data = blo_bhead_data_at<AssetMetaData *>(bhead,
+                                                                         fd->id_asset_data_offset);
+   return asset_data ? *asset_data : nullptr;

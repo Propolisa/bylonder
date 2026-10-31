@@ -19,7 +19,11 @@ function wasiFor(memory) {
   const write = (text) => globalThis.process?.stderr ? process.stderr.write(text) : console.warn(text);
   const view = () => new DataView(memory().buffer);
   const string = (pointer, length) => decoder.decode(new Uint8Array(memory().buffer, pointer, length));
-  const path = (pointer, length) => "/" + string(pointer, length).replace(/^\/+/, "");
+  const path = (pointer, length, dir = ROOT) => {
+    const name = string(pointer, length);
+    const base = dir === ROOT || name.startsWith("/") ? "/" : open.get(dir)?.directory?.replace(/\/?$/, "/") ?? "/";
+    return base + name.replace(/^\/+/, "");
+  };
   const isDirectory = (name) => name === "/" || [...files.keys()].some((file) => file.startsWith(name.replace(/\/?$/, "/")));
   const open = /* @__PURE__ */ new Map([[ROOT, { directory: "/" }]]);
   let next = ROOT + 1;
@@ -45,8 +49,8 @@ function wasiFor(memory) {
       new Uint8Array(memory().buffer, at, length).set(encoder.encode("/").subarray(0, length));
       return fd === ROOT ? ESUCCESS : EBADF;
     },
-    path_open(_dir, _lookup, at, length, oflags, _rights, _inheriting, _fdflags, fdOut) {
-      const name = path(at, length);
+    path_open(dir, _lookup, at, length, oflags, _rights, _inheriting, _fdflags, fdOut) {
+      const name = path(at, length, dir);
       if (oflags & O_DIRECTORY || !files.has(name) && !(oflags & O_CREAT) && isDirectory(name)) {
         if (!isDirectory(name) && !(oflags & O_CREAT)) return ENOENT;
         open.set(next, { directory: name });
@@ -60,6 +64,31 @@ function wasiFor(memory) {
       return ESUCCESS;
     },
     fd_close: (fd) => open.delete(fd) ? ESUCCESS : EBADF,
+    // A directory's entries from the cookie on, as dirents (next cookie, inode, name length, type, then the name), the
+    // last one cut off where the buffer ends, as WASI's readdir fills it.
+    fd_readdir(fd, buf, length, cookie, bufused) {
+      const directory = open.get(fd)?.directory;
+      if (directory === void 0) return EBADF;
+      const prefix = directory.replace(/\/?$/, "/");
+      const entries = [...new Map([...files.keys()].filter((file) => file.startsWith(prefix)).map((file) => {
+        const [name, ...rest] = file.slice(prefix.length).split("/");
+        return [name, rest.length ? FILETYPE_DIRECTORY : FILETYPE_REGULAR];
+      }))];
+      let used = 0;
+      for (let i = Number(cookie); i < entries.length && used < length; i++) {
+        const [name, type] = entries[i], encoded = encoder.encode(name), record = new Uint8Array(24 + encoded.length), v = new DataView(record.buffer);
+        v.setBigUint64(0, BigInt(i + 1), true);
+        v.setBigUint64(8, BigInt(i + 1), true);
+        v.setUint32(16, encoded.length, true);
+        v.setUint8(20, type);
+        record.set(encoded, 24);
+        const part = record.subarray(0, Math.min(record.length, length - used));
+        new Uint8Array(memory().buffer, buf + used, part.length).set(part);
+        used += part.length;
+      }
+      view().setUint32(bufused, used, true);
+      return ESUCCESS;
+    },
     // Nanoseconds: the realtime clock (0) from the epoch, the others from the page's start (BLI_time_now_seconds).
     clock_time_get(id, _precision, out) {
       const ms = id === 0 ? Date.now() : performance.timeOrigin + performance.now();
@@ -126,21 +155,21 @@ function wasiFor(memory) {
       filestat(at, file.path ?? file.directory);
       return ESUCCESS;
     },
-    path_filestat_get(_dir, _flags, at, length, out) {
-      const name = path(at, length);
+    path_filestat_get(dir, _flags, at, length, out) {
+      const name = path(at, length, dir);
       if (!files.has(name) && !isDirectory(name)) return ENOENT;
       filestat(out, name);
       return ESUCCESS;
     },
-    path_rename(_dir, from, fromLength, _toDir, to, toLength) {
-      const source = path(from, fromLength), target = path(to, toLength);
+    path_rename(dir, from, fromLength, toDir, to, toLength) {
+      const source = path(from, fromLength, dir), target = path(to, toLength, toDir);
       if (!files.has(source)) return ENOENT;
       files.set(target, files.get(source));
       files.delete(source);
       return ESUCCESS;
     },
-    path_unlink_file: (_dir, at, length) => files.delete(path(at, length)) ? ESUCCESS : ENOENT,
-    path_remove_directory: (_dir, at, length) => isDirectory(path(at, length)) ? ENOTDIR : ESUCCESS
+    path_unlink_file: (dir, at, length) => files.delete(path(at, length, dir)) ? ESUCCESS : ENOENT,
+    path_remove_directory: (dir, at, length) => isDirectory(path(at, length, dir)) ? ENOTDIR : ESUCCESS
   }, { get: (calls, name) => calls[name] ?? (() => 0) });
 }
 var provided = {};

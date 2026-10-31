@@ -27,8 +27,8 @@ import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // Types of Blender's the view draws only as the depsgraph evaluates them: as their evaluated mesh, or placed where they
-// are (what they do, a lattice's deform or a speaker's sound, is Blender's).
-const EVALUATED = ['SURFACE', 'META'], PLACED = ['LATTICE', 'SPEAKER', 'LIGHT_PROBE'];
+// are (what they do, a lattice's deform or a speaker's sound, is Blender's; a Curves object's curves, drawCurves).
+const EVALUATED = ['SURFACE', 'META'], PLACED = ['LATTICE', 'SPEAKER', 'LIGHT_PROBE', 'CURVES'];
 // The objects drawn from what the depsgraph evaluated.
 const DRAWN = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA', ...CURVE_TYPES, ...EVALUATED, ...PLACED];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
@@ -416,8 +416,8 @@ export function createMainView(state) {
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
   }
-  // The curves objects draw (particle hair), as Blender's engines draw them (curves.js), one data each for: the render
-  // engines' mesh in the emitter's slot material (Workbench's hair in Solid views, workbench.js), and the overlay's
+  // The curves objects draw (Curves objects' evaluated curves, particle hair), as Blender's engines draw them (curves.js),
+  // one data each for: the render engines' mesh in the object's slot material (Workbench's hair in Solid views, workbench.js), and the overlay's
   // strands where the viewport shows them as paths (overlay-particle.js).
   const curved = new Map();
   function drawCurves() {
@@ -431,7 +431,7 @@ export function createMainView(state) {
       const data = curvesData(scene, record);
       const mesh = curvesMesh(scene, '__curves ' + key, data, record.faces, kept.mesh);
       Object.assign(mesh.metadata.curves, { render: record.render, viewport: record.viewport });
-      const material = emitter.material?.subMaterials ? emitter.material.subMaterials[record.material - 1] : emitter.material;
+      const material = materialFor(record.material);
       mesh.material = material && CurvesPlugin.draws(material) ? material : null;
       let overlay = kept.overlay;
       if (record.viewport && !rendering) {

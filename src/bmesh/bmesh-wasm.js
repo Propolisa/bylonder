@@ -1,11 +1,15 @@
 // Blender's own code (tools/blender-port/wasm, built by wasm_module.py): Main (BlenderMain) and its operators, and
 // Mesh arrays extracted as Blender's draw cache extracts its buffers.
-import { instantiate, files } from '../port/wasm.js';
+import { instantiate, files, read } from '../port/wasm.js';
+import { DATAFILES } from './datafiles.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { BMESH_WASM } from './bmesh-module.js';
 import { moduleMesh } from './module-mesh.js';
 
 const { exports: x } = await instantiate(BMESH_WASM);
+// Blender's datafiles (its Essentials asset libraries) at its system directory (ghost-paths.cc), read in once the module
+// starts; what reads assets (the asset menus, object.modifier_add_node_group) waits for them.
+export const datafiles = Promise.all(DATAFILES.map(async ([name, url]) => files.set(`/blender/datafiles/${name}`, new Uint8Array(await read(url)))));
 const { withArrays, cString, withString, meshArrays, extractedMesh, attachedMesh, setModifiers, evaluateModifiers } = moduleMesh(x, createMesh);
 // A detached extraction ({counts, buffers}) as the Mesh it was; Blender's modifier stack on a Mesh (modifier-api.cc),
 // whose result's arrays are valid until the next evaluation, with each modifier's error or null.
@@ -237,10 +241,10 @@ export class BlenderMain {
   evaluate() { x.main_evaluate(this.#context); }
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
-  // The curves Main's objects draw (main-api.cc main_curves): particle hair, { ob, system, render (the render engines
-  // draw it), viewport (Workbench and, in Wireframe, the overlay do), overlay (the overlay always does: its viewport
-  // display is Path), material (slot, 1-based), faces (the Hair shape's faces per segment),
-  // objectToWorld, posRad (each evaluated point's position, object space, and radius), indirection, time (each point's
+  // The curves Main's objects draw (main-api.cc main_curves): their evaluated curves (system -1) and particle hair,
+  // { ob, system, render (the render engines draw it), viewport (Workbench and, in Wireframe, the overlay do), overlay
+  // (the overlay always does: its viewport display is Path), material (Main's Material, or 0), faces (the Hair shape's
+  // faces per segment), objectToWorld, posRad (each evaluated point's position, object space, and radius), indirection, time (each point's
   // along its curve, 0 to 1), length (each curve's) }, the arrays views
   // into the module's memory valid until the next call.
   curves() {
@@ -249,7 +253,7 @@ export class BlenderMain {
     const ints = new Int32Array(memory, at, count * words), floats = new Float32Array(memory, at, count * words);
     return Array.from({ length: count }, (_, i) => {
       const [ob, system, render, viewport, overlay, material, faces, firstPoint, points, firstIndirection, indirections, firstCurve, curves] = ints.subarray(i * words, i * words + 13);
-      return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material, faces, objectToWorld: floats.subarray(i * words + 13, i * words + 29),
+      return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material: material >>> 0, faces, objectToWorld: floats.subarray(i * words + 13, i * words + 29),
         posRad: new Float32Array(memory, posRad + firstPoint * 16, points * 4), indirection: new Int32Array(memory, indirection + firstIndirection * 4, indirections),
         time: new Float32Array(memory, time + firstPoint * 4, points), length: new Float32Array(memory, length + firstCurve * 4, curves) };
     });

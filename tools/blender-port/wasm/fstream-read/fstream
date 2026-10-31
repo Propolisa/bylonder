@@ -40,6 +40,11 @@ template<class C, class T> class basic_ifstream : public basic_istream<C, T> {
       this->seekg(0, ios_base::end);
     }
   }
+  template<class Path, class = decltype(declval<const Path &>().c_str())>
+  void open(const Path &path, ios_base::openmode mode = ios_base::in)
+  {
+    open(path.c_str(), mode);
+  }
   bool is_open() const { return !this->fail(); }
   void close() {}
 };

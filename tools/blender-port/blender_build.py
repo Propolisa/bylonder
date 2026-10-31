@@ -8,6 +8,7 @@ Usage: tools/blender-port/blender_build.py HOST_BUILD [--report FILE]   (HOST_BU
   defines: the seams Bylonder implements. JOBS=n compiles n sources at a time; SHARD=i/n compiles one in n libraries.
 """
 import concurrent.futures
+import functools
 import hashlib
 import json
 import os
@@ -107,8 +108,33 @@ def wasm_command(entry, extra):
 
 REPO = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 # The work directory (configure_host.sh's DIR), set by main.
+# Blender's tree the build reads (main sets it).
+BLENDER_TREE = None
 WORK = {}
 SHIMS = wasm_module.own_headers()[:8]
+FSTREAM = [os.path.join(WASM, name, 'fstream') for name in ('fstream', 'fstream-read')]
+
+
+@functools.cache
+def fstream_users(tree):
+    """What brings the module's <fstream> (wasm/fstream) into a source: <fstream> itself and Blender's headers that
+    include it, by the name a source includes them by."""
+    names = {'<fstream>'}
+    for root, _, files in os.walk(os.path.join(tree, 'source')):
+        for name in files:
+            if name.endswith(('.h', '.hh')) and '#include <fstream>' in open(os.path.join(root, name), errors='ignore').read():
+                names.add(name)
+    return frozenset(names)
+
+
+def shim_key(source):
+    """The module's <fstream> (with the reading half it includes), for a source that includes it, directly or through one of Blender's headers: a change
+    to it builds that source again."""
+    text = open(source, errors='ignore').read()
+    users = fstream_users(BLENDER_TREE)
+    if not any(f'include {name}' in text or f'/{name}"' in text or f'"{name}"' in text for name in users):
+        return ''
+    return hashlib.sha1(b''.join(open(path, 'rb').read() for path in FSTREAM)).hexdigest()[:8]
 
 
 def compile_one(objects, entry, extra):
@@ -122,7 +148,7 @@ def compile_one(objects, entry, extra):
     for work, token in WORK.items():
         stable = stable.replace(work, token)
     stable = stable.replace(REPO, '$REPO')
-    digest = hashlib.sha1((stable + open(source, 'rb').read().hex()).encode()).hexdigest()[:16]
+    digest = hashlib.sha1((stable + open(source, 'rb').read().hex() + shim_key(source)).encode()).hexdigest()[:16]
     obj = os.path.join(objects, f'{os.path.basename(source)}.{digest}.o')
     if os.path.exists(obj):
         return source, obj, None
@@ -229,6 +255,8 @@ def first_error(stderr):
 
 def main():
     host = os.path.abspath(sys.argv[1])
+    global BLENDER_TREE
+    BLENDER_TREE = os.path.realpath(os.path.join(host, '..', 'blender'))
     WORK[os.path.realpath(os.path.join(host, '..'))] = '$WORK'
     WORK[os.path.dirname(host)] = '$WORK'
     report = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else os.path.join(host, '..', 'seam-report.json')

@@ -1,14 +1,15 @@
-// <fstream> for sources whose debug paths write files (delaunay_2d.cc's SVG dumps) or that declare file streams they
-// do not use (BLI_fileops.hh's, in action_draw.cc and the .blend writer, which writes through POSIX calls): wasi's
-// libc++ is built without a
-// filesystem, so its <fstream> declares the streams without defining them. The module has no files, so every stream
-// fails to open, as a file that cannot be opened does. Seen only by the libraries that list wasm/fstream as includes.
+// <fstream> for the module's sources: wasi's libc++ is built without a filesystem, so its <fstream> declares the streams
+// without defining them. Streams read and write the module's file system through C's stdio, which WASI gives: an input
+// stream reads its file whole (wasm/fstream-read), an output stream writes what it was given when it closes, and a
+// stream opened for both does both. Seen only
+// by the libraries that list wasm/fstream as includes.
 #pragma once
 
-#include <iosfwd>
-#include <istream>
+#include "../fstream-read/fstream"
+
+#include <cstdio>
 #include <ostream>
-#include <streambuf>
+#include <sstream>
 #include <string>
 
 _LIBCPP_BEGIN_NAMESPACE_STD
@@ -21,42 +22,76 @@ template<class C, class T> class basic_filebuf : public basic_streambuf<C, T> {
 };
 
 template<class C, class T> class basic_ofstream : public basic_ostream<C, T> {
-  basic_filebuf<C, T> buf_;
+  basic_stringbuf<C, T> buf_;
+  string path_;
 
  public:
   basic_ofstream() : basic_ostream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
-  explicit basic_ofstream(const char *, ios_base::openmode = ios_base::out) : basic_ofstream() {}
-  explicit basic_ofstream(const string &, ios_base::openmode = ios_base::out) : basic_ofstream() {}
-  void open(const char *, ios_base::openmode = ios_base::out) { this->setstate(ios_base::failbit); }
-  void open(const string &, ios_base::openmode = ios_base::out) { this->setstate(ios_base::failbit); }
-  bool is_open() const { return false; }
-  void close() {}
-};
-
-template<class C, class T> class basic_ifstream : public basic_istream<C, T> {
-  basic_filebuf<C, T> buf_;
-
- public:
-  basic_ifstream() : basic_istream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
-  explicit basic_ifstream(const char *, ios_base::openmode = ios_base::in) : basic_ifstream() {}
-  explicit basic_ifstream(const string &, ios_base::openmode = ios_base::in) : basic_ifstream() {}
-  void open(const char *, ios_base::openmode = ios_base::in) { this->setstate(ios_base::failbit); }
-  void open(const string &, ios_base::openmode = ios_base::in) { this->setstate(ios_base::failbit); }
-  bool is_open() const { return false; }
-  void close() {}
+  explicit basic_ofstream(const char *path, ios_base::openmode mode = ios_base::out) : basic_ostream<C, T>(&buf_) { open(path, mode); }
+  explicit basic_ofstream(const string &path, ios_base::openmode mode = ios_base::out) : basic_ofstream(path.c_str(), mode) {}
+  ~basic_ofstream() { close(); }
+  void open(const char *path, ios_base::openmode /*mode*/ = ios_base::out)
+  {
+    path_ = path;
+    buf_.str({});
+    this->clear();
+  }
+  void open(const string &path, ios_base::openmode mode = ios_base::out) { open(path.c_str(), mode); }
+  bool is_open() const { return !path_.empty(); }
+  void close()
+  {
+    if (path_.empty()) {
+      return;
+    }
+    FILE *file = fopen(path_.c_str(), "wb");
+    const basic_string<C, T> text = buf_.str();
+    if (!file || fwrite(text.data(), sizeof(C), text.size(), file) != text.size()) {
+      this->setstate(ios_base::failbit);
+    }
+    if (file) {
+      fclose(file);
+    }
+    path_.clear();
+  }
 };
 
 template<class C, class T> class basic_fstream : public basic_iostream<C, T> {
-  basic_filebuf<C, T> buf_;
+  basic_stringbuf<C, T> buf_;
+  string path_;
+  bool write_ = false;
 
  public:
   basic_fstream() : basic_iostream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
-  explicit basic_fstream(const char *, ios_base::openmode = ios_base::in | ios_base::out) : basic_fstream() {}
-  explicit basic_fstream(const string &, ios_base::openmode = ios_base::in | ios_base::out) : basic_fstream() {}
-  void open(const char *, ios_base::openmode = ios_base::in | ios_base::out) { this->setstate(ios_base::failbit); }
-  void open(const string &, ios_base::openmode = ios_base::in | ios_base::out) { this->setstate(ios_base::failbit); }
-  bool is_open() const { return false; }
-  void close() {}
+  explicit basic_fstream(const char *path, ios_base::openmode mode = ios_base::in | ios_base::out) : basic_iostream<C, T>(&buf_) { open(path, mode); }
+  explicit basic_fstream(const string &path, ios_base::openmode mode = ios_base::in | ios_base::out) : basic_fstream(path.c_str(), mode) {}
+  ~basic_fstream() { close(); }
+  void open(const char *path, ios_base::openmode mode = ios_base::in | ios_base::out)
+  {
+    basic_ifstream<C, T> in;
+    if ((mode & ios_base::in) && !(mode & ios_base::trunc) && (in.open(path), in.is_open())) {
+      basic_ostringstream<C, T> text;
+      text << in.rdbuf();
+      buf_.str(text.str());
+    }
+    else if (!(mode & ios_base::out)) {
+      this->setstate(ios_base::failbit);
+      return;
+    }
+    path_ = path;
+    write_ = mode & ios_base::out;
+    this->clear();
+  }
+  void open(const string &path, ios_base::openmode mode = ios_base::in | ios_base::out) { open(path.c_str(), mode); }
+  bool is_open() const { return !path_.empty(); }
+  void close()
+  {
+    if (write_) {
+      basic_ofstream<C, T> out(path_);
+      out << buf_.str();
+    }
+    path_.clear();
+    write_ = false;
+  }
 };
 
 _LIBCPP_END_NAMESPACE_STD
