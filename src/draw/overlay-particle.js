@@ -1,7 +1,8 @@
 // Particles as Blender's overlay draws them (overlay_particle.hh), by Blender's own shaders (gpu-library.js `draw`:
-// overlay_particle_vert/frag.glsl for dots, overlay_particle_shape_vert/frag.glsl for circles, crosses and axes),
-// each particle a thin instance whose data is the point the draw cache gives the shader (position, value, rotation:
-// main-api.cc main_instances). What the shaders' create infos declare stands in front of them: the instance's point as
+// overlay_particle_vert/frag.glsl for dots, overlay_particle_shape_vert/frag.glsl for circles, crosses and axes,
+// overlay_particle_hair_vert.glsl for hair), each particle a thin instance whose data is the point the draw cache gives
+// the shader (position, value, rotation: main-api.cc main_instances), hair a curves mesh (curves.js) whose strand
+// points are the shader's vertex input. What the shaders' create infos declare stands in front of them: the instance's point as
 // the shader's vertex input or its storage buffer's one element, the shape's vertex index as gl_VertexID (a dot is
 // one point, a shape the vertices it expands to), the view, and the weight ramp texture as a 2D texture one texel
 // high. Selection ids, clipping and line anti-aliasing data are not drawn.
@@ -9,17 +10,18 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial.js';
 import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { draw } from '../nodes/blender/gpu-library.js';
 import { glslShader } from '../nodes/blender/glsl.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
+import { CURVES_VERTEX_GLSL, CURVES_UNIFORMS, CURVES_SAMPLERS, curvesDefines, bindCurves } from './curves.js';
+import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 
-// overlay_shader_shared.hh.
+// blender-port: overlay_shader_shared.hh.
 const PART_SHAPE = { AXIS: 1, CIRCLE: 2, CROSS: 3 }, PARTICLE_SHAPE_CIRCLE_RESOLUTION = 7;
-// Vertices each shape expands a particle to (overlay_particle.hh draw_expand).
+// blender-port: overlay_particle.hh draw_expand, the vertices each shape expands a particle to.
 const VERTICES = { DOT: 1, AXIS: 6, CROSS: 6, CIRCLE: PARTICLE_SHAPE_CIRCLE_RESOLUTION * 2 };
 
 // Where GLSL ES differs from the desktop GLSL Blender targets: (text, replacement, reason).
@@ -85,8 +87,8 @@ void main() { part_pos[0] = ParticlePointData(world0.xyz, world0.w, world1); bl_
   },
 };
 
-// The weight ramp (overlay_instance.cc ensure_weight_ramp_texture, without a custom range): hue from blue to red,
-// gamma corrected.
+// blender-port: overlay_instance.cc ensure_weight_ramp_texture (without a custom range): the weight ramp, hue from
+// blue to red, gamma corrected.
 function weightRamp(scene) {
   const pixels = new Uint8Array(256 * 4), gamma = 1.5;
   for (let i = 0; i < 256; i++) {
@@ -98,7 +100,7 @@ function weightRamp(scene) {
 }
 
 const made = new WeakMap();
-const sceneData = (scene) => made.get(scene) ?? made.set(scene, { shapes: new Map(), ramp: null, segment: null }).get(scene);
+const sceneData = (scene) => made.get(scene) ?? made.set(scene, { shapes: new Map(), ramp: null }).get(scene);
 // A scene's mesh of a shape's vertices (their indices as positions' x), made once and never drawn itself.
 export function particleShapeMesh(scene, shape) {
   const { shapes } = sceneData(scene);
@@ -135,21 +137,50 @@ export function particleShapeMaterial(scene, shape, color, drawSize) {
   return material;
 }
 
-// A hair path's segment (0 to 1 along Blender's Z, Babylon's Y), which a segment's matrix places, and its unlit lines
-// in the material's color.
-export function hairSegmentMesh(scene) {
-  const data = sceneData(scene);
-  if (!data.segment) {
-    data.segment = new Mesh('__shape SEGMENT', scene);
-    Object.assign(new VertexData(), { positions: [0, 0, 0, 0, 1, 0], indices: [0, 1] }).applyToMesh(data.segment);
-    data.segment.setEnabled(false);
-  }
-  return data.segment;
-}
-export function hairMaterial(scene, [r, g, b]) {
-  const material = new StandardMaterial('__hair', scene);
-  Object.assign(material, { disableLighting: true, fillMode: Material.LineListDrawMode });
-  material.emissiveColor.set(r, g, b);
-  material.diffuseColor.set(0, 0, 0);
-  return material;
+// The overlay's hair: Blender's hair shader over a curves mesh of strands (curvesMesh with no faces), each vertex's
+// position and tangent its strand point's (curves_point_get). It shows in Wireframe views, and in every view where the
+// system's viewport display is Path (`explicit()`), in the emitter's wire colors as selected (`selected()`, `active()`).
+// blender-port: draw_shader_shared.hh eObjectInfoFlag.
+const OBJECT = { SELECTED: 1, FROM_SET: 4, ACTIVE: 8 }, THEME = ['wire', 'transform', 'object_active', 'object_selected', 'background'];
+const HAIR_VERTEX = `${VERTEX_PRELUDE}
+${CURVES_VERTEX_GLSL}
+uniform int object_flag;
+uniform vec4 theme_colors[${THEME.length}];
+const int color_type = 0;
+const bool is_transform = false;
+const bool use_coloring = true;
+struct ObjectInfos { uint flag; vec4 ob_color; float random; };
+ObjectInfos drw_object_infos() { return ObjectInfos(uint(object_flag), vec4(1.0), 0.0); }
+struct ThemeColors { vec4 wire, transform, active_object, object_select, background; };
+struct Theme { ThemeColors colors; };
+Theme theme;
+bool flag_test(uint flag, uint bit) { return (flag & bit) != 0u; }
+vec3 square(vec3 v) { return v * v; }
+vec3 drw_point_object_to_world(vec3 p) { return (curves_object_to_world * vec4(p, 1.0)).xyz; }
+vec3 drw_normal_object_to_world(vec3 n) { return transpose(inverse(mat3(curves_object_to_world))) * n; }
+vec3 drw_world_incident_vector(vec3 P) { return curves_incident_vector(P); }
+vec3 pos;
+vec3 nor;
+${glslShader(draw['overlay_particle_hair_vert.glsl'], 'vertex', { ...MACROS, eObjectInfoFlag: 'uint', OBJECT_SELECTED: `${OBJECT.SELECTED}u`, OBJECT_FROM_SET: `${OBJECT.FROM_SET}u`, OBJECT_ACTIVE: `${OBJECT.ACTIVE}u`, V3D_SHADING_OBJECT_COLOR: '1', V3D_SHADING_RANDOM_COLOR: '3' })}
+void main() {
+  theme = Theme(ThemeColors(theme_colors[0], theme_colors[1], theme_colors[2], theme_colors[3], theme_colors[4]));
+  bl_curves_Point pt = bl_curves_point_get(uint(gl_VertexID));
+  pos = pt.P;
+  nor = pt.T;
+  bl_main();
+}`;
+export function hairOverlay(scene, mesh, { workbench, explicit, selected, active }) {
+  const material = new ShaderMaterial('__particle hair', scene, { vertexSource: HAIR_VERTEX, fragmentSource: SOURCES.shape.fragment }, {
+    attributes: ['position'], uniforms: ['viewProjection', 'viewinv', 'winmat', 'size_viewport', 'object_flag', 'theme_colors', ...CURVES_UNIFORMS], samplers: CURVES_SAMPLERS, defines: curvesDefines(0),
+  });
+  material.setArray4('theme_colors', THEME.flatMap((name) => [...theme[name], 1].slice(0, 4)));
+  material.onBindObservable.add(() => {
+    const e = material.getEffect(), v = drawView(scene);
+    e.setInt('object_flag', (selected() ? OBJECT.SELECTED : 0) | (active() ? OBJECT.ACTIVE : 0));
+    e.setFloat2('size_viewport', v.size[0], v.size[1]);
+    bindCurves(e, mesh);
+  });
+  mesh.material = material;
+  const shown = scene.onBeforeCameraRenderObservable.add((camera) => { mesh.isVisible = explicit() || workbench?.shading(camera) === 'wire'; });
+  mesh.onDisposeObservable.add(() => { scene.onBeforeCameraRenderObservable.remove(shown); material.dispose(); });
 }

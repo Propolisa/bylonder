@@ -14,6 +14,7 @@ const FIXES = [
   ['valtorgb_nearest', 'fac * (textureSize(colormap, 0).x - 1)', 'fac * float(textureSize(colormap, 0).x - 1)', 'GLSL ES has no implicit int to float conversion'],
   ['valtorgb', 'sampler1DArray', 'sampler2D', 'WebGL 2 has no 1D textures: a color map is a 2D texture one texel high'],
   ['valtorgb_nearest', 'sampler1DArray', 'sampler2D', 'WebGL 2 has no 1D textures: a color map is a 2D texture one texel high'],
+  ['curves_segment_get', 'drw_curves.vertex_per_segment - 1)', 'drw_curves.vertex_per_segment - 1u)', 'GLSL ES has no implicit int to uint conversion'],
 ];
 
 const PREFIX = 'bl_';
@@ -108,22 +109,65 @@ function declarations(code) {
     const struct = /^struct\s+(\w+)/.exec(chunk);
     const constant = /^const\s+\w+\s+(\w+)\s*(\[\d*\])?\s*=/.exec(chunk);
     const name = struct?.[1] ?? (fn && !/^(if|for|while|switch|return)$/.test(fn[1]) ? fn[1] : null) ?? constant?.[1];
-    if (name) found.push([name, fn && !struct ? glslFunctionText(chunk) : chunk]);
+    if (name) found.push([name, fn && !struct ? glslFunctionText(chunk) : struct ? chunk + ';' : chunk]);
   }
   return found;
 }
 
 // A function with its parameters passed by reference (float &x, const float4 &x) as GLSL's inout, and its local
 // constants as variables: GLSL ES wants a constant expression where desktop GLSL takes any value.
+// Parameters passed by reference (float &x, const float4 &x) as GLSL's inout.
+const references = (params) => params.replace(/(?:\bconst\s+)?(\w+)\s*&\s*(\w+)/g, 'inout $1 $2');
 const glslFunctionText = (chunk) => {
   const at = chunk.indexOf('{');
-  const head = chunk.slice(0, at).replace(/\(([^)]*)\)/, (_, params) => `(${params.replace(/(?:\bconst\s+)?(\w+)\s*&\s*(\w+)/g, 'inout $1 $2')})`);
+  const head = chunk.slice(0, at).replace(/\(([^)]*)\)/, (_, params) => `(${references(params)})`);
   return head + chunk.slice(at).replace(/([;{}]\s*)const\s+/g, '$1');
 };
 
-const dialect = (text) => text
+// A call's arguments from the text after its opening parenthesis: [arguments, the index after its closing one].
+function callArguments(text, at) {
+  const args = [];
+  let depth = 0, start = at;
+  for (let i = at; i < text.length; i++) {
+    const c = text[i];
+    if (c === '(') depth++;
+    else if (c === ')' && depth-- === 0) return [[...args, text.slice(start, i)].map((a) => a.trim()), i + 1];
+    else if (c === ',' && depth === 0) { args.push(text.slice(start, i)); start = i + 1; }
+  }
+  return [args, text.length];
+}
+// WebGL 2 has no buffer textures: a buffer read (texelFetch(buffer, index)) reads the texel at that index of a 2D
+// texture laid out in rows (bl_buffer_fetch, which a shader reading buffers defines).
+function bufferReads(text) {
+  let out = '', i = 0;
+  for (let at; (at = text.indexOf('texelFetch(', i)) !== -1;) {
+    const [args, end] = callArguments(text, at + 'texelFetch('.length);
+    out += text.slice(i, at) + (args.length === 2 ? `bl_buffer_fetch(${args.map(bufferReads).join(', ')})` : text.slice(at, end));
+    i = end;
+  }
+  return out + text.slice(i);
+}
+
+const dialect = (text) => bufferReads(text)
   .replace(/\.([xyzwrgba]{1,4})\(\)/g, '.$1')
   .replace(/\b(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?[fF]\b/g, '$1$2');
+
+// What Blender's shader preprocessor makes of C++ its GLSL uses: a namespace's names prefixed with it (curves::point_get
+// as curves_point_get), and a resource accessor's local alias of a resource (const auto &buf = buffer_get(info, buf),
+// which the compatibility macros make `const auto &buf = buf;`) left out, the resource being global.
+function flatten(code) {
+  let out = code.replace(/^\s*const\s+auto\s*&\s*(\w+)\s*=\s*\1\s*;\s*$/gm, '');
+  for (let match; (match = /\bnamespace\s+(\w+)\s*\{/.exec(out));) {
+    const [, name] = match, open = match.index + match[0].length;
+    let depth = 1, close = open;
+    while (depth) depth += { '{': 1, '}': -1 }[out[++close]] ?? 0;
+    const inner = out.slice(open, close), names = declarations(inner).map(([n]) => n);
+    const renamed = names.reduce((text, n) => text.replace(new RegExp(`(?<![.\\w:])${n}\\b`, 'g'), `${name}_${n}`), inner);
+    out = out.slice(0, match.index) + renamed + out.slice(close + 1);
+    out = out.replaceAll(`${name}::`, `${name}_`);
+  }
+  return out;
+}
 
 // The libraries each after what it includes, the compatibility macros (gpu_shader_compat.hh's) first.
 function includeOrder() {
@@ -141,7 +185,7 @@ function includeOrder() {
 function parse() {
   // Every function Bylonder links runs in a fragment shader (a material's, or a compositor node's pass).
   const macros = new Map([['GPU_FRAGMENT_SHADER', { params: null, body: '1' }]]);
-  const codes = includeOrder().map((file) => [file, preprocess(libraries[file], macros)]);
+  const codes = includeOrder().map((file) => [file, flatten(preprocess(libraries[file], macros))]);
   const symbols = new Map();
   for (const [, code] of codes) for (const [name, text] of declarations(code)) {
     if (!symbols.has(name)) symbols.set(name, []);
@@ -167,7 +211,7 @@ export function glslShader(source, stage, macros = {}) {
   const defined = new Map([[stage === 'vertex' ? 'GPU_VERTEX_SHADER' : 'GPU_FRAGMENT_SHADER', { params: null, body: '1' }]]);
   preprocess(libraries['gpu_shader_compat_glsl.glsl'], defined);
   for (const [name, value] of Object.entries(macros)) defined.set(name, Array.isArray(value) ? { params: value[0], body: value[1] } : { params: null, body: value });
-  return dialect(preprocess(source, defined));
+  return dialect(preprocess(source, defined)).replace(/\b(\w+\s+\w+\s*)\(([^()]*)\)(\s*\{)/g, (_, head, params, brace) => `${head}(${references(params)})${brace}`);
 }
 
 // GLSL ES reserves names with two underscores in a row.

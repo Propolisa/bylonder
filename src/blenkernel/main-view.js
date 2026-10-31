@@ -15,7 +15,8 @@ import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
-import { particleShapeMesh, particleShapeMaterial, isParticleShape, hairSegmentMesh, hairMaterial } from '../draw/overlay-particle.js';
+import { particleShapeMesh, particleShapeMaterial, hairOverlay } from '../draw/overlay-particle.js';
+import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
@@ -360,7 +361,7 @@ export function createMainView(state) {
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
       if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
-      if (updates.size) drawInstances();
+      if (updates.size) { drawInstances(); drawCurves(); }
     } finally {
       state.applying = was;
     }
@@ -368,20 +369,20 @@ export function createMainView(state) {
   // What objects draw as instances (main-api.cc main_instances), as Blender's draw engines draw them, each group as
   // thin instances on a mesh of the view's own sharing its shape's geometry: an instanced object's at their world
   // matrices in its material, a particle system's overlay shape drawn by Blender's shaders from each particle's point
-  // (overlay-particle.js), hair segments at their matrices. The instance data is copied once, from the module's memory
+  // (overlay-particle.js). The instance data is copied once, from the module's memory
   // into a thin instance buffer that grows by doubling and is otherwise reused. A render leaves out the overlay.
   const instanced = new Map();
   function drawInstances() {
     const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
     for (const { instancer, ob, shape, overlay, drawSize, color, data } of blender.instances()) {
       const key = `${instancer}:${ob || shape}:${color}:${drawSize}`;
-      const source = shape === 'OBJECT' ? byOb.get(ob) : shape === 'SEGMENT' ? hairSegmentMesh(scene) : particleShapeMesh(scene, shape);
+      const source = shape === 'OBJECT' ? byOb.get(ob) : particleShapeMesh(scene, shape);
       if (!source?.geometry || (overlay && rendering)) continue;
       drawn.add(key);
       let carrier = instanced.get(key);
       if (!carrier) {
         instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} }));
-        if (shape !== 'OBJECT') carrier.material = isParticleShape(shape) ? particleShapeMaterial(scene, shape, color, drawSize) : hairMaterial(scene, color);
+        if (shape !== 'OBJECT') carrier.material = particleShapeMaterial(scene, shape, color, drawSize);
         if (carrier.material) carrier.onDisposeObservable.add(() => carrier.material.dispose());
       }
       if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
@@ -396,6 +397,33 @@ export function createMainView(state) {
       carrier.thinInstanceCount = data.length / 16;
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
+  }
+  // The curves objects draw (particle hair), as Blender's engines draw them (curves.js), one data each for: the render
+  // engines' mesh in the emitter's slot material (Workbench's hair in Solid views, workbench.js), and the overlay's
+  // strands where the viewport shows them as paths (overlay-particle.js).
+  const curved = new Map();
+  function drawCurves() {
+    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
+    for (const record of blender.curves()) {
+      const emitter = byOb.get(record.ob), key = record.ob + ':' + record.system;
+      if (!emitter || (rendering && !record.render)) continue;
+      drawn.add(key);
+      const kept = curved.get(key) ?? {};
+      if (kept.data) disposeCurvesData(kept.data);
+      const data = curvesData(scene, record);
+      const mesh = curvesMesh(scene, '__curves ' + key, data, record.faces, kept.mesh);
+      Object.assign(mesh.metadata.curves, { render: record.render, viewport: record.viewport });
+      const material = emitter.material?.subMaterials ? emitter.material.subMaterials[record.material - 1] : emitter.material;
+      mesh.material = material && CurvesPlugin.of(material) && material;
+      let overlay = kept.overlay;
+      if (record.viewport && !rendering) {
+        overlay = curvesMesh(scene, '__curves overlay ' + key, data, 0, overlay);
+        Object.assign(overlay.metadata, { overlay: true, explicit: record.overlay });
+        if (!overlay.material) { const shown = overlay; hairOverlay(scene, shown, { workbench: world.workbench, explicit: () => shown.metadata.explicit, selected: () => selection.has(emitter), active: () => selection.nodes.at(-1) === emitter }); }
+      } else if (overlay) { overlay.dispose(); overlay = null; }
+      curved.set(key, { data, mesh, overlay });
+    }
+    for (const [key, { data, mesh, overlay }] of curved) if (!drawn.has(key)) { disposeCurvesData(data); mesh.dispose(); overlay?.dispose(); curved.delete(key); }
   }
   // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the
   // old one's place: its name, ids, parent, children and selection.

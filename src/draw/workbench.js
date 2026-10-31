@@ -13,6 +13,7 @@ import { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRende
 import { Color4 } from '@babylonjs/core/Maths/math.color.js';
 import { mesh_batch_cache_wire_indices } from './mesh-batch-cache.js';
 import { createFullscreenPass } from './fullscreen-pass.js';
+import { CURVES_VERTEX_GLSL, CURVES_UNIFORMS, CURVES_SAMPLERS, curvesDefines, bindCurves } from './curves.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 
 // BKE_studiolight_default (studiolight.cc): direction, diffuse color with wrap (smooth), specular color.
@@ -55,14 +56,53 @@ void main() {
   gl_Position = viewProjection * worldPos;
 }`;
 
+// blender-port: workbench_prepass.bsl.hh vert_curves. Curves (curves.js) as Workbench's hair: Blender's strand vertex,
+// and the material's values varied per strand (Blender's hair_random_material).
+const CURVES_VERTEX = `precision highp float;
+precision highp int;
+attribute vec3 position;
+uniform mat4 view;
+uniform mat4 viewProjection;
+uniform vec3 baseColor;
+uniform float roughness;
+uniform float metallic;
+varying vec3 vNormalView;
+varying vec3 vPositionView;
+varying vec3 vColor;
+varying float vRoughness;
+varying float vMetallic;
+${CURVES_VERTEX_GLSL}
+void main() {
+  vec3 P, N;
+  float rand;
+  curves_vertex(P, N, rand);
+  vec4 worldPos = vec4(curves_babylon(P), 1.0);
+  vNormalView = mat3(view) * normalize(curves_babylon(N));
+  vPositionView = (view * worldPos).xyz;
+  gl_Position = viewProjection * worldPos;
+  vColor = baseColor;
+  vRoughness = roughness;
+  vMetallic = metallic;
+  bl_hair_random_material(rand, vColor, vRoughness, vMetallic);
+}`;
+
 // Babylon's view space looks down +Z; Blender's down -Z, so Z flips.
 const LIGHTING = `precision highp float;
 varying vec3 vNormalView;
 varying vec3 vPositionView;
 uniform mat4 projection;
+#ifdef CURVES
+varying vec3 vColor;
+varying float vRoughness;
+varying float vMetallic;
+#define baseColor vColor
+#define roughness vRoughness
+#define metallic vMetallic
+#else
 uniform vec3 baseColor;
 uniform float roughness;
 uniform float metallic;
+#endif
 uniform vec4 lightDirection[4];
 uniform vec4 lightDiffuseWrap[4];
 uniform vec4 lightSpecular[4];
@@ -147,7 +187,12 @@ float calculate_transparent_weight() {
   return clamp(w, 1e-2, 3e2);
 }
 void main() {
+#ifdef CURVES
+  /* Hairs have lots of layer and can rapidly become the most prominent surface. So we lower their alpha artificially. */
+  float alpha = xray_alpha * 0.3;
+#else
   float alpha = xray_alpha;
+#endif
   float weight = calculate_transparent_weight() * alpha;
   out_transparent_accum = vec4(shaded_color() * weight, -log(1.0 - alpha));
   out_revealage_accum = vec4(weight);
@@ -203,10 +248,12 @@ function surface(material, out) {
 export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
   const shaded = new Map(); // camera -> 'solid' | 'xray' | 'wire'
   const current = { color: [0, 0, 0], roughness: 0, metallic: 0 };
-  const lit = (name, fragmentSource, uniforms = []) => {
-    const material = new ShaderMaterial(name, scene, { vertexSource: VERTEX, fragmentSource }, {
-      attributes: ['position', 'normal'], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms], samplers: SAMPLERS,
-    });
+  // A lit material: of meshes, or of curves of a Hair shape (`curves`: its mesh, for its defines).
+  const lit = (name, fragmentSource, uniforms = [], curves = null) => {
+    const material = new ShaderMaterial(name, scene, { vertexSource: curves ? CURVES_VERTEX : VERTEX, fragmentSource }, curves
+      ? { attributes: ['position'], uniforms: ['view', 'viewProjection', 'projection', 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...CURVES_UNIFORMS, ...uniforms],
+        samplers: CURVES_SAMPLERS, defines: ['#define CURVES', ...curvesDefines(curves.metadata.curves.faces)] }
+      : { attributes: ['position', 'normal'], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms], samplers: SAMPLERS });
     material.backFaceCulling = false;
     material.setArray4('lightDirection', STUDIO_LIGHT_DEFAULT.flatMap(([d]) => [...d, 0]));
     material.setArray4('lightDiffuseWrap', STUDIO_LIGHT_DEFAULT.flatMap(([, c]) => c));
@@ -217,6 +264,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
       effect.setFloat3('baseColor', color[0], color[1], color[2]);
       effect.setFloat('roughness', roughness);
       effect.setFloat('metallic', metallic);
+      if (curves) bindCurves(effect, mesh);
     });
     return material;
   };
@@ -235,9 +283,26 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
   });
   const hidden = new ShaderMaterial('__workbenchHidden', scene, { vertexSource: HIDDEN_VERTEX, fragmentSource: HIDDEN_FRAGMENT }, { attributes: ['position'] });
   const materials = { solid, xray: hidden, wire: hidden };
-  // Overlays (grid, extras, Edit Mode) and line meshes draw themselves.
-  const shadedMesh = (mesh) => !mesh.name.startsWith('__') && !mesh.metadata?.overlay && !(mesh instanceof LinesMesh) && mesh.getTotalVertices() > 0;
-  const assign = (mesh, camera) => mesh.setMaterialForRenderPass(camera.renderPassId, materials[shaded.get(camera)]);
+  // Curves' Solid and X-ray materials, by their Hair shape; curves Workbench does not draw (their viewport display is
+  // not Path) and Wireframe draw none.
+  const curvesMaterials = new Map();
+  const curvesMaterial = (mesh, type) => {
+    const { faces, viewport } = mesh.metadata.curves, key = type + faces;
+    if (!viewport || type === 'wire') return hidden;
+    if (!curvesMaterials.has(key)) {
+      const material = type === 'solid' ? lit('__workbenchCurves' + faces, FRAGMENT, [], mesh) : lit('__workbenchCurvesAccum' + faces, ACCUM_FRAGMENT, ['xray_alpha'], mesh);
+      if (type !== 'solid') {
+        Object.assign(material, { alphaMode: Constants.ALPHA_ONEONE_ONEONE, disableDepthWrite: true, depthFunction: Constants.ALWAYS, transparencyMode: Material.MATERIAL_ALPHABLEND });
+        material.setFloat('xray_alpha', XRAY_ALPHA);
+      }
+      curvesMaterials.set(key, material);
+    }
+    return curvesMaterials.get(key);
+  };
+  const materialOf = (mesh, type) => (mesh.metadata?.curves ? curvesMaterial(mesh, type === 'xray' ? 'accum' : type) : materials[type]);
+  // Overlays (grid, extras, Edit Mode) and line meshes draw themselves; curves draw as Workbench's hair.
+  const shadedMesh = (mesh) => (mesh.metadata?.curves ? !mesh.metadata.overlay : !mesh.name.startsWith('__') && !mesh.metadata?.overlay && !(mesh instanceof LinesMesh) && mesh.getTotalVertices() > 0);
+  const assign = (mesh, camera) => mesh.setMaterialForRenderPass(camera.renderPassId, materialOf(mesh, shaded.get(camera)));
   const added = scene.onNewMeshAddedObservable.add((mesh) => {
     // Builders add vertices after construction; decide once the mesh is set up.
     scene.onBeforeRenderObservable.addOnce(() => { if (shadedMesh(mesh)) for (const camera of shaded.keys()) assign(mesh, camera); });
@@ -263,7 +328,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
   };
   const showWires = scene.onBeforeCameraRenderObservable.add((camera) => {
     const show = shaded.get(camera) === 'wire';
-    if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !wires.has(mesh)) edges(mesh);
+    if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !mesh.metadata?.curves && !wires.has(mesh)) edges(mesh);
     for (const [mesh, lines] of wires) {
       if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); continue; }
       edges(mesh).isVisible = show && mesh.isVisible;
@@ -279,7 +344,8 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
   Object.assign(transparent, { clearColor: new Color4(0, 0, 0, 0), renderParticles: false, renderSprites: false });
   transparent.renderListPredicate = (mesh) => {
     if (!shadedMesh(mesh)) return false;
-    if (mesh.getMaterialForRenderPass(transparent.renderPassId) !== accum) transparent.setMaterialForRendering(mesh, accum);
+    const material = mesh.metadata?.curves ? curvesMaterial(mesh, 'accum') : accum;
+    if (mesh.getMaterialForRenderPass(transparent.renderPassId) !== material) transparent.setMaterialForRendering(mesh, material);
     return true;
   };
   const fitted = transparent.onBeforeBindObservable.add(() => pass.fit([transparent]));
@@ -295,12 +361,14 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
     scene.resetCachedMaterial();
   });
   return {
+    // What `camera` renders: 'solid', 'xray', 'wire', or undefined for the scene's materials.
+    shading: (camera) => shaded.get(camera),
     // Solid ('solid'), Solid with X-ray ('xray'), Wireframe ('wire') or the scene's materials (null) for what `camera`
     // renders. Not per frame.
     setShading(camera, type) {
       if ((shaded.get(camera) ?? null) === type) return;
       if (type) shaded.set(camera, type); else shaded.delete(camera);
-      for (const mesh of scene.meshes) if (shadedMesh(mesh)) mesh.setMaterialForRenderPass(camera.renderPassId, type ? materials[type] : undefined);
+      for (const mesh of scene.meshes) if (shadedMesh(mesh)) mesh.setMaterialForRenderPass(camera.renderPassId, type ? materialOf(mesh, type) : undefined);
       const targets = camera.customRenderTargets, index = targets.indexOf(transparent);
       if (type === 'xray' && index < 0) targets.push(transparent);
       else if (type !== 'xray' && index >= 0) targets.splice(index, 1);
@@ -312,7 +380,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
       transparent.onBeforeBindObservable.remove(fitted);
       for (const lines of wires.values()) lines.dispose();
       for (const camera of [...shaded.keys()]) this.setShading(camera, null);
-      for (const resource of [hidden, solid, accum, wire, transparent, resolve, pass]) resource.dispose();
+      for (const resource of [hidden, solid, accum, wire, transparent, resolve, pass, ...curvesMaterials.values()]) resource.dispose();
     },
   };
 }

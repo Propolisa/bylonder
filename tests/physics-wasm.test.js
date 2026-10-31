@@ -55,12 +55,17 @@ const [carrier] = drawn('__instances');
 assert.equal(carrier.thinInstanceCount, sync.blender.instances().find((g) => g.shape === 'OBJECT').data.length / 16);
 assert.equal(carrier.geometry, puff.geometry, "the instanced object's geometry is shared, not copied");
 assert.equal(drawn('__instances').length, 1, 'instanced particles draw no shapes');
-// Hair renders as paths: line segments, two indices each.
+// Hair is curves: each strand's points and Blender's indirection between drawn segments and strands, drawn by
+// Blender's curve shape functions, one vertex per segment vertex of the scene's Hair shape (a strip: two).
 Object.assign(settings, { type: 'HAIR', render_type: 'PATH', count: 50, hair_length: 0.5 });
+blendData().scenes[0].render.hair_type = 'STRIP';
 sync.view();
 sync.frameChanged(1);
-const [hair] = drawn('__instances');
-assert(hair.thinInstanceCount >= 50 && hair.material.fillMode === Material.LineListDrawMode, `hair as segments: ${hair.thinInstanceCount}`);
+const [strands] = sync.blender.curves(), [hair] = drawn('__curves');
+assert.equal(strands.posRad.length / 4, 50 * (2 ** settings.display_step + 1), 'every strand point');
+assert.equal(strands.indirection.length, 50 * (2 ** settings.display_step + 2), "a strip's segment per point, and a restart per strand");
+assert.equal(hair.getTotalVertices(), strands.indirection.length * 2);
+assert.equal(hair.material, emitter.material);
 
 // A wind field pushes emitted particles along its direction.
 Object.assign(settings, { type: 'EMITTER', render_type: 'HALO', count: 200, frame_end: 1, lifetime: 100, normal_factor: 0 });

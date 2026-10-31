@@ -19,7 +19,7 @@ from transpile import TAG, fetch  # noqa: E402
 OUT = os.path.join(REPO, 'src', 'nodes', 'blender', 'gpu-library.js')
 # Where Blender's shader includes are found, in order.
 DIRS = ['source/blender/gpu/shaders/common', 'source/blender/gpu/shaders/material', 'source/blender/compositor/shaders/library',
-        'source/blender/gpu/shaders']
+        'source/blender/gpu/shaders', 'source/blender/draw/intern/shaders']
 ROOTS = [
     'gpu_shader_compat_glsl.glsl',
     'gpu_shader_common_math.glsl',
@@ -30,9 +30,18 @@ ROOTS = [
     'gpu_shader_common_color_ramp.glsl',
     'gpu_shader_material_bump.glsl',
     'gpu_shader_material_set.glsl',
+    # Curves drawing (particle hair, Curves objects): the curve shape library and the hash its strands vary by.
+    'draw_curves_lib.glsl',
+    'gpu_shader_common_hash.glsl',
+    'gpu_shader_utildefines_lib.glsl',
 ]
+# Functions of shaders written in Blender's shader language (.bsl.hh), which the libraries above leave out, as a
+# library of their own: (its name, the file, the functions' signatures).
+BSL = [('workbench_hair.glsl', 'source/blender/draw/engines/workbench/shaders/workbench_prepass.bsl.hh',
+        ['float3 hair_random_normal(', 'void hair_random_material('])]
 # Draw engines' shaders the view runs whole (src/draw/overlay-particle.js), by file.
-DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_particle_shape_vert.glsl', 'overlay_particle_shape_frag.glsl']
+DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_particle_shape_vert.glsl', 'overlay_particle_shape_frag.glsl',
+        'overlay_particle_hair_vert.glsl']
 DRAW_DIR = 'source/blender/draw/engines/overlay/shaders'
 # name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items).
 TABLES = {
@@ -62,7 +71,8 @@ def find(name):
 
 
 def libraries():
-    sources, todo = {}, list(ROOTS)
+    sources, todo = {name: '\n\n'.join(signature.split('(')[0] + '(' + function(fetch(path), signature) for signature in signatures)
+                     for name, path, signatures in BSL}, list(ROOTS)
     while todo:
         name = todo.pop(0)
         if name in sources:
@@ -70,6 +80,12 @@ def libraries():
         sources[name] = find(name)
         todo += [n for n in re.findall(r'^#include "([^"]+\.glsl)"', sources[name], re.M) if n not in sources]
     return sources
+
+
+def function(source, signature):
+    """A function's text from its signature's parameters to its closing brace."""
+    start = source.index(signature) + len(signature)
+    return source[start:start + len(body(source, signature))  + source[start:].index('{')]
 
 
 def body(source, signature):

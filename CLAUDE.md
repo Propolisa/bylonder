@@ -30,7 +30,9 @@ with `tools/blender-reference/surface.py`.
 
 Blender's C/C++ runs in the WASM module (`tools/blender-port/blender_build.py`, `manifest.json`), built from Blender's
 sources; Bylonder's hand-written C is limited to seams in `tools/blender-port/wasm/`, and a seam that replaces Blender's
-own definition carries a `// port-override: <reason>` comment. Call the module, never port C to JS.
+own definition carries a `// port-override: <reason>` comment. Call the module, never port C to JS. Drawing Blender's data
+reuses Blender's shaders (`docs/blender-boundary.md` Drawing); logic copied from Blender where its code cannot run carries
+`blender-port: <Blender file and function>`.
 
 The generated JS ports (`*.gen.js` and their shims, from `tools/blender-port/port.py`) are kept for tests and possible
 later use, but must not ship: `node scripts/port-usage.mjs` lists which port modules the app still imports

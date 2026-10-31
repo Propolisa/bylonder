@@ -141,6 +141,37 @@ what).
 - Its IDs go in the same Main: data of its own (an Action, a node tree) with `BKE_*_add(main_bmain(), name)` in an export of its API file, object data through `object_data(ob)`. `ID_code_to_RNA_type` in `operator-properties.cc` names the module's ID types for context pointers; add the new type there.
 - Its values cross through the same RNA names: a binding in `rna-bylonder.js` marked `sync` (with its struct in `dna-data.json`, `modifier_dna.py`), which the scene sync writes and reads back; what is not a value goes in the sync's relations. Its operators run through `sync.run` (or `flush` and `view`); it keeps no copy of its own.
 
+### Drawing
+
+Blender's draw engines and GPU module are past the seam; Babylon draws what Blender evaluated. Where Blender draws
+something meshes do not cover (instances, particles, hair and Curves), the boundary has four layers, kept apart so each
+can be maintained on its own:
+
+- **Extraction in the module**, the analogue of Blender's draw caches: exports that read Blender's evaluated data and
+  pack it into one buffer the view copies once, never per element. `main-api.cc` `main_instances` (`object_duplilist`
+  results as world matrices in Babylon's axes, and each particle's point as `particle_batch_cache_ensure_pos` gives
+  it), `main_curves` (strand points with radii as `CurvesEvalCache::ensure_positions` gives them, and the topology
+  indirection), next to the mesh extraction (`extraction.hh`).
+- **Blender's shaders, reused.** `tools/blender-nodes/gpu.py` fetches Blender's GLSL at the tag into
+  `src/nodes/blender/gpu-library.js`: libraries (the nodes', `draw_curves_lib.glsl`), functions of shaders in Blender's
+  shader language (`workbench_prepass.bsl.hh`'s hair functions) and whole draw shaders (`draw`: the particle overlay's).
+  `src/nodes/blender/glsl.js` converts them to GLSL ES as Blender's shader preprocessor would: compatibility macros,
+  namespaces as prefixes, resource accessors as globals, references as `inout`, buffer reads as data texture reads,
+  and named fixes where GLSL ES is stricter (`FIXES`). A prelude in each user stands in for what a shader's create
+  info declares.
+- **Babylon's own mechanisms** for drawing them: thin instances (instanced objects, particle shapes, their data in the
+  instance buffer), `ShaderMaterial` (the overlay, Workbench), `MaterialPluginBase` (`CurvesPlugin` puts the curves
+  vertex stage into whatever material an object has, for Material Preview and Rendered), `RawTexture` data textures
+  (Blender's buffers) and materials per render pass (Workbench per view).
+- **The drawing modules** (`src/draw`): `overlay-particle.js` (dots, circles, crosses, axes and hair as the overlay
+  draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`
+  (Solid, with curves as Workbench's hair), called by the view (`main-view.js` `drawInstances`, `drawCurves`).
+
+What could not be reused is copied, and marked `blender-port: <Blender file and function>` where it is
+(`grep -rn blender-port src tools/blender-port/wasm`): a few lines each, such as the weight ramp, a hair radius, the
+curves topology (a compute shader in Blender; WebGL has none) and the calls `vert_curves` makes. When the tag moves,
+those are what to compare with Blender's.
+
 ### Known limits
 
 Material textures (Image Texture nodes), an Area light's disk or ellipse shape (drawn as its rectangle), snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; Actions stay Main's, which the animation's own record mirrors. In a saved file, Bylonder's own modifiers are missing, a Node Material is a Principled BSDF

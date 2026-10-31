@@ -137,9 +137,9 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
 
 
 // IDRecalcFlag: what the depsgraph evaluates again of an ID tagged with it (0 for all of it).
-// The shapes an instance group draws (main-api.cc ParticleShape): an object's, what Blender's overlay expands a particle
-// into, or a hair path's segment.
-export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS', 'SEGMENT'];
+// The shapes an instance group draws (main-api.cc ParticleShape): an object's, or what Blender's overlay expands a
+// particle into.
+export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS'];
 export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13, ID_RECALC_ALL = 0xffffffff;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
@@ -231,9 +231,23 @@ export class BlenderMain {
   evaluate() { x.main_evaluate(this.#context); }
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
+  // The curves Main's objects draw (main-api.cc main_curves): particle hair, { ob, system, render (the render engines
+  // draw it), viewport (Workbench and, in Wireframe, the overlay do), overlay (the overlay always does: its viewport
+  // display is Path), material (slot, 1-based), faces (the Hair shape's faces per segment),
+  // objectToWorld, posRad (each evaluated point's position, object space, and radius), indirection }, the arrays views
+  // into the module's memory valid until the next call.
+  curves() {
+    const count = x.main_curves(this.#context), at = x.main_curves_draws() >>> 0, posRad = x.main_curves_pos_rad() >>> 0, indirection = x.main_curves_indirection() >>> 0;
+    const ints = new Int32Array(x.memory.buffer, at, count * 27), floats = new Float32Array(x.memory.buffer, at, count * 27);
+    return Array.from({ length: count }, (_, i) => {
+      const [ob, system, render, viewport, overlay, material, faces, firstPoint, points, firstIndirection, indirections] = ints.subarray(i * 27, i * 27 + 11);
+      return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material, faces, objectToWorld: floats.subarray(i * 27 + 11, i * 27 + 27),
+        posRad: new Float32Array(x.memory.buffer, posRad + firstPoint * 16, points * 4), indirection: new Int32Array(x.memory.buffer, indirection + firstIndirection * 4, indirections) };
+    });
+  }
   // What Main's objects draw as instances (main-api.cc main_instances): groups of one shape, { instancer, ob (the
   // object instanced, or 0), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), drawSize, color, data (16
-  // floats per instance: an object's or a hair segment's world matrix in Babylon's layout, else a particle's point data
+  // floats per instance: an object's world matrix in Babylon's layout, else a particle's point data
   // in Blender's axes: position, value, rotation) }, the data a view into the module's memory valid until the next call.
   instances() {
     const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, data = x.main_instance_matrices() >>> 0;

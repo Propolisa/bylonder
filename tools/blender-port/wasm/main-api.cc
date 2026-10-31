@@ -44,6 +44,7 @@
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
 #include "BKE_particle.h"
+#include "BKE_curves.hh"
 #include "DNA_particle_types.h"
 #include "BKE_scene.hh"
 #include "BKE_workspace.hh"
@@ -623,11 +624,11 @@ static void babylon_matrix(const float m[4][4], float *out)
  * collection, their vertices or faces), their particle systems rendered as objects or collections and their evaluated
  * geometry's instances (object_duplilist), grouped by instancer and object, each a world matrix in Babylon's axes; their
  * particle systems' overlay (overlay_particle.hh), a shape at each particle drawn by Blender's own shaders from its
- * point data as the draw cache gives it (particle_batch_cache_ensure_pos: position, value, rotation, in Blender's axes);
- * and hair paths, a line segment's matrix per segment. A group is { instancer, ob (the object instanced, or null),
+ * point data as the draw cache gives it (particle_batch_cache_ensure_pos: position, value, rotation, in Blender's
+ * axes). Hair is curves (main_curves). A group is { instancer, ob (the object instanced, or null),
  * shape (ParticleShape), overlay (the viewport's only), first, count, draw size, color (rgb: its material's) }; its
  * instances' 16 floats are contiguous in one buffer. Valid until the next call; returns the number of groups. */
-enum ParticleShape { SHAPE_OBJECT, SHAPE_DOT, SHAPE_CIRCLE, SHAPE_CROSS, SHAPE_AXIS, SHAPE_SEGMENT };
+enum ParticleShape { SHAPE_OBJECT, SHAPE_DOT, SHAPE_CIRCLE, SHAPE_CROSS, SHAPE_AXIS };
 struct InstanceGroup {
   Object *instancer, *ob;
   int shape, overlay, first, count;
@@ -671,41 +672,18 @@ static void object_instances(Depsgraph *depsgraph, Object &ob, Object *evaluated
     instance_group_add(group);
   }
 }
-/* A hair path's segments, each the matrix that takes the segment shape (0 to 1 along Z) onto it. */
-static void path_segments(ParticleCacheKey **cache, int total)
-{
-  for (int p = 0; p < total; p++) {
-    const ParticleCacheKey *keys = cache[p];
-    for (int k = 0; keys && k < keys->segments; k++) {
-      float m[4][4] = {};
-      sub_v3_v3v3(m[2], keys[k + 1].co, keys[k].co);
-      copy_v3_v3(m[3], keys[k].co);
-      m[3][3] = 1.0f;
-      babylon_matrix(m, instance_matrix_add());
-    }
-  }
-}
 static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
 {
   for (ParticleSystem &psys : evaluated->particlesystem) {
     const ParticleSettings *part = psys.part;
     const int draw_as = part->draw_as == PART_DRAW_REND ? part->ren_as : part->draw_as;
-    if (!psys_check_enabled(evaluated, &psys, false) || ELEM(draw_as, PART_DRAW_NOT, PART_DRAW_OB, PART_DRAW_GR)) {
+    if (!psys_check_enabled(evaluated, &psys, false) || ELEM(draw_as, PART_DRAW_NOT, PART_DRAW_OB, PART_DRAW_GR, PART_DRAW_PATH)) {
       continue;
     }
     const Material *ma = BKE_object_material_get_eval(evaluated, part->omat);
     InstanceGroup group = {&ob, nullptr, SHAPE_DOT, true, int(instance_matrices.size() / 16), 0, 0.0f, {0.6f, 0.6f, 0.6f}};
     if (ma) {
       copy_v3_v3(group.color, &ma->r);
-    }
-    if (draw_as == PART_DRAW_PATH) {
-      /* Hair renders as strands where it renders as paths; drawn as paths only in the viewport, the overlay draws it. */
-      group.shape = SHAPE_SEGMENT;
-      group.overlay = part->ren_as != PART_DRAW_PATH;
-      path_segments(psys.pathcache, psys.totcached);
-      path_segments(psys.childcache, psys.totchildcache);
-      instance_group_add(group);
-      continue;
     }
     group.shape = draw_as == PART_DRAW_CIRC ? SHAPE_CIRCLE : draw_as == PART_DRAW_CROSS ? SHAPE_CROSS : draw_as == PART_DRAW_AXIS ? SHAPE_AXIS : SHAPE_DOT;
     group.draw_size = part->draw_size;
@@ -722,6 +700,7 @@ static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
       if (!psys_get_particle_state(&sim, p, &state, false)) {
         continue;
       }
+      /* blender-port: draw_cache_impl_particles.cc particle_batch_cache_ensure_pos. */
       const ParticleData &pa = psys.particles[p];
       const float value = part->draw_col == PART_DRAW_COL_VEL ? len_v3(state.vel) / part->color_vec_max :
                           part->draw_col == PART_DRAW_COL_ACC ?
@@ -751,6 +730,113 @@ EXPORT(main_instances) int main_instances(BlenderMain *ctx)
   return instance_groups.size();
 }
 EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { return instance_groups.data(); }
+
+/* The curves Main's objects draw as Blender's draw engines draw curves (draw_curves_lib.glsl): their particle systems'
+ * hair, by its render type (the render engines') or viewport display (the overlay's and Workbench's), each its
+ * strands' points as the draw cache gives them, position (object space) and radius from the settings' root, tip and
+ * shape (draw_cache_impl_particles.cc CurvesEvalCache::ensure_positions), subdivided as the scene's Hair settings ask
+ * by Blender's Catmull-Rom evaluation, with the indirection Blender's topology pass makes for its strips or cylinders
+ * (draw_curves_topology_comp.glsl, here on the CPU). A curves record is { ob, system, render (drawn by the render
+ * engines), viewport (by Workbench, and the overlay in Wireframe), overlay (by the overlay always), material slot, face_per_segment, first point, points, first indirection,
+ * indirections, object_to_world (Blender's axes) }. Valid until the next call; returns their count. */
+struct CurvesDraw {
+  Object *ob;
+  int system, render, viewport, overlay, material, face_per_segment, first_point, points, first_indirection, indirections;
+  float object_to_world[16];
+};
+static Vector<CurvesDraw> curves_draws;
+static Vector<float> curves_pos_rad;
+static Vector<int> curves_indirection;
+/* blender-port: draw_cache_impl_particles.cc hair_shape_radius (copied from cycles). */
+static float hair_shape_radius(float shape, float root, float tip, float time)
+{
+  float radius = 1.0f - time;
+  radius = shape < 0.0f ? powf(radius, 1.0f + shape) : powf(radius, 1.0f / (1.0f - shape));
+  return (radius * (root - tip)) + tip;
+}
+/* blender-port: draw_curves_topology_comp.glsl, for curves that are not cyclic (WebGL has no compute shaders). */
+static void curves_topology(int curve, int points, bool is_ribbon)
+{
+  constexpr int end_of_curve = INT_MAX;
+  const int count = points + (is_ribbon ? 1 : -1);
+  for (int i = 0; i < count; i++) {
+    curves_indirection.append(is_ribbon && i == count - 1 ? end_of_curve : i == 0 ? curve : -i);
+  }
+}
+static void particle_hair(const Scene &scene, Object &ob, Object *evaluated)
+{
+  int index = 0;
+  for (ParticleSystem &psys : evaluated->particlesystem) {
+    const ParticleSettings &part = *psys.part;
+    const int system = index++;
+    const int viewport_as = part.draw_as == PART_DRAW_REND ? part.ren_as : part.draw_as;
+    if (!psys_check_enabled(evaluated, &psys, false) || (viewport_as != PART_DRAW_PATH && part.ren_as != PART_DRAW_PATH)) {
+      continue;
+    }
+    /* blender-port: draw_hair.cc hair_sub_pass_setup. */
+    const int face_per_segment = scene.r.hair_type == SCE_HAIR_SHAPE_STRAND ? 0 : scene.r.hair_type == SCE_HAIR_SHAPE_CYLINDER ? 3 : 1;
+    CurvesDraw draw = {&ob, system, part.ren_as == PART_DRAW_PATH, viewport_as == PART_DRAW_PATH, part.draw_as == PART_DRAW_PATH, part.omat, face_per_segment,
+                       int(curves_pos_rad.size() / 4), 0, int(curves_indirection.size()), 0};
+    copy_m4_m4(reinterpret_cast<float(*)[4]>(draw.object_to_world), evaluated->object_to_world().ptr());
+    const float root = part.rad_root * part.rad_scale * 0.5f, tip = part.rad_tip * part.rad_scale * 0.5f;
+    const bool close_tip = part.shape_flag & PART_SHAPE_CLOSE_TIP;
+    const int resolution = 1 << scene.r.hair_subdiv;
+    const bool display_parent = !psys.childcache || (part.draw & PART_DRAW_PARENT);
+    int curve = 0;
+    const auto strand = [&](const ParticleCacheKey *keys) {
+      const int size = keys->segments + 1;
+      Array<float3> positions(size);
+      Array<float> radii(size);
+      for (int j = 0; j < size; j++) {
+        mul_v3_m4v3(positions[j], psys.imat, keys[j].co);
+        radii[j] = close_tip && j == size - 1 ? 0.0f : hair_shape_radius(part.shape, root, tip, keys[j].time);
+      }
+      const int evaluated = size > 1 ? bke::curves::catmull_rom::calculate_evaluated_num(size, false, resolution) : 1;
+      Array<float3> evaluated_positions(evaluated);
+      Array<float> evaluated_radii(evaluated);
+      if (resolution > 1 && size > 1) {
+        bke::curves::catmull_rom::interpolate_to_evaluated(GSpan(positions.as_span()), false, resolution, GMutableSpan(evaluated_positions.as_mutable_span()));
+        bke::curves::catmull_rom::interpolate_to_evaluated(GSpan(radii.as_span()), false, resolution, GMutableSpan(evaluated_radii.as_mutable_span()));
+      }
+      else {
+        evaluated_positions = positions;
+        evaluated_radii = radii;
+      }
+      for (int j = 0; j < evaluated; j++) {
+        curves_pos_rad.extend({evaluated_positions[j].x, evaluated_positions[j].y, evaluated_positions[j].z, evaluated_radii[j]});
+      }
+      curves_topology(curve++, evaluated, face_per_segment < 2);
+    };
+    for (int p = 0; display_parent && psys.pathcache && p < psys.totpart; p++) {
+      strand(psys.pathcache[p]);
+    }
+    for (int c = 0; psys.childcache && c < psys.totchild * part.disp / 100; c++) {
+      strand(psys.childcache[c]);
+    }
+    draw.points = curves_pos_rad.size() / 4 - draw.first_point;
+    draw.indirections = curves_indirection.size() - draw.first_indirection;
+    if (draw.points) {
+      curves_draws.append(draw);
+    }
+  }
+}
+EXPORT(main_curves) int main_curves(BlenderMain *ctx)
+{
+  curves_draws.clear();
+  curves_pos_rad.clear();
+  curves_indirection.clear();
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  for (Object &ob : ctx->bmain->objects) {
+    Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
+    if (evaluated && evaluated != &ob) {
+      particle_hair(*ctx->scene, ob, evaluated);
+    }
+  }
+  return curves_draws.size();
+}
+EXPORT(main_curves_draws) const CurvesDraw *main_curves_draws() { return curves_draws.data(); }
+EXPORT(main_curves_pos_rad) const float *main_curves_pos_rad() { return curves_pos_rad.data(); }
+EXPORT(main_curves_indirection) const int *main_curves_indirection() { return curves_indirection.data(); }
 EXPORT(main_instance_matrices) const float *main_instance_matrices() { return instance_matrices.data(); }
 
 
