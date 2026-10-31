@@ -195,7 +195,7 @@ those are what to compare with Blender's.
 
 ### Known limits
 
-Material textures (Image Texture nodes), an Area light's disk or ellipse shape (drawn as its rectangle), snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; Actions stay Main's, which the animation's own record mirrors. In a saved file, Bylonder's own modifiers are missing, a Node Material is a Principled BSDF
+Blender's AgX view transform (its default; views show Standard, so bright surfaces clip where Blender's roll off: it needs each view's scene-linear image, a post process Babylon's image processing has no place for), material textures (Image Texture nodes), an Area light's disk or ellipse shape (drawn as its rectangle), snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; Actions stay Main's, which the animation's own record mirrors. In a saved file, Bylonder's own modifiers are missing, a Node Material is a Principled BSDF
 with Blender's defaults (its graph is kept in `bylonder_node_material`), and a Standard material gives only its color,
 alpha and emission color.
 

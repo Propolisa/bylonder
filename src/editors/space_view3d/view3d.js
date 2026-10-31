@@ -215,7 +215,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     authored = null;
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
     ctx.overlays.setEnabled(state.overlays && !rendered, state);
-    world.beforeViewRender({ rendered, preview: view.preview, compositor: view.wantsCompositor });
+    world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };
   view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; };
   view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); toolOverlay.tick(); };
