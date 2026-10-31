@@ -5,7 +5,7 @@ import { dnaGet } from '../src/makesrna/dna-struct.js';
 import { hasArmatures, armatureData, armatureDrawn, setArmatureData } from '../src/blenkernel/armature/armature.js';
 import { moduleModifiers } from '../src/modifiers/blender.js';
 import { NullEngine, Scene, FreeCamera, Vector3 } from '@babylonjs/core';
-import { createArmatureModes } from '../src/editors/armature/armature-modes.js';
+import { createMainModes } from '../src/editors/object/main-modes.js';
 import { registerObjectOperators } from '../src/editors/object/object-operators.js';
 import { createContext } from '../src/blenkernel/context.js';
 import { invokeOperator } from '../src/windowmanager/wm-operators.js';
@@ -178,7 +178,7 @@ assert.deepEqual(sync.check(), []);
 // a click on a bone selecting it with Blender's pick.
 const host = { transaction: (fn) => fn(), notify: () => {}, keying: (fn) => fn(), commit: () => {}, wm: () => null, pointer: () => null, view: () => null };
 registerObjectOperators({ actions: [] }, { sync, ...host });
-const modes = createArmatureModes({ sync, selection, views: { pickPoint: (view, x, y) => ({ x, y }) }, options: host });
+const modes = createMainModes({ sync, selection, views: { pickPoint: (view, x, y) => ({ x, y }) }, options: host });
 const contextMode = () => createContext(rna).mode;
 assert.equal(modes.mode(), 'POSE');
 assert.equal(contextMode(), 'POSE');

@@ -90,7 +90,10 @@ export const hasStruct = (struct) => struct in structs;
 // Blender's, by name.)
 const byIdentifier = (list) => new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
   : Array.prototype.find.call(target, (item) => item.identifier === key) ?? target[rnaName(key)]) });
-const enumItems = (items = []) => byIdentifier(collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value }))));
+const enumItem = ([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value });
+const enumItems = (items = []) => byIdentifier(collection(items.filter(Boolean).map(enumItem)));
+// enum_items_static_ui: the items with their separators, as items with no name.
+const enumItemsUI = (items = []) => byIdentifier(collection(items.map((item, value) => enumItem(item ?? ['', '', '', 'NONE'], value))));
 const propertyNames = (struct) => { const names = new Set(); for (let s = structs[struct]; s; s = structs[s.base]) Object.keys(s.props).forEach((n) => names.add(n)); return names; };
 
 // bpy_struct.bl_rna: a struct's RNA as Blender's scripts read it, its properties (its own and its bases') as
@@ -104,7 +107,7 @@ export function blRna(struct) {
       identifier, name: p.name, description: p.description ?? '', type: TYPES[p.type], default: pointer ? null : p.default, is_readonly: !!p.readonly,
       subtype: p.subtype ?? 'NONE', unit: p.unit ?? 'NONE', icon: p.icon ?? 'NONE', array_length: p.array ?? 0, is_enum_flag: !!p.flag,
       hard_min: p.min, hard_max: p.max, soft_min: p.soft_min, soft_max: p.soft_max, step: p.step, precision: p.precision,
-      translation_context: '*', enum_items: items, enum_items_static: items,
+      translation_context: '*', enum_items: items, enum_items_static: items, enum_items_static_ui: enumItemsUI(p.items),
       get fixed_type() { return pointer ? blRna(p.struct) : null; },
     });
   });

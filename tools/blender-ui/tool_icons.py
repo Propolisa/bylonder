@@ -13,7 +13,7 @@ from collections import defaultdict
 import transpile
 
 OUT = os.path.join(transpile.REPO, 'public', 'icons', 'blender', 'tools')
-MODES = ['OBJECT', 'EDIT_MESH']
+MODES = ['OBJECT', 'EDIT_MESH', 'PARTICLE']
 # The icons the tools of MODES name, and Blender's fallback for a missing one.
 ICONS = '''
 const { registered: { VIEW3D_PT_tools_active: P } } = await import('./src/python/bpy_interface.js');

@@ -13,6 +13,8 @@ import { Material } from '@babylonjs/core/Materials/material.js';
 import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
+import { Buffer } from '@babylonjs/core/Buffers/buffer.js';
+import { SubMesh } from '@babylonjs/core/Meshes/subMesh.js';
 import { draw } from '../nodes/blender/gpu-library.js';
 import { glslShader } from '../nodes/blender/glsl.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
@@ -38,12 +40,13 @@ const MACROS = {
   OVERLAY_ParticleShape: [['x'], 'x'], select_id_set: [['x'], ''], select_id_output: [['x'], ''], drw_custom_id: [[], '0'],
   view_clipping_distances: [['x'], ''], pack_line_data: [['a', 'b', 'c'], 'vec4(0.0)'], texture: [['t', 'x'], 'texture(t, vec2(x, 0.5))'],
 };
-const INTERFACE = `flat varying vec4 final_color;
+const iface = (interpolation) => `${interpolation} varying vec4 final_color;
 varying vec2 edge_start;
 varying vec2 edge_pos;
 uniform vec4 ucolor;
 uniform int shape_type;
 uniform sampler2D weight_tx;`;
+const INTERFACE = iface('flat');
 const VIEW = `uniform mat4 viewProjection;
 uniform mat4 viewinv;
 uniform mat4 winmat;
@@ -62,11 +65,12 @@ attribute vec3 position;
 ${INTERFACE}
 ${VIEW}
 int bl_vertex_id;`;
-const FRAGMENT_PRELUDE = `precision highp float;
+const fragmentPrelude = (face = INTERFACE) => `precision highp float;
 precision highp int;
-${INTERFACE}
+${face}
 layout(location = 0) out vec4 frag_color;
 vec4 line_output;`;
+const FRAGMENT_PRELUDE = fragmentPrelude();
 const SOURCES = {
   dot: {
     vertex: `${VERTEX_PRELUDE}
@@ -183,4 +187,81 @@ export function hairOverlay(scene, mesh, { workbench, explicit, selected, active
   mesh.material = material;
   const shown = scene.onBeforeCameraRenderObservable.add((camera) => { mesh.isVisible = explicit() || workbench?.shading(camera) === 'wire'; });
   mesh.onDisposeObservable.add(() => { scene.onBeforeCameraRenderObservable.remove(shown); material.dispose(); });
+}
+
+// Particle Edit Mode's overlay (overlay_particle.hh edit_object_sync): the edited system's strands as line strips
+// (overlay_edit_particle_strand_vert.glsl), its inner keys and tips as points (overlay_edit_particle_point_vert.glsl),
+// each vertex a point of the module's edit data (BlenderMain.particleEdit), in world space, colored by its selection
+// or, with the Weight brush, its weight. The parts are meshes whose one interleaved buffer is the shader's two inputs.
+const EDIT_THEME = ['wire', 'wire_edit', 'vertex', 'vertex_select'];
+// blender-port: overlay_private.hh vertex_size_get.
+const VERTEX_SIZE = Math.max(1, (theme.vertex_size * Math.SQRT2) / 2);
+const EDIT_MACROS = { ...MACROS, pos: 'position', use_grease_pencil: 'false', do_stroke_endpoints: 'false', vflag: '0u', GP_EDIT_STROKE_START: '1u', GP_EDIT_STROKE_END: '2u', gpu_discard_fragment: [[], 'discard'] };
+const editVertex = (face, file) => `precision highp float;
+precision highp int;
+attribute vec3 position;
+attribute float selection;
+${face}
+uniform mat4 viewProjection;
+uniform bool use_weight;
+uniform vec4 theme_colors[${EDIT_THEME.length}];
+${DRAW_VIEW_GLSL}
+struct ThemeColors { vec4 wire, wire_edit, vert, vert_select, gpencil_wire_edit, gpencil_vertex_select, gpencil_vertex; };
+struct ThemeSizes { float vert, vertex_gpencil; };
+struct Theme { ThemeColors colors; ThemeSizes sizes; };
+Theme theme;
+vec3 drw_point_object_to_world(vec3 p) { return p; }
+${glslShader(draw[file], 'vertex', EDIT_MACROS)}
+void main() {
+  ThemeColors colors = ThemeColors(theme_colors[0], theme_colors[1], theme_colors[2], theme_colors[3], theme_colors[1], theme_colors[3], theme_colors[2]);
+  theme = Theme(colors, ThemeSizes(${VERTEX_SIZE.toFixed(4)}, ${VERTEX_SIZE.toFixed(4)}));
+  bl_main();
+}`;
+const EDIT = {
+  strands: { vertex: editVertex(iface('smooth'), 'overlay_edit_particle_strand_vert.glsl'), fragment: `${fragmentPrelude(iface('smooth'))}\n${glslShader(draw['overlay_varying_color.glsl'], 'fragment', EDIT_MACROS)}\nvoid main() { bl_main(); }`, fillMode: Material.LineStripDrawMode },
+  points: { vertex: editVertex(INTERFACE, 'overlay_edit_particle_point_vert.glsl'), fragment: `${FRAGMENT_PRELUDE}\n${glslShader(draw['overlay_point_varying_color_frag.glsl'], 'fragment', EDIT_MACROS)}\nvoid main() { bl_main(); }`, fillMode: Material.PointListDrawMode },
+};
+function editPart(scene, name, kind) {
+  const mesh = Object.assign(new Mesh('__particle edit ' + name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: { points: null } });
+  const material = new ShaderMaterial(mesh.name, scene, { vertexSource: EDIT[kind].vertex, fragmentSource: EDIT[kind].fragment }, {
+    attributes: ['position', 'selection'], uniforms: ['viewProjection', 'use_weight', 'theme_colors'], samplers: ['weight_tx'],
+  });
+  material.fillMode = EDIT[kind].fillMode;
+  material.backFaceCulling = false;
+  material.setArray4('theme_colors', EDIT_THEME.flatMap((key) => theme[key].slice(0, 4)));
+  material.setTexture('weight_tx', (sceneData(scene).ramp ??= weightRamp(scene)));
+  mesh.material = material;
+  mesh._getRenderingFillMode = (fillMode) => fillMode;
+  mesh.onDisposeObservable.add(() => material.dispose());
+  return mesh;
+}
+// Copies a part's points into its buffer (grown by doubling, else reused) and draws them, or hides it without any.
+function fillPart(mesh, points, useWeight, indices = null) {
+  const count = points.length / 4;
+  mesh.setEnabled(count > 0);
+  if (!count) return;
+  let buffer = mesh.metadata.points;
+  if (!(buffer?.length >= points.length)) {
+    buffer = mesh.metadata.points = new Float32Array(2 ** Math.ceil(Math.log2(points.length)));
+    const data = new Buffer(mesh.getEngine(), buffer, true, 4);
+    mesh.setVerticesBuffer(data.createVertexBuffer('selection', 3, 1));
+    mesh.setVerticesBuffer(data.createVertexBuffer('position', 0, 3), buffer.length / 4);
+  }
+  buffer.set(points);
+  mesh.getVertexBuffer('position').getWrapperBuffer().update(buffer);
+  if (indices) mesh.setIndices(indices.slice(), buffer.length / 4);
+  mesh.isUnIndexed = !indices;
+  mesh.subMeshes = [];
+  new SubMesh(0, 0, count, 0, indices?.length ?? count, mesh);
+  mesh.material.setInt('use_weight', useWeight ? 1 : 0);
+}
+// The overlay's parts for an edit (null hides them), made on first use and reused.
+export function particleEditOverlay(scene, edit, parts = null) {
+  if (!edit && !parts) return null;
+  parts ??= { strands: editPart(scene, 'strands', 'strands'), inner: editPart(scene, 'inner', 'points'), tips: editPart(scene, 'tips', 'points') };
+  const none = new Float32Array(0);
+  fillPart(parts.strands, edit?.strands ?? none, edit?.useWeight, edit?.indices);
+  fillPart(parts.inner, edit?.showInner ? edit.inner : none, edit?.useWeight);
+  fillPart(parts.tips, edit?.showTips ? edit.tips : none, edit?.useWeight);
+  return parts;
 }

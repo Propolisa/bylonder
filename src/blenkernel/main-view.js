@@ -15,7 +15,7 @@ import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
-import { particleShapeMesh, particleShapeMaterial, hairOverlay } from '../draw/overlay-particle.js';
+import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
@@ -130,7 +130,7 @@ export function createMainView(state) {
   function drawEditMode(entry) {
     const edit = blender.editMesh(entry.ob), { node } = entry;
     if (!edit && !entry.overlay) return false;
-    node.metadata = { ...node.metadata, wbMode: edit ? 'EDIT' : 'OBJECT' };
+    node.metadata = { ...node.metadata, wbMode: blender.mode(entry.ob) };
     if (!edit) {
       entry.overlay.dispose();
       entry.overlay = null;
@@ -295,6 +295,8 @@ export function createMainView(state) {
         if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
         const name = blender.name(ob);
         if (name !== entry.name) [node.name, entry.name, entry.babylonName] = [name, name, name];
+        // Its mode is Main's (an armature's, with its record, pullArmature's).
+        if (entry.type !== 'ARMATURE') node.metadata = { ...node.metadata, wbMode: blender.mode(ob) };
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
@@ -361,7 +363,7 @@ export function createMainView(state) {
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
       if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
-      if (updates.size) { drawInstances(); drawCurves(); }
+      if (updates.size) { drawInstances(); drawCurves(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
     } finally {
       state.applying = was;
     }
@@ -372,6 +374,8 @@ export function createMainView(state) {
   // (overlay-particle.js). The instance data is copied once, from the module's memory
   // into a thin instance buffer that grows by doubling and is otherwise reused. A render leaves out the overlay.
   const instanced = new Map();
+  // Particle Edit Mode's overlay (overlay-particle.js particleEditOverlay), made on first use.
+  let particleEdit = null;
   function drawInstances() {
     const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
     for (const { instancer, ob, shape, overlay, drawSize, color, data } of blender.instances()) {

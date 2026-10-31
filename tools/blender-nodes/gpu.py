@@ -41,7 +41,8 @@ BSL = [('workbench_hair.glsl', 'source/blender/draw/engines/workbench/shaders/wo
         ['float3 hair_random_normal(', 'void hair_random_material('])]
 # Draw engines' shaders the view runs whole (src/draw/overlay-particle.js), by file.
 DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_particle_shape_vert.glsl', 'overlay_particle_shape_frag.glsl',
-        'overlay_particle_hair_vert.glsl']
+        'overlay_particle_hair_vert.glsl', 'overlay_edit_particle_strand_vert.glsl', 'overlay_varying_color.glsl',
+        'overlay_edit_particle_point_vert.glsl', 'overlay_point_varying_color_frag.glsl']
 DRAW_DIR = 'source/blender/draw/engines/overlay/shaders'
 # name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items).
 TABLES = {

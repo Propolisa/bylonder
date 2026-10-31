@@ -38,7 +38,7 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
 
 - `object.mode_set`, `object.editmode_toggle` and `object.posemode_toggle` are Object Mode's operators, Blender's in
   Main (`object-operators.js`), so Tab and Ctrl Tab enter and leave an armature's modes as in Blender; the mesh and
-  curve editors leave armatures to them. `src/editors/armature/armature-modes.js` registers every `armature.*` and
+  curve editors leave armatures to them. `src/editors/object/main-modes.js` registers every `armature.*` and
   `pose.*` operator the module has by idname, run through `runBlenderOperator`, modally from an event, so the Armature
   and Pose keymaps and menus run Blender's code (E is `armature.extrude_move`, Blender's macro).
   G, R and S are Object Mode's transforms, Blender's in Main, which move edit bones or pose bones by the object's mode.

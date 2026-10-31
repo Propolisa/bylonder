@@ -53,7 +53,7 @@ import { createEditModes } from "./editors/object/edit-modes.js";
 import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
 import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators, openModulePopup, runBlenderOperator } from "./editors/object/object-operators.js";
-import { createArmatureModes } from "./editors/armature/armature-modes.js";
+import { createMainModes } from "./editors/object/main-modes.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
@@ -71,7 +71,8 @@ import { createContext } from "./blenkernel/context.js";
 import { exportScene } from "./io_scene_babylon/export.js";
 import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTextFiles } from "./blenkernel/text-files.js";
-import { setContextPointer, pointerStruct, structFind } from "./python/bpy_rna.js";
+import * as bpyRna from "./python/bpy_rna.js";
+const { setContextPointer, pointerStruct, structFind } = bpyRna;
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
@@ -251,7 +252,9 @@ window.__bylonder ={ world, renderHost, runOperator, settled,
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
   coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); },
-  get mainScene() { return mainScene(); } };
+  get mainScene() { return mainScene(); },
+  // This window's bpy over the module, for tests (an import of its own would be a second instance).
+  bpyRna };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });
@@ -391,7 +394,7 @@ const blenderRNA = createRNA({ world, selection: editor.selection, update: () =>
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
-const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? world.armatureModes?.contextMode ?? "OBJECT");
+const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? world.mainModes?.contextMode ?? "OBJECT");
 // Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
 const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
 const applyTool = () => {
@@ -429,8 +432,8 @@ registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainS
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost,
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
-// An armature's Edit and Pose Modes, Blender's in Main.
-world.armatureModes = createArmatureModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
+// The modes Blender runs on Main: an armature's Edit and Pose Modes, Particle Edit Mode.
+world.mainModes = createMainModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
 registerAddOperators(creator);
 world.dock = viewportDock;
 world.outliner = createOutliner({ world, editor, commands, sync: world.mainSync, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
@@ -641,7 +644,7 @@ registerOperators({
   "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },
   // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
-  "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : world.armatureModes.mode() ? world.armatureModes : editor).selectOperator(event, props) },
+  "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : world.mainModes.mode() ? world.mainModes : editor).selectOperator(event, props) },
   "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
   "view3d.select_lasso": {
     poll: (props, event) => inView(event),
@@ -714,12 +717,12 @@ const bylonderKeys = createKeymap([
   { keys: "ESC", poll: () => !world.wm.modal, run: () => renderHost.escape() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve, Font, Armature or Pose), then the
+// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve, Font, Armature, Pose or Particle), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
 const view3dKeys = keymapHandler(
-  (event) => [...world.toolsystem.keymaps(contextMode(), gizmoState(event)), "Object Mode", "Mesh", "Curve", "Font", ...world.armatureModes.keymaps, "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (event) => [...world.toolsystem.keymaps(contextMode(), gizmoState(event)), "Object Mode", "Mesh", "Curve", "Font", ...world.mainModes.keymaps, "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
   (name) => (({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE",
-    Font: world.editMode.kind === "FONT" })[name] ?? true) && world.armatureModes.keymapActive(name),
+    Font: world.editMode.kind === "FONT" })[name] ?? true) && world.mainModes.keymapActive(name),
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {

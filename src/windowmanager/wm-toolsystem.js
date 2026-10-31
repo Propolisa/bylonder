@@ -8,9 +8,10 @@ import { contextStruct, inPythonContext, pointerOf } from '../python/bpy_rna.js'
 import { registerOperators, kw } from './wm-operators.js';
 
 const { exports: x, cString } = blenderModule;
-// WM_toolsystem_default_tool for the 3D View's modes Bylonder has (OBJECT, EDIT_MESH, EDIT_CURVE, EDIT_TEXT), and
-// whether Blender's startup file also has it as the fallback tool (Select Text is in no select group, so has none).
-const defaultTool = (mode) => (mode === 'EDIT_TEXT' ? ['builtin.select_text', [false]] : ['builtin.select_box', [false, true]]);
+// WM_toolsystem_default_tool for the 3D View's modes Bylonder has, and whether Blender's startup file also has it as the
+// fallback tool (Select Text and the brushes are in no select group, so have none).
+const DEFAULT_TOOLS = { EDIT_TEXT: 'builtin.select_text', PARTICLE: 'builtin_brush.Comb' };
+const defaultTool = (mode) => (DEFAULT_TOOLS[mode] ? [DEFAULT_TOOLS[mode], [false]] : ['builtin.select_box', [false, true]]);
 // The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo
 // (wm_toolsystem.cc keeps a fallback keymap only for those, by the flag editor-context.cc gives them).
 const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_gizmo_context', 'VIEW3D_GGT_xform_cage', 'VIEW3D_GGT_xform_shear', 'VIEW3D_GGT_xform_extrude', 'MESH_GGT_spin', 'MESH_GGT_spin_redo',

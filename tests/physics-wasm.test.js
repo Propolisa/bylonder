@@ -66,6 +66,20 @@ assert.equal(strands.posRad.length / 4, 50 * (2 ** settings.display_step + 1), '
 assert.equal(strands.indirection.length, 50 * (2 ** settings.display_step + 2), "a strip's segment per point, and a restart per strand");
 assert.equal(hair.getTotalVertices(), strands.indirection.length * 2);
 assert.equal(hair.material, emitter.material);
+// Particle Edit Mode draws the edit's strands, as line strips restarting per strand, and, in Point select mode, its
+// keys: inner ones and tips.
+assert.equal(sync.blender.run('object.mode_set', { mode: 'PARTICLE_EDIT' }).status, OPERATOR_FINISHED);
+blendData().scenes[0].tool_settings.particle_edit.select_mode = 'POINT';
+sync.view();
+const edit = sync.blender.particleEdit(), keys = settings.hair_step + 1;
+assert.equal(edit.indices.filter((i) => i === 0xffffffff).length, 50, 'a restart after each strand');
+assert.equal(edit.tips.length / 4, 50);
+assert.equal(edit.inner.length / 4, 50 * (keys - 1));
+assert.deepEqual(drawn('__particle edit').map((m) => m.isEnabled()), [true, true, true]);
+assert.equal(sync.blender.run('object.mode_set', { mode: 'OBJECT' }).status, OPERATOR_FINISHED);
+sync.view();
+assert.equal(sync.blender.particleEdit(), null);
+assert.deepEqual(drawn('__particle edit').map((m) => m.isEnabled()), [false, false, false]);
 
 // A wind field pushes emitted particles along its direction.
 Object.assign(settings, { type: 'EMITTER', render_type: 'HALO', count: 200, frame_end: 1, lifetime: 100, normal_factor: 0 });

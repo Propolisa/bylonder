@@ -575,7 +575,7 @@ provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => inPython
     else outputs.forEach((index, i) => setParameter(parms >>> 0, index, parameters[index], result[i]));
     return 0;
   } catch (error) {
-    console.error(`Python: ${cls?.__name__}.${functionName(func >>> 0)}:`, pythonError(error));
+    console.error(`Python: ${cls?.__name__ ?? structIdentifier(ptr[0])}.${functionName(func >>> 0)}:`, pythonError(error));
     return -1;
   } finally {
     classCalls--;

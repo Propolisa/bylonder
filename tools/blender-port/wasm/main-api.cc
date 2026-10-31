@@ -10,6 +10,8 @@
 #include "BKE_duplilist.hh"
 #include "BKE_curve_to_mesh.hh"
 #include "BKE_curves.hh"
+#include "BKE_pointcache.h"
+#include "ED_particle.hh"
 #include "BKE_geometry_set.hh"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
@@ -448,6 +450,7 @@ EXPORT(object_parent_set) void object_parent_set(Object *ob, Object *parent)
 }
 
 /* An object's mode (eObjectMode). */
+EXPORT(object_mode) int object_mode(Object *ob) { return ob->mode; }
 /* An object's mode, tagged only when it changes: the evaluated copy taken again from the original would lose what was
  * evaluated over time (a simulation's state). */
 EXPORT(object_mode_set) void object_mode_set(Object *ob, int mode)
@@ -841,6 +844,78 @@ EXPORT(main_curves) int main_curves(BlenderMain *ctx)
 EXPORT(main_curves_draws) const CurvesDraw *main_curves_draws() { return curves_draws.data(); }
 EXPORT(main_curves_pos_rad) const float *main_curves_pos_rad() { return curves_pos_rad.data(); }
 EXPORT(main_curves_indirection) const int *main_curves_indirection() { return curves_indirection.data(); }
+
+/* Particle Edit Mode as Blender's overlay draws it (overlay_particle.hh edit_object_sync): the edited system's
+ * strands from the edit's path cache, each point with its selection (draw_cache_impl_particles.cc
+ * particle_batch_cache_fill_segments_edit, or the key weight when the brush paints weights), as line strips that
+ * restart at each strand's end, and its keys, the inner ones and the tips, with theirs (_ensure_edit_inner_pos,
+ * _ensure_edit_tip_pos), all in world space. The record is { strands, strand indices, inner points, tip points, flags:
+ * 1 use weight, 2 show inner points, 4 show tips }; points are { position, selection }. Valid until the next call;
+ * returns whether an object is in Particle Edit Mode with an edit. */
+struct ParticleEdit {
+  int strands, indices, inner, tips, flags;
+};
+static ParticleEdit particle_edit;
+static Vector<float> particle_edit_points;
+static Vector<uint32_t> particle_edit_indices;
+static void edit_point(const float co[3], float selection) { particle_edit_points.extend({co[0], co[1], co[2], selection}); }
+EXPORT(main_particle_edit) bool main_particle_edit(BlenderMain *ctx)
+{
+  particle_edit = {};
+  particle_edit_points.clear();
+  particle_edit_indices.clear();
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  Object *ob = BKE_view_layer_active_object_get(ctx->view_layer);
+  PTCacheEdit *edit = ob && (ob->mode & OB_MODE_PARTICLE_EDIT) ? PE_create_current(depsgraph, ctx->scene, ob) : nullptr;
+  if (!edit || !edit->psys) {
+    return false;
+  }
+  if (!edit->pathcache) {
+    psys_cache_edit_paths(depsgraph, ctx->scene, ob, edit, DEG_get_ctime(depsgraph), false);
+  }
+  const ParticleEditSettings &pset = ctx->scene->toolsettings->particle;
+  const bool use_weight = pset.brushtype == PE_BRUSH_WEIGHT;
+  const ParticleData *particles = use_weight ? edit->psys->particles : nullptr;
+  for (int i = 0; edit->pathcache && i < edit->totcached; i++) {
+    const ParticleCacheKey *path = edit->pathcache[i];
+    if (path->segments <= 0) {
+      continue;
+    }
+    for (int j = 0; j <= path->segments; j++) {
+      const float t = float(j) / path->segments;
+      float selection = path[j].col[0];
+      if (particles) {
+        /* blender-port: draw_cache_impl_particles.cc particle_key_weight. */
+        const ParticleData &pa = particles[i];
+        const float interp = t == 1.0f ? 0.0f : t * (pa.totkey - 1), weight = t == 1.0f ? pa.hair[pa.totkey - 1].weight :
+            pa.hair[int(interp)].weight + (interp - floorf(interp)) * (pa.hair[int(interp) + 1].weight - pa.hair[int(interp)].weight);
+        selection = weight < 1.0f ? weight : 1.0f;
+      }
+      particle_edit_indices.append(particle_edit_points.size() / 4);
+      edit_point(path[j].co, selection);
+    }
+    particle_edit_indices.append(UINT32_MAX);
+  }
+  particle_edit.strands = particle_edit_points.size() / 4;
+  particle_edit.indices = particle_edit_indices.size();
+  for (const bool tips : {false, true}) {
+    for (int p = 0; p < edit->totpoint; p++) {
+      const PTCacheEditPoint &point = edit->points[p];
+      if (point.flag & PEP_HIDE) {
+        continue;
+      }
+      for (int k = tips ? point.totkey - 1 : 0; k < (tips ? point.totkey : point.totkey - 1); k++) {
+        edit_point(point.keys[k].world_co, point.keys[k].flag & PEK_SELECT ? 1.0f : 0.0f);
+      }
+    }
+    (tips ? particle_edit.tips : particle_edit.inner) = particle_edit_points.size() / 4 - particle_edit.strands - (tips ? particle_edit.inner : 0);
+  }
+  particle_edit.flags = (use_weight ? 1 : 0) | (pset.selectmode == SCE_SELECT_POINT ? 2 : 0) | (ELEM(pset.selectmode, SCE_SELECT_POINT, SCE_SELECT_END) ? 4 : 0);
+  return true;
+}
+EXPORT(main_particle_edit_record) const ParticleEdit *main_particle_edit_record() { return &particle_edit; }
+EXPORT(main_particle_edit_points) const float *main_particle_edit_points() { return particle_edit_points.data(); }
+EXPORT(main_particle_edit_indices) const uint32_t *main_particle_edit_indices() { return particle_edit_indices.data(); }
 EXPORT(main_instance_matrices) const float *main_instance_matrices() { return instance_matrices.data(); }
 
 

@@ -139,6 +139,10 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
 // IDRecalcFlag: what the depsgraph evaluates again of an ID tagged with it (0 for all of it).
 // The shapes an instance group draws (main-api.cc ParticleShape): an object's, or what Blender's overlay expands a
 // particle into.
+// Object.mode's items (rna_object.cc rna_enum_object_mode_items) as eObjectMode flags.
+export const OBJECT_MODES = { OBJECT: 0, EDIT: 1, SCULPT: 2, VERTEX_PAINT: 4, WEIGHT_PAINT: 8, TEXTURE_PAINT: 16, PARTICLE_EDIT: 32, POSE: 64,
+  EDIT_GPENCIL: 128, PAINT_GREASE_PENCIL: 256, SCULPT_GREASE_PENCIL: 512, WEIGHT_GREASE_PENCIL: 1024, VERTEX_GREASE_PENCIL: 2048, SCULPT_CURVES: 4096 };
+const OBJECT_MODES_BY_FLAG = new Map(Object.entries(OBJECT_MODES).map(([name, flag]) => [flag, name]));
 export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS'];
 export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13, ID_RECALC_ALL = 0xffffffff;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
@@ -184,7 +188,9 @@ export class BlenderMain {
     x.main_base_set(this.#context, ob, visible, hidden, hide_select, select, active);
   }
   setParent(ob, parent) { x.object_parent_set(ob, parent ?? 0); }
-  setMode(ob, mode) { x.object_mode_set(ob, mode === 'EDIT' ? 1 : 0); }
+  // An object's mode (Object.mode, OBJECT_MODES), Main's.
+  mode(ob) { return OBJECT_MODES_BY_FLAG.get(x.object_mode(ob)) ?? 'OBJECT'; }
+  setMode(ob, mode) { x.object_mode_set(ob, OBJECT_MODES[mode] ?? 0); }
 
   // The object's DNA (ObjectFields in main-api.cc), read and written in place.
   #fields(ob) {
@@ -244,6 +250,17 @@ export class BlenderMain {
       return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material, faces, objectToWorld: floats.subarray(i * 27 + 11, i * 27 + 27),
         posRad: new Float32Array(x.memory.buffer, posRad + firstPoint * 16, points * 4), indirection: new Int32Array(x.memory.buffer, indirection + firstIndirection * 4, indirections) };
     });
+  }
+  // The active object's Particle Edit Mode as Blender's overlay draws it (main-api.cc main_particle_edit), or null:
+  // { useWeight, showInner, showTips, strands, inner, tips (points of 4 floats: world position in Blender's axes,
+  // selection), indices (the strands' line strips, 0xFFFFFFFF between) }, views into the module's memory valid until
+  // the next call.
+  particleEdit() {
+    if (!x.main_particle_edit(this.#context)) return null;
+    const [strands, indices, inner, tips, flags] = new Int32Array(x.memory.buffer, x.main_particle_edit_record() >>> 0, 5), points = x.main_particle_edit_points() >>> 0;
+    const part = (first, count) => new Float32Array(x.memory.buffer, points + first * 16, count * 4);
+    return { useWeight: !!(flags & 1), showInner: !!(flags & 2), showTips: !!(flags & 4), strands: part(0, strands), inner: part(strands, inner), tips: part(strands + inner, tips),
+      indices: new Uint32Array(x.memory.buffer, x.main_particle_edit_indices() >>> 0, indices) };
   }
   // What Main's objects draw as instances (main-api.cc main_instances): groups of one shape, { instancer, ob (the
   // object instanced, or 0), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), drawSize, color, data (16

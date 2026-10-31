@@ -151,10 +151,12 @@ can be maintained on its own:
   pack it into one buffer the view copies once, never per element. `main-api.cc` `main_instances` (`object_duplilist`
   results as world matrices in Babylon's axes, and each particle's point as `particle_batch_cache_ensure_pos` gives
   it), `main_curves` (strand points with radii as `CurvesEvalCache::ensure_positions` gives them, and the topology
-  indirection), next to the mesh extraction (`extraction.hh`).
+  indirection), `main_particle_edit` (Particle Edit Mode's strands, inner keys and tips with their selection, as
+  `particle_batch_cache_ensure_edit_pos_and_seg` and its key counterparts give them), next to the mesh extraction
+  (`extraction.hh`).
 - **Blender's shaders, reused.** `tools/blender-nodes/gpu.py` fetches Blender's GLSL at the tag into
   `src/nodes/blender/gpu-library.js`: libraries (the nodes', `draw_curves_lib.glsl`), functions of shaders in Blender's
-  shader language (`workbench_prepass.bsl.hh`'s hair functions) and whole draw shaders (`draw`: the particle overlay's).
+  shader language (`workbench_prepass.bsl.hh`'s hair functions) and whole draw shaders (`draw`: the particle overlay's and Particle Edit Mode's).
   `src/nodes/blender/glsl.js` converts them to GLSL ES as Blender's shader preprocessor would: compatibility macros,
   namespaces as prefixes, resource accessors as globals, references as `inout`, buffer reads as data texture reads,
   and named fixes where GLSL ES is stricter (`FIXES`). A prelude in each user stands in for what a shader's create
@@ -163,9 +165,10 @@ can be maintained on its own:
   instance buffer), `ShaderMaterial` (the overlay, Workbench), `MaterialPluginBase` (`CurvesPlugin` puts the curves
   vertex stage into whatever material an object has, for Material Preview and Rendered), `RawTexture` data textures
   (Blender's buffers) and materials per render pass (Workbench per view).
-- **The drawing modules** (`src/draw`): `overlay-particle.js` (dots, circles, crosses, axes and hair as the overlay
-  draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`
-  (Solid, with curves as Workbench's hair), called by the view (`main-view.js` `drawInstances`, `drawCurves`).
+- **The drawing modules** (`src/draw`): `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
+  Mode as the overlay draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`
+  (Solid, with curves as Workbench's hair), called by the view (`main-view.js` `drawInstances`, `drawCurves`,
+  `particleEditOverlay`).
 
 What could not be reused is copied, and marked `blender-port: <Blender file and function>` where it is
 (`grep -rn blender-port src tools/blender-port/wasm`): a few lines each, such as the weight ramp, a hair radius, the
