@@ -28,6 +28,9 @@ const run = (test) => new Promise((resolve) => {
   child.on('close', (code) => resolve({ test, code, output, seconds: (performance.now() - start) / 1000 }));
 });
 
+const NOISE = /\b(error|warning|warn)\b/i;
+const noise = (output) => [...Map.groupBy(output.split('\n').filter((l) => NOISE.test(l)).map((l) => l.trim().slice(0, 200)), (l) => l)].map(([line, all]) => [line, all.length]);
+
 const failed = [];
 let next = 0;
 const worker = async () => {
@@ -36,6 +39,8 @@ const worker = async () => {
     times[result.test] = result.seconds;
     const last = result.output.trim().split('\n').filter((l) => !l.startsWith('BJS')).at(-1) ?? '';
     console.log(`${result.code ? 'FAIL' : 'ok  '} ${result.test} (${result.seconds.toFixed(0)} s) ${result.code ? '' : last}`);
+    // What a passing test reported as an error or warning (Blender's logs, the page's console) shows too.
+    if (!result.code) for (const [line, count] of noise(result.output)) console.log(`     ${count > 1 ? count + ' x ' : ''}${line}`);
     if (result.code) failed.push(result);
   }
 };

@@ -50,7 +50,8 @@ export function deriveBabylonLight(light) {
   light.diffuse.copyFromFloats(...record.color);
   light.intensity = intensityOf(record.type, record.energy * 2 ** (record.exposure ?? 0), lightingMode(light.getScene()));
   if (record.type !== 'SUN') light.falloffType = Light.FALLOFF_GLTF;
-  if ('radius' in light) light.radius = record.shadow_soft_size;
+  // An area light's extent is its size; a radius would zero its photometric scale, which Babylon has no case for.
+  if (record.type !== 'AREA') light.radius = record.shadow_soft_size;
   light.shadowEnabled = record.use_shadow;
   light.range = record.use_custom_distance ? record.cutoff_distance : Number.MAX_VALUE;
   if (record.type === 'SPOT') {

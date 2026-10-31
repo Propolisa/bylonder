@@ -4,7 +4,7 @@
 // modifiers, keys and collections Blender reads in it (tools/blender-reference/blend-check.py).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,6 +28,7 @@ import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { objectMesh } from '../src/editors/object/object-mesh.js';
 import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
+import { referenceBlender } from './blender-reference.js';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const close = (a, b, tolerance = 1e-4) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < tolerance);
@@ -102,14 +103,7 @@ opened.sync.flush();
 assert.deepEqual(opened.sync.check(), [], 'Babylon and Main agree after opening');
 
 // A file the reference Blender made.
-const reference = (() => {
-  if (process.env.BLENDER_REFERENCE) return join(process.env.BLENDER_REFERENCE, 'blender-5.2.3-linux-x64/blender');
-  for (let dir = root; dir !== dirname(dir); dir = dirname(dir)) {
-    const path = join(dir, '.blender-reference/blender-5.2.3-linux-x64/blender');
-    if (existsSync(path)) return path;
-  }
-  return null;
-})();
+const reference = referenceBlender();
 if (!reference) console.log('.blend: a file Bylonder wrote opens again (no reference Blender to make a user\'s file)');
 else {
   const dir = mkdtempSync(join(tmpdir(), 'blend-read-'));

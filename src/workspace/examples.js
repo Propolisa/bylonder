@@ -28,4 +28,5 @@ export const examples = [
   { id: "shader", title: "Shader Waves" },
   { id: "text", title: "3D Text" },
   { id: "hair", title: "Combed Hair" },
+  { id: "hair-dynamics", title: "Hair Dynamics" },
 ].map((example) => ({ ...example, files: () => files(example.id) }));

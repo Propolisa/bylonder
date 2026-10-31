@@ -816,6 +816,8 @@ static void curves_append(int curve, Span<float3> positions, Span<float> radii, 
 }
 static CurvesDraw curves_draw_begin(Object &ob, Object *evaluated, int system, bool render, bool viewport, bool overlay, Material *material, int face_per_segment)
 {
+  /* Main's Material, which the view knows, not the evaluated object's copy of it. */
+  material = material ? reinterpret_cast<Material *>(DEG_get_original_id(&material->id)) : nullptr;
   CurvesDraw draw = {&ob, system, render, viewport, overlay, material, face_per_segment,
                      int(curves_pos_rad.size() / 4), 0, int(curves_indirection.size()), 0, int(curves_length.size()), 0};
   copy_m4_m4(reinterpret_cast<float(*)[4]>(draw.object_to_world), evaluated->object_to_world().ptr());

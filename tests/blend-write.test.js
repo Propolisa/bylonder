@@ -3,7 +3,7 @@
 // objects, transforms, materials, modifiers and animation. Without the reference Blender, only the file is checked.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +23,7 @@ import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { mesh_serialize } from '../src/blenkernel/mesh/mesh.js';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { asObject } from '../src/runtime/object-transform.js';
+import { referenceBlender } from './blender-reference.js';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -91,14 +92,7 @@ assert.match(header, /^BLENDER/, `a .blend header (${header})`);
 assert(bytes.length > 10000, `${bytes.length} bytes`);
 
 // The reference Blender, by the repository's checkout (worktrees are inside it).
-const reference = (() => {
-  if (process.env.BLENDER_REFERENCE) return join(process.env.BLENDER_REFERENCE, 'blender-5.2.3-linux-x64/blender');
-  for (let dir = root; dir !== dirname(dir); dir = dirname(dir)) {
-    const path = join(dir, '.blender-reference/blender-5.2.3-linux-x64/blender');
-    if (existsSync(path)) return path;
-  }
-  return null;
-})();
+const reference = referenceBlender();
 if (!reference) {
   console.log(`.blend: Blender's writer wrote ${bytes.length} bytes (no reference Blender to read them)`);
 } else {

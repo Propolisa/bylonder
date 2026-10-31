@@ -73,23 +73,32 @@ static void editor_id_remap(const bke::id::IDRemapper &mappings)
   }
 }
 
-/* The window manager as WM_init sets it up for its window (wm_window_ghostwindow_ensure, WM_keyconfig_init): the
- * key configurations with the keymaps Blender's C defines (their items come from keyconfig data, wm_keymap_item_new),
- * the window's GHOST window and its handlers. */
+/* The window manager as WM_init sets it up for its window: its key configurations, empty until Python's keyconfig
+ * (wm_keyconfig_init), and the window's GHOST window. */
 void wm_init(bContext *C)
 {
   wmWindowManager *wm = CTX_wm_manager(C);
-  wmWindow *win = CTX_wm_window(C);
   wm->runtime->defaultconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT, false);
   wm->runtime->addonconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT " addon", false);
   wm->runtime->userconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT " user", false);
+  BKE_library_callback_remap_editor_id_reference_set(editor_id_remap);
+  BKE_library_callback_free_notifier_reference_set(WM_main_remove_notifier_reference);
+  CTX_wm_window(C)->runtime->ghostwin = ghost_window_new(1, 1);
+}
+
+/* As WM_keyconfig_init does once Python is initialized (its operators registered, which drop boxes name): the keymaps
+ * and drop boxes Blender's C defines (wm_window_keymap, ED_spacetypes_keymap), then, as wm_window_ghostwindows_ensure
+ * adds them, the window's handlers. Python's keyconfig data then fills the keymaps (bl_keymap_utils.io). */
+EXPORT(wm_keyconfig_init) void wm_keyconfig_init(bContext *C)
+{
+  wmWindowManager *wm = CTX_wm_manager(C);
+  if (wm->runtime->defaultconf->flag & KEYCONF_INIT_DEFAULT) {
+    return;
+  }
   wm_window_keymap(wm->runtime->defaultconf);
   ED_spacetypes_keymap(wm->runtime->defaultconf);
   wm->runtime->defaultconf->flag |= KEYCONF_INIT_DEFAULT;
-
-  BKE_library_callback_remap_editor_id_reference_set(editor_id_remap);
-  BKE_library_callback_free_notifier_reference_set(WM_main_remove_notifier_reference);
-  win->runtime->ghostwin = ghost_window_new(1, 1);
+  wmWindow *win = CTX_wm_window(C);
   wmKeyMap *keymap = WM_keymap_ensure(wm->runtime->defaultconf, "Window", SPACE_EMPTY, RGN_TYPE_WINDOW);
   WM_event_add_keymap_handler(&win->runtime->handlers, keymap);
   keymap = WM_keymap_ensure(wm->runtime->defaultconf, "Screen", SPACE_EMPTY, RGN_TYPE_WINDOW);

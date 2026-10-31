@@ -16,10 +16,12 @@ export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE
 // The browser's input as wm_event takes it (BrowserEvent in wm-api.cc).
 const KINDS = { pointermove: 0, buttondown: 1, buttonup: 2, wheel: 3, trackpad: 4, keydown: 5, keyup: 6 };
 
-// Keyconfig data (keymap_data/blender_default.py's generate_keymaps) into Blender's default key configuration by
-// Blender's own Python (bl_keymap_utils.io.keyconfig_init_from_data: KeyMaps.new, KeyMapItems.new and the items'
-// properties, through bpy_rna.js).
+// Blender's key configuration as WM_keyconfig_init makes it once Python's operators are registered: its C keymaps and
+// drop boxes (wm_keyconfig_init), then keyconfig data (keymap_data/blender_default.py's generate_keymaps) by Blender's
+// own Python (bl_keymap_utils.io.keyconfig_init_from_data: KeyMaps.new, KeyMapItems.new and the items' properties,
+// through bpy_rna.js).
 export function loadKeyconfig(C, keyconfig) {
+  x.wm_keyconfig_init(C);
   const previous = contextPointer();
   setContextPointer(C);
   try {

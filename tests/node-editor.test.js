@@ -6,9 +6,14 @@ import { createNodeTree } from '../src/editors/space_node/node-tree.js';
 import { createNodeEditorController } from '../src/editors/space_node/node-editor-controller.js';
 import { addMenuEntries, addMenuItems } from '../src/editors/space_node/node-add-menu.js';
 const subitems = (item) => item.items();
-import { keymapHandler } from '../src/windowmanager/keyconfig.js';
+import { keymapHandler, defaultKeymaps } from '../src/windowmanager/keyconfig.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { inArea } from '../src/windowmanager/wm-operators.js';
 import { blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
+
+// Blender's keyconfig, as the app loads it when its window first takes an event.
+loadKeyconfig(blenderMain().C, defaultKeymaps());
 import { addElement, removeElement, setElementPosition } from '../src/blenkernel/colorband.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);

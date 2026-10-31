@@ -1,17 +1,13 @@
 #!/bin/bash
 # Screenshots of Blender's own UI, as a reference for comparing Bylonder's. Runs CPU-only (Xvfb, Mesa llvmpipe)
-# and needs Xvfb, Mesa and ImageMagick. Blender downloads once into .blender-reference/ (git-ignored).
+# and needs Xvfb, Mesa and ImageMagick. The reference Blender is install.sh's.
 # usage: tools/blender-reference/capture.sh Layout Compositing Video_Editing ...
 #   a name is a workspace of the default file, or an app template (Video_Editing, 2D_Animation, VFX, ...)
 set -euo pipefail
-VERSION=5.2.3
 root=$(cd "$(dirname "$0")/../.." && pwd)
 cache="$root/.blender-reference"
-blender="$cache/blender-$VERSION-linux-x64/blender"
+blender=$("$root/tools/blender-reference/install.sh")
 mkdir -p "$cache/shots"
-if [ ! -x "$blender" ]; then
-  curl -fL "https://download.blender.org/release/Blender${VERSION%.*}/blender-$VERSION-linux-x64.tar.xz" | tar -xJ -C "$cache"
-fi
 # Opening a file skips the splash screen.
 [ -f "$cache/start.blend" ] || "$blender" -b --factory-startup --python-expr "import bpy; bpy.ops.wm.save_as_mainfile(filepath='$cache/start.blend')" >/dev/null
 for name in "$@"; do

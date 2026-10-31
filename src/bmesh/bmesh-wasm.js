@@ -301,7 +301,8 @@ export class BlenderMain {
     const mesh = extractedMesh(x.object_mesh_extract(this.#context, ob) >>> 0);
     mesh.attributes = new Map(listed.map(([name, { domain, type }]) => {
       const [, Type, size] = ATTRIBUTE_TYPES[type], pointer = withString(name, (p) => x.object_mesh_attribute(ob, p)) >>> 0;
-      return [OWN_NAMES.get(name) ?? name, { domain, type, data: new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size) }];
+      // A view made when read: reading the next attribute's name allocates, which can grow the memory.
+      return [OWN_NAMES.get(name) ?? name, { domain, type, get data() { return new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size); } }];
     }));
     return ownedMesh(mesh);
   }
