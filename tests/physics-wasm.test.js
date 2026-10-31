@@ -1,6 +1,7 @@
 // Blender's particle systems, force fields and rigid bodies, run by Blender's code in the module and drawn by the view
-// (main-view.js): particles as points, as instances of an object (thin instances from one packed buffer) and as hair
-// paths; a frame jumped to shows what playing up to it shows (view-api.cc view_frame_set), and a cache bakes.
+// (main-view.js) as thin instances from one packed buffer: the overlay's shapes at the particles, an instanced object's
+// geometry, hair paths' segments; a frame jumped to shows what playing up to it shows (view-api.cc view_frame_set), and
+// a cache bakes.
 import assert from 'node:assert/strict';
 import { Material, NullEngine, Scene } from '@babylonjs/core';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
@@ -26,15 +27,23 @@ setContextPointer(sync.blender.C);
 const drawn = (prefix) => scene.meshes.filter((m) => m.name.startsWith(prefix));
 const play = (to) => { for (let f = 1; f <= to; f++) sync.frameChanged(f); };
 
-// A particle system as Blender adds it: Halo particles, drawn as points where they are.
+// A particle system as Blender adds it: Halo particles, which the overlay draws as dots of their display size.
 const ob = blendData().objects.get('Emitter');
 ob.modifiers.new('ParticleSystem', 'PARTICLE_SYSTEM');
 const settings = ob.particle_systems[0].settings;
 sync.view();
 play(30);
-const [points] = drawn('__particles');
-assert(points.subMeshes[0].verticesCount > 100, `particles born over 30 frames are points: ${points.subMeshes[0].verticesCount}`);
-assert.equal(points.material.fillMode, Material.PointListDrawMode, 'drawn as a point cloud');
+const [dots] = drawn('__instances');
+assert(dots.thinInstanceCount > 100, `particles born over 30 frames are dots: ${dots.thinInstanceCount}`);
+assert.equal(dots.geometry, scene.getMeshByName('__shape DOT').geometry);
+// Crosses are three lines at each particle; colored by speed, each instance has its color.
+Object.assign(settings, { display_method: 'CROSS', display_color: 'VELOCITY' });
+sync.view();
+sync.frameChanged(30);
+const [crosses] = drawn('__instances');
+assert.equal(crosses.material.fillMode, Material.LineListDrawMode);
+assert.equal(crosses.metadata.color.length >= crosses.thinInstanceCount * 4, true, 'an instance color each');
+Object.assign(settings, { display_method: 'RENDER', display_color: 'MATERIAL' });
 
 // Rendered as an object: thin instances of its mesh, sharing its geometry.
 settings.render_type = 'OBJECT';
@@ -42,21 +51,21 @@ settings.instance_object = blendData().objects.get('Puff');
 sync.view();
 play(30);
 const [carrier] = drawn('__instances');
-assert.equal(carrier.thinInstanceCount, sync.blender.instances()[0].matrices.length / 16);
+assert.equal(carrier.thinInstanceCount, sync.blender.instances().find((g) => g.shape === 'OBJECT').matrices.length / 16);
 assert.equal(carrier.geometry, puff.geometry, "the instanced object's geometry is shared, not copied");
-assert(!drawn('__particles').length, 'no points for instanced particles');
+assert.equal(drawn('__instances').length, 1, 'instanced particles draw no shapes');
 // Hair renders as paths: line segments, two indices each.
 Object.assign(settings, { type: 'HAIR', render_type: 'PATH', count: 50, hair_length: 0.5 });
 sync.view();
 sync.frameChanged(1);
-const [hair] = drawn('__particles');
-assert(hair.subMeshes[0].indexCount >= 50 * 2 && hair.material.fillMode === Material.LineListDrawMode, `hair as lines: ${hair.subMeshes[0].indexCount} indices`);
+const [hair] = drawn('__instances');
+assert(hair.thinInstanceCount >= 50 && hair.material.fillMode === Material.LineListDrawMode, `hair as segments: ${hair.thinInstanceCount}`);
 
 // A wind field pushes emitted particles along its direction.
 Object.assign(settings, { type: 'EMITTER', render_type: 'HALO', count: 200, frame_end: 1, lifetime: 100, normal_factor: 0 });
 settings.effector_weights.gravity = 0;
 sync.view();
-const meanX = () => { const [{ positions }] = sync.blender.particles(); let x = 0; for (let i = 0; i < positions.length; i += 3) x += positions[i]; return x / (positions.length / 3); };
+const meanX = () => { const { matrices } = sync.blender.instances().find((g) => g.shape === 'DOT'); let x = 0; for (let i = 12; i < matrices.length; i += 16) x += matrices[i]; return x / (matrices.length / 16); };
 play(20);
 const still = meanX();
 assert.equal(sync.run(() => sync.blender.run('object.effector_add', { type: 'WIND', rotation: [0, Math.PI / 2, 0] }), { meshes: [] }).status, OPERATOR_FINISHED);

@@ -44,6 +44,7 @@
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
 #include "BKE_particle.h"
+#include "BKE_deform.hh"
 #include "DNA_particle_types.h"
 #include "BKE_scene.hh"
 #include "BKE_workspace.hh"
@@ -619,153 +620,146 @@ static void babylon_matrix(const float m[4][4], float *out)
   }
 }
 
-/* The instances Main's objects make as Blender's draw engines draw them (object_duplilist): by their Instancing (a
- * collection, their vertices or faces), their particle systems rendered as objects or collections, and the instances
- * of their evaluated geometry. They are grouped by instancer and the object instanced; each group's world matrices,
- * in Babylon's axes, are contiguous in one buffer that is read in place: { instancer, ob, first, count } per group.
- * Valid until the next call; returns the number of groups. */
+/* What Main's objects draw as instances, each group one shape at a world matrix per instance, as Blender's draw engines
+ * draw them: the objects their Instancing makes (a collection, their vertices or faces), their particle systems
+ * rendered as objects or collections and their evaluated geometry's instances (object_duplilist), grouped by instancer
+ * and object; and their particle systems' own drawing (overlay_particle.hh), which expands a shape at each particle
+ * scaled by its display size (Dot, Circle, Cross, Axis: overlay_particle_shape_vert.glsl) or draws hair paths, here
+ * a line segment's shape per segment. A group is { instancer, ob (the object instanced, or null for a shape), shape
+ * (ParticleShape), overlay (the viewport's only), first, count, colored, color (rgb: its material's) }; its world
+ * matrices, in Babylon's axes, are contiguous in one buffer and its instances' colors, when Blender colors them by
+ * velocity or acceleration, in another. Valid until the next call; returns the number of groups. */
+enum ParticleShape { SHAPE_OBJECT, SHAPE_DOT, SHAPE_CIRCLE, SHAPE_CROSS, SHAPE_AXIS, SHAPE_SEGMENT };
 struct InstanceGroup {
   Object *instancer, *ob;
-  int first, count;
+  int shape, overlay, first, count, colored;
+  float color[3];
 };
 static Vector<InstanceGroup> instance_groups;
-static Vector<float> instance_matrices;
+static Vector<float> instance_matrices, instance_colors;
+static float *instance_matrix_add()
+{
+  instance_matrices.resize(instance_matrices.size() + 16);
+  return instance_matrices.end() - 16;
+}
+static void instance_group_add(InstanceGroup group)
+{
+  group.count = instance_matrices.size() / 16 - group.first;
+  if (group.count) {
+    instance_groups.append(group);
+  }
+}
+static void object_instances(Depsgraph *depsgraph, Object &ob, Object *evaluated)
+{
+  const bke::GeometrySet *geometry = evaluated->runtime->geometry_set_eval;
+  if (!(evaluated->transflag & OB_DUPLI) && !(geometry && geometry->has_instances())) {
+    return;
+  }
+  DupliList duplis;
+  object_duplilist(depsgraph, evaluated, nullptr, duplis);
+  Map<Object *, Vector<const DupliObject *>> grouped;
+  for (const DupliObject &dupli : duplis) {
+    /* Instances of geometry no object of Main's holds have nothing for the view to draw them with. */
+    Object *instanced = DEG_get_original(dupli.ob);
+    if (!dupli.no_draw && instanced && instanced != dupli.ob && instanced != &ob) {
+      grouped.lookup_or_add_default(instanced).append(&dupli);
+    }
+  }
+  for (const auto item : grouped.items()) {
+    InstanceGroup group = {&ob, item.key, SHAPE_OBJECT, false, int(instance_matrices.size() / 16)};
+    for (const DupliObject *dupli : item.value) {
+      babylon_matrix(dupli->mat, instance_matrix_add());
+    }
+    instance_group_add(group);
+  }
+}
+/* A hair path's segments, each the matrix that takes the segment shape (0 to 1 along Z) onto it. */
+static void path_segments(ParticleCacheKey **cache, int total)
+{
+  for (int p = 0; p < total; p++) {
+    const ParticleCacheKey *keys = cache[p];
+    for (int k = 0; keys && k < keys->segments; k++) {
+      float m[4][4] = {};
+      sub_v3_v3v3(m[2], keys[k + 1].co, keys[k].co);
+      copy_v3_v3(m[3], keys[k].co);
+      m[3][3] = 1.0f;
+      babylon_matrix(m, instance_matrix_add());
+    }
+  }
+}
+static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
+{
+  for (ParticleSystem &psys : evaluated->particlesystem) {
+    const ParticleSettings *part = psys.part;
+    const int draw_as = part->draw_as == PART_DRAW_REND ? part->ren_as : part->draw_as;
+    if (!psys_check_enabled(evaluated, &psys, false) || ELEM(draw_as, PART_DRAW_NOT, PART_DRAW_OB, PART_DRAW_GR)) {
+      continue;
+    }
+    const Material *ma = BKE_object_material_get_eval(evaluated, part->omat);
+    InstanceGroup group = {&ob, nullptr, SHAPE_DOT, true, int(instance_matrices.size() / 16), 0, false, {0.6f, 0.6f, 0.6f}};
+    if (ma) {
+      copy_v3_v3(group.color, &ma->r);
+    }
+    if (draw_as == PART_DRAW_PATH) {
+      /* Hair renders as strands where it renders as paths; drawn as paths only in the viewport, the overlay draws it. */
+      group.shape = SHAPE_SEGMENT;
+      group.overlay = part->ren_as != PART_DRAW_PATH;
+      path_segments(psys.pathcache, psys.totcached);
+      path_segments(psys.childcache, psys.totchildcache);
+      instance_group_add(group);
+      continue;
+    }
+    group.shape = draw_as == PART_DRAW_CIRC ? SHAPE_CIRCLE : draw_as == PART_DRAW_CROSS ? SHAPE_CROSS : draw_as == PART_DRAW_AXIS ? SHAPE_AXIS : SHAPE_DOT;
+    group.colored = ELEM(part->draw_col, PART_DRAW_COL_VEL, PART_DRAW_COL_ACC) && group.shape != SHAPE_AXIS;
+    ParticleSimulationData sim = {nullptr};
+    sim.depsgraph = depsgraph;
+    sim.scene = DEG_get_evaluated_scene(depsgraph);
+    sim.ob = evaluated;
+    sim.psys = &psys;
+    sim.psmd = psys_get_modifier(evaluated, &psys);
+    psys_sim_data_init(&sim);
+    const float size[3] = {part->draw_size, part->draw_size, part->draw_size};
+    for (int p = 0; p < psys.totpart; p++) {
+      ParticleKey state;
+      state.time = DEG_get_ctime(depsgraph);
+      if (!psys_get_particle_state(&sim, p, &state, false)) {
+        continue;
+      }
+      float m[4][4];
+      loc_quat_size_to_mat4(m, state.co, state.rot, size);
+      babylon_matrix(m, instance_matrix_add());
+      if (group.colored) {
+        /* As the overlay colors them: speed, or change of velocity, over the settings' maximum, on the weight ramp. */
+        const ParticleData &pa = psys.particles[p];
+        const float value = part->draw_col == PART_DRAW_COL_VEL ? len_v3(state.vel) / part->color_vec_max :
+                            len_v3v3(state.vel, pa.prev_state.vel) / ((state.time - pa.prev_state.time) * part->color_vec_max);
+        instance_colors.resize(instance_matrices.size() / 4);
+        BKE_defvert_weight_to_rgb(instance_colors.end() - 4, std::clamp(value, 0.0f, 1.0f));
+        instance_colors.last() = 1.0f;
+      }
+    }
+    psys_sim_data_free(&sim);
+    instance_group_add(group);
+  }
+}
 EXPORT(main_instances) int main_instances(BlenderMain *ctx)
 {
   instance_groups.clear();
   instance_matrices.clear();
+  instance_colors.clear();
   Depsgraph *depsgraph = depsgraph_of(ctx);
-  Map<std::pair<Object *, Object *>, Vector<const float *>> grouped;
-  Vector<std::pair<Object *, Object *>> order;
   for (Object &ob : ctx->bmain->objects) {
     Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
-    if (!evaluated || evaluated == &ob) {
-      continue;
+    if (evaluated && evaluated != &ob) {
+      object_instances(depsgraph, ob, evaluated);
+      particle_shapes(depsgraph, ob, evaluated);
     }
-    const bke::GeometrySet *geometry = evaluated->runtime->geometry_set_eval;
-    if (!(evaluated->transflag & OB_DUPLI) && !(geometry && geometry->has_instances())) {
-      continue;
-    }
-    DupliList duplis;
-    object_duplilist(depsgraph, evaluated, nullptr, duplis);
-    for (const DupliObject &dupli : duplis) {
-      /* Instances of geometry no object of Main's holds have nothing for the view to draw them with. */
-      Object *instanced = DEG_get_original(dupli.ob);
-      if (dupli.no_draw || !instanced || instanced == dupli.ob || instanced == &ob) {
-        continue;
-      }
-      const std::pair<Object *, Object *> key = {&ob, instanced};
-      Vector<const float *> &matrices = grouped.lookup_or_add_cb(key, [&]() { order.append(key); return Vector<const float *>(); });
-      matrices.append(&dupli.mat[0][0]);
-    }
-    for (const std::pair<Object *, Object *> &key : order) {
-      const Vector<const float *> &matrices = grouped.lookup(key);
-      instance_groups.append({key.first, key.second, int(instance_matrices.size() / 16), int(matrices.size())});
-      const int64_t at = instance_matrices.size();
-      instance_matrices.resize(at + matrices.size() * 16);
-      for (const int64_t i : matrices.index_range()) {
-        babylon_matrix(reinterpret_cast<const float(*)[4]>(matrices[i]), &instance_matrices[at + i * 16]);
-      }
-    }
-    grouped.clear();
-    order.clear();
   }
   return instance_groups.size();
 }
 EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { return instance_groups.data(); }
 EXPORT(main_instance_matrices) const float *main_instance_matrices() { return instance_matrices.data(); }
-
-/* The particles Main's particle systems show that are not instances, as Blender's overlay and EEVEE draw them: by the
- * system's viewport display (or, rendering, its render type) a point per living particle (Halo, Dot, Circle, Cross,
- * Axis), or its paths as line segments (Path: hair strands and children). Positions are in world space and Babylon's
- * axes, segments pairs of indices into the system's positions; each system is { ob, system index, kind (0 points, 1 lines), material slot
- * (1-based, 0 none), first position, positions, first index, indices }. Valid until the next call; returns their
- * count. */
-struct ParticleDraw {
-  Object *ob;
-  int system, kind, material, first, count, first_index, indices;
-};
-static Vector<ParticleDraw> particle_draws;
-static Vector<float> particle_positions;
-static Vector<uint32_t> particle_indices;
-static void particle_position(const float co[3])
-{
-  particle_positions.extend({co[0], co[2], co[1]});
-}
-static void particle_paths(ParticleCacheKey **cache, int total, int step, int base)
-{
-  for (int p = 0; p < total; p += step) {
-    const ParticleCacheKey *keys = cache[p];
-    if (!keys || keys->segments < 1) {
-      continue;
-    }
-    const uint32_t first = particle_positions.size() / 3 - base;
-    for (int k = 0; k <= keys->segments; k++) {
-      particle_position(keys[k].co);
-    }
-    for (int k = 0; k < keys->segments; k++) {
-      particle_indices.extend({first + k, first + k + 1});
-    }
-  }
-}
-EXPORT(main_particles) int main_particles(BlenderMain *ctx, bool rendering)
-{
-  particle_draws.clear();
-  particle_positions.clear();
-  particle_indices.clear();
-  Depsgraph *depsgraph = depsgraph_of(ctx);
-  for (Object &ob : ctx->bmain->objects) {
-    Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
-    if (!evaluated || evaluated == &ob) {
-      continue;
-    }
-    int index = -1;
-    for (ParticleSystem &system : evaluated->particlesystem) {
-      ParticleSystem *psys = &system;
-      index++;
-      const ParticleSettings *part = psys->part;
-      if (!part || !psys_check_enabled(evaluated, psys, rendering)) {
-        continue;
-      }
-      const int as = rendering || part->draw_as == PART_DRAW_REND ? part->ren_as : part->draw_as;
-      ParticleDraw draw = {&ob, index, 0, part->omat, int(particle_positions.size() / 3), 0, int(particle_indices.size()), 0};
-      if (as == PART_DRAW_PATH) {
-        /* Hair renders as strands; the viewport shows its share of them (display percentage). */
-        const int step = rendering ? 1 : std::max(1, int(std::lround(100.0f / std::max(1, int(part->disp)))));
-        draw.kind = 1;
-        particle_paths(psys->pathcache, psys->totcached, step, draw.first);
-        particle_paths(psys->childcache, psys->totchildcache, step, draw.first);
-      }
-      else if (!rendering && ELEM(as, PART_DRAW_DOT, PART_DRAW_CIRC, PART_DRAW_CROSS, PART_DRAW_AXIS, PART_DRAW_LINE)) {
-        ParticleSimulationData sim = {nullptr};
-        sim.depsgraph = depsgraph;
-        sim.scene = DEG_get_evaluated_scene(depsgraph);
-        sim.ob = evaluated;
-        sim.psys = psys;
-        sim.psmd = psys_get_modifier(evaluated, psys);
-        psys_sim_data_init(&sim);
-        for (int p = 0; p < psys->totpart; p++) {
-          ParticleKey state;
-          state.time = DEG_get_ctime(depsgraph);
-          if (psys_get_particle_state(&sim, p, &state, false)) {
-            particle_position(state.co);
-          }
-        }
-        psys_sim_data_free(&sim);
-      }
-      else {
-        continue;
-      }
-      draw.count = particle_positions.size() / 3 - draw.first;
-      draw.indices = particle_indices.size() - draw.first_index;
-      particle_draws.append(draw);
-    }
-  }
-  return particle_draws.size();
-}
-EXPORT(main_particle_draws) const ParticleDraw *main_particle_draws() { return particle_draws.data(); }
-EXPORT(main_particle_positions) const float *main_particle_positions() { return particle_positions.data(); }
-EXPORT(main_particle_indices) const uint32_t *main_particle_indices() { return particle_indices.data(); }
+EXPORT(main_instance_colors) const float *main_instance_colors() { return instance_colors.data(); }
 
 
 /* The last extracted Mesh's material slot of each face (its material_index, 0-based), or null when all are the first. */

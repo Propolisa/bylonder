@@ -137,6 +137,9 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
 
 
 // IDRecalcFlag: what the depsgraph evaluates again of an ID tagged with it (0 for all of it).
+// The shapes an instance group draws (main-api.cc ParticleShape): an object's, what Blender's overlay expands a particle
+// into, or a hair path's segment.
+export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS', 'SEGMENT'];
 export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13, ID_RECALC_ALL = 0xffffffff;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
@@ -228,25 +231,17 @@ export class BlenderMain {
   evaluate() { x.main_evaluate(this.#context); }
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
-  // The instances Main's objects make (main-api.cc main_instances), grouped by instancer and instanced object:
-  // { instancer, ob, matrices } each, `matrices` their world matrices in Babylon's layout, a view into the module's
-  // memory valid until the next call.
+  // What Main's objects draw as instances (main-api.cc main_instances): groups of one shape, { instancer, ob (the
+  // object instanced, or 0 for a particle shape), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), color
+  // (the shape's), matrices (world matrices in Babylon's layout), colors (each instance's RGBA, or null) }, the arrays
+  // views into the module's memory valid until the next call.
   instances() {
-    const count = x.main_instances(this.#context), groups = new Int32Array(x.memory.buffer, x.main_instance_groups() >>> 0, count * 4);
-    const all = new Float32Array(x.memory.buffer, x.main_instance_matrices() >>> 0, groups.length ? (groups.at(-2) + groups.at(-1)) * 16 : 0);
-    return Array.from({ length: groups.length / 4 }, (_, i) => ({ instancer: groups[i * 4] >>> 0, ob: groups[i * 4 + 1] >>> 0,
-      matrices: all.subarray(groups[i * 4 + 2] * 16, (groups[i * 4 + 2] + groups[i * 4 + 3]) * 16) }));
-  }
-  // The particles Main's particle systems draw that are not instances (main-api.cc main_particles), as the viewport
-  // shows them or, `rendering`, as they render: { ob, system, kind: 'POINTS' or 'LINES', material (slot, 1-based),
-  // positions (world space, Babylon's axes), indices (segments' point pairs) }, views valid until the next call.
-  particles(rendering = false) {
-    const count = x.main_particles(this.#context, rendering), draws = new Int32Array(x.memory.buffer, x.main_particle_draws() >>> 0, count * 8);
-    const positions = x.main_particle_positions() >>> 0, indices = x.main_particle_indices() >>> 0;
+    const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, ints = new Int32Array(x.memory.buffer, at, count * 10);
+    const floats = new Float32Array(x.memory.buffer, at, count * 10), matrices = x.main_instance_matrices() >>> 0, colors = x.main_instance_colors() >>> 0;
     return Array.from({ length: count }, (_, i) => {
-      const [ob, system, kind, material, first, points, firstIndex, segments] = draws.subarray(i * 8, i * 8 + 8);
-      return { ob: ob >>> 0, system, kind: kind ? 'LINES' : 'POINTS', material, positions: new Float32Array(x.memory.buffer, positions + first * 12, points * 3),
-        indices: new Uint32Array(x.memory.buffer, indices + firstIndex * 4, segments) };
+      const [instancer, ob, shape, overlay, first, n, colored] = ints.subarray(i * 10, i * 10 + 7);
+      return { instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, color: Array.from(floats.subarray(i * 10 + 7, i * 10 + 10)),
+        matrices: new Float32Array(x.memory.buffer, matrices + first * 64, n * 16), colors: colored ? new Float32Array(x.memory.buffer, colors + first * 16, n * 4) : null };
     });
   }
   // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.

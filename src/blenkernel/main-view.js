@@ -14,7 +14,8 @@ import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
-import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, SubMesh, TransformNode, Vector3 } from '@babylonjs/core';
+import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { shapeMesh, drawsLines } from '../draw/instance-shapes.js';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
@@ -359,98 +360,51 @@ export function createMainView(state) {
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
       if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
-      if (updates.size) { drawInstances(); drawParticles(); }
+      if (updates.size) drawInstances();
     } finally {
       state.applying = was;
     }
   }
-  // The instances objects make (a collection instance, instancing on vertices or faces, particles rendered as objects,
-  // their geometry's instances), drawn as Blender's draw engines draw them: for each instancer and object it instances,
-  // the object's geometry (shared, not copied) and material as thin instances at their world matrices, on a mesh of the
-  // view's own. The matrices are copied once, from the module's memory into the instance buffer, which grows by
-  // doubling and is otherwise reused.
+  // What objects draw as instances (main-api.cc main_instances), drawn as Blender's draw engines draw them: a group's
+  // shape (the instanced object's geometry and material, or a particle shape or hair segment in its material's color)
+  // as thin instances at their world matrices, on a mesh of the view's own sharing the shape's geometry. The matrices
+  // (and instance colors) are copied once, from the module's memory into thin instance buffers that grow by doubling
+  // and are otherwise reused. A render leaves out what only the viewport's overlay draws.
   const instanced = new Map();
   function drawInstances() {
-    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set();
-    for (const { instancer, ob, matrices } of blender.instances()) {
-      const key = instancer + ':' + ob, source = byOb.get(ob);
-      if (!source?.geometry) continue;
+    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering;
+    for (const { instancer, ob, shape, overlay, color, matrices, colors } of blender.instances()) {
+      const key = `${instancer}:${ob || shape}:${colors ? 'colored' : color}`, source = shape === 'OBJECT' ? byOb.get(ob) : shapeMesh(world.scene, shape);
+      if (!source?.geometry || (overlay && rendering)) continue;
       drawn.add(key);
       let carrier = instanced.get(key);
-      if (!carrier) instanced.set(key, carrier = viewMesh('__instances ' + key, source.getScene()));
+      if (!carrier) instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, world.scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} }));
       if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
-      carrier.material = source.material;
-      const buffer = grown(carrier, 'matrix', matrices.length);
-      if (buffer) carrier.thinInstanceSetBuffer('matrix', buffer, 16, false);
-      carrier.metadata.matrix.set(matrices);
+      carrier.material = shape === 'OBJECT' ? source.material : (carrier.metadata.material ??= shapeMaterial(carrier, shape, colors ? [1, 1, 1] : color));
+      fillInstances(carrier, 'matrix', 16, matrices);
+      if (colors) fillInstances(carrier, 'color', 4, colors);
       carrier.thinInstanceCount = matrices.length / 16;
-      carrier.thinInstanceBufferUpdated('matrix');
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
   }
-  // A mesh of the view's own, which picking and culling skip.
-  const viewMesh = (name, scene) => Object.assign(new Mesh(name, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} });
-  // A mesh's buffer of a kind (in its metadata) made at least `length` long, doubling: the new buffer, or null when the
-  // one it has is long enough.
-  function grown(mesh, kind, length, Type = Float32Array) {
-    if (mesh.metadata[kind]?.length >= length) return null;
-    return (mesh.metadata[kind] = new Type(Math.max(16, 2 ** Math.ceil(Math.log2(length)))));
-  }
-
-  // The particles systems show that are not instances, as Blender's overlay draws them (a point per particle) and
-  // EEVEE renders them (hair paths as strands), in the color of the emitter's material slot they render with. Each
-  // system is a mesh of the view's own whose vertex buffer is filled from the module's memory in place.
-  const particleMeshes = new Map();
-  function drawParticles() {
-    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set();
-    for (const { ob, system, kind, material, positions, indices } of blender.particles(!!world.collections?.rendering)) {
-      const emitter = byOb.get(ob), key = ob + ':' + system;
-      if (!emitter) continue;
-      drawn.add(key);
-      let mesh = particleMeshes.get(key);
-      if (!mesh || mesh.metadata.kind !== kind) {
-        mesh?.dispose();
-        particleMeshes.set(key, mesh = viewMesh('__particles ' + key, emitter.getScene()));
-        Object.assign(mesh.metadata, { kind });
-        mesh.material = particleMaterial(mesh, kind);
-      }
-      const color = slotColor(emitter, material);
-      mesh.material.emissiveColor.set(...color);
-      fillParticles(mesh, positions, kind === 'LINES' ? indices : null);
+  // A thin instance buffer filled with values, its buffer kept while it is long enough, else one twice as long.
+  function fillInstances(mesh, kind, stride, values) {
+    let buffer = mesh.metadata[kind];
+    if (!(buffer?.length >= values.length)) {
+      buffer = mesh.metadata[kind] = new Float32Array(Math.max(stride, 2 ** Math.ceil(Math.log2(values.length))));
+      mesh.thinInstanceSetBuffer(kind, buffer, stride, false);
     }
-    for (const [key, mesh] of particleMeshes) if (!drawn.has(key)) { mesh.dispose(); particleMeshes.delete(key); }
+    buffer.set(values);
+    mesh.thinInstanceBufferUpdated(kind);
   }
-  function particleMaterial(mesh, kind) {
-    const material = new StandardMaterial(mesh.name, mesh.getScene());
-    Object.assign(material, { disableLighting: true, pointSize: 3, fillMode: kind === 'LINES' ? Material.LineListDrawMode : Material.PointListDrawMode });
+  // A shape's material: unlit, in its color (an instance's color or a vertex's multiplies it), lines for line shapes.
+  function shapeMaterial(mesh, shape, [r, g, b]) {
+    const material = Object.assign(new StandardMaterial(mesh.name, mesh.getScene()), { disableLighting: true, emissiveColor: new Color3(r, g, b) });
     material.diffuseColor.set(0, 0, 0);
+    if (drawsLines(shape)) material.fillMode = Material.LineListDrawMode;
     mesh.onDisposeObservable.add(() => material.dispose());
     return material;
   }
-  // The base color of the material in an object's slot (1-based), else Blender's default grey.
-  function slotColor(node, slot) {
-    const material = node.material?.subMaterials ? node.material.subMaterials[slot - 1] : slot === 1 ? node.material : null;
-    const color = material?.albedoColor ?? material?.diffuseColor;
-    return color ? [color.r, color.g, color.b] : [0.8, 0.8, 0.8];
-  }
-  // Positions (and line segments' indices) copied into the mesh's own buffers, kept while they are long enough; one
-  // submesh draws the part in use, a point cloud unindexed.
-  function fillParticles(mesh, positions, indices) {
-    const points = positions.length / 3;
-    if (grown(mesh, 'positions', positions.length)) mesh.setVerticesData('position', mesh.metadata.positions, true);
-    mesh.metadata.positions.set(positions);
-    mesh.updateVerticesData('position', mesh.metadata.positions, false, false);
-    if (indices) {
-      if (grown(mesh, 'indices', indices.length, Uint32Array)) mesh.setIndices(mesh.metadata.indices, mesh.metadata.positions.length / 3, true);
-      mesh.metadata.indices.set(indices);
-      mesh.updateIndices(mesh.metadata.indices, 0, true);
-    }
-    mesh.isUnIndexed = !indices;
-    mesh.subMeshes = [];
-    new SubMesh(0, 0, points, 0, indices ? indices.length : points, mesh);
-    mesh.setEnabled(points > 0);
-  }
-
   // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the
   // old one's place: its name, ids, parent, children and selection.
   function retype(entry) {
