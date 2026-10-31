@@ -52,7 +52,7 @@ const CALLS = [
 
 // How loud each sound is against the others: tones carry far more than rumbles of the same peak.
 const LEVEL = { eruption: 2, steam: 1, insects: 1, fire: 1.3, mother: 0.3, father: 0.3, alarm: 0.32, coo: 0.3, peep: 0.22, sad: 0.28, flock: 0.25, crack: 0.4,
-  song: 0.16, spout: 0.35, creak: 0.6, crash: 1.4, roar: 1.6, boom: 3.4, thud: 2, surf: 1, approach: 2.2, rumble: 2.6, blast: 2.5 };
+  song: 0.16, spout: 0.35, creak: 0.6, crash: 1.4, roar: 1.6, boom: 3.4, thud: 2, surf: 1, approach: 2.2, rumble: 2.6, blast: 2.5, sonic: 2.6 };
 // Every sound: a one-shot plays once from `at` (seconds) where `place(time)` puts it; a bed loops as loud as
 // `volume(day, time)` says. `near` is the distance it is heard at full loudness; with no place it is all around.
 export function cues() {
@@ -72,6 +72,7 @@ export function cues() {
     ...WHALES.flatMap(({ start, at: place, size, length }) => [at('song', start + 0.2, () => place, size, 10), at('spout', start + 0.28 * length, () => place, size, 10)]),
     at('rumble', BEAT.crack, () => TREE, 1, 8), at('creak', BEAT.blast - 0.7, () => TREE, 0.8), at('blast', BEAT.blast, () => TREE, 1, 8),
     at('crash', BEAT.blast + 1.5, () => new Vector3(Math.cos(NEST.angle) * 7, 0.3, Math.sin(NEST.angle) * 7), 0.8, 6),
+    { ...at('sonic', BEAT.entry, () => fireballAt(BEAT.entry), 1, 60), shock: true },
     at('approach', BEAT.streak, (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), 1, 60),
     at('roar', BEAT.impact - 6.2, (time) => fireballAt(Math.min(time, BEAT.impact - 0.01)), 1, 30),
     ...IMPACTS.map(({ x, z, time, size }) => ({ ...at(size >= 0.75 ? 'boom' : 'thud', time, () => new Vector3(x, 1, z), size, 25), shock: true })),

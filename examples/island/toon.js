@@ -22,14 +22,14 @@ void main() {
   gl_Position = viewProjection * w;
 }`;
 
-const LIGHT = ['sunDir', 'sunColor', 'moonDir', 'moonColor', 'skyLight', 'groundLight', 'cameraPosition', 'fireLight', 'fireColor', 'fogColor', 'fogDensity'];
+const LIGHT = ['sunDir', 'sunColor', 'moonDir', 'moonColor', 'skyLight', 'groundLight', 'cameraPosition', 'fireLight', 'fireColor', 'fogColor', 'fogDensity', 'soot'];
 const lighting = `
 precision highp float;
 varying vec3 vWorld;
 varying vec3 vNormal;
 flat varying vec3 vFace;
 uniform vec3 sunDir, sunColor, moonDir, moonColor, skyLight, groundLight, cameraPosition, fireLight, fireColor, fogColor;
-uniform float fogDensity;
+uniform float fogDensity, soot;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
   vec2 i = floor(p), f = fract(p);
@@ -42,6 +42,8 @@ vec3 facet() {
   return dot(n, vNormal) < 0.0 ? -n : n;
 }
 vec3 toon(vec3 albedo, vec3 n, float lit) {
+  // After the strike soot dulls everything: greyer and darker.
+  albedo = mix(albedo, mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, 0.45) * 0.6, soot);
   float d = dot(n, sunDir);
   float sun = 0.55 * smoothstep(0.0, 0.05, d) + 0.45 * smoothstep(0.45, 0.5, d);
   float moon = smoothstep(0.0, 0.05, dot(n, moonDir));
@@ -126,8 +128,20 @@ void main() {
   float struck = length(p.xz - vec2(${STRIKE.x.toFixed(4)}, ${STRIKE.z.toFixed(4)})), blasted = step(struck, blastReach + 0.6 * (wander - 0.5)) * step(0.0, blast);
   vec3 glass = mix(vec3(0.07, 0.05, 0.09), vec3(0.16, 0.12, 0.17), grain);
   color = mix(color, glass, blasted);
-  float cracks = step(0.55, hash(floor(p.xz * 4.0))) * (1.0 - smoothstep(0.0, 9.0, blast - struck * 0.08));
-  glow += blasted * (cracks * mix(vec3(2.4, 0.5, 0.05), vec3(2.6, 1.3, 0.2), grain) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
+  // It cools in streaks: molten seams running out from the strike, each cooling at its own pace from yellow through
+  // orange to a dull red, some still glowing by morning.
+  vec2 fromStrike = p.xz - vec2(${STRIKE.x.toFixed(4)}, ${STRIKE.z.toFixed(4)});
+  float seam = atan(fromStrike.y, fromStrike.x) * 9.0 + 2.5 * wander + 0.8 * sin(struck * 1.7), lane = floor(seam);
+  float vein = 1.0 - smoothstep(0.04, 0.16, abs(fract(seam) - 0.5) * (0.6 + 0.8 * hash(vec2(lane, 3.1))));
+  float cools = 3.0 + 40.0 * hash(vec2(lane, 7.7)) * hash(vec2(lane, 1.3)), heat = vein * (1.0 - smoothstep(0.0, cools, blast - struck * 0.08));
+  glow += blasted * (heat * mix(vec3(0.9, 0.12, 0.02), vec3(2.8, 1.5, 0.3), heat * heat) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
+  // Where the strike cut away the volcano's shoulder, its inside shows in section: layers of old flows, and the conduit
+  // and the chamber below it still glowing.
+  float inside = blasted * (1.0 - smoothstep(2.6, 3.4, r));
+  vec3 layers = mix(vec3(0.23, 0.17, 0.21), vec3(0.42, 0.3, 0.3), step(0.5, fract(p.y * 3.2 + 0.4 * wander)));
+  color = mix(color, layers, inside);
+  float conduit = (1.0 - smoothstep(0.35, 0.55, r)) + (1.0 - smoothstep(1.0, 1.5, r)) * (1.0 - smoothstep(0.1, 0.6, p.y));
+  glow += inside * min(1.0, conduit) * mix(vec3(1.6, 0.25, 0.04), vec3(2.6, 1.0, 0.15), 0.5 + 0.5 * sin(day * 40.0 + p.y * 6.0)) * (0.55 + 0.45 * (1.0 - smoothstep(0.0, 30.0, blast)));
   // Ash settling over it all, in drifts, thickest toward the strike.
   float drift = smoothstep(0.25, 0.75, patches + 0.35 * grain) * (0.55 + 0.45 * (1.0 - smoothstep(4.0, 12.0, struck)));
   color = mix(color, mix(vec3(0.33, 0.31, 0.33), vec3(0.45, 0.43, 0.44), grain), ash * (0.5 + 0.45 * drift) * step(s, 1.04));
@@ -289,7 +303,7 @@ export function createToon(scene) {
       for (const material of materials) {
         material.setVector3('sunDir', sunDir).setColor3('sunColor', sunColor).setVector3('moonDir', moonDir).setColor3('moonColor', moonColor);
         material.setColor3('skyLight', skyLight).setColor3('groundLight', groundLight).setFloat('day', day);
-        material.setVector3('fireLight', air.firePosition).setColor3('fireColor', air.fireColor).setColor3('fogColor', air.fogColor).setFloat('fogDensity', air.fogDensity);
+        material.setVector3('fireLight', air.firePosition).setColor3('fireColor', air.fireColor).setColor3('fogColor', air.fogColor).setFloat('fogDensity', air.fogDensity).setFloat('soot', air.soot);
       }
       skyMaterial.setVector3('sunDir', sunDir).setVector3('moonDir', moonDir).setFloat('time', time);
       skyMaterial.setColor3('skyTop', skyTop).setColor3('skyHorizon', skyHorizon).setFloat('stars', stars);

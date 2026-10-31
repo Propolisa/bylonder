@@ -26,7 +26,7 @@ export const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
   // Blender's Color Management look gives the film its contrast.
-  renderSettings({ render: { useMotionBlur: true, motionBlurShutter: 0.5 }, eevee: { taaRenderSamples: 16 }, viewSettings: { look: 'MEDIUM_HIGH_CONTRAST' } });
+  renderSettings({ eevee: { taaRenderSamples: 1 }, viewSettings: { look: 'MEDIUM_HIGH_CONTRAST' } });
   const toon = createToon(scene);
 
   const dome = BABYLON.MeshBuilder.CreateSphere('Sky', { diameter: 400, segments: 24, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
@@ -122,10 +122,10 @@ function air(light, fire, time, eye) {
   const from = fireballAt(BEAT.streak), head = fireballAt(Math.min(time, BEAT.impact - 0.01));
   return {
     firePosition: fire.position, fireColor: fire.color,
-    fogColor: mix(light.skyHorizon, new Color3(0.5, 0.42, 0.38), 0.6 * smoke), fogDensity: 0.004 + 0.016 * smoke,
+    fogColor: mix(light.skyHorizon, new Color3(0.5, 0.42, 0.38), 0.6 * smoke), fogDensity: 0.004 + 0.016 * smoke, soot: 0.75 * aftermath(time),
     rays: 1 + 0.8 * smoothstep(BEAT.wake - 1, BEAT.wake + 3, time),
     omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.omen + 4, BEAT.leave, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
-    trail: smoothstep(BEAT.streak, BEAT.streak + 0.6, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),
+    trail: smoothstep(BEAT.entry, BEAT.entry + 0.8, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),
     trailTail: from.subtract(eye).normalize(), trailHead: head.subtract(eye).normalize(),
   };
 }

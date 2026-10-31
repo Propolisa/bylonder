@@ -5,7 +5,7 @@
 import { createMesh } from '@workbench/sdk';
 import { BEAT, NEST, IMPACTS, smoothstep } from './story.js';
 import { cues } from './audio.js';
-import { fallingRocks } from './meteor.js';
+import { fallingRocks, fireballAt } from './meteor.js';
 import { WHALES } from './life.js';
 import { whereIs } from './family.js';
 import { setMatrices, place } from './sky.js';
@@ -56,6 +56,8 @@ function marksOf() {
   }
   const tree = new Vector3(NEST.x, NEST.ground + 1, NEST.z);
   for (const impact of IMPACTS.filter((i) => i.size >= 0.75)) list.push({ kind: 'burst', start: impact.time, life: 0.8, at: () => new Vector3(impact.x, 2 * impact.size, impact.z), turn: rand() * 6.28, size: 0.22 * impact.size });
+  // The sound barrier breaking as the asteroid meets the thick air.
+  list.push({ kind: 'burst', start: BEAT.entry, life: 1, at: () => fireballAt(BEAT.entry), turn: 0.6, size: 0.13 });
   list.push({ kind: 'burst', start: BEAT.blast, life: 0.8, at: () => tree, turn: 0.3, size: 0.15 });
   // The shove: lines streaking along it from the mother past the chick, as it goes over the edge.
   const along = new Vector3(Math.cos(NEST.angle), -0.3, Math.sin(NEST.angle));

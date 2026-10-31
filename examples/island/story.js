@@ -10,7 +10,7 @@ export const lerp = (a, b, t) => a + (b - a) * t;
 // The story in seconds of story time.
 export const BEAT = {
   arrive: 40, mate: 47, court: 51, nest: 57, egg: 64, hatch: 82.5, feed: 86, lesson: 99, tryFly: 105.5,
-  omen: 109, leave: 121, streak: 122, impact: 134, embers: 143, crack: 150.5, climax: 155, blast: 155.6, gone: 156.4,
+  omen: 109, leave: 121, streak: 122, entry: 126, impact: 134, embers: 143, crack: 150.5, climax: 155, blast: 155.6, gone: 156.4,
   mourn: 161.5, sleep: 166, dawn: 171, wake: 173, call: 176.5, cave: 181.5, rescue: 184, reunion: 188, after: 195,
 };
 export const FPS = 24, LENGTH = 208;

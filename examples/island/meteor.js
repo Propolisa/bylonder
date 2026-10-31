@@ -57,26 +57,54 @@ function createFireball(scene, toon) {
     puff.material.setColor3('glow', glowOf(...glow));
     return puff;
   });
-  const flame = (name, glow, rate, life, peak) => createParticles(scene, toon, { name, color: '#000000', glow: glowOf(...glow), seed: rate, start: T0, end: T1, rate, life,
-    origin: path, velocity: (r) => direction(r).scale(1.5), drag: 2, gravity: 0.4, size: pop(peak, 0.05), strength: near });
-  return together(rock, ...shells,
+  // Until it meets the thick air it is only a star that swells. Then it strikes the air: a flash, a bowl of glowing
+  // shocked air ballooning round its face, a ring racing out from where it broke the sound barrier, and its flame and
+  // smoke trailing after.
+  const E = BEAT.entry, entered = (birth) => smoothstep(E, E + 1, birth), burning = (birth) => near(birth) * entered(birth);
+  const flame = (name, glow, rate, life, peak) => createParticles(scene, toon, { name, color: '#000000', glow: glowOf(...glow), seed: rate, start: E, end: T1, rate, life,
+    origin: path, velocity: (r) => direction(r).scale(1.5), drag: 2, gravity: 0.4, size: pop(peak, 0.05), strength: burning });
+  const bowl = { vertices: [], faces: [] }, RIM = 12, DEPTH = 6;
+  for (let j = 0; j <= DEPTH; j++) for (let i = 0; i < RIM; i++) { const z = j / DEPTH, a = (i / RIM) * 2 * Math.PI, w = 1.1 * Math.sqrt(z) + 0.02; bowl.vertices.push([w * Math.cos(a), w * Math.sin(a), 1.6 * z]); }
+  for (let j = 0; j < DEPTH; j++) for (let i = 0; i < RIM; i++) { const a = j * RIM + i, b = j * RIM + (i + 1) % RIM; bowl.faces.push([a, b, b + RIM, a + RIM], [a, a + RIM, b + RIM, b]); }
+  const shock = createMesh('Bow Shock', bowl, scene);
+  shock.material = toon.plain('Bow Shock', '#000000');
+  const shockBuffer = setMatrices(shock, 1);
+  const ringMesh = { vertices: [], faces: [] };
+  for (let i = 0; i < 32; i++) { const a = (i / 32) * 2 * Math.PI; ringMesh.vertices.push([0.9 * Math.cos(a), 0.9 * Math.sin(a), 0], [Math.cos(a), Math.sin(a), 0]); }
+  for (let i = 0; i < 32; i++) { const a = 2 * i, b = (2 * i + 2) % 64; ringMesh.faces.push([a, b, b + 1, a + 1], [a, a + 1, b + 1, b]); }
+  const ring = createMesh('Sonic Ring', ringMesh, scene);
+  ring.material = toon.plain('Sonic Ring', '#000000');
+  const ringBuffer = setMatrices(ring, 1), at = fireballAt(E), heading = fireballAt(E + 0.1).subtract(at).normalize();
+  const along = (dir) => { const q = new Quaternion(); Quaternion.FromUnitVectorsToRef(Vector3.Up(), dir, q); return q; };
+  const air = (day, time) => {
+    const v = fireballAt(time + 0.05).subtract(fireballAt(time - 0.05)).normalize(), u = time - E, on = time >= E && time < T1;
+    const size = near(time) * (0.6 + 2.4 * smoothstep(0, 0.8, u) - 0.9 * smoothstep(0.8, 2.5, u)) * (1 + 0.06 * Math.sin(time * 40));
+    place(shockBuffer, 0, fireballAt(time).add(v.scale(0.5 * near(time))), new Vector3(1, 1, 1).scale(on ? size : 1e-4), along(v.scale(-1)));
+    shock.material.setColor3('glow', glowOf(2.4, 1.3, 1.9).scale(on ? 0.5 + 0.8 * Math.exp(-u * 1.5) : 0));
+    const r = u > 0 && u < 2 ? 2 + 40 * (1 - (1 - u / 2) ** 2) : 0;
+    place(ringBuffer, 0, at, new Vector3(r, r, r).scale(1).add(new Vector3(1e-4, 1e-4, 1e-4)), along(heading));
+    ring.material.setColor3('glow', glowOf(2.2, 2, 2.4).scale(u > 0 && u < 2 ? (1 - u / 2) ** 2 : 0));
+    shock.thinInstanceBufferUpdated('matrix');
+    ring.thinInstanceBufferUpdated('matrix');
+  };
+  return together(rock, ...shells, air,
     flame('Trail Flame Hot', [2.6, 1.6, 1.3], 90, [0.15, 0.3], 0.8), flame('Trail Flame', [2.2, 0.75, 0.8], 70, [0.3, 0.6], 1.1), flame('Trail Flame Outer', [0.9, 0.2, 0.5], 50, [0.5, 1], 1.4),
-    createParticles(scene, toon, { name: 'Trail Smoke', color: '#58525e', underglow: glowOf(0.9, 0.3, 0.06), seed: 4, start: T0, end: T1 - 0.4, rate: 60, life: [5, 8],
-      origin: path, velocity: (r) => direction(r).scale(0.6), drag: 0.6, gravity: 0.05, turbulence: 0.2, size: swell(0.6, 2.6) }),
-    createParticles(scene, toon, { name: 'Trail Sparks', color: '#000000', glow: glowOf(2.6, 1.7, 1.4), seed: 5, start: T0, end: T1, rate: 120, life: [0.5, 1.2],
-      origin: path, velocity: (r) => direction(r).scale(4 + 5 * r(3)), gravity: -6, size: pop(0.14), strength: near }));
+    createParticles(scene, toon, { name: 'Trail Smoke', color: '#58525e', underglow: glowOf(0.9, 0.3, 0.06), seed: 4, start: E, end: T1 - 0.4, rate: 60, life: [5, 8],
+      origin: path, velocity: (r) => direction(r).scale(0.6), drag: 0.6, gravity: 0.05, turbulence: 0.2, size: swell(0.6, 2.6), strength: entered }),
+    createParticles(scene, toon, { name: 'Trail Sparks', color: '#000000', glow: glowOf(2.6, 1.7, 1.4), seed: 5, start: E, end: T1, rate: 120, life: [0.5, 1.2],
+      origin: path, velocity: (r) => direction(r).scale(4 + 5 * r(3)), gravity: -6, size: pop(0.14), strength: burning }));
 }
 
 // Where each fragment breaks off and falls: from the asteroid's path, ever faster down to the sea.
 const PIECES = FRAGMENTS.map((f) => {
-  const split = BEAT.streak + f.part * (BEAT.impact - BEAT.streak);
+  const split = BEAT.entry + f.part * (BEAT.impact - BEAT.entry);
   return { ...f, split, from: fireballAt(split), to: new Vector3(f.x, 0.1, f.z) };
 });
 const fragmentAt = (f, time) => Vector3.Lerp(f.from, f.to, Math.min(1, Math.max(0, (time - f.split) / (f.land - f.split))) ** 1.6);
 // Every rock falling through the air now: the asteroid and its fragments, where each is and which way it moves.
 export function fallingRocks(time) {
   const rock = (at, size) => ({ position: at(time), velocity: at(time + 0.05).subtract(at(time - 0.05)).scale(10), size });
-  return [...(time >= BEAT.streak && time < BEAT.impact ? [rock(fireballAt, 1 + falling(time) + 0.012 * Vector3.Distance(fireballAt(time), STRIKE_AT))] : []),
+  return [...(time >= BEAT.entry && time < BEAT.impact ? [rock(fireballAt, 1 + falling(time) + 0.012 * Vector3.Distance(fireballAt(time), STRIKE_AT))] : []),
     ...PIECES.filter((f) => time >= f.split && time < f.land).map((f) => rock((t) => fragmentAt(f, t), f.size))];
 }
 // The fragments in the air: burning rocks in glowing shells, the large ones nearly the asteroid's size, each its own
@@ -262,7 +290,7 @@ export function fireLight(time) {
 // Rubble afloat after the wave: frothy chunks of the strike's rock strewn over the sea, thickest downrange of it, each
 // riding the swell from when the wave has passed it.
 function createRubble(scene, toon) {
-  const rand = random(91), COUNT = 90;
+  const rand = random(91), COUNT = 240;
   const pieces = Array.from({ length: COUNT }, () => {
     const side = STRIKE.heading + (rand() - 0.5) * (rand() < 0.7 ? 2.4 : 6.2), d = 3 + 22 * rand() ** 0.8;
     const x = STRIKE.x + Math.cos(side) * d, z = STRIKE.z + Math.sin(side) * d;
@@ -323,18 +351,27 @@ function createCrack(scene, toon) {
 
 // What the waves left on every shore: charred logs and broken branches, clumps of ashy wrack and stones thrown up the
 // beach and lying in the shallows, each there from when the wave reached it.
+// And the strike's own ejecta: stones and clods of glassy rock strewn over the land, thickest toward it, each landing
+// a moment after it, and logs, branches and clots of ash floating out on the sea, riding the swell.
 function createWreckage(scene, toon) {
-  const rand = random(97), parts = [['Driftwood', cone(5, 0.06, 0, 0.045, 1), '#3d312b', 70], ['Wrack', blob(0.12, [0, 0, 0]), '#5b5652', 50], ['Thrown Stones', blob(0.1, [0, 0, 0]), '#4a4450', 40]];
-  return together(...parts.map(([name, data, color, count]) => {
+  const rand = random(97), onShore = () => { const a = rand() * 2 * Math.PI; return [a, shore(a) * (0.86 + 0.18 * rand())]; };
+  const onLand = () => { for (;;) { const a = STRIKE.angle + (rand() - 0.5) * 2 * Math.PI * (rand() < 0.6 ? 0.45 : 1), r = shore(a) * Math.sqrt(rand()) * 0.95; if (rand() < 1.2 - Math.hypot(Math.cos(a) * r - STRIKE.x, Math.sin(a) * r - STRIKE.z) / 12) return [a, r]; } };
+  const atSea = () => { const a = rand() * 2 * Math.PI; return [a, shore(a) * 1.08 + 18 * rand() ** 1.5]; };
+  const log = cone(5, 0.06, 0, 0.045, 1), lump = blob(0.12, [0, 0, 0]), slick = blob(0.5, [0, 0, 0]);
+  const parts = [['Driftwood', log, '#3d312b', 90, onShore, 0.45, 'log'], ['Wrack', lump, '#5b5652', 70, onShore, 0.9, 'lump'], ['Thrown Stones', blob(0.1, [0, 0, 0]), '#4a4450', 60, onShore, 0.9, 'lump'],
+    ['Ejecta', blob(0.1, [0, 0, 0]), '#2e2830', 220, onLand, 1.1, 'lump'], ['Floating Logs', log, '#352b27', 120, atSea, 0.5, 'float'], ['Ash Slick', slick, '#6b6668', 70, atSea, 1, 'slick']];
+  return together(...parts.map(([name, data, color, count, where, scale, kind]) => {
     const mesh = createMesh(name, data, scene);
     mesh.material = toon.plain(name, color);
     const buffer = setMatrices(mesh, count), pieces = Array.from({ length: count }, () => {
-      const a = rand() * 2 * Math.PI, r = shore(a) * (0.86 + 0.18 * rand()), x = Math.cos(a) * r, z = Math.sin(a) * r;
-      const lying = Quaternion.RotationYawPitchRoll(rand() * 6.28, 0, name === 'Driftwood' ? Math.PI / 2 - 0.1 : rand());
-      return { at: new Vector3(x, Math.max(-0.04, heightAt(x, z)) + 0.03, z), turn: lying, size: (0.5 + rand()) * (name === 'Driftwood' ? 0.45 : 0.9), comes: BEAT.impact + 3 + Math.hypot(x - STRIKE.x, z - STRIKE.z) / 6 };
+      const [a, r] = where(), x = Math.cos(a) * r, z = Math.sin(a) * r, lies = kind === 'log' || kind === 'float';
+      const size = kind === 'slick' ? new Vector3(1.4 + 2 * rand(), 0.04, 1 + 1.5 * rand()) : new Vector3(1, 1, 1).scale((0.5 + rand()) * scale);
+      return { x, z, size, phase: rand() * 6.28, turn: Quaternion.RotationYawPitchRoll(rand() * 6.28, 0, lies ? Math.PI / 2 - 0.1 : rand()),
+        floats: kind === 'float' || kind === 'slick', y: Math.max(-0.04, heightAt(x, z)) + 0.03, comes: BEAT.impact + 1.5 + Math.hypot(x - STRIKE.x, z - STRIKE.z) / 7 };
     });
     return (day, time) => {
-      pieces.forEach(({ at, turn, size, comes }, i) => place(buffer, i, at, new Vector3(1, 1, 1).scale(Math.max(1e-4, size * (time > comes ? 1 : 0))), turn));
+      pieces.forEach(({ x, z, size, phase, turn, floats, y, comes }, i) => place(buffer, i, new Vector3(x, floats ? 0.02 * Math.sin(time * 1.1 + phase) : y, z),
+        time > comes ? size : new Vector3(1e-4, 1e-4, 1e-4), turn));
       mesh.thinInstanceBufferUpdated('matrix');
     };
   }));

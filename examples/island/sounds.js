@@ -142,6 +142,14 @@ export function createSounds() {
       });
     })(),
     blast: blow(11, 87, 0),
+    // The asteroid breaking the sound barrier: the double crack of a shock wave passing, and its thump.
+    sonic: (() => {
+      const thump = lowpass(80), crack = band(400, 6000);
+      return sound(3, 88, (t, noise) => {
+        const n = noise(), at = (t0) => (t >= t0 ? Math.exp(-(t - t0) * 55) : 0);
+        return 1.6 * crack(n) * (at(0) + 0.8 * at(0.14)) + 6 * thump(n) * Math.min(1, t * 40) * Math.exp(-t * 2.2);
+      });
+    })(),
     thud: blow(5, 82, 1),
     // The wave breaking on the shore: swells of hiss over a low wash.
     surf: (() => {
