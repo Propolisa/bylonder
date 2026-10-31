@@ -92,13 +92,13 @@ export const SEA_CAVE = (() => {
 })();
 // A low shelf of rock at the water beside the cave's mouth, where they come together.
 export const SHELF = (() => {
-  const a = SEA_CAVE.angle, along = [-Math.sin(a), Math.cos(a)], x = Math.cos(a) * (SEA_CAVE.r + 0.35) + along[0] * 1.25, z = Math.sin(a) * (SEA_CAVE.r + 0.35) + along[1] * 1.25;
+  const a = SEA_CAVE.angle, along = [-Math.sin(a), Math.cos(a)], x = Math.cos(a) * (SEA_CAVE.r + 0.35) + along[0] * 1.35, z = Math.sin(a) * (SEA_CAVE.r + 0.35) + along[1] * 1.35;
   return { angle: Math.atan2(z, x), x, z, ground: 0.18 };
 })();
 // Halfway round the shore from the beach to the cave, where they pass in the morning.
 export const PATH = (() => { const angle = lerp(MOURN.angle, SEA_CAVE.angle, 0.5), r = 0.84 * shore(angle), x = Math.cos(angle) * r, z = Math.sin(angle) * r; return { angle, x, z, ground: heightAt(x, z) }; })();
 // The turtle hauls out of the sea on the green side, in the last wide shot: [from, to] as parts of the shore's radius.
-export const TURTLE = { angle: SEA_CAVE.angle + 0.55, from: 1.03, to: 0.9, start: BEAT.after - 1, end: LENGTH };
+export const TURTLE = { angle: SEA_CAVE.angle + 0.45, from: 1.03, to: 0.88, start: BEAT.after - 3, end: LENGTH };
 // The asteroid: an odd-colored star with a faint trail, in the sky over the far side of the island from the first
 // frame. It grows through the film, fast in its last nights, then falls in the dusk just after sunset onto the island's
 // far shoulder, behind the volcano from the nest.
@@ -188,6 +188,8 @@ export const crackReach = (time) => lerp(IMPACT.r - 0.2, NEST.r - 0.15, Math.min
 // It runs its own way, apart from the fire's: from high on the slope off to one side, bending down to the tree.
 export const crackAngle = (r) => NEST.angle - 0.45 * smoothstep(NEST.r, IMPACT.r - 0.2, r) + 0.04 * Math.sin(r * 7);
 export const crackAt = (time) => { const r = crackReach(time), a = crackAngle(r), x = Math.cos(a) * r, z = Math.sin(a) * r; return new BABYLON.Vector3(x, heightAt(x, z), z); };
+// The strike's aftermath, for good: ash settling over everything, smoke and haze in the air.
+export const aftermath = (time) => smoothstep(BEAT.impact + 1, BEAT.impact + 12, time);
 // The burning: hot through the night, out by the morning after.
 export const burning = (time) => 1 - smoothstep(BEAT.mourn + 4, BEAT.wake + 1, time);
 
@@ -235,7 +237,7 @@ export const SHOTS = [
   [184, 'shelf', SEA_CAVE.angle - 0.65, 2.2, 0.5, 0.2, 'in 0.5'], [188, 'shelf', SEA_CAVE.angle + 0.35, 0.95, 0.3, 0.22, 'right 0.5'],
   // The camera draws back from them and up over the island: the wasted far side, the sea strewn with rubble, the
   // green lee, a turtle coming ashore, a whale and her calf.
-  [BEAT.after, 'shelf', SEA_CAVE.angle - 0.4, 1.5, 0.4, 0.22, { to: ['island', SEA_CAVE.angle - 0.45, 30, 11, 0.5] }],
+  [BEAT.after, 'shelf', SEA_CAVE.angle + 0.95, 1.6, 0.45, 0.22, { to: ['island', SEA_CAVE.angle + 0.1, 30, 11, 0.5] }],
 ];
 const at = ({ x, z, ground = 0 }) => ({ x, y: ground, z });
 const CENTERS = { nest: at(NEST), shore: at(MOURN), path: at(PATH), cave: at(SEA_CAVE), shelf: at(SHELF), island: { x: 0, y: 0, z: 0 } };

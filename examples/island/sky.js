@@ -1,6 +1,6 @@
 import { createPrimitive } from '@workbench/sdk';
 import { random } from './random.js';
-import { smoothstep, eruption } from './story.js';
+import { smoothstep, eruption, aftermath } from './story.js';
 
 const { Vector3, Color3, Matrix, Quaternion } = BABYLON;
 const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
@@ -52,8 +52,10 @@ export function createClouds(scene, toon) {
     angle: (i / 12) * Math.PI * 2 + rand() * 0.5, radius: 32 + rand() * 12, height: 5 + rand() * 5,
     puffs: Array.from({ length: 3 + Math.floor(rand() * 3) }, () => [rand() * 2 - 1, rand() * 0.4, rand() - 0.5, 0.6 + rand() * 0.6]),
   }));
-  const buffer = setMatrices(puff, clouds.reduce((n, c) => n + c.puffs.length, 0));
-  return (day) => {
+  const buffer = setMatrices(puff, clouds.reduce((n, c) => n + c.puffs.length, 0)), white = Color3.White(), sooty = new Color3(0.44, 0.4, 0.42);
+  return (day, time) => {
+    // After the strike they are dirty with smoke.
+    puff.material.setColor3('color', Color3.Lerp(white, sooty, aftermath(time)));
     let i = 0;
     for (const cloud of clouds) {
       const a = cloud.angle + Math.PI * day, center = new Vector3(Math.cos(a) * cloud.radius, cloud.height, Math.sin(a) * cloud.radius);

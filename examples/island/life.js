@@ -68,7 +68,7 @@ function whaleMesh() {
 
 // The whales' swims: a whale early on, surfacing along the shore in the shot it is seen in; at the end a whale and her
 // calf beyond the island from the last shot, rising twice, slow and long. `length` is a swim's seconds.
-const BEYOND = SEA_CAVE.angle - 0.45 + Math.PI;
+const BEYOND = SEA_CAVE.angle + 0.1 + Math.PI;
 export const WHALES = [
   { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
   ...[FILM - 12, FILM - 6.5].flatMap((start, k) => [{ start, at: BEYOND + 0.35 - 0.1 * k, distance: 17, size: 1.0, length: 5.5 },
@@ -206,7 +206,7 @@ function stripe(mesh, direction) {
 // forward, a rest; its shell rides up out of the water as the beach rises under it.
 export function createTurtle(scene, toon) {
   // Its parts in its own frame (Blender's axes, facing +X, Z up), sized to stand out among the birds.
-  const SIZE = 0.9, scaled = ({ vertices, faces }, [sx, sy, sz], [dx, dy, dz] = [0, 0, 0]) => ({ vertices: vertices.map(([x, y, z]) => [(x * sx + dx) * SIZE, (y * sy + dy) * SIZE, (z * sz + dz) * SIZE]), faces });
+  const SIZE = 1.3, scaled = ({ vertices, faces }, [sx, sy, sz], [dx, dy, dz] = [0, 0, 0]) => ({ vertices: vertices.map(([x, y, z]) => [(x * sx + dx) * SIZE, (y * sy + dy) * SIZE, (z * sz + dz) * SIZE]), faces });
   const flipper = (side, along, length) => ({ vertices: [[along + 0.05, side * 0.1, 0.08], [along - 0.05, side * 0.1, 0.08], [along - 0.08, side * (0.1 + length), 0.04], [along + 0.02, side * (0.1 + length * 0.9), 0.05]],
     faces: [[0, 1, 2], [0, 2, 3], [0, 2, 1], [0, 3, 2]] });
   const part = (name, data, color) => {

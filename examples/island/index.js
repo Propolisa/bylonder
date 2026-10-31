@@ -1,5 +1,5 @@
 import { animate, animation, renderSettings } from '@workbench/sdk';
-import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, shake, omen, fireFront, burning, sinceStrike, blastRadius } from './story.js';
+import { FRAMES, FPS, LENGTH, BEAT, OMEN, STRIKE, days, speed, seconds, frameAt, shotAt, smoothstep, falling, flash, shake, omen, fireFront, burning, sinceStrike, blastRadius, aftermath } from './story.js';
 import { createToon } from './toon.js';
 import { createIsland, createSea } from './island.js';
 import { createForest } from './forest.js';
@@ -26,7 +26,7 @@ export const createScene = async function () {
   const scene = new BABYLON.Scene(engine);
   // Flat toon shading needs few samples to smooth its edges.
   // Blender's Color Management look gives the film its contrast.
-  renderSettings({ eevee: { taaRenderSamples: 16 }, viewSettings: { look: 'MEDIUM_HIGH_CONTRAST' } });
+  renderSettings({ render: { useMotionBlur: true, motionBlurShutter: 0.5 }, eevee: { taaRenderSamples: 16 }, viewSettings: { look: 'MEDIUM_HIGH_CONTRAST' } });
   const toon = createToon(scene);
 
   const dome = BABYLON.MeshBuilder.CreateSphere('Sky', { diameter: 400, segments: 24, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
@@ -59,7 +59,7 @@ export const createScene = async function () {
     toon.light(light, day, time, meteorAt(frame), air(light, fire, time, camera.globalPosition));
     island.isVisible = time < BEAT.impact;
     struck.isVisible = !island.isVisible;
-    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, blast: sinceStrike(time), blastReach: blastRadius(time) });
+    toon.fire({ front: fireFront(time), heat: time >= BEAT.embers ? burning(time) : 0, blast: sinceStrike(time), blastReach: blastRadius(time), ash: aftermath(time) });
     for (const move of moving) move(day, time);
   });
 
@@ -90,7 +90,7 @@ function grade(light, time) {
   const uneasy = smoothstep(BEAT.omen, BEAT.streak - 2, time) * (1 - smoothstep(BEAT.streak, BEAT.streak + 1, time));
   const coming = smoothstep(BEAT.streak - 6, BEAT.impact - 1, time) * (1 - smoothstep(BEAT.impact, BEAT.impact + 4, time));
   const burning = falling(time) ** 1.5, F = flash(time), smoke = smoothstep(BEAT.impact + 0.5, BEAT.impact + 5, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.wake + 2, time));
-  const dawn = smoothstep(BEAT.wake - 1, BEAT.wake + 3, time), white = new Color3(1, 1, 1);
+  const dawn = smoothstep(BEAT.wake - 1, BEAT.wake + 3, time), white = new Color3(1, 1, 1), ashen = aftermath(time) * dawn;
   let { skyTop, skyHorizon, sunColor, skyLight, groundLight } = light;
   skyTop = mix(skyTop, new Color3(0.26, 0.2, 0.46), 0.3 * uneasy);
   skyHorizon = mix(skyHorizon, new Color3(0.5, 0.78, 0.72), 0.22 * uneasy);
@@ -105,6 +105,12 @@ function grade(light, time) {
   skyLight = mix(skyLight, new Color3(0.38, 0.24, 0.24), 0.4 * smoke);
   skyHorizon = mix(skyHorizon, new Color3(1.0, 0.78, 0.5), 0.35 * dawn);
   sunColor = mix(sunColor, new Color3(1.0, 0.78, 0.5).scale(0.75), 0.4 * dawn);
+  // The morning after: the sky ashen, the light brown and dim through the haze, the sun a weak orange disc.
+  skyTop = mix(skyTop, new Color3(0.46, 0.42, 0.44), 0.7 * ashen);
+  skyHorizon = mix(skyHorizon, new Color3(0.72, 0.58, 0.46), 0.75 * ashen);
+  sunColor = mix(sunColor, new Color3(0.95, 0.6, 0.35).scale(0.55), 0.7 * ashen);
+  skyLight = mix(skyLight, new Color3(0.42, 0.37, 0.36), 0.6 * ashen);
+  groundLight = groundLight.scale(1 - 0.3 * ashen);
   return { ...light, skyTop: skyTop.add(white.scale(0.6 * F)), skyHorizon: skyHorizon.add(white.scale(0.8 * F)), sunColor: sunColor.add(white.scale(0.7 * F)),
     skyLight: skyLight.add(white.scale(0.5 * F)), groundLight: groundLight.add(white.scale(0.3 * F)), stars: Math.max(light.stars, 0.7 * coming) * (1 - 0.5 * smoke) };
 }
@@ -112,11 +118,11 @@ function grade(light, time) {
 // The air: the fire light, the haze (thicker with smoke), shafts of light, the aurora as the meteor nears, its star
 // and the contrail it burns across the sky.
 function air(light, fire, time, eye) {
-  const smoke = smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.wake + 2, time));
+  const smoke = Math.max(smoothstep(BEAT.impact, BEAT.impact + 4, time) * (1 - smoothstep(BEAT.dawn + 1, BEAT.wake + 2, time)), 0.75 * aftermath(time));
   const from = fireballAt(BEAT.streak), head = fireballAt(Math.min(time, BEAT.impact - 0.01));
   return {
     firePosition: fire.position, fireColor: fire.color,
-    fogColor: mix(light.skyHorizon, new Color3(0.35, 0.24, 0.24), 0.5 * smoke), fogDensity: 0.004 + 0.012 * smoke,
+    fogColor: mix(light.skyHorizon, new Color3(0.5, 0.42, 0.38), 0.6 * smoke), fogDensity: 0.004 + 0.016 * smoke,
     rays: 1 + 0.8 * smoothstep(BEAT.wake - 1, BEAT.wake + 3, time),
     omenDir: new Vector3(OMEN.x, OMEN.y, OMEN.z), omen: omen(time), aurora: smoothstep(BEAT.omen + 4, BEAT.leave, time) * (1 - smoothstep(BEAT.streak + 0.5, BEAT.impact, time)),
     trail: smoothstep(BEAT.streak, BEAT.streak + 0.6, time) * (1 - smoothstep(BEAT.impact + 1, BEAT.climax - 1, time)),

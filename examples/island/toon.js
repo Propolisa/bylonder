@@ -75,7 +75,7 @@ void main() { gl_FragColor = vec4(color, 1.0); }`;
 // and cooling to basalt, then soil and grass spreading from the shore up the slopes. Long after, a meteor strikes the
 // slope and a fire burns a path down through the forest past the nest tree (its front at fireFront from the centre).
 const terrain = `${lighting}
-uniform float day, fireFront, fireHeat, blast, blastReach;
+uniform float day, fireFront, fireHeat, blast, blastReach, ash;
 float fireAngle(float r) { return ${NEST.angle.toFixed(4)} + 0.12 * (sin(r * 1.9 + 1.0) - sin(${(NEST.r * 1.9 + 1).toFixed(4)})); }
 float shore(float a) { return 6.2 + 0.7 * sin(3.0 * a + 1.0) + 0.4 * sin(5.0 * a + 2.3) + 0.25 * sin(8.0 * a + 0.5); }
 float channel(float a, float r) {
@@ -128,6 +128,9 @@ void main() {
   color = mix(color, glass, blasted);
   float cracks = step(0.55, hash(floor(p.xz * 4.0))) * (1.0 - smoothstep(0.0, 9.0, blast - struck * 0.08));
   glow += blasted * (cracks * mix(vec3(2.4, 0.5, 0.05), vec3(2.6, 1.3, 0.2), grain) + vec3(0.6, 0.1, 0.02) * (1.0 - smoothstep(0.0, 4.0, blast)));
+  // Ash settling over it all, in drifts, thickest toward the strike.
+  float drift = smoothstep(0.25, 0.75, patches + 0.35 * grain) * (0.55 + 0.45 * (1.0 - smoothstep(4.0, 12.0, struck)));
+  color = mix(color, mix(vec3(0.33, 0.31, 0.33), vec3(0.45, 0.43, 0.44), grain), ash * (0.5 + 0.45 * drift) * step(s, 1.04));
   float embers = scorched * step(0.62, hash(p.xz * 5.3)) * (0.4 + 0.6 * (1.0 - smoothstep(0.0, 1.5, passed)));
   glow += (embers * fireHeat * mix(vec3(1.4, 0.25, 0.03), vec3(2.4, 0.8, 0.08), 0.5 + 0.5 * sin(day * 60.0 + grain * 9.0)));
   gl_FragColor = vec4(atmosphere(toon(color, n, 1.0) + glow), 1.0);
@@ -271,14 +274,14 @@ export function createToon(scene) {
   let ground = null, water = null;
   return {
     // The fire's state in the ground.
-    fire({ front, heat, blast, blastReach }) {
-      ground?.setFloat('fireFront', front).setFloat('fireHeat', heat).setFloat('blast', blast).setFloat('blastReach', blastReach);
+    fire({ front, heat, blast, blastReach, ash }) {
+      ground?.setFloat('fireFront', front).setFloat('fireHeat', heat).setFloat('blast', blast).setFloat('ash', ash).setFloat('blastReach', blastReach);
       water?.setFloat('blast', blast);
     },
     sky: skyMaterial,
     ink: (name, color) => Object.assign(make(name, ink, ['color']).setColor3('color', BABYLON.Color3.FromHexString(color)), { backFaceCulling: false }),
     plain: (name, color) => make(name, plain, ['color', 'underglow', 'glow']).setColor3('color', BABYLON.Color3.FromHexString(color)).setColor3('underglow', BABYLON.Color3.Black()).setColor3('glow', BABYLON.Color3.Black()),
-    terrain: () => (ground = make('Ground', terrain, ['day', 'fireFront', 'fireHeat', 'blast', 'blastReach'])),
+    terrain: () => (ground = make('Ground', terrain, ['day', 'fireFront', 'fireHeat', 'blast', 'blastReach', 'ash'])),
     sea: () => (water = make('Water', sea, ['day', 'blast'])),
     // The light of the moment, in every toon material and the sky; `air` is the story's: the fire light, the haze, and
     // what the meteor draws on the sky.

@@ -115,10 +115,12 @@ const FATHER = flight([
   [136.8, around(OUT - 0.3, 1, 0.6)], [137.6, PERCH_B, 'sit'], [BEAT.embers, PERCH_B, 'sit'], [BEAT.embers + 0.6, circling(BEAT.embers + 0.6)],
 ]);
 // The ground under a point, where a bird stands on it.
-const onGround = (v) => new Vector3(v.x, heightAt(v.x, v.z) + 0.08, v.z);
-// The beach below where they wait, the father at the chick's side; in the night he draws close and they sleep.
+// Standing on the ground: above its highest point under the bird, so a slope never cuts into it.
+const onGround = (v) => new Vector3(v.x, Math.max(...[[0, 0], [0.18, 0], [-0.18, 0], [0, 0.18], [0, -0.18]].map(([dx, dz]) => heightAt(v.x + dx, v.z + dz))) + 0.06, v.z);
+// The beach below where they wait, the father at the chick's side; in the night he draws close, his wings over it,
+// and they sleep.
 const ROCK_C = onGround(new Vector3(MOURN.x, 0, MOURN.z)), SIDEWAYS = new Vector3(-Math.sin(MOURN.angle), 0, Math.cos(MOURN.angle));
-const ROCK_F = onGround(ROCK_C.add(SIDEWAYS.scale(0.32))), CLOSE_F = onGround(ROCK_C.add(SIDEWAYS.scale(0.17)));
+const ROCK_F = onGround(ROCK_C.add(SIDEWAYS.scale(0.32))), CLOSE_F = onGround(ROCK_C.add(SIDEWAYS.scale(0.13)));
 const TO_TREE = headingOf(BASE.subtract(ROCK_C));
 // Along the shore from the beach to the cave: a point `u` of the way, `up` above the beach.
 const SHORE_PATH = (u, up = 0) => { const a = lerp(MOURN.angle, SEA_CAVE.angle + 0.25, u), r = shore(a) * 0.84, x = Math.cos(a) * r, z = Math.sin(a) * r; return new Vector3(x, Math.max(0.05, heightAt(x, z)) + 0.08 + up, z); };
@@ -130,7 +132,7 @@ const GRIP = HAULED.add(ALONG.scale(0.28)).add(new Vector3(0, 0.12, 0));
 const ESCAPE = flight([
   [155.4, circling(155.4)], [156.2, NEST_AT.add(new Vector3(Math.cos(OUT) * 1.4, -0.9, Math.sin(OUT) * 1.4))], [157.2, sea(OUT + 0.05, 6.5, 2.2)],
   [159.2, sea(MOURN.angle + 0.1, 9.5, 2.8)], [160.8, ROCK_F.add(new Vector3(0.4, 0.6, 0.2))], [161.6, ROCK_F, 'sit'], [165.6, ROCK_F, 'sit'],
-  [166.4, CLOSE_F, 'sit'], [176.9, CLOSE_F, 'sit'], [177.4, SHORE_PATH(0.05, 0.9)], [179, SHORE_PATH(0.45, 1.3)], [180.6, SHORE_PATH(0.85, 1.1)],
+  [166.4, CLOSE_F, 'shelter'], [172.8, CLOSE_F, 'sit'], [176.9, CLOSE_F, 'sit'], [177.4, SHORE_PATH(0.05, 0.9)], [179, SHORE_PATH(0.45, 1.3)], [180.6, SHORE_PATH(0.85, 1.1)],
   [181.4, HF.add(new Vector3(0, 0.4, 0))], [181.8, HF, 'sit'], [184, HF, 'sit'], [184.4, GRIP, 'spread'], [186.3, GRIP.add(HAULED.subtract(MOUTH)), 'spread'],
   [186.8, HF, 'sit'], [LENGTH + 1, HF, 'sit'],
 ]);
@@ -154,14 +156,16 @@ const facing = (from, to) => headingOf(to.subtract(from));
 // The mother: on the nest until the blast takes the tree; then on the wreck, unseen until they find her in the cave,
 // limp and slow; once it is hauled in she scrambles across to the ledge.
 const CLIMBS = BEAT.rescue + 2.6;
+// On top of the wreck's burnt crown, clear of its branches.
+const onWreck = (time) => onTree(BASE.add(new Vector3(0, 0.66 * NEST.size, 0)), time).add(new Vector3(0, 0.42, 0));
 const motherAt = (time) => {
   if (time < BEAT.cave) {
     const point = MOTHER.pointAt(time);
     return { point: time > BEAT.blast ? onTree(point, time) : point, pose: MOTHER.poseAt(time), velocity: MOTHER.velocityAt(time) };
   }
   const injured = { bent: 0.3, scarred: true };
-  if (time < CLIMBS) return { point: onTree(SEAT, time), pose: 'sit', heading: facing(MOUTH, HC), ...injured };
-  const u = smoothstep(CLIMBS, CLIMBS + 1.1, time), from = onTree(SEAT, CLIMBS), point = Vector3.Lerp(from, HM, u).add(new Vector3(0, 0.3 * Math.sin(Math.PI * u), 0));
+  if (time < CLIMBS) return { point: onWreck(time), pose: 'sit', heading: facing(MOUTH, HC), ...injured };
+  const u = smoothstep(CLIMBS, CLIMBS + 1.1, time), from = onWreck(CLIMBS), point = Vector3.Lerp(from, HM, u).add(new Vector3(0, 0.3 * Math.sin(Math.PI * u), 0));
   return { point, pose: u > 0 && u < 1 ? 'flutter' : 'sit', wings: 0.6, heading: facing(from, HM), ...injured };
 };
 const fatherAt = (time) => {
@@ -270,8 +274,12 @@ export function createFamily(scene, toon) {
   stump.isVisible = false;
   // The sea cave: a hump of dark rock on the shore, its mouth dark at the waterline, open to the sea; it is there from
   // when the lava cools.
-  const cave = [['Sea Cave', blob(0.5, [0, 0, 0]), '#4f4659', new Vector3(2.2, 1.8, 3.6), -0.75, -0.1, 0], ['Sea Cave Mouth', blob(0.3, [0, 0, 0]), '#100c16', new Vector3(0.9, 2.0, 3.2), 0.05, 0.1, 0],
-    ['Sea Cave Shelf', blob(0.5, [0, 0, 0]), '#5d5566', new Vector3(1.5, 0.36, 1.7), 0.35, 0.0, 1.25]]
+  // The cave: a hill of rock with an arch in its seaward face, two pillars and a lintel, and the dark inside set back
+  // behind it; the shelf beside it.
+  const cave = [['Sea Cave', blob(0.5, [0, 0, 0]), '#4f4659', new Vector3(2.4, 2.4, 4.2), -1.25, 0, 0], ['Sea Cave Inside', blob(0.5, [0, 0, 0]), '#16111d', new Vector3(1.4, 1.3, 1.5), -0.5, 0.1, 0],
+    ...[-0.95, 0.95].map((along, k) => [`Sea Cave Pillar ${k + 1}`, blob(0.5, [0, 0, 0]), '#574e62', new Vector3(1.1, 2.3, 0.9), -0.1, 0.35, along]),
+    ['Sea Cave Lintel', blob(0.5, [0, 0, 0]), '#574e62', new Vector3(1.1, 0.75, 2.9), -0.1, 1.0, 0],
+    ['Sea Cave Shelf', blob(0.5, [0, 0, 0]), '#5d5566', new Vector3(1.5, 0.36, 1.7), 0.35, 0.0, 1.35]]
     .map(([name, data, color, size, out, y, along]) => {
       const mesh = createMesh(name, data, scene);
       mesh.material = toon.plain(name, color);

@@ -6,7 +6,7 @@ import { createMesh } from '@workbench/sdk';
 import { createParticles, together, pop, swell, glowOf, direction, rnd } from './particles.js';
 import { createPuffs, setMatrices, place } from './sky.js';
 import { heightAt, shore } from './island.js';
-import { blob } from './forest.js';
+import { blob, cone } from './forest.js';
 import { random } from './random.js';
 import { BEAT, OMEN, STRIKE, fireballAt, WAVE, FRAGMENTS, IMPACTS, waveReach, islandShadow, landAt, IMPACT, NEST, LENGTH, crackReach, crackAt, crackAngle, smoothstep, lerp, falling, fireFront, fireAngle, burning, flash, sinceStrike } from './story.js';
 
@@ -193,7 +193,10 @@ function createStrikeSmoke(scene, toon) {
       wind: new Vector3(-0.4, 0, -0.2), turbulence: 0.4, size: swell(0.6, 2.2), strength: (birth) => 1 - smoothstep(T + 6, T + 12, birth) }),
     createParticles(scene, toon, { name: 'Strike Cap', color: '#6e6977', underglow: glowOf(0.9, 0.3, 0.06), seed: 27, start: T + 2, end: T + 18, rate: 14, life: [8, 12],
       origin: (r) => STRIKE_AT.add(new Vector3(0, 15 + 4 * r(3), 0)), velocity: (r) => { const a = r(11) * 2 * Math.PI; return new Vector3(Math.cos(a), 0.15, Math.sin(a)).scale(2 + 2 * r(4)); },
-      drag: 0.4, gravity: 0.1, turbulence: 0.5, size: swell(1, 3), strength: (birth) => 1 - smoothstep(T + 8, T + 16, birth) }));
+      drag: 0.4, gravity: 0.1, turbulence: 0.5, size: swell(1, 3), strength: (birth) => 1 - smoothstep(T + 8, T + 16, birth) }),
+    createParticles(scene, toon, { name: 'Crater Smoke', color: '#6a656e', seed: 28, start: T + 10, end: LENGTH, rate: 4, life: [10, 14],
+      origin: at, velocity: (r) => new Vector3((2 * r(32) - 1) * 0.4, 2.2 + r(3), (2 * r(33) - 1) * 0.4), drag: 0.3, gravity: 0.35,
+      wind: DOWNRANGE.scale(0.7), turbulence: 0.6, size: swell(0.5, 2.4) }));
 }
 
 // Burning debris and embers carried over the ridge on the shockwave, falling on the nest's side of the island; the
@@ -232,7 +235,7 @@ function createAfter(scene, toon) {
     createParticles(scene, toon, { name: 'Ash', color: '#9b97a3', seed: 41, start: BEAT.impact + 2, end: LENGTH, rate: 70, life: [5, 7],
       origin: (r) => new Vector3((2 * r(30) - 1) * 11, 6 + 3 * r(3), (2 * r(31) - 1) * 11),
       velocity: () => new Vector3(0, -0.9, 0), wind: new Vector3(-0.3, 0, -0.15), turbulence: 0.35, size: pop(0.05, 0.1),
-      strength: (birth) => smoothstep(BEAT.impact + 2, BEAT.impact + 6, birth) * (1 - smoothstep(BEAT.dawn, BEAT.wake, birth)) }),
+      strength: (birth) => smoothstep(BEAT.impact + 2, BEAT.impact + 6, birth) * (1 - 0.4 * smoothstep(BEAT.dawn, BEAT.wake, birth)) }),
     createParticles(scene, toon, { name: 'Rising Embers', color: '#000000', glow: glowOf(2.4, 1.0, 0.25), seed: 42, start: BEAT.gone, end: BEAT.wake, rate: 8, life: [5, 7],
       origin: (r) => top.add(new Vector3((2 * r(30) - 1) * 0.4, 0, (2 * r(31) - 1) * 0.4)),
       velocity: (r) => new Vector3((2 * r(32) - 1) * 0.2, 1.4 + 0.8 * r(3), (2 * r(33) - 1) * 0.2), turbulence: 0.25,
@@ -318,6 +321,25 @@ function createCrack(scene, toon) {
       wind: new Vector3(-0.3, 0, -0.15), turbulence: 0.4, size: swell(0.2, 1.4) }));
 }
 
+// What the waves left on every shore: charred logs and broken branches, clumps of ashy wrack and stones thrown up the
+// beach and lying in the shallows, each there from when the wave reached it.
+function createWreckage(scene, toon) {
+  const rand = random(97), parts = [['Driftwood', cone(5, 0.06, 0, 0.045, 1), '#3d312b', 70], ['Wrack', blob(0.12, [0, 0, 0]), '#5b5652', 50], ['Thrown Stones', blob(0.1, [0, 0, 0]), '#4a4450', 40]];
+  return together(...parts.map(([name, data, color, count]) => {
+    const mesh = createMesh(name, data, scene);
+    mesh.material = toon.plain(name, color);
+    const buffer = setMatrices(mesh, count), pieces = Array.from({ length: count }, () => {
+      const a = rand() * 2 * Math.PI, r = shore(a) * (0.86 + 0.18 * rand()), x = Math.cos(a) * r, z = Math.sin(a) * r;
+      const lying = Quaternion.RotationYawPitchRoll(rand() * 6.28, 0, name === 'Driftwood' ? Math.PI / 2 - 0.1 : rand());
+      return { at: new Vector3(x, Math.max(-0.04, heightAt(x, z)) + 0.03, z), turn: lying, size: (0.5 + rand()) * (name === 'Driftwood' ? 0.45 : 0.9), comes: BEAT.impact + 3 + Math.hypot(x - STRIKE.x, z - STRIKE.z) / 6 };
+    });
+    return (day, time) => {
+      pieces.forEach(({ at, turn, size, comes }, i) => place(buffer, i, at, new Vector3(1, 1, 1).scale(Math.max(1e-4, size * (time > comes ? 1 : 0))), turn));
+      mesh.thinInstanceBufferUpdated('matrix');
+    };
+  }));
+}
+
 export function createMeteor(scene, toon) {
-  return together(createRubble(scene, toon), createCrack(scene, toon), createFireball(scene, toon), createFragments(scene, toon), ...IMPACTS.map((impact, k) => createImpact(scene, toon, impact, k ? `Fragment ${k}` : 'Strike', 200 + 40 * k)), createStrikeSmoke(scene, toon), createEmberRain(scene, toon), createGroundFire(scene, toon), createAfter(scene, toon));
+  return together(createRubble(scene, toon), createCrack(scene, toon), createWreckage(scene, toon), createFireball(scene, toon), createFragments(scene, toon), ...IMPACTS.map((impact, k) => createImpact(scene, toon, impact, k ? `Fragment ${k}` : 'Strike', 200 + 40 * k)), createStrikeSmoke(scene, toon), createEmberRain(scene, toon), createGroundFire(scene, toon), createAfter(scene, toon));
 }
