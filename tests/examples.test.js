@@ -3,7 +3,7 @@
 // its frame range.
 import assert from 'node:assert/strict';
 import { register } from 'node:module';
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 register('./fixtures/example-loader.mjs', import.meta.url);
 
 const BABYLON = await import('@babylonjs/core');
@@ -17,10 +17,14 @@ const { hasMesh, identify } = await import('../src/editors/object/identity.js');
 // Examples that need the network.
 const SKIPPED = { text: 'loads its font from Google Fonts', materials: 'loads its environment from assets.babylonjs.com' };
 const root = new URL('../examples/', import.meta.url);
+// A project's files (sdk.asset) are its example folder's.
+const fetchURL = globalThis.fetch;
+globalThis.location = { origin: '' };
+globalThis.fetch = (url, ...rest) => (String(url).startsWith('file:') ? Promise.resolve(new Response(readFileSync(new URL(url)))) : fetchURL(url, ...rest));
 
 for (const id of readdirSync(root).filter((id) => !SKIPPED[id]).sort()) {
   const engine = new BABYLON.NullEngine();
-  const sdk = createSDK('/', {}, () => {});
+  const sdk = createSDK(new URL(`${id}/`, root).href, {}, () => {});
   Object.assign(globalThis, { BABYLON: { ...BABYLON }, engine, canvas: null, workbench: sdk });
   const { createScene } = await import(new URL(`${id}/index.js`, root));
   const scene = await createScene();

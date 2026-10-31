@@ -14,6 +14,7 @@ import {
   normalizePath,
   validateFiles,
   textFile,
+  binaryFile,
   renamePath,
   removePath,
 } from "./project-model";
@@ -741,12 +742,6 @@ async function exportZip() {
   );
   download(zipSync(files), project.name.replace(/[^a-z0-9_-]/gi, "-") + ".zip");
 }
-function encoded(bytes) {
-  let result = "";
-  for (let i = 0; i < bytes.length; i += 32768)
-    result += String.fromCharCode(...bytes.subarray(i, i + 32768));
-  return btoa(result);
-}
 function importedFile(path, bytes, mime) {
   if (
     /\.(?:[mc]?[jt]sx?|json|css|html|md|txt|glsl|wgsl|svg|yaml|yml|csv|d\.ts)$/i.test(
@@ -754,7 +749,7 @@ function importedFile(path, bytes, mime) {
     )
   )
     return textFile(strFromU8(bytes));
-  return { kind: "binary", content: encoded(bytes), ...(mime ? { mime } : {}) };
+  return binaryFile(bytes, mime);
 }
 async function importZip(file) {
   await save();
@@ -848,7 +843,7 @@ const openBlend = action(async (file) => {
 });
 const openExample = action(async (example) => {
   await save();
-  const created = await repo.create(example.title, example.files());
+  const created = await repo.create(example.title, await example.files());
   await load(created.id);
 });
 $("fork-project").onclick = action(async () => {

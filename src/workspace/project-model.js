@@ -75,3 +75,9 @@ export function validateProject(project) {
   return project;
 }
 export const textFile = (content) => ({ kind: "text", content });
+// A binary file, its bytes as base64.
+export function binaryFile(bytes, mime) {
+  let result = "";
+  for (let i = 0; i < bytes.length; i += 32768) result += String.fromCharCode(...bytes.subarray(i, i + 32768));
+  return { kind: "binary", content: btoa(result), ...(mime ? { mime } : {}) };
+}

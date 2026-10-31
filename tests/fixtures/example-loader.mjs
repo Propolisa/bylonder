@@ -1,9 +1,10 @@
-// Node module hooks for running example projects as the app does: `@workbench/sdk` is the running project's SDK,
+// Node module hooks for running example projects as the app does: `@workbench/sdk` is the running project's SDK (a
+// module of its own per project folder, as each run has),
 // `?raw` imports are text, and app modules may import without extensions, as Vite allows.
 const SDK = 'bylonder:sdk';
 
 export async function resolve(specifier, context, next) {
-  if (specifier === '@workbench/sdk') return { url: SDK, shortCircuit: true };
+  if (specifier === '@workbench/sdk') return { url: `${SDK}?${new URL('.', context.parentURL).href}`, shortCircuit: true };
   if (specifier.endsWith('?raw')) return { url: new URL(specifier, context.parentURL).href, shortCircuit: true };
   try {
     return await next(specifier, context);
@@ -14,7 +15,7 @@ export async function resolve(specifier, context, next) {
 }
 
 export async function load(url, context, next) {
-  if (url === SDK) {
+  if (url.startsWith(SDK + '?')) {
     const { sdkModuleSource } = await import('../../src/runtime/sdk-module.js');
     return { format: 'module', source: sdkModuleSource, shortCircuit: true };
   }

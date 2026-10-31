@@ -119,7 +119,8 @@ what).
   Main's. The ID types the module does not build (images, sounds, the window manager) are read as their ID alone, and sequencer strips are left out.
 - **Adopting.** The view's `adopt()` draws what Main holds that Babylon does not, through the same mapping and
   `RELATIONS`: objects of their type (Main keeps their data), materials of Bylonder's kind with their Principled BSDF
-  inputs, modifiers into Bylonder's stack, rotation modes in Bylonder's order, the scene camera and the world's color;
+  inputs, or, where the node tree is more than a Principled BSDF, as a node material of the blocks for Blender's nodes
+  (`nodeMaterialFromTree`, its nodes' properties read through RNA), modifiers into Bylonder's stack, rotation modes in Bylonder's order, the scene camera and the world's color;
   the scene's settings and collections follow once the world's slices exist. Objects Blender's code adds come
   the same way. What Bylonder cannot show is reported to the Info editor as warnings: other object types, Area lights
   (opened as point lights), modifiers and node types Bylonder lacks, keys on other properties, a world's strength,

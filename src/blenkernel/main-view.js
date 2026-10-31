@@ -20,6 +20,8 @@ import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
+import { nodeMaterialFromTree, nodeProperties } from '../nodes/blender/shader-nodes.js';
+import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
@@ -76,12 +78,14 @@ export function createMainView(state) {
 
   // A record's values Main holds that Babylon does not yet, written to Babylon. A new rotation mode changes which
   // rotation is synced: that one is read again.
+  // An enum whose items Blender makes at run time (an itemf: a unit system's lengths) is read through RNA, by them.
+  const dynamicEnum = (field) => field.type === 'ENUM' && !field.items?.length;
   function pull(record, owner) {
     let changed = false;
     for (const [name, binding] of syncBindings(rna, record.struct, owner)) {
       const field = dnaProperty(record.struct, name);
       if (!field || field.kind === 'pointer' || field.kind === 'struct' || record.unheld?.has(name)) continue;
-      const value = dnaGet(record.struct, record.ptr, name);
+      const value = dynamicEnum(field) ? pointerStruct(structFind(record.struct), record.holder ?? record.ptr, record.ptr)[name] : dnaGet(record.struct, record.ptr, name);
       if (same(record.shadow.get(name), value)) continue;
       record.shadow.set(name, value);
       if (!binding.set) continue;
@@ -218,7 +222,10 @@ export function createMainView(state) {
       drawShading(record, own, 'Material');
       return;
     }
-    const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : kind === 'standard' ? new StandardMaterial(name, scene)
+    const tree = !graph && !kind ? nodeTreeOf(ma) : null;
+    const nodes = tree && !tree.nodes.every((node) => PRINCIPLED_TREE.includes(node.idname)) ? nodeMaterialFromTree(name, scene, tree) : null;
+    if (nodes?.missing.length) warnings.push(`Material "${name}": its ${nodes.missing.join(', ')} nodes are not opened`);
+    const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : nodes ? nodes.material : kind === 'standard' ? new StandardMaterial(name, scene)
       : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
     material.name = name;
     material.metadata = { ...material.metadata, wbId: name };
@@ -226,6 +233,13 @@ export function createMainView(state) {
     materials.set(material, record);
     ids.adopted.set(material, ma);
     drawShading(record, material, 'Material', warnings);
+  }
+  // A material's node tree in Main as plain data (nodeMaterialFromTree), its nodes' properties as RNA reads them.
+  const PRINCIPLED_TREE = ['ShaderNodeBsdfPrincipled', 'ShaderNodeOutputMaterial'];
+  function nodeTreeOf(ma) {
+    const { nodes, links } = blender.nodeTree(ma), rnaNodes = idStruct(ma).node_tree?.nodes;
+    if (!rnaNodes || !nodes.length) return null;
+    return { links, nodes: nodes.map((node) => ({ ...node, values: node.inputs, properties: nodeProperties(rnaNodes.get(node.name)) })) };
   }
   // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
   function adoptWorld(wo, scene, warnings) {

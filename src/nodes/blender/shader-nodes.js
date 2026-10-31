@@ -9,7 +9,7 @@
 // BSDF is Babylon's PBR block lit by Babylon's lights, Emission adds its radiance, and Material Output writes the
 // fragment through Babylon's image processing.
 import {
-  Color4, Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, NodeMaterialBlock, NodeMaterialBlockConnectionPointTypes as T,
+  Color4, Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, NodeMaterial, NodeMaterialBlock, NodeMaterialBlockConnectionPointTypes as T,
   NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, PBRMetallicRoughnessBlock, RawTexture, ReflectionBlock, RegisterClass,
   Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
@@ -562,6 +562,40 @@ export function blenderDefaultTree(material) {
   material.attachedBlocks.push(principled);
   output.attach(material);
   material.editorData = { locations: [{ blockId: principled.uniqueId, x: 10, y: -300 }, { blockId: output.uniqueId, x: 300, y: -300 }], frames: [] };
+}
+
+// A node's properties as its block keeps them, from Blender's node (RNA): those its declaration has, and its color ramp.
+export function nodeProperties(node) {
+  const decl = declaration('shader', node.bl_idname), ramp = node.color_ramp;
+  return {
+    ...Object.fromEntries(Object.keys(decl?.properties ?? {}).map((key) => [key, node[key]])),
+    ...(ramp && { color_ramp: { color_mode: ramp.color_mode, interpolation: ramp.interpolation, hue_interpolation: ramp.hue_interpolation,
+      elements: [...ramp.elements].map((e) => ({ position: e.position, color: [...e.color] })) } }),
+  };
+}
+
+// A Blender node tree (plain: { nodes: [{ idname, name, properties, values }], links: [[from node, output, to node,
+// input]] }, as a read .blend's Main holds it) as a node material of the blocks for Blender's nodes, linked as in the
+// tree. Returns the material and the node types it has no block for, which it leaves out.
+export function nodeMaterialFromTree(name, scene, tree) {
+  const material = new NodeMaterial(name, scene), blocks = new Map(), missing = new Set();
+  material.clear();
+  for (const node of tree.nodes) {
+    const Block = shaderNodeClasses[node.idname];
+    if (!Block) { if (!['NodeFrame', 'NodeReroute'].includes(node.idname)) missing.add(node.idname); continue; }
+    const block = new Block(node.name);
+    Object.assign(block.properties, structuredClone(node.properties ?? {}));
+    for (const [id, value] of Object.entries(node.values ?? {})) if (value !== null && id in block.values) block.values[id] = value;
+    blocks.set(node.name, block);
+    if (block instanceof ShaderNodeOutputMaterial) block.attach(material);
+    else material.attachedBlocks.push(block);
+  }
+  for (const [from, output, to, input] of tree.links) {
+    const source = blocks.get(from)?.getOutputByName(output), target = blocks.get(to)?.getInputByName(input);
+    if (source && target) source.connectTo(target);
+  }
+  buildMaterial(material);
+  return { material, missing: [...missing] };
 }
 
 // Babylon drops a build asked for while one waits for its blocks' code, so the latest asks again once that one ends
