@@ -15,7 +15,7 @@ import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
-import { shapeMesh, drawsLines } from '../draw/instance-shapes.js';
+import { particleShapeMesh, particleShapeMaterial, isParticleShape, hairSegmentMesh, hairMaterial } from '../draw/overlay-particle.js';
 import { armatureData, armatureDrawn } from './armature/armature.js';
 import { armature_draw } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
@@ -365,45 +365,37 @@ export function createMainView(state) {
       state.applying = was;
     }
   }
-  // What objects draw as instances (main-api.cc main_instances), drawn as Blender's draw engines draw them: a group's
-  // shape (the instanced object's geometry and material, or a particle shape or hair segment in its material's color)
-  // as thin instances at their world matrices, on a mesh of the view's own sharing the shape's geometry. The matrices
-  // (and instance colors) are copied once, from the module's memory into thin instance buffers that grow by doubling
-  // and are otherwise reused. A render leaves out what only the viewport's overlay draws.
+  // What objects draw as instances (main-api.cc main_instances), as Blender's draw engines draw them, each group as
+  // thin instances on a mesh of the view's own sharing its shape's geometry: an instanced object's at their world
+  // matrices in its material, a particle system's overlay shape drawn by Blender's shaders from each particle's point
+  // (overlay-particle.js), hair segments at their matrices. The instance data is copied once, from the module's memory
+  // into a thin instance buffer that grows by doubling and is otherwise reused. A render leaves out the overlay.
   const instanced = new Map();
   function drawInstances() {
-    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering;
-    for (const { instancer, ob, shape, overlay, color, matrices, colors } of blender.instances()) {
-      const key = `${instancer}:${ob || shape}:${colors ? 'colored' : color}`, source = shape === 'OBJECT' ? byOb.get(ob) : shapeMesh(world.scene, shape);
+    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
+    for (const { instancer, ob, shape, overlay, drawSize, color, data } of blender.instances()) {
+      const key = `${instancer}:${ob || shape}:${color}:${drawSize}`;
+      const source = shape === 'OBJECT' ? byOb.get(ob) : shape === 'SEGMENT' ? hairSegmentMesh(scene) : particleShapeMesh(scene, shape);
       if (!source?.geometry || (overlay && rendering)) continue;
       drawn.add(key);
       let carrier = instanced.get(key);
-      if (!carrier) instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, world.scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} }));
+      if (!carrier) {
+        instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} }));
+        if (shape !== 'OBJECT') carrier.material = isParticleShape(shape) ? particleShapeMaterial(scene, shape, color, drawSize) : hairMaterial(scene, color);
+        if (carrier.material) carrier.onDisposeObservable.add(() => carrier.material.dispose());
+      }
       if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
-      carrier.material = shape === 'OBJECT' ? source.material : (carrier.metadata.material ??= shapeMaterial(carrier, shape, colors ? [1, 1, 1] : color));
-      fillInstances(carrier, 'matrix', 16, matrices);
-      if (colors) fillInstances(carrier, 'color', 4, colors);
-      carrier.thinInstanceCount = matrices.length / 16;
+      if (shape === 'OBJECT') carrier.material = source.material;
+      let buffer = carrier.metadata.instances;
+      if (!(buffer?.length >= data.length)) {
+        buffer = carrier.metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(data.length))));
+        carrier.thinInstanceSetBuffer('matrix', buffer, 16, false);
+      }
+      buffer.set(data);
+      carrier.thinInstanceBufferUpdated('matrix');
+      carrier.thinInstanceCount = data.length / 16;
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
-  }
-  // A thin instance buffer filled with values, its buffer kept while it is long enough, else one twice as long.
-  function fillInstances(mesh, kind, stride, values) {
-    let buffer = mesh.metadata[kind];
-    if (!(buffer?.length >= values.length)) {
-      buffer = mesh.metadata[kind] = new Float32Array(Math.max(stride, 2 ** Math.ceil(Math.log2(values.length))));
-      mesh.thinInstanceSetBuffer(kind, buffer, stride, false);
-    }
-    buffer.set(values);
-    mesh.thinInstanceBufferUpdated(kind);
-  }
-  // A shape's material: unlit, in its color (an instance's color or a vertex's multiplies it), lines for line shapes.
-  function shapeMaterial(mesh, shape, [r, g, b]) {
-    const material = Object.assign(new StandardMaterial(mesh.name, mesh.getScene()), { disableLighting: true, emissiveColor: new Color3(r, g, b) });
-    material.diffuseColor.set(0, 0, 0);
-    if (drawsLines(shape)) material.fillMode = Material.LineListDrawMode;
-    mesh.onDisposeObservable.add(() => material.dispose());
-    return material;
   }
   // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the
   // old one's place: its name, ids, parent, children and selection.

@@ -1,6 +1,6 @@
 // Blender's particle systems, force fields and rigid bodies, run by Blender's code in the module and drawn by the view
-// (main-view.js) as thin instances from one packed buffer: the overlay's shapes at the particles, an instanced object's
-// geometry, hair paths' segments; a frame jumped to shows what playing up to it shows (view-api.cc view_frame_set), and
+// (main-view.js) as thin instances from one packed buffer: the overlay's shapes by Blender's shaders from each
+// particle's point, an instanced object's geometry, hair paths' segments; a frame jumped to shows what playing up to it shows (view-api.cc view_frame_set), and
 // a cache bakes.
 import assert from 'node:assert/strict';
 import { Material, NullEngine, Scene } from '@babylonjs/core';
@@ -36,13 +36,14 @@ play(30);
 const [dots] = drawn('__instances');
 assert(dots.thinInstanceCount > 100, `particles born over 30 frames are dots: ${dots.thinInstanceCount}`);
 assert.equal(dots.geometry, scene.getMeshByName('__shape DOT').geometry);
-// Crosses are three lines at each particle; colored by speed, each instance has its color.
+// Crosses are lines Blender's shape shader expands each particle into; colored by speed, each particle's point carries
+// its speed as its value, which the shader colors it by.
 Object.assign(settings, { display_method: 'CROSS', display_color: 'VELOCITY' });
 sync.view();
 sync.frameChanged(30);
-const [crosses] = drawn('__instances');
+const [crosses] = drawn('__instances'), points = sync.blender.instances().find((g) => g.shape === 'CROSS').data;
 assert.equal(crosses.material.fillMode, Material.LineListDrawMode);
-assert.equal(crosses.metadata.color.length >= crosses.thinInstanceCount * 4, true, 'an instance color each');
+assert(points[3] >= 0, `a value: ${points[3]}`);
 Object.assign(settings, { display_method: 'RENDER', display_color: 'MATERIAL' });
 
 // Rendered as an object: thin instances of its mesh, sharing its geometry.
@@ -51,7 +52,7 @@ settings.instance_object = blendData().objects.get('Puff');
 sync.view();
 play(30);
 const [carrier] = drawn('__instances');
-assert.equal(carrier.thinInstanceCount, sync.blender.instances().find((g) => g.shape === 'OBJECT').matrices.length / 16);
+assert.equal(carrier.thinInstanceCount, sync.blender.instances().find((g) => g.shape === 'OBJECT').data.length / 16);
 assert.equal(carrier.geometry, puff.geometry, "the instanced object's geometry is shared, not copied");
 assert.equal(drawn('__instances').length, 1, 'instanced particles draw no shapes');
 // Hair renders as paths: line segments, two indices each.
@@ -65,7 +66,7 @@ assert(hair.thinInstanceCount >= 50 && hair.material.fillMode === Material.LineL
 Object.assign(settings, { type: 'EMITTER', render_type: 'HALO', count: 200, frame_end: 1, lifetime: 100, normal_factor: 0 });
 settings.effector_weights.gravity = 0;
 sync.view();
-const meanX = () => { const { matrices } = sync.blender.instances().find((g) => g.shape === 'DOT'); let x = 0; for (let i = 12; i < matrices.length; i += 16) x += matrices[i]; return x / (matrices.length / 16); };
+const meanX = () => { const { data } = sync.blender.instances().find((g) => g.shape === 'DOT'); let x = 0; for (let i = 0; i < data.length; i += 16) x += data[i]; return x / (data.length / 16); };
 play(20);
 const still = meanX();
 assert.equal(sync.run(() => sync.blender.run('object.effector_add', { type: 'WIND', rotation: [0, Math.PI / 2, 0] }), { meshes: [] }).status, OPERATOR_FINISHED);

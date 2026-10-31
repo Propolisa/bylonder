@@ -44,7 +44,6 @@
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
 #include "BKE_particle.h"
-#include "BKE_deform.hh"
 #include "DNA_particle_types.h"
 #include "BKE_scene.hh"
 #include "BKE_workspace.hh"
@@ -620,23 +619,22 @@ static void babylon_matrix(const float m[4][4], float *out)
   }
 }
 
-/* What Main's objects draw as instances, each group one shape at a world matrix per instance, as Blender's draw engines
- * draw them: the objects their Instancing makes (a collection, their vertices or faces), their particle systems
- * rendered as objects or collections and their evaluated geometry's instances (object_duplilist), grouped by instancer
- * and object; and their particle systems' own drawing (overlay_particle.hh), which expands a shape at each particle
- * scaled by its display size (Dot, Circle, Cross, Axis: overlay_particle_shape_vert.glsl) or draws hair paths, here
- * a line segment's shape per segment. A group is { instancer, ob (the object instanced, or null for a shape), shape
- * (ParticleShape), overlay (the viewport's only), first, count, colored, color (rgb: its material's) }; its world
- * matrices, in Babylon's axes, are contiguous in one buffer and its instances' colors, when Blender colors them by
- * velocity or acceleration, in another. Valid until the next call; returns the number of groups. */
+/* What Main's objects draw as instances, as Blender's draw engines draw them: the objects their Instancing makes (a
+ * collection, their vertices or faces), their particle systems rendered as objects or collections and their evaluated
+ * geometry's instances (object_duplilist), grouped by instancer and object, each a world matrix in Babylon's axes; their
+ * particle systems' overlay (overlay_particle.hh), a shape at each particle drawn by Blender's own shaders from its
+ * point data as the draw cache gives it (particle_batch_cache_ensure_pos: position, value, rotation, in Blender's axes);
+ * and hair paths, a line segment's matrix per segment. A group is { instancer, ob (the object instanced, or null),
+ * shape (ParticleShape), overlay (the viewport's only), first, count, draw size, color (rgb: its material's) }; its
+ * instances' 16 floats are contiguous in one buffer. Valid until the next call; returns the number of groups. */
 enum ParticleShape { SHAPE_OBJECT, SHAPE_DOT, SHAPE_CIRCLE, SHAPE_CROSS, SHAPE_AXIS, SHAPE_SEGMENT };
 struct InstanceGroup {
   Object *instancer, *ob;
-  int shape, overlay, first, count, colored;
-  float color[3];
+  int shape, overlay, first, count;
+  float draw_size, color[3];
 };
 static Vector<InstanceGroup> instance_groups;
-static Vector<float> instance_matrices, instance_colors;
+static Vector<float> instance_matrices;
 static float *instance_matrix_add()
 {
   instance_matrices.resize(instance_matrices.size() + 16);
@@ -696,7 +694,7 @@ static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
       continue;
     }
     const Material *ma = BKE_object_material_get_eval(evaluated, part->omat);
-    InstanceGroup group = {&ob, nullptr, SHAPE_DOT, true, int(instance_matrices.size() / 16), 0, false, {0.6f, 0.6f, 0.6f}};
+    InstanceGroup group = {&ob, nullptr, SHAPE_DOT, true, int(instance_matrices.size() / 16), 0, 0.0f, {0.6f, 0.6f, 0.6f}};
     if (ma) {
       copy_v3_v3(group.color, &ma->r);
     }
@@ -710,7 +708,7 @@ static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
       continue;
     }
     group.shape = draw_as == PART_DRAW_CIRC ? SHAPE_CIRCLE : draw_as == PART_DRAW_CROSS ? SHAPE_CROSS : draw_as == PART_DRAW_AXIS ? SHAPE_AXIS : SHAPE_DOT;
-    group.colored = ELEM(part->draw_col, PART_DRAW_COL_VEL, PART_DRAW_COL_ACC) && group.shape != SHAPE_AXIS;
+    group.draw_size = part->draw_size;
     ParticleSimulationData sim = {nullptr};
     sim.depsgraph = depsgraph;
     sim.scene = DEG_get_evaluated_scene(depsgraph);
@@ -718,25 +716,21 @@ static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
     sim.psys = &psys;
     sim.psmd = psys_get_modifier(evaluated, &psys);
     psys_sim_data_init(&sim);
-    const float size[3] = {part->draw_size, part->draw_size, part->draw_size};
     for (int p = 0; p < psys.totpart; p++) {
       ParticleKey state;
       state.time = DEG_get_ctime(depsgraph);
       if (!psys_get_particle_state(&sim, p, &state, false)) {
         continue;
       }
-      float m[4][4];
-      loc_quat_size_to_mat4(m, state.co, state.rot, size);
-      babylon_matrix(m, instance_matrix_add());
-      if (group.colored) {
-        /* As the overlay colors them: speed, or change of velocity, over the settings' maximum, on the weight ramp. */
-        const ParticleData &pa = psys.particles[p];
-        const float value = part->draw_col == PART_DRAW_COL_VEL ? len_v3(state.vel) / part->color_vec_max :
-                            len_v3v3(state.vel, pa.prev_state.vel) / ((state.time - pa.prev_state.time) * part->color_vec_max);
-        instance_colors.resize(instance_matrices.size() / 4);
-        BKE_defvert_weight_to_rgb(instance_colors.end() - 4, std::clamp(value, 0.0f, 1.0f));
-        instance_colors.last() = 1.0f;
-      }
+      const ParticleData &pa = psys.particles[p];
+      const float value = part->draw_col == PART_DRAW_COL_VEL ? len_v3(state.vel) / part->color_vec_max :
+                          part->draw_col == PART_DRAW_COL_ACC ?
+                          len_v3v3(state.vel, pa.prev_state.vel) / ((state.time - pa.prev_state.time) * part->color_vec_max) : -1.0f;
+      float *point = instance_matrix_add();
+      std::fill_n(point, 16, 0.0f);
+      copy_v3_v3(point, state.co);
+      point[3] = value;
+      copy_v4_v4(point + 4, state.rot);
     }
     psys_sim_data_free(&sim);
     instance_group_add(group);
@@ -746,7 +740,6 @@ EXPORT(main_instances) int main_instances(BlenderMain *ctx)
 {
   instance_groups.clear();
   instance_matrices.clear();
-  instance_colors.clear();
   Depsgraph *depsgraph = depsgraph_of(ctx);
   for (Object &ob : ctx->bmain->objects) {
     Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
@@ -759,7 +752,6 @@ EXPORT(main_instances) int main_instances(BlenderMain *ctx)
 }
 EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { return instance_groups.data(); }
 EXPORT(main_instance_matrices) const float *main_instance_matrices() { return instance_matrices.data(); }
-EXPORT(main_instance_colors) const float *main_instance_colors() { return instance_colors.data(); }
 
 
 /* The last extracted Mesh's material slot of each face (its material_index, 0-based), or null when all are the first. */

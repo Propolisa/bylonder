@@ -160,6 +160,16 @@ const library = () => (symbols ??= parse());
 const used = (text, self) => [...new Set(text.match(/(?<![.\w])[A-Za-z_]\w*/g))].filter((n) => n !== self && library().has(n));
 const prefixed = (text) => text.replace(/(?<![.\w])[A-Za-z_]\w*/g, (n) => (library().has(n) ? glslName(n) : n));
 
+// A whole shader of Blender's (a draw engine's, gpu-library.js `draw`) as GLSL ES for its stage: its includes and
+// create info left to `macros`, which stand in for what they declare (as name to body, or to [params, body]), after
+// Blender's compatibility macros.
+export function glslShader(source, stage, macros = {}) {
+  const defined = new Map([[stage === 'vertex' ? 'GPU_VERTEX_SHADER' : 'GPU_FRAGMENT_SHADER', { params: null, body: '1' }]]);
+  preprocess(libraries['gpu_shader_compat_glsl.glsl'], defined);
+  for (const [name, value] of Object.entries(macros)) defined.set(name, Array.isArray(value) ? { params: value[0], body: value[1] } : { params: null, body: value });
+  return dialect(preprocess(source, defined));
+}
+
 // GLSL ES reserves names with two underscores in a row.
 export const glslName = (name) => (PREFIX + name).replace(/_{2,}/g, '_');
 export const hasFunction = (name) => library().has(name);

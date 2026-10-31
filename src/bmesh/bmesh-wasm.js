@@ -232,16 +232,16 @@ export class BlenderMain {
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
   // What Main's objects draw as instances (main-api.cc main_instances): groups of one shape, { instancer, ob (the
-  // object instanced, or 0 for a particle shape), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), color
-  // (the shape's), matrices (world matrices in Babylon's layout), colors (each instance's RGBA, or null) }, the arrays
-  // views into the module's memory valid until the next call.
+  // object instanced, or 0), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), drawSize, color, data (16
+  // floats per instance: an object's or a hair segment's world matrix in Babylon's layout, else a particle's point data
+  // in Blender's axes: position, value, rotation) }, the data a view into the module's memory valid until the next call.
   instances() {
-    const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, ints = new Int32Array(x.memory.buffer, at, count * 10);
-    const floats = new Float32Array(x.memory.buffer, at, count * 10), matrices = x.main_instance_matrices() >>> 0, colors = x.main_instance_colors() >>> 0;
+    const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, data = x.main_instance_matrices() >>> 0;
+    const ints = new Int32Array(x.memory.buffer, at, count * 10), floats = new Float32Array(x.memory.buffer, at, count * 10);
     return Array.from({ length: count }, (_, i) => {
-      const [instancer, ob, shape, overlay, first, n, colored] = ints.subarray(i * 10, i * 10 + 7);
-      return { instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, color: Array.from(floats.subarray(i * 10 + 7, i * 10 + 10)),
-        matrices: new Float32Array(x.memory.buffer, matrices + first * 64, n * 16), colors: colored ? new Float32Array(x.memory.buffer, colors + first * 16, n * 4) : null };
+      const [instancer, ob, shape, overlay, first, n] = ints.subarray(i * 10, i * 10 + 6);
+      return { instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, drawSize: floats[i * 10 + 6],
+        color: Array.from(floats.subarray(i * 10 + 7, i * 10 + 10)), data: new Float32Array(x.memory.buffer, data + first * 64, n * 16) };
     });
   }
   // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.
