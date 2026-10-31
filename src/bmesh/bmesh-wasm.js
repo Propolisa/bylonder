@@ -228,12 +228,25 @@ export class BlenderMain {
   evaluate() { x.main_evaluate(this.#context); }
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
-  // The instances Main's objects make by their Instancing (main-api.cc): { instancer, ob (the instanced object),
-  // matrix_world (column-major, Blender's axes) } each.
+  // The instances Main's objects make (main-api.cc main_instances), grouped by instancer and instanced object:
+  // { instancer, ob, matrices } each, `matrices` their world matrices in Babylon's layout, a view into the module's
+  // memory valid until the next call.
   instances() {
-    return Array.from({ length: x.main_instances(this.#context) }, (_, i) => {
-      const at = x.main_instance(i) >>> 0, [instancer, ob] = new Uint32Array(x.memory.buffer, at, 2);
-      return { instancer, ob, matrix_world: Array.from(new Float32Array(x.memory.buffer, at + 8, 16)) };
+    const count = x.main_instances(this.#context), groups = new Int32Array(x.memory.buffer, x.main_instance_groups() >>> 0, count * 4);
+    const all = new Float32Array(x.memory.buffer, x.main_instance_matrices() >>> 0, groups.length ? (groups.at(-2) + groups.at(-1)) * 16 : 0);
+    return Array.from({ length: groups.length / 4 }, (_, i) => ({ instancer: groups[i * 4] >>> 0, ob: groups[i * 4 + 1] >>> 0,
+      matrices: all.subarray(groups[i * 4 + 2] * 16, (groups[i * 4 + 2] + groups[i * 4 + 3]) * 16) }));
+  }
+  // The particles Main's particle systems draw that are not instances (main-api.cc main_particles), as the viewport
+  // shows them or, `rendering`, as they render: { ob, system, kind: 'POINTS' or 'LINES', material (slot, 1-based),
+  // positions (world space, Babylon's axes), indices (segments' point pairs) }, views valid until the next call.
+  particles(rendering = false) {
+    const count = x.main_particles(this.#context, rendering), draws = new Int32Array(x.memory.buffer, x.main_particle_draws() >>> 0, count * 8);
+    const positions = x.main_particle_positions() >>> 0, indices = x.main_particle_indices() >>> 0;
+    return Array.from({ length: count }, (_, i) => {
+      const [ob, system, kind, material, first, points, firstIndex, segments] = draws.subarray(i * 8, i * 8 + 8);
+      return { ob: ob >>> 0, system, kind: kind ? 'LINES' : 'POINTS', material, positions: new Float32Array(x.memory.buffer, positions + first * 12, points * 3),
+        indices: new Uint32Array(x.memory.buffer, indices + firstIndex * 4, segments) };
     });
   }
   // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.

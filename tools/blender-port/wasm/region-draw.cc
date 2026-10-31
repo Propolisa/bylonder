@@ -63,6 +63,9 @@ struct Recording {
   rcti scissor = {};
   bool scissored = false;
   float line_width = 1.0f;
+  /* The model-view matrix in the plane: x' = x * axes[0] + y * axes[1] + offset. */
+  float2 axes[2] = {float2(1.0f, 0.0f), float2(0.0f, 1.0f)};
+  float2 offset = float2(0.0f);
 };
 static Recording rec;
 
@@ -109,6 +112,9 @@ static void string_json(std::string &s, StringRef text)
 static float2 to_region(float x, float y)
 {
   const rctf &o = rec.ortho;
+  const float2 p = rec.axes[0] * x + rec.axes[1] * y + rec.offset;
+  x = p.x;
+  y = p.y;
   return {(x - o.xmin) / (o.xmax - o.xmin) * rec.winx, (y - o.ymin) / (o.ymax - o.ymin) * rec.winy};
 }
 
@@ -202,9 +208,57 @@ namespace blender {
 
 void wmOrtho2(float x1, float x2, float y1, float y2) { rec.ortho = {x1, x2, y1, y2}; }
 void wmOrtho2_region_pixelspace(const ARegion *region) { wmOrtho2(0.0f, region->winx, 0.0f, region->winy); }
-void GPU_matrix_identity_set() {}
-void GPU_matrix_push() {}
-void GPU_matrix_pop() {}
+/* The model-view matrix is an affine map of the plane (widgets drawn about a center or scaled: a pie menu, a direction
+ * ball, a curve's view), kept as a stack; depth is not drawn. */
+struct ModelView {
+  float2 axes[2], offset;
+};
+static Vector<ModelView> &model_views()
+{
+  static Vector<ModelView> stack;
+  return stack;
+}
+void GPU_matrix_reset()
+{
+  rec.axes[0] = float2(1.0f, 0.0f);
+  rec.axes[1] = float2(0.0f, 1.0f);
+  rec.offset = float2(0.0f);
+}
+void GPU_matrix_identity_set() { GPU_matrix_reset(); }
+void GPU_matrix_push() { model_views().append({{rec.axes[0], rec.axes[1]}, rec.offset}); }
+void GPU_matrix_pop()
+{
+  if (model_views().is_empty()) {
+    GPU_matrix_reset();
+    return;
+  }
+  const ModelView view = model_views().pop_last();
+  rec.axes[0] = view.axes[0];
+  rec.axes[1] = view.axes[1];
+  rec.offset = view.offset;
+}
+void GPU_matrix_translate_2f(float x, float y) { rec.offset += rec.axes[0] * x + rec.axes[1] * y; }
+void GPU_matrix_translate_2fv(const float vec[2]) { GPU_matrix_translate_2f(vec[0], vec[1]); }
+void GPU_matrix_translate_3f(float x, float y, float /*z*/) { GPU_matrix_translate_2f(x, y); }
+void GPU_matrix_translate_3fv(const float vec[3]) { GPU_matrix_translate_2f(vec[0], vec[1]); }
+void GPU_matrix_scale_2f(float x, float y)
+{
+  rec.axes[0] *= x;
+  rec.axes[1] *= y;
+}
+void GPU_matrix_scale_2fv(const float vec[2]) { GPU_matrix_scale_2f(vec[0], vec[1]); }
+void GPU_matrix_scale_1f(float factor) { GPU_matrix_scale_2f(factor, factor); }
+void GPU_matrix_scale_3f(float x, float y, float /*z*/) { GPU_matrix_scale_2f(x, y); }
+void GPU_matrix_rotate_2d(float deg)
+{
+  const float c = cosf(DEG2RADF(deg)), s = sinf(DEG2RADF(deg));
+  const float2 x = rec.axes[0], y = rec.axes[1];
+  rec.axes[0] = x * c + y * s;
+  rec.axes[1] = y * c - x * s;
+}
+void GPU_matrix_ortho_set(float left, float right, float bottom, float top, float /*near*/, float /*far*/) { wmOrtho2(left, right, bottom, top); }
+void GPU_point_size(float /*size*/) {}
+float GPU_line_width_get() { return rec.line_width; }
 /* The projection is the ortho rectangle (wmOrtho2): pushed and popped as a stack. */
 static Vector<rctf> &projections()
 {
@@ -295,6 +349,13 @@ void immUniform1f(const char *name, float x)
   }
 }
 void immUniform2f(const char * /*name*/, float /*x*/, float /*y*/) {}
+void immUniform4f(const char *name, float x, float y, float z, float w)
+{
+  if (STREQ(name, "color")) {
+    immUniformColor4f(x, y, z, w);
+  }
+}
+void immUniform4fv(const char *name, const float data[4]) { immUniform4f(name, data[0], data[1], data[2], data[3]); }
 void immUniform2fv(const char * /*name*/, const float /*data*/[2]) {}
 void immUniformColor4f(float r, float g, float b, float a)
 {
@@ -383,6 +444,15 @@ void immVertex2f(uint /*attr_id*/, float x, float y) { imm.verts.append({x, y});
 void immVertex2fv(uint attr_id, const float data[2]) { immVertex2f(attr_id, data[0], data[1]); }
 void immVertex3f(uint attr_id, float x, float y, float /*z*/) { immVertex2f(attr_id, x, y); }
 void immVertex3fv(uint attr_id, const float data[3]) { immVertex2f(attr_id, data[0], data[1]); }
+/* A vertex color attribute colors the primitive (the last one given): gradients draw flat. */
+void immAttr4f(uint /*attr_id*/, float r, float g, float b, float a) { immUniformColor4f(r, g, b, a); }
+void immAttr4fv(uint attr_id, const float data[4]) { immAttr4f(attr_id, data[0], data[1], data[2], data[3]); }
+void immAttr3fv(uint attr_id, const float data[3]) { immAttr4f(attr_id, data[0], data[1], data[2], 1.0f); }
+void immAttr4ub(uint /*attr_id*/, uchar r, uchar g, uchar b, uchar a) { immUniformColor4ub(r, g, b, a); }
+void immAttr4ubv(uint attr_id, const uchar data[4]) { immAttr4ub(attr_id, data[0], data[1], data[2], data[3]); }
+void immAttr1f(uint /*attr_id*/, float /*x*/) {}
+void immAttr1u(uint /*attr_id*/, uint /*x*/) {}
+void immAttrSkip(uint /*attr_id*/) {}
 
 /* Triangles of a strip or fan, as the GPU assembles them. */
 static Vector<float2> triangles(GPUPrimType prim, Span<float2> v)
@@ -445,6 +515,54 @@ void immRectf(uint pos, float x1, float y1, float x2, float y2)
   immVertex2f(pos, x2, y2);
   immVertex2f(pos, x1, y2);
   immEnd();
+}
+
+void immRectf_fast(uint pos, float x1, float y1, float x2, float y2) { immRectf(pos, x1, y1, x2, y2); }
+void imm_draw_box_wire_2d(uint pos, float x1, float y1, float x2, float y2)
+{
+  immBegin(GPU_PRIM_LINE_LOOP, 4);
+  immVertex2f(pos, x1, y1);
+  immVertex2f(pos, x1, y2);
+  immVertex2f(pos, x2, y2);
+  immVertex2f(pos, x2, y1);
+  immEnd();
+}
+static void circle(GPUPrimType prim, uint pos, float x, float y, float radius_x, float radius_y, int nsegments)
+{
+  immBegin(prim, nsegments);
+  for (int i = 0; i < nsegments; i++) {
+    const float angle = float(2 * M_PI) * i / nsegments;
+    immVertex2f(pos, x + radius_x * cosf(angle), y + radius_y * sinf(angle));
+  }
+  immEnd();
+}
+void imm_draw_circle_wire_2d(uint pos, float x, float y, float radius, int nsegments) { circle(GPU_PRIM_LINE_LOOP, pos, x, y, radius, radius, nsegments); }
+void imm_draw_circle_fill_2d(uint pos, float x, float y, float radius, int nsegments) { circle(GPU_PRIM_TRI_FAN, pos, x, y, radius, radius, nsegments); }
+void imm_draw_circle_wire_aspect_2d(uint pos, float x, float y, float radius_x, float radius_y, int nsegments) { circle(GPU_PRIM_LINE_LOOP, pos, x, y, radius_x, radius_y, nsegments); }
+void imm_draw_circle_fill_aspect_2d(uint pos, float x, float y, float radius_x, float radius_y, int nsegments) { circle(GPU_PRIM_TRI_FAN, pos, x, y, radius_x, radius_y, nsegments); }
+void immAttr2f(uint /*attr_id*/, float /*x*/, float /*y*/) {}
+void immAttr3f(uint attr_id, float r, float g, float b) { immAttr4f(attr_id, r, g, b, 1.0f); }
+void imm_cpack(uint x) { immUniformColor3ub(x & 0xff, (x >> 8) & 0xff, (x >> 16) & 0xff); }
+void imm_draw_disk_partial_fill_2d(uint pos, float x, float y, float rad_inner, float rad_outer, int nsegments, float start, float sweep)
+{
+  immBegin(GPU_PRIM_TRI_STRIP, nsegments * 2);
+  for (int i = 0; i < nsegments; i++) {
+    const float angle = DEG2RADF(start + sweep * i / (nsegments - 1));
+    immVertex2f(pos, x + rad_inner * cosf(angle), y + rad_inner * sinf(angle));
+    immVertex2f(pos, x + rad_outer * cosf(angle), y + rad_outer * sinf(angle));
+  }
+  immEnd();
+}
+/* A checkerboard (behind transparent colors) as its lighter grey. */
+void imm_draw_box_checker_2d_ex(float x1, float y1, float x2, float y2, const float color_primary[4], const float /*color_secondary*/[4], int /*checker_size*/)
+{
+  immUniformColor4fv(color_primary);
+  immRectf(0, x1, y1, x2, y2);
+}
+void imm_draw_box_checker_2d(float x1, float y1, float x2, float y2, bool /*clear_alpha*/)
+{
+  const float light[4] = {0.4f, 0.4f, 0.4f, 1.0f};
+  imm_draw_box_checker_2d_ex(x1, y1, x2, y2, light, light, 8);
 }
 
 namespace ui {

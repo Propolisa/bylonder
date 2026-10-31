@@ -1,7 +1,7 @@
 // Object Mode operators: Blender's own where the module runs them, on Main kept equal to the scene (main-sync.js), else Bylonder's actions
 // (object-actions.js) as the Blender operators they name, so Blender's own 3D View menus and keymaps run them. Actions
 // Blender lacks are `bylonder.*` operators, added to Blender's Object menu as an add-on would.
-import { registerOperator, registerFallback, appendMenu, kw, invokeOperator } from '../../windowmanager/wm-operators.js';
+import { registerOperator, registerFallback, appendMenu, kw, invokeOperator, contextArea } from '../../windowmanager/wm-operators.js';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { runModal } from '../space_view3d/view3d-modal.js';
 import { regionView3D } from '../space_view3d/view3d-project.js';
@@ -11,8 +11,9 @@ import { OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
 // static items (rna-operators.json).
 const ENUMS = {};
 // Blender's Object Mode operators, run by Blender's code in the module (tests/objects-wasm.test.js) where Bylonder has no
-// action of its own for them.
-const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh)\./.test(idname));
+// action of its own for them, with its physics: particle systems and their settings, point caches, rigid bodies,
+// boids and dynamic paint.
+const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh|particle|ptcache|rigidbody|boid|dpaint)\./.test(idname));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
 //   host: commit() an undo step, wm() the window manager, pointer() its last pointer event, view() the 3D View under it.
@@ -22,7 +23,8 @@ const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 // runs it again by exec with what it chose, or, for a properties dialog, runs the operator it kept.
 export function runBlenderOperator(sync, idname, props, options) {
   const { event, keying, notify, commit, wm, pointer } = options;
-  if (!event) return inMain(sync, options, () => sync.blender.run(idname, props));
+  // From one of Blender's own areas (its buttons), it runs in that area's context, which its editor set.
+  if (!event || contextArea()?.blender) return inMain(sync, options, () => sync.blender.run(idname, props));
   const view = event.view ?? options.view();
   if (!view) return inMain(sync, options, () => sync.blender.run(idname, props));
   let invoked = {};

@@ -54,7 +54,8 @@ export function mountProperties(host, { world, editor, history, systems, propert
     refresh,
     undoPush: () => { refresh(); history.commit(); },
     report: (error) => world.notify?.(error.message ?? String(error)),
-    run: (idname, props, event) => { inArea(contextArea, () => invokeOperator(idname, props, event)); refresh(); },
+    // In the region's context, so Blender's operators find what its buttons show (a particle system, a point cache).
+    run: (idname, props, event) => { inArea(contextArea, () => area.inContext(type, () => invokeOperator(idname, props, event))); refresh(); },
     keys: (idname, props) => blenderKeys(['Property Editor', 'Window'], idname, props),
     panelClosed: (id, closed) => area.inContext(type, (C) => panelClosedSet(C, id, closed)),
     button: (b) => blenderButton(area, type, b, () => { refresh(); history.commit(); }),
@@ -65,6 +66,8 @@ export function mountProperties(host, { world, editor, history, systems, propert
   let tabs = [];
   // This editor as the context area (wm-operators.js): its menus, and what its operators act on (properties-operators.js).
   const contextArea = {
+    // Blender's own area: its buttons' operators run in its context (object-operators.js).
+    blender: true,
     menu: (name) => (event) => openMenu(treeMenu(area.inContext(RGN_TYPE_WINDOW, (C) => menuTree(C, name)) ?? { children: [] }, ui[RGN_TYPE_WINDOW]),
       event?.currentTarget instanceof Element ? event.currentTarget : { x: event?.native?.clientX ?? 0, y: event?.native?.clientY ?? 0 }),
     properties: {

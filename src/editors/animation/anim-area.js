@@ -99,13 +99,14 @@ export class AnimArea {
   set subtype(value) { x.anim_area_subtype_set(this.pointer, value); }
   // The header text the running operator shows (ED_area_status_text).
   get status() { const text = x.anim_area_status(this.pointer); return text ? cString(text) : ''; }
-  // Runs fn with the context in this area and one of its regions.
+  // Runs fn with the context in this area and one of its regions, then gives back the context's own.
   inContext(regionType, fn) {
-    x.wm_area_context_set(this.main.C, this.pointer, regionType);
+    const { C } = this.main, area = x.wm_context_area(C), region = x.wm_context_region(C);
+    x.wm_area_context_set(C, this.pointer, regionType);
     try {
-      return fn(this.main.C);
+      return fn(C);
     } finally {
-      x.wm_area_context_set(this.main.C, 0, 0);
+      x.wm_context_restore(C, area, region);
     }
   }
   // What the space's refresh does before drawing (the Graph Editor's curve colors).

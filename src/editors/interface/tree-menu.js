@@ -2,7 +2,7 @@
 // Blender's menus; without components, so that scripts and tests can lay menus out too.
 //   ui: block-view.js's region contract; `runs(idname)` may say which operators ui.run runs itself (else Bylonder's
 //   registry's do), `adjust(tree)` may change a tree before its entries are made.
-import { buttonMenu, buttonPress, buttonOperator } from './ui-tree.js';
+import { buttonMenu, buttonPress, buttonOperator, inButtonContext } from './ui-tree.js';
 import { takeOperatorPopup } from '../../bmesh/bmesh-wasm.js';
 import { runsOperator } from '../../windowmanager/wm-operators.js';
 
@@ -12,8 +12,8 @@ export const press = (b, ui, value = -1) => {
   ui.refresh();
 };
 
-// An operator button: run by Bylonder's registry where it has the operator, else by Blender's handlers in the module,
-// the button active (template_ID's New assigns what it makes).
+// An operator button: run by Bylonder's registry where it has the operator (with the context its layout gave the
+// button), else by Blender's handlers in the module, the button active (template_ID's New assigns what it makes).
 const OPERATOR_FINISHED = 4;
 // A button's operator properties, but rna_type, which is no value to set.
 const buttonProperties = (b) => Object.fromEntries(Object.entries(b.properties ?? {}).filter(([, value]) => value !== null));
@@ -24,7 +24,7 @@ export function runOperator(b, ui, event) {
     const invoke = (b.context ?? EXEC_DEFAULT) < EXEC_DEFAULT;
     const at = { type: 'NONE', value: 'NOTHING', clientX: event?.clientX ?? event?.x, clientY: event?.clientY ?? event?.y, shiftKey: event?.shiftKey,
       ctrlKey: event?.ctrlKey, altKey: event?.altKey, metaKey: event?.metaKey, invoke };
-    return ui.run(b.operator, buttonProperties(b), at);
+    return ui.inContext((C) => inButtonContext(C, b, () => ui.run(b.operator, buttonProperties(b), at)));
   }
   const status = ui.inContext((C) => buttonOperator(C, b));
   // The popup its invoke opened (a properties dialog, a confirmation): the page's (wm-popups.js).

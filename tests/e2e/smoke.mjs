@@ -155,6 +155,24 @@ const checks = {
     await app.until((b) => { const c = b.world.scene.getMeshByName("Cube").material.albedoColor; return c.r > 0.99 && c.g < 0.01; });
   },
 
+  // Blender's particle systems from its Particles tab: one added emits points the view draws, its Cache panel's Bake runs
+  // as Blender's job to its end in the module, and the system goes again.
+  async "the Particles tab adds a particle system that emits, and its cache bakes"() {
+    const properties = app.locator("#properties-section");
+    await app.locator('[role="tab"][aria-label="Particles"]').click();
+    await properties.getByRole("button", { name: "Add a particle system" }).click();
+    for (const frame of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) await app.bylonder((b, f) => b.world.animation.time.configure({ frameCurrent: f }), frame);
+    await app.until((b) => b.world.scene.meshes.some((m) => m.name.startsWith("__particles") && m.subMeshes[0]?.verticesCount > 10));
+    const cache = properties.locator('[data-blender="PARTICLE_PT_cache"]');
+    await cache.locator("header").click();
+    await cache.getByRole("button", { name: "Bake", exact: true }).click();
+    await cache.getByRole("button", { name: "Delete Bake" }).waitFor();
+    await cache.getByRole("button", { name: "Delete Bake" }).click();
+    await properties.getByRole("button", { name: "Remove the selected particle system" }).click();
+    await app.until((b) => !b.world.scene.meshes.some((m) => m.name.startsWith("__particles")));
+    await typeInto('[role="spinbutton"][aria-label="Current Frame"]', "1");
+  },
+
   // anim.change_frame runs as Blender's modal operator: the frame follows the pointer until the button is released.
   async "dragging across the Timeline's frame numbers scrubs the frame"() {
     const box = await app.locator(".anim-editor").first().boundingBox(), frame = () => app.bylonder((b) => b.world.animation.time.frame);

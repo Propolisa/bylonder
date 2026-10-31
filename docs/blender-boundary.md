@@ -268,7 +268,7 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   armatures),
   run on the given build through `BYLONDER_BMESH_WASM`, about 8 s a run. `tests/export-live.test.js` runs the
   modifiers check on the committed module.
-- **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`: 15.4 MB, 4.4 MB gzipped), with
+- **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`, all of Blender's libraries but those past the seams: 59.2 MB, 16.5 MB gzipped), with
   `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
   3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
   and `BKE_modifier_init` reach (every ID type's code) and RNA's static definitions; narrowing those to Mesh and

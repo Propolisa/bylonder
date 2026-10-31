@@ -427,7 +427,7 @@ static const char *event_result(wmWindow *win, const Set<wmOperator *> &register
 
 /* port-override: wm_window_timers_process (wm_window.cc) for the page's window, which has no GHOST loop to run it: the
  * window timers that are due become TIMER events in its queue (panel animations, tooltips, modal operators' timers),
- * notifier timers add their notifiers. Jobs and autosave have no timers here. */
+ * notifier timers add their notifiers and job timers update and end their jobs. Autosave has no timer here. */
 static void wm_window_timers_process(wmWindowManager *wm)
 {
   const double time = BLI_time_now_seconds();
@@ -448,7 +448,10 @@ static void wm_window_timers_process(wmWindowManager *wm)
     if (wt.event_type == TIMERNOTIFIER) {
       WM_main_add_notifier(POINTER_AS_UINT(wt.customdata), nullptr);
     }
-    else if (wmWindow *win = wt.win; !ELEM(wt.event_type, TIMERJOBS, TIMERAUTOSAVE)) {
+    else if (wt.event_type == TIMERJOBS) {
+      wm_jobs_timer(wm, &wt);
+    }
+    else if (wmWindow *win = wt.win; wt.event_type != TIMERAUTOSAVE) {
       wmEvent event;
       wm_event_init_from_window(win, &event);
       event.type = wt.event_type;
@@ -535,7 +538,7 @@ EXPORT(wm_timers_active) bool wm_timers_active(bContext *C)
 {
   wmWindowManager *wm = CTX_wm_manager(C);
   for (const wmTimer &wt : wm->runtime->timers) {
-    if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && !ELEM(wt.event_type, TIMERJOBS, TIMERAUTOSAVE) &&
+    if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && wt.event_type != TIMERAUTOSAVE &&
         BLI_findindex(&wm->windows, wt.win) != -1)
     {
       return true;
@@ -587,6 +590,14 @@ EXPORT(wm_area_context_set) void wm_area_context_set(bContext *C, ScrArea *area,
 {
   CTX_wm_area_set(C, area);
   CTX_wm_region_set(C, area ? BKE_area_find_region_type(area, regiontype) : nullptr);
+}
+/* The context's area and region, to give back after a nested one (anim-area.js inContext). */
+EXPORT(wm_context_area) ScrArea *wm_context_area(bContext *C) { return CTX_wm_area(C); }
+EXPORT(wm_context_region) ARegion *wm_context_region(bContext *C) { return CTX_wm_region(C); }
+EXPORT(wm_context_restore) void wm_context_restore(bContext *C, ScrArea *area, ARegion *region)
+{
+  CTX_wm_area_set(C, area);
+  CTX_wm_region_set(C, region);
 }
 
 /* A region of an area drawn by its type's draw callback (or its overlay's, draw_overlay), with the area and region the

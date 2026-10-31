@@ -43,6 +43,8 @@
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
+#include "BKE_particle.h"
+#include "DNA_particle_types.h"
 #include "BKE_scene.hh"
 #include "BKE_workspace.hh"
 #include "BLI_filereader.h"
@@ -608,36 +610,163 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   return &ctx->extraction;
 }
 
-/* The instances Main's objects make by their Instancing (a collection, their vertices or faces), as Blender's draw
- * engines draw them (object_duplilist): each one's instancer, the object it instances and its world matrix, valid until
- * the next call; returns their count. */
-struct Instance {
+/* A Blender matrix (column-major, Z up) written as Babylon's (row-major, Y up; main-view.js babylonMatrix). */
+static void babylon_matrix(const float m[4][4], float *out)
+{
+  static const int axis[4] = {0, 2, 1, 3};
+  for (int i = 0; i < 16; i++) {
+    out[i] = m[axis[i >> 2]][axis[i & 3]];
+  }
+}
+
+/* The instances Main's objects make as Blender's draw engines draw them (object_duplilist): by their Instancing (a
+ * collection, their vertices or faces), their particle systems rendered as objects or collections, and the instances
+ * of their evaluated geometry. They are grouped by instancer and the object instanced; each group's world matrices,
+ * in Babylon's axes, are contiguous in one buffer that is read in place: { instancer, ob, first, count } per group.
+ * Valid until the next call; returns the number of groups. */
+struct InstanceGroup {
   Object *instancer, *ob;
-  float matrix[4][4];
+  int first, count;
 };
-static Vector<Instance> instances;
+static Vector<InstanceGroup> instance_groups;
+static Vector<float> instance_matrices;
 EXPORT(main_instances) int main_instances(BlenderMain *ctx)
 {
-  instances.clear();
+  instance_groups.clear();
+  instance_matrices.clear();
   Depsgraph *depsgraph = depsgraph_of(ctx);
+  Map<std::pair<Object *, Object *>, Vector<const float *>> grouped;
+  Vector<std::pair<Object *, Object *>> order;
   for (Object &ob : ctx->bmain->objects) {
     Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
-    if (!evaluated || evaluated == &ob || !(evaluated->transflag & OB_DUPLI)) {
+    if (!evaluated || evaluated == &ob) {
+      continue;
+    }
+    const bke::GeometrySet *geometry = evaluated->runtime->geometry_set_eval;
+    if (!(evaluated->transflag & OB_DUPLI) && !(geometry && geometry->has_instances())) {
       continue;
     }
     DupliList duplis;
     object_duplilist(depsgraph, evaluated, nullptr, duplis);
     for (const DupliObject &dupli : duplis) {
-      if (!dupli.no_draw) {
-        Instance instance = {&ob, DEG_get_original(dupli.ob)};
-        copy_m4_m4(instance.matrix, dupli.mat);
-        instances.append(instance);
+      /* Instances of geometry no object of Main's holds have nothing for the view to draw them with. */
+      Object *instanced = DEG_get_original(dupli.ob);
+      if (dupli.no_draw || !instanced || instanced == dupli.ob || instanced == &ob) {
+        continue;
+      }
+      const std::pair<Object *, Object *> key = {&ob, instanced};
+      Vector<const float *> &matrices = grouped.lookup_or_add_cb(key, [&]() { order.append(key); return Vector<const float *>(); });
+      matrices.append(&dupli.mat[0][0]);
+    }
+    for (const std::pair<Object *, Object *> &key : order) {
+      const Vector<const float *> &matrices = grouped.lookup(key);
+      instance_groups.append({key.first, key.second, int(instance_matrices.size() / 16), int(matrices.size())});
+      const int64_t at = instance_matrices.size();
+      instance_matrices.resize(at + matrices.size() * 16);
+      for (const int64_t i : matrices.index_range()) {
+        babylon_matrix(reinterpret_cast<const float(*)[4]>(matrices[i]), &instance_matrices[at + i * 16]);
       }
     }
+    grouped.clear();
+    order.clear();
   }
-  return instances.size();
+  return instance_groups.size();
 }
-EXPORT(main_instance) const Instance *main_instance(int index) { return &instances[index]; }
+EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { return instance_groups.data(); }
+EXPORT(main_instance_matrices) const float *main_instance_matrices() { return instance_matrices.data(); }
+
+/* The particles Main's particle systems show that are not instances, as Blender's overlay and EEVEE draw them: by the
+ * system's viewport display (or, rendering, its render type) a point per living particle (Halo, Dot, Circle, Cross,
+ * Axis), or its paths as line segments (Path: hair strands and children). Positions are in world space and Babylon's
+ * axes, segments pairs of indices into the system's positions; each system is { ob, system index, kind (0 points, 1 lines), material slot
+ * (1-based, 0 none), first position, positions, first index, indices }. Valid until the next call; returns their
+ * count. */
+struct ParticleDraw {
+  Object *ob;
+  int system, kind, material, first, count, first_index, indices;
+};
+static Vector<ParticleDraw> particle_draws;
+static Vector<float> particle_positions;
+static Vector<uint32_t> particle_indices;
+static void particle_position(const float co[3])
+{
+  particle_positions.extend({co[0], co[2], co[1]});
+}
+static void particle_paths(ParticleCacheKey **cache, int total, int step, int base)
+{
+  for (int p = 0; p < total; p += step) {
+    const ParticleCacheKey *keys = cache[p];
+    if (!keys || keys->segments < 1) {
+      continue;
+    }
+    const uint32_t first = particle_positions.size() / 3 - base;
+    for (int k = 0; k <= keys->segments; k++) {
+      particle_position(keys[k].co);
+    }
+    for (int k = 0; k < keys->segments; k++) {
+      particle_indices.extend({first + k, first + k + 1});
+    }
+  }
+}
+EXPORT(main_particles) int main_particles(BlenderMain *ctx, bool rendering)
+{
+  particle_draws.clear();
+  particle_positions.clear();
+  particle_indices.clear();
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  for (Object &ob : ctx->bmain->objects) {
+    Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
+    if (!evaluated || evaluated == &ob) {
+      continue;
+    }
+    int index = -1;
+    for (ParticleSystem &system : evaluated->particlesystem) {
+      ParticleSystem *psys = &system;
+      index++;
+      const ParticleSettings *part = psys->part;
+      if (!part || !psys_check_enabled(evaluated, psys, rendering)) {
+        continue;
+      }
+      const int as = rendering || part->draw_as == PART_DRAW_REND ? part->ren_as : part->draw_as;
+      ParticleDraw draw = {&ob, index, 0, part->omat, int(particle_positions.size() / 3), 0, int(particle_indices.size()), 0};
+      if (as == PART_DRAW_PATH) {
+        /* Hair renders as strands; the viewport shows its share of them (display percentage). */
+        const int step = rendering ? 1 : std::max(1, int(std::lround(100.0f / std::max(1, int(part->disp)))));
+        draw.kind = 1;
+        particle_paths(psys->pathcache, psys->totcached, step, draw.first);
+        particle_paths(psys->childcache, psys->totchildcache, step, draw.first);
+      }
+      else if (!rendering && ELEM(as, PART_DRAW_DOT, PART_DRAW_CIRC, PART_DRAW_CROSS, PART_DRAW_AXIS, PART_DRAW_LINE)) {
+        ParticleSimulationData sim = {nullptr};
+        sim.depsgraph = depsgraph;
+        sim.scene = DEG_get_evaluated_scene(depsgraph);
+        sim.ob = evaluated;
+        sim.psys = psys;
+        sim.psmd = psys_get_modifier(evaluated, psys);
+        psys_sim_data_init(&sim);
+        for (int p = 0; p < psys->totpart; p++) {
+          ParticleKey state;
+          state.time = DEG_get_ctime(depsgraph);
+          if (psys_get_particle_state(&sim, p, &state, false)) {
+            particle_position(state.co);
+          }
+        }
+        psys_sim_data_free(&sim);
+      }
+      else {
+        continue;
+      }
+      draw.count = particle_positions.size() / 3 - draw.first;
+      draw.indices = particle_indices.size() - draw.first_index;
+      particle_draws.append(draw);
+    }
+  }
+  return particle_draws.size();
+}
+EXPORT(main_particle_draws) const ParticleDraw *main_particle_draws() { return particle_draws.data(); }
+EXPORT(main_particle_positions) const float *main_particle_positions() { return particle_positions.data(); }
+EXPORT(main_particle_indices) const uint32_t *main_particle_indices() { return particle_indices.data(); }
+
 
 /* The last extracted Mesh's material slot of each face (its material_index, 0-based), or null when all are the first. */
 EXPORT(extracted_material_index) const int *extracted_material_index()

@@ -5,21 +5,22 @@ import { bindGraph } from '../../nodes/bindings.js';
 const inputRows = (rows, row, empty) => (rows.length ? rows.map(f => row({ ...f, default: undefined })) : [h('p', { class: 'bl-message' }, empty)]);
 const openButton = (label, iconName, run) => h('button', { type: 'button', class: 'bl-wide-button', onClick: run }, [icon(iconName), label]);
 
+// Bylonder's Babylon particle systems (node particle sets), after Blender's own particle systems in the tab, in one panel.
 export function particlePanels({ world, node, row, panel }) {
   const particles = world.particles;
-  if (!node?.getTotalVertices) return [h('p', { class: 'bl-message' }, 'Select a mesh object to add particle systems.')];
+  if (!node?.getTotalVertices) return [];
   const list = particles.systems(node), active = particles.active(node), index = list.indexOf(active);
   const rows = active && particles.graph(active.id)
     ? bindGraph(world.animation, { id: 'particles:' + active.id, title: node.name + ' › ' + active.name, graph: () => particles.graph(active.id), kind: 'particles' })
     : [];
-  return [
+  return [panel('particles.babylon', 'Babylon Particle Systems', () => [
     h('div', { class: 'bl-list-wrap' }, [
-      h('div', { class: 'bl-list', role: 'listbox', 'aria-label': 'Particle systems' }, list.length
+      h('div', { class: 'bl-list', role: 'listbox', 'aria-label': 'Babylon particle systems' }, list.length
         ? list.map((s, i) => h('button', { class: ['bl-list-row', { active: i === index }], role: 'option', 'aria-selected': i === index, onClick: () => particles.setActive(node, i) }, [icon('PARTICLES'), h('span', s.name), h('span', { class: 'bl-list-flag', title: s.enabled ? 'Shown in viewport' : 'Hidden' }, icon(s.enabled ? 'RESTRICT_VIEW_OFF' : 'RESTRICT_VIEW_ON'))]))
         : [h('div', { class: 'bl-list-empty' })]),
       h('div', { class: 'bl-list-side' }, [
-        iconButton('ADD', 'Add Particle System', () => particles.add(node)),
-        iconButton('REMOVE', 'Remove Particle System', () => active && particles.remove(node, active.id), { disabled: !active }),
+        iconButton('ADD', 'Add Babylon Particle System', () => particles.add(node)),
+        iconButton('REMOVE', 'Remove Babylon Particle System', () => active && particles.remove(node, active.id), { disabled: !active }),
       ]),
     ]),
     active ? h('div', { class: 'bl-id-row' }, [
@@ -30,8 +31,8 @@ export function particlePanels({ world, node, row, panel }) {
     active ? panel('particles.inputs', 'Inputs', () => [
       ...inputRows(rows, row, 'Add Input blocks to the particle node set to expose values here.'),
       openButton('Edit in Particle Node Editor', 'PARTICLES', () => world.openNodeEditor?.('particles')),
-    ]) : null,
-  ];
+    ], { subpanel: true }) : null,
+  ], { defaultClosed: true })];
 }
 
 export function compositingPanel({ world, row, panel }) {

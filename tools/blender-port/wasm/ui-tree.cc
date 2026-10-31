@@ -890,6 +890,18 @@ EXPORT(ui_button_operator) int ui_button_operator(bContext *C, Button *but)
   button_applied(C, but);
   return int(status);
 }
+/* The context store a button's layout gave it (context_pointer_set: a panel's point cache, a modifier) made the
+ * context's, for its operator run by the page's registry; returns the store it replaced, which
+ * ui_context_store_restore gives back. */
+EXPORT(ui_button_context_push) const bContextStore *ui_button_context_push(bContext *C, Button *but)
+{
+  const bContextStore *previous = CTX_store_get(C);
+  if (button_live(C, but) && but->context) {
+    CTX_store_set(C, but->context);
+  }
+  return previous;
+}
+EXPORT(ui_context_store_restore) void ui_context_store_restore(bContext *C, const bContextStore *store) { CTX_store_set(C, store); }
 /* After JS set a property button's value through RNA: its functions, as after a press. */
 EXPORT(ui_button_applied) void ui_button_applied(bContext *C, Button *but)
 {

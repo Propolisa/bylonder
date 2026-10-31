@@ -110,6 +110,7 @@ export function createCollections(world, { commit = () => {} } = {}) {
     },
     // A render's world shows what renders show.
     useRenderVisibility() { render = true; sync(); },
+    get rendering() { return render; },
     // What Main does not hold: the view layers (Main's view layer has the active one's flags).
     capture() { return JSON.stringify(viewLayersOf(state)) === JSON.stringify(viewLayersOf(baseline)) ? undefined : clone(viewLayersOf(state)); },
     // A project's view layers; one saved before Main held the collections brings them too, which Main then takes.

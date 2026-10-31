@@ -8,6 +8,9 @@
 #include "BKE_main.hh"
 #include "BKE_mesh.hh"
 #include "BKE_scene.hh"
+#include "BKE_pointcache.h"
+#include "BLI_listbase.h"
+#include "DEG_depsgraph_query.hh"
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
@@ -38,10 +41,43 @@ EXPORT(mesh_attributes_list) const char *mesh_attributes_list(const Object *ob)
 
 /* The scene at a frame, evaluated by its depsgraph as Blender evaluates a new frame (animation, drivers and what
  * depends on them). */
+/* The last frame Main's simulations (particles, cloth, soft body, dynamic paint, rigid bodies) were stepped to without
+ * a gap since their caches started, as their point caches record it (PointCache.last_exact, which an edit that outdates
+ * a cache resets); INT_MAX without one that could step further. */
+static int simulated_until(Depsgraph *depsgraph)
+{
+  Scene *scene = DEG_get_evaluated_scene(depsgraph);
+  int until = INT_MAX;
+  for (Object &ob : DEG_get_bmain(depsgraph)->objects) {
+    Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
+    ListBaseT<PTCacheID> pids;
+    BKE_ptcache_ids_from_object(&pids, evaluated ? evaluated : &ob, scene, 0);
+    for (PTCacheID &pid : pids) {
+      const PointCache *cache = pid.cache;
+      const int exact = cache->flag & PTCACHE_OUTDATED ? cache->startframe - 1 : std::max(cache->last_exact, cache->startframe - 1);
+      if (!(cache->flag & PTCACHE_BAKED) && exact < cache->endframe) {
+        until = std::min(until, exact);
+      }
+    }
+    BLI_freelistN(&pids);
+  }
+  return until;
+}
+
+/* The scene at a frame, as Blender's depsgraph evaluates a new frame. Simulations step a frame at a time, so frames they
+ * have not reached are stepped first (as playing every frame does): a jump ahead, or a frame rendered on its own, shows
+ * the state playing up to it gives. */
 EXPORT(view_frame_set) void view_frame_set(bContext *C, float frame)
 {
-  BKE_scene_frame_set(CTX_data_scene(C), frame);
-  BKE_scene_graph_update_for_newframe(CTX_data_depsgraph_pointer(C));
+  Scene *scene = CTX_data_scene(C);
+  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(C);
+  const int until = simulated_until(depsgraph);
+  for (int step = std::max(until + 1, int(scene->r.sfra)); until != INT_MAX && step < int(frame); step++) {
+    BKE_scene_frame_set(scene, step);
+    BKE_scene_graph_update_for_newframe(depsgraph);
+  }
+  BKE_scene_frame_set(scene, frame);
+  BKE_scene_graph_update_for_newframe(depsgraph);
 }
 
 /* An object Main holds in Edit Mode: its edit mesh's arrays as the draw cache extracts them (extraction.hh), the parts

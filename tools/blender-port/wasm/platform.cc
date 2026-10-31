@@ -61,6 +61,26 @@ WEAK void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
 WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
+/* port-override: WASI has no threads: a thread pool's work (a window manager job's: a point cache bake) runs where it
+ * is inserted, to its end; the job's timer then ends the job (wm-api.cc wm_window_timers_process). */
+struct ThreadSlot {
+  ThreadSlot *next, *prev;
+  void *(*do_thread)(void *);
+  void *callerdata;
+  pthread_t pthread;
+  int avail;
+};
+void BLI_threadpool_insert(ListBaseT<ThreadSlot> *threadbase, void *callerdata)
+{
+  for (ThreadSlot &slot : *threadbase) {
+    if (slot.avail) {
+      slot.avail = 0;
+      slot.callerdata = callerdata;
+      slot.do_thread(callerdata);
+      return;
+    }
+  }
+}
 /* port-override: image files are the browser's to decode; OpenImageIO and OpenEXR are past the seam. */
 WEAK void OIIO_init() {}
 WEAK void imb_initopenexr() {}

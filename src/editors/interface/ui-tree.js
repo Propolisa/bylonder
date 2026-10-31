@@ -37,5 +37,14 @@ export const buttonPress = (C, button, value = -1) => x.ui_button_press(C, butto
 export const buttonApplied = (C, button) => x.ui_button_applied(C, button.id);
 // An operator button pressed as Blender's handlers run it: its operator with the button active; its wmOperatorStatus.
 export const buttonOperator = (C, button) => x.ui_button_operator(C, button.id);
+// Runs fn with the context store a button's layout gave it (its panel's point cache, its modifier) as the context's.
+export function inButtonContext(C, button, fn) {
+  const previous = x.ui_button_context_push(C, button.id);
+  try {
+    return fn();
+  } finally {
+    x.ui_context_store_restore(C, previous);
+  }
+}
 export const buttonValueSet = (C, button, value) => x.ui_button_value_set(C, button.id, value);
 export const buttonTextSet = (C, button, text) => withString(text, (p) => x.ui_button_text_set(C, button.id, p));
