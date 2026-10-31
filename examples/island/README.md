@@ -10,7 +10,8 @@ falling far out to sea, and the main chunk strikes the island's far shoulder gla
 Burning debris over the ridge lights the forest above the nest; then the mountain cracks. The mother sees the fissure
 racing down at the tree, cries out and shoves the chick, who has failed to fly twice, off the branch; it flies, and the
 blast hurls the tree out over the sea with her on it. The father and the chick call into the smoke from the beach and
-sleep pressed together. In the morning a faint call carries round the shore: they find her on the wreck in a sea cave,
+sleep pressed together. In the morning a faint call carries round the shore: they find her on the wreck, run aground on the
+lava point round the headland,
 one wing bent and a scar across her face; the father hauls it in, she climbs out to them, and the three, sooty from the
 fire, huddle together. The camera draws back over the island, its far side glass still glowing in seams and cut open to
 its hollow core, its lee still green, everything sooted, the land strewn with ejecta, logs and ash afloat,
@@ -30,7 +31,7 @@ a turtle coming ashore and a whale with her calf beyond.
   which cools in uneven seams, with the volcano's strata, conduit and chamber showing in the cutaway. After the strike a
   soot uniform darkens and greys every toon surface. The sky
   draws the sun's shafts, stars, aurora, the new star with its coma and tail, and the meteor's contrail.
-- **Family.** `family.js`: the nest tree and its wreck, nest, egg and chick, the sea cave, the parents' flights as keyed paths, and where each bird
+- **Family.** `family.js`: the nest tree and its wreck, nest, egg and chick, the lava point, the parents' flights as keyed paths, and where each bird
   looks, bows, sleeps or looks back, as gaze timelines. The mother's bent wing, her scar and the family's soot are
   pose options of the bird kit, marks painted on its faces.
 - **Effects.** `particles.js` makes particles that are each a function of time (born, thrown, falling under gravity and

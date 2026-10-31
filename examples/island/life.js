@@ -2,7 +2,7 @@ import { createMesh } from '@workbench/sdk';
 import { blob } from './forest.js';
 import { random } from './random.js';
 import { shore, heightAt } from './island.js';
-import { smoothstep, lerp, eruption, BEAT, OMEN, SEA_CAVE, TURTLE, LENGTH as FILM, shotAngle, frameAt, days, dayAt } from './story.js';
+import { smoothstep, lerp, eruption, BEAT, OMEN, LAVA_POINT, TURTLE, LENGTH as FILM, shotAngle, frameAt, days, dayAt } from './story.js';
 import { createParticles, together, pop, swell, glowOf, direction } from './particles.js';
 import { setMatrices, place, createPuffs } from './sky.js';
 
@@ -68,7 +68,7 @@ function whaleMesh() {
 
 // The whales' swims: a whale early on, surfacing along the shore in the shot it is seen in; at the end a whale and her
 // calf beyond the island from the last shot, rising twice, slow and long. `length` is a swim's seconds.
-const BEYOND = SEA_CAVE.angle + 0.1 + Math.PI;
+const BEYOND = LAVA_POINT.angle + 0.1 + Math.PI;
 export const WHALES = [
   { start: 7.5, angle: 0.35, distance: 10, size: 0.85 },
   ...[FILM - 12, FILM - 6.5].flatMap((start, k) => [{ start, at: BEYOND + 0.35 - 0.1 * k, distance: 17, size: 1.0, length: 5.5 },

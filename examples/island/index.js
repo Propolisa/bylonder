@@ -19,7 +19,7 @@ const mix = (a, b, t) => Color3.Lerp(a, b, Math.min(1, Math.max(0, t)));
 // trail; it grows night after night, the flock leaves, and just after sunset it falls, breaking up in the sky, its main
 // chunk striking the island's far shoulder glancingly. Burning debris lights the forest above the nest; the mountain
 // cracks, the mother shoves the chick off the branch, and the blast hurls the tree out to sea with her on it. After a
-// night on the beach the father and the chick find her on the wreck in a sea cave, and they are together again. Low
+// night on the beach the father and the chick find her on the wreck aground on the lava point, and they are together again. Low
 // poly and toon shaded: the look is in toon.js, the story's clock in story.js, the family in family.js, the effects are
 // layers of particles (particles.js), the sound is Babylon's spatial audio (audio.js).
 export const createScene = async function () {

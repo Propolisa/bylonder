@@ -84,21 +84,25 @@ export const MOURN = (() => {
   const angle = NEST.angle - 0.7, r = 0.82 * shore(angle), x = Math.cos(angle) * r, z = Math.sin(angle) * r;
   return { angle, x, z, ground: heightAt(x, z) };
 })();
-// A sea cave on the coast where the blasted land meets the green, round the island from the beach: a hump of dark rock
-// with its mouth at the waterline, open to the sea. The wreck of the tree drifts into it overnight.
-export const SEA_CAVE = (() => {
-  const angle = NEST.angle - 2.5, r = shore(angle);
+// The lava point: where the next of the first lava channels past the nest (toon.js channel) ran into the sea and built
+// a rough tongue of basalt boulders out from the waterline, round the nest's headland from the beach. The wreck of the
+// tree drifts onto it overnight. `r` is the waterline.
+export const LAVA_POINT = (() => {
+  let angle = 1.6;
+  for (let k = 0; k < 30; k++) angle = 1.5566 + 0.25 * Math.sin(0.95 * shore(angle) * 1.7 + 1);
+  const r = 0.855 * shore(angle);
   return { angle, r, x: Math.cos(angle) * r, z: Math.sin(angle) * r };
 })();
-// A low shelf of rock at the water beside the cave's mouth, where they come together.
+// A flat slab of basalt on the point, where they come together.
 export const SHELF = (() => {
-  const a = SEA_CAVE.angle, along = [-Math.sin(a), Math.cos(a)], x = Math.cos(a) * (SEA_CAVE.r + 0.35) + along[0] * 1.35, z = Math.sin(a) * (SEA_CAVE.r + 0.35) + along[1] * 1.35;
+  const a = LAVA_POINT.angle, along = [-Math.sin(a), Math.cos(a)], out = LAVA_POINT.r + 0.75;
+  const x = Math.cos(a) * out + along[0] * 0.3, z = Math.sin(a) * out + along[1] * 0.3;
   return { angle: Math.atan2(z, x), x, z, ground: 0.18 };
 })();
-// Halfway round the shore from the beach to the cave, where they pass in the morning.
-export const PATH = (() => { const angle = lerp(MOURN.angle, SEA_CAVE.angle, 0.5), r = 0.84 * shore(angle), x = Math.cos(angle) * r, z = Math.sin(angle) * r; return { angle, x, z, ground: heightAt(x, z) }; })();
+// Halfway round the shore from the beach to the point, below where the tree stood, where they pass in the morning.
+export const PATH = (() => { const angle = lerp(MOURN.angle, LAVA_POINT.angle, 0.5), r = 0.84 * shore(angle), x = Math.cos(angle) * r, z = Math.sin(angle) * r; return { angle, x, z, ground: heightAt(x, z) }; })();
 // The turtle hauls out of the sea on the green side, in the last wide shot: [from, to] as parts of the shore's radius.
-export const TURTLE = { angle: SEA_CAVE.angle + 0.45, from: 1.03, to: 0.88, start: BEAT.after - 3, end: LENGTH };
+export const TURTLE = { angle: LAVA_POINT.angle + 0.45, from: 1.03, to: 0.88, start: BEAT.after - 3, end: LENGTH };
 // The asteroid: an odd-colored star with a faint trail, in the sky over the far side of the island from the first
 // frame. It grows through the film, fast in its last nights, then falls in the dusk just after sunset onto the island's
 // far shoulder, behind the volcano from the nest.
@@ -231,16 +235,16 @@ export const SHOTS = [
   [158.5, 'shore', MOURN.angle + 0.35, 4.6, 0.7, 0.35, 'in'], [163, 'island', MOURN.angle - 0.15, 14, 1.4, 1.2, 'left 0.5'],
   [166, 'shore', MOURN.angle + 1.3, 1.25, 0.32, 0.12, 'in 0.5'], [169.5, 'island', NEST.angle - 1.1, 21, 9, 1.4, 'left'],
   // Morning: they wake, and look about them. A faint call. They go round the shore to it, the chick in short hops,
-  // and find her on the wreck in a sea cave; the father hauls it in and she climbs out to them.
+  // and find her on the wreck run aground on the lava point; the father hauls it in and she climbs out to them.
   [172.5, 'shore', MOURN.angle + 1.3, 1.1, 0.3, 0.12, 'hold'], [175, 'shore', MOURN.angle + 0.5, 1.8, 0.45, 0.2, 'right 0.5'],
-  [177.4, 'path', PATH.angle + 0.15, 2.8, 0.7, 0.25, 'right 1.5'], [181.5, 'cave', SEA_CAVE.angle - 0.1, 3.6, 0.5, 0.25, 'in'],
-  [184, 'shelf', SEA_CAVE.angle - 0.65, 2.2, 0.5, 0.2, 'in 0.5'], [188, 'shelf', SEA_CAVE.angle + 0.35, 0.95, 0.3, 0.22, 'right 0.5'],
+  [177.4, 'path', PATH.angle + 0.15, 2.8, 0.7, 0.25, 'right 1.5'], [181.5, 'point', LAVA_POINT.angle - 0.1, 3.6, 0.5, 0.25, 'in'],
+  [184, 'shelf', LAVA_POINT.angle - 0.65, 2.2, 0.5, 0.2, 'in 0.5'], [188, 'shelf', LAVA_POINT.angle + 0.35, 0.95, 0.3, 0.22, 'right 0.5'],
   // The camera draws back from them and up over the island: the wasted far side, the sea strewn with rubble, the
   // green lee, a turtle coming ashore, a whale and her calf.
-  [BEAT.after, 'shelf', SEA_CAVE.angle + 0.95, 1.6, 0.45, 0.22, { to: ['island', SEA_CAVE.angle + 0.1, 30, 11, 0.5] }],
+  [BEAT.after, 'shelf', LAVA_POINT.angle + 0.95, 1.6, 0.45, 0.22, { to: ['island', LAVA_POINT.angle + 0.1, 30, 11, 0.5] }],
 ];
 const at = ({ x, z, ground = 0 }) => ({ x, y: ground, z });
-const CENTERS = { nest: at(NEST), shore: at(MOURN), path: at(PATH), cave: at(SEA_CAVE), shelf: at(SHELF), island: { x: 0, y: 0, z: 0 } };
+const CENTERS = { nest: at(NEST), shore: at(MOURN), path: at(PATH), point: at(LAVA_POINT), shelf: at(SHELF), island: { x: 0, y: 0, z: 0 } };
 // A shot's framing `t` seconds in: [center, angle, distance, height, look].
 export function framing([start, center, angle, distance, height, look, move], t, end) {
   if (typeof move === 'object') {
