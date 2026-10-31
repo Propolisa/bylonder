@@ -352,22 +352,22 @@ function createCrack(scene, toon) {
 // What the waves left on every shore: charred logs and broken branches, clumps of ashy wrack and stones thrown up the
 // beach and lying in the shallows, each there from when the wave reached it.
 // And the strike's own ejecta: stones and clods of glassy rock strewn over the land, thickest toward it, each landing
-// a moment after it, and logs, branches and clots of ash floating out on the sea, riding the swell.
+// a moment after it, and logs and branches floating out on the sea, riding the swell.
 function createWreckage(scene, toon) {
   const rand = random(97), onShore = () => { const a = rand() * 2 * Math.PI; return [a, shore(a) * (0.86 + 0.18 * rand())]; };
   const onLand = () => { for (;;) { const a = STRIKE.angle + (rand() - 0.5) * 2 * Math.PI * (rand() < 0.6 ? 0.45 : 1), r = shore(a) * Math.sqrt(rand()) * 0.95; if (rand() < 1.2 - Math.hypot(Math.cos(a) * r - STRIKE.x, Math.sin(a) * r - STRIKE.z) / 12) return [a, r]; } };
   const atSea = () => { const a = rand() * 2 * Math.PI; return [a, shore(a) * 1.08 + 18 * rand() ** 1.5]; };
-  const log = cone(5, 0.06, 0, 0.045, 1), lump = blob(0.12, [0, 0, 0]), slick = blob(0.5, [0, 0, 0]);
+  const log = cone(5, 0.06, 0, 0.045, 1), lump = blob(0.12, [0, 0, 0]);
   const parts = [['Driftwood', log, '#3d312b', 90, onShore, 0.45, 'log'], ['Wrack', lump, '#5b5652', 70, onShore, 0.9, 'lump'], ['Thrown Stones', blob(0.1, [0, 0, 0]), '#4a4450', 60, onShore, 0.9, 'lump'],
-    ['Ejecta', blob(0.1, [0, 0, 0]), '#2e2830', 220, onLand, 1.1, 'lump'], ['Floating Logs', log, '#352b27', 120, atSea, 0.5, 'float'], ['Ash Slick', slick, '#6b6668', 70, atSea, 1, 'slick']];
+    ['Ejecta', blob(0.1, [0, 0, 0]), '#2e2830', 220, onLand, 1.1, 'lump'], ['Floating Logs', log, '#352b27', 120, atSea, 0.5, 'float']];
   return together(...parts.map(([name, data, color, count, where, scale, kind]) => {
     const mesh = createMesh(name, data, scene);
     mesh.material = toon.plain(name, color);
     const buffer = setMatrices(mesh, count), pieces = Array.from({ length: count }, () => {
       const [a, r] = where(), x = Math.cos(a) * r, z = Math.sin(a) * r, lies = kind === 'log' || kind === 'float';
-      const size = kind === 'slick' ? new Vector3(1.4 + 2 * rand(), 0.04, 1 + 1.5 * rand()) : new Vector3(1, 1, 1).scale((0.5 + rand()) * scale);
+      const size = new Vector3(1, 1, 1).scale((0.5 + rand()) * scale);
       return { x, z, size, phase: rand() * 6.28, turn: Quaternion.RotationYawPitchRoll(rand() * 6.28, 0, lies ? Math.PI / 2 - 0.1 : rand()),
-        floats: kind === 'float' || kind === 'slick', y: Math.max(-0.04, heightAt(x, z)) + 0.03, comes: BEAT.impact + 1.5 + Math.hypot(x - STRIKE.x, z - STRIKE.z) / 7 };
+        floats: kind === 'float', y: Math.max(-0.04, heightAt(x, z)) + 0.03, comes: BEAT.impact + 1.5 + Math.hypot(x - STRIKE.x, z - STRIKE.z) / 7 };
     });
     return (day, time) => {
       pieces.forEach(({ x, z, size, phase, turn, floats, y, comes }, i) => place(buffer, i, new Vector3(x, floats ? 0.02 * Math.sin(time * 1.1 + phase) : y, z),

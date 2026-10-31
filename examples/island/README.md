@@ -37,8 +37,8 @@ a turtle coming ashore and a whale with her calf beyond.
 - **Effects.** `particles.js` makes particles that are each a function of time (born, thrown, falling under gravity and
   drag), as layers of low-poly puffs: the fireball and its trail, its fragments' streamers, each impact's flash, fire,
   debris, sparks, water column, spray, vapor ring, steam and a wave that the island breaks, with foam and surf, the
-  strike's smoke column, the forest fire, ash, embers, the bow shock and sonic ring at entry, ejecta strewn over the land and the rubble, logs and ash slicks
-  left floating on the sea (`meteor.js`), and steam where the first lava meets the
+  strike's smoke column, the forest fire, ash, embers, the bow shock and sonic ring at entry, ejecta strewn over the land and the rubble and logs left
+  floating on the sea (`meteor.js`), and steam where the first lava meets the
   sea (`life.js`).
 - **Marks.** `marks.js` draws comic marks over the film in flat ink with an outline, each kind its own shape: jagged
   red spikes burst from a bird's head when it calls in alarm, wide arcs swell out from a whale's song and blow, a

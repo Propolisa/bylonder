@@ -15,7 +15,7 @@ import { createParticles, together, pop, glowOf, direction } from './particles.j
 import { setMatrices, place, createPuffs } from './sky.js';
 import { heightAt, shore } from './island.js';
 import { random } from './random.js';
-import { BEAT, NEST, OMEN, IMPACT, MOURN, LAVA_POINT, SHELF, LENGTH, crackAt, fireballAt, smoothstep, lerp, tremor, gust, fireFront, fireAngle } from './story.js';
+import { BEAT, NEST, OMEN, IMPACT, MOURN, LAVA_POINT, SHELF, shotAt, LENGTH, crackAt, fireballAt, smoothstep, lerp, tremor, gust, fireFront, fireAngle } from './story.js';
 
 const { Vector3, Quaternion, Color3 } = BABYLON;
 
@@ -264,12 +264,16 @@ function createLavaPoint(scene, toon) {
   boulder.material = toon.plain('Lava Point', '#342e40');
   slab.material = toon.plain('Lava Point Slab', '#3d3649');
   const clear = (p) => [[SHELF, 0.75], [SNAG, 0.75], [HAULED, 0.65]].every(([c, d]) => Math.hypot(p.x - c.x, p.z - c.z) > d);
+  // Nor between the camera and the family while it is on them.
+  const sights = Array.from({ length: Math.ceil((LENGTH - BEAT.cave) * 4) }, (_, k) => new Vector3(...shotAt(BEAT.cave + k / 4).position)).filter((eye) => Vector3.Distance(eye, HC) < 5);
+  const inView = (rock) => sights.some((eye) => { const v = HC.subtract(eye), u = Math.max(0, Math.min(1, Vector3.Dot(rock.at.subtract(eye), v) / v.lengthSquared())); return Vector3.Distance(rock.at, eye.add(v.scale(u))) < 0.6 * Math.max(rock.size.x, rock.size.y, rock.size.z); });
   const rocks = [];
-  while (rocks.length < 26) {
+  for (let tries = 0; rocks.length < 26 && tries < 2000; tries++) {
     const u = rand(), at = sea(LAVA_POINT.angle, LAVA_POINT.r - 0.6 + 2.1 * u, 0).add(ALONG.scale((rand() - 0.5) * 1.6 * (1 - 0.45 * u)));
     if (!clear(at)) continue;
     const size = new Vector3(0.45 + 0.5 * rand(), 0.5 + 0.5 * rand(), 0.45 + 0.5 * rand()).scale(1.15 - 0.4 * u), top = Math.max(heightAt(at.x, at.z), 0) + 0.12 + 0.3 * rand() * (1 - u);
-    rocks.push({ at: at.add(new Vector3(0, top - size.y / 2, 0)), size, turn: Quaternion.RotationYawPitchRoll(rand() * 6.28, (rand() - 0.5) * 0.5, (rand() - 0.5) * 0.5) });
+    const rock = { at: at.add(new Vector3(0, top - size.y / 2, 0)), size, turn: Quaternion.RotationYawPitchRoll(rand() * 6.28, (rand() - 0.5) * 0.5, (rand() - 0.5) * 0.5) };
+    if (!inView(rock)) rocks.push(rock);
   }
   const buffer = setMatrices(boulder, rocks.length), slabBuffer = setMatrices(slab, 1), SLAB = new Vector3(1.1, 0.4, 0.9);
   return (day) => {
