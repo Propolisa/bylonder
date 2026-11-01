@@ -185,20 +185,25 @@ EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
 
 void view3d_region_set(ScrArea &area, View3D &v3d, ARegion &region, RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx,
                        int winy, bool is_persp);
+void view3d_navigation_set(View3D &v3d, RegionView3D &rv3d, Scene *scene, const float *ofs, float dist, bool camera_view);
 /* The 3D View the editor shows, as edit_context_view_set gives Edit Mode's: Object Mode's operators (transforms, view
  * operators) then act in its window region. */
 EXPORT(main_view_set)
-void main_view_set(BlenderMain *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
+void main_view_set(BlenderMain *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp, const float *ofs, float dist,
+                   bool camera_view)
 {
   ScrArea &area = ctx->view_area.area;
   if (BLI_listbase_is_empty(&area.spacedata)) {
     BLI_addtail(&ctx->screen.areabase, &area);
   }
   view3d_region_set(area, ctx->v3d, ctx->region, ctx->rv3d, viewmat, winmat, winx, winy, is_persp);
+  view3d_navigation_set(ctx->v3d, ctx->rv3d, ctx->scene, ofs, dist, camera_view);
   CTX_wm_window_set(ctx->C, &ctx->window);
   CTX_wm_area_set(ctx->C, &area);
   CTX_wm_region_set(ctx->C, &ctx->region);
 }
+/* The view's projection after an operator (RV3D_CAMOB after Align Active Camera to View). */
+EXPORT(main_view_persp) int main_view_persp(BlenderMain *ctx) { return ctx->rv3d.persp; }
 /* What the last operator showed in the view's header (ED_area_status_text), or ''. */
 EXPORT(main_status) const char *main_status(BlenderMain *ctx) { return ctx->view_area.status.c_str(); }
 EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return ctx->scene; }

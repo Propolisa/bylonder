@@ -72,6 +72,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     else sync.end();
     if (running) host.notify(areas.get(view)?.status ?? '');
     else if (result.finished.length) host.notify('');
+    if (result.finished.length && areas.get(view)?.cameraView) view.enterCameraView();
     if (result.finished.some(({ undo }) => undo)) host.commit();
     if (result.popup) popup(result.popup, host.pointer());
     tagRedraw();

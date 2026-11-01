@@ -119,6 +119,20 @@ void view3d_matrices_set(RegionView3D &rv3d, const float *viewmat, const float *
   const float v2[3] = {rv3d.persmat[0][1], rv3d.persmat[1][1], rv3d.persmat[2][1]};
   rv3d.pixsize = (2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)))) / float(std::max(winx, winy));
 }
+/* What Blender's view navigation keeps besides the matrices (ofs, dist; ED_view3d_from_object and the view operators
+ * read them), whether the page shows the view through the scene camera (RV3D_CAMOB), and the camera a 3D View locked
+ * to its scene shows (BKE_screen_view3d_sync), so that operators on the view's camera find it. */
+void view3d_navigation_set(View3D &v3d, RegionView3D &rv3d, Scene *scene, const float *ofs, float dist, bool camera_view)
+{
+  copy_v3_v3(rv3d.ofs, ofs);
+  rv3d.dist = dist;
+  if (camera_view) {
+    rv3d.persp = RV3D_CAMOB;
+  }
+  if (scene) {
+    BKE_screen_view3d_sync(&v3d, scene);
+  }
+}
 void view3d_matrices_restore(RegionView3D &rv3d)
 {
   if (const GivenView *given = given_views().lookup_ptr(&rv3d)) {

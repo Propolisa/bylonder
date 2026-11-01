@@ -694,6 +694,16 @@ const checks = {
     assert.deepEqual(view, { rendered: false, shading: "solid", overlaysOff: false });
   } },
 
+  // Align Active Camera to View (Ctrl Alt Numpad 0) moves the scene camera to the view's eye and looks through it.
+  "Align Active Camera to View moves the camera to the view": { open: { example: "Rigged Character", node: "Rig" }, async run() {
+    await app.hover(0.5, 0.5);
+    const eye = await app.bylonder((b) => b.views.input.camera.globalPosition.asArray());
+    await app.page.keyboard.press("Control+Alt+Numpad0");
+    await app.until((b) => b.views.input.state.cameraView);
+    const camera = await app.bylonder((b) => b.views.input.camera.globalPosition.asArray());
+    camera.forEach((v, i) => assert.ok(Math.abs(v - eye[i]) < 1e-3, `camera ${camera} at the view's eye ${eye}`));
+  } },
+
   // The Shader Editor edits the active object's active material for any object type with materials: a Curves object's.
   "the Shader Editor edits a Curves object's material": { open: { example: "Hair Dynamics", node: "Hair" }, async run() {
     await app.bylonder((b) => { b.editor.selection.replace([b.world.scene.getNodeByName("Hair")]); b.world.openNodeEditor("shader"); });

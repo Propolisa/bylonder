@@ -99,6 +99,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     sync(); ctx.shadingChanged();
   };
   view.toggleCameraView = toggleCameraView;
+  // Blender's operators that leave the view looking through the camera (Align Active Camera to View).
+  view.enterCameraView = () => { if (!state.cameraView) toggleCameraView(); };
   view.setShading = id => { state.shading = id; sync(); ctx.shadingChanged(); };
   // The scene camera changed while this view looks through it.
   view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); next?.attachControl(canvas, true); sync(); ctx.shadingChanged(); };
