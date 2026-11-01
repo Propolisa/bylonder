@@ -3,6 +3,8 @@
 //   node scripts/module.mjs        fetches the module for the checked-out tree unless a local build is in place
 //   node scripts/module.mjs key    prints the tree's key (module-<hash>)
 //   --force                        replaces a local build too
+// Each release also holds bmesh-names.wasm: the same module with its function names, whose code offsets match, to name
+// the frames of a crash reported from the live site.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
