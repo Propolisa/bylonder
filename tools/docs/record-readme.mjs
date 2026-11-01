@@ -1,5 +1,5 @@
 // Records README.md's images from the Volcanic Island (examples/island/story.js), the whole window at 1440 x 810 (2x):
-// the nest through the scene camera in Rendered shading, then the 3D Viewport split: the camera's render on the left
+// a parent feeding the chick in the nest, through the scene camera in Rendered shading, then the 3D Viewport split: the camera's render on the left
 // (wide, overlays off) and the island's terrain in Edit Mode, close up, on the right, at the asteroid's strike and after.
 // usage: node tools/docs/record-readme.mjs [nest:<frame> ...] [split:<frame> ...]   (DOCS_PORT: the dev server's port)
 import { record } from "./record.mjs";
@@ -8,7 +8,7 @@ const frames = (kind, fallback) => {
   const given = process.argv.slice(2).filter((a) => a.startsWith(kind + ":")).map((a) => Number(a.slice(kind.length + 1)));
   return process.argv.length > 2 ? given : fallback;
 };
-const NEST = frames("nest", [2545]), SPLIT = frames("split", [3266, 3366, 5259]);
+const NEST = frames("nest", [2137]), SPLIT = frames("split", [3366]);
 const RENDER_WIDTH = 0.65, EDIT_ZOOM = 0.35;
 
 await record("readme", { example: "island", node: null, media: "readme", size: { width: 1440, height: 810 }, scale: 2 }, async (r) => {

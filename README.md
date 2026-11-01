@@ -7,7 +7,7 @@ Blender's interface and Blender's own code, running in the browser, drawn by Bab
 [Open Bylonder](https://propolisa.github.io/bylonder/) | [Manual](docs/features/README.md) |
 [Babylon.js docs](https://doc.babylonjs.com/) | [Blender manual](https://docs.blender.org/manual/en/5.2/)
 
-[![The Volcanic Island example in the Layout workspace](docs/media/readme/island.png)](https://propolisa.github.io/bylonder/#example=island)
+[![A parent bird feeds its chick in the nest: the Volcanic Island example through its camera in the Layout workspace](docs/media/readme/nest-2137.png)](https://propolisa.github.io/bylonder/#example=island)
 
 Bylonder puts two communities' work in one place. Blender's modeling, modifiers, geometry nodes, rigging and
 animation run as Blender's C and Python, compiled to WebAssembly. Babylon.js draws the result in real time and turns it
@@ -72,6 +72,8 @@ The [Manual](docs/features/README.md) has a page per feature: steps with GIFs th
 scene, and links to the matching pages of Blender's manual.
 
 ## What is Blender's and what is Babylon's
+
+[![The asteroid strikes the island in the camera's render on the left while the island's terrain is open in Edit Mode on the right](docs/media/readme/split-3366.png)](https://propolisa.github.io/bylonder/#example=island)
 
 | Part | Who does it |
 | --- | --- |
