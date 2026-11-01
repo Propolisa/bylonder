@@ -1,6 +1,7 @@
 # Working on this repo
 
-Setup: `npm ci`, `npm test`, `npm run dev`. Commit and push to `main` when done.
+Setup: `npm ci`, `npm run module` (fetches Blender's WASM module built by CI for this checkout; a local module build installs
+itself instead), `npm test`, `npm run dev`. Commit and push to `main` when done. The module is not kept in git.
 
 Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to

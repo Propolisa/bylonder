@@ -409,6 +409,15 @@ def link_module(host, out, entries, extra, archives, module_libraries):
           file=sys.stderr)
     # The module the app loads starts initialized (wasm_snapshot.py): Blender's RNA and node types are in its data.
     wasm_snapshot.snapshot(module, os.path.join(out, 'bylonder.wasm'))
+    install(os.path.join(out, 'bylonder.wasm'))
+
+
+def install(module):
+    """The checkout's module becomes this build; without scripts/module.mjs's key it is a local build, which a fetch keeps."""
+    target = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'bmesh', 'bmesh.wasm')
+    shutil.copy(module, target)
+    if os.path.exists(target + '.key'):
+        os.remove(target + '.key')
 
 
 def duplicate_losers(stderr, preferred):

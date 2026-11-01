@@ -15,7 +15,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Blender's module for this tree: published by an earlier build, or built now (blender-wasm.yml).
+  module:
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.check.outputs.published }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "$(node scripts/module.mjs key)" >/dev/null 2>&1 && echo published=true >> "$GITHUB_OUTPUT" || echo published=false >> "$GITHUB_OUTPUT"
+
+  build-module:
+    needs: module
+    if: needs.module.outputs.published != 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/blender-wasm.yml
+
   build:
+    needs: [module, build-module]
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +45,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run module
       - run: npm test
       - run: npm run build
         env:
