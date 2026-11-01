@@ -722,6 +722,16 @@ const checks = {
     assert.deepEqual(await state(), before);
   } },
 
+  // Shade Flat after Shade Smooth draws flat again (every face sharp is stored as one value of sharp_face).
+  "Shade Flat after Shade Smooth draws flat faces": { open: {}, async run() {
+    const normal = () => app.bylonder((b) => Array.from(b.world.scene.getMeshByName("Cube").getVerticesData("normal").slice(0, 3), (v) => Math.round(Math.abs(v) * 100) / 100));
+    for (const op of ["object.shade_smooth", "object.shade_flat"]) {
+      await app.bylonder((b, op) => b.runOperator(op, {}), op);
+      await app.settled();
+    }
+    assert.equal((await normal()).filter((v) => v === 1).length, 1, `a face normal: ${await normal()}`);
+  } },
+
   // The Shader Editor edits the active object's active material for any object type with materials: a Curves object's.
   "the Shader Editor edits a Curves object's material": { open: { example: "Hair Dynamics", node: "Hair" }, async run() {
     await app.bylonder((b) => { b.editor.selection.replace([b.world.scene.getNodeByName("Hair")]); b.world.openNodeEditor("shader"); });
