@@ -55,7 +55,7 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
   }
   await page.waitForFunction((node) => {
     const w = document.querySelector('iframe[src*="viewport.html"]')?.contentWindow;
-    return !!(w?.__bylonder?.editor && w.__bylonder.world.scene.getNodeByName(node));
+    return !!(w?.__bylonder?.editor && (!node || w.__bylonder.world.scene.getNodeByName(node)));
   }, node, { timeout: 60000 });
   await page.click('[data-workspace="layout"]');
   const app = {

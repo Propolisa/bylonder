@@ -97,7 +97,13 @@ try {
   await page.keyboard.press("Tab");
   const outliner = await frame.locator(".bl-outliner-region").boundingBox();
   const row = await app.bylonder((b) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === b.world.objects.find((n) => n.getTotalVertices?.()).name).at);
-  await contextMenu("OUTLINER_MT_object", [outliner.x + row[0] + 5, outliner.y + outliner.height - row[1] - 4]);
+  const rowAt = [outliner.x + row[0] + 5, outliner.y + outliner.height - row[1] - 4];
+  await step("Outliner row click selects", async () => {
+    await page.mouse.click(...rowAt);
+    await app.settled();
+    noErrors("an Outliner row click");
+  });
+  await contextMenu("OUTLINER_MT_object", rowAt);
   const header = await frame.locator(".dock-heading").first().boundingBox();
   await contextMenu("Header", [header.x + header.width - 40, header.y + header.height / 2]);
   await step("OBJECT_MT_move_to_collection", async () => {

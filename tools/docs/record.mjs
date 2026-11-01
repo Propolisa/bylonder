@@ -46,9 +46,10 @@ const overlay = () => {
 const ffmpeg = (...args) => execFileSync("ffmpeg", ["-y", "-loglevel", "error", ...args]);
 
 // Opens the app on `example` (its #example= link; none: the Default Cube from the splash) and returns the recorder.
-export async function recorder(feature, { example, node, size = SIZE } = {}) {
+// `media` is the folder under docs/media/ the files go to (default: the feature's).
+export async function recorder(feature, { example, node, size = SIZE, media: folder = `features/${feature}` } = {}) {
   // Media are written to a temporary folder and moved in at the end: the dev server reloads the app on a change in docs/.
-  const media = `${root}docs/media/features/${feature}/`, out = mkdtempSync(`${tmpdir()}/bylonder-${feature}-`) + "/";
+  const media = `${root}docs/media/${folder}/`, out = mkdtempSync(`${tmpdir()}/bylonder-${feature}-`) + "/";
   const stopServer = await devServer();
   const browser = await chromium.launch();
   const app = await openApp(browser, URL_, { ...(example ? { link: example } : {}), node, size });
