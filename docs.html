@@ -3,11 +3,20 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="logo/bylonder-32.svg"><link rel="icon" type="image/png" sizes="32x32" href="logo/bylonder-32.png">
-<title>Bylonder Docs</title>
+<title>Bylonder Manual</title>
 </head>
 <body>
-<header class="doc-top"><span class="doc-brand"><img src="logo/bylonder.svg" alt="" width="22" height="22">Bylonder</span><span class="doc-title">Documentation</span><a class="bl-pulldown" href="./">Open Workbench</a></header>
-<main class="doc-main"><nav id="doc-nav"></nav><article id="doc-body"></article></main>
+<header class="doc-top">
+  <button id="doc-menu" class="bl-icon-button" aria-label="Contents" aria-expanded="false">&#9776;</button>
+  <a class="doc-brand" href="#"><img src="logo/bylonder.svg" alt="" width="22" height="22">Bylonder Manual</a>
+  <span id="doc-version" class="doc-version"></span>
+  <a class="doc-open" href="./">Open Bylonder</a>
+</header>
+<div class="doc-main">
+  <nav id="doc-nav" aria-label="Contents"><input id="doc-search" type="search" placeholder="Search" aria-label="Search the manual"><div id="doc-tree"></div></nav>
+  <main id="doc-content"><nav id="doc-crumbs" aria-label="Breadcrumbs"></nav><article id="doc-body"></article><nav id="doc-pager" aria-label="Previous and next page"></nav></main>
+  <aside id="doc-toc" aria-label="On this page"></aside>
+</div>
 <script type="module" src="/src/docs.js"></script>
 </body>
 </html>

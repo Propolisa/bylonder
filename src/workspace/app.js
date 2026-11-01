@@ -841,10 +841,20 @@ const openBlend = action(async (file) => {
   const created = await repo.create(file.name.replace(/\.blend$/i, ""), files);
   await load(created.id);
 });
+const createExample = async (example) => repo.create(example.title, await example.files());
 const openExample = action(async (example) => {
   await save();
-  const created = await repo.create(example.title, await example.files());
-  await load(created.id);
+  await load((await createExample(example)).id);
+});
+// A link to index.html#example=<id> (the docs' Open in Bylonder) opens that example as a new project.
+const linkedExample = () => {
+  const example = examples.find(({ id }) => location.hash === `#example=${id}`);
+  if (example) history.replaceState(null, "", location.pathname + location.search);
+  return example;
+};
+window.addEventListener("hashchange", () => {
+  const example = linkedExample();
+  if (example) openExample(example);
 });
 $("fork-project").onclick = action(async () => {
   const name = await askText("Fork Project", "Name", project.name + " copy");
@@ -985,10 +995,12 @@ document.addEventListener("visibilitychange", () => {
     const projects = await repo.list();
     let id = localStorage.getItem("babylon-active-project");
     if (!projects.some((p) => p.id === id)) id = projects[0]?.id;
-    if (!id) id = (await repo.create("Untitled", defaultFiles())).id;
+    const example = linkedExample();
+    if (example) id = (await createExample(example)).id;
+    else if (!id) id = (await repo.create("Untitled", defaultFiles())).id;
     await load(id, !location.hash.startsWith("#project="));
     await sharing.incoming();
-    if (!projects.length && !location.hash.startsWith("#project=")) topbar.splash();
+    if (!projects.length && !example && !location.hash.startsWith("#project=")) topbar.splash();
   } catch (e) {
     failure(e);
     if (!project) {

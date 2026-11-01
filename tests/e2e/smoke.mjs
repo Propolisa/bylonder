@@ -16,6 +16,15 @@ const checks = {
   // The new project's scene (sphere and ground), as a first visit shows it.
   "app boots": { open: { example: null, node: "sphere" }, async run() {} },
 
+  // The docs' Open in Bylonder link: index.html#example=<id> opens that example as a new project, without the splash.
+  "an #example= link opens the example": {
+    open: { link: "rigged-character", node: "Rig" },
+    async run() {
+      assert.equal(await app.page.locator("dialog.bl-splash[open]").count(), 0, "no splash");
+      assert.equal(await app.page.locator("#project option:checked").textContent(), "Rigged Character");
+    },
+  },
+
   async "Render Image shows a rendered frame"() {
     await menu("TOPBAR_MT_render", "Render Image");
     await rendered();

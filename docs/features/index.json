@@ -1,0 +1,422 @@
+[
+ {
+  "id": "curves-and-text",
+  "title": "Curves and Text",
+  "summary": "Add a text object, type into it in Edit Mode, give it depth with Extrude and Bevel, and extrude a Bézier curve's points.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/texts/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/texts/editing.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/curves/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/curves/editing/index.html"
+  ],
+  "example": "text",
+  "thumbnail": "curves-and-text/thumbnail.png",
+  "media": [
+   "curves-and-text/add-text.gif",
+   "curves-and-text/edit-text.gif",
+   "curves-and-text/extrude.gif",
+   "curves-and-text/curve.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "VIEW3D_MT_add",
+   "VIEW3D_MT_curve_add",
+   "VIEW3D_MT_edit_font",
+   "VIEW3D_MT_edit_curve",
+   "DATA_PT_geometry_curve",
+   "DATA_PT_font",
+   "EDIT"
+  ],
+  "operators": [
+   "object.text_add",
+   "font.text_insert",
+   "font.delete",
+   "curve.primitive_bezier_curve_add",
+   "curve.extrude_move",
+   "object.editmode_toggle"
+  ],
+  "code": [
+   "src/blenkernel/curve/curve.js",
+   "src/editors/curve/editcurve.js",
+   "src/draw/overlay-edit-curve.js",
+   "src/draw/overlay-edit-text.js",
+   "tools/blender-port/wasm/curve-api.cc"
+  ],
+  "tests": [
+   "tests/curves-wasm.test.js",
+   "tests/text-wasm.test.js",
+   "tests/text.test.js"
+  ],
+  "limits": [
+   "The 3D Text example builds its text from code with a Google Fonts family and needs network access; a text object added with Shift A uses Blender's built-in font."
+  ],
+  "page": "docs/features/curves-and-text.md",
+  "open": "https://propolisa.github.io/bylonder/#example=text",
+  "example_title": "3D Text"
+ },
+ {
+  "id": "geometry-node-editor",
+  "title": "Geometry Node Editor",
+  "summary": "Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/geometry_node.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/index.html",
+   "https://docs.blender.org/manual/en/5.2/interface/controls/nodes/editing.html"
+  ],
+  "example": "hair-dynamics",
+  "thumbnail": "geometry-node-editor/thumbnail.png",
+  "media": [
+   "geometry-node-editor/open.gif",
+   "geometry-node-editor/zoom.gif",
+   "geometry-node-editor/mute.gif",
+   "geometry-node-editor/add-node.gif"
+  ],
+  "ui": [
+   "GeometryNodeTree",
+   "NODE_EDITOR",
+   "NODE_MT_add",
+   "PROPERTIES"
+  ],
+  "operators": [
+   "node.add_node",
+   "node.mute_toggle",
+   "node.select",
+   "node.view_all",
+   "node.link"
+  ],
+  "code": [
+   "src/editors/space_node/main-node-tree.js",
+   "src/editors/space_node/node-editor-controller.js",
+   "src/editors/space_node/node-add-menu.js",
+   "src/editors/space_node/contexts.js"
+  ],
+  "tests": [
+   "tests/geometry-node-editor.test.js",
+   "tests/node-editor.test.js"
+  ],
+  "limits": [
+   "Bylonder's own Geometry Nodes modifier keeps its Babylon graph and opens in Babylon's Node Geometry Editor, not here.",
+   "The Geometry Nodes workspace tab opens the Layout screen; switch an area's editor type to Geometry Node Editor instead."
+  ],
+  "page": "docs/features/geometry-node-editor.md",
+  "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
+  "example_title": "Hair Dynamics"
+ },
+ {
+  "id": "hair-dynamics",
+  "title": "Hair Dynamics",
+  "summary": "Hair curves grown by Generate Hair Curves and simulated by Blender's Hair Dynamics node group in a simulation zone.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/simulation/hair_dynamics.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/hair/generation/generate_hair_curves.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/simulation/simulation_zone.html"
+  ],
+  "example": "hair-dynamics",
+  "thumbnail": "hair-dynamics/thumbnail.png",
+  "media": [
+   "hair-dynamics/play.gif",
+   "hair-dynamics/frame.gif",
+   "hair-dynamics/settings.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "TIMELINE",
+   "PROPERTIES",
+   "OBJECT_MT_modifier_add"
+  ],
+  "operators": [
+   "screen.animation_play",
+   "object.modifier_add",
+   "object.modifier_set_active"
+  ],
+  "code": [
+   "src/blenkernel/main-view.js",
+   "src/draw/curves.js",
+   "src/modifiers/main-modifiers.js",
+   "tools/blender-port/wasm/modifier-api.cc"
+  ],
+  "tests": [
+   "tests/hair-dynamics.test.js",
+   "tests/geometry-node-editor.test.js"
+  ],
+  "limits": [
+   "The Shader Editor does not show a Curves object's material; the Hair material is read from the .blend and drawn.",
+   "Simulating to a far frame plays every frame from the start, which takes a moment on slow devices."
+  ],
+  "page": "docs/features/hair-dynamics.md",
+  "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
+  "example_title": "Hair Dynamics"
+ },
+ {
+  "id": "keyframe-animation",
+  "title": "Keyframe Animation",
+  "summary": "Key an object's transform with I at two frames on the Timeline and play the animation with Space.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/animation/keyframes/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/animation/keyframes/editing.html",
+   "https://docs.blender.org/manual/en/5.2/editors/timeline.html"
+  ],
+  "example": "animation",
+  "thumbnail": "keyframe-animation/thumbnail.png",
+  "media": [
+   "keyframe-animation/insert.gif",
+   "keyframe-animation/second-key.gif",
+   "keyframe-animation/play.gif",
+   "keyframe-animation/timeline.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "TIMELINE",
+   "TIME_MT_view",
+   "DOPESHEET_MT_marker"
+  ],
+  "operators": [
+   "anim.keyframe_insert",
+   "transform.translate",
+   "transform.rotate",
+   "screen.animation_play",
+   "screen.frame_jump",
+   "screen.keyframe_jump"
+  ],
+  "code": [
+   "src/blenkernel/animation/model.js",
+   "src/blenkernel/animation/anim-blender.js",
+   "src/blenkernel/animation/bindings.js",
+   "tools/blender-port/wasm/anim-api.cc"
+  ],
+  "tests": [
+   "tests/animation.test.js",
+   "tests/anim-wasm.test.js",
+   "tests/animatable.test.js"
+  ],
+  "limits": [
+   "The Keyframe Animation example keys a Babylon scene from code with the project SDK; the steps here key Blender's objects with I."
+  ],
+  "page": "docs/features/keyframe-animation.md",
+  "open": "https://propolisa.github.io/bylonder/#example=animation",
+  "example_title": "Keyframe Animation"
+ },
+ {
+  "id": "modifiers",
+  "title": "Modifiers",
+  "summary": "Add, edit and stack modifiers in Properties > Modifiers, here two Array modifiers that turn a cube into a floor of tiles.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/generate/array.html"
+  ],
+  "example": "arrays",
+  "thumbnail": "modifiers/thumbnail.png",
+  "media": [
+   "modifiers/add-array.gif",
+   "modifiers/count.gif",
+   "modifiers/second-array.gif"
+  ],
+  "ui": [
+   "PROPERTIES",
+   "OBJECT_MT_modifier_add",
+   "DATA_PT_modifiers",
+   "VIEW_3D"
+  ],
+  "operators": [
+   "object.modifier_add",
+   "object.modifier_remove",
+   "object.modifier_apply",
+   "object.modifier_set_active"
+  ],
+  "code": [
+   "src/modifiers/stack.js",
+   "src/modifiers/array.js",
+   "src/modifiers/main-modifiers.js",
+   "src/modifiers/blender.js"
+  ],
+  "tests": [
+   "tests/modifiers.test.js",
+   "tests/modifiers-wasm.test.js"
+  ],
+  "limits": [
+   "The Array Modifiers example builds its arrays from code with Bylonder's Array (Nodes) modifier; the steps here use the Add Modifier menu.",
+   "Modifier panels lay out Blender's properties in a narrow column, so long labels are cut short."
+  ],
+  "page": "docs/features/modifiers.md",
+  "open": "https://propolisa.github.io/bylonder/#example=arrays",
+  "example_title": "Array Modifiers"
+ },
+ {
+  "id": "particle-hair",
+  "title": "Particle Hair",
+  "summary": "A hair particle system on a mesh, shaped with the Comb brush in Particle Edit Mode and set up in Properties > Particles.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/physics/particles/hair/index.html",
+   "https://docs.blender.org/manual/en/5.2/physics/particles/mode.html",
+   "https://docs.blender.org/manual/en/5.2/physics/particles/hair/children.html"
+  ],
+  "example": "hair",
+  "thumbnail": "particle-hair/thumbnail.png",
+  "media": [
+   "particle-hair/particles.png",
+   "particle-hair/particle-edit.gif",
+   "particle-hair/comb.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PARTICLE_EDIT",
+   "VIEW3D_MT_particle",
+   "PARTICLE_PT_context_particles",
+   "PROPERTIES"
+  ],
+  "operators": [
+   "object.mode_set",
+   "particle.brush_edit",
+   "particle.select_all"
+  ],
+  "code": [
+   "src/draw/overlay-particle.js",
+   "src/editors/object/main-modes.js",
+   "src/editors/space_buttons/registry.js"
+  ],
+  "tests": [
+   "tests/physics-wasm.test.js"
+  ],
+  "limits": [
+   "Hair's UV and color attributes are not drawn.",
+   "Overlays of hair have no selection ids, clipping or Blender's line anti-aliasing."
+  ],
+  "page": "docs/features/particle-hair.md",
+  "open": "https://propolisa.github.io/bylonder/#example=hair",
+  "example_title": "Combed Hair"
+ },
+ {
+  "id": "rigging",
+  "title": "Rigging and Posing",
+  "summary": "Pose an armature's bones in Pose Mode, key the pose with I, and organize bones with bone collections and constraints.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/index.html",
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/selecting.html",
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/properties/bone_collections.html",
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/bone_constraints/index.html"
+  ],
+  "example": "rigged-character",
+  "thumbnail": "rigging/thumbnail.png",
+  "media": [
+   "rigging/pose-mode.gif",
+   "rigging/select.gif",
+   "rigging/rotate.gif",
+   "rigging/keyframe.gif",
+   "rigging/bone-collections.gif",
+   "rigging/constraint.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "POSE",
+   "VIEW3D_MT_pose",
+   "VIEW3D_MT_select_pose",
+   "PROPERTIES",
+   "DATA_PT_bone_collections",
+   "BONE_PT_constraints",
+   "TIMELINE"
+  ],
+  "operators": [
+   "object.posemode_toggle",
+   "view3d.select",
+   "transform.rotate",
+   "pose.rot_clear",
+   "anim.keyframe_insert",
+   "screen.animation_play",
+   "armature.collection_add",
+   "armature.collection_assign",
+   "pose.constraint_add"
+  ],
+  "code": [
+   "src/blenkernel/armature/armature.js",
+   "src/draw/overlay-armature.js",
+   "tools/blender-port/wasm/armature-api.cc",
+   "tools/blender-port/wasm/armature-draw.cc"
+  ],
+  "tests": [
+   "tests/armature-wasm.test.js",
+   "tests/rigging-wasm.test.js",
+   "tests/armature-draw-wasm.test.js"
+  ],
+  "limits": [
+   "Box, circle and lasso select of bones are not done; click and Shift click select.",
+   "Bylonder's own meshes have no vertex groups, so an armature deforms them by envelopes only; meshes read from a .blend keep their groups.",
+   "Selecting the armature in Object Mode outlines its child mesh too.",
+   "Bones are picked from the overlay without Blender's depth cycling through overlapping bones."
+  ],
+  "page": "docs/features/rigging.md",
+  "open": "https://propolisa.github.io/bylonder/#example=rigged-character",
+  "example_title": "Rigged Character"
+ },
+ {
+  "id": "shader-nodes",
+  "title": "Shader Nodes",
+  "summary": "Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/shader_editor.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/index.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/noise.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/color/color_ramp.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/deform/displace.html"
+  ],
+  "example": "lava",
+  "thumbnail": "shader-nodes/thumbnail.png",
+  "media": [
+   "shader-nodes/sphere.gif",
+   "shader-nodes/nodes.gif",
+   "shader-nodes/node-tree.png"
+  ],
+  "ui": [
+   "ShaderNodeTree",
+   "NODE_EDITOR",
+   "NODE_MT_add",
+   "VIEW_3D",
+   "PROPERTIES",
+   "VIEW3D_MT_add"
+  ],
+  "operators": [
+   "node.add_node",
+   "node.link",
+   "mesh.primitive_uv_sphere_add",
+   "object.modifier_add",
+   "texture.new",
+   "material.new"
+  ],
+  "code": [
+   "src/nodes/blender/shader-nodes.js",
+   "src/nodes/blender/node-code.js",
+   "src/nodes/blender/glsl.js",
+   "src/editors/space_node/node-editor.js"
+  ],
+  "tests": [
+   "tests/nodes-gpu.test.js",
+   "tests/nodes.test.js",
+   "tests/textures-wasm.test.js",
+   "tests/e2e/lava.mjs"
+  ],
+  "limits": [
+   "Material Preview lights the scene with Babylon's studio environment, not Blender's forest.exr.",
+   "Bump takes the height's screen derivatives (Blender's fast path), not the height again at offset points.",
+   "Principled BSDF's sockets are one list, without Blender's collapsible panels.",
+   "The Texture tab's preview is empty."
+  ],
+  "page": "docs/features/shader-nodes.md",
+  "open": "https://propolisa.github.io/bylonder/#example=lava",
+  "example_title": "Lava Sphere"
+ }
+]

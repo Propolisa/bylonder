@@ -36,17 +36,19 @@ export async function startServer({ build = true } = {}) {
 
 // Opens Bylonder in a fresh browser context (fresh project storage), opens `example` from the splash (none: the new
 // project's scene) and waits until the 3D Viewport shows the node `node`. Page errors of every frame land in `errors`.
-// `video`: a directory to record the session to.
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", size = { width: 1600, height: 950 }, video } = {}) {
+// `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
+// session to.
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, video } = {}) {
   const context = await browser.newContext({ viewport: size, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) });
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
-  await page.goto(url);
+  await page.goto(link ? `${url}#example=${link}` : url);
   const frame = () => page.frames().findLast((f) => f.url().includes("viewport.html") && !f.isDetached());
   const splash = page.locator("dialog.bl-splash");
-  if (example) await splash.getByRole("button", { name: example }).click();
+  if (link) await page.waitForURL((url) => !url.hash);
+  else if (example) await splash.getByRole("button", { name: example }).click();
   else {
     await splash.waitFor();
     await page.keyboard.press("Escape");

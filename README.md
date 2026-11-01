@@ -4,6 +4,11 @@
 
 Full-viewport Babylon.js workspace with modular reactive systems, generated controls, transform tools and browser-local persistence. Licensed under GPL-3.0-or-later (see `LICENSE`). Dependencies are pinned; Inspector is loaded on demand.
 
+**Live site:** https://propolisa.github.io/bylonder/ . **Manual:** the [features index](docs/features/README.md) has a
+page per feature with step-by-step GIFs and an Open in Bylonder link (`index.html#example=<id>` opens an example);
+`docs.html` shows these pages and the architecture docs. `node scripts/feature-docs.mjs` checks the pages and writes
+`docs/features/index.json`; `node tools/docs/record-<feature>.mjs` records a page's media again.
+
 ## Develop / fork
 
 Node 20+: `npm ci`, `npm run dev`, `npm test`, `npm run build`. Serve `dist/` on any static host. No backend, remote fonts or credentials are needed at runtime. To fork, copy source, remove `.openai/hosting.json` (the original Site identity), rename the package and register a new Site if using Sites hosting.

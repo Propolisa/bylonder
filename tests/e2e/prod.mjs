@@ -1,6 +1,8 @@
 // Production check: the built app (dist/) boots in headless Chromium without a page error or console error, its
 // topbar menus, the 3D View header menus and the context menus open with items, every workspace tab shows a screen in
-// its object mode, and examples made in Blender open with their objects in the scene sync. CI runs it after the build and before deploying, since some failures only happen in the production build.
+// its object mode, examples made in Blender open with their objects in the scene sync, an #example= link opens its
+// example and the manual (docs.html) shows its feature pages with their media. CI runs it after the build and before
+// deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
@@ -164,6 +166,40 @@ try {
       }
     });
   }
+  // The docs' Open in Bylonder link (index.html#example=<id>) opens its example without the splash.
+  await step("example link #example=lava", async () => {
+    const opened = await openApp(browser, server.url, { link: "lava", node: "Sphere" });
+    try {
+      assert.equal(await opened.page.locator("dialog.bl-splash[open]").count(), 0, "no splash");
+      assert.deepEqual(opened.errors, [], "page errors");
+    } finally {
+      await opened.close();
+    }
+  });
+
+  // The manual (docs.html): the features index shows a card per page with its thumbnail, a feature page its GIFs, and
+  // its Open in Bylonder link points at this build's app.
+  await step("docs", async () => {
+    const docs = await browser.newPage();
+    const errors = [];
+    docs.on("pageerror", (error) => errors.push(error.message));
+    const loaded = () => docs.evaluate(() => Promise.all([...document.querySelectorAll("#doc-body img")].map((img) => {
+      img.loading = "eager";
+      return img.decode().then(() => img.naturalWidth > 0, () => img.src);
+    })));
+    const features = (await import("../../docs/features/index.json", { with: { type: "json" } })).default;
+    await docs.goto(new URL("docs.html#docs/features/README.md", server.url).href);
+    await docs.locator(".feature-card").first().waitFor();
+    assert.equal(await docs.locator(".feature-card").count(), features.length, "a card per feature");
+    assert.ok((await loaded()).every((ok) => ok === true), "every thumbnail loads");
+    await docs.goto(new URL(`docs.html#${features[0].page}`, server.url).href);
+    await docs.locator(".feature-lead").waitFor();
+    assert.ok((await loaded()).every((ok) => ok === true), "every figure loads");
+    const open = new URL(await docs.locator(".doc-button.primary").getAttribute("href"), docs.url());
+    assert.equal(open.href, new URL(`#example=${features[0].example}`, server.url).href, "Open in Bylonder opens this build");
+    assert.deepEqual(errors, [], "docs page errors");
+    await docs.close();
+  });
   console.log(`Production check passed: ${steps.length} steps in ${Math.round((Date.now() - started) / 1000)} s`);
 } catch (error) {
   const shot = `${tmpdir()}/prod-check.png`;
