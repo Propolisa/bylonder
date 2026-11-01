@@ -9,6 +9,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.io_utils';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['ExportHelper', 'ImportHelper', 'orientation_helper', 'axis_conversion', 'axis_conversion_ensure', 'create_derived_objects', 'poll_file_object_drop', 'unpack_list', 'unpack_face_list', 'path_reference', 'path_reference_copy', 'path_reference_mode', 'unique_name']);
 export var _check_axis_conversion = function (op) {
 	if (arguments.length) {
@@ -50,9 +206,9 @@ export var ExportHelper =  __class__ ('ExportHelper', [object], {
 		}
 		// pass;
 		var os = __call__ (_module, null, 'os');
-		if (!(self.filepath)) {
+		if (!(__call__ (_truth, null, self.filepath))) {
 			var blend_filepath = context.blend_data.filepath;
-			if (!(blend_filepath)) {
+			if (!(__call__ (_truth, null, blend_filepath))) {
 				var blend_filepath = __call__ (data_, null, 'Untitled');
 			}
 			else {
@@ -91,11 +247,11 @@ export var ExportHelper =  __class__ ('ExportHelper', [object], {
 		var check_extension = self.check_extension;
 		if (check_extension !== null) {
 			var filepath = self.filepath;
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.basename, __accu0__, filepath);
-			}) ()) {
-				if (check_extension) {
+			}) ())) {
+				if (__call__ (_truth, null, check_extension)) {
 					var filepath = (function () {
 						var __accu0__ = bpy.path;
 						return __call__ (__accu0__.ensure_ext, __accu0__, __getitem__ ((function () {
@@ -158,10 +314,10 @@ export var ImportHelper =  __class__ ('ImportHelper', [object], {
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self.properties;
 			return __call__ (__accu0__.is_property_set, __accu0__, 'filepath');
-		}) ()) {
+		}) ())) {
 			var title = self.filepath;
 			if (__gt__ (__call__ (len, null, self.files), 1)) {
 				var title = (function () {
@@ -169,7 +325,7 @@ export var ImportHelper =  __class__ ('ImportHelper', [object], {
 					return __call__ (__accu0__.format, __accu0__, __call__ (len, null, self.files));
 				}) ();
 			}
-			if (confirm_text) {
+			if (__call__ (_truth, null, confirm_text)) {
 				var confirm_text = __call__ (iface_, null, confirm_text);
 			}
 			else {
@@ -439,15 +595,15 @@ export var create_derived_objects = function (depsgraph, objects) {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var ob = __getitem__ (__iterable0__, __index0__);
 		var ob_parent = ob.parent;
-		if (ob_parent && __in__ (ob_parent.instance_type, new set (['VERTS', 'FACES']))) {
+		if (__call__ (_truth, null, ob_parent) && __in__ (ob_parent.instance_type, new set (['VERTS', 'FACES']))) {
 			continue;
 		}
-		__setitem__ (result, ob, (ob.is_instancer ? [] : [tuple ([ob, (function () {
+		__setitem__ (result, ob, (__call__ (_truth, null, ob.is_instancer) ? [] : [tuple ([ob, (function () {
 			var __accu0__ = ob.matrix_world;
 			return __call__ (__accu0__.py_copy, __accu0__);
 		}) ()])]));
 	}
-	if (result) {
+	if (__call__ (_truth, null, result)) {
 		var __iterable0__ = depsgraph.object_instances;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -457,7 +613,7 @@ export var create_derived_objects = function (depsgraph, objects) {
 				continue;
 			}
 			var dup_parent_original = dup_parent.original;
-			if (!(dup_parent_original.is_instancer)) {
+			if (!(__call__ (_truth, null, dup_parent_original.is_instancer))) {
 				continue;
 			}
 			var instance_list = (function () {
@@ -550,7 +706,7 @@ export var poll_file_object_drop = function (context) {
 	else {
 	}
 	var area = context.area;
-	if (!(area)) {
+	if (!(__call__ (_truth, null, area))) {
 		return false;
 	}
 	var is_v3d = __eq__ (area.py_metatype, 'VIEW_3D');
@@ -607,20 +763,20 @@ export var path_reference = function (filepath, base_src, base_dst, mode, copy_s
 		// pass;
 	}
 	else if (__eq__ (mode, 'MATCH')) {
-		var mode = (is_relative ? 'RELATIVE' : 'ABSOLUTE');
+		var mode = (__call__ (_truth, null, is_relative) ? 'RELATIVE' : 'ABSOLUTE');
 	}
 	else if (__eq__ (mode, 'AUTO')) {
-		var mode = ((function () {
+		var mode = (__call__ (_truth, null, (function () {
 			var __accu0__ = bpy.path;
 			return __call__ (__accu0__.is_subdir, __accu0__, filepath_abs, base_dst);
-		}) () ? 'RELATIVE' : 'ABSOLUTE');
+		}) ()) ? 'RELATIVE' : 'ABSOLUTE');
 	}
 	else if (__eq__ (mode, 'COPY')) {
 		var subdir_abs = (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.normpath, __accu0__, base_dst);
 		}) ();
-		if (copy_subdir) {
+		if (__call__ (_truth, null, copy_subdir)) {
 			var subdir_abs = (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.join, __accu0__, subdir_abs, copy_subdir);
@@ -692,7 +848,7 @@ export var path_reference_copy = function (copy_set, report) {
 	}
 	else {
 	}
-	if (!(copy_set)) {
+	if (!(__call__ (_truth, null, copy_set))) {
 		return ;
 	}
 	var os = __call__ (_module, null, 'os');
@@ -703,22 +859,22 @@ export var path_reference_copy = function (copy_set, report) {
 		var __left0__ = __getitem__ (__iterable0__, __index0__);
 		var file_src = __left0__ [0];
 		var file_dst = __left0__ [1];
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, file_src);
-		}) ())) {
+		}) ()))) {
 			__call__ (report, null, (function () {
 				var __accu0__ = 'missing {!r}, not copying';
 				return __call__ (__accu0__.format, __accu0__, file_src);
 			}) ());
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, file_dst);
-		}) () && (function () {
+		}) ()) && __call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.samefile, __accu0__, file_src, file_dst);
-		}) ()) {
+		}) ())) {
 			// pass;
 		}
 		else {
@@ -839,6 +995,14 @@ export {BoolProperty, EnumProperty, StringProperty, _globals, _import, _lazy, _m
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case '_check_axis_conversion': _check_axis_conversion = value; break;
 		case 'ExportHelper': ExportHelper = value; break;

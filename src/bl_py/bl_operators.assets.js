@@ -107,6 +107,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -167,13 +183,13 @@ export var AssetBrowserMetadataOperator =  __class__ ('AssetBrowserMetadataOpera
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = SpaceAssetInfo;
 			return __call__ (__accu0__.is_asset_browser_poll, __accu0__, context);
-		}) ()) || !(context.asset)) {
+		}) ())) || !(__call__ (_truth, null, context.asset))) {
 			return false;
 		}
-		if (!(context.asset.local_id)) {
+		if (!(__call__ (_truth, null, context.asset.local_id))) {
 			(function () {
 				var __accu0__ = Operator;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Asset metadata from external asset libraries cannot be edited, only assets stored in the current file can');
@@ -231,7 +247,7 @@ export var ASSET_OT_tag_remove =  __class__ ('ASSET_OT_tag_remove', [AssetBrowse
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, ASSET_OT_tag_remove, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, ASSET_OT_tag_remove, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var active_asset = context.asset;
@@ -286,38 +302,38 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		else {
 		}
 		var asset = __call__ (getattr, null, context, 'asset', null);
-		if (!(asset)) {
+		if (!(__call__ (_truth, null, asset))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'No asset selected');
 			}) ();
 			return false;
 		}
-		if (asset.local_id) {
+		if (__call__ (_truth, null, asset.local_id)) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is contained in the current file');
 			}) ();
 			return false;
 		}
-		if (asset.is_online) {
+		if (__call__ (_truth, null, asset.is_online)) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is stored online');
 			}) ();
 			return false;
 		}
-		if (!(asset.owner_asset_library.is_editable)) {
+		if (!(__call__ (_truth, null, asset.owner_asset_library.is_editable))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'The asset library this asset belongs to is not editable');
 			}) ();
 			return false;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = asset.full_library_path;
 			return __call__ (__accu0__.endswith, __accu0__, '.asset.blend');
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is contained in a file managed by the asset system, manual edits should be avoided');
@@ -342,7 +358,7 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		else {
 		}
 		var asset = context.asset;
-		if (asset.local_id) {
+		if (__call__ (_truth, null, asset.local_id)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'This asset is stored in the current blend file');
@@ -402,7 +418,7 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 		if (returncode === null) {
 			return new set (['RUNNING_MODAL']);
 		}
-		if (returncode) {
+		if (__call__ (_truth, null, returncode)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -411,10 +427,10 @@ export var ASSET_OT_open_containing_blend_file =  __class__ ('ASSET_OT_open_cont
 				}) ());
 			}) ();
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = bpy.ops.asset.library_refresh;
 			return __call__ (__accu0__.poll, __accu0__);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = bpy.ops.asset;
 				return __call__ (__accu0__.library_refresh, __accu0__);
@@ -491,21 +507,21 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 		else {
 		}
 		var asset = __call__ (getattr, null, context, 'asset', null);
-		if (!(asset)) {
+		if (!(__call__ (_truth, null, asset))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'No asset selected');
 			}) ();
 			return false;
 		}
-		if (asset.local_id && !(bpy.data.filepath)) {
+		if (__call__ (_truth, null, asset.local_id) && !(__call__ (_truth, null, bpy.data.filepath))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Asset local to the current file, which is not saved anywhere');
 			}) ();
 			return false;
 		}
-		if (asset.is_online) {
+		if (__call__ (_truth, null, asset.is_online)) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Selected asset is stored online');
@@ -531,7 +547,7 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 		}
 		var Path = __call__ (_member, null, 'pathlib', 'Path');
 		var asset = context.asset;
-		if (asset.local_id) {
+		if (__call__ (_truth, null, asset.local_id)) {
 			var asset_path = __call__ (Path, null, bpy.data.filepath);
 		}
 		else {
@@ -555,6 +571,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'AssetBrowserMetadataOperator': AssetBrowserMetadataOperator = value; break;

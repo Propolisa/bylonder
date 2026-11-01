@@ -101,6 +101,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -163,7 +179,7 @@ export var addon_keymap_register = function (keymap_data) {
 	var wm = bpy.context.window_manager;
 	var keymap_init_from_data = __call__ (_member, null, 'bl_keymap_utils.io', 'keymap_init_from_data');
 	var kconf = wm.keyconfigs.addon;
-	if (!(kconf)) {
+	if (!(__call__ (_truth, null, kconf))) {
 		return ;
 	}
 	var __iterable0__ = keymap_data;
@@ -309,7 +325,7 @@ export var keyconfig_test = function (kc) {
 		}
 		else {
 		}
-		if (is_modal) {
+		if (__call__ (_truth, null, is_modal)) {
 			var kmi_id = kmi.propvalue;
 		}
 		else {
@@ -353,21 +369,21 @@ export var keyconfig_test = function (kc) {
 			var __accu0__ = kc.keymaps;
 			return __call__ (__accu0__.find, __accu0__, idname, __kwargtrans__ ({space_type: spaceid, region_type: regionid}));
 		}) ();
-		if (km) {
+		if (__call__ (_truth, null, km)) {
 			var km = (function () {
 				var __accu0__ = km;
 				return __call__ (__accu0__.active, __accu0__);
 			}) ();
 			var is_modal = km.is_modal;
-			if (src) {
+			if (__call__ (_truth, null, src)) {
 				var __iterable0__ = km.keymap_items;
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var item = __getitem__ (__iterable0__, __index0__);
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = src;
 						return __call__ (__accu0__.compare, __accu0__, item);
-					}) ()) {
+					}) ())) {
 						__call__ (print, null, '===========');
 						__call__ (print, null, parent.py_name, '[parent]');
 						__call__ (print, null, (function () {
@@ -386,7 +402,7 @@ export var keyconfig_test = function (kc) {
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var child = __getitem__ (__iterable0__, __index0__);
-					if (__call__ (testEntry, null, kc, child, src, parent)) {
+					if (__call__ (_truth, null, __call__ (testEntry, null, kc, child, src, parent))) {
 						var result = true;
 					}
 				}
@@ -402,16 +418,16 @@ export var keyconfig_test = function (kc) {
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 						var child = __getitem__ (__iterable1__, __index1__);
-						if (__call__ (testEntry, null, kc, child, src, km)) {
+						if (__call__ (_truth, null, __call__ (testEntry, null, kc, child, src, km))) {
 							var result = true;
 						}
 					}
 					for (var j = 0; j < __sub__ (__sub__ (__call__ (len, null, km.keymap_items), i), 1); j++) {
 						var item = __getitem__ (km.keymap_items, __add__ (__add__ (j, i), 1));
-						if ((function () {
+						if (__call__ (_truth, null, (function () {
 							var __accu0__ = src;
 							return __call__ (__accu0__.compare, __accu0__, item);
-						}) ()) {
+						}) ())) {
 							__call__ (print, null, '===========');
 							__call__ (print, null, km.py_name, '[self conflict]');
 							__call__ (print, null, (function () {
@@ -430,7 +446,7 @@ export var keyconfig_test = function (kc) {
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var child = __getitem__ (__iterable0__, __index0__);
-					if (__call__ (testEntry, null, kc, child)) {
+					if (__call__ (_truth, null, __call__ (testEntry, null, kc, child))) {
 						var result = true;
 					}
 				}
@@ -447,7 +463,7 @@ export var keyconfig_test = function (kc) {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var entry = __getitem__ (__iterable0__, __index0__);
-		if (__call__ (testEntry, null, kc, entry)) {
+		if (__call__ (_truth, null, __call__ (testEntry, null, kc, entry))) {
 			var result = true;
 		}
 	}
@@ -464,6 +480,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

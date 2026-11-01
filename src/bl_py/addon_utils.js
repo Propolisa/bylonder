@@ -102,6 +102,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -220,10 +236,10 @@ export var paths = function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.join, __accu0__, p, (__eq__ (i, 0) ? 'addons_core' : 'addons'));
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, addon_dir);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = paths;
 				return __call__ (__accu0__.append, __accu0__, addon_dir);
@@ -264,14 +280,14 @@ export var _paths_with_extension_repos = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var repo = __getitem__ (__iterable0__, __index0__);
-		if (!(repo.enabled)) {
+		if (!(__call__ (_truth, null, repo.enabled))) {
 			continue;
 		}
 		var dirpath = repo.directory;
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, dirpath);
-		}) ())) {
+		}) ()))) {
 			continue;
 		}
 		(function () {
@@ -304,13 +320,13 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	else {
 	}
 	var os = __call__ (_module, null, 'os');
-	if (_bpy.app.debug_python) {
+	if (__call__ (_truth, null, _bpy.app.debug_python)) {
 		__call__ (print, null, 'fake_module', mod_path, mod_name);
 	}
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = mod_name;
 		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
-	}) ()) {
+	}) ())) {
 		return __call__ (_fake_module_from_extension, null, mod_name, mod_path);
 	}
 	var ast = __call__ (_module, null, 'ast');
@@ -331,14 +347,14 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	var __withid0__ = file_mod;
 	try {
 		__withid0__.__enter__ ();
-		if (speedy) {
+		if (__call__ (_truth, null, speedy)) {
 			var lines = [];
 			var line_iter = __call__ (py_iter, null, file_mod);
 			var line = '';
-			while (!((function () {
+			while (!(__call__ (_truth, null, (function () {
 				var __accu0__ = line;
 				return __call__ (__accu0__.startswith, __accu0__, 'bl_info');
-			}) ())) {
+			}) ()))) {
 				try {
 					var line = (function () {
 						var __accu0__ = line_iter;
@@ -348,7 +364,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 				catch (__except0__) {
 					if (isinstance (__except0__, UnicodeDecodeError)) {
 						var ex = __except0__;
-						if (!(error_encoding)) {
+						if (!(__call__ (_truth, null, error_encoding))) {
 							error_encoding = true;
 							__call__ (print, null, 'Error reading file as UTF-8:', mod_path, ex);
 						}
@@ -362,10 +378,10 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 					break;
 				}
 			}
-			while ((function () {
+			while (__call__ (_truth, null, (function () {
 				var __accu0__ = line;
 				return __call__ (__accu0__.rstrip, __accu0__);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = lines;
 					return __call__ (__accu0__.append, __accu0__, line);
@@ -379,7 +395,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 				catch (__except0__) {
 					if (isinstance (__except0__, UnicodeDecodeError)) {
 						var ex = __except0__;
-						if (!(error_encoding)) {
+						if (!(__call__ (_truth, null, error_encoding))) {
 							error_encoding = true;
 							__call__ (print, null, 'Error reading file as UTF-8:', mod_path, ex);
 						}
@@ -430,7 +446,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 		}
 	}
 	var body_info = null;
-	if (ast_data) {
+	if (__call__ (_truth, null, ast_data)) {
 		var __iterable0__ = ast_data.body;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -445,7 +461,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 			}
 		}
 	}
-	if (body_info) {
+	if (__call__ (_truth, null, body_info)) {
 		try {
 			var mod = __call__ (ModuleType, null, mod_name);
 			mod.bl_info = (function () {
@@ -539,7 +555,7 @@ export var modules_refresh = function () {
 					}) ();
 				}
 				else {
-					if (!(pkg_id)) {
+					if (!(__call__ (_truth, null, pkg_id))) {
 						var metadata_path = mod_path;
 						var _walrus2 = __ne__ (mod.__time__, (function () {
 							var __accu0__ = os.path;
@@ -553,7 +569,7 @@ export var modules_refresh = function () {
 							return __call__ (__accu0__.getmtime, __accu0__, metadata_path);
 						}) ());
 					}
-					if (_walrus2) {
+					if (__call__ (_truth, null, _walrus2)) {
 						__call__ (print, null, 'reloading addon meta-data:', mod_name, __call__ (repr, null, metadata_path), '(time-stamp change detected)');
 						(function () {
 							var __accu0__ = module_cache;
@@ -565,7 +581,7 @@ export var modules_refresh = function () {
 			}
 			if (mod === null) {
 				var mod = __call__ (_fake_module, null, mod_name, mod_path);
-				if (mod) {
+				if (__call__ (_truth, null, mod)) {
 					__setitem__ (module_cache, mod_name, mod);
 				}
 			}
@@ -599,7 +615,7 @@ export var modules = function () {
 	}
 	else {
 	}
-	if (refresh || module_cache === addons_fake_modules && modules._is_first) {
+	if (__call__ (_truth, null, refresh) || module_cache === addons_fake_modules && __call__ (_truth, null, modules._is_first)) {
 		__call__ (modules_refresh, null, __kwargtrans__ ({module_cache: module_cache}));
 		modules._is_first = false;
 		var module_cache_items = __call__ (list, null, (function () {
@@ -685,7 +701,7 @@ export var check = function (module_name) {
 		__call__ (print, null, 'Warning: addon-module', module_name, "found module but without '__addon_enabled__' field, possible name collision from file:", __call__ (repr, null, __call__ (getattr, null, mod, '__file__', '<unknown>')));
 		var loaded_state = false;
 	}
-	if (mod && __call__ (getattr, null, mod, '__addon_persistent__', false)) {
+	if (__call__ (_truth, null, mod) && __call__ (_truth, null, __call__ (getattr, null, mod, '__addon_persistent__', false))) {
 		var loaded_default = true;
 	}
 	return tuple ([loaded_default, loaded_state]);
@@ -728,7 +744,7 @@ export var _addon_ensure = function (module_name) {
 		var __accu0__ = addons;
 		return __call__ (__accu0__.py_get, __accu0__, module_name);
 	}) ();
-	if (!(addon)) {
+	if (!(__call__ (_truth, null, addon))) {
 		var addon = (function () {
 			var __accu0__ = addons;
 			return __call__ (__accu0__.py_new, __accu0__);
@@ -756,7 +772,7 @@ export var _addon_remove = function (module_name) {
 			var __accu0__ = addons;
 			return __call__ (__accu0__.py_get, __accu0__, module_name);
 		}) ();
-		if (addon) {
+		if (__call__ (_truth, null, addon)) {
 			(function () {
 				var __accu0__ = addons;
 				return __call__ (__accu0__.remove, __accu0__, addon);
@@ -807,10 +823,10 @@ export var enable = function (module_name) {
 			}
 			if (__call__ (isinstance, null, ex, ImportError)) {
 				var msg = ex.msg;
-				if (py_typeof (msg) === str && (function () {
+				if (py_typeof (msg) === str && __call__ (_truth, null, (function () {
 					var __accu0__ = msg;
 					return __call__ (__accu0__.startswith, __accu0__, 'Add-on ');
-				}) ()) {
+				}) ())) {
 					__call__ (print, null, msg);
 					return ;
 				}
@@ -826,11 +842,11 @@ export var enable = function (module_name) {
 		var __accu0__ = module_name;
 		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
 	}) ();
-	if (is_extension) {
-		if (!(refresh_handled)) {
+	if (__call__ (_truth, null, is_extension)) {
+		if (!(__call__ (_truth, null, refresh_handled))) {
 			__call__ (extensions_refresh, null, __kwargtrans__ ({addon_modules_pending: [module_name], handle_error: handle_error}));
 		}
-		if (_extensions_incompatible) {
+		if (__call__ (_truth, null, _extensions_incompatible)) {
 			var error = (function () {
 				var __accu0__ = _extensions_incompatible;
 				return __call__ (__accu0__.py_get, __accu0__, __getslice__ ((function () {
@@ -838,7 +854,7 @@ export var enable = function (module_name) {
 					return __call__ (__accu1__.partition, __accu1__, '.');
 				}) (), 0, null, 2));
 			}) ();
-			if (error) {
+			if (__call__ (_truth, null, error)) {
 				try {
 					var __except0__ = __call__ (RuntimeError, null, (function () {
 						var __accu0__ = 'Extension {:s} is incompatible ({:s})';
@@ -866,18 +882,18 @@ export var enable = function (module_name) {
 	}) ();
 	var mod_file = null;
 	var _walrus1 = mod !== null;
-	if (_walrus1) {
+	if (__call__ (_truth, null, _walrus1)) {
 		var mod_file = mod.__file__;
 		var _walrus1 = mod_file !== null;
 	}
-	if (_walrus1) {
+	if (__call__ (_truth, null, _walrus1)) {
 		var _walrus1 = (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, mod_file);
 		}) ();
 	}
-	if (_walrus1) {
-		if (__call__ (getattr, null, mod, '__addon_enabled__', false)) {
+	if (__call__ (_truth, null, _walrus1)) {
+		if (__call__ (_truth, null, __call__ (getattr, null, mod, '__addon_enabled__', false))) {
 			try {
 				(function () {
 					var __accu0__ = mod;
@@ -889,7 +905,7 @@ export var enable = function (module_name) {
 					var ex = __except0__;
 					__call__ (print, null, 'Exception in module unregister():', mod_file || module_name);
 					__call__ (handle_error, null, ex);
-					if (is_extension && !(refresh_handled)) {
+					if (__call__ (_truth, null, is_extension) && !(__call__ (_truth, null, refresh_handled))) {
 						__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 					}
 					return null;
@@ -921,7 +937,7 @@ export var enable = function (module_name) {
 						var __accu0__ = sys.modules;
 						return __call__ (__accu0__.py_pop, __accu0__, module_name);
 					}) ();
-					if (is_extension && !(refresh_handled)) {
+					if (__call__ (_truth, null, is_extension) && !(__call__ (_truth, null, refresh_handled))) {
 						__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 					}
 					return null;
@@ -933,7 +949,7 @@ export var enable = function (module_name) {
 			mod.__addon_enabled__ = false;
 		}
 	}
-	if (default_set) {
+	if (__call__ (_truth, null, default_set)) {
 		__call__ (_addon_ensure, null, module_name);
 	}
 	var __withid0__ = __call__ (RestrictBlend, null);
@@ -969,10 +985,10 @@ export var enable = function (module_name) {
 							return __call__ (__accu0__.format, __accu0__, module_name, __call__ (str, null, ex));
 						}) ();
 					}
-					else if (is_extension && (function () {
+					else if (__call__ (_truth, null, is_extension) && __call__ (_truth, null, (function () {
 						var __accu0__ = module_name;
 						return __call__ (__accu0__.startswith, __accu0__, __add__ (ex.py_name, '.'));
-					}) ()) {
+					}) ())) {
 						var repo_id = __getitem__ ((function () {
 							var __accu0__ = __getslice__ (module_name, __call__ (len, null, _ext_base_pkg_idname_with_dot), null, 1);
 							return __call__ (__accu0__.rpartition, __accu0__, '.');
@@ -998,7 +1014,7 @@ export var enable = function (module_name) {
 								return __call__ (__accu0__.format, __accu0__, module_name, repo_id);
 							}) ();
 						}
-						else if (!(repo.enabled)) {
+						else if (!(__call__ (_truth, null, repo.enabled))) {
 							ex.msg = (function () {
 								var __accu0__ = 'Add-on not loaded: "{:s}", cause: extension repository "{:s}" is disabled';
 								return __call__ (__accu0__.format, __accu0__, module_name, repo_id);
@@ -1013,10 +1029,10 @@ export var enable = function (module_name) {
 					}
 				}
 				__call__ (handle_error, null, ex);
-				if (default_set) {
+				if (__call__ (_truth, null, default_set)) {
 					__call__ (_addon_remove, null, module_name);
 				}
-				if (is_extension && !(refresh_handled)) {
+				if (__call__ (_truth, null, is_extension) && !(__call__ (_truth, null, refresh_handled))) {
 					__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 				}
 				return null;
@@ -1025,11 +1041,11 @@ export var enable = function (module_name) {
 				throw __except0__;
 			}
 		}
-		if (is_extension) {
+		if (__call__ (_truth, null, is_extension)) {
 			var bl_info = __call__ (getattr, null, mod, 'bl_info', null);
 			if (bl_info !== null) {
 				if (py_typeof (bl_info) === dict && !__in__ ('_init', bl_info)) {
-					if (_bpy.app.debug_python) {
+					if (__call__ (_truth, null, _bpy.app.debug_python)) {
 						__call__ (print, null, (function () {
 							var __accu0__ = 'Add-on "{:s}" has a "bl_info" which will be ignored in favor of "{:s}"';
 							return __call__ (__accu0__.format, __accu0__, module_name, _ext_manifest_filename_toml);
@@ -1043,7 +1059,7 @@ export var enable = function (module_name) {
 		var _bl_owner_id_get = __call__ (_member, null, '_bpy', '_bl_owner_id_get');
 		var _bl_owner_id_set = __call__ (_member, null, '_bpy', '_bl_owner_id_set');
 		var owner_id_prev = __call__ (_bl_owner_id_get, null);
-		__call__ (_bl_owner_id_set, null, (use_owner ? module_name : ''));
+		__call__ (_bl_owner_id_set, null, (__call__ (_truth, null, use_owner) ? module_name : ''));
 		try {
 			(function () {
 				var __accu0__ = mod;
@@ -1059,10 +1075,10 @@ export var enable = function (module_name) {
 					var __accu0__ = sys.modules;
 					return __call__ (__accu0__.py_pop, __accu0__, module_name);
 				}) ();
-				if (default_set) {
+				if (__call__ (_truth, null, default_set)) {
 					__call__ (_addon_remove, null, module_name);
 				}
-				if (is_extension && !(refresh_handled)) {
+				if (__call__ (_truth, null, is_extension) && !(__call__ (_truth, null, refresh_handled))) {
 					__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 				}
 				return null;
@@ -1083,7 +1099,7 @@ export var enable = function (module_name) {
 	}
 	mod.__addon_enabled__ = true;
 	mod.__addon_persistent__ = persistent;
-	if (_bpy.app.debug_python) {
+	if (__call__ (_truth, null, _bpy.app.debug_python)) {
 		__call__ (print, null, '\taddon_utils.enable', mod.__name__);
 	}
 	return mod;
@@ -1135,7 +1151,7 @@ export var disable = function (module_name) {
 		var __accu0__ = sys.modules;
 		return __call__ (__accu0__.py_get, __accu0__, module_name);
 	}) ();
-	if (mod && __call__ (getattr, null, mod, '__addon_enabled__', false) !== false) {
+	if (__call__ (_truth, null, mod) && __call__ (getattr, null, mod, '__addon_enabled__', false) !== false) {
 		mod.__addon_enabled__ = false;
 		mod.__addon_persistent__ = false;
 		try {
@@ -1163,13 +1179,13 @@ export var disable = function (module_name) {
 			return __call__ (__accu0__.format, __accu0__, module_name, (mod === null ? 'loaded' : 'enabled'));
 		}) ());
 	}
-	if (default_set) {
+	if (__call__ (_truth, null, default_set)) {
 		__call__ (_addon_remove, null, module_name);
 	}
-	if (!(refresh_handled)) {
+	if (!(__call__ (_truth, null, refresh_handled))) {
 		__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 	}
-	if (_bpy.app.debug_python) {
+	if (__call__ (_truth, null, _bpy.app.debug_python)) {
 		__call__ (print, null, '\taddon_utils.disable', module_name);
 	}
 };
@@ -1201,7 +1217,7 @@ export var reset_all = function () {
 		var __left0__ = __getitem__ (__iterable0__, __index0__);
 		var path = __left0__ [0];
 		var pkg_id = __left0__ [1];
-		if (!(pkg_id)) {
+		if (!(__call__ (_truth, null, pkg_id))) {
 			(function () {
 				var __accu0__ = _bpy.utils;
 				return __call__ (__accu0__._sys_path_ensure_append, __accu0__, path);
@@ -1219,13 +1235,13 @@ export var reset_all = function () {
 			var __left0__ = __call__ (check, null, mod_name);
 			var is_enabled = __left0__ [0];
 			var is_loaded = __left0__ [1];
-			if (reload_scripts) {
+			if (__call__ (_truth, null, reload_scripts)) {
 				var importlib = __call__ (_module, null, 'importlib');
 				var mod = (function () {
 					var __accu0__ = sys.modules;
 					return __call__ (__accu0__.py_get, __accu0__, mod_name);
 				}) ();
-				if (mod) {
+				if (__call__ (_truth, null, mod)) {
 					(function () {
 						var __accu0__ = importlib;
 						return __call__ (__accu0__.reload, __accu0__, mod);
@@ -1235,10 +1251,10 @@ export var reset_all = function () {
 			if (__eq__ (is_enabled, is_loaded)) {
 				// pass;
 			}
-			else if (is_enabled) {
+			else if (__call__ (_truth, null, is_enabled)) {
 				__call__ (enable, null, mod_name, __kwargtrans__ ({refresh_handled: true}));
 			}
-			else if (is_loaded) {
+			else if (__call__ (_truth, null, is_loaded)) {
 				__call__ (print, null, '\taddon_utils.reset_all unloading', mod_name);
 				__call__ (disable, null, mod_name);
 			}
@@ -1275,10 +1291,10 @@ export var disable_all = function () {
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var mod_dict = __getitem__ (__iterable1__, __index1__);
 				if (py_typeof (mod_dict) === dict) {
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu1__ = mod_dict;
 						return __call__ (__accu1__.py_get, __accu1__, '__addon_enabled__');
-					}) ()) {
+					}) ())) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, item);
@@ -1295,7 +1311,7 @@ export var disable_all = function () {
 		var __left0__ = __getitem__ (__iterable0__, __index0__);
 		var mod_name = __left0__ [0];
 		var mod = __left0__ [1];
-		if (__call__ (getattr, null, mod, '__addon_enabled__', false)) {
+		if (__call__ (_truth, null, __call__ (getattr, null, mod, '__addon_enabled__', false))) {
 			__call__ (disable, null, mod_name, __kwargtrans__ ({refresh_handled: true}));
 		}
 	}
@@ -1355,11 +1371,11 @@ export var module_bl_info = function (mod) {
 	if (__in__ ('_init', addon_info)) {
 		return addon_info;
 	}
-	if (!(addon_info)) {
-		if ((function () {
+	if (!(__call__ (_truth, null, addon_info))) {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = mod.__name__;
 			return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
-		}) ()) {
+		}) ())) {
 			var __left0__ = __call__ (_bl_info_from_extension, null, mod.__name__, mod.__file__);
 			var addon_info = __left0__ [0];
 			var filepath_toml = __left0__ [1];
@@ -1384,11 +1400,11 @@ export var module_bl_info = function (mod) {
 			return __call__ (__accu0__.py_setdefault, __accu0__, key, value);
 		}) ();
 	}
-	if (!(__getitem__ (addon_info, 'name'))) {
+	if (!(__call__ (_truth, null, __getitem__ (addon_info, 'name')))) {
 		__setitem__ (addon_info, 'name', mod.__name__);
 	}
 	var doc_url = __getitem__ (addon_info, 'doc_url');
-	if (doc_url) {
+	if (__call__ (_truth, null, doc_url)) {
 		var doc_url_prefix = '{BLENDER_MANUAL_URL}';
 		if (__in__ (doc_url_prefix, doc_url)) {
 			__setitem__ (addon_info, 'doc_url', (function () {
@@ -1447,10 +1463,10 @@ export var _stale_pending_stage = function (debug) {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.dirname, __accu0__, stale_pending_filepath);
 	}) ();
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.exists, __accu0__, stale_pending_filepath);
-	}) ()) {
+	}) ())) {
 		return ;
 	}
 	try {
@@ -1496,7 +1512,7 @@ export var _stale_file_directory_iter = function* () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var repo = __getitem__ (__iterable0__, __index0__);
-		if (!(repo.enabled)) {
+		if (!(__call__ (_truth, null, repo.enabled))) {
 			continue;
 		}
 		if (__eq__ (repo.source, 'SYSTEM')) {
@@ -1532,10 +1548,10 @@ export var _stale_pending_check_and_remove_once = function () {
 	}
 	var os = __call__ (_module, null, 'os');
 	var stale_pending_filepath = __call__ (_stale_pending_filepath, null);
-	if (!((function () {
+	if (!(__call__ (_truth, null, (function () {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.exists, __accu0__, stale_pending_filepath);
-	}) ())) {
+	}) ()))) {
 		return ;
 	}
 	var StaleFiles = __call__ (_member, null, '_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
@@ -1545,13 +1561,13 @@ export var _stale_pending_check_and_remove_once = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var dirpath = __getitem__ (__iterable0__, __index0__);
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, (function () {
 				var __accu1__ = os.path;
 				return __call__ (__accu1__.join, __accu1__, dirpath, _stale_filename);
 			}) ());
-		}) ())) {
+		}) ()))) {
 			continue;
 		}
 		try {
@@ -1560,25 +1576,25 @@ export var _stale_pending_check_and_remove_once = function () {
 				var __accu0__ = stale_handle;
 				return __call__ (__accu0__.state_load, __accu0__, __kwargtrans__ ({check_exists: true}));
 			}) ();
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = stale_handle;
 				return __call__ (__accu0__.is_empty, __accu0__);
-			}) ())) {
+			}) ()))) {
 				(function () {
 					var __accu0__ = stale_handle;
 					return __call__ (__accu0__.state_remove_all, __accu0__);
 				}) ();
-				if (!((function () {
+				if (!(__call__ (_truth, null, (function () {
 					var __accu0__ = stale_handle;
 					return __call__ (__accu0__.is_empty, __accu0__);
-				}) ())) {
+				}) ()))) {
 					var is_empty = false;
 				}
 			}
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = stale_handle;
 				return __call__ (__accu0__.is_modified, __accu0__);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = stale_handle;
 					return __call__ (__accu0__.state_store, __accu0__, __kwargtrans__ ({check_exists: false}));
@@ -1595,7 +1611,7 @@ export var _stale_pending_check_and_remove_once = function () {
 			}
 		}
 	}
-	if (is_empty) {
+	if (__call__ (_truth, null, is_empty)) {
 		try {
 			(function () {
 				var __accu0__ = os;
@@ -1605,7 +1621,7 @@ export var _stale_pending_check_and_remove_once = function () {
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				if (debug) {
+				if (__call__ (_truth, null, debug)) {
 					__call__ (print, null, 'Failed to remove stale-pending file:', __call__ (str, null, ex));
 				}
 			}
@@ -1633,10 +1649,10 @@ export var stale_pending_stage_paths = function (path_base, paths) {
 	var StaleFiles = __call__ (_member, null, '_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
 	var debug = _bpy.app.debug_python;
 	var stale_handle = __call__ (StaleFiles, null, __kwargtrans__ ({base_directory: path_base, stale_filename: _stale_filename, debug: debug}));
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = stale_handle;
 		return __call__ (__accu0__.state_load_add_and_store, __accu0__, __kwargtrans__ ({paths: paths}));
-	}) ()) {
+	}) ())) {
 		__call__ (_stale_pending_stage, null, debug);
 	}
 };
@@ -1658,10 +1674,10 @@ export var stale_pending_remove_paths = function (path_base, paths) {
 	var StaleFiles = __call__ (_member, null, '_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
 	var debug = _bpy.app.debug_python;
 	var stale_handle = __call__ (StaleFiles, null, __kwargtrans__ ({base_directory: path_base, stale_filename: _stale_filename, debug: debug}));
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = stale_handle;
 		return __call__ (__accu0__.state_load_remove_and_store, __accu0__, __kwargtrans__ ({paths: paths}));
-	}) ()) {
+	}) ())) {
 		// pass;
 	}
 };
@@ -1752,7 +1768,7 @@ export var _extension_repos_module_to_directory_map = function () {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var repo = __getitem__ (__iterable0__, __index0__);
-			if (repo.enabled) {
+			if (__call__ (_truth, null, repo.enabled)) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, [repo.module, repo.directory]);
@@ -1825,13 +1841,13 @@ export var _extension_compat_cache_update_needed = function (cache_data, blender
 			var __accu0__ = repos_module_to_directory_map;
 			return __call__ (__accu0__.py_get, __accu0__, repo_module, '');
 		}) ();
-		if (repo_directory) {
+		if (__call__ (_truth, null, repo_directory)) {
 			var pkg_manifest_filepath = __call__ (join, null, repo_directory, pkg_id, _ext_manifest_filename_toml);
 		}
 		else {
 			var pkg_manifest_filepath = '';
 		}
-		if (pkg_manifest_filepath) {
+		if (__call__ (_truth, null, pkg_manifest_filepath)) {
 			try {
 				var statinfo = __call__ (stat, null, pkg_manifest_filepath);
 			}
@@ -1910,7 +1926,7 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 			var __accu0__ = repos_module_to_directory_map;
 			return __call__ (__accu0__.py_get, __accu0__, repo_module, '');
 		}) ();
-		if (repo_directory) {
+		if (__call__ (_truth, null, repo_directory)) {
 			var pkg_manifest_filepath = __call__ (join, null, repo_directory, pkg_id, _ext_manifest_filename_toml);
 		}
 		else {
@@ -1922,7 +1938,7 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 				}) ());
 			}
 		}
-		if (pkg_manifest_filepath) {
+		if (__call__ (_truth, null, pkg_manifest_filepath)) {
 			try {
 				var statinfo = (function () {
 					var __accu0__ = os;
@@ -2024,10 +2040,10 @@ export var _initialize_extensions_compat_ensure_up_to_date = function (extension
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.join, __accu0__, extensions_directory, '.cache', 'compat.dat');
 	}) ();
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.exists, __accu0__, filepath_compat);
-	}) ()) {
+	}) ())) {
 		try {
 			var cache_data = __call__ (_pickle_zlib_file_read, null, filepath_compat);
 		}
@@ -2053,7 +2069,7 @@ export var _initialize_extensions_compat_ensure_up_to_date = function (extension
 	}
 	if (cache_data !== null) {
 		try {
-			if (__call__ (_extension_compat_cache_update_needed, null, cache_data, blender_id, extensions_enabled, print_debug)) {
+			if (__call__ (_truth, null, __call__ (_extension_compat_cache_update_needed, null, cache_data, blender_id, extensions_enabled, print_debug))) {
 				var cache_data = null;
 			}
 		}
@@ -2159,7 +2175,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var addon = __getitem__ (__iterable0__, __index0__);
 		var module_name = addon.module;
-		if (__call__ (check_extension, null, module_name)) {
+		if (__call__ (_truth, null, __call__ (check_extension, null, module_name))) {
 			(function () {
 				var __accu0__ = extensions_enabled;
 				return __call__ (__accu0__.add, __accu0__, __getslice__ ((function () {
@@ -2174,7 +2190,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var module_name = __getitem__ (__iterable0__, __index0__);
-			if (__call__ (check_extension, null, module_name)) {
+			if (__call__ (_truth, null, __call__ (check_extension, null, module_name))) {
 				(function () {
 					var __accu0__ = extensions_enabled;
 					return __call__ (__accu0__.add, __accu0__, __getslice__ ((function () {
@@ -2186,7 +2202,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 		}
 	}
 	var debug = _bpy.app.debug_python;
-	var print_debug = (debug ? (function __lambda__ () {
+	var print_debug = (__call__ (_truth, null, debug) ? (function __lambda__ () {
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -2206,7 +2222,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 		}
 		return __call__ (print, null, 'Extension version cache:', ...args, __kwargtrans__ (__call__ (_merged, null, kwargs)));
 	}) : null);
-	if (use_startup_fastpath && !(extensions_enabled)) {
+	if (__call__ (_truth, null, use_startup_fastpath) && !(__call__ (_truth, null, extensions_enabled))) {
 		if (print_debug !== null) {
 			__call__ (print_debug, null, 'no extensions, skipping cache data.');
 		}
@@ -2231,8 +2247,8 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 			throw __except0__;
 		}
 	}
-	if (ensure_wheels) {
-		if (updated) {
+	if (__call__ (_truth, null, ensure_wheels)) {
+		if (__call__ (_truth, null, updated)) {
 			if (error_fn === null) {
 				var error_fn = function (ex) {
 					if (arguments.length) {
@@ -2292,10 +2308,10 @@ export var _version_int_left_digits = function (x) {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var i = __left0__ [0];
 			var c = __left0__ [1];
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu1__ = c;
 				return __call__ (__accu1__.isdigit, __accu1__);
-			}) ())) {
+			}) ()))) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, i);
@@ -2572,13 +2588,13 @@ export var _extension_sync_wheels = function () {
 		}) ();
 	};
 	__call__ (apply_action, null, __kwargtrans__ ({local_dir: local_dir, local_dir_site_packages: local_dir_site_packages, wheel_list: wheel_list, error_fn: error_fn, remove_error_fn: remove_error_fn, debug: debug}));
-	if (paths_stale) {
+	if (__call__ (_truth, null, paths_stale)) {
 		__call__ (stale_pending_stage_paths, null, local_dir, paths_stale);
 	}
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.exists, __accu0__, local_dir_site_packages);
-	}) ()) {
+	}) ())) {
 		if (!__in__ (local_dir_site_packages, sys.path)) {
 			(function () {
 				var __accu0__ = sys.path;
@@ -2610,10 +2626,10 @@ export var _extension_module_name_decompose = function (package_) {
 	}
 	else {
 	}
-	if (!((function () {
+	if (!(__call__ (_truth, null, (function () {
 		var __accu0__ = package_;
 		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
-	}) ())) {
+	}) ()))) {
 		var __except0__ = __call__ (ValueError, null, 'The "package" does not name an extension');
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -2624,7 +2640,7 @@ export var _extension_module_name_decompose = function (package_) {
 	}) (), 0, null, 2);
 	var repo_module = __left0__ [0];
 	var pkg_idname = __left0__ [1];
-	if (!(repo_module && pkg_idname)) {
+	if (!(__call__ (_truth, null, repo_module) && __call__ (_truth, null, pkg_idname))) {
 		var __except0__ = __call__ (ValueError, null, 'The "package" is expected to be a module name containing 3 components');
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -2640,13 +2656,13 @@ export var _extension_module_name_decompose = function (package_) {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	if (!((function () {
+	if (!(__call__ (_truth, null, (function () {
 		var __accu0__ = repo_module;
 		return __call__ (__accu0__.isidentifier, __accu0__);
-	}) () && (function () {
+	}) ()) && __call__ (_truth, null, (function () {
 		var __accu0__ = pkg_idname;
 		return __call__ (__accu0__.isidentifier, __accu0__);
-	}) ())) {
+	}) ()))) {
 		var __except0__ = __call__ (ValueError, null, 'The "package" contains non-identifier characters');
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -2670,7 +2686,7 @@ export var _extension_preferences_idmap = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var repo = __getitem__ (__iterable0__, __index0__);
-		if (repo.enabled) {
+		if (__call__ (_truth, null, repo.enabled)) {
 			__setitem__ (repos_idmap, (function () {
 				var __accu0__ = repo;
 				return __call__ (__accu0__.as_pointer, __accu0__);
@@ -2701,7 +2717,7 @@ export var _extension_dirpath_from_preferences = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var repo = __getitem__ (__iterable0__, __index0__);
-		if (!(repo.enabled)) {
+		if (!(__call__ (_truth, null, repo.enabled))) {
 			continue;
 		}
 		__setitem__ (repos_dict, repo.module, repo.directory);
@@ -2764,7 +2780,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 	else {
 	}
 	var addons_to_enable = [];
-	if (!(submodules_del || submodules_add || submodules_rename_module || submodules_del_disabled || submodules_rename_module_disabled)) {
+	if (!(__call__ (_truth, null, submodules_del) || __call__ (_truth, null, submodules_add) || __call__ (_truth, null, submodules_rename_module) || __call__ (_truth, null, submodules_del_disabled) || __call__ (_truth, null, submodules_rename_module_disabled))) {
 		return addons_to_enable;
 	}
 	var addon_userdef_info = dict ({});
@@ -2773,10 +2789,10 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var addon = __getitem__ (__iterable0__, __index0__);
 		var module = addon.module;
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = module;
 			return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
-		}) ())) {
+		}) ()))) {
 			continue;
 		}
 		var __left0__ = __getslice__ ((function () {
@@ -2812,10 +2828,10 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 		__iterable1__ = __i__ (__iterable1__);
 		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 			var submodule_id = __getitem__ (__iterable1__, __index1__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = submodule_id;
 				return __call__ (__accu0__.startswith, __accu0__, '_');
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			var mod = __call__ (getattr, null, repo_module, submodule_id);
@@ -2827,7 +2843,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 		__setitem__ (addon_runtime_info, module_id, extensions_info);
 		// pass;
 	}
-	if (submodules_add) {
+	if (__call__ (_truth, null, submodules_add)) {
 		var __iterable0__ = submodules_add;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -2887,7 +2903,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 			var __left0__ = __getitem__ (__iterable1__, __index1__);
 			var submodule_id = __left0__ [0];
 			var mod = __left0__ [1];
-			if (!(__call__ (getattr, null, mod, '__addon_enabled__', false))) {
+			if (!(__call__ (_truth, null, __call__ (getattr, null, mod, '__addon_enabled__', false)))) {
 				continue;
 			}
 			var module_name_prev = (function () {
@@ -2938,7 +2954,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 				var __accu0__ = repo_runtime;
 				return __call__ (__accu0__.py_get, __accu0__, submodule_id);
 			}) ();
-			if (mod !== null && __call__ (getattr, null, mod, '__addon_enabled__', false)) {
+			if (mod !== null && __call__ (_truth, null, __call__ (getattr, null, mod, '__addon_enabled__', false))) {
 				continue;
 			}
 			var module_name_next = (function () {
@@ -2948,7 +2964,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 			addon.module = module_name_next;
 		}
 	}
-	if (submodules_del) {
+	if (__call__ (_truth, null, submodules_del)) {
 		var repo_module_map = (function () {
 			var __accu0__ = [];
 			var __iterable0__ = _preferences.extensions.repos;
@@ -2979,7 +2995,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 				return __call__ (__accu0__.py_get, __accu0__, module_id);
 			}) ();
 			var default_set = true;
-			if (repo && !(repo.enabled)) {
+			if (__call__ (_truth, null, repo) && !(__call__ (_truth, null, repo.enabled))) {
 				var default_set = false;
 			}
 			var __iterable1__ = (function () {
@@ -3001,7 +3017,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 		}
 		// pass;
 	}
-	if (submodules_del_disabled) {
+	if (__call__ (_truth, null, submodules_del_disabled)) {
 		var __iterable0__ = submodules_del_disabled;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -3041,7 +3057,7 @@ export var _initialize_extension_repos_post_addons_restore = function (addons_to
 	}
 	else {
 	}
-	if (!(addons_to_enable)) {
+	if (!(__call__ (_truth, null, addons_to_enable))) {
 		return ;
 	}
 	__call__ (extensions_refresh, null, __kwargtrans__ ({addon_modules_pending: (function () {
@@ -3077,7 +3093,7 @@ export var _initialize_extension_repos_post_addons_restore = function (addons_to
 			var any_failed = true;
 		}
 	}
-	if (any_failed) {
+	if (__call__ (_truth, null, any_failed)) {
 		__call__ (extensions_refresh, null);
 	}
 	__call__ (_is_first_reset, null);
@@ -3114,7 +3130,7 @@ export var _initialize_extension_repos_post = __call__ (_bpy.app.handlers.persis
 	else {
 		var _ = tuple ();
 	}
-	var do_addons = !(is_first);
+	var do_addons = !(__call__ (_truth, null, is_first));
 	var repos_info_prev = __call__ (_extension_dirpath_from_handle, null);
 	var repos_info_next = __call__ (_extension_dirpath_from_preferences, null);
 	var __left0__ = _ext_global.idmap_pair;
@@ -3233,7 +3249,7 @@ export var _initialize_extension_repos_post = __call__ (_bpy.app.handlers.persis
 			}) ();
 		}
 	}
-	if (do_addons) {
+	if (__call__ (_truth, null, do_addons)) {
 		var submodules_del_disabled = [];
 		var submodules_rename_module_disabled = [];
 		var __iterable0__ = (function () {
@@ -3329,10 +3345,10 @@ export var _initialize_extension_repos_post = __call__ (_bpy.app.handlers.persis
 		var __accu0__ = __getitem__ (_ext_global.idmap_pair, 1);
 		return __call__ (__accu0__.py_clear, __accu0__);
 	}) ();
-	if (do_addons) {
+	if (__call__ (_truth, null, do_addons)) {
 		__call__ (_initialize_extension_repos_post_addons_restore, null, addons_to_enable);
 	}
-	if (submodules_del || submodules_add || submodules_rename_dirpath) {
+	if (__call__ (_truth, null, submodules_del) || __call__ (_truth, null, submodules_add) || __call__ (_truth, null, submodules_rename_dirpath)) {
 		__call__ (_is_first_reset, null);
 	}
 });
@@ -3361,11 +3377,11 @@ export var _initialize_extensions_site_packages = function () {
 			return __call__ (__accu1__.format, __accu1__, sys.version_info.major, sys.version_info.minor);
 		}) (), 'site-packages');
 	}) ();
-	if (create) {
-		if (!((function () {
+	if (__call__ (_truth, null, create)) {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, site_packages);
-		}) ())) {
+		}) ()))) {
 			(function () {
 				var __accu0__ = os;
 				return __call__ (__accu0__.makedirs, __accu0__, site_packages);
@@ -3379,11 +3395,11 @@ export var _initialize_extensions_site_packages = function () {
 			return __call__ (__accu0__.exists, __accu0__, site_packages);
 		}) ();
 	}
-	if (found) {
+	if (__call__ (_truth, null, found)) {
 		var getsitepackages = __call__ (_member, null, 'site', 'getsitepackages');
 		var index = null;
 		var builtin_site_packages = __call__ (set, null, __call__ (getsitepackages, null));
-		if (builtin_site_packages) {
+		if (__call__ (_truth, null, builtin_site_packages)) {
 			var __iterable0__ = __call__ (py_enumerate, null, sys.path);
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -3425,7 +3441,7 @@ export var _initialize_extensions_site_packages = function () {
 			}
 		}
 	}
-	return (found ? site_packages : null);
+	return (__call__ (_truth, null, found) ? site_packages : null);
 };
 export var _initialize_extensions_repos_once = function () {
 	if (arguments.length) {
@@ -3567,23 +3583,23 @@ export var _extensions_warnings_get = function () {
 			continue;
 		}
 		var module_file = __call__ (getattr, null, module, '__file__', null) || '';
-		if (!(module_file)) {
+		if (!(__call__ (_truth, null, module_file))) {
 			continue;
 		}
 		var module_file = (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.normpath, __accu0__, module_file);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = module_file;
 			return __call__ (__accu0__.startswith, __accu0__, dirs_skip_expected);
-		}) ()) {
+		}) ())) {
 			continue;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = module_name;
 			return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
-		}) ()) {
+		}) ())) {
 			if (__ne__ ((function () {
 				var __accu0__ = module_name;
 				return __call__ (__accu0__.find, __accu0__, '.', __call__ (len, null, _ext_base_pkg_idname_with_dot));
@@ -3639,17 +3655,17 @@ export var _extensions_warnings_get = function () {
 		}
 		return __accu0__;
 	}) ());
-	if (dirs_extensions) {
+	if (__call__ (_truth, null, dirs_extensions)) {
 		var __iterable0__ = modules_other;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var module_other_name = __left0__ [0];
 			var module_other_file = __left0__ [1];
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = module_other_file;
 				return __call__ (__accu0__.startswith, __accu0__, dirs_extensions);
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
 			var found = false;
@@ -3662,10 +3678,10 @@ export var _extensions_warnings_get = function () {
 				var __left0__ = __getitem__ (__iterable1__, __index1__);
 				var module_name = __left0__ [0];
 				var module_dirpath = __left0__ [1];
-				if (!((function () {
+				if (!(__call__ (_truth, null, (function () {
 					var __accu0__ = module_other_file;
 					return __call__ (__accu0__.startswith, __accu0__, module_dirpath);
-				}) ())) {
+				}) ()))) {
 					continue;
 				}
 				try {
@@ -3700,16 +3716,16 @@ export var _extensions_warnings_get = function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.normpath, __accu0__, path);
 			}) ();
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = path;
 				return __call__ (__accu0__.startswith, __accu0__, dirs_skip_expected);
-			}) ()) {
+			}) ())) {
 				continue;
 			}
-			if (!(__in__ (path, dirs_extensions_noslash) || (function () {
+			if (!(__in__ (path, dirs_extensions_noslash) || __call__ (_truth, null, (function () {
 				var __accu0__ = path;
 				return __call__ (__accu0__.startswith, __accu0__, dirs_extensions);
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
 			var found = false;
@@ -3725,10 +3741,10 @@ export var _extensions_warnings_get = function () {
 				if (!(__eq__ (path, (function () {
 					var __accu0__ = module_dirpath;
 					return __call__ (__accu0__.rstrip, __accu0__, os.sep);
-				}) ()) || (function () {
+				}) ()) || __call__ (_truth, null, (function () {
 					var __accu0__ = path;
 					return __call__ (__accu0__.startswith, __accu0__, module_dirpath);
-				}) ())) {
+				}) ()))) {
 					continue;
 				}
 				try {
@@ -3790,6 +3806,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

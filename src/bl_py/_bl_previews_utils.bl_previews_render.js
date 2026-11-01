@@ -108,6 +108,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -172,7 +188,7 @@ export var ids_nolib = function (bids) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var bid = __getitem__ (__iterable0__, __index0__);
-			if (!(bid.library)) {
+			if (!(__call__ (_truth, null, bid.library))) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, bid);
@@ -202,7 +218,7 @@ export var ids_nolib_with_preview = function (bids) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var bid = __getitem__ (__iterable0__, __index0__);
-			if (!(bid.library) && bid.preview) {
+			if (!(__call__ (_truth, null, bid.library)) && __call__ (_truth, null, bid.preview)) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, bid);
@@ -257,10 +273,10 @@ export var rna_backup_gen = function* (data, include_props, exclude_props, root)
 		if (val !== null && __eq__ (p.py_metatype, 'POINTER')) {
 			yield* __call__ (rna_backup_gen, null, val, include_props, exclude_props, __kwargtrans__ ({root: path}));
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = data;
 			return __call__ (__accu0__.is_property_readonly, __accu0__, pid);
-		}) ()) {
+		}) ())) {
 			continue;
 		}
 		else {
@@ -350,7 +366,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 			var backup_scene = __call__ (tuple, null, __call__ (rna_backup_gen, null, scene, __kwargtrans__ ({exclude_props: exclude_props})));
 			var world = scene.world;
 			var camera = scene.camera;
-			if (camera) {
+			if (__call__ (_truth, null, camera)) {
 				var camera_data = camera.data;
 			}
 			else {
@@ -448,7 +464,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 		}) ();
 		image.source = 'FILE';
 		image.filepath = scene.render.filepath;
-		return __call__ (RenderContext, null, scene.py_name, (world ? world.py_name : null), camera.py_name, (light ? light.py_name : null), camera_data.py_name, (light_data ? light_data.py_name : null), image.py_name, backup_scene, backup_world, backup_camera, backup_light, backup_camera_data, backup_light_data);
+		return __call__ (RenderContext, null, scene.py_name, (__call__ (_truth, null, world) ? world.py_name : null), camera.py_name, (__call__ (_truth, null, light) ? light.py_name : null), camera_data.py_name, (__call__ (_truth, null, light_data) ? light_data.py_name : null), image.py_name, backup_scene, backup_world, backup_camera, backup_light, backup_camera_data, backup_light_data);
 	};
 	var render_context_delete = function (render_context) {
 		if (arguments.length) {
@@ -470,13 +486,13 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 			if (render_context.backup_scene === null) {
 				scene.world = null;
 				scene.camera = null;
-				if (render_context.camera) {
+				if (__call__ (_truth, null, render_context.camera)) {
 					(function () {
 						var __accu0__ = scene.collection.objects;
 						return __call__ (__accu0__.unlink, __accu0__, bpy.data.objects.__getitem__ ([render_context.camera, null]));
 					}) ();
 				}
-				if (render_context.light) {
+				if (__call__ (_truth, null, render_context.light)) {
 					(function () {
 						var __accu0__ = scene.collection.objects;
 						return __call__ (__accu0__.unlink, __accu0__, bpy.data.objects.__getitem__ ([render_context.light, null]));
@@ -533,7 +549,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 				}
 			}
 		}
-		if (render_context.camera) {
+		if (__call__ (_truth, null, render_context.camera)) {
 			try {
 				var camera = bpy.data.objects.__getitem__ ([render_context.camera, null]);
 				if (render_context.backup_camera === null) {
@@ -573,7 +589,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 				}
 			}
 		}
-		if (render_context.light) {
+		if (__call__ (_truth, null, render_context.light)) {
 			try {
 				var light = bpy.data.objects.__getitem__ ([render_context.light, null]);
 				if (render_context.backup_light === null) {
@@ -661,7 +677,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 					var ob = __getitem__ (__iterable0__, __index0__);
 					(function () {
 						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, tuple ([ob.py_name, (ob.library ? ob.library.filepath : null)]));
+						return __call__ (__accu1__.append, __accu1__, tuple ([ob.py_name, (__call__ (_truth, null, ob.library) ? ob.library.filepath : null)]));
 					}) ();
 				}
 				return __accu0__;
@@ -680,7 +696,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 				var ob_bbox = tuple ([tuple ([__getitem__ (coords, 0), __getitem__ (coords, 1), __getitem__ (coords, 2)]), tuple ([__getitem__ (coords, 21), __getitem__ (coords, 22), __getitem__ (coords, 23)])]);
 			}
 		}
-		else if (ob.bound_box) {
+		else if (__call__ (_truth, null, ob.bound_box)) {
 			var ob_bbox = ob.bound_box;
 		}
 		else {
@@ -798,7 +814,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 			}
 			camera.data.clip_start = __truediv__ (min_dist, 2);
 			camera.data.clip_end = __mul__ (max_dist, 2);
-			if (light) {
+			if (__call__ (_truth, null, light)) {
 				var __left0__ = (function () {
 					var __accu0__ = light;
 					return __call__ (__accu0__.camera_fit_coords, __accu0__, depsgraph, cos);
@@ -830,7 +846,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 		__setslice__ (preview.image_pixels_float, 0, null, null, image.pixels);
 	};
 	var do_save = true;
-	if (do_data_intern) {
+	if (__call__ (_truth, null, do_data_intern)) {
 		(function () {
 			var __accu0__ = bpy.ops.wm;
 			return __call__ (__accu0__.previews_clear, __accu0__, __kwargtrans__ ({id_type: new set (['SHADING'])}));
@@ -844,7 +860,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 	var objects_ignored = __call__ (set, null);
 	var collections_ignored = __call__ (set, null);
 	var prev_scenename = bpy.context.window.scene.py_name;
-	if (do_objects) {
+	if (__call__ (_truth, null, do_objects)) {
 		var prev_shown = (function () {
 			var __accu0__ = [];
 			var __iterable0__ = __call__ (list, null, __call__ (ids_nolib, null, bpy.data.objects));
@@ -936,7 +952,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 			}
 		}
 	}
-	if (do_collections) {
+	if (__call__ (_truth, null, do_collections)) {
 		var __iterable0__ = __call__ (ids_nolib, null, bpy.data.collections);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -952,7 +968,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 					var ob = __getitem__ (__iterable1__, __index1__);
 					(function () {
 						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, tuple ([ob.py_name, (ob.library ? ob.library.filepath : null)]));
+						return __call__ (__accu1__.append, __accu1__, tuple ([ob.py_name, (__call__ (_truth, null, ob.library) ? ob.library.filepath : null)]));
 					}) ();
 				}
 				return __accu0__;
@@ -977,7 +993,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var ob = __getitem__ (__iterable1__, __index1__);
-					if (ob.instance_collection && __eq__ (ob.instance_collection.py_name, grp.py_name)) {
+					if (__call__ (_truth, null, ob.instance_collection) && __eq__ (ob.instance_collection.py_name, grp.py_name)) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, ob);
@@ -1014,11 +1030,11 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var render_context = __getitem__ (__iterable0__, __index0__);
-		if (!(__call__ (render_context_delete, null, render_context))) {
+		if (!(__call__ (_truth, null, __call__ (render_context_delete, null, render_context)))) {
 			var do_save = false;
 		}
 	}
-	if (do_scenes) {
+	if (__call__ (_truth, null, do_scenes)) {
 		var __iterable0__ = __call__ (ids_nolib, null, bpy.data.scenes);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1031,17 +1047,17 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 				return __call__ (__accu0__.py_update, __accu0__);
 			}) ();
 			var objects = null;
-			if (!(has_camera)) {
+			if (!(__call__ (_truth, null, has_camera))) {
 				var objects = __call__ (tuple, null, (function () {
 					var __accu0__ = [];
 					var __iterable1__ = scene.objects;
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 						var ob = __getitem__ (__iterable1__, __index1__);
-						if (!(ob.hide_render) && __in__ (ob.py_metatype, OBJECT_TYPES_RENDER)) {
+						if (!(__call__ (_truth, null, ob.hide_render)) && __in__ (ob.py_metatype, OBJECT_TYPES_RENDER)) {
 							(function () {
 								var __accu1__ = __accu0__;
-								return __call__ (__accu1__.append, __accu1__, tuple ([ob.py_name, (ob.library ? ob.library.filepath : null)]));
+								return __call__ (__accu1__.append, __accu1__, tuple ([ob.py_name, (__call__ (_truth, null, ob.library) ? ob.library.filepath : null)]));
 							}) ();
 						}
 					}
@@ -1049,13 +1065,13 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 				}) ());
 			}
 			__call__ (preview_render_do, null, render_context, 'scenes', scene.py_name, objects);
-			if (!(__call__ (render_context_delete, null, render_context))) {
+			if (!(__call__ (_truth, null, __call__ (render_context_delete, null, render_context)))) {
 				var do_save = false;
 			}
 		}
 	}
 	bpy.context.window.scene = bpy.data.scenes.__getitem__ ([prev_scenename, null]);
-	if (do_save) {
+	if (__call__ (_truth, null, do_save)) {
 		__call__ (print, null, (function () {
 			var __accu0__ = 'Saving {:s}...';
 			return __call__ (__accu0__.format, __accu0__, bpy.data.filepath);
@@ -1100,13 +1116,13 @@ export var do_clear_previews = function (do_objects, do_collections, do_scenes, 
 	}
 	else {
 	}
-	if (do_data_intern) {
+	if (__call__ (_truth, null, do_data_intern)) {
 		(function () {
 			var __accu0__ = bpy.ops.wm;
 			return __call__ (__accu0__.previews_clear, __accu0__, __kwargtrans__ ({id_type: new set (['SHADING'])}));
 		}) ();
 	}
-	if (do_objects) {
+	if (__call__ (_truth, null, do_objects)) {
 		var __iterable0__ = __call__ (ids_nolib_with_preview, null, bpy.data.objects);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1114,7 +1130,7 @@ export var do_clear_previews = function (do_objects, do_collections, do_scenes, 
 			ob.preview.image_size = tuple ([0, 0]);
 		}
 	}
-	if (do_collections) {
+	if (__call__ (_truth, null, do_collections)) {
 		var __iterable0__ = __call__ (ids_nolib_with_preview, null, bpy.data.collections);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1122,7 +1138,7 @@ export var do_clear_previews = function (do_objects, do_collections, do_scenes, 
 			grp.preview.image_size = tuple ([0, 0]);
 		}
 	}
-	if (do_scenes) {
+	if (__call__ (_truth, null, do_scenes)) {
 		var __iterable0__ = __call__ (ids_nolib_with_preview, null, bpy.data.scenes);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1201,13 +1217,13 @@ export var main = function () {
 		return __call__ (__accu0__.parse_args, __accu0__, argv);
 	}) ();
 	var orig_save_version = bpy.context.preferences.filepaths.save_version;
-	if (args.no_backups) {
+	if (__call__ (_truth, null, args.no_backups)) {
 		bpy.context.preferences.filepaths.save_version = 0;
 	}
 	else if (__lt__ (orig_save_version, 1)) {
 		bpy.context.preferences.filepaths.save_version = 1;
 	}
-	if (args.py_clear) {
+	if (__call__ (_truth, null, args.py_clear)) {
 		__call__ (print, null, 'clear!');
 		__call__ (do_clear_previews, null, __kwargtrans__ ({do_objects: args.no_objects, do_collections: args.no_collections, do_scenes: args.no_scenes, do_data_intern: args.no_data_intern}));
 	}
@@ -1243,6 +1259,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'OBJECT_TYPES_RENDER': OBJECT_TYPES_RENDER = value; break;

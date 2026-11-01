@@ -107,6 +107,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -171,7 +187,7 @@ export var EditExternally =  __class__ ('EditExternally', [Operator], {
 		}
 		var sys = __call__ (_module, null, 'sys');
 		var image_editor = context.preferences.filepaths.image_editor;
-		if (!(image_editor)) {
+		if (!(__call__ (_truth, null, image_editor))) {
 			if (__eq__ (__getslice__ (sys.platform, null, 3, 1), 'win')) {
 				var image_editor = ['start'];
 			}
@@ -212,20 +228,20 @@ export var EditExternally =  __class__ ('EditExternally', [Operator], {
 		var os = __call__ (_module, null, 'os');
 		var subprocess = __call__ (_module, null, 'subprocess');
 		var filepath = self.filepath;
-		if (!(filepath)) {
+		if (!(__call__ (_truth, null, filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Image path not set');
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, filepath);
-		}) ()) || !((function () {
+		}) ())) || !(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isfile, __accu0__, filepath);
-		}) ())) {
+		}) ()))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -297,7 +313,7 @@ export var EditExternally =  __class__ ('EditExternally', [Operator], {
 				throw __except0__;
 			}
 		}
-		if (image.packed_file) {
+		if (__call__ (_truth, null, image.packed_file)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Image is packed, unpack before editing');
@@ -382,12 +398,12 @@ export var ProjectEdit =  __class__ ('ProjectEdit', [Operator], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var image = __getitem__ (__iterable0__, __index0__);
-			if (!(image.tag)) {
+			if (!(__call__ (_truth, null, image.tag))) {
 				var image_new = image;
 				break;
 			}
 		}
-		if (!(image_new)) {
+		if (!(__call__ (_truth, null, image_new))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Could not make new image');
@@ -402,7 +418,7 @@ export var ProjectEdit =  __class__ ('ProjectEdit', [Operator], {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.splitext, __accu0__, filepath);
 		}) (), 0);
-		if (bpy.data.is_saved) {
+		if (__call__ (_truth, null, bpy.data.is_saved)) {
 			var filepath = __add__ ('//', filepath);
 		}
 		else {
@@ -412,7 +428,7 @@ export var ProjectEdit =  __class__ ('ProjectEdit', [Operator], {
 			}) ();
 		}
 		var obj = context.object;
-		if (obj) {
+		if (__call__ (_truth, null, obj)) {
 			var filepath = __call__ (__iadd__, null, filepath, __add__ ('_', (function () {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.clean_name, __accu0__, obj.py_name);
@@ -420,13 +436,13 @@ export var ProjectEdit =  __class__ ('ProjectEdit', [Operator], {
 		}
 		var filepath_final = __add__ (__add__ (filepath, '.'), EXT);
 		var i = 0;
-		while ((function () {
+		while (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, (function () {
 				var __accu1__ = bpy.path;
 				return __call__ (__accu1__.abspath, __accu1__, filepath_final);
 			}) ());
-		}) ()) {
+		}) ())) {
 			var filepath_final = __add__ (filepath, (function () {
 				var __accu0__ = '{:03d}.{:s}';
 				return __call__ (__accu0__.format, __accu0__, i, EXT);
@@ -553,7 +569,7 @@ export var IMAGE_OT_open_images =  __class__ ('IMAGE_OT_open_images', [Operator]
 		}
 		else {
 		}
-		if (!(self.directory) || __eq__ (__call__ (len, null, self.files), 0)) {
+		if (!(__call__ (_truth, null, self.directory)) || __eq__ (__call__ (len, null, self.files), 0)) {
 			return new set (['CANCELLED']);
 		}
 		var files = [];
@@ -589,17 +605,17 @@ export var IMAGE_OT_open_images =  __class__ ('IMAGE_OT_open_images', [Operator]
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var file = __getitem__ (__iterable0__, __index0__);
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = regex_extension;
 				return __call__ (__accu0__.search, __accu0__, file.py_name);
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
 			var match = (function () {
 				var __accu0__ = regex_sequence;
 				return __call__ (__accu0__.search, __accu0__, file.py_name);
 			}) ();
-			if (!(match && (self.use_sequence_detection || self.use_udim_detection))) {
+			if (!(__call__ (_truth, null, match) && (__call__ (_truth, null, self.use_sequence_detection) || __call__ (_truth, null, self.use_udim_detection)))) {
 				(function () {
 					var __accu0__ = files;
 					return __call__ (__accu0__.append, __accu0__, file.py_name);
@@ -629,7 +645,7 @@ export var IMAGE_OT_open_images =  __class__ ('IMAGE_OT_open_images', [Operator]
 					break;
 				}
 			}
-			if (seq) {
+			if (__call__ (_truth, null, seq)) {
 				(function () {
 					var __accu0__ = sequences;
 					return __call__ (__accu0__.append, __accu0__, seq);
@@ -680,7 +696,7 @@ export var IMAGE_OT_open_images =  __class__ ('IMAGE_OT_open_images', [Operator]
 				return __call__ (__accu0__.open, __accu0__, __kwargtrans__ ({filepath: filepath, directory: self.directory, files: files, use_sequence_detection: self.use_sequence_detection, use_udim_detecting: self.use_udim_detection, relative_path: self.relative_path}));
 			}) ();
 			var is_tiled = __eq__ (context.edit_image.source, 'TILED');
-			if (__gt__ (__call__ (len, null, files), 1) && self.use_sequence_detection && !(is_tiled)) {
+			if (__gt__ (__call__ (len, null, files), 1) && __call__ (_truth, null, self.use_sequence_detection) && !(__call__ (_truth, null, is_tiled))) {
 				context.edit_image.py_name = (function () {
 					var __accu0__ = '{:s}{:s}{:s}';
 					return __call__ (__accu0__.format, __accu0__, __getitem__ (seq, 'prefix'), __mul__ ('#', __getitem__ (seq, 'frame_size')), __getitem__ (seq, 'ext'));
@@ -730,6 +746,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'EditExternally': EditExternally = value; break;

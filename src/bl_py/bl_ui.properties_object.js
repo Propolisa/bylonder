@@ -11,6 +11,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {MotionPathButtonsPanel, MotionPathButtonsPanel_display} from './bl_ui.properties_animviz.js';
 var __name__ = 'bl_ui.properties_object';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var ObjectButtonsPanel =  __class__ ('ObjectButtonsPanel', [object], {
 	__module__: __name__,
 	bl_space_type: 'PROPERTIES',
@@ -38,7 +194,7 @@ export var OBJECT_PT_context_object =  __class__ ('OBJECT_PT_context_object', [O
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		if (space.use_pin_id) {
+		if (__call__ (_truth, null, space.use_pin_id)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
@@ -347,7 +503,7 @@ export var OBJECT_PT_relations =  __class__ ('OBJECT_PT_relations', [ObjectButto
 			return __call__ (__accu0__.prop, __accu0__, ob, 'parent_type');
 		}) ();
 		var parent = ob.parent;
-		if (parent && __eq__ (ob.parent_type, 'BONE') && __eq__ (parent.py_metatype, 'ARMATURE')) {
+		if (__call__ (_truth, null, parent) && __eq__ (ob.parent_type, 'BONE') && __eq__ (parent.py_metatype, 'ARMATURE')) {
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.prop_search, __accu0__, ob, 'parent_bone', parent.data, 'bones');
@@ -470,7 +626,7 @@ export var OBJECT_PT_collections =  __class__ ('OBJECT_PT_collections', [ObjectB
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (bpy.data.collections) {
+		if (__call__ (_truth, null, bpy.data.collections)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.operator, __accu0__, 'object.collection_link', __kwargtrans__ ({text: 'Add to Collection'}));
@@ -576,19 +732,19 @@ export var OBJECT_PT_display =  __class__ ('OBJECT_PT_display', [ObjectButtonsPa
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, obj, 'show_axis', __kwargtrans__ ({text: 'Axes'}));
 		}) ();
-		if (is_geometry || is_dupli) {
+		if (__call__ (_truth, null, is_geometry) || __call__ (_truth, null, is_dupli)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, obj, 'show_wire', __kwargtrans__ ({text: 'Wireframe'}));
 			}) ();
 		}
-		if (__eq__ (obj_type, 'MESH') || is_dupli) {
+		if (__eq__ (obj_type, 'MESH') || __call__ (_truth, null, is_dupli)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, obj, 'show_all_edges', __kwargtrans__ ({text: 'All Edges'}));
 			}) ();
 		}
-		if (is_geometry) {
+		if (__call__ (_truth, null, is_geometry)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, obj, 'show_texture_space', __kwargtrans__ ({text: 'Texture Space'}));
@@ -611,13 +767,13 @@ export var OBJECT_PT_display =  __class__ ('OBJECT_PT_display', [ObjectButtonsPa
 			var __accu0__ = sub;
 			return __call__ (__accu0__.prop, __accu0__, obj, 'display_type', __kwargtrans__ ({text: 'Display As'}));
 		}) ();
-		if (is_geometry || is_dupli || is_empty_image || is_gpencil) {
+		if (__call__ (_truth, null, is_geometry) || __call__ (_truth, null, is_dupli) || __call__ (_truth, null, is_empty_image) || __call__ (_truth, null, is_gpencil)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, obj, 'color');
 			}) ();
 		}
-		if (has_bounds) {
+		if (__call__ (_truth, null, has_bounds)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Bounds'}));
@@ -715,7 +871,7 @@ export var OBJECT_PT_instancing =  __class__ ('OBJECT_PT_instancing', [ObjectBut
 				return __call__ (__accu0__.prop, __accu0__, ob, 'instance_collection', __kwargtrans__ ({text: 'Collection'}));
 			}) ();
 		}
-		if (__ne__ (ob.instance_type, 'NONE') || ob.particle_systems) {
+		if (__ne__ (ob.instance_type, 'NONE') || __call__ (_truth, null, ob.particle_systems)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Show Instancer', align: true}));
@@ -1259,7 +1415,7 @@ export var OBJECT_PT_light_linking =  __class__ ('OBJECT_PT_light_linking', [Obj
 			var __accu0__ = col;
 			return __call__ (__accu0__.template_ID, __accu0__, light_linking, 'receiver_collection', __kwargtrans__ ({py_new: 'object.light_linking_receiver_collection_new'}));
 		}) ();
-		if (!(light_linking.receiver_collection)) {
+		if (!(__call__ (_truth, null, light_linking.receiver_collection))) {
 			return ;
 		}
 		var row = (function () {
@@ -1359,7 +1515,7 @@ export var OBJECT_PT_shadow_linking =  __class__ ('OBJECT_PT_shadow_linking', [O
 			var __accu0__ = col;
 			return __call__ (__accu0__.template_ID, __accu0__, light_linking, 'blocker_collection', __kwargtrans__ ({py_new: 'object.light_linking_blocker_collection_new'}));
 		}) ();
-		if (!(light_linking.blocker_collection)) {
+		if (!(__call__ (_truth, null, light_linking.blocker_collection))) {
 			return ;
 		}
 		var row = (function () {
@@ -1489,6 +1645,14 @@ export {Menu, MotionPathButtonsPanel, MotionPathButtonsPanel_display, Panel, Pro
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'ObjectButtonsPanel': ObjectButtonsPanel = value; break;
 		case 'OBJECT_PT_context_object': OBJECT_PT_context_object = value; break;
 		case 'OBJECT_PT_transform': OBJECT_PT_transform = value; break;

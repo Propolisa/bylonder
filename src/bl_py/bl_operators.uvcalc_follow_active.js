@@ -6,6 +6,162 @@ import {EnumProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.uvcalc_follow_active';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['classes']);
 export var STATUS_OK = __lshift__ (1, 0);
 export var STATUS_ERR_ACTIVE_FACE = __lshift__ (1, 1);
@@ -41,7 +197,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	if (f_act === null) {
 		return STATUS_ERR_ACTIVE_FACE;
 	}
-	if (!(f_act.select)) {
+	if (!(__call__ (_truth, null, f_act.select))) {
 		return STATUS_ERR_NOT_SELECTED;
 	}
 	if (__ne__ (__call__ (len, null, f_act.verts), 4)) {
@@ -51,7 +207,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	if (uv_act === null) {
 		return STATUS_ERR_MISSING_UV_LAYER;
 	}
-	if (use_uv_selection) {
+	if (__call__ (_truth, null, use_uv_selection)) {
 		var face_select_test_fn = __call__ (is_face_uv_selected_fn_from_context, null, scene, bm);
 		var faces = (function () {
 			var __accu0__ = [];
@@ -59,7 +215,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var f = __getitem__ (__iterable0__, __index0__);
-				if (f.select && __eq__ (__call__ (len, null, f.verts), 4) && __call__ (face_select_test_fn, null, f, false)) {
+				if (__call__ (_truth, null, f.select) && __eq__ (__call__ (len, null, f.verts), 4) && __call__ (_truth, null, __call__ (face_select_test_fn, null, f, false))) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, f);
@@ -76,7 +232,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var f = __getitem__ (__iterable0__, __index0__);
-				if (f.select && __eq__ (__call__ (len, null, f.verts), 4)) {
+				if (__call__ (_truth, null, f.select) && __eq__ (__call__ (len, null, f.verts), 4)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, f);
@@ -86,7 +242,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 			return __accu0__;
 		}) ();
 	}
-	if (!(faces)) {
+	if (!(__call__ (_truth, null, faces))) {
 		return STATUS_ERR_NO_FACES_SELECTED;
 	}
 	var walk_face_init = function (faces, f_act) {
@@ -135,7 +291,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		f.tag = true;
 		var faces_a = [f];
 		var faces_b = [];
-		while (faces_a) {
+		while (__call__ (_truth, null, faces_a)) {
 			var __iterable0__ = faces_a;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -148,7 +304,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 					if (l_edge.is_manifold === true && l_edge.seam === false) {
 						var l_other = l.link_loop_radial_next;
 						var f_other = l_other.face;
-						if (!(f_other.tag)) {
+						if (!(__call__ (_truth, null, f_other.tag))) {
 							yield tuple ([f, l, f_other]);
 							f_other.tag = true;
 							(function () {
@@ -192,7 +348,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 				return __call__ (__accu0__.add, __accu0__, l_other_edge);
 			}) ();
 			yield l_other_edge;
-			if (!(l_other_edge.is_boundary)) {
+			if (!(__call__ (_truth, null, l_other_edge.is_boundary))) {
 				(function () {
 					var __accu0__ = loop_stack;
 					return __call__ (__accu0__.append, __accu0__, l_other);
@@ -228,14 +384,14 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		}
 		while (true) {
 			var _walrus1 = loop_stack;
-			if (_walrus1) {
+			if (__call__ (_truth, null, _walrus1)) {
 				var l_test = (function () {
 					var __accu0__ = loop_stack;
 					return __call__ (__accu0__.py_pop, __accu0__);
 				}) ();
 				var _walrus1 = l_test;
 			}
-			if (!(_walrus1)) {
+			if (!(__call__ (_truth, null, _walrus1))) {
 				break;
 			}
 			var l = l_test;
@@ -444,7 +600,7 @@ export var main = function (context, operator) {
 	}
 	var scene = context.scene;
 	var use_uv_selection = true;
-	if (context.space_data && __eq__ (context.space_data.py_metatype, 'VIEW_3D')) {
+	if (__call__ (_truth, null, context.space_data) && __eq__ (context.space_data.py_metatype, 'VIEW_3D')) {
 		var use_uv_selection = false;
 	}
 	var num_meshes = 0;
@@ -463,25 +619,25 @@ export var main = function (context, operator) {
 		}
 	}
 	if (__eq__ (num_errors, num_meshes)) {
-		if (__and__ (status, STATUS_ERR_NOT_QUAD)) {
+		if (__call__ (_truth, null, __and__ (status, STATUS_ERR_NOT_QUAD))) {
 			(function () {
 				var __accu0__ = operator;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Active face must be a quad');
 			}) ();
 		}
-		else if (__and__ (status, STATUS_ERR_NOT_SELECTED)) {
+		else if (__call__ (_truth, null, __and__ (status, STATUS_ERR_NOT_SELECTED))) {
 			(function () {
 				var __accu0__ = operator;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Active face not selected');
 			}) ();
 		}
-		else if (__and__ (status, STATUS_ERR_NO_FACES_SELECTED)) {
+		else if (__call__ (_truth, null, __and__ (status, STATUS_ERR_NO_FACES_SELECTED))) {
 			(function () {
 				var __accu0__ = operator;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No selected faces');
 			}) ();
 		}
-		else if (__and__ (status, STATUS_ERR_MISSING_UV_LAYER)) {
+		else if (__call__ (_truth, null, __and__ (status, STATUS_ERR_MISSING_UV_LAYER))) {
 			(function () {
 				var __accu0__ = operator;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No UV layers');
@@ -566,6 +722,14 @@ export {EnumProperty, Operator, _globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'STATUS_OK': STATUS_OK = value; break;
 		case 'STATUS_ERR_ACTIVE_FACE': STATUS_ERR_ACTIVE_FACE = value; break;

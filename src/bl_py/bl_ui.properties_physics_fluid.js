@@ -11,6 +11,162 @@ import {Panel} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_physics_fluid';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var FLUID_PT_presets =  __class__ ('FLUID_PT_presets', [PresetPanel, Panel], {
 	__module__: __name__,
 	bl_label: 'Fluid Presets',
@@ -37,7 +193,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		return domain.use_guide && !(domain.has_cache_baked_guide) && (__eq__ (domain.guide_source, 'EFFECTOR') || __eq__ (domain.guide_source, 'DOMAIN') && !(domain.guide_parent));
+		return domain.use_guide && !(__call__ (_truth, null, domain.has_cache_baked_guide)) && (__eq__ (domain.guide_source, 'EFFECTOR') || __eq__ (domain.guide_source, 'DOMAIN') && !(__call__ (_truth, null, domain.guide_parent)));
 	};},
 	get poll_fluid () {return function (context) {
 		if (arguments.length) {
@@ -54,7 +210,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		else {
 		}
 		var ob = context.object;
-		if (!((ob && __eq__ (ob.py_metatype, 'MESH')) && context.fluid)) {
+		if (!((__call__ (_truth, null, ob) && __eq__ (ob.py_metatype, 'MESH')) && __call__ (_truth, null, context.fluid))) {
 			return false;
 		}
 		var md = context.fluid;
@@ -74,10 +230,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
@@ -97,14 +253,14 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
-		if (md && __eq__ (md.fluid_type, 'DOMAIN')) {
+		if (__call__ (_truth, null, md) && __eq__ (md.fluid_type, 'DOMAIN')) {
 			var domain = md.domain_settings;
 			return __eq__ (domain.domain_type, 'GAS');
 		}
@@ -124,14 +280,14 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
-		if (md && __eq__ (md.fluid_type, 'DOMAIN')) {
+		if (__call__ (_truth, null, md) && __eq__ (md.fluid_type, 'DOMAIN')) {
 			var domain = md.domain_settings;
 			return __eq__ (domain.domain_type, 'LIQUID');
 		}
@@ -151,10 +307,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
@@ -174,10 +330,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
@@ -198,10 +354,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
@@ -248,7 +404,7 @@ export var PHYSICS_PT_fluid =  __class__ ('PHYSICS_PT_fluid', [PhysicButtonsPane
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		if (!(bpy.app.build_options.fluid)) {
+		if (!(__call__ (_truth, null, bpy.app.build_options.fluid))) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -287,10 +443,10 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -323,7 +479,7 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			row.enabled = !(is_baking_any) && !(has_baked_data);
+			row.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, domain, 'domain_type', __kwargtrans__ ({expand: false}));
@@ -332,12 +488,12 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 				var __accu0__ = layout;
 				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 			}) ();
-			flow.enabled = !(is_baking_any) && !(has_baked_data);
+			flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 			var col = (function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.column, __accu0__);
 			}) ();
-			col.enabled = !(domain.has_cache_baked_guide);
+			col.enabled = !(__call__ (_truth, null, domain.has_cache_baked_guide));
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, domain, 'resolution_max', __kwargtrans__ ({text: 'Resolution Divisions'}));
@@ -379,7 +535,7 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 				var __accu0__ = flow;
 				return __call__ (__accu0__.column, __accu0__);
 			}) ();
-			if (scene.use_gravity) {
+			if (__call__ (_truth, null, scene.use_gravity)) {
 				var sub = (function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.column, __accu0__);
@@ -400,10 +556,10 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 				var __accu0__ = flow;
 				return __call__ (__accu0__.column, __accu0__);
 			}) ();
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = PhysicButtonsPanel;
 				return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, domain, 'clipping', __kwargtrans__ ({text: 'Empty Space'}));
@@ -420,32 +576,32 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 				}) ();
 				var label = '';
 				var note_flag = true;
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.check_domain_has_unbaked_guide, __accu0__, domain);
-				}) ()) {
+				}) ())) {
 					var note_flag = false;
 					var label = 'Unbaked Guides: Bake Guides or disable them';
 				}
-				else if (!(domain.cache_resumable) && !(label)) {
+				else if (!(__call__ (_truth, null, domain.cache_resumable)) && !(__call__ (_truth, null, label))) {
 					var label = 'Non Resumable Cache: Baking ';
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = PhysicButtonsPanel;
 						return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
-					}) ()) {
+					}) ())) {
 						var label = __call__ (__iadd__, null, label, 'mesh or particles will not be possible');
 					}
-					else if ((function () {
+					else if (__call__ (_truth, null, (function () {
 						var __accu0__ = PhysicButtonsPanel;
 						return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-					}) ()) {
+					}) ())) {
 						var label = __call__ (__iadd__, null, label, 'noise will not be possible');
 					}
 					else {
 						var label = '';
 					}
 				}
-				if (label) {
+				if (__call__ (_truth, null, label)) {
 					var info = (function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.py_split, __accu0__);
@@ -467,7 +623,7 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 				}) ();
 				py_split.enabled = note_flag && __eq__ (ob.mode, 'OBJECT');
 				var bake_incomplete = __lt__ (domain.cache_frame_pause_data, domain.cache_frame_end);
-				if (domain.cache_resumable && domain.has_cache_baked_data && !(domain.is_cache_baking_data) && bake_incomplete) {
+				if (__call__ (_truth, null, domain.cache_resumable) && __call__ (_truth, null, domain.has_cache_baked_data) && !(__call__ (_truth, null, domain.is_cache_baking_data)) && __call__ (_truth, null, bake_incomplete)) {
 					var col = (function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.column, __accu0__);
@@ -485,14 +641,14 @@ export var PHYSICS_PT_settings =  __class__ ('PHYSICS_PT_settings', [PhysicButto
 						return __call__ (__accu0__.operator, __accu0__, 'fluid.free_data', __kwargtrans__ ({text: 'Free'}));
 					}) ();
 				}
-				else if (domain.is_cache_baking_data && !(domain.has_cache_baked_data)) {
+				else if (__call__ (_truth, null, domain.is_cache_baking_data) && !(__call__ (_truth, null, domain.has_cache_baked_data))) {
 					py_split.enabled = false;
 					(function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Data - ESC to pause'}));
 					}) ();
 				}
-				else if (!(domain.has_cache_baked_data) && !(domain.is_cache_baking_data)) {
+				else if (!(__call__ (_truth, null, domain.has_cache_baked_data)) && !(__call__ (_truth, null, domain.is_cache_baking_data))) {
 					(function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_data', __kwargtrans__ ({text: 'Bake Data'}));
@@ -650,10 +806,10 @@ export var PHYSICS_PT_borders =  __class__ ('PHYSICS_PT_borders', [PhysicButtons
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -683,7 +839,7 @@ export var PHYSICS_PT_borders =  __class__ ('PHYSICS_PT_borders', [PhysicButtons
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		col.enabled = !(is_baking_any) && !(has_baked_data);
+		col.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'use_collision_border_front');
@@ -730,10 +886,10 @@ export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -763,7 +919,7 @@ export var PHYSICS_PT_smoke =  __class__ ('PHYSICS_PT_smoke', [PhysicButtonsPane
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_data);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -808,10 +964,10 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -834,7 +990,7 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 		var md = context.fluid.domain_settings;
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
-		self.layout.enabled = !(is_baking_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_dissolve_smoke', __kwargtrans__ ({text: ''}));
@@ -865,7 +1021,7 @@ export var PHYSICS_PT_smoke_dissolve =  __class__ ('PHYSICS_PT_smoke_dissolve', 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_data);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		layout.active = domain.use_dissolve_smoke;
 		var col = (function () {
 			var __accu0__ = flow;
@@ -906,10 +1062,10 @@ export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel,
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -939,7 +1095,7 @@ export var PHYSICS_PT_fire =  __class__ ('PHYSICS_PT_fire', [PhysicButtonsPanel,
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_data);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
@@ -1006,10 +1162,10 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1032,7 +1188,7 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 		var md = context.fluid.domain_settings;
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
-		self.layout.enabled = !(is_baking_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_flip_particles', __kwargtrans__ ({text: ''}));
@@ -1059,7 +1215,7 @@ export var PHYSICS_PT_liquid =  __class__ ('PHYSICS_PT_liquid', [PhysicButtonsPa
 		var domain = md.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_data = domain.has_cache_baked_data;
-		layout.enabled = !(is_baking_any) && !(has_baked_data);
+		layout.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		var flow = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
@@ -1170,10 +1326,10 @@ export var PHYSICS_PT_flow_source =  __class__ ('PHYSICS_PT_flow_source', [Physi
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1276,16 +1432,16 @@ export var PHYSICS_PT_flow_initial_velocity =  __class__ ('PHYSICS_PT_flow_initi
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow_outflow, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1381,22 +1537,22 @@ export var PHYSICS_PT_flow_texture =  __class__ ('PHYSICS_PT_flow_texture', [Phy
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow, __accu0__, context);
+		}) ()))) {
+			return false;
+		}
+		if (__call__ (_truth, null, (function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_fluid_flow_outflow, __accu0__, context);
 		}) ())) {
 			return false;
 		}
-		if ((function () {
-			var __accu0__ = PhysicButtonsPanel;
-			return __call__ (__accu0__.poll_fluid_flow_outflow, __accu0__, context);
-		}) ()) {
-			return false;
-		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_flow_liquid, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1507,15 +1663,15 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.fluid;
 		var domain = md.domain_settings;
-		if (domain.use_guide && __eq__ (domain.guide_source, 'EFFECTOR')) {
+		if (__call__ (_truth, null, domain.use_guide) && __eq__ (domain.guide_source, 'EFFECTOR')) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1539,7 +1695,7 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
-		self.layout.enabled = !(is_baking_any) && !(has_baked_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_adaptive_domain', __kwargtrans__ ({text: ''}));
@@ -1570,7 +1726,7 @@ export var PHYSICS_PT_adaptive_domain =  __class__ ('PHYSICS_PT_adaptive_domain'
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_any);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
@@ -1618,10 +1774,10 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1644,7 +1800,7 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 		var md = context.fluid.domain_settings;
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
-		self.layout.enabled = !(is_baking_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_noise', __kwargtrans__ ({text: ''}));
@@ -1676,7 +1832,7 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_noise);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_noise));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
@@ -1707,15 +1863,15 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 			var note_flag = true;
-			if (domain.use_noise) {
+			if (__call__ (_truth, null, domain.use_noise)) {
 				var label = '';
-				if (!(domain.cache_resumable)) {
+				if (!(__call__ (_truth, null, domain.cache_resumable))) {
 					var label = 'Non Resumable Cache: Enable resumable option first';
 				}
-				else if (!(domain.has_cache_baked_data)) {
+				else if (!(__call__ (_truth, null, domain.has_cache_baked_data))) {
 					var label = 'Unbaked Data: Bake Data first';
 				}
-				if (label) {
+				if (__call__ (_truth, null, label)) {
 					var info = (function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.py_split, __accu0__);
@@ -1739,7 +1895,7 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 			}) ();
 			py_split.enabled = domain.has_cache_baked_data && note_flag && __eq__ (ob.mode, 'OBJECT');
 			var bake_incomplete = __lt__ (domain.cache_frame_pause_noise, domain.cache_frame_end);
-			if (domain.has_cache_baked_noise && !(domain.is_cache_baking_noise) && bake_incomplete) {
+			if (__call__ (_truth, null, domain.has_cache_baked_noise) && !(__call__ (_truth, null, domain.is_cache_baking_noise)) && __call__ (_truth, null, bake_incomplete)) {
 				var col = (function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.column, __accu0__);
@@ -1757,14 +1913,14 @@ export var PHYSICS_PT_noise =  __class__ ('PHYSICS_PT_noise', [PhysicButtonsPane
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_noise', __kwargtrans__ ({text: 'Free'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_noise) && domain.is_cache_baking_noise) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_noise)) && __call__ (_truth, null, domain.is_cache_baking_noise)) {
 				py_split.enabled = false;
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Noise - ESC to pause'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_noise) && !(domain.is_cache_baking_noise)) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_noise)) && !(__call__ (_truth, null, domain.is_cache_baking_noise))) {
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_noise', __kwargtrans__ ({text: 'Bake Noise'}));
@@ -1800,10 +1956,10 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1826,7 +1982,7 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 		var md = context.fluid.domain_settings;
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
-		self.layout.enabled = !(is_baking_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_mesh', __kwargtrans__ ({text: ''}));
@@ -1858,7 +2014,7 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_mesh);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_mesh));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
@@ -1919,15 +2075,15 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 			var note_flag = true;
-			if (domain.use_mesh) {
+			if (__call__ (_truth, null, domain.use_mesh)) {
 				var label = '';
-				if (!(domain.cache_resumable)) {
+				if (!(__call__ (_truth, null, domain.cache_resumable))) {
 					var label = 'Non Resumable Cache: Enable resumable option first';
 				}
-				else if (!(domain.has_cache_baked_data)) {
+				else if (!(__call__ (_truth, null, domain.has_cache_baked_data))) {
 					var label = 'Unbaked Data: Bake Data first';
 				}
-				if (label) {
+				if (__call__ (_truth, null, label)) {
 					var info = (function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.py_split, __accu0__);
@@ -1951,7 +2107,7 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 			}) ();
 			py_split.enabled = domain.has_cache_baked_data && note_flag && __eq__ (ob.mode, 'OBJECT');
 			var bake_incomplete = __lt__ (domain.cache_frame_pause_mesh, domain.cache_frame_end);
-			if (domain.has_cache_baked_mesh && !(domain.is_cache_baking_mesh) && bake_incomplete) {
+			if (__call__ (_truth, null, domain.has_cache_baked_mesh) && !(__call__ (_truth, null, domain.is_cache_baking_mesh)) && __call__ (_truth, null, bake_incomplete)) {
 				var col = (function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.column, __accu0__);
@@ -1969,14 +2125,14 @@ export var PHYSICS_PT_mesh =  __class__ ('PHYSICS_PT_mesh', [PhysicButtonsPanel,
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_mesh', __kwargtrans__ ({text: 'Free'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_mesh) && domain.is_cache_baking_mesh) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_mesh)) && __call__ (_truth, null, domain.is_cache_baking_mesh)) {
 				py_split.enabled = false;
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Mesh - ESC to pause'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_mesh) && !(domain.is_cache_baking_mesh)) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_mesh)) && !(__call__ (_truth, null, domain.is_cache_baking_mesh))) {
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_mesh', __kwargtrans__ ({text: 'Bake Mesh'}));
@@ -2012,10 +2168,10 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2046,7 +2202,7 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any));
 		var sndparticle_combined_export = domain.sndparticle_combined_export;
 		var col = (function () {
 			var __accu0__ = flow;
@@ -2081,7 +2237,7 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_particles);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_particles));
 		flow.active = using_particles;
 		var col = (function () {
 			var __accu0__ = flow;
@@ -2221,15 +2377,15 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 			var note_flag = true;
-			if (using_particles) {
+			if (__call__ (_truth, null, using_particles)) {
 				var label = '';
-				if (!(domain.cache_resumable)) {
+				if (!(__call__ (_truth, null, domain.cache_resumable))) {
 					var label = 'Non Resumable Cache: Enable resumable option first';
 				}
-				else if (!(domain.has_cache_baked_data)) {
+				else if (!(__call__ (_truth, null, domain.has_cache_baked_data))) {
 					var label = 'Unbaked Data: Bake Data first';
 				}
-				if (label) {
+				if (__call__ (_truth, null, label)) {
 					var info = (function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.py_split, __accu0__);
@@ -2253,7 +2409,7 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 			}) ();
 			py_split.enabled = note_flag && __eq__ (ob.mode, 'OBJECT') && domain.has_cache_baked_data && (domain.use_spray_particles || domain.use_bubble_particles || domain.use_foam_particles || domain.use_tracer_particles);
 			var bake_incomplete = __lt__ (domain.cache_frame_pause_particles, domain.cache_frame_end);
-			if (domain.has_cache_baked_particles && !(domain.is_cache_baking_particles) && bake_incomplete) {
+			if (__call__ (_truth, null, domain.has_cache_baked_particles) && !(__call__ (_truth, null, domain.is_cache_baking_particles)) && __call__ (_truth, null, bake_incomplete)) {
 				var col = (function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.column, __accu0__);
@@ -2271,14 +2427,14 @@ export var PHYSICS_PT_particles =  __class__ ('PHYSICS_PT_particles', [PhysicBut
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_particles', __kwargtrans__ ({text: 'Free'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_particles) && domain.is_cache_baking_particles) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_particles)) && __call__ (_truth, null, domain.is_cache_baking_particles)) {
 				py_split.enabled = false;
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Particles - ESC to pause'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_particles) && !(domain.is_cache_baking_particles)) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_particles)) && !(__call__ (_truth, null, domain.is_cache_baking_particles))) {
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_particles', __kwargtrans__ ({text: 'Bake Particles'}));
@@ -2314,10 +2470,10 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2341,7 +2497,7 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
-		self.layout.enabled = !(is_baking_any) && !(has_baked_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_diffusion', __kwargtrans__ ({text: ''}));
@@ -2393,7 +2549,7 @@ export var PHYSICS_PT_diffusion =  __class__ ('PHYSICS_PT_diffusion', [PhysicBut
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_any) && !(has_baked_data);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any)) && !(__call__ (_truth, null, has_baked_data));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2437,10 +2593,10 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_liquid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2464,7 +2620,7 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
 		var has_baked_any = domain.has_cache_baked_any;
-		self.layout.enabled = !(is_baking_any) && !(has_baked_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_viscosity', __kwargtrans__ ({text: ''}));
@@ -2496,7 +2652,7 @@ export var PHYSICS_PT_viscosity =  __class__ ('PHYSICS_PT_viscosity', [PhysicBut
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_any) && !(has_baked_data);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any)) && !(__call__ (_truth, null, has_baked_data));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2528,10 +2684,10 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2554,7 +2710,7 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 		var md = context.fluid.domain_settings;
 		var domain = context.fluid.domain_settings;
 		var is_baking_any = domain.is_cache_baking_any;
-		self.layout.enabled = !(is_baking_any);
+		self.layout.enabled = !(__call__ (_truth, null, is_baking_any));
 		(function () {
 			var __accu0__ = self.layout;
 			return __call__ (__accu0__.prop, __accu0__, md, 'use_guide', __kwargtrans__ ({text: ''}));
@@ -2585,7 +2741,7 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_data);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
@@ -2627,7 +2783,7 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 					return __call__ (__accu0__.py_split, __accu0__);
 				}) ();
 				var bake_incomplete = __lt__ (domain.cache_frame_pause_guide, domain.cache_frame_end);
-				if (domain.has_cache_baked_guide && !(domain.is_cache_baking_guide) && bake_incomplete) {
+				if (__call__ (_truth, null, domain.has_cache_baked_guide) && !(__call__ (_truth, null, domain.is_cache_baking_guide)) && __call__ (_truth, null, bake_incomplete)) {
 					var col = (function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.column, __accu0__);
@@ -2645,14 +2801,14 @@ export var PHYSICS_PT_guide =  __class__ ('PHYSICS_PT_guide', [PhysicButtonsPane
 						return __call__ (__accu0__.operator, __accu0__, 'fluid.free_guides', __kwargtrans__ ({text: 'Free'}));
 					}) ();
 				}
-				else if (!(domain.has_cache_baked_guide) && domain.is_cache_baking_guide) {
+				else if (!(__call__ (_truth, null, domain.has_cache_baked_guide)) && __call__ (_truth, null, domain.is_cache_baking_guide)) {
 					py_split.enabled = false;
 					(function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking Guides - ESC to pause'}));
 					}) ();
 				}
-				else if (!(domain.has_cache_baked_guide) && !(domain.is_cache_baking_guide)) {
+				else if (!(__call__ (_truth, null, domain.has_cache_baked_guide)) && !(__call__ (_truth, null, domain.is_cache_baking_guide))) {
 					(function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_guides', __kwargtrans__ ({text: 'Bake Guides'}));
@@ -2689,10 +2845,10 @@ export var PHYSICS_PT_collections =  __class__ ('PHYSICS_PT_collections', [Physi
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2753,10 +2909,10 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2789,7 +2945,7 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_directory', __kwargtrans__ ({text: ''}));
 		}) ();
-		col.enabled = !(is_baking_any);
+		col.enabled = !(__call__ (_truth, null, is_baking_any));
 		layout.use_property_split = true;
 		var flow = (function () {
 			var __accu0__ = layout;
@@ -2840,7 +2996,7 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.enabled = !(is_baking_any) && !(has_baked_data);
+		row.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_resumable', __kwargtrans__ ({text: 'Resumable'}));
@@ -2856,7 +3012,7 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 			}) ();
 			py_split.enabled = __eq__ (ob.mode, 'OBJECT');
 			var bake_incomplete = __lt__ (domain.cache_frame_pause_data, domain.cache_frame_end);
-			if (domain.cache_resumable && domain.has_cache_baked_data && !(domain.is_cache_baking_data) && bake_incomplete) {
+			if (__call__ (_truth, null, domain.cache_resumable) && __call__ (_truth, null, domain.has_cache_baked_data) && !(__call__ (_truth, null, domain.is_cache_baking_data)) && __call__ (_truth, null, bake_incomplete)) {
 				var col = (function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.column, __accu0__);
@@ -2874,14 +3030,14 @@ export var PHYSICS_PT_cache =  __class__ ('PHYSICS_PT_cache', [PhysicButtonsPane
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.free_all', __kwargtrans__ ({text: 'Free'}));
 				}) ();
 			}
-			else if (domain.is_cache_baking_data && !(domain.has_cache_baked_data)) {
+			else if (__call__ (_truth, null, domain.is_cache_baking_data) && !(__call__ (_truth, null, domain.has_cache_baked_data))) {
 				py_split.enabled = false;
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.pause_bake', __kwargtrans__ ({text: 'Baking All - ESC to pause'}));
 				}) ();
 			}
-			else if (!(domain.has_cache_baked_data) && !(domain.is_cache_baking_data)) {
+			else if (!(__call__ (_truth, null, domain.has_cache_baked_data)) && !(__call__ (_truth, null, domain.is_cache_baking_data))) {
 				(function () {
 					var __accu0__ = py_split;
 					return __call__ (__accu0__.operator, __accu0__, 'fluid.bake_all', __kwargtrans__ ({text: 'Bake All'}));
@@ -2917,10 +3073,10 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2952,7 +3108,7 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 			var __accu0__ = layout;
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
-		flow.enabled = !(is_baking_any) && !(has_baked_any);
+		flow.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_any));
 		var col = (function () {
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
@@ -2961,13 +3117,13 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.enabled = !(is_baking_any) && !(has_baked_data);
+		row.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'cache_data_format', __kwargtrans__ ({text: 'Format'}));
 		}) ();
 		if (__eq__ (domain.cache_data_format, 'OPENVDB')) {
-			col.enabled = !(is_baking_any) && !(has_baked_data);
+			col.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_data));
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, domain, 'openvdb_cache_compress_type', __kwargtrans__ ({text: 'Compression'}));
@@ -2981,12 +3137,12 @@ export var PHYSICS_PT_export =  __class__ ('PHYSICS_PT_export', [PhysicButtonsPa
 				return __call__ (__accu0__.prop, __accu0__, domain, 'openvdb_data_depth', __kwargtrans__ ({text: 'Precision'}));
 			}) ();
 		}
-		if (__eq__ (md.domain_settings.domain_type, 'LIQUID') && domain.use_mesh) {
+		if (__eq__ (md.domain_settings.domain_type, 'LIQUID') && __call__ (_truth, null, domain.use_mesh)) {
 			var row = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			row.enabled = !(is_baking_any) && !(has_baked_mesh);
+			row.enabled = !(__call__ (_truth, null, is_baking_any)) && !(__call__ (_truth, null, has_baked_mesh));
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, domain, 'cache_mesh_format', __kwargtrans__ ({text: 'Meshes'}));
@@ -3025,10 +3181,10 @@ export var PHYSICS_PT_field_weights =  __class__ ('PHYSICS_PT_field_weights', [P
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_fluid_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -3115,14 +3271,14 @@ export var PHYSICS_PT_viewport_display =  __class__ ('PHYSICS_PT_viewport_displa
 			var __accu0__ = sub;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'display_interpolation');
 		}) ();
-		if (domain.use_color_ramp && __eq__ (domain.color_ramp_field, 'FLAGS')) {
+		if (__call__ (_truth, null, domain.use_color_ramp) && __eq__ (domain.color_ramp_field, 'FLAGS')) {
 			sub.enabled = false;
 		}
 		var col = (function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = !(domain.use_slice);
+		col.active = !(__call__ (_truth, null, domain.use_slice));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'slice_per_voxel');
@@ -3386,7 +3542,7 @@ export var PHYSICS_PT_viewport_display_debug =  __class__ ('PHYSICS_PT_viewport_
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, domain, 'vector_display_type', __kwargtrans__ ({text: 'Display As'}));
 		}) ();
-		if (!(domain.use_guide) && __eq__ (domain.vector_field, 'GUIDE_VELOCITY')) {
+		if (!(__call__ (_truth, null, domain.use_guide)) && __eq__ (domain.vector_field, 'GUIDE_VELOCITY')) {
 			var note = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.py_split, __accu0__);
@@ -3484,7 +3640,7 @@ export var PHYSICS_PT_viewport_display_advanced =  __class__ ('PHYSICS_PT_viewpo
 			return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_color_field', __kwargtrans__ ({text: 'Color Gridlines'}));
 		}) ();
 		if (__eq__ (domain.gridlines_color_field, 'RANGE')) {
-			if (domain.use_color_ramp && __ne__ (domain.color_ramp_field, 'FLAGS')) {
+			if (__call__ (_truth, null, domain.use_color_ramp) && __ne__ (domain.color_ramp_field, 'FLAGS')) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, domain, 'gridlines_lower_bound');
@@ -3507,7 +3663,7 @@ export var PHYSICS_PT_viewport_display_advanced =  __class__ ('PHYSICS_PT_viewpo
 					var __accu0__ = layout;
 					return __call__ (__accu0__.py_split, __accu0__);
 				}) ();
-				if (!(domain.use_color_ramp)) {
+				if (!(__call__ (_truth, null, domain.use_color_ramp))) {
 					(function () {
 						var __accu0__ = note;
 						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'INFO', text: 'Enable Grid Display to use range highlighting!'}));
@@ -3544,10 +3700,10 @@ export var PHYSICS_PT_fluid_domain_render =  __class__ ('PHYSICS_PT_fluid_domain
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_gas_domain, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -3591,6 +3747,14 @@ export {Panel, PresetPanel, effector_weights_ui, i18n_contexts, register_class};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'FLUID_PT_presets': FLUID_PT_presets = value; break;
 		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
 		case 'PHYSICS_PT_fluid': PHYSICS_PT_fluid = value; break;

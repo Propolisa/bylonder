@@ -13,6 +13,162 @@ import {Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_particle';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var particle_panel_enabled = function (context, psys) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -36,7 +192,7 @@ export var particle_panel_enabled = function (context, psys) {
 		return true;
 	}
 	else {
-		return psys.point_cache.is_baked === false && !(psys.is_edited) && !(context.particle_system_editable);
+		return psys.point_cache.is_baked === false && !(__call__ (_truth, null, psys.is_edited)) && !(__call__ (_truth, null, context.particle_system_editable));
 	}
 };
 export var particle_panel_poll = function (cls, context) {
@@ -57,13 +213,13 @@ export var particle_panel_poll = function (cls, context) {
 	var psys = context.particle_system;
 	var engine = context.engine;
 	var settings = 0;
-	if (psys) {
+	if (__call__ (_truth, null, psys)) {
 		var settings = psys.settings;
 	}
 	else if (__call__ (isinstance, null, context.space_data.pin_id, bpy.types.ParticleSettings)) {
 		var settings = context.space_data.pin_id;
 	}
-	if (!(settings)) {
+	if (!(__call__ (_truth, null, settings))) {
 		return false;
 	}
 	return settings.is_fluid === false && __in__ (engine, cls.COMPAT_ENGINES);
@@ -82,7 +238,7 @@ export var particle_get_settings = function (context) {
 	}
 	else {
 	}
-	if (context.particle_system) {
+	if (__call__ (_truth, null, context.particle_system)) {
 		return context.particle_system.settings;
 	}
 	else if (__call__ (isinstance, null, context.space_data.pin_id, bpy.types.ParticleSettings)) {
@@ -237,7 +393,7 @@ export var PARTICLE_UL_particle_systems =  __class__ ('PARTICLE_UL_particle_syst
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, psys, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
 		}) ();
-		if (md) {
+		if (__call__ (_truth, null, md)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, md, 'show_viewport', __kwargtrans__ ({emboss: false, icon_only: true}));
@@ -291,7 +447,7 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 		var ob = context.object;
 		var psys = context.particle_system;
 		var part = 0;
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -330,7 +486,7 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, context.space_data, 'pin_id');
 			}) ();
-			if (part.is_fluid) {
+			if (__call__ (_truth, null, part.is_fluid)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Settings used for fluid'}));
@@ -342,7 +498,7 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 				return __call__ (__accu0__.prop, __accu0__, part, 'type', __kwargtrans__ ({text: 'Type'}));
 			}) ();
 		}
-		else if (!(psys.settings)) {
+		else if (!(__call__ (_truth, null, psys.settings))) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_ID, __accu0__, psys, 'settings', __kwargtrans__ ({py_new: 'particle.new'}));
@@ -365,7 +521,7 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 					return __call__ (__accu0__.template_ID, __accu0__, psys, 'settings', __kwargtrans__ ({py_new: 'particle.new'}));
 				}) ();
 			}
-			if (part.is_fluid) {
+			if (__call__ (_truth, null, part.is_fluid)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
@@ -385,13 +541,13 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 				return __call__ (__accu0__.prop, __accu0__, part, 'type', __kwargtrans__ ({expand: true}));
 			}) ();
 		}
-		if (part) {
+		if (__call__ (_truth, null, part)) {
 			var py_split = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.py_split, __accu0__);
 			}) ();
 			if (__eq__ (part.py_metatype, 'HAIR')) {
-				if (psys !== null && psys.is_edited) {
+				if (psys !== null && __call__ (_truth, null, psys.is_edited)) {
 					(function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.operator, __accu0__, 'particle.edited_clear', __kwargtrans__ ({text: 'Delete Edit'}));
@@ -412,8 +568,8 @@ export var PARTICLE_PT_context_particles =  __class__ ('PARTICLE_PT_context_part
 						return __call__ (__accu0__.prop, __accu0__, part, 'use_advanced_hair');
 					}) ();
 				}
-				if (psys !== null && psys.is_edited) {
-					if (psys.is_global_hair) {
+				if (psys !== null && __call__ (_truth, null, psys.is_edited)) {
+					if (__call__ (_truth, null, psys.is_global_hair)) {
 						var row = (function () {
 							var __accu0__ = layout;
 							return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -482,11 +638,11 @@ export var PARTICLE_PT_emission =  __class__ ('PARTICLE_PT_emission', [ParticleB
 		if (settings === null) {
 			return false;
 		}
-		if (settings.is_fluid) {
+		if (__call__ (_truth, null, settings.is_fluid)) {
 			return false;
 		}
-		if (__call__ (particle_panel_poll, null, PARTICLE_PT_emission, context)) {
-			return psys === null || !(context.particle_system.point_cache.use_external);
+		if (__call__ (_truth, null, __call__ (particle_panel_poll, null, PARTICLE_PT_emission, context))) {
+			return psys === null || !(__call__ (_truth, null, context.particle_system.point_cache.use_external));
 		}
 		return false;
 	});},
@@ -509,7 +665,7 @@ export var PARTICLE_PT_emission =  __class__ ('PARTICLE_PT_emission', [ParticleB
 		var psys = context.particle_system;
 		var part = __call__ (particle_get_settings, null, context);
 		layout.use_property_split = true;
-		layout.enabled = __call__ (particle_panel_enabled, null, context, psys) && (psys === null || !(psys.has_multiple_caches));
+		layout.enabled = __call__ (particle_panel_enabled, null, context, psys) && (psys === null || !(__call__ (_truth, null, psys.has_multiple_caches)));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
@@ -722,7 +878,7 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		else {
 		}
 		var psys = context.particle_system;
-		if (!(psys.cloth)) {
+		if (!(__call__ (_truth, null, psys.cloth))) {
 			return ;
 		}
 		var layout = self.layout;
@@ -749,7 +905,7 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		if (!(psys.cloth)) {
+		if (!(__call__ (_truth, null, psys.cloth))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Hair dynamics disabled'}));
@@ -789,12 +945,12 @@ export var PARTICLE_PT_hair_dynamics =  __class__ ('PARTICLE_PT_hair_dynamics', 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (result) {
+		if (__call__ (_truth, null, result)) {
 			var box = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.box, __accu0__);
 			}) ();
-			if (!(result.status)) {
+			if (!(__call__ (_truth, null, result.status))) {
 				var label = ' ';
 				var icon = 'NONE';
 			}
@@ -1080,7 +1236,7 @@ export var PARTICLE_PT_cache =  __class__ ('PARTICLE_PT_cache', [ParticleButtons
 		if (psys.settings === null) {
 			return false;
 		}
-		if (psys.settings.is_fluid) {
+		if (__call__ (_truth, null, psys.settings.is_fluid)) {
 			return false;
 		}
 		var phystype = psys.settings.physics_type;
@@ -1128,13 +1284,13 @@ export var PARTICLE_PT_velocity =  __class__ ('PARTICLE_PT_velocity', [ParticleB
 		}
 		else {
 		}
-		if (__call__ (particle_panel_poll, null, PARTICLE_PT_velocity, context)) {
+		if (__call__ (_truth, null, __call__ (particle_panel_poll, null, PARTICLE_PT_velocity, context))) {
 			var psys = context.particle_system;
 			var settings = __call__ (particle_get_settings, null, context);
-			if (__eq__ (settings.py_metatype, 'HAIR') && !(settings.use_advanced_hair)) {
+			if (__eq__ (settings.py_metatype, 'HAIR') && !(__call__ (_truth, null, settings.use_advanced_hair))) {
 				return false;
 			}
-			return __ne__ (settings.physics_type, 'BOIDS') && (psys === null || !(psys.point_cache.use_external));
+			return __ne__ (settings.physics_type, 'BOIDS') && (psys === null || !(__call__ (_truth, null, psys.point_cache.use_external)));
 		}
 		else {
 			return false;
@@ -1230,13 +1386,13 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 		}
 		else {
 		}
-		if (__call__ (particle_panel_poll, null, PARTICLE_PT_rotation, context)) {
+		if (__call__ (_truth, null, __call__ (particle_panel_poll, null, PARTICLE_PT_rotation, context))) {
 			var psys = context.particle_system;
 			var settings = __call__ (particle_get_settings, null, context);
-			if (__eq__ (settings.py_metatype, 'HAIR') && !(settings.use_advanced_hair)) {
+			if (__eq__ (settings.py_metatype, 'HAIR') && !(__call__ (_truth, null, settings.use_advanced_hair))) {
 				return false;
 			}
-			return __ne__ (settings.physics_type, 'BOIDS') && (psys === null || !(psys.point_cache.use_external));
+			return __ne__ (settings.physics_type, 'BOIDS') && (psys === null || !(__call__ (_truth, null, psys.point_cache.use_external)));
 		}
 		else {
 			return false;
@@ -1258,7 +1414,7 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 		else {
 		}
 		var psys = context.particle_system;
-		if (psys) {
+		if (__call__ (_truth, null, psys)) {
 			var part = psys.settings;
 		}
 		else {
@@ -1288,7 +1444,7 @@ export var PARTICLE_PT_rotation =  __class__ ('PARTICLE_PT_rotation', [ParticleB
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		if (psys) {
+		if (__call__ (_truth, null, psys)) {
 			var part = psys.settings;
 		}
 		else {
@@ -1351,7 +1507,7 @@ export var PARTICLE_PT_rotation_angular_velocity =  __class__ ('PARTICLE_PT_rota
 		}
 		var layout = self.layout;
 		var psys = context.particle_system;
-		if (psys) {
+		if (__call__ (_truth, null, psys)) {
 			var part = psys.settings;
 		}
 		else {
@@ -1398,13 +1554,13 @@ export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleBut
 		}
 		else {
 		}
-		if (__call__ (particle_panel_poll, null, PARTICLE_PT_physics, context)) {
+		if (__call__ (_truth, null, __call__ (particle_panel_poll, null, PARTICLE_PT_physics, context))) {
 			var psys = context.particle_system;
 			var settings = __call__ (particle_get_settings, null, context);
-			if (__eq__ (settings.py_metatype, 'HAIR') && !(settings.use_advanced_hair)) {
+			if (__eq__ (settings.py_metatype, 'HAIR') && !(__call__ (_truth, null, settings.use_advanced_hair))) {
 				return false;
 			}
-			return psys === null || !(psys.point_cache.use_external);
+			return psys === null || !(__call__ (_truth, null, psys.point_cache.use_external));
 		}
 		else {
 			return false;
@@ -1480,12 +1636,12 @@ export var PARTICLE_PT_physics =  __class__ ('PARTICLE_PT_physics', [ParticleBut
 				var __accu0__ = col;
 				return __call__ (__accu0__.column, __accu0__);
 			}) ();
-			sub.active = !(psys) || !(psys.use_keyed_timing);
+			sub.active = !(__call__ (_truth, null, psys)) || !(__call__ (_truth, null, psys.use_keyed_timing));
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.prop, __accu0__, part, 'keyed_loops', __kwargtrans__ ({text: 'Loops'}));
 			}) ();
-			if (psys) {
+			if (__call__ (_truth, null, psys)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, psys, 'use_keyed_timing', __kwargtrans__ ({text: 'Use Timing'}));
@@ -2160,7 +2316,7 @@ export var PARTICLE_PT_physics_relations =  __class__ ('PARTICLE_PT_physics_rela
 			return __call__ (__accu0__.operator, __accu0__, 'particle.target_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
 		}) ();
 		var key = psys.active_particle_target;
-		if (key) {
+		if (__call__ (_truth, null, key)) {
 			if (__eq__ (part.physics_type, 'KEYED')) {
 				var col = (function () {
 					var __accu0__ = layout;
@@ -2296,7 +2452,7 @@ export var PARTICLE_PT_physics_fluid_interaction =  __class__ ('PARTICLE_PT_phys
 			return __call__ (__accu0__.operator, __accu0__, 'particle.target_move_down', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
 		}) ();
 		var key = psys.active_particle_target;
-		if (key) {
+		if (__call__ (_truth, null, key)) {
 			var sub = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -2539,7 +2695,7 @@ export var PARTICLE_PT_boidbrain =  __class__ ('PARTICLE_PT_boidbrain', [Particl
 		if (settings === null) {
 			return false;
 		}
-		if (psys !== null && psys.point_cache.use_external) {
+		if (psys !== null && __call__ (_truth, null, psys.point_cache.use_external)) {
 			return false;
 		}
 		return __eq__ (settings.physics_type, 'BOIDS') && __in__ (engine, cls.COMPAT_ENGINES);
@@ -2620,7 +2776,7 @@ export var PARTICLE_PT_boidbrain =  __class__ ('PARTICLE_PT_boidbrain', [Particl
 			}) ();
 		}
 		var rule = state.active_boid_rule;
-		if (rule) {
+		if (__call__ (_truth, null, rule)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2797,7 +2953,7 @@ export var PARTICLE_PT_render =  __class__ ('PARTICLE_PT_render', [ParticleButto
 				}) ();
 			}
 		}
-		if (psys) {
+		if (__call__ (_truth, null, psys)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -2813,7 +2969,7 @@ export var PARTICLE_PT_render =  __class__ ('PARTICLE_PT_render', [ParticleButto
 				}) ();
 			}
 		}
-		if (context.object) {
+		if (__call__ (_truth, null, context.object)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -2995,15 +3151,15 @@ export var PARTICLE_PT_render_path_timing =  __class__ ('PARTICLE_PT_render_path
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, part, 'use_absolute_path_time');
 		}) ();
-		if (__eq__ (part.py_metatype, 'HAIR') || psys.point_cache.is_baked) {
+		if (__eq__ (part.py_metatype, 'HAIR') || __call__ (_truth, null, psys.point_cache.is_baked)) {
 			(function () {
 				var __accu0__ = col;
-				return __call__ (__accu0__.prop, __accu0__, part, 'path_start', __kwargtrans__ ({text: 'Start', slider: !(part.use_absolute_path_time)}));
+				return __call__ (__accu0__.prop, __accu0__, part, 'path_start', __kwargtrans__ ({text: 'Start', slider: !(__call__ (_truth, null, part.use_absolute_path_time))}));
 			}) ();
 		}
 		(function () {
 			var __accu0__ = col;
-			return __call__ (__accu0__.prop, __accu0__, part, 'path_end', __kwargtrans__ ({text: 'End', slider: !(part.use_absolute_path_time)}));
+			return __call__ (__accu0__.prop, __accu0__, part, 'path_end', __kwargtrans__ ({text: 'End', slider: !(__call__ (_truth, null, part.use_absolute_path_time))}));
 		}) ();
 		(function () {
 			var __accu0__ = col;
@@ -3195,7 +3351,7 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 		}
 		var layout = self.layout;
 		var part = __call__ (particle_get_settings, null, context);
-		layout.active = !(part.use_whole_collection);
+		layout.active = !(__call__ (_truth, null, part.use_whole_collection));
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, part, 'use_collection_count', __kwargtrans__ ({text: ''}));
@@ -3223,7 +3379,7 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		layout.active = part.use_collection_count && !(part.use_whole_collection);
+		layout.active = part.use_collection_count && !(__call__ (_truth, null, part.use_whole_collection));
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
@@ -3269,7 +3425,7 @@ export var PARTICLE_PT_render_collection_use_count =  __class__ ('PARTICLE_PT_re
 			return __call__ (__accu0__.operator, __accu0__, 'particle.dupliob_refresh', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
 		}) ();
 		var weight = part.active_instanceweight;
-		if (weight) {
+		if (__call__ (_truth, null, weight)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -3357,7 +3513,7 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (path) {
+		if (__call__ (_truth, null, path)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, part, 'display_step', __kwargtrans__ ({text: 'Strand Steps'}));
@@ -3375,7 +3531,7 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 		}
 		if (__ne__ (part.display_percentage, 100) && psys !== null) {
 			if (__eq__ (part.py_metatype, 'HAIR')) {
-				if (psys.use_hair_dynamics && psys.point_cache.is_baked === false) {
+				if (__call__ (_truth, null, psys.use_hair_dynamics) && psys.point_cache.is_baked === false) {
 					(function () {
 						var __accu0__ = (function () {
 							var __accu1__ = layout;
@@ -3404,7 +3560,7 @@ export var PARTICLE_PT_draw =  __class__ ('PARTICLE_PT_draw', [ParticleButtonsPa
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (context.object) {
+		if (__call__ (_truth, null, context.object)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -3496,7 +3652,7 @@ export var PARTICLE_PT_children =  __class__ ('PARTICLE_PT_children', [ParticleB
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, part, 'child_length_threshold', __kwargtrans__ ({slider: true}));
 		}) ();
-		if (psys) {
+		if (__call__ (_truth, null, psys)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, psys, 'child_seed', __kwargtrans__ ({text: 'Seed'}));
@@ -3593,7 +3749,7 @@ export var PARTICLE_PT_children_parting =  __class__ ('PARTICLE_PT_children_part
 		var part = __call__ (particle_get_settings, null, context);
 		var is_virtual = __gt__ (part.virtual_parents, 0.0);
 		layout.use_property_split = true;
-		if (is_virtual) {
+		if (__call__ (_truth, null, is_virtual)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Parting not available with virtual parents'}));
@@ -3603,7 +3759,7 @@ export var PARTICLE_PT_children_parting =  __class__ ('PARTICLE_PT_children_part
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = !(is_virtual);
+		col.active = !(__call__ (_truth, null, is_virtual));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, part, 'child_parting_factor', __kwargtrans__ ({text: 'Parting', slider: true}));
@@ -3676,7 +3832,7 @@ export var PARTICLE_PT_children_clumping =  __class__ ('PARTICLE_PT_children_clu
 			var __accu0__ = sub;
 			return __call__ (__accu0__.prop, __accu0__, part, 'use_clump_curve');
 		}) ();
-		if (part.use_clump_curve) {
+		if (__call__ (_truth, null, part.use_clump_curve)) {
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, part, 'clump_curve');
@@ -3701,7 +3857,7 @@ export var PARTICLE_PT_children_clumping =  __class__ ('PARTICLE_PT_children_clu
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, part, 'use_twist_curve');
 			}) ();
-			if (part.use_twist_curve) {
+			if (__call__ (_truth, null, part.use_twist_curve)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.template_curve_mapping, __accu0__, part, 'twist_curve');
@@ -3813,7 +3969,7 @@ export var PARTICLE_PT_children_roughness =  __class__ ('PARTICLE_PT_children_ro
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, part, 'use_roughness_curve');
 		}) ();
-		if (part.use_roughness_curve) {
+		if (__call__ (_truth, null, part.use_roughness_curve)) {
 			var sub = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.column, __accu0__);
@@ -4127,7 +4283,7 @@ export var PARTICLE_PT_force_fields_type1 =  __class__ ('PARTICLE_PT_force_field
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var part = __call__ (particle_get_settings, null, context);
-		if (part.force_field_1) {
+		if (__call__ (_truth, null, part.force_field_1)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -4163,7 +4319,7 @@ export var PARTICLE_PT_force_fields_type2 =  __class__ ('PARTICLE_PT_force_field
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var part = __call__ (particle_get_settings, null, context);
-		if (part.force_field_2) {
+		if (__call__ (_truth, null, part.force_field_2)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -4200,7 +4356,7 @@ export var PARTICLE_PT_force_fields_type1_falloff =  __class__ ('PARTICLE_PT_for
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var part = __call__ (particle_get_settings, null, context);
-		if (part.force_field_1) {
+		if (__call__ (_truth, null, part.force_field_1)) {
 			__call__ (basic_force_field_falloff_ui, null, self, part.force_field_1);
 		}
 	});}
@@ -4229,7 +4385,7 @@ export var PARTICLE_PT_force_fields_type2_falloff =  __class__ ('PARTICLE_PT_for
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var part = __call__ (particle_get_settings, null, context);
-		if (part.force_field_2) {
+		if (__call__ (_truth, null, part.force_field_2)) {
 			__call__ (basic_force_field_falloff_ui, null, self, part.force_field_2);
 		}
 	});}
@@ -4487,7 +4643,7 @@ export var PARTICLE_PT_textures =  __class__ ('PARTICLE_PT_textures', [ParticleB
 			var __accu0__ = col;
 			return __call__ (__accu0__.menu, __accu0__, 'TEXTURE_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
 		}) ();
-		if (!(part.active_texture)) {
+		if (!(__call__ (_truth, null, part.active_texture))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, part, 'active_texture', __kwargtrans__ ({py_new: 'texture.new'}));
@@ -4620,6 +4776,14 @@ export {Menu, Panel, PresetPanel, PropertiesAnimationMixin, PropertyPanel, UILis
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'particle_panel_enabled': particle_panel_enabled = value; break;
 		case 'particle_panel_poll': particle_panel_poll = value; break;
 		case 'particle_get_settings': particle_get_settings = value; break;

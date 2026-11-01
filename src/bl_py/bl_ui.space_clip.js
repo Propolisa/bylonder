@@ -11,6 +11,162 @@ import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt
 import {Header, Menu, Panel, UIList} from './_bpy.types.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_clip';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var CLIP_UL_tracking_objects =  __class__ ('CLIP_UL_tracking_objects', [UIList], {
 	__module__: __name__,
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, _icon, _active_data, _active_propname, _index) {
@@ -38,7 +194,7 @@ export var CLIP_UL_tracking_objects =  __class__ ('CLIP_UL_tracking_objects', [U
 		var tobj = item;
 		(function () {
 			var __accu0__ = layout;
-			return __call__ (__accu0__.prop, __accu0__, tobj, 'name', __kwargtrans__ ({text: '', emboss: false, icon: (tobj.is_camera ? 'CAMERA_DATA' : 'OBJECT_DATA')}));
+			return __call__ (__accu0__.prop, __accu0__, tobj, 'name', __kwargtrans__ ({text: '', emboss: false, icon: (__call__ (_truth, null, tobj.is_camera) ? 'CAMERA_DATA' : 'OBJECT_DATA')}));
 		}) ();
 	});}
 });
@@ -155,7 +311,7 @@ export var CLIP_PT_clip_display =  __class__ ('CLIP_PT_clip_display', [Panel], {
 			return __call__ (__accu0__.prop, __accu0__, sc, 'use_manual_calibration', __kwargtrans__ ({text: 'Calibration'}));
 		}) ();
 		var clip = sc.clip;
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -290,12 +446,12 @@ export var CLIP_HT_header =  __class__ ('CLIP_HT_header', [Header], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator_spacer, __accu0__);
 		}) ();
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			var tracking = clip.tracking;
 			var active_object = tracking.objects.active;
 			if (__eq__ (sc.view, 'CLIP')) {
 				var r = active_object.reconstruction;
-				if (r.is_valid && __eq__ (sc.view, 'CLIP')) {
+				if (__call__ (_truth, null, r.is_valid) && __eq__ (sc.view, 'CLIP')) {
 					(function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
@@ -308,7 +464,7 @@ export var CLIP_HT_header =  __class__ ('CLIP_HT_header', [Header], {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 				}) ();
-				var icon = (sc.lock_selection ? 'LOCKED' : 'UNLOCKED');
+				var icon = (__call__ (_truth, null, sc.lock_selection) ? 'LOCKED' : 'UNLOCKED');
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.operator, __accu0__, 'clip.lock_selection_toggle', __kwargtrans__ ({icon: icon, text: '', depress: sc.lock_selection}));
@@ -377,7 +533,7 @@ export var CLIP_HT_header =  __class__ ('CLIP_HT_header', [Header], {
 				}) ();
 				(function () {
 					var __accu0__ = row;
-					return __call__ (__accu0__.prop, __accu0__, dopesheet, 'use_invert_sort', __kwargtrans__ ({text: '', toggle: true, icon: (dopesheet.use_invert_sort ? 'SORT_DESC' : 'SORT_ASC')}));
+					return __call__ (__accu0__.prop, __accu0__, dopesheet, 'use_invert_sort', __kwargtrans__ ({text: '', toggle: true, icon: (__call__ (_truth, null, dopesheet.use_invert_sort) ? 'SORT_DESC' : 'SORT_ASC')}));
 				}) ();
 			}
 		}
@@ -417,7 +573,7 @@ export var CLIP_HT_header =  __class__ ('CLIP_HT_header', [Header], {
 			var __accu0__ = row;
 			return __call__ (__accu0__.template_ID, __accu0__, sc, 'clip', __kwargtrans__ ({open: 'clip.open'}));
 		}) ();
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -455,7 +611,7 @@ export var CLIP_HT_header =  __class__ ('CLIP_HT_header', [Header], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
-			var icon = (sc.lock_selection ? 'LOCKED' : 'UNLOCKED');
+			var icon = (__call__ (_truth, null, sc.lock_selection) ? 'LOCKED' : 'UNLOCKED');
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.operator, __accu0__, 'clip.lock_selection_toggle', __kwargtrans__ ({icon: icon, text: '', depress: sc.lock_selection}));
@@ -617,7 +773,7 @@ export var CLIP_MT_tracking_editor_menus =  __class__ ('CLIP_MT_tracking_editor_
 			return __call__ (__accu0__.menu, __accu0__, 'CLIP_MT_view');
 		}) ();
 		if (__eq__ (sc.view, 'CLIP')) {
-			if (clip) {
+			if (__call__ (_truth, null, clip)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.menu, __accu0__, 'CLIP_MT_select');
@@ -676,7 +832,7 @@ export var CLIP_MT_masking_editor_menus =  __class__ ('CLIP_MT_masking_editor_me
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'CLIP_MT_view');
 		}) ();
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'MASK_MT_select');
@@ -1240,7 +1396,7 @@ export var CLIP_PT_tools_solve =  __class__ ('CLIP_PT_tools_solve', [CLIP_PT_tra
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = !(settings.use_tripod_solver);
+		col.active = !(__call__ (_truth, null, settings.use_tripod_solver));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, settings, 'use_keyframe_selection', __kwargtrans__ ({text: 'Keyframe'}));
@@ -1249,7 +1405,7 @@ export var CLIP_PT_tools_solve =  __class__ ('CLIP_PT_tools_solve', [CLIP_PT_tra
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		col.active = !(settings.use_tripod_solver) && !(settings.use_keyframe_selection);
+		col.active = !(__call__ (_truth, null, settings.use_tripod_solver)) && !(__call__ (_truth, null, settings.use_keyframe_selection));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, tracking_object, 'keyframe_a');
@@ -1291,7 +1447,7 @@ export var CLIP_PT_tools_solve =  __class__ ('CLIP_PT_tools_solve', [CLIP_PT_tra
 		col.scale_y = 2.0;
 		(function () {
 			var __accu0__ = col;
-			return __call__ (__accu0__.operator, __accu0__, 'clip.solve_camera', __kwargtrans__ ({text: (tracking_object.is_camera ? 'Solve Camera Motion' : 'Solve Object Motion')}));
+			return __call__ (__accu0__.operator, __accu0__, 'clip.solve_camera', __kwargtrans__ ({text: (__call__ (_truth, null, tracking_object.is_camera) ? 'Solve Camera Motion' : 'Solve Object Motion')}));
 		}) ();
 	});}
 });
@@ -1491,13 +1647,13 @@ export var CLIP_PT_tools_object =  __class__ ('CLIP_PT_tools_object', [CLIP_PT_r
 		else {
 		}
 		var sc = context.space_data;
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = CLIP_PT_reconstruction_panel;
 			return __call__ (__accu0__.poll, __accu0__, context);
-		}) () && __eq__ (sc.mode, 'TRACKING')) {
+		}) ()) && __eq__ (sc.mode, 'TRACKING')) {
 			var clip = sc.clip;
 			var tracking_object = clip.tracking.objects.active;
-			return !(tracking_object.is_camera);
+			return !(__call__ (_truth, null, tracking_object.is_camera));
 		}
 		return false;
 	});},
@@ -1616,7 +1772,7 @@ export var CLIP_PT_track =  __class__ ('CLIP_PT_track', [CLIP_PT_tracking_panel,
 		var sc = context.space_data;
 		var clip = context.space_data.clip;
 		var act_track = clip.tracking.tracks.active;
-		if (!(act_track)) {
+		if (!(__call__ (_truth, null, act_track))) {
 			layout.active = false;
 			(function () {
 				var __accu0__ = layout;
@@ -1640,7 +1796,7 @@ export var CLIP_PT_track =  __class__ ('CLIP_PT_track', [CLIP_PT_tracking_panel,
 			var __accu0__ = sub;
 			return __call__ (__accu0__.template_marker, __accu0__, sc, 'clip', sc.clip_user, act_track, __kwargtrans__ ({compact: true}));
 		}) ();
-		var icon = (act_track.lock ? 'LOCKED' : 'UNLOCKED');
+		var icon = (__call__ (_truth, null, act_track.lock) ? 'LOCKED' : 'UNLOCKED');
 		(function () {
 			var __accu0__ = sub;
 			return __call__ (__accu0__.prop, __accu0__, act_track, 'lock', __kwargtrans__ ({text: '', icon: icon}));
@@ -1694,7 +1850,7 @@ export var CLIP_PT_track =  __class__ ('CLIP_PT_track', [CLIP_PT_tracking_panel,
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, act_track, 'weight_stab');
 		}) ();
-		if (act_track.has_bundle) {
+		if (__call__ (_truth, null, act_track.has_bundle)) {
 			var label_text = (function () {
 				var __accu0__ = __call__ (rpt_, null, 'Average Error: {:.2f} px');
 				return __call__ (__accu0__.format, __accu0__, act_track.average_error);
@@ -1721,7 +1877,7 @@ export var CLIP_PT_track =  __class__ ('CLIP_PT_track', [CLIP_PT_tracking_panel,
 			var __accu0__ = row;
 			return __call__ (__accu0__.operator, __accu0__, 'clip.track_copy_color', __kwargtrans__ ({icon: 'COPY_ID', text: ''}));
 		}) ();
-		if (act_track.use_custom_color) {
+		if (__call__ (_truth, null, act_track.use_custom_color)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -1760,7 +1916,7 @@ export var CLIP_PT_plane_track =  __class__ ('CLIP_PT_plane_track', [CLIP_PT_tra
 		layout.use_property_decorate = false;
 		var clip = context.space_data.clip;
 		var active_track = clip.tracking.plane_tracks.active;
-		if (!(active_track)) {
+		if (!(__call__ (_truth, null, active_track))) {
 			layout.active = false;
 			(function () {
 				var __accu0__ = layout;
@@ -1826,7 +1982,7 @@ export var CLIP_PT_track_settings =  __class__ ('CLIP_PT_track_settings', [CLIP_
 		layout.use_property_decorate = false;
 		var clip = context.space_data.clip;
 		var active = clip.tracking.tracks.active;
-		if (!(active)) {
+		if (!(__call__ (_truth, null, active))) {
 			layout.active = false;
 			(function () {
 				var __accu0__ = layout;
@@ -1955,10 +2111,10 @@ export var CLIP_PT_tracking_camera =  __class__ ('CLIP_PT_tracking_camera', [Pan
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = CLIP_PT_clip_view_panel;
 			return __call__ (__accu0__.poll, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			var sc = context.space_data;
 			return __eq__ (sc.mode, 'TRACKING') && sc.clip;
 		}
@@ -2042,10 +2198,10 @@ export var CLIP_PT_tracking_lens =  __class__ ('CLIP_PT_tracking_lens', [Panel],
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = CLIP_PT_clip_view_panel;
 			return __call__ (__accu0__.poll, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			var sc = context.space_data;
 			return __eq__ (sc.mode, 'TRACKING') && sc.clip;
 		}
@@ -2231,7 +2387,7 @@ export var CLIP_PT_marker =  __class__ ('CLIP_PT_marker', [CLIP_PT_tracking_pane
 		var sc = context.space_data;
 		var clip = context.space_data.clip;
 		var act_track = clip.tracking.tracks.active;
-		if (act_track) {
+		if (__call__ (_truth, null, act_track)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_marker, __accu0__, sc, 'clip', sc.clip_user, act_track, __kwargtrans__ ({compact: false}));
@@ -2267,10 +2423,10 @@ export var CLIP_PT_stabilization =  __class__ ('CLIP_PT_stabilization', [CLIP_PT
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = CLIP_PT_clip_view_panel;
 			return __call__ (__accu0__.poll, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			var sc = context.space_data;
 			return __eq__ (sc.mode, 'TRACKING') && sc.clip;
 		}
@@ -2351,7 +2507,7 @@ export var CLIP_PT_stabilization =  __class__ ('CLIP_PT_stabilization', [CLIP_PT
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, stab, 'show_tracks_expanded', __kwargtrans__ ({text: '', emboss: false}));
 		}) ();
-		if (!(stab.show_tracks_expanded)) {
+		if (!(__call__ (_truth, null, stab.show_tracks_expanded))) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Tracks for Stabilization'}));
@@ -2386,7 +2542,7 @@ export var CLIP_PT_stabilization =  __class__ ('CLIP_PT_stabilization', [CLIP_PT
 				var __accu0__ = sub;
 				return __call__ (__accu0__.menu, __accu0__, 'CLIP_MT_stabilize_2d_context_menu', __kwargtrans__ ({text: '', icon: 'DOWNARROW_HLT'}));
 			}) ();
-			if (stab.use_stabilize_rotation) {
+			if (__call__ (_truth, null, stab.use_stabilize_rotation)) {
 				(function () {
 					var __accu0__ = box;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Tracks for Rotation/Scale'}));
@@ -2458,7 +2614,7 @@ export var CLIP_PT_stabilization =  __class__ ('CLIP_PT_stabilization', [CLIP_PT
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, stab, 'target_scale');
 		}) ();
-		row.active = !(stab.use_autoscale);
+		row.active = !(__call__ (_truth, null, stab.use_autoscale));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2507,10 +2663,10 @@ export var CLIP_PT_2d_cursor =  __class__ ('CLIP_PT_2d_cursor', [Panel], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = CLIP_PT_clip_view_panel;
 			return __call__ (__accu0__.poll, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var sc = context.space_data;
@@ -2658,7 +2814,7 @@ export var CLIP_PT_proxy =  __class__ ('CLIP_PT_proxy', [CLIP_PT_clip_view_panel
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, clip, 'use_proxy_custom_directory');
 		}) ();
-		if (clip.use_proxy_custom_directory) {
+		if (__call__ (_truth, null, clip.use_proxy_custom_directory)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, clip.proxy, 'directory');
@@ -2763,7 +2919,7 @@ export var CLIP_PT_footage =  __class__ ('CLIP_PT_footage', [Panel], {
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var sc = context.space_data;
-		if (!(sc.clip)) {
+		if (!(__call__ (_truth, null, sc.clip))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No active movie clip', icon: 'INFO'}));
@@ -2919,7 +3075,7 @@ export var CLIP_MT_view_zoom =  __class__ ('CLIP_MT_view_zoom', [Menu], {
 				return __call__ (__accu0__.operator, __accu0__, 'clip.view_zoom_ratio', __kwargtrans__ ({text: (function () {
 					var __accu1__ = '{:g}% ({:d}:{:d})';
 					return __call__ (__accu1__.format, __accu1__, percent, a, b);
-				}) (), translate: false, icon: (__call__ (isclose, null, percent, current_zoom, __kwargtrans__ ({abs_tol: 0.5})) ? 'LAYER_ACTIVE' : 'NONE')}));
+				}) (), translate: false, icon: (__call__ (_truth, null, __call__ (isclose, null, percent, current_zoom, __kwargtrans__ ({abs_tol: 0.5}))) ? 'LAYER_ACTIVE' : 'NONE')}));
 			}) ().ratio = ratio;
 		}
 		(function () {
@@ -3064,7 +3220,7 @@ export var CLIP_MT_clip =  __class__ ('CLIP_MT_clip', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'clip.open', __kwargtrans__ ({text: 'Open...', icon: 'FILE_FOLDER'}));
 		}) ();
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'clip.set_scene_frames');
@@ -3443,7 +3599,7 @@ export var CLIP_MT_track =  __class__ ('CLIP_MT_track', [Menu], {
 		}) ();
 		(function () {
 			var __accu0__ = layout;
-			return __call__ (__accu0__.operator, __accu0__, 'clip.solve_camera', __kwargtrans__ ({text: (tracking_object.is_camera ? 'Solve Camera Motion' : 'Solve Object Motion')}));
+			return __call__ (__accu0__.operator, __accu0__, 'clip.solve_camera', __kwargtrans__ ({text: (__call__ (_truth, null, tracking_object.is_camera) ? 'Solve Camera Motion' : 'Solve Object Motion')}));
 		}) ();
 		(function () {
 			var __accu0__ = layout;
@@ -4011,7 +4167,7 @@ export var CLIP_MT_marker_pie =  __class__ ('CLIP_MT_marker_pie', [Menu], {
 		}
 		var clip = context.space_data.clip;
 		var tracks = __call__ (getattr, null, __call__ (getattr, null, clip, 'tracking', null), 'tracks', null);
-		var track_active = (tracks ? tracks.active : null);
+		var track_active = (__call__ (_truth, null, tracks) ? tracks.active : null);
 		var layout = self.layout;
 		var pie = (function () {
 			var __accu0__ = layout;
@@ -4037,7 +4193,7 @@ export var CLIP_MT_marker_pie =  __class__ ('CLIP_MT_marker_pie', [Menu], {
 			var __accu0__ = pie;
 			return __call__ (__accu0__.operator, __accu0__, 'clip.track_settings_as_default', __kwargtrans__ ({icon: 'SETTINGS'}));
 		}) ();
-		if (track_active) {
+		if (__call__ (_truth, null, track_active)) {
 			(function () {
 				var __accu0__ = pie;
 				return __call__ (__accu0__.prop, __accu0__, track_active, 'use_normalization', __kwargtrans__ ({text: 'Normalization'}));
@@ -4192,7 +4348,7 @@ export var CLIP_MT_solving_pie =  __class__ ('CLIP_MT_solving_pie', [Menu], {
 			var __accu0__ = pie;
 			return __call__ (__accu0__.operator, __accu0__, 'clip.solve_camera', __kwargtrans__ ({text: 'Solve Camera', icon: 'OUTLINER_OB_CAMERA'}));
 		}) ();
-		if (settings) {
+		if (__call__ (_truth, null, settings)) {
 			(function () {
 				var __accu0__ = pie;
 				return __call__ (__accu0__.prop, __accu0__, settings, 'use_tripod_solver', __kwargtrans__ ({text: 'Tripod Solver'}));
@@ -4621,6 +4777,14 @@ export {AnnotationDataPanel, AnnotationDrawingToolsPanel, Header, MASK_PT_animat
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'CLIP_UL_tracking_objects': CLIP_UL_tracking_objects = value; break;
 		case 'CLIP_PT_display': CLIP_PT_display = value; break;
 		case 'CLIP_PT_clip_display': CLIP_PT_clip_display = value; break;

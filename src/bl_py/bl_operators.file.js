@@ -10,6 +10,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.file';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var WM_OT_previews_batch_generate =  __class__ ('WM_OT_previews_batch_generate', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.previews_batch_generate',
@@ -74,7 +230,7 @@ export var WM_OT_previews_batch_generate =  __class__ ('WM_OT_previews_batch_gen
 				return __call__ (__accu0__.join, __accu0__, self.directory, fn.py_name);
 			}) ();
 			var cmd = [bpy.app.binary_path, '--background', '--factory-startup'];
-			if (self.use_trusted) {
+			if (__call__ (_truth, null, self.use_trusted)) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--enable-autoexec');
@@ -90,40 +246,40 @@ export var WM_OT_previews_batch_generate =  __class__ ('WM_OT_previews_batch_gen
 					}) (), 'bl_previews_render.py');
 				}) (), '--']);
 			}) ();
-			if (!(self.use_scenes)) {
+			if (!(__call__ (_truth, null, self.use_scenes))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_scenes');
 				}) ();
 			}
-			if (!(self.use_collections)) {
+			if (!(__call__ (_truth, null, self.use_collections))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_collections');
 				}) ();
 			}
-			if (!(self.use_objects)) {
+			if (!(__call__ (_truth, null, self.use_objects))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_objects');
 				}) ();
 			}
-			if (!(self.use_intern_data)) {
+			if (!(__call__ (_truth, null, self.use_intern_data))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_data_intern');
 				}) ();
 			}
-			if (!(self.use_backups)) {
+			if (!(__call__ (_truth, null, self.use_backups))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_backups');
 				}) ();
 			}
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = subprocess;
 				return __call__ (__accu0__.call, __accu0__, cmd);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -214,7 +370,7 @@ export var WM_OT_previews_batch_clear =  __class__ ('WM_OT_previews_batch_clear'
 				return __call__ (__accu0__.join, __accu0__, self.directory, fn.py_name);
 			}) ();
 			var cmd = [bpy.app.binary_path, '--background', '--factory-startup'];
-			if (self.use_trusted) {
+			if (__call__ (_truth, null, self.use_trusted)) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--enable-autoexec');
@@ -230,40 +386,40 @@ export var WM_OT_previews_batch_clear =  __class__ ('WM_OT_previews_batch_clear'
 					}) (), 'bl_previews_render.py');
 				}) (), '--', '--clear']);
 			}) ();
-			if (!(self.use_scenes)) {
+			if (!(__call__ (_truth, null, self.use_scenes))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_scenes');
 				}) ();
 			}
-			if (!(self.use_collections)) {
+			if (!(__call__ (_truth, null, self.use_collections))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_collections');
 				}) ();
 			}
-			if (!(self.use_objects)) {
+			if (!(__call__ (_truth, null, self.use_objects))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_objects');
 				}) ();
 			}
-			if (!(self.use_intern_data)) {
+			if (!(__call__ (_truth, null, self.use_intern_data))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_data_intern');
 				}) ();
 			}
-			if (!(self.use_backups)) {
+			if (!(__call__ (_truth, null, self.use_backups))) {
 				(function () {
 					var __accu0__ = cmd;
 					return __call__ (__accu0__.append, __accu0__, '--no_backups');
 				}) ();
 			}
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = subprocess;
 				return __call__ (__accu0__.call, __accu0__, cmd);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -332,7 +488,7 @@ export var WM_OT_blend_strings_utf8_validate =  __class__ ('WM_OT_blend_strings_
 			if (__in__ (prop.identifier, new set (['bl_rna', 'rna_type']))) {
 				continue;
 			}
-			if (prop.is_readonly) {
+			if (__call__ (_truth, null, prop.is_readonly)) {
 				continue;
 			}
 			if (__eq__ (prop.py_metatype, 'STRING')) {
@@ -414,7 +570,7 @@ export var WM_OT_blend_strings_utf8_validate =  __class__ ('WM_OT_blend_strings_
 				}
 			}
 		}
-		if (changed) {
+		if (__call__ (_truth, null, changed)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), "Some strings were fixed, don't forget to save the .blend file to keep those changes");
@@ -430,6 +586,14 @@ export {BoolProperty, CollectionProperty, Operator, OperatorFileListElement, Str
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'WM_OT_previews_batch_generate': WM_OT_previews_batch_generate = value; break;
 		case 'WM_OT_previews_batch_clear': WM_OT_previews_batch_clear = value; break;
 		case 'WM_OT_blend_strings_utf8_validate': WM_OT_blend_strings_utf8_validate = value; break;

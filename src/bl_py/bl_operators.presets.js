@@ -12,6 +12,162 @@ __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = 'bl_operators.presets';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 WindowManager.preset_name = __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Preset Name', description: 'Name for new preset', py_default: __call__ (data_, null, 'New Preset')}));
 export var _call_preset_cb = function (fn, context, filepath) {
 	var deprecated = '4.2';
@@ -175,19 +331,19 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 		}
 		var preset_menu_class = __call__ (getattr, null, bpy.types, self.preset_menu);
 		var is_xml = __eq__ (__call__ (getattr, null, preset_menu_class, 'preset_type', null), 'XML');
-		var is_preset_add = !(self.remove_name || self.remove_active);
-		if (is_xml) {
+		var is_preset_add = !(__call__ (_truth, null, self.remove_name) || __call__ (_truth, null, self.remove_active));
+		if (__call__ (_truth, null, is_xml)) {
 			var ext = '.xml';
 		}
 		else {
 			var ext = '.py';
 		}
-		var py_name = (is_preset_add ? (function () {
+		var py_name = (__call__ (_truth, null, is_preset_add) ? (function () {
 			var __accu0__ = self.py_name;
 			return __call__ (__accu0__.strip, __accu0__);
 		}) () : self.py_name);
-		if (is_preset_add) {
-			if (!(py_name)) {
+		if (__call__ (_truth, null, is_preset_add)) {
+			if (!(__call__ (_truth, null, py_name))) {
 				return new set (['FINISHED']);
 			}
 			var wm = __getitem__ (bpy.data.window_managers, 0);
@@ -206,7 +362,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 				var __accu0__ = bpy.utils;
 				return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: target_path, create: true}));
 			}) ();
-			if (!(target_path)) {
+			if (!(__call__ (_truth, null, target_path))) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Failed to create presets path');
@@ -217,7 +373,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 				var __accu0__ = bpy.utils;
 				return __call__ (__accu0__.preset_find, __accu0__, filename, self.preset_subdir, __kwargtrans__ ({ext: ext}));
 			}) ();
-			if (__call__ (_is_path_readonly, null, target_path) || preset_filepath) {
+			if (__call__ (_truth, null, __call__ (_is_path_readonly, null, target_path)) || __call__ (_truth, null, preset_filepath)) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -242,7 +398,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 					var __accu0__ = 'Writing Preset: {!r}';
 					return __call__ (__accu0__.format, __accu0__, filepath);
 				}) ());
-				if (is_xml) {
+				if (__call__ (_truth, null, is_xml)) {
 					var rna_xml = __call__ (_module, null, '_rna_xml');
 					(function () {
 						var __accu0__ = rna_xml;
@@ -385,23 +541,23 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 			}) ();
 		}
 		else {
-			if (self.remove_active) {
+			if (__call__ (_truth, null, self.remove_active)) {
 				var py_name = preset_menu_class.bl_label;
 			}
 			var filepath = (function () {
 				var __accu0__ = bpy.utils;
 				return __call__ (__accu0__.preset_find, __accu0__, py_name, self.preset_subdir, __kwargtrans__ ({ext: ext}));
 			}) ();
-			if (!(filepath)) {
+			if (!(__call__ (_truth, null, filepath))) {
 				var filepath = (function () {
 					var __accu0__ = bpy.utils;
 					return __call__ (__accu0__.preset_find, __accu0__, py_name, self.preset_subdir, __kwargtrans__ ({display_name: true, ext: ext}));
 				}) ();
 			}
-			if (!(filepath)) {
+			if (!(__call__ (_truth, null, filepath))) {
 				return new set (['CANCELLED']);
 			}
-			if (__call__ (_is_path_readonly, null, filepath)) {
+			if (__call__ (_truth, null, __call__ (_is_path_readonly, null, filepath))) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Unable to remove default presets');
@@ -487,7 +643,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 		}
 		else {
 		}
-		if (!(self.remove_active || self.remove_name)) {
+		if (!(__call__ (_truth, null, self.remove_active) || __call__ (_truth, null, self.remove_name))) {
 			var wm = context.window_manager;
 			return (function () {
 				var __accu0__ = wm;
@@ -646,7 +802,7 @@ export var AddPresetCamera =  __class__ ('AddPresetCamera', [AddPresetBase, Oper
 		else {
 		}
 		var preset_values = ['cam.sensor_width', 'cam.sensor_height', 'cam.sensor_fit'];
-		if (self.use_focal_length) {
+		if (__call__ (_truth, null, self.use_focal_length)) {
 			(function () {
 				var __accu0__ = preset_values;
 				return __call__ (__accu0__.append, __accu0__, 'cam.lens');
@@ -728,7 +884,7 @@ export var AddPresetTrackingCamera =  __class__ ('AddPresetTrackingCamera', [Add
 		else {
 		}
 		var preset_values = ['camera.sensor_width', 'camera.pixel_aspect', 'camera.k1', 'camera.k2', 'camera.k3'];
-		if (self.use_focal_length) {
+		if (__call__ (_truth, null, self.use_focal_length)) {
 			(function () {
 				var __accu0__ = preset_values;
 				return __call__ (__accu0__.append, __accu0__, 'camera.units');
@@ -836,7 +992,7 @@ export var RemovePresetInterfaceTheme =  __class__ ('RemovePresetInterfaceTheme'
 		else {
 		}
 		var filepath = __getitem__ (context.preferences.themes, 0).filepath;
-		if (!(filepath) || __call__ (_is_path_readonly, null, filepath)) {
+		if (!(__call__ (_truth, null, filepath)) || __call__ (_truth, null, __call__ (_is_path_readonly, null, filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Built-in themes cannot be removed');
@@ -894,7 +1050,7 @@ export var SavePresetInterfaceTheme =  __class__ ('SavePresetInterfaceTheme', [A
 		}
 		var rna_xml = __call__ (_module, null, '_rna_xml');
 		var filepath = __getitem__ (context.preferences.themes, 0).filepath;
-		if (!(filepath) || __call__ (_is_path_readonly, null, filepath)) {
+		if (!(__call__ (_truth, null, filepath)) || __call__ (_truth, null, __call__ (_is_path_readonly, null, filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Built-in themes cannot be overwritten');
@@ -949,7 +1105,7 @@ export var SavePresetInterfaceTheme =  __class__ ('SavePresetInterfaceTheme', [A
 		else {
 		}
 		var filepath = __getitem__ (context.preferences.themes, 0).filepath;
-		if (!(filepath) || __call__ (_is_path_readonly, null, filepath)) {
+		if (!(__call__ (_truth, null, filepath)) || __call__ (_truth, null, __call__ (_is_path_readonly, null, filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Built-in themes cannot be overwritten');
@@ -1064,7 +1220,7 @@ export var RemovePresetKeyconfig =  __class__ ('RemovePresetKeyconfig', [AddPres
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.preset_find, __accu0__, py_name, self.preset_subdir, __kwargtrans__ ({ext: '.py'}));
 		}) ();
-		if (!(filepath) || __call__ (_is_path_readonly, null, filepath)) {
+		if (!(__call__ (_truth, null, filepath)) || __call__ (_truth, null, __call__ (_is_path_readonly, null, filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Built-in keymap configurations cannot be removed');
@@ -1146,7 +1302,7 @@ export var AddPresetOperator =  __class__ ('AddPresetOperator', [AddPresetBase, 
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var prop_id = __left0__ [0];
 			var prop = __left0__ [1];
-			if (!(prop.is_skip_preset)) {
+			if (!(__call__ (_truth, null, prop.is_skip_preset))) {
 				if (!__in__ (prop_id, properties_blacklist)) {
 					(function () {
 						var __accu0__ = ret;
@@ -1337,10 +1493,10 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 		}
 		var os = __call__ (_module, null, 'os');
 		var re = __call__ (_module, null, 're');
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isfile, __accu0__, filepath);
-		}) () && __eq__ ((function () {
+		}) ()) && __eq__ ((function () {
 			var __accu0__ = __getitem__ ((function () {
 				var __accu1__ = os.path;
 				return __call__ (__accu1__.splitext, __accu1__, filepath);
@@ -1366,7 +1522,7 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 				throw __except0__;
 			}
 		}
-		if (!(lines_prev)) {
+		if (!(__call__ (_truth, null, lines_prev))) {
 			return ;
 		}
 		var regex_exclude = (function () {
@@ -1414,11 +1570,11 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 					return __call__ (__accu0__.startswith, __accu0__, '.clear()');
 				}) ();
 				var i = __call__ (__iadd__, null, i, 1);
-				if (is_collection) {
-					while (__lt__ (i, __call__ (len, null, lines_prev)) && !((function () {
+				if (__call__ (_truth, null, is_collection)) {
+					while (__lt__ (i, __call__ (len, null, lines_prev)) && !(__call__ (_truth, null, (function () {
 						var __accu0__ = __getitem__ (lines_prev, i);
 						return __call__ (__accu0__.startswith, __accu0__, 'op.');
-					}) ())) {
+					}) ()))) {
 						var i = __call__ (__iadd__, null, i, 1);
 					}
 				}
@@ -1463,7 +1619,7 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: 'presets', create: false}));
 		}) ();
-		if (!(base_preset_directory)) {
+		if (!(__call__ (_truth, null, base_preset_directory))) {
 			return ;
 		}
 		var __iterable0__ = operators;
@@ -1478,10 +1634,10 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.join, __accu0__, base_preset_directory, operator_path);
 			}) ();
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.isdir, __accu0__, directory);
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
 			var __iterable1__ = (function () {
@@ -1518,7 +1674,7 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 		}
 		var properties_exclude = [];
 		var operators = [];
-		if (self.operator) {
+		if (__call__ (_truth, null, self.operator)) {
 			(function () {
 				var __accu0__ = operators;
 				return __call__ (__accu0__.append, __accu0__, self.operator);
@@ -1570,6 +1726,14 @@ export {BoolProperty, CollectionProperty, Menu, Operator, OperatorFileListElemen
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_call_preset_cb': _call_preset_cb = value; break;
 		case '_is_path_readonly': _is_path_readonly = value; break;
 		case 'AddPresetBase': AddPresetBase = value; break;

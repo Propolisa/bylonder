@@ -11,6 +11,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.clip';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var CLIP_spaces_walk = function (context, all_screens, tarea, tspace, callback) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -31,7 +187,7 @@ export var CLIP_spaces_walk = function (context, all_screens, tarea, tspace, cal
 	else {
 		var args = tuple ();
 	}
-	var screens = (all_screens ? bpy.data.screens : [context.screen]);
+	var screens = (__call__ (_truth, null, all_screens) ? bpy.data.screens : [context.screen]);
 	var __iterable0__ = screens;
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -141,7 +297,7 @@ export var CLIP_set_viewport_background = function (context, clip, clip_user) {
 				break;
 			}
 		}
-		if (!(bgpic)) {
+		if (!(__call__ (_truth, null, bgpic))) {
 			var bgpic = (function () {
 				var __accu0__ = cam.background_images;
 				return __call__ (__accu0__.py_new, __accu0__);
@@ -150,14 +306,14 @@ export var CLIP_set_viewport_background = function (context, clip, clip_user) {
 		bgpic.source = 'MOVIE_CLIP';
 		bgpic.clip = clip;
 		bgpic.clip_user.proxy_render_size = user.proxy_render_size;
-		if (__call__ (check_camera_has_distortion, null, clip.tracking.camera)) {
+		if (__call__ (_truth, null, __call__ (check_camera_has_distortion, null, clip.tracking.camera))) {
 			bgpic.clip_user.use_render_undistorted = true;
 		}
 		bgpic.use_camera_clip = false;
 		cam.show_background_images = true;
 	};
 	var scene_camera = context.scene.camera;
-	if (!(scene_camera) || __ne__ (scene_camera.py_metatype, 'CAMERA')) {
+	if (!(__call__ (_truth, null, scene_camera)) || __ne__ (scene_camera.py_metatype, 'CAMERA')) {
 		return ;
 	}
 	__call__ (set_background, null, scene_camera.data, clip, clip_user);
@@ -189,7 +345,7 @@ export var CLIP_camera_for_clip = function (context, clip) {
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var con = __getitem__ (__iterable1__, __index1__);
 				if (__eq__ (con.py_metatype, 'CAMERA_SOLVER')) {
-					var cur_clip = (con.use_active_clip ? scene.active_clip : con.clip);
+					var cur_clip = (__call__ (_truth, null, con.use_active_clip) ? scene.active_clip : con.clip);
 					if (__eq__ (cur_clip, clip)) {
 						return ob;
 					}
@@ -214,13 +370,13 @@ export var CLIP_track_view_selected = function (sc, track) {
 	}
 	else {
 	}
-	if (track.select_anchor) {
+	if (__call__ (_truth, null, track.select_anchor)) {
 		return true;
 	}
-	if (sc.show_marker_pattern && track.select_pattern) {
+	if (__call__ (_truth, null, sc.show_marker_pattern) && __call__ (_truth, null, track.select_pattern)) {
 		return true;
 	}
-	if (sc.show_marker_search && track.select_search) {
+	if (__call__ (_truth, null, sc.show_marker_search) && __call__ (_truth, null, track.select_search)) {
 		return true;
 	}
 	return false;
@@ -349,13 +505,13 @@ export var CLIP_OT_filter_tracks =  __class__ ('CLIP_OT_filter_tracks', [Operato
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var track = __getitem__ (__iterable0__, __index0__);
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu1__ = track.markers;
 						return __call__ (__accu1__.find_frame, __accu1__, frame);
-					}) () && (function () {
+					}) ()) && __call__ (_truth, null, (function () {
 						var __accu1__ = track.markers;
 						return __call__ (__accu1__.find_frame, __accu1__, __sub__ (frame, 1));
-					}) ()) {
+					}) ())) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, track);
@@ -364,7 +520,7 @@ export var CLIP_OT_filter_tracks =  __class__ ('CLIP_OT_filter_tracks', [Operato
 				}
 				return __accu0__;
 			}) ();
-			if (!(relevant_tracks)) {
+			if (!(__call__ (_truth, null, relevant_tracks))) {
 				continue;
 			}
 			var average_velocity = __call__ (Vector, null, tuple ([0.0, 0.0]));
@@ -593,7 +749,7 @@ export var CLIP_OT_track_to_empty =  __class__ ('CLIP_OT_track_to_empty', [Opera
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var track = __getitem__ (__iterable0__, __index0__);
-			if (__call__ (CLIP_track_view_selected, null, sc, track)) {
+			if (__call__ (_truth, null, __call__ (CLIP_track_view_selected, null, sc, track))) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__._link_track, __accu0__, context, clip, tracking_object, track);
@@ -652,7 +808,7 @@ export var CLIP_OT_bundles_to_mesh =  __class__ ('CLIP_OT_bundles_to_mesh', [Ope
 			var __accu0__ = Matrix;
 			return __call__ (__accu0__.Identity, __accu0__, 4);
 		}) ();
-		if (camera) {
+		if (__call__ (_truth, null, camera)) {
 			var reconstruction = tracking_object.reconstruction;
 			var framenr = __add__ (__sub__ (scene.frame_current, clip.frame_start), 1);
 			var reconstructed_matrix = (function () {
@@ -668,14 +824,14 @@ export var CLIP_OT_bundles_to_mesh =  __class__ ('CLIP_OT_bundles_to_mesh', [Ope
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var track = __getitem__ (__iterable0__, __index0__);
-			if (track.has_bundle && track.select) {
+			if (__call__ (_truth, null, track.has_bundle) && __call__ (_truth, null, track.select)) {
 				(function () {
 					var __accu0__ = new_verts;
 					return __call__ (__accu0__.append, __accu0__, track.bundle);
 				}) ();
 			}
 		}
-		if (new_verts) {
+		if (__call__ (_truth, null, new_verts)) {
 			var mesh = (function () {
 				var __accu0__ = bpy.data.meshes;
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: 'Tracks'}));
@@ -773,16 +929,16 @@ export var CLIP_OT_delete_proxy =  __class__ ('CLIP_OT_delete_proxy', [Operator]
 		}
 		var os = __call__ (_module, null, 'os');
 		var shutil = __call__ (_module, null, 'shutil');
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, abspath);
-		}) ())) {
+		}) ()))) {
 			return ;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, abspath);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = shutil;
 				return __call__ (__accu0__.rmtree, __accu0__, abspath);
@@ -813,7 +969,7 @@ export var CLIP_OT_delete_proxy =  __class__ ('CLIP_OT_delete_proxy', [Operator]
 		var os = __call__ (_module, null, 'os');
 		var sc = context.space_data;
 		var clip = sc.clip;
-		if (clip.use_proxy_custom_directory) {
+		if (__call__ (_truth, null, clip.use_proxy_custom_directory)) {
 			var proxydir = clip.proxy.directory;
 		}
 		else {
@@ -981,27 +1137,27 @@ export var CLIP_OT_constraint_to_fcurve =  __class__ ('CLIP_OT_constraint_to_fcu
 				var con = x;
 			}
 		}
-		if (!(con)) {
+		if (!(__call__ (_truth, null, con))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Motion Tracking constraint to be converted not found');
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (con.use_active_clip) {
+		if (__call__ (_truth, null, con.use_active_clip)) {
 			var clip = scene.active_clip;
 		}
 		else {
 			var clip = con.clip;
 		}
-		if (!(clip)) {
+		if (!(__call__ (_truth, null, clip))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), "Movie clip to use tracking data from isn't set");
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (__eq__ (con.py_metatype, 'FOLLOW_TRACK') && con.use_3d_position) {
+		if (__eq__ (con.py_metatype, 'FOLLOW_TRACK') && __call__ (_truth, null, con.use_3d_position)) {
 			var mat = (function () {
 				var __accu0__ = ob.matrix_world;
 				return __call__ (__accu0__.py_copy, __accu0__);
@@ -1016,12 +1172,12 @@ export var CLIP_OT_constraint_to_fcurve =  __class__ ('CLIP_OT_constraint_to_fcu
 		if (__eq__ (con.py_metatype, 'CAMERA_SOLVER')) {
 			var tracks = clip.tracking.tracks;
 		}
-		else if (con.object) {
+		else if (__call__ (_truth, null, con.object)) {
 			var tracking_object = (function () {
 				var __accu0__ = clip.tracking.objects;
 				return __call__ (__accu0__.py_get, __accu0__, con.object, null);
 			}) ();
-			if (!(tracking_object)) {
+			if (!(__call__ (_truth, null, tracking_object))) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Motion Tracking object not found');
@@ -1125,10 +1281,10 @@ export var CLIP_OT_constraint_to_fcurve =  __class__ ('CLIP_OT_constraint_to_fcu
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var ob = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = ob;
 				return __call__ (__accu0__.select_get, __accu0__);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__._bake_object, __accu0__, scene, ob);
@@ -1159,9 +1315,9 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		else {
 		}
 		var sc = context.space_data;
-		if (sc && __eq__ (sc.py_metatype, 'CLIP_EDITOR')) {
+		if (__call__ (_truth, null, sc) && __eq__ (sc.py_metatype, 'CLIP_EDITOR')) {
 			var clip = sc.clip;
-			if (clip && clip.tracking.objects.active.reconstruction.is_valid) {
+			if (__call__ (_truth, null, clip) && __call__ (_truth, null, clip.tracking.objects.active.reconstruction.is_valid)) {
 				return true;
 			}
 		}
@@ -1201,7 +1357,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		}
 		var scene = context.scene;
 		var world = scene.world;
-		if (!(world)) {
+		if (!(__call__ (_truth, null, world))) {
 			var world = (function () {
 				var __accu0__ = bpy.data.worlds;
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: 'World'}));
@@ -1228,7 +1384,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		else {
 		}
 		var scene = context.scene;
-		if (scene.camera) {
+		if (__call__ (_truth, null, scene.camera)) {
 			return scene.camera;
 		}
 		var cam = (function () {
@@ -1333,10 +1489,10 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		}
 		var scene = context.scene;
 		var view_layers = scene.view_layers;
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = view_layers;
 			return __call__ (__accu0__.py_get, __accu0__, 'Foreground');
-		}) ())) {
+		}) ()))) {
 			if (__eq__ (__call__ (len, null, view_layers), 1)) {
 				var fg = __getitem__ (view_layers, 0);
 				fg.py_name = 'Foreground';
@@ -1349,10 +1505,10 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 			}
 			fg.use_sky = true;
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = view_layers;
 			return __call__ (__accu0__.py_get, __accu0__, 'Background');
-		}) ())) {
+		}) ()))) {
 			var _bg = (function () {
 				var __accu0__ = view_layers;
 				return __call__ (__accu0__.py_new, __accu0__, 'Background');
@@ -1396,7 +1552,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 				if (__eq__ (collection, child)) {
 					return true;
 				}
-				if (__call__ (collection_in_collection, null, collection, child)) {
+				if (__call__ (_truth, null, __call__ (collection_in_collection, null, collection, child))) {
 					return true;
 				}
 			}
@@ -1406,10 +1562,10 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 			var __accu0__ = bpy.data.collections;
 			return __call__ (__accu0__.py_get, __accu0__, collection_name);
 		}) ();
-		if (collection && !(collection.is_editable)) {
+		if (__call__ (_truth, null, collection) && !(__call__ (_truth, null, collection.is_editable))) {
 			var collection = null;
 		}
-		if (!(collection)) {
+		if (!(__call__ (_truth, null, collection))) {
 			var collection = (function () {
 				var __accu0__ = bpy.data.collections;
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: collection_name}));
@@ -1419,7 +1575,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 				return __call__ (__accu0__.link, __accu0__, collection);
 			}) ();
 		}
-		else if (!(__call__ (collection_in_collection, null, collection, master_collection))) {
+		else if (!(__call__ (_truth, null, __call__ (collection_in_collection, null, collection, master_collection)))) {
 			(function () {
 				var __accu0__ = master_collection.children;
 				return __call__ (__accu0__.link, __accu0__, collection);
@@ -1521,7 +1677,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		var tree = scene.compositing_node_group;
 		var clip = sc.clip;
 		var need_stabilization = false;
-		if (tree) {
+		if (__call__ (_truth, null, tree)) {
 			tree.use_fake_user = true;
 		}
 		var tree = (function () {
@@ -1553,7 +1709,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 			var __accu0__ = tree.nodes;
 			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'CompositorNodeMovieDistortion'}));
 		}) ();
-		if (need_stabilization) {
+		if (__call__ (_truth, null, need_stabilization)) {
 			var stabilize = (function () {
 				var __accu0__ = tree.nodes;
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'CompositorNodeStabilize2D'}));
@@ -1578,7 +1734,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		movieclip.clip = clip;
 		distortion.clip = clip;
 		__getitem__ (distortion.inputs, 'Type').default_value = 'Undistort';
-		if (need_stabilization) {
+		if (__call__ (_truth, null, need_stabilization)) {
 			stabilize.clip = clip;
 		}
 		__getitem__ (scale.inputs, 'Type').default_value = 'Render Size';
@@ -1590,7 +1746,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 			var __accu0__ = tree.links;
 			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (movieclip.outputs, 'Image'), __getitem__ (distortion.inputs, 'Image'));
 		}) ();
-		if (need_stabilization) {
+		if (__call__ (_truth, null, need_stabilization)) {
 			(function () {
 				var __accu0__ = tree.links;
 				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (distortion.outputs, 'Image'), __getitem__ (stabilize.inputs, 'Image'));
@@ -1633,7 +1789,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 		movieclip.location = __call__ (Vector, null, tuple ([__neg__ (300.0), 350.0]));
 		distortion.location = movieclip.location;
 		distortion.location = __call__ (__iadd__, null, distortion.location, __call__ (Vector, null, tuple ([200.0, 0.0])));
-		if (need_stabilization) {
+		if (__call__ (_truth, null, need_stabilization)) {
 			stabilize.location = distortion.location;
 			stabilize.location = __call__ (__iadd__, null, stabilize.location, __call__ (Vector, null, tuple ([200.0, 0.0])));
 			scale.location = stabilize.location;
@@ -1898,7 +2054,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 				var has_mesh = true;
 			}
 		}
-		if (!(has_light)) {
+		if (!(__call__ (_truth, null, has_light))) {
 			var light = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._createLight, __accu0__);
@@ -1912,7 +2068,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 				return __call__ (__accu0__.link, __accu0__, light);
 			}) ();
 		}
-		if (!(has_mesh)) {
+		if (!(__call__ (_truth, null, has_mesh))) {
 			var ob = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._createSampleObject, __accu0__, fg_coll);
@@ -1922,7 +2078,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 			var __accu0__ = self;
 			return __call__ (__accu0__._findGround, __accu0__, context);
 		}) ();
-		if (!(ground)) {
+		if (!(__call__ (_truth, null, ground))) {
 			var ground = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._createGround, __accu0__, bg_coll);
@@ -2003,9 +2159,9 @@ export var CLIP_OT_track_settings_as_default =  __class__ ('CLIP_OT_track_settin
 		else {
 		}
 		var sc = context.space_data;
-		if (sc && __eq__ (sc.py_metatype, 'CLIP_EDITOR')) {
+		if (__call__ (_truth, null, sc) && __eq__ (sc.py_metatype, 'CLIP_EDITOR')) {
 			var clip = sc.clip;
-			if (clip && clip.tracking.tracks.active) {
+			if (__call__ (_truth, null, clip) && __call__ (_truth, null, clip.tracking.tracks.active)) {
 				return true;
 			}
 		}
@@ -2057,9 +2213,9 @@ export var CLIP_OT_track_settings_to_track =  __class__ ('CLIP_OT_track_settings
 		else {
 		}
 		var sc = context.space_data;
-		if (sc && __eq__ (sc.py_metatype, 'CLIP_EDITOR')) {
+		if (__call__ (_truth, null, sc) && __eq__ (sc.py_metatype, 'CLIP_EDITOR')) {
 			var clip = sc.clip;
-			if (clip && clip.tracking.tracks.active) {
+			if (__call__ (_truth, null, clip) && __call__ (_truth, null, clip.tracking.tracks.active)) {
 				return true;
 			}
 		}
@@ -2092,7 +2248,7 @@ export var CLIP_OT_track_settings_to_track =  __class__ ('CLIP_OT_track_settings
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var t = __getitem__ (__iterable0__, __index0__);
-			if (t.select && __ne__ (t, track)) {
+			if (__call__ (_truth, null, t.select) && __ne__ (t, track)) {
 				var marker_selected = (function () {
 					var __accu0__ = t.markers;
 					return __call__ (__accu0__.find_frame, __accu0__, framenr, __kwargtrans__ ({exact: false}));
@@ -2121,6 +2277,14 @@ export {FloatProperty, Matrix, Operator, Vector, _globals, _import, _lazy, _memb
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'CLIP_spaces_walk': CLIP_spaces_walk = value; break;
 		case 'CLIP_set_viewport_background': CLIP_set_viewport_background = value; break;
 		case 'CLIP_camera_for_clip': CLIP_camera_for_clip = value; break;

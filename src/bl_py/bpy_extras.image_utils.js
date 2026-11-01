@@ -4,6 +4,162 @@ import * as __self__ from './bpy_extras.image_utils.js';
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.image_utils';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['load_image']);
 export var load_image = function (imagepath, dirname, place_holder, recursive, ncase_cmp, convert_callback, verbose, relpath, check_existing, force_reload) {
 	if (typeof dirname == 'undefined' || (dirname != null && globalThis.Object.hasOwn (dirname, "__kwargtrans__"))) {;
@@ -109,13 +265,13 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 		else {
 		}
 		var bpy = __call__ (_module, null, 'bpy');
-		if (convert_callback) {
+		if (__call__ (_truth, null, convert_callback)) {
 			var path = __call__ (convert_callback, null, path);
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isabs, __accu0__, path);
-		}) ())) {
+		}) ()))) {
 			var path = (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.abspath, __accu0__, path);
@@ -135,8 +291,8 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 				throw __except0__;
 			}
 		}
-		if (verbose) {
-			if (image) {
+		if (__call__ (_truth, null, verbose)) {
+			if (__call__ (_truth, null, image)) {
 				__call__ (print, null, (function () {
 					var __accu0__ = "    image loaded '{:s}'";
 					return __call__ (__accu0__.format, __accu0__, path);
@@ -149,11 +305,11 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 				}) ());
 			}
 		}
-		if (place_holder && image === null) {
+		if (__call__ (_truth, null, place_holder) && image === null) {
 			var image = __call__ (_image_load_placeholder, null, path);
 		}
-		if (image) {
-			if (force_reload) {
+		if (__call__ (_truth, null, image)) {
+			if (__call__ (_truth, null, force_reload)) {
 				(function () {
 					var __accu0__ = image;
 					return __call__ (__accu0__.reload, __accu0__);
@@ -215,7 +371,7 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 				__iterable2__ = __i__ (__iterable2__);
 				for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
 					var filename = __getitem__ (__iterable2__, __index2__);
-					if (__call__ (filename_check, null, filename)) {
+					if (__call__ (_truth, null, __call__ (filename_check, null, filename))) {
 						yield (function () {
 							var __accu0__ = os.path;
 							return __call__ (__accu0__.join, __accu0__, dirpath, filename);
@@ -229,20 +385,20 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 		var __accu0__ = bpy.path;
 		return __call__ (__accu0__.native_pathsep, __accu0__, imagepath);
 	}) ();
-	if (verbose) {
+	if (__call__ (_truth, null, verbose)) {
 		__call__ (print, null, (function () {
 			var __accu0__ = "load_image('{:s}', '{:s}', ...)";
 			return __call__ (__accu0__.format, __accu0__, imagepath, dirname);
 		}) ());
 	}
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.exists, __accu0__, imagepath);
-	}) ()) {
+	}) ())) {
 		return __call__ (_image_load, null, imagepath);
 	}
 	var variants = [imagepath];
-	if (dirname) {
+	if (__call__ (_truth, null, dirname)) {
 		var variants = __call__ (__iadd__, null, variants, [(function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.join, __accu0__, dirname, imagepath);
@@ -258,7 +414,7 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var filepath_test = __getitem__ (__iterable0__, __index0__);
-		if (ncase_cmp) {
+		if (__call__ (_truth, null, ncase_cmp)) {
 			var ncase_variants = tuple ([filepath_test, (function () {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.resolve_ncase, __accu0__, filepath_test);
@@ -271,15 +427,15 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 		__iterable1__ = __i__ (__iterable1__);
 		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 			var nfilepath = __getitem__ (__iterable1__, __index1__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, nfilepath);
-			}) ()) {
+			}) ())) {
 				return __call__ (_image_load, null, nfilepath);
 			}
 		}
 	}
-	if (recursive) {
+	if (__call__ (_truth, null, recursive)) {
 		var search_paths = [];
 		var __iterable0__ = tuple ([(function () {
 			var __accu0__ = os.path;
@@ -288,10 +444,10 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var dirpath_test = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, dirpath_test);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = search_paths;
 					return __call__ (__accu0__.append, __accu0__, dirpath_test);
@@ -306,7 +462,7 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 			var __accu0__ = bpy.path;
 			return __call__ (__accu0__.basename, __accu0__, imagepath);
 		}) ();
-		if (ncase_cmp) {
+		if (__call__ (_truth, null, ncase_cmp)) {
 			var imagepath_base = (function () {
 				var __accu0__ = imagepath_base;
 				return __call__ (__accu0__.lower, __accu0__);
@@ -354,7 +510,7 @@ export var load_image = function (imagepath, dirname, place_holder, recursive, n
 			return __call__ (_image_load, null, nfilepath);
 		}
 	}
-	if (place_holder) {
+	if (__call__ (_truth, null, place_holder)) {
 		return __call__ (_image_load_placeholder, null, imagepath);
 	}
 	return null;
@@ -365,6 +521,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'load_image': load_image = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);

@@ -101,6 +101,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -343,7 +359,7 @@ export var generate = function (context, space_type) {
 		var __accu0__ = ToolSelectPanelHelper;
 		return __call__ (__accu0__._tool_class_from_space_type, __accu0__, space_type);
 	}) ();
-	if (use_hack_properties) {
+	if (__call__ (_truth, null, use_hack_properties)) {
 		var kmi_hack = (function () {
 			var __accu0__ = keymap.keymap_items;
 			return __call__ (__accu0__.py_new, __accu0__, 'wm.tool_set_by_id', 'NONE', 'PRESS');
@@ -351,13 +367,13 @@ export var generate = function (context, space_type) {
 		var kmi_hack_properties = kmi_hack.properties;
 		kmi_hack.active = false;
 	}
-	if (use_release_confirm || use_tap_reset) {
+	if (__call__ (_truth, null, use_release_confirm) || __call__ (_truth, null, use_tap_reset)) {
 		var kmi_toolbar = __getitem__ ((function () {
 			var __accu0__ = wm.keyconfigs;
 			return __call__ (__accu0__.find_item_from_operator, __accu0__, __kwargtrans__ ({idname: 'wm.toolbar'}));
 		}) (), 1);
-		var kmi_toolbar_type = (!(kmi_toolbar) ? null : kmi_toolbar.py_metatype);
-		if (use_tap_reset && kmi_toolbar_type !== null) {
+		var kmi_toolbar_type = (!(__call__ (_truth, null, kmi_toolbar)) ? null : kmi_toolbar.py_metatype);
+		if (__call__ (_truth, null, use_tap_reset) && kmi_toolbar_type !== null) {
 			var kmi_toolbar_args_type_only = dict ({'type': kmi_toolbar_type});
 			var kmi_toolbar_args = __call__ (_merged, null, kmi_toolbar_args_type_only, __call__ (modifier_keywords_from_item, null, kmi_toolbar));
 		}
@@ -366,24 +382,24 @@ export var generate = function (context, space_type) {
 		}
 		// pass;
 	}
-	if (use_tap_reset) {
+	if (__call__ (_truth, null, use_tap_reset)) {
 		var kmi_found = null;
-		if (use_hack_properties) {
+		if (__call__ (_truth, null, use_hack_properties)) {
 			kmi_hack_properties.py_name = tap_reset_tool;
 			var kmi_found = __getitem__ ((function () {
 				var __accu0__ = wm.keyconfigs;
 				return __call__ (__accu0__.find_item_from_operator, __accu0__, __kwargtrans__ ({idname: 'wm.tool_set_by_id', context: 'INVOKE_REGION_WIN', properties: kmi_hack_properties, include: new set (['KEYBOARD'])}));
 			}) (), 1);
-			if (kmi_found) {
+			if (__call__ (_truth, null, kmi_found)) {
 				var use_tap_reset = false;
 			}
 		}
 		// pass;
 	}
-	if (use_tap_reset) {
+	if (__call__ (_truth, null, use_tap_reset)) {
 		var use_tap_reset = __call__ (kmi_unique_or_pass, null, kmi_toolbar_args);
 	}
-	if (use_tap_reset) {
+	if (__call__ (_truth, null, use_tap_reset)) {
 		__setslice__ (items_all, 0, null, null, (function () {
 			var __accu0__ = [];
 			var __iterable0__ = items_all;
@@ -405,7 +421,7 @@ export var generate = function (context, space_type) {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var item_container = __getitem__ (__iterable0__, __index0__);
 		var item = __getitem__ (item_container, 0);
-		if (use_hack_properties) {
+		if (__call__ (_truth, null, use_hack_properties)) {
 			kmi_hack_properties.py_name = item.idname;
 			var kmi_found = __getitem__ ((function () {
 				var __accu0__ = wm.keyconfigs;
@@ -435,7 +451,7 @@ export var generate = function (context, space_type) {
 			}
 			else {
 				var kmi_first = km.keymap_items;
-				var kmi_first = (kmi_first ? __getitem__ (kmi_first, 0) : null);
+				var kmi_first = (__call__ (_truth, null, kmi_first) ? __getitem__ (kmi_first, 0) : null);
 				if (kmi_first !== null) {
 					var kmi_found = __getitem__ ((function () {
 						var __accu0__ = wm.keyconfigs;
@@ -478,7 +494,7 @@ export var generate = function (context, space_type) {
 		var kmi_found_type = kmi_found.py_metatype;
 		if (__eq__ (__call__ (len, null, kmi_found_type), 1) || __in__ (kmi_found.idname, new set (['wm.tool_set_by_id', 'WM_OT_tool_set_by_id']))) {
 			var kmi_args = __call__ (_merged, null, dict ({'type': kmi_found_type}), __call__ (modifier_keywords_from_item, null, kmi_found));
-			if (__call__ (kmi_unique_or_pass, null, kmi_args)) {
+			if (__call__ (_truth, null, __call__ (kmi_unique_or_pass, null, kmi_args))) {
 				var kmi = (function () {
 					var __accu0__ = keymap.keymap_items;
 					return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ (__call__ (_merged, null, dict ({'idname': 'wm.tool_set_by_id', 'value': 'PRESS'}), kmi_args)));
@@ -496,7 +512,7 @@ export var generate = function (context, space_type) {
 		var item = __left0__ [0];
 		var kmi_found = __left0__ [1];
 		var kmi_exist = __left0__ [2];
-		if (kmi_found === null || kmi_exist) {
+		if (kmi_found === null || __call__ (_truth, null, kmi_exist)) {
 			continue;
 		}
 		var kmi_found_type = kmi_found.py_metatype;
@@ -508,7 +524,7 @@ export var generate = function (context, space_type) {
 					var __accu0__ = kmi_args;
 					return __call__ (__accu0__.py_pop, __accu0__, 'key_modifier');
 				}) ();
-				if (__call__ (kmi_unique_or_pass, null, kmi_args)) {
+				if (__call__ (_truth, null, __call__ (kmi_unique_or_pass, null, kmi_args))) {
 					var kmi = (function () {
 						var __accu0__ = keymap.keymap_items;
 						return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ (__call__ (_merged, null, dict ({'idname': 'wm.tool_set_by_id', 'value': 'PRESS'}), kmi_args)));
@@ -519,7 +535,7 @@ export var generate = function (context, space_type) {
 			}
 		}
 	}
-	if (use_auto_keymap_alpha) {
+	if (__call__ (_truth, null, use_auto_keymap_alpha)) {
 		var kmi_type_alpha_char = (function () {
 			var __accu0__ = [];
 			var __iterable0__ = __call__ (list, null, __call__ (range, null, 65, 91));
@@ -567,7 +583,7 @@ export var generate = function (context, space_type) {
 			var item = __left0__ [0];
 			var kmi_found = __left0__ [1];
 			var kmi_exist = __left0__ [2];
-			if (kmi_exist) {
+			if (__call__ (_truth, null, kmi_exist)) {
 				continue;
 			}
 			var kmi_type = (function () {
@@ -578,7 +594,7 @@ export var generate = function (context, space_type) {
 				var __accu0__ = kmi_type_alpha_args_tuple;
 				return __call__ (__accu0__.py_get, __accu0__, kmi_type);
 			}) ();
-			if (kmi_tuple && !__in__ (kmi_tuple, kmi_unique_args)) {
+			if (__call__ (_truth, null, kmi_tuple) && !__in__ (kmi_tuple, kmi_unique_args)) {
 				(function () {
 					var __accu0__ = kmi_unique_args;
 					return __call__ (__accu0__.add, __accu0__, kmi_tuple);
@@ -593,7 +609,7 @@ export var generate = function (context, space_type) {
 		}
 		// pass;
 	}
-	if (use_auto_keymap_num) {
+	if (__call__ (_truth, null, use_auto_keymap_num)) {
 		var kmi_type_auto = tuple (['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'ZERO']);
 		var kmi_type_dupe = dict ({'ONE': 'NUMPAD_1', 'TWO': 'NUMPAD_2', 'THREE': 'NUMPAD_3', 'FOUR': 'NUMPAD_4', 'FIVE': 'NUMPAD_5', 'SIX': 'NUMPAD_6', 'SEVEN': 'NUMPAD_7', 'EIGHT': 'NUMPAD_8', 'NINE': 'NUMPAD_9', 'ZERO': 'NUMPAD_0'});
 		var iter_free_events = function* () {
@@ -628,7 +644,7 @@ export var generate = function (context, space_type) {
 			var item = __left0__ [0];
 			var kmi_found = __left0__ [1];
 			var kmi_exist = __left0__ [2];
-			if (kmi_exist) {
+			if (__call__ (_truth, null, kmi_exist)) {
 				continue;
 			}
 			var kmi_args = null;
@@ -681,13 +697,13 @@ export var generate = function (context, space_type) {
 			}
 		}
 	}
-	if (use_hack_properties) {
+	if (__call__ (_truth, null, use_hack_properties)) {
 		(function () {
 			var __accu0__ = keymap.keymap_items;
 			return __call__ (__accu0__.remove, __accu0__, kmi_hack);
 		}) ();
 	}
-	if (use_tap_reset) {
+	if (__call__ (_truth, null, use_tap_reset)) {
 		if (__eq__ (__call__ (len, null, kmi_toolbar_args_type_only), __call__ (len, null, kmi_toolbar_args))) {
 			var kmi_toolbar_args_available = kmi_toolbar_args;
 		}
@@ -711,7 +727,7 @@ export var generate = function (context, space_type) {
 		}) ();
 		kmi.properties.py_name = tap_reset_tool;
 	}
-	if (use_release_confirm && kmi_toolbar_type !== null) {
+	if (__call__ (_truth, null, use_release_confirm) && kmi_toolbar_type !== null) {
 		var kmi = (function () {
 			var __accu0__ = keymap.keymap_items;
 			return __call__ (__accu0__.py_new, __accu0__, 'ui.button_execute', __kwargtrans__ ({py_metatype: kmi_toolbar_type, value: 'RELEASE', any: true}));
@@ -735,6 +751,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

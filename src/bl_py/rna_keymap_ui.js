@@ -8,6 +8,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'rna_keymap_ui';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['draw_entry', 'draw_km', 'draw_kmi', 'draw_filtered', 'draw_hierarchy', 'draw_keymaps']);
 export var _is_operator_available = function (idname) {
 	if (arguments.length) {
@@ -142,13 +298,13 @@ export var draw_km = function (display_keymaps, kc, km, children, layout, level)
 		var __accu0__ = row;
 		return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: km.py_name, text_ctxt: i18n_contexts.id_windowmanager}));
 	}) ();
-	if (km.is_user_modified || km.is_modal) {
+	if (__call__ (_truth, null, km.is_user_modified) || __call__ (_truth, null, km.is_modal)) {
 		var subrow = (function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
 		subrow.alignment = 'RIGHT';
-		if (km.is_user_modified) {
+		if (__call__ (_truth, null, km.is_user_modified)) {
 			(function () {
 				var __accu0__ = subrow;
 				return __call__ (__accu0__.operator, __accu0__, 'preferences.keymap_restore', __kwargtrans__ ({text: 'Restore'}));
@@ -158,7 +314,7 @@ export var draw_km = function (display_keymaps, kc, km, children, layout, level)
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (km.is_modal) {
+		if (__call__ (_truth, null, km.is_modal)) {
 			(function () {
 				var __accu0__ = subrow;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon: 'LINKED'}));
@@ -166,8 +322,8 @@ export var draw_km = function (display_keymaps, kc, km, children, layout, level)
 		}
 		// pass;
 	}
-	if (km.show_expanded_children) {
-		if (children) {
+	if (__call__ (_truth, null, km.show_expanded_children)) {
+		if (__call__ (_truth, null, children)) {
 			var subcol = __call__ (_indented_layout, null, col, __add__ (level, 1));
 			var subrow = (function () {
 				var __accu0__ = subcol;
@@ -188,8 +344,8 @@ export var draw_km = function (display_keymaps, kc, km, children, layout, level)
 		else {
 			km.show_expanded_items = true;
 		}
-		if (km.show_expanded_items) {
-			var kmi_level = (children ? __add__ (level, 3) : __add__ (level, 1));
+		if (__call__ (_truth, null, km.show_expanded_items)) {
+			var kmi_level = (__call__ (_truth, null, children) ? __add__ (level, 3) : __add__ (level, 1));
 			var __iterable0__ = km.keymap_items;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -213,7 +369,7 @@ export var draw_km = function (display_keymaps, kc, km, children, layout, level)
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (children) {
+		if (__call__ (_truth, null, children)) {
 			var __iterable0__ = children;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -249,7 +405,7 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 	var map_type = kmi.map_type;
 	var is_op_available = __call__ (_is_operator_available, null, kmi.idname);
 	var col = __call__ (_indented_layout, null, layout, level);
-	if (kmi.show_expanded) {
+	if (__call__ (_truth, null, kmi.show_expanded)) {
 		var col = (function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -281,18 +437,18 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 		var __accu0__ = row;
 		return __call__ (__accu0__.prop, __accu0__, kmi, 'active', __kwargtrans__ ({text: '', emboss: false}));
 	}) ();
-	if (km.is_modal) {
+	if (__call__ (_truth, null, km.is_modal)) {
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		row.alert = !(kmi.propvalue);
+		row.alert = !(__call__ (_truth, null, kmi.propvalue));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, kmi, 'propvalue', __kwargtrans__ ({text: ''}));
 		}) ();
 	}
-	else if (is_op_available) {
+	else if (__call__ (_truth, null, is_op_available)) {
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: kmi.py_name}));
@@ -367,7 +523,7 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 			return __call__ (__accu0__.label, __accu0__);
 		}) ();
 	}
-	if (!(kmi.is_user_defined) && kmi.is_user_modified) {
+	if (!(__call__ (_truth, null, kmi.is_user_defined)) && __call__ (_truth, null, kmi.is_user_modified)) {
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.operator, __accu0__, 'preferences.keyitem_restore', __kwargtrans__ ({text: '', icon: 'BACK'}));
@@ -376,14 +532,14 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 	else {
 		(function () {
 			var __accu0__ = row;
-			return __call__ (__accu0__.operator, __accu0__, 'preferences.keyitem_remove', __kwargtrans__ ({text: '', icon: (kmi.is_user_defined ? 'TRACKING_CLEAR_BACKWARDS' : 'X')}));
+			return __call__ (__accu0__.operator, __accu0__, 'preferences.keyitem_remove', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, kmi.is_user_defined) ? 'TRACKING_CLEAR_BACKWARDS' : 'X')}));
 		}) ().item_id = kmi.id;
 	}
 	(function () {
 		var __accu0__ = row;
-		return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({factor: (kmi.show_expanded ? 0.25 : 1.0)}));
+		return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({factor: (__call__ (_truth, null, kmi.show_expanded) ? 0.25 : 1.0)}));
 	}) ();
-	if (kmi.show_expanded) {
+	if (__call__ (_truth, null, kmi.show_expanded)) {
 		var _wm_capabilities = __call__ (_member, null, '_bpy', '_wm_capabilities');
 		var capabilities = __call__ (_wm_capabilities, null);
 		var box = (function () {
@@ -398,8 +554,8 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 			var __accu0__ = py_split;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (km.is_modal) {
-			sub.alert = !(kmi.propvalue);
+		if (__call__ (_truth, null, km.is_modal)) {
+			sub.alert = !(__call__ (_truth, null, kmi.propvalue));
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.prop, __accu0__, kmi, 'propvalue', __kwargtrans__ ({text: ''}));
@@ -410,7 +566,7 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			subrow.alert = !(is_op_available);
+			subrow.alert = !(__call__ (_truth, null, is_op_available));
 			(function () {
 				var __accu0__ = subrow;
 				return __call__ (__accu0__.prop, __accu0__, kmi, 'idname', __kwargtrans__ ({text: '', placeholder: 'Operator'}));
@@ -500,7 +656,7 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 				var __accu0__ = subrow;
 				return __call__ (__accu0__.prop, __accu0__, kmi, 'oskey_ui', __kwargtrans__ ({text: oskey_label, toggle: true}));
 			}) ();
-			if (__getitem__ (capabilities, 'KEYBOARD_HYPER_KEY') || __eq__ (kmi.hyper, 1)) {
+			if (__call__ (_truth, null, __getitem__ (capabilities, 'KEYBOARD_HYPER_KEY')) || __eq__ (kmi.hyper, 1)) {
 				(function () {
 					var __accu0__ = subrow;
 					return __call__ (__accu0__.prop, __accu0__, kmi, 'hyper_ui', __kwargtrans__ ({text: 'Hyper', toggle: true}));
@@ -515,12 +671,12 @@ export var draw_kmi = function (display_keymaps, kc, km, kmi, layout, level) {
 			var __accu0__ = box;
 			return __call__ (__accu0__.template_keymap_item_properties, __accu0__, kmi);
 		}) ();
-		if (!(km.is_modal)) {
+		if (!(__call__ (_truth, null, km.is_modal))) {
 			var kmm = (function () {
 				var __accu0__ = kc.keymaps;
 				return __call__ (__accu0__.find_modal, __accu0__, kmi.idname);
 			}) ();
-			if (kmm) {
+			if (__call__ (_truth, null, kmm)) {
 				__call__ (draw_km, null, display_keymaps, kc, kmm, null, layout, __add__ (level, 1));
 				(function () {
 					var __accu0__ = layout;
@@ -817,7 +973,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 			var prefix = __left0__ [0];
 			var sep = __left0__ [1];
 			var rest = __left0__ [2];
-			if (sep) {
+			if (__call__ (_truth, null, sep)) {
 				var val = (function () {
 					var __accu0__ = _VALUE_ALIASES;
 					return __call__ (__accu0__.py_get, __accu0__, prefix);
@@ -830,7 +986,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 						}) ();
 						return __call__ (__accu0__.add, __accu0__, val);
 					}) ();
-					if (rest) {
+					if (__call__ (_truth, null, rest)) {
 						(function () {
 							var __accu0__ = normalized_tokens;
 							return __call__ (__accu0__.append, __accu0__, rest);
@@ -884,7 +1040,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 					return __call__ (__accu0__.add, __accu0__, kmi_type);
 				}) ();
 			}
-			if (!(kmi_type_set) || __gt__ (__call__ (len, null, kmi_type), 1)) {
+			if (!(__call__ (_truth, null, kmi_type_set)) || __gt__ (__call__ (len, null, kmi_type), 1)) {
 				var __iterable0__ = tuple ([_EVENT_TYPE_MAP, _EVENT_TYPE_MAP_I18N, _EVENT_TYPE_MAP_EXTRA]);
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -926,7 +1082,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var kmi_type = __getitem__ (__iterable0__, __index0__);
 			var kmi_type_set = __call__ (kmi_type_set_from_string, null, kmi_type);
-			if (!(kmi_type_set)) {
+			if (!(__call__ (_truth, null, kmi_type_set))) {
 				return false;
 			}
 			(function () {
@@ -1017,7 +1173,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var kmi = __getitem__ (__iterable1__, __index1__);
-				if (__call__ (filter_func, null, kmi)) {
+				if (__call__ (_truth, null, __call__ (filter_func, null, kmi))) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, kmi);
@@ -1026,7 +1182,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 			}
 			return __accu0__;
 		}) ();
-		if (filtered_items) {
+		if (__call__ (_truth, null, filtered_items)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -1039,7 +1195,7 @@ export var draw_filtered = function (display_keymaps, filter_type, filter_text, 
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: km.py_name, icon: 'DOT', text_ctxt: i18n_contexts.id_windowmanager}));
 			}) ();
-			if (km.is_user_modified) {
+			if (__call__ (_truth, null, km.is_user_modified)) {
 				var subrow = (function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.row, __accu0__);
@@ -1114,7 +1270,7 @@ export var draw_keymaps = function (context, layout) {
 		var __accu0__ = bpy.path;
 		return __call__ (__accu0__.display_name, __accu0__, kc_active.py_name, __kwargtrans__ ({has_ext: false}));
 	}) ();
-	if (!(text)) {
+	if (!(__call__ (_truth, null, text))) {
 		var text = 'Blender (default)';
 	}
 	var py_split = (function () {
@@ -1175,7 +1331,7 @@ export var draw_keymaps = function (context, layout) {
 		var __accu0__ = spref.filter_text;
 		return __call__ (__accu0__.strip, __accu0__);
 	}) ();
-	if (filter_text) {
+	if (__call__ (_truth, null, filter_text)) {
 		var filter_text = (function () {
 			var __accu0__ = filter_text;
 			return __call__ (__accu0__.lower, __accu0__);
@@ -1198,7 +1354,7 @@ export var draw_keymaps = function (context, layout) {
 		var __accu0__ = rowsub;
 		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 	}) ();
-	if (!(ok)) {
+	if (!(__call__ (_truth, null, ok))) {
 		rowsubsub.alert = true;
 	}
 	var search_placeholder = '';
@@ -1212,7 +1368,7 @@ export var draw_keymaps = function (context, layout) {
 		var __accu0__ = rowsubsub;
 		return __call__ (__accu0__.prop, __accu0__, spref, 'filter_text', __kwargtrans__ ({text: '', icon: 'VIEWZOOM', placeholder: search_placeholder}));
 	}) ();
-	if (!(filter_text)) {
+	if (!(__call__ (_truth, null, filter_text))) {
 		var kc_prefs = kc_active.preferences;
 		if (kc_prefs !== null) {
 			var box = (function () {
@@ -1228,13 +1384,13 @@ export var draw_keymaps = function (context, layout) {
 			var show_ui_keyconfig = keymappref.show_ui_keyconfig;
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.prop, __accu0__, keymappref, 'show_ui_keyconfig', __kwargtrans__ ({text: '', icon: (show_ui_keyconfig ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT'), emboss: false}));
+				return __call__ (__accu0__.prop, __accu0__, keymappref, 'show_ui_keyconfig', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, show_ui_keyconfig) ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT'), emboss: false}));
 			}) ();
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Preferences'}));
 			}) ();
-			if (show_ui_keyconfig) {
+			if (__call__ (_truth, null, show_ui_keyconfig)) {
 				try {
 					(function () {
 						var __accu0__ = kc_prefs;
@@ -1265,6 +1421,14 @@ export {_globals, _import, _lazy, _member, _module, i18n_contexts, iface_, rpt_}
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case '_is_operator_available': _is_operator_available = value; break;
 		case '_indented_layout': _indented_layout = value; break;

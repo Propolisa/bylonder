@@ -109,6 +109,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -216,13 +232,13 @@ export var DATA_PT_context_camera =  __class__ ('DATA_PT_context_camera', [Camer
 		var ob = context.object;
 		var cam = context.camera;
 		var space = context.space_data;
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
 			}) ();
 		}
-		else if (cam) {
+		else if (__call__ (_truth, null, cam)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
@@ -554,7 +570,7 @@ export var DATA_PT_camera_stereoscopy =  __class__ ('DATA_PT_camera_stereoscopy'
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, st, 'interocular_distance');
 		}) ();
-		if (is_spherical_stereo) {
+		if (__call__ (_truth, null, is_spherical_stereo)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -590,7 +606,7 @@ export var DATA_PT_camera_stereoscopy =  __class__ ('DATA_PT_camera_stereoscopy'
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = !(use_spherical_stereo);
+		col.active = !(__call__ (_truth, null, use_spherical_stereo));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.separator, __accu0__);
@@ -735,7 +751,7 @@ export var DATA_PT_camera_dof =  __class__ ('DATA_PT_camera_dof', [CameraButtons
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, dof, 'focus_object', __kwargtrans__ ({text: 'Focus on Object'}));
 		}) ();
-		if (dof.focus_object && __eq__ (dof.focus_object.py_metatype, 'ARMATURE')) {
+		if (__call__ (_truth, null, dof.focus_object) && __eq__ (dof.focus_object.py_metatype, 'ARMATURE')) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop_search, __accu0__, dof, 'focus_subtarget', dof.focus_object.data, 'bones', __kwargtrans__ ({text: 'Focus on Bone'}));
@@ -888,19 +904,19 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, bg, 'show_expanded', __kwargtrans__ ({text: '', emboss: false}));
 			}) ();
-			if (__eq__ (bg.source, 'IMAGE') && bg.image) {
+			if (__eq__ (bg.source, 'IMAGE') && __call__ (_truth, null, bg.image)) {
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop, __accu0__, bg.image, 'name', __kwargtrans__ ({text: '', emboss: false}));
 				}) ();
 			}
-			else if (__eq__ (bg.source, 'MOVIE_CLIP') && bg.clip) {
+			else if (__eq__ (bg.source, 'MOVIE_CLIP') && __call__ (_truth, null, bg.clip)) {
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop, __accu0__, bg.clip, 'name', __kwargtrans__ ({text: '', emboss: false}));
 				}) ();
 			}
-			else if (bg.source && bg.use_camera_clip) {
+			else if (__call__ (_truth, null, bg.source) && __call__ (_truth, null, bg.use_camera_clip)) {
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Active Clip'}));
@@ -914,13 +930,13 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 			}
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.prop, __accu0__, bg, 'show_background_image', __kwargtrans__ ({text: '', emboss: false, icon: (bg.show_background_image ? 'RESTRICT_VIEW_OFF' : 'RESTRICT_VIEW_ON')}));
+				return __call__ (__accu0__.prop, __accu0__, bg, 'show_background_image', __kwargtrans__ ({text: '', emboss: false, icon: (__call__ (_truth, null, bg.show_background_image) ? 'RESTRICT_VIEW_OFF' : 'RESTRICT_VIEW_ON')}));
 			}) ();
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.operator, __accu0__, 'view3d.camera_background_image_remove', __kwargtrans__ ({text: '', emboss: false, icon: 'X'}));
 			}) ().index = i;
-			if (bg.show_expanded) {
+			if (__call__ (_truth, null, bg.show_expanded)) {
 				var row = (function () {
 					var __accu0__ = box;
 					return __call__ (__accu0__.row, __accu0__);
@@ -945,7 +961,7 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 							return __call__ (__accu0__.template_image, __accu0__, bg, 'image', bg.image_user, __kwargtrans__ ({compact: true}));
 						}) ();
 						var has_bg = true;
-						if (use_multiview) {
+						if (__call__ (_truth, null, use_multiview)) {
 							(function () {
 								var __accu0__ = box;
 								return __call__ (__accu0__.prop, __accu0__, bg.image, 'use_multiview');
@@ -987,18 +1003,18 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 						var __accu0__ = box;
 						return __call__ (__accu0__.column, __accu0__);
 					}) ();
-					column.active = !(bg.use_camera_clip);
+					column.active = !(__call__ (_truth, null, bg.use_camera_clip));
 					(function () {
 						var __accu0__ = column;
 						return __call__ (__accu0__.template_ID, __accu0__, bg, 'clip', __kwargtrans__ ({open: 'clip.open'}));
 					}) ();
-					if (bg.clip) {
+					if (__call__ (_truth, null, bg.clip)) {
 						(function () {
 							var __accu0__ = column;
 							return __call__ (__accu0__.template_movieclip, __accu0__, bg, 'clip', __kwargtrans__ ({compact: true}));
 						}) ();
 					}
-					if (bg.use_camera_clip || bg.clip) {
+					if (__call__ (_truth, null, bg.use_camera_clip) || __call__ (_truth, null, bg.clip)) {
 						var has_bg = true;
 					}
 					var column = (function () {
@@ -1015,7 +1031,7 @@ export var DATA_PT_camera_background_image =  __class__ ('DATA_PT_camera_backgro
 						return __call__ (__accu0__.prop, __accu0__, bg.clip_user, 'proxy_render_size');
 					}) ();
 				}
-				if (has_bg) {
+				if (__call__ (_truth, null, has_bg)) {
 					var col = (function () {
 						var __accu0__ = box;
 						return __call__ (__accu0__.column, __accu0__);
@@ -1439,6 +1455,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'CameraButtonsPanel': CameraButtonsPanel = value; break;

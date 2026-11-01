@@ -106,6 +106,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -191,26 +207,26 @@ export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_
 		}
 		var object_report_if_active_shape_key_is_locked = __call__ (_member, null, 'bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
 		var ob = context.object;
-		if (__call__ (object_report_if_active_shape_key_is_locked, null, ob, self)) {
+		if (__call__ (_truth, null, __call__ (object_report_if_active_shape_key_is_locked, null, ob, self))) {
 			return new set (['CANCELLED']);
 		}
 		var mesh = ob.data;
 		var select_mode = context.tool_settings.mesh_select_mode;
 		var totface = mesh.total_face_sel;
 		var totedge = mesh.total_edge_sel;
-		if (__getitem__ (select_mode, 2) && __eq__ (totface, 1)) {
+		if (__call__ (_truth, null, __getitem__ (select_mode, 2)) && __eq__ (totface, 1)) {
 			(function () {
 				var __accu0__ = bpy.ops.mesh;
 				return __call__ (__accu0__.extrude_region_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
 			}) ();
 		}
-		else if (__getitem__ (select_mode, 2) && __gt__ (totface, 1)) {
+		else if (__call__ (_truth, null, __getitem__ (select_mode, 2)) && __gt__ (totface, 1)) {
 			(function () {
 				var __accu0__ = bpy.ops.mesh;
 				return __call__ (__accu0__.extrude_faces_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_shrink_fatten: dict ({'release_confirm': false})}));
 			}) ();
 		}
-		else if (__getitem__ (select_mode, 1) && __ge__ (totedge, 1)) {
+		else if (__call__ (_truth, null, __getitem__ (select_mode, 1)) && __ge__ (totedge, 1)) {
 			(function () {
 				var __accu0__ = bpy.ops.mesh;
 				return __call__ (__accu0__.extrude_edges_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
@@ -286,20 +302,20 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 		}
 		var object_report_if_active_shape_key_is_locked = __call__ (_member, null, 'bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
 		var ob = context.object;
-		if (__call__ (object_report_if_active_shape_key_is_locked, null, ob, operator)) {
+		if (__call__ (_truth, null, __call__ (object_report_if_active_shape_key_is_locked, null, ob, operator))) {
 			return new set (['CANCELLED']);
 		}
 		var mesh = ob.data;
 		var totface = mesh.total_face_sel;
 		var totedge = mesh.total_edge_sel;
 		if (__ge__ (totface, 1)) {
-			if (use_vert_normals) {
+			if (__call__ (_truth, null, use_vert_normals)) {
 				(function () {
 					var __accu0__ = bpy.ops.mesh;
 					return __call__ (__accu0__.extrude_region_shrink_fatten, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_shrink_fatten: dict ({'release_confirm': false})}));
 				}) ();
 			}
-			else if (dissolve_and_intersect) {
+			else if (__call__ (_truth, null, dissolve_and_intersect)) {
 				(function () {
 					var __accu0__ = bpy.ops.mesh;
 					return __call__ (__accu0__.extrude_manifold, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({MESH_OT_extrude_region: dict ({'use_dissolve_ortho_edges': true}), TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
@@ -469,7 +485,7 @@ export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_
 		else {
 		}
 		var object_report_if_active_shape_key_is_locked = __call__ (_member, null, 'bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
-		if (__call__ (object_report_if_active_shape_key_is_locked, null, context.object, self)) {
+		if (__call__ (_truth, null, __call__ (object_report_if_active_shape_key_is_locked, null, context.object, self))) {
 			return new set (['CANCELLED']);
 		}
 		(function () {
@@ -557,7 +573,7 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 			}
 			return __accu0__;
 		}) ());
-		if (self.extend) {
+		if (__call__ (_truth, null, self.extend)) {
 			var __iterable0__ = attrs;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -593,10 +609,10 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = self.properties;
 			return __call__ (__accu0__.is_property_set, __accu0__, 'extend');
-		}) ())) {
+		}) ()))) {
 			self.extend = event.shift;
 		}
 		return (function () {
@@ -627,7 +643,7 @@ export var VIEW3D_FH_empty_image =  __class__ ('VIEW3D_FH_empty_image', [FileHan
 		}
 		else {
 		}
-		if (!(context.space_data) || __ne__ (context.space_data.py_metatype, 'VIEW_3D')) {
+		if (!(__call__ (_truth, null, context.space_data)) || __ne__ (context.space_data.py_metatype, 'VIEW_3D')) {
 			return false;
 		}
 		var rv3d = context.space_data.region_3d;
@@ -655,7 +671,7 @@ export var VIEW3D_FH_camera_background_image =  __class__ ('VIEW3D_FH_camera_bac
 		}
 		else {
 		}
-		if (!(context.space_data) || __ne__ (context.space_data.py_metatype, 'VIEW_3D')) {
+		if (!(__call__ (_truth, null, context.space_data)) || __ne__ (context.space_data.py_metatype, 'VIEW_3D')) {
 			return false;
 		}
 		var rv3d = context.space_data.region_3d;
@@ -698,6 +714,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'bl_file_extensions_image_and_movie': bl_file_extensions_image_and_movie = value; break;

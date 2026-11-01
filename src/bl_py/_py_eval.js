@@ -3,6 +3,162 @@ import * as __self__ from './_py_eval.js';
 (globalThis.__py_modules ??= {})['_py_eval'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = '_py_eval';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var _PUNCTUATION = ['**', '//', '==', '!=', '<=', '>=', '+=', '-=', '*=', '/=', '(', ')', '[', ']', ',', '.', ':', '+', '-', '*', '/', '%', '<', '>', '='];
 export var _KEYWORDS = dict ({'True': true, 'False': false, 'None': null});
 export var _tokens = function (source) {
@@ -27,18 +183,18 @@ export var _tokens = function (source) {
 		if (__in__ (c, ' \t\n')) {
 			var i = __call__ (__iadd__, null, i, 1);
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = c;
 			return __call__ (__accu0__.isdigit, __accu0__);
-		}) () || __eq__ (c, '.') && __lt__ (__add__ (i, 1), __call__ (len, null, source)) && (function () {
+		}) ()) || __eq__ (c, '.') && __lt__ (__add__ (i, 1), __call__ (len, null, source)) && __call__ (_truth, null, (function () {
 			var __accu0__ = __getitem__ (source, __add__ (i, 1));
 			return __call__ (__accu0__.isdigit, __accu0__);
-		}) ()) {
+		}) ())) {
 			var j = i;
-			while (__lt__ (j, __call__ (len, null, source)) && ((function () {
+			while (__lt__ (j, __call__ (len, null, source)) && (__call__ (_truth, null, (function () {
 				var __accu0__ = __getitem__ (source, j);
 				return __call__ (__accu0__.isdigit, __accu0__);
-			}) () || __in__ (__getitem__ (source, j), '.eE') || __in__ (__getitem__ (source, j), '+-') && __in__ (__getitem__ (source, __sub__ (j, 1)), 'eE'))) {
+			}) ()) || __in__ (__getitem__ (source, j), '.eE') || __in__ (__getitem__ (source, j), '+-') && __in__ (__getitem__ (source, __sub__ (j, 1)), 'eE'))) {
 				var j = __call__ (__iadd__, null, j, 1);
 			}
 			var text = __getslice__ (source, i, j, 1);
@@ -77,15 +233,15 @@ export var _tokens = function (source) {
 			}) ();
 			var i = __add__ (j, 1);
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = c;
 			return __call__ (__accu0__.isalpha, __accu0__);
-		}) () || __eq__ (c, '_')) {
+		}) ()) || __eq__ (c, '_')) {
 			var j = i;
-			while (__lt__ (j, __call__ (len, null, source)) && ((function () {
+			while (__lt__ (j, __call__ (len, null, source)) && (__call__ (_truth, null, (function () {
 				var __accu0__ = __getitem__ (source, j);
 				return __call__ (__accu0__.isalnum, __accu0__);
-			}) () || __eq__ (__getitem__ (source, j), '_'))) {
+			}) ()) || __eq__ (__getitem__ (source, j), '_'))) {
 				var j = __call__ (__iadd__, null, j, 1);
 			}
 			(function () {
@@ -238,10 +394,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var op = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.accept, __accu0__, op);
-			}) ()) {
+			}) ())) {
 				var value = __call__ (__getitem__ ((function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.expression, __accu0__);
@@ -278,10 +434,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 			return __call__ (__accu0__.peek, __accu0__);
 		}) (), 1), ',')) {
 			var py_items = [node];
-			while ((function () {
+			while (__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.accept, __accu0__, ',');
-			}) ()) {
+			}) ())) {
 				if (__eq__ (__getitem__ ((function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.peek, __accu0__);
@@ -345,10 +501,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 			var __accu0__ = self;
 			return __call__ (__accu0__.conjunction, __accu0__);
 		}) ();
-		while ((function () {
+		while (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.accept, __accu0__, 'or');
-		}) ()) {
+		}) ())) {
 			var __left0__ = tuple ([node, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.conjunction, __accu0__);
@@ -415,10 +571,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 			var __accu0__ = self;
 			return __call__ (__accu0__.negation, __accu0__);
 		}) ();
-		while ((function () {
+		while (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.accept, __accu0__, 'and');
-		}) ()) {
+		}) ())) {
 			var __left0__ = tuple ([node, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.negation, __accu0__);
@@ -481,10 +637,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.accept, __accu0__, 'not');
-		}) ()) {
+		}) ())) {
 			var operand = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.negation, __accu0__);
@@ -500,7 +656,7 @@ export var _Parser =  __class__ ('_Parser', [object], {
 				}
 				else {
 				}
-				return !(__call__ (__getitem__ (operand, 0), null));
+				return !(__call__ (_truth, null, __call__ (__getitem__ (operand, 0), null)));
 			}), null]);
 		}
 		return (function () {
@@ -759,10 +915,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.accept, __accu0__, '-');
-		}) ()) {
+		}) ())) {
 			var operand = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.unary, __accu0__);
@@ -901,10 +1057,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 		}
 		if (__eq__ (value, '[')) {
 			var py_items = [];
-			while (!((function () {
+			while (!(__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.accept, __accu0__, ']');
-			}) ())) {
+			}) ()))) {
 				(function () {
 					var __accu0__ = py_items;
 					return __call__ (__accu0__.append, __accu0__, (function () {
@@ -963,10 +1119,10 @@ export var _Parser =  __class__ ('_Parser', [object], {
 		else {
 		}
 		while (true) {
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.accept, __accu0__, '.');
-			}) ()) {
+			}) ())) {
 				var __left0__ = tuple ([node, __getitem__ ((function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.take, __accu0__);
@@ -1052,15 +1208,15 @@ export var _Parser =  __class__ ('_Parser', [object], {
 					});
 				}), null, owner, py_name)]);
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.accept, __accu0__, '[');
-			}) ()) {
+			}) ())) {
 				var owner = node;
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.accept, __accu0__, ':');
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.take, __accu0__, ']');
@@ -1191,17 +1347,17 @@ export var _Parser =  __class__ ('_Parser', [object], {
 					});
 				}), null, owner, key)]);
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.accept, __accu0__, '(');
-			}) ()) {
+			}) ())) {
 				var __left0__ = tuple ([node, []]);
 				var function_ = __left0__ [0];
 				var py_arguments = __left0__ [1];
-				while (!((function () {
+				while (!(__call__ (_truth, null, (function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.accept, __accu0__, ')');
-				}) ())) {
+				}) ()))) {
 					(function () {
 						var __accu0__ = py_arguments;
 						return __call__ (__accu0__.append, __accu0__, (function () {
@@ -1460,6 +1616,14 @@ export var _py_exec = function (source, local, module) {
 //# sourceMappingURL=_py_eval.map
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_PUNCTUATION': _PUNCTUATION = value; break;
 		case '_KEYWORDS': _KEYWORDS = value; break;
 		case '_tokens': _tokens = value; break;

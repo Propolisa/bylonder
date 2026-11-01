@@ -6,6 +6,162 @@ import {register_class} from './bpy.utils.js';
 import {contexts as i18n_contexts} from './_bpy.app.translations.js';
 import {Panel} from './_bpy.types.js';
 var __name__ = 'bl_ui.properties_constraint';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var ObjectConstraintPanel =  __class__ ('ObjectConstraintPanel', [object], {
 	__module__: __name__,
 	bl_context: 'constraint',
@@ -185,20 +341,20 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		}
 		else {
 		}
-		if (target || owner) {
-			if (separator) {
+		if (__call__ (_truth, null, target) || __call__ (_truth, null, owner)) {
+			if (__call__ (_truth, null, separator)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.separator, __accu0__);
 				}) ();
 			}
-			if (target) {
+			if (__call__ (_truth, null, target)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.prop, __accu0__, con, 'target_space', __kwargtrans__ ({text: 'Target'}));
 				}) ();
 			}
-			if (owner) {
+			if (__call__ (_truth, null, owner)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.prop, __accu0__, con, 'owner_space', __kwargtrans__ ({text: 'Owner'}));
@@ -214,7 +370,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 					return __call__ (__accu0__.prop, __accu0__, con, 'space_object');
 				}) ();
 				var space_object = con.space_object;
-				if (space_object) {
+				if (__call__ (_truth, null, space_object)) {
 					var _match_subject = space_object.py_metatype;
 					if (__eq__ (_match_subject, 'ARMATURE')) {
 						(function () {
@@ -259,13 +415,13 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, con, 'target');
 		}) ();
-		if (con.target && subtargets) {
+		if (__call__ (_truth, null, con.target) && __call__ (_truth, null, subtargets)) {
 			if (__eq__ (con.target.py_metatype, 'ARMATURE')) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop_search, __accu0__, con, 'subtarget', con.target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
 				}) ();
-				if (con.subtarget && __call__ (hasattr, null, con, 'head_tail')) {
+				if (__call__ (_truth, null, con.subtarget) && __call__ (hasattr, null, con, 'head_tail')) {
 					var row = (function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -523,7 +679,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = self;
 			return __call__ (__accu0__.target_template, __accu0__, layout, con);
 		}) ();
-		if (con.use_fixed_location) {
+		if (__call__ (_truth, null, con.use_fixed_location)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, con, 'offset_factor', __kwargtrans__ ({text: 'Offset Factor'}));
@@ -1470,7 +1626,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		target_row.active = !(con.use_eval_time);
+		target_row.active = !(__call__ (_truth, null, con.use_eval_time));
 		(function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.target_template, __accu0__, target_row, con);
@@ -1910,7 +2066,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 					return __call__ (__accu0__.prop, __accu0__, con, 'space_object');
 				}) ();
 				var space_object = con.space_object;
-				if (space_object) {
+				if (__call__ (_truth, null, space_object)) {
 					var _match_subject = space_object.py_metatype;
 					if (__eq__ (_match_subject, 'ARMATURE')) {
 						(function () {
@@ -2093,7 +2249,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = self;
 			return __call__ (__accu0__.target_template, __accu0__, layout, con);
 		}) ();
-		if (con.target) {
+		if (__call__ (_truth, null, con.target)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, con, 'offset', __kwargtrans__ ({text: 'Pivot Offset'}));
@@ -2104,7 +2260,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, con, 'use_relative_location');
 			}) ();
-			if (con.use_relative_location) {
+			if (__call__ (_truth, null, con.use_relative_location)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.prop, __accu0__, con, 'offset', __kwargtrans__ ({text: 'Pivot Point'}));
@@ -2153,7 +2309,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
 		var clip = null;
-		if (con.use_active_clip) {
+		if (__call__ (_truth, null, con.use_active_clip)) {
 			var clip = context.scene.active_clip;
 		}
 		else {
@@ -2171,12 +2327,12 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.active = !(con.use_3d_position);
+		row.active = !(__call__ (_truth, null, con.use_3d_position));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, con, 'use_undistorted_position');
 		}) ();
-		if (!(con.use_active_clip)) {
+		if (!(__call__ (_truth, null, con.use_active_clip))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, con, 'clip');
@@ -2186,7 +2342,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, con, 'frame_method');
 		}) ();
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			var tracking = clip.tracking;
 			(function () {
 				var __accu0__ = layout;
@@ -2209,7 +2365,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.active = !(con.use_3d_position);
+		row.active = !(__call__ (_truth, null, con.use_3d_position));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, con, 'depth_object');
@@ -2249,7 +2405,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, con, 'use_active_clip');
 		}) ();
-		if (!(con.use_active_clip)) {
+		if (!(__call__ (_truth, null, con.use_active_clip))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, con, 'clip');
@@ -2287,7 +2443,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
 		var clip = null;
-		if (con.use_active_clip) {
+		if (__call__ (_truth, null, con.use_active_clip)) {
 			var clip = context.scene.active_clip;
 		}
 		else {
@@ -2297,13 +2453,13 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, con, 'use_active_clip');
 		}) ();
-		if (!(con.use_active_clip)) {
+		if (!(__call__ (_truth, null, con.use_active_clip))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, con, 'clip');
 			}) ();
 		}
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop_search, __accu0__, con, 'object', clip.tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA'}));
@@ -2406,7 +2562,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, con, 'use_bone_envelopes');
 		}) ();
-		if (context.pose_bone) {
+		if (__call__ (_truth, null, context.pose_bone)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, con, 'use_current_location');
@@ -2424,7 +2580,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			var __accu0__ = self;
 			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
 		}) ();
-		if (!(con.targets)) {
+		if (!(__call__ (_truth, null, con.targets))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No target bones added', icon: 'ERROR'}));
@@ -2470,7 +2626,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, con, 'pole_target');
 			}) ();
-			if (con.pole_target && __eq__ (con.pole_target.py_metatype, 'ARMATURE')) {
+			if (__call__ (_truth, null, con.pole_target) && __eq__ (con.pole_target.py_metatype, 'ARMATURE')) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop_search, __accu0__, con, 'pole_subtarget', con.pole_target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
@@ -2480,7 +2636,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
 			}) ();
-			if (con.pole_target) {
+			if (__call__ (_truth, null, con.pole_target)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, con, 'pole_angle');
@@ -2618,7 +2774,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, con, 'pole_target');
 			}) ();
-			if (con.pole_target && __eq__ (con.pole_target.py_metatype, 'ARMATURE')) {
+			if (__call__ (_truth, null, con.pole_target) && __eq__ (con.pole_target.py_metatype, 'ARMATURE')) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop_search, __accu0__, con, 'pole_subtarget', con.pole_target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
@@ -2628,7 +2784,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
 			}) ();
-			if (con.pole_target) {
+			if (__call__ (_truth, null, con.pole_target)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, con, 'pole_angle');
@@ -3014,7 +3170,7 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
 			row.active = has_target;
-			if (has_target) {
+			if (__call__ (_truth, null, has_target)) {
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop_search, __accu0__, tgt, 'subtarget', tgt.target.data, 'bones', __kwargtrans__ ({text: ''}));
@@ -3200,7 +3356,7 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = !(con.use_eval_time);
+		col.active = !(__call__ (_truth, null, con.use_eval_time));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, con, 'transform_channel', __kwargtrans__ ({text: 'Channel'}));
@@ -3252,7 +3408,7 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, con, 'action');
 		}) ();
-		if (con.action) {
+		if (__call__ (_truth, null, con.action)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.context_pointer_set, __accu0__, 'animated_id', con.id_data);
@@ -5144,6 +5300,14 @@ export {Panel, i18n_contexts, register_class};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'ObjectConstraintPanel': ObjectConstraintPanel = value; break;
 		case 'BoneConstraintPanel': BoneConstraintPanel = value; break;
 		case 'OBJECT_PT_constraints': OBJECT_PT_constraints = value; break;

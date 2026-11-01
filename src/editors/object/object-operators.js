@@ -12,8 +12,8 @@ import { OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
 const ENUMS = {};
 // Blender's Object Mode operators, run by Blender's code in the module (tests/objects-wasm.test.js) where Bylonder has no
 // action of its own for them, with its physics: particle systems and their settings, point caches, rigid bodies,
-// boids and dynamic paint.
-const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh|particle|ptcache|rigidbody|boid|dpaint)\./.test(idname));
+// boids and dynamic paint; and Ctrl Tab's mode toggle (an armature's Pose Mode).
+const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh|particle|ptcache|rigidbody|boid|dpaint)\.|^view3d\.object_mode_pie_or_toggle$/.test(idname));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
 //   host: commit() an undo step, wm() the window manager, pointer() its last pointer event, view() the 3D View under it.

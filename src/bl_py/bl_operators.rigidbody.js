@@ -106,6 +106,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -221,7 +237,7 @@ export var CopyRigidbodySettings =  __class__ ('CopyRigidbodySettings', [Operato
 			}) ();
 		}
 		var objects = context.selected_objects;
-		if (objects) {
+		if (__call__ (_truth, null, objects)) {
 			var rb_from = obj_act.rigid_body;
 			var __iterable0__ = objects;
 			__iterable0__ = __i__ (__iterable0__);
@@ -291,7 +307,7 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var obj = __getitem__ (__iterable0__, __index0__);
-			if (!(obj.rigid_body) || __ne__ (obj.rigid_body.py_metatype, 'ACTIVE')) {
+			if (!(__call__ (_truth, null, obj.rigid_body)) || __ne__ (obj.rigid_body.py_metatype, 'ACTIVE')) {
 				(function () {
 					var __accu0__ = obj;
 					return __call__ (__accu0__.select_set, __accu0__, false);
@@ -299,7 +315,7 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 			}
 		}
 		var objects = context.selected_objects;
-		if (objects) {
+		if (__call__ (_truth, null, objects)) {
 			var __iterable0__ = frames_full;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -344,7 +360,7 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 					var j = __left0__ [0];
 					var obj = __left0__ [1];
 					var mat = __getitem__ (__getitem__ (bake, i), j);
-					if (obj.parent) {
+					if (__call__ (_truth, null, obj.parent)) {
 						var mat = __matmul__ (__matmul__ ((function () {
 							var __accu0__ = obj.matrix_parent_inverse;
 							return __call__ (__accu0__.inverted, __accu0__);
@@ -408,7 +424,7 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 					var __accu0__ = anim_utils;
 					return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, obj.animation_data.action, obj.animation_data.action_slot);
 				}) ();
-				if (!(channelbag)) {
+				if (!(__call__ (_truth, null, channelbag))) {
 					continue;
 				}
 				var __iterable1__ = channelbag.fcurves;
@@ -587,7 +603,7 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 				}
 			}
 			var last_obj = obj_act;
-			while (objects_tmp) {
+			while (__call__ (_truth, null, objects_tmp)) {
 				(function () {
 					var __accu0__ = objects_tmp;
 					return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (o) {
@@ -636,7 +652,7 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 				var change = true;
 			}
 		}
-		if (change) {
+		if (__call__ (_truth, null, change)) {
 			(function () {
 				var __accu0__ = bpy.ops.object;
 				return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
@@ -687,6 +703,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'CopyRigidbodySettings': CopyRigidbodySettings = value; break;

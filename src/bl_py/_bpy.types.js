@@ -103,6 +103,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -2990,7 +3006,7 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 				var div = div_test;
 			}
 		}
-		if (div) {
+		if (__call__ (_truth, null, div)) {
 			var attr = __getslice__ (path, null, sep, 1);
 			if (__eq__ (div, '.')) {
 				var sep = __call__ (__iadd__, null, sep, 1);
@@ -3013,10 +3029,10 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 		if (value === null) {
 			return value;
 		}
-		if (__call__ (isinstance, null, value, list) && (function () {
+		if (__call__ (isinstance, null, value, list) && __call__ (_truth, null, (function () {
 			var __accu0__ = path_rest;
 			return __call__ (__accu0__.startswith, __accu0__, '[');
-		}) ()) {
+		}) ())) {
 			var __left0__ = (function () {
 				var __accu0__ = __getslice__ (path_rest, 1, null, 1);
 				return __call__ (__accu0__.partition, __accu0__, ']');
@@ -3024,7 +3040,7 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 			var index_str = __left0__ [0];
 			var div = __left0__ [1];
 			var index_tail = __left0__ [2];
-			if (!(div)) {
+			if (!(__call__ (_truth, null, div))) {
 				var __except0__ = __call__ (ValueError, null, (function () {
 					var __accu0__ = 'Path index is not terminated: {:s}{:s}';
 					return __call__ (__accu0__.format, __accu0__, attr, path_rest);
@@ -3061,7 +3077,7 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 				throw __except0__;
 			}
 		}
-		if (path_rest) {
+		if (__call__ (_truth, null, path_rest)) {
 			var path_resolve_fn = __call__ (getattr, null, value, 'path_resolve', null);
 			if (path_resolve_fn === null) {
 				var __except0__ = __call__ (ValueError, null, (function () {
@@ -3100,10 +3116,10 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var attr = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = attr;
 				return __call__ (__accu0__.startswith, __accu0__, '_');
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			if (__in__ (attr, generic_attrs)) {
@@ -3632,7 +3648,7 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 			var __accu0__ = self;
 			return __call__ (__accu0__.piemenu_begin__internal, __accu0__, title, __kwargtrans__ ({icon: icon, event: event}));
 		}) ();
-		if (pie) {
+		if (__call__ (_truth, null, pie)) {
 			try {
 				__call__ (draw_func, null, pie, bpy.context);
 			}
@@ -3755,7 +3771,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		var py_name = parent_test.py_name;
 		var parent = self.parent;
 		var i = 1;
-		while (parent) {
+		while (__call__ (_truth, null, parent)) {
 			if (__eq__ (parent.py_name, py_name)) {
 				return i;
 			}
@@ -3859,8 +3875,8 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 		}
 		var parent_list = [];
 		var parent = self.parent;
-		while (parent) {
-			if (parent) {
+		while (__call__ (_truth, null, parent)) {
+			if (__call__ (_truth, null, parent)) {
 				(function () {
 					var __accu0__ = parent_list;
 					return __call__ (__accu0__.append, __accu0__, parent);
@@ -3925,7 +3941,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 				var __accu0__ = bone;
 				return __call__ (__accu0__.parent_index, __accu0__, self);
 			}) ();
-			if (index) {
+			if (__call__ (_truth, null, index)) {
 				(function () {
 					var __accu0__ = bones_children;
 					return __call__ (__accu0__.append, __accu0__, tuple ([index, bone]));
@@ -4006,7 +4022,7 @@ export var _GenericBone =  __class__ ('_GenericBone', [object], {
 				}) ();
 			}
 			else {
-				if (children_basename) {
+				if (__call__ (_truth, null, children_basename)) {
 					__call__ (print, null, 'multiple basenames found, this is probably not what you want!', self.py_name, children_basename);
 				}
 				break;
@@ -4176,12 +4192,12 @@ export var EditBone =  __class__ ('EditBone', [_StructRNA, _GenericBone], {
 		}) (), __call__ (Vector, null, tuple ([0.0, 0.0, 1.0])));
 		self.tail = __matmul__ (matrix, self.tail);
 		self.head = __matmul__ (matrix, self.head);
-		if (scale) {
+		if (__call__ (_truth, null, scale)) {
 			var scalar = matrix.median_scale;
 			self.head_radius = __call__ (__imul__, null, self.head_radius, scalar);
 			self.tail_radius = __call__ (__imul__, null, self.tail_radius, scalar);
 		}
-		if (roll) {
+		if (__call__ (_truth, null, roll)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.align_roll, __accu0__, __matmul__ (matrix, z_vec));
@@ -4209,7 +4225,7 @@ export var BoneCollection =  __class__ ('BoneCollection', [_StructRNA], {
 		}
 		var bones = __call__ (set, null);
 		var collections = [self];
-		while (collections) {
+		while (__call__ (_truth, null, collections)) {
 			var visit = (function () {
 				var __accu0__ = collections;
 				return __call__ (__accu0__.py_pop, __accu0__);
@@ -4430,13 +4446,13 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 			var __accu0__ = self.polygons;
 			return __call__ (__accu0__.foreach_set, __accu0__, 'vertices', vertex_indices);
 		}) ();
-		if (shade_flat) {
+		if (__call__ (_truth, null, shade_flat)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.shade_flat, __accu0__);
 			}) ();
 		}
-		if (edges_len || faces_len) {
+		if (__call__ (_truth, null, edges_len) || __call__ (_truth, null, faces_len)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({calc_edges: __call__ (bool, null, faces_len), calc_edges_loose: __call__ (bool, null, edges_len)}));
@@ -4972,7 +4988,7 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 			var use_blend = false;
 		}
 		else {
-			if (self.is_highlight) {
+			if (__call__ (_truth, null, self.is_highlight)) {
 				var color = __call__ (_joined, null, self.color_highlight, [self.alpha_highlight]);
 			}
 			else {
@@ -4984,7 +5000,7 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 			}) ();
 			var use_blend = __lt__ (__getitem__ (color, 3), 1.0);
 		}
-		if (use_blend) {
+		if (__call__ (_truth, null, use_blend)) {
 			(function () {
 				var __accu0__ = gpu.state;
 				return __call__ (__accu0__.blend_set, __accu0__, 'ALPHA');
@@ -5011,7 +5027,7 @@ export var Gizmo =  __class__ ('Gizmo', [_StructRNA], {
 				throw __except0__;
 			}
 		}
-		if (use_blend) {
+		if (__call__ (_truth, null, use_blend)) {
 			(function () {
 				var __accu0__ = gpu.state;
 				return __call__ (__accu0__.blend_set, __accu0__, 'NONE');
@@ -5277,7 +5293,7 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 				}
 				var operator_context_default = self.layout.operator_context;
 				var workspace = context.workspace;
-				if (workspace.use_filter_by_owner) {
+				if (__call__ (_truth, null, workspace.use_filter_by_owner)) {
 					var owner_names = (function () {
 						var __accu0__ = [];
 						var __iterable0__ = workspace.owner_ids;
@@ -5299,7 +5315,7 @@ export var _GenericUI =  __class__ ('_GenericUI', [object], {
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var func = __getitem__ (__iterable0__, __index0__);
-					if (!(__call__ (getattr, null, self, 'bl_owner_use_filter', true))) {
+					if (!(__call__ (_truth, null, __call__ (getattr, null, self, 'bl_owner_use_filter', true)))) {
 						// pass;
 					}
 					else if (owner_names !== null) {
@@ -5521,14 +5537,14 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 		var bpy = __call__ (_module, null, 'bpy');
 		var iface_ = __call__ (_member, null, '_bpy.app.translations', 'pgettext_iface');
 		var layout = self.layout;
-		if (!(searchpaths)) {
+		if (!(__call__ (_truth, null, searchpaths))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '* Missing Paths *'}));
 			}) ();
 		}
 		var subdir = __call__ (getattr, null, bpy.context, 'path_menu_directory', null);
-		if (subdir) {
+		if (__call__ (_truth, null, subdir)) {
 			var searchpaths = [subdir];
 		}
 		var files = [];
@@ -5544,29 +5560,29 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var entry = __getitem__ (__iterable1__, __index1__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = entry.py_name;
 					return __call__ (__accu0__.startswith, __accu0__, '.');
-				}) ()) {
+				}) ())) {
 					continue;
 				}
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = entry;
 					return __call__ (__accu0__.is_dir, __accu0__);
-				}) () && recursive_paths) {
+				}) ()) && __call__ (_truth, null, recursive_paths)) {
 					(function () {
 						var __accu0__ = subdirs;
 						return __call__ (__accu0__.append, __accu0__, tuple ([entry.py_name, entry.path]));
 					}) ();
 					continue;
 				}
-				if (filter_ext !== null && !(__call__ (filter_ext, null, __getitem__ ((function () {
+				if (filter_ext !== null && !(__call__ (_truth, null, __call__ (filter_ext, null, __getitem__ ((function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.splitext, __accu0__, entry.py_name);
-				}) (), 1)))) {
+				}) (), 1))))) {
 					continue;
 				}
-				if (filter_path !== null && !(__call__ (filter_path, null, entry.py_name))) {
+				if (filter_path !== null && !(__call__ (_truth, null, __call__ (filter_path, null, entry.py_name)))) {
 					continue;
 				}
 				(function () {
@@ -5603,10 +5619,10 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 					var t = __getitem__ (__iterable0__, __index0__);
 					(function () {
 						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, ((function () {
+						return __call__ (__accu1__.append, __accu1__, (__call__ (_truth, null, (function () {
 							var __accu2__ = t;
 							return __call__ (__accu2__.isdigit, __accu2__);
-						}) () ? __call__ (int, null, t) : t));
+						}) ()) ? __call__ (int, null, t) : t));
 					}) ();
 				}
 				return __accu0__;
@@ -5616,7 +5632,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 			var __accu0__ = files;
 			return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: natural_sort_key}));
 		}) ();
-		if (subdirs) {
+		if (__call__ (_truth, null, subdirs)) {
 			(function () {
 				var __accu0__ = subdirs;
 				return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: natural_sort_key}));
@@ -5639,7 +5655,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 					}) ()}));
 				}) ();
 			}
-			if (files) {
+			if (__call__ (_truth, null, files)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -5666,7 +5682,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 			}) () : __call__ (display_name, null, filepath));
 			var props = (function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.operator, __accu0__, operator, __kwargtrans__ ({text: (translate ? __call__ (iface_, null, py_name) : py_name), translate: false}));
+				return __call__ (__accu0__.operator, __accu0__, operator, __kwargtrans__ ({text: (__call__ (_truth, null, translate) ? __call__ (iface_, null, py_name) : py_name), translate: false}));
 			}) ();
 			if (props_default !== null) {
 				var __iterable1__ = (function () {
@@ -5685,7 +5701,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 			if (__eq__ (operator, 'script.execute_preset')) {
 				props.menu_idname = self.bl_idname;
 			}
-			if (add_operator) {
+			if (__call__ (_truth, null, add_operator)) {
 				var props = (function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.operator, __accu0__, add_operator, __kwargtrans__ ({text: '', icon: 'REMOVE'}));
@@ -5707,7 +5723,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 				}
 			}
 		}
-		if (add_operator) {
+		if (__call__ (_truth, null, add_operator)) {
 			var wm = __getitem__ (bpy.data.window_managers, 0);
 			(function () {
 				var __accu0__ = layout;
@@ -5827,7 +5843,7 @@ export var Menu =  __class__ ('Menu', [_StructRNA, _GenericUI], {
 		}
 		else {
 		}
-		if (context.area.show_menus) {
+		if (__call__ (_truth, null, context.area.show_menus)) {
 			(function () {
 				var __accu0__ = (function () {
 					var __accu1__ = layout;
@@ -5914,7 +5930,7 @@ export var NodeSocket =  __class__ ('NodeSocket', [_StructRNA], {
 			}
 			return __accu0__;
 		}) ();
-		if (!(self.is_output)) {
+		if (!(__call__ (_truth, null, self.is_output))) {
 			var links = __call__ (sorted, null, links, __kwargtrans__ ({key: (function __lambda__ (link) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -6074,7 +6090,7 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		else {
 		}
 		if (__call__ (hasattr, null, self, 'engine_ptr')) {
-			if (self.engine_ptr) {
+			if (__call__ (_truth, null, self.engine_ptr)) {
 				var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
 				(function () {
 					var __accu0__ = _bpy_hydra;
@@ -6117,14 +6133,14 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		else {
 		}
 		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
-		var engine_type = (self.is_preview ? 'PREVIEW' : 'FINAL');
-		if (!(self.engine_ptr)) {
+		var engine_type = (__call__ (_truth, null, self.is_preview) ? 'PREVIEW' : 'FINAL');
+		if (!(__call__ (_truth, null, self.engine_ptr))) {
 			self.engine_ptr = (function () {
 				var __accu0__ = _bpy_hydra;
 				return __call__ (__accu0__.engine_create, __accu0__, self, engine_type, self.bl_delegate_id);
 			}) ();
 		}
-		if (!(self.engine_ptr)) {
+		if (!(__call__ (_truth, null, self.engine_ptr))) {
 			return ;
 		}
 		(function () {
@@ -6134,7 +6150,7 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		var __iterable0__ = (function () {
 			var __accu0__ = (function () {
 				var __accu1__ = self;
-				return __call__ (__accu1__.get_render_settings, __accu1__, (self.is_preview ? 'PREVIEW' : 'FINAL'));
+				return __call__ (__accu1__.get_render_settings, __accu1__, (__call__ (_truth, null, self.is_preview) ? 'PREVIEW' : 'FINAL'));
 			}) ();
 			return __call__ (__accu0__.py_items, __accu0__);
 		}) ();
@@ -6164,7 +6180,7 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		}
 		else {
 		}
-		if (!(self.engine_ptr)) {
+		if (!(__call__ (_truth, null, self.engine_ptr))) {
 			return ;
 		}
 		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
@@ -6190,13 +6206,13 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		else {
 		}
 		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
-		if (!(self.engine_ptr)) {
+		if (!(__call__ (_truth, null, self.engine_ptr))) {
 			self.engine_ptr = (function () {
 				var __accu0__ = _bpy_hydra;
 				return __call__ (__accu0__.engine_create, __accu0__, self, 'VIEWPORT', self.bl_delegate_id);
 			}) ();
 		}
-		if (!(self.engine_ptr)) {
+		if (!(__call__ (_truth, null, self.engine_ptr))) {
 			return ;
 		}
 		(function () {
@@ -6237,7 +6253,7 @@ export var HydraRenderEngine =  __class__ ('HydraRenderEngine', [RenderEngine], 
 		}
 		else {
 		}
-		if (!(self.engine_ptr)) {
+		if (!(__call__ (_truth, null, self.engine_ptr))) {
 			return ;
 		}
 		var _bpy_hydra = __call__ (_module, null, '_bpy_hydra');
@@ -10257,6 +10273,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'bpy_struct': bpy_struct = value; break;

@@ -102,6 +102,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -180,7 +196,7 @@ export var _set_check = function (func) {
 		else {
 			var args = tuple ();
 		}
-		if (self.is_readonly) {
+		if (__call__ (_truth, null, self.is_readonly)) {
 			return ;
 		}
 		return __call__ (func, null, self, ...args, __kwargtrans__ (__call__ (_merged, null, kwargs)));
@@ -332,7 +348,7 @@ export var _ShaderWrapper_node_texcoords_get = function (self) {
 			self._node_texcoords = null;
 		}
 	}
-	if (self._node_texcoords === null && !(self.is_readonly)) {
+	if (self._node_texcoords === null && !(__call__ (_truth, null, self.is_readonly))) {
 		var tree = self.material.node_tree;
 		var nodes = tree.nodes;
 		var node_texcoords = (function () {
@@ -482,7 +498,7 @@ export var _PrincipledBSDFWrapper_node_normalmap_get = function (self) {
 	}
 	var node_principled = self.node_principled_bsdf;
 	if (self._node_normalmap === _ellipsis) {
-		if (__getitem__ (node_principled.inputs, 'Normal').is_linked) {
+		if (__call__ (_truth, null, __getitem__ (node_principled.inputs, 'Normal').is_linked)) {
 			var node_normalmap = __getitem__ (__getitem__ (node_principled.inputs, 'Normal').links, 0).from_node;
 			if (__eq__ (node_normalmap.bl_idname, 'ShaderNodeNormalMap')) {
 				self._node_normalmap = node_normalmap;
@@ -496,7 +512,7 @@ export var _PrincipledBSDFWrapper_node_normalmap_get = function (self) {
 			self._node_normalmap = null;
 		}
 	}
-	if (self._node_normalmap === null && !(self.is_readonly)) {
+	if (self._node_normalmap === null && !(__call__ (_truth, null, self.is_readonly))) {
 		var tree = self.material.node_tree;
 		var nodes = tree.nodes;
 		var links = tree.links;
@@ -1212,11 +1228,11 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var n = __getitem__ (__iterable0__, __index0__);
-			if (__eq__ (n.bl_idname, 'ShaderNodeOutputMaterial') && __getitem__ (n.inputs, 0).is_linked) {
+			if (__eq__ (n.bl_idname, 'ShaderNodeOutputMaterial') && __call__ (_truth, null, __getitem__ (n.inputs, 0).is_linked)) {
 				var node_out = n;
 				var node_principled = __getitem__ (__getitem__ (n.inputs, 0).links, 0).from_node;
 			}
-			else if (__eq__ (n.bl_idname, 'ShaderNodeBsdfPrincipled') && __getitem__ (n.outputs, 0).is_linked) {
+			else if (__eq__ (n.bl_idname, 'ShaderNodeBsdfPrincipled') && __call__ (_truth, null, __getitem__ (n.outputs, 0).is_linked)) {
 				var node_principled = n;
 				var __iterable1__ = __getitem__ (n.outputs, 0).links;
 				__iterable1__ = __i__ (__iterable1__);
@@ -1241,7 +1257,7 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 				return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: node_out}));
 			}) ();
 		}
-		else if (!(self.is_readonly)) {
+		else if (!(__call__ (_truth, null, self.is_readonly))) {
 			var node_out = (function () {
 				var __accu0__ = nodes;
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeOutputMaterial'}));
@@ -1260,7 +1276,7 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 				return __call__ (__accu0__._grid_to_location, __accu0__, 0, 0, __kwargtrans__ ({ref_node: node_principled}));
 			}) ();
 		}
-		else if (!(self.is_readonly)) {
+		else if (!(__call__ (_truth, null, self.is_readonly))) {
 			var node_principled = (function () {
 				var __accu0__ = nodes;
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_metatype: 'ShaderNodeBsdfPrincipled'}));
@@ -1353,7 +1369,7 @@ export var _ShaderImageTextureWrapper_node_image_get = function (self) {
 	else {
 	}
 	if (self._node_image === _ellipsis) {
-		if (self.socket_dst.is_linked) {
+		if (__call__ (_truth, null, self.socket_dst.is_linked)) {
 			var node_image = __getitem__ (self.socket_dst.links, 0).from_node;
 			if (__eq__ (node_image.bl_idname, 'ShaderNodeTexImage')) {
 				self._node_image = node_image;
@@ -1367,7 +1383,7 @@ export var _ShaderImageTextureWrapper_node_image_get = function (self) {
 			self._node_image = null;
 		}
 	}
-	if (self._node_image === null && !(self.is_readonly)) {
+	if (self._node_image === null && !(__call__ (_truth, null, self.is_readonly))) {
 		var tree = self.owner_shader.material.node_tree;
 		var node_image = (function () {
 			var __accu0__ = tree.nodes;
@@ -1379,9 +1395,9 @@ export var _ShaderImageTextureWrapper_node_image_get = function (self) {
 		}) ();
 		(function () {
 			var __accu0__ = tree.links;
-			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (node_image.outputs, (self.use_alpha ? 'Alpha' : 'Color')), self.socket_dst);
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (node_image.outputs, (__call__ (_truth, null, self.use_alpha) ? 'Alpha' : 'Color')), self.socket_dst);
 		}) ();
-		if (self.use_alpha) {
+		if (__call__ (_truth, null, self.use_alpha)) {
 			self.owner_shader.material.surface_render_method = 'DITHERED';
 			self.owner_shader.material.use_transparency_overlap = false;
 		}
@@ -1438,7 +1454,7 @@ export var _ShaderImageTextureWrapper_image_set = __call__ (_set_check, null, fu
 		}
 		image.colorspace_settings.py_name = self.colorspace_name;
 	}
-	if (self.use_alpha) {
+	if (__call__ (_truth, null, self.use_alpha)) {
 		var tree = self.owner_shader.material.node_tree;
 		if (__lt__ (image.channels, 4) || __in__ (image.depth, new set ([24, 8]))) {
 			(function () {
@@ -1503,11 +1519,11 @@ export var _ShaderImageTextureWrapper_texcoords_get = function (self) {
 	else {
 	}
 	if (self.node_image !== null) {
-		var socket = __getitem__ (((function () {
+		var socket = __getitem__ ((__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.has_mapping_node, __accu0__);
-		}) () ? self.node_mapping : self.node_image).inputs, 'Vector');
-		if (socket.is_linked) {
+		}) ()) ? self.node_mapping : self.node_image).inputs, 'Vector');
+		if (__call__ (_truth, null, socket.is_linked)) {
 			return __getitem__ (socket.links, 0).from_socket.py_name;
 		}
 	}
@@ -1528,18 +1544,18 @@ export var _ShaderImageTextureWrapper_texcoords_set = __call__ (_set_check, null
 	}
 	else {
 	}
-	if (__eq__ (texcoords, 'UV') && !((function () {
+	if (__eq__ (texcoords, 'UV') && !(__call__ (_truth, null, (function () {
 		var __accu0__ = self;
 		return __call__ (__accu0__.has_mapping_node, __accu0__);
-	}) ())) {
+	}) ()))) {
 		return ;
 	}
 	var tree = self.node_image.id_data;
 	var links = tree.links;
-	var node_dst = ((function () {
+	var node_dst = (__call__ (_truth, null, (function () {
 		var __accu0__ = self;
 		return __call__ (__accu0__.has_mapping_node, __accu0__);
-	}) () ? self.node_mapping : self.node_image);
+	}) ()) ? self.node_mapping : self.node_image);
 	var socket_src = __getitem__ (self.owner_shader.node_texcoords.outputs, texcoords);
 	(function () {
 		var __accu0__ = links;
@@ -1597,7 +1613,7 @@ export var _ShaderImageTextureWrapper_node_mapping_get = function (self) {
 		if (self.node_image === null) {
 			return null;
 		}
-		if (__getitem__ (self.node_image.inputs, 'Vector').is_linked) {
+		if (__call__ (_truth, null, __getitem__ (self.node_image.inputs, 'Vector').is_linked)) {
 			var node_mapping = __getitem__ (__getitem__ (self.node_image.inputs, 'Vector').links, 0).from_node;
 			if (__eq__ (node_mapping.bl_idname, 'ShaderNodeMapping')) {
 				self._node_mapping = node_mapping;
@@ -1611,9 +1627,9 @@ export var _ShaderImageTextureWrapper_node_mapping_get = function (self) {
 			self._node_mapping = null;
 		}
 	}
-	if (self._node_mapping === null && !(self.is_readonly)) {
+	if (self._node_mapping === null && !(__call__ (_truth, null, self.is_readonly))) {
 		var socket_dst = __getitem__ (self.node_image.inputs, 'Vector');
-		var socket_src = (socket_dst.is_linked ? __getitem__ (socket_dst.links, 0).from_socket : __getitem__ (self.owner_shader.node_texcoords.outputs, 'UV'));
+		var socket_src = (__call__ (_truth, null, socket_dst.is_linked) ? __getitem__ (socket_dst.links, 0).from_socket : __getitem__ (self.owner_shader.node_texcoords.outputs, 'UV'));
 		var tree = self.owner_shader.material.node_tree;
 		var node_mapping = (function () {
 			var __accu0__ = tree.nodes;
@@ -1821,7 +1837,7 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		self.colorspace_name = colorspace_name;
 		self._node_image = _ellipsis;
 		self._node_mapping = _ellipsis;
-		if (socket_dst.is_linked) {
+		if (__call__ (_truth, null, socket_dst.is_linked)) {
 			var from_node = __getitem__ (socket_dst.links, 0).from_node;
 			if (__eq__ (from_node.bl_idname, 'ShaderNodeTexImage')) {
 				self._node_image = from_node;
@@ -1829,7 +1845,7 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		}
 		if (self.node_image !== null) {
 			var socket_dst = __getitem__ (self.node_image.inputs, 'Vector');
-			if (socket_dst.is_linked) {
+			if (__call__ (_truth, null, socket_dst.is_linked)) {
 				var from_node = __getitem__ (socket_dst.links, 0).from_node;
 				if (__eq__ (from_node.bl_idname, 'ShaderNodeMapping')) {
 					self._node_mapping = from_node;
@@ -1883,14 +1899,14 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		var is_readonly_back = tex.is_readonly;
 		tex.is_readonly = true;
 		if (tex.node_mapping === null) {
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.has_mapping_node, __accu0__);
-			}) ()) {
+			}) ())) {
 				var __left0__ = null;
 				var socket_dst = __left0__;
 				var socket_src = __left0__;
-				if (__getitem__ (self.node_mapping.inputs, 'Vector').is_linked) {
+				if (__call__ (_truth, null, __getitem__ (self.node_mapping.inputs, 'Vector').is_linked)) {
 					var socket_dst = __getitem__ (self.node_image.inputs, 'Vector');
 					var socket_src = __getitem__ (__getitem__ (self.node_mapping.inputs, 'Vector').links, 0).from_socket;
 				}
@@ -1968,6 +1984,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

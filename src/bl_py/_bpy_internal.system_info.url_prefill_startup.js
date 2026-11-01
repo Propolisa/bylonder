@@ -104,6 +104,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -267,10 +283,10 @@ export var url_from_blender = function () {
 		var __accu0__ = re;
 		return __call__ (__accu0__.search, __accu0__, '^\\s+build hash: (.*)', text, __kwargtrans__ ({flags: re.MULTILINE}));
 	}) ())});
-	if (!(__sub__ (__call__ (set, null, (function () {
+	if (!(__call__ (_truth, null, __sub__ (__call__ (set, null, (function () {
 		var __accu0__ = py_values;
 		return __call__ (__accu0__.py_values, __accu0__);
-	}) ()), new set ([unknown_string])))) {
+	}) ()), new set ([unknown_string]))))) {
 		__call__ (print, null, 'Blender did not provide any build information. Blender may be corrupt or blocked from running.');
 		__call__ (print, null, "Please try reinstalling Blender and double check your anti-virus isn't blocking it from running.");
 		return '';
@@ -300,7 +316,7 @@ export var main = function () {
 	}
 	var webbrowser = __call__ (_module, null, 'webbrowser');
 	var url = __call__ (url_from_blender, null);
-	if (!(url)) {
+	if (!(__call__ (_truth, null, url))) {
 		return 1;
 	}
 	(function () {
@@ -326,6 +342,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

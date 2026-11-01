@@ -11,6 +11,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_output';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var RENDER_PT_format_presets =  __class__ ('RENDER_PT_format_presets', [PresetPanel, Panel], {
 	__module__: __name__,
 	bl_label: 'Format Presets',
@@ -209,7 +365,7 @@ export var RENDER_PT_format =  __class__ ('RENDER_PT_format', [RenderOutputButto
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'RENDER_MT_framerate_presets', __kwargtrans__ ({text: fps_label_text}));
 		}) ();
-		if (show_framerate) {
+		if (__call__ (_truth, null, show_framerate)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -443,7 +599,7 @@ export var RENDER_PT_stamp =  __class__ ('RENDER_PT_stamp', [RenderOutputButtons
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var rd = context.scene.render;
-		if (rd.use_sequencer) {
+		if (__call__ (_truth, null, rd.use_sequencer)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, rd, 'metadata_input');
@@ -501,7 +657,7 @@ export var RENDER_PT_stamp =  __class__ ('RENDER_PT_stamp', [RenderOutputButtons
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, rd, 'use_stamp_filename', __kwargtrans__ ({text: 'Filename'}));
 		}) ();
-		if (rd.use_sequencer) {
+		if (__call__ (_truth, null, rd.use_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, rd, 'use_stamp_sequencer_strip', __kwargtrans__ ({text: 'Strip Name'}));
@@ -701,7 +857,7 @@ export var RENDER_PT_output =  __class__ ('RENDER_PT_output', [RenderOutputButto
 			var __accu0__ = layout;
 			return __call__ (__accu0__.template_image_settings, __accu0__, image_settings, __kwargtrans__ ({color_management: false}));
 		}) ();
-		if (!(rd.is_movie_format)) {
+		if (!(__call__ (_truth, null, rd.is_movie_format))) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Image Sequence'}));
@@ -815,7 +971,7 @@ export var RENDER_PT_output_color_management =  __class__ ('RENDER_PT_output_col
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (image_settings.has_linear_colorspace) {
+		if (__call__ (_truth, null, image_settings.has_linear_colorspace)) {
 			if (__call__ (hasattr, null, owner, 'linear_colorspace_settings')) {
 				(function () {
 					var __accu0__ = col;
@@ -948,7 +1104,7 @@ export var RENDER_PT_output_pixel_density =  __class__ ('RENDER_PT_output_pixel_
 			var __accu0__ = row;
 			return __call__ (__accu0__.menu, __accu0__, 'RENDER_MT_pixeldensity_presets', __kwargtrans__ ({text: pixeldensity_label_text}));
 		}) ();
-		if (show_pixeldensity) {
+		if (__call__ (_truth, null, show_pixeldensity)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1123,13 +1279,13 @@ export var RENDER_PT_encoding_video =  __class__ ('RENDER_PT_encoding_video', [R
 		var layout = self.layout;
 		var ffmpeg = context.scene.render.ffmpeg;
 		var needs_codec = __in__ (ffmpeg.format, new set (['AVI', 'QUICKTIME', 'MKV', 'OGG', 'MPEG4', 'WEBM']));
-		if (needs_codec) {
+		if (__call__ (_truth, null, needs_codec)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'codec');
 			}) ();
 		}
-		if (needs_codec && __eq__ (ffmpeg.codec, 'NONE')) {
+		if (__call__ (_truth, null, needs_codec) && __eq__ (ffmpeg.codec, 'NONE')) {
 			return ;
 		}
 		var image_settings = context.scene.render.image_settings;
@@ -1141,20 +1297,20 @@ export var RENDER_PT_encoding_video =  __class__ ('RENDER_PT_encoding_video', [R
 			var display_settings = context.scene.display_settings;
 			var view_settings = context.scene.view_settings;
 		}
-		if (view_settings.is_hdr && (!(needs_codec) || !__in__ (ffmpeg.codec, new set (['H265', 'AV1'])))) {
+		if (__call__ (_truth, null, view_settings.is_hdr) && (!(__call__ (_truth, null, needs_codec)) || !__in__ (ffmpeg.codec, new set (['H265', 'AV1'])))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'HDR needs H.265 or AV1', icon: 'ERROR'}));
 			}) ();
 		}
 		var use_bpp = needs_codec && __in__ (ffmpeg.codec, new set (['H264', 'H265', 'AV1', 'PRORES', 'FFV1']));
-		if (use_bpp) {
+		if (__call__ (_truth, null, use_bpp)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, image_settings, 'color_depth', __kwargtrans__ ({expand: true}));
 			}) ();
 		}
-		if (view_settings.is_hdr && !__in__ (image_settings.color_depth, new set (['10', '12']))) {
+		if (__call__ (_truth, null, view_settings.is_hdr) && !__in__ (image_settings.color_depth, new set (['10', '12']))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'HDR needs 10 or 12 bits', icon: 'ERROR'}));
@@ -1186,20 +1342,20 @@ export var RENDER_PT_encoding_video =  __class__ ('RENDER_PT_encoding_video', [R
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, display_settings, 'display_device', __kwargtrans__ ({text: ''}));
 		}) ();
-		if (needs_codec && __eq__ (ffmpeg.codec, 'DNXHD')) {
+		if (__call__ (_truth, null, needs_codec) && __eq__ (ffmpeg.codec, 'DNXHD')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'use_lossless_output');
 			}) ();
 		}
-		if (needs_codec && __eq__ (ffmpeg.codec, 'PRORES')) {
+		if (__call__ (_truth, null, needs_codec) && __eq__ (ffmpeg.codec, 'PRORES')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'ffmpeg_prores_profile');
 			}) ();
 		}
 		var use_crf = needs_codec && __in__ (ffmpeg.codec, new set (['H264', 'H265', 'MPEG4', 'WEBM', 'AV1']));
-		if (use_crf) {
+		if (__call__ (_truth, null, use_crf)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'constant_rate_factor');
@@ -1216,19 +1372,19 @@ export var RENDER_PT_encoding_video =  __class__ ('RENDER_PT_encoding_video', [R
 		var use_min_max_bitrate = !__in__ (ffmpeg.codec, new set (['DNXHD']));
 		var use_gop = needs_codec && !__in__ (ffmpeg.codec, new set (['DNXHD', 'HUFFYUV', 'PNG', 'PRORES']));
 		var use_b_frames = needs_codec && use_gop && !__in__ (ffmpeg.codec, new set (['FFV1', 'QTRLE']));
-		if (use_encoding_speed) {
+		if (__call__ (_truth, null, use_encoding_speed)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'ffmpeg_preset');
 			}) ();
 		}
-		if (use_gop) {
+		if (__call__ (_truth, null, use_gop)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'gopsize');
 			}) ();
 		}
-		if (use_b_frames) {
+		if (__call__ (_truth, null, use_b_frames)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Max B-frames'}));
@@ -1247,7 +1403,7 @@ export var RENDER_PT_encoding_video =  __class__ ('RENDER_PT_encoding_video', [R
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'max_b_frames', __kwargtrans__ ({text: ''}));
 			}) ();
 		}
-		if ((!(use_crf) || __eq__ (ffmpeg.constant_rate_factor, 'NONE')) && use_bitrate) {
+		if ((!(__call__ (_truth, null, use_crf)) || __eq__ (ffmpeg.constant_rate_factor, 'NONE')) && __call__ (_truth, null, use_bitrate)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -1260,7 +1416,7 @@ export var RENDER_PT_encoding_video =  __class__ ('RENDER_PT_encoding_video', [R
 				var __accu0__ = sub;
 				return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'video_bitrate');
 			}) ();
-			if (use_min_max_bitrate) {
+			if (__call__ (_truth, null, use_min_max_bitrate)) {
 				(function () {
 					var __accu0__ = sub;
 					return __call__ (__accu0__.prop, __accu0__, ffmpeg, 'minrate', __kwargtrans__ ({text: 'Minimum'}));
@@ -1388,7 +1544,7 @@ export var RENDER_UL_renderviews =  __class__ ('RENDER_UL_renderviews', [UIList]
 		if (__in__ (view.py_name, new set (['left', 'right']))) {
 			(function () {
 				var __accu0__ = layout;
-				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: view.py_name, icon_value: __sub__ (icon, !(view.use))}));
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: view.py_name, icon_value: __sub__ (icon, !(__call__ (_truth, null, view.use)))}));
 			}) ();
 		}
 		else {
@@ -1461,7 +1617,7 @@ export var RENDER_PT_stereoscopy =  __class__ ('RENDER_PT_stereoscopy', [RenderO
 			}) ();
 			return __call__ (__accu0__.prop, __accu0__, rd, 'views_format', __kwargtrans__ ({expand: true}));
 		}) ();
-		if (basic_stereo) {
+		if (__call__ (_truth, null, basic_stereo)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -1530,6 +1686,14 @@ export {Menu, Panel, PresetPanel, UIList, _globals, _import, _lazy, _member, _mo
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'RENDER_PT_format_presets': RENDER_PT_format_presets = value; break;
 		case 'RENDER_PT_ffmpeg_presets': RENDER_PT_ffmpeg_presets = value; break;
 		case 'RENDER_MT_framerate_presets': RENDER_MT_framerate_presets = value; break;

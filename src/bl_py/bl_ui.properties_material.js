@@ -12,6 +12,162 @@ import {Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_material';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var MATERIAL_MT_context_menu =  __class__ ('MATERIAL_MT_context_menu', [Menu], {
 	__module__: __name__,
 	bl_label: 'Material Specials',
@@ -87,7 +243,7 @@ export var MATERIAL_UL_matslots =  __class__ ('MATERIAL_UL_matslots', [UIList], 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.context_pointer_set, __accu0__, 'material_slot', slot);
 		}) ();
-		if (ma) {
+		if (__call__ (_truth, null, ma)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, ma, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
@@ -122,7 +278,7 @@ export var MaterialButtonsPanel =  __class__ ('MaterialButtonsPanel', [object], 
 		else {
 		}
 		var mat = context.material;
-		return mat && __in__ (context.engine, cls.COMPAT_ENGINES) && !(mat.grease_pencil);
+		return mat && __in__ (context.engine, cls.COMPAT_ENGINES) && !(__call__ (_truth, null, mat.grease_pencil));
 	});}
 });
 export var MATERIAL_PT_preview =  __class__ ('MATERIAL_PT_preview', [MaterialButtonsPanel, Panel], {
@@ -180,10 +336,10 @@ export var EEVEE_MATERIAL_PT_context_material =  __class__ ('EEVEE_MATERIAL_PT_c
 		}
 		var ob = context.object;
 		var mat = context.material;
-		if (mat && mat.grease_pencil) {
+		if (__call__ (_truth, null, mat) && __call__ (_truth, null, mat.grease_pencil)) {
 			return false;
 		}
-		if (ob && __eq__ (ob.py_metatype, 'GREASEPENCIL')) {
+		if (__call__ (_truth, null, ob) && __eq__ (ob.py_metatype, 'GREASEPENCIL')) {
 			return false;
 		}
 		return (ob || mat) && __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -208,10 +364,10 @@ export var EEVEE_MATERIAL_PT_context_material =  __class__ ('EEVEE_MATERIAL_PT_c
 		var ob = context.object;
 		var slot = context.material_slot;
 		var space = context.space_data;
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			var is_sortable = __gt__ (__call__ (len, null, ob.material_slots), 1);
 			var rows = 3;
-			if (is_sortable) {
+			if (__call__ (_truth, null, is_sortable)) {
 				var rows = 5;
 			}
 			var row = (function () {
@@ -242,7 +398,7 @@ export var EEVEE_MATERIAL_PT_context_material =  __class__ ('EEVEE_MATERIAL_PT_c
 				var __accu0__ = col;
 				return __call__ (__accu0__.menu, __accu0__, 'MATERIAL_MT_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
 			}) ();
-			if (is_sortable) {
+			if (__call__ (_truth, null, is_sortable)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -261,12 +417,12 @@ export var EEVEE_MATERIAL_PT_context_material =  __class__ ('EEVEE_MATERIAL_PT_c
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.template_ID, __accu0__, ob, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
 			}) ();
-			if (slot) {
+			if (__call__ (_truth, null, slot)) {
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop, __accu0__, slot, 'link', __kwargtrans__ ({icon_only: true}));
@@ -293,7 +449,7 @@ export var EEVEE_MATERIAL_PT_context_material =  __class__ ('EEVEE_MATERIAL_PT_c
 				}
 			}
 		}
-		else if (mat) {
+		else if (__call__ (_truth, null, mat)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
@@ -322,9 +478,9 @@ export var panel_node_draw = function (layout, ntree, _output_type, input_name) 
 		var __accu0__ = ntree;
 		return __call__ (__accu0__.get_output_node, __accu0__, 'EEVEE');
 	}) ();
-	if (node) {
+	if (__call__ (_truth, null, node)) {
 		var input = __call__ (find_node_input, null, node, input_name);
-		if (input) {
+		if (__call__ (_truth, null, input)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_node_view, __accu0__, ntree, node, input);
@@ -394,7 +550,7 @@ export var EEVEE_MATERIAL_PT_volume =  __class__ ('EEVEE_MATERIAL_PT_volume', [M
 		}
 		var engine = context.engine;
 		var mat = context.material;
-		return mat && __in__ (engine, cls.COMPAT_ENGINES) && !(mat.grease_pencil);
+		return mat && __in__ (engine, cls.COMPAT_ENGINES) && !(__call__ (_truth, null, mat.grease_pencil));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -440,7 +596,7 @@ export var EEVEE_MATERIAL_PT_displacement =  __class__ ('EEVEE_MATERIAL_PT_displ
 		}
 		var engine = context.engine;
 		var mat = context.material;
-		return mat && __in__ (engine, cls.COMPAT_ENGINES) && !(mat.grease_pencil);
+		return mat && __in__ (engine, cls.COMPAT_ENGINES) && !(__call__ (_truth, null, mat.grease_pencil));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -487,7 +643,7 @@ export var EEVEE_MATERIAL_PT_thickness =  __class__ ('EEVEE_MATERIAL_PT_thicknes
 		}
 		var engine = context.engine;
 		var mat = context.material;
-		return mat && __in__ (engine, cls.COMPAT_ENGINES) && !(mat.grease_pencil);
+		return mat && __in__ (engine, cls.COMPAT_ENGINES) && !(__call__ (_truth, null, mat.grease_pencil));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -549,7 +705,7 @@ export var draw_material_surface_settings = function (layout, mat, is_eevee) {
 		var __accu0__ = layout;
 		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 	}) ();
-	if (is_eevee) {
+	if (__call__ (_truth, null, is_eevee)) {
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, mat, 'displacement_method', __kwargtrans__ ({text: 'Displacement'}));
@@ -560,7 +716,7 @@ export var draw_material_surface_settings = function (layout, mat, is_eevee) {
 		}) ();
 	}
 	col.enabled = __ne__ (mat.displacement_method, 'BUMP');
-	var max_diplacement_text = (is_eevee ? 'Max Distance' : 'Max Displacement');
+	var max_diplacement_text = (__call__ (_truth, null, is_eevee) ? 'Max Distance' : 'Max Displacement');
 	(function () {
 		var __accu0__ = col;
 		return __call__ (__accu0__.prop, __accu0__, mat, 'max_vertex_displacement', __kwargtrans__ ({text: max_diplacement_text}));
@@ -571,7 +727,7 @@ export var draw_material_surface_settings = function (layout, mat, is_eevee) {
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Unsupported displacement method', icon: 'ERROR'}));
 		}) ();
 	}
-	if (is_eevee) {
+	if (__call__ (_truth, null, is_eevee)) {
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, mat, 'use_transparent_shadow');
@@ -633,7 +789,7 @@ export var draw_material_volume_settings = function (layout, mat, is_eevee) {
 	}
 	(function () {
 		var __accu0__ = layout;
-		return __call__ (__accu0__.prop, __accu0__, mat, 'volume_intersection_method', __kwargtrans__ ({text: (is_eevee ? 'Intersection' : 'Volume Intersection')}));
+		return __call__ (__accu0__.prop, __accu0__, mat, 'volume_intersection_method', __kwargtrans__ ({text: (__call__ (_truth, null, is_eevee) ? 'Intersection' : 'Volume Intersection')}));
 	}) ();
 };
 export var draw_material_settings = function (self, context) {
@@ -790,7 +946,7 @@ export var MATERIAL_PT_viewport =  __class__ ('MATERIAL_PT_viewport', [MaterialB
 		else {
 		}
 		var mat = context.material;
-		return mat && !(mat.grease_pencil);
+		return mat && !(__call__ (_truth, null, mat.grease_pencil));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -849,7 +1005,7 @@ export var MATERIAL_PT_lineart =  __class__ ('MATERIAL_PT_lineart', [MaterialBut
 		else {
 		}
 		var mat = context.material;
-		return mat && !(mat.grease_pencil);
+		return mat && !(__call__ (_truth, null, mat.grease_pencil));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -957,7 +1113,7 @@ export var MATERIAL_PT_animation =  __class__ ('MATERIAL_PT_animation', [Materia
 			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, material);
 		}) ();
 		var node_tree = material.node_tree;
-		if (node_tree) {
+		if (__call__ (_truth, null, node_tree)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -988,6 +1144,14 @@ export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, find_node_
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'MATERIAL_MT_context_menu': MATERIAL_MT_context_menu = value; break;
 		case 'MATERIAL_UL_matslots': MATERIAL_UL_matslots = value; break;
 		case 'MaterialButtonsPanel': MaterialButtonsPanel = value; break;

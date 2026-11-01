@@ -106,6 +106,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -177,17 +193,17 @@ export var guess_player_path = function (preset) {
 			var os = __call__ (_module, null, 'os');
 			var djv3_path = '/Applications/DJV.app/Contents/MacOS/DJV';
 			var djv2_path = '/Applications/DJV2.app/Contents/Resources/bin/djv';
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, djv3_path);
-			}) ()) {
+			}) ())) {
 				var player_path = djv3_path;
 				var found_version = tuple ([3, 4, 0]);
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, djv2_path);
-			}) ()) {
+			}) ())) {
 				var player_path = djv2_path;
 				var found_version = tuple ([2, 0, 0]);
 			}
@@ -316,7 +332,7 @@ export var guess_player_path = function (preset) {
 					throw __except0__;
 				}
 			}
-			if (!(reg_value)) {
+			if (!(__call__ (_truth, null, reg_value))) {
 				try {
 					var reg_path = 'SOFTWARE\\Classes\\djv\\shell\\open\\command';
 					var regkey = (function () {
@@ -347,7 +363,7 @@ export var guess_player_path = function (preset) {
 					}
 				}
 			}
-			if (reg_value) {
+			if (__call__ (_truth, null, reg_value)) {
 				if (__gt__ (found_version, tuple ([2, 0, 0]))) {
 					var player_path = __add__ ((function () {
 						var __accu0__ = reg_value;
@@ -450,7 +466,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 		var preset = prefs.filepaths.animation_player_preset;
 		var is_movie = rd.is_movie_format;
 		var views_format = rd.image_settings.views_format;
-		if (rd.use_multiview && __eq__ (views_format, 'INDIVIDUAL')) {
+		if (__call__ (_truth, null, rd.use_multiview) && __eq__ (views_format, 'INDIVIDUAL')) {
 			var view_suffix = rd.views.active.file_suffix;
 		}
 		else {
@@ -485,10 +501,10 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.abspath, __accu0__, file);
 			}) ();
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, file);
-			}) ())) {
+			}) ()))) {
 				var err_msg = (function () {
 					var __accu0__ = __call__ (rpt_, null, 'File {!r} not found');
 					return __call__ (__accu0__.format, __accu0__, file);
@@ -499,7 +515,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 				}) ();
 				var path_valid = false;
 			}
-			if (scene.use_preview_range && !(path_valid)) {
+			if (__call__ (_truth, null, scene.use_preview_range) && !(__call__ (_truth, null, path_valid))) {
 				var file = (function () {
 					var __accu0__ = rd;
 					return __call__ (__accu0__.frame_path, __accu0__, __kwargtrans__ ({frame: scene.frame_start, preview: false, view: view_suffix}));
@@ -512,10 +528,10 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 					var __accu0__ = __call__ (rpt_, null, 'File {!r} not found');
 					return __call__ (__accu0__.format, __accu0__, file);
 				}) ();
-				if (!((function () {
+				if (!(__call__ (_truth, null, (function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.exists, __accu0__, file);
-				}) ())) {
+				}) ()))) {
 					(function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), err_msg);
@@ -525,7 +541,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 		}
 		var remove_OCIO_env = false;
 		var cmd = [player_path];
-		if (scene.use_preview_range) {
+		if (__call__ (_truth, null, scene.use_preview_range)) {
 			var frame_start = scene.frame_preview_start;
 			var frame_end = scene.frame_preview_end;
 		}
@@ -583,7 +599,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 		}
 		else if (__eq__ (preset, 'RV')) {
 			var opts = ['-fps', __call__ (str, null, rd.fps), '-play'];
-			if (scene.use_preview_range) {
+			if (__call__ (_truth, null, scene.use_preview_range)) {
 				var opts = __call__ (__iadd__, null, opts, [(function () {
 					var __accu0__ = file;
 					return __call__ (__accu0__.py_replace, __accu0__, '#', '', __sub__ ((function () {
@@ -608,7 +624,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 		}
 		else if (__eq__ (preset, 'MPLAYER')) {
 			var opts = [];
-			if (is_movie) {
+			if (__call__ (_truth, null, is_movie)) {
 				(function () {
 					var __accu0__ = opts;
 					return __call__ (__accu0__.append, __accu0__, file);
@@ -656,7 +672,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 				var __accu0__ = os.environ;
 				return __call__ (__accu0__.py_copy, __accu0__);
 			}) ();
-			if (remove_OCIO_env) {
+			if (__call__ (_truth, null, remove_OCIO_env)) {
 				(function () {
 					var __accu0__ = env_copy;
 					return __call__ (__accu0__.py_pop, __accu0__, 'OCIO', null);
@@ -699,6 +715,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'guess_player_path': guess_player_path = value; break;

@@ -8,6 +8,162 @@ import * as anim from './bl_ui.anim.js';
 import {PropertyPanel} from './rna_prop_ui.js';
 import {Header, Panel} from './_bpy.types.js';
 var __name__ = 'bl_ui.space_properties';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var tabs_attr_infos = tuple ([tuple (['show_properties_tool', 'Tool', 'TOOL_SETTINGS']), tuple (['show_properties_render', 'Render', 'SCENE']), tuple (['show_properties_output', 'Output', 'OUTPUT']), tuple (['show_properties_view_layer', 'View Layer', 'RENDERLAYERS']), tuple (['show_properties_scene', 'Scene', 'SCENE_DATA']), tuple (['show_properties_world', 'World', 'WORLD']), tuple (['show_properties_collection', 'Collection', 'GROUP']), tuple (['show_properties_object', 'Object', 'OBJECT_DATA']), tuple (['show_properties_modifiers', 'Modifiers', 'MODIFIER']), tuple (['show_properties_effects', 'Effects', 'SHADERFX']), tuple (['show_properties_particles', 'Particles', 'PARTICLES']), tuple (['show_properties_physics', 'Physics', 'PHYSICS']), tuple (['show_properties_constraints', 'Constraints', 'CONSTRAINT']), tuple (['show_properties_data', 'Data', 'MESH_DATA']), tuple (['show_properties_bone', 'Bone', 'BONE_DATA']), tuple (['show_properties_bone_constraints', 'Bone Constraints', 'CONSTRAINT_BONE']), tuple (['show_properties_material', 'Material', 'MATERIAL']), tuple (['show_properties_texture', 'Texture', 'TEXTURE']), tuple (['show_properties_strip', 'Strip', 'SEQ_SEQUENCER']), tuple (['show_properties_strip_modifier', 'Strip Modifiers', 'SEQ_STRIP_MODIFIER'])]);
 export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], {
 	__module__: __name__,
@@ -67,10 +223,10 @@ export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator_spacer, __accu0__);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__._search_poll, __accu0__, context.space_data);
-		}) ()) {
+		}) ())) {
 			var content_size_est = __mul__ (160, ui_scale);
 			var layout_scale = __call__ (min, null, 1, __call__ (max, null, 0, __sub__ (__truediv__ (region.width, content_size_est), 1)));
 			if (__gt__ (layout_scale, 0)) {
@@ -152,7 +308,7 @@ export var PROPERTIES_PT_navigation_bar =  __class__ ('PROPERTIES_PT_navigation_
 		var view = context.space_data;
 		layout.scale_x = 1.4;
 		layout.scale_y = 1.4;
-		if (view.search_filter) {
+		if (__call__ (_truth, null, view.search_filter)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop_tabs_enum, __accu0__, view, 'context', __kwargtrans__ ({data_highlight: view, property_highlight: 'tab_search_results', icon_only: true}));
@@ -316,7 +472,7 @@ export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [o
 		}
 		else {
 		}
-		if (!(animated_id)) {
+		if (!(__call__ (_truth, null, animated_id))) {
 			var class_list = (function () {
 				var __accu0__ = [];
 				var __iterable0__ = __call__ (list, null, (function () {
@@ -417,6 +573,14 @@ export {Header, Panel, PropertyPanel, iface_, register_class};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'tabs_attr_infos': tabs_attr_infos = value; break;
 		case 'PROPERTIES_HT_header': PROPERTIES_HT_header = value; break;
 		case 'has_hidden_tabs': has_hidden_tabs = value; break;

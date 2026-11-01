@@ -14,6 +14,162 @@ import * as units from './_bpy._utils_units.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 export {_sys, units, flip_name, _addon_utils, resource_path, _module, unregister_cli_command, unregister_class, _globals, register_cli_command, register_class, blend_paths, unescape_identifier, _lazy, _user_resource, _member, _import, _bpy_script_paths, system_resource, escape_identifier, _os};
 var __name__ = 'bpy.utils';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['blend_paths', 'escape_identifier', 'flip_name', 'unescape_identifier', 'keyconfig_init', 'keyconfig_set', 'load_scripts', 'modules_from_path', 'preset_find', 'preset_paths', 'refresh_script_paths', 'app_template_paths', 'register_class', 'register_cli_command', 'time_from_frame', 'unregister_cli_command', 'register_manual_map', 'unregister_manual_map', 'register_preset_path', 'unregister_preset_path', 'register_classes_factory', 'register_submodule_factory', 'register_tool', 'make_rna_paths', 'manual_map', 'manual_language_code', 'previews', 'resource_path', 'script_path_user', 'extension_path_user', 'script_paths', 'smpte_from_frame', 'smpte_from_seconds', 'units', 'unregister_class', 'unregister_tool', 'user_resource', 'execfile', 'expose_bundled_modules']);
 export var _bpy = __cycle0__;
 export var _preferences = _bpy.context.preferences;
@@ -112,7 +268,7 @@ export var _test_import = function (module_name, loaded_modules) {
 		}) ());
 		return null;
 	}
-	if (use_time) {
+	if (__call__ (_truth, null, use_time)) {
 		var time = __call__ (_module, null, 'time');
 		var t = (function () {
 			var __accu0__ = time;
@@ -135,7 +291,7 @@ export var _test_import = function (module_name, loaded_modules) {
 			throw __except0__;
 		}
 	}
-	if (use_time) {
+	if (__call__ (_truth, null, use_time)) {
 		__call__ (print, null, (function () {
 			var __accu0__ = 'time {:s} {:.4f}';
 			return __call__ (__accu0__.format, __accu0__, module_name, __sub__ ((function () {
@@ -227,7 +383,7 @@ export var modules_from_path = function (path, loaded_modules) {
 		var mod_name = __left0__ [0];
 		var _mod_path = __left0__ [1];
 		var mod = __call__ (_test_import, null, mod_name, loaded_modules);
-		if (mod) {
+		if (__call__ (_truth, null, mod)) {
 			(function () {
 				var __accu0__ = modules;
 				return __call__ (__accu0__.append, __accu0__, mod);
@@ -252,7 +408,7 @@ export var _register_module_call = function (mod) {
 	else {
 	}
 	var register = __call__ (getattr, null, mod, 'register', null);
-	if (register) {
+	if (__call__ (_truth, null, register)) {
 		try {
 			__call__ (register, null);
 		}
@@ -291,7 +447,7 @@ export var _unregister_module_call = function (mod) {
 	else {
 	}
 	var unregister = __call__ (getattr, null, mod, 'unregister', null);
-	if (unregister) {
+	if (__call__ (_truth, null, unregister)) {
 		try {
 			__call__ (unregister, null);
 		}
@@ -331,8 +487,8 @@ export var load_scripts = function () {
 	var __left0__ = _bpy.app.debug_python;
 	var use_time = __left0__;
 	var use_class_register_check = __left0__;
-	var use_user = !(_is_factory_startup);
-	if (use_time) {
+	var use_user = !(__call__ (_truth, null, _is_factory_startup));
+	if (__call__ (_truth, null, use_time)) {
 		var time = __call__ (_module, null, 'time');
 		var t_main = (function () {
 			var __accu0__ = time;
@@ -340,13 +496,13 @@ export var load_scripts = function () {
 		}) ();
 	}
 	var loaded_modules = __call__ (set, null);
-	if (refresh_scripts) {
+	if (__call__ (_truth, null, refresh_scripts)) {
 		var original_modules = (function () {
 			var __accu0__ = _sys.modules;
 			return __call__ (__accu0__.py_values, __accu0__);
 		}) ();
 	}
-	if (reload_scripts) {
+	if (__call__ (_truth, null, reload_scripts)) {
 		var __iterable0__ = (function () {
 			var __accu0__ = [];
 			var __iterable1__ = _preferences.addons;
@@ -420,14 +576,14 @@ export var load_scripts = function () {
 		}
 		else {
 		}
-		if (refresh_scripts && __in__ (mod, original_modules)) {
+		if (__call__ (_truth, null, refresh_scripts) && __in__ (mod, original_modules)) {
 			return ;
 		}
-		if (reload_scripts && mod) {
+		if (__call__ (_truth, null, reload_scripts) && __call__ (_truth, null, mod)) {
 			__call__ (print, null, 'Reloading:', mod);
 			var mod = __call__ (test_reload, null, mod);
 		}
-		if (mod) {
+		if (__call__ (_truth, null, mod)) {
 			__call__ (_register_module_call, null, mod);
 			(function () {
 				var __accu0__ = _registered_module_names;
@@ -435,7 +591,7 @@ export var load_scripts = function () {
 			}) ();
 		}
 	};
-	if (reload_scripts) {
+	if (__call__ (_truth, null, reload_scripts)) {
 		var registered_modules = (function () {
 			var __accu0__ = [];
 			var __iterable0__ = __call__ (list, null, __call__ (map, null, _sys.modules.py_get, __call__ (py_reversed, null, _registered_module_names)));
@@ -506,10 +662,10 @@ export var load_scripts = function () {
 					var __accu0__ = _os.path;
 					return __call__ (__accu0__.join, __accu0__, base_path, path_subdir);
 				}) ();
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = _os.path;
 					return __call__ (__accu0__.isdir, __accu0__, path);
-				}) ()) {
+				}) ())) {
 					__call__ (_sys_path_ensure_prepend, null, path);
 					if (__eq__ (path_subdir, 'startup')) {
 						var __iterable2__ = __call__ (modules_from_path, null, path, loaded_modules);
@@ -529,16 +685,16 @@ export var load_scripts = function () {
 			throw __except0__;
 		}
 	}
-	if (reload_scripts) {
+	if (__call__ (_truth, null, reload_scripts)) {
 		(function () {
 			var __accu0__ = _bpy.context.window_manager.keyconfigs;
 			return __call__ (__accu0__.py_update, __accu0__);
 		}) ();
 	}
-	if (extensions) {
+	if (__call__ (_truth, null, extensions)) {
 		__call__ (load_scripts_extensions, null, __kwargtrans__ ({reload_scripts: reload_scripts}));
 	}
-	if (reload_scripts) {
+	if (__call__ (_truth, null, reload_scripts)) {
 		(function () {
 			var __accu0__ = _bpy.context.window_manager;
 			return __call__ (__accu0__.tag_script_reload, __accu0__);
@@ -552,7 +708,7 @@ export var load_scripts = function () {
 			}) ());
 		}) ());
 	}
-	if (use_time) {
+	if (__call__ (_truth, null, use_time)) {
 		__call__ (print, null, (function () {
 			var __accu0__ = 'Python Script Load Time {:.4f}';
 			return __call__ (__accu0__.format, __accu0__, __sub__ ((function () {
@@ -561,7 +717,7 @@ export var load_scripts = function () {
 			}) (), t_main));
 		}) ());
 	}
-	if (use_class_register_check) {
+	if (__call__ (_truth, null, use_class_register_check)) {
 		var __iterable0__ = (function () {
 			var __accu0__ = _bpy.types.bpy_struct;
 			return __call__ (__accu0__.__subclasses__, __accu0__);
@@ -569,7 +725,7 @@ export var load_scripts = function () {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var cls = __getitem__ (__iterable0__, __index0__);
-			if (__call__ (getattr, null, cls, 'is_registered', false)) {
+			if (__call__ (_truth, null, __call__ (getattr, null, cls, 'is_registered', false))) {
 				var __iterable1__ = (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__.__subclasses__, __accu0__);
@@ -577,7 +733,7 @@ export var load_scripts = function () {
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var subcls = __getitem__ (__iterable1__, __index1__);
-					if (!(subcls.is_registered)) {
+					if (!(__call__ (_truth, null, subcls.is_registered))) {
 						__call__ (print, null, (function () {
 							var __accu0__ = 'Warning, unregistered class: {:s}({:s})';
 							return __call__ (__accu0__.format, __accu0__, subcls.__name__, cls.__name__);
@@ -683,7 +839,7 @@ export var script_path_user = function () {
 	else {
 	}
 	var path = __call__ (_user_resource, null, 'SCRIPTS');
-	return (path ? (function () {
+	return (__call__ (_truth, null, path) ? (function () {
 		var __accu0__ = _os.path;
 		return __call__ (__accu0__.normpath, __accu0__, path);
 	}) () : null);
@@ -705,7 +861,7 @@ export var script_paths_pref = function () {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var script_directory = __getitem__ (__iterable0__, __index0__);
 		var directory = script_directory.directory;
-		if (directory) {
+		if (__call__ (_truth, null, directory)) {
 			(function () {
 				var __accu0__ = paths;
 				return __call__ (__accu0__.append, __accu0__, (function () {
@@ -732,7 +888,7 @@ export var script_paths_system_environment = function () {
 		var __accu0__ = _os.environ;
 		return __call__ (__accu0__.py_get, __accu0__, 'BLENDER_SYSTEM_SCRIPTS');
 	}) ();
-	if (env_system_paths) {
+	if (__call__ (_truth, null, env_system_paths)) {
 		return (function () {
 			var __accu0__ = [];
 			var __iterable0__ = __call__ (list, null, (function () {
@@ -742,7 +898,7 @@ export var script_paths_system_environment = function () {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var p = __getitem__ (__iterable0__, __index0__);
-				if (p) {
+				if (__call__ (_truth, null, p)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, (function () {
@@ -780,15 +936,15 @@ export var script_paths = function () {
 	}
 	else {
 	}
-	if (check_all || use_user) {
+	if (__call__ (_truth, null, check_all) || __call__ (_truth, null, use_user)) {
 		var __left0__ = __call__ (_bpy_script_paths, null);
 		var path_system = __left0__ [0];
 		var path_user = __left0__ [1];
 	}
 	var base_paths = [];
-	if (check_all) {
+	if (__call__ (_truth, null, check_all)) {
 		var path_local = __call__ (resource_path, null, 'LOCAL');
-		if (path_local) {
+		if (__call__ (_truth, null, path_local)) {
 			(function () {
 				var __accu0__ = base_paths;
 				return __call__ (__accu0__.append, __accu0__, (function () {
@@ -797,7 +953,7 @@ export var script_paths = function () {
 				}) ());
 			}) ();
 		}
-		if (use_user) {
+		if (__call__ (_truth, null, use_user)) {
 			(function () {
 				var __accu0__ = base_paths;
 				return __call__ (__accu0__.append, __accu0__, path_user);
@@ -812,21 +968,21 @@ export var script_paths = function () {
 		var __accu0__ = base_paths;
 		return __call__ (__accu0__.append, __accu0__, _script_base_dir);
 	}) ();
-	if (!(check_all)) {
-		if (use_user) {
+	if (!(__call__ (_truth, null, check_all))) {
+		if (__call__ (_truth, null, use_user)) {
 			(function () {
 				var __accu0__ = base_paths;
 				return __call__ (__accu0__.append, __accu0__, path_user);
 			}) ();
 		}
 	}
-	if (user_pref) {
+	if (__call__ (_truth, null, user_pref)) {
 		(function () {
 			var __accu0__ = base_paths;
 			return __call__ (__accu0__.extend, __accu0__, __call__ (script_paths_pref, null));
 		}) ();
 	}
-	if (use_system_environment) {
+	if (__call__ (_truth, null, use_system_environment)) {
 		(function () {
 			var __accu0__ = base_paths;
 			return __call__ (__accu0__.extend, __accu0__, __call__ (script_paths_system_environment, null));
@@ -837,7 +993,7 @@ export var script_paths = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var path = __getitem__ (__iterable0__, __index0__);
-		if (!(path)) {
+		if (!(__call__ (_truth, null, path))) {
 			continue;
 		}
 		var path = (function () {
@@ -853,10 +1009,10 @@ export var script_paths = function () {
 		if (__in__ (path, scripts)) {
 			continue;
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, path);
-		}) ())) {
+		}) ()))) {
 			continue;
 		}
 		(function () {
@@ -912,10 +1068,10 @@ export var refresh_script_paths = function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.join, __accu0__, base_path, path_subdir);
 			}) ();
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.isdir, __accu0__, path);
-			}) ()) {
+			}) ())) {
 				__call__ (_sys_path_ensure_prepend, null, path);
 			}
 		}
@@ -932,10 +1088,10 @@ export var refresh_script_paths = function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.join, __accu0__, path, 'modules');
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, path);
-		}) ()) {
+		}) ())) {
 			__call__ (_sys_path_ensure_append, null, path);
 		}
 	}
@@ -960,10 +1116,10 @@ export var app_template_paths = function* () {
 		var __accu0__ = _os.path;
 		return __call__ (__accu0__.join, __accu0__, 'startup', 'bl_app_templates_user', ...subdir_args);
 	}) ()}));
-	if (path_test && (function () {
+	if (__call__ (_truth, null, path_test) && __call__ (_truth, null, (function () {
 		var __accu0__ = _os.path;
 		return __call__ (__accu0__.isdir, __accu0__, path_test);
-	}) ()) {
+	}) ())) {
 		yield path_test;
 	}
 	var __iterable0__ = __call__ (script_paths_system_environment, null);
@@ -974,10 +1130,10 @@ export var app_template_paths = function* () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.join, __accu0__, path, 'startup', 'bl_app_templates_system', ...subdir_args);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, path_test);
-		}) ()) {
+		}) ())) {
 			yield path_test;
 		}
 	}
@@ -985,10 +1141,10 @@ export var app_template_paths = function* () {
 		var __accu0__ = _os.path;
 		return __call__ (__accu0__.join, __accu0__, 'startup', 'bl_app_templates_system', ...subdir_args);
 	}) ()}));
-	if (path_test && (function () {
+	if (__call__ (_truth, null, path_test) && __call__ (_truth, null, (function () {
 		var __accu0__ = _os.path;
 		return __call__ (__accu0__.isdir, __accu0__, path_test);
-	}) ()) {
+	}) ())) {
 		yield path_test;
 	}
 	};
@@ -1015,10 +1171,10 @@ export var preset_paths = function (subdir) {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.join, __accu0__, path, subdir);
 		}) ();
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = directory;
 			return __call__ (__accu0__.startswith, __accu0__, path);
-		}) ())) {
+		}) ()))) {
 			var __except0__ = __call__ (Exception, null, (function () {
 				var __accu0__ = 'invalid subdir given {!r}';
 				return __call__ (__accu0__.format, __accu0__, subdir);
@@ -1026,10 +1182,10 @@ export var preset_paths = function (subdir) {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, directory);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = dirs;
 				return __call__ (__accu0__.append, __accu0__, directory);
@@ -1047,10 +1203,10 @@ export var preset_paths = function (subdir) {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.join, __accu0__, path, 'presets', subdir);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, directory);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = dirs;
 				return __call__ (__accu0__.append, __accu0__, directory);
@@ -1065,10 +1221,10 @@ export var preset_paths = function (subdir) {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.join, __accu0__, path, 'presets', subdir);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, directory);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = dirs;
 				return __call__ (__accu0__.append, __accu0__, directory);
@@ -1143,7 +1299,7 @@ export var _is_path_parent_of = function (parent_path, path) {
 	else {
 	}
 	try {
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.samefile, __accu0__, (function () {
 				var __accu1__ = _os.path;
@@ -1152,7 +1308,7 @@ export var _is_path_parent_of = function (parent_path, path) {
 				var __accu1__ = _os.path;
 				return __call__ (__accu1__.commonpath, __accu1__, [parent_path, path]);
 			}) ());
-		}) ()) {
+		}) ())) {
 			return true;
 		}
 	}
@@ -1192,10 +1348,10 @@ export var is_path_builtin = function (path) {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var res = __getitem__ (__iterable0__, __index0__);
 		var parent_path = __call__ (resource_path, null, res);
-		if (!(parent_path) || __eq__ (parent_path, user_path)) {
+		if (!(__call__ (_truth, null, parent_path)) || __eq__ (parent_path, user_path)) {
 			continue;
 		}
-		if (__call__ (_is_path_parent_of, null, parent_path, path)) {
+		if (__call__ (_truth, null, __call__ (_is_path_parent_of, null, parent_path, path))) {
 			return true;
 		}
 	}
@@ -1219,10 +1375,10 @@ export var is_path_extension = function (path) {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var repo = __getitem__ (__iterable0__, __index0__);
-		if (!(repo.enabled)) {
+		if (!(__call__ (_truth, null, repo.enabled))) {
 			continue;
 		}
-		if (__call__ (_is_path_parent_of, null, repo.directory, path)) {
+		if (__call__ (_truth, null, __call__ (_is_path_parent_of, null, repo.directory, path))) {
 			return true;
 		}
 	}
@@ -1361,14 +1517,14 @@ export var preset_find = function (py_name, preset_path) {
 	}
 	else {
 	}
-	if (!(py_name)) {
+	if (!(__call__ (_truth, null, py_name))) {
 		return null;
 	}
 	var __iterable0__ = __call__ (preset_paths, null, preset_path);
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var directory = __getitem__ (__iterable0__, __index0__);
-		if (display_name) {
+		if (__call__ (_truth, null, display_name)) {
 			var filename = '';
 			var __iterable1__ = (function () {
 				var __accu0__ = _os;
@@ -1377,10 +1533,10 @@ export var preset_find = function (py_name, preset_path) {
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var fn = __getitem__ (__iterable1__, __index1__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = fn;
 					return __call__ (__accu0__.endswith, __accu0__, ext);
-				}) () && __eq__ (py_name, (function () {
+				}) ()) && __eq__ (py_name, (function () {
 					var __accu0__ = _bpy.path;
 					return __call__ (__accu0__.display_name, __accu0__, fn, __kwargtrans__ ({title_case: false}));
 				}) ())) {
@@ -1392,15 +1548,15 @@ export var preset_find = function (py_name, preset_path) {
 		else {
 			var filename = __add__ (py_name, ext);
 		}
-		if (filename) {
+		if (__call__ (_truth, null, filename)) {
 			var filepath = (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.join, __accu0__, directory, filename);
 			}) ();
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.exists, __accu0__, filepath);
-			}) ()) {
+			}) ())) {
 				return filepath;
 			}
 		}
@@ -1423,7 +1579,7 @@ export var keyconfig_init = function () {
 	__call__ (keyconfig_set, null, filepath);
 	if (__ne__ (default_config, active_config)) {
 		var filepath = __call__ (preset_find, null, active_config, 'keyconfig');
-		if (filepath) {
+		if (__call__ (_truth, null, filepath)) {
 			__call__ (keyconfig_set, null, filepath);
 		}
 	}
@@ -1446,7 +1602,7 @@ export var keyconfig_set = function (filepath) {
 	}
 	var basename = __call__ (_member, null, 'os.path', 'basename');
 	var splitext = __call__ (_member, null, 'os.path', 'splitext');
-	if (_bpy.app.debug_python) {
+	if (__call__ (_truth, null, _bpy.app.debug_python)) {
 		__call__ (print, null, 'loading preset:', filepath);
 	}
 	var keyconfigs = _bpy.context.window_manager.keyconfigs;
@@ -1475,7 +1631,7 @@ export var keyconfig_set = function (filepath) {
 		var __accu0__ = keyconfigs;
 		return __call__ (__accu0__.py_get, __accu0__, py_name);
 	}) ();
-	if (error_msg) {
+	if (__call__ (_truth, null, error_msg)) {
 		if (report !== null) {
 			__call__ (report, null, new set (['ERROR']), error_msg);
 		}
@@ -1521,12 +1677,12 @@ export var user_resource = function (resource_type) {
 	else {
 	}
 	var target_path = __call__ (_user_resource, null, resource_type, __kwargtrans__ ({path: path}));
-	if (create) {
-		if (target_path) {
-			if (!((function () {
+	if (__call__ (_truth, null, create)) {
+		if (__call__ (_truth, null, target_path)) {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.exists, __accu0__, target_path);
-			}) ())) {
+			}) ()))) {
 				try {
 					(function () {
 						var __accu0__ = _os;
@@ -1547,10 +1703,10 @@ export var user_resource = function (resource_type) {
 					}
 				}
 			}
-			else if (!((function () {
+			else if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.isdir, __accu0__, target_path);
-			}) ())) {
+			}) ()))) {
 				__call__ (print, null, (function () {
 					var __accu0__ = "Path {!r} found but isn't a directory!";
 					return __call__ (__accu0__.format, __accu0__, target_path);
@@ -1584,8 +1740,8 @@ export var extension_path_user = function (package_) {
 	var repo_module = __left0__ [0];
 	var pkg_idname = __left0__ [1];
 	var target_path = __call__ (_user_resource, null, 'EXTENSIONS');
-	if (target_path) {
-		if (path) {
+	if (__call__ (_truth, null, target_path)) {
+		if (__call__ (_truth, null, path)) {
 			var target_path = (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.join, __accu0__, target_path, '.user', repo_module, pkg_idname, path);
@@ -1597,11 +1753,11 @@ export var extension_path_user = function (package_) {
 				return __call__ (__accu0__.join, __accu0__, target_path, '.user', repo_module, pkg_idname);
 			}) ();
 		}
-		if (create) {
-			if (!((function () {
+		if (__call__ (_truth, null, create)) {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.exists, __accu0__, target_path);
-			}) ())) {
+			}) ()))) {
 				try {
 					(function () {
 						var __accu0__ = _os;
@@ -1622,10 +1778,10 @@ export var extension_path_user = function (package_) {
 					}
 				}
 			}
-			else if (!((function () {
+			else if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.isdir, __accu0__, target_path);
-			}) ())) {
+			}) ()))) {
 				__call__ (print, null, (function () {
 					var __accu0__ = "Path {!r} found but isn't a directory!";
 					return __call__ (__accu0__.format, __accu0__, target_path);
@@ -1898,10 +2054,10 @@ export var register_tool = function (tool_cls) {
 		return tool_def;
 	};
 	var tool_converted = __call__ (tool_from_class, null, tool_cls);
-	if (group) {
+	if (__call__ (_truth, null, group)) {
 		var tool_converted = tuple ([tool_converted]);
 	}
-	var tool_def_insert = (separator ? tuple ([null, tool_converted]) : tuple ([tool_converted]));
+	var tool_def_insert = (__call__ (_truth, null, separator) ? tuple ([null, tool_converted]) : tuple ([tool_converted]));
 	var skip_to_end_of_group = function (seq, i) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1952,7 +2108,7 @@ export var register_tool = function (tool_cls) {
 					var sub_item = __left0__ [1];
 					if (__call__ (isinstance, null, sub_item, ToolDef)) {
 						if (__in__ (sub_item.idname, after)) {
-							if (group) {
+							if (__call__ (_truth, null, group)) {
 								var i = __call__ (skip_to_end_of_group, null, tools, i);
 								__setslice__ (tools, __add__ (i, 1), __add__ (i, 1), null, tool_def_insert);
 							}
@@ -1966,16 +2122,16 @@ export var register_tool = function (tool_cls) {
 						}
 					}
 				}
-				if (changed) {
+				if (__call__ (_truth, null, changed)) {
 					break;
 				}
 			}
 		}
-		if (!(changed)) {
+		if (!(__call__ (_truth, null, changed))) {
 			__call__ (print, null, "bpy.utils.register_tool: could not find 'after'", after);
 		}
 	}
-	if (!(changed)) {
+	if (!(__call__ (_truth, null, changed))) {
 		(function () {
 			var __accu0__ = tools;
 			return __call__ (__accu0__.extend, __accu0__, tool_def_insert);
@@ -2041,13 +2197,13 @@ export var unregister_tool = function (tool_cls) {
 		}
 		else {
 		}
-		while (tool_list && __getitem__ (tool_list, __neg__ (1)) === null) {
+		while (__call__ (_truth, null, tool_list) && __getitem__ (tool_list, __neg__ (1)) === null) {
 			(function () {
 				var __accu0__ = tool_list;
 				return __call__ (__accu0__.py_pop, __accu0__, __neg__ (1));
 			}) ();
 		}
-		while (tool_list && __getitem__ (tool_list, 0) === null) {
+		while (__call__ (_truth, null, tool_list) && __getitem__ (tool_list, 0) === null) {
 			(function () {
 				var __accu0__ = tool_list;
 				return __call__ (__accu0__.py_pop, __accu0__, 0);
@@ -2055,7 +2211,7 @@ export var unregister_tool = function (tool_cls) {
 		}
 		for (var i = __sub__ (__call__ (len, null, tool_list), 1); i > __neg__ (1); i--) {
 			var is_none = __getitem__ (tool_list, i) === null;
-			if (is_none && prev_is_none) {
+			if (__call__ (_truth, null, is_none) && __call__ (_truth, null, prev_is_none)) {
 				(function () {
 					var __accu0__ = tool_list;
 					return __call__ (__accu0__.py_pop, __accu0__, i);
@@ -2073,7 +2229,7 @@ export var unregister_tool = function (tool_cls) {
 		__call__ (tool_list_clean, null, tools);
 		var changed = true;
 	}
-	if (!(changed)) {
+	if (!(__call__ (_truth, null, changed))) {
 		var __iterable0__ = __call__ (py_enumerate, null, tools);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -2102,7 +2258,7 @@ export var unregister_tool = function (tool_cls) {
 						return __call__ (__accu0__.py_pop, __accu0__, j);
 					}) ();
 					__call__ (tool_list_clean, null, item_clean);
-					if (item_clean) {
+					if (__call__ (_truth, null, item_clean)) {
 						__setitem__ (tools, i, __call__ (tuple, null, item_clean));
 					}
 					else {
@@ -2119,7 +2275,7 @@ export var unregister_tool = function (tool_cls) {
 			}
 		}
 	}
-	if (!(changed)) {
+	if (!(__call__ (_truth, null, changed))) {
 		var __except0__ = __call__ (Exception, null, (function () {
 			var __accu0__ = 'Unable to remove {!r}';
 			return __call__ (__accu0__.format, __accu0__, tool_cls);
@@ -2308,15 +2464,15 @@ export var make_rna_paths = function (struct_name, prop_name, enum_name) {
 	var src = __left0__;
 	var src_rna = __left0__;
 	var src_enum = __left0__;
-	if (struct_name) {
-		if (prop_name) {
+	if (__call__ (_truth, null, struct_name)) {
+		if (__call__ (_truth, null, prop_name)) {
 			var __left0__ = (function () {
 				var __accu0__ = '.';
 				return __call__ (__accu0__.join, __accu0__, tuple ([struct_name, prop_name]));
 			}) ();
 			var src = __left0__;
 			var src_rna = __left0__;
-			if (enum_name) {
+			if (__call__ (_truth, null, enum_name)) {
 				var __left0__ = (function () {
 					var __accu0__ = "{:s}:'{:s}'";
 					return __call__ (__accu0__.format, __accu0__, src_rna, enum_name);
@@ -2344,10 +2500,10 @@ export var expose_bundled_modules = function () {
 	}
 	else {
 	}
-	if (!(_bpy.app.module)) {
+	if (!(__call__ (_truth, null, _bpy.app.module))) {
 		return ;
 	}
-	if (!(_bpy.app.portable)) {
+	if (!(__call__ (_truth, null, _bpy.app.portable))) {
 		return ;
 	}
 	var version_dir = (function () {
@@ -2385,6 +2541,14 @@ export var expose_bundled_modules = function () {
 //# sourceMappingURL=bpy.utils.map
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case '_bpy': _bpy = value; break;
 		case '_preferences': _preferences = value; break;

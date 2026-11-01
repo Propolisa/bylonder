@@ -9,6 +9,162 @@ import {Menu, Panel} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.space_time';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var TIME_PT_playhead_snapping =  __class__ ('TIME_PT_playhead_snapping', [Panel], {
 	__module__: __name__,
 	bl_space_type: 'DOPESHEET_EDITOR',
@@ -105,17 +261,17 @@ export var playback_controls = function (layout, context) {
 	var st = context.space_data;
 	var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR');
 	var is_timeline = __eq__ (st.py_metatype, 'DOPESHEET_EDITOR') && __eq__ (st.mode, 'TIMELINE');
-	var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
-	var tool_settings = (scene ? scene.tool_settings : null);
+	var scene = (!(__call__ (_truth, null, is_sequencer)) ? context.scene : context.sequencer_scene);
+	var tool_settings = (__call__ (_truth, null, scene) ? scene.tool_settings : null);
 	var screen = context.screen;
-	if (!(scene)) {
+	if (!(__call__ (_truth, null, scene))) {
 		return ;
 	}
 	(function () {
 		var __accu0__ = layout;
 		return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_playback', text: 'Playback'}));
 	}) ();
-	if (tool_settings && !(is_timeline)) {
+	if (__call__ (_truth, null, tool_settings) && !(__call__ (_truth, null, is_timeline))) {
 		var icon_keytype = (function () {
 			var __accu0__ = 'KEYTYPE_{:s}_VEC';
 			return __call__ (__accu0__.format, __accu0__, tool_settings.keyframe_type);
@@ -125,7 +281,7 @@ export var playback_controls = function (layout, context) {
 			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_keyframing_settings', text_ctxt: i18n_contexts.id_windowmanager, icon: icon_keytype}));
 		}) ();
 	}
-	if (is_sequencer) {
+	if (__call__ (_truth, null, is_sequencer)) {
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, context.workspace, 'use_scene_time_sync');
@@ -135,7 +291,7 @@ export var playback_controls = function (layout, context) {
 		var __accu0__ = layout;
 		return __call__ (__accu0__.separator_spacer, __accu0__);
 	}) ();
-	if (tool_settings) {
+	if (__call__ (_truth, null, tool_settings)) {
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -166,8 +322,8 @@ export var playback_controls = function (layout, context) {
 		var __accu0__ = row;
 		return __call__ (__accu0__.operator, __accu0__, 'screen.keyframe_jump', __kwargtrans__ ({text: '', icon: 'PREV_KEYFRAME'}));
 	}) ().py_next = false;
-	if (!(screen.is_animation_playing)) {
-		if (scene && __eq__ (scene.sync_mode, 'AUDIO_SYNC') && __eq__ (context.preferences.system.audio_device, 'JACK')) {
+	if (!(__call__ (_truth, null, screen.is_animation_playing))) {
+		if (__call__ (_truth, null, scene) && __eq__ (scene.sync_mode, 'AUDIO_SYNC') && __eq__ (context.preferences.system.audio_device, 'JACK')) {
 			row.scale_x = 2;
 			(function () {
 				var __accu0__ = row;
@@ -218,7 +374,7 @@ export var playback_controls = function (layout, context) {
 		var __accu0__ = row;
 		return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TIME_PT_jump', text: ''}));
 	}) ();
-	if (tool_settings) {
+	if (__call__ (_truth, null, tool_settings)) {
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -240,12 +396,12 @@ export var playback_controls = function (layout, context) {
 		var __accu0__ = layout;
 		return __call__ (__accu0__.separator_spacer, __accu0__);
 	}) ();
-	if (scene) {
+	if (__call__ (_truth, null, scene)) {
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (scene.show_subframe) {
+		if (__call__ (_truth, null, scene.show_subframe)) {
 			row.scale_x = 1.15;
 			(function () {
 				var __accu0__ = row;
@@ -272,7 +428,7 @@ export var playback_controls = function (layout, context) {
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
 		sub.scale_x = 0.8;
-		if (!(scene.use_preview_range)) {
+		if (!(__call__ (_truth, null, scene.use_preview_range))) {
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.prop, __accu0__, scene, 'frame_start', __kwargtrans__ ({text: 'Start'}));
@@ -331,7 +487,7 @@ export var TIME_MT_view =  __class__ ('TIME_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'action.view_all');
 		}) ();
-		if (context.scene.use_preview_range) {
+		if (__call__ (_truth, null, context.scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
@@ -520,7 +676,7 @@ export var TIME_PT_playback =  __class__ ('TIME_PT_playback', [TimelinePanelButt
 		var screen = context.screen;
 		var st = context.space_data;
 		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
-		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
+		var scene = (!(__call__ (_truth, null, is_sequencer)) ? context.scene : context.sequencer_scene);
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, scene, 'sync_mode', __kwargtrans__ ({text: 'Sync'}));
@@ -549,7 +705,7 @@ export var TIME_PT_playback =  __class__ ('TIME_PT_playback', [TimelinePanelButt
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.active = !(scene.lock_frame_selection_to_range);
+		row.active = !(__call__ (_truth, null, scene.lock_frame_selection_to_range));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, scene, 'allow_preroll');
@@ -657,8 +813,8 @@ export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_setting
 		}
 		var st = context.space_data;
 		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
-		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
-		if (scene.keying_sets_all.active) {
+		var scene = (!(__call__ (_truth, null, is_sequencer)) ? context.scene : context.sequencer_scene);
+		if (__call__ (_truth, null, scene.keying_sets_all.active)) {
 			self.bl_label = scene.keying_sets_all.active.bl_label;
 			if (__in__ (scene.keying_sets_all.active.bl_label, scene.keying_sets)) {
 				self.bl_translation_context = i18n_contexts.no_translation;
@@ -690,7 +846,7 @@ export var TIME_PT_keyframing_settings =  __class__ ('TIME_PT_keyframing_setting
 		var layout = self.layout;
 		var st = context.space_data;
 		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
-		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
+		var scene = (!(__call__ (_truth, null, is_sequencer)) ? context.scene : context.sequencer_scene);
 		var tool_settings = context.tool_settings;
 		var col = (function () {
 			var __accu0__ = layout;
@@ -771,7 +927,7 @@ export var TIME_PT_auto_keyframing =  __class__ ('TIME_PT_auto_keyframing', [Tim
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_keyframe_insert_keyingset', __kwargtrans__ ({text: 'Only Active Keying Set', toggle: false}));
 		}) ();
-		if (!(prefs.edit.use_keyframe_insert_available)) {
+		if (!(__call__ (_truth, null, prefs.edit.use_keyframe_insert_available))) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_record_with_nla', __kwargtrans__ ({text: 'Layered Recording'}));
@@ -805,7 +961,7 @@ export var TIME_PT_jump =  __class__ ('TIME_PT_jump', [TimelinePanelButtons, Pan
 		layout.use_property_decorate = false;
 		var st = context.space_data;
 		var is_sequencer = __eq__ (st.py_metatype, 'SEQUENCE_EDITOR') && __eq__ (st.view_type, 'SEQUENCER');
-		var scene = (!(is_sequencer) ? context.scene : context.sequencer_scene);
+		var scene = (!(__call__ (_truth, null, is_sequencer)) ? context.scene : context.sequencer_scene);
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, scene, 'time_jump_unit', __kwargtrans__ ({expand: true, text: 'Jump Unit'}));
@@ -831,6 +987,14 @@ export {Menu, Panel, i18n_contexts, n_, register_class};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'TIME_PT_playhead_snapping': TIME_PT_playhead_snapping = value; break;
 		case 'playback_controls': playback_controls = value; break;
 		case 'TIME_MT_view': TIME_MT_view = value; break;

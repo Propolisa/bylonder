@@ -101,6 +101,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -1695,8 +1711,8 @@ export var radial_control_properties = function (paint, prop, secondary_prop, se
 	}
 	var brush_path = __add__ (__add__ ('tool_settings.', paint), '.brush');
 	var unified_path = __add__ (__add__ ('tool_settings.', paint), '.unified_paint_settings');
-	var rotation = (secondary_rotation ? 'mask_texture_slot.angle' : 'texture_slot.angle');
-	return dict ({'properties': [tuple (['data_path_primary', __add__ (__add__ (brush_path, '.'), prop)]), tuple (['data_path_secondary', (secondary_prop ? __add__ (__add__ (unified_path, '.'), prop) : '')]), tuple (['use_secondary', (secondary_prop ? __add__ (__add__ (unified_path, '.'), secondary_prop) : '')]), tuple (['rotation_path', __add__ (__add__ (brush_path, '.'), rotation)]), tuple (['color_path', __add__ (brush_path, '.cursor_color_add')]), tuple (['fill_color_path', (color ? __add__ (brush_path, '.color') : '')]), tuple (['fill_color_override_path', (color ? __add__ (unified_path, '.color') : '')]), tuple (['fill_color_override_test_path', (color ? __add__ (unified_path, '.use_unified_color') : '')]), tuple (['zoom_path', (zoom ? 'space_data.zoom' : '')]), tuple (['image_id', __add__ (brush_path, '')]), tuple (['secondary_tex', secondary_rotation])]});
+	var rotation = (__call__ (_truth, null, secondary_rotation) ? 'mask_texture_slot.angle' : 'texture_slot.angle');
+	return dict ({'properties': [tuple (['data_path_primary', __add__ (__add__ (brush_path, '.'), prop)]), tuple (['data_path_secondary', (__call__ (_truth, null, secondary_prop) ? __add__ (__add__ (unified_path, '.'), prop) : '')]), tuple (['use_secondary', (__call__ (_truth, null, secondary_prop) ? __add__ (__add__ (unified_path, '.'), secondary_prop) : '')]), tuple (['rotation_path', __add__ (__add__ (brush_path, '.'), rotation)]), tuple (['color_path', __add__ (brush_path, '.cursor_color_add')]), tuple (['fill_color_path', (__call__ (_truth, null, color) ? __add__ (brush_path, '.color') : '')]), tuple (['fill_color_override_path', (__call__ (_truth, null, color) ? __add__ (unified_path, '.color') : '')]), tuple (['fill_color_override_test_path', (__call__ (_truth, null, color) ? __add__ (unified_path, '.use_unified_color') : '')]), tuple (['zoom_path', (__call__ (_truth, null, zoom) ? 'space_data.zoom' : '')]), tuple (['image_id', __add__ (brush_path, '')]), tuple (['secondary_tex', secondary_rotation])]});
 };
 export var _template_paint_radial_control = function (paint, rotation, secondary_rotation, color, zoom, weight) {
 	if (typeof rotation == 'undefined' || (rotation != null && globalThis.Object.hasOwn (rotation, "__kwargtrans__"))) {;
@@ -1737,19 +1753,19 @@ export var _template_paint_radial_control = function (paint, rotation, secondary
 		var __accu0__ = py_items;
 		return __call__ (__accu0__.extend, __accu0__, [tuple (['wm.radial_control', dict ({'type': 'S', 'value': 'PRESS'}), __call__ (radial_control_properties, null, paint, 'size', 'use_unified_size', __kwargtrans__ ({secondary_rotation: secondary_rotation, color: color, zoom: zoom}))]), tuple (['wm.radial_control', dict ({'type': 'U', 'value': 'PRESS'}), __call__ (radial_control_properties, null, paint, 'strength', 'use_unified_strength', __kwargtrans__ ({secondary_rotation: secondary_rotation, color: color}))])]);
 	}) ();
-	if (rotation) {
+	if (__call__ (_truth, null, rotation)) {
 		(function () {
 			var __accu0__ = py_items;
 			return __call__ (__accu0__.extend, __accu0__, [tuple (['wm.radial_control', dict ({'type': 'F', 'value': 'PRESS', 'ctrl': true}), __call__ (radial_control_properties, null, paint, 'texture_slot.angle', null, __kwargtrans__ ({color: color}))])]);
 		}) ();
 	}
-	if (secondary_rotation) {
+	if (__call__ (_truth, null, secondary_rotation)) {
 		(function () {
 			var __accu0__ = py_items;
 			return __call__ (__accu0__.extend, __accu0__, [tuple (['wm.radial_control', dict ({'type': 'F', 'value': 'PRESS', 'ctrl': true, 'alt': true}), __call__ (radial_control_properties, null, paint, 'mask_texture_slot.angle', null, __kwargtrans__ ({secondary_rotation: secondary_rotation, color: color}))])]);
 		}) ();
 	}
-	if (weight) {
+	if (__call__ (_truth, null, weight)) {
 		(function () {
 			var __accu0__ = py_items;
 			return __call__ (__accu0__.extend, __accu0__, [tuple (['wm.radial_control', dict ({'type': 'F', 'value': 'PRESS', 'ctrl': true, 'alt': true}), __call__ (radial_control_properties, null, paint, 'mask_texture_slot.angle', null, __kwargtrans__ ({secondary_rotation: secondary_rotation, color: color}))]), tuple (['wm.radial_control', dict ({'type': 'F', 'value': 'PRESS', 'ctrl': true}), __call__ (radial_control_properties, null, paint, 'weight', 'use_unified_weight')])]);
@@ -2234,7 +2250,7 @@ export var _template_node_select = function () {
 	else {
 	}
 	var py_items = [tuple (['node.select', dict ({'type': py_metatype, 'value': value}), dict ({'properties': [tuple (['deselect_all', true]), tuple (['select_passthrough', true])]})]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'ctrl': true}), null]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'alt': true}), null]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'ctrl': true, 'alt': true}), null]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'shift': true}), dict ({'properties': [tuple (['toggle', true])]})]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'shift': true, 'ctrl': true}), dict ({'properties': [tuple (['toggle', true])]})]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'shift': true, 'alt': true}), dict ({'properties': [tuple (['toggle', true])]})]), tuple (['node.select', dict ({'type': py_metatype, 'value': value, 'shift': true, 'ctrl': true, 'alt': true}), dict ({'properties': [tuple (['toggle', true])]})])];
-	if (select_passthrough && __eq__ (value, 'PRESS')) {
+	if (__call__ (_truth, null, select_passthrough) && __eq__ (value, 'PRESS')) {
 		(function () {
 			var __accu0__ = py_items;
 			return __call__ (__accu0__.append, __accu0__, tuple (['node.select', dict ({'type': py_metatype, 'value': 'CLICK'}), dict ({'properties': [tuple (['deselect_all', true])]})]));
@@ -2340,10 +2356,10 @@ export var keymap_transform_tool_mmb = function (keymap) {
 		var km_name = __left0__ [0];
 		var _km_args = __left0__ [1];
 		var km_content = __left0__ [2];
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = re_fallback_tool;
 			return __call__ (__accu0__.match, __accu0__, km_name);
-		}) ()) {
+		}) ())) {
 			var km_items = __getitem__ (km_content, 'items');
 			var km_items_new = [];
 			var __iterable1__ = km_items;
@@ -2352,10 +2368,10 @@ export var keymap_transform_tool_mmb = function (keymap) {
 				var kmi = __getitem__ (__iterable1__, __index1__);
 				var ty = __getitem__ (__getitem__ (kmi, 1), 'type');
 				var value = __getitem__ (__getitem__ (kmi, 1), 'value');
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = km_name;
 					return __call__ (__accu0__.endswith, __accu0__, ' (fallback)');
-				}) ()) {
+				}) ())) {
 					if (__eq__ (ty, 'RIGHTMOUSE')) {
 						var kmi = tuple ([__getitem__ (kmi, 0), (function () {
 							var __accu0__ = __getitem__ (kmi, 1);
@@ -2489,6 +2505,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'Params': Params = value; break;

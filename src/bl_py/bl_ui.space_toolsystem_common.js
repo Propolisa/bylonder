@@ -108,6 +108,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -196,7 +212,7 @@ export var _keymap_fn_from_seq = function (keymap_data) {
 		}
 		else {
 		}
-		if (keymap_fn.keymap_data) {
+		if (__call__ (_truth, null, keymap_fn.keymap_data)) {
 			var keymap_init_from_data = __call__ (_member, null, 'bl_keymap_utils.io', 'keymap_init_from_data');
 			__call__ (keymap_init_from_data, null, km, keymap_fn.keymap_data);
 		}
@@ -467,10 +483,10 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 				catch (__except0__) {
 					if (isinstance (__except0__, Exception)) {
 						var ex = __except0__;
-						if (!((function () {
+						if (!(__call__ (_truth, null, (function () {
 							var __accu0__ = os.path;
 							return __call__ (__accu0__.exists, __accu0__, filepath);
-						}) ())) {
+						}) ()))) {
 							__call__ (print, null, 'Missing icons:', filepath, ex);
 						}
 						else {
@@ -523,7 +539,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var item = __getitem__ (__iterable1__, __index1__);
-				if (item === null || __call__ (_item_is_fn, null, item)) {
+				if (item === null || __call__ (_truth, null, __call__ (_item_is_fn, null, item))) {
 					yield null;
 				}
 				else {
@@ -558,7 +574,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var item = __getitem__ (__iterable1__, __index1__);
-				if (item === null || __call__ (_item_is_fn, null, item)) {
+				if (item === null || __call__ (_truth, null, __call__ (_item_is_fn, null, item))) {
 					yield tuple ([null, __neg__ (1)]);
 				}
 				else {
@@ -597,7 +613,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 				if (item === null) {
 					yield null;
 				}
-				else if (__call__ (_item_is_fn, null, item)) {
+				else if (__call__ (_truth, null, __call__ (_item_is_fn, null, item))) {
 					yield* (function () {
 						var __accu0__ = ToolSelectPanelHelper;
 						return __call__ (__accu0__._tools_flatten_with_dynamic, __accu0__, __call__ (item, null, context), __kwargtrans__ ({context: context}));
@@ -647,7 +663,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			var item = __getitem__ (__iterable0__, __index0__);
 			if (item !== null) {
 				if (__eq__ (item.idname, tool_active_id)) {
-					if (with_icon) {
+					if (__call__ (_truth, null, with_icon)) {
 						var icon_value = (function () {
 							var __accu0__ = ToolSelectPanelHelper;
 							return __call__ (__accu0__._icon_value_from_icon_handle, __accu0__, item.icon);
@@ -815,7 +831,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 					}
 				}
 				else if (__eq__ (item.idname, idname)) {
-					if (coerce) {
+					if (__call__ (_truth, null, coerce)) {
 						return tuple ([item]);
 					}
 					else {
@@ -952,14 +968,14 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			var __accu0__ = cls;
 			return __call__ (__accu0__._tool_get_group_by_id, __accu0__, context, idname_group, __kwargtrans__ ({coerce: true}));
 		}) ();
-		if (item_group) {
+		if (__call__ (_truth, null, item_group)) {
 			var __iterable0__ = __call__ (py_enumerate, null, item_group);
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var __left0__ = __getitem__ (__iterable0__, __index0__);
 				var i = __left0__ [0];
 				var item = __left0__ [1];
-				if (item && __eq__ (item.idname, idname)) {
+				if (__call__ (_truth, null, item) && __eq__ (item.idname, idname)) {
 					__setitem__ (cls._tool_group_active, __getitem__ (item_group, 0).idname, i);
 					return true;
 				}
@@ -1134,7 +1150,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		}
 		else {
 		}
-		if (cls._has_keymap_data) {
+		if (__call__ (_truth, null, cls._has_keymap_data)) {
 			return ;
 		}
 		(function () {
@@ -1455,7 +1471,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			var __accu0__ = ToolSelectPanelHelper;
 			return __call__ (__accu0__._tool_active_from_context, __accu0__, context, space_type);
 		}) (), 'idname', null);
-		if (detect_layout) {
+		if (__call__ (_truth, null, detect_layout)) {
 			var __left0__ = (function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__._layout_generator_detect_from_region, __accu0__, layout, context.region, scale_y);
@@ -1501,13 +1517,13 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 						continue;
 					}
 					var is_active = __eq__ (sub_item.idname, tool_active_id);
-					if (is_active) {
+					if (__call__ (_truth, null, is_active)) {
 						var index = i;
 						break;
 					}
 				}
 				// pass;
-				if (is_active) {
+				if (__call__ (_truth, null, is_active)) {
 					__setitem__ (cls._tool_group_active, __getitem__ (item, 0).idname, index);
 				}
 				else {
@@ -1532,16 +1548,16 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 				var __accu0__ = ui_gen;
 				return __call__ (__accu0__.send, __accu0__, false);
 			}) ();
-			if (use_menu) {
+			if (__call__ (_truth, null, use_menu)) {
 				(function () {
 					var __accu0__ = sub;
-					return __call__ (__accu0__.operator_menu_hold, __accu0__, 'wm.tool_set_by_id', __kwargtrans__ ({text: (show_text ? item.label : ''), depress: is_active, menu: 'WM_MT_toolsystem_submenu', icon_value: icon_value}));
+					return __call__ (__accu0__.operator_menu_hold, __accu0__, 'wm.tool_set_by_id', __kwargtrans__ ({text: (__call__ (_truth, null, show_text) ? item.label : ''), depress: is_active, menu: 'WM_MT_toolsystem_submenu', icon_value: icon_value}));
 				}) ().py_name = item.idname;
 			}
 			else {
 				(function () {
 					var __accu0__ = sub;
-					return __call__ (__accu0__.operator, __accu0__, 'wm.tool_set_by_id', __kwargtrans__ ({text: (show_text ? item.label : ''), depress: is_active, icon_value: icon_value}));
+					return __call__ (__accu0__.operator, __accu0__, 'wm.tool_set_by_id', __kwargtrans__ ({text: (__call__ (_truth, null, show_text) ? item.label : ''), depress: is_active, icon_value: icon_value}));
 				}) ().py_name = item.idname;
 			}
 		}
@@ -1665,7 +1681,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		if (item_fallback !== null) {
 			var draw_settings = item_fallback.draw_settings;
 			if (draw_settings !== null) {
-				if (!(is_horizontal_layout)) {
+				if (!(__call__ (_truth, null, is_horizontal_layout))) {
 					(function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.separator, __accu0__);
@@ -1724,7 +1740,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		if (item === null) {
 			return null;
 		}
-		if (show_tool_icon_always) {
+		if (__call__ (_truth, null, show_tool_icon_always)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __add__ ('    ', __call__ (iface_, null, item.label, i18n_contexts.operator_default)), icon_value: icon_value, translate: false}));
@@ -1734,7 +1750,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		else if (!(context.space_data.show_region_toolbar)) {
+		else if (!(__call__ (_truth, null, context.space_data.show_region_toolbar))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_icon, __accu0__, __kwargtrans__ ({icon_value: icon_value, scale: 0.5}));
@@ -1749,7 +1765,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			__call__ (draw_settings, null, context, layout, tool);
 		}
 		var idname_fallback = tool.idname_fallback;
-		if (idname_fallback && __ne__ (idname_fallback, item.idname)) {
+		if (__call__ (_truth, null, idname_fallback) && __ne__ (idname_fallback, item.idname)) {
 			var tool_settings = context.tool_settings;
 			if (__eq__ (tool_settings.workspace_tool_type, 'FALLBACK')) {
 				var tool_fallback_id = cls.tool_fallback_id;
@@ -1829,7 +1845,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (is_active_tool) {
+		if (__call__ (_truth, null, is_active_tool)) {
 			var index_current = __neg__ (1);
 		}
 		else {
@@ -1916,7 +1932,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			return __call__ (__accu0__.prop_enum, __accu0__, tool_settings, 'workspace_tool_type', __kwargtrans__ ({value: 'DEFAULT', text: 'Active Tool', icon: 'TOOL_SETTINGS'}));
 		}) ();
 		var is_active_tool = __eq__ (tool_settings.workspace_tool_type, 'DEFAULT');
-		if (is_active_tool) {
+		if (__call__ (_truth, null, is_active_tool)) {
 			var index_current = __neg__ (1);
 		}
 		else {
@@ -1941,7 +1957,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 			}) ();
 			props.py_name = sub_item.idname;
 			props.space_type = space_type;
-			if (!(is_fallback_group_active)) {
+			if (!(__call__ (_truth, null, is_fallback_group_active))) {
 				props.as_fallback = true;
 			}
 		}
@@ -2074,7 +2090,7 @@ export var _activate_by_item = function (context, space_type, item, index) {
 		return __call__ (__accu0__._tool_active_from_context, __accu0__, context, space_type, __kwargtrans__ ({create: true}));
 	}) ();
 	var tool_fallback_id = cls.tool_fallback_id;
-	if (as_fallback) {
+	if (__call__ (_truth, null, as_fallback)) {
 		var __left0__ = (function () {
 			var __accu0__ = cls;
 			return __call__ (__accu0__._tool_get_by_id_active_with_group, __accu0__, context, tool_fallback_id);
@@ -2118,7 +2134,7 @@ export var _activate_by_item = function (context, space_type, item, index) {
 	}
 	else {
 		var stored_idname_fallback = tool.idname_fallback;
-		if (stored_idname_fallback) {
+		if (__call__ (_truth, null, stored_idname_fallback)) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__._tool_group_active_set_by_id, __accu0__, context, tool_fallback_id, stored_idname_fallback);
@@ -2144,7 +2160,7 @@ export var _activate_by_item = function (context, space_type, item, index) {
 	var gizmo_group = item.widget || '';
 	var idname_fallback = item_fallback && item_fallback.idname || '';
 	var keymap_fallback = item_fallback && item_fallback.keymap && __getitem__ (item_fallback.keymap, 0) || '';
-	if (keymap_fallback) {
+	if (__call__ (_truth, null, keymap_fallback)) {
 		var keymap_fallback = __add__ (keymap_fallback, ' (fallback)');
 	}
 	(function () {
@@ -2152,14 +2168,14 @@ export var _activate_by_item = function (context, space_type, item, index) {
 		return __call__ (__accu0__.setup, __accu0__, __kwargtrans__ ({idname: item.idname, keymap: (item.keymap !== null ? __getitem__ (item.keymap, 0) : ''), cursor: item.cursor || 'DEFAULT', options: item.options || __call__ (set, null), gizmo_group: gizmo_group, brush_type: item.brush_type || 'ANY', data_block: item.data_block || '', operator: item.operator || '', index: index, idname_fallback: idname_fallback, keymap_fallback: keymap_fallback}));
 	}) ();
 	var _walrus1 = __ne__ (gizmo_group, '');
-	if (_walrus1) {
+	if (__call__ (_truth, null, _walrus1)) {
 		var props = (function () {
 			var __accu0__ = tool;
 			return __call__ (__accu0__.gizmo_group_properties, __accu0__, gizmo_group);
 		}) ();
 		var _walrus1 = props;
 	}
-	if (_walrus1) {
+	if (__call__ (_truth, null, _walrus1)) {
 		if (props === null) {
 			__call__ (print, null, 'Error:', gizmo_group, 'could not access properties!');
 		}
@@ -2328,7 +2344,7 @@ export var activate_by_id_or_cycle = function (context, space_type, idname) {
 					break;
 				}
 			}
-			if (id_current) {
+			if (__call__ (_truth, null, id_current)) {
 				break;
 			}
 		}
@@ -2384,7 +2400,7 @@ export var description_from_id = function (context, space_type, idname) {
 		}
 		return __call__ (tip_, null, description);
 	}
-	if (use_operator) {
+	if (__call__ (_truth, null, use_operator)) {
 		var operator = item.operator;
 		if (operator === null) {
 			if (item.keymap !== null) {
@@ -2394,7 +2410,7 @@ export var description_from_id = function (context, space_type, idname) {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var kmi = __getitem__ (__iterable0__, __index0__);
-						if (kmi.active) {
+						if (__call__ (_truth, null, kmi.active)) {
 							var operator = kmi.idname;
 							break;
 						}
@@ -2631,7 +2647,7 @@ export var keymap_from_id = function (context, space_type, idname) {
 		return false;
 	}
 	var keymap = item.keymap;
-	if (keymap) {
+	if (__call__ (_truth, null, keymap)) {
 		return __getitem__ (keymap, 0);
 	}
 	return '';
@@ -2681,6 +2697,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

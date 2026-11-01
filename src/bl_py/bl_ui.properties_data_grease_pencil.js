@@ -10,6 +10,162 @@ import {Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_data_grease_pencil';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	__module__: __name__,
 	bl_space_type: 'PROPERTIES',
@@ -144,7 +300,7 @@ export var GreasePencil_LayerMaskPanel =  __class__ ('GreasePencil_LayerMaskPane
 		var layer = grease_pencil.layers.active;
 		var layout = self.layout;
 		layout.enabled = layer.use_masks;
-		if (!(layer)) {
+		if (!(__call__ (_truth, null, layer))) {
 			return ;
 		}
 		var rows = 4;
@@ -211,7 +367,7 @@ export var GreasePencil_LayerTransformPanel =  __class__ ('GreasePencil_LayerTra
 		layout.use_property_split = true;
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
-		layout.active = !(layer.lock);
+		layout.active = !(__call__ (_truth, null, layer.lock));
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -259,7 +415,7 @@ export var GreasePencil_LayerAdjustmentsPanel =  __class__ ('GreasePencil_LayerA
 		layout.use_property_split = true;
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
-		layout.active = !(layer.lock);
+		layout.active = !(__call__ (_truth, null, layer.lock));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -303,7 +459,7 @@ export var GreasePencil_LayerRelationsPanel =  __class__ ('GreasePencil_LayerRel
 		layout.use_property_split = true;
 		var grease_pencil = context.grease_pencil;
 		var layer = grease_pencil.layers.active;
-		layout.active = !(layer.lock);
+		layout.active = !(__call__ (_truth, null, layer.lock));
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -312,7 +468,7 @@ export var GreasePencil_LayerRelationsPanel =  __class__ ('GreasePencil_LayerRel
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, layer, 'parent', __kwargtrans__ ({text: 'Parent'}));
 		}) ();
-		if (layer.parent && __eq__ (layer.parent.py_metatype, 'ARMATURE')) {
+		if (__call__ (_truth, null, layer.parent) && __eq__ (layer.parent.py_metatype, 'ARMATURE')) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -416,7 +572,7 @@ export var GREASE_PENCIL_MT_layer_mask_add =  __class__ ('GREASE_PENCIL_MT_layer
 				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_mask_add', __kwargtrans__ ({text: layer.py_name}));
 			}) ().py_name = layer.py_name;
 		}
-		if (!(found)) {
+		if (!(__call__ (_truth, null, found))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No layers to add'}));
@@ -447,13 +603,13 @@ export var DATA_PT_context_grease_pencil =  __class__ ('DATA_PT_context_grease_p
 		var ob = context.object;
 		var grease_pencil = context.grease_pencil;
 		var space = context.space_data;
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
 			}) ();
 		}
-		else if (grease_pencil) {
+		else if (__call__ (_truth, null, grease_pencil)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
@@ -526,7 +682,7 @@ export var GREASE_PENCIL_MT_grease_pencil_add_layer_extra =  __class__ ('GREASE_
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, grease_pencil, 'use_autolock_layers', __kwargtrans__ ({text: 'Autolock Inactive Layers'}));
 		}) ();
-		if (layer) {
+		if (__call__ (_truth, null, layer)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, layer, 'ignore_locked_materials');
@@ -670,13 +826,13 @@ export var DATA_PT_grease_pencil_layers =  __class__ ('DATA_PT_grease_pencil_lay
 			var __accu0__ = sub;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (is_layer_active) {
+		if (__call__ (_truth, null, is_layer_active)) {
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
 			}) ();
 		}
-		if (is_group_active) {
+		if (__call__ (_truth, null, is_group_active)) {
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_group_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
@@ -706,7 +862,7 @@ export var DATA_PT_grease_pencil_layers =  __class__ ('DATA_PT_grease_pencil_lay
 			var __accu0__ = sub;
 			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
 		}) ().direction = 'DOWN';
-		if (!(is_layer_active)) {
+		if (!(__call__ (_truth, null, is_layer_active))) {
 			return ;
 		}
 		layout.use_property_split = true;
@@ -1083,13 +1239,13 @@ export var GREASE_PENCIL_UL_attributes =  __class__ ('GREASE_PENCIL_UL_attribute
 			}
 			return __accu0__;
 		}) ();
-		if (self.filter_name) {
+		if (__call__ (_truth, null, self.filter_name)) {
 			var flags = (function () {
 				var __accu0__ = bpy.types.UI_UL_list;
 				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
 			}) ();
 		}
-		if (!(flags)) {
+		if (!(__call__ (_truth, null, flags))) {
 			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
 		var __iterable0__ = __call__ (py_enumerate, null, attributes);
@@ -1098,9 +1254,9 @@ export var GREASE_PENCIL_UL_attributes =  __class__ ('GREASE_PENCIL_UL_attribute
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var idx = __left0__ [0];
 			var item = __left0__ [1];
-			__setitem__ (flags, idx, (item.is_internal ? 0 : __getitem__ (flags, idx)));
+			__setitem__ (flags, idx, (__call__ (_truth, null, item.is_internal) ? 0 : __getitem__ (flags, idx)));
 		}
-		if (self.use_filter_sort_alpha) {
+		if (__call__ (_truth, null, self.use_filter_sort_alpha)) {
 			var indices = (function () {
 				var __accu0__ = bpy.types.UI_UL_list;
 				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
@@ -1214,6 +1370,14 @@ export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_c
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'DataButtonsPanel': DataButtonsPanel = value; break;
 		case 'LayerDataButtonsPanel': LayerDataButtonsPanel = value; break;
 		case 'GREASE_PENCIL_UL_masks': GREASE_PENCIL_UL_masks = value; break;

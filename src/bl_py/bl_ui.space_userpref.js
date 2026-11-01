@@ -108,6 +108,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -171,13 +187,13 @@ export var USERPREF_HT_header =  __class__ ('USERPREF_HT_header', [Header], {
 		}
 		var prefs = context.preferences;
 		layout.operator_context = 'EXEC_AREA';
-		if (prefs.use_preferences_save && !(bpy.app.use_userpref_skip_save_on_exit)) {
+		if (__call__ (_truth, null, prefs.use_preferences_save) && !(__call__ (_truth, null, bpy.app.use_userpref_skip_save_on_exit))) {
 			// pass;
 		}
 		else {
 			(function () {
 				var __accu0__ = layout;
-				return __call__ (__accu0__.operator, __accu0__, 'wm.save_userpref', __kwargtrans__ ({text: __add__ ((prefs.is_dirty ? '* ' : ''), __call__ (iface_, null, 'Save Preferences')), translate: false}));
+				return __call__ (__accu0__.operator, __accu0__, 'wm.save_userpref', __kwargtrans__ ({text: __add__ ((__call__ (_truth, null, prefs.is_dirty) ? '* ' : ''), __call__ (iface_, null, 'Save Preferences')), translate: false}));
 			}) ();
 		}
 	};},
@@ -255,7 +271,7 @@ export var USERPREF_PT_navigation_bar =  __class__ ('USERPREF_PT_navigation_bar'
 		}) ();
 		col.scale_x = 1.3;
 		col.scale_y = 1.3;
-		if (view.search_filter) {
+		if (__call__ (_truth, null, view.search_filter)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop_tabs_enum, __accu0__, prefs, 'active_section', __kwargtrans__ ({data_highlight: view, property_highlight: 'tab_search_results', expand_as: 'ROW'}));
@@ -357,7 +373,7 @@ export var USERPREF_MT_save_load =  __class__ ('USERPREF_MT_save_load', [Menu], 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.active = !(bpy.app.use_userpref_skip_save_on_exit);
+		row.active = !(__call__ (_truth, null, bpy.app.use_userpref_skip_save_on_exit));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, prefs, 'use_preferences_save', __kwargtrans__ ({text: 'Auto-Save Preferences'}));
@@ -367,7 +383,7 @@ export var USERPREF_MT_save_load =  __class__ ('USERPREF_MT_save_load', [Menu], 
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
 		layout.operator_context = 'EXEC_AREA';
-		if (prefs.use_preferences_save) {
+		if (__call__ (_truth, null, prefs.use_preferences_save)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.save_userpref', __kwargtrans__ ({text: 'Save Preferences'}));
@@ -384,7 +400,7 @@ export var USERPREF_MT_save_load =  __class__ ('USERPREF_MT_save_load', [Menu], 
 			return __call__ (__accu0__.operator, __accu0__, 'wm.read_userpref', __kwargtrans__ ({text: 'Revert to Saved Preferences'}));
 		}) ();
 		var app_template = prefs.app_template;
-		if (app_template) {
+		if (__call__ (_truth, null, app_template)) {
 			var display_name = (function () {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.display_name, __accu0__, __call__ (iface_, null, app_template));
@@ -499,7 +515,7 @@ export var CenterAlignMixIn =  __class__ ('CenterAlignMixIn', [object], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (is_wide) {
+		if (__call__ (_truth, null, is_wide)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__);
@@ -514,7 +530,7 @@ export var CenterAlignMixIn =  __class__ ('CenterAlignMixIn', [object], {
 			var __accu0__ = self;
 			return __call__ (__accu0__.draw_centered, __accu0__, context, col);
 		}) ();
-		if (is_wide) {
+		if (__call__ (_truth, null, is_wide)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__);
@@ -1796,7 +1812,7 @@ export var USERPREF_PT_system_cycles_devices =  __class__ ('USERPREF_PT_system_c
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
 		col.use_property_split = false;
-		if (bpy.app.build_options.cycles) {
+		if (__call__ (_truth, null, bpy.app.build_options.cycles)) {
 			var addon = (function () {
 				var __accu0__ = prefs.addons;
 				return __call__ (__accu0__.py_get, __accu0__, 'cycles');
@@ -1960,7 +1976,7 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 		}
 		var platform = __call__ (_member, null, 'sys', 'platform');
 		if (__eq__ (__getslice__ (platform, null, 3, 1), 'win')) {
-			if (context.preferences.system.is_microsoft_store_install) {
+			if (__call__ (_truth, null, context.preferences.system.is_microsoft_store_install)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Microsoft Store installation'}));
@@ -1973,7 +1989,7 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 			}
 		}
 		else {
-			if (!(bpy.app.portable)) {
+			if (!(__call__ (_truth, null, bpy.app.portable))) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'System Installation'}));
@@ -1985,10 +2001,10 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 				return false;
 			}
 			var os = __call__ (_module, null, 'os');
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.environ;
 				return __call__ (__accu0__.py_get, __accu0__, 'SNAP');
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Snap Package Installation'}));
@@ -2018,10 +2034,10 @@ export var USERPREF_PT_system_os_settings =  __class__ ('USERPREF_PT_system_os_s
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__._draw_associate_supported_or_label, __accu0__, context, layout);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Open blend files with this Blender version'}));
@@ -2085,7 +2101,7 @@ export var USERPREF_PT_system_network =  __class__ ('USERPREF_PT_system_network'
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: ''}));
 			}) ();
-			if (runtime_online_access) {
+			if (__call__ (_truth, null, runtime_online_access)) {
 				var text = __call__ (iface_, null, 'Enabled on startup, overriding the preference.');
 			}
 			else {
@@ -2597,7 +2613,7 @@ export var USERPREF_PT_theme =  __class__ ('USERPREF_PT_theme', [ThemePanel, Pan
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
 		var filepath = __getitem__ (context.preferences.themes, 0).filepath;
-		if (filepath) {
+		if (__call__ (_truth, null, filepath)) {
 			var preset_label = (function () {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.display_name, __accu0__, (function () {
@@ -3772,7 +3788,7 @@ export var ThemeGenericClassGenerator =  __class__ ('ThemeGenericClassGenerator'
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 						var prop = __getitem__ (__iterable1__, __index1__);
-						var new_datapath = (datapath ? __add__ (__add__ (datapath, '.'), prop.identifier) : prop.identifier);
+						var new_datapath = (__call__ (_truth, null, datapath) ? __add__ (__add__ (datapath, '.'), prop.identifier) : prop.identifier);
 						var panel_id = __add__ (__add__ (parent_id, '_'), prop.identifier);
 						yield (function () {
 							var __accu0__ = py_metatype;
@@ -3960,7 +3976,7 @@ export var USERPREF_PT_file_paths_script_directories =  __class__ ('USERPREF_PT_
 				var __accu0__ = name_col;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			row.alert = !(script_directory.py_name);
+			row.alert = !(__call__ (_truth, null, script_directory.py_name));
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, script_directory, 'name', __kwargtrans__ ({text: ''}));
@@ -3973,7 +3989,7 @@ export var USERPREF_PT_file_paths_script_directories =  __class__ ('USERPREF_PT_
 				var __accu0__ = row;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			subrow.alert = !(script_directory.directory);
+			subrow.alert = !(__call__ (_truth, null, script_directory.directory));
 			(function () {
 				var __accu0__ = subrow;
 				return __call__ (__accu0__.prop, __accu0__, script_directory, 'directory', __kwargtrans__ ({text: ''}));
@@ -4205,7 +4221,7 @@ export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_auto
 		var text = __call__ (iface_, null, 'Auto Run Python Scripts');
 		var autoexec_override = bpy.app.autoexec_override;
 		if (autoexec_override !== null) {
-			if (autoexec_override) {
+			if (__call__ (_truth, null, autoexec_override)) {
 				var text_warn = __call__ (iface_, null, 'enabled on startup, overriding the preference');
 			}
 			else {
@@ -4242,7 +4258,7 @@ export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_auto
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		layout.active = paths.use_scripts_auto_execute;
-		if (paths.use_scripts_auto_execute) {
+		if (__call__ (_truth, null, paths.use_scripts_auto_execute)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -4322,13 +4338,13 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 		else {
 		}
 		var repo = item;
-		var icon = (repo.use_remote_url ? 'INTERNET' : 'DISK_DRIVE');
+		var icon = (__call__ (_truth, null, repo.use_remote_url) ? 'INTERNET' : 'DISK_DRIVE');
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, repo, 'name', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
 		}) ();
-		if (repo.enabled) {
-			if (repo.use_custom_directory && __eq__ (repo.custom_directory, '') || repo.use_remote_url && __eq__ (repo.remote_url, '')) {
+		if (__call__ (_truth, null, repo.enabled)) {
+			if (__call__ (_truth, null, repo.use_custom_directory) && __eq__ (repo.custom_directory, '') || __call__ (_truth, null, repo.use_remote_url) && __eq__ (repo.remote_url, '')) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon: 'ERROR'}));
@@ -4337,7 +4353,7 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 		}
 		(function () {
 			var __accu0__ = layout;
-			return __call__ (__accu0__.prop, __accu0__, repo, 'enabled', __kwargtrans__ ({text: '', emboss: false, icon: (repo.enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT')}));
+			return __call__ (__accu0__.prop, __accu0__, repo, 'enabled', __kwargtrans__ ({text: '', emboss: false, icon: (__call__ (_truth, null, repo.enabled) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT')}));
 		}) ();
 	});},
 	get filter_items () {return __get__ (this, function (self, _context, data, propname) {
@@ -4374,7 +4390,7 @@ export var USERPREF_UL_extension_repos =  __class__ ('USERPREF_UL_extension_repo
 			}
 			else {
 			}
-			return tuple ([(repo__getitem__ (py_items, i).use_remote_url ? 0 : (__ne__ (repo.source, 'SYSTEM') ? 1 : 2)), (function () {
+			return tuple ([(__call__ (_truth, null, repo__getitem__ (py_items, i).use_remote_url) ? 0 : (__ne__ (repo.source, 'SYSTEM') ? 1 : 2)), (function () {
 				var __accu0__ = repo.py_name;
 				return __call__ (__accu0__.casefold, __accu0__);
 			}) ()]);
@@ -4734,7 +4750,7 @@ export var USERPREF_PT_input_touchpad =  __class__ ('USERPREF_PT_input_touchpad'
 		}) ();
 		var _wm_capabilities = __call__ (_member, null, '_bpy', '_wm_capabilities');
 		var capabilities = __call__ (_wm_capabilities, null);
-		if (!(__getitem__ (capabilities, 'TRACKPAD_PHYSICAL_DIRECTION'))) {
+		if (!(__call__ (_truth, null, __getitem__ (capabilities, 'TRACKPAD_PHYSICAL_DIRECTION')))) {
 			var row = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.row, __accu0__);
@@ -4792,7 +4808,7 @@ export var USERPREF_PT_input_tablet =  __class__ ('USERPREF_PT_input_tablet', [I
 			return __call__ (__accu0__.prop, __accu0__, inputs, 'pressure_softness');
 		}) ();
 		var use_debug = prefs.experimental.use_paint_debug && prefs.view.show_developer_ui;
-		if (use_debug) {
+		if (__call__ (_truth, null, use_debug)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, inputs, 'show_tablet_debug_values');
@@ -5217,7 +5233,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 			}) ();
 			return __call__ (__accu0__.prop, __accu0__, props, 'ndof_navigation_mode', __kwargtrans__ ({text: 'Navigation Mode'}));
 		}) ();
-		if (show_3dview_settings) {
+		if (__call__ (_truth, null, show_3dview_settings)) {
 			var colsub = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.column, __accu0__);
@@ -5243,7 +5259,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (show_3dview_settings) {
+		if (__call__ (_truth, null, show_3dview_settings)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Orbit Center'}));
@@ -5300,7 +5316,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 			var __accu0__ = layout_header;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Advanced'}));
 		}) ();
-		if (layout_advanced) {
+		if (__call__ (_truth, null, layout_advanced)) {
 			var col = (function () {
 				var __accu0__ = layout_advanced;
 				return __call__ (__accu0__.column, __accu0__);
@@ -5334,7 +5350,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 			}) ();
 			var row = (function () {
 				var __accu0__ = col;
-				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: (show_3dview_settings ? 'Invert Pan' : 'Invert Pan Axis')}));
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: (__call__ (_truth, null, show_3dview_settings) ? 'Invert Pan' : 'Invert Pan Axis')}));
 			}) ();
 			var __iterable0__ = tuple ([tuple (['X', 'ndof_panx_invert_axis']), tuple (['Y', 'ndof_pany_invert_axis']), tuple (['Z', 'ndof_panz_invert_axis'])]);
 			__iterable0__ = __i__ (__iterable0__);
@@ -5347,7 +5363,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 					return __call__ (__accu0__.prop, __accu0__, props, attr, __kwargtrans__ ({text: text, toggle: true}));
 				}) ();
 			}
-			if (show_3dview_settings) {
+			if (__call__ (_truth, null, show_3dview_settings)) {
 				var row = (function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Invert Rotate'}));
@@ -5364,7 +5380,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 					}) ();
 				}
 			}
-			if (show_3dview_settings) {
+			if (__call__ (_truth, null, show_3dview_settings)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, props, 'ndof_lock_camera_pan_zoom');
@@ -5513,7 +5529,7 @@ export var USERPREF_MT_extensions_active_repo_remove =  __class__ ('USERPREF_MT_
 			return __call__ (__accu0__.operator, __accu0__, 'preferences.extension_repo_remove', __kwargtrans__ ({text: 'Remove Repository'}));
 		}) ();
 		props.index = active_repo_index;
-		if (!(is_system_repo)) {
+		if (!(__call__ (_truth, null, is_system_repo))) {
 			var props = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'preferences.extension_repo_remove', __kwargtrans__ ({text: 'Remove Repository & Files'}));
@@ -5593,7 +5609,7 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 			return ;
 		}
 		var use_remote_url = active_repo.use_remote_url;
-		if (use_remote_url) {
+		if (__call__ (_truth, null, use_remote_url)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -5613,8 +5629,8 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 				var __accu0__ = row;
 				return __call__ (__accu0__.py_split, __accu0__);
 			}) ();
-			if (active_repo.use_access_token) {
-				var access_token_icon = (active_repo.access_token ? 'LOCKED' : 'UNLOCKED');
+			if (__call__ (_truth, null, active_repo.use_access_token)) {
+				var access_token_icon = (__call__ (_truth, null, active_repo.access_token) ? 'LOCKED' : 'UNLOCKED');
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
@@ -5647,7 +5663,7 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 			var __accu0__ = layout_header;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Advanced'}));
 		}) ();
-		if (layout_panel) {
+		if (__call__ (_truth, null, layout_panel)) {
 			layout_panel.use_property_split = true;
 			var use_custom_directory = active_repo.use_custom_directory;
 			var col = (function () {
@@ -5671,7 +5687,7 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
 			sub.active = use_custom_directory;
-			if (use_custom_directory) {
+			if (__call__ (_truth, null, use_custom_directory)) {
 				if (__eq__ (active_repo.custom_directory, '')) {
 					sub.alert = true;
 				}
@@ -5686,7 +5702,7 @@ export var USERPREF_PT_extensions_repos =  __class__ ('USERPREF_PT_extensions_re
 					return __call__ (__accu0__.prop, __accu0__, active_repo, 'directory', __kwargtrans__ ({text: ''}));
 				}) ();
 			}
-			if (use_remote_url) {
+			if (__call__ (_truth, null, use_remote_url)) {
 				var row = (function () {
 					var __accu0__ = layout_panel;
 					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Authentication'}));
@@ -5799,7 +5815,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		else {
 		}
 		var os = __call__ (_module, null, 'os');
-		if (!(user_addon_paths)) {
+		if (!(__call__ (_truth, null, user_addon_paths))) {
 			var __iterable0__ = __call__ (_joined, null, [(function () {
 				var __accu0__ = bpy.utils;
 				return __call__ (__accu0__.script_path_user, __accu0__);
@@ -5825,10 +5841,10 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var path = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.is_subdir, __accu0__, mod.__file__, path);
-			}) ()) {
+			}) ())) {
 				return true;
 			}
 		}
@@ -6051,10 +6067,10 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		var os = __call__ (_module, null, 'os');
 		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var prefs = context.preferences;
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.is_extended, __accu0__);
-		}) ()) {
+		}) ())) {
 			return ;
 		}
 		var layout = self.layout;
@@ -6099,7 +6115,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var p = __getitem__ (__iterable0__, __index0__);
-				if (p) {
+				if (__call__ (_truth, null, p)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, p);
@@ -6120,7 +6136,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (addon_utils.error_duplicates) {
+		if (__call__ (_truth, null, addon_utils.error_duplicates)) {
 			var box = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.box, __accu0__);
@@ -6192,7 +6208,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 				}) ();
 			}
 		}
-		if (addon_utils.error_encoding) {
+		if (__call__ (_truth, null, addon_utils.error_encoding)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.draw_error, __accu0__, col, 'One or more addons do not have UTF-8 encoding\n(see console for details)');
@@ -6231,19 +6247,19 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 				var __accu0__ = mod.__file__;
 				return __call__ (__accu0__.startswith, __accu0__, addon_user_dirs);
 			}) ();
-			if (show_enabled_only) {
+			if (__call__ (_truth, null, show_enabled_only)) {
 				var is_visible = is_visible && is_enabled;
 			}
-			if (!(is_visible)) {
+			if (!(__call__ (_truth, null, is_visible))) {
 				continue;
 			}
-			if (search && !((__in__ (search, (function () {
+			if (__call__ (_truth, null, search) && !((__in__ (search, (function () {
 				var __accu0__ = __getitem__ (bl_info, 'name');
 				return __call__ (__accu0__.casefold, __accu0__);
 			}) ()) || __in__ (search, (function () {
 				var __accu0__ = __call__ (iface_, null, __getitem__ (bl_info, 'name'));
 				return __call__ (__accu0__.casefold, __accu0__);
-			}) ())) || __getitem__ (bl_info, 'author') && __in__ (search, (function () {
+			}) ())) || __call__ (_truth, null, __getitem__ (bl_info, 'author')) && __in__ (search, (function () {
 				var __accu0__ = __getitem__ (bl_info, 'author');
 				return __call__ (__accu0__.casefold, __accu0__);
 			}) ()) || __eq__ (filter, 'All') && (__in__ (search, (function () {
@@ -6273,11 +6289,11 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 			}) ();
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_expand', __kwargtrans__ ({icon: (__getitem__ (bl_info, 'show_expanded') ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT'), emboss: false}));
+				return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_expand', __kwargtrans__ ({icon: (__call__ (_truth, null, __getitem__ (bl_info, 'show_expanded')) ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT'), emboss: false}));
 			}) ().module = addon_module_name;
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.operator, __accu0__, (is_enabled ? 'preferences.addon_disable' : 'preferences.addon_enable'), __kwargtrans__ ({icon: (is_enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: '', emboss: false}));
+				return __call__ (__accu0__.operator, __accu0__, (__call__ (_truth, null, is_enabled) ? 'preferences.addon_disable' : 'preferences.addon_enable'), __kwargtrans__ ({icon: (__call__ (_truth, null, is_enabled) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: '', emboss: false}));
 			}) ().module = addon_module_name;
 			var sub = (function () {
 				var __accu0__ = row;
@@ -6291,7 +6307,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					return __call__ (__accu1__.format, __accu1__, __call__ (iface_, null, __getitem__ (bl_info, 'category')), __call__ (iface_, null, __getitem__ (bl_info, 'name')));
 				}) ()}));
 			}) ();
-			if (__getitem__ (bl_info, 'warning')) {
+			if (__call__ (_truth, null, __getitem__ (bl_info, 'warning'))) {
 				(function () {
 					var __accu0__ = sub;
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'ERROR'}));
@@ -6304,9 +6320,9 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					return __call__ (__accu1__.py_get, __accu1__, __getitem__ (bl_info, 'support'), 'QUESTION');
 				}) ()}));
 			}) ();
-			if (__getitem__ (bl_info, 'show_expanded')) {
+			if (__call__ (_truth, null, __getitem__ (bl_info, 'show_expanded'))) {
 				var value = __getitem__ (bl_info, 'description');
-				if (value) {
+				if (__call__ (_truth, null, value)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6324,7 +6340,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					}) ();
 				}
 				var value = __getitem__ (bl_info, 'location');
-				if (value) {
+				if (__call__ (_truth, null, value)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6341,7 +6357,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __call__ (iface_, null, value)}));
 					}) ();
 				}
-				if (mod) {
+				if (__call__ (_truth, null, mod)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6359,7 +6375,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					}) ();
 				}
 				var value = __getitem__ (bl_info, 'author');
-				if (value) {
+				if (__call__ (_truth, null, value)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6377,7 +6393,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					}) ();
 				}
 				var value = __getitem__ (bl_info, 'version');
-				if (value) {
+				if (__call__ (_truth, null, value)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6410,7 +6426,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					}) ();
 				}
 				var value = __getitem__ (bl_info, 'warning');
-				if (value) {
+				if (__call__ (_truth, null, value)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6432,10 +6448,10 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					var __accu0__ = USERPREF_PT_addons;
 					return __call__ (__accu0__.is_user_addon, __accu0__, mod, user_addon_paths);
 				}) ();
-				if (__getitem__ (bl_info, 'doc_url') || (function () {
+				if (__call__ (_truth, null, __getitem__ (bl_info, 'doc_url')) || __call__ (_truth, null, (function () {
 					var __accu0__ = bl_info;
 					return __call__ (__accu0__.py_get, __accu0__, 'tracker_url');
-				}) ()) {
+				}) ())) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6451,23 +6467,23 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.row, __accu0__);
 					}) ();
-					if (__getitem__ (bl_info, 'doc_url')) {
+					if (__call__ (_truth, null, __getitem__ (bl_info, 'doc_url'))) {
 						(function () {
 							var __accu0__ = sub;
 							return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Documentation', icon: 'HELP'}));
 						}) ().url = __getitem__ (bl_info, 'doc_url');
 					}
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = bl_info;
 						return __call__ (__accu0__.py_get, __accu0__, 'tracker_url');
-					}) ()) {
+					}) ())) {
 						(function () {
 							var __accu0__ = sub;
 							return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Report a Bug', icon: 'URL'}));
 						}) ().url = __getitem__ (bl_info, 'tracker_url');
 					}
 				}
-				if (user_addon) {
+				if (__call__ (_truth, null, user_addon)) {
 					var py_split = (function () {
 						var __accu0__ = (function () {
 							var __accu1__ = colsub;
@@ -6484,7 +6500,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 						return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_remove', __kwargtrans__ ({text: 'Remove', icon: 'CANCEL'}));
 					}) ().module = mod.__name__;
 				}
-				if (is_enabled) {
+				if (__call__ (_truth, null, is_enabled)) {
 					var addon_preferences = __getitem__ (used_addon_module_name_map, addon_module_name).preferences;
 					if (addon_preferences !== null) {
 						(function () {
@@ -6511,7 +6527,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 				}
 				return set (__accu0__);
 			}) ();
-			if (missing_modules) {
+			if (__call__ (_truth, null, missing_modules)) {
 				(function () {
 					var __accu0__ = (function () {
 						var __accu1__ = layout_topmost;
@@ -6550,7 +6566,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 						var __accu0__ = row;
 						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon: 'ERROR'}));
 					}) ();
-					if (is_enabled) {
+					if (__call__ (_truth, null, is_enabled)) {
 						(function () {
 							var __accu0__ = row;
 							return __call__ (__accu0__.operator, __accu0__, 'preferences.addon_disable', __kwargtrans__ ({icon: 'CHECKBOX_HLT', text: '', emboss: false}));
@@ -6591,7 +6607,7 @@ export var USERPREF_PT_assets =  __class__ ('USERPREF_PT_assets', [AssetsPanel, 
 		else {
 		}
 		var prefs = context.preferences;
-		if (bpy.app.online_access || prefs.extensions.use_online_access_handled) {
+		if (__call__ (_truth, null, bpy.app.online_access) || __call__ (_truth, null, prefs.extensions.use_online_access_handled)) {
 			return ;
 		}
 		var has_online_essentials = prefs.asset_libraries.use_online_essentials;
@@ -6608,7 +6624,7 @@ export var USERPREF_PT_assets =  __class__ ('USERPREF_PT_assets', [AssetsPanel, 
 			}
 			return __accu0__;
 		}) ());
-		if (!(has_online_library)) {
+		if (!(__call__ (_truth, null, has_online_library))) {
 			return ;
 		}
 		var layout = self.layout;
@@ -6683,7 +6699,7 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var light = __getitem__ (__iterable0__, __index0__);
-				if (light.is_user_defined && __eq__ (light.py_metatype, self.sl_type)) {
+				if (__call__ (_truth, null, light.is_user_defined) && __eq__ (light.py_metatype, self.sl_type)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, light);
@@ -6735,7 +6751,7 @@ export var StudioLightPanelMixin =  __class__ ('StudioLightPanelMixin', [object]
 		}
 		else {
 		}
-		if (lights) {
+		if (__call__ (_truth, null, lights)) {
 			var flow = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: false, columns: 4, even_columns: true, even_rows: true, align: false}));
@@ -7122,7 +7138,7 @@ export var _draw_experimental_items = function (layout, preferences, py_items, u
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, experimental, __kwargtrans__ (__call__ (_merged, null, prop_keywords)));
 		}) ();
-		if (reference) {
+		if (__call__ (_truth, null, reference)) {
 			if (py_typeof (reference) === tuple) {
 				var url_ext = __getitem__ (reference, 0);
 				var text = __getitem__ (reference, 1);
@@ -7274,6 +7290,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'USERPREF_HT_header': USERPREF_HT_header = value; break;

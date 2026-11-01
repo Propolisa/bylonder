@@ -7,6 +7,162 @@ import {effector_weights_ui, point_cache_ui} from './bl_ui.properties_physics_co
 import {contexts as i18n_contexts} from './_bpy.app.translations.js';
 import {Panel, UIList} from './_bpy.types.js';
 var __name__ = 'bl_ui.properties_physics_dynamicpaint';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var PHYSICS_UL_dynapaint_surfaces =  __class__ ('PHYSICS_UL_dynapaint_surfaces', [UIList], {
 	__module__: __name__,
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
@@ -94,10 +250,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.dynamic_paint;
@@ -117,10 +273,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var surface = context.dynamic_paint.canvas_settings.canvas_surfaces.active;
@@ -140,10 +296,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var md = context.dynamic_paint;
@@ -163,10 +319,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var surface = context.dynamic_paint.canvas_settings.canvas_surfaces.active;
@@ -186,10 +342,10 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_output, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var surface = context.dynamic_paint.canvas_settings.canvas_surfaces.active;
@@ -215,10 +371,10 @@ export var PHYSICS_PT_dynamic_paint =  __class__ ('PHYSICS_PT_dynamic_paint', [P
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -267,10 +423,10 @@ export var PHYSICS_PT_dynamic_paint_settings =  __class__ ('PHYSICS_PT_dynamic_p
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -331,7 +487,7 @@ export var PHYSICS_PT_dynamic_paint_settings =  __class__ ('PHYSICS_PT_dynamic_p
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 			layout.use_property_split = true;
-			if (surface) {
+			if (__call__ (_truth, null, surface)) {
 				var flow = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
@@ -441,10 +597,10 @@ export var PHYSICS_PT_dp_surface_canvas =  __class__ ('PHYSICS_PT_dp_surface_can
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -592,10 +748,10 @@ export var PHYSICS_PT_dp_surface_canvas_paint_dry =  __class__ ('PHYSICS_PT_dp_s
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -690,10 +846,10 @@ export var PHYSICS_PT_dp_surface_canvas_paint_dissolve =  __class__ ('PHYSICS_PT
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var surface = context.dynamic_paint.canvas_settings.canvas_surfaces.active;
@@ -784,10 +940,10 @@ export var PHYSICS_PT_dp_canvas_output =  __class__ ('PHYSICS_PT_dp_canvas_outpu
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_output, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -823,10 +979,10 @@ export var PHYSICS_PT_dp_canvas_output =  __class__ ('PHYSICS_PT_dp_canvas_outpu
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop_search, __accu0__, surface, 'output_name_a', ob.data, 'vertex_colors', __kwargtrans__ ({text: 'Paintmap Layer'}));
 				}) ();
-				var icons = ((function () {
+				var icons = (__call__ (_truth, null, (function () {
 					var __accu0__ = surface;
 					return __call__ (__accu0__.output_exists, __accu0__, __kwargtrans__ ({object: ob, index: 0}));
-				}) () ? 'REMOVE' : 'ADD');
+				}) ()) ? 'REMOVE' : 'ADD');
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.operator, __accu0__, 'dpaint.output_toggle', __kwargtrans__ ({icon: icons, text: ''}));
@@ -839,10 +995,10 @@ export var PHYSICS_PT_dp_canvas_output =  __class__ ('PHYSICS_PT_dp_canvas_outpu
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop_search, __accu0__, surface, 'output_name_b', ob.data, 'vertex_colors', __kwargtrans__ ({text: 'Wetmap Layer'}));
 				}) ();
-				var icons = ((function () {
+				var icons = (__call__ (_truth, null, (function () {
 					var __accu0__ = surface;
 					return __call__ (__accu0__.output_exists, __accu0__, __kwargtrans__ ({object: ob, index: 1}));
-				}) () ? 'REMOVE' : 'ADD');
+				}) ()) ? 'REMOVE' : 'ADD');
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.operator, __accu0__, 'dpaint.output_toggle', __kwargtrans__ ({icon: icons, text: ''}));
@@ -857,10 +1013,10 @@ export var PHYSICS_PT_dp_canvas_output =  __class__ ('PHYSICS_PT_dp_canvas_outpu
 					var __accu0__ = row;
 					return __call__ (__accu0__.prop_search, __accu0__, surface, 'output_name_a', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
 				}) ();
-				var icons = ((function () {
+				var icons = (__call__ (_truth, null, (function () {
 					var __accu0__ = surface;
 					return __call__ (__accu0__.output_exists, __accu0__, __kwargtrans__ ({object: ob, index: 0}));
-				}) () ? 'REMOVE' : 'ADD');
+				}) ()) ? 'REMOVE' : 'ADD');
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.operator, __accu0__, 'dpaint.output_toggle', __kwargtrans__ ({icon: icons, text: ''}));
@@ -950,10 +1106,10 @@ export var PHYSICS_PT_dp_canvas_output_paintmaps =  __class__ ('PHYSICS_PT_dp_ca
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_output_maps, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1031,10 +1187,10 @@ export var PHYSICS_PT_dp_canvas_output_wetmaps =  __class__ ('PHYSICS_PT_dp_canv
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_output_maps, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1112,10 +1268,10 @@ export var PHYSICS_PT_dp_canvas_initial_color =  __class__ ('PHYSICS_PT_dp_canva
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1199,10 +1355,10 @@ export var PHYSICS_PT_dp_effects =  __class__ ('PHYSICS_PT_dp_effects', [PhysicB
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1246,10 +1402,10 @@ export var PHYSICS_PT_dp_effects_spread =  __class__ ('PHYSICS_PT_dp_effects_spr
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1339,10 +1495,10 @@ export var PHYSICS_PT_dp_effects_drip =  __class__ ('PHYSICS_PT_dp_effects_drip'
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1432,10 +1588,10 @@ export var PHYSICS_PT_dp_effects_drip_weights =  __class__ ('PHYSICS_PT_dp_effec
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1483,10 +1639,10 @@ export var PHYSICS_PT_dp_effects_shrink =  __class__ ('PHYSICS_PT_dp_effects_shr
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_paint, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1560,10 +1716,10 @@ export var PHYSICS_PT_dp_cache =  __class__ ('PHYSICS_PT_dp_cache', [PhysicButto
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var surface = context.dynamic_paint.canvas_settings.canvas_surfaces.active;
@@ -1609,10 +1765,10 @@ export var PHYSICS_PT_dp_brush_source =  __class__ ('PHYSICS_PT_dp_brush_source'
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_brush, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1657,7 +1813,7 @@ export var PHYSICS_PT_dp_brush_source =  __class__ ('PHYSICS_PT_dp_brush_source'
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop_search, __accu0__, brush, 'particle_system', ob, 'particle_systems');
 			}) ();
-			if (brush.particle_system) {
+			if (__call__ (_truth, null, brush.particle_system)) {
 				var col = (function () {
 					var __accu0__ = flow;
 					return __call__ (__accu0__.column, __accu0__);
@@ -1666,7 +1822,7 @@ export var PHYSICS_PT_dp_brush_source =  __class__ ('PHYSICS_PT_dp_brush_source'
 					var __accu0__ = col;
 					return __call__ (__accu0__.column, __accu0__);
 				}) ();
-				sub.active = !(brush.use_particle_radius);
+				sub.active = !(__call__ (_truth, null, brush.use_particle_radius));
 				(function () {
 					var __accu0__ = sub;
 					return __call__ (__accu0__.prop, __accu0__, brush, 'solid_radius', __kwargtrans__ ({text: 'Effect Solid Radius'}));
@@ -1757,10 +1913,10 @@ export var PHYSICS_PT_dp_brush_source_color_ramp =  __class__ ('PHYSICS_PT_dp_br
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_brush, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var brush = context.dynamic_paint.brush_settings;
@@ -1816,10 +1972,10 @@ export var PHYSICS_PT_dp_brush_velocity =  __class__ ('PHYSICS_PT_dp_brush_veloc
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_brush, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1898,10 +2054,10 @@ export var PHYSICS_PT_dp_brush_velocity_color_ramp =  __class__ ('PHYSICS_PT_dp_
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_brush, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -1950,10 +2106,10 @@ export var PHYSICS_PT_dp_brush_velocity_smudge =  __class__ ('PHYSICS_PT_dp_brus
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_brush, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2025,10 +2181,10 @@ export var PHYSICS_PT_dp_brush_wave =  __class__ ('PHYSICS_PT_dp_brush_wave', [P
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_dyn_canvas_brush, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -2094,6 +2250,14 @@ export {Panel, UIList, effector_weights_ui, i18n_contexts, point_cache_ui, regis
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'PHYSICS_UL_dynapaint_surfaces': PHYSICS_UL_dynapaint_surfaces = value; break;
 		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
 		case 'PHYSICS_PT_dynamic_paint': PHYSICS_PT_dynamic_paint = value; break;

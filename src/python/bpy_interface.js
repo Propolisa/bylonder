@@ -4,7 +4,7 @@ import { loadRNAUI } from '../makesrna/rna.js';
 import { invokeOperator, runOperator, pollOperator, hasOperator, runsOperator, ownsOperator, registerFallback, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
 import { hasOperator as blenderHasOperator, newOperator, blenderModule } from '../bmesh/bmesh-wasm.js';
 import { set, bool, __class__, __get__ } from '../bl_py/org.transcrypt.__runtime__.js';
-import { registerClass, inPythonContext, contextPointer, inClassCall } from './bpy_rna.js';
+import { registerClass, inPythonContext, contextPointer, inClassCall, defineAssignedProperties } from './bpy_rna.js';
 
 const { exports: x, withString, cString } = blenderModule;
 
@@ -53,18 +53,20 @@ export const registered = _bpy.registered;
 // Blender's panels, menus, headers, lists and operators become Blender's types in the module, in the order the scripts
 // register them, as register_class makes them (bpy_rna.js), so Blender's regions lay them out and its window manager
 // runs them.
-// Property groups are registered too, before the classes whose properties hold them (node.add_node's NodeSetting).
+// Property groups are registered too, before the classes whose properties hold them (node.add_node's NodeSetting), and
+// keying sets' types (keyingsets_builtins.py), which keyframe_insert_by_name and the Insert Keyframe menu find by idname.
 const REGISTERED_TYPES = /_(PT|MT|HT|UL)_|\./;
-const PropertyGroup = globalThis.__py_modules['_bpy.types'].PropertyGroup;
-const isPropertyGroup = (cls) => cls === PropertyGroup || (cls?.__bases__ ?? []).some(isPropertyGroup);
+const { PropertyGroup, KeyingSetInfo } = globalThis.__py_modules['_bpy.types'];
+const isSubclass = (cls, base) => cls === base || (cls?.__bases__ ?? []).some((b) => isSubclass(b, base));
 for (const [idname, cls] of Object.entries(registered)) {
-  if (!REGISTERED_TYPES.test(idname) && !isPropertyGroup(cls)) continue;
+  if (!REGISTERED_TYPES.test(idname) && !isSubclass(cls, PropertyGroup) && !isSubclass(cls, KeyingSetInfo)) continue;
   try {
     registerClass(cls);
   } catch (error) {
     console.error(`Python: register_class(${idname}):`, error.__args__?.[0] ?? error);
   }
 }
+defineAssignedProperties();
 // Bylonder's operators Blender has no type for become Blender's operator types, as an add-on's Python operators do:
 // Blender's menus and buttons show them, polled and run by Bylonder.
 const ownTypes = new Set();
