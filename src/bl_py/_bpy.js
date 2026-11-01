@@ -177,7 +177,14 @@ export var _datas = [];
 
 const window_manager = rna('WindowManager', { keyconfigs: KeyConfigs () });
 _datas.push(rna('BlendData', { window_managers: collection([window_manager]) }));
-_contexts.push(rna('Context', { window_manager, preferences: rna('Preferences', {}), blend_data: _datas[0] }));
+// The Preferences, which scripts keep from their first load (addon_utils._preferences): RNA's defaults until Bylonder
+// sets its context, then the module's (Blender's U).
+const defaults = rna('Preferences', {});
+const preferences = new Proxy({}, {
+    get: (target, key) => (_contexts[0].preferences === preferences ? defaults : _contexts[0].preferences)[key],
+    set: (target, key, value) => { (_contexts[0].preferences === preferences ? defaults : _contexts[0].preferences)[key] = value; return true; },
+});
+_contexts.push(rna('Context', { window_manager, preferences, blend_data: _datas[0] }));
 const top = (stack) => new Proxy({}, {
     get: (target, key) => stack.at(-1)[key],
     set: (target, key, value) => { stack.at(-1)[key] = value; return true; },

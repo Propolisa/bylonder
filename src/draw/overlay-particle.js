@@ -105,6 +105,8 @@ function weightRamp(scene) {
 
 const made = new WeakMap();
 const sceneData = (scene) => made.get(scene) ?? made.set(scene, { shapes: new Map(), ramp: null }).get(scene);
+// A scene's weight ramp, made once (the weight paint overlay's too).
+export const weightRampTexture = (scene) => (sceneData(scene).ramp ??= weightRamp(scene));
 // A scene's mesh of a shape's vertices (their indices as positions' x), made once and never drawn itself.
 export function particleShapeMesh(scene, shape) {
   const { shapes } = sceneData(scene);
@@ -120,13 +122,13 @@ export const isParticleShape = (shape) => shape in VERTICES;
 
 // The overlay's material for a particle system's shape, in its color and display size (ucolor).
 export function particleShapeMaterial(scene, shape, color, drawSize) {
-  const data = sceneData(scene), kind = shape === 'DOT' ? 'dot' : 'shape';
+  const kind = shape === 'DOT' ? 'dot' : 'shape';
   const material = new ShaderMaterial('__particle ' + shape, scene, { vertexSource: SOURCES[kind].vertex, fragmentSource: SOURCES[kind].fragment }, {
     attributes: ['position'], uniforms: ['viewProjection', 'viewinv', 'winmat', 'size_viewport', 'ucolor', 'shape_type'], samplers: ['weight_tx'],
   });
   material.fillMode = shape === 'DOT' ? Material.PointListDrawMode : Material.LineListDrawMode;
   material.backFaceCulling = false;
-  material.setTexture('weight_tx', (data.ramp ??= weightRamp(scene)));
+  material.setTexture('weight_tx', weightRampTexture(scene));
   material.setVector4('ucolor', { x: color[0], y: color[1], z: color[2], w: drawSize });
   material.setInt('shape_type', PART_SHAPE[shape] ?? 0);
   const viewinv = new Float32Array(16), winmat = new Float32Array(16);
@@ -229,7 +231,7 @@ function editPart(scene, name, kind) {
   material.fillMode = EDIT[kind].fillMode;
   material.backFaceCulling = false;
   material.setArray4('theme_colors', EDIT_THEME.flatMap((key) => theme[key].slice(0, 4)));
-  material.setTexture('weight_tx', (sceneData(scene).ramp ??= weightRamp(scene)));
+  material.setTexture('weight_tx', weightRampTexture(scene));
   mesh.material = material;
   mesh._getRenderingFillMode = (fillMode) => fillMode;
   mesh.onDisposeObservable.add(() => material.dispose());

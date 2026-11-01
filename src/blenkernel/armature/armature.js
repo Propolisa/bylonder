@@ -55,11 +55,12 @@ export function setArmatureData(bmain, ob, { bones, active = null }) {
     x.armature_bones_set(bmain, ob, bones.length, i, f, names, index.get(active) ?? -1)));
 }
 
-// A click on a bone (its index in the data's order, -1 for none; `part` 0 for its body, 1 its head, 2 its tail) in
-// Edit or Pose Mode, as Blender's view3d.select applies it, in Main's context C: whether it found a bone or changed the
-// selection.
-export const selectBone = (C, ob, index, { part = 0, sel_op, deselect_all = false, select_passthrough = false }) =>
-  !!x.armature_select_pick(C, ob, index, part, sel_op, deselect_all, select_passthrough);
+// The depth (0 to 1) at which a click at (px, py) in a view's pixels from its top left hits the bones an armature draws
+// in Object Mode, or null (armature-draw.cc armature_pick_depth). view: regionView3D's.
+export function armaturePickDepth(C, ob, { viewmat, winmat, winx, winy }, px, py) {
+  const depth = withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.armature_pick_depth(C, ob, v, w, winx, winy, px, winy - py));
+  return depth < 0 ? null : depth;
+}
 
 // The overlay's buffers (armature-draw.cc) by name, with their floats per instance: bone matrices with packed colors
 // (BoneInstanceData), envelope spheres (BoneEnvelopeData), stick ends and colors (BoneStickData), lines as vertex pairs

@@ -66,7 +66,8 @@ import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
 import { tagRedraw } from "./draw/overlay-tool.js";
-import { pickArmature } from "./draw/overlay-armature-select.js";
+import { armaturePickDepth } from "./blenkernel/armature/armature.js";
+import { regionView3D } from "./editors/space_view3d/view3d-project.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
@@ -213,10 +214,14 @@ const overlays = createViewportOverlays(scene, {
   view3dCursor: () => world.sceneSettings.state.cursor,
 });
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
-// The armature whose bones a click hits nearest in Object Mode, with its depth: { node, depth }, or null.
-world.pickArmature = (x, y, camera, accept) => world.objects.filter((node) => node.metadata?.wbCreation?.armature && accept(node))
-  .map((node) => ({ node, depth: pickArmature(world.mainSync.blender.C, world.mainSync.objectOf(node), { x, y, camera }) }))
-  .filter(({ depth }) => depth !== null).sort((a, b) => a.depth - b.depth)[0] ?? null;
+// The armature whose bones a click at a view's pixel (x, y) hits nearest in Object Mode, with its depth: { node, depth },
+// or null.
+world.pickArmature = (view, x, y, accept) => {
+  const region = regionView3D(view), k = view.scale ?? 1;
+  return world.objects.filter((node) => node.metadata?.wbCreation?.armature && accept(node))
+    .map((node) => ({ node, depth: armaturePickDepth(world.mainSync.blender.C, world.mainSync.objectOf(node), region, x / k, y / k) }))
+    .filter(({ depth }) => depth !== null).sort((a, b) => a.depth - b.depth)[0] ?? null;
+};
 world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
 // particles, video; otherwise they stop until the next input or change.
@@ -457,7 +462,7 @@ view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, take
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
 // The modes Blender runs on Main: an armature's Edit and Pose Modes, Particle Edit Mode.
-world.mainModes = createMainModes({ sync: world.mainSync, selection: editor.selection, views, options: objectOperatorHost });
+world.mainModes = createMainModes({ sync: world.mainSync, selection: editor.selection, options: objectOperatorHost });
 registerAddOperators(creator);
 world.dock = viewportDock;
 world.outliner = createOutliner({ world, editor, commands, sync: world.mainSync, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
@@ -642,8 +647,10 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area');
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event?.view;
-// Mesh Edit Mode's gestures are Blender's (editmesh-mode.js); the other modes select in the page.
+// Mesh Edit Mode's gestures are Blender's (editmesh-mode.js); the other modes select in the page, those Blender runs on
+// Main (main-modes.js) by Blender's operators.
 const meshGesture = (idname, props, event) => world.editMode.kind === "MESH" && (world.editMode.selectGesture(idname, props, event), true);
+const mainMode = () => !world.editMode.active && world.mainModes.mode();
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
 const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
@@ -672,16 +679,20 @@ registerOperators({
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },
   // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
   "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : world.mainModes.mode() ? world.mainModes : editor).selectOperator(event, props) },
-  "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
+  "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : world.mainModes.mode() ? world.mainModes : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
   "view3d.select_lasso": {
     poll: (props, event) => inView(event),
-    run: ({ mode = "SET" }, event) => { if (!meshGesture("view3d.select_lasso", { mode }, event)) startGestureLasso(world.wm, { begin: event, select: (path) => selectRegion(event.view, lassoRegion(path), mode) }); },
+    run: ({ mode = "SET" }, event) => {
+      if (!meshGesture("view3d.select_lasso", { mode }, event)) startGestureLasso(world.wm, { begin: event, select: (path) => (mainMode() ? world.mainModes.selectLasso(event.view, path, mode) : selectRegion(event.view, lassoRegion(path), mode)) });
+    },
   },
   "view3d.select_circle": {
     poll: (props, event) => !!(event?.view ?? activeView()),
     run: ({ mode = "SET", radius = 25, wait_for_input = true }, event) => {
       if (meshGesture("view3d.select_circle", { mode, radius, wait_for_input }, event)) return;
-      startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
+      const view = event.view ?? activeView();
+      startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode,
+        select: (center, r, m) => (mainMode() ? world.mainModes.selectCircle(view, center, r, m) : selectRegion(view, circleRegion(center, r), m)) });
     },
   },
   // A transform starts at the mouse (initTransInfo), the 3D cursor's at a drag's press; release_confirm ends it on

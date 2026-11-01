@@ -1,0 +1,1071 @@
+{
+ "view": {
+  "viewmat": [
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   3.422854177870249e-08,
+   -0.9999999403953552,
+   0.0,
+   0.0,
+   0.9999999403953552,
+   3.422854177870249e-08,
+   0.0,
+   -0.75,
+   -1.4999998807907104,
+   -5.134281266805374e-08,
+   1.0
+  ],
+  "winmat": [
+   0.2777777910232544,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.4147684574127197,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   -0.0020000000949949026,
+   0.0,
+   -0.0,
+   -0.0,
+   -0.0,
+   1.0
+  ],
+  "winx": 1311,
+  "winy": 878,
+  "persp": false
+ },
+ "bones": [
+  [
+   "Root",
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    1
+   ],
+   null
+  ],
+  [
+   "Mid",
+   [
+    0,
+    0,
+    1
+   ],
+   [
+    0,
+    0,
+    2
+   ],
+   "Root"
+  ],
+  [
+   "Tip",
+   [
+    0,
+    0,
+    2
+   ],
+   [
+    0,
+    0,
+    3
+   ],
+   "Mid"
+  ],
+  [
+   "Side",
+   [
+    1.5,
+    0,
+    0
+   ],
+   [
+    1.5,
+    0,
+    1
+   ],
+   null
+  ]
+ ],
+ "cases": {
+  "POSE": [
+   {
+    "name": "click",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      439
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      519,
+      439
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      519,
+      439
+     ]
+    ],
+    "selection": {
+     "Root": false,
+     "Mid": true,
+     "Tip": false,
+     "Side": false
+    }
+   },
+   {
+    "name": "shift click",
+    "events": [
+     [
+      "LEFT_SHIFT",
+      "PRESS",
+      792,
+      257
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      792,
+      257
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      792,
+      257
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      792,
+      257
+     ],
+     [
+      "LEFT_SHIFT",
+      "RELEASE",
+      792,
+      257
+     ]
+    ],
+    "selection": {
+     "Root": false,
+     "Mid": true,
+     "Tip": false,
+     "Side": true
+    }
+   },
+   {
+    "name": "box",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      220
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      446,
+      220
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      470,
+      262
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      494,
+      305
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      347
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      543,
+      390
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      567,
+      432
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      592,
+      475
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      592,
+      475
+     ]
+    ],
+    "selection": {
+     "Root": true,
+     "Mid": true,
+     "Tip": false,
+     "Side": false
+    }
+   },
+   {
+    "name": "L",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      621
+     ],
+     [
+      "L",
+      "PRESS",
+      519,
+      621
+     ],
+     [
+      "L",
+      "RELEASE",
+      519,
+      621
+     ]
+    ],
+    "selection": {
+     "Root": true,
+     "Mid": true,
+     "Tip": true,
+     "Side": false
+    }
+   },
+   {
+    "name": "box shift",
+    "events": [
+     [
+      "LEFT_SHIFT",
+      "PRESS",
+      737,
+      202
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      737,
+      202
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      737,
+      202
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      755,
+      220
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      773,
+      238
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      792,
+      257
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      810,
+      275
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      828,
+      293
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      847,
+      312
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      847,
+      312
+     ],
+     [
+      "LEFT_SHIFT",
+      "RELEASE",
+      847,
+      312
+     ]
+    ],
+    "selection": {
+     "Root": true,
+     "Mid": true,
+     "Tip": true,
+     "Side": true
+    }
+   },
+   {
+    "name": "box ctrl",
+    "events": [
+     [
+      "LEFT_CTRL",
+      "PRESS",
+      446,
+      566
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      566
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      446,
+      566
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      470,
+      584
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      494,
+      602
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      621
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      543,
+      639
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      567,
+      657
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      592,
+      676
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      592,
+      676
+     ],
+     [
+      "LEFT_CTRL",
+      "RELEASE",
+      592,
+      676
+     ]
+    ],
+    "selection": {
+     "Root": true,
+     "Mid": true,
+     "Tip": false,
+     "Side": true
+    }
+   },
+   {
+    "name": "circle",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      621
+     ],
+     [
+      "C",
+      "PRESS",
+      519,
+      621
+     ],
+     [
+      "C",
+      "RELEASE",
+      519,
+      621
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      519,
+      621
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      519,
+      621
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      621
+     ],
+     [
+      "ESC",
+      "PRESS",
+      519,
+      621
+     ],
+     [
+      "ESC",
+      "RELEASE",
+      519,
+      621
+     ]
+    ],
+    "selection": {
+     "Root": true,
+     "Mid": true,
+     "Tip": true,
+     "Side": true
+    }
+   },
+   {
+    "name": "lasso shift",
+    "events": [
+     [
+      "LEFT_CTRL",
+      "PRESS",
+      737,
+      202
+     ],
+     [
+      "LEFT_SHIFT",
+      "PRESS",
+      737,
+      202
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      737,
+      202
+     ],
+     [
+      "RIGHTMOUSE",
+      "PRESS",
+      737,
+      202
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      847,
+      202
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      847,
+      312
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      737,
+      312
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      737,
+      202
+     ],
+     [
+      "RIGHTMOUSE",
+      "RELEASE",
+      737,
+      202
+     ],
+     [
+      "LEFT_CTRL",
+      "RELEASE",
+      737,
+      202
+     ],
+     [
+      "LEFT_SHIFT",
+      "RELEASE",
+      737,
+      202
+     ]
+    ],
+    "selection": {
+     "Root": true,
+     "Mid": true,
+     "Tip": true,
+     "Side": false
+    }
+   }
+  ],
+  "EDIT": [
+   {
+    "name": "click tail",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      712
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      519,
+      712
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      519,
+      712
+     ]
+    ],
+    "selection": {
+     "Root": [
+      false,
+      false,
+      false
+     ],
+     "Mid": [
+      false,
+      false,
+      false
+     ],
+     "Tip": [
+      false,
+      false,
+      true
+     ],
+     "Side": [
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "name": "ctrl click",
+    "events": [
+     [
+      "LEFT_CTRL",
+      "PRESS",
+      519,
+      257
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      257
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      519,
+      257
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      519,
+      257
+     ],
+     [
+      "LEFT_CTRL",
+      "RELEASE",
+      519,
+      257
+     ]
+    ],
+    "selection": {
+     "Root": [
+      true,
+      true,
+      true
+     ],
+     "Mid": [
+      true,
+      true,
+      true
+     ],
+     "Tip": [
+      true,
+      true,
+      true
+     ],
+     "Side": [
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "name": "box body",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      220
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      446,
+      220
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      470,
+      232
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      494,
+      244
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      256
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      543,
+      268
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      567,
+      280
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      592,
+      293
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      592,
+      293
+     ]
+    ],
+    "selection": {
+     "Root": [
+      true,
+      true,
+      true
+     ],
+     "Mid": [
+      false,
+      true,
+      false
+     ],
+     "Tip": [
+      false,
+      false,
+      false
+     ],
+     "Side": [
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "name": "L",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      792,
+      257
+     ],
+     [
+      "L",
+      "PRESS",
+      792,
+      257
+     ],
+     [
+      "L",
+      "RELEASE",
+      792,
+      257
+     ]
+    ],
+    "selection": {
+     "Root": [
+      true,
+      true,
+      true
+     ],
+     "Mid": [
+      false,
+      true,
+      false
+     ],
+     "Tip": [
+      false,
+      false,
+      false
+     ],
+     "Side": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "name": "click head",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      792,
+      166
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      792,
+      166
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      792,
+      166
+     ]
+    ],
+    "selection": {
+     "Root": [
+      false,
+      false,
+      false
+     ],
+     "Mid": [
+      false,
+      false,
+      false
+     ],
+     "Tip": [
+      false,
+      false,
+      false
+     ],
+     "Side": [
+      false,
+      true,
+      false
+     ]
+    }
+   },
+   {
+    "name": "lasso",
+    "events": [
+     [
+      "LEFT_CTRL",
+      "PRESS",
+      446,
+      494
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      494
+     ],
+     [
+      "RIGHTMOUSE",
+      "PRESS",
+      446,
+      494
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      592,
+      494
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      592,
+      566
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      566
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      494
+     ],
+     [
+      "RIGHTMOUSE",
+      "RELEASE",
+      446,
+      494
+     ],
+     [
+      "LEFT_CTRL",
+      "RELEASE",
+      446,
+      494
+     ]
+    ],
+    "selection": {
+     "Root": [
+      false,
+      false,
+      false
+     ],
+     "Mid": [
+      false,
+      false,
+      true
+     ],
+     "Tip": [
+      false,
+      true,
+      false
+     ],
+     "Side": [
+      false,
+      true,
+      false
+     ]
+    }
+   },
+   {
+    "name": "circle",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      348
+     ],
+     [
+      "C",
+      "PRESS",
+      519,
+      348
+     ],
+     [
+      "C",
+      "RELEASE",
+      519,
+      348
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      519,
+      348
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      519,
+      348
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      519,
+      348
+     ],
+     [
+      "ESC",
+      "PRESS",
+      519,
+      348
+     ],
+     [
+      "ESC",
+      "RELEASE",
+      519,
+      348
+     ]
+    ],
+    "selection": {
+     "Root": [
+      false,
+      false,
+      true
+     ],
+     "Mid": [
+      true,
+      true,
+      true
+     ],
+     "Tip": [
+      false,
+      true,
+      false
+     ],
+     "Side": [
+      false,
+      true,
+      false
+     ]
+    }
+   },
+   {
+    "name": "box joints",
+    "events": [
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      446,
+      129
+     ],
+     [
+      "LEFTMOUSE",
+      "PRESS",
+      446,
+      129
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      512,
+      141
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      579,
+      153
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      646,
+      165
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      713,
+      177
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      780,
+      189
+     ],
+     [
+      "MOUSEMOVE",
+      "NOTHING",
+      847,
+      202
+     ],
+     [
+      "LEFTMOUSE",
+      "RELEASE",
+      847,
+      202
+     ]
+    ],
+    "selection": {
+     "Root": [
+      false,
+      true,
+      false
+     ],
+     "Mid": [
+      false,
+      false,
+      false
+     ],
+     "Tip": [
+      false,
+      false,
+      false
+     ],
+     "Side": [
+      false,
+      true,
+      false
+     ]
+    }
+   }
+  ]
+ }
+}

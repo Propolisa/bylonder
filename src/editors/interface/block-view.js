@@ -18,7 +18,7 @@ import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
-import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet } from './ui-tree.js';
+import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename } from './ui-tree.js';
 import { treeMenu, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
@@ -125,7 +125,7 @@ function widgetNode(b, env) {
     case 'CHECKBOX': case 'CHECKBOX_N':
       return checkbox({ checked: !!b.selected, text: shown, ...common, onChange: () => press(b, ui) });
     case 'TEXT':
-      return withStyle(textField({ value: b.rna ? String(rnaValue(b) ?? '') : b.value ?? shown, iconName, ...common, flat,
+      return withStyle(textField({ value: b.rna ? String(rnaValue(b) ?? '') : b.value ?? shown, iconName, ...common, flat, editing: !!b.renaming,
         onChange: (v) => (b.rna ? setRna(b, v, ui) : (ui.inContext((C) => buttonTextSet(C, b, v)), ui.refresh())) }));
     case 'COLOR':
       return withStyle(colorSwatch({ value: b.rna ? [...struct(b.rna)[b.rna.prop]] : [0, 0, 0], ...common, onChange: (v, finish) => setRna({ ...b, rna: { ...b.rna, index: -1 } }, v, ui, finish) }));
@@ -147,6 +147,7 @@ function widgetNode(b, env) {
       const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
       const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
         value: item?.identifier, onClick: () => press(b, ui) }));
+      if (b.type === 'VIEW_ITEM') return cloneVNode(vnode, { onDblclick: () => ui.inContext((C) => buttonRename(C, b)) && ui.refresh() });
       return b.type === 'TAB' ? cloneVNode(vnode, { role: 'tab', 'aria-selected': String(!!b.selected), 'aria-label': shown || item?.name || b.tip }) : vnode;
     }
     default:

@@ -4246,9 +4246,12 @@ export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 		else {
 		}
 		var write = __call__ (_member, null, '_bpy_internal.system_info.text_generate_runtime', 'write');
-		var output = __call__ (open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+		var _with_manager6_0 = __call__ (open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+		var output = (function () {
+			var __accu0__ = _with_manager6_0;
+			return __call__ (__accu0__.__enter__, __accu0__);
+		}) ();
 		try {
-			output.__enter__ ();
 			try {
 				__call__ (write, null, output);
 			}
@@ -4272,12 +4275,12 @@ export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 					throw __except0__;
 				}
 			}
-			output.__exit__ ();
 		}
-		catch (__except0__) {
-			if (! (output.__exit__ (__except0__.name, __except0__, __except0__.stack))) {
-				throw __except0__;
-			}
+		finally {
+			(function () {
+				var __accu0__ = _with_manager6_0;
+				return __call__ (__accu0__.__exit__, __accu0__, null, null, null);
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});},

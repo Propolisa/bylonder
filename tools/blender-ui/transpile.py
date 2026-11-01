@@ -315,6 +315,41 @@ class Walrus:
         return statements, node
 
 
+def returns_from(body):
+    """Whether statements return from the function they are in (not from a function or class defined in them)."""
+    def walk(node):
+        if isinstance(node, ast.Return):
+            return True
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+            return False
+        return any(walk(child) for child in ast.iter_child_nodes(node))
+    return any(walk(statement) for statement in body)
+
+
+def reload_test(test):
+    """Whether a test is Blender's reload idiom, `"name" in locals()` (True) or `not in` (False); else None."""
+    if (isinstance(test, ast.Compare) and len(test.ops) == 1 and isinstance(test.ops[0], (ast.In, ast.NotIn))
+            and isinstance(test.comparators[0], ast.Call) and getattr(test.comparators[0].func, 'id', None) == 'locals'):
+        return isinstance(test.ops[0], ast.In)
+    return None
+
+
+def first_load(body):
+    """A module's statements as its first load runs them: the branches of Blender's reload idiom (`if "name" in
+    locals():`, directly or through a name assigned it, as the pose library's `_need_reload`) that reload modules
+    left out, so the names the module imports stay its imports."""
+    reloads = {t.id for n in body if isinstance(n, ast.Assign) and reload_test(n.value) for t in n.targets if isinstance(t, ast.Name)}
+    out = []
+    for statement in body:
+        test = statement.test if isinstance(statement, ast.If) else None
+        reloading = True if isinstance(test, ast.Name) and test.id in reloads else reload_test(test) if test is not None else None
+        if reloading is None:
+            out.append(statement)
+        else:
+            out += statement.orelse if reloading else statement.body
+    return out
+
+
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
     # The functions each module of the tree defines, by module name (set by tree.py).
@@ -327,6 +362,7 @@ class TranscryptFixes(ast.NodeTransformer):
         self.modules = {a.asname or a.name: a.name for n in node.body if isinstance(n, ast.Import) for a in n.names}
         self.properties = {t.id for n in node.body if isinstance(n, ast.Assign) and isinstance(n.value, ast.Call) for t in n.targets if isinstance(t, ast.Name)}
         node = Walrus().lower_module(class_scopes(node))
+        node.body = first_load(node.body)
         self.generic_visit(node)
         return node
 
@@ -469,13 +505,6 @@ class TranscryptFixes(ast.NodeTransformer):
         outer = ast.Lambda(ast.arguments(posonlyargs=[], args=[ast.arg(n) for n in names], kwonlyargs=[], kw_defaults=[], defaults=[]), node)
         return ast.fix_missing_locations(ast.copy_location(ast.Call(outer, defaults, []), node))
 
-    def visit_Compare(self, node):
-        """Blender's reload idiom, `"name" in locals()`, is False: modules load once."""
-        self.generic_visit(node)
-        reload = (len(node.ops) == 1 and isinstance(node.ops[0], ast.In) and isinstance(node.comparators[0], ast.Call)
-                  and getattr(node.comparators[0].func, 'id', None) == 'locals')
-        return ast.copy_location(ast.Constant(False), node) if reload else node
-
     def visit_Delete(self, node):
         """del d[k], which Transcrypt compiles to a no-op with operator overloading, as d.pop(k); del of names, which
         only tidies a namespace and is a syntax error in an ES module, as nothing."""
@@ -617,7 +646,22 @@ class TranscryptFixes(ast.NodeTransformer):
                 unpack.append(ast.Assign(targets=[item.optional_vars], value=ast.Name(name, ast.Load())))
                 item.optional_vars = ast.Name(name, ast.Store())
         node.body = unpack + node.body
-        return ast.fix_missing_locations(node)
+        if not returns_from(node.body):
+            return ast.fix_missing_locations(node)
+        # A return inside, after which Transcrypt's with never calls __exit__ (addon_utils.enable leaves RestrictBlend
+        # entered): the context managers entered, then left in a finally.
+        TranscryptFixes.with_temporaries += 1
+        body = node.body
+        for i, item in reversed(list(enumerate(node.items))):
+            manager = f'_with_manager{TranscryptFixes.with_temporaries}_{i}'
+            enter = ast.Call(ast.Attribute(ast.Name(manager, ast.Load()), '__enter__', ast.Load()), [], [])
+            body = [ast.Assign(targets=[ast.Name(manager, ast.Store())], value=item.context_expr),
+                    ast.Assign(targets=[item.optional_vars], value=enter) if item.optional_vars else ast.Expr(enter),
+                    ast.Try(body=body, handlers=[], orelse=[], finalbody=[ast.Expr(ast.Call(
+                        ast.Attribute(ast.Name(manager, ast.Load()), '__exit__', ast.Load()), [ast.Constant(None)] * 3, []))])]
+        return [ast.fix_missing_locations(ast.copy_location(statement, node)) for statement in body]
+
+    with_temporaries = 0
 
     # Python names JS reserves that Transcrypt does not rename (it renames case, default, new, switch and others to
     # py_*), renamed alike wherever they are names: variables, parameters and keyword arguments.
@@ -699,11 +743,12 @@ class TranscryptFixes(ast.NodeTransformer):
         return [self.visit(a) for a in assigns] + [node]
 
     def visit_Compare(self, node):
-        """`name in locals()`, which a module tests to tell a reload from its first load, as False: modules load once."""
+        """`name in locals()`, which a module tests to tell a reload from its first load, as False (and `not in` as True):
+        modules load once."""
         self.generic_visit(node)
         right = node.comparators[0]
-        if isinstance(node.ops[0], ast.In) and isinstance(right, ast.Call) and getattr(right.func, 'id', None) == 'locals':
-            return ast.Constant(False)
+        if isinstance(node.ops[0], (ast.In, ast.NotIn)) and isinstance(right, ast.Call) and getattr(right.func, 'id', None) == 'locals':
+            return ast.Constant(isinstance(node.ops[0], ast.NotIn))
         return node
 
     def visit_Match(self, node):

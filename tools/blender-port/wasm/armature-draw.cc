@@ -9,12 +9,15 @@
 #include "BKE_global.hh"
 #include "BKE_layer.hh"
 #include "BKE_mesh.hh"
+#include "BKE_object.hh"
+#include "BKE_object_types.hh"
 #include "BLI_array.hh"
 #include "BLI_map.hh"
 #include "BLI_math_color.h"
 #include "BLI_math_matrix.hh"
 #include "BLI_math_vector.h"
 #include "BLI_ordered_edge.hh"
+#include "BLI_rect.h"
 #include "DEG_depsgraph_query.hh"
 #include "DNA_curve_types.h"
 #include "DNA_screen_types.h"
@@ -29,6 +32,9 @@
 #include "engines/overlay/overlay_shader_shared.hh"
 
 #include <string>
+
+void view3d_matrices_set(blender::RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy,
+                         bool is_persp);
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
@@ -234,6 +240,13 @@ class Armatures {
 
 namespace blender {
 
+/* A part of an armature the overlay draws into a selection rectangle (gpu-select.cc). */
+struct SelectHit {
+  uint id;
+  float depth;
+  float distance;
+};
+
 /* A bone name the overlay draws (DRW_text_cache_add): where, in what color. */
 struct DRWTextStore {
   struct Text {
@@ -255,11 +268,11 @@ DRWContext::DRWContext(Mode mode, Depsgraph *depsgraph, const int2 /*size*/, con
   this->evil_C = C;
   scene = DEG_get_evaluated_scene(depsgraph);
   view_layer = DEG_get_evaluated_view_layer(depsgraph);
-  BKE_view_layer_synced_ensure(*CTX_data_main(C), scene, view_layer);
+  BKE_view_layer_synced_ensure(*DEG_get_bmain(depsgraph), scene, view_layer);
   obact = BKE_view_layer_active_object_get(view_layer);
   object_mode = obact ? eObjectMode(obact->mode) : OB_MODE_OBJECT;
-  object_pose = obact && (obact->mode & OB_MODE_POSE) ? obact : nullptr;
-  object_edit = obact && (obact->mode & OB_MODE_EDIT) ? obact : nullptr;
+  object_pose = (object_mode & OB_MODE_POSE) ? obact : (object_mode & OB_MODE_ALL_WEIGHT_PAINT) ? BKE_object_pose_armature_get(obact) : nullptr;
+  object_edit = (object_mode & OB_MODE_EDIT) ? obact : nullptr;
 }
 DRWContext::~DRWContext() = default;
 const DRWContext *DRW_context_get() { return draw_context; }
@@ -578,8 +591,32 @@ EXPORT(armature_shape_mesh) const ShapeMesh *armature_shape_mesh(const Mesh *mes
   return &header;
 }
 
-/* What the overlay draws of an armature object in the view, synced as Blender's overlay syncs it (edit_object_sync in
- * Edit Mode, else object_sync), valid until the next call. */
+/* The overlay's sync of an armature object (edit_object_sync in Edit Mode, else object_sync) into `bb` and `dt`; returns
+ * whether its instances are in the transparent passes. */
+static bool armature_sync(Depsgraph *depsgraph, Object *ob, int flags, Armatures::BoneBuffers &bb, DRWTextStore &dt)
+{
+  DRWContext context(DRWContext::VIEWPORT, depsgraph, int2(1, 1));
+  draw_context = &context;
+  resources.selecting = flags & DRAW_SELECTING;
+  update_theme_settings(resources.theme);
+  Object *evaluated = DEG_get_evaluated(depsgraph, ob);
+  const ObjectRef ob_ref{evaluated};
+  bArmature &arm = *id_cast<bArmature *>(ob->data);
+  Armatures::DrawContext ctx;
+  if (arm.edbo) {
+    ctx = create_draw_context(ob_ref, bb, dt, ARM_DRAW_MODE_EDIT, flags);
+    Armatures::draw_armature_edit(&ctx);
+  }
+  else if (evaluated->pose) {
+    ctx = create_draw_context(ob_ref, bb, dt, is_pose_mode(evaluated) ? ARM_DRAW_MODE_POSE : ARM_DRAW_MODE_OBJECT, flags);
+    Armatures::draw_armature_pose(&ctx);
+  }
+  draw_context = nullptr;
+  return ctx.transparent;
+}
+
+/* What the overlay draws of an armature object in the view, synced as Blender's overlay syncs it, valid until the next
+ * call. */
 EXPORT(armature_draw) const ArmatureDraw *armature_draw(bContext *C, Object *ob, int flags)
 {
   static ArmatureDraw header;
@@ -587,32 +624,12 @@ EXPORT(armature_draw) const ArmatureDraw *armature_draw(bContext *C, Object *ob,
   static DRWTextStore dt;
   static Vector<CustomShape> customs;
   static Vector<BoneText> texts;
-  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(C);
-  DRWContext context(DRWContext::VIEWPORT, depsgraph, int2(1, 1), C);
-  draw_context = &context;
-  resources.selecting = flags & DRAW_SELECTING;
-  update_theme_settings(resources.theme);
   buffers = std::make_unique<Armatures::BoneBuffers>(SelectionType::ENABLED);
   dt.texts.clear();
   customs.clear();
   texts.clear();
-
-  Object *evaluated = DEG_get_evaluated(depsgraph, ob);
-  const ObjectRef ob_ref{evaluated};
-  bArmature &arm = *id_cast<bArmature *>(ob->data);
-  Armatures::DrawContext ctx;
-  if (arm.edbo) {
-    ctx = create_draw_context(ob_ref, *buffers, dt, ARM_DRAW_MODE_EDIT, flags);
-    Armatures::draw_armature_edit(&ctx);
-  }
-  else if (evaluated->pose) {
-    ctx = create_draw_context(ob_ref, *buffers, dt, is_pose_mode(evaluated) ? ARM_DRAW_MODE_POSE : ARM_DRAW_MODE_OBJECT, flags);
-    Armatures::draw_armature_pose(&ctx);
-  }
-  draw_context = nullptr;
-
   Armatures::BoneBuffers &bb = *buffers;
-  header.transparent = ctx.transparent;
+  header.transparent = armature_sync(CTX_data_depsgraph_pointer(C), ob, flags, bb, dt);
   header.in_front = (ob->dtx & OB_DRAW_IN_FRONT) != 0;
   header.buffers[SPHERE_FILL] = buffer_of(bb.sphere_fill_buf);
   header.buffers[SPHERE_OUTLINE] = buffer_of(bb.sphere_outline_buf);
@@ -646,6 +663,257 @@ EXPORT(armature_draw) const ArmatureDraw *armature_draw(bContext *C, Object *ob,
   header.texts_num = texts.size();
   header.texts = texts.data();
   return &header;
+}
+
+/* Selection: what the GPU would rasterize of each drawn instance into a selection rectangle, from the same buffers
+ * (port-override: the module has no GPU selection buffer, gpu-select.cc). Each instance is projected into the view as
+ * triangles (the solid shapes), capsules (sticks, wires, edges, envelopes' bodies) and discs (joints, envelopes' ends),
+ * in region pixels with their depth. */
+
+/* blender-port: overlay_shape.cc bone_octahedral_verts, bone_octahedral_solid_tris, bone_box_verts, bone_box_solid_tris. */
+static const float3 octahedral_verts[6] = {{0, 0, 0}, {0.1f, 0.1f, 0.1f}, {0.1f, 0.1f, -0.1f}, {-0.1f, 0.1f, -0.1f}, {-0.1f, 0.1f, 0.1f}, {0, 1, 0}};
+static const int3 octahedral_tris[8] = {{2, 1, 0}, {3, 2, 0}, {4, 3, 0}, {1, 4, 0}, {5, 1, 2}, {5, 2, 3}, {5, 3, 4}, {5, 4, 1}};
+static const float3 box_verts[8] = {{1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {-1, 0, 1}, {1, 1, 1}, {1, 1, -1}, {-1, 1, -1}, {-1, 1, 1}};
+static const int3 box_tris[12] = {{0, 2, 1}, {0, 3, 2}, {0, 1, 5}, {0, 5, 4}, {1, 2, 6}, {1, 6, 5},
+                                  {2, 3, 7}, {2, 7, 6}, {3, 0, 4}, {3, 4, 7}, {4, 5, 6}, {4, 6, 7}};
+/* overlay_armature_stick_vert.glsl's size of a stick in pixels. */
+static constexpr float stick_size = 5.0f;
+
+/* The view's projection of world points into region pixels and depth (0 to 1), as the GPU rasterizes them. */
+struct Projection {
+  float4x4 persmat;
+  float3 right;
+  float2 size;
+
+  float3 point(const float3 &co) const
+  {
+    const float4 v = persmat * float4(co, 1.0f);
+    const float3 ndc = v.xyz() / v.w;
+    return {(ndc.x + 1.0f) * 0.5f * size.x, (ndc.y + 1.0f) * 0.5f * size.y, (ndc.z + 1.0f) * 0.5f};
+  }
+  /* A world radius at a point, in pixels. */
+  float pixels(const float3 &co, float radius) const { return math::distance(point(co).xy(), point(co + right * radius).xy()); }
+};
+
+static float segment_distance(const float2 &p, const float2 &a, const float2 &b)
+{
+  const float2 d = b - a;
+  const float length2 = math::length_squared(d);
+  const float t = length2 > 0.0f ? std::clamp(math::dot(p - a, d) / length2, 0.0f, 1.0f) : 0.0f;
+  return math::distance(p, a + d * t);
+}
+
+/* What a selection rectangle catches of an instance: whether any of its pixels, and of those the nearest depth and
+ * distance in pixels to the rectangle's center; only pixels within `radius` of the center when it is not 0 (a circle). */
+struct Catch {
+  rctf rect;
+  float2 center;
+  float radius = 0.0f;
+  bool hit = false;
+  float depth = 1.0f;
+  float distance = FLT_MAX;
+
+  void add(float to_center, bool in_rect, Span<float3> points)
+  {
+    if (!(radius > 0.0f ? to_center <= radius : in_rect)) {
+      return;
+    }
+    hit = true;
+    distance = std::min(distance, to_center);
+    for (const float3 &p : points) {
+      depth = std::min(depth, p.z);
+    }
+  }
+  float rect_distance(const float2 &p) const
+  {
+    return math::distance(p, float2(std::clamp(p.x, rect.xmin, rect.xmax), std::clamp(p.y, rect.ymin, rect.ymax)));
+  }
+  void triangle(const float3 &a, const float3 &b, const float3 &c)
+  {
+    const float2 v[3] = {a.xy(), b.xy(), c.xy()};
+    const auto side = [&](const float2 &p, int i) {
+      const float2 e = v[(i + 1) % 3] - v[i];
+      return e.x * (p.y - v[i].y) - e.y * (p.x - v[i].x);
+    };
+    const auto contains = [&](const float2 &p) {
+      const float s0 = side(p, 0), s1 = side(p, 1), s2 = side(p, 2);
+      return (s0 >= 0 && s1 >= 0 && s2 >= 0) || (s0 <= 0 && s1 <= 0 && s2 <= 0);
+    };
+    bool in_rect = contains(float2(rect.xmin, rect.ymin)) || contains(float2(rect.xmax, rect.ymax)) ||
+                   contains(float2(rect.xmin, rect.ymax)) || contains(float2(rect.xmax, rect.ymin));
+    float to_center = contains(center) ? 0.0f : FLT_MAX;
+    for (int i = 0; i < 3; i++) {
+      in_rect |= BLI_rctf_isect_segment(&rect, v[i], v[(i + 1) % 3]);
+      to_center = std::min(to_center, segment_distance(center, v[i], v[(i + 1) % 3]));
+    }
+    add(to_center, in_rect, {a, b, c});
+  }
+  void capsule(const float3 &a, const float3 &b, float width)
+  {
+    const float2 corners[4] = {{rect.xmin, rect.ymin}, {rect.xmax, rect.ymin}, {rect.xmax, rect.ymax}, {rect.xmin, rect.ymax}};
+    float to_rect = BLI_rctf_isect_segment(&rect, a.xy(), b.xy()) ? 0.0f : std::min(rect_distance(a.xy()), rect_distance(b.xy()));
+    for (const float2 &corner : corners) {
+      to_rect = std::min(to_rect, segment_distance(corner, a.xy(), b.xy()));
+    }
+    add(std::max(0.0f, segment_distance(center, a.xy(), b.xy()) - width), to_rect <= width, {a, b});
+  }
+  void disc(const float3 &c, float r) { add(std::max(0.0f, math::distance(center, c.xy()) - r), rect_distance(c.xy()) <= r, {c}); }
+};
+
+/* An instance's matrix without the colors packed in its fourth row (overlay_common_lib.glsl extract_matrix_packed_data). */
+static float4x4 unpacked(const BoneInstanceData &instance)
+{
+  float4x4 m = instance.mat44;
+  m[0][3] = m[1][3] = m[2][3] = 0.0f;
+  m[3][3] = 1.0f;
+  return m;
+}
+
+/* Each instance of an armature's sync a region catches: fn(its select id, what it caught). */
+static void select_catches(Armatures::BoneBuffers &bb, const Projection &view, const Catch &region, FunctionRef<void(uint32_t, const Catch &)> fn)
+{
+  const auto each = [&](const auto &buf, const auto &shape) {
+    for (const int i : buf.ids.index_range()) {
+      Catch c = region;
+      shape(buf.data[i], c);
+      if (c.hit) {
+        fn(buf.ids[i], c);
+      }
+    }
+  };
+  const auto solid = [&](Span<float3> verts, Span<int3> tris) {
+    return [&view, verts, tris](const BoneInstanceData &instance, Catch &c) {
+      const float4x4 m = unpacked(instance);
+      const auto at = [&](int v) { return view.point(math::transform_point(m, verts[v])); };
+      for (const int3 &tri : tris) {
+        c.triangle(at(tri.x), at(tri.y), at(tri.z));
+      }
+    };
+  };
+  each(bb.octahedral_fill_buf, solid(Span(octahedral_verts, 6), Span(octahedral_tris, 8)));
+  each(bb.bbones_fill_buf, solid(Span(box_verts, 8), Span(box_tris, 12)));
+  each(bb.sphere_fill_buf, [&](const BoneInstanceData &instance, Catch &c) {
+    const float4x4 m = unpacked(instance);
+    c.disc(view.point(m.location()), view.pixels(m.location(), 0.05f * math::length(m.x_axis())));
+  });
+  each(bb.envelope_fill_buf, [&](const BoneEnvelopeData &envelope, Catch &c) {
+    const float3 head = envelope.head_sphere.xyz(), tail = envelope.tail_sphere.xyz();
+    const float rh = view.pixels(head, envelope.head_sphere.w), rt = view.pixels(tail, envelope.tail_sphere.w);
+    c.disc(view.point(head), rh);
+    c.disc(view.point(tail), rt);
+    c.capsule(view.point(head), view.point(tail), std::min(rh, rt));
+  });
+  each(bb.stick_buf, [&](const BoneStickData &stick, Catch &c) {
+    /* overlay_armature_stick_vert.glsl: thinner without a wire color; the body a band, the ends discs. */
+    const float scale = (stick.wire_color.w > 0.0f ? 1.0f : 0.5f) * stick_size / 2.0f;
+    const float3 start = view.point(stick.bone_start.xyz()), end = view.point(stick.bone_end.xyz());
+    if (stick.bone_color.w > 0.0f) {
+      c.capsule(start, end, scale);
+    }
+    if (stick.head_color.w > 0.0f) {
+      c.disc(start, 2.0f * scale);
+    }
+    if (stick.tail_color.w > 0.0f) {
+      c.disc(end, 2.0f * scale);
+    }
+  });
+  for (const int i : bb.wire_buf.ids.index_range()) {
+    Catch c = region;
+    c.capsule(view.point(bb.wire_buf.data[i * 2].pos_.xyz()), view.point(bb.wire_buf.data[i * 2 + 1].pos_.xyz()), 1.0f);
+    if (c.hit) {
+      fn(bb.wire_buf.ids[i], c);
+    }
+  }
+  const auto custom = [&](const Map<gpu::Batch *, std::unique_ptr<Armatures::BoneInstanceBuf>> &map) {
+    for (const auto item : map.items()) {
+      const ShapeBatch &shape = batch_shape(item.key);
+      each(*item.value, [&](const BoneInstanceData &instance, Catch &c) {
+        const float4x4 m = unpacked(instance);
+        const auto at = [&](const float3 &co) { return view.point(math::transform_point(m, co)); };
+        if (!shape.mesh) {
+          /* An empty's shape, caught by its axes. */
+          for (const float3 &axis : {float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1)}) {
+            c.capsule(at(-axis), at(axis), 1.0f);
+          }
+          return;
+        }
+        const Span<float3> positions = shape.mesh->vert_positions();
+        if (shape.geometry == ShapeGeometry::Surface) {
+          const Span<int> corner_verts = shape.mesh->corner_verts();
+          for (const int3 &tri : shape.mesh->corner_tris()) {
+            c.triangle(at(positions[corner_verts[tri.x]]), at(positions[corner_verts[tri.y]]), at(positions[corner_verts[tri.z]]));
+          }
+          return;
+        }
+        for (const int2 &edge : shape.mesh->edges()) {
+          c.capsule(at(positions[edge.x]), at(positions[edge.y]), 1.0f);
+        }
+      });
+    }
+  };
+  custom(bb.custom_shape_fill);
+  custom(bb.custom_shape_wire);
+}
+
+static Projection projection_of(const RegionView3D &rv3d, int winx, int winy)
+{
+  return {float4x4(rv3d.persmat), math::normalize(float3(rv3d.viewinv[0])), float2(winx, winy)};
+}
+
+static Catch rect_catch(const rctf &rect, float radius)
+{
+  Catch region;
+  region.rect = rect;
+  region.center = float2(BLI_rctf_cent_x(&rect), BLI_rctf_cent_y(&rect));
+  region.radius = radius;
+  return region;
+}
+
+/* The parts of an armature in Edit or Pose Mode drawn into a selection rectangle of the view (in region pixels; a
+ * circle of `radius` about its center when not 0), as the select engine finds them, for gpu-select.cc's draw loop.
+ * Blender's overlay draws an armature's select ids with the object's (select_instance.hh SelectMap::select_id), and
+ * In Front ones as nearer (read_result). */
+void armature_select_hits(Depsgraph *depsgraph, Object *ob, const RegionView3D &rv3d, int winx, int winy, const rcti &rect, int radius,
+                          Vector<SelectHit> &hits)
+{
+  Armatures::BoneBuffers bb(SelectionType::ENABLED);
+  DRWTextStore dt;
+  armature_sync(depsgraph, ob, DRAW_SELECTING, bb, dt);
+  rctf region;
+  BLI_rctf_rcti_copy(&region, &rect);
+  const float in_front = (ob->dtx & OB_DRAW_IN_FRONT) ? 0.01f : 1.0f;
+  Map<uint32_t, SelectHit> by_id;
+  select_catches(bb, projection_of(rv3d, winx, winy), rect_catch(region, float(radius)), [&](uint32_t id, const Catch &c) {
+    if (id == uint32_t(-1)) {
+      return;
+    }
+    SelectHit &hit = by_id.lookup_or_add(id, {ob->runtime->select_id | id, 1.0f, FLT_MAX});
+    hit.depth = std::min(hit.depth, c.depth * in_front);
+    hit.distance = std::min(hit.distance, c.distance);
+  });
+  for (const SelectHit &hit : by_id.values()) {
+    hits.append(hit);
+  }
+}
+
+/* The depth at which a click at (x, y) in region pixels of a view (its matrices as main_view_set takes them) hits the
+ * bones an armature draws in Object Mode, or -1: within 5 pixels, as a click picks objects (view3d_select.cc
+ * mixed_bones_object_selectbuffer's smallest rectangle). */
+EXPORT(armature_pick_depth)
+float armature_pick_depth(bContext *C, Object *ob, const float *viewmat, const float *winmat, int winx, int winy, float x, float y)
+{
+  RegionView3D rv3d = {};
+  view3d_matrices_set(rv3d, viewmat, winmat, winx, winy, true);
+  Armatures::BoneBuffers bb(SelectionType::ENABLED);
+  DRWTextStore dt;
+  armature_sync(CTX_data_depsgraph_pointer(C), ob, 0, bb, dt);
+  rctf region;
+  BLI_rctf_init(&region, x - 5, x + 5, y - 5, y + 5);
+  float depth = -1.0f;
+  select_catches(bb, projection_of(rv3d, winx, winy), rect_catch(region, 0.0f), [&](uint32_t, const Catch &c) {
+    depth = depth < 0.0f ? c.depth : std::min(depth, c.depth);
+  });
+  return depth;
 }
 
 }  // namespace blender

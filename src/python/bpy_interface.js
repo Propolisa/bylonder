@@ -2,9 +2,9 @@
 // and started as Blender starts them, which registers their classes. Bylonder draws and runs those classes by name.
 import { loadRNAUI } from '../makesrna/rna.js';
 import { invokeOperator, runOperator, pollOperator, hasOperator, runsOperator, ownsOperator, registerFallback, onRegister, extendMenus } from '../windowmanager/wm-operators.js';
-import { hasOperator as blenderHasOperator, newOperator, blenderModule } from '../bmesh/bmesh-wasm.js';
+import { hasOperator as blenderHasOperator, newOperator, blenderModule, blenderMain } from '../bmesh/bmesh-wasm.js';
 import { set, bool, __class__, __get__ } from '../bl_py/org.transcrypt.__runtime__.js';
-import { registerClass, inPythonContext, contextPointer, inClassCall, defineAssignedProperties } from './bpy_rna.js';
+import { registerClass, inPythonContext, contextPointer, setContextPointer, inClassCall, defineAssignedProperties } from './bpy_rna.js';
 
 const { exports: x, withString, cString } = blenderModule;
 
@@ -13,6 +13,10 @@ const { exports: x, withString, cString } = blenderModule;
 await loadRNAUI(import.meta.env ? () => import('../makesrna/rna-ui.json') : undefined);
 await import('../bl_py/__main__.js');
 const _bpy = globalThis.__py_modules._bpy;
+// The add-ons the Preferences enable (the pose library), loaded once as WM_init loads them
+// (wm_init_scripts_extensions_once), with the module's Preferences.
+setContextPointer(blenderMain().C);
+globalThis.__py_modules['bpy.utils'].load_scripts_extensions();
 
 // bpy.ops (the boundary's _bpy.ops, bpy_operator.cc): an operator Bylonder runs its own way, or any its registry has
 // outside Blender's callbacks (a script's, with the scene made current around it), runs in the registry; the others go

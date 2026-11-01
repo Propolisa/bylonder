@@ -2,6 +2,7 @@
  * own invoke, modal and exec on a context (Main's, main-api.cc), the 3D View they act in, and the stand-ins they read
  * of what the window manager and screen would give. */
 #include "BLI_listbase.h"
+#include "BLI_map.hh"
 #include "BLI_set.hh"
 #include "BLI_math_matrix.h"
 #include "BLI_math_matrix.hh"
@@ -90,8 +91,21 @@ static const bool logging = (CLG_init(), true);
 /* port-override: the 3D View the editor shows (ED_view3d_update_viewmat with Babylon's camera as its matrices): its view
  * and window matrices (Blender's axes, column-major), its size in pixels and whether it is a perspective view. Operators
  * then act in it as in Blender's window region, projecting the mouse as it does. */
+/* The window matrix and size each view was last given, which view3d_matrices_restore gives back after Blender's code
+ * set up a view of its own (view3d_gpu_select_ex picking in a rectangle, gpu-select.cc). */
+struct GivenView {
+  float4x4 winmat;
+  int winx, winy;
+  bool is_persp;
+};
+static Map<const RegionView3D *, GivenView> &given_views()
+{
+  static Map<const RegionView3D *, GivenView> views;
+  return views;
+}
 void view3d_matrices_set(RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
 {
+  given_views().add_overwrite(&rv3d, {float4x4(winmat), winx, winy, is_persp});
   std::copy_n(viewmat, 16, &rv3d.viewmat[0][0]);
   std::copy_n(winmat, 16, &rv3d.winmat[0][0]);
   mul_m4_m4m4(rv3d.persmat, rv3d.winmat, rv3d.viewmat);
@@ -104,6 +118,13 @@ void view3d_matrices_set(RegionView3D &rv3d, const float *viewmat, const float *
   const float v1[3] = {rv3d.persmat[0][0], rv3d.persmat[1][0], rv3d.persmat[2][0]};
   const float v2[3] = {rv3d.persmat[0][1], rv3d.persmat[1][1], rv3d.persmat[2][1]};
   rv3d.pixsize = (2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)))) / float(std::max(winx, winy));
+}
+void view3d_matrices_restore(RegionView3D &rv3d)
+{
+  if (const GivenView *given = given_views().lookup_ptr(&rv3d)) {
+    const GivenView view = *given;
+    view3d_matrices_set(rv3d, &rv3d.viewmat[0][0], view.winmat.base_ptr(), view.winx, view.winy, view.is_persp);
+  }
 }
 static wmGizmoMap *gizmo_map_standin();
 /* A 3D View's window region given its view (main_view_set): area, space and region linked

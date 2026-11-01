@@ -1,5 +1,5 @@
 """Blender's datafiles, from a Blender install at the manifest's tag: the asset libraries of Blender's Essentials the
-module reads at run time (node groups such as Hair Dynamics, the curve and mesh sculpt brushes) and their catalogs, which the
+module reads at run time (node groups such as Hair Dynamics, the curve and mesh sculpt and weight paint brushes) and their catalogs, which the
 module's realm puts in its file system at Blender's system directory (src/bmesh/bmesh-wasm.js, ghost-paths.cc); and the
 studio light Material Preview lights the view with (STUDIOLIGHT_WORLD_DEFAULT, studiolight.cc), which the view loads.
 Writes src/bmesh/datafiles/ and src/bmesh/datafiles.js.
@@ -15,7 +15,8 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FILES = ['assets/blender_assets.cats.txt', 'assets/nodes/geometry_nodes_essentials.blend',
          'assets/nodes/geometry_nodes_dynamics_assets.blend', 'assets/nodes/procedural_hair_node_assets.blend',
-         'assets/brushes/essentials_brushes-curve_sculpt.blend', 'assets/brushes/essentials_brushes-mesh_sculpt.blend']
+         'assets/brushes/essentials_brushes-curve_sculpt.blend', 'assets/brushes/essentials_brushes-mesh_sculpt.blend',
+         'assets/brushes/essentials_brushes-mesh_weight.blend']
 STUDIO_LIGHT = 'studiolights/world/forest.exr'
 # Written again by Blender with ZIP compression: Blender ships it as DWAB, which Babylon's EXR loader does not read.
 REENCODE = ("import bpy, sys; image = bpy.data.images.load(sys.argv[-2]); s = bpy.context.scene.render.image_settings; "

@@ -113,11 +113,14 @@ export const checkbox = ({ checked, text, disabled, inactive, onChange, title })
   text ? h('span', { class: 'truncate' }, text) : null,
 ]);
 
-export function textField({ value, iconName, disabled, inactive, onChange, title, placeholder, flat = false }) {
+// editing: a field whose text is being edited as it appears (a view item's rename field), selected, its edit applied as
+// it loses focus.
+export function textField({ value, iconName, disabled, inactive, onChange, title, placeholder, flat = false, editing = false }) {
   return h('label', { class: [W, 'bl-text flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md px-1.5 text-xs', inactive && 'opacity-50', flat && 'bl-flat'], title }, [
     icon(iconName),
     h('input', { class: 'min-w-0 flex-1 bg-transparent outline-none', value, disabled, placeholder, 'aria-label': title,
-      onChange: (e) => onChange(e.target.value), onKeydown: (e) => { e.stopPropagation(); if (e.key === 'Enter' || e.key === 'Escape') e.target.blur(); } }),
+      ...(editing ? { onVnodeMounted: ({ el }) => { el.focus(); el.select(); }, onBlur: (e) => onChange(e.target.value) } : { onChange: (e) => onChange(e.target.value) }),
+      onKeydown: (e) => { e.stopPropagation(); if (e.key === 'Enter' || e.key === 'Escape') e.target.blur(); } }),
   ]);
 }
 

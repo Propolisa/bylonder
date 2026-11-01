@@ -200,9 +200,12 @@ export var get_service = function (storage_path) {
 	else {
 	}
 	var map_key = __call__ (_map_key, null, storage_path);
-	var __withid0__ = _services_mutex;
+	var _with_manager4_0 = _services_mutex;
+	(function () {
+		var __accu0__ = _with_manager4_0;
+		return __call__ (__accu0__.__enter__, __accu0__);
+	}) ();
 	try {
-		__withid0__.__enter__ ();
 		try {
 			return __getitem__ (_services, map_key);
 		}
@@ -236,12 +239,12 @@ export var get_service = function (storage_path) {
 		}) ();
 		__setitem__ (_services, map_key, service);
 		return service;
-		__withid0__.__exit__ ();
 	}
-	catch (__except0__) {
-		if (! (__withid0__.__exit__ (__except0__.name, __except0__, __except0__.stack))) {
-			throw __except0__;
-		}
+	finally {
+		(function () {
+			var __accu0__ = _with_manager4_0;
+			return __call__ (__accu0__.__exit__, __accu0__, null, null, null);
+		}) ();
 	}
 };
 export var release_service = function (storage_path) {
@@ -259,9 +262,12 @@ export var release_service = function (storage_path) {
 	else {
 	}
 	var map_key = __call__ (_map_key, null, storage_path);
-	var __withid0__ = _services_mutex;
+	var _with_manager5_0 = _services_mutex;
+	(function () {
+		var __accu0__ = _with_manager5_0;
+		return __call__ (__accu0__.__enter__, __accu0__);
+	}) ();
 	try {
-		__withid0__.__enter__ ();
 		try {
 			var service = (function () {
 				var __accu0__ = _services;
@@ -280,12 +286,12 @@ export var release_service = function (storage_path) {
 			var __accu0__ = service;
 			return __call__ (__accu0__.close, __accu0__);
 		}) ();
-		__withid0__.__exit__ ();
 	}
-	catch (__except0__) {
-		if (! (__withid0__.__exit__ (__except0__.name, __except0__, __except0__.stack))) {
-			throw __except0__;
-		}
+	finally {
+		(function () {
+			var __accu0__ = _with_manager5_0;
+			return __call__ (__accu0__.__exit__, __accu0__, null, null, null);
+		}) ();
 	}
 };
 export var _map_key = function (storage_path) {

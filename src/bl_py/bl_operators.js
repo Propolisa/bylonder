@@ -39,9 +39,8 @@ import * as anim from './bl_operators.anim.js';
 import * as add_mesh_torus from './bl_operators.add_mesh_torus.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {reload} from './importlib.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
-export {view3d, reload, copy_global_transform, screen_play_rendered_anim, constraint, bone_selection_sets, render, console, sequencer, grease_pencil, geometry_nodes, _module, object_align, image_as_planes, wm, object, userpref, spreadsheet, _globals, anim, assets, add_mesh_torus, vertexpaint_dirt, connect_to_output, clip, file, rigidbody, node, _lazy, object_quick_effects, _member, object_randomize_transform, _import, mesh, uvcalc_follow_active, uvcalc_lightmap, world, presets, uvcalc_transform, image};
+export {view3d, copy_global_transform, screen_play_rendered_anim, constraint, bone_selection_sets, render, console, sequencer, grease_pencil, geometry_nodes, _module, object_align, image_as_planes, wm, object, userpref, spreadsheet, _globals, anim, assets, add_mesh_torus, vertexpaint_dirt, connect_to_output, clip, file, rigidbody, node, _lazy, object_quick_effects, _member, object_randomize_transform, _import, mesh, uvcalc_follow_active, uvcalc_lightmap, world, presets, uvcalc_transform, image};
 var __name__ = 'bl_operators';
 export var _merged = function () {
 	if (arguments.length) {
@@ -199,22 +198,6 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
-if (false) {
-	__setslice__ (_modules_loaded, 0, null, null, (function () {
-		var __accu0__ = [];
-		var __iterable0__ = _modules_loaded;
-		__iterable0__ = __i__ (__iterable0__);
-		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-			var val = __getitem__ (__iterable0__, __index0__);
-			(function () {
-				var __accu1__ = __accu0__;
-				return __call__ (__accu1__.append, __accu1__, __call__ (reload, null, val));
-			}) ();
-		}
-		return __accu0__;
-	}) ());
-	// pass;
-}
 export var _modules = ['add_mesh_torus', 'anim', 'assets', 'bone_selection_sets', 'clip', 'connect_to_output', 'console', 'constraint', 'copy_global_transform', 'file', 'geometry_nodes', 'grease_pencil', 'image', 'image_as_planes', 'mesh', 'node', 'object', 'object_align', 'object_quick_effects', 'object_randomize_transform', 'presets', 'render', 'rigidbody', 'screen_play_rendered_anim', 'sequencer', 'spreadsheet', 'userpref', 'uvcalc_follow_active', 'uvcalc_lightmap', 'uvcalc_transform', 'vertexpaint_dirt', 'view3d', 'world', 'wm'];
 if (__call__ (_truth, null, bpy.app.build_options.freestyle)) {
 	(function () {

@@ -1,13 +1,11 @@
 /* Blender's Armature objects in the module's Main (main-api.cc makes them with main_object_add, OB_ARMATURE): their bones
  * and pose in and out, Edit Mode's edit bones (armature_utils.cc's ED_armature_to_edit and ED_armature_from_edit, which
- * object.mode_set runs), the pose Blender evaluates (BKE_pose_where_is, in main_evaluate), and picking a bone in Edit and
- * Pose Mode. armature-draw.cc gives what the overlay draws of them. */
+ * object.mode_set runs) and the pose Blender evaluates (BKE_pose_where_is, in main_evaluate). armature-draw.cc gives what
+ * the overlay draws of them, and what selection catches of it (gpu-select.cc). */
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_build.hh"
 #include "BKE_action.hh"
 #include "BKE_armature.hh"
-#include "BKE_context.hh"
-#include "BKE_layer.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
@@ -18,7 +16,6 @@
 #include "DNA_armature_types.h"
 #include "DNA_object_types.h"
 #include "ED_armature.hh"
-#include "ED_select_utils.hh"
 #include "MEM_guardedalloc.h"
 
 #include <string>
@@ -167,26 +164,4 @@ void armature_bones_set(Main *bmain, Object *ob, int bones_num, const int *ints,
   DEG_id_tag_update(&arm.id, ID_RECALC_GEOMETRY);
   DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
   DEG_relations_tag_update(bmain);
-}
-
-/* A click on a bone (its index in armature_bones_get's order, -1 for none; `part` 0 for its body, 1 its head, 2 its
- * tail) in Edit or Pose Mode, with a select operation (eSelectOp), as view3d.select applies it to the bone the GPU's
- * selection buffer found (port-override: the module has no GPU selection, Bylonder's picking finds the bone). */
-EXPORT(armature_select_pick)
-bool armature_select_pick(bContext *C, Object *ob, int index, int part, int sel_op, bool deselect_all, bool select_passthrough)
-{
-  const SelectPick_Params params = {eSelectOp(sel_op), deselect_all, select_passthrough};
-  Scene *scene = CTX_data_scene(C);
-  ViewLayer *view_layer = CTX_data_view_layer(C);
-  BKE_view_layer_synced_ensure(*CTX_data_main(C), scene, view_layer);
-  bArmature &arm = armature_of(ob);
-  if (arm.edbo) {
-    EditBone *ebone = index >= 0 ? static_cast<EditBone *>(BLI_findlink(arm.edbo, index)) : nullptr;
-    const eBone_Flag selmask = part == 1 ? BONE_ROOTSEL : part == 2 ? BONE_TIPSEL : BONE_SELECTED;
-    return ED_armature_edit_select_pick_bone(C, BKE_view_layer_base_find(view_layer, ob), ebone, selmask, params);
-  }
-  const Bone *picked = nullptr;
-  BKE_armature_foreach_bone(arm, [&](const int i, const Bone &bone) { picked = i == index ? &bone : picked; });
-  bPoseChannel *pchan = picked && ob->pose ? BKE_pose_channel_find_name(ob->pose, picked->name) : nullptr;
-  return ED_armature_pose_select_pick_bone(*CTX_data_main(C), scene, view_layer, CTX_wm_view3d(C), ob, pchan, params);
 }

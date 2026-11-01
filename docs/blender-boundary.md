@@ -94,6 +94,10 @@ Babylon was the truth and Main a second model kept equal both ways. Where the co
   `src/editors/mesh/editmesh-mode.js` is the editor's mode over it. A click and the region selections run Blender's
   `view3d.select`, `select_box`, `select_lasso` and `select_circle` from the page, picking as in X-ray
   (`view_xray_picking`: the module has no GPU select buffer, so there is no occlusion).
+- **GPU selection.** Blender's `view3d_gpu_select_ex` (a click, box select and the picks of objects' parts) runs on
+  Blender's `gpu_select.cc` and `gpu_select_next.cc`, compiled in `gpu-select.cc`; the draw loop that would render
+  select ids into the selection rectangle is that file's seam, answered for armatures in Edit and Pose Mode from the
+  overlay's own sync (`armature-draw.cc` `armature_select_hits`). Other object types draw no select ids yet.
 
 ### .blend files
 

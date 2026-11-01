@@ -33,6 +33,5 @@ void DRW_module_init() {}
 void DRW_module_exit() {}
 void DRW_engines_free() {}
 bool DRW_gpu_context_try_enable() { return false; }
-void DRW_gpu_context_disable() {}
 
 }  // namespace blender
