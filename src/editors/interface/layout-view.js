@@ -17,6 +17,7 @@ import { defineComponent, h, ref, Teleport, onBeforeUnmount, cloneVNode } from '
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
 import { iconStyle, iconUrl, toolIconName } from './icon.js';
+import { BYLONDER_ICON } from '../../python/bpy_icons.js';
 import { rnaProperty, INFO, baseOf } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 import { operatorValues, isLayout, UILayout } from './layout.js';
@@ -26,7 +27,9 @@ import themes from './icon-themes.json' with { type: 'json' };
 
 // An icon in its theme color, as Blender draws its monochrome icons.
 // A tool's icon in a layout Blender made (ui_icon_name's `tools/NAME`) is its colored image.
+// Bylonder's icon (BYLONDER) is a custom icon in Blender's icon system (python/bpy_icons.js), drawn as Blender's own.
 export const icon = (name, className = '') => (typeof name !== 'string' || name === 'NONE' ? null
+  : name === BYLONDER_ICON ? icon('BYLONDER', className)
   : name.startsWith('tools/') ? h('img', { class: ['bl-tool-icon', className], src: iconUrl(name), alt: '' })
   : h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: iconStyle(name), 'aria-hidden': 'true' }));
 

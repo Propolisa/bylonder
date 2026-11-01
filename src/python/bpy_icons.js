@@ -17,3 +17,7 @@ export function releaseIcon(value) {
   for (const [name, id] of icons) if (id === value) icons.delete(name);
   x.icon_release(value);
 }
+// Bylonder's icon (BYLONDER, the logo), one custom icon of Blender's icon system, as an add-on's are: its icon_value for
+// layouts (`layout.label(icon_value=...)`), drawn as Blender's monochrome icons (layout-view.js).
+export const BYLONDER_ICON = 'tools/BYLONDER';
+export const bylonderIcon = () => geometryIcon('BYLONDER');

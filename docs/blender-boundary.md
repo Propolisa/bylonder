@@ -292,6 +292,10 @@ operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.
   material's property is animated through a mesh using it (`material.albedoColor`), a rotation on a quaternion node
   as `rotationQuaternion`. Channels without a Babylon target (stores, `depthOfField`, modifier settings unless they are
   live) stay out.
+- **Runtimes.** A feature with a runtime (`runtimes.md`) is written through its mapping to Babylon, the view's own in
+  Babylon (mapped), else one made for the export (`exportRuntimes`), with its approximations and fallbacks reported to
+  the Info editor: an armature as a `Skeleton`, its meshes skinned, its pose sampled from Main as `_matrix` animations
+  of the bones in the animation group.
 - **Effects.** The scene camera's rendering pipelines (Bylonder's render effects and the project's own) go in
   `renderingPipelines` and the scene's image processing in `imageProcessingConfiguration`, in Babylon's own
   serialization; camera post-processes go in `postProcesses`, which Babylon's loader reads. Babylon's `.babylon`
@@ -301,7 +305,8 @@ operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.
   pipelines and animation with Babylon's `Parse` functions, as the loader does. It imports `@babylonjs/core`, mapped
   in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/+esm` (the header names the URL).
 - **Checked.** `tests/export.test.js` (NullEngine: serialize, reload with Babylon's loader and import the module,
-  compare geometry, material, camera and animation) and `tests/e2e/smoke.mjs` (File > Export in the app).
+  compare geometry, material, camera and animation), `tests/runtimes-armature-wasm.test.js` (the Rigged Character's
+  skeleton reloaded and skinned as Main deforms it at each frame) and `tests/e2e/smoke.mjs` (File > Export in the app).
 
 ### Modifier kernels polyfill
 

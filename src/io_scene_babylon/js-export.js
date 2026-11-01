@@ -4,6 +4,7 @@
 // Babylon's own serialization, passed to their Parse functions as Babylon's .babylon loader does.
 import { AbstractEngine } from '@babylonjs/core';
 import { serializeScene } from './babylon-export.js';
+import { exportRuntimes } from '../runtimes/runtimes.js';
 
 const CDN = `https://cdn.jsdelivr.net/npm/@babylonjs/core@${AbstractEngine.Version}/+esm`;
 const json = (value) => JSON.stringify(value);
@@ -84,7 +85,18 @@ const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 // kernels polyfill, which createScene loads from `bylonder-modifiers/` next to the module (or its `modifiers` option).
 export async function exportModule(world, { live: keepLive = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
-  const data = await serializeScene(world, { geometry: false, live });
+  await world.modifiers.settled();
+  // The mapped meshes' geometry is read below: their mapping holds until the module is written.
+  const mapped = exportRuntimes(world);
+  try {
+    return await moduleSource(world, live, mapped);
+  } finally {
+    mapped.restore();
+  }
+}
+
+async function moduleSource(world, live, mapped) {
+  const data = await serializeScene(world, { geometry: false, live, mapped });
   const { scene } = world;
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];

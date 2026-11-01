@@ -132,3 +132,71 @@ One wrapper module per feature, without changing the code of other features or t
   other than Blender evaluates a struct and hands it over if so; export asks it for the mapping; the runtime panels, the
   Scene tab's Runtimes panel and the Outliner mark come from the registry. A feature in Blender runs exactly the code it
   runs today.
+
+## Implementation
+
+- **Registry.** `src/runtimes/runtimes.js`: `registerRuntime(feature)`, `runtimeOf(struct)`, `featureOf(struct)`. The
+  view's hooks are two calls in `main-view.js` `drawEvaluated`: `evaluates(entry)` (whether a runtime other than Blender
+  evaluates an object's geometry, so the view does not draw Main's evaluated mesh for it) and `evaluated(view)` after
+  each evaluation (`view`: the scene, Main, the objects' entries, `drawGeometry`, `drawMesh`). A struct whose runtime
+  changed since the last evaluation reports its issues to the Info editor (`wm-reports.js` `report`). Export calls
+  `exportRuntimes(world)` (`babylon-export.js` `serializeScene`, `js-export.js` `exportModule`).
+- **Properties.** `registerRuntimeTypes(icon)` (called by `main.js` once Blender's Python is loaded) registers, per
+  struct the features live on, `BYLONDER_PG_<struct>` (`runtime`, an enum of the runtimes those features offer, not
+  animatable; `babylon`, a `BYLONDER_PG_<struct>_babylon` of their Babylon-only settings; `issues`, read only) and
+  assigns it as `<struct>.bylonder`, as an add-on assigns a `PointerProperty`. Blender stores it as ID properties, so
+  it saves in the .blend and undoes with Main's memfile steps.
+- **Panels.** `<CONTEXT>_PT_bylonder_runtime` per feature (`DATA_PT_bylonder_runtime` for armatures) and
+  `SCENE_PT_bylonder_runtimes` are `bpy.types.Panel` classes registered into the module, so Blender's Properties editor
+  lays them out like its own panels. Issues are listed under Approximated (`INFO` icon) and Evaluated as Blender
+  (`ERROR` icon). The Blender Coverage scan leaves out ids with `bylonder` in them, which are not Blender's.
+- **The Bylonder icon** is a custom icon of Blender's icon system (`python/bpy_icons.js` `bylonderIcon`, a layout's
+  `icon_value`); the layout renderer draws it as the monochrome `BYLONDER` icon (`public/logo/bylonder-20.svg`).
+
+## Armature deform
+
+`src/runtimes/armature.js`. With Babylon (mapped) on an armature object not in Edit Mode:
+
+- **Skeleton.** A Babylon `Skeleton` named after the armature object, one `Bone` per Blender bone (parents first, the
+  bone's name, id `<skeleton> <bone>`), its rest and bind matrices from the bones' `matrix_local`, its local matrix from
+  the pose bones' evaluated `matrix`, both in Blender's axes mapped as `blender-boundary.md` Decision 2 says. A root
+  bone's matrices include the armature-to-mesh matrix, so meshes placed differently from the armature get a skeleton
+  each (named `<armature> <mesh>`).
+- **Skin.** Each mesh object with an Armature modifier on it is drawn from its Mesh as Main holds it, with
+  `matricesIndices` and `matricesWeights` per Babylon vertex (face corner) from its vertex groups: the groups of
+  deforming bones, normalized by their sum as `armature_deform.cc` does, the modifier's vertex group (inverted or not)
+  scaling the deform, the rest of the weight on the identity matrix Babylon's skeletons end with, so unweighted vertices
+  stay in place. Influencers per vertex are the `influencers` setting: Automatic (4, or 8 with Babylon's extra buffers
+  when a vertex has more), 4 or 8.
+- **Pose.** Blender poses the bones in every runtime (its animation system, constraints, IK, drivers and Pose Mode
+  tools), so constraints and every bone setting that changes the pose (scale inheritance included) are exact: IK is
+  not mapped to Babylon's `BoneIKController`, which would only approximate Blender's solver. After
+  each evaluation the bones' local matrices are set from Main's pose and Babylon skins on the GPU. The skinned mesh's
+  bounds and picking positions follow the pose (skinned on the CPU when the pose changes, from its bones' boxes while
+  the animation plays).
+- **Exact.** Babylon's skinning gives Main's evaluated positions to float precision (checked at three poses and two
+  frames of an action, `tests/runtimes-armature-wasm.test.js`).
+- **Approximations:** normals (Babylon skins them with the bones; Blender recomputes them from the deformed shape, so
+  shading differs a little where bones blend: listed for every skinned mesh), Preserve Volume (skinned linearly: Babylon has no dual quaternion skinning), bone envelopes
+  (`use_bone_envelopes`: they do not deform), a deforming bone's B-Bone segments (it deforms as one segment) and its
+  Multiply Vertex Group by Envelope, and vertices with more weights than the influencers (the strongest kept,
+  normalized).
+- **Fallbacks**, per mesh (the mesh deforms as Blender; the rig's other meshes still skin in Babylon): a modifier before
+  or after the Armature modifier, more than one Armature modifier, Multi Modifier, shape keys, Bylonder's own modifiers
+  after Blender's, and a mesh whose geometry is Babylon's own. A mesh in Edit or Sculpt Mode deforms as Blender while it
+  is edited, without an issue.
+- **Export.** File > Export > Babylon writes the skeletons, the skinned meshes and one matrix animation per bone
+  (`_matrix`, in the scene's animation group), sampled from Main at every frame of the scene range when the armature
+  is animated (an action, drivers or constraints), else its pose at the current frame. An armature on Blender is mapped
+  for the export's duration. Babylon's loader skins the file as Main deforms it at each frame; Babylon interpolates
+  matrix keys between frames only with `Animation.AllowMatricesInterpolation`. Babylon's serializer leaves out the extra
+  four influences of a shared geometry, so such a mesh is written with its own geometry.
+
+When Babylon (mapped) is preferable: GPU skinning keeps the deformed mesh off the CPU-to-GPU upload every frame, and
+the view is what the exported file shows. Until the module skips the Armature modifier in Main's evaluation of a mapped
+mesh, Blender still deforms it on the CPU as well.
+
+Not yet: B-Bone segments as Babylon bones (Blender's segment matrices, `PoseBone.bbone_segment_matrix`, as extra bones
+weighted by `bbone_segment_index`); the Outliner mark; the Scene tab's rows as links to their panels; a module export
+that skips the Armature modifier of a mapped mesh, and one that gives the mesh evaluated before it (so modifiers and
+shape keys before the Armature modifier stop being fallbacks).

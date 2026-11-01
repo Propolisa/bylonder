@@ -1,7 +1,8 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture } from '@babylonjs/core';
+import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture, VertexBuffer } from '@babylonjs/core';
 import { deleted, nodeId } from '../editors/object/identity.js';
+import { exportRuntimes } from '../runtimes/runtimes.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -103,9 +104,10 @@ function animationTarget(channel, content, live) {
   return { owner, path: (owner === target ? [] : ['material']).concat(base), value: read(target, base), component: compound ? parts.at(-1) : null };
 }
 
-// Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range.
-// Channels without one (stores, modifier settings unless they are live, depthOfField) stay out.
-function bakeAnimations(world, samples, content, live) {
+// Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range, and the
+// runtimes' animations (`mapped`, a skeleton's bones). Channels without one (stores, modifier settings unless they are
+// live, depthOfField) stay out.
+function bakeAnimations(world, samples, content, live, mapped) {
   const { fps, frameStart, frameEnd } = world.animation.time.state;
   const tracks = new Map();
   for (const { channel, start, values } of samples) {
@@ -118,7 +120,7 @@ function bakeAnimations(world, samples, content, live) {
     track.step ||= typeof values[0] === 'boolean';
     track.components.push({ component: at.component, start, values: values.map((v) => (typeof v === 'boolean' ? +v : v)) });
   }
-  const targetedAnimations = [];
+  const targetedAnimations = mapped.map(({ animation, target }) => ({ animation: animation.serialize(), targetId: target.id }));
   for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
     const quaternion = path.join('.') === 'rotation' && owner.rotationQuaternion;
@@ -142,6 +144,24 @@ function bakeAnimations(world, samples, content, live) {
   return [{ name: world.animation.action.name || 'Action', from: frameStart, to: frameEnd, speedRatio: 1, loopAnimation: !!world.animation.time.state.loop, isAdditive: false, weight: -1, playOrder: 0, targetedAnimations }];
 }
 
+// Babylon's serializer writes a skinned geometry's first four bone influences and its loader reads the extra four only
+// with a mesh's own geometry: such a geometry is written into its meshes with them.
+function extraInfluences(json, scene) {
+  const extra = (entry) => scene.getGeometryById(entry.id)?.isVerticesDataPresent(VertexBuffer.MatricesIndicesExtraKind);
+  const inlined = new Set(json.geometries?.vertexData.filter(extra) ?? []);
+  for (const entry of inlined) {
+    const geometry = scene.getGeometryById(entry.id), { id, uniqueId, updatable, ...data } = entry;
+    Object.assign(data, { matricesIndicesExtra: Array.from(geometry.getVerticesData(VertexBuffer.MatricesIndicesExtraKind)), matricesIndicesExtraExpanded: true,
+      matricesWeightsExtra: Array.from(geometry.getVerticesData(VertexBuffer.MatricesWeightsExtraKind)) });
+    for (const mesh of json.meshes.filter((m) => m.geometryId === id)) {
+      delete mesh.geometryId;
+      delete mesh.geometryUniqueId;
+      Object.assign(mesh, data);
+    }
+  }
+  if (inlined.size) json.geometries.vertexData = json.geometries.vertexData.filter((entry) => !inlined.has(entry));
+}
+
 // A camera aimed at a point (lockedTarget, which Babylon does not serialize) keeps the rotation it looks with.
 function aimed(entry, camera) {
   if (!camera?.lockedTarget || !entry.rotation) return;
@@ -158,9 +178,20 @@ const authoredMetadata = (node) => {
 };
 
 // The serialized scene. `geometry: false` leaves vertex data out, for the JS export, which reads it from the meshes;
-// `live` (object to its modifier stack, as modifiers.live gives it) animates those stacks' settings.
-export async function serializeScene(world, { geometry = true, live = null } = {}) {
+// `live` (object to its modifier stack, as modifiers.live gives it) animates those stacks' settings. Features with a
+// runtime (runtimes.js) are written through their mapping to Babylon: `mapped`, an exportRuntimes result the caller
+// restores, else one made and restored here.
+export async function serializeScene(world, { geometry = true, live = null, mapped = null } = {}) {
   await world.modifiers.settled();
+  const runtimes = mapped ?? exportRuntimes(world);
+  try {
+    return await serializeMapped(world, { geometry, live, mapped: runtimes.animations });
+  } finally {
+    if (!mapped) runtimes.restore();
+  }
+}
+
+async function serializeMapped(world, { geometry, live, mapped }) {
   const { scene } = world;
   const camera = world.sceneSettings.camera() ?? scene.activeCamera;
   const content = exportedContent(scene);
@@ -181,7 +212,7 @@ export async function serializeScene(world, { geometry = true, live = null } = {
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
-    animationGroups = bakeAnimations(world, samples, content, liveIds);
+    animationGroups = bakeAnimations(world, samples, content, liveIds, mapped);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());
@@ -191,6 +222,7 @@ export async function serializeScene(world, { geometry = true, live = null } = {
   json.multiMaterials = kept(json.multiMaterials, scene.multiMaterials, (m) => content.materials.has(m) || content.meshes.some((mesh) => mesh.material === m));
   json.particleSystems = kept(json.particleSystems, scene.particleSystems, (p) => !p.emitter?.getClassName || content.nodes.has(p.emitter));
   for (const entry of json.cameras) aimed(entry, scene.getCameraByUniqueId(entry.uniqueId));
+  extraInfluences(json, scene);
   Object.assign(json, { animationGroups, activeCameraID, renderingPipelines: effects.renderingPipelines, imageProcessingConfiguration: scene.imageProcessingConfiguration.serialize(), producer: { name: 'Bylonder', file: 'scene.babylon' } });
   json.postProcesses.push(...effects.postProcesses);
   await environment(json, scene);

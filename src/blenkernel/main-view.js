@@ -23,6 +23,7 @@ import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { nodeMaterialFromTree, nodeProperties } from '../nodes/blender/shader-nodes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
+import * as runtimes from '../runtimes/runtimes.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
@@ -377,8 +378,9 @@ export function createMainView(state) {
         const matrix = babylonMatrix(blender.transform(entry.ob).matrix_world);
         if (entry.node.freezeWorldMatrix) entry.node.freezeWorldMatrix(matrix);
         else setEvaluatedMatrix(entry.node, matrix);
-        if ((recalc & ID_RECALC_GEOMETRY || sculpted(entry, recalc)) && drawsGeometry(entry)) drawGeometry(entry);
+        if ((recalc & ID_RECALC_GEOMETRY || sculpted(entry, recalc)) && drawsGeometry(entry) && !runtimes.evaluates(entry)) drawGeometry(entry);
       }
+      runtimes.evaluated({ ...runtimeView, updates });
       const shading = [...materials.values()].map((record) => record.ma).concat([...worlds.values()].map((record) => record.wo));
       const nodeTrees = [...updates.keys()].some((id) => !drawn.has(id) && id !== blender.scene && !shading.includes(id));
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
@@ -475,13 +477,16 @@ export function createMainView(state) {
   // which object_mesh_eval gives.
   const sculpted = (entry, recalc) => entry.type === 'MESH' && entry.node.metadata?.wbMode === 'SCULPT' && !!(recalc & ID_RECALC_SHADING);
   const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) || EVALUATED.includes(type));
-  function drawGeometry({ node, ob }) {
-    const mesh = blender.evaluatedMesh(ob);
-    if (!mesh) return;
-    const errors = blender.modifiers(ob).map(({ error }) => error);
+  function drawGeometry(entry) {
+    const mesh = blender.evaluatedMesh(entry.ob);
+    if (mesh) drawMesh(entry, mesh, blender.modifiers(entry.ob).map(({ error }) => error));
+  }
+  function drawMesh({ node }, mesh, errors = []) {
     if (world.modifiers) world.modifiers.draw(node, mesh, errors);
     else mesh_batch_cache_apply(mesh, node);
   }
+  // What a runtime other than Blender's evaluates from (runtimes.js): Main, the objects' entries and how they draw.
+  const runtimeView = { world, scene: world.scene, blender, entries: () => objects.values(), drawGeometry, drawMesh, drawsGeometry };
 
   // Materials and worlds as Main holds them: their values and their node trees' inputs, Babylon's derived from them.
   function pullShading() {

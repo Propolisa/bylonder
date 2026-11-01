@@ -8,7 +8,8 @@ import { join } from 'node:path';
 // count in the Blender keymaps their file names in createKeymap(items, keymaps), or anywhere when it names none; every
 // binding of a registered operator counts in the Blender keymaps keymapHandler(keymaps) or areaUI({ keymaps })
 // dispatches, named in the call or in the module's array and object literals it refers to.
-const UI_ID = /^[A-Z][A-Z0-9]*_(MT|PT|HT)_\w+$/;
+// Bylonder's own types (`DATA_PT_bylonder_runtime`) carry `bylonder` and are not Blender's.
+const UI_ID = /^[A-Z][A-Z0-9]*_(MT|PT|HT)_(?!bylonder)\w+$/;
 
 async function files(dir) {
   const entries = await readdir(dir, { withFileTypes: true });

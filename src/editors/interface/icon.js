@@ -8,7 +8,7 @@ const urls = new Map();
 const dataUrl = (key) => icons[key] && (urls.get(key) ?? urls.set(key, 'data:image/svg+xml,' + encodeURIComponent(icons[key])).get(key));
 export const iconSvg = (name) => icons[name.toLowerCase()] ?? '';
 // The app logo drawn as a monochrome icon, as Blender draws its own logo in the interface.
-export const iconUrl = name => (name === 'bylonder' ? import.meta.env.BASE_URL + 'logo/bylonder-20.svg' : dataUrl(name.toLowerCase()) ?? '');
+export const iconUrl = name => (name.toLowerCase() === 'bylonder' ? import.meta.env.BASE_URL + 'logo/bylonder-20.svg' : dataUrl(name.toLowerCase()) ?? '');
 // An icon's mask at Blender's scale: 1600 units of its document at the icon's size, centered (blf_glyph_cache_add_svg).
 export function iconStyle(name) {
   const [width, height] = sizes[name.toLowerCase()] ?? [1600, 1600];

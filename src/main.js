@@ -59,6 +59,9 @@ import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
+import { registerRuntimeTypes } from "./runtimes/runtimes.js";
+import "./runtimes/armature.js";
+import { bylonderIcon } from "./python/bpy_icons.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
@@ -448,6 +451,8 @@ const objectOperatorHost = { transaction: commands.transaction, notify, keying: 
 registerObjectOperators(world.objectActions, { sync: world.mainSync, ...objectOperatorHost });
 registerCurveAddOperators({ sync: world.mainSync, host: objectOperatorHost, editCurve });
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
+// The runtimes' properties and panels (docs/runtimes.md), as an add-on registers its classes.
+registerRuntimeTypes(bylonderIcon());
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost,
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);

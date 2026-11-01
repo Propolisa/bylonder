@@ -147,6 +147,17 @@ try {
             ...[...new Set(names.filter((n, i) => names.indexOf(n) !== i))].map((n) => `${n}: two objects`)];
         });
         assert.deepEqual(problems, [], `${example}: objects`);
+        // The rig on Babylon (mapped): Babylon skins the body (docs/runtimes.md).
+        if (example === "Rigged Character") {
+          const skeleton = await opened.bylonder((b) => {
+            const node = (name) => b.world.objects.find((n) => n.name === name);
+            b.modules.bpyRna.idStruct(b.world.mainSync.objectOf(node("Rig"))).bylonder.runtime = "MAPPED";
+            b.world.mainSync.view();
+            return node("Body").skeleton?.name ?? null;
+          });
+          await opened.settled();
+          assert.equal(skeleton, "Rig", "Rigged Character: the body skinned by Babylon");
+        }
         assert.deepEqual(opened.errors, [], `${example}: page errors`);
       } finally {
         await opened.close();

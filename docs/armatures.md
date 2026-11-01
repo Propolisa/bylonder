@@ -93,6 +93,12 @@ bone's group and show keys of the selected bones. Alt G, R and S (`pose.loc_clea
 and Paste Pose (Ctrl C, Ctrl V, Shift Ctrl V flipped: `pose.copy`, `pose.paste`) and Apply Pose as Rest Pose
 (`pose.armature_apply`) are Blender's.
 
+## Runtime
+
+An armature object's deform can run on Babylon (`docs/runtimes.md`, Armature deform): the Armature tab's Runtime panel
+(`DATA_PT_bylonder_runtime`, `object.bylonder.runtime`) switches it between Blender and Babylon (mapped), where Babylon
+skins the meshes it deforms on the GPU with a `Skeleton` posed from Main's evaluated pose. Blender is the default.
+
 ## Tests
 
 `tools/blender-reference/rigging-fixtures.py` runs Blender 5.2.3 on 10 rigging cases in Pose Mode (the clears, copy and
@@ -147,5 +153,5 @@ on a module without `armature-api.cc`.
   nothing) and the 3D View's asset shelf (`VIEW3D_AST_pose_library`).
 - A Dope Sheet made from another editor keeps the Timeline's hidden channel region (View > Channels shows it).
 - Export: `.blend` files carry the armature (Blender reads its bones and pose); the `.babylon` and JavaScript exports
-  write the armature as an empty mesh; a Babylon `Skeleton` from the pose and skinned meshes (glTF style) are not made
-  yet.
+  write it as a Babylon `Skeleton` with the meshes it deforms skinned and the pose as bone animations
+  (`docs/runtimes.md`, Armature deform); the armature object itself is still an empty mesh in the file.
