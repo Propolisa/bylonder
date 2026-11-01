@@ -39,15 +39,8 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   watchRedraws(redrawn);
 
   // A view's area, laid out from the page (unless `layout` is false: as it last was).
-  let configured = false;
   function area(view, layout = true) {
-    if (!configured) {
-      configured = true;
-      configureWindow(window);
-      // Mesh Edit Mode is Blender's on Main, and so is the 3D View's navigation (view3d.rotate, view_axis, ...): their
-      // operators the page has no code of its own for are Blender's (the Knife, the view's).
-      allowOperators(window, operatorNames().filter((idname) => /^(mesh|view3d)\./.test(idname) && !hasOperator(idname)));
-    }
+    configureWindow(window);
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
     else if (!layout) return areas.get(view);
     window.size = { width: innerWidth, height: innerHeight };
@@ -66,7 +59,18 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     openModulePopup(sync, { type: POPUPS[type], title, text }, event, { idname, finish });
   }
 
+  // Mesh Edit Mode is Blender's on Main, and so is the 3D View's navigation (view3d.rotate, view_axis, ...): their
+  // operators the page has no code of its own for are Blender's (the Knife, the view's). Decided at the first input,
+  // once the page has registered its own (view3d.select and the other picks), which areas are laid out before.
+  let inputTaken = false;
+  function takeInput() {
+    if (inputTaken) return;
+    inputTaken = true;
+    allowOperators(window, operatorNames().filter((idname) => /^(mesh|view3d)\./.test(idname) && !hasOperator(idname)));
+  }
+
   function send(kind, data, strings, view) {
+    takeInput();
     for (const v of views()) area(v);
     const acting = kind !== 'pointermove' || running;
     // An operator may start: Main gets the scene, and the selected meshes' geometry while it runs.
@@ -95,6 +99,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   // An operator of the view's navigation gizmo, invoked as a gizmo invokes it on a left press at the pointer (modal
   // ones run in the window until the release): view3d.rotate, move, zoom, view_axis, view_persportho.
   function invoke(view, idname, props = {}, native = null) {
+    takeInput();
     if (native) send('pointermove', [native.clientX, native.clientY], {}, view);
     const result = window.invoke(area(view), idname, props);
     redrawn(result.redraw);
