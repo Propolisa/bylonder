@@ -16,6 +16,7 @@ import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
+import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
 import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
@@ -477,9 +478,13 @@ export function createMainView(state) {
   // which object_mesh_eval gives.
   const sculpted = (entry, recalc) => entry.type === 'MESH' && entry.node.metadata?.wbMode === 'SCULPT' && !!(recalc & ID_RECALC_SHADING);
   const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) || EVALUATED.includes(type));
+  // In Weight Paint Mode the weights are drawn over it (overlay-paint-weight.js), read with the mesh they are of.
   function drawGeometry(entry) {
     const mesh = blender.evaluatedMesh(entry.ob);
-    if (mesh) drawMesh(entry, mesh, blender.modifiers(entry.ob).map(({ error }) => error));
+    if (!mesh) return;
+    const weights = blender.mode(entry.ob) === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;
+    drawMesh(entry, mesh, blender.modifiers(entry.ob).map(({ error }) => error));
+    entry.paintWeight = paintWeightOverlay(entry.node, mesh, weights, entry.paintWeight);
   }
   function drawMesh({ node }, mesh, errors = []) {
     if (world.modifiers) world.modifiers.draw(node, mesh, errors);

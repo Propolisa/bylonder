@@ -15,7 +15,7 @@ export var _module = function (module_id) {
 	}
 	else {
 	}
-	return globalThis.__py_modules[module_id] && new Proxy(globalThis.__py_modules[module_id], {get: (target, key) => key in target || typeof key !== "string" ? target[key] : globalThis.__py_modules[module_id + "." + key]})
+	return globalThis.__py_modules[module_id] && new Proxy(globalThis.__py_modules[module_id], {get: (target, key) => key in target || typeof key !== "string" ? target[key] : key in ((globalThis.__py_module_attrs ??= {})[module_id] ??= {}) ? globalThis.__py_module_attrs[module_id][key] : globalThis.__py_modules[module_id + "." + key], set: (target, key, value) => { if (key in target) target.__py_setattr__(key, value); else ((globalThis.__py_module_attrs ??= {})[module_id] ??= {})[key] = value; return true; }})
 };
 export var _member = function (module_id, member_id) {
 	if (arguments.length) {
@@ -99,6 +99,16 @@ export var _globals = function (module_id) {
 	}
 	return new Proxy({}, {get: (target, key) => { const own = globalThis.__py_modules[module_id]; return own && key in own ? own[key] : _lazy(module_id + "." + String(key)); }})
 };
+export var ImportError =  __class__ ('ImportError', [Exception], {
+	__module__: __name__,
+});
+export var ModuleNotFoundError =  __class__ ('ModuleNotFoundError', [ImportError], {
+	__module__: __name__,
+});
+export var RuntimeError =  __class__ ('RuntimeError', [Exception], {
+	__module__: __name__,
+});
+globalThis.Object.assign(globalThis, {ImportError, ModuleNotFoundError, RuntimeError});
 
 //# sourceMappingURL=_modules.map
 export function __py_setattr__ (key, value) {
@@ -108,6 +118,9 @@ export function __py_setattr__ (key, value) {
 		case '_lazy': _lazy = value; break;
 		case '_import': _import = value; break;
 		case '_globals': _globals = value; break;
+		case 'ImportError': ImportError = value; break;
+		case 'ModuleNotFoundError': ModuleNotFoundError = value; break;
+		case 'RuntimeError': RuntimeError = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);
 	}
 }

@@ -28,6 +28,7 @@
 #include "RNA_enum_types.hh"
 #include "RNA_access.hh"
 #include "RNA_prototypes.hh"
+#include "UI_abstract_view.hh"
 #include "UI_interface_c.hh"
 #include "UI_interface_layout.hh"
 #include "WM_api.hh"
@@ -252,7 +253,8 @@ static void button_json(std::ostringstream &out, Button *but)
                                   {"driven", bool(but->flag & BUT_DRIVEN)}, {"submenu", bool(but->flag & BUT_ICON_SUBMENU)},
                                   {"text_left", bool(but->drawflag & BUT_TEXT_LEFT)}, {"text_right", bool(but->drawflag & BUT_TEXT_RIGHT)},
                                   {"icon_left", bool(but->drawflag & BUT_ICON_LEFT)}, {"invert", bool(but->drawflag & BUT_CHECKBOX_INVERT)},
-                                  {"active_default", bool(but->flag & BUT_ACTIVE_DEFAULT)}})
+                                  {"active_default", bool(but->flag & BUT_ACTIVE_DEFAULT)},
+                                  {"renaming", but->type == ButtonType::Text && !but->rnaprop && bool(static_cast<const ButtonText *>(but)->rename_func)}})
   {
     if (set) {
       out << ",\"" << name << "\":true";
@@ -500,16 +502,19 @@ static std::string menu_root(const Block *block)
 
 /* Panels. */
 
-/* The context region, about to be laid out again: its last blocks go. It is shown (port-override: Bylonder's window
+/* The context region, about to be laid out again. Its last blocks stay until the new ones replace them (block_region_set),
+ * as when Blender redraws a region, so what the new blocks take over from them carries (a view's renaming,
+ * AbstractView::update_from_old); layout_end frees those not replaced. It is shown (port-override: Bylonder's window
  * manager lays out the regions it draws, so it marks them visible, as ED_region_visibility_change_update would). */
 static ARegion *region_drawn(bContext *C)
 {
   ARegion *region = CTX_wm_region(C);
-  blocklist_free(C, region);
   recorded.clear();
   region->runtime->visible = true;
   return region;
 }
+/* The region laid out: its blocks the layout did not make again go, as after Blender's region draw. */
+static void layout_end(bContext *C, ARegion *region) { blocklist_free_inactive(C, region); }
 
 /* A panel and its sub-panels as a region drew them: its header, preset and body roots in the order drawn, then its
  * open sub-panels. */
@@ -606,6 +611,7 @@ EXPORT(ui_region_panels) const char *ui_region_panels(bContext *C)
     }
     ED_region_panels_layout(C, region);
   }
+  layout_end(C, region);
   Vector<Panel *> panels;
   for (Panel &panel : region->panels) {
     if (panel.type && panel_is_active(&panel) && panel.runtime->block) {
@@ -665,6 +671,7 @@ EXPORT(ui_region_header) const char *ui_region_header(bContext *C)
   static std::string json;
   ARegion *region = region_drawn(C);
   ED_region_header_layout(C, region);
+  layout_end(C, region);
   std::ostringstream out;
   out << '[';
   bool first = true;
@@ -909,6 +916,12 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
   else if (but->type == ButtonType::ButMenu) {
     button_value_set(but, double(but->retval));
   }
+  else if (but->type == ButtonType::ViewItem) {
+    /* As a click activates a view's item (interface_handlers.cc force_activate_view_item_but). */
+    CTX_store_set(C, but->context);
+    static_cast<ButtonViewItem *>(but)->view_item->activate(*C);
+    CTX_store_set(C, nullptr);
+  }
   button_applied(C, but);
   button_update(but);
   /* A menu item's value goes to the menu button that opened it (handle_button_return_submenu). */
@@ -921,6 +934,20 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
     }
   }
   return (but->flag & UI_SELECT) ? 1 : 0;
+}
+/* A double click on a view's item: its renaming begins, where it can be renamed (do_but_VIEW_ITEM). Its layout then
+ * has the rename field in its place. */
+EXPORT(ui_button_rename) bool ui_button_rename(bContext *C, Button *but)
+{
+  if (!button_live(C, but) || but->type != ButtonType::ViewItem) {
+    return false;
+  }
+  AbstractViewItem &item = *static_cast<ButtonViewItem *>(but)->view_item;
+  if (!view_item_can_rename(item)) {
+    return false;
+  }
+  view_item_begin_rename(item);
+  return true;
 }
 /* An operator button pressed, as ui_apply_but_funcs_after runs it: its operator in the button's context with the button
  * active (template_ID's New assigns what it makes to the template's property), then the button's functions. Returns the

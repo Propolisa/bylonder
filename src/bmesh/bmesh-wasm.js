@@ -325,6 +325,11 @@ export class BlenderMain {
     if (slots) mesh.attributes.set('material_index', { domain: 'FACE', type: 'INT', get data() { return new Int32Array(x.memory.buffer, slots, mesh.faces_num); } });
     return mesh;
   }
+  // A lasso gesture's path in the view's region pixels, for view3d.select_lasso's exec (anim-api.cc).
+  set lassoPath(path) { withArrays([Int32Array.from(path.flat())], ([p]) => x.gesture_lasso_path_set(p, path.length)); }
+  // The weight of each vertex of the mesh evaluatedMesh last gave, as Weight Paint Mode's overlay draws it (main-api.cc
+  // mesh_paint_weights), a copy.
+  paintWeights(ob, count) { return new Float32Array(x.memory.buffer, x.mesh_paint_weights(this.#context, ob) >>> 0, count).slice(); }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
   setModifiers(ob, modifiers) {
     const { errors } = setModifiers(ob, modifiers);

@@ -33,7 +33,7 @@ export function createEditor(world, views, history, changed, capture) {
     const p = views.pickPoint(view, clientX, clientY);
     let node = world.pickExtra?.(p.x, p.y, view.camera, selectable);
     if (!node) {
-      const hit = scene.pick(p.x, p.y, selectable, false, view.camera), bones = world.pickArmature?.(p.x, p.y, view.camera, selectable);
+      const hit = scene.pick(p.x, p.y, selectable, false, view.camera), bones = world.pickArmature?.(view, p.x, p.y, selectable);
       const depth = hit?.hit ? Vector3.Project(hit.pickedPoint, Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width: 1, height: 1 }).z : Infinity;
       node = bones && bones.depth < depth ? bones.node : hit?.hit ? owner(hit.pickedMesh) : null;
     }

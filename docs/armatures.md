@@ -62,13 +62,19 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
   G, R and S are Object Mode's transforms, Blender's in Main, which move edit bones or pose bones by the object's mode.
 - The context's mode is `EDIT_ARMATURE` or `POSE`, `edit_object` and `pose_object` are the armature, and the 3D View
   runs the Armature or Pose keymap in place of Object Mode's.
-- A click selects with Blender's pick (`ED_armature_edit_select_pick_bone`, `ED_armature_pose_select_pick_bone`) on the
-  bone part the overlay draws under the pointer (port-override: the module has no GPU selection buffer).
-  `src/draw/overlay-armature-select.js` syncs the overlay for selection and projects each part it draws (bodies,
-  heads, tails, with their select ids) into the view: `armatureParts` gives them, for box, circle and lasso selection
-  too; `pickBone` takes the hits within 12 pixels, then 5, and prefers joints and unselected bones, then the nearest,
-  as `get_nearest_editbonepoint` does. In Object Mode a click on the bones selects the armature when they are nearer
-  than the mesh under the pointer.
+- Selection is Blender's view3d operators in Main: a click (`view3d.select`), the Select Box tool and B
+  (`view3d.select_box`), C (`view3d.select_circle`) and a Ctrl right drag or the Select Lasso tool
+  (`view3d.select_lasso`), with their modes (set, extend, subtract, invert), and L, Shift L and Ctrl click
+  (`armature.select_linked_pick`, `pose.select_linked_pick`, `armature.shortest_path_pick`). Circle and lasso project
+  the bones as Blender does (`armature_foreachScreenBone`); a click, a box and the picks read Blender's GPU selection
+  (`view3d_gpu_select_ex`). `tools/blender-port/wasm/gpu-select.cc` compiles Blender's `gpu_select.cc` and
+  `gpu_select_next.cc` and answers the draw loop they run (`DRW_draw_select_loop`, port-override: the module has no
+  GPU): `armature-draw.cc` syncs the overlay for selection (its select ids, the object's with the bone's index and
+  part) and catches what each instance would draw into the selection rectangle (its shape projected as triangles,
+  capsules and discs, in the view's own matrices), with the nearest depth and the distance to the cursor the select
+  engine reads back. Only armatures in Edit and Pose Mode draw select ids there; a mesh's or curve's parts would need
+  their own. In Object Mode a click on the bones selects the armature when they are nearer than the mesh under the
+  pointer (`armature_pick_depth`).
 - Ctrl Tab is the Object Non-modal keymap's `view3d.object_mode_pie_or_toggle`, Blender's, which toggles an armature's
   Pose Mode. A browser keeps Ctrl Tab for its own tab switching and never gives it to the page, so there the header's
   Mode menu (`object.mode_set`, its items Blender's `object_mode_set_itemf` gives) enters Pose Mode.
@@ -81,6 +87,17 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
   operators (`armature.collection_remove_unused`, `collection_show_all`, `collection_unsolo_all`,
   `copy_bone_color_to_selected`, the `pose.selection_set_*` of `bone_selection_sets.py`), whose properties on RNA's own
   types (`Object.selection_sets`) are defined as Blender defines a script's (`bpy_rna.js`).
+
+## Weight Paint
+
+Weight Paint Mode is Blender's on Main (`WEIGHT_PAINT`, the Weight Paint keymap): Ctrl P > With Automatic Weights
+gives a mesh Blender's vertex groups and Armature modifier, and entering Weight Paint Mode with the armature selected
+puts the armature in Pose Mode, as `posemode_set_for_weight_paint` does. A drag paints the active vertex group
+(`paint.weight_paint`, Blender's stroke, with the Essentials weight brushes shipped in the datafiles), Ctrl paints the
+inverse, and Alt click selects a bone, which makes its group active (`view3d.select` with the Weight Paint keymap's
+bone selection, through the GPU selection above). The view draws the mesh's weights as Blender's overlay does
+(`src/draw/overlay-paint-weight.js`): `overlay_paint_weight_vert/frag.glsl` with the weight ramp, each vertex's weight
+in the active group as `extract_weights` gives the draw cache (`main-api.cc` `mesh_paint_weights`).
 
 ## Animation
 
@@ -108,6 +125,14 @@ evaluates to). `tests/rigging-wasm.test.js` replays them through the module and 
 Bone and constraint tabs draw Blender's panels with their properties in Pose and Edit Mode, that the Graph Editor lists
 a pose bone's F-Curves under its group, and the armature tools and their icons.
 
+`tools/blender-reference/bone-select-fixtures.py` records Blender 5.2.3 with real input (under X, event simulation)
+selecting the bones of a chain and a bone apart in Pose and Edit Mode: clicks, Shift clicks, Select Box tool drags with
+Shift and Ctrl, L, Ctrl click, C and Ctrl right drags. `tests/bone-select-wasm.test.js` sends the same events through
+Blender's window in the module and compares the selected bones and joints after each.
+`tools/blender-reference/weight-paint-fixtures.py` records Weight Paint Mode on a grid skinned With Automatic Weights:
+Alt click bone selection, a stroke and a Ctrl click; `tests/weight-paint-wasm.test.js` replays them and compares every
+vertex's weights, the active group and the pose selection, and the weights the overlay draws.
+
 `tools/blender-reference/armature-draw-fixtures.py` makes a rig in Blender 5.2.3 (three bones, a curved B-Bone of
 four segments, an unconnected child, posed, names and axes shown) and writes its pose matrices, B-Bone segment points,
 radii, edit bones and theme colors. `tests/armature-draw-wasm.test.js` makes the same rig in the module and checks what
@@ -129,28 +154,22 @@ on a module without `armature-api.cc`.
   depth and cycling through overlapping bones; In Front is drawn over the whole scene, not over Blender's in front
   depth; line anti-aliasing and wider outlines (Blender's line pass); the weight paint pass (locked weights, wire
   alpha); curve and text objects as custom shapes.
-- Box, circle and lasso select of bones (`armatureParts` gives the parts).
 - Framing an armature (View Selected): its Babylon object has no bounds.
-- Vertex groups: Bylonder's meshes have none, so the Armature modifier deforms by envelopes only;
-  `object.parent_set` with automatic or envelope weights and `object.vertex_group_*` need deform weights on the Babylon
-  side.
 - An Armature modifier read from a .blend, or added in Main by Blender's operators (`object.parent_set` with
   `ARMATURE`), is not taken into Bylonder's stack; the object field of its panel is not checked yet.
 - A stack evaluated in Main applies every Blender modifier of the object there, so a Geometry Nodes Array after the
   Armature modifier that Main holds as Blender's Array applies twice.
 - Edit Mode's modifier preview (`editFinal`) evaluates in a worker without the armature.
-- A click on a bone collection in the Armature tab's tree view does not make it active, and a double click does not
-  rename it: Blender activates a view item through its keymap's `ui.view_item_select` at the pointer, which needs the
-  item's place in the region. Module change: `ui_button_press` (`ui-tree.cc`) activating a `ViewItem` button's item
-  (`view_item->activate(*C)`, as `force_activate_view_item_but` does). A new collection is the active one.
-- `armature.select_linked_pick`, `armature.shortest_path_pick` and `pose.select_linked_pick` (L, Ctrl click) pick by
-  the GPU selection buffer, which the module lacks. Module change: a seam for `ED_armature_pick_bone` and
-  `ed_armature_pick_ebone` (`armature_select.cc`) that asks Bylonder's picking for the bone under the pointer, as
-  `armature_select_pick` does for a click.
-- The pose library (`poselib.*`): its operators are the `pose_library` add-on's and the asset shelf's. It needs the
-  add-on in the Python tree (`tree.py`), Blender's default add-ons in the module's preferences
-  (`BKE_blendfile_userdef_from_defaults` lists them; the module's `U` has none, so `addon_utils.reset_all` enables
-  nothing) and the 3D View's asset shelf (`VIEW3D_AST_pose_library`).
+- The pose library: Blender's `pose_library` add-on is enabled from the Preferences' default add-ons as Blender
+  enables it, and Pose > Create Pose Asset (`poselib.create_pose_asset`) makes a pose asset in the file. The 3D View's
+  asset shelf (`VIEW3D_AST_pose_library`, registered) is not drawn, so a pose is applied (`poselib.apply_pose_asset`)
+  only with an asset reference (`asset_library_type`, `asset_library_identifier`, `relative_asset_identifier`), as the
+  shelf passes it, from a script or the console.
+- Selection without occlusion: a box selects bones behind other objects, as in X-ray; the select engine's depth test
+  against the scene's meshes is not drawn.
+- Weight Paint Mode: the overlay draws at Blender's default opacity without contour lines (the View3D overlay's
+  `weight_paint_mode_opacity` and `show_wpaint_contours` are not read yet); Bylonder's own meshes still have no vertex
+  groups until Blender's code makes them (`object.parent_set` with automatic weights does).
 - A Dope Sheet made from another editor keeps the Timeline's hidden channel region (View > Channels shows it).
 - Export: `.blend` files carry the armature (Blender reads its bones and pose); the `.babylon` and JavaScript exports
   write it as a Babylon `Skeleton` with the meshes it deforms skinned and the pose as bone animations

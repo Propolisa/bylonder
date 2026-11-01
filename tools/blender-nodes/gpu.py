@@ -50,7 +50,8 @@ DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_par
         'overlay_armature_envelope_solid_vert.glsl', 'overlay_armature_envelope_solid_frag.glsl',
         'overlay_armature_envelope_outline_vert.glsl', 'overlay_armature_stick_vert.glsl', 'overlay_armature_stick_frag.glsl',
         'overlay_armature_wire_vert.glsl', 'overlay_armature_dof_vert.glsl', 'overlay_armature_dof_solid_frag.glsl',
-        'overlay_extra_vert.glsl', 'overlay_extra_frag.glsl', 'overlay_extra_wire_vert.glsl', 'overlay_extra_wire_frag.glsl']
+        'overlay_extra_vert.glsl', 'overlay_extra_frag.glsl', 'overlay_extra_wire_vert.glsl', 'overlay_extra_wire_frag.glsl',
+        'overlay_paint_weight_vert.glsl', 'overlay_paint_weight_frag.glsl']
 DRAW_DIR = 'source/blender/draw/engines/overlay/shaders'
 # name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items).
 TABLES = {

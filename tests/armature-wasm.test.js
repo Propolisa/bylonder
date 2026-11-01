@@ -191,10 +191,10 @@ assert.equal(octahedra(), 1);
 assert.deepEqual(sync.check(), []);
 
 // The modes in the app: Object Mode's operators (Blender's mode_set) for an armature, its keymaps and context mode, and
-// a click on a bone selecting it with Blender's pick.
+// a click on a bone selecting it with Blender's view3d.select, which picks by Blender's GPU selection (gpu-select.cc).
 const host = { transaction: (fn) => fn(), notify: () => {}, keying: (fn) => fn(), commit: () => {}, wm: () => null, pointer: () => null, view: () => null };
 registerObjectOperators({ actions: [] }, { sync, ...host });
-const modes = createMainModes({ sync, selection, views: { pickPoint: (view, x, y) => ({ x, y }) }, options: host });
+const modes = createMainModes({ sync, selection, options: host });
 const contextMode = () => createContext(rna).mode;
 assert.equal(modes.mode(), 'POSE');
 assert.equal(contextMode(), 'POSE');
@@ -211,8 +211,9 @@ assert.ok(modes.keymapActive('Object Mode') && !modes.keymapActive('Pose'));
 invokeOperator('object.mode_set', { mode: 'POSE' }, null);
 const camera = new FreeCamera('Camera', new Vector3(0, 0.5, -5), scene);
 camera.setTarget(new Vector3(0, 0.5, 0));
-const engine = scene.getEngine(), center = { x: engine.getRenderWidth() / 2, y: engine.getRenderHeight() / 2 };
-const click = (at, props = {}) => modes.selectOperator({ view: { camera }, ...at }, { deselect_all: true, ...props });
+const engine = scene.getEngine(), [width, height] = [engine.getRenderWidth(), engine.getRenderHeight()], center = { x: width / 2, y: height / 2 };
+const canvas = { width, height, clientWidth: width, clientHeight: height, getBoundingClientRect: () => ({ left: 0, top: 0, width, height }) };
+const click = (at, props = {}) => modes.selectOperator({ view: { camera, canvas }, type: 'leftmouse', value: 'PRESS', ...at }, { deselect_all: true, ...props });
 click(center);
 assert.equal(bones()[0].pose.select, true, 'a click on the bone selects it');
 click({ x: 1, y: 1 });

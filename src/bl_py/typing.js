@@ -9,12 +9,54 @@ export var Any = __left0__;
 export var Callable = __left0__;
 export var Iterable = __left0__;
 export var Iterator = __left0__;
-export var Optional = __left0__;
 export var Protocol = __left0__;
 export var TypeAlias = __left0__;
-export var Union = __left0__;
 export var Sequence = __left0__;
 export var Mapping = __left0__;
+export var _Generic =  __class__ ('_Generic', [object], {
+	__module__: __name__,
+	get __getitem__ () {return __get__ (this, function (self, _parameters) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case '_parameters': var _parameters = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self;
+	});}
+});
+var __left0__ = __call__ (_Generic, null);
+export var Optional = __left0__;
+export var Union = __left0__;
+export var List = __left0__;
+export var Tuple = __left0__;
+export var Set = __left0__;
+export var FrozenSet = __left0__;
+export var cast = function (_type, value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case '_type': var _type = __allkwargs0__ [__attrib0__]; break;
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value;
+};
 
 //# sourceMappingURL=typing.map
 export function __py_setattr__ (key, value) {
@@ -24,12 +66,18 @@ export function __py_setattr__ (key, value) {
 		case 'Callable': Callable = value; break;
 		case 'Iterable': Iterable = value; break;
 		case 'Iterator': Iterator = value; break;
-		case 'Optional': Optional = value; break;
 		case 'Protocol': Protocol = value; break;
 		case 'TypeAlias': TypeAlias = value; break;
-		case 'Union': Union = value; break;
 		case 'Sequence': Sequence = value; break;
 		case 'Mapping': Mapping = value; break;
+		case '_Generic': _Generic = value; break;
+		case 'Optional': Optional = value; break;
+		case 'Union': Union = value; break;
+		case 'List': List = value; break;
+		case 'Tuple': Tuple = value; break;
+		case 'Set': Set = value; break;
+		case 'FrozenSet': FrozenSet = value; break;
+		case 'cast': cast = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);
 	}
 }

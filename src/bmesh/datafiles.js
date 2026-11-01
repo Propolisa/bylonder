@@ -6,6 +6,7 @@ export const DATAFILES = [
   ['assets/nodes/procedural_hair_node_assets.blend', new URL('./datafiles/assets/nodes/procedural_hair_node_assets.blend', import.meta.url)],
   ['assets/brushes/essentials_brushes-curve_sculpt.blend', new URL('./datafiles/assets/brushes/essentials_brushes-curve_sculpt.blend', import.meta.url)],
   ['assets/brushes/essentials_brushes-mesh_sculpt.blend', new URL('./datafiles/assets/brushes/essentials_brushes-mesh_sculpt.blend', import.meta.url)],
+  ['assets/brushes/essentials_brushes-mesh_weight.blend', new URL('./datafiles/assets/brushes/essentials_brushes-mesh_weight.blend', import.meta.url)],
 ];
 // Material Preview's studio light.
 export const STUDIO_LIGHT = new URL('./datafiles/studiolights/world/forest.exr', import.meta.url);

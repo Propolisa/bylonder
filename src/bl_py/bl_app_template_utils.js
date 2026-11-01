@@ -205,9 +205,12 @@ export var _enable = function (template_id) {
 			}) ();
 		};
 	}
-	var __withid0__ = __call__ (RestrictBlend, null);
+	var _with_manager3_0 = __call__ (RestrictBlend, null);
+	(function () {
+		var __accu0__ = _with_manager3_0;
+		return __call__ (__accu0__.__enter__, __accu0__);
+	}) ();
 	try {
-		__withid0__.__enter__ ();
 		try {
 			var mod = __call__ (import_from_id, null, template_id, __kwargtrans__ ({ignore_not_found: ignore_not_found}));
 		}
@@ -250,12 +253,12 @@ export var _enable = function (template_id) {
 				throw __except0__;
 			}
 		}
-		__withid0__.__exit__ ();
 	}
-	catch (__except0__) {
-		if (! (__withid0__.__exit__ (__except0__.name, __except0__, __except0__.stack))) {
-			throw __except0__;
-		}
+	finally {
+		(function () {
+			var __accu0__ = _with_manager3_0;
+			return __call__ (__accu0__.__exit__, __accu0__, null, null, null);
+		}) ();
 	}
 	mod.__template_enabled__ = true;
 	if (__call__ (_truth, null, _bpy.app.debug_python)) {

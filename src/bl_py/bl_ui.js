@@ -81,9 +81,8 @@ import * as asset_shelf from './bl_ui.asset_shelf.js';
 import * as anim from './bl_ui.anim.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {reload} from './importlib.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
-export {properties_material_gpencil, asset_shelf, space_dopesheet, properties_view_layer, _globals, properties_paint_common, properties_particle, properties_constraint, space_properties, properties_physics_softbody, properties_physics_fluid, properties_workspace, properties_object, properties_physics_common, properties_data_lattice, properties_mask_common, node_add_menu_compositor, node_add_menu_geometry, space_image, properties_data_curves, space_filebrowser, space_toolsystem_toolbar, reload, properties_data_mesh, properties_data_empty, properties_data_shaderfx, properties_material, space_toolsystem_common, properties_scene, _module, generic_ui_list, space_spreadsheet, properties_data_light, properties_strip, properties_world, properties_strip_modifier, space_topbar, space_console, node_add_menu_shader, _lazy, space_sequencer, properties_physics_geometry_nodes, space_outliner, properties_data_bone, properties_data_curve, properties_physics_rigidbody, space_info, properties_data_metaball, properties_animviz, space_nla, node_add_menu_texture, properties_physics_cloth, space_node, space_time, space_clip, properties_grease_pencil_common, properties_data_grease_pencil, space_graph, _member, properties_texture, properties_data_modifier, space_text, space_view3d_sidebar, properties_data_speaker, properties_physics_field, space_userpref, properties_output, properties_collection, space_statusbar, space_view3d, properties_data_volume, properties_physics_dynamicpaint, anim, node_add_menu, properties_render, properties_data_armature, properties_data_camera, properties_physics_rigidbody_constraint, _import, properties_data_pointcloud, properties_data_lightprobe, space_view3d_toolbar};
+export {properties_material_gpencil, asset_shelf, space_dopesheet, properties_view_layer, _globals, properties_paint_common, properties_particle, properties_constraint, space_properties, properties_physics_softbody, properties_physics_fluid, properties_workspace, properties_object, properties_physics_common, properties_data_lattice, properties_mask_common, node_add_menu_compositor, node_add_menu_geometry, space_image, properties_data_curves, space_filebrowser, space_toolsystem_toolbar, properties_data_mesh, properties_data_empty, properties_data_shaderfx, properties_material, space_toolsystem_common, properties_scene, _module, generic_ui_list, space_spreadsheet, properties_data_light, properties_strip, properties_world, properties_strip_modifier, space_topbar, space_console, node_add_menu_shader, _lazy, space_sequencer, properties_physics_geometry_nodes, space_outliner, properties_data_bone, properties_data_curve, properties_physics_rigidbody, space_info, properties_data_metaball, properties_animviz, space_nla, node_add_menu_texture, properties_physics_cloth, space_node, space_time, space_clip, properties_grease_pencil_common, properties_data_grease_pencil, space_graph, _member, properties_texture, properties_data_modifier, space_text, space_view3d_sidebar, properties_data_speaker, properties_physics_field, space_userpref, properties_output, properties_collection, space_statusbar, space_view3d, properties_data_volume, properties_physics_dynamicpaint, anim, node_add_menu, properties_render, properties_data_armature, properties_data_camera, properties_physics_rigidbody_constraint, _import, properties_data_pointcloud, properties_data_lightprobe, space_view3d_toolbar};
 var __name__ = 'bl_ui';
 export var _merged = function () {
 	if (arguments.length) {
@@ -241,22 +240,6 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
-if (false) {
-	__setslice__ (_modules_loaded, 0, null, null, (function () {
-		var __accu0__ = [];
-		var __iterable0__ = _modules_loaded;
-		__iterable0__ = __i__ (__iterable0__);
-		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-			var val = __getitem__ (__iterable0__, __index0__);
-			(function () {
-				var __accu1__ = __accu0__;
-				return __call__ (__accu1__.append, __accu1__, __call__ (reload, null, val));
-			}) ();
-		}
-		return __accu0__;
-	}) ());
-	// pass;
-}
 export var _modules = ['anim', 'asset_shelf', 'node_add_menu', 'node_add_menu_compositor', 'node_add_menu_geometry', 'node_add_menu_shader', 'node_add_menu_texture', 'properties_animviz', 'properties_constraint', 'properties_data_armature', 'properties_data_bone', 'properties_data_camera', 'properties_data_curve', 'properties_data_curves', 'properties_data_empty', 'properties_data_grease_pencil', 'properties_data_light', 'properties_data_lattice', 'properties_data_mesh', 'properties_data_metaball', 'properties_data_modifier', 'properties_data_pointcloud', 'properties_data_shaderfx', 'properties_data_lightprobe', 'properties_data_speaker', 'properties_data_volume', 'properties_mask_common', 'properties_material', 'properties_material_gpencil', 'properties_object', 'properties_paint_common', 'properties_grease_pencil_common', 'properties_particle', 'properties_physics_cloth', 'properties_physics_common', 'properties_physics_dynamicpaint', 'properties_physics_field', 'properties_physics_geometry_nodes', 'properties_physics_rigidbody', 'properties_physics_rigidbody_constraint', 'properties_physics_fluid', 'properties_physics_softbody', 'properties_render', 'properties_output', 'properties_view_layer', 'properties_scene', 'properties_texture', 'properties_world', 'properties_collection', 'properties_strip', 'properties_strip_modifier', 'generic_ui_list', 'space_toolsystem_common', 'space_toolsystem_toolbar', 'space_clip', 'space_console', 'space_dopesheet', 'space_filebrowser', 'space_graph', 'space_image', 'space_info', 'space_nla', 'space_node', 'space_outliner', 'space_properties', 'space_sequencer', 'space_spreadsheet', 'space_statusbar', 'space_text', 'space_time', 'space_topbar', 'space_userpref', 'space_view3d', 'space_view3d_sidebar', 'space_view3d_toolbar', 'properties_workspace'];
 if (__call__ (_truth, null, bpy.app.build_options.freestyle)) {
 	(function () {

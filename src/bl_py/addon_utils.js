@@ -344,9 +344,12 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 			throw __except0__;
 		}
 	}
-	var __withid0__ = file_mod;
+	var _with_manager1_0 = file_mod;
+	(function () {
+		var __accu0__ = _with_manager1_0;
+		return __call__ (__accu0__.__enter__, __accu0__);
+	}) ();
 	try {
-		__withid0__.__enter__ ();
 		if (__call__ (_truth, null, speedy)) {
 			var lines = [];
 			var line_iter = __call__ (py_iter, null, file_mod);
@@ -417,12 +420,12 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 				return __call__ (__accu0__.read, __accu0__);
 			}) ();
 		}
-		__withid0__.__exit__ ();
 	}
-	catch (__except0__) {
-		if (! (__withid0__.__exit__ (__except0__.name, __except0__, __except0__.stack))) {
-			throw __except0__;
-		}
+	finally {
+		(function () {
+			var __accu0__ = _with_manager1_0;
+			return __call__ (__accu0__.__exit__, __accu0__, null, null, null);
+		}) ();
 	}
 	// pass;
 	try {
@@ -952,9 +955,12 @@ export var enable = function (module_name) {
 	if (__call__ (_truth, null, default_set)) {
 		__call__ (_addon_ensure, null, module_name);
 	}
-	var __withid0__ = __call__ (RestrictBlend, null);
+	var _with_manager2_0 = __call__ (RestrictBlend, null);
+	(function () {
+		var __accu0__ = _with_manager2_0;
+		return __call__ (__accu0__.__enter__, __accu0__);
+	}) ();
 	try {
-		__withid0__.__enter__ ();
 		try {
 			var mod = (function () {
 				var __accu0__ = importlib;
@@ -1090,12 +1096,12 @@ export var enable = function (module_name) {
 		finally {
 			__call__ (_bl_owner_id_set, null, owner_id_prev);
 		}
-		__withid0__.__exit__ ();
 	}
-	catch (__except0__) {
-		if (! (__withid0__.__exit__ (__except0__.name, __except0__, __except0__.stack))) {
-			throw __except0__;
-		}
+	finally {
+		(function () {
+			var __accu0__ = _with_manager2_0;
+			return __call__ (__accu0__.__exit__, __accu0__, null, null, null);
+		}) ();
 	}
 	mod.__addon_enabled__ = true;
 	mod.__addon_persistent__ = persistent;
