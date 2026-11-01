@@ -4,6 +4,7 @@
 import registerOperators from './operator-register.json' with { type: 'json' };
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
 import { blenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
+import { onOperatorFinished } from './wm-operators.js';
 
 const { exports: x, withString } = blenderModule;
 const REGISTER = new Set(registerOperators);
@@ -40,6 +41,6 @@ export function operatorPystring(idname, props = {}) {
   return `bpy.ops.${idname}(${args.join(', ')})`;
 }
 
-export function operatorFinished(idname, props) {
+onOperatorFinished((idname, props) => {
   if (REGISTER.has(idname)) report('OPERATOR', operatorPystring(idname, props));
-}
+});

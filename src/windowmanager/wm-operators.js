@@ -4,7 +4,6 @@
 import { operatorKeys, setProperties } from './input/keymap.js';
 import { blenderKeys } from './keyconfig.js';
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
-import { operatorFinished } from './wm-reports.js';
 
 const operators = new Map(), spaceOperators = new Map();
 // Who is told of each registration (bpy_interface.js, which makes Blender's types of Bylonder's operators).
@@ -48,9 +47,11 @@ export const runsOperator = (idname) => !!operatorFor(idname);
 // Whether Bylonder runs an operator its own way, not Blender's behind it (`blender: true`).
 export const ownsOperator = (idname) => runsOperator(idname) && !operatorFor(idname).blender;
 
-// A finished operator reports its call (wm-reports.js).
+// Who is told of each finished operator (wm-reports.js, in the realm that runs Blender).
+const finishedListeners = new Set();
+export const onOperatorFinished = (fn) => finishedListeners.add(fn);
 const finished = (idname, props, result) => {
-  if ((result ?? 'FINISHED') === 'FINISHED') operatorFinished(idname, props);
+  if ((result ?? 'FINISHED') === 'FINISHED') finishedListeners.forEach((fn) => fn(idname, props));
   return result;
 };
 export const runOperator = (idname, props = {}) => finished(idname, props, operatorFor(idname).run(props));
