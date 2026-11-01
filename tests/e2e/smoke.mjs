@@ -746,8 +746,8 @@ const checks = {
     assert.deepEqual(await fps(), [24, 1, 24]);
   },
 
-  // Video with sound mixes the scene's sound along with its frames, in the frames' own render context: frames come in
-  // from the start, with no mixing beforehand, the video has the sound, and Cancel stops it at once.
+  // Video with sound renders its frames in the live scene while the scene's sound mixes in a render context of its own:
+  // frames come in from the start, with no mixing beforehand, the video has the sound, and Cancel stops it at once.
   "Render Animation to video mixes the scene's sound along with its frames": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     await app.bylonder((b) => {
       b.world.animation.time.configure({ frameEnd: 24 });
@@ -764,7 +764,8 @@ const checks = {
       await app.page.waitForTimeout(100);
     }
     assert.match(statuses.at(-1), /^Finished 24 frames/);
-    assert.ok(!statuses.some((s) => s.startsWith("Mixing")), `no mix before the frames: ${statuses.join(" / ")}`);
+    const firstFrame = statuses.findIndex((s) => s.startsWith("Frame "));
+    assert.ok(firstFrame >= 0 && !statuses.slice(0, firstFrame).some((s) => s.startsWith("Mixing")), `no mix before the frames: ${statuses.join(" / ")}`);
     assert.match(statuses.find((s) => !s.startsWith("Preparing")), /^Frame \d+ \|/);
     const file = `${tmpdir()}/smoke-render.webm`;
     await (await download).saveAs(file);

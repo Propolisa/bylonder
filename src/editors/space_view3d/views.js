@@ -12,7 +12,7 @@ import { Viewport } from '@babylonjs/core';
 // A view is { canvas, camera, active (bool, renders or not), wantsCompositor (bool), beforeRender(), afterRender() }.
 export function createViews({ engine, scene, live = () => false }) {
   const views = new Map(); // canvas -> { view, engineView }
-  let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false;
+  let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false, held = false;
   const scaling = () => engine.getHardwareScalingLevel();
   const cssSize = view => [view.canvas.clientWidth, view.canvas.clientHeight];
   const pixelSize = view => cssSize(view).map(v => Math.max(1, Math.floor(v / scaling())));
@@ -38,7 +38,7 @@ export function createViews({ engine, scene, live = () => false }) {
   };
   const observer = new ResizeObserver(() => { layoutDirty = true; api.wake(); });
   // Anything else resizing the engine (hardware scaling, engine.resize() in user code) re-runs the layout.
-  const resized = engine.onResizeObservable.add(() => { layoutDirty = true; api.wake(); });
+  const resized = engine.onResizeObservable.add(() => { if (!held) { layoutDirty = true; api.wake(); } });
 
   // Views may share a camera (camera view, compositor backdrop), so each applies its region as it renders.
   const before = engine.onBeforeViewRenderObservable.add(engineView => {
@@ -50,6 +50,7 @@ export function createViews({ engine, scene, live = () => false }) {
   const after = engine.onAfterViewRenderObservable.add(engineView => views.get(engineView.target)?.view.afterRender?.());
   // Decide, once per frame, which views render.
   const frame = engine.onBeginFrameObservable.add(() => {
+    if (held) return;
     if (layoutDirty) layout();
     // Busy while anything changes, and while a material compiles (a mesh is not drawn until its shader is ready) and a
     // moment after, to draw what it compiled.
@@ -99,7 +100,7 @@ export function createViews({ engine, scene, live = () => false }) {
     // The view under the pointer receives Babylon's scene input (gizmos, camera controls) and defines
     // scene.activeCamera between frames.
     setInput(view) {
-      if (inputView === view) return;
+      if (inputView === view || held) return;
       inputView = view;
       engine.inputElement = view.canvas;
       scene.activeCamera = view.camera;
@@ -114,6 +115,8 @@ export function createViews({ engine, scene, live = () => false }) {
     // Keeps views rendering for a short while; call on any change that should show.
     wake() { lastWake = performance.now(); },
     relayout() { layoutDirty = true; api.wake(); },
+    // A render in the live scene holds the engine: the views leave its size and camera alone until it lets go.
+    hold(on) { held = on; if (!on) api.relayout(); },
     // Converts client coordinates to the coordinates scene.pick expects for this view.
     pickPoint(view, clientX, clientY) {
       const rect = view.canvas.getBoundingClientRect(), k = (view.scale ?? 1);

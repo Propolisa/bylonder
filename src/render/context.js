@@ -1,18 +1,16 @@
-// Offline render context: the hidden iframe behind Render Image and Render Animation. It runs the project
-// from a document snapshot on its own engine and canvas, on a virtual clock, so renders are deterministic
-// and the user's viewport is never disturbed (Blender renders from its own evaluated copy of the scene the
-// same way). The host (src/editors/render/host.js) creates one per job and talks to window.bylonderRender.
-import { Engine, Matrix, Camera } from '@babylonjs/core';
+// Offline render context: a hidden iframe that runs a project from a document snapshot on its own engine and canvas,
+// on a virtual clock. The Video Sequencer's scene strips render other scenes in one (sequencer/scene-frames.js), and a
+// scene's sound mixes in one (sequencer/scene-audio.js), on an offline audio context its audio engines play into.
+// Render Image and Render Animation render the live scene instead (live.js).
+import { Engine } from '@babylonjs/core';
 import { installVirtualClock } from './clock.js';
 import { createWorld } from '../runtime/world.js';
-import { jitter, jitterProjection, sampleTimes, createAccumulator } from './sampling.js';
-import { frameRate } from '../blenkernel/scene/time.js';
+import { createFrameRenderer, frameMs } from './frames.js';
 
 const clock = installVirtualClock(window);
 const canvas = document.getElementById('render');
 const warnings = [];
 let built = null, engine = null;
-const frameMs = (frame, start, fps) => (frame - start + 1) * 1000 / fps;
 
 function resize(width, height) {
   if (canvas.width === width && canvas.height === height) return;
@@ -20,24 +18,10 @@ function resize(width, height) {
   canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
   engine?.setSize(width, height);
 }
-
-// Render effects attach to the camera that renders (the scene may already have it active from its code), and
-// their shaders compile before its first frame.
-let shadedCamera = null;
-async function useCamera(name) {
-  const { world, scene } = built;
-  const camera = name ? scene.cameras.find((c) => c.name === name) : built.authoredCamera;
-  if (!camera) throw Error(name ? `No camera named ${name}` : 'No camera found in scene. Add a camera in code or pick one in Properties > Scene.');
-  scene.activeCamera = camera;
-  if (camera === shadedCamera) return camera;
-  shadedCamera = camera;
-  world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
-  await scene.whenReadyAsync();
-  return camera;
-}
+const { useCamera, renderFrame } = createFrameRenderer({ world: () => built, engine: () => engine, canvas, resize, clock });
 
 // Opens the scene for rendering; with `audio` ({ frameStart, frameEnd, fps, sampleRate }), for mixing its sound over
-// those frames (mixUntil, renderAudio).
+// those frames (renderAudio).
 let sound = null;
 async function open(input, { width, height }, { camera: cameraName, audio } = {}) {
   resize(width, height);
@@ -52,83 +36,7 @@ async function open(input, { width, height }, { camera: cameraName, audio } = {}
   world.beforeViewRender({ rendered: true, compositor: true });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
   await scene.whenReadyAsync();
-  return { camera: camera.name, warnings, audible: audible() };
-}
-
-// The scene's own render settings: final frames use its samples and motion blur.
-function quality() {
-  const { state } = built.animation.time, { render, eevee } = built.world.renderSettings.state;
-  return { start: state.frameStart, fps: frameRate(state), samples: Math.max(1, Math.round(eevee.taaRenderSamples)), motionBlur: render.useMotionBlur, shutter: render.motionBlurShutter };
-}
-
-let surface = null;
-function surfaceFor(width, height, samples) {
-  if (surface?.width !== width || surface.height !== height || surface.samples !== samples) {
-    const out = new OffscreenCanvas(width, height);
-    surface = { width, height, samples, out, ctx: out.getContext('2d', { willReadFrequently: samples > 1 }), accumulator: samples > 1 ? createAccumulator(width, height) : null };
-  }
-  return surface;
-}
-
-// Frame the scene state was last advanced to, so sequential final frames pre-roll only once.
-let simulated = null;
-
-async function drawFinalFrame(frame, width, height, progress) {
-  const q = quality(), job = { ...q, width, height };
-  const { out, ctx, accumulator } = surfaceFor(width, height, q.samples);
-  // A scene with physics pre-rolls from the start frame, so it reaches the state a full animation render would; its
-  // frames are thrown away, so they draw at the smallest size. Without physics a frame is its time alone.
-  const from = !built.scene.isPhysicsEnabled() ? frame : simulated !== null && simulated < frame ? simulated + 1 : q.start;
-  if (from < frame) {
-    resize(2, 2);
-    for (let f = from; f < frame; f++) {
-      await renderSample(f, [0, 0], { ...job, width: 2, height: 2 });
-      progress?.(f - from + 1, frame - from);
-    }
-    resize(width, height);
-  }
-  const times = sampleTimes(frame, q.samples, q);
-  accumulator?.reset();
-  for (let s = 0; s < q.samples; s++) {
-    await renderSample(times[s], jitter(s, q.samples), job);
-    ctx.drawImage(canvas, 0, 0);
-    accumulator?.add(ctx.getImageData(0, 0, width, height).data);
-  }
-  if (accumulator) ctx.putImageData(new ImageData(accumulator.result(), width, height), 0, 0);
-  simulated = frame;
-  return out;
-}
-
-// One frame for a scene strip: a single sample for previews, full quality for final renders.
-// progress(done, total) hears of a final frame's pre-roll.
-async function renderFrame({ frame, width, height, camera, quality: kind = 'preview', progress }) {
-  resize(width, height);
-  await useCamera(camera);
-  if (kind === 'final') return createImageBitmap(await drawFinalFrame(frame, width, height, progress));
-  simulated = null;
-  const { start, fps } = quality();
-  await renderSample(frame, [0, 0], { start, fps, width, height });
-  return createImageBitmap(canvas);
-}
-
-// Renders one sample at scene frame t (may be fractional) with a sub-pixel jitter, once modifiers have evaluated for
-// it off the main thread and everything it draws is ready.
-async function renderSample(t, offset, { start, fps, width, height }) {
-  const { world, scene, animation } = built;
-  const camera = scene.activeCamera;
-  clock.set(frameMs(t, start, fps));
-  animation.time.configure({ frameCurrent: t }, { record: false });
-  await world.modifiers.settled();
-  // Geometry modifiers just drew may need shaders compiled before it can be drawn.
-  await scene.whenReadyAsync();
-  camera.unfreezeProjectionMatrix();
-  if (offset[0] || offset[1]) {
-    const m = Array.from(camera.getProjectionMatrix(true).m);
-    camera.freezeProjectionMatrix(Matrix.FromArray(jitterProjection(m, offset, width, height, camera.mode === Camera.ORTHOGRAPHIC_CAMERA)));
-  }
-  engine.beginFrame();
-  scene.render();
-  engine.endFrame();
+  return { camera: camera.name, warnings };
 }
 
 // A frame of the scene without drawing it: what its sound follows (its animations, its camera, and the logic its code
@@ -143,47 +51,27 @@ function advance(scene) {
 
 // The scene's sound over the frames it was opened for, as its camera hears it (Blender's mixdown of a scene): its own
 // Babylon audio engines play into the offline audio context, which pauses at each frame for the scene to move its
-// sources and listener there. A render mixes it along with its frames (mixUntil after each frame, then renderAudio
-// for the rest); alone, renderAudio mixes it all. Null for a scene that makes no sound. progress(done, total) hears
-// of each frame mixed.
-let mixing = null;
-const audible = () => !!sound && built.audible;
-function startMixing() {
-  const { frameStart, frameEnd, fps, context } = sound, reached = new Map();
-  let failed;
-  const stopped = new Promise((resolve, reject) => { failed = reject; });
-  for (let frame = frameStart; frame <= frameEnd; frame++) {
-    reached.set(frame, context.suspend((frame - frameStart) / fps));
-  }
-  built.animation.time.play();
-  mixing = { next: frameStart, reached, rendering: Promise.race([context.startRendering(), stopped]), failed };
-}
-
-// Mixes the scene's sound from each frame not yet mixed up to `frame`, from the scene as it is at each.
-async function mixUntil(frame, progress = () => {}) {
-  if (!audible()) return;
-  if (!mixing) startMixing();
-  const { frameStart, frameEnd, fps } = sound, { animation, scene } = built, start = animation.time.state.frameStart;
-  for (; mixing.next <= Math.min(frame, frameEnd); mixing.next++) {
-    const at = mixing.next;
-    await mixing.reached.get(at);
-    clock.set(frameMs(at, start, fps));
-    animation.time.configure({ frameCurrent: at }, { record: false });
-    try { advance(scene); } catch (error) { mixing.failed(error); throw error; }
-    progress(at - frameStart + 1, frameEnd - frameStart + 1);
-    sound.context.resume();
-  }
-}
-
-async function renderAudio(progress) {
-  if (!audible()) return null;
+// sources and listener there. Null for a scene that makes no sound. progress(done, total) hears of each frame mixed.
+async function renderAudio(progress = () => {}) {
+  if (!sound || !built.audible) return null;
   await useCamera();
-  await mixUntil(sound.frameEnd, progress);
-  const buffer = await mixing.rendering;
-  built.animation.time.pause();
-  mixing = null;
+  const { frameStart, frameEnd, fps, context } = sound, { animation, scene } = built, start = animation.time.state.frameStart;
+  const reached = [];
+  for (let frame = frameStart; frame <= frameEnd; frame++) reached.push(context.suspend((frame - frameStart) / fps));
+  animation.time.play();
+  const rendering = context.startRendering();
+  for (let frame = frameStart; frame <= frameEnd; frame++) {
+    await reached[frame - frameStart];
+    clock.set(frameMs(frame, start, fps));
+    animation.time.configure({ frameCurrent: frame }, { record: false });
+    advance(scene);
+    progress(frame - frameStart + 1, frameEnd - frameStart + 1);
+    context.resume();
+  }
+  const buffer = await rendering;
+  animation.time.pause();
   return { samples: Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c)), sampleRate: buffer.sampleRate };
 }
 
-window.bylonderRender = { open, renderFrame, mixUntil, renderAudio, warnings, get clock() { return clock.ms; } };
+window.bylonderRender = { open, renderFrame, renderAudio, warnings, get clock() { return clock.ms; } };
 dispatchEvent(new Event('bylonder-render'));

@@ -1,4 +1,3 @@
-import { openRenderContext } from '../../render/render-context.js';
 import { createWriter } from '../../render/output.js';
 import { outputSpec, encodeSize, fileFormats } from '../../render/formats.js';
 import { outputSize } from '../../blenkernel/scene/render.js';
@@ -14,12 +13,16 @@ const untilCancelled = (promise, signal) => new Promise((resolve, reject) => {
   promise.then(resolve, reject);
 });
 
-// Render Image (F12), Render Animation (Ctrl F12) and View Render (F11). Each job runs in a fresh hidden
-// render context (render.html) built from a snapshot of the current document, and shows progress and the
-// result in a Render Result window, like Blender's render window.
-//   snapshot() -> run payload with the current scene edits and animation, independent of Remember Scene Edits
+// Render Image (F12), Render Animation (Ctrl F12) and View Render (F11). A job renders the live scene through its
+// camera, or the Video Sequencer's edit, and shows progress and the result in a Render Result window, like Blender's
+// render window.
+//   live(size) -> the live scene's frame source (render/live.js)
+//   sceneAudio({ frameStart, frameEnd, sampleRate }, { signal }) -> the scene's sound over those frames, or null
 //   sequencer: { hasStrips(), openCompositor({ frameStart, frameEnd, width, height }) } for Post Processing > Sequencer
-export function createRenderHost({ world, snapshot, sequencer, name = () => 'render' }) {
+// The wall clock: a live render puts the window on its virtual clock.
+const now = performance.now.bind(performance);
+
+export function createRenderHost({ world, live, sceneAudio, sequencer, name = () => 'render' }) {
   let job = null, last = null;
   const win = document.createElement('section');
   win.className = 'render-result';
@@ -41,7 +44,7 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
   };
-  const clock = start => { const s = (performance.now() - start) / 1000; return `${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(2).padStart(5, '0')}`; };
+  const clock = start => { const s = (now() - start) / 1000; return `${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(2).padStart(5, '0')}`; };
 
   async function run(kind) {
     if (job) return;
@@ -56,7 +59,7 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     if (kind === 'image') frames.push(Math.round(world.animation.time.frame));
     else for (let f = time.frameStart; f <= time.frameEnd; f += time.frameStep) frames.push(f);
     const controller = new AbortController(), signal = controller.signal;
-    const started = performance.now();
+    const started = now();
     job = { controller, kind };
     last = null; sync(); show();
     setStatus('Preparing render…');
@@ -64,11 +67,11 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     let source = null, writer = null;
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
-      source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames, spec.audio?.rate);
+      source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames, spec.audio?.rate, signal);
       const mixing = (done, total) => { setStatus(`Mixing scene sound | ${done} / ${total} | ${clock(started)}`); setProgress(done / total); };
-      // The sequencer mixes its sound first; the camera's mixes along with its frames.
-      let audio = spec.audio && !source.mixUntil ? await source.audio?.(signal, mixing) : null;
-      writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio: !!(spec.audio && (audio || source.audible)) });
+      // The sequencer mixes its sound first; the camera's mixes while its frames render.
+      let audio = spec.audio && edit ? await source.audio?.(signal, mixing) : null;
+      writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio: !!(spec.audio && (audio || !edit)) });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
         if (signal.aborted) throw cancelled();
@@ -79,11 +82,13 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
         draw(await createImageBitmap(out));
         if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / frameRate(time)) }));
         else await writer.add(out, frames[index]);
-        if (spec.audio) await source.mixUntil?.(frames[index]);
         setProgress((index + 1) / frames.length);
         setStatus(`Frame ${frames[index]} | ${index + 1} / ${frames.length} | ${size.width} x ${size.height} | ${source.label} | ${clock(started)}`);
       }
-      if (spec.audio && source.mixUntil) audio = await untilCancelled(source.audio(), signal);
+      if (spec.audio && !edit) {
+        setStatus(`Mixing scene sound | ${clock(started)}`);
+        audio = await untilCancelled(source.audio(), signal);
+      }
       if (audio) await writer.addAudio(audio);
       last = await writer.finish();
       writer = null;
@@ -100,15 +105,14 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
     }
   }
 
-  // The scene camera through the compositor, rendered in an isolated render context, with the scene's sound mixed there
-  // along with the frames.
-  async function cameraSource(size, frames, sampleRate) {
-    const audio = sampleRate && { frameStart: frames[0], frameEnd: frames.at(-1), fps: frameRate(world.animation.time.state), sampleRate };
-    const { context, opened, dispose } = await openRenderContext(snapshot(), size, { audio });
-    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, audible: opened.audible, dispose,
-      renderFrame: (frame, progress) => context.renderFrame({ frame, ...size, quality: 'final', progress }),
-      mixUntil: (frame) => context.mixUntil(frame),
-      audio: () => context.renderAudio().then((mix) => mix && { samples: mix.samples.map((channel) => new Float32Array(channel)), sampleRate: mix.sampleRate }) };
+  // The scene camera in the live scene (render/live.js), with the scene's sound mixed meanwhile in a render context of
+  // its own (sceneAudio); silence when the scene makes none, as Blender writes a video's sound track.
+  async function cameraSource(size, frames, sampleRate, signal) {
+    const fps = frameRate(world.animation.time.state), range = { frameStart: frames[0], frameEnd: frames.at(-1), sampleRate };
+    const sound = sampleRate ? sceneAudio(range, { signal }) : null;
+    sound?.catch(() => {});
+    const silence = () => { const length = Math.round((frames.length / fps) * sampleRate); return { samples: [new Float32Array(length), new Float32Array(length)], sampleRate }; };
+    return { ...(await live(size)), audio: async () => (await sound) ?? silence() };
   }
 
   cancelButton.onclick = () => job?.controller.abort();

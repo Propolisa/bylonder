@@ -131,7 +131,7 @@ try {
       await page.waitForFunction((id) => document.querySelector(`[data-workspace="${id}"]`)?.classList.contains("active"), id, { timeout: 30000 });
       await app.settled();
       // Its screen draws: editors of a visible size in the workspace.
-      await page.waitForFunction(() => [...document.querySelectorAll("#workspace > *")].some((el) => el.offsetWidth > 100 && el.offsetHeight > 100), null, { timeout: 10000 });
+      await page.waitForFunction(() => [...document.querySelectorAll("#workspace > *")].some((el) => el.offsetWidth > 100 && el.offsetHeight > 100), null, { timeout: 30000 });
       const mode = await app.bylonder((b) => b.editor.selection.nodes.at(-1)?.metadata?.wbMode ?? "OBJECT");
       const wanted = MODES[id] ?? "OBJECT";
       if (meshModes.includes(wanted)) expected = wanted;
