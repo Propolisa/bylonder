@@ -4,7 +4,7 @@ import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
 import { fullDate, timeAgo } from './relative-time.js';
 
-export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend }) {
+export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
   const $ = id => document.getElementById(id);
   const click = id => () => $(id).click();
   const bar = $('appbar');
@@ -81,6 +81,9 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     'bylonder.auto_run_toggle': { run: () => { autoRun.checked = !autoRun.checked; autoRun.dispatchEvent(new Event('change')); } },
     'bylonder.docs': { run: url(import.meta.env.BASE_URL + 'docs.html') },
     'bylonder.babylon_docs': { run: url('https://doc.babylonjs.com/') },
+    // Deletes every project and setting the app keeps in this browser, once the user confirms, and restarts clean; after
+    // the operator returns, as the scene window it runs in goes.
+    'bylonder.app_reset': { run: () => { if (confirm('Reset App deletes every project, its media and all settings Bylonder keeps in this browser, then restarts. This cannot be undone.')) setTimeout(resetApp); } },
   };
   registerOperators(operators);
   // Bylonder's entries in Blender's menus, as an add-on's (Menu.append); its settings as check entries.
@@ -96,7 +99,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     ['TOPBAR_MT_render', 'prepend', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); check(layout, 'bylonder.auto_run_toggle', 'Auto-run', autoRun.checked); layout.separator(); }],
     ['TOPBAR_MT_render', 'append', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); }],
     ['TOPBAR_MT_window', 'append', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_code', 'Toggle Project Code'); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); }],
-    ['TOPBAR_MT_help', 'append', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); }],
+    ['TOPBAR_MT_help', 'append', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); layout.separator(); op(layout, 'bylonder.app_reset', 'Reset App...'); }],
   ];
   // Blender's menus, laid out in the scene window, where Main is (editors/space_topbar/topbar-area.js,
   // `sceneTopbar()`): each scene window gets Bylonder's operators and entries once, and the bar its menus from the
