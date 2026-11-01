@@ -121,3 +121,17 @@ diff -ru a/src/libutil/sysutil.cpp b/src/libutil/sysutil.cpp
      int r = 0;
  #else
      // No idea what platform this is
+diff -ru a/src/libutil/thread.cpp b/src/libutil/thread.cpp
+--- a/src/libutil/thread.cpp	2026-11-01 23:14:58.025588776 +0000
++++ b/src/libutil/thread.cpp	2026-11-01 23:15:00.914929144 +0000
+@@ -141,6 +141,10 @@
+     {
+         if (nThreads < 0)
+             nThreads = std::max(1, int(threads_default()) - 1);
++#ifdef __wasi__
++        // WASI has no threads: the pool has no workers, and its callers run every task themselves.
++        nThreads = 0;
++#endif
+         if (!this->isStop && !this->isDone) {
+             int oldNThreads = size();
+             if (oldNThreads
