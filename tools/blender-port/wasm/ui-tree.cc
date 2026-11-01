@@ -36,6 +36,7 @@
 #include "WM_types.hh"
 
 #include "interface_intern.hh"
+#include "regions/interface_regions_intern.hh"
 #include "rna-runtime.hh"
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
@@ -451,67 +452,75 @@ static std::string block_json(const Block *block, const char *kind)
   return out.str();
 }
 
-/* Blocks made outside a region (menus, popups, recorded panels), kept until the next of their kind. */
-static Vector<Block *> &owned(int kind)
+/* Menus and popups, each in a temporary region of the window's screen as Blender's popups are (popup_block_create's
+ * region_temp_add, whose UI handler frees its blocks with it), never in the editor region whose context made them,
+ * which frees its own blocks when it is drawn again. A menu is kept by its root, the menu it was opened from: opening
+ * a menu frees only its own last regions and their sub-menus, so a menu still open elsewhere (the topbar's, while a
+ * header draws its own) keeps its buttons. The operator popup (popup_menu_begin, a properties dialog) is one at a time. */
+struct Popup {
+  bool is_menu;
+  std::string root;
+  ARegion *region;
+  /* An enum menu's items return their value through it to the button that opened it. */
+  std::unique_ptr<PopupBlockHandle> handle;
+};
+static Vector<std::unique_ptr<Popup>> &popups()
 {
-  static Vector<Block *> lists[3];
-  return lists[kind];
+  static Vector<std::unique_ptr<Popup>> list;
+  return list;
 }
-/* The popup handles of menus opened from a button (popup_block_create's): an enum menu's items return their value
- * through it to the button that opened it. */
-static Map<const Block *, std::unique_ptr<PopupBlockHandle>> &menu_handles()
-{
-  static Map<const Block *, std::unique_ptr<PopupBlockHandle>> handles;
-  return handles;
-}
-enum { OWNED_MENU = 0, OWNED_PANELS = 1, OWNED_POPUP = 2 };
-static void owned_free(const bContext *C, int kind)
-{
-  for (Block *block : owned(kind)) {
-    recorded.erase(block);
-    menu_handles().remove(block);
-    block_free(C, block);
-  }
-  owned(kind).clear();
-}
+static bScreen *window_screen(const bContext *C) { return WM_window_get_active_screen(CTX_wm_window(C)); }
 
-/* Menus by the menu they were opened from: opening a menu frees only its own last blocks and their sub-menus, so a
- * menu still open elsewhere (the topbar's, while a header draws its own) keeps its buttons. */
-static Map<Block *, std::string> &menu_roots()
+static void popups_free(bContext *C, FunctionRef<bool(const Popup &)> which)
 {
-  static Map<Block *, std::string> roots;
-  return roots;
-}
-static void menu_free(const bContext *C, const StringRef root)
-{
-  owned(OWNED_MENU).remove_if([&](Block *block) {
-    if (menu_roots().lookup_default(block, "") != root) {
+  popups().remove_if([&](const std::unique_ptr<Popup> &popup) {
+    if (!which(*popup)) {
       return false;
     }
-    menu_roots().remove(block);
-    menu_handles().remove(block);
-    recorded.erase(block);
-    block_free(C, block);
+    for (const Block &block : popup->region->runtime->uiblocks) {
+      recorded.erase(&block);
+    }
+    region_temp_remove(C, window_screen(C), popup->region);
     return true;
   });
 }
-
-static Block *block_new(const bContext *C, const char *name, EmbossType emboss, int kind)
+static void menu_free(bContext *C, const StringRef root)
 {
-  Block *block = block_begin(C, C ? CTX_data_scene(C) : nullptr, C ? CTX_wm_window(C) : nullptr, nullptr, name, emboss);
-  owned(kind).append(block);
-  return block;
+  popups_free(C, [&](const Popup &popup) { return popup.is_menu && popup.root == root; });
+}
+static void operator_popup_free(bContext *C)
+{
+  popups_free(C, [](const Popup &popup) { return !popup.is_menu; });
 }
 
+static Popup &popup_new(const bContext *C, const bool is_menu, const StringRef root)
+{
+  ARegion *region = region_temp_add(window_screen(C));
+  region_handlers_add(&region->runtime->handlers);
+  popups().append(std::make_unique<Popup>(Popup{is_menu, root, region, nullptr}));
+  return *popups().last();
+}
+static Block *popup_block_new(const bContext *C, const char *name, EmbossType emboss, const bool is_menu, const StringRef root)
+{
+  return block_begin(C, CTX_data_scene(C), CTX_wm_window(C), popup_new(C, is_menu, root).region, name, emboss);
+}
 static Block *menu_block_new(const bContext *C, const char *name, EmbossType emboss, const StringRef root)
 {
-  Block *block = block_new(C, name, emboss, OWNED_MENU);
-  menu_roots().add(block, root);
-  return block;
+  return popup_block_new(C, name, emboss, true, root);
+}
+static Popup *popup_of(const Block *block)
+{
+  for (std::unique_ptr<Popup> &popup : popups()) {
+    if (BLI_findindex(&popup->region->runtime->uiblocks, block) != -1) {
+      return popup.get();
+    }
+  }
+  return nullptr;
 }
 static std::string menu_root(const Block *block)
 {
-  return menu_roots().lookup_default(const_cast<Block *>(block), block->name);
+  const Popup *popup = popup_of(block);
+  return popup && popup->is_menu ? popup->root : block->name;
 }
 
 /* Panels. */
@@ -811,23 +820,17 @@ EXPORT(menu_type_label) const char *menu_type_label(const char *name)
 /* What a button opens (a menu, a popover, an enum's items, a block), drawn by the button's own function as Blender's
  * popup does (popup_block_create's create functions), as a menu tree. Menus opened before from the same menu stay,
  * as sub-menus stay open. */
-/* Whether a button JS names is still one of a live block's: the context region's, any region of the window's screen,
- * or a menu's or popup's. A layout drawn again frees the buttons a page may still show, so a click on one is dropped
- * rather than read from freed memory. */
+/* Whether a button JS names is still one of a live block's: the context region's, or any region of the window's screen,
+ * its areas' or its menus' and popups'. A layout drawn again frees the buttons a page may still show, so a click on one
+ * is dropped rather than read from freed memory. */
 static bool button_live(const bContext *C, const Button *but)
 {
-  const auto holds = [&](const Block *block) {
-    for (const std::unique_ptr<Button> &held : block->buttons_ptrs) {
-      if (held.get() == but) {
-        return true;
-      }
-    }
-    return false;
-  };
   const auto in_region = [&](const ARegion &region) {
     for (const Block &block : region.runtime->uiblocks) {
-      if (holds(&block)) {
-        return true;
+      for (const std::unique_ptr<Button> &held : block.buttons_ptrs) {
+        if (held.get() == but) {
+          return true;
+        }
       }
     }
     return false;
@@ -835,22 +838,17 @@ static bool button_live(const bContext *C, const Button *but)
   if (const ARegion *region = CTX_wm_region(C); region && in_region(*region)) {
     return true;
   }
-  if (wmWindow *win = CTX_wm_window(C)) {
-    if (const bScreen *screen = WM_window_get_active_screen(win)) {
-      for (const ScrArea &area : screen->areabase) {
-        for (const ARegion &region : area.regionbase) {
-          if (in_region(region)) {
-            return true;
-          }
-        }
+  const bScreen *screen = window_screen(C);
+  for (const ScrArea &area : screen->areabase) {
+    for (const ARegion &region : area.regionbase) {
+      if (in_region(region)) {
+        return true;
       }
     }
   }
-  for (const int kind : {OWNED_MENU, OWNED_PANELS, OWNED_POPUP}) {
-    for (const Block *block : owned(kind)) {
-      if (holds(block)) {
-        return true;
-      }
+  for (const ARegion &region : screen->regionbase) {
+    if (in_region(region)) {
+      return true;
     }
   }
   return false;
@@ -880,10 +878,11 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
   else if (but->menu_create_func) {
     Block *block = menu_block_new(C, but->str.c_str(), EmbossType::Pulldown, root);
     if (but->type == ButtonType::Menu && but->rnaprop && RNA_property_type(but->rnaprop) == PROP_ENUM) {
-      auto handle = std::make_unique<PopupBlockHandle>();
-      handle->popup_create_vars.but = but;
-      block->handle = handle.get();
-      menu_handles().add(block, std::move(handle));
+      Popup &popup = *popup_of(block);
+      popup.handle = std::make_unique<PopupBlockHandle>();
+      popup.handle->region = popup.region;
+      popup.handle->popup_create_vars.but = but;
+      block->handle = popup.handle.get();
     }
     /* The button's context goes with what it opens (ui_popup_menu_create_block): a collection's sub-menu of Move to
      * Collection reads its collection from it. */
@@ -896,9 +895,7 @@ EXPORT(ui_button_menu) const char *ui_button_menu(bContext *C, Button *but)
     json = menu_json(C, block);
   }
   else if (but->block_create_func) {
-    Block *block = but->block_create_func(C, CTX_wm_region(C), but->poin ? static_cast<void *>(but->poin) : but->func_argN);
-    owned(OWNED_MENU).append(block);
-    menu_roots().add(block, root);
+    Block *block = but->block_create_func(C, popup_new(C, true, root).region, but->poin ? static_cast<void *>(but->poin) : but->func_argN);
     if (block_layout_needs_resolving(block)) {
       block_layout_resolve(block);
     }
@@ -960,7 +957,7 @@ EXPORT(ui_button_press) int ui_button_press(bContext *C, Button *but, int value)
   /* A menu item's value goes to the menu button that opened it (handle_button_return_submenu). */
   if (but->type == ButtonType::ButMenu && but->block->handle) {
     Button *opener = but->block->handle->popup_create_vars.but;
-    if (opener && opener->type == ButtonType::Menu) {
+    if (opener && button_live(C, opener) && opener->type == ButtonType::Menu) {
       button_value_set(opener, double(but->block->handle->retvalue));
       button_applied(C, opener);
       button_update(opener);
@@ -1039,9 +1036,12 @@ EXPORT(ui_button_operator) int ui_button_operator(bContext *C, Button *but)
   }
   but->flag |= BUT_ACTIVE_OVERRIDE;
   const wmOperatorStatus status = WM_operator_name_call_ptr(C, but->optype, but->opcontext, but->opptr, nullptr);
-  but->flag &= ~BUT_ACTIVE_OVERRIDE;
   CTX_store_set(C, previous);
-  button_applied(C, but);
+  /* The operator may have opened a popup in the button's place, which frees the menu that held it. */
+  if (button_live(C, but)) {
+    but->flag &= ~BUT_ACTIVE_OVERRIDE;
+    button_applied(C, but);
+  }
   return int(status);
 }
 /* The context store a button's layout gave it (context_pointer_set: a panel's point cache, a modifier) made the
@@ -1102,8 +1102,8 @@ struct PopupMenu {
 };
 PopupMenu *popup_menu_begin_ex(bContext *C, const char *title, const char *block_name, int /*icon*/)
 {
-  owned_free(C, OWNED_POPUP);
-  Block *block = block_new(C, block_name, EmbossType::Pulldown, OWNED_POPUP);
+  operator_popup_free(C);
+  Block *block = popup_block_new(C, block_name, EmbossType::Pulldown, false, "");
   return MEM_new<PopupMenu>(__func__, block, &menu_layout(C, block), title);
 }
 PopupMenu *popup_menu_begin(bContext *C, const char *title, int icon) { return popup_menu_begin_ex(C, title, __func__, icon); }
@@ -1128,8 +1128,8 @@ bool popup_menu_end_or_cancel(bContext *C, PopupMenu *pup)
  * visible properties), on the operator's own properties, which JS edits in place: a menu tree. */
 std::string operator_props_layout(bContext *C, wmOperator *op)
 {
-  owned_free(C, OWNED_POPUP);
-  Block *block = block_new(C, op->type->idname, EmbossType::Emboss, OWNED_POPUP);
+  operator_popup_free(C);
+  Block *block = popup_block_new(C, op->type->idname, EmbossType::Emboss, false, "");
   Layout &layout = block_layout(block, LayoutDirection::Vertical, LayoutType::Panel, 0, 0, 15 * UI_UNIT_X, 0, 0, style_get_dpi());
   layout.use_property_split_set(true);
   layout.use_property_decorate_set(false);
