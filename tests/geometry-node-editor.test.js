@@ -9,13 +9,13 @@ import { contextStruct, idStruct, inPythonContext, setContextPointer } from '../
 import { createMainNodeTree } from '../src/editors/space_node/main-node-tree.js';
 import { createNodeEditorController } from '../src/editors/space_node/node-editor-controller.js';
 import { addMenuItems } from '../src/editors/space_node/node-add-menu.js';
-import { keymapHandler, defaultKeymaps } from '../src/windowmanager/keyconfig.js';
+import { keymapHandler } from '../src/windowmanager/keyconfig.js';
 import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
 import { inArea } from '../src/windowmanager/wm-operators.js';
 import { sceneMain } from './scene-main.js';
 
 await datafiles;
-loadKeyconfig(blenderMain().C, defaultKeymaps());
+loadKeyconfig(blenderMain().C);
 const scene = new Scene(new NullEngine()), objects = Object.assign([], { scene });
 const sync = sceneMain({ scene, objects });
 const { nodes } = sync.readBlend(fs.readFileSync(new URL('../examples/hair-dynamics/hair-dynamics.blend', import.meta.url)), scene);

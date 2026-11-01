@@ -234,7 +234,7 @@ const checks = {
   },
 
   async "middle mouse orbits and Shift middle mouse pans"() {
-    const view = () => app.frame().evaluate(() => { const c = window.__bylonder.views.input.editorCamera; return { alpha: c.alpha, x: c.target.x }; });
+    const view = () => app.frame().evaluate(() => { const c = window.__bylonder.views.input.editorCamera; return { alpha: c.position.x, x: c.target.x }; });
     const drag = async (shift) => {
       await app.hover(0.5, 0.5);
       if (shift) await app.page.keyboard.down("Shift");
@@ -942,6 +942,74 @@ const checks = {
     // The media library logs the missing file as an error.
     app.errors.splice(0, app.errors.length, ...app.errors.filter((error) => !/clip\.webm|requested file or directory could not be found/.test(error)));
   } },
+  // Edit > Preferences: Blender's Preferences editor in its window, its sections Blender's own, what Bylonder does not
+  // honor greyed out (never hidden), Bylonder's own settings in their panel.
+  async "Preferences show Blender's sections with greyed and live settings"() {
+    const prefs = await openPreferences();
+    await section(prefs, "Input");
+    assert.ok(await setting(prefs, EMULATE_3_BUTTON).isEnabled(), "a live setting");
+    assert.ok(await setting(prefs, EMULATE_NUMPAD).isEnabled());
+    await section(prefs, "System");
+    assert.ok(await prefs.locator("[data-blender=USERPREF_PT_bylonder]").count() || await prefs.getByText("Keep Scenes Loaded").count(), "Bylonder's panel");
+    await section(prefs, "File Paths");
+    const disabled = await prefs.locator("button:disabled, input:disabled, [aria-disabled=true]").count();
+    assert.ok(disabled > 0, "greyed settings");
+  },
+
+  // Laptops: the number row as the numpad, the left button with Alt as the middle one, two-finger trackpad scrolling.
+  async "Emulate Numpad: 1, 3 and 7 on the number row view front, right and top"() {
+    await setInput(EMULATE_NUMPAD);
+    await app.click(0.3, 0.8);
+    for (const [key, name] of [["Digit1", "Front"], ["Digit3", "Right"], ["Digit7", "Top"]]) {
+      await app.page.keyboard.press(key);
+      await app.until((b, n) => document.querySelector(".view-name").textContent.startsWith(n), name);
+    }
+  },
+
+  async "Emulate 3 Button Mouse: Alt and left drag orbits"() {
+    await setInput(EMULATE_3_BUTTON);
+    const before = await cameraPosition();
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.down("Alt");
+    await app.page.mouse.down();
+    const [x, y] = await app.point(0.6, 0.55);
+    await app.page.mouse.move(x, y, { steps: 6 });
+    await app.page.mouse.up();
+    await app.page.keyboard.up("Alt");
+    assert.notDeepEqual(await cameraPosition(), before, "orbited");
+    assert.equal(await app.bylonder((b) => b.editor.selection.size), 1, "the cube stays selected: no click");
+  },
+
+  async "a trackpad's two-finger drag orbits the view"() {
+    const before = await cameraPosition();
+    await app.hover(0.5, 0.5);
+    for (let i = 0; i < 6; i++) await app.page.mouse.wheel(12, 7);
+    await app.until((b, p) => b.views.input.editorCamera.position.x !== p[0], before);
+  },
+
+  async "a rebound key runs its operator, and the Preferences are kept over a reload"() {
+    await setInput(EMULATE_NUMPAD);
+    // Keymap: Object Mode's Delete on X rebound to Y in its key field.
+    const prefs = await openPreferences();
+    await section(prefs, "Keymap");
+    const search = prefs.locator(".bl-preferences-region input").first();
+    await search.fill("object.delete");
+    await search.press("Enter");
+    await prefs.locator('button[data-blender="type"]', { hasText: /^X$/ }).first().click();
+    await app.page.keyboard.press("y");
+    await prefs.locator('button[data-blender="type"]', { hasText: /^Y$/ }).first().waitFor();
+    await prefs.getByRole("button", { name: "Save Preferences" }).click();
+    await prefs.getByRole("button", { name: "Close" }).click();
+    await app.click(0.3, 0.8);
+    await app.page.keyboard.press("a");
+    await app.page.keyboard.press("y");
+    await app.frame().getByRole("menuitem", { name: "Delete" }).click();
+    await expectStats(({ Objects }) => Objects[1] === 0);
+    await app.page.reload();
+    await app.page.waitForFunction(() => document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.editor, null, { timeout: 180000 });
+    assert.equal(await app.frame().evaluate(() => window.__bylonder.userdef.preferences().inputs.use_emulate_numpad), true, "kept over a reload");
+  },
+
 };
 
 // A one-second clip with sound imported into the Sequencer's media library (the origin's private file system) and
@@ -1015,6 +1083,28 @@ async function screenOf([bx, by, bz]) {
   }, [bx, by, bz]);
   return app.point(fx, fy);
 }
+
+// Edit > Preferences, its window.
+async function openPreferences() {
+  await menu("TOPBAR_MT_edit", "Preferences...");
+  const prefs = app.frame().locator("[data-blender=PREFERENCES_WINDOW]");
+  await prefs.waitFor();
+  return prefs;
+}
+async function section(prefs, name) {
+  await prefs.locator("[data-blender=USERPREF_PT_navigation_bar]").getByText(name, { exact: true }).click();
+}
+// A setting's checkbox, by its RNA description (its tooltip): some of Blender's checkboxes have their label beside them.
+const EMULATE_NUMPAD = "Main 1 to 0 keys act as the numpad ones", EMULATE_3_BUTTON = "Emulate Middle Mouse with Alt+Left Mouse";
+const setting = (prefs, description) => prefs.locator(`label[title^="${description}"] input`);
+// An Input preference turned on in the Preferences editor.
+async function setInput(description) {
+  const prefs = await openPreferences();
+  await section(prefs, "Input");
+  if (!(await setting(prefs, description).isChecked())) await prefs.locator(`label[title^="${description}"]`).click();
+  await prefs.getByRole("button", { name: "Close" }).click();
+}
+const cameraPosition = () => app.bylonder((b) => b.views.input.editorCamera.position.asArray());
 
 async function typeInto(selector, value) {
   await app.locator(selector).first().click();

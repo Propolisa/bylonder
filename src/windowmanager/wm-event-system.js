@@ -27,23 +27,58 @@ const KM_SHIFT = 1, KM_CTRL = 2, KM_ALT = 4, KM_OSKEY = 8;
 // The page's name of a Blender event type.
 const pageType = (type) => (type === 'SPACE' ? 'spacebar' : type.toLowerCase());
 
+const DIGITS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+// blender-port: wm_event_system.cc wm_event_add_ghostevent's Emulate 3 Button Mouse (Alt or OS key with the left button
+// is the middle one, its release too) and Emulate Numpad (the number row is the numpad), for the events the page takes
+// itself; Blender's window applies them to the events it takes. `input`: { emulate_3_button, emulate_3_button_modifier
+// ('ALT' or 'OSKEY'), emulate_numpad }.
+export function emulateInput(event, input, state) {
+  if (input.emulate_numpad && DIGITS.includes(event.type)) event.type = 'numpad_' + DIGITS.indexOf(event.type);
+  if (!input.emulate_3_button || event.type !== 'leftmouse') return event;
+  const [modifier, domKey] = input.emulate_3_button_modifier === 'OSKEY' ? ['oskey', 'metaKey'] : ['alt', 'altKey'];
+  if (event.value === 'PRESS' && event[modifier]) {
+    Object.assign(event, { type: 'middlemouse', [modifier]: false, [domKey]: false });
+    state.emulating = true;
+  } else if (event.value === 'RELEASE') {
+    if (state.emulating) Object.assign(event, { type: 'middlemouse', [modifier]: false, [domKey]: false });
+    state.emulating = false;
+  }
+  return event;
+}
+
+// GHOST's trackpad events from the browser's wheel events (GHOST_TTrackpadEventSubTypes: Scroll 1, Magnify 4): a
+// pinch arrives as the wheel with Ctrl, a two-finger drag as a wheel of pixel deltas that are not a mouse wheel's
+// notches. Null for a mouse wheel. Blender applies the Preferences' scroll direction to them.
+const TRACKPAD_SCROLL = 1, TRACKPAD_MAGNIFY = 4;
+// A pen's state with a pointer event, as GHOST's tablet data (wm-api.cc tablet_data): mode (0 none, 1 stylus, 2 eraser:
+// the eraser end or button), pressure and tilt (degrees to a full lean) in thousandths.
+const TABLET_STYLUS = 1, TABLET_ERASER = 2;
+export const pen = (e) => (e.pointerType !== 'pen' ? [0, 0, 0, 0]
+  : [e.buttons & 32 || e.button === 5 ? TABLET_ERASER : TABLET_STYLUS, Math.round(e.pressure * 1000), Math.round((e.tiltX / 90) * 1000), Math.round((e.tiltY / 90) * 1000)]);
+export function trackpadGesture(e) {
+  if (e.deltaMode !== 0) return null;
+  if (e.ctrlKey && !Number.isInteger(e.deltaY)) return { subtype: TRACKPAD_MAGNIFY, dx: Math.round(-e.deltaY * 4), dy: 0 };
+  if (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 50) return null;
+  return { subtype: TRACKPAD_SCROLL, dx: Math.round(e.deltaX), dy: Math.round(e.deltaY) };
+}
+
 // `layers()` returns the handlers below the modal ones, top first; `viewAt(event)` the 3D View a pointer event is
 // over (or null); `accepts(event)` filters out keys meant for text fields and other editors; `hover(event)` gets the
 // pointer's motion while no modal handler runs (the gizmo map's highlighting); `blender` is Blender's window
 // ({ takes(native, view): whether it handles the event, send(kind, data, strings, view): the event's result }).
-export function createEventSystem({ layers, viewAt, accepts = () => true, hover = () => {}, blender = null }) {
-  const modal = [];
+export function createEventSystem({ layers, viewAt, accepts = () => true, hover = () => {}, blender = null, input = () => ({}) }) {
+  const modal = [], emulation = { emulating: false };
   // Every event carries the mouse position, key presses included, as Blender's do.
   let press = null, mouse = { x: 0, y: 0 }, blenderModal = false, buttons = 0;
 
-  const wmEvent = (native, type, value, extra = {}) => ({
+  const wmEvent = (native, type, value, extra = {}) => emulateInput({
     type, value, native,
     shift: native.shiftKey, ctrl: native.ctrlKey || native.metaKey, alt: native.altKey, oskey: native.metaKey,
     // DOM-style names for handlers written against them.
     shiftKey: native.shiftKey, ctrlKey: native.ctrlKey, altKey: native.altKey, metaKey: native.metaKey,
     x: native.clientX ?? mouse.x, y: native.clientY ?? mouse.y, clientX: native.clientX ?? mouse.x, clientY: native.clientY ?? mouse.y,
     ...extra,
-  });
+  }, input(), emulation);
 
   // A modal handler { keymap(event), mousemove?(event), passthrough?(event), cancel?() } gets every event first;
   // what its keymap does not use is blocked unless passthrough(event) lets it continue.
@@ -97,7 +132,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   };
   const pointerdown = (e) => {
     if (e.pointerType === 'touch') return;
-    if (toBlender(e, 'buttondown', [e.button])) { buttons++; return; }
+    if (toBlender(e, 'buttondown', [e.button, 0, ...pen(e)])) { buttons++; return; }
     const view = viewAt(e);
     if (!view && !modal.length) return;
     const type = BUTTONS[e.button];
@@ -109,7 +144,9 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   };
   const pointermove = (e) => {
     mouse = { x: e.clientX, y: e.clientY };
-    const sent = toBlender(e, 'pointermove', [e.clientX, e.clientY]);
+    // A pen's moves between frames reach Blender each, for smooth strokes.
+    if (e.pointerType === 'pen') for (const c of e.getCoalescedEvents?.().slice(0, -1) ?? []) toBlender(e, 'pointermove', [c.clientX, c.clientY, ...pen(c)]);
+    const sent = toBlender(e, 'pointermove', [e.clientX, e.clientY, ...pen(e)]);
     for (const handler of [...modal]) handler.mousemove?.(wmEvent(e, 'mousemove', 'NOTHING', { view: viewAt(e) }));
     if (!modal.length && !blenderModal && !press && !buttons) hover(wmEvent(e, 'mousemove', 'NOTHING', { view: viewAt(e) }));
     if (sent || !press || press.handled || press.dragged) return;
@@ -120,7 +157,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   };
   const pointerup = (e) => {
     if (e.pointerType === 'touch') return;
-    if (toBlender(e, 'buttonup', [e.button])) { buttons = Math.max(0, buttons - 1); return; }
+    if (toBlender(e, 'buttonup', [e.button, 0, ...pen(e)])) { buttons = Math.max(0, buttons - 1); return; }
     buttons = 0;
     const type = BUTTONS[e.button], down = press?.type === type ? press : null;
     if (modal.length || down) dispatch(wmEvent(e, type, 'RELEASE', { view: viewAt(e), press: down }));
@@ -128,7 +165,11 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     if (down) press = null;
   };
   const wheel = (e) => {
-    if (toBlender(e, 'wheel', [0, e.deltaY < 0 ? 1 : -1])) return;
+    const pad = input().trackpad && trackpadGesture(e);
+    if (pad ? toBlender(e, 'trackpad', [pad.subtype, e.clientX, e.clientY, pad.dx, pad.dy, 0]) : toBlender(e, 'wheel', [0, e.deltaY < 0 ? 1 : -1])) {
+      e.preventDefault();
+      return;
+    }
     const view = viewAt(e);
     if (!view && !modal.length) return;
     if (dispatch(wmEvent(e, e.deltaY < 0 ? 'wheelupmouse' : 'wheeldownmouse', 'PRESS', { view }))) e.preventDefault();

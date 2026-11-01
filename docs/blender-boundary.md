@@ -272,6 +272,12 @@ Decided 2026-10-29 (docs/model.md, principle 5). Blender's window manager runs t
   outside an event (a menu loading an asset list) ends. Startup and File > Open queue what `wm_file_read_post` queues
   (`NC_WM | ND_FILEREAD`, `NC_ASSET | ND_ASSET_LIST_READING`), which registers the node tools and so loads the asset
   lists, as Blender does at startup.
+- **Preferences** are Blender's `U`, read at startup from Blender's user directory (`/user`, which the page keeps in
+  IndexedDB) by `wm.read_userpref` and saved by `wm.save_userpref`; the window takes their resolution when they are read
+  (`wm_window_clear_drawable`, port-override). See `docs/blender-coverage.md` PREFERENCES.
+- **3D View navigation** is Blender's navigation operators on the area's RegionView3D: the page sets the view from its
+  camera before an event (`wm_view3d_set`) and the camera follows what the operators leave (`wm_view3d_get`); the
+  navigation gizmo invokes them as a gizmo does (`wm_area_operator_invoke`).
 - **Threads.** WASI has none: a thread pool's work runs where it is inserted, to its end, and frees its slot; popping an
   empty queue gives no work instead of waiting for a thread that cannot come (`platform.cc`).
 - **Checked.** `tests/wm-wasm.test.js`: G, mouse moves and a click move an object through Blender's transform modal
@@ -532,4 +538,4 @@ The Shader Editor and Compositor build on the same foundations: Blender's node d
 - The 3D View's Object Mode Select and Object menus are Blender's, over `createContext`, running Bylonder's actions by the operators they name (`editors/object/object-operators.js`). Next: View and Add.
 - Properties editor: popovers in panels other than the 3D View's, template_list filtering and sorting, multi-drag of number fields, light type changes (Bylonder replaces the Babylon light), the Collection tab for the master collection.
 - The topbar's scene properties across windows (decision 7).
-- Mesh element collections, Preferences.
+- Mesh element collections.

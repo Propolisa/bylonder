@@ -1,4 +1,5 @@
-import { preferences } from '../../workspace/preferences.js';
+import { bylonderPreferences } from '../../workspace/preferences.js';
+import { preferencesChanged } from '../../windowmanager/wm-userdef.js';
 
 // Asks what to set up (SequencerSetup.vue): resolves to { video, scene, audio, remember }, all false when declined,
 // or null when dismissed.
@@ -21,11 +22,13 @@ async function ask(props) {
 //   render(): the scene's RNA render settings; time: scene time; add(menu, scene): runs Add > menu > scene
 export async function offerSequencerSetup({ empty, scene, render, time, add, commit }) {
   if (!empty()) return;
-  const choice = preferences.get('askSequencerSetup') ? await ask({ scene: scene.name, video: render().image_settings.file_format === 'FFMPEG' }) : preferences.get('sequencerSetup');
+  const prefs = bylonderPreferences();
+  const choice = prefs.ask_sequencer_setup ? await ask({ scene: scene.name, video: render().image_settings.file_format === 'FFMPEG' })
+    : { video: prefs.sequencer_setup_video, scene: prefs.sequencer_setup_scene, audio: prefs.sequencer_setup_audio };
   if (!choice || !empty()) return;
   if (choice.remember) {
-    preferences.set('sequencerSetup', { video: choice.video, scene: choice.scene, audio: choice.audio });
-    preferences.set('askSequencerSetup', false);
+    Object.assign(prefs, { sequencer_setup_video: choice.video, sequencer_setup_scene: choice.scene, sequencer_setup_audio: choice.audio, ask_sequencer_setup: false });
+    preferencesChanged();
   }
   const audio = choice.scene && choice.audio;
   if (choice.video) {

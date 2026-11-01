@@ -7,7 +7,6 @@ import { readFile } from 'node:fs/promises';
 import { BlenderMain, datafiles } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 
 const fixture = JSON.parse(await readFile(new URL('./fixtures/bone-select/rig.json', import.meta.url), 'utf8'));
@@ -28,7 +27,7 @@ for (const [name, head, tail, parent] of fixture.bones) {
 const window = new Window(main);
 const { winx, winy } = fixture.view;
 window.size = { width: winx, height: winy };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(['view3d.select', 'view3d.select_box', 'view3d.select_circle', 'view3d.select_lasso', 'pose.select_linked_pick',
   'armature.select_linked_pick', 'armature.shortest_path_pick']);
 const view = window.area(SPACE_VIEW3D);

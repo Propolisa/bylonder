@@ -5,6 +5,11 @@ import { menus, module } from '../src/python/bpy_interface.js';
 import { drawMenu } from '../src/editors/interface/ui-layout.js';
 import { menuUI, registerOperators } from '../src/windowmanager/wm-operators.js';
 import { createKeymap, operatorKeys } from '../src/windowmanager/input/keymap.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
+
+// Blender's key configuration, as the app loads it at startup.
+loadKeyconfig(blenderMain().C);
 
 // Bylonder's own keys(props) bind the properties they read: wm.read_homefile's Ctrl N reads none.
 registerOperators({

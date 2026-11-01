@@ -5,11 +5,15 @@
 import assert from 'node:assert/strict';
 import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { setContextPointer } from '../src/python/bpy_rna.js';
-import { Window, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
+import { Window, SPACE_VIEW3D, RGN_TYPE_WINDOW, loadKeyconfig } from '../src/windowmanager/wm-window.js';
 import { createToolSystem } from '../src/windowmanager/wm-toolsystem.js';
 import { keymapHandler } from '../src/windowmanager/keyconfig.js';
 import { registerOperator, invokeOperator, kw } from '../src/windowmanager/wm-operators.js';
 import { boxRegion, lassoRegion, circleRegion } from '../src/editors/space_view3d/view3d-select.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
+
+// Blender's key configuration, as the app loads it at startup.
+loadKeyconfig(blenderMain().C);
 
 const blender = new BlenderMain();
 setContextPointer(blender.C);

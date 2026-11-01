@@ -298,6 +298,92 @@
   "example_title": "Combed Hair"
  },
  {
+  "id": "preferences",
+  "title": "Preferences",
+  "summary": "Blender's Preferences editor with all of its sections and settings, kept in this browser, with laptop input (Emulate 3 Button Mouse, Emulate Numpad, trackpad gestures), Blender's keymaps to edit, and its themes on the interface.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/index.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/input.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/navigation.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/keymap.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/themes.html",
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/navigate/navigation.html"
+  ],
+  "example": "cube",
+  "thumbnail": "preferences/thumbnail.png",
+  "media": [
+   "preferences/open.png",
+   "preferences/input.png",
+   "preferences/keymap.png",
+   "preferences/themes.png",
+   "preferences/bylonder.png"
+  ],
+  "ui": [
+   "PREFERENCES",
+   "USERPREF_HT_header",
+   "USERPREF_PT_navigation_bar",
+   "USERPREF_PT_save_preferences",
+   "USERPREF_PT_input_mouse",
+   "USERPREF_PT_input_keyboard",
+   "USERPREF_PT_input_touchpad",
+   "USERPREF_PT_navigation_orbit",
+   "USERPREF_PT_navigation_zoom",
+   "USERPREF_PT_keymap",
+   "USERPREF_PT_theme",
+   "TOPBAR_MT_edit",
+   "VIEW_3D"
+  ],
+  "operators": [
+   "screen.userpref_show",
+   "wm.save_userpref",
+   "wm.read_userpref",
+   "wm.read_factory_userpref",
+   "preferences.keyconfig_activate",
+   "preferences.reset_default_theme",
+   "view3d.rotate",
+   "view3d.move",
+   "view3d.zoom",
+   "view3d.view_axis",
+   "view3d.view_persportho",
+   "view3d.view_selected"
+  ],
+  "code": [
+   "src/editors/space_userpref/editor.js",
+   "src/editors/space_userpref/support.js",
+   "src/editors/space_userpref/userpref-operators.js",
+   "src/windowmanager/wm-userdef.js",
+   "src/windowmanager/keyconfig.js",
+   "src/windowmanager/wm-window.js",
+   "src/windowmanager/wm-event-system.js",
+   "src/editors/space_view3d/navigation.js",
+   "src/editors/interface/theme-tokens.js",
+   "src/workspace/preferences.js",
+   "tools/blender-port/wasm/wm-api.cc",
+   "tools/blender-port/wasm/ghost-paths.cc"
+  ],
+  "tests": [
+   "tests/preferences-wasm.test.js",
+   "tests/context.test.js",
+   "tests/e2e/smoke.mjs"
+  ],
+  "limits": [
+   "NDOF devices are greyed out: Bylonder is built without NDOF input, so the Gamepad API is not read.",
+   "Auto Depth has no depth buffer to read in the module; navigation centers as without it.",
+   "Interface settings the page draws itself (Resolution Scale, Line Width, fonts, pie menu timing, tooltips' Python) are greyed out until the page's interface follows them.",
+   "Viewport quality settings (Anti-Aliasing, Texture Limit, Anisotropic Filtering, Clip Alpha) and Studio Lights are shown greyed out; Babylon's drawing does not take them yet.",
+   "Theme colors that no design token stands for are greyed out. Reset to Default Theme gives Blender Dark; the theme presets menu (Blender Light) does not load its XML yet.",
+   "The Add-ons list does not draw yet (Blender's addon_utils reads add-ons' sources, which the app's Python cannot open yet); nothing can be installed from disk or online.",
+   "The Keymap lists operators Bylonder runs its own way as unavailable, as Blender lists an operator it lacks; their keys still work.",
+   "The Mouse panel's labels are cut short at the window's default width.",
+   "File Paths are greyed out: projects and their files live in the browser."
+  ],
+  "page": "docs/features/preferences.md",
+  "open": "https://propolisa.github.io/bylonder/#example=cube",
+  "example_title": "Default Cube"
+ },
+ {
   "id": "rigging",
   "title": "Rigging and Posing",
   "summary": "Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, keep poses in the pose library's asset shelf, and paint a mesh's weights.",

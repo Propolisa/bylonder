@@ -21,7 +21,6 @@ import {
 } from "./project-model";
 import { publishRun, removeRun, APP_BASE } from "./module-host";
 import { sceneList, activeSceneId, setSceneData, switchScene, addScene, renameScene, removeScene, storedScenes } from "./scenes.js";
-import { preferences, openPreferences } from "./preferences.js";
 import { menuButton } from "../editors/interface/menu.js";
 import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
@@ -449,7 +448,7 @@ async function activateScene(sceneId) {
   const previous = activeSceneId(project);
   if (sceneId === previous) return;
   switchScene(project, sceneId);
-  if (frame && runData && preferences.get("keepScenesLoaded")) {
+  if (frame && runData && frame.contentWindow.__bylonder?.bylonderPreferences()?.keep_scenes_loaded !== false) {
     frame.hidden = true;
     frame.contentWindow.postMessage({ channel, type: "suspend" }, location.origin);
     parked.set(previous, { frame, channel, runData });
@@ -499,7 +498,6 @@ $("scene").ondblclick = action(async () => {
   const name = await askText("Rename Scene", "Name", scene.name);
   if (name) { renameSceneTo(scene.id, name); postToScene(scene.id, "scene-name", sceneList(project).find((s) => s.id === scene.id).name); }
 });
-preferences.subscribe((key, value) => { if (key === "keepScenesLoaded" && !value) unloadParked(); });
 async function load(id, autoRun = true) {
   await save();
   stop();
@@ -596,6 +594,7 @@ window.addEventListener("message", (e) => {
       location.origin,
     );
   if (type === "text") textChanged(payload);
+  if (type === "preferences" && !payload.keep_scenes_loaded) unloadParked();
   if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(() => { reveal(); setTimeout(code, 0); }));
   if (type === "running") { topbar.connect(); $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
   if (type === "run-error") {
