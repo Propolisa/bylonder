@@ -7,6 +7,11 @@ Commit subjects are the app's changelog (Splash Screen > Changelog): one commit 
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to
 `main`: `npm test`, `npm run build` and `npm run test:prod` pass (the Pages deploy runs the same).
 
+## Roadmap
+
+`docs/roadmap.md` changes only with the project owner's approval: propose an entry or an edit and wait for a yes; never
+add, edit, reorder or remove entries on your own.
+
 ## Writing style for docs
 
 In all project docs (README, docs/, example READMEs, comments meant as docs): no emoji, no em
