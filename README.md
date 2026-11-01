@@ -102,6 +102,7 @@ Node 20 or later:
 
 ```sh
 npm ci
+npm run module   # Blender's WebAssembly module, built by CI for this checkout
 npm run dev      # dev server
 npm test         # unit and integration tests
 npm run build    # static site in dist/

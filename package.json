@@ -11,6 +11,7 @@
     "test:prod": "node tests/e2e/prod.mjs",
     "test:workflows": "node tests/e2e/workflows.mjs",
     "test": "node scripts/run-tests.mjs",
+    "module": "node scripts/module.mjs",
     "gates": "node scripts/gates.mjs"
   },
   "dependencies": {
