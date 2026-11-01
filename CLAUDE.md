@@ -12,6 +12,19 @@ In all project docs (README, docs/, example READMEs, comments meant as docs): no
 dashes or en dashes, no arrow glyphs (write menu paths as `File > Export`), and no AI-style
 filler or flourishes. Keep prose short, plain and factual.
 
+## Working with agents
+
+When work is split across background agents, the coordinating session owns release quality:
+
+- Each agent gets one feature area, a brief that names its files, constraints and checks, and its own worktree.
+- Agents send a one-line update about every 5 minutes (finished, next, blocker or doubt). The coordinator reads
+  code only when an update looks off, and steers by message.
+- One build at a time on the machine (`npm run build` and module builds share memory): an agent asks for the build
+  slot and says when it is done. One agent at a time holds the right to rebuild the WASM module; others write seam
+  source and hand it over.
+- An agent's work lands as one commit with a user-facing subject, after `npm test`, `npm run build` and
+  `npm run test:prod` pass on the merged tree. Each stable increment goes to `main` and its deploy is checked.
+
 ## Feature docs
 
 Every user-facing feature has a page in `docs/features/<id>.md`, shown by the docs viewer (`docs.html`, styled as
