@@ -109,6 +109,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -399,7 +415,7 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 				var setting = __getitem__ (__iterable0__, __index0__);
 				if (__eq__ (setting.py_name, 'node_tree')) {
 					var node_group = __call__ (_py_eval, null, setting.value, dict ({'cls': cls, '_context': _context, 'properties': properties, 'bl_rna': bl_rna, 'node_group': node_group, 'nodetype': nodetype, 'setting': setting}), __call__ (_module, null, 'bl_operators.node'));
-					if (node_group.description) {
+					if (__call__ (_truth, null, node_group.description)) {
 						return node_group.description;
 					}
 				}
@@ -615,7 +631,7 @@ export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 			var __accu0__ = self;
 			return __call__ (__accu0__.execute, __accu0__, context);
 		}) ();
-		if (self.use_transform && __in__ ('FINISHED', result)) {
+		if (__call__ (_truth, null, self.use_transform) && __in__ ('FINISHED', result)) {
 			(function () {
 				var __accu0__ = bpy.ops.node;
 				return __call__ (__accu0__.translate_attach_remove_on_cancel, __accu0__, 'INVOKE_DEFAULT');
@@ -822,7 +838,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		var both_math_nodes = __in__ (old_node.bl_idname, math_nodes) && __in__ (new_node.bl_idname, math_nodes);
 		var both_switch_nodes = __in__ (old_node.bl_idname, switch_nodes) && __in__ (new_node.bl_idname, switch_nodes);
 		var transfer_by_index = both_math_nodes || both_switch_nodes;
-		if (transfer_by_index) {
+		if (__call__ (_truth, null, transfer_by_index)) {
 			var __iterable0__ = __call__ (zip, null, old_node.inputs, new_node.inputs);
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -851,7 +867,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 						}) ());
 					}) ();
 					var already_defined = __in__ (settings_name, self.settings);
-					if (new_value !== null && !(already_defined)) {
+					if (new_value !== null && !(__call__ (_truth, null, already_defined))) {
 						new_socket.default_value = new_value;
 					}
 				}
@@ -887,8 +903,8 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 		var both_math_nodes = __in__ (old_node.bl_idname, math_nodes) && __in__ (new_node.bl_idname, math_nodes);
 		var both_switch_nodes = __in__ (old_node.bl_idname, switch_nodes) && __in__ (new_node.bl_idname, switch_nodes);
 		var transfer_by_index = both_math_nodes || both_switch_nodes;
-		if (is_input) {
-			if (transfer_by_index) {
+		if (__call__ (_truth, null, is_input)) {
+			if (__call__ (_truth, null, transfer_by_index)) {
 				var __iterable0__ = __call__ (py_enumerate, null, old_node.inputs);
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -903,7 +919,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 							var is_muted = link.is_muted;
 							var old_socket = link.from_socket;
 							var new_socket = __getitem__ (new_node.inputs, i);
-							if (new_socket.hide || !(new_socket.enabled)) {
+							if (__call__ (_truth, null, new_socket.hide) || !(__call__ (_truth, null, new_socket.enabled))) {
 								continue;
 							}
 							var new_link = (function () {
@@ -911,7 +927,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 								return __call__ (__accu0__.py_new, __accu0__, old_socket, new_socket);
 							}) ();
 							new_link.is_muted = is_muted;
-							if (!(new_link.is_valid)) {
+							if (!(__call__ (_truth, null, new_link.is_valid))) {
 								(function () {
 									var __accu0__ = tree.links;
 									return __call__ (__accu0__.remove, __accu0__, new_link);
@@ -929,14 +945,14 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 					}
 				}
 			}
-			else if (is_reroute) {
+			else if (__call__ (_truth, null, is_reroute)) {
 				var input = __getitem__ (old_node.inputs, 0);
 				var new_socket = null;
 				var __iterable0__ = new_node.inputs;
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var s = __getitem__ (__iterable0__, __index0__);
-					if (s.hide || !(s.enabled)) {
+					if (__call__ (_truth, null, s.hide) || !(__call__ (_truth, null, s.enabled))) {
 						continue;
 					}
 					if (__eq__ (s.py_metatype, input.py_metatype) || __call__ (cast_value, null, input, s) !== null) {
@@ -944,7 +960,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 						break;
 					}
 				}
-				if (new_socket) {
+				if (__call__ (_truth, null, new_socket)) {
 					var __iterable0__ = __getslice__ (input.links, null, null, 1);
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -986,7 +1002,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 						try {
 							var is_muted = link.is_muted;
 							var new_socket = __getitem__ (new_node.inputs, input.py_name);
-							if (new_socket.hide || !(new_socket.enabled)) {
+							if (__call__ (_truth, null, new_socket.hide) || !(__call__ (_truth, null, new_socket.enabled))) {
 								continue;
 							}
 							var new_link = (function () {
@@ -1007,7 +1023,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 				}
 			}
 		}
-		else if (transfer_by_index) {
+		else if (__call__ (_truth, null, transfer_by_index)) {
 			var __iterable0__ = __call__ (py_enumerate, null, old_node.outputs);
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1021,7 +1037,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 					try {
 						var is_muted = link.is_muted;
 						var new_socket = __getitem__ (new_node.outputs, i);
-						if (new_socket.hide || !(new_socket.enabled)) {
+						if (__call__ (_truth, null, new_socket.hide) || !(__call__ (_truth, null, new_socket.enabled))) {
 							continue;
 						}
 						var new_link = (function () {
@@ -1041,14 +1057,14 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 				}
 			}
 		}
-		else if (is_reroute) {
+		else if (__call__ (_truth, null, is_reroute)) {
 			var output = __getitem__ (old_node.outputs, 0);
 			var new_socket = null;
 			var __iterable0__ = new_node.outputs;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var s = __getitem__ (__iterable0__, __index0__);
-				if (s.hide || !(s.enabled)) {
+				if (__call__ (_truth, null, s.hide) || !(__call__ (_truth, null, s.enabled))) {
 					continue;
 				}
 				if (__eq__ (s.py_metatype, output.py_metatype) || __call__ (cast_value, null, s, output) !== null) {
@@ -1056,7 +1072,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 					break;
 				}
 			}
-			if (new_socket) {
+			if (__call__ (_truth, null, new_socket)) {
 				var __iterable0__ = __getslice__ (output.links, null, null, 1);
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1068,7 +1084,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 						return __call__ (__accu0__.py_new, __accu0__, new_socket, link.to_socket);
 					}) ();
 					new_link.is_muted = is_muted;
-					if (is_multi_input) {
+					if (__call__ (_truth, null, is_multi_input)) {
 						(function () {
 							var __accu0__ = new_link;
 							return __call__ (__accu0__.swap_multi_input_sort_id, __accu0__, link);
@@ -1089,7 +1105,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 					try {
 						var is_muted = link.is_muted;
 						var new_socket = __getitem__ (new_node.outputs, output.py_name);
-						if (new_socket.hide || !(new_socket.enabled)) {
+						if (__call__ (_truth, null, new_socket.hide) || !(__call__ (_truth, null, new_socket.enabled))) {
 							continue;
 						}
 						var is_multi_input = link.to_socket.is_multi_input;
@@ -1098,7 +1114,7 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 							return __call__ (__accu0__.py_new, __accu0__, new_socket, link.to_socket);
 						}) ();
 						new_link.is_muted = is_muted;
-						if (is_multi_input) {
+						if (__call__ (_truth, null, is_multi_input)) {
 							(function () {
 								var __accu0__ = new_link;
 								return __call__ (__accu0__.swap_multi_input_sort_id, __accu0__, link);
@@ -1267,10 +1283,10 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = self.properties;
 			return __call__ (__accu0__.is_property_set, __accu0__, 'type');
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.deselect_nodes, __accu0__, context);
@@ -1279,12 +1295,12 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 				var __accu0__ = self;
 				return __call__ (__accu0__.create_node, __accu0__, context, self.py_metatype);
 			}) ();
-			if (node) {
+			if (__call__ (_truth, null, node)) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.apply_node_settings, __accu0__, node);
 				}) ();
-				if (self.visible_output) {
+				if (__call__ (_truth, null, self.visible_output)) {
 					var __iterable0__ = node.outputs;
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1435,7 +1451,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 						var __accu0__ = tree.links;
 						return __call__ (__accu0__.py_new, __accu0__, target_output, link.to_socket);
 					}) ();
-					if (!(new_link.is_valid)) {
+					if (!(__call__ (_truth, null, new_link.is_valid))) {
 						(function () {
 							var __accu0__ = tree.links;
 							return __call__ (__accu0__.remove, __accu0__, new_link);
@@ -1475,7 +1491,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 					var __accu0__ = self;
 					return __call__ (__accu0__.apply_node_settings, __accu0__, old_node);
 				}) ();
-				if (self.visible_output) {
+				if (__call__ (_truth, null, self.visible_output)) {
 					(function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.swap_visible_output, __accu0__, tree, old_node, __kwargtrans__ ({output_name: self.visible_output}));
@@ -1491,7 +1507,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 				var __accu0__ = self;
 				return __call__ (__accu0__.apply_node_settings, __accu0__, new_node);
 			}) ();
-			if (self.visible_output) {
+			if (__call__ (_truth, null, self.visible_output)) {
 				var __iterable1__ = new_node.outputs;
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
@@ -1515,7 +1531,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 				var __left0__ = zone_pair;
 				var input_node = __left0__ [0];
 				var output_node = __left0__ [1];
-				if (input_node.select && output_node.select) {
+				if (__call__ (_truth, null, input_node.select) && __call__ (_truth, null, output_node.select)) {
 					new_node.location_absolute = __truediv__ (__add__ (input_node.location_absolute, output_node.location_absolute), 2);
 				}
 				(function () {
@@ -1937,7 +1953,7 @@ export var NodeAddZoneOperator =  __class__ ('NodeAddZoneOperator', [ZoneOperato
 		}) ();
 		input_node.location = __call__ (__isub__, null, input_node.location, __call__ (Vector, null, self.offset));
 		output_node.location = __call__ (__iadd__, null, output_node.location, __call__ (Vector, null, self.offset));
-		if (__eq__ (tree.py_metatype, 'GEOMETRY') && self.add_default_geometry_link) {
+		if (__eq__ (tree.py_metatype, 'GEOMETRY') && __call__ (_truth, null, self.add_default_geometry_link)) {
 			var from_socket = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 				var __accu0__ = [];
 				var __iterable0__ = input_node.outputs;
@@ -2038,16 +2054,16 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 		else {
 			var output_node = node;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = node.bl_idname;
 			return __call__ (__accu0__.startswith, __accu0__, 'GeometryNodeSimulation');
-		}) ()) {
+		}) ())) {
 			return output_node.state_items;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = node.bl_idname;
 			return __call__ (__accu0__.startswith, __accu0__, 'GeometryNodeRepeat');
-		}) ()) {
+		}) ())) {
 			return output_node.repeat_items;
 		}
 		if (__eq__ (node.bl_idname, 'NodeClosureInput')) {
@@ -2199,7 +2215,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 						var node = __getitem__ (__iterable1__, __index1__);
-						if (node.select) {
+						if (__call__ (_truth, null, node.select)) {
 							(function () {
 								var __accu0__ = self;
 								return __call__ (__accu0__.transfer_zone_sockets, __accu0__, node, output_node);
@@ -2207,10 +2223,10 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 						}
 					}
 				}
-				else if ((function () {
+				else if (__call__ (_truth, null, (function () {
 					var __accu0__ = input_node.bl_idname;
 					return __call__ (__accu0__.startswith, __accu0__, 'NodeClosure');
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.transfer_zone_sockets, __accu0__, old_input_node, input_node);
@@ -2289,7 +2305,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 					var __accu0__ = nodes_to_delete;
 					return __call__ (__accu0__.add, __accu0__, old_node);
 				}) ();
-				if (__eq__ (tree.py_metatype, 'GEOMETRY') && self.add_default_geometry_link) {
+				if (__eq__ (tree.py_metatype, 'GEOMETRY') && __call__ (_truth, null, self.add_default_geometry_link)) {
 					var from_socket = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 						var __accu0__ = [];
 						var __iterable1__ = input_node.outputs;
@@ -2320,7 +2336,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 						}
 						return __accu0__;
 					}) ()));
-					if (!(from_socket.is_linked || to_socket.is_linked)) {
+					if (!(__call__ (_truth, null, from_socket.is_linked) || __call__ (_truth, null, to_socket.is_linked))) {
 						(function () {
 							var __accu0__ = tree.links;
 							return __call__ (__accu0__.py_new, __accu0__, to_socket, from_socket);
@@ -2420,8 +2436,8 @@ export var NODE_OT_collapse_hide_unused_toggle =  __class__ ('NODE_OT_collapse_h
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var node = __getitem__ (__iterable0__, __index0__);
-			if (node.select) {
-				var hide = !(node.hide);
+			if (__call__ (_truth, null, node.select)) {
+				var hide = !(__call__ (_truth, null, node.hide));
 				node.hide = hide;
 				var __iterable1__ = node.inputs;
 				__iterable1__ = __i__ (__iterable1__);
@@ -2508,10 +2524,10 @@ export var NodeInterfaceOperator =  __class__ ('NodeInterfaceOperator', [object]
 		else {
 		}
 		var space = context.space_data;
-		if (!(space) || __ne__ (space.py_metatype, 'NODE_EDITOR') || !(space.edit_tree)) {
+		if (!(__call__ (_truth, null, space)) || __ne__ (space.py_metatype, 'NODE_EDITOR') || !(__call__ (_truth, null, space.edit_tree))) {
 			return false;
 		}
-		if (space.edit_tree.is_embedded_data) {
+		if (__call__ (_truth, null, space.edit_tree.is_embedded_data)) {
 			return false;
 		}
 		return true;
@@ -2537,23 +2553,23 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 		else {
 		}
 		var socket_type = 'NodeSocketFloat';
-		if (!(__call__ (hasattr, null, tree, 'valid_socket_type')) || (function () {
+		if (!(__call__ (hasattr, null, tree, 'valid_socket_type')) || __call__ (_truth, null, (function () {
 			var __accu0__ = tree;
 			return __call__ (__accu0__.valid_socket_type, __accu0__, socket_type);
-		}) ()) {
+		}) ())) {
 			return socket_type;
 		}
 		var types_to_check = [bpy.types.NodeSocket];
-		while (types_to_check) {
+		while (__call__ (_truth, null, types_to_check)) {
 			var t = (function () {
 				var __accu0__ = types_to_check;
 				return __call__ (__accu0__.py_pop, __accu0__);
 			}) ();
 			var idname = __call__ (getattr, null, t, 'bl_idname', '');
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = tree;
 				return __call__ (__accu0__.valid_socket_type, __accu0__, idname);
-			}) ()) {
+			}) ())) {
 				return idname;
 			}
 			(function () {
@@ -2584,7 +2600,7 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		var active_pos = (active_item ? active_item.position : __neg__ (1));
+		var active_pos = (__call__ (_truth, null, active_item) ? active_item.position : __neg__ (1));
 		if (__eq__ (self.item_type, 'INPUT')) {
 			var item = (function () {
 				var __accu0__ = interface_;
@@ -2612,7 +2628,7 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 		else {
 			return new set (['CANCELLED']);
 		}
-		if (active_item) {
+		if (__call__ (_truth, null, active_item)) {
 			if (__eq__ (active_item.item_type, 'PANEL') && __ne__ (item.item_type, 'PANEL')) {
 				(function () {
 					var __accu0__ = interface_;
@@ -2652,7 +2668,7 @@ export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interf
 		}
 		if (__gt__ (__call__ (len, null, panel.interface_items), 0)) {
 			var first_item = __getitem__ (panel.interface_items, 0);
-			if (py_typeof (first_item) === bpy.types.NodeTreeInterfaceSocketBool && first_item.is_panel_toggle) {
+			if (py_typeof (first_item) === bpy.types.NodeTreeInterfaceSocketBool && __call__ (_truth, null, first_item.is_panel_toggle)) {
 				return first_item;
 			}
 		}
@@ -2757,7 +2773,7 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_duplicate, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_duplicate, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var snode = context.space_data;
@@ -2784,7 +2800,7 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var item = interface_.active;
-		if (item) {
+		if (__call__ (_truth, null, item)) {
 			var item_copy = (function () {
 				var __accu0__ = interface_;
 				return __call__ (__accu0__.py_copy, __accu0__, item);
@@ -2824,7 +2840,7 @@ export var NODE_OT_interface_item_remove =  __class__ ('NODE_OT_interface_item_r
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var item = __getitem__ (__iterable0__, __index0__);
-				if (item.select || __eq__ (item, active_item)) {
+				if (__call__ (_truth, null, item.select) || __eq__ (item, active_item)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, item);
@@ -2844,7 +2860,7 @@ export var NODE_OT_interface_item_remove =  __class__ ('NODE_OT_interface_item_r
 				var children = item.interface_items;
 				if (__gt__ (__call__ (len, null, children), 0)) {
 					var first_child = __getitem__ (children, 0);
-					if (__call__ (isinstance, null, first_child, bpy.types.NodeTreeInterfaceSocket) && first_child.is_panel_toggle) {
+					if (__call__ (isinstance, null, first_child, bpy.types.NodeTreeInterfaceSocket) && __call__ (_truth, null, first_child.is_panel_toggle)) {
 						(function () {
 							var __accu0__ = interface_;
 							return __call__ (__accu0__.remove, __accu0__, first_child);
@@ -2859,7 +2875,7 @@ export var NODE_OT_interface_item_remove =  __class__ ('NODE_OT_interface_item_r
 		}
 		interface_.active_index = __call__ (min, null, interface_.active_index, __sub__ (__call__ (len, null, interface_.items_tree), 1));
 		var new_active = interface_.active;
-		if (__call__ (isinstance, null, new_active, bpy.types.NodeTreeInterfaceSocket) && new_active.is_panel_toggle) {
+		if (__call__ (isinstance, null, new_active, bpy.types.NodeTreeInterfaceSocket) && __call__ (_truth, null, new_active.is_panel_toggle)) {
 			interface_.active_index = new_active.parent.index;
 		}
 		return new set (['FINISHED']);
@@ -2885,14 +2901,14 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_make_panel_toggle, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_make_panel_toggle, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var snode = context.space_data;
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		if (!(active_item)) {
+		if (!(__call__ (_truth, null, active_item))) {
 			return false;
 		}
 		if (py_typeof (active_item) !== bpy.types.NodeTreeInterfaceSocketBool || __ne__ (active_item.in_out, 'INPUT')) {
@@ -2912,7 +2928,7 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 		}
 		if (__gt__ (__call__ (len, null, parent_panel.interface_items), 0)) {
 			var first_item = __getitem__ (parent_panel.interface_items, 0);
-			if (first_item.is_panel_toggle) {
+			if (__call__ (_truth, null, first_item.is_panel_toggle)) {
 				(function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__.poll_message_set, __accu0__, 'Panel already has a toggle');
@@ -2942,7 +2958,7 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
 		var parent_panel = active_item.parent;
-		if (!(parent_panel)) {
+		if (!(__call__ (_truth, null, parent_panel))) {
 			return new set (['CANCELLED']);
 		}
 		if (py_typeof (active_item) !== bpy.types.NodeTreeInterfaceSocketBool) {
@@ -2974,14 +2990,14 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_unlink_panel_toggle, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_unlink_panel_toggle, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var snode = context.space_data;
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		if (!(active_item) || __ne__ (active_item.item_type, 'PANEL')) {
+		if (!(__call__ (_truth, null, active_item)) || __ne__ (active_item.item_type, 'PANEL')) {
 			return false;
 		}
 		if (__eq__ (__call__ (len, null, active_item.interface_items), 0)) {
@@ -3009,14 +3025,14 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 		var tree = snode.edit_tree;
 		var interface_ = tree.interface;
 		var active_item = interface_.active;
-		if (!(active_item) || __ne__ (active_item.item_type, 'PANEL')) {
+		if (!(__call__ (_truth, null, active_item)) || __ne__ (active_item.item_type, 'PANEL')) {
 			return new set (['CANCELLED']);
 		}
 		if (__eq__ (__call__ (len, null, active_item.interface_items), 0)) {
 			return new set (['CANCELLED']);
 		}
 		var first_item = __getitem__ (active_item.interface_items, 0);
-		if (py_typeof (first_item) !== bpy.types.NodeTreeInterfaceSocketBool || !(first_item.is_panel_toggle)) {
+		if (py_typeof (first_item) !== bpy.types.NodeTreeInterfaceSocketBool || !(__call__ (_truth, null, first_item.is_panel_toggle))) {
 			return new set (['CANCELLED']);
 		}
 		first_item.is_panel_toggle = false;
@@ -3112,7 +3128,7 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 				var __accu0__ = self;
 				return __call__ (__accu0__.get_connected_viewer, __accu0__, fav_node);
 			}) ();
-			if (!(viewer_node)) {
+			if (!(__call__ (_truth, null, viewer_node))) {
 				(function () {
 					var __accu0__ = bpy.ops.node;
 					return __call__ (__accu0__.link_viewer, __accu0__);
@@ -3123,7 +3139,7 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 				}) ();
 			}
 		}
-		if (!(viewer_node)) {
+		if (!(__call__ (_truth, null, viewer_node))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Unable to set shortcut, selected node is not a viewer node or does not support viewing');
@@ -3208,7 +3224,7 @@ export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_ge
 				var viewer_node = n;
 			}
 		}
-		if (!(viewer_node)) {
+		if (!(__call__ (_truth, null, viewer_node))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
@@ -3278,6 +3294,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'math_nodes': math_nodes = value; break;

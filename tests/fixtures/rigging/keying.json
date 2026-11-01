@@ -1,0 +1,2537 @@
+{
+ "steps": [
+  {
+   "step": [
+    "op",
+    "object.armature_add",
+    {}
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "OBJECT",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": false,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": []
+  },
+  {
+   "step": [
+    "op",
+    "object.mode_set",
+    {
+     "mode": "EDIT"
+    }
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "EDIT",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": false,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": []
+  },
+  {
+   "step": [
+    "op",
+    "armature.extrude",
+    {
+     "forked": false
+    }
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "EDIT",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": false,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": []
+  },
+  {
+   "step": [
+    "op",
+    "transform.translate",
+    {
+     "value": [
+      0.5,
+      0,
+      0.5
+     ]
+    }
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "EDIT",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": false,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": []
+  },
+  {
+   "step": [
+    "op",
+    "object.mode_set",
+    {
+     "mode": "POSE"
+    }
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": false,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": false,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": []
+  },
+  {
+   "step": [
+    "op",
+    "pose.select_all",
+    {
+     "action": "SELECT"
+    }
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": []
+  },
+  {
+   "step": [
+    "op",
+    "anim.keyframe_insert",
+    {}
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": [
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "step": [
+    "frame",
+    10
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": [
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "step": [
+    "set",
+    "pose.bones[\"Bone\"]",
+    "rotation_quaternion",
+    [
+     0.7071,
+     0.7071,
+     0,
+     0
+    ]
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      0.7071,
+      0.7071,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": [
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "step": [
+    "op",
+    "anim.keyframe_insert_by_name",
+    {
+     "type": "Rotation"
+    }
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      0.7071,
+      0.7071,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": [
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ],
+      [
+       10.0,
+       0.7071
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.7071
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ],
+      [
+       10.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "step": [
+    "frame",
+    5
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      0.87786,
+      0.29487,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": [
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ],
+      [
+       10.0,
+       0.7071
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.7071
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ],
+      [
+       10.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "step": [
+    "frame",
+    1
+   ],
+   "result": [
+    "FINISHED"
+   ],
+   "mode": "POSE",
+   "bones": [
+    {
+     "name": "Bone",
+     "head": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tail": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    },
+    {
+     "name": "Bone.001",
+     "head": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "tail": [
+      0.5,
+      0.0,
+      1.5
+     ],
+     "collections": [
+      "Bones"
+     ],
+     "color": "DEFAULT"
+    }
+   ],
+   "pose": [
+    {
+     "name": "Bone",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    },
+    {
+     "name": "Bone.001",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "select": true,
+     "color": "DEFAULT",
+     "constraints": []
+    }
+   ],
+   "collections": [
+    {
+     "name": "Bones",
+     "is_visible": true,
+     "is_solo": false
+    }
+   ],
+   "selection_sets": [],
+   "active_selection_set": 0,
+   "constraints": [],
+   "fcurves": [
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].location",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ],
+      [
+       10.0,
+       0.7071
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.7071
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 0,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 1,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone\"].scale",
+     "index": 2,
+     "group": "Bone",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].location",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ],
+      [
+       10.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].rotation_quaternion",
+     "index": 3,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       0.0
+      ],
+      [
+       10.0,
+       0.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 0,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 1,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    },
+    {
+     "data_path": "pose.bones[\"Bone.001\"].scale",
+     "index": 2,
+     "group": "Bone.001",
+     "keys": [
+      [
+       1.0,
+       1.0
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}

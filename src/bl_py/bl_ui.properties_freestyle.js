@@ -106,6 +106,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -280,7 +296,7 @@ export var ViewLayerFreestyleEditorButtonsPanel =  __class__ ('ViewLayerFreestyl
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, ViewLayerFreestyleEditorButtonsPanel, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, ViewLayerFreestyleEditorButtonsPanel, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var view_layer = context.view_layer;
@@ -305,7 +321,7 @@ export var ViewLayerFreestyleLineStyle =  __class__ ('ViewLayerFreestyleLineStyl
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, ViewLayerFreestyleLineStyle, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, ViewLayerFreestyleLineStyle, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var view_layer = context.view_layer;
@@ -690,7 +706,7 @@ export var VIEWLAYER_PT_freestyle_lineset =  __class__ ('VIEWLAYER_PT_freestyle_
 		}) ();
 		var is_sortable = __gt__ (__call__ (len, null, freestyle.linesets), 1);
 		var rows = 3;
-		if (is_sortable) {
+		if (__call__ (_truth, null, is_sortable)) {
 			var rows = 5;
 		}
 		(function () {
@@ -717,7 +733,7 @@ export var VIEWLAYER_PT_freestyle_lineset =  __class__ ('VIEWLAYER_PT_freestyle_
 			var __accu0__ = col;
 			return __call__ (__accu0__.menu, __accu0__, 'RENDER_MT_lineset_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
 		}) ();
-		if (is_sortable) {
+		if (__call__ (_truth, null, is_sortable)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -731,7 +747,7 @@ export var VIEWLAYER_PT_freestyle_lineset =  __class__ ('VIEWLAYER_PT_freestyle_
 				return __call__ (__accu0__.operator, __accu0__, 'scene.freestyle_lineset_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
 			}) ().direction = 'DOWN';
 		}
-		if (lineset) {
+		if (__call__ (_truth, null, lineset)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, lineset, 'linestyle', __kwargtrans__ ({py_new: 'scene.freestyle_linestyle_new'}));
@@ -1133,7 +1149,7 @@ export var draw_modifier_box_header = function (box, modifier) {
 		var __accu0__ = row;
 		return __call__ (__accu0__.context_pointer_set, __accu0__, 'modifier', modifier);
 	}) ();
-	if (modifier.expanded) {
+	if (__call__ (_truth, null, modifier.expanded)) {
 		var icon = 'TRIA_DOWN';
 	}
 	else {
@@ -1151,7 +1167,7 @@ export var draw_modifier_box_header = function (box, modifier) {
 		var __accu0__ = sub;
 		return __call__ (__accu0__.prop, __accu0__, modifier, 'name', __kwargtrans__ ({text: ''}));
 	}) ();
-	if (modifier.use) {
+	if (__call__ (_truth, null, modifier.use)) {
 		var icon = 'RESTRICT_RENDER_OFF';
 	}
 	else {
@@ -1255,7 +1271,7 @@ export var draw_modifier_color_ramp_common = function (box, modifier, has_range)
 		var __accu0__ = box;
 		return __call__ (__accu0__.template_color_ramp, __accu0__, modifier, 'color_ramp', __kwargtrans__ ({expand: true}));
 	}) ();
-	if (has_range) {
+	if (__call__ (_truth, null, has_range)) {
 		var col = (function () {
 			var __accu0__ = box;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1301,7 +1317,7 @@ export var draw_modifier_curve_common = function (box, modifier, has_range, has_
 			return __call__ (__accu0__.prop, __accu0__, modifier, 'invert');
 		}) ();
 	}
-	if (has_range) {
+	if (__call__ (_truth, null, has_range)) {
 		var col = (function () {
 			var __accu0__ = box;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1315,7 +1331,7 @@ export var draw_modifier_curve_common = function (box, modifier, has_range, has_
 			return __call__ (__accu0__.prop, __accu0__, modifier, 'range_max', __kwargtrans__ ({text: 'Max'}));
 		}) ();
 	}
-	if (has_value) {
+	if (__call__ (_truth, null, has_value)) {
 		var col = (function () {
 			var __accu0__ = box;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1898,7 +1914,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_color =  __class__ ('VIEWLAYER_PT_fr
 			var __accu0__ = col;
 			return __call__ (__accu0__.box, __accu0__);
 		}) (), modifier);
-		if (modifier.expanded) {
+		if (__call__ (_truth, null, modifier.expanded)) {
 			var box = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.box, __accu0__);
@@ -1954,7 +1970,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_color =  __class__ ('VIEWLAYER_PT_fr
 					sub.active = false;
 					var show_ramp = true;
 				}
-				if (show_ramp) {
+				if (__call__ (_truth, null, show_ramp)) {
 					__call__ (draw_modifier_color_ramp_common, null, box, modifier, false);
 				}
 			}
@@ -2010,7 +2026,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_color =  __class__ ('VIEWLAYER_PT_fr
 				}) ();
 				__call__ (draw_modifier_color_ramp_common, null, box, modifier, false);
 				var freestyle = context.view_layer.freestyle_settings;
-				if (!(freestyle.use_smoothness)) {
+				if (!(__call__ (_truth, null, freestyle.use_smoothness))) {
 					var message = 'Enable Face Smoothness to use this modifier';
 					__call__ (draw_modifier_box_error, null, (function () {
 						var __accu0__ = col;
@@ -2121,7 +2137,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_alpha =  __class__ ('VIEWLAYER_PT_fr
 			var __accu0__ = col;
 			return __call__ (__accu0__.box, __accu0__);
 		}) (), modifier);
-		if (modifier.expanded) {
+		if (__call__ (_truth, null, modifier.expanded)) {
 			var box = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.box, __accu0__);
@@ -2211,7 +2227,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_alpha =  __class__ ('VIEWLAYER_PT_fr
 					return __call__ (__accu0__.prop, __accu0__, modifier, 'curvature_max', __kwargtrans__ ({text: 'Max'}));
 				}) ();
 				var freestyle = context.view_layer.freestyle_settings;
-				if (!(freestyle.use_smoothness)) {
+				if (!(__call__ (_truth, null, freestyle.use_smoothness))) {
 					var message = 'Enable Face Smoothness to use this modifier';
 					__call__ (draw_modifier_box_error, null, (function () {
 						var __accu0__ = col;
@@ -2322,7 +2338,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_thickness =  __class__ ('VIEWLAYER_P
 			var __accu0__ = col;
 			return __call__ (__accu0__.box, __accu0__);
 		}) (), modifier);
-		if (modifier.expanded) {
+		if (__call__ (_truth, null, modifier.expanded)) {
 			var box = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.box, __accu0__);
@@ -2474,7 +2490,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_thickness =  __class__ ('VIEWLAYER_P
 				}) ();
 				__call__ (draw_modifier_curve_common, null, box, modifier, false, false);
 				var freestyle = context.view_layer.freestyle_settings;
-				if (!(freestyle.use_smoothness)) {
+				if (!(__call__ (_truth, null, freestyle.use_smoothness))) {
 					var message = 'Enable Face Smoothness to use this modifier';
 					__call__ (draw_modifier_box_error, null, (function () {
 						var __accu0__ = col;
@@ -2612,7 +2628,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_geometry =  __class__ ('VIEWLAYER_PT
 			var __accu0__ = col;
 			return __call__ (__accu0__.box, __accu0__);
 		}) (), modifier);
-		if (modifier.expanded) {
+		if (__call__ (_truth, null, modifier.expanded)) {
 			var box = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.box, __accu0__);
@@ -3004,7 +3020,7 @@ export var VIEWLAYER_PT_freestyle_linestyle_texture =  __class__ ('VIEWLAYER_PT_
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (linestyle.active_texture) {
+		if (__call__ (_truth, null, linestyle.active_texture)) {
 			var slot = __getitem__ (linestyle.texture_slots, linestyle.active_texture_index);
 			(function () {
 				var __accu0__ = layout;
@@ -3135,6 +3151,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'RenderFreestyleButtonsPanel': RenderFreestyleButtonsPanel = value; break;

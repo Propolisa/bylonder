@@ -374,6 +374,8 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
 
 - Fixes are generic, in the transpiler (`TranscryptFixes` and `Walrus` in `transpile.py`, `runtime.js` for the runtime,
   applied to both pipelines by `finish()`), or in tree.py for what spans modules. Never edit `src/bl_py`.
+- Tests take Python's truth (`_truth`): an empty list, set, dict or `bpy_prop_collection` is false, as JS's is not. A
+  module's function assigned in a class body (`poll = keyingsets_utils.RKS_POLL_selected_items`) is a method.
 - The tree's modules compile with operator overloading and iterable conversion (`opov`, `iconv`) for Python's
   semantics (list `+`, loops over iterators); Transcrypt's own library modules compile without.
 - Module semantics: imported names are module attributes (re-exported); assigning a module's attribute
@@ -395,6 +397,9 @@ Consumers and running:
 - `src/python/bpy_interface.js` loads the tree and exports `registered`, `menus`, `panels`, `headers`, `module(name)` and
   `setContext`. Menus, the Properties editor's panels, the 3D View's regions, the animation editors' headers, the tool system and the
   keymaps (`presets/keyconfig`) all come from these; the per-class transpile it replaced is gone (2026-10-28).
+- Keying sets' types (`KeyingSetInfo`) register as Blender's types with the panels and operators, and a deferred
+  property a script assigns to RNA's own type (`bpy.types.Object.selection_sets = CollectionProperty(...)`) is defined
+  on it as `pyrna_struct_meta_idprop_setattro` defines one (`defineAssignedProperties`).
 - Blender's Python operators register in Bylonder's operator registry by idname unless Bylonder registers its own
   (which then wins); they run as Blender runs one: an instance with its property defaults and the given values,
   `poll`, then `execute` (or `invoke` from an event) in `bpy.context`.

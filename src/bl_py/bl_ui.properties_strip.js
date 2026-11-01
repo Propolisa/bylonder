@@ -12,6 +12,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_strip';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var StripButtonsPanel =  __class__ ('StripButtonsPanel', [object], {
 	__module__: __name__,
 	bl_space_type: 'PROPERTIES',
@@ -233,7 +389,7 @@ export var STRIP_PT_adjust_crop =  __class__ ('STRIP_PT_adjust_crop', [StripButt
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __ne__ (strip.py_metatype, 'SOUND');
@@ -256,7 +412,7 @@ export var STRIP_PT_adjust_crop =  __class__ ('STRIP_PT_adjust_crop', [StripButt
 		var strip = context.active_strip;
 		var layout = self.layout;
 		layout.use_property_split = true;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -295,7 +451,7 @@ export var draw_compositor_effect_node_group_errors = function (layout, node_tre
 	}
 	else {
 	}
-	if (!(node_tree) || !(node_tree.interface)) {
+	if (!(__call__ (_truth, null, node_tree)) || !(__call__ (_truth, null, node_tree.interface))) {
 		return ;
 	}
 	var float_input_sockets_num = 0;
@@ -367,7 +523,7 @@ export var STRIP_PT_effect =  __class__ ('STRIP_PT_effect', [StripButtonsPanel, 
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __in__ (strip.py_metatype, new set (['ADD', 'SUBTRACT', 'ALPHA_OVER', 'ALPHA_UNDER', 'CROSS', 'GAMMA_CROSS', 'COMPOSITOR', 'MULTIPLY', 'WIPE', 'GLOW', 'COLOR', 'SPEED', 'MULTICAM', 'GAUSSIAN_BLUR', 'TEXT', 'COLORMIX']));
@@ -413,7 +569,7 @@ export var STRIP_PT_effect =  __class__ ('STRIP_PT_effect', [StripButtonsPanel, 
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var strip = context.active_strip;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var strip_type = strip.py_metatype;
 		if (__eq__ (strip_type, 'COMPOSITOR')) {
 			(function () {
@@ -623,7 +779,7 @@ export var STRIP_PT_effect =  __class__ ('STRIP_PT_effect', [StripButtonsPanel, 
 						}) ().camera = i;
 					}
 				}
-				if (__gt__ (strip.channel, BT_ROW) && __mod__ (__sub__ (strip_channel, 1), BT_ROW)) {
+				if (__gt__ (strip.channel, BT_ROW) && __call__ (_truth, null, __mod__ (__sub__ (strip_channel, 1), BT_ROW))) {
 					for (var i = strip.channel; i < __add__ (strip_channel, __mod__ (__sub__ (__add__ (BT_ROW, 1), strip_channel), BT_ROW)); i++) {
 						(function () {
 							var __accu0__ = row;
@@ -667,7 +823,7 @@ export var STRIP_PT_effect =  __class__ ('STRIP_PT_effect', [StripButtonsPanel, 
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, strip, 'use_default_fade', __kwargtrans__ ({text: 'Default Fade'}));
 			}) ();
-			if (!(strip.use_default_fade)) {
+			if (!(__call__ (_truth, null, strip.use_default_fade))) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, strip, 'effect_fader', __kwargtrans__ ({text: 'Effect Fader'}));
@@ -835,7 +991,7 @@ export var STRIP_PT_effect_text_style =  __class__ ('STRIP_PT_effect_text_style'
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (strip.use_absolute_line_spacing) {
+		if (__call__ (_truth, null, strip.use_absolute_line_spacing)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, strip, 'abs_space_line', __kwargtrans__ ({text: 'Line Spacing'}));
@@ -932,7 +1088,7 @@ export var STRIP_PT_effect_text_outline =  __class__ ('STRIP_PT_effect_text_outl
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, strip, 'outline_width', __kwargtrans__ ({text: 'Width'}));
 		}) ();
-		col.active = strip.use_outline && !(strip.mute);
+		col.active = strip.use_outline && !(__call__ (_truth, null, strip.mute));
 	});}
 });
 export var STRIP_PT_effect_text_shadow =  __class__ ('STRIP_PT_effect_text_shadow', [StripButtonsPanel, Panel], {
@@ -1018,7 +1174,7 @@ export var STRIP_PT_effect_text_shadow =  __class__ ('STRIP_PT_effect_text_shado
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, strip, 'shadow_blur', __kwargtrans__ ({text: 'Blur'}));
 		}) ();
-		col.active = strip.use_shadow && !(strip.mute);
+		col.active = strip.use_shadow && !(__call__ (_truth, null, strip.mute));
 	});}
 });
 export var STRIP_PT_effect_text_box =  __class__ ('STRIP_PT_effect_text_box', [StripButtonsPanel, Panel], {
@@ -1101,7 +1257,7 @@ export var STRIP_PT_effect_text_box =  __class__ ('STRIP_PT_effect_text_box', [S
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, strip, 'box_roundness', __kwargtrans__ ({text: 'Roundness'}));
 		}) ();
-		col.active = strip.use_box && !(strip.mute);
+		col.active = strip.use_box && !(__call__ (_truth, null, strip.mute));
 	});}
 });
 export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, Panel], {
@@ -1123,7 +1279,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __in__ (strip.py_metatype, new set (['MOVIE', 'IMAGE', 'SOUND']));
@@ -1149,7 +1305,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 		var scene = context.sequencer_scene;
 		var strip = context.active_strip;
 		var strip_type = strip.py_metatype;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		if (__eq__ (strip_type, 'SOUND')) {
 			var sound = strip.sound;
 			(function () {
@@ -1175,7 +1331,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 					return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5, align: true}));
 				}) ();
 				py_split.alignment = 'RIGHT';
-				if (sound.packed_file) {
+				if (__call__ (_truth, null, sound.packed_file)) {
 					(function () {
 						var __accu0__ = py_split;
 						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Unpack'}));
@@ -1267,7 +1423,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 					var __accu0__ = strip;
 					return __call__ (__accu0__.strip_elem_from_frame, __accu0__, scene.frame_current);
 				}) ();
-				if (elem) {
+				if (__call__ (_truth, null, elem)) {
 					(function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.prop, __accu0__, elem, 'filename', __kwargtrans__ ({text: ''}));
@@ -1313,7 +1469,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 					return __call__ (__accu0__.prop, __accu0__, strip, 'use_deinterlace');
 				}) ();
 			}
-			if (scene.render.use_multiview) {
+			if (__call__ (_truth, null, scene.render.use_multiview)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.prop, __accu0__, strip, 'use_multiview');
@@ -1357,8 +1513,8 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 				var __accu0__ = py_split;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Resolution'}));
 			}) ();
-			var size = (elem ? tuple ([elem.orig_width, elem.orig_height]) : tuple ([0, 0]));
-			if (__getitem__ (size, 0) && __getitem__ (size, 1)) {
+			var size = (__call__ (_truth, null, elem) ? tuple ([elem.orig_width, elem.orig_height]) : tuple ([0, 0]));
+			if (__call__ (_truth, null, __getitem__ (size, 0)) && __call__ (_truth, null, __getitem__ (size, 1))) {
 				py_split.alignment = 'LEFT';
 				(function () {
 					var __accu0__ = py_split;
@@ -1374,7 +1530,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'None'}));
 				}) ();
 			}
-			if (elem.orig_fps) {
+			if (__call__ (_truth, null, elem.orig_fps)) {
 				var py_split = (function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5, align: false}));
@@ -1415,7 +1571,7 @@ export var STRIP_PT_movie_clip =  __class__ ('STRIP_PT_movie_clip', [StripButton
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __eq__ (strip.py_metatype, 'MOVIECLIP');
@@ -1439,7 +1595,7 @@ export var STRIP_PT_movie_clip =  __class__ ('STRIP_PT_movie_clip', [StripButton
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var strip = context.active_strip;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.template_ID, __accu0__, strip, 'clip');
@@ -1459,7 +1615,7 @@ export var STRIP_PT_movie_clip =  __class__ ('STRIP_PT_movie_clip', [StripButton
 			}) ();
 		}
 		var clip = strip.clip;
-		if (clip) {
+		if (__call__ (_truth, null, clip)) {
 			var sta = clip.frame_start;
 			var end = __add__ (clip.frame_start, clip.frame_duration);
 			(function () {
@@ -1491,7 +1647,7 @@ export var STRIP_PT_scene =  __class__ ('STRIP_PT_scene', [StripButtonsPanel, Pa
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __eq__ (strip.py_metatype, 'SCENE');
@@ -1516,12 +1672,12 @@ export var STRIP_PT_scene =  __class__ ('STRIP_PT_scene', [StripButtonsPanel, Pa
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.template_ID, __accu0__, strip, 'scene', __kwargtrans__ ({text: 'Scene', py_new: 'scene.new_sequencer'}));
 		}) ();
-		if (scene) {
+		if (__call__ (_truth, null, scene)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -1551,7 +1707,7 @@ export var STRIP_PT_scene =  __class__ ('STRIP_PT_scene', [StripButtonsPanel, Pa
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, strip, 'use_annotations', __kwargtrans__ ({text: 'Annotations'}));
 			}) ();
-			if (scene) {
+			if (__call__ (_truth, null, scene)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.prop, __accu0__, scene.render, 'film_transparent');
@@ -1579,7 +1735,7 @@ export var STRIP_PT_scene_sound =  __class__ ('STRIP_PT_scene_sound', [StripButt
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __eq__ (strip.py_metatype, 'SCENE');
@@ -1603,7 +1759,7 @@ export var STRIP_PT_scene_sound =  __class__ ('STRIP_PT_scene_sound', [StripButt
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
@@ -1644,7 +1800,7 @@ export var STRIP_PT_mask =  __class__ ('STRIP_PT_mask', [StripButtonsPanel, Pane
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __eq__ (strip.py_metatype, 'MASK');
@@ -1667,13 +1823,13 @@ export var STRIP_PT_mask =  __class__ ('STRIP_PT_mask', [StripButtonsPanel, Pane
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var strip = context.active_strip;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.template_ID, __accu0__, strip, 'mask');
 		}) ();
 		var mask = strip.mask;
-		if (mask) {
+		if (__call__ (_truth, null, mask)) {
 			var sta = mask.frame_start;
 			var end = mask.frame_end;
 			(function () {
@@ -1705,7 +1861,7 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return strip.py_metatype;
@@ -1763,7 +1919,7 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 		var duration = strip.duration;
 		var right_handle = strip.right_handle;
 		var length_list = tuple ([__call__ (str, null, __call__ (round, null, content_start, 0)), __call__ (str, null, __call__ (round, null, content_duration, 0)), __call__ (str, null, __call__ (round, null, content_end, 0))]);
-		if (!(is_effect)) {
+		if (!(__call__ (_truth, null, is_effect))) {
 			var length_list = __add__ (length_list, tuple ([__call__ (str, null, __call__ (round, null, left_handle, 0)), __call__ (str, null, __call__ (round, null, duration, 0)), __call__ (str, null, __call__ (round, null, right_handle, 0)), __call__ (str, null, __call__ (round, null, strip.content_trim_start, 0)), __call__ (str, null, __call__ (round, null, strip.content_trim_end, 0))]));
 		}
 		var max_length = __call__ (max, null, (function () {
@@ -1781,8 +1937,8 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 		}) ());
 		var max_factor = __truediv__ (__sub__ (1.9, max_length), 30);
 		var factor = 0.45;
-		layout.enabled = !(strip.lock);
-		layout.active = !(strip.mute);
+		layout.enabled = !(__call__ (_truth, null, strip.lock));
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var sub = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -1800,7 +1956,7 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 			var __accu0__ = py_split;
 			return __call__ (__accu0__.prop, __accu0__, strip, 'channel', __kwargtrans__ ({text: ''}));
 		}) ();
-		if (!(is_effect) || __eq__ (strip.input_count, 0)) {
+		if (!(__call__ (_truth, null, is_effect)) || __eq__ (strip.input_count, 0)) {
 			layout.alignment = 'RIGHT';
 			var sub = (function () {
 				var __accu0__ = layout;
@@ -1889,7 +2045,7 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 			var __accu0__ = py_split;
 			return __call__ (__accu0__.prop, __accu0__, strip, 'content_end', __kwargtrans__ ({text: __call__ (smpte_from_frame, null, content_end)}));
 		}) ();
-		if (!(is_effect)) {
+		if (!(__call__ (_truth, null, is_effect))) {
 			layout.alignment = 'RIGHT';
 			var sub = (function () {
 				var __accu0__ = layout;
@@ -1978,7 +2134,7 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 		}) ();
 		if (__eq__ (strip.py_metatype, 'SCENE')) {
 			var scene = strip.scene;
-			if (scene) {
+			if (__call__ (_truth, null, scene)) {
 				var sta = scene.frame_start;
 				var end = scene.frame_end;
 				var py_split = (function () {
@@ -2038,7 +2194,7 @@ export var STRIP_PT_adjust_sound =  __class__ ('STRIP_PT_adjust_sound', [StripBu
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __in__ (strip.py_metatype, new set (['SOUND', 'META']));
@@ -2061,7 +2217,7 @@ export var STRIP_PT_adjust_sound =  __class__ ('STRIP_PT_adjust_sound', [StripBu
 		var layout = self.layout;
 		var strip = context.active_strip;
 		var sound = __call__ (getattr, null, strip, 'sound', null);
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		if (sound !== null || __eq__ (strip.py_metatype, 'META')) {
 			layout.use_property_split = true;
 			var col = (function () {
@@ -2202,7 +2358,7 @@ export var STRIP_PT_adjust_comp =  __class__ ('STRIP_PT_adjust_comp', [StripButt
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __ne__ (strip.py_metatype, 'SOUND');
@@ -2225,7 +2381,7 @@ export var STRIP_PT_adjust_comp =  __class__ ('STRIP_PT_adjust_comp', [StripButt
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var strip = context.active_strip;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
@@ -2259,7 +2415,7 @@ export var STRIP_PT_adjust_transform =  __class__ ('STRIP_PT_adjust_transform', 
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __ne__ (strip.py_metatype, 'SOUND');
@@ -2282,7 +2438,7 @@ export var STRIP_PT_adjust_transform =  __class__ ('STRIP_PT_adjust_transform', 
 		var strip = context.active_strip;
 		var layout = self.layout;
 		layout.use_property_split = true;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2379,7 +2535,7 @@ export var STRIP_PT_adjust_video =  __class__ ('STRIP_PT_adjust_video', [StripBu
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __in__ (strip.py_metatype, new set (['MOVIE', 'IMAGE', 'SCENE', 'MOVIECLIP', 'MASK', 'META', 'ADD', 'SUBTRACT', 'ALPHA_OVER', 'ALPHA_UNDER', 'CROSS', 'GAMMA_CROSS', 'MULTIPLY', 'COMPOSITOR', 'WIPE', 'GLOW', 'COLOR', 'MULTICAM', 'SPEED', 'ADJUSTMENT', 'COLORMIX']));
@@ -2406,7 +2562,7 @@ export var STRIP_PT_adjust_video =  __class__ ('STRIP_PT_adjust_video', [StripBu
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
 		var strip = context.active_strip;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, strip, 'strobe');
@@ -2437,7 +2593,7 @@ export var STRIP_PT_adjust_color =  __class__ ('STRIP_PT_adjust_color', [StripBu
 		else {
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __in__ (strip.py_metatype, new set (['MOVIE', 'IMAGE', 'SCENE', 'MOVIECLIP', 'MASK', 'META', 'ADD', 'SUBTRACT', 'ALPHA_OVER', 'ALPHA_UNDER', 'CROSS', 'GAMMA_CROSS', 'MULTIPLY', 'COMPOSITOR', 'WIPE', 'GLOW', 'COLOR', 'MULTICAM', 'SPEED', 'ADJUSTMENT', 'COLORMIX']));
@@ -2460,7 +2616,7 @@ export var STRIP_PT_adjust_color =  __class__ ('STRIP_PT_adjust_color', [StripBu
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var strip = context.active_strip;
-		layout.active = !(strip.mute);
+		layout.active = !(__call__ (_truth, null, strip.mute));
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
@@ -2504,6 +2660,14 @@ export {Panel, PresetPanel, PropertyPanel, _globals, _import, _lazy, _member, _m
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'StripButtonsPanel': StripButtonsPanel = value; break;
 		case 'StripColorTagPicker': StripColorTagPicker = value; break;
 		case 'STRIP_PT_effect_text_style_presets': STRIP_PT_effect_text_style_presets = value; break;

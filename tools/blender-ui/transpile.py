@@ -17,7 +17,7 @@ TAG = json.load(open(os.path.join(REPO, 'tools', 'blender-port', 'manifest.json'
 
 
 # Where Transcrypt's Python differs from what Blender's scripts use: (generated file, text, replacement, reason).
-FORMAT = "str.format with a format spec ('{:s}', '{:.2f}'), which Transcrypt leaves unformatted"
+FORMAT = "str.format with a format spec ('{:s}', '{:.2f}', '{:03d}'), which Transcrypt leaves unformatted"
 PATCHES = [
     ('org.transcrypt.__runtime__.js', "export function getattr (obj, name) {\n    return name in obj ? obj [name] : obj ['py_' + name];",
      "export function getattr (obj, name, py_default) {\n"
@@ -31,9 +31,23 @@ PATCHES = [
     ('org.transcrypt.__runtime__.js', "return args [key] === undefined ? match : str (args [key]);",
      "return args [key] === undefined ? match : __format_spec__ (args [key], spec);", FORMAT),
     ('org.transcrypt.__runtime__.js', "return str (args [index][key]);", "return __format_spec__ (args [index][key], spec);", FORMAT),
+    ('org.transcrypt.__runtime__.js', "Array.prototype.py_update = function () {\n"
+     "    let updated = [] .concat.apply (this.slice (), arguments) .sort ();\n"
+     "    this.py_clear ();\n"
+     "    for (let i = 0; i < updated.length; i++) {\n"
+     "        if (updated [i] != updated [i - 1]) {\n"
+     "            this.push (updated [i]);\n"
+     "        }\n"
+     "    }\n"
+     "};",
+     "Array.prototype.py_update = function () {\n"
+     "    for (const iterable of arguments) for (const item of Array.from (py_typeof (iterable) == dict ? iterable.py_keys () : iterable)) this.add (item);\n"
+     "};",
+     "set.update from any iterable (a bpy_prop_collection, a dict), which Transcrypt's spreads only from arrays"),
     ('org.transcrypt.__runtime__.js', "__setproperty__ (String.prototype, 'format', {",
      "var __format_spec__ = function (value, spec) {\n"
-     "    var fixed = spec && /^\\.(\\d+)f$/.exec (spec);\n"
+     "    var fixed = spec && /^\\.(\\d+)f$/.exec (spec), padded = spec && /^0(\\d+)d$/.exec (spec);\n"
+     "    if (padded) return (value < 0 ? '-' : '') + String (Math.abs (Math.trunc (value))).padStart (+padded [1] - (value < 0), '0');\n"
      "    return fixed ? Number (value).toFixed (+fixed [1]) : str (value);\n"
      "};\n"
      "__setproperty__ (String.prototype, 'format', {", FORMAT),
@@ -191,7 +205,7 @@ def class_scopes(module):
 
 
 def uses_helpers(source):
-    return re.search(r'\b_(merged|joined|formatted|ellipsis|property|new_object|super_classmethod)\b', source) is not None
+    return re.search(r'\b_(merged|joined|formatted|ellipsis|property|new_object|super_classmethod|truth)\b', source) is not None
 
 
 class Walrus:
@@ -303,10 +317,14 @@ class Walrus:
 
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
+    # The functions each module of the tree defines, by module name (set by tree.py).
+    module_functions = {}
+
     def visit_Module(self, node):
         # The module's functions and its property declarations by name (rna_path_prop = StringProperty(...)), which
         # class bodies use by name.
         self.functions = {n.name for n in node.body if isinstance(n, ast.FunctionDef)}
+        self.modules = {a.asname or a.name: a.name for n in node.body if isinstance(n, ast.Import) for a in n.names}
         self.properties = {t.id for n in node.body if isinstance(n, ast.Assign) and isinstance(n.value, ast.Call) for t in n.targets if isinstance(t, ast.Name)}
         node = Walrus().lower_module(class_scopes(node))
         self.generic_visit(node)
@@ -517,8 +535,13 @@ class TranscryptFixes(ast.NodeTransformer):
         def aliased(value):
             if isinstance(value, ast.Name):
                 return value.id in getattr(self, 'functions', ())
-            return (isinstance(value, ast.Attribute) and isinstance(value.value, ast.Name) and value.value.id[:1].isupper()
-                    and value.attr.islower() and not value.attr.startswith(('bl_', '_')))
+            if not (isinstance(value, ast.Attribute) and isinstance(value.value, ast.Name)) or value.attr.startswith(('bl_', '_')):
+                return False
+            # A module's function (poll = keyingsets_utils.RKS_POLL_selected_items).
+            module = getattr(self, 'modules', {}).get(value.value.id)
+            if module:
+                return value.attr in TranscryptFixes.module_functions.get(module, ())
+            return value.value.id[:1].isupper() and value.attr.islower()
         node.body = [ast.copy_location(ast.parse(f'def {s.targets[0].id}(self, *args, **kwargs):\n    return {ast.unparse(s.value)}(self, *args, **kwargs)').body[0], s)
                      if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name) and aliased(s.value) else s
                      for s in node.body]
@@ -621,11 +644,45 @@ class TranscryptFixes(ast.NodeTransformer):
             node.arg += '_'
         return node
 
+    # Tests whose value is already a bool, or a call that gives one.
+    BOOLEAN_CALLS = {'_truth', 'bool', 'isinstance', 'issubclass', 'hasattr', 'callable', 'any', 'all', 'len'}
+
+    @classmethod
+    def truth(cls, test):
+        """A test as Python takes its truth: JS takes an empty list, set, tuple, dict or bpy_prop_collection as true."""
+        if isinstance(test, ast.BoolOp):
+            test.values = [cls.truth(v) for v in test.values]
+            return test
+        if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+            test.operand = cls.truth(test.operand)
+            return test
+        if isinstance(test, (ast.Compare, ast.Constant)) or (isinstance(test, ast.Call) and getattr(test.func, 'id', None) in cls.BOOLEAN_CALLS):
+            return test
+        return ast.copy_location(ast.Call(ast.Name('_truth', ast.Load()), [test], []), test)
+
+    def visit_While(self, node):
+        self.generic_visit(node)
+        node.test = self.truth(node.test)
+        return node
+
+    def visit_IfExp(self, node):
+        self.generic_visit(node)
+        node.test = self.truth(node.test)
+        return node
+
+    def visit_UnaryOp(self, node):
+        self.generic_visit(node)
+        if isinstance(node.op, ast.Not):
+            node.operand = self.truth(node.operand)
+        return node
+
     def visit_If(self, node):
         """`if (x := value)`, which Transcrypt compiles wrong, as `x = value` before the if; in a chain of `and` (without
         an else), as nested ifs so the value is only taken when the operands before it hold."""
         if not any(isinstance(n, ast.NamedExpr) for n in ast.walk(node.test)):
-            return self.generic_visit(node)
+            self.generic_visit(node)
+            node.test = self.truth(node.test)
+            return node
         if isinstance(node.test, ast.BoolOp) and isinstance(node.test.op, ast.And) and not node.orelse:
             first, *rest = node.test.values
             inner = ast.If(test=rest[0] if len(rest) == 1 else ast.BoolOp(op=ast.And(), values=rest), body=node.body, orelse=[])
@@ -638,6 +695,7 @@ class TranscryptFixes(ast.NodeTransformer):
                 return ast.Name(named.target.id, ast.Load())
         node.test = Hoist().visit(node.test)
         self.generic_visit(node)
+        node.test = self.truth(node.test)
         return [self.visit(a) for a in assigns] + [node]
 
     def visit_Compare(self, node):
@@ -717,6 +775,7 @@ class TranscryptFixes(ast.NodeTransformer):
         """Comprehensions loop by index up to len(), which is 0 for iterators (enumerate, zip, generators): the
         iterable as a list."""
         self.generic_visit(node)
+        node.ifs = [self.truth(test) for test in node.ifs]
         if isinstance(node.iter, ast.Call):
             node.iter = ast.Call(func=ast.Name('list', ast.Load()), args=[node.iter], keywords=[])
         return node
@@ -747,6 +806,10 @@ def _formatted(value, conversion, spec):
     elif conversion == 's':
         value = str(value)
     return ('{:' + spec + '}').format(value) if spec else str(value)
+
+
+def _truth(value):
+    return __pragma__('js', '{}', 'value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value')
 
 
 def _joined(*lists):

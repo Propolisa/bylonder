@@ -100,6 +100,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -321,7 +337,7 @@ export var KeyMapItems =  __class__ ('KeyMapItems', [object], {
 		else {
 		}
 		item.id = __add__ (__call__ (len, null, self.py_items), 1);
-		if (head) {
+		if (__call__ (_truth, null, head)) {
 			(function () {
 				var __accu0__ = self.py_items;
 				return __call__ (__accu0__.insert, __accu0__, 0, item);
@@ -502,7 +518,7 @@ export var KeyMapItems =  __class__ ('KeyMapItems', [object], {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var item = __getitem__ (__iterable0__, __index0__);
-				if (__eq__ (item.idname, idname) && item.active) {
+				if (__eq__ (item.idname, idname) && __call__ (_truth, null, item.active)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, item);
@@ -780,7 +796,7 @@ export var KeyMaps =  __class__ ('KeyMaps', [object], {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var km = __getitem__ (__iterable0__, __index0__);
-				if (__eq__ (km.py_name, py_name) && km.is_modal) {
+				if (__eq__ (km.py_name, py_name) && __call__ (_truth, null, km.is_modal)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, km);
@@ -1144,6 +1160,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'OperatorProperties': OperatorProperties = value; break;

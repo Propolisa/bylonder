@@ -10,6 +10,162 @@ import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bl_console_utils.autocomplete.complete_import';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var TIMEOUT_STORAGE = 3;
 export var TIMEOUT_GIVEUP = 20;
 export var ROOT_MODULES = null;
@@ -36,7 +192,7 @@ export var get_root_modules = function () {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var path = __getitem__ (__iterable0__, __index0__);
 		var modules = __call__ (__iadd__, null, modules, __call__ (module_list, null, path));
-		if (__ge__ (__sub__ (__call__ (time, null), t), TIMEOUT_STORAGE) && !(store)) {
+		if (__ge__ (__sub__ (__call__ (time, null), t), TIMEOUT_STORAGE) && !(__call__ (_truth, null, store))) {
 			var store = true;
 		}
 		if (__gt__ (__sub__ (__call__ (time, null), t), TIMEOUT_GIVEUP)) {
@@ -55,7 +211,7 @@ export var get_root_modules = function () {
 		return __call__ (__accu0__.discard, __accu0__, '__init__');
 	}) ();
 	var modules = __call__ (sorted, null, __call__ (list, null, modules));
-	if (store) {
+	if (__call__ (_truth, null, store)) {
 		ROOT_MODULES = modules;
 	}
 	return modules;
@@ -74,19 +230,19 @@ export var module_list = function (path) {
 	}
 	else {
 	}
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = os.path;
 		return __call__ (__accu0__.isdir, __accu0__, path);
-	}) ()) {
+	}) ())) {
 		var folder_list = (function () {
 			var __accu0__ = os;
 			return __call__ (__accu0__.listdir, __accu0__, path);
 		}) ();
 	}
-	else if ((function () {
+	else if (__call__ (_truth, null, (function () {
 		var __accu0__ = path;
 		return __call__ (__accu0__.endswith, __accu0__, '.egg');
-	}) ()) {
+	}) ())) {
 		var zipimporter = __call__ (_member, null, 'zipimport', 'zipimporter');
 		try {
 			var folder_list = (function () {
@@ -116,13 +272,13 @@ export var module_list = function (path) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var p = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu1__ = os.path;
 				return __call__ (__accu1__.exists, __accu1__, (function () {
 					var __accu2__ = os.path;
 					return __call__ (__accu2__.join, __accu2__, path, p, '__init__.py');
 				}) ());
-			}) () || __in__ (__getslice__ (p, __neg__ (3), null, 1), new set (['.py', '.so'])) || __in__ (__getslice__ (p, __neg__ (4), null, 1), new set (['.pyc', '.pyo', '.pyd']))) {
+			}) ()) || __in__ (__getslice__ (p, __neg__ (3), null, 1), new set (['.py', '.so'])) || __in__ (__getslice__ (p, __neg__ (4), null, 1), new set (['.pyc', '.pyo', '.pyd']))) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, p);
@@ -198,7 +354,7 @@ export var complete = function (line) {
 			}
 			else {
 			}
-			if (only_modules) {
+			if (__call__ (_truth, null, only_modules)) {
 				return (function () {
 					var __accu0__ = inspect;
 					return __call__ (__accu0__.ismodule, __accu0__, __call__ (getattr, null, module, attr));
@@ -224,14 +380,14 @@ export var complete = function (line) {
 			var module = __getitem__ (__iterable0__, __index0__);
 			var m = __call__ (getattr, null, m, module);
 		}
-		if (!(__call__ (hasattr, null, m, '__file__')) || !(only_modules) || __call__ (hasattr, null, m, '__file__') && __in__ ('__init__', m.__file__)) {
+		if (!(__call__ (hasattr, null, m, '__file__')) || !(__call__ (_truth, null, only_modules)) || __call__ (hasattr, null, m, '__file__') && __in__ ('__init__', m.__file__)) {
 			var completion_list = (function () {
 				var __accu0__ = [];
 				var __iterable0__ = __call__ (list, null, __call__ (dir, null, m));
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var attr = __getitem__ (__iterable0__, __index0__);
-					if (__call__ (is_importable, null, m, attr)) {
+					if (__call__ (_truth, null, __call__ (is_importable, null, m, attr))) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, attr);
@@ -287,10 +443,10 @@ export var complete = function (line) {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var py_name = __getitem__ (__iterable0__, __index0__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu1__ = py_name;
 					return __call__ (__accu1__.startswith, __accu1__, prefix);
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, py_name);
@@ -352,6 +508,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'TIMEOUT_STORAGE': TIMEOUT_STORAGE = value; break;
 		case 'TIMEOUT_GIVEUP': TIMEOUT_GIVEUP = value; break;
 		case 'ROOT_MODULES': ROOT_MODULES = value; break;

@@ -10,6 +10,162 @@ import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bl_console_utils.autocomplete.intellisense';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var RE_MODULE = (function () {
 	var __accu0__ = re;
 	return __call__ (__accu0__.compile, __accu0__, '^import(\\s|$)|from.+');
@@ -39,21 +195,21 @@ export var complete = function (line, cursor, namespace, private_) {
 		var __accu0__ = RE_UNQUOTED_WORD;
 		return __call__ (__accu0__.search, __accu0__, __getslice__ (line, null, cursor, 1));
 	}) ();
-	if (re_unquoted_word) {
+	if (__call__ (_truth, null, re_unquoted_word)) {
 		var word = (function () {
 			var __accu0__ = re_unquoted_word;
 			return __call__ (__accu0__.group, __accu0__, 1);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = RE_MODULE;
 			return __call__ (__accu0__.match, __accu0__, line);
-		}) ()) {
+		}) ())) {
 			var complete_import = __call__ (_member, null, '_bl_console_utils.autocomplete', 'complete_import');
 			var matches = (function () {
 				var __accu0__ = complete_import;
 				return __call__ (__accu0__.complete, __accu0__, line);
 			}) ();
-			if (!(private_)) {
+			if (!(__call__ (_truth, null, private_))) {
 				__setslice__ (matches, 0, null, null, (function () {
 					var __accu0__ = [];
 					var __iterable0__ = matches;
@@ -107,13 +263,13 @@ export var expand = function (line, cursor, namespace) {
 	}
 	else {
 	}
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = (function () {
 			var __accu1__ = __getslice__ (line, null, cursor, 1);
 			return __call__ (__accu1__.strip, __accu1__);
 		}) ();
 		return __call__ (__accu0__.endswith, __accu0__, '(');
-	}) ()) {
+	}) ())) {
 		var complete_calltip = __call__ (_member, null, '_bl_console_utils.autocomplete', 'complete_calltip');
 		var __left0__ = (function () {
 			var __accu0__ = complete_calltip;
@@ -152,10 +308,10 @@ export var expand = function (line, cursor, namespace) {
 						var m = __getitem__ (__iterable0__, __index0__);
 						(function () {
 							var __accu2__ = __accu1__;
-							return __call__ (__accu2__.append, __accu2__, (word_prefix && (function () {
+							return __call__ (__accu2__.append, __accu2__, (__call__ (_truth, null, word_prefix) && __call__ (_truth, null, (function () {
 								var __accu3__ = m;
 								return __call__ (__accu3__.startswith, __accu3__, word_prefix);
-							}) () ? __add__ (white_space, __getslice__ (m, __call__ (len, null, word_prefix), null, 1)) : __add__ (white_space, __getitem__ ((function () {
+							}) ()) ? __add__ (white_space, __getslice__ (m, __call__ (len, null, word_prefix), null, 1)) : __add__ (white_space, __getitem__ ((function () {
 								var __accu3__ = m;
 								return __call__ (__accu3__.rsplit, __accu3__, '.', 1);
 							}) (), __neg__ (1)))));
@@ -167,16 +323,16 @@ export var expand = function (line, cursor, namespace) {
 		}
 		var no_calltip = true;
 	}
-	if (prefix) {
+	if (__call__ (_truth, null, prefix)) {
 		var line = __add__ (__add__ (__getslice__ (line, null, cursor, 1), prefix), __getslice__ (line, cursor, null, 1));
 		var cursor = __call__ (__iadd__, null, cursor, __call__ (len, null, (function () {
 			var __accu0__ = prefix;
 			return __call__ (__accu0__.encode, __accu0__, 'utf-8');
 		}) ()));
-		if (no_calltip && (function () {
+		if (__call__ (_truth, null, no_calltip) && __call__ (_truth, null, (function () {
 			var __accu0__ = prefix;
 			return __call__ (__accu0__.endswith, __accu0__, '(');
-		}) ()) {
+		}) ())) {
 			return __call__ (expand, null, line, cursor, namespace, __kwargtrans__ ({private_: private_}));
 		}
 	}
@@ -188,6 +344,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'RE_MODULE': RE_MODULE = value; break;
 		case 'RE_UNQUOTED_WORD': RE_UNQUOTED_WORD = value; break;
 		case 'complete': complete = value; break;

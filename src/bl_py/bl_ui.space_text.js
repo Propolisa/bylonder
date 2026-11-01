@@ -9,6 +9,162 @@ import {Header, Menu, Panel} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.space_text';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var TEXT_HT_header =  __class__ ('TEXT_HT_header', [Header], {
 	__module__: __name__,
 	bl_space_type: 'TEXT_EDITOR',
@@ -46,7 +202,7 @@ export var TEXT_HT_header =  __class__ ('TEXT_HT_header', [Header], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator_spacer, __accu0__);
 		}) ();
-		if (text && text.is_modified) {
+		if (__call__ (_truth, null, text) && __call__ (_truth, null, text.is_modified)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -65,12 +221,12 @@ export var TEXT_HT_header =  __class__ ('TEXT_HT_header', [Header], {
 			var __accu0__ = row;
 			return __call__ (__accu0__.template_ID, __accu0__, st, 'text', __kwargtrans__ ({py_new: 'text.new', unlink: 'text.unlink', open: 'text.open'}));
 		}) ();
-		if (text) {
+		if (__call__ (_truth, null, text)) {
 			var is_osl = (function () {
 				var __accu0__ = text.py_name;
 				return __call__ (__accu0__.endswith, __accu0__, tuple (['.osl', '.oso']));
 			}) ();
-			if (is_osl) {
+			if (__call__ (_truth, null, is_osl)) {
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.operator, __accu0__, 'text.update_shader', __kwargtrans__ ({text: '', icon: 'FILE_REFRESH'}));
@@ -137,13 +293,13 @@ export var TEXT_HT_footer =  __class__ ('TEXT_HT_footer', [Header], {
 		var layout = self.layout;
 		var st = context.space_data;
 		var text = st.text;
-		if (text) {
+		if (__call__ (_truth, null, text)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			if (text.filepath) {
-				if (text.is_dirty) {
+			if (__call__ (_truth, null, text.filepath)) {
+				if (__call__ (_truth, null, text.is_dirty)) {
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
@@ -165,7 +321,7 @@ export var TEXT_HT_footer =  __class__ ('TEXT_HT_footer', [Header], {
 			else {
 				(function () {
 					var __accu0__ = row;
-					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (text.library ? __call__ (iface_, null, 'Text: External') : __call__ (iface_, null, 'Text: Internal')), translate: false}));
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (__call__ (_truth, null, text.library) ? __call__ (iface_, null, 'Text: External') : __call__ (iface_, null, 'Text: Internal')), translate: false}));
 				}) ();
 			}
 		}
@@ -201,7 +357,7 @@ export var TEXT_MT_editor_menus =  __class__ ('TEXT_MT_editor_menus', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'TEXT_MT_text');
 		}) ();
-		if (text) {
+		if (__call__ (_truth, null, text)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'TEXT_MT_edit');
@@ -246,7 +402,7 @@ export var TEXT_PT_properties =  __class__ ('TEXT_PT_properties', [Panel], {
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var st = context.space_data;
-		if (!(st.text)) {
+		if (!(__call__ (_truth, null, st.text))) {
 			layout.active = false;
 		}
 		var st = context.space_data;
@@ -284,7 +440,7 @@ export var TEXT_PT_properties =  __class__ ('TEXT_PT_properties', [Panel], {
 			return __call__ (__accu0__.prop, __accu0__, st, 'tab_width');
 		}) ();
 		var text = st.text;
-		if (text) {
+		if (__call__ (_truth, null, text)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, text, 'indentation');
@@ -376,7 +532,7 @@ export var TEXT_PT_find =  __class__ ('TEXT_PT_find', [Panel], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Search'}));
 		}) ();
-		if (!(st.text)) {
+		if (!(__call__ (_truth, null, st.text))) {
 			col.active = false;
 		}
 		(function () {
@@ -573,7 +729,7 @@ export var TEXT_MT_text =  __class__ ('TEXT_MT_text', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'text.open', __kwargtrans__ ({text: 'Open...', icon: 'FILE_FOLDER'}));
 		}) ();
-		if (text) {
+		if (__call__ (_truth, null, text)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -586,7 +742,7 @@ export var TEXT_MT_text =  __class__ ('TEXT_MT_text', [Menu], {
 				var __accu0__ = row;
 				return __call__ (__accu0__.operator, __accu0__, 'text.reload');
 			}) ();
-			row.enabled = !(text.is_in_memory);
+			row.enabled = !(__call__ (_truth, null, text.is_in_memory));
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -595,7 +751,7 @@ export var TEXT_MT_text =  __class__ ('TEXT_MT_text', [Menu], {
 				var __accu0__ = row;
 				return __call__ (__accu0__.operator, __accu0__, 'text.jump_to_file_at_point', __kwargtrans__ ({text: 'Edit Externally'}));
 			}) ();
-			row.enabled = !(text.is_in_memory) && __ne__ (context.preferences.filepaths.text_editor, '');
+			row.enabled = !(__call__ (_truth, null, text.is_in_memory)) && __ne__ (context.preferences.filepaths.text_editor, '');
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -608,7 +764,7 @@ export var TEXT_MT_text =  __class__ ('TEXT_MT_text', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'text.save_as', __kwargtrans__ ({text: 'Save As...'}));
 			}) ();
-			if (text.filepath) {
+			if (__call__ (_truth, null, text.filepath)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -1147,6 +1303,14 @@ export {Header, Menu, Panel, i18n_contexts, iface_, register_class};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'TEXT_HT_header': TEXT_HT_header = value; break;
 		case 'TEXT_HT_footer': TEXT_HT_footer = value; break;
 		case 'TEXT_MT_editor_menus': TEXT_MT_editor_menus = value; break;

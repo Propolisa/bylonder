@@ -108,6 +108,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -174,7 +190,7 @@ export var object_ensure_material = function (obj, mat_name) {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var mat_slot = __getitem__ (__iterable0__, __index0__);
 		var mat = mat_slot.material;
-		if (mat) {
+		if (__call__ (_truth, null, mat)) {
 			break;
 		}
 	}
@@ -187,7 +203,7 @@ export var object_ensure_material = function (obj, mat_name) {
 			var __accu0__ = mat.node_tree.nodes;
 			return __call__ (__accu0__.py_clear, __accu0__);
 		}) ();
-		if (mat_slot) {
+		if (__call__ (_truth, null, mat_slot)) {
 			mat_slot.material = mat;
 		}
 		else {
@@ -239,7 +255,7 @@ export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, QuickFur, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, QuickFur, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		if (context.active_object === null || __ne__ (context.active_object.py_metatype, 'MESH')) {
@@ -283,7 +299,7 @@ export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 			}
 			return __accu0__;
 		}) ();
-		if (!(mesh_objects)) {
+		if (!(__call__ (_truth, null, mesh_objects))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Select at least one mesh object');
@@ -307,13 +323,13 @@ export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 			}) (), 'assets', 'nodes', 'procedural_hair_node_assets.blend');
 		}) ();
 		var attr_name_pairs = [tuple (['generate', 'Generate Hair Curves']), tuple (['interpolate', 'Interpolate Hair Curves']), tuple (['radius', 'Set Hair Curve Profile'])];
-		if (self.use_noise) {
+		if (__call__ (_truth, null, self.use_noise)) {
 			(function () {
 				var __accu0__ = attr_name_pairs;
 				return __call__ (__accu0__.append, __accu0__, tuple (['noise', 'Hair Curves Noise']));
 			}) ();
 		}
-		if (self.use_frizz) {
+		if (__call__ (_truth, null, self.use_frizz)) {
 			(function () {
 				var __accu0__ = attr_name_pairs;
 				return __call__ (__accu0__.append, __accu0__, tuple (['frizz', 'Frizz Hair Curves']));
@@ -475,21 +491,21 @@ export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 			interpolate_modifier.properties.inputs.Input_15.value = density;
 			interpolate_modifier.properties.inputs.Input_17.value = self.view_percentage;
 			interpolate_modifier.properties.inputs.Input_24.value = true;
-			if (self.use_noise) {
+			if (__call__ (_truth, null, self.use_noise)) {
 				var noise_modifier = (function () {
 					var __accu0__ = curves_object.modifiers;
 					return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: __call__ (data_, null, 'Hair Curves Noise'), py_metatype: 'NODES'}));
 				}) ();
 				noise_modifier.node_group = node_groups.noise;
 			}
-			if (self.use_frizz) {
+			if (__call__ (_truth, null, self.use_frizz)) {
 				var frizz_modifier = (function () {
 					var __accu0__ = curves_object.modifiers;
 					return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: __call__ (data_, null, 'Frizz Hair Curves'), py_metatype: 'NODES'}));
 				}) ();
 				frizz_modifier.node_group = node_groups.frizz;
 			}
-			if (self.apply_hair_guides) {
+			if (__call__ (_truth, null, self.apply_hair_guides)) {
 				var __withid0__ = (function () {
 					var __accu0__ = context;
 					return __call__ (__accu0__.temp_override, __accu0__, __kwargtrans__ ({object: curves_object}));
@@ -531,19 +547,19 @@ export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 				}
 			}
 		}
-		if (mesh_with_zero_area) {
+		if (__call__ (_truth, null, mesh_with_zero_area)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Mesh has no face area');
 			}) ();
 		}
-		if (mesh_missing_uv_map) {
+		if (__call__ (_truth, null, mesh_missing_uv_map)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Mesh UV map required');
 			}) ();
 		}
-		if (modifier_apply_error && !(mesh_with_zero_area)) {
+		if (__call__ (_truth, null, modifier_apply_error) && !(__call__ (_truth, null, mesh_with_zero_area))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Unable to apply "Generate" modifier');
@@ -612,7 +628,7 @@ export var QuickExplode =  __class__ ('QuickExplode', [ObjectModeOperator, Opera
 			self.style = 'EXPLODE';
 			return new set (['CANCELLED']);
 		}
-		else if (!(mesh_objects)) {
+		else if (!(__call__ (_truth, null, mesh_objects))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Select at least one mesh object');
@@ -623,7 +639,7 @@ export var QuickExplode =  __class__ ('QuickExplode', [ObjectModeOperator, Opera
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var obj = __getitem__ (__iterable0__, __index0__);
-			if (obj.particle_systems) {
+			if (__call__ (_truth, null, obj.particle_systems)) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -672,7 +688,7 @@ export var QuickExplode =  __class__ ('QuickExplode', [ObjectModeOperator, Opera
 				return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({py_name: __call__ (data_, null, 'Explode'), py_metatype: 'EXPLODE'}));
 			}) ();
 			explode.use_edge_cut = true;
-			if (self.fade) {
+			if (__call__ (_truth, null, self.fade)) {
 				explode.show_dead = false;
 				var uv = (function () {
 					var __accu0__ = obj.data.uv_layers;
@@ -893,7 +909,7 @@ export var QuickSmoke =  __class__ ('QuickSmoke', [ObjectModeOperator, Operator]
 		}
 		else {
 		}
-		if (!(bpy.app.build_options.fluid)) {
+		if (!(__call__ (_truth, null, bpy.app.build_options.fluid))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Built without Fluid modifier');
@@ -917,7 +933,7 @@ export var QuickSmoke =  __class__ ('QuickSmoke', [ObjectModeOperator, Operator]
 		}) ();
 		var min_co = __call__ (Vector, null, tuple ([100000.0, 100000.0, 100000.0]));
 		var max_co = __neg__ (min_co);
-		if (!(mesh_objects)) {
+		if (!(__call__ (_truth, null, mesh_objects))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Select at least one mesh object');
@@ -936,7 +952,7 @@ export var QuickSmoke =  __class__ ('QuickSmoke', [ObjectModeOperator, Operator]
 			fluid.flow_settings.flow_type = self.style;
 			fluid.flow_settings.flow_behavior = 'INFLOW';
 			fluid.flow_settings.surface_distance = 1.0;
-			if (!(self.show_flows)) {
+			if (!(__call__ (_truth, null, self.show_flows))) {
 				obj.display_type = 'WIRE';
 			}
 			__call__ (obj_bb_minmax, null, obj, min_co, max_co);
@@ -958,7 +974,7 @@ export var QuickSmoke =  __class__ ('QuickSmoke', [ObjectModeOperator, Operator]
 		if (__eq__ (self.style, new set (['FIRE', 'BOTH']))) {
 			fluid.domain_settings.use_noise = true;
 		}
-		if (bpy.app.build_options.openvdb) {
+		if (__call__ (_truth, null, bpy.app.build_options.openvdb)) {
 			fluid.domain_settings.cache_data_format = 'OPENVDB';
 		}
 		(function () {
@@ -1019,7 +1035,7 @@ export var QuickLiquid =  __class__ ('QuickLiquid', [Operator], {
 		}
 		else {
 		}
-		if (!(bpy.app.build_options.fluid)) {
+		if (!(__call__ (_truth, null, bpy.app.build_options.fluid))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Built without Fluid modifier');
@@ -1043,7 +1059,7 @@ export var QuickLiquid =  __class__ ('QuickLiquid', [Operator], {
 		}) ();
 		var min_co = __call__ (Vector, null, tuple ([100000.0, 100000.0, 100000.0]));
 		var max_co = __neg__ (min_co);
-		if (!(mesh_objects)) {
+		if (!(__call__ (_truth, null, mesh_objects))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Select at least one mesh object');
@@ -1077,7 +1093,7 @@ export var QuickLiquid =  __class__ ('QuickLiquid', [Operator], {
 			fluid.flow_settings.flow_type = 'LIQUID';
 			fluid.flow_settings.flow_behavior = 'GEOMETRY';
 			fluid.flow_settings.surface_distance = 0.0;
-			if (!(self.show_flows)) {
+			if (!(__call__ (_truth, null, self.show_flows))) {
 				obj.display_type = 'WIRE';
 			}
 			__call__ (obj_bb_minmax, null, obj, min_co, max_co);
@@ -1101,7 +1117,7 @@ export var QuickLiquid =  __class__ ('QuickLiquid', [Operator], {
 		fluid.domain_settings.use_collision_border_left = true;
 		fluid.domain_settings.use_collision_border_top = true;
 		fluid.domain_settings.use_collision_border_bottom = true;
-		if (bpy.app.build_options.openvdb) {
+		if (__call__ (_truth, null, bpy.app.build_options.openvdb)) {
 			fluid.domain_settings.cache_data_format = 'OPENVDB';
 		}
 		fluid.domain_settings.cache_mesh_format = 'BOBJECT';
@@ -1170,6 +1186,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'object_ensure_material': object_ensure_material = value; break;

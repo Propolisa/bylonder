@@ -997,13 +997,7 @@ Array.prototype.symmetric_difference = function (other) {
     return this.union (other) .difference (this.intersection (other));
 };
 Array.prototype.py_update = function () {
-    let updated = [] .concat.apply (this.slice (), arguments) .sort ();
-    this.py_clear ();
-    for (let i = 0; i < updated.length; i++) {
-        if (updated [i] != updated [i - 1]) {
-            this.push (updated [i]);
-        }
-    }
+    for (const iterable of arguments) for (const item of Array.from (py_typeof (iterable) == dict ? iterable.py_keys () : iterable)) this.add (item);
 };
 Array.prototype.__eq__ = function (other) {
     if (this.length != other.length) {
@@ -1191,7 +1185,8 @@ String.prototype.__getslice__ = function (start, stop, step) {
     return result;
 };
 var __format_spec__ = function (value, spec) {
-    var fixed = spec && /^\.(\d+)f$/.exec (spec);
+    var fixed = spec && /^\.(\d+)f$/.exec (spec), padded = spec && /^0(\d+)d$/.exec (spec);
+    if (padded) return (value < 0 ? '-' : '') + String (Math.abs (Math.trunc (value))).padStart (+padded [1] - (value < 0), '0');
     return fixed ? Number (value).toFixed (+fixed [1]) : str (value);
 };
 __setproperty__ (String.prototype, 'format', {

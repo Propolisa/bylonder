@@ -105,6 +105,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -201,20 +217,20 @@ export var draw_ui_list = function (layout, context, class_name) {
 	var list_to_draw = __call__ (_get_context_attr, null, context, list_path);
 	(function () {
 		var __accu0__ = row;
-		return __call__ (__accu0__.template_list, __accu0__, class_name, unique_id, list_owner, list_prop_name, index_owner, index_prop_name, __kwargtrans__ (__call__ (_merged, null, dict ({'rows': (list_to_draw ? 4 : 1)}), kwargs)));
+		return __call__ (__accu0__.template_list, __accu0__, class_name, unique_id, list_owner, list_prop_name, index_owner, index_prop_name, __kwargtrans__ (__call__ (_merged, null, dict ({'rows': (__call__ (_truth, null, list_to_draw) ? 4 : 1)}), kwargs)));
 	}) ();
 	var col = (function () {
 		var __accu0__ = row;
 		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 	}) ();
-	if (insertion_operators) {
+	if (__call__ (_truth, null, insertion_operators)) {
 		__call__ (_draw_add_remove_buttons, null, __kwargtrans__ ({layout: col, list_path: list_path, active_index_path: active_index_path, list_length: __call__ (len, null, list_to_draw)}));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
 	}
-	if (menu_class_name) {
+	if (__call__ (_truth, null, menu_class_name)) {
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.menu, __accu0__, menu_class_name, __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
@@ -224,7 +240,7 @@ export var draw_ui_list = function (layout, context, class_name) {
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
 	}
-	if (move_operators && list_to_draw) {
+	if (__call__ (_truth, null, move_operators) && __call__ (_truth, null, list_to_draw)) {
 		__call__ (_draw_move_buttons, null, __kwargtrans__ ({layout: col, list_path: list_path, active_index_path: active_index_path, list_length: __call__ (len, null, list_to_draw)}));
 	}
 	return col;
@@ -542,6 +558,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

@@ -46,8 +46,38 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
   runs the Armature or Pose keymap in place of Object Mode's.
 - A click selects with Blender's pick (`ED_armature_edit_select_pick_bone`, `ED_armature_pose_select_pick_bone`) on the
   bone Bylonder's picking finds under the pointer (port-override: the module has no GPU selection buffer).
+- Ctrl Tab is the Object Non-modal keymap's `view3d.object_mode_pie_or_toggle`, Blender's, which toggles an armature's
+  Pose Mode. A browser keeps Ctrl Tab for its own tab switching and never gives it to the page, so there the header's
+  Mode menu (`object.mode_set`, its items Blender's `object_mode_set_itemf` gives) enters Pose Mode.
+- The toolbar is Blender's in each mode (`VIEW3D_PT_tools_active`): Edit Mode's Roll, Bone Size, Envelope, Extrude and
+  Shear, Pose Mode's Breakdowner, Push and Relax, with their icons (`tools/blender-ui/tool_icons.py`).
+- The Properties editor is Blender's (`space_buttons`), so its Armature, Bone, Bone Constraints and Constraints tabs are
+  Blender's panels over Main (`properties_data_armature.py`, `properties_data_bone.py`, `properties_constraint.py`),
+  with `context.bone`, `edit_bone`, `pose_bone` and `active_pose_bone` from `buttons_context.cc`. Their operator
+  buttons run in the module: `pose.constraint_add`, `constraint.*`, `armature.collection_*` and Blender's Python
+  operators (`armature.collection_remove_unused`, `collection_show_all`, `collection_unsolo_all`,
+  `copy_bone_color_to_selected`, the `pose.selection_set_*` of `bone_selection_sets.py`), whose properties on RNA's own
+  types (`Object.selection_sets`) are defined as Blender defines a script's (`bpy_rna.js`).
+
+## Animation
+
+Pose bones are keyed as Blender keys them, in Main: I in Pose Mode is `anim.keyframe_insert` on the selected pose
+bones (`pose.bones["Bone"].location` and the rest, in a group named after the bone), and the Insert Keyframe menu's
+keying sets are Blender's (`keyingsets_builtins.py`, registered as Blender registers a `KeyingSetInfo`: Location,
+Rotation, Scaling, Whole Character, Available, ...). A frame change evaluates the action (`frameChanged`) and the view
+draws the evaluated pose. The Timeline, Dope Sheet and Graph Editor are Blender's, so they list the F-Curves under each
+bone's group and show keys of the selected bones. Alt G, R and S (`pose.loc_clear`, `rot_clear`, `scale_clear`), Copy
+and Paste Pose (Ctrl C, Ctrl V, Shift Ctrl V flipped: `pose.copy`, `pose.paste`) and Apply Pose as Rest Pose
+(`pose.armature_apply`) are Blender's.
 
 ## Tests
+
+`tools/blender-reference/rigging-fixtures.py` runs Blender 5.2.3 on 10 rigging cases in Pose Mode (the clears, copy and
+paste and paste flipped, Apply Pose as Rest Pose, bone collections with `collection_remove_unused`, solo and visibility,
+bone colors, selection sets, bone and object constraints, keying with I and with keying sets, and the pose a frame
+evaluates to). `tests/rigging-wasm.test.js` replays them through the module and compares, checks that the Armature,
+Bone and constraint tabs draw Blender's panels with their properties in Pose and Edit Mode, that the Graph Editor lists
+a pose bone's F-Curves under its group, and the armature tools and their icons.
 
 `tools/blender-reference/armature-fixtures.py` runs Blender 5.2.3 on 13 cases (Add with and without location and
 radius, entering Edit Mode, extrude once, twice and forked, moving all bones, Pose Mode, rotating and moving a pose bone
@@ -71,8 +101,19 @@ on a module without `armature-api.cc`.
 - A stack evaluated in Main applies every Blender modifier of the object there, so a Geometry Nodes Array after the
   Armature modifier that Main holds as Blender's Array applies twice.
 - Edit Mode's modifier preview (`editFinal`) evaluates in a worker without the armature.
-- Bone properties panels (`BONE_PT_*`), bone collections, constraints in the UI, the Armature tab's settings
-  (`pose_position`, display type), and keying pose bones (the animation channels are the object's).
+- A click on a bone collection in the Armature tab's tree view does not make it active, and a double click does not
+  rename it: Blender activates a view item through its keymap's `ui.view_item_select` at the pointer, which needs the
+  item's place in the region. Module change: `ui_button_press` (`ui-tree.cc`) activating a `ViewItem` button's item
+  (`view_item->activate(*C)`, as `force_activate_view_item_but` does). A new collection is the active one.
+- `armature.select_linked_pick`, `armature.shortest_path_pick` and `pose.select_linked_pick` (L, Ctrl click) pick by
+  the GPU selection buffer, which the module lacks. Module change: a seam for `ED_armature_pick_bone` and
+  `ed_armature_pick_ebone` (`armature_select.cc`) that asks Bylonder's picking for the bone under the pointer, as
+  `armature_select_pick` does for a click.
+- The pose library (`poselib.*`): its operators are the `pose_library` add-on's and the asset shelf's. It needs the
+  add-on in the Python tree (`tree.py`), Blender's default add-ons in the module's preferences
+  (`BKE_blendfile_userdef_from_defaults` lists them; the module's `U` has none, so `addon_utils.reset_all` enables
+  nothing) and the 3D View's asset shelf (`VIEW3D_AST_pose_library`).
+- A Dope Sheet made from another editor keeps the Timeline's hidden channel region (View > Channels shows it).
 - Export: `.blend` files carry the armature (Blender reads its bones and pose); the `.babylon` and JavaScript exports
   write the drawn bones as a mesh; a Babylon `Skeleton` from the pose and
   skinned meshes (glTF style) are not made yet.

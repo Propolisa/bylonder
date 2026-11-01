@@ -9,6 +9,162 @@ __nest__ (os, '', __module_os__);
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = '_graphviz_export';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var header = '\ndigraph ancestors           {\ngraph [fontsize=30 labelloc="t" label="" splines=false overlap=true, rankdir=BT];\nratio = "auto" ;\n';
 export var footer = '\n}\n';
 export var compat_str = function (text, line_length) {
@@ -29,7 +185,7 @@ export var compat_str = function (text, line_length) {
 	}
 	else {
 	}
-	if (line_length) {
+	if (__call__ (_truth, null, line_length)) {
 		var text_ls = [];
 		while (__gt__ (__call__ (len, null, text), line_length)) {
 			(function () {
@@ -38,7 +194,7 @@ export var compat_str = function (text, line_length) {
 			}) ();
 			var text = __getslice__ (text, line_length, null, 1);
 		}
-		if (text) {
+		if (__call__ (_truth, null, text)) {
 			(function () {
 				var __accu0__ = text_ls;
 				return __call__ (__accu0__.append, __accu0__, text);
@@ -142,10 +298,10 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			var __left0__ = __getitem__ (__iterable1__, __index1__);
 			var key = __left0__ [0];
 			var value = __left0__ [1];
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = key;
 				return __call__ (__accu0__.startswith, __accu0__, '_');
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			var value_type = py_typeof (value);
@@ -173,10 +329,10 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 				return __call__ (__accu1__.join, __accu1__, label);
 			}) ()));
 		}) ()];
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = bone.py_name;
 			return __call__ (__accu0__.startswith, __accu0__, 'ORG');
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = opts;
 				return __call__ (__accu0__.append, __accu0__, 'fillcolor=yellow');
@@ -197,7 +353,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 		}) ());
 	}
 	__call__ (fw, null, '\n\n# Hierarchy:\n');
-	if (FAKE_PARENT) {
+	if (__call__ (_truth, null, FAKE_PARENT)) {
 		__call__ (fw, null, (function () {
 			var __accu0__ = '"Object::{:s}" [];\n';
 			return __call__ (__accu0__.format, __accu0__, obj.py_name);
@@ -209,11 +365,11 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 		var bone = __getitem__ (__iterable0__, __index0__);
 		var bone = __getitem__ (arm.bones, bone);
 		var parent = bone.parent;
-		if (parent) {
+		if (__call__ (_truth, null, parent)) {
 			var parent_name = parent.py_name;
 			var connected = bone.use_connect;
 		}
-		else if (FAKE_PARENT) {
+		else if (__call__ (_truth, null, FAKE_PARENT)) {
 			var parent_name = (function () {
 				var __accu0__ = 'Object::{:s}';
 				return __call__ (__accu0__.format, __accu0__, obj.py_name);
@@ -224,7 +380,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			continue;
 		}
 		var opts = ['dir=forward', 'weight=2', 'arrowhead=normal'];
-		if (!(connected)) {
+		if (!(__call__ (_truth, null, connected))) {
 			(function () {
 				var __accu0__ = opts;
 				return __call__ (__accu0__.append, __accu0__, 'style=dotted');
@@ -239,7 +395,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 		}) ());
 	}
 	// pass;
-	if (CONSTRAINTS) {
+	if (__call__ (_truth, null, CONSTRAINTS)) {
 		__call__ (fw, null, '\n\n# Constraints:\n');
 		var __iterable0__ = bones;
 		__iterable0__ = __i__ (__iterable0__);
@@ -251,9 +407,9 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var constraint = __getitem__ (__iterable1__, __index1__);
 				var subtarget = __call__ (getattr, null, constraint, 'subtarget', '');
-				if (subtarget) {
+				if (__call__ (_truth, null, subtarget)) {
 					var opts = ['dir=forward', 'weight=1', 'arrowhead=normal', 'arrowtail=none', 'constraint=false', 'color="red"', 'labelfontsize=4'];
-					if (XTRA_INFO) {
+					if (__call__ (_truth, null, XTRA_INFO)) {
 						var label = (function () {
 							var __accu0__ = '{:s}\n{:s}';
 							return __call__ (__accu0__.format, __accu0__, constraint.py_metatype, constraint.py_name);
@@ -277,7 +433,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			}
 		}
 	}
-	if (DRIVERS) {
+	if (__call__ (_truth, null, DRIVERS)) {
 		__call__ (fw, null, '\n\n# Drivers:\n');
 		var rna_path_as_pbone = function (rna_path) {
 			if (arguments.length) {
@@ -293,10 +449,10 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			}
 			else {
 			}
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = rna_path;
 				return __call__ (__accu0__.startswith, __accu0__, 'pose.bones[');
-			}) ())) {
+			}) ()))) {
 				return null;
 			}
 			var bone_name = __getitem__ ((function () {
@@ -309,7 +465,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 			return __getitem__ (obj.pose.bones, __getslice__ (bone_name, 1, __neg__ (1), 1));
 		};
 		var animation_data = obj.animation_data;
-		if (animation_data) {
+		if (__call__ (_truth, null, animation_data)) {
 			var fcurve_drivers = (function () {
 				var __accu0__ = [];
 				var __iterable0__ = animation_data.drivers;
@@ -348,7 +504,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 				var fcurve_driver = __getitem__ (__iterable0__, __index0__);
 				var rna_path = fcurve_driver.data_path;
 				var pbone = __call__ (rna_path_as_pbone, null, rna_path);
-				if (pbone) {
+				if (__call__ (_truth, null, pbone)) {
 					var __iterable1__ = fcurve_driver.driver.variables;
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
@@ -359,7 +515,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 							var target = __getitem__ (__iterable2__, __index2__);
 							var pbone_target = __call__ (rna_path_as_pbone, null, target.data_path);
 							var rna_path_target = target.data_path;
-							if (pbone_target) {
+							if (__call__ (_truth, null, pbone_target)) {
 								var opts = ['dir=forward', 'weight=1', 'arrowhead=normal', 'arrowtail=none', 'constraint=false', 'color="blue"', 'labelfontsize=4'];
 								var display_source = (function () {
 									var __accu0__ = rna_path;
@@ -369,7 +525,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 									var __accu0__ = rna_path_target;
 									return __call__ (__accu0__.py_replace, __accu0__, 'pose.bones', '');
 								}) ();
-								if (XTRA_INFO) {
+								if (__call__ (_truth, null, XTRA_INFO)) {
 									var label = (function () {
 										var __accu0__ = '{:s}\\n{:s}';
 										return __call__ (__accu0__.format, __accu0__, display_source, display_target);
@@ -419,6 +575,14 @@ if (__eq__ (__name__, '__main__')) {
 //# sourceMappingURL=_graphviz_export.map
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'header': header = value; break;
 		case 'footer': footer = value; break;
 		case 'compat_str': compat_str = value; break;

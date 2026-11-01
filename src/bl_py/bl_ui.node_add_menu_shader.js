@@ -103,6 +103,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -277,7 +293,7 @@ export var object_not_eevee_shader_nodes_poll = function (context) {
 	}
 	else {
 	}
-	return __call__ (object_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context));
+	return __call__ (object_shader_nodes_poll, null, context) && !(__call__ (_truth, null, __call__ (eevee_shader_nodes_poll, null, context)));
 };
 export var object_eevee_shader_nodes_poll = function (context) {
 	if (arguments.length) {
@@ -527,7 +543,7 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}
 		else {
 		}
-		return __call__ (__call__ (_super_classmethod, null, NODE_MT_shader_node_shader_base, cls, 'poll'), null, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
+		return __call__ (__call__ (_super_classmethod, null, NODE_MT_shader_node_shader_base, cls, 'poll'), null, context) && !(__call__ (_truth, null, __call__ (line_style_shader_nodes_poll, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -579,7 +595,7 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfHair', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfHair', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (_truth, null, __call__ (eevee_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
@@ -595,11 +611,11 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfHairPrincipled', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfHairPrincipled', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (_truth, null, __call__ (eevee_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfRayPortal', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfRayPortal', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (_truth, null, __call__ (eevee_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
@@ -607,7 +623,7 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfSheen', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfSheen', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (_truth, null, __call__ (eevee_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
@@ -619,7 +635,7 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfToon', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (eevee_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeBsdfToon', __kwargtrans__ ({poll: __call__ (object_material_shader_nodes_poll, null, context) && !(__call__ (_truth, null, __call__ (eevee_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
@@ -635,19 +651,19 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumePrincipled', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumePrincipled', __kwargtrans__ ({poll: !(__call__ (_truth, null, __call__ (object_light_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeAbsorption', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeAbsorption', __kwargtrans__ ({poll: !(__call__ (_truth, null, __call__ (object_light_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeScatter', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeScatter', __kwargtrans__ ({poll: !(__call__ (_truth, null, __call__ (object_light_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
-			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeCoefficients', __kwargtrans__ ({poll: !(__call__ (object_light_shader_nodes_poll, null, context))}));
+			return __call__ (__accu0__.node_operator, __accu0__, layout, 'ShaderNodeVolumeCoefficients', __kwargtrans__ ({poll: !(__call__ (_truth, null, __call__ (object_light_shader_nodes_poll, null, context)))}));
 		}) ();
 		(function () {
 			var __accu0__ = self;
@@ -975,7 +991,7 @@ export var NODE_MT_shader_node_displacement_base =  __class__ ('NODE_MT_shader_n
 		}
 		else {
 		}
-		return __call__ (__call__ (_super_classmethod, null, NODE_MT_shader_node_displacement_base, cls, 'poll'), null, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
+		return __call__ (__call__ (_super_classmethod, null, NODE_MT_shader_node_displacement_base, cls, 'poll'), null, context) && !(__call__ (_truth, null, __call__ (line_style_shader_nodes_poll, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
@@ -1086,7 +1102,7 @@ export var NODE_MT_shader_node_utilities_base =  __class__ ('NODE_MT_shader_node
 			var __accu0__ = self;
 			return __call__ (__accu0__.node_operator, __accu0__, layout, 'GeometryNodeMenuSwitch');
 		}) ();
-		if (__call__ (cycles_shader_nodes_poll, null, context)) {
+		if (__call__ (_truth, null, __call__ (cycles_shader_nodes_poll, null, context))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1212,6 +1228,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'line_style_shader_nodes_poll': line_style_shader_nodes_poll = value; break;

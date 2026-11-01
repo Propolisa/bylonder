@@ -12,6 +12,162 @@ import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'keyconfig.Blender';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 var __left0__ = (function () {
 	var __accu0__ = os.path;
 	return __call__ (__accu0__.py_split, __accu0__, '/blender/scripts/presets/keyconfig/Blender.py');
@@ -82,7 +238,7 @@ export var Prefs =  __class__ ('Prefs', [bpy.types.KeyConfigPreferences], {
 			}) ();
 			return __call__ (__accu0__.prop, __accu0__, self, 'spacebar_action', __kwargtrans__ ({text: 'Spacebar Action', expand: true}));
 		}) ();
-		if (is_select_left) {
+		if (__call__ (_truth, null, is_select_left)) {
 			(function () {
 				var __accu0__ = (function () {
 					var __accu1__ = col;
@@ -127,7 +283,7 @@ export var Prefs =  __class__ ('Prefs', [bpy.types.KeyConfigPreferences], {
 			var __accu0__ = row;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (is_select_left) {
+		if (__call__ (_truth, null, is_select_left)) {
 			(function () {
 				var __accu0__ = rowsub;
 				return __call__ (__accu0__.prop, __accu0__, self, 'use_alt_tool');
@@ -139,7 +295,7 @@ export var Prefs =  __class__ ('Prefs', [bpy.types.KeyConfigPreferences], {
 				return __call__ (__accu0__.prop, __accu0__, self, 'use_alt_cursor');
 			}) ();
 		}
-		rowsub.active = !(use_mouse_emulate_3_button);
+		rowsub.active = !(__call__ (_truth, null, use_mouse_emulate_3_button));
 		var row = (function () {
 			var __accu0__ = sub;
 			return __call__ (__accu0__.row, __accu0__);
@@ -261,7 +417,7 @@ export var load = function () {
 		var __accu0__ = blender_default;
 		return __call__ (__accu0__.generate_keymaps, __accu0__, (function () {
 			var __accu1__ = blender_default;
-			return __call__ (__accu1__.Params, __accu1__, __kwargtrans__ ({select_mouse: kc_prefs.select_mouse, use_mouse_emulate_3_button: use_mouse_emulate_3_button, spacebar_action: kc_prefs.spacebar_action, use_key_activate_tools: __eq__ (kc_prefs.tool_key_mode, 'TOOL'), use_region_toggle_pie: kc_prefs.use_region_toggle_pie, v3d_tilde_action: kc_prefs.v3d_tilde_action, use_v3d_mmb_pan: __eq__ (kc_prefs.v3d_mmb_action, 'PAN'), v3d_alt_mmb_drag_action: kc_prefs.v3d_alt_mmb_drag_action, use_select_all_toggle: kc_prefs.use_select_all_toggle, use_v3d_tab_menu: kc_prefs.use_v3d_tab_menu, use_v3d_shade_ex_pie: kc_prefs.use_v3d_shade_ex_pie, use_gizmo_drag: is_select_left && __eq__ (kc_prefs.gizmo_action, 'DRAG'), use_fallback_tool: true, use_fallback_tool_select_handled: (is_select_left ? false : __ne__ (kc_prefs.rmb_action, 'FALLBACK_TOOL')), use_alt_tool_or_cursor: !(use_mouse_emulate_3_button) && (is_select_left ? kc_prefs.use_alt_tool : kc_prefs.use_alt_cursor), use_alt_click_leader: kc_prefs.use_alt_click_leader, use_pie_click_drag: kc_prefs.use_pie_click_drag, use_file_single_click: kc_prefs.use_file_single_click, use_alt_navigation: kc_prefs.use_alt_navigation}));
+			return __call__ (__accu1__.Params, __accu1__, __kwargtrans__ ({select_mouse: kc_prefs.select_mouse, use_mouse_emulate_3_button: use_mouse_emulate_3_button, spacebar_action: kc_prefs.spacebar_action, use_key_activate_tools: __eq__ (kc_prefs.tool_key_mode, 'TOOL'), use_region_toggle_pie: kc_prefs.use_region_toggle_pie, v3d_tilde_action: kc_prefs.v3d_tilde_action, use_v3d_mmb_pan: __eq__ (kc_prefs.v3d_mmb_action, 'PAN'), v3d_alt_mmb_drag_action: kc_prefs.v3d_alt_mmb_drag_action, use_select_all_toggle: kc_prefs.use_select_all_toggle, use_v3d_tab_menu: kc_prefs.use_v3d_tab_menu, use_v3d_shade_ex_pie: kc_prefs.use_v3d_shade_ex_pie, use_gizmo_drag: is_select_left && __eq__ (kc_prefs.gizmo_action, 'DRAG'), use_fallback_tool: true, use_fallback_tool_select_handled: (__call__ (_truth, null, is_select_left) ? false : __ne__ (kc_prefs.rmb_action, 'FALLBACK_TOOL')), use_alt_tool_or_cursor: !(__call__ (_truth, null, use_mouse_emulate_3_button)) && (__call__ (_truth, null, is_select_left) ? kc_prefs.use_alt_tool : kc_prefs.use_alt_cursor), use_alt_click_leader: kc_prefs.use_alt_click_leader, use_pie_click_drag: kc_prefs.use_pie_click_drag, use_file_single_click: kc_prefs.use_file_single_click, use_alt_navigation: kc_prefs.use_alt_navigation}));
 		}) ());
 	}) ();
 	if (__eq__ (platform, 'darwin')) {
@@ -283,6 +439,14 @@ export {BoolProperty, EnumProperty, _globals, _import, _lazy, _member, _module, 
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'DIRNAME': DIRNAME = value; break;
 		case 'FILENAME': FILENAME = value; break;
 		case 'IDNAME': IDNAME = value; break;

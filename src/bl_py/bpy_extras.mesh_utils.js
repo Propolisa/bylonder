@@ -4,6 +4,162 @@ import * as __self__ from './bpy_extras.mesh_utils.js';
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.mesh_utils';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['mesh_linked_uv_islands', 'mesh_linked_triangles', 'edge_face_count_dict', 'edge_face_count', 'edge_loops_from_edges', 'ngon_tessellate', 'triangle_random_points']);
 export var mesh_linked_uv_islands = function (mesh) {
 	if (arguments.length) {
@@ -19,7 +175,7 @@ export var mesh_linked_uv_islands = function (mesh) {
 	}
 	else {
 	}
-	if (mesh.polygons && !(mesh.uv_layers.active.data)) {
+	if (__call__ (_truth, null, mesh.polygons) && !(__call__ (_truth, null, mesh.uv_layers.active.data))) {
 		var __except0__ = __call__ (ValueError, null, 'UV Layers are not currently available from python in Edit Mode. Use bmesh and bpy_extras.bmesh_utils.bmesh_linked_uv_islands instead.');
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -101,7 +257,7 @@ export var mesh_linked_uv_islands = function (mesh) {
 			break;
 		}
 		var added = true;
-		while (added) {
+		while (__call__ (_truth, null, added)) {
 			var added = false;
 			var __iterable0__ = __getslice__ (island, null, null, 1);
 			__iterable0__ = __i__ (__iterable0__);
@@ -189,7 +345,7 @@ export var mesh_linked_triangles = function (mesh) {
 	}) ();
 	var tri_mapping = __call__ (list, null, __call__ (range, null, __call__ (len, null, mesh.loop_triangles)));
 	var ok = true;
-	while (ok) {
+	while (__call__ (_truth, null, ok)) {
 		var ok = false;
 		var __iterable0__ = mesh.loop_triangles;
 		__iterable0__ = __i__ (__iterable0__);
@@ -232,7 +388,7 @@ export var mesh_linked_triangles = function (mesh) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var tg = __getitem__ (__iterable0__, __index0__);
-			if (tg) {
+			if (__call__ (_truth, null, tg)) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, tg);
@@ -338,7 +494,7 @@ export var edge_loops_from_edges = function (mesh, edges) {
 	if (!(__call__ (hasattr, null, edges, 'pop'))) {
 		var edges = __getslice__ (edges, null, null, 1);
 	}
-	while (edges) {
+	while (__call__ (_truth, null, edges)) {
 		var current_edge = (function () {
 			var __accu0__ = edges;
 			return __call__ (__accu0__.py_pop, __accu0__);
@@ -348,10 +504,10 @@ export var edge_loops_from_edges = function (mesh, edges) {
 		var vert_start = __left0__ [1];
 		var line_poly = [vert_start, vert_end];
 		var ok = true;
-		while (ok) {
+		while (__call__ (_truth, null, ok)) {
 			var ok = false;
 			var i = __call__ (len, null, edges);
-			while (i) {
+			while (__call__ (_truth, null, i)) {
 				var i = __call__ (__isub__, null, i, 1);
 				var ed = __getitem__ (edges, i);
 				var __left0__ = ed.vertices;
@@ -440,7 +596,7 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 	var tessellate_polygon = __call__ (_member, null, 'mathutils.geometry', 'tessellate_polygon');
 	var Vector = __call__ (_member, null, 'mathutils', 'Vector');
 	var vector_to_tuple = Vector.to_tuple;
-	if (!(indices)) {
+	if (!(__call__ (_truth, null, indices))) {
 		return [];
 	}
 	var mlen = function (co) {
@@ -498,7 +654,7 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 			return tuple ([__getitem__ (v1, 1), __getitem__ (v2, 1)]);
 		}
 	};
-	if (!(fix_loops)) {
+	if (!(__call__ (_truth, null, fix_loops))) {
 		if (__in__ (py_typeof (from_data), new set ([tuple, list]))) {
 			var verts = (function () {
 				var __accu0__ = [];
@@ -591,10 +747,10 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 			}
 			return __accu0__;
 		}) ();
-		if (edges) {
+		if (__call__ (_truth, null, edges)) {
 			__setitem__ (edges, 0, tuple ([0, __sub__ (__call__ (len, null, verts), 1)]));
 		}
-		if (!(verts)) {
+		if (!(__call__ (_truth, null, verts))) {
 			return [];
 		}
 		var edges_used = __call__ (set, null);
@@ -633,7 +789,7 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 						return __call__ (__accu0__.append, __accu0__, context_loop);
 					}) ();
 				}
-				else if (context_loop && __eq__ (__getitem__ (__getitem__ (context_loop, __neg__ (1)), 1), __getitem__ (v, 1))) {
+				else if (__call__ (_truth, null, context_loop) && __eq__ (__getitem__ (__getitem__ (context_loop, __neg__ (1)), 1), __getitem__ (v, 1))) {
 					// pass;
 				}
 				else {
@@ -689,18 +845,18 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 			return true;
 		};
 		var joining_segments = true;
-		while (joining_segments) {
+		while (__call__ (_truth, null, joining_segments)) {
 			var joining_segments = false;
 			var segcount = __call__ (len, null, loop_segments);
 			for (var j = __sub__ (segcount, 1); j > __neg__ (1); j--) {
 				var seg_j = __getitem__ (loop_segments, j);
-				if (seg_j) {
+				if (__call__ (_truth, null, seg_j)) {
 					for (var k = __sub__ (j, 1); k > __neg__ (1); k--) {
-						if (!(seg_j)) {
+						if (!(__call__ (_truth, null, seg_j))) {
 							break;
 						}
 						var seg_k = __getitem__ (loop_segments, k);
-						if (seg_k && __call__ (join_seg, null, seg_j, seg_k)) {
+						if (__call__ (_truth, null, seg_k) && __call__ (_truth, null, __call__ (join_seg, null, seg_j, seg_k))) {
 							var joining_segments = true;
 						}
 					}
@@ -712,7 +868,7 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var verts = __getitem__ (__iterable0__, __index0__);
-			while (verts && __eq__ (__getitem__ (__getitem__ (verts, 0), 1), __getitem__ (__getitem__ (verts, __neg__ (1)), 1))) {
+			while (__call__ (_truth, null, verts) && __eq__ (__getitem__ (__getitem__ (verts, 0), 1), __getitem__ (__getitem__ (verts, __neg__ (1)), 1))) {
 				(function () {
 					var __accu0__ = verts;
 					return __call__ (__accu0__.py_pop, __accu0__);
@@ -803,8 +959,8 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 			return __accu0__;
 		}) ();
 	}
-	if (!(fill)) {
-		if (debug_print) {
+	if (!(__call__ (_truth, null, fill))) {
+		if (__call__ (_truth, null, debug_print)) {
 			__call__ (print, null, 'Warning Cannot scan-fill, fallback on a triangle fan.');
 		}
 		var fill = (function () {
@@ -846,7 +1002,7 @@ export var ngon_tessellate = function (from_data, indices, fix_loops, debug_prin
 				}
 			}
 		}
-		if (!(flip)) {
+		if (!(__call__ (_truth, null, flip))) {
 			var __iterable0__ = __call__ (py_enumerate, null, fill);
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -907,6 +1063,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'mesh_linked_uv_islands': mesh_linked_uv_islands = value; break;
 		case 'mesh_linked_triangles': mesh_linked_triangles = value; break;

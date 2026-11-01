@@ -13,6 +13,162 @@ import {Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_texture';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var TEXTURE_MT_context_menu =  __class__ ('TEXTURE_MT_context_menu', [Menu], {
 	__module__: __name__,
 	bl_label: 'Texture Specials',
@@ -68,8 +224,8 @@ export var TEXTURE_UL_texslots =  __class__ ('TEXTURE_UL_texslots', [UIList], {
 		else {
 		}
 		var slot = item;
-		var tex = (slot ? slot.texture : null);
-		if (tex) {
+		var tex = (__call__ (_truth, null, slot) ? slot.texture : null);
+		if (__call__ (_truth, null, tex)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, tex, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
@@ -98,14 +254,14 @@ export var context_tex_datablock = function (context) {
 	else {
 	}
 	var idblock = context.brush;
-	if (idblock) {
+	if (__call__ (_truth, null, idblock)) {
 		return idblock;
 	}
 	var idblock = context.line_style;
-	if (idblock) {
+	if (__call__ (_truth, null, idblock)) {
 		return idblock;
 	}
-	if (context.particle_system) {
+	if (__call__ (_truth, null, context.particle_system)) {
 		var idblock = context.particle_system.settings;
 	}
 	return idblock;
@@ -157,7 +313,7 @@ export var TEXTURE_PT_preview =  __class__ ('TEXTURE_PT_preview', [TextureButton
 		var tex = context.texture;
 		var slot = __call__ (getattr, null, context, 'texture_slot', null);
 		var idblock = __call__ (context_tex_datablock, null, context);
-		if (idblock) {
+		if (__call__ (_truth, null, idblock)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_preview, __accu0__, tex, __kwargtrans__ ({parent: idblock, slot: slot}));
@@ -209,21 +365,21 @@ export var TEXTURE_PT_context =  __class__ ('TEXTURE_PT_context', [TextureButton
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (!(use_pin_id && __call__ (isinstance, null, pin_id, bpy.types.Texture))) {
+		if (!(__call__ (_truth, null, use_pin_id) && __call__ (isinstance, null, pin_id, bpy.types.Texture))) {
 			var pin_id = null;
 		}
-		if (!(pin_id)) {
+		if (!(__call__ (_truth, null, pin_id))) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_texture_user, __accu0__);
 			}) ();
 		}
-		if (user || pin_id) {
+		if (__call__ (_truth, null, user) || __call__ (_truth, null, pin_id)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
-			if (pin_id) {
+			if (__call__ (_truth, null, pin_id)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
@@ -236,7 +392,7 @@ export var TEXTURE_PT_context =  __class__ ('TEXTURE_PT_context', [TextureButton
 					return __call__ (__accu0__.template_ID, __accu0__, user, propname, __kwargtrans__ ({py_new: 'texture.new'}));
 				}) ();
 			}
-			if (tex) {
+			if (__call__ (_truth, null, tex)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -324,7 +480,7 @@ export var TextureTypePanel =  __class__ ('TextureTypePanel', [TextureButtonsPan
 		}
 		var tex = context.texture;
 		var engine = context.engine;
-		return tex && ((__eq__ (tex.py_metatype, cls.tex_type) && !(tex.use_nodes)) && __in__ (engine, cls.COMPAT_ENGINES));
+		return tex && ((__eq__ (tex.py_metatype, cls.tex_type) && !(__call__ (_truth, null, tex.use_nodes))) && __in__ (engine, cls.COMPAT_ENGINES));
 	});}
 });
 export var TEXTURE_PT_clouds =  __class__ ('TEXTURE_PT_clouds', [TextureTypePanel, Panel], {
@@ -1422,10 +1578,10 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 		else {
 		}
 		var idblock = __call__ (context_tex_datablock, null, context);
-		if (__call__ (isinstance, null, idblock, Brush) && !(context.sculpt_object)) {
+		if (__call__ (isinstance, null, idblock, Brush) && !(__call__ (_truth, null, context.sculpt_object))) {
 			return false;
 		}
-		if (!(__call__ (getattr, null, context, 'texture_slot', null))) {
+		if (!(__call__ (_truth, null, __call__ (getattr, null, context, 'texture_slot', null)))) {
 			return false;
 		}
 		var engine = context.engine;
@@ -1455,7 +1611,7 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 		var idblock = __call__ (context_tex_datablock, null, context);
 		var tex = context.texture_slot;
 		if (__call__ (isinstance, null, idblock, Brush)) {
-			if (context.sculpt_object || context.image_paint_object) {
+			if (__call__ (_truth, null, context.sculpt_object) || __call__ (_truth, null, context.image_paint_object)) {
 				__call__ (brush_texture_settings, null, layout, idblock, context.sculpt_object);
 			}
 		}
@@ -1470,7 +1626,7 @@ export var TEXTURE_PT_mapping =  __class__ ('TEXTURE_PT_mapping', [TextureSlotPa
 			}) ();
 			if (__eq__ (tex.texture_coords, 'UV')) {
 				var ob = context.object;
-				if (ob && __eq__ (ob.py_metatype, 'MESH')) {
+				if (__call__ (_truth, null, ob) && __eq__ (ob.py_metatype, 'MESH')) {
 					(function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.prop_search, __accu0__, tex, 'uv_layer', ob.data, 'uv_layers', __kwargtrans__ ({text: 'Map'}));
@@ -1576,7 +1732,7 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 		if (__call__ (isinstance, null, idblock, Brush)) {
 			return false;
 		}
-		if (!(__call__ (getattr, null, context, 'texture_slot', null))) {
+		if (!(__call__ (_truth, null, __call__ (getattr, null, context, 'texture_slot', null)))) {
 			return false;
 		}
 		var engine = context.engine;
@@ -1844,7 +2000,7 @@ export var TEXTURE_PT_colors_ramp =  __class__ ('TEXTURE_PT_colors_ramp', [Textu
 		var layout = self.layout;
 		var tex = context.texture;
 		var is_active = __call__ (bool, null, tex && tex.use_color_ramp);
-		if (is_active) {
+		if (__call__ (_truth, null, is_active)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_color_ramp, __accu0__, tex, 'color_ramp', __kwargtrans__ ({expand: true}));
@@ -1897,7 +2053,7 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 		layout.use_property_decorate = false;
 		var texture = context.texture;
 		var texture_user = context.texture_user;
-		if (texture_user) {
+		if (__call__ (_truth, null, texture_user)) {
 			var texture_user_id = texture_user.id_data;
 			if (__call__ (hasattr, null, texture_user_id, 'animation_data')) {
 				var col = (function () {
@@ -1927,7 +2083,7 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, texture);
 		}) ();
 		var node_tree = texture.node_tree;
-		if (node_tree) {
+		if (__call__ (_truth, null, node_tree)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1981,6 +2137,14 @@ export {Brush, FreestyleLineStyle, Menu, Panel, ParticleSettings, PropertiesAnim
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'TEXTURE_MT_context_menu': TEXTURE_MT_context_menu = value; break;
 		case 'TEXTURE_UL_texslots': TEXTURE_UL_texslots = value; break;
 		case 'context_tex_datablock': context_tex_datablock = value; break;

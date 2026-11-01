@@ -9,6 +9,162 @@ import {GreasePencil, GreasePencilLayer, GreasePencilLayerGroup, GreasePencilTre
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_grease_pencil_common';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var AnnotationDrawingToolsPanel =  __class__ ('AnnotationDrawingToolsPanel', [object], {
 	__module__: __name__,
 	bl_label: 'Annotation',
@@ -162,7 +318,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 		else {
 			var brush = context.tool_settings.gpencil_paint.brush;
 		}
-		if (ob && __eq__ (ob.py_metatype, 'GREASEPENCIL') && brush) {
+		if (__call__ (_truth, null, ob) && __eq__ (ob.py_metatype, 'GREASEPENCIL') && __call__ (_truth, null, brush)) {
 			return true;
 		}
 		return false;
@@ -182,7 +338,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 		}
 		else {
 		}
-		if (self.is_popover) {
+		if (__call__ (_truth, null, self.is_popover)) {
 			return ;
 		}
 		var tool_settings = context.tool_settings;
@@ -199,7 +355,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 			var settings = tool_settings.gpencil_vertex_paint;
 		}
 		var brush = settings.brush;
-		if (brush) {
+		if (__call__ (_truth, null, brush)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: ''}));
@@ -240,7 +396,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 		var brush = settings.brush;
 		var gp_settings = brush.gpencil_settings;
 		var ob = context.active_object;
-		if (self.is_popover && !__in__ (ob.mode, new set (['PAINT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL']))) {
+		if (__call__ (_truth, null, self.is_popover) && !__in__ (ob.mode, new set (['PAINT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL']))) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -252,7 +408,7 @@ export var GreasePencilDisplayPanel =  __class__ ('GreasePencilDisplayPanel', [o
 			}) ();
 		}
 		if (__eq__ (ob.mode, 'PAINT_GREASE_PENCIL')) {
-			if (self.is_popover) {
+			if (__call__ (_truth, null, self.is_popover)) {
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -348,7 +504,7 @@ export var GreasePencilBrushFalloff =  __class__ ('GreasePencilBrushFalloff', [o
 		else if (__eq__ (context.mode, 'VERTEX_GREASE_PENCIL')) {
 			var settings = tool_settings.gpencil_vertex_paint;
 		}
-		if (settings) {
+		if (__call__ (_truth, null, settings)) {
 			var brush = settings.brush;
 			var col = (function () {
 				var __accu0__ = layout;
@@ -496,7 +652,7 @@ export var GREASE_PENCIL_MT_move_to_layer =  __class__ ('GREASE_PENCIL_MT_move_t
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.move_to_layer', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
 		}) ().add_new_layer = true;
-		if (!(grease_pencil.layers)) {
+		if (!(__call__ (_truth, null, grease_pencil.layers))) {
 			return ;
 		}
 		(function () {
@@ -541,7 +697,7 @@ export var GREASE_PENCIL_MT_layer_group =  __class__ ('GREASE_PENCIL_MT_layer_gr
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
 		var target_group = __call__ (getattr, null, context, 'active_gpencil_layer_group', null);
-		if (!(target_group) || !(__call__ (isinstance, null, target_group, GreasePencilLayerGroup))) {
+		if (!(__call__ (_truth, null, target_group)) || !(__call__ (isinstance, null, target_group, GreasePencilLayerGroup))) {
 			return ;
 		}
 		op.target_group_name = target_group.py_name;
@@ -609,7 +765,7 @@ export var GREASE_PENCIL_MT_layer_active =  __class__ ('GREASE_PENCIL_MT_layer_a
 			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.layer_add', __kwargtrans__ ({text: 'New Layer', icon: 'ADD'}));
 		}) ();
 		nlop.new_layer_name = 'Layer';
-		if (!(obd.layers)) {
+		if (!(__call__ (_truth, null, obd.layers))) {
 			return ;
 		}
 		(function () {
@@ -656,7 +812,7 @@ export var GPENCIL_UL_annotation_layer =  __class__ ('GPENCIL_UL_annotation_laye
 		else {
 		}
 		var gpl = item;
-		if (gpl.lock) {
+		if (__call__ (_truth, null, gpl.lock)) {
 			layout.active = false;
 		}
 		var py_split = (function () {
@@ -677,7 +833,7 @@ export var GPENCIL_UL_annotation_layer =  __class__ ('GPENCIL_UL_annotation_laye
 		}) ();
 		(function () {
 			var __accu0__ = row;
-			return __call__ (__accu0__.prop, __accu0__, gpl, 'show_in_front', __kwargtrans__ ({text: '', icon: (gpl.show_in_front ? 'XRAY' : 'FACESEL'), emboss: false}));
+			return __call__ (__accu0__.prop, __accu0__, gpl, 'show_in_front', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, gpl.show_in_front) ? 'XRAY' : 'FACESEL'), emboss: false}));
 		}) ();
 		(function () {
 			var __accu0__ = row;
@@ -734,7 +890,7 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 		var is_clip_editor = __eq__ (space.py_metatype, 'CLIP_EDITOR');
 		var gpd_owner = context.annotation_data_owner;
 		var gpd = context.annotation_data;
-		if (is_clip_editor) {
+		if (__call__ (_truth, null, is_clip_editor)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -772,7 +928,7 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 			var __accu0__ = row;
 			return __call__ (__accu0__.template_ID, __accu0__, gpd_owner, 'annotation', __kwargtrans__ ({py_new: 'gpencil.annotation_add', unlink: 'gpencil.data_unlink'}));
 		}) ();
-		if (gpd && gpd.layers) {
+		if (__call__ (_truth, null, gpd) && __call__ (_truth, null, gpd.layers)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.draw_layers, __accu0__, context, layout, gpd);
@@ -831,7 +987,7 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 			return __call__ (__accu0__.operator, __accu0__, 'gpencil.layer_annotation_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
 		}) ();
 		var gpl = context.active_annotation_layer;
-		if (gpl) {
+		if (__call__ (_truth, null, gpl)) {
 			if (__gt__ (__call__ (len, null, gpd.layers), 1)) {
 				(function () {
 					var __accu0__ = col;
@@ -852,7 +1008,7 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 			}
 		}
 		var tool_settings = context.tool_settings;
-		if (gpd && gpl) {
+		if (__call__ (_truth, null, gpd) && __call__ (_truth, null, gpl)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_opacity', __kwargtrans__ ({text: 'Opacity', slider: true}));
@@ -868,14 +1024,14 @@ export var AnnotationDataPanel =  __class__ ('AnnotationDataPanel', [object], {
 				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'annotation_thickness', __kwargtrans__ ({text: 'Thickness'}));
 			}) ();
 		}
-		if (gpl) {
+		if (__call__ (_truth, null, gpl)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
-			row.active = !(gpl.lock);
-			if (gpl.active_frame) {
-				var lock_status = (gpl.lock_frame ? __call__ (iface_, null, 'Locked') : __call__ (iface_, null, 'Unlocked'));
+			row.active = !(__call__ (_truth, null, gpl.lock));
+			if (__call__ (_truth, null, gpl.active_frame)) {
+				var lock_status = (__call__ (_truth, null, gpl.lock_frame) ? __call__ (iface_, null, 'Locked') : __call__ (iface_, null, 'Unlocked'));
 				var lock_label = (function () {
 					var __accu0__ = __call__ (iface_, null, 'Frame: {:d} ({:s})');
 					return __call__ (__accu0__.format, __accu0__, gpl.active_frame.frame_number, lock_status);
@@ -989,7 +1145,7 @@ export var AnnotationOnionSkin =  __class__ ('AnnotationOnionSkin', [object], {
 			var __accu0__ = sub;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (gpl.annotation_onion_use_custom_color) {
+		if (__call__ (_truth, null, gpl.annotation_onion_use_custom_color)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_before_color', __kwargtrans__ ({text: ''}));
@@ -1007,7 +1163,7 @@ export var AnnotationOnionSkin =  __class__ ('AnnotationOnionSkin', [object], {
 			var __accu0__ = sub;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (gpl.annotation_onion_use_custom_color) {
+		if (__call__ (_truth, null, gpl.annotation_onion_use_custom_color)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, gpl, 'annotation_onion_after_color', __kwargtrans__ ({text: ''}));
@@ -1041,22 +1197,22 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 		var is_view3d = __eq__ (self.bl_space_type, 'VIEW_3D');
 		var tool_settings = context.scene.tool_settings;
 		var gpencil_paint = tool_settings.gpencil_paint;
-		var brush = (gpencil_paint ? gpencil_paint.brush : null);
+		var brush = (__call__ (_truth, null, gpencil_paint) ? gpencil_paint.brush : null);
 		var ob = context.object;
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			var is_sortable = __gt__ (__call__ (len, null, ob.material_slots), 1);
 			var rows = 7;
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.template_list, __accu0__, 'GPENCIL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index', __kwargtrans__ ({rows: rows}));
 			}) ();
-			if (is_view3d && brush !== null) {
+			if (__call__ (_truth, null, is_view3d) && brush !== null) {
 				var gp_settings = brush.gpencil_settings;
-				if (gp_settings.use_material_pin) {
+				if (__call__ (_truth, null, gp_settings.use_material_pin)) {
 					row.enabled = false;
 				}
 			}
@@ -1064,7 +1220,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 				var __accu0__ = row;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
-			if (show_full_ui) {
+			if (__call__ (_truth, null, show_full_ui)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_add', __kwargtrans__ ({icon: 'ADD', text: ''}));
@@ -1082,7 +1238,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 				var __accu0__ = col;
 				return __call__ (__accu0__.menu, __accu0__, 'GREASE_PENCIL_MT_material_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
 			}) ();
-			if (is_sortable) {
+			if (__call__ (_truth, null, is_sortable)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -1112,7 +1268,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 					return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_isolate', __kwargtrans__ ({icon: 'LOCKED', text: ''}));
 				}) ().affect_visibility = false;
 			}
-			if (show_full_ui) {
+			if (__call__ (_truth, null, show_full_ui)) {
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
@@ -1122,7 +1278,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 					return __call__ (__accu0__.template_ID, __accu0__, ob, 'active_material', __kwargtrans__ ({py_new: 'material.new', live_icon: true}));
 				}) ();
 				var slot = context.material_slot;
-				if (slot) {
+				if (__call__ (_truth, null, slot)) {
 					var icon_link = (__eq__ (slot.link, 'DATA') ? 'MESH_DATA' : 'OBJECT_DATA');
 					(function () {
 						var __accu0__ = row;
@@ -1149,7 +1305,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 				}
 			}
 			var ma = null;
-			if (is_view3d && brush !== null) {
+			if (__call__ (_truth, null, is_view3d) && brush !== null) {
 				var gp_settings = brush.gpencil_settings;
 				if (gp_settings.use_material_pin === false) {
 					if (__gt__ (__call__ (len, null, ob.material_slots), 0) && __ge__ (ob.active_material_index, 0)) {
@@ -1163,7 +1319,7 @@ export var GreasePencilMaterialsPanel =  __class__ ('GreasePencilMaterialsPanel'
 			else if (__gt__ (__call__ (len, null, ob.material_slots), 0) && __ge__ (ob.active_material_index, 0)) {
 				var ma = __getitem__ (ob.material_slots, ob.active_material_index).material;
 			}
-			if (is_view3d && ma !== null && ma.grease_pencil !== null) {
+			if (__call__ (_truth, null, is_view3d) && ma !== null && ma.grease_pencil !== null) {
 				var gpcolor = ma.grease_pencil;
 				var col = (function () {
 					var __accu0__ = layout;
@@ -1441,6 +1597,14 @@ export {GreasePencil, GreasePencilLayer, GreasePencilLayerGroup, GreasePencilTre
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'AnnotationDrawingToolsPanel': AnnotationDrawingToolsPanel = value; break;
 		case 'GreasePencilSculptAdvancedPanel': GreasePencilSculptAdvancedPanel = value; break;
 		case 'GreasePencilDisplayPanel': GreasePencilDisplayPanel = value; break;

@@ -108,6 +108,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -187,10 +203,10 @@ export var _rna_path_prop_search_for_context_impl = function* (context, edit_tex
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var attr = __getitem__ (__iterable0__, __index0__);
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = attr;
 			return __call__ (__accu0__.endswith, __accu0__, tuple (['(', ')', '.bl_rna', '.rna_type']));
-		}) ()) {
+		}) ())) {
 			continue;
 		}
 		var attr_full = (function () {
@@ -270,7 +286,7 @@ export var rna_path_prop_search_for_context = function* (self, context, edit_tex
 			}
 		}
 	}
-	if (!(unique_attrs)) {
+	if (!(__call__ (_truth, null, unique_attrs))) {
 		yield* __call__ (_rna_path_prop_search_for_context_impl, null, context, edit_text, unique_attrs);
 	}
 	};
@@ -308,7 +324,7 @@ export var context_path_validate = function (context, data_path) {
 	else {
 	}
 	try {
-		var value = (data_path ? __call__ (_py_eval, null, (function () {
+		var value = (__call__ (_truth, null, data_path) ? __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
 		}) (), dict ({'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm')) : _ellipsis);
@@ -316,10 +332,10 @@ export var context_path_validate = function (context, data_path) {
 	catch (__except0__) {
 		if (isinstance (__except0__, AttributeError)) {
 			var ex = __except0__;
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = __call__ (str, null, ex);
 				return __call__ (__accu0__.startswith, __accu0__, "'NoneType'");
-			}) ()) {
+			}) ())) {
 				var value = _ellipsis;
 			}
 			else {
@@ -382,14 +398,14 @@ export var context_path_decompose = function (data_path) {
 			break;
 		}
 		var value = __getitem__ (path_split, i);
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = value;
 			return __call__ (__accu0__.startswith, __accu0__, '.');
-		}) ()) {
-			if (!((function () {
+		}) ())) {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = value_prev;
 				return __call__ (__accu0__.startswith, __accu0__, '(');
-			}) ())) {
+			}) ()))) {
 				break;
 			}
 		}
@@ -405,10 +421,10 @@ export var context_path_decompose = function (data_path) {
 			var __accu0__ = '';
 			return __call__ (__accu0__.join, __accu0__, __getslice__ (path_split, __add__ (i, 1), null, 1));
 		}) ();
-		if (base_path) {
+		if (__call__ (_truth, null, base_path)) {
 			var base_path = __getslice__ (base_path, 1, null, 1);
 		}
-		if (prop_attr) {
+		if (__call__ (_truth, null, prop_attr)) {
 			var prop_attr = __getslice__ (prop_attr, 1, null, 1);
 		}
 	}
@@ -445,11 +461,11 @@ export var description_from_data_path = function (base, data_path) {
 	}
 	var rna_prop = __call__ (context_path_to_rna_property, null, base, data_path);
 	var _walrus1 = rna_prop;
-	if (_walrus1) {
+	if (__call__ (_truth, null, _walrus1)) {
 		var description = __call__ (tip_, null, rna_prop.description);
 		var _walrus1 = description;
 	}
-	if (_walrus1) {
+	if (__call__ (_truth, null, _walrus1)) {
 		var description = (function () {
 			var __accu0__ = __call__ (tip_, null, '{:s}: {:s}');
 			return __call__ (__accu0__.format, __accu0__, prefix, description);
@@ -512,7 +528,7 @@ export var operator_path_is_undo = function (context, data_path) {
 	var data_path_head = __left0__ [0];
 	var _ = __left0__ [1];
 	var _ = __left0__ [2];
-	if (!(data_path_head)) {
+	if (!(__call__ (_truth, null, data_path_head))) {
 		return false;
 	}
 	var value = __call__ (context_path_validate, null, context, data_path_head);
@@ -533,7 +549,7 @@ export var operator_path_undo_return = function (context, data_path) {
 	}
 	else {
 	}
-	return (__call__ (operator_path_is_undo, null, context, data_path) ? new set (['FINISHED']) : new set (['CANCELLED']));
+	return (__call__ (_truth, null, __call__ (operator_path_is_undo, null, context, data_path)) ? new set (['FINISHED']) : new set (['CANCELLED']));
 };
 export var operator_value_undo_return = function (value) {
 	if (arguments.length) {
@@ -549,7 +565,7 @@ export var operator_value_undo_return = function (value) {
 	}
 	else {
 	}
-	return (__call__ (operator_value_is_undo, null, value) ? new set (['FINISHED']) : new set (['CANCELLED']));
+	return (__call__ (_truth, null, __call__ (operator_value_is_undo, null, value)) ? new set (['FINISHED']) : new set (['CANCELLED']));
 };
 export var execute_context_assign = function (self, context) {
 	if (arguments.length) {
@@ -570,7 +586,7 @@ export var execute_context_assign = function (self, context) {
 	if (__call__ (context_path_validate, null, context, data_path) === _ellipsis) {
 		return new set (['PASS_THROUGH']);
 	}
-	if (__call__ (getattr, null, self, 'relative', false)) {
+	if (__call__ (_truth, null, __call__ (getattr, null, self, 'relative', false))) {
 		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} += self.value';
 			return __call__ (__accu0__.format, __accu0__, data_path);
@@ -776,7 +792,7 @@ export var WM_OT_context_scale_int =  __class__ ('WM_OT_context_scale_int', [Ope
 		if (__eq__ (value, 1.0)) {
 			return new set (['CANCELLED']);
 		}
-		if (__call__ (getattr, null, self, 'always_step', false)) {
+		if (__call__ (_truth, null, __call__ (getattr, null, self, 'always_step', false))) {
 			if (__gt__ (value, 1.0)) {
 				var add = '1';
 				var func = 'max';
@@ -1009,7 +1025,7 @@ export var WM_OT_context_toggle =  __class__ ('WM_OT_context_toggle', [Operator]
 		}
 		else {
 		}
-		if (props.module) {
+		if (__call__ (_truth, null, props.module)) {
 			return null;
 		}
 		return __call__ (description_from_data_path, null, context, props.data_path, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Toggle')}));
@@ -1031,7 +1047,7 @@ export var WM_OT_context_toggle =  __class__ ('WM_OT_context_toggle', [Operator]
 		}
 		var data_path = self.data_path;
 		var module = self.module;
-		if (!(module)) {
+		if (!(__call__ (_truth, null, module))) {
 			var base = context;
 		}
 		else {
@@ -1156,7 +1172,7 @@ export var WM_OT_context_cycle_int =  __class__ ('WM_OT_context_cycle_int', [Ope
 		if (value === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
-		if (self.reverse) {
+		if (__call__ (_truth, null, self.reverse)) {
 			var value = __call__ (__isub__, null, value, 1);
 		}
 		else {
@@ -1166,12 +1182,12 @@ export var WM_OT_context_cycle_int =  __class__ ('WM_OT_context_cycle_int', [Ope
 			var __accu0__ = 'context.{:s} = value';
 			return __call__ (__accu0__.format, __accu0__, data_path);
 		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
-		if (self.wrap) {
+		if (__call__ (_truth, null, self.wrap)) {
 			if (__ne__ (value, __call__ (_py_eval, null, (function () {
 				var __accu0__ = 'context.{:s}';
 				return __call__ (__accu0__.format, __accu0__, data_path);
 			}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm')))) {
-				if (self.reverse) {
+				if (__call__ (_truth, null, self.reverse)) {
 					var value = __sub__ (__lshift__ (1, 31), 1);
 				}
 				else {
@@ -1245,16 +1261,16 @@ export var WM_OT_context_cycle_enum =  __class__ ('WM_OT_context_cycle_enum', [O
 			var __accu0__ = enums;
 			return __call__ (__accu0__.index, __accu0__, orig_value);
 		}) ();
-		if (self.reverse) {
+		if (__call__ (_truth, null, self.reverse)) {
 			if (__eq__ (orig_index, 0)) {
-				var advance_enum = (self.wrap ? __getitem__ (enums, __neg__ (1)) : __getitem__ (enums, 0));
+				var advance_enum = (__call__ (_truth, null, self.wrap) ? __getitem__ (enums, __neg__ (1)) : __getitem__ (enums, 0));
 			}
 			else {
 				var advance_enum = __getitem__ (enums, __sub__ (orig_index, 1));
 			}
 		}
 		else if (__eq__ (orig_index, __sub__ (__call__ (len, null, enums), 1))) {
-			var advance_enum = (self.wrap ? __getitem__ (enums, 0) : __getitem__ (enums, __neg__ (1)));
+			var advance_enum = (__call__ (_truth, null, self.wrap) ? __getitem__ (enums, 0) : __getitem__ (enums, __neg__ (1)));
 		}
 		else {
 			var advance_enum = __getitem__ (enums, __add__ (orig_index, 1));
@@ -1324,7 +1340,7 @@ export var WM_OT_context_cycle_array =  __class__ ('WM_OT_context_cycle_array', 
 			}
 			else {
 			}
-			if (self.reverse) {
+			if (__call__ (_truth, null, self.reverse)) {
 				(function () {
 					var __accu0__ = array;
 					return __call__ (__accu0__.insert, __accu0__, 0, (function () {
@@ -1650,7 +1666,7 @@ export var WM_OT_context_set_id =  __class__ ('WM_OT_context_set_id', [Operator]
 				}
 			}
 		}
-		if (id_iter) {
+		if (__call__ (_truth, null, id_iter)) {
 			var value_id = (function () {
 				var __accu0__ = __call__ (getattr, null, bpy.data, id_iter);
 				return __call__ (__accu0__.py_get, __accu0__, value);
@@ -1728,7 +1744,7 @@ export var WM_OT_context_collection_boolean_set =  __class__ ('WM_OT_context_col
 				return __call__ (__accu0__.append, __accu0__, item);
 			}) ();
 		}
-		if (!(items_ok)) {
+		if (!(__call__ (_truth, null, items_ok))) {
 			return new set (['CANCELLED']);
 		}
 		if (__eq__ (self.py_metatype, 'ENABLE')) {
@@ -1738,7 +1754,7 @@ export var WM_OT_context_collection_boolean_set =  __class__ ('WM_OT_context_col
 			var is_set = false;
 		}
 		else {
-			var is_set = !(is_set);
+			var is_set = !(__call__ (_truth, null, is_set));
 		}
 		var exec_str = (function () {
 			var __accu0__ = 'item.{:s} = {:s}';
@@ -1827,7 +1843,7 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 		else {
 		}
 		var delta = __call__ (__imul__, null, delta, self.input_scale);
-		if (self.invert) {
+		if (__call__ (_truth, null, self.invert)) {
 			var delta = __neg__ (delta);
 		}
 		var data_path_item = self.data_path_item;
@@ -1928,7 +1944,7 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 		if (__eq__ (event_type, 'MOUSEMOVE')) {
 			var total_offset = __sub__ (event.mouse_x, self.initial_x);
 			var step_delta = __sub__ (event.mouse_x, self._prev_x);
-			if (event.shift) {
+			if (__call__ (_truth, null, event.shift)) {
 				self._precision_offset = __call__ (__iadd__, null, self._precision_offset, step_delta);
 			}
 			var effective_offset = __sub__ (total_offset, __mul__ (self._precision_offset, __sub__ (1.0, context_modal_mouse_precision_fac)));
@@ -1939,7 +1955,7 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 			}) ();
 			var delta = effective_offset;
 			var header_text = self.header_text;
-			if (header_text) {
+			if (__call__ (_truth, null, header_text)) {
 				if (__eq__ (__call__ (len, null, self._values), 1)) {
 					var __left0__ = (function () {
 						var __accu0__ = self._values;
@@ -2008,7 +2024,7 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 			var __accu0__ = self;
 			return __call__ (__accu0__._values_store, __accu0__, context);
 		}) ();
-		if (!(self._values)) {
+		if (!(__call__ (_truth, null, self._values))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -2052,10 +2068,10 @@ export var WM_OT_url_open =  __class__ ('WM_OT_url_open', [Operator], {
 		else {
 		}
 		var urllib = __call__ (_module, null, 'urllib');
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = urllib.parse;
 			return __call__ (__accu0__.urlparse, __accu0__, url);
-		}) ().scheme)) {
+		}) ().scheme))) {
 			var url = __add__ ('https://', url);
 		}
 		var parsed_url = (function () {
@@ -2063,10 +2079,10 @@ export var WM_OT_url_open =  __class__ ('WM_OT_url_open', [Operator], {
 			return __call__ (__accu0__.urlparse, __accu0__, url);
 		}) ();
 		var domain = parsed_url.netloc;
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = domain;
 			return __call__ (__accu0__.endswith, __accu0__, '.blender.org');
-		}) () || __eq__ (domain, 'blender.org'))) {
+		}) ()) || __eq__ (domain, 'blender.org'))) {
 			return url;
 		}
 		var query_params = (function () {
@@ -2325,7 +2341,7 @@ export var WM_OT_path_open =  __class__ ('WM_OT_path_open', [Operator], {
 		var os = __call__ (_module, null, 'os');
 		var subprocess = __call__ (_module, null, 'subprocess');
 		var filepath = self.filepath;
-		if (!(filepath)) {
+		if (!(__call__ (_truth, null, filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'File path was not set');
@@ -2340,10 +2356,10 @@ export var WM_OT_path_open =  __class__ ('WM_OT_path_open', [Operator], {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.normpath, __accu0__, filepath);
 		}) ();
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, filepath);
-		}) ())) {
+		}) ()))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -2459,7 +2475,7 @@ export var _wm_doc_get_id = function (doc_id) {
 	var url = __left0__;
 	var rna = __left0__;
 	if (__eq__ (__call__ (len, null, id_split), 1)) {
-		if (do_url) {
+		if (__call__ (_truth, null, do_url)) {
 			var url = (function () {
 				var __accu0__ = '{:s}/bpy.types.{:s}.html';
 				return __call__ (__accu0__.format, __accu0__, url_prefix, __getitem__ (id_split, 0));
@@ -2476,8 +2492,8 @@ export var _wm_doc_get_id = function (doc_id) {
 		var __left0__ = id_split;
 		var class_name = __left0__ [0];
 		var class_prop = __left0__ [1];
-		if (__call__ (operator_exists_pair, null, class_name, class_prop)) {
-			if (do_url) {
+		if (__call__ (_truth, null, __call__ (operator_exists_pair, null, class_name, class_prop))) {
+			if (__call__ (_truth, null, do_url)) {
 				var url = (function () {
 					var __accu0__ = '{:s}/bpy.ops.{:s}.html#bpy.ops.{:s}.{:s}';
 					return __call__ (__accu0__.format, __accu0__, url_prefix, class_name, class_name, class_prop);
@@ -2490,7 +2506,7 @@ export var _wm_doc_get_id = function (doc_id) {
 				}) ();
 			}
 		}
-		else if (__call__ (operator_exists_single, null, class_name)) {
+		else if (__call__ (_truth, null, __call__ (operator_exists_single, null, class_name))) {
 			var __left0__ = (function () {
 				var __accu0__ = class_name;
 				return __call__ (__accu0__.py_split, __accu0__, '_OT_', 1);
@@ -2501,7 +2517,7 @@ export var _wm_doc_get_id = function (doc_id) {
 				var __accu0__ = class_name;
 				return __call__ (__accu0__.lower, __accu0__);
 			}) ();
-			if (do_url) {
+			if (__call__ (_truth, null, do_url)) {
 				var url = (function () {
 					var __accu0__ = '{:s}/bpy.ops.{:s}.html#bpy.ops.{:s}.{:s}';
 					return __call__ (__accu0__.format, __accu0__, url_prefix, class_name, class_name, class_prop);
@@ -2542,16 +2558,16 @@ export var _wm_doc_get_id = function (doc_id) {
 				var __accu0__ = rna_parent.properties;
 				return __call__ (__accu0__.py_get, __accu0__, class_prop);
 			}) ();
-			if (rna_prop) {
+			if (__call__ (_truth, null, rna_prop)) {
 				var rna_parent = rna_parent.base;
-				while (rna_parent && __eq__ (rna_prop, (function () {
+				while (__call__ (_truth, null, rna_parent) && __eq__ (rna_prop, (function () {
 					var __accu0__ = rna_parent.properties;
 					return __call__ (__accu0__.py_get, __accu0__, class_prop);
 				}) ())) {
 					var class_name = rna_parent.identifier;
 					var rna_parent = rna_parent.base;
 				}
-				if (do_url) {
+				if (__call__ (_truth, null, do_url)) {
 					var url = (function () {
 						var __accu0__ = '{:s}/bpy.types.{:s}.html#bpy.types.{:s}.{:s}';
 						return __call__ (__accu0__.format, __accu0__, url_prefix, class_name, class_name, class_prop);
@@ -2564,7 +2580,7 @@ export var _wm_doc_get_id = function (doc_id) {
 					}) ();
 				}
 			}
-			else if (do_url) {
+			else if (__call__ (_truth, null, do_url)) {
 				var url = (function () {
 					var __accu0__ = '{:s}/bpy.types.bpy_struct.html#bpy.types.bpy_struct.items';
 					return __call__ (__accu0__.format, __accu0__, url_prefix);
@@ -2575,7 +2591,7 @@ export var _wm_doc_get_id = function (doc_id) {
 			}
 		}
 	}
-	return (do_url ? url : rna);
+	return (__call__ (_truth, null, do_url) ? url : rna);
 };
 export var WM_OT_doc_view_manual =  __class__ ('WM_OT_doc_view_manual', [Operator], {
 	__module__: __name__,
@@ -2598,7 +2614,7 @@ export var WM_OT_doc_view_manual =  __class__ ('WM_OT_doc_view_manual', [Operato
 		}
 		else {
 		}
-		if (verbose) {
+		if (__call__ (_truth, null, verbose)) {
 			__call__ (print, null, (function () {
 				var __accu0__ = "online manual check for: '{:s}'... ";
 				return __call__ (__accu0__.format, __accu0__, rna_id);
@@ -2621,17 +2637,17 @@ export var WM_OT_doc_view_manual =  __class__ ('WM_OT_doc_view_manual', [Operato
 			var pattern = __left0__ [0];
 			var url_suffix = __left0__ [1];
 			var non_special = __call__ (re_match_non_special, null, pattern);
-			if (non_special === null || !((function () {
+			if (non_special === null || !(__call__ (_truth, null, (function () {
 				var __accu0__ = rna_id;
 				return __call__ (__accu0__.startswith, __accu0__, __getslice__ (pattern, null, (function () {
 					var __accu1__ = non_special;
 					return __call__ (__accu1__.end, __accu1__);
 				}) (), 1));
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
-			if (__call__ (fnmatchcase, null, rna_id, pattern)) {
-				if (verbose) {
+			if (__call__ (_truth, null, __call__ (fnmatchcase, null, rna_id, pattern))) {
+				if (__call__ (_truth, null, verbose)) {
 					__call__ (print, null, (function () {
 						var __accu0__ = "            match found: '{:s}' --> '{:s}'";
 						return __call__ (__accu0__.format, __accu0__, pattern, url_suffix);
@@ -2640,7 +2656,7 @@ export var WM_OT_doc_view_manual =  __class__ ('WM_OT_doc_view_manual', [Operato
 				return url_suffix;
 			}
 		}
-		if (verbose) {
+		if (__call__ (_truth, null, verbose)) {
 			__call__ (print, null, 'match not found');
 		}
 		return null;
@@ -2912,10 +2928,10 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		}
 		var to_dict = __call__ (getattr, null, old_value, 'to_dict', null);
 		var to_list = __call__ (getattr, null, old_value, 'to_list', null);
-		if (to_dict) {
+		if (__call__ (_truth, null, to_dict)) {
 			var old_value = __call__ (to_dict, null);
 		}
-		else if (to_list) {
+		else if (__call__ (_truth, null, to_list)) {
 			var old_value = __call__ (to_list, null);
 		}
 		return __call__ (str, null, old_value);
@@ -2941,31 +2957,31 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		var prop_type = __left0__ [0];
 		var is_array = __left0__ [1];
 		if (__eq__ (prop_type, int)) {
-			if (is_array) {
+			if (__call__ (_truth, null, is_array)) {
 				return 'INT_ARRAY';
 			}
 			return 'INT';
 		}
 		else if (__eq__ (prop_type, float)) {
-			if (is_array) {
+			if (__call__ (_truth, null, is_array)) {
 				return 'FLOAT_ARRAY';
 			}
 			return 'FLOAT';
 		}
 		else if (__eq__ (prop_type, bool)) {
-			if (is_array) {
+			if (__call__ (_truth, null, is_array)) {
 				return 'BOOL_ARRAY';
 			}
 			return 'BOOL';
 		}
 		else if (__eq__ (prop_type, str)) {
-			if (is_array) {
+			if (__call__ (_truth, null, is_array)) {
 				return 'PYTHON';
 			}
 			return 'STRING';
 		}
 		else if (__eq__ (prop_type, py_typeof (null)) || __call__ (issubclass, null, prop_type, bpy.types.ID)) {
-			if (is_array) {
+			if (__call__ (_truth, null, is_array)) {
 				return 'PYTHON';
 			}
 			return 'DATA_BLOCK';
@@ -3279,7 +3295,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 			}) ();
 			(function () {
 				var __accu0__ = ui_data;
-				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({min: self.min_int, max: self.max_int, soft_min: (self.use_soft_limits ? self.soft_min_int : self.min_int), soft_max: (self.use_soft_limits ? self.soft_max_int : self.max_int), step: self.step_int, py_default: (__eq__ (prop_type_new, 'INT') ? __getitem__ (self.default_int, 0) : __getslice__ (self.default_int, null, self.array_length, 1)), description: self.description, py_items: self.enum_items}));
+				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({min: self.min_int, max: self.max_int, soft_min: (__call__ (_truth, null, self.use_soft_limits) ? self.soft_min_int : self.min_int), soft_max: (__call__ (_truth, null, self.use_soft_limits) ? self.soft_max_int : self.max_int), step: self.step_int, py_default: (__eq__ (prop_type_new, 'INT') ? __getitem__ (self.default_int, 0) : __getslice__ (self.default_int, null, self.array_length, 1)), description: self.description, py_items: self.enum_items}));
 			}) ();
 		}
 		else if (__in__ (prop_type_new, new set (['BOOL', 'BOOL_ARRAY']))) {
@@ -3299,7 +3315,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 			}) ();
 			(function () {
 				var __accu0__ = ui_data;
-				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({min: self.min_float, max: self.max_float, soft_min: (self.use_soft_limits ? self.soft_min_float : self.min_float), soft_max: (self.use_soft_limits ? self.soft_max_float : self.max_float), step: self.step_float, precision: self.precision, py_default: (__eq__ (prop_type_new, 'FLOAT') ? __getitem__ (self.default_float, 0) : __getslice__ (self.default_float, null, self.array_length, 1)), description: self.description, subtype: self.subtype}));
+				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({min: self.min_float, max: self.max_float, soft_min: (__call__ (_truth, null, self.use_soft_limits) ? self.soft_min_float : self.min_float), soft_max: (__call__ (_truth, null, self.use_soft_limits) ? self.soft_max_float : self.max_float), step: self.step_float, precision: self.precision, py_default: (__eq__ (prop_type_new, 'FLOAT') ? __getitem__ (self.default_float, 0) : __getslice__ (self.default_float, null, self.array_length, 1)), description: self.description, subtype: self.subtype}));
 			}) ();
 		}
 		else if (__eq__ (prop_type_new, 'STRING')) {
@@ -3419,7 +3435,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 							var __accu0__ = anim_utils;
 							return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, st.action, st.action_slot);
 						}) ();
-						if (!(channelbag)) {
+						if (!(__call__ (_truth, null, channelbag))) {
 							continue;
 						}
 						__call__ (_update, null, channelbag.fcurves);
@@ -3435,13 +3451,13 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 					var __accu0__ = anim_utils;
 					return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, adt.action, adt.action_slot);
 				}) ();
-				if (channelbag) {
+				if (__call__ (_truth, null, channelbag)) {
 					__call__ (_update, null, channelbag.fcurves);
 				}
-				if (adt.drivers) {
+				if (__call__ (_truth, null, adt.drivers)) {
 					__call__ (_update, null, adt.drivers);
 				}
-				if (adt.nla_tracks) {
+				if (__call__ (_truth, null, adt.nla_tracks)) {
 					var __iterable0__ = adt.nla_tracks;
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -3495,7 +3511,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
 		}) (), dict ({'self': self, 'context': context, 'adt': adt, 'data_path': data_path, 'id_type_new': id_type_new, 'id_type_old': id_type_old, 'item': item, 'name': py_name, 'name_old': name_old, 'new_value': new_value, 'prop_type_new': prop_type_new, 'prop_type_old': prop_type_old}), __call__ (_module, null, 'bl_operators.wm'));
-		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
+		if (__call__ (_truth, null, item.id_data) && __call__ (_truth, null, item.id_data.override_library) && __call__ (_truth, null, item.id_data.override_library.reference)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Cannot edit properties from override data');
@@ -3606,7 +3622,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		else {
 		}
 		var data_path = self.data_path;
-		if (!(data_path)) {
+		if (!(__call__ (_truth, null, data_path))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Data path not set');
@@ -3619,7 +3635,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
 		}) (), dict ({'self': self, 'context': context, '_event': _event, 'data_path': data_path, 'item': item, 'name': py_name, 'old_type': old_type, 'wm': wm}), __call__ (_module, null, 'bl_operators.wm'));
-		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
+		if (__call__ (_truth, null, item.id_data) && __call__ (_truth, null, item.id_data.override_library) && __call__ (_truth, null, item.id_data.override_library.reference)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Properties from override data cannot be edited');
@@ -3678,7 +3694,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 				self.max_float = __left0__ [1];
 				var changed = true;
 			}
-			if (self.use_soft_limits) {
+			if (__call__ (_truth, null, self.use_soft_limits)) {
 				if (__gt__ (self.soft_min_float, self.soft_max_float)) {
 					var __left0__ = tuple ([self.soft_max_float, self.soft_min_float]);
 					self.soft_min_float = __left0__ [0];
@@ -3702,7 +3718,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 				self.max_int = __left0__ [1];
 				var changed = true;
 			}
-			if (self.use_soft_limits) {
+			if (__call__ (_truth, null, self.use_soft_limits)) {
 				if (__gt__ (self.soft_min_int, self.soft_max_int)) {
 					var __left0__ = tuple ([self.soft_max_int, self.soft_min_int]);
 					self.soft_min_int = __left0__ [0];
@@ -3965,7 +3981,7 @@ export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_valu
 		}
 		else {
 		}
-		if (self.eval_string) {
+		if (__call__ (_truth, null, self.eval_string)) {
 			var rna_item = __call__ (_py_eval, null, (function () {
 				var __accu0__ = 'context.{:s}';
 				return __call__ (__accu0__.format, __accu0__, self.data_path);
@@ -4100,7 +4116,7 @@ export var WM_OT_properties_add =  __class__ ('WM_OT_properties_add', [Operator]
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
 		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'i': i, 'item': item, 'prop': prop, 'prop_new': prop_new}), __call__ (_module, null, 'bl_operators.wm'));
-		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
+		if (__call__ (_truth, null, item.id_data) && __call__ (_truth, null, item.id_data.override_library) && __call__ (_truth, null, item.id_data.override_library.reference)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Cannot add properties to override data');
@@ -4193,7 +4209,7 @@ export var WM_OT_properties_remove =  __class__ ('WM_OT_properties_remove', [Ope
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
 		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'item': item, 'name': py_name}), __call__ (_module, null, 'bl_operators.wm'));
-		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
+		if (__call__ (_truth, null, item.id_data) && __call__ (_truth, null, item.id_data.override_library) && __call__ (_truth, null, item.id_data.override_library.reference)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Cannot remove properties from override data');
@@ -4282,7 +4298,7 @@ export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 		else {
 		}
 		var os = __call__ (_module, null, 'os');
-		if (!(self.filepath)) {
+		if (!(__call__ (_truth, null, self.filepath))) {
 			self.filepath = (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.join, __accu0__, (function () {
@@ -4332,13 +4348,13 @@ export var WM_OT_operator_cheat_sheet =  __class__ ('WM_OT_operator_cheat_sheet'
 				var op_submodule_name = __getitem__ (__iterable1__, __index1__);
 				var op = __call__ (getattr, null, op_module, op_submodule_name);
 				var text = __call__ (repr, null, op);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = __getitem__ ((function () {
 						var __accu1__ = text;
 						return __call__ (__accu1__.py_split, __accu1__, '\n');
 					}) (), __neg__ (1));
 					return __call__ (__accu0__.startswith, __accu0__, 'bpy.ops.');
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu0__ = op_strings;
 						return __call__ (__accu0__.append, __accu0__, text);
@@ -4452,10 +4468,10 @@ export var WM_OT_tool_set_by_id =  __class__ ('WM_OT_tool_set_by_id', [Operator]
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = op.properties;
 			return __call__ (__accu0__.is_property_set, __accu0__, 'space_type');
-		}) ()) {
+		}) ())) {
 			var space_type = op.space_type;
 		}
 		else {
@@ -4495,9 +4511,9 @@ export var WM_OT_tool_set_by_id =  __class__ ('WM_OT_tool_set_by_id', [Operator]
 		if (space_type === null) {
 			return new set (['CANCELLED']);
 		}
-		var fn = (self.cycle ? activate_by_id_or_cycle : activate_by_id);
-		if (__call__ (fn, null, context, space_type, self.py_name, __kwargtrans__ ({as_fallback: self.as_fallback}))) {
-			if (self.as_fallback) {
+		var fn = (__call__ (_truth, null, self.cycle) ? activate_by_id_or_cycle : activate_by_id);
+		if (__call__ (_truth, null, __call__ (fn, null, context, space_type, self.py_name, __kwargtrans__ ({as_fallback: self.as_fallback})))) {
+			if (__call__ (_truth, null, self.as_fallback)) {
 				var tool_settings = context.tool_settings;
 				tool_settings.workspace_tool_type = 'FALLBACK';
 			}
@@ -4546,14 +4562,14 @@ export var WM_OT_tool_set_by_index =  __class__ ('WM_OT_tool_set_by_index', [Ope
 		if (space_type === null) {
 			return new set (['CANCELLED']);
 		}
-		var fn = (self.expand ? item_from_flat_index : item_from_index_active);
+		var fn = (__call__ (_truth, null, self.expand) ? item_from_flat_index : item_from_index_active);
 		var item = __call__ (fn, null, context, space_type, self.index);
 		if (item === null) {
 			return new set (['CANCELLED']);
 		}
-		var fn = (self.cycle ? activate_by_id_or_cycle : activate_by_id);
-		if (__call__ (fn, null, context, space_type, item.idname, __kwargtrans__ ({as_fallback: self.as_fallback}))) {
-			if (self.as_fallback) {
+		var fn = (__call__ (_truth, null, self.cycle) ? activate_by_id_or_cycle : activate_by_id);
+		if (__call__ (_truth, null, __call__ (fn, null, context, space_type, item.idname, __kwargtrans__ ({as_fallback: self.as_fallback})))) {
+			if (__call__ (_truth, null, self.as_fallback)) {
 				var tool_settings = context.tool_settings;
 				tool_settings.workspace_tool_type = 'FALLBACK';
 			}
@@ -4623,7 +4639,7 @@ export var WM_OT_tool_set_by_brush_type =  __class__ ('WM_OT_tool_set_by_brush_t
 				}
 			}
 		}
-		if (__call__ (activate_by_id, null, context, space_type, tool_id)) {
+		if (__call__ (_truth, null, __call__ (activate_by_id, null, context, space_type, tool_id))) {
 			return new set (['FINISHED']);
 		}
 		else {
@@ -4881,10 +4897,10 @@ export var WM_OT_toolbar_prompt =  __class__ ('WM_OT_toolbar_prompt', [Operator]
 				var __accu0__ = item;
 				return __call__ (__accu0__.to_string, __accu0__);
 			}) ();
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = key_str;
 				return __call__ (__accu0__.startswith, __accu0__, 'Numpad ');
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			var properties = item.properties;
@@ -4974,7 +4990,7 @@ export var WM_OT_toolbar_prompt =  __class__ ('WM_OT_toolbar_prompt', [Operator]
 		}
 		if (__eq__ (event_type, self._init_event_type)) {
 			if (__eq__ (event_value, 'RELEASE')) {
-				if (!(event.ctrl || event.alt || event.shift || event.oskey || event.hyper)) {
+				if (!(__call__ (_truth, null, event.ctrl) || __call__ (_truth, null, event.alt) || __call__ (_truth, null, event.shift) || __call__ (_truth, null, event.oskey) || __call__ (_truth, null, event.hyper))) {
 					(function () {
 						var __accu0__ = context.workspace;
 						return __call__ (__accu0__.status_text_set, __accu0__, null);
@@ -5012,7 +5028,7 @@ export var WM_OT_toolbar_prompt =  __class__ ('WM_OT_toolbar_prompt', [Operator]
 		}) ();
 		var cls = __left0__ [0];
 		var keymap = __left0__ [1];
-		if (keymap === null || !(keymap.keymap_items)) {
+		if (keymap === null || !(__call__ (_truth, null, keymap.keymap_items))) {
 			return new set (['CANCELLED']);
 		}
 		self._init_event_type = event.py_metatype;
@@ -5132,7 +5148,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var id = __getitem__ (__iterable0__, __index0__);
 				if (__call__ (isinstance, null, id, ty)) {
-					if (id.is_editable) {
+					if (__call__ (_truth, null, id.is_editable)) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, id);
@@ -5170,7 +5186,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var id = __getitem__ (__iterable1__, __index1__);
 					if (__call__ (isinstance, null, id, ty)) {
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5231,7 +5247,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var action = __getitem__ (__iterable1__, __index1__);
 					if (action !== null) {
-						if (action.is_editable) {
+						if (__call__ (_truth, null, action.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, action);
@@ -5276,7 +5292,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 			}
 			else {
 			}
-			return data.id_data.is_editable && !(data.id_data.override_library);
+			return data.id_data.is_editable && !(__call__ (_truth, null, data.id_data.override_library));
 		};
 		var mode = context.mode;
 		var scene = context.scene;
@@ -5285,41 +5301,41 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 		var data = null;
 		if (__eq__ (space_type, 'SEQUENCE_EDITOR')) {
 			var data_type_test = 'SEQUENCE_STRIP';
-			if (check_context) {
+			if (__call__ (_truth, null, check_context)) {
 				return data_type_test;
 			}
 			if (__eq__ (data_type, data_type_test)) {
-				var data = tuple ([(only_selected ? context.selected_strips : context.sequencer_scene.sequence_editor.strips_all), 'name', __call__ (iface_, null, 'Strip(s)')]);
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? context.selected_strips : context.sequencer_scene.sequence_editor.strips_all), 'name', __call__ (iface_, null, 'Strip(s)')]);
 			}
 		}
 		else if (__eq__ (space_type, 'NODE_EDITOR')) {
 			var data_type_test = 'NODE';
-			if (check_context) {
+			if (__call__ (_truth, null, check_context)) {
 				return data_type_test;
 			}
 			if (__eq__ (data_type, data_type_test)) {
-				var data = tuple ([(only_selected ? context.selected_nodes : __call__ (list, null, space.node_tree.nodes)), 'name', __call__ (iface_, null, 'Node(s)')]);
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? context.selected_nodes : __call__ (list, null, space.node_tree.nodes)), 'name', __call__ (iface_, null, 'Node(s)')]);
 			}
 		}
 		else if (__eq__ (space_type, 'OUTLINER')) {
 			var data_type_test = 'COLLECTION';
-			if (check_context) {
+			if (__call__ (_truth, null, check_context)) {
 				return data_type_test;
 			}
 			if (__eq__ (data_type, data_type_test)) {
-				var data = tuple ([(only_selected ? (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_ids_from_outliner_by_type, __accu0__, context, bpy.types.Collection);
 				}) () : scene.collection.children_recursive), 'name', __call__ (iface_, null, 'Collection(s)')]);
 			}
 		}
-		else if (__eq__ (mode, 'POSE') || __eq__ (mode, 'WEIGHT_PAINT') && context.pose_object) {
+		else if (__eq__ (mode, 'POSE') || __eq__ (mode, 'WEIGHT_PAINT') && __call__ (_truth, null, context.pose_object)) {
 			var data_type_test = 'BONE';
-			if (check_context) {
+			if (__call__ (_truth, null, check_context)) {
 				return data_type_test;
 			}
 			if (__eq__ (data_type, data_type_test)) {
-				var data = tuple ([(only_selected ? (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? (function () {
 					var __accu0__ = [];
 					var __iterable0__ = context.selected_pose_bones;
 					__iterable0__ = __i__ (__iterable0__);
@@ -5353,11 +5369,11 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 		}
 		else if (__eq__ (mode, 'EDIT_ARMATURE')) {
 			var data_type_test = 'BONE';
-			if (check_context) {
+			if (__call__ (_truth, null, check_context)) {
 				return data_type_test;
 			}
 			if (__eq__ (data_type, data_type_test)) {
-				var data = tuple ([(only_selected ? context.selected_editable_bones : (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? context.selected_editable_bones : (function () {
 					var __accu0__ = [];
 					var __iterable0__ = context.objects_in_mode_unique_data;
 					__iterable0__ = __i__ (__iterable0__);
@@ -5377,13 +5393,13 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}) ()), 'name', __call__ (iface_, null, 'Edit Bone(s)')]);
 			}
 		}
-		if (check_context) {
+		if (__call__ (_truth, null, check_context)) {
 			return 'OBJECT';
 		}
 		var object_data_type_attrs_map = dict ({'MESH': tuple (['meshes', __call__ (iface_, null, 'Mesh(es)'), bpy.types.Mesh]), 'CURVE': tuple (['curves', __call__ (iface_, null, 'Curve(s)'), bpy.types.Curve]), 'META': tuple (['metaballs', __call__ (iface_, null, 'Metaball(s)'), bpy.types.MetaBall]), 'VOLUME': tuple (['volumes', __call__ (iface_, null, 'Volume(s)'), bpy.types.Volume]), 'GREASEPENCIL': tuple (['grease_pencils', __call__ (iface_, null, 'Grease Pencil(s)'), bpy.types.GreasePencil]), 'ARMATURE': tuple (['armatures', __call__ (iface_, null, 'Armature(s)'), bpy.types.Armature]), 'LATTICE': tuple (['lattices', __call__ (iface_, null, 'Lattice(s)'), bpy.types.Lattice]), 'LIGHT': tuple (['lights', __call__ (iface_, null, 'Light(s)'), bpy.types.Light]), 'LIGHT_PROBE': tuple (['lightprobes', __call__ (iface_, null, 'Light Probe(s)'), bpy.types.LightProbe]), 'CAMERA': tuple (['cameras', __call__ (iface_, null, 'Camera(s)'), bpy.types.Camera]), 'SPEAKER': tuple (['speakers', __call__ (iface_, null, 'Speaker(s)'), bpy.types.Speaker])});
 		if (data === null) {
 			if (__eq__ (data_type, 'OBJECT')) {
-				var data = tuple ([(only_selected ? (__eq__ (space_type, 'OUTLINER') ? (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? (__eq__ (space_type, 'OUTLINER') ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_ids_from_outliner_by_type, __accu0__, context, bpy.types.Object);
 				}) () : context.selected_editable_objects) : (function () {
@@ -5392,7 +5408,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5403,7 +5419,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}) ()), 'name', __call__ (iface_, null, 'Object(s)')]);
 			}
 			else if (__eq__ (data_type, 'COLLECTION')) {
-				var data = tuple ([(only_selected ? __call__ (tuple, null, __call__ (set, null, (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? __call__ (tuple, null, __call__ (set, null, (function () {
 					var __accu0__ = [];
 					var __iterable0__ = context.selected_objects;
 					__iterable0__ = __i__ (__iterable0__);
@@ -5413,7 +5429,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 						__iterable1__ = __i__ (__iterable1__);
 						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 							var collection = __getitem__ (__iterable1__, __index1__);
-							if (__eq__ (ob.instance_type, 'COLLECTION') && collection !== null && collection.is_editable) {
+							if (__eq__ (ob.instance_type, 'COLLECTION') && collection !== null && __call__ (_truth, null, collection.is_editable)) {
 								(function () {
 									var __accu1__ = __accu0__;
 									return __call__ (__accu1__.append, __accu1__, ob.instance_collection);
@@ -5428,7 +5444,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5439,7 +5455,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}) ()), 'name', __call__ (iface_, null, 'Collection(s)')]);
 			}
 			else if (__eq__ (data_type, 'MATERIAL')) {
-				var data = tuple ([(only_selected ? (__eq__ (space_type, 'OUTLINER') ? (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? (__eq__ (space_type, 'OUTLINER') ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_ids_from_outliner_by_type, __accu0__, context, bpy.types.Material);
 				}) () : __call__ (tuple, null, __call__ (set, null, (function () {
@@ -5456,7 +5472,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 							__iterable2__ = __i__ (__iterable2__);
 							for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
 								var id = __getitem__ (__iterable2__, __index2__);
-								if (id !== null && id.is_editable) {
+								if (id !== null && __call__ (_truth, null, id.is_editable)) {
 									(function () {
 										var __accu1__ = __accu0__;
 										return __call__ (__accu1__.append, __accu1__, id);
@@ -5472,7 +5488,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5483,7 +5499,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}) ()), 'name', __call__ (iface_, null, 'Material(s)')]);
 			}
 			else if (__eq__ (data_type, 'ACTION_CLIP')) {
-				var data = tuple ([(only_selected ? (__eq__ (space_type, 'OUTLINER') ? (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? (__eq__ (space_type, 'OUTLINER') ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_actions_from_outliner, __accu0__, context);
 				}) () : __call__ (tuple, null, __call__ (set, null, (function () {
@@ -5500,7 +5516,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 							__iterable2__ = __i__ (__iterable2__);
 							for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
 								var action = __getitem__ (__iterable2__, __index2__);
-								if (animation_data !== null && action !== null && action.is_editable) {
+								if (animation_data !== null && action !== null && __call__ (_truth, null, action.is_editable)) {
 									(function () {
 										var __accu1__ = __accu0__;
 										return __call__ (__accu1__.append, __accu1__, action);
@@ -5516,7 +5532,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5527,7 +5543,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}) ()), 'name', __call__ (iface_, null, 'Action(s)')]);
 			}
 			else if (__eq__ (data_type, 'SCENE')) {
-				var data = tuple ([(__eq__ (space_type, 'OUTLINER') && only_selected ? (function () {
+				var data = tuple ([(__eq__ (space_type, 'OUTLINER') && __call__ (_truth, null, only_selected) ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_ids_from_outliner_by_type, __accu0__, context, bpy.types.Scene);
 				}) () : (function () {
@@ -5536,7 +5552,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5547,7 +5563,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}) ()), 'name', __call__ (iface_, null, 'Scene(s)')]);
 			}
 			else if (__eq__ (data_type, 'BRUSH')) {
-				var data = tuple ([(__eq__ (space_type, 'OUTLINER') && only_selected ? (function () {
+				var data = tuple ([(__eq__ (space_type, 'OUTLINER') && __call__ (_truth, null, only_selected) ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_ids_from_outliner_by_type, __accu0__, context, bpy.types.Brush);
 				}) () : (function () {
@@ -5556,7 +5572,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5574,7 +5590,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				var attr = __left0__ [0];
 				var descr = __left0__ [1];
 				var ty = __left0__ [2];
-				var data = tuple ([(only_selected ? (__eq__ (space_type, 'OUTLINER') ? (function () {
+				var data = tuple ([(__call__ (_truth, null, only_selected) ? (__eq__ (space_type, 'OUTLINER') ? (function () {
 					var __accu0__ = cls;
 					return __call__ (__accu0__._selected_ids_from_outliner_by_type_for_object_data, __accu0__, context, ty);
 				}) () : __call__ (tuple, null, __call__ (set, null, (function () {
@@ -5588,7 +5604,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 							__iterable1__ = __i__ (__iterable1__);
 							for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 								var id = __getitem__ (__iterable1__, __index1__);
-								if (id !== null && id.is_editable) {
+								if (id !== null && __call__ (_truth, null, id.is_editable)) {
 									(function () {
 										var __accu1__ = __accu0__;
 										return __call__ (__accu1__.append, __accu1__, id);
@@ -5604,7 +5620,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					__iterable0__ = __i__ (__iterable0__);
 					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 						var id = __getitem__ (__iterable0__, __index0__);
-						if (id.is_editable) {
+						if (__call__ (_truth, null, id.is_editable)) {
 							(function () {
 								var __accu1__ = __accu0__;
 								return __call__ (__accu1__.append, __accu1__, id);
@@ -5624,7 +5640,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var it = __getitem__ (__iterable0__, __index0__);
-				if (__call__ (_is_editable, null, it)) {
+				if (__call__ (_truth, null, __call__ (_is_editable, null, it))) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, it);
@@ -5693,9 +5709,9 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}
 			}
 			else if (__eq__ (ty, 'REPLACE')) {
-				if (action.use_replace_regex_src) {
+				if (__call__ (_truth, null, action.use_replace_regex_src)) {
 					var replace_src = action.replace_src;
-					if (action.use_replace_regex_dst) {
+					if (__call__ (_truth, null, action.use_replace_regex_dst)) {
 						var replace_dst = action.replace_dst;
 					}
 					else {
@@ -5717,7 +5733,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				}
 				var py_name = (function () {
 					var __accu0__ = re;
-					return __call__ (__accu0__.sub, __accu0__, replace_src, replace_dst, py_name, __kwargtrans__ ({flags: (action.replace_match_case ? 0 : re.IGNORECASE)}));
+					return __call__ (__accu0__.sub, __accu0__, replace_src, replace_dst, py_name, __kwargtrans__ ({flags: (__call__ (_truth, null, action.replace_match_case) ? 0 : re.IGNORECASE)}));
 				}) ();
 			}
 			else if (__eq__ (ty, 'CASE')) {
@@ -5915,7 +5931,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: fac}));
 				}) ();
 				var re_error_src = null;
-				if (action.use_replace_regex_src) {
+				if (__call__ (_truth, null, action.use_replace_regex_src)) {
 					try {
 						(function () {
 							var __accu0__ = re;
@@ -5970,8 +5986,8 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: fac}));
 				}) ();
 				var re_error_dst = null;
-				if (action.use_replace_regex_src) {
-					if (action.use_replace_regex_dst) {
+				if (__call__ (_truth, null, action.use_replace_regex_src)) {
+					if (__call__ (_truth, null, action.use_replace_regex_dst)) {
 						if (re_error_src === null) {
 							try {
 								(function () {
@@ -6103,7 +6119,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var i = __left0__ [0];
 			var action = __left0__ [1];
-			if (action.op_add) {
+			if (__call__ (_truth, null, action.op_add)) {
 				action.op_add = false;
 				(function () {
 					var __accu0__ = self.actions;
@@ -6118,7 +6134,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				var changed = true;
 				break;
 			}
-			if (action.op_remove) {
+			if (__call__ (_truth, null, action.op_remove)) {
 				action.op_remove = false;
 				if (__gt__ (__call__ (len, null, self.actions), 1)) {
 					(function () {
@@ -6164,7 +6180,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var action = __getitem__ (__iterable0__, __index0__);
-			if (action.use_replace_regex_src) {
+			if (__call__ (_truth, null, action.use_replace_regex_src)) {
 				try {
 					(function () {
 						var __accu0__ = re;
@@ -6187,7 +6203,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 						throw __except0__;
 					}
 				}
-				if (action.use_replace_regex_dst) {
+				if (__call__ (_truth, null, action.use_replace_regex_dst)) {
 					try {
 						(function () {
 							var __accu0__ = re;
@@ -6259,7 +6275,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 			var __accu0__ = self;
 			return __call__ (__accu0__._data_update, __accu0__, context);
 		}) ();
-		if (!(self.actions)) {
+		if (!(__call__ (_truth, null, self.actions))) {
 			(function () {
 				var __accu0__ = self.actions;
 				return __call__ (__accu0__.add, __accu0__);
@@ -6303,7 +6319,7 @@ export var WM_MT_splash_quick_setup =  __class__ ('WM_MT_splash_quick_setup', [M
 			var __accu0__ = bpy.types.PREFERENCES_OT_copy_prev;
 			return __call__ (__accu0__.poll, __accu0__, context);
 		}) () && old_version;
-		if (can_import) {
+		if (__call__ (_truth, null, can_import)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Import Preferences From Previous Version'}));
@@ -6340,7 +6356,7 @@ export var WM_MT_splash_quick_setup =  __class__ ('WM_MT_splash_quick_setup', [M
 				return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({py_metatype: 'LINE'}));
 			}) ();
 		}
-		if (can_import) {
+		if (__call__ (_truth, null, can_import)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Create New Preferences'}));
@@ -6370,7 +6386,7 @@ export var WM_MT_splash_quick_setup =  __class__ ('WM_MT_splash_quick_setup', [M
 		}) ();
 		col.use_property_split = true;
 		col.use_property_decorate = false;
-		if (bpy.app.build_options.international) {
+		if (__call__ (_truth, null, bpy.app.build_options.international)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, prefs.view, 'language');
@@ -6402,7 +6418,7 @@ export var WM_MT_splash_quick_setup =  __class__ ('WM_MT_splash_quick_setup', [M
 			var __accu0__ = bpy.path;
 			return __call__ (__accu0__.display_name, __accu0__, kc.py_name);
 		}) ();
-		if (!(text)) {
+		if (!(__call__ (_truth, null, text))) {
 			var text = 'Blender';
 		}
 		(function () {
@@ -6435,7 +6451,7 @@ export var WM_MT_splash_quick_setup =  __class__ ('WM_MT_splash_quick_setup', [M
 			var __accu0__ = sub;
 			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({factor: 2}));
 		}) ();
-		if (can_import) {
+		if (__call__ (_truth, null, can_import)) {
 			(function () {
 				var __accu0__ = sub;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.save_userpref', __kwargtrans__ ({text: 'Save New Preferences', icon: 'NONE'}));
@@ -6502,7 +6518,7 @@ export var WM_MT_splash =  __class__ ('WM_MT_splash', [Menu], {
 			var __accu0__ = col2;
 			return __call__ (__accu0__.template_recent_files, __accu0__, __kwargtrans__ ({rows: 5}));
 		}) ();
-		if (found_recent) {
+		if (__call__ (_truth, null, found_recent)) {
 			(function () {
 				var __accu0__ = col2_title;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Recent Files'}));
@@ -6597,7 +6613,7 @@ export var WM_MT_splash =  __class__ ('WM_MT_splash', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (!(bpy.app.online_access) && bpy.app.online_access_override) {
+		if (!(__call__ (_truth, null, bpy.app.online_access)) && __call__ (_truth, null, bpy.app.online_access_override)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Running in Offline Mode', icon: 'INTERNET_OFFLINE'}));
@@ -6794,10 +6810,10 @@ export var WM_MT_region_toggle_pie =  __class__ ('WM_MT_region_toggle_pie', [Men
 			if (attr === null) {
 				continue;
 			}
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = space_data;
 				return __call__ (__accu0__.is_property_readonly, __accu0__, attr);
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			if (__in__ (region_type, region_by_type)) {
@@ -6838,7 +6854,7 @@ export var WM_MT_region_toggle_pie =  __class__ ('WM_MT_region_toggle_pie', [Men
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var index_other = __getitem__ (__iterable0__, __index0__);
-				if (!(__getitem__ (py_items, index_other))) {
+				if (!(__call__ (_truth, null, __getitem__ (py_items, index_other)))) {
 					(function () {
 						var __accu0__ = __getitem__ (py_items, index_other);
 						return __call__ (__accu0__.append, __accu0__, (function () {
@@ -6858,7 +6874,7 @@ export var WM_MT_region_toggle_pie =  __class__ ('WM_MT_region_toggle_pie', [Men
 				continue;
 			}
 			for (var index_other = 4; index_other < 8; index_other++) {
-				if (!(__getitem__ (py_items, index_other))) {
+				if (!(__call__ (_truth, null, __getitem__ (py_items, index_other)))) {
 					(function () {
 						var __accu0__ = __getitem__ (py_items, index_other);
 						return __call__ (__accu0__.append, __accu0__, (function () {
@@ -6888,7 +6904,7 @@ export var WM_MT_region_toggle_pie =  __class__ ('WM_MT_region_toggle_pie', [Men
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var region_type_list = __getitem__ (__iterable0__, __index0__);
-			if (!(region_type_list)) {
+			if (!(__call__ (_truth, null, region_type_list))) {
 				(function () {
 					var __accu0__ = pie;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -6901,7 +6917,7 @@ export var WM_MT_region_toggle_pie =  __class__ ('WM_MT_region_toggle_pie', [Men
 			var value = __call__ (getattr, null, space_data, attr);
 			var props = (function () {
 				var __accu0__ = pie;
-				return __call__ (__accu0__.operator, __accu0__, 'wm.context_toggle', __kwargtrans__ ({text: text, text_ctxt: i18n_contexts.py_default, icon: (value ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT')}));
+				return __call__ (__accu0__.operator, __accu0__, 'wm.context_toggle', __kwargtrans__ ({text: text, text_ctxt: i18n_contexts.py_default, icon: (__call__ (_truth, null, value) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT')}));
 			}) ();
 			props.data_path = __add__ ('space_data.', attr);
 		}
@@ -6998,11 +7014,11 @@ export var WM_OT_drop_blend_file =  __class__ ('WM_OT_drop_blend_file', [Operato
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		var is_untrusted = context.preferences.filepaths.use_scripts_auto_execute && bpy.app.autoexec_override === null && !((function () {
+		var is_untrusted = context.preferences.filepaths.use_scripts_auto_execute && bpy.app.autoexec_override === null && !(__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__._is_autoexec, __accu0__, filepath);
-		}) ());
-		if (!(is_untrusted)) {
+		}) ()));
+		if (!(__call__ (_truth, null, is_untrusted))) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, self, 'use_scripts');
@@ -7095,6 +7111,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '_rna_path_prop_search_for_context_impl': _rna_path_prop_search_for_context_impl = value; break;

@@ -110,6 +110,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -170,7 +186,7 @@ export var get_matrix = function (context) {
 	else {
 	}
 	var bone = context.active_pose_bone;
-	if (bone) {
+	if (__call__ (_truth, null, bone)) {
 		var arm = context.active_object;
 		var mat = __matmul__ (arm.matrix_world, bone.matrix);
 	}
@@ -196,7 +212,7 @@ export var set_matrix = function (context, mat) {
 	}
 	var AutoKeying = __call__ (_member, null, 'bpy_extras.anim_utils', 'AutoKeying');
 	var bone = context.active_pose_bone;
-	if (bone) {
+	if (__call__ (_truth, null, bone)) {
 		var arm_eval = (function () {
 			var __accu0__ = context.active_object;
 			return __call__ (__accu0__.evaluated_get, __accu0__, context.view_layer.depsgraph);
@@ -270,7 +286,7 @@ export var _selected_keyframes = function (context) {
 	else {
 	}
 	var bone = context.active_pose_bone;
-	if (bone) {
+	if (__call__ (_truth, null, bone)) {
 		return __call__ (_selected_keyframes_for_bone, null, context.active_object, bone);
 	}
 	return __call__ (_selected_keyframes_for_object, null, context.active_object);
@@ -331,7 +347,7 @@ export var _selected_keyframes_for_action_slot = function (object, rna_path_pref
 	else {
 	}
 	var cbag = __call__ (_channelbag_for_id, null, object);
-	if (!(cbag)) {
+	if (!(__call__ (_truth, null, cbag))) {
 		return [];
 	}
 	var keyframes = __call__ (set, null);
@@ -339,17 +355,17 @@ export var _selected_keyframes_for_action_slot = function (object, rna_path_pref
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var fcurve = __getitem__ (__iterable0__, __index0__);
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = fcurve.data_path;
 			return __call__ (__accu0__.startswith, __accu0__, rna_path_prefix);
-		}) ())) {
+		}) ()))) {
 			continue;
 		}
 		var __iterable1__ = fcurve.keyframe_points;
 		__iterable1__ = __i__ (__iterable1__);
 		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 			var kp = __getitem__ (__iterable1__, __index1__);
-			if (!(kp.select_control_point)) {
+			if (!(__call__ (_truth, null, kp.select_control_point))) {
 				continue;
 			}
 			(function () {
@@ -482,7 +498,7 @@ export var OBJECT_OT_copy_relative_transform =  __class__ ('OBJECT_OT_copy_relat
 		else {
 		}
 		var rel_ob = __call__ (get_relative_ob, null, context);
-		if (!(rel_ob)) {
+		if (!(__call__ (_truth, null, rel_ob))) {
 			return false;
 		}
 		return __call__ (bool, null, context.active_pose_bone) || __call__ (bool, null, context.active_object);
@@ -503,7 +519,7 @@ export var OBJECT_OT_copy_relative_transform =  __class__ ('OBJECT_OT_copy_relat
 		else {
 		}
 		var rel_ob = __call__ (get_relative_ob, null, context);
-		if (!(rel_ob)) {
+		if (!(__call__ (_truth, null, rel_ob))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), "No 'Relative To' object found, set one explicitly or make sure there is an active object");
@@ -544,7 +560,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		if (!(context.active_pose_bone) && !(context.active_object)) {
+		if (!(__call__ (_truth, null, context.active_pose_bone)) && !(__call__ (_truth, null, context.active_object))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Select an object or pose bone');
@@ -568,25 +584,25 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = value;
 			return __call__ (__accu0__.startswith, __accu0__, 'Matrix');
-		}) ()) {
+		}) ())) {
 			return (function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.parse_matrix, __accu0__, value);
 			}) ();
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = value;
 			return __call__ (__accu0__.startswith, __accu0__, '<Matrix 4x4');
-		}) ()) {
+		}) ())) {
 			return (function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.parse_repr_m4, __accu0__, __getslice__ (value, 12, __neg__ (1), 1));
 			}) ();
 		}
-		if (value) {
+		if (__call__ (_truth, null, value)) {
 			return (function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.parse_print_m4, __accu0__, value);
@@ -825,13 +841,13 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		if (self.use_relative) {
+		if (__call__ (_truth, null, self.use_relative)) {
 			var matrix = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._relative_to_world, __accu0__, context, matrix);
 			}) ();
 		}
-		if (self.use_mirror) {
+		if (__call__ (_truth, null, self.use_mirror)) {
 			var matrix = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._mirror_matrix, __accu0__, context, matrix);
@@ -856,7 +872,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		var rel_ob = __call__ (get_relative_ob, null, context);
-		if (!(rel_ob)) {
+		if (!(__call__ (_truth, null, rel_ob))) {
 			return matrix;
 		}
 		var rel_ob_eval = (function () {
@@ -884,15 +900,15 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		var mirror_ob = context.scene.tool_settings.anim_mirror_object;
 		var mirror_bone = context.scene.tool_settings.anim_mirror_bone;
 		var ctx_ob = context.object;
-		if (!(mirror_ob) && mirror_bone && ctx_ob && __eq__ (ctx_ob.py_metatype, 'ARMATURE')) {
+		if (!(__call__ (_truth, null, mirror_ob)) && __call__ (_truth, null, mirror_bone) && __call__ (_truth, null, ctx_ob) && __eq__ (ctx_ob.py_metatype, 'ARMATURE')) {
 			var mirror_ob = ctx_ob;
 		}
-		if (!(mirror_ob)) {
+		if (!(__call__ (_truth, null, mirror_ob))) {
 			var __except0__ = __call__ (UnableToMirrorError, null);
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (__eq__ (mirror_ob.py_metatype, 'ARMATURE') && mirror_bone) {
+		if (__eq__ (mirror_ob.py_metatype, 'ARMATURE') && __call__ (_truth, null, mirror_bone)) {
 			return (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._mirror_over_bone, __accu0__, matrix, mirror_ob, mirror_bone);
@@ -1044,7 +1060,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		if (!(context.scene.tool_settings.use_keyframe_insert_auto)) {
+		if (!(__call__ (_truth, null, context.scene.tool_settings.use_keyframe_insert_auto))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'This mode requires auto-keying to work properly');
@@ -1052,7 +1068,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 			return new set (['CANCELLED']);
 		}
 		var frame_numbers = __call__ (_selected_keyframes, null, context);
-		if (!(frame_numbers)) {
+		if (!(__call__ (_truth, null, frame_numbers))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No selected frames found');
@@ -1081,7 +1097,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		if (!(context.scene.tool_settings.use_keyframe_insert_auto)) {
+		if (!(__call__ (_truth, null, context.scene.tool_settings.use_keyframe_insert_auto))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'This mode requires auto-keying to work properly');
@@ -1119,10 +1135,10 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		var frame_numbers = __call__ (_selected_keyframes, null, context);
-		if (frame_numbers) {
+		if (__call__ (_truth, null, frame_numbers)) {
 			return tuple ([__getitem__ (frame_numbers, 0), __getitem__ (frame_numbers, __neg__ (1))]);
 		}
-		if (context.scene.use_preview_range) {
+		if (__call__ (_truth, null, context.scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'No selected keys, pasting over preview range');
@@ -1548,7 +1564,7 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 		else {
 		}
 		var cbag = __call__ (_channelbag_for_id, null, self.object);
-		if (!(cbag)) {
+		if (!(__call__ (_truth, null, cbag))) {
 			return ;
 		}
 		yield* cbag.fcurves});}
@@ -1690,7 +1706,7 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		else {
 		}
 		var cbag = __call__ (_channelbag_for_id, null, self.arm_object);
-		if (!(cbag)) {
+		if (!(__call__ (_truth, null, cbag))) {
 			return ;
 		}
 		var rna_prefix = __add__ ((function () {
@@ -1701,10 +1717,10 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var fcurve = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = fcurve.data_path;
 				return __call__ (__accu0__.startswith, __accu0__, rna_prefix);
-			}) ()) {
+			}) ())) {
 				yield fcurve;
 			}
 		}
@@ -1783,7 +1799,7 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		}
 		else {
 		}
-		if (!(context.active_pose_bone) && !(context.active_object)) {
+		if (!(__call__ (_truth, null, context.active_pose_bone)) && !(__call__ (_truth, null, context.active_object))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Select an object or pose bone');
@@ -1797,7 +1813,7 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 			}) ();
 			return false;
 		}
-		if (!(context.scene.camera)) {
+		if (!(__call__ (_truth, null, context.scene.camera))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'The Scene needs a camera');
@@ -2025,7 +2041,7 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 			var __accu0__ = self;
 			return __call__ (__accu0__._get_matrices, __accu0__, camera_eval, transformables);
 		}) ();
-		if (scene.use_preview_range) {
+		if (__call__ (_truth, null, scene.use_preview_range)) {
 			var frame_start = scene.frame_preview_start;
 			var frame_end = scene.frame_preview_end;
 		}
@@ -2157,7 +2173,7 @@ export var OBJECT_OT_delete_fix_to_camera_keys =  __class__ ('OBJECT_OT_delete_f
 		else {
 		}
 		var scene = context.scene;
-		if (scene.use_preview_range) {
+		if (__call__ (_truth, null, scene.use_preview_range)) {
 			var frame_start = scene.frame_preview_start;
 			var frame_end = scene.frame_preview_end;
 		}
@@ -2301,6 +2317,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '_axis_enum_items': _axis_enum_items = value; break;

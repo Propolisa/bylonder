@@ -101,6 +101,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -199,7 +215,7 @@ export var repr_f32 = function (f) {
 		var __accu0__ = f_str;
 		return __call__ (__accu0__.partition, __accu0__, '.');
 	}) (), 2);
-	if (!(f_str_frac)) {
+	if (!(__call__ (_truth, null, f_str_frac))) {
 		return f_str;
 	}
 	for (var i = 1; i < __call__ (len, null, f_str_frac); i++) {
@@ -235,7 +251,7 @@ export var kmi_args_as_data = function (kmi) {
 		var __accu0__ = '';
 		return __call__ (__accu0__.join, __accu0__, ['"value": \'', __call__ (_formatted, null, kmi.value, '', ''), "'"]);
 	}) ()];
-	if (kmi.any) {
+	if (__call__ (_truth, null, kmi.any)) {
 		(function () {
 			var __accu0__ = s;
 			return __call__ (__accu0__.append, __accu0__, '"any": True');
@@ -247,7 +263,7 @@ export var kmi_args_as_data = function (kmi) {
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var attr = __getitem__ (__iterable0__, __index0__);
 			var mod = __call__ (getattr, null, kmi, attr);
-			if (mod) {
+			if (__call__ (_truth, null, mod)) {
 				(function () {
 					var __accu0__ = s;
 					return __call__ (__accu0__.append, __accu0__, __add__ ((function () {
@@ -262,7 +278,7 @@ export var kmi_args_as_data = function (kmi) {
 		}
 	}
 	var mod = kmi.key_modifier;
-	if (mod && __ne__ (mod, 'NONE')) {
+	if (__call__ (_truth, null, mod) && __ne__ (mod, 'NONE')) {
 		(function () {
 			var __accu0__ = s;
 			return __call__ (__accu0__.append, __accu0__, (function () {
@@ -275,7 +291,7 @@ export var kmi_args_as_data = function (kmi) {
 		}) ();
 	}
 	var direction = kmi.direction;
-	if (direction && __ne__ (direction, 'ANY')) {
+	if (__call__ (_truth, null, direction) && __ne__ (direction, 'ANY')) {
 		(function () {
 			var __accu0__ = s;
 			return __call__ (__accu0__.append, __accu0__, (function () {
@@ -287,7 +303,7 @@ export var kmi_args_as_data = function (kmi) {
 			}) ());
 		}) ();
 	}
-	if (kmi.repeat) {
+	if (__call__ (_truth, null, kmi.repeat)) {
 		if (__eq__ (kmi.map_type, 'KEYBOARD') && __in__ (kmi.value, new set (['PRESS', 'ANY'])) || __eq__ (kmi.map_type, 'TEXTINPUT')) {
 			(function () {
 				var __accu0__ = s;
@@ -337,7 +353,7 @@ export var _kmi_properties_to_lines_recursive = function (level, properties, lin
 		else if (__call__ (isinstance, null, value, float)) {
 			return __call__ (repr_f32, null, value);
 		}
-		else if (__call__ (getattr, null, value, '__len__', false)) {
+		else if (__call__ (_truth, null, __call__ (getattr, null, value, '__len__', false))) {
 			return __call__ (repr, null, __call__ (tuple, null, value));
 		}
 		var __except0__ = __call__ (Exception, null, (function () {
@@ -359,7 +375,7 @@ export var _kmi_properties_to_lines_recursive = function (level, properties, lin
 			if (__call__ (isinstance, null, value, OperatorProperties)) {
 				var lines_test = [];
 				__call__ (_kmi_properties_to_lines_recursive, null, __add__ (level, 2), value, lines_test);
-				if (lines_test) {
+				if (__call__ (_truth, null, lines_test)) {
 					(function () {
 						var __accu0__ = lines;
 						return __call__ (__accu0__.append, __accu0__, '(');
@@ -396,10 +412,10 @@ export var _kmi_properties_to_lines_recursive = function (level, properties, lin
 				}
 				// pass;
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = properties;
 				return __call__ (__accu0__.is_property_set, __accu0__, pname);
-			}) ()) {
+			}) ())) {
 				var value = __call__ (string_value, null, value);
 				(function () {
 					var __accu0__ = lines;
@@ -476,7 +492,7 @@ export var _kmi_attrs_or_none = function (level, kmi) {
 			}) ());
 		}) ();
 	}
-	if (!(lines)) {
+	if (!(__call__ (_truth, null, lines))) {
 		return null;
 	}
 	return (function () {
@@ -511,7 +527,7 @@ export var keyconfig_export_as_data = function (wm, kc, filepath) {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var km = __getitem__ (__iterable0__, __index0__);
-		if (all_keymaps || km.is_user_modified) {
+		if (__call__ (_truth, null, all_keymaps) || __call__ (_truth, null, km.is_user_modified)) {
 			(function () {
 				var __accu0__ = edited_kc.keymaps;
 				return __call__ (__accu0__.append, __accu0__, km);
@@ -590,7 +606,7 @@ export var keyconfig_export_as_data = function (wm, kc, filepath) {
 					return __call__ (__accu1__.join, __accu1__, ['s']);
 				}) ()), "'"]);
 			}) ());
-			if (km.is_modal) {
+			if (__call__ (_truth, null, km.is_modal)) {
 				__call__ (fw, null, ', "modal": True');
 			}
 			__call__ (fw, null, '},\n');
@@ -608,7 +624,7 @@ export var keyconfig_export_as_data = function (wm, kc, filepath) {
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var kmi = __getitem__ (__iterable1__, __index1__);
-				if (is_modal) {
+				if (__call__ (_truth, null, is_modal)) {
 					var kmi_id = kmi.propvalue;
 				}
 				else {
@@ -768,7 +784,7 @@ export var keymap_init_from_data = function (km, km_items, is_modal) {
 	}
 	else {
 	}
-	var new_fn = __call__ (getattr, null, km.keymap_items, (is_modal ? 'new_modal' : 'new'));
+	var new_fn = __call__ (getattr, null, km.keymap_items, (__call__ (_truth, null, is_modal) ? 'new_modal' : 'new'));
 	var __iterable0__ = km_items;
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -778,10 +794,10 @@ export var keymap_init_from_data = function (km, km_items, is_modal) {
 		var kmi_data = __left0__ [2];
 		var kmi = __call__ (new_fn, null, kmi_idname, __kwargtrans__ (__call__ (_merged, null, kmi_args)));
 		if (kmi_data !== null) {
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = kmi_data;
 				return __call__ (__accu0__.py_get, __accu0__, 'active', true);
-			}) ())) {
+			}) ()))) {
 				kmi.active = false;
 			}
 			var kmi_props_data = (function () {
@@ -932,6 +948,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

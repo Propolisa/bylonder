@@ -13,6 +13,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_view3d_toolbar';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var VIEW3D_MT_brush_context_menu =  __class__ ('VIEW3D_MT_brush_context_menu', [Menu], {
 	__module__: __name__,
 	bl_label: 'Brush Specials',
@@ -37,14 +193,14 @@ export var VIEW3D_MT_brush_context_menu =  __class__ ('VIEW3D_MT_brush_context_m
 			return __call__ (__accu0__.paint_settings, __accu0__, context);
 		}) ();
 		var brush = __call__ (getattr, null, settings, 'brush', null);
-		if (!(brush)) {
+		if (!(__call__ (_truth, null, brush))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No brush selected', icon: 'INFO'}));
 			}) ();
 			return ;
 		}
-		if (brush.library && brush.library.is_editable) {
+		if (__call__ (_truth, null, brush.library) && __call__ (_truth, null, brush.library.is_editable)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'brush.asset_save_as', __kwargtrans__ ({text: 'Duplicate Asset...', icon: 'DUPLICATE'}));
@@ -131,7 +287,7 @@ export var draw_vpaint_symmetry = function (layout, obj) {
 		var __accu0__ = layout;
 		return __call__ (__accu0__.column, __accu0__);
 	}) ();
-	col.active = !(mesh.use_mirror_vertex_groups);
+	col.active = !(__call__ (_truth, null, mesh.use_mirror_vertex_groups));
 	(function () {
 		var __accu0__ = col;
 		return __call__ (__accu0__.prop, __accu0__, mesh, 'radial_symmetry', __kwargtrans__ ({text: 'Radial'}));
@@ -443,7 +599,7 @@ export var VIEW3D_PT_tools_posemode_options =  __class__ ('VIEW3D_PT_tools_posem
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = pose.use_mirror_x && !(pose.use_auto_ik);
+		col.active = pose.use_mirror_x && !(__call__ (_truth, null, pose.use_auto_ik));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, pose, 'use_mirror_relative');
@@ -486,7 +642,7 @@ export var TEXTURE_UL_texpaintslots =  __class__ ('TEXTURE_UL_texpaintslots', [U
 			var __accu0__ = _data.texture_paint_images;
 			return __call__ (__accu0__.py_get, __accu0__, item.py_name);
 		}) ();
-		if (ima !== null && !(ima.is_editable)) {
+		if (ima !== null && !(__call__ (_truth, null, ima.is_editable))) {
 			layout.enabled = false;
 		}
 		(function () {
@@ -571,10 +727,10 @@ export var VIEW3D_PT_tools_particlemode =  __class__ ('VIEW3D_PT_tools_particlem
 			var __accu0__ = ToolSelectPanelHelper;
 			return __call__ (__accu0__.tool_active_from_context, __accu0__, context);
 		}) ();
-		if (!(tool_context)) {
+		if (!(__call__ (_truth, null, tool_context))) {
 			var tool = null;
 		}
-		if (!(tool_context.use_brushes)) {
+		if (!(__call__ (_truth, null, tool_context.use_brushes))) {
 			var tool = null;
 		}
 		if (tool !== null) {
@@ -815,15 +971,15 @@ export var VIEW3D_PT_tools_brush_color =  __class__ ('VIEW3D_PT_tools_brush_colo
 			return __call__ (__accu0__.paint_settings, __accu0__, context);
 		}) ();
 		var brush = settings.brush;
-		if (context.image_paint_object) {
+		if (__call__ (_truth, null, context.image_paint_object)) {
 			var capabilities = brush.image_paint_capabilities;
 			return capabilities.has_color;
 		}
-		else if (context.vertex_paint_object) {
+		else if (__call__ (_truth, null, context.vertex_paint_object)) {
 			var capabilities = brush.vertex_paint_capabilities;
 			return capabilities.has_color;
 		}
-		else if (context.sculpt_object) {
+		else if (__call__ (_truth, null, context.sculpt_object)) {
 			var capabilities = brush.sculpt_capabilities;
 			return capabilities.has_color;
 		}
@@ -850,7 +1006,7 @@ export var VIEW3D_PT_tools_brush_color =  __class__ ('VIEW3D_PT_tools_brush_colo
 			return __call__ (__accu0__.paint_settings, __accu0__, context);
 		}) ();
 		var brush = settings.brush;
-		__call__ (draw_color_settings, null, context, layout, brush, __kwargtrans__ ({color_type: !(context.vertex_paint_object)}));
+		__call__ (draw_color_settings, null, context, layout, brush, __kwargtrans__ ({color_type: !(__call__ (_truth, null, context.vertex_paint_object))}));
 	});}
 });
 export var VIEW3D_PT_tools_brush_swatches =  __class__ ('VIEW3D_PT_tools_brush_swatches', [Panel, View3DPaintPanel, ColorPalettePanel], {
@@ -949,7 +1105,7 @@ export var SelectPaintSlotHelper =  __class__ ('SelectPaintSlotHelper', [object]
 				}) ();
 			}
 			var mat = ob.active_material;
-			if (mat && mat.texture_paint_images) {
+			if (__call__ (_truth, null, mat) && __call__ (_truth, null, mat.texture_paint_images)) {
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
@@ -958,7 +1114,7 @@ export var SelectPaintSlotHelper =  __class__ ('SelectPaintSlotHelper', [object]
 					var __accu0__ = row;
 					return __call__ (__accu0__.template_list, __accu0__, 'TEXTURE_UL_texpaintslots', '', mat, 'texture_paint_slots', mat, 'paint_active_slot', __kwargtrans__ ({rows: 2}));
 				}) ();
-				if (mat.texture_paint_slots) {
+				if (__call__ (_truth, null, mat.texture_paint_slots)) {
 					var slot = __getitem__ (mat.texture_paint_slots, mat.paint_active_slot);
 				}
 				else {
@@ -991,12 +1147,12 @@ export var SelectPaintSlotHelper =  __class__ ('SelectPaintSlotHelper', [object]
 		}
 		else if (__eq__ (_match_subject, 'IMAGE')) {
 			var mesh = ob.data;
-			var uv_text = (mesh.uv_layers.active ? mesh.uv_layers.active.py_name : '');
+			var uv_text = (__call__ (_truth, null, mesh.uv_layers.active) ? mesh.uv_layers.active.py_name : '');
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, mode_settings, self.canvas_image_attr_name, __kwargtrans__ ({py_new: 'image.new', open: 'image.open'}));
 			}) ();
-			if (settings.missing_uvs) {
+			if (__call__ (_truth, null, settings.missing_uvs)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.operator, __accu0__, 'paint.add_simple_uvs', __kwargtrans__ ({icon: 'ADD', text: 'Add UVs'}));
@@ -1041,7 +1197,7 @@ export var SelectPaintSlotHelper =  __class__ ('SelectPaintSlotHelper', [object]
 				return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
 			}) ();
 		}
-		if (settings.missing_uvs) {
+		if (__call__ (_truth, null, settings.missing_uvs)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1059,7 +1215,7 @@ export var SelectPaintSlotHelper =  __class__ ('SelectPaintSlotHelper', [object]
 				return __call__ (__accu0__.operator, __accu0__, 'paint.add_simple_uvs', __kwargtrans__ ({icon: 'ADD', text: 'Add Simple UVs'}));
 			}) ();
 		}
-		else if (have_image) {
+		else if (__call__ (_truth, null, have_image)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1152,11 +1308,11 @@ export var VIEW3D_PT_slots_projectpaint =  __class__ ('VIEW3D_PT_slots_projectpa
 		var mat = ob.active_material;
 		var label = __call__ (iface_, null, 'Texture Slots');
 		if (__eq__ (tool.mode, 'MATERIAL')) {
-			if (mat && mat.texture_paint_images && mat.texture_paint_slots) {
+			if (__call__ (_truth, null, mat) && __call__ (_truth, null, mat.texture_paint_images) && __call__ (_truth, null, mat.texture_paint_slots)) {
 				var label = __getitem__ (mat.texture_paint_slots, mat.paint_active_slot).py_name;
 			}
 		}
-		else if (tool.canvas) {
+		else if (__call__ (_truth, null, tool.canvas)) {
 			var label = tool.canvas.py_name;
 		}
 		self.bl_label = label;
@@ -1180,7 +1336,7 @@ export var VIEW3D_PT_slots_paint_canvas =  __class__ ('VIEW3D_PT_slots_paint_can
 		}
 		else {
 		}
-		if (!(context.preferences.experimental.use_sculpt_texture_paint)) {
+		if (!(__call__ (_truth, null, context.preferences.experimental.use_sculpt_texture_paint))) {
 			return false;
 		}
 		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
@@ -1192,9 +1348,9 @@ export var VIEW3D_PT_slots_paint_canvas =  __class__ ('VIEW3D_PT_slots_paint_can
 			return false;
 		}
 		var is_paint_tool = false;
-		if (tool.use_brushes) {
+		if (__call__ (_truth, null, tool.use_brushes)) {
 			var brush = context.tool_settings.sculpt.brush;
-			if (brush) {
+			if (__call__ (_truth, null, brush)) {
 				var is_paint_tool = __in__ (brush.sculpt_brush_type, new set (['PAINT', 'SMEAR']));
 			}
 		}
@@ -1260,15 +1416,15 @@ export var VIEW3D_PT_slots_paint_canvas =  __class__ ('VIEW3D_PT_slots_paint_can
 		var mat = ob.active_material;
 		var label = __call__ (iface_, null, 'Canvas');
 		if (__eq__ (paint.canvas_source, 'MATERIAL')) {
-			if (mat && mat.texture_paint_images && mat.texture_paint_slots) {
+			if (__call__ (_truth, null, mat) && __call__ (_truth, null, mat.texture_paint_images) && __call__ (_truth, null, mat.texture_paint_slots)) {
 				var label = __getitem__ (mat.texture_paint_slots, mat.paint_active_slot).py_name;
 			}
 		}
 		else if (__eq__ (paint.canvas_source, 'COLOR_ATTRIBUTE')) {
 			var active_color = me.color_attributes.active_color;
-			var label = (active_color ? active_color.py_name : __call__ (iface_, null, 'Color Attribute'));
+			var label = (__call__ (_truth, null, active_color) ? active_color.py_name : __call__ (iface_, null, 'Color Attribute'));
 		}
-		else if (paint.canvas_image) {
+		else if (__call__ (_truth, null, paint.canvas_image)) {
 			var label = paint.canvas_image.py_name;
 		}
 		self.bl_label = label;
@@ -1297,7 +1453,7 @@ export var VIEW3D_PT_slots_color_attributes =  __class__ ('VIEW3D_PT_slots_color
 		}
 		var me = context.object.data;
 		var active_color = me.color_attributes.active_color;
-		self.bl_label = (active_color ? active_color.py_name : __call__ (iface_, null, 'Color Attributes'));
+		self.bl_label = (__call__ (_truth, null, active_color) ? active_color.py_name : __call__ (iface_, null, 'Color Attributes'));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -1374,7 +1530,7 @@ export var VIEW3D_PT_slots_vertex_groups =  __class__ ('VIEW3D_PT_slots_vertex_g
 		}
 		var ob = context.object;
 		var groups = ob.vertex_groups;
-		self.bl_label = (groups && groups.active ? groups.active.py_name : __call__ (iface_, null, 'Vertex Groups'));
+		self.bl_label = (__call__ (_truth, null, groups) && __call__ (_truth, null, groups.active) ? groups.active.py_name : __call__ (iface_, null, 'Vertex Groups'));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -1403,7 +1559,7 @@ export var VIEW3D_PT_slots_vertex_groups =  __class__ ('VIEW3D_PT_slots_vertex_g
 		var ob = context.object;
 		var group = ob.vertex_groups.active;
 		var rows = 3;
-		if (group) {
+		if (__call__ (_truth, null, group)) {
 			var rows = 5;
 		}
 		var row = (function () {
@@ -1437,7 +1593,7 @@ export var VIEW3D_PT_slots_vertex_groups =  __class__ ('VIEW3D_PT_slots_vertex_g
 			var __accu0__ = col;
 			return __call__ (__accu0__.menu, __accu0__, 'MESH_MT_vertex_group_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
 		}) ();
-		if (group) {
+		if (__call__ (_truth, null, group)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1522,7 +1678,7 @@ export var VIEW3D_PT_stencil_projectpaint =  __class__ ('VIEW3D_PT_stencil_proje
 		var ipaint = context.tool_settings.image_paint;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, ipaint, 'use_stencil_layer', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, ipaint, 'use_stencil_layer', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -1560,7 +1716,7 @@ export var VIEW3D_PT_stencil_projectpaint =  __class__ ('VIEW3D_PT_stencil_proje
 			var __accu0__ = col;
 			return __call__ (__accu0__.template_ID, __accu0__, ipaint, 'stencil_image', __kwargtrans__ ({py_new: 'image.new', open: 'image.open'}));
 		}) ();
-		var stencil_text = (mesh.uv_layer_stencil ? mesh.uv_layer_stencil.py_name : '');
+		var stencil_text = (__call__ (_truth, null, mesh.uv_layer_stencil) ? mesh.uv_layer_stencil.py_name : '');
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.separator, __accu0__);
@@ -1638,15 +1794,15 @@ export var VIEW3D_PT_tools_brush_texture =  __class__ ('VIEW3D_PT_tools_brush_te
 			return __call__ (__accu0__.paint_settings, __accu0__, context);
 		}) ();
 		var _walrus1 = settings;
-		if (_walrus1) {
+		if (__call__ (_truth, null, _walrus1)) {
 			var brush = settings.brush;
 			var _walrus1 = brush;
 		}
-		if (_walrus1) {
-			if (context.sculpt_object || context.vertex_paint_object) {
+		if (__call__ (_truth, null, _walrus1)) {
+			if (__call__ (_truth, null, context.sculpt_object) || __call__ (_truth, null, context.vertex_paint_object)) {
 				return true;
 			}
-			else if (context.image_paint_object) {
+			else if (__call__ (_truth, null, context.image_paint_object)) {
 				return __eq__ (brush.image_brush_type, 'DRAW');
 			}
 		}
@@ -1875,7 +2031,7 @@ export var VIEW3D_PT_tools_brush_falloff_frontface =  __class__ ('VIEW3D_PT_tool
 		var brush = settings.brush;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, brush, 'use_frontface_falloff', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_frontface_falloff', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -1954,7 +2110,7 @@ export var VIEW3D_PT_tools_brush_falloff_normal =  __class__ ('VIEW3D_PT_tools_b
 		var ipaint = tool_settings.image_paint;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, ipaint, 'use_normal_falloff', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, ipaint, 'use_normal_falloff', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -2034,7 +2190,7 @@ export var VIEW3D_PT_sculpt_dyntopo =  __class__ ('VIEW3D_PT_sculpt_dyntopo', [P
 		var layout = self.layout;
 		(function () {
 			var __accu0__ = layout;
-			return __call__ (__accu0__.operator, __accu0__, 'sculpt.dynamic_topology_toggle', __kwargtrans__ ({icon: (context.sculpt_object.use_dynamic_topology_sculpting ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: '', emboss: is_popover}));
+			return __call__ (__accu0__.operator, __accu0__, 'sculpt.dynamic_topology_toggle', __kwargtrans__ ({icon: (__call__ (_truth, null, context.sculpt_object.use_dynamic_topology_sculpting) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: '', emboss: is_popover}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -3050,7 +3206,7 @@ export var VIEW3D_PT_tools_imagepaint_options_cavity =  __class__ ('VIEW3D_PT_to
 		var ipaint = tool_settings.image_paint;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, ipaint, 'use_cavity', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, ipaint, 'use_cavity', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -3188,7 +3344,7 @@ export var VIEW3D_PT_tools_particlemode_options =  __class__ ('VIEW3D_PT_tools_p
 		}) ();
 		var ptcache = null;
 		if (__eq__ (pe.py_metatype, 'PARTICLES')) {
-			if (ob.particle_systems) {
+			if (__call__ (_truth, null, ob.particle_systems)) {
 				if (__gt__ (__call__ (len, null, ob.particle_systems), 1)) {
 					(function () {
 						var __accu0__ = layout;
@@ -3208,13 +3364,13 @@ export var VIEW3D_PT_tools_particlemode_options =  __class__ ('VIEW3D_PT_tools_p
 				}
 			}
 		}
-		if (ptcache && __gt__ (__call__ (len, null, ptcache.point_caches), 1)) {
+		if (__call__ (_truth, null, ptcache) && __gt__ (__call__ (len, null, ptcache.point_caches), 1)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'particles_point_caches', ptcache, 'point_caches', ptcache.point_caches, 'active_index', __kwargtrans__ ({rows: 2, maxrows: 3}));
 			}) ();
 		}
-		if (!(pe.is_editable)) {
+		if (!(__call__ (_truth, null, pe.is_editable))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Point cache must be baked'}));
@@ -3229,7 +3385,7 @@ export var VIEW3D_PT_tools_particlemode_options =  __class__ ('VIEW3D_PT_tools_p
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
 		col.active = pe.is_editable;
-		if (!(pe.is_hair)) {
+		if (!(__call__ (_truth, null, pe.is_hair))) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, pe, 'use_auto_velocity', __kwargtrans__ ({text: 'Auto-Velocity'}));
@@ -3339,7 +3495,7 @@ export var VIEW3D_PT_tools_particlemode_options_display =  __class__ ('VIEW3D_PT
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, pe, 'display_step', __kwargtrans__ ({text: 'Path Steps'}));
 		}) ();
-		if (pe.is_hair) {
+		if (__call__ (_truth, null, pe.is_hair)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, pe, 'show_particles', __kwargtrans__ ({text: 'Children'}));
@@ -3399,7 +3555,7 @@ export var tool_use_brush = function (context) {
 		var __accu0__ = ToolSelectPanelHelper;
 		return __call__ (__accu0__.tool_active_from_context, __accu0__, context);
 	}) ();
-	if (tool && tool.use_brushes === false) {
+	if (__call__ (_truth, null, tool) && tool.use_brushes === false) {
 		return false;
 	}
 	return true;
@@ -3462,7 +3618,7 @@ export var VIEW3D_PT_tools_grease_pencil_weight_paint_settings =  __class__ ('VI
 		}
 		else {
 		}
-		if (self.is_popover) {
+		if (__call__ (_truth, null, self.is_popover)) {
 			return ;
 		}
 		var layout = self.layout;
@@ -3568,7 +3724,7 @@ export var VIEW3D_PT_tools_grease_pencil_vertex_paint_settings =  __class__ ('VI
 		var tool_settings = context.scene.tool_settings;
 		var settings = tool_settings.gpencil_vertex_paint;
 		var brush = settings.brush;
-		if (!(self.is_popover)) {
+		if (!(__call__ (_truth, null, self.is_popover))) {
 			var brush_basic_grease_pencil_vertex_settings = __call__ (_member, null, 'bl_ui.properties_paint_common', 'brush_basic_grease_pencil_vertex_settings');
 			__call__ (brush_basic_grease_pencil_vertex_settings, null, layout, context, brush);
 		}
@@ -3629,7 +3785,7 @@ export var VIEW3D_PT_tools_grease_pencil_brush_vertex_color =  __class__ ('VIEW3
 		var brush = settings.brush;
 		var use_unified_paint = __ne__ (context.object.mode, 'PAINT_GREASE_PENCIL');
 		var ups = settings.unified_paint_settings;
-		var prop_owner = (use_unified_paint && ups.use_unified_color ? ups : brush);
+		var prop_owner = (__call__ (_truth, null, use_unified_paint) && __call__ (_truth, null, ups.use_unified_color) ? ups : brush);
 		var col = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
@@ -3642,7 +3798,7 @@ export var VIEW3D_PT_tools_grease_pencil_brush_vertex_color =  __class__ ('VIEW3
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (use_unified_paint) {
+		if (__call__ (_truth, null, use_unified_paint)) {
 			(function () {
 				var __accu0__ = UnifiedPaintPanel;
 				return __call__ (__accu0__.prop_unified_color, __accu0__, sub_row, context, brush, 'color', __kwargtrans__ ({text: ''}));
@@ -3666,7 +3822,7 @@ export var VIEW3D_PT_tools_grease_pencil_brush_vertex_color =  __class__ ('VIEW3
 			var __accu0__ = sub_row;
 			return __call__ (__accu0__.operator, __accu0__, 'paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
 		}) ();
-		if (use_unified_paint) {
+		if (__call__ (_truth, null, use_unified_paint)) {
 			(function () {
 				var __accu0__ = sub_row;
 				return __call__ (__accu0__.prop, __accu0__, ups, 'use_unified_color', __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
@@ -3764,7 +3920,7 @@ export var VIEW3D_PT_tools_grease_pencil_brush_vertex_palette =  __class__ ('VIE
 			var __accu0__ = row;
 			return __call__ (__accu0__.template_ID, __accu0__, settings, 'palette', __kwargtrans__ ({py_new: 'palette.new'}));
 		}) ();
-		if (settings.palette) {
+		if (__call__ (_truth, null, settings.palette)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_palette, __accu0__, settings, 'palette');
@@ -3915,7 +4071,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_settings =  __class__ ('VIEW3D
 					var __accu0__ = row;
 					return __call__ (__accu0__.row, __accu0__);
 				}) ();
-				if (gp_settings.use_material_pin) {
+				if (__call__ (_truth, null, gp_settings.use_material_pin)) {
 					(function () {
 						var __accu0__ = row_mat;
 						return __call__ (__accu0__.template_ID, __accu0__, gp_settings, 'material', __kwargtrans__ ({live_icon: true}));
@@ -3933,7 +4089,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_settings =  __class__ ('VIEW3D
 					return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_material_pin', __kwargtrans__ ({text: ''}));
 				}) ();
 			}
-			if (!(self.is_popover)) {
+			if (!(__call__ (_truth, null, self.is_popover))) {
 				var brush_basic_grease_pencil_paint_settings = __call__ (_member, null, 'bl_ui.properties_paint_common', 'brush_basic_grease_pencil_paint_settings');
 				__call__ (brush_basic_grease_pencil_paint_settings, null, layout, context, brush, null, __kwargtrans__ ({compact: false}));
 			}
@@ -4037,10 +4193,10 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_advanced =  __class__ ('VIEW3D
 		}) ();
 		var ob = context.object;
 		var ma = null;
-		if (ob && brush.gpencil_settings.use_material_pin === false) {
+		if (__call__ (_truth, null, ob) && brush.gpencil_settings.use_material_pin === false) {
 			var ma = ob.active_material;
 		}
-		else if (brush.gpencil_settings.material) {
+		else if (__call__ (_truth, null, brush.gpencil_settings.material)) {
 			var ma = brush.gpencil_settings.material;
 		}
 		(function () {
@@ -4055,7 +4211,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_advanced =  __class__ ('VIEW3D
 			var __accu0__ = col;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (ma && __eq__ (ma.grease_pencil.mode, 'LINE')) {
+		if (__call__ (_truth, null, ma) && __eq__ (ma.grease_pencil.mode, 'LINE')) {
 			subcol.enabled = false;
 		}
 		(function () {
@@ -4155,7 +4311,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_fill_advanced =  __class__ ('V
 		}) ();
 		(function () {
 			var __accu0__ = row;
-			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'show_fill_boundary', __kwargtrans__ ({icon: (gp_settings.show_fill_boundary ? 'HIDE_OFF' : 'HIDE_ON'), text: ''}));
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'show_fill_boundary', __kwargtrans__ ({icon: (__call__ (_truth, null, gp_settings.show_fill_boundary) ? 'HIDE_OFF' : 'HIDE_ON'), text: ''}));
 		}) ();
 		(function () {
 			var __accu0__ = col;
@@ -4330,7 +4486,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_post_processing =  __class__ (
 		self.layout.use_property_split = false;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_settings_postprocess', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_settings_postprocess', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -4497,7 +4653,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 		self.layout.use_property_split = false;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_settings_random', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_settings_random', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -4544,7 +4700,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_random_press_radius', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
 		}) ();
-		if (gp_settings.use_random_press_radius && self.is_popover === false) {
+		if (__call__ (_truth, null, gp_settings.use_random_press_radius) && self.is_popover === false) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, gp_settings, 'curve_random_pressure', __kwargtrans__ ({brush: true}));
@@ -4566,7 +4722,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_random_press_strength', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
 		}) ();
-		if (gp_settings.use_random_press_strength && self.is_popover === false) {
+		if (__call__ (_truth, null, gp_settings.use_random_press_strength) && self.is_popover === false) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, gp_settings, 'curve_random_strength', __kwargtrans__ ({brush: true}));
@@ -4588,7 +4744,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_random_press_uv', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
 		}) ();
-		if (gp_settings.use_random_press_uv && self.is_popover === false) {
+		if (__call__ (_truth, null, gp_settings.use_random_press_uv) && self.is_popover === false) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, gp_settings, 'curve_random_uv', __kwargtrans__ ({brush: true}));
@@ -4619,7 +4775,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, brush, 'use_random_press_hue', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
 		}) ();
-		if (brush.use_random_press_hue && self.is_popover === false) {
+		if (__call__ (_truth, null, brush.use_random_press_hue) && self.is_popover === false) {
 			(function () {
 				var __accu0__ = col1;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, 'curve_random_hue', __kwargtrans__ ({brush: true}));
@@ -4641,7 +4797,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, brush, 'use_random_press_sat', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
 		}) ();
-		if (brush.use_random_press_sat && self.is_popover === false) {
+		if (__call__ (_truth, null, brush.use_random_press_sat) && self.is_popover === false) {
 			(function () {
 				var __accu0__ = col1;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, 'curve_random_saturation', __kwargtrans__ ({brush: true}));
@@ -4663,7 +4819,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, brush, 'use_random_press_val', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
 		}) ();
-		if (brush.use_random_press_val && self.is_popover === false) {
+		if (__call__ (_truth, null, brush.use_random_press_val) && self.is_popover === false) {
 			(function () {
 				var __accu0__ = col1;
 				return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, 'curve_random_value', __kwargtrans__ ({brush: true}));
@@ -4688,9 +4844,9 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_random =  __class__ ('VIEW3D_P
 		if (self.is_popover === false) {
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.prop, __accu0__, paint, 'show_jitter_curve', __kwargtrans__ ({text: '', icon: (paint.show_jitter_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+				return __call__ (__accu0__.prop, __accu0__, paint, 'show_jitter_curve', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, paint.show_jitter_curve) ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
 			}) ();
-			if (paint.show_jitter_curve) {
+			if (__call__ (_truth, null, paint.show_jitter_curve)) {
 				col.active = gp_settings.use_jitter_pressure;
 				(function () {
 					var __accu0__ = col;
@@ -4748,7 +4904,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_stabilizer =  __class__ ('VIEW
 		self.layout.use_property_split = false;
 		(function () {
 			var __accu0__ = self.layout;
-			return __call__ (__accu0__.prop, __accu0__, brush, 'use_smooth_stroke', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_smooth_stroke', __kwargtrans__ ({text: (__call__ (_truth, null, self.is_popover) ? self.bl_label : '')}));
 		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -4820,7 +4976,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_mixcolor =  __class__ ('VIEW3D
 			var __accu0__ = ToolSelectPanelHelper;
 			return __call__ (__accu0__.tool_active_from_context, __accu0__, context);
 		}) ();
-		if (tool && __in__ (tool.idname, new set (['builtin.cutter', 'builtin.eyedropper', 'builtin.interpolate']))) {
+		if (__call__ (_truth, null, tool) && __in__ (tool.idname, new set (['builtin.cutter', 'builtin.eyedropper', 'builtin.interpolate']))) {
 			return false;
 		}
 		if (__eq__ (brush.gpencil_brush_type, 'TINT')) {
@@ -4853,7 +5009,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_mixcolor =  __class__ ('VIEW3D
 		var gp_settings = brush.gpencil_settings;
 		var use_unified_paint = __ne__ (context.object.mode, 'PAINT_GREASE_PENCIL');
 		var ups = settings.unified_paint_settings;
-		var prop_owner = (use_unified_paint && ups.use_unified_color ? ups : brush);
+		var prop_owner = (__call__ (_truth, null, use_unified_paint) && __call__ (_truth, null, ups.use_unified_color) ? ups : brush);
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
@@ -4877,7 +5033,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_mixcolor =  __class__ ('VIEW3D
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (use_unified_paint) {
+		if (__call__ (_truth, null, use_unified_paint)) {
 			(function () {
 				var __accu0__ = UnifiedPaintPanel;
 				return __call__ (__accu0__.prop_unified_color, __accu0__, sub_row, context, brush, 'color', __kwargtrans__ ({text: ''}));
@@ -4942,7 +5098,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_mix_palette =  __class__ ('VIE
 			var __accu0__ = ToolSelectPanelHelper;
 			return __call__ (__accu0__.tool_active_from_context, __accu0__, context);
 		}) ();
-		if (tool && __in__ (tool.idname, new set (['builtin.cutter', 'builtin.eyedropper', 'builtin.interpolate']))) {
+		if (__call__ (_truth, null, tool) && __in__ (tool.idname, new set (['builtin.cutter', 'builtin.eyedropper', 'builtin.interpolate']))) {
 			return false;
 		}
 		if (__eq__ (brush.gpencil_brush_type, 'TINT')) {
@@ -4986,7 +5142,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_mix_palette =  __class__ ('VIE
 			var __accu0__ = row;
 			return __call__ (__accu0__.template_ID, __accu0__, settings, 'palette', __kwargtrans__ ({py_new: 'palette.new'}));
 		}) ();
-		if (settings.palette) {
+		if (__call__ (_truth, null, settings.palette)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.template_palette, __accu0__, settings, 'palette');
@@ -5080,7 +5236,7 @@ export var VIEW3D_PT_tools_grease_pencil_v3_brush_gap_closure =  __class__ ('VIE
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'fill_internal_gaps');
 			}) ();
-			if (gp_settings.fill_internal_gaps) {
+			if (__call__ (_truth, null, gp_settings.fill_internal_gaps)) {
 				(function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, gp_settings, 'fill_gap_factor', __kwargtrans__ ({text: 'Detection Factor'}));
@@ -5104,6 +5260,14 @@ export {BrushSelectPanel, ClonePanel, ColorPalettePanel, DisplayPanel, FalloffPa
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'VIEW3D_MT_brush_context_menu': VIEW3D_MT_brush_context_menu = value; break;
 		case 'View3DPanel': View3DPanel = value; break;
 		case 'draw_vpaint_symmetry': draw_vpaint_symmetry = value; break;

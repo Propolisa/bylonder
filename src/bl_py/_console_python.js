@@ -10,6 +10,162 @@ import * as __module_sys__ from './sys.js';
 __nest__ (sys, '', __module_sys__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_console_python';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['autocomplete', 'banner', 'execute', 'language_id']);
 export var language_id = 'python';
 export var _TempModuleOverride =  __class__ ('_TempModuleOverride', [object], {
@@ -230,7 +386,7 @@ export var get_console = function (console_id) {
 		var __accu0__ = consoles;
 		return __call__ (__accu0__.py_get, __accu0__, console_id);
 	}) ();
-	if (console_data) {
+	if (__call__ (_truth, null, console_data)) {
 		var __left0__ = console_data;
 		var console = __left0__ [0];
 		var stdout = __left0__ [1];
@@ -330,10 +486,10 @@ export var execute = function (context, is_interactive) {
 					var is_multiline = false;
 					try {
 						var line = line_object.body;
-						var line_exec = ((function () {
+						var line_exec = (__call__ (_truth, null, (function () {
 							var __accu0__ = line;
 							return __call__ (__accu0__.strip, __accu0__);
-						}) () ? line : '\n');
+						}) ()) ? line : '\n');
 						var is_multiline = (function () {
 							var __accu0__ = console;
 							return __call__ (__accu0__.push, __accu0__, line_exec);
@@ -418,20 +574,20 @@ export var execute = function (context, is_interactive) {
 		var __accu0__ = bpy.ops.console;
 		return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: __add__ (sc.prompt, line), py_metatype: 'INPUT'}));
 	}) ();
-	if (is_multiline) {
+	if (__call__ (_truth, null, is_multiline)) {
 		sc.prompt = PROMPT_MULTI;
-		if (is_interactive) {
+		if (__call__ (_truth, null, is_interactive)) {
 			var indent = __getslice__ (line, null, __sub__ (__call__ (len, null, line), __call__ (len, null, (function () {
 				var __accu0__ = line;
 				return __call__ (__accu0__.lstrip, __accu0__);
 			}) ())), 1);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = (function () {
 					var __accu1__ = line;
 					return __call__ (__accu1__.rstrip, __accu1__);
 				}) ();
 				return __call__ (__accu0__.endswith, __accu0__, ':');
-			}) ()) {
+			}) ())) {
 				var indent = __call__ (__iadd__, null, indent, '    ');
 			}
 		}
@@ -448,10 +604,10 @@ export var execute = function (context, is_interactive) {
 		return __call__ (__accu0__.history_append, __accu0__, __kwargtrans__ ({text: indent, current_character: 0, remove_duplicates: true}));
 	}) ();
 	__getitem__ (sc.history, __neg__ (1)).current_character = __call__ (len, null, indent);
-	if (output) {
+	if (__call__ (_truth, null, output)) {
 		__call__ (add_scrollback, null, output, 'OUTPUT');
 	}
-	if (output_err) {
+	if (__call__ (_truth, null, output_err)) {
 		__call__ (add_scrollback, null, output_err, 'ERROR');
 	}
 	var __iterable0__ = execute.hooks;
@@ -482,7 +638,7 @@ export var autocomplete = function (context) {
 	var intellisense = __call__ (_member, null, '_bl_console_utils.autocomplete', 'intellisense');
 	var sc = context.space_data;
 	var console = __getitem__ (__call__ (get_console, null, __call__ (hash, null, context.region)), 0);
-	if (!(console)) {
+	if (!(__call__ (_truth, null, console))) {
 		return new set (['CANCELLED']);
 	}
 	var scrollback = '';
@@ -542,10 +698,10 @@ export var autocomplete = function (context) {
 			return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: __add__ (sc.prompt, current_line.body), py_metatype: 'INPUT'}));
 		}) ();
 	}
-	if (scrollback) {
+	if (__call__ (_truth, null, scrollback)) {
 		__call__ (add_scrollback, null, scrollback, 'INFO');
 	}
-	if (scrollback_error) {
+	if (__call__ (_truth, null, scrollback_error)) {
 		__call__ (add_scrollback, null, scrollback_error, 'ERROR');
 	}
 	(function () {
@@ -580,16 +736,16 @@ export var copy_as_script = function (context) {
 			continue;
 		}
 		if (__eq__ (py_metatype, 'INPUT')) {
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = text;
 				return __call__ (__accu0__.startswith, __accu0__, PROMPT);
-			}) ()) {
+			}) ())) {
 				var text = __getslice__ (text, __call__ (len, null, PROMPT), null, 1);
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = text;
 				return __call__ (__accu0__.startswith, __accu0__, PROMPT_MULTI);
-			}) ()) {
+			}) ())) {
 				var text = __getslice__ (text, __call__ (len, null, PROMPT_MULTI), null, 1);
 			}
 		}
@@ -651,6 +807,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'language_id': language_id = value; break;
 		case '_TempModuleOverride': _TempModuleOverride = value; break;

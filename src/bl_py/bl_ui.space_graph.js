@@ -9,6 +9,162 @@ import {contexts as i18n_contexts, pgettext_iface as iface_} from './_bpy.app.tr
 import {Header, Menu, Panel} from './_bpy.types.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_graph';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var drivers_editor_footer = function (layout, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -25,11 +181,11 @@ export var drivers_editor_footer = function (layout, context) {
 	else {
 	}
 	var act_fcurve = context.active_editable_fcurve;
-	if (!(act_fcurve)) {
+	if (!(__call__ (_truth, null, act_fcurve))) {
 		return ;
 	}
 	var act_driver = act_fcurve.driver;
-	if (!(act_driver)) {
+	if (!(__call__ (_truth, null, act_driver))) {
 		return ;
 	}
 	(function () {
@@ -43,7 +199,7 @@ export var drivers_editor_footer = function (layout, context) {
 			return __call__ (__accu1__.format, __accu1__, act_fcurve.id_data.py_name, act_fcurve.data_path);
 		}) (), translate: false}));
 	}) ();
-	if (act_driver.variables) {
+	if (__call__ (_truth, null, act_driver.variables)) {
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({py_metatype: 'LINE'}));
@@ -56,7 +212,7 @@ export var drivers_editor_footer = function (layout, context) {
 			}) (), translate: false}));
 		}) ();
 	}
-	if (__eq__ (act_driver.py_metatype, 'SCRIPTED') && act_driver.expression) {
+	if (__eq__ (act_driver.py_metatype, 'SCRIPTED') && __call__ (_truth, null, act_driver.expression)) {
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({py_metatype: 'LINE'}));
@@ -125,7 +281,7 @@ export var GRAPH_HT_header =  __class__ ('GRAPH_HT_header', [Header], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (st.has_ghost_curves) {
+		if (__call__ (_truth, null, st.has_ghost_curves)) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.operator, __accu0__, 'graph.ghost_curves_clear', __kwargtrans__ ({text: '', icon: 'X'}));
@@ -217,7 +373,7 @@ export var GRAPH_HT_playback_controls =  __class__ ('GRAPH_HT_playback_controls'
 		}
 		var layout = self.layout;
 		var is_drivers_editor = __eq__ (context.space_data.mode, 'DRIVERS');
-		if (is_drivers_editor) {
+		if (__call__ (_truth, null, is_drivers_editor)) {
 			__call__ (drivers_editor_footer, null, layout, context);
 		}
 		else {
@@ -428,7 +584,7 @@ export var GRAPH_MT_editor_menus =  __class__ ('GRAPH_MT_editor_menus', [Menu], 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'GRAPH_MT_select');
 		}) ();
-		if (__ne__ (st.mode, 'DRIVERS') && st.show_markers) {
+		if (__ne__ (st.mode, 'DRIVERS') && __call__ (_truth, null, st.show_markers)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'GRAPH_MT_marker');
@@ -498,7 +654,7 @@ export var GRAPH_MT_view =  __class__ ('GRAPH_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'graph.local_view');
 		}) ();
-		if (context.scene.use_preview_range) {
+		if (__call__ (_truth, null, context.scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
@@ -1318,7 +1474,7 @@ export var GRAPH_MT_view_pie =  __class__ ('GRAPH_MT_view_pie', [Menu], {
 			var __accu0__ = pie;
 			return __call__ (__accu0__.operator, __accu0__, 'graph.view_frame');
 		}) ();
-		if (context.scene.use_preview_range) {
+		if (__call__ (_truth, null, context.scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = pie;
 				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
@@ -1557,6 +1713,14 @@ export {DopesheetFilterPopoverBase, Header, Menu, Panel, _globals, _import, _laz
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'drivers_editor_footer': drivers_editor_footer = value; break;
 		case 'GRAPH_HT_header': GRAPH_HT_header = value; break;
 		case 'GRAPH_HT_playback_controls': GRAPH_HT_playback_controls = value; break;

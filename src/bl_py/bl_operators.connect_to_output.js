@@ -108,6 +108,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -289,12 +305,12 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 				var __left0__ = __getitem__ (__iterable0__, __index0__);
 				var i = __left0__ [0];
 				var socket = __left0__ [1];
-				if (socket.is_inspect_output) {
+				if (__call__ (_truth, null, socket.is_inspect_output)) {
 					var is_used = (function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.has_socket_other_users, __accu0__, socket);
 					}) ();
-					if (is_used) {
+					if (__call__ (_truth, null, is_used)) {
 						if (connect_socket === null) {
 							continue;
 						}
@@ -387,7 +403,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var i = __left0__ [0];
 			var input_socket = __left0__ [1];
-			if (index && __ne__ (i, index)) {
+			if (__call__ (_truth, null, index) && __ne__ (i, index)) {
 				continue;
 			}
 			if (__call__ (len, null, input_socket.links)) {
@@ -405,7 +421,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 							break;
 						}
 					}
-					if (socket.is_inspect_output && !__in__ (socket, r_sockets)) {
+					if (__call__ (_truth, null, socket.is_inspect_output) && !__in__ (socket, r_sockets)) {
 						(function () {
 							var __accu0__ = r_sockets;
 							return __call__ (__accu0__.append, __accu0__, socket);
@@ -451,7 +467,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var socket = __getitem__ (__iterable1__, __index1__);
-					if (socket.is_inspect_output && !__in__ (socket, r_sockets)) {
+					if (__call__ (_truth, null, socket.is_inspect_output) && !__in__ (socket, r_sockets)) {
 						(function () {
 							var __accu0__ = r_sockets;
 							return __call__ (__accu0__.append, __accu0__, socket);
@@ -631,17 +647,17 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var i = __left0__ [0];
 			var out = __left0__ [1];
-			if (out.select) {
+			if (__call__ (_truth, null, out.select)) {
 				return i;
 			}
-			if (__call__ (is_visible_socket, null, out) && (!(check_type) || __eq__ (out.py_metatype, socket_type))) {
+			if (__call__ (_truth, null, __call__ (is_visible_socket, null, out)) && (!(__call__ (_truth, null, check_type)) || __eq__ (out.py_metatype, socket_type))) {
 				(function () {
 					var __accu0__ = valid_outputs;
 					return __call__ (__accu0__.append, __accu0__, i);
 				}) ();
 			}
 		}
-		if (valid_outputs) {
+		if (__call__ (_truth, null, valid_outputs)) {
 			var out_i = __getitem__ (valid_outputs, 0);
 		}
 		var __iterable0__ = __call__ (py_enumerate, null, valid_outputs);
@@ -654,11 +670,11 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var out_link = __getitem__ (__iterable1__, __index1__);
-				if (__call__ (is_viewer_link, null, out_link, output_node)) {
-					if (is_base_node_tree || (function () {
+				if (__call__ (_truth, null, __call__ (is_viewer_link, null, out_link, output_node))) {
+					if (__call__ (_truth, null, is_base_node_tree) || __call__ (_truth, null, (function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.link_leads_to_used_socket, __accu0__, out_link);
-					}) ()) {
+					}) ())) {
 						if (__lt__ (i, __sub__ (__call__ (len, null, valid_outputs), 1))) {
 							var out_i = __getitem__ (valid_outputs, __add__ (i, 1));
 						}
@@ -753,10 +769,10 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var socket = __getitem__ (__iterable0__, __index0__);
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.has_socket_other_users, __accu0__, socket);
-			}) ())) {
+			}) ()))) {
 				var tree = socket.id_data;
 				(function () {
 					var __accu0__ = self;
@@ -801,7 +817,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 		var path = context.space_data.path;
 		var nodes = active_tree.nodes;
 		var active = nodes.active;
-		if (!(active) && !(__call__ (any, null, (function () {
+		if (!(__call__ (_truth, null, active)) && !(__call__ (any, null, (function () {
 			var __accu0__ = [];
 			var __iterable0__ = active.outputs;
 			__iterable0__ = __i__ (__iterable0__);
@@ -821,7 +837,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 			var __accu0__ = self;
 			return __call__ (__accu0__.search_viewer_sockets_in_tree, __accu0__, base_node_tree, self.delete_sockets);
 		}) ();
-		if (!(active.outputs)) {
+		if (!(__call__ (_truth, null, active.outputs))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.cleanup, __accu0__);
@@ -867,7 +883,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 				return __call__ (__accu0__.init_shader_variables, __accu0__, space, space.shader_type);
 			}) ();
 			var output_node = __call__ (get_group_output_node, null, base_node_tree, __kwargtrans__ ({output_node_idname: self.shader_output_idname}));
-			if (!(output_node)) {
+			if (!(__call__ (_truth, null, output_node))) {
 				var output_node = (function () {
 					var __accu0__ = base_node_tree.nodes;
 					return __call__ (__accu0__.py_new, __accu0__, self.shader_output_idname);
@@ -922,6 +938,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'NODE_OT_connect_to_output': NODE_OT_connect_to_output = value; break;

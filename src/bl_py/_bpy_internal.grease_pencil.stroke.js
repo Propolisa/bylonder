@@ -101,6 +101,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -194,7 +210,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, py_name);
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			if (__in__ (py_metatype, new set (['FLOAT', 'INT', 'STRING', 'BOOLEAN', 'INT8', 'INT32_2D', 'QUATERNION', 'FLOAT4X4']))) {
 				return __getitem__ (attribute.data, self._index).value;
 			}
@@ -273,7 +289,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, py_name);
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._set_attribute_value, __accu0__, attribute, self._index, py_metatype, value);
@@ -284,7 +300,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 				var __accu0__ = self._attributes;
 				return __call__ (__accu0__.py_new, __accu0__, py_name, py_metatype, self._domain);
 			}) ();
-			if (attribute) {
+			if (__call__ (_truth, null, attribute)) {
 				var num = (function () {
 					var __accu0__ = self._attributes;
 					return __call__ (__accu0__.domain_size, __accu0__, self._domain);
@@ -389,10 +405,10 @@ export var SliceHelper =  __class__ ('SliceHelper', [object], {
 		else {
 		}
 		if (__call__ (isinstance, null, key, int)) {
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._is_valid_index, __accu0__, key);
-			}) ())) {
+			}) ()))) {
 				var __except0__ = __call__ (IndexError, null, (function () {
 					var __accu0__ = 'Key {:d} is out of range';
 					return __call__ (__accu0__.format, __accu0__, key);
@@ -730,7 +746,7 @@ export var GreasePencilStrokePoint =  __call__ (__call__ (DefAttributeGetterSett
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, 'position');
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			return __getitem__ (attribute.data, self._point_index).vector;
 		}
 		return tuple ([0.0, 0.0, 0.0]);
@@ -754,7 +770,7 @@ export var GreasePencilStrokePoint =  __call__ (__call__ (DefAttributeGetterSett
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, 'position');
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			__getitem__ (attribute.data, self._point_index).vector = value;
 			(function () {
 				var __accu0__ = self._drawing;
@@ -780,7 +796,7 @@ export var GreasePencilStrokePoint =  __call__ (__call__ (DefAttributeGetterSett
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, '.selection');
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			if (__eq__ (attribute.domain, 'CURVE')) {
 				return __getitem__ (attribute.data, self._curve_index).value;
 			}
@@ -809,7 +825,7 @@ export var GreasePencilStrokePoint =  __call__ (__call__ (DefAttributeGetterSett
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, '.selection');
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			if (__eq__ (attribute.domain, 'CURVE')) {
 				__getitem__ (attribute.data, self._curve_index).value = value;
 			}
@@ -822,7 +838,7 @@ export var GreasePencilStrokePoint =  __call__ (__call__ (DefAttributeGetterSett
 				var __accu0__ = self._attributes;
 				return __call__ (__accu0__.py_new, __accu0__, '.selection', 'BOOLEAN', 'POINT');
 			}) ();
-			if (attribute) {
+			if (__call__ (_truth, null, attribute)) {
 				__getitem__ (attribute.data, self._point_index).value = value;
 			}
 		}
@@ -1066,7 +1082,7 @@ export var GreasePencilStroke =  __call__ (__call__ (DefAttributeGetterSetters, 
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, '.selection');
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			if (__eq__ (attribute.domain, 'CURVE')) {
 				return __getitem__ (attribute.data, self._curve_index).value;
 			}
@@ -1107,7 +1123,7 @@ export var GreasePencilStroke =  __call__ (__call__ (DefAttributeGetterSetters, 
 			var __accu0__ = self._attributes;
 			return __call__ (__accu0__.py_get, __accu0__, '.selection');
 		}) ();
-		if (attribute) {
+		if (__call__ (_truth, null, attribute)) {
 			if (__eq__ (attribute.domain, 'CURVE')) {
 				__getitem__ (attribute.data, self._curve_index).value = value;
 			}
@@ -1122,7 +1138,7 @@ export var GreasePencilStroke =  __call__ (__call__ (DefAttributeGetterSetters, 
 				var __accu0__ = self._attributes;
 				return __call__ (__accu0__.py_new, __accu0__, '.selection', 'BOOLEAN', 'CURVE');
 			}) ();
-			if (attribute) {
+			if (__call__ (_truth, null, attribute)) {
 				__getitem__ (attribute.data, self._curve_index).value = value;
 			}
 		}
@@ -1210,6 +1226,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'BezierHandle': BezierHandle = value; break;
