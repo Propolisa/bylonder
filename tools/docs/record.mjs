@@ -1,5 +1,5 @@
 // Records a feature page's media from the app (CLAUDE.md, Feature docs): PNG steps and GIFs into
-// docs/media/features/<feature>/, from a dev server on port 5205 (started here when none runs) driven by Playwright's
+// docs/media/features/<feature>/, from a dev server on port 5205 (DOCS_PORT) (started here when none runs) driven by Playwright's
 // Chromium. A GIF is a CDP screencast of the page while the step runs, cropped to the step's region and encoded by
 // ffmpeg (palettegen and paletteuse, 12 fps, 640 wide), smaller until it is under 1 MB.
 import { spawn, execFileSync } from "node:child_process";
@@ -8,14 +8,14 @@ import { tmpdir } from "node:os";
 import { chromium, openApp } from "../../tests/e2e/app.mjs";
 
 const root = new URL("../..", import.meta.url).pathname;
-const URL_ = "http://localhost:5205/";
+const PORT = process.env.DOCS_PORT ?? "5205", URL_ = `http://localhost:${PORT}/`;
 const SIZE = { width: 1280, height: 800 };
 const MAX_GIF = 1024 * 1024;
 
 const reachable = () => fetch(URL_).then((r) => r.ok, () => false);
 async function devServer() {
   if (await reachable()) return () => {};
-  const server = spawn("npx", ["vite", "--port", "5205", "--strictPort"], { cwd: root, stdio: "ignore", detached: true });
+  const server = spawn("npx", ["vite", "--port", PORT, "--strictPort"], { cwd: root, stdio: "ignore", detached: true });
   while (!(await reachable())) await new Promise((done) => setTimeout(done, 300));
   return () => process.kill(-server.pid);
 }
