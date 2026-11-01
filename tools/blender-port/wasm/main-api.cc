@@ -146,6 +146,8 @@ EXPORT(main_new) BlenderMain *main_new()
   ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
   /* Auto keying is off until the scene sync sets Bylonder's. */
   ctx->scene->toolsettings->autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
+  /* As screen_add names it: an ID RNA types by its code (Screen, for the scripts' context.screen). */
+  STRNCPY(ctx->screen.id.name, "SRLayout");
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
   /* As BKE_workspace_add makes it: an ID (RNA's WorkSpace, its tools for the scripts) whose status transforms clear when

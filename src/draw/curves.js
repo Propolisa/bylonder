@@ -43,8 +43,8 @@ uniform mat4 curves_object_to_world;
 uniform vec3 curves_view_position;
 uniform vec3 curves_view_forward;
 uniform float curves_persp;`];
-const CURVES_INFOS = ['curves_infos', `vec4 bl_buffer_fetch(highp sampler2D buffer, int i) { return texelFetch(buffer, ivec2(i % ${BUFFER_WIDTH}, i / ${BUFFER_WIDTH}), 0); }
-ivec4 bl_buffer_fetch(highp isampler2D buffer, int i) { return texelFetch(buffer, ivec2(i % ${BUFFER_WIDTH}, i / ${BUFFER_WIDTH}), 0); }
+// A macro, not overloads on the sampler type: ANGLE's D3D11 backend passes samplers as uint, making them one function.
+const CURVES_INFOS = ['curves_infos', `#define bl_buffer_fetch(buffer, i) texelFetch(buffer, ivec2((i) % ${BUFFER_WIDTH}, (i) / ${BUFFER_WIDTH}), 0)
 struct DrawCurvesInfos { uint half_cylinder_face_count; uint vertex_per_segment; };
 const DrawCurvesInfos drw_curves = DrawCurvesInfos(uint(CURVES_FACES), uint(CURVES_VERTEX_PER_SEGMENT));`];
 const CURVES_STAGE = ['curves_vertex', `// blender-port: draw_view_lib.glsl drw_world_incident_vector.
