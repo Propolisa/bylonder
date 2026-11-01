@@ -64,6 +64,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
       sync.begin({ meshes: sync.selected() });
     }
     let result;
+    const step = sync.blender.undoStep;
     host.keying(() => { result = window.event(kind, data, strings); });
     redrawn(result.redraw);
     if (!acting) return result;
@@ -73,7 +74,8 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     if (running) host.notify(areas.get(view)?.status ?? '');
     else if (result.finished.length) host.notify('');
     if (result.finished.length && areas.get(view)?.cameraView) view.enterCameraView();
-    if (result.finished.some(({ undo }) => undo)) host.commit();
+    // Operators that push their own undo steps (sculpt and paint strokes) are not flagged OPTYPE_UNDO.
+    if (result.finished.some(({ undo }) => undo) || sync.blender.undoStep !== step) host.commit();
     if (result.popup) popup(result.popup, host.pointer());
     tagRedraw();
     ticking();
