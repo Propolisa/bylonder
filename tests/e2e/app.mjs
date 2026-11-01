@@ -38,8 +38,8 @@ export async function startServer({ build = true } = {}) {
 // project's scene) and waits until the 3D Viewport shows the node `node`. Page errors of every frame land in `errors`.
 // `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
 // session to.
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, video } = {}) {
-  const context = await browser.newContext({ viewport: size, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) });
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video } = {}) {
+  const context = await browser.newContext({ viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) });
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
