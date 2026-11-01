@@ -422,8 +422,8 @@ const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "built
 const applyTool = () => {
   if (!world.wm?.modal && !world.editMode.active) editor.setMode(TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ?? "select");
 };
-// The 3D View operators act on: the context area's (wm-operators.js), else the one under the pointer.
-const contextView = () => contextArea()?.space ?? activeView();
+// The 3D View operators act on: the context area's (wm-operators.js; other editors name their space), else the one under the pointer.
+const contextView = () => (typeof contextArea()?.space === "object" ? contextArea().space : activeView());
 world.toolsystem = createToolSystem({
   // The workspace's tools in Main, read in the context of the 3D View the window manager acts on (a view's toolbar in its
   // own area's toolbar region).
