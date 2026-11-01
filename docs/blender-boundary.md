@@ -189,6 +189,11 @@ can be maintained on its own:
   node material is the mesh's, or with `CURVES` defined the curves' and EEVEE's curves interface, so one material draws
   the emitter and its hair), `RawTexture` data textures
   (Blender's buffers) and materials per render pass (Workbench per view).
+  Edit Mode draws its overlay where the edited object is, never at a thin instance: a mesh a script places only through
+  thin instance matrices (the island example's Nest, Whale and Lava Point boulders, `setMatrices`) shows Edit Mode at
+  its own origin. Blender has no object whose only placement is its instances: an instancer's copies, linked
+  duplicates and collection instances show the edited data without the edit overlay, which Blender draws on the object
+  in Edit Mode alone, so drawing it at every copy would not be Blender's.
 - **The drawing modules** (`src/draw`): `overlay-armature.js` (bones in every display type, custom shapes, names,
   axes and relationship lines, as `docs/armatures.md` says), `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
   Mode as the overlay draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`

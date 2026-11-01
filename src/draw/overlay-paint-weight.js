@@ -2,11 +2,13 @@
 // Blender's own shaders (gpu-library.js `draw`: overlay_paint_weight_vert/frag.glsl, with FAKE_SHADING as the Solid
 // view draws it), each vertex's weight in the active vertex group (main-api.cc mesh_paint_weights, as extract_weights
 // gives the draw cache) mapped through Blender's weight ramp, the zero weight alert and the contour lines its overlay
-// settings ask for. The shaders' create info stands in front of them: the vertex's position, normal and weight, the
-// object's and view's matrices, the theme's alert colors.
+// settings ask for (Overlays > Weight Paint: Opacity and Show Weight Contours, each view's own). The shaders' create info
+// stands in front of them: the vertex's position, normal and weight, the object's and view's matrices, the theme's alert
+// colors.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
+import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { draw } from '../nodes/blender/gpu-library.js';
 import { glslShader } from '../nodes/blender/glsl.js';
 import { weightRampTexture } from './overlay-particle.js';
@@ -57,8 +59,6 @@ void main() { theme = Theme(ThemeColors(vert_missing_data, vert_unreferenced)); 
 
 // overlay_instance.cc: the missing data alert, and the theme's unreferenced vertex color.
 const MISSING_DATA = [0xb0 / 255, 0, 0xb0 / 255, 1];
-// The View3D overlay's default Weight Paint opacity (weight_paint_mode_opacity), without contour lines.
-const OPACITY = 1;
 // overlay_paint.hh: an arbitrary light to give a hint of the geometry behind the weights.
 const LIGHT = (() => { const l = [0, 0.5, 0.86602]; const n = Math.hypot(...l); return l.map((c) => c / n); })();
 
@@ -69,8 +69,6 @@ function material(scene) {
   });
   m.backFaceCulling = false;
   m.setTexture('colorramp', weightRampTexture(scene));
-  m.setFloat('opacity', OPACITY);
-  m.setInt('draw_contours', 0);
   m.setVector3('light_dir', { x: LIGHT[0], y: LIGHT[1], z: LIGHT[2] });
   m.setVector4('vert_missing_data', { x: MISSING_DATA[0], y: MISSING_DATA[1], z: MISSING_DATA[2], w: MISSING_DATA[3] });
   const [r, g, b] = theme.view_3d.vertex_unreferenced;
@@ -86,17 +84,26 @@ export function paintWeightOverlay(node, mesh, weights, overlay) {
     overlay?.dispose();
     return null;
   }
-  // At the overlay's full opacity the weights are all the mesh shows (overlay_paint.hh's opaque pass): it is drawn in
-  // the mesh's place.
-  node.isVisible = false;
   if (!overlay || overlay.isDisposed()) {
-    overlay = Object.assign(new Mesh('__paint weights ' + node.name, node.getScene()), { isPickable: false, parent: node, metadata: { overlay: true } });
+    overlay = Object.assign(new Mesh('__paint weights ' + node.name, node.getScene()), { isPickable: false, parent: node, metadata: { overlay: true, paintWeight: true } });
     overlay.material = material(node.getScene());
-    overlay.onDisposeObservable.add(() => { overlay.material.dispose(); node.isVisible = true; });
+    overlay.onDisposeObservable.add(() => overlay.material.dispose());
   }
   Object.assign(new VertexData(), {
     positions: node.getVerticesData('position'), normals: node.getVerticesData('normal'), indices: node.getIndices(),
   }).applyToMesh(overlay, true);
   overlay.setVerticesData('weight', Float32Array.from(mesh.corner_verts, (v) => weights[v]), true, 1);
   return overlay;
+}
+
+// The overlay as a view draws it, right before that view renders (its state, view3d.js): hidden with the view's
+// Overlays; in Solid shading without X-ray over the mesh at the view's Weight Paint opacity (overlay_paint.hh's masked
+// transparency pass), else opaque (its opaque pass); contour lines as the view asks.
+export function paintWeightView(overlay, { overlays = true, shading, xray, weight_paint_mode_opacity: opacity = 1, show_wpaint_contours: contours = false }) {
+  overlay.isVisible = overlays;
+  const masked = shading === 'solid' && !xray, m = overlay.material;
+  m.alphaMode = Constants.ALPHA_COMBINE;
+  m.needAlphaBlending = () => masked;
+  m.setFloat('opacity', opacity);
+  m.setInt('draw_contours', contours ? 1 : 0);
 }

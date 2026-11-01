@@ -13,6 +13,7 @@ const { exports: x, withArrays, withString, cString } = blenderModule;
 // Blender's space and region types (eSpace_Type, eRegion_Type).
 export const SPACE_VIEW3D = 1;
 export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_FOOTER = 11, RGN_TYPE_TOOL_HEADER = 12;
+export const RGN_TYPE_ASSET_SHELF = 14, RGN_TYPE_ASSET_SHELF_HEADER = 15;
 // The browser's input as wm_event takes it (BrowserEvent in wm-api.cc).
 const KINDS = { pointermove: 0, buttondown: 1, buttonup: 2, wheel: 3, trackpad: 4, keydown: 5, keyup: 6 };
 
@@ -65,6 +66,11 @@ export class Area {
     const entries = [[-1, rect], ...Object.entries(regions).map(([type, r]) => [Number(type), r])];
     const rects = Int32Array.from(entries.flatMap(([type, r]) => [type, r.x, r.y, r.width, r.height].map(Math.round)));
     withArrays([rects], ([p]) => x.wm_area_layout(this.window.C, this.pointer, p, entries.length));
+  }
+  // Of the region types given, those Blender shows by its own polls and flags (the asset shelf), which layout() then
+  // lists as Blender shows them: { [regiontype]: height in pixels }.
+  regionsShown(types) {
+    return withArrays([Int32Array.from(types)], ([p]) => JSON.parse(cString(x.wm_area_regions_shown(this.window.C, this.pointer, p, types.length))));
   }
   // A 3D View's view, as regionView3D (editors/space_view3d/view3d-project.js) gives it.
   set view3d({ viewmat, winmat, persp }) {

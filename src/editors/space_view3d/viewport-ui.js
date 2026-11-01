@@ -5,6 +5,7 @@ import { createCursorOverlay } from '../../draw/overlay-cursor.js';
 import { createOriginOverlay } from '../../draw/overlay-origin.js';
 import { createOutlineOverlay } from '../../draw/overlay-outline.js';
 import { createArmatureOverlay } from '../../draw/overlay-armature.js';
+import { paintWeightView } from '../../draw/overlay-paint-weight.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
 // and outlines, the extras of cameras, lights and empties, and armatures' bones. Each view's header, gizmo and shading live in view3d.js.
@@ -19,9 +20,14 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
   return {
     extras: extra,
     // Called per view right before it renders, with its state (view3d.js).
-    setEnabled(value, { shading, xray, overlays = true } = {}) {
-      // Edit Mode's overlay follows the view's Overlays toggle only: Blender shows it in Rendered shading too.
-      for (const mesh of scene.meshes) if (mesh.metadata?.editMode) mesh.isVisible = overlays;
+    setEnabled(value, state = {}) {
+      const { shading, xray, overlays = true } = state;
+      // Edit Mode's overlay follows the view's Overlays toggle only: Blender shows it in Rendered shading too, as it does
+      // Weight Paint's weights.
+      for (const mesh of scene.meshes) {
+        if (mesh.metadata?.editMode) mesh.isVisible = overlays;
+        if (mesh.metadata?.paintWeight) paintWeightView(mesh, state);
+      }
       extra.setEnabled(value);
       armature.setEnabled(value, { shading, xray });
       origin.update(value);

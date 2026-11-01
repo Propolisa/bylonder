@@ -10,6 +10,7 @@
 
 #include "BKE_context.hh"
 #include "BKE_icons.hh"
+#include "BKE_preview_image.hh"
 #include "BLI_map.hh"
 #include "BKE_screen.hh"
 #include "BLF_api.hh"
@@ -941,6 +942,19 @@ void block_draw(const bContext *C, Block *block)
     buttons().append(&but);
   }
 }
+
+/* port-override: an ID's preview is rendered on the GPU (render_preview.cc draws it offscreen), which is past the seam,
+ * and the browser draws icons by name: a preview is made but stays empty, rendered neither when an ID asks for one
+ * (Create Pose Asset) nor when a button shows it (a grid view's tile, which shows its item's name instead). */
+void icon_render_id_ex(const bContext * /*C*/, Scene * /*scene*/, ID * /*id_to_render*/, const enum eIconSizes /*size*/,
+                       const bool /*use_job*/, PreviewImage * /*r_preview_image*/)
+{
+}
+void icon_render_id(const bContext * /*C*/, Scene * /*scene*/, ID *id, const enum eIconSizes /*size*/, const bool /*use_job*/)
+{
+  BKE_previewimg_id_ensure(id);
+}
+void icon_ensure_deferred(const bContext * /*C*/, const int /*icon_id*/, const bool /*big*/) {}
 
 }  // namespace blender::ui
 

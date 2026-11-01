@@ -1,13 +1,15 @@
 // The 3D View's regions besides the toolbar: the header (VIEW3D_HT_header), the tool settings row
-// (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header) and the sidebar (RGN_TYPE_UI) with its tabs, laid out by Blender in
-// the view's area of its window (ui-tree.js) and drawn by block-view.js. In Bylonder's own mesh Edit Mode, which Main
+// (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header), the sidebar (RGN_TYPE_UI) with its tabs and the asset shelf
+// (RGN_TYPE_ASSET_SHELF and its header), laid out by Blender in the view's area of its window (ui-tree.js) and drawn by
+// block-view.js. In Bylonder's own mesh Edit Mode, which Main
 // does not know, the header and sidebar still draw Blender's scripts through the JS layout (layout-view.js).
 import { createApp, h, reactive, markRaw } from 'vue';
 import { BlockView, PanelsView } from '../interface/block-view.js';
-import { regionHeader, regionPanels, categorySet, panelClosedSet } from '../interface/ui-tree.js';
+import { regionHeader, regionLayout, regionPanels, categorySet, panelClosedSet, viewItemDrag } from '../interface/ui-tree.js';
 import { contextStruct } from '../../python/bpy_rna.js';
 import { panels, headers, menus } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
+import { ticking } from '../../windowmanager/wm-areas.js';
 import { panelTypes, drawPanels, headerLayout, idname, drawType } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { drawMenu } from '../interface/ui-layout.js';
@@ -18,7 +20,8 @@ import './view3d-regions.css';
 const MODULES = [{ classes: [VIEW3D_PT_transform] }, { classes: Object.values(panels) }];
 // view3d_buttons_region_layout: the context string of each mode.
 const MODE_CONTEXTS = { OBJECT: '.objectmode', EDIT_MESH: '.mesh_edit' };
-const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_TOOL_HEADER = 12;
+const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_TOOL_HEADER = 12, RGN_TYPE_ASSET_SHELF = 14, RGN_TYPE_ASSET_SHELF_HEADER = 15;
+const SHELF = [RGN_TYPE_ASSET_SHELF, RGN_TYPE_ASSET_SHELF_HEADER];
 // The view's state Bylonder draws with (view3d.js) as the area's SpaceView3D has it, by RNA path.
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', material: 'MATERIAL', rendered: 'RENDERED' };
 const SPACE_STATE = [
@@ -26,6 +29,8 @@ const SPACE_STATE = [
   ['overlays', ['overlay', 'show_overlays']],
   ['xray', ['shading', 'show_xray'], (value) => !!value],
   ['shading', ['shading', 'type'], (value) => SHADING[value], (type) => Object.keys(SHADING).find((id) => SHADING[id] === type)],
+  ['weight_paint_mode_opacity', ['overlay', 'weight_paint_mode_opacity']],
+  ['show_wpaint_contours', ['overlay', 'show_wpaint_contours']],
 ];
 // Region flags follow the page's regions (rects()): only Blender's changes to them come back.
 const REGION_STATE = ['show_region_toolbar', 'show_region_ui', 'show_region_tool_header'];
@@ -40,6 +45,11 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
   const toolHeader = Object.assign(document.createElement('div'), { className: 'bl-ui bl-tool-header' });
   const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui bl-sidebar' });
   sidebar.setAttribute('aria-label', 'Sidebar');
+  const shelf = Object.assign(document.createElement('div'), { className: 'bl-ui bl-asset-shelf', hidden: true });
+  const shelfHeader = Object.assign(document.createElement('div'), { className: 'bl-asset-shelf-header' });
+  const shelfMain = Object.assign(document.createElement('div'), { className: 'bl-asset-shelf-main' });
+  shelf.setAttribute('aria-label', 'Asset Shelf');
+  shelf.append(shelfHeader, shelfMain);
   // Shown as the view's state says from the first draw (draw() keeps them so).
   toolHeader.hidden = !view.state.show_region_tool_header;
   sidebar.hidden = !view.state.show_region_ui;
@@ -112,7 +122,13 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     keys: (idname, props) => ui.keys(idname, props),
     panelClosed: (id, closed) => area().inContext(type, (C) => panelClosedSet(C, id, closed)),
   });
-  const blenderUIs = { [RGN_TYPE_HEADER]: blenderUI(RGN_TYPE_HEADER), [RGN_TYPE_TOOL_HEADER]: blenderUI(RGN_TYPE_TOOL_HEADER), [RGN_TYPE_UI]: blenderUI(RGN_TYPE_UI) };
+  const blenderUIs = Object.fromEntries([RGN_TYPE_HEADER, RGN_TYPE_TOOL_HEADER, RGN_TYPE_UI, ...SHELF].map((type) => [type, blenderUI(type)]));
+  // An asset's drag invokes the shelf's drag operator (Blend Pose Asset) from where it leaves the press, as a press does.
+  blenderUIs[RGN_TYPE_ASSET_SHELF].dragged = (b, e) => {
+    const call = blenderUIs[RGN_TYPE_ASSET_SHELF].inContext((C) => viewItemDrag(C, b));
+    const properties = call && Object.fromEntries(Object.entries(call.properties).filter(([, value]) => value !== null));
+    if (call) ui.run(call.operator, properties, { type: 'leftmouse', value: 'PRESS', x: e.clientX, y: e.clientY, clientX: e.clientX, clientY: e.clientY, view, invoke: true });
+  };
   const blenderHeader = (type) => (blenderUIs[type].inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: blenderUIs[type], header: true }));
   const blenderSidebar = () => {
     const sidebarUI = blenderUIs[RGN_TYPE_UI], { category, categories, panels: drawn } = sidebarUI.inContext((C) => regionPanels(C));
@@ -123,6 +139,27 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
         onClick: () => { area().inContext(RGN_TYPE_UI, (C) => categorySet(C, name)); state.revision++; },
       }, name))),
     ];
+  };
+
+  // The asset shelf shows as Blender shows it (its shelf types' polls, the pose library's in Pose Mode, and View > Asset
+  // Shelf), at Blender's heights, once per redraw.
+  let shelfRevision = -1, shelfHeights = {};
+  const shelfShown = (type) => {
+    if (shelfRevision !== state.revision) {
+      shelfRevision = state.revision;
+      shelfHeights = legacy() || !view.canvas.clientWidth ? {} : area(false).regionsShown(SHELF);
+      shelf.hidden = !(RGN_TYPE_ASSET_SHELF in shelfHeights);
+      shelfHeader.style.height = `${shelfHeights[RGN_TYPE_ASSET_SHELF_HEADER] ?? 0}px`;
+      shelfMain.style.height = `${shelfHeights[RGN_TYPE_ASSET_SHELF] ?? 0}px`;
+    }
+    return type in shelfHeights;
+  };
+  // Its layout may start reading an asset library, a job of the window's.
+  const shelfRegion = (type, layout) => {
+    if (!shelfShown(type)) return null;
+    const trees = blenderUIs[type].inContext(layout) ?? [];
+    ticking();
+    return trees.map((tree) => h(BlockView, { tree, ui: blenderUIs[type], header: type === RGN_TYPE_ASSET_SHELF_HEADER }));
   };
 
   const mount = (el, render, blender) => {
@@ -158,6 +195,8 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     // The tool settings are the workspace's tools' (WorkSpace.tools) in every mode.
     mount(toolHeader, () => toolSettings(), () => toolSettings()),
     mount(sidebar, sidebarRegion, () => (sidebar.hidden ? null : blenderSidebar())),
+    mount(shelfHeader, () => null, () => shelfRegion(RGN_TYPE_ASSET_SHELF_HEADER, (C) => regionHeader(C))),
+    mount(shelfMain, () => null, () => shelfRegion(RGN_TYPE_ASSET_SHELF, (C) => regionLayout(C))),
   ];
 
   loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { state.ready = true; draw(); });
@@ -168,9 +207,10 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     state.revision++;
   }
   // The regions' rectangles in the page, for the view's area (the regions not shown are hidden there).
-  const rects = () => Object.fromEntries([[RGN_TYPE_HEADER, headerRegion], [RGN_TYPE_TOOL_HEADER, toolHeader], [RGN_TYPE_UI, sidebar], [RGN_TYPE_TOOLS, view.toolbar?.el]]
+  const rects = () => Object.fromEntries([[RGN_TYPE_HEADER, headerRegion], [RGN_TYPE_TOOL_HEADER, toolHeader], [RGN_TYPE_UI, sidebar], [RGN_TYPE_TOOLS, view.toolbar?.el],
+    [RGN_TYPE_ASSET_SHELF, shelfMain], [RGN_TYPE_ASSET_SHELF_HEADER, shelfHeader]]
     .filter(([, el]) => el)
-    .filter(([, el]) => !el.hidden && el.isConnected).map(([type, el]) => [type, el.getBoundingClientRect()])
+    .filter(([, el]) => !el.hidden && !el.parentElement?.hidden && el.isConnected).map(([type, el]) => [type, el.getBoundingClientRect()])
     .filter(([, r]) => r.width && r.height).map(([type, r]) => [type, { x: r.left, y: r.top, width: r.width, height: r.height }]));
-  return { header: headerRegion, toolHeader, sidebar, draw, rects, blenderUI: blenderUI(RGN_TYPE_WINDOW), dispose: () => { apps.forEach((app) => app.unmount()); [headerRegion, toolHeader, sidebar].forEach((el) => el.remove()); } };
+  return { header: headerRegion, toolHeader, sidebar, shelf, draw, rects, blenderUI: blenderUI(RGN_TYPE_WINDOW), dispose: () => { apps.forEach((app) => app.unmount()); [headerRegion, toolHeader, sidebar, shelf].forEach((el) => el.remove()); } };
 }

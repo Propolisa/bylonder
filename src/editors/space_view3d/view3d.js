@@ -62,9 +62,10 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const editorCamera = new ArcRotateCamera(cameraName, STARTUP_VIEW.alpha, STARTUP_VIEW.beta, STARTUP_VIEW.radius, STARTUP_VIEW.target.clone(), scene);
   Object.assign(editorCamera, { minZ: 0.01, maxZ: 1000, lowerRadiusLimit: 0.1, upperRadiusLimit: 10000, inertia: 0 });
   if (from) { editorCamera.alpha = from.alpha; editorCamera.beta = from.beta; editorCamera.radius = from.radius; editorCamera.target.copyFrom(from.target); editorCamera.mode = from.mode; }
-  // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar).
+  // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar), and the
+  // overlay's Weight Paint settings (View3DOverlay's defaults).
   const state = { shading: 'solid', overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
-    show_region_ui: false };
+    show_region_ui: false, weight_paint_mode_opacity: 1, show_wpaint_contours: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
     get camera() { return state.cameraView && ctx.sceneCamera() ? ctx.sceneCamera() : editorCamera; },
@@ -137,7 +138,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     templates: { template_header_3D_mode: () => (editMesh() ? selectModeLayout(world.editMode.selectmode) : null) },
   });
   header.replaceChildren(regions.header);
-  section.append(regions.toolHeader, regions.sidebar);
+  section.append(regions.toolHeader, regions.sidebar, regions.shelf);
   view.regions = regions;
   // Navigation gizmo and buttons, drawn from this view's camera.
   const drag = (el, fn) => {

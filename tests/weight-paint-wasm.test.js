@@ -4,10 +4,11 @@
 // group active, a left drag paints it and a Ctrl click paints the inverse, each vertex's weight as Blender's. The
 // weights the overlay draws are extract_weights' (mesh_paint_weights).
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { BlenderMain, datafiles } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
-import '../src/python/bpy_interface.js';
+import { registered } from '../src/python/bpy_interface.js';
 import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 
@@ -73,4 +74,9 @@ const mesh = main.evaluatedMesh(ob), shown = main.paintWeights(ob, mesh.verts_nu
 const painted = fixture.cases.at(-1).weights.Bone.map((w) => (w === 0 && alert ? -1 : w));
 assert.deepEqual(failed, [], 'Weight Paint results that differ from Blender');
 assert.ok(near(Array.from(shown), painted), 'the overlay draws the active group\'s weights');
+
+// Weight Paint's tools are Blender's, each with its icon shipped (tools/blender-ui/tool_icons.py).
+const icons = [...registered.VIEW3D_PT_tools_active.tools_from_context({ mode: 'PAINT_WEIGHT' })].flatMap((item) => [item ?? []].flat()).map((tool) => tool.icon);
+assert.ok(icons.includes('ops.paint.weight_gradient'), 'Weight Paint has its tools');
+for (const icon of icons) assert.ok(existsSync(new URL(`../public/icons/blender/tools/${icon}.svg`, import.meta.url)), `${icon} has its icon`);
 console.log(`weight paint: automatic weights, Alt click bone selection, a stroke and an inverted click match Blender's (${fixture.cases.length} steps)`);

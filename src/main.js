@@ -66,7 +66,7 @@ import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
 import { tagRedraw } from "./draw/overlay-tool.js";
-import { armaturePickDepth } from "./blenkernel/armature/armature.js";
+import { armaturePickDepth, armatureViewBounds } from "./blenkernel/armature/armature.js";
 import { regionView3D } from "./editors/space_view3d/view3d-project.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
@@ -378,7 +378,12 @@ const editor = createEditor(
 );
 const activeView = () => views.input;
 // Object actions and menus act on the 3D Viewport under the pointer, as in Blender.
-const nav = { frame: (nodes) => activeView()?.nav.frame(nodes) };
+// An armature is framed by its bones, as Blender's View Selected frames it (in Pose Mode its selected bones).
+const armatureBounds = (node) => {
+  const ob = node.metadata?.wbCreation?.armature && world.mainSync.objectOf(node);
+  return ob ? armatureViewBounds(world.mainSync.blender.C, ob) : null;
+};
+const nav = { frame: (nodes) => activeView()?.nav.frame(nodes, armatureBounds) };
 const commands = createObjectCommands(world, editor, history, () =>
   refreshUI(),
 );

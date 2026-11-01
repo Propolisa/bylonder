@@ -13,6 +13,8 @@ const json = (pointer) => { const text = cString(pointer); return text ? JSON.pa
 
 export const regionPanels = (C) => json(x.ui_region_panels(C));
 export const regionHeader = (C) => json(x.ui_region_header(C));
+// The region laid out by its type (the asset shelf's grid of assets): its blocks.
+export const regionLayout = (C) => json(x.ui_region_layout(C));
 // A node's buttons as its draw_buttons lays them out, or null for a node that draws none.
 export const nodeButtonsTree = (C, ntree, node) => json(x.ui_node_buttons(C, ntree, node));
 export const menuTree = (C, name) => withString(name, (p) => json(x.ui_menu(C, p)));
@@ -52,3 +54,8 @@ export function inButtonContext(C, button, fn) {
 }
 export const buttonValueSet = (C, button, value) => x.ui_button_value_set(C, button.id, value);
 export const buttonTextSet = (C, button, text) => withString(text, (p) => x.ui_button_text_set(C, button.id, p));
+// A view's item dragged: the operator call its drag starts, for the page to invoke from the drag ({ operator,
+// properties }: an asset shelf's drag operator), or null.
+export const viewItemDrag = (C, button) => json(x.ui_view_item_drag(C, button.id));
+// A view's item's context menu, as a menu tree.
+export const viewItemContextMenu = (C, button) => json(x.ui_view_item_context_menu(C, button.id));

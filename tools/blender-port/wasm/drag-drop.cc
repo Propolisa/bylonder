@@ -42,11 +42,20 @@ wmEventHandler_Dropbox *WM_event_add_dropbox_handler(ListBaseT<wmEventHandler> *
   return handler;
 }
 
+/* What takes the operator calls Blender's code makes while it is set, to invoke them from the page (ui-tree.cc's view
+ * item drag: an asset shelf's drag operator). */
+void (*operator_call_handover)(wmOperatorType *ot, PointerRNA *properties) = nullptr;
+
 /* port-override: Bylonder's window manager runs one modal operator at a time (operator_modal_added), so an operator
- * another one calls runs only when it has an exec (the Outliner's drag calls the modal VIEW2D_OT_edge_pan). */
+ * another one calls runs only when it has an exec (the Outliner's drag calls the modal VIEW2D_OT_edge_pan), or is handed
+ * over to the page (operator_call_handover). */
 wmOperatorStatus WM_operator_name_call_ptr(bContext *C, wmOperatorType *ot, wm::OpCallContext /*context*/,
                                            PointerRNA *properties, const wmEvent * /*event*/)
 {
+  if (operator_call_handover) {
+    operator_call_handover(ot, properties);
+    return OPERATOR_RUNNING_MODAL;
+  }
   if (!ot->exec || !WM_operator_poll(C, ot)) {
     return OPERATOR_CANCELLED;
   }

@@ -5,7 +5,7 @@ import { registered, module } from '../src/python/bpy_interface.js';
 import { setContextPointer, contextStruct, blendData, pointerStruct, structFind } from '../src/python/bpy_rna.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_CHANNELS, SPACE_GRAPH, GRAPH_MODES, ACHANNEL_SETTING } from '../src/editors/animation/anim-area.js';
 import { regionPanels, panelClosedSet, buttonPress, buttonRename, buttonTextSet } from '../src/editors/interface/ui-tree.js';
-import { hasArmatures } from '../src/blenkernel/armature/armature.js';
+import { hasArmatures, armatureDraw } from '../src/blenkernel/armature/armature.js';
 
 // Rigging in Pose Mode as Blender 5.2 does it (tools/blender-reference/rigging-fixtures.py): the pose operators (clears,
 // copy and paste, Apply Pose as Rest Pose), bone collections, bone colors, selection sets and constraints, Blender's
@@ -94,6 +94,11 @@ const has = (drawn, id, props) => {
 blender.run('object.mode_set', { mode: 'POSE' });
 blender.run('pose.constraint_add', { type: 'IK' });
 blender.run('object.constraint_add', { type: 'COPY_LOCATION' });
+// The bones draw right after an operator the Properties editor runs in Pose Mode tags the armature (Add Bone Constraint),
+// before Main is evaluated: the overlay's draw evaluates the depsgraph's pending updates first, as Blender's window does.
+blender.run('pose.constraint_add', { type: 'LIMIT_ROTATION' });
+const rig = blender.ids(0x424f).find((id) => blender.name(id) === 'Armature');
+assert.ok(armatureDraw(blender.C, rig, 0).buffers.octahedral_fill.ids.length > 0, 'the bones draw after Add Bone Constraint');
 let drawn = tab('DATA');
 has(drawn, 'DATA_PT_pose', ['pose_position']);
 has(drawn, 'DATA_PT_bone_collections', ['is_visible', 'is_solo', 'op:armature.collection_add', 'op:armature.collection_remove', 'op:armature.collection_move',

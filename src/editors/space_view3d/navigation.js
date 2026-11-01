@@ -55,8 +55,8 @@ export function createNavigation({ camera, engine, canvas, capture, enabled = ()
     pan, orbit, zoom,
     rotate: (event) => begin(event, false),
     move: (event) => begin(event, true),
-    // view3d.zoom by one wheel step: `delta` 1 zooms in.
-    wheelZoom(delta) { if (enabled()) zoom(Math.exp(-delta * 0.1)); },
+    // view3d.zoom by wheel steps: `delta` 1 zooms in. blender-port: view3d_navigate_view_zoom.cc viewzoom_exec, 1.2 a step.
+    wheelZoom(delta) { if (enabled()) zoom(1.2 ** -delta); },
     updateBounds,
     get viewName() { return viewName; },
     opposite() { camera.alpha += Math.PI; camera.beta = Math.PI - camera.beta; viewName = "User"; sync(); },
@@ -81,16 +81,16 @@ export function createNavigation({ camera, engine, canvas, capture, enabled = ()
       viewName = { front: ["Front", "Back"], right: ["Right", "Left"], top: ["Top", "Bottom"] }[name][opposite ? 1 : 0];
       sync();
     },
-    // view3d.view_selected: the view centers the objects' bounds (an object without geometry by its origin) and fits
-    // their longest side (view3d_from_minmax).
-    frame(nodes) {
+    // view3d.view_selected: the view centers the objects' bounds (an object without geometry by its origin, one Blender
+    // bounds by `bounds(node)`: { min, max } in world space or null) and fits their longest side (view3d_from_minmax).
+    frame(nodes, bounds = () => null) {
       if (!nodes.length) return;
       const min = new Vector3(Infinity, Infinity, Infinity), max = min.negate();
       for (const node of nodes) {
         node.computeWorldMatrix(true);
-        const box = node.getTotalVertices?.() ? node.getBoundingInfo().boundingBox : null;
-        min.minimizeInPlace(box?.minimumWorld ?? node.getAbsolutePosition());
-        max.maximizeInPlace(box?.maximumWorld ?? node.getAbsolutePosition());
+        const box = bounds(node) ?? (node.getTotalVertices?.() ? node.getBoundingInfo().boundingBox : null);
+        min.minimizeInPlace(box?.min ?? box?.minimumWorld ?? node.getAbsolutePosition());
+        max.maximizeInPlace(box?.max ?? box?.maximumWorld ?? node.getAbsolutePosition());
       }
       camera.target.copyFrom(min.add(max).scale(0.5));
       const size = Math.max(...max.subtract(min).asArray()), persp = camera.mode === Camera.PERSPECTIVE_CAMERA;

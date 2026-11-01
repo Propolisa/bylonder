@@ -4,8 +4,12 @@
  * the overlay draws of them, and what selection catches of it (gpu-select.cc). */
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_build.hh"
+#include "DEG_depsgraph_query.hh"
 #include "BKE_action.hh"
 #include "BKE_armature.hh"
+#include "BKE_context.hh"
+#include "BKE_object.hh"
+#include "BLI_bounds.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
@@ -18,6 +22,7 @@
 #include "ED_armature.hh"
 #include "MEM_guardedalloc.h"
 
+#include <cfloat>
 #include <string>
 
 using namespace blender;
@@ -164,4 +169,28 @@ void armature_bones_set(Main *bmain, Object *ob, int bones_num, const int *ints,
   DEG_id_tag_update(&arm.id, ID_RECALC_GEOMETRY);
   DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
   DEG_relations_tag_update(bmain);
+}
+
+/* An armature's bounds in world space as View Selected frames it (view3d_navigate_view_all.cc): in Pose Mode its
+ * evaluated pose's selected bones (BKE_pose_minmax), else the object's (BKE_object_minmax, its posed bones); false where
+ * there are none. r_bounds: min then max, in Blender's axes. */
+EXPORT(armature_view_bounds) bool armature_view_bounds(bContext *C, Object *ob, float *r_bounds)
+{
+  Object *evaluated = DEG_get_evaluated(CTX_data_depsgraph_pointer(C), ob);
+  float3 min(FLT_MAX), max(-FLT_MAX);
+  if (evaluated->mode & OB_MODE_POSE) {
+    const std::optional<Bounds<float3>> bounds = BKE_pose_minmax(evaluated, true);
+    if (!bounds) {
+      return false;
+    }
+    const Bounds<float3> world = bounds::transform_bounds<float, 4>(evaluated->object_to_world(), *bounds);
+    min = world.min;
+    max = world.max;
+  }
+  else {
+    BKE_object_minmax(evaluated, min, max);
+  }
+  copy_v3_v3(r_bounds, min);
+  copy_v3_v3(r_bounds + 3, max);
+  return min.x <= max.x;
 }

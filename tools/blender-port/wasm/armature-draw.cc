@@ -6,6 +6,7 @@
  * BONESEL_*), which Bylonder's picking reads in place of the GPU's selection buffer. Blender's overlay_armature.hh is
  * this file's stand-ins: the build maps it to an empty header (blender_build.py OVERLAY_STAND_INS). */
 #include "BKE_context.hh"
+#include "BKE_scene.hh"
 #include "BKE_global.hh"
 #include "BKE_layer.hh"
 #include "BKE_mesh.hh"
@@ -629,7 +630,12 @@ EXPORT(armature_draw) const ArmatureDraw *armature_draw(bContext *C, Object *ob,
   customs.clear();
   texts.clear();
   Armatures::BoneBuffers &bb = *buffers;
-  header.transparent = armature_sync(CTX_data_depsgraph_pointer(C), ob, flags, bb, dt);
+  /* The depsgraph's pending updates evaluated first, as Blender's window evaluates them before it draws
+   * (wm_event_do_depsgraph): an operator that tagged the armature (Add Bone Constraint) leaves its evaluated copy
+   * without its pose until then. */
+  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(C);
+  BKE_scene_graph_update_tagged(depsgraph, CTX_data_main(C));
+  header.transparent = armature_sync(depsgraph, ob, flags, bb, dt);
   header.in_front = (ob->dtx & OB_DRAW_IN_FRONT) != 0;
   header.buffers[SPHERE_FILL] = buffer_of(bb.sphere_fill_buf);
   header.buffers[SPHERE_OUTLINE] = buffer_of(bb.sphere_outline_buf);

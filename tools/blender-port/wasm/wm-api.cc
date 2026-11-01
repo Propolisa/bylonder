@@ -20,6 +20,7 @@
 #include "BLI_time.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_view3d_types.h"
 #include "DNA_windowmanager_types.h"
 #include "ED_screen.hh"
@@ -56,6 +57,11 @@ void view3d_matrices_set(blender::RegionView3D &rv3d, const float *viewmat, cons
 namespace blender {
 
 std::string operator_popup_json();
+bool area_regions_poll(bContext *C, const bScreen *screen, ScrArea *area);
+namespace ed::asset::shelf {
+int region_prefsizey();
+int header_region_size();
+}  // namespace ed::asset::shelf
 void screen_area_spacelink_add(const Scene *scene, ScrArea *area, eSpace_Type space_type);
 ScrVert *screen_geom_vertex_add(bScreen *screen, short x, short y);
 
@@ -165,7 +171,8 @@ static rcti window_rect(const wmWindow *win, const int *rect)
 }
 
 /* An area's place and its regions' as the page lays them out: (regiontype, x, y, width, height) for the area (-1)
- * and each region it shows, in page pixels; the regions it does not list are hidden. The first layout initializes
+ * and each region it shows, in page pixels; the regions it does not list are hidden, but for those Blender shows itself
+ * (wm_area_regions_shown), which it lists as Blender shows them. The first layout initializes
  * the area as ED_area_init does (its handlers and keymaps, its regions' types); every layout runs the regions' init
  * as Blender does after a resize (ED_area_update_region_sizes). */
 EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int *rects, int count)
@@ -183,6 +190,7 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
   area->totrct = total;
   area->winx = short(BLI_rcti_size_x(&total) + 1);
   area->winy = short(BLI_rcti_size_y(&total) + 1);
+  const Set<int> &polled = reinterpret_cast<BylonderArea *>(area)->polled;
   for (ARegion &region : area->regionbase) {
     const int *shown = nullptr;
     for (int i = 1; i < count; i++) {
@@ -190,7 +198,9 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
         shown = rects + i * 5 + 1;
       }
     }
-    SET_FLAG_FROM_TEST(region.flag, !shown, RGN_FLAG_HIDDEN);
+    if (!polled.contains(region.regiontype)) {
+      SET_FLAG_FROM_TEST(region.flag, !shown, RGN_FLAG_HIDDEN);
+    }
     region.runtime->visible = shown != nullptr;
     if (!shown) {
       /* As region_rect_recursive leaves a hidden region: no rectangle, so no event finds it. */
@@ -203,6 +213,44 @@ EXPORT(wm_area_layout) void wm_area_layout(bContext *C, ScrArea *area, const int
       region.runtime->type->init(wm, &region);
     }
   }
+}
+
+/* blender-port: area.cc region_rect_recursive, the preferred height of a region in pixels. */
+static int region_height(const ARegion &region)
+{
+  switch (region.regiontype) {
+    case RGN_TYPE_ASSET_SHELF:
+      return region.sizey > 1 ? int(UI_SCALE_FAC * (region.sizey + 0.5f)) : ed::asset::shelf::region_prefsizey();
+    case RGN_TYPE_ASSET_SHELF_HEADER:
+      return ed::asset::shelf::header_region_size();
+    default:
+      return int(UI_SCALE_FAC * (region.sizey > 1 ? region.sizey + 0.5f : region.runtime->type->prefsizey));
+  }
+}
+
+/* Regions Blender shows itself, by their types' polls and their flags (area_regions_poll, as a screen refresh runs it:
+ * the asset shelf, by its shelf types' polls and its View > Asset Shelf toggle), of the `types` given, which the page
+ * lays out from now on as Blender shows them. Returns JSON { regiontype: height in pixels } of those shown; a region
+ * that hides with the one before it (the asset shelf's header, which Blender never hides itself) is shown with it. */
+EXPORT(wm_area_regions_shown) const char *wm_area_regions_shown(bContext *C, ScrArea *area, const int *types, int count)
+{
+  static std::string json;
+  Set<int> &polled = reinterpret_cast<BylonderArea *>(area)->polled;
+  polled.add_multiple(Span<int>(types, count));
+  area_regions_poll(C, WM_window_get_active_screen(CTX_wm_window(C)), area);
+  json = "{";
+  bool previous_shown = false;
+  for (const ARegion &region : area->regionbase) {
+    const bool shown = !(region.flag & RGN_FLAG_POLL_FAILED) && ((region.alignment & RGN_ALIGN_HIDE_WITH_PREV) ?
+                                                                    previous_shown :
+                                                                    !(region.flag & RGN_FLAG_HIDDEN));
+    if (shown && polled.contains(region.regiontype)) {
+      json += (json.size() > 1 ? ",\"" : "\"") + std::to_string(region.regiontype) + "\":" + std::to_string(region_height(region));
+    }
+    previous_shown = shown;
+  }
+  json += "}";
+  return json.c_str();
 }
 
 /* A 3D View's view as the page's camera has it (port-override: Bylonder navigates the view, ED_view3d_update_viewmat

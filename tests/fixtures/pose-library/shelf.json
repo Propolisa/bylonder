@@ -1,0 +1,196 @@
+{
+ "bones": [
+  [
+   "Root",
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    1
+   ],
+   null
+  ],
+  [
+   "Tip",
+   [
+    0,
+    0,
+    1
+   ],
+   [
+    0,
+    0,
+    2
+   ],
+   "Root"
+  ]
+ ],
+ "pose": {
+  "Root": [
+   0.9238795,
+   0.3826834,
+   0,
+   0
+  ],
+  "Tip": [
+   0.7071068,
+   0,
+   0.7071068,
+   0
+  ]
+ },
+ "cases": {
+  "hidden": {
+   "shown": false,
+   "rotations": {
+    "Root": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "Tip": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "shown": {
+   "shown": true,
+   "regions": {
+    "ASSET_SHELF": [
+     0,
+     0,
+     1311,
+     75
+    ],
+    "ASSET_SHELF_HEADER": [
+     0,
+     75,
+     1311,
+     24
+    ],
+    "WINDOW": [
+     0,
+     0,
+     1311,
+     880
+    ]
+   }
+  },
+  "click": {
+   "events": [
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     30,
+     30
+    ],
+    [
+     "LEFTMOUSE",
+     "PRESS",
+     30,
+     30
+    ],
+    [
+     "LEFTMOUSE",
+     "RELEASE",
+     30,
+     30
+    ]
+   ],
+   "rotations": {
+    "Root": [
+     0.92388,
+     0.38268,
+     0.0,
+     0.0
+    ],
+    "Tip": [
+     0.70711,
+     0.0,
+     0.70711,
+     0.0
+    ]
+   }
+  },
+  "drag": {
+   "events": [
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     30,
+     30
+    ],
+    [
+     "LEFTMOUSE",
+     "PRESS",
+     30,
+     30
+    ],
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     40,
+     30
+    ],
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     50,
+     30
+    ],
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     60,
+     30
+    ],
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     70,
+     30
+    ],
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     80,
+     30
+    ],
+    [
+     "MOUSEMOVE",
+     "NOTHING",
+     90,
+     30
+    ],
+    [
+     "LEFTMOUSE",
+     "RELEASE",
+     90,
+     30
+    ]
+   ],
+   "rotations": {
+    "Root": [
+     0.99144,
+     0.13053,
+     0.0,
+     0.0
+    ],
+    "Tip": [
+     0.96593,
+     0.0,
+     0.25882,
+     0.0
+    ]
+   }
+  }
+ }
+}
