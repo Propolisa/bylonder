@@ -7,8 +7,8 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
 
 - An armature is an Armature ID in the shared Main (`main_object_add` with `OB_ARMATURE`). Its bones and pose cross
   through `tools/blender-port/wasm/armature-api.cc`: `armature_bones_get` reads the bones (the edit bones in Edit Mode)
-  with their pose channels and what Blender draws of each, `armature_bones_set` replaces them, outside Edit Mode as
-  leaving Edit Mode makes bones (`ED_armature_from_edit`) with the pose rebuilt.
+  with their pose channels, `armature_bones_set` replaces them, outside Edit Mode as leaving Edit Mode makes bones
+  (`ED_armature_from_edit`) with the pose rebuilt. Drawing reads Main directly (Evaluation and drawing).
 - Main owns the bones: undo is Blender's (memfile steps) and a project saves them in its `.blend` (`model.md`). The
   view (`main-view.js`) writes what Main holds into the object's record in RNA's terms
   (`metadata.wbCreation.armature`), as it writes a curve's splines, after Blender's code ran, an undo step loaded or a
@@ -25,9 +25,27 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
 
 - Blender's depsgraph evaluates each armature's pose after its world matrix (constraints and IK included), when
   `main_evaluate` runs it.
-- The armature object's Babylon mesh is its bones drawn as Blender's overlay draws Octahedral bones
-  (`src/draw/overlay-armature.js`): an octahedron per bone placed by the matrix Blender evaluated (the edit bone's in
-  Edit Mode, else the pose's), scaled by the bone's length. Main is authoritative; Babylon draws.
+- Bones are drawn as Blender's overlay draws them, by Blender's code. `tools/blender-port/wasm/armature-draw.cc`
+  compiles Blender's own `overlay_armature.cc` with stand-ins for the draw manager it syncs into (its
+  `overlay_armature.hh` is an empty header in the build, `blender_build.py` `OVERLAY_STAND_INS`): `armature_draw` runs
+  its Edit Mode or pose sync on the object in Main, the evaluated pose, B-Bone segments
+  (`BKE_pchan_bbone_spline_setup`, or `ebone_spline_preview` in Edit Mode), display type per bone, custom shapes with
+  their transform, scale and wire width, bone color palettes and the theme's bone colors per mode, hidden bones per
+  mode, names, axes and relationship lines all as Blender decides them, and gives each of the overlay's buffers: what
+  its shader reads per instance, a select id each. Theme colors are read as `Resources::update_theme_settings` reads
+  them. `armature_shape_mesh` gives a custom shape's mesh as the draw cache's batches the overlay names (surface, edge
+  detection, loose and all edges). Empties as custom shapes draw their shape; curve and text custom shapes do not draw.
+- `src/draw/overlay-armature.js` draws the buffers with Blender's shaders (`overlay_armature_*`, `overlay_extra_*` for
+  axes and the dashed relationship lines, in `gpu-library.js` `draw`): a mesh per buffer of its shape
+  (`overlay-shape.js` `BONE_SHAPES`, `overlay_shape.cc`'s), the buffer's data as instance attributes, in the passes'
+  order and states (`Armatures::begin_sync`), opaque or transparent per view (Wireframe, X-ray in Solid), In Front over
+  the scene. Names are drawn as the overlay's text over each view. Shading, outlines and joints are the shaders' own;
+  the colors are written in display space as Blender's sRGB overlay buffer holds them.
+- The overlay syncs an armature again when Main evaluated it (`main-view.js` calls `armatureChanged`) or when its
+  object's selection changed, which is flushed into Main first: Object Mode draws an armature in its object's wire
+  color. The armature's Babylon object is an empty mesh, its object's transform.
+- The status bar shows Blender's statistics in an armature's Edit and Pose Modes (`main_statistics`,
+  `ED_info_statusbar_string_ex`): Joints and Bones.
 - The Armature modifier (`ARMATURE`, a scene modifier in `src/modifiers/blender.js`) holds its armature by Bylonder id,
   which RNA's `object` reads and writes as the Object (`modifier.object = armature` in a script); the sync points its
   `object` at that armature's Object in Main. A stack with it evaluates in Main (`sync.evaluatedMesh`), not in a
@@ -45,24 +63,38 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
 - The context's mode is `EDIT_ARMATURE` or `POSE`, `edit_object` and `pose_object` are the armature, and the 3D View
   runs the Armature or Pose keymap in place of Object Mode's.
 - A click selects with Blender's pick (`ED_armature_edit_select_pick_bone`, `ED_armature_pose_select_pick_bone`) on the
-  bone Bylonder's picking finds under the pointer (port-override: the module has no GPU selection buffer).
+  bone part the overlay draws under the pointer (port-override: the module has no GPU selection buffer).
+  `src/draw/overlay-armature-select.js` syncs the overlay for selection and projects each part it draws (bodies,
+  heads, tails, with their select ids) into the view: `armatureParts` gives them, for box, circle and lasso selection
+  too; `pickBone` takes the hits within 12 pixels, then 5, and prefers joints and unselected bones, then the nearest,
+  as `get_nearest_editbonepoint` does. In Object Mode a click on the bones selects the armature when they are nearer
+  than the mesh under the pointer.
 
 ## Tests
+
+`tools/blender-reference/armature-draw-fixtures.py` makes a rig in Blender 5.2.3 (three bones, a curved B-Bone of
+four segments, an unconnected child, posed, names and axes shown) and writes its pose matrices, B-Bone segment points,
+radii, edit bones and theme colors. `tests/armature-draw-wasm.test.js` makes the same rig in the module and checks what
+the overlay draws against them: octahedra, B-Bone boxes (start, direction and width of each segment), wire lines,
+sticks and envelopes in Pose Mode, Object Mode and Edit Mode, the theme's colors, names, axes, joints, relationship
+lines, hidden bones per mode and the selection ids.
 
 `tools/blender-reference/armature-fixtures.py` runs Blender 5.2.3 on 13 cases (Add with and without location and
 radius, entering Edit Mode, extrude once, twice and forked, moving all bones, Pose Mode, rotating and moving a pose bone
 and all of them, clearing rotation, and the Armature modifier deforming a box by envelopes) and writes the bones, pose
 and deformed positions after each step. `tests/armature-wasm.test.js` replays each case through the module and compares
-them, checks the data round trip in Object and Edit Mode, the scene sync (Add, Edit Mode, Pose Mode, a mesh drawn
+them (the bones' matrices as the overlay draws them), checks the data round trip in Object and Edit Mode, the scene sync (Add, Edit Mode, Pose Mode, a mesh drawn
 deformed, an undo step's data going back), the modes' operators, keymaps and context, and bone picking. It is skipped
 on a module without `armature-api.cc`.
 
 ## Not yet
 
-- Bone drawing: selection and active colors, wire, the other display types (B-Bone, Envelope, Stick), names and axes,
-  relationship lines, custom shapes. A bone hidden in Edit Mode (`hide`) or in Pose Mode (`pose.hide`) is hidden in
-  every mode; Blender hides each in its own mode.
-- Picking a bone's head or tail on its own in Edit Mode, box, circle and lasso select of bones.
+- Bone drawing: degrees of freedom draw (the pose's IK limits) but are not checked; bone selection by the overlay's
+  depth and cycling through overlapping bones; In Front is drawn over the whole scene, not over Blender's in front
+  depth; line anti-aliasing and wider outlines (Blender's line pass); the weight paint pass (locked weights, wire
+  alpha); curve and text objects as custom shapes.
+- Box, circle and lasso select of bones (`armatureParts` gives the parts).
+- Framing an armature (View Selected): its Babylon object has no bounds.
 - Vertex groups: Bylonder's meshes have none, so the Armature modifier deforms by envelopes only;
   `object.parent_set` with automatic or envelope weights and `object.vertex_group_*` need deform weights on the Babylon
   side.
@@ -74,5 +106,5 @@ on a module without `armature-api.cc`.
 - Bone properties panels (`BONE_PT_*`), bone collections, constraints in the UI, the Armature tab's settings
   (`pose_position`, display type), and keying pose bones (the animation channels are the object's).
 - Export: `.blend` files carry the armature (Blender reads its bones and pose); the `.babylon` and JavaScript exports
-  write the drawn bones as a mesh; a Babylon `Skeleton` from the pose and
-  skinned meshes (glTF style) are not made yet.
+  write the armature as an empty mesh; a Babylon `Skeleton` from the pose and skinned meshes (glTF style) are not made
+  yet.

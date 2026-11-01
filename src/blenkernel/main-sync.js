@@ -28,8 +28,8 @@ import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { MultiMaterial, VertexData } from '@babylonjs/core';
-import { armatureData, armatureDrawn, setArmatureData } from './armature/armature.js';
-import { armature_draw } from '../draw/overlay-armature.js';
+import { armatureData, setArmatureData } from './armature/armature.js';
+import { armatureChanged } from '../draw/overlay-armature.js';
 import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
 import { ID_RECALC_TRANSFORM, ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
@@ -306,7 +306,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     entry.armature = signature;
     setArmatureData(blender.bmain, entry.ob, data);
     blender.evaluate();
-    armature_draw(armatureDrawn(entry.ob), entry.node);
+    armatureChanged(entry.node);
   }
   // A curve or text object's Curve data, live in Main as in Babylon (the edit data in Edit Mode), with the objects its
   // data and modifiers follow, which Main's depsgraph evaluates it with.
