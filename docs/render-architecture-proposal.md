@@ -4,6 +4,7 @@ Snapshot as of 2026-10-25, on top of `main` at `3c760aa` (scene time, Render and
 
 ## Status
 
+- **2026-11-01:** Render Image and Render Animation render the live scene (`src/render/live.js`), as Blender does; render contexts remain for other scenes' strips and for a scene's sound. The render context sections below describe the earlier design and still apply to those uses.
 - **Implemented (steps 1 to 3):** render context, virtual clock, Render Image, Render Animation, Render Result, Output tab resolution and file output, render samples with jitter and sub-frame motion blur. Checked in Chromium: the Solar System example (which advances by `getDeltaTime()`) renders identical pixels for the same frame twice and different pixels for the next frame; a 24-frame Render Animation produced WebM (VP9) and MPEG-4 (H.264) files with exactly 24 frames and 1.000 s duration. See the Offline render row in [babylon-blender.md](babylon-blender.md).
 - **Findings from the sanity probe:** `getDeltaTime()` only follows the virtual clock when each render is bracketed by `engine.beginFrame()`/`endFrame()`; `scene.render()` alone leaves it at 0. Engine views render only through registered render loops. Per-view `scene.frameGraph` switching works. Differently sized views call `setSize` on every view render, as expected.
 - **Encoder:** mediabunny 1.61.4, used unmodified (MPL-2.0 is file-level, so this is fine as a dependency).

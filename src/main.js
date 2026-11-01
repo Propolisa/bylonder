@@ -40,7 +40,8 @@ import { createRenderHost } from "./editors/render/host.js";
 import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
 import { timeDefaults, frameRate } from "./blenkernel/scene/time.js";
 import { createSceneFrames } from "./sequencer/scene-frames.js";
-import { createSceneAudio } from "./sequencer/scene-audio.js";
+import { createSceneAudio, renderSceneAudio } from "./sequencer/scene-audio.js";
+import { createLiveRender } from "./render/live.js";
 import { strips } from "./sequencer/sequence-editor.js";
 import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
@@ -244,7 +245,9 @@ const mainScene = () => pointerStruct(structFind("Scene"), world.mainSync.blende
 const liveSnapshot = () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() });
 const renderHost = createRenderHost({
   world,
-  snapshot: liveSnapshot,
+  live: createLiveRender({ world: () => built, engine, views: () => views, overlays, gizmos: (on) => { editor.gizmosShown = on; }, loop: () => renderScene,
+    restored: () => { viewportCtx.shadingChanged(); for (const view of viewports()) view.sync(); } }),
+  sceneAudio: (range, options) => renderSceneAudio(liveSnapshot(), { ...range, fps: frameRate(animation.time.state), ...options }),
   sequencer: { hasStrips: () => strips(world.sequenceEditor.state).length > 0, openCompositor: (range) => sequencerAdapter.openCompositor(range) },
   name: () => world.sceneSettings.state.name || "render",
 });

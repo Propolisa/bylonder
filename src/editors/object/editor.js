@@ -140,6 +140,8 @@ export function createEditor(world, views, history, changed, capture) {
   window.addEventListener("mousemove", track);
   setMode("select");
   return {
+    // Whether the gizmos draw: a render of the live scene draws none.
+    set gizmosShown(on) { gizmos.utilityLayer.shouldRender = on; gizmos.keepDepthUtilityLayer.shouldRender = on; },
     get selected() {
       return selection.size ? selected : null;
     },

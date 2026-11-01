@@ -13,7 +13,7 @@ export function seededRandom(seed) {
   };
 }
 
-export function installVirtualClock(target = globalThis, { epoch = Date.UTC(2000, 0, 1), seed = 1 } = {}) {
+export function installVirtualClock(target = globalThis, { epoch = Date.UTC(2000, 0, 1), seed = 1, frames = true } = {}) {
   const original = {
     now: target.performance.now.bind(target.performance),
     dateNow: target.Date.now,
@@ -24,9 +24,12 @@ export function installVirtualClock(target = globalThis, { epoch = Date.UTC(2000
   let ms = 0;
   target.performance.now = () => ms;
   target.Date.now = () => epoch + ms;
-  // Render loops started by user code never tick; the render job drives every frame itself.
-  target.requestAnimationFrame = () => 0;
-  target.cancelAnimationFrame = () => {};
+  // Render loops started by user code never tick; the render job drives every frame itself. A render of the live
+  // scene (frames: false) stops the engine's loop instead and leaves the page's animation frames running.
+  if (frames) {
+    target.requestAnimationFrame = () => 0;
+    target.cancelAnimationFrame = () => {};
+  }
   target.Math.random = seededRandom(seed);
   return {
     get ms() { return ms; },
