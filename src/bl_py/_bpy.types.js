@@ -6364,12 +6364,6 @@ export var World =  __class__ ('World', [_types.ID], {
 export var ANIM_OT_clear_useless_actions =  __class__ ('ANIM_OT_clear_useless_actions', [Operator], {
 	__module__: __name__,
 });
-export var ASSETBROWSER_MT_asset =  __class__ ('ASSETBROWSER_MT_asset', [Menu], {
-	__module__: __name__,
-});
-export var ASSET_OT_assign_action =  __class__ ('ASSET_OT_assign_action', [Operator], {
-	__module__: __name__,
-});
 export var AreaLight =  __class__ ('AreaLight', [Light], {
 	__module__: __name__,
 });
@@ -6980,9 +6974,6 @@ export var CompositorNodeViewer =  __class__ ('CompositorNodeViewer', [Composito
 	__module__: __name__,
 });
 export var CompositorNodeZcombine =  __class__ ('CompositorNodeZcombine', [CompositorNode], {
-	__module__: __name__,
-});
-export var DOPESHEET_PT_asset_panel =  __class__ ('DOPESHEET_PT_asset_panel', [Panel], {
 	__module__: __name__,
 });
 export var DistortedNoiseTexture =  __class__ ('DistortedNoiseTexture', [Texture], {
@@ -9397,18 +9388,6 @@ export var PAINT_OT_vertex_color_dirt =  __class__ ('PAINT_OT_vertex_color_dirt'
 export var PARTICLE_OT_hair_dynamics_preset_add =  __class__ ('PARTICLE_OT_hair_dynamics_preset_add', [Operator], {
 	__module__: __name__,
 });
-export var POSELIB_OT_copy_as_asset =  __class__ ('POSELIB_OT_copy_as_asset', [Operator], {
-	__module__: __name__,
-});
-export var POSELIB_OT_paste_asset =  __class__ ('POSELIB_OT_paste_asset', [Operator], {
-	__module__: __name__,
-});
-export var POSELIB_OT_pose_asset_select_bones =  __class__ ('POSELIB_OT_pose_asset_select_bones', [Operator], {
-	__module__: __name__,
-});
-export var POSELIB_OT_restore_previous_action =  __class__ ('POSELIB_OT_restore_previous_action', [Operator], {
-	__module__: __name__,
-});
 export var PREFERENCES_OT_script_directory_add =  __class__ ('PREFERENCES_OT_script_directory_add', [Operator], {
 	__module__: __name__,
 });
@@ -10202,12 +10181,6 @@ export var UV_OT_lightmap_pack =  __class__ ('UV_OT_lightmap_pack', [Operator], 
 	__module__: __name__,
 });
 export var UV_OT_randomize_uv_transform =  __class__ ('UV_OT_randomize_uv_transform', [Operator], {
-	__module__: __name__,
-});
-export var VIEW3D_AST_pose_library =  __class__ ('VIEW3D_AST_pose_library', [AssetShelf], {
-	__module__: __name__,
-});
-export var VIEW3D_MT_pose_modify =  __class__ ('VIEW3D_MT_pose_modify', [Menu], {
 	__module__: __name__,
 });
 export var VIEW3D_OT_edit_mesh_extrude_move_normal =  __class__ ('VIEW3D_OT_edit_mesh_extrude_move_normal', [Operator], {
@@ -11267,8 +11240,6 @@ export function __py_setattr__ (key, value) {
 		case 'Light': Light = value; break;
 		case 'World': World = value; break;
 		case 'ANIM_OT_clear_useless_actions': ANIM_OT_clear_useless_actions = value; break;
-		case 'ASSETBROWSER_MT_asset': ASSETBROWSER_MT_asset = value; break;
-		case 'ASSET_OT_assign_action': ASSET_OT_assign_action = value; break;
 		case 'AreaLight': AreaLight = value; break;
 		case 'BVH_PT_export_animation': BVH_PT_export_animation = value; break;
 		case 'BVH_PT_export_transform': BVH_PT_export_transform = value; break;
@@ -11473,7 +11444,6 @@ export function __py_setattr__ (key, value) {
 		case 'CompositorNodeVecBlur': CompositorNodeVecBlur = value; break;
 		case 'CompositorNodeViewer': CompositorNodeViewer = value; break;
 		case 'CompositorNodeZcombine': CompositorNodeZcombine = value; break;
-		case 'DOPESHEET_PT_asset_panel': DOPESHEET_PT_asset_panel = value; break;
 		case 'DistortedNoiseTexture': DistortedNoiseTexture = value; break;
 		case 'EXPORT_ANIM_OT_bvh': EXPORT_ANIM_OT_bvh = value; break;
 		case 'EXPORT_SCENE_OT_fbx': EXPORT_SCENE_OT_fbx = value; break;
@@ -12278,10 +12248,6 @@ export function __py_setattr__ (key, value) {
 		case 'OperatorStrokeElement': OperatorStrokeElement = value; break;
 		case 'PAINT_OT_vertex_color_dirt': PAINT_OT_vertex_color_dirt = value; break;
 		case 'PARTICLE_OT_hair_dynamics_preset_add': PARTICLE_OT_hair_dynamics_preset_add = value; break;
-		case 'POSELIB_OT_copy_as_asset': POSELIB_OT_copy_as_asset = value; break;
-		case 'POSELIB_OT_paste_asset': POSELIB_OT_paste_asset = value; break;
-		case 'POSELIB_OT_pose_asset_select_bones': POSELIB_OT_pose_asset_select_bones = value; break;
-		case 'POSELIB_OT_restore_previous_action': POSELIB_OT_restore_previous_action = value; break;
 		case 'PREFERENCES_OT_script_directory_add': PREFERENCES_OT_script_directory_add = value; break;
 		case 'PointLight': PointLight = value; break;
 		case 'RENDER_OT_color_management_white_balance_preset_add': RENDER_OT_color_management_white_balance_preset_add = value; break;
@@ -12547,8 +12513,6 @@ export function __py_setattr__ (key, value) {
 		case 'UV_OT_follow_active_quads': UV_OT_follow_active_quads = value; break;
 		case 'UV_OT_lightmap_pack': UV_OT_lightmap_pack = value; break;
 		case 'UV_OT_randomize_uv_transform': UV_OT_randomize_uv_transform = value; break;
-		case 'VIEW3D_AST_pose_library': VIEW3D_AST_pose_library = value; break;
-		case 'VIEW3D_MT_pose_modify': VIEW3D_MT_pose_modify = value; break;
 		case 'VIEW3D_OT_edit_mesh_extrude_move_normal': VIEW3D_OT_edit_mesh_extrude_move_normal = value; break;
 		case 'VIEW3D_OT_edit_mesh_extrude_move_shrink_fatten': VIEW3D_OT_edit_mesh_extrude_move_shrink_fatten = value; break;
 		case 'VoronoiTexture': VoronoiTexture = value; break;

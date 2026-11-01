@@ -35,6 +35,8 @@ export const panelClosedSet = (C, idname, closed) => withString(idname, (p) => x
 
 // A toggle flipped (or set to `value`, 0 or 1), a row button's value set, any other button's functions run.
 export const buttonPress = (C, button, value = -1) => x.ui_button_press(C, button.id, value);
+// A double click on a view's item: its renaming begins where it can be renamed; whether it did.
+export const buttonRename = (C, button) => !!x.ui_button_rename(C, button.id);
 // What runs after a property button's value changed through RNA (its functions, its property's update).
 export const buttonApplied = (C, button) => x.ui_button_applied(C, button.id);
 // An operator button pressed as Blender's handlers run it: its operator with the button active; its wmOperatorStatus.

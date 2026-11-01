@@ -168,21 +168,6 @@ export var _super_classmethod = function (owner, cls, method) {
 	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
 export var __all__ = tuple (['ToolDef', 'ToolSelectPanelHelper', 'activate_by_id', 'activate_by_id_or_cycle', 'description_from_id', 'keymap_from_id']);
-if (false) {
-	var release = bpy.app.icons.release;
-	var __iterable0__ = __call__ (set, null, (function () {
-		var __accu0__ = _icon_cache;
-		return __call__ (__accu0__.py_values, __accu0__);
-	}) ());
-	__iterable0__ = __i__ (__iterable0__);
-	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-		var icon_value = __getitem__ (__iterable0__, __index0__);
-		if (__ne__ (icon_value, 0)) {
-			__call__ (release, null, icon_value);
-		}
-	}
-	// pass;
-}
 export var _icon_cache = dict ({});
 export var _keymap_fn_from_seq = function (keymap_data) {
 	if (arguments.length) {

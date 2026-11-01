@@ -28,7 +28,8 @@ import transpile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(transpile.REPO, 'src', 'bl_py')
-ROOTS = ['scripts/startup', 'scripts/modules', 'scripts/presets/keyconfig']
+# Blender's scripts, and the core add-on Blender's default Preferences enable that Bylonder ships (the pose library).
+ROOTS = ['scripts/startup', 'scripts/modules', 'scripts/presets/keyconfig', 'scripts/addons_core/pose_library']
 # Blender's presets other than keymaps: scripts of assignments (bpy.context.scene.render.fps = 60) that
 # script.execute_preset runs by file each time it is chosen, so they ship as sources the boundary interprets.
 PRESETS = 'scripts/presets'
@@ -341,7 +342,8 @@ def stub_boundary(build, trees):
         for package in (module.rsplit('.', i)[0] for i in range(1, module.count('.') + 1)):
             os.makedirs(os.path.join(build, *package.split('.')), exist_ok=True)
             open(os.path.join(build, *package.split('.'), '__init__.py'), 'a').close()
-        tree = trees.get(module) or ast.parse(f'# {module}: stubbed by tree.py; not at the boundary yet.\n')
+        # A module of its own the tree lacks says so, so importing it by name fails as a missing module does.
+        tree = trees.get(module) or ast.parse(f'# {module}: stubbed by tree.py; not at the boundary yet.\n__stubbed__ = True\n')
         defined = {d for n in tree.body for d in transpile.defined_names(n)}
         missing = sorted(n for n in names - defined if not is_module(build, f'{module}.{n}'))
         tree.body += [ast.parse(f'{n} = None').body[0] for n in missing]

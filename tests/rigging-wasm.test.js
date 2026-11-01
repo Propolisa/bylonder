@@ -4,7 +4,7 @@ import { BlenderMain, blenderModule, OPERATOR_FINISHED, OPERATOR_CANCELLED } fro
 import { registered, module } from '../src/python/bpy_interface.js';
 import { setContextPointer, contextStruct, blendData, pointerStruct, structFind } from '../src/python/bpy_rna.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_CHANNELS, SPACE_GRAPH, GRAPH_MODES, ACHANNEL_SETTING } from '../src/editors/animation/anim-area.js';
-import { regionPanels, panelClosedSet } from '../src/editors/interface/ui-tree.js';
+import { regionPanels, panelClosedSet, buttonPress, buttonRename, buttonTextSet } from '../src/editors/interface/ui-tree.js';
 import { hasArmatures } from '../src/blenkernel/armature/armature.js';
 
 // Rigging in Pose Mode as Blender 5.2 does it (tools/blender-reference/rigging-fixtures.py): the pose operators (clears,
@@ -103,6 +103,23 @@ has(drawn, 'DATA_PT_iksolver_itasc', ['ik_solver']);
 has(drawn, 'DATA_PT_motion_paths', ['op:pose.paths_calculate']);
 has(drawn, 'POSE_PT_selection_sets', ['op:pose.selection_set_add', 'op:pose.selection_set_assign', 'op:pose.selection_set_select']);
 has(drawn, 'DATA_PT_custom_props_arm', ['op:wm.properties_add']);
+// The bone collections' tree view: a click on a collection's row makes it the active one, a double click renames it
+// in the field that takes the row's place (do_but_VIEW_ITEM).
+blender.run('armature.collection_add');
+blender.run('armature.collection_add');
+const arm = data().objects.get('Armature').data;
+const collectionRows = () => flat(panels()).find((panel) => panel.id === 'DATA_PT_bone_collections').parts.flatMap((part) => buttons(part.layout));
+// A row's item button is the last one before its name's label.
+const row = (name) => { const rows = collectionRows(), label = rows.findIndex((b) => b.type === 'LABEL' && b.text === name); return rows.slice(0, label).findLast((b) => b.type === 'VIEW_ITEM'); };
+const second = arm.collections_all[1].name;
+area.inContext(RGN_TYPE_WINDOW, (C) => buttonPress(C, row(second)));
+assert.equal(arm.collections.active.name, second, 'a click on a collection makes it active');
+assert.ok(area.inContext(RGN_TYPE_WINDOW, (C) => buttonRename(C, row(second))), 'a double click begins its renaming');
+const field = collectionRows().find((b) => b.type === 'TEXT' && b.renaming);
+assert.ok(field, 'the row is a rename field');
+area.inContext(RGN_TYPE_WINDOW, (C) => buttonTextSet(C, field, 'Arms'));
+assert.equal(arm.collections_all[1].name, 'Arms', 'the field renames the collection');
+
 drawn = tab('BONE');
 has(drawn, 'BONE_PT_transform', ['location', 'rotation_quaternion', 'rotation_mode', 'scale']);
 has(drawn, 'BONE_PT_curved', ['bbone_segments', 'bbone_easein']);
@@ -142,4 +159,18 @@ assert.ok(['ops.pose.breakdowner', 'ops.pose.push', 'ops.pose.relax'].every((ico
 for (const icon of [...pose, ...edit]) assert.ok(fs.existsSync(new URL(`../public/icons/blender/tools/${icon}.svg`, import.meta.url)), `${icon} has its icon`);
 assert.ok(module('keyingsets_builtins'), 'the keying sets are registered');
 
-console.log(`Rigging: ${files.length} cases match Blender 5.2 (pose clears, copy and paste, apply as rest, bone collections, colors, selection sets, constraints, keying pose bones); Armature, Bone and constraint panels; armature tools`);
+// The pose library: Blender's default add-on is enabled, Pose > Create Pose Asset makes a pose asset in the file, and
+// Apply Pose with its asset reference (as the asset shelf gives it) poses the bones.
+assert.ok(registered.VIEW3D_AST_pose_library && registered['poselib.pose_asset_select_bones'], 'the pose_library add-on is enabled');
+blender.run('object.mode_set', { mode: 'POSE' });
+blender.run('pose.select_all', { action: 'SELECT' });
+const posed = data().objects.get('Armature').pose.bones[0];
+posed.rotation_quaternion = [0.7071, 0.7071, 0, 0];
+assert.equal(blender.run('poselib.create_pose_asset', { pose_name: 'Bent' }).status, OPERATOR_FINISHED);
+assert.ok(data().actions.get('Bent').asset_data, 'the pose is an asset');
+posed.rotation_quaternion = [1, 0, 0, 0];
+const apply = { asset_library_type: 'LOCAL', asset_library_identifier: '', relative_asset_identifier: 'Action/Bent' };
+assert.equal(blender.run('poselib.apply_pose_asset', apply).status, OPERATOR_FINISHED);
+assert.ok(Math.abs(posed.rotation_quaternion[1] - 0.7071) < 1e-3, 'Apply Pose poses the bone');
+
+console.log(`Rigging: ${files.length} cases match Blender 5.2 (pose clears, copy and paste, apply as rest, bone collections, colors, selection sets, constraints, keying pose bones); Armature, Bone and constraint panels; collection rows activate and rename; armature tools; pose library`);

@@ -3,10 +3,102 @@ import * as __self__ from './_bpy.msgbus.js';
 (globalThis.__py_modules ??= {})['_bpy.msgbus'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = '_bpy.msgbus';
+export var _subscriptions = [];
+export var subscribe_rna = function (key, owner, args, notify, options) {
+	if (typeof key == 'undefined' || (key != null && globalThis.Object.hasOwn (key, "__kwargtrans__"))) {;
+		var key = null;
+	};
+	if (typeof owner == 'undefined' || (owner != null && globalThis.Object.hasOwn (owner, "__kwargtrans__"))) {;
+		var owner = null;
+	};
+	if (typeof args == 'undefined' || (args != null && globalThis.Object.hasOwn (args, "__kwargtrans__"))) {;
+		var args = tuple ([]);
+	};
+	if (typeof notify == 'undefined' || (notify != null && globalThis.Object.hasOwn (notify, "__kwargtrans__"))) {;
+		var notify = null;
+	};
+	if (typeof options == 'undefined' || (options != null && globalThis.Object.hasOwn (options, "__kwargtrans__"))) {;
+		var options = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'key': var key = __allkwargs0__ [__attrib0__]; break;
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'args': var args = __allkwargs0__ [__attrib0__]; break;
+					case 'notify': var notify = __allkwargs0__ [__attrib0__]; break;
+					case 'options': var options = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	(function () {
+		var __accu0__ = _subscriptions;
+		return __call__ (__accu0__.append, __accu0__, tuple ([owner, key, args, notify]));
+	}) ();
+};
+export var clear_by_owner = function (owner) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	__setslice__ (_subscriptions, 0, null, null, (function () {
+		var __accu0__ = [];
+		var __iterable0__ = _subscriptions;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var s = __getitem__ (__iterable0__, __index0__);
+			if (__getitem__ (s, 0) !== owner) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, s);
+				}) ();
+			}
+		}
+		return __accu0__;
+	}) ());
+};
+export var publish_rna = function (key) {
+	if (typeof key == 'undefined' || (key != null && globalThis.Object.hasOwn (key, "__kwargtrans__"))) {;
+		var key = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'key': var key = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	// pass;
+};
 
 //# sourceMappingURL=_bpy.msgbus.map
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_subscriptions': _subscriptions = value; break;
+		case 'subscribe_rna': subscribe_rna = value; break;
+		case 'clear_by_owner': clear_by_owner = value; break;
+		case 'publish_rna': publish_rna = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);
 	}
 }

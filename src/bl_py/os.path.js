@@ -453,6 +453,22 @@ export var islink = function (py_name) {
 	}
 	return false;
 };
+export var getmtime = function (py_name) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return 0.0;
+};
 export var _mount = function (directory, names) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -521,6 +537,7 @@ export function __py_setattr__ (key, value) {
 		case 'isdir': isdir = value; break;
 		case 'exists': exists = value; break;
 		case 'islink': islink = value; break;
+		case 'getmtime': getmtime = value; break;
 		case '_mount': _mount = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);
 	}

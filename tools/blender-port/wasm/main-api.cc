@@ -44,7 +44,10 @@
 #include "BKE_mesh.h"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
+#include "BKE_deform.hh"
 #include "BKE_object.hh"
+#include "BKE_object_deform.h"
+#include "BLI_array.hh"
 #include "BKE_object_types.hh"
 #include "BKE_paint.hh"
 #include "BKE_paint_bvh.hh"
@@ -644,6 +647,96 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   }
   mesh_extraction(*mesh, ctx->extraction);
   return &ctx->extraction;
+}
+
+/* What Weight Paint Mode shows of the vertex groups (draw_cache_extract.hh DRW_MeshWeightState). */
+struct WeightState {
+  int defgroup_active, defgroup_len;
+  bool multipaint, auto_normalize, lock_relative;
+  char alert_mode;
+  Array<bool> sel, locked, unlocked;
+  int sel_count = 0;
+};
+
+/* blender-port: draw_cache_impl_mesh.cc drw_mesh_weight_state_extract, in Weight Paint Mode. */
+static WeightState weight_state(Object &ob, const Mesh &mesh, const ToolSettings &ts)
+{
+  WeightState ws{mesh.vertex_group_active_index - 1, BLI_listbase_count(&mesh.vertex_group_names)};
+  ws.alert_mode = ts.weightuser;
+  const auto take = [&](bool *flags, Array<bool> &into) {
+    into = flags ? Array<bool>(Span(flags, ws.defgroup_len)) : Array<bool>();
+    MEM_SAFE_DELETE(flags);
+  };
+  if (ts.multipaint) {
+    take(BKE_object_defgroup_selected_get(&ob, ws.defgroup_len, &ws.sel_count), ws.sel);
+    if (ws.sel_count > 1) {
+      ws.multipaint = true;
+      ws.auto_normalize = ts.auto_normalize;
+      if (ME_USING_MIRROR_X_VERTEX_GROUPS(&mesh)) {
+        BKE_object_defgroup_mirror_selection(&ob, ws.defgroup_len, ws.sel.data(), ws.sel.data(), &ws.sel_count);
+      }
+    }
+    else {
+      ws.sel_count = 0;
+      ws.sel = {};
+    }
+  }
+  if (ts.wpaint_lock_relative) {
+    take(BKE_object_defgroup_lock_flags_get(&ob, ws.defgroup_len), ws.locked);
+    take(BKE_object_defgroup_validmap_get(&ob, ws.defgroup_len), ws.unlocked);
+    if (!ws.locked.is_empty() && BKE_object_defgroup_check_lock_relative(ws.locked.data(), ws.unlocked.data(), ws.defgroup_active) &&
+        BKE_object_defgroup_check_lock_relative_multi(ws.defgroup_len, ws.locked.data(), ws.sel.data(), ws.sel_count))
+    {
+      ws.lock_relative = true;
+      BKE_object_defgroup_split_locked_validmap(ws.defgroup_len, ws.locked.data(), ws.unlocked.data(), ws.locked.data(), ws.unlocked.data());
+    }
+  }
+  return ws;
+}
+
+/* blender-port: extract_mesh_vbo_weights.cc evaluate_vertex_weight: a vertex's weight as the overlay shows it, -1 where
+ * the alert (Zero Weights) marks it, -2 with no active group of several. */
+static float vertex_weight(const MDeformVert *dvert, const WeightState &ws)
+{
+  if (ws.defgroup_active < 0 && ws.defgroup_len > 0) {
+    return -2.0f;
+  }
+  float input = 0.0f;
+  if (ws.multipaint) {
+    input = BKE_defvert_multipaint_collective_weight(dvert, ws.defgroup_len, ws.sel.data(), ws.sel_count,
+                                                     ws.auto_normalize || ws.lock_relative);
+    if (input == 0.0f) {
+      return -1.0f;
+    }
+  }
+  else {
+    input = BKE_defvert_find_weight(dvert, ws.defgroup_active);
+    if (input == 0.0f && (ws.alert_mode == OB_DRAW_GROUPUSER_ACTIVE ||
+                          (ws.alert_mode == OB_DRAW_GROUPUSER_ALL && BKE_defvert_is_weight_zero(dvert, ws.defgroup_len))))
+    {
+      return -1.0f;
+    }
+  }
+  if (ws.lock_relative) {
+    input = BKE_defvert_lock_relative_weight(input, dvert, ws.defgroup_len, ws.locked.data(), ws.unlocked.data());
+  }
+  return std::clamp(input, 0.0f, 1.0f);
+}
+
+/* The weight of each vertex of the mesh object_mesh_eval last gave, as Weight Paint Mode's overlay draws it
+ * (extract_weights: its weight in the active vertex group, or its alert); valid until the next call. */
+EXPORT(mesh_paint_weights) const float *mesh_paint_weights(BlenderMain *ctx, Object *ob)
+{
+  static Vector<float> weights;
+  const Mesh &mesh = *extracted_mesh;
+  const Span<MDeformVert> dverts = mesh.deform_verts();
+  const WeightState ws = weight_state(*ob, mesh, *ctx->scene->toolsettings);
+  const float none = ws.alert_mode == OB_DRAW_GROUPUSER_NONE ? 0.0f : -1.0f;
+  weights.resize(mesh.verts_num);
+  for (const int vert : IndexRange(mesh.verts_num)) {
+    weights[vert] = dverts.is_empty() || ws.defgroup_active == -1 ? none : vertex_weight(&dverts[vert], ws);
+  }
+  return weights.data();
 }
 
 /* A Blender matrix (column-major, Z up) written as Babylon's (row-major, Y up; main-view.js babylonMatrix). */

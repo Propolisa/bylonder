@@ -3,6 +3,8 @@
  * evaluated mesh is read in place through an ExtractionHeader. */
 #include "BKE_attribute.hh"
 #include "BKE_blender.hh"
+#include "BKE_blendfile.hh"
+#include "DNA_userdef_types.h"
 #include "BKE_brush.hh"
 #include "BKE_callbacks.hh"
 #include "BKE_material.hh"
@@ -63,6 +65,16 @@ void operators_register();
 void ui_init();
 void movie_init();
 
+/* The Preferences' add-ons as Blender has them without a userpref.blend (BKE_blendfile_userdef_from_defaults, which
+ * WM_init reads), for addon_utils to enable as the scripts load. */
+static void addons_init()
+{
+  UserDef *defaults = BKE_blendfile_userdef_from_defaults();
+  BLI_movelisttolist(&U.addons, &defaults->addons);
+  BKE_blender_userdef_data_free(defaults, false);
+  MEM_delete(defaults);
+}
+
 /* What Blender's main initializes (creator.cc), in its order, without the window system and Python. */
 static void blender_init()
 {
@@ -89,6 +101,7 @@ static void blender_init()
   fonts_init();
   BKE_materials_init();
   ui_init();
+  addons_init();
   operators_register();
 }
 
