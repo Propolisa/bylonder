@@ -1,6 +1,6 @@
 // Production check: the built app (dist/) boots in headless Chromium without a page error or console error, its
-// topbar menus, the 3D View header menus and the context menus open with items, and every workspace tab shows a
-// screen. CI runs it after the build and before deploying, since some failures only happen in the production build.
+// topbar menus, the 3D View header menus and the context menus open with items, every workspace tab shows a screen in
+// its object mode, and examples made in Blender open with their objects in the scene sync. CI runs it after the build and before deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
@@ -109,15 +109,48 @@ try {
     noErrors("OBJECT_MT_move_to_collection");
   });
 
+  // Each workspace tab shows its screen and puts the active mesh in the workspace's object mode where Bylonder has that
+  // mode, else leaves it in its mode, as ED_workspace_change does when a mode cannot be entered. A switch is checked
+  // once the app has settled: leaving a mode and compiling a view's shaders take a while on a runner without a GPU.
+  const MODES = { modeling: "EDIT", sculpting: "SCULPT", "uv-editing": "EDIT", "texture-paint": "TEXTURE_PAINT", animation: "POSE" };
+  const meshModes = ["OBJECT", "EDIT", "SCULPT"];
+  let expected = "OBJECT";
   const tabs = await page.locator("#workspace-tabs [data-workspace]").evaluateAll((els) => els.map((el) => el.dataset.workspace));
   assert.ok(tabs.length >= 11, `workspace tabs: ${tabs}`);
   for (const id of [...tabs, "layout"]) {
     await step(`workspace ${id}`, async () => {
       await page.click(`[data-workspace="${id}"]`);
-      await page.waitForFunction((id) => document.querySelector(`[data-workspace="${id}"]`)?.classList.contains("active"), id, { timeout: 10000 });
+      await page.waitForFunction((id) => document.querySelector(`[data-workspace="${id}"]`)?.classList.contains("active"), id, { timeout: 30000 });
+      await app.settled();
       // Its screen draws: editors of a visible size in the workspace.
       await page.waitForFunction(() => [...document.querySelectorAll("#workspace > *")].some((el) => el.offsetWidth > 100 && el.offsetHeight > 100), null, { timeout: 10000 });
+      const mode = await app.bylonder((b) => b.editor.selection.nodes.at(-1)?.metadata?.wbMode ?? "OBJECT");
+      const wanted = MODES[id] ?? "OBJECT";
+      if (meshModes.includes(wanted)) expected = wanted;
+      assert.equal(mode, expected, `object mode in ${id}`);
       noErrors(`switching to ${id}`);
+    });
+  }
+
+  // Examples made in Blender open with every object of Main in the scene sync, once (an armature left out of it was
+  // invisible to every tool), and without a page error.
+  for (const example of ["Rigged Character", "Hair Dynamics"]) {
+    await step(`example ${example}`, async () => {
+      const opened = await openApp(browser, server.url, { example, node: example === "Rigged Character" ? "Rig" : "Hair" });
+      try {
+        await opened.settled();
+        const problems = await opened.bylonder((b) => {
+          const { scene, objects, mainSync } = b.world, authored = (n) => !n.name.startsWith("__");
+          const nodes = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras].filter(authored);
+          const names = nodes.map((n) => n.name);
+          return [...objects.filter((n) => !mainSync.objectOf(n)).map((n) => `${n.name}: not in Main's sync`),
+            ...[...new Set(names.filter((n, i) => names.indexOf(n) !== i))].map((n) => `${n}: two objects`)];
+        });
+        assert.deepEqual(problems, [], `${example}: objects`);
+        assert.deepEqual(opened.errors, [], `${example}: page errors`);
+      } finally {
+        await opened.close();
+      }
     });
   }
   console.log(`Production check passed: ${steps.length} steps in ${Math.round((Date.now() - started) / 1000)} s`);
