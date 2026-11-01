@@ -27,6 +27,13 @@ name, Open in Bylonder link, Blender manual link). A feature is done when its pa
   `tools/docs/record-*.mjs`, so they can be regenerated), the project files of the demo, and what is not done yet.
 - Media: GIFs short and small (under 1 MB), screenshots cropped to what the step shows, all regenerable.
 
+## Runtimes
+
+A feature that exists on both sides (Blender data and a Babylon class) runs as Blender, Mapped or Babylon, chosen per
+data block: `docs/runtimes.md` is the model. A feature joins through one wrapper module in `src/runtimes/`, registered
+with `src/runtimes/runtimes.js`, never by changing other code; Bylonder's own panels, settings, operators and modifiers
+carry the Bylonder icon (`BYLONDER`), Blender's own UI none.
+
 ## UI components
 
 New UI is Vue single-file components built from shadcn-vue (reka-ui primitives), in
