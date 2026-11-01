@@ -50,11 +50,11 @@ globalThis.__bylonder_operators__ = {
 // Registered classes by Blender's idname (VIEW3D_MT_object, PROPERTIES_PT_context_object, OBJECT_OT_...).
 export const registered = _bpy.registered;
 
-// Blender's panels, menus, headers, lists and operators become Blender's types in the module, in the order the scripts
+// Blender's panels, menus, headers, lists, asset shelves and operators become Blender's types in the module, in the order the scripts
 // register them, as register_class makes them (bpy_rna.js), so Blender's regions lay them out and its window manager
 // runs them.
 // Property groups are registered too, before the classes whose properties hold them (node.add_node's NodeSetting).
-const REGISTERED_TYPES = /_(PT|MT|HT|UL)_|\./;
+const REGISTERED_TYPES = /_(PT|MT|HT|UL|AST)_|\./;
 const PropertyGroup = globalThis.__py_modules['_bpy.types'].PropertyGroup;
 const isPropertyGroup = (cls) => cls === PropertyGroup || (cls?.__bases__ ?? []).some(isPropertyGroup);
 for (const [idname, cls] of Object.entries(registered)) {

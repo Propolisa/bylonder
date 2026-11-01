@@ -225,10 +225,10 @@ const structHandler = {
     if (typeof key !== 'string' || (key.startsWith('_') && !(key in STRUCT_METHODS))) return Reflect.get(target, key, receiver);
     const ptr = target[POINTER_RNA], name = rnaName(key);
     if (!key.startsWith('_')) {
-      const prop = findProperty(ptr, name);
-      if (prop) return propertyGet(ptr, prop);
       const own = operatorProperty(ptr, name);
       if (own) return propertyGet(...own);
+      const prop = findProperty(ptr, name);
+      if (prop) return propertyGet(ptr, prop);
       const func = findFunction(ptr[0], name);
       if (func && functionInfo(func).defined) return (...args) => callFunction(ptr, func, args);
       if (isContext(ptr)) {
@@ -243,7 +243,7 @@ const structHandler = {
   set(target, key, value, receiver) {
     if (typeof key === 'string' && !key.startsWith('_')) {
       const ptr = target[POINTER_RNA], prop = findProperty(ptr, rnaName(key));
-      const own = prop ? [ptr, prop] : operatorProperty(ptr, rnaName(key));
+      const own = operatorProperty(ptr, rnaName(key)) ?? (prop && [ptr, prop]);
       if (own) {
         propertySet(...own, value, rnaName(key));
         return true;

@@ -15,7 +15,7 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FILES = ['assets/blender_assets.cats.txt', 'assets/nodes/geometry_nodes_essentials.blend',
          'assets/nodes/geometry_nodes_dynamics_assets.blend', 'assets/nodes/procedural_hair_node_assets.blend',
-         'assets/brushes/essentials_brushes-curve_sculpt.blend']
+         'assets/brushes/essentials_brushes-curve_sculpt.blend', 'assets/brushes/essentials_brushes-mesh_sculpt.blend']
 STUDIO_LIGHT = 'studiolights/world/forest.exr'
 # Written again by Blender with ZIP compression: Blender ships it as DWAB, which Babylon's EXR loader does not read.
 REENCODE = ("import bpy, sys; image = bpy.data.images.load(sys.argv[-2]); s = bpy.context.scene.render.image_settings; "
