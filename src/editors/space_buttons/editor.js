@@ -69,7 +69,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
     // Blender's own area: its buttons' operators run in its context (object-operators.js).
     blender: true,
     menu: (name) => (event) => openMenu(treeMenu(area.inContext(RGN_TYPE_WINDOW, (C) => menuTree(C, name)) ?? { children: [] }, ui[RGN_TYPE_WINDOW]),
-      event?.currentTarget instanceof Element ? event.currentTarget : { x: event?.native?.clientX ?? 0, y: event?.native?.clientY ?? 0 }),
+      event?.currentTarget instanceof Element ? event.currentTarget : { x: event?.native?.clientX ?? event?.clientX ?? 0, y: event?.native?.clientY ?? event?.clientY ?? 0 }),
     properties: {
       cycle(step) {
         const at = tabs.indexOf(space().context);

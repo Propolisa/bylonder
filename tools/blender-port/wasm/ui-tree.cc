@@ -13,17 +13,21 @@
 #include "BKE_context.hh"
 #include "BKE_idprop.hh"
 #include "BKE_modifier.hh"
+#include "BKE_node.hh"
+#include "BKE_node_runtime.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "DNA_modifier_types.h"
+#include "DNA_node_types.h"
 #include "DNA_object_types.h"
 #include "DNA_screen_types.h"
 #include "ED_screen.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_enum_types.hh"
 #include "RNA_access.hh"
+#include "RNA_prototypes.hh"
 #include "UI_interface_c.hh"
 #include "UI_interface_layout.hh"
 #include "WM_api.hh"
@@ -671,6 +675,34 @@ EXPORT(ui_region_header) const char *ui_region_header(bContext *C)
   }
   out << ']';
   json = out.str();
+  return json.c_str();
+}
+
+/* Node bodies. */
+
+/* A node's buttons as its editor lays them out (node_draw.cc node_update_basis_buttons: its type's draw_buttons, in
+ * the node's width), or an empty string for a node that draws none. The page edits what they show through RNA, so
+ * the block goes once written. */
+EXPORT(ui_node_buttons) const char *ui_node_buttons(bContext *C, bNodeTree *ntree, bNode *node)
+{
+  static std::string json;
+  if (!node->typeinfo->draw_buttons || !(node->flag & NODE_OPTIONS)) {
+    return "";
+  }
+  PointerRNA nodeptr = RNA_pointer_create_discrete(&ntree->id, RNA_Node, node);
+  Block *block = block_begin(C, CTX_data_scene(C), CTX_wm_window(C), nullptr, "node_buttons", EmbossType::Emboss);
+  Layout &layout = block_layout(block, LayoutDirection::Vertical, LayoutType::Panel, 0, 0, node->width - U.widget_unit, 0, 0, style_get_dpi());
+  if (node->is_muted()) {
+    layout.active_set(false);
+  }
+  layout.context_ptr_set("node", &nodeptr);
+  node->typeinfo->draw_buttons(layout, C, &nodeptr);
+  block_align_end(block);
+  block_layout_resolve(block);
+  block_end(C, block);
+  json = block_json(block, "node");
+  recorded.erase(block);
+  block_free(C, block);
   return json.c_str();
 }
 

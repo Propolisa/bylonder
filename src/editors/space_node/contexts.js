@@ -4,6 +4,7 @@ import { modifierStack } from '../../modifiers/stack.js';
 import { geometryGraph, isEvaluating, storeGeometryGraph } from '../../nodes/geometry-nodes.js';
 import { mountLogicEditor } from './logic-editor.js';
 import { buildMaterial } from '../../nodes/blender/shader-nodes.js';
+import { idStruct, pointerOf } from '../../python/bpy_rna.js';
 
 const debounce = (fn, ms = 400) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
 const observed = new WeakSet();
@@ -17,11 +18,13 @@ const toggle = (label, checked, run) => {
   return b;
 };
 
-// Bylonder's Node Editor (blender-node-editor.js), loaded when first shown.
-const blenderEditor = (graph, changed) => (host) => {
+// Bylonder's Node Editor (blender-node-editor.js), loaded when first shown, on a Babylon graph or a node tree of Main's.
+const blenderEditor = (graph, changed, mainTree = false) => (host) => {
   let mounted = null, disposed = false;
-  import('./blender-node-editor.js').then(({ mountBlenderNodeEditor }) => { if (!disposed) mounted = mountBlenderNodeEditor(host, graph, { changed }); });
-  return { frameAll: () => mounted?.frameAll(), dispose: () => { disposed = true; mounted?.dispose(); } };
+  Promise.all([import('./blender-node-editor.js'), mainTree && import('./main-node-tree.js')]).then(([{ mountBlenderNodeEditor }, main]) => {
+    if (!disposed) mounted = mountBlenderNodeEditor(host, graph, { changed, ...(main && { tree: main.createMainNodeTree(graph, { changed }) }) });
+  });
+  return { frameAll: () => mounted?.frameAll(), refresh: () => mounted?.editor.refresh(), dispose: () => { disposed = true; mounted?.dispose(); } };
 };
 
 const newButton = (run) => {
@@ -31,8 +34,13 @@ const newButton = (run) => {
   return b;
 };
 
-export function createNodeContexts({ world, editor }) {
+export function createNodeContexts({ world, editor, commit = () => {} }) {
   const activeMesh = () => { const node = editor.selection.nodes.at(-1); return node?.getTotalVertices ? node : null; };
+  // The node group of the active object's active Geometry Nodes modifier, as Blender's Geometry Node Editor shows it.
+  const mainNodeGroup = (node) => {
+    const ob = node && world.mainSync.objectOf(node), modifier = ob && idStruct(ob).modifiers.active;
+    return modifier?.type === 'NODES' ? { modifier, group: modifier.node_group } : null;
+  };
   return {
     shader() {
       const mesh = activeMesh(), material = world.materials.activeMaterial(mesh);
@@ -47,6 +55,15 @@ export function createNodeContexts({ world, editor }) {
       };
     },
     geometry() {
+      const node = editor.selection.nodes.at(-1), main = mainNodeGroup(node);
+      if (main?.group) {
+        const sync = world.mainSync;
+        return {
+          key: 'main:' + pointerOf(main.group)[2], title: node.name + ' › ' + main.modifier.name + ' › ' + main.group.name, graph: main.group, babylon: false,
+          mount: blenderEditor(main.group, () => { sync.view(); commit(); }, true),
+        };
+      }
+      if (main) return { key: 'empty:' + node.uniqueId, title: node.name + ' › ' + main.modifier.name, message: main.modifier.name + ' has no node group.' };
       const mesh = activeMesh();
       if (!mesh) return { key: 'none', message: 'Select a mesh object to edit its Geometry Nodes.' };
       const modifier = modifierStack(mesh).find(m => m.type === 'NODES');

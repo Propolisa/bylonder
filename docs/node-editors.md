@@ -1,6 +1,6 @@
 # Node editors
 
-How the Shader Editor and the Compositor work: one Babylon graph per tree, holding Babylon's blocks and Blender's nodes, edited in a node editor that behaves as Blender's. Decided 2026-10-28.
+How the node editors work: the Shader Editor's and the Compositor's trees are one Babylon graph each, holding Babylon's blocks and Blender's nodes; the Geometry Node Editor's is Main's node group (10). All are edited in a node editor that behaves as Blender's. Decided 2026-10-28.
 
 ## Decisions
 
@@ -15,6 +15,8 @@ How the Shader Editor and the Compositor work: one Babylon graph per tree, holdi
 
 9. **Shader nodes reach the scene's geometry through helpers.** What Blender's GPU code reads of the shaded point (position, normal, texture space, UVs) comes from Babylon blocks Bylonder links to hidden inputs, named `blender:` (or the attribute's name). The editor draws neither them nor their links. Principled BSDF is Babylon's PBR block and Material Output Babylon's fragment output, with the vertex output a material needs added when one is placed. Main's node tree of the material (the scene sync) has the Blender nodes, their input values and links.
 
+10. **Geometry Nodes are Blender's, in Main.** The Geometry Node Editor shows the node group of the active object's active Geometry Nodes modifier, as Blender's does (`main-node-tree.js`). Blender holds the tree and its geometry nodes evaluate it in the module; the editor reads it through RNA (`bpy_rna.js`: nodes, sockets, links, frames, `color_tag`, `location_absolute`) and edits it through Blender's own API: `nodes.new`, `links.new`, socket `default_value`, `mute`, and Blender's node operators run in a Node Editor area of the module showing the tree (`node.duplicate`, `node.join`). A node's buttons are what its `draw_buttons` lays out (`ui_node_buttons`, as `node_update_basis_buttons`), and the Add menu is Blender's for the tree, every node enabled. Each edit is an undo step and redraws the view. Bylonder's own Geometry Nodes modifier keeps its Babylon `NodeGeometry` graph, opened in Babylon's Node Geometry Editor; Babylon's blocks cannot join a Blender node group, since Blender's evaluation does not call back into the page.
+
 ## What a Blender user finds
 
 | Blender | Here |
@@ -28,13 +30,14 @@ How the Shader Editor and the Compositor work: one Babylon graph per tree, holdi
 | M mute, H collapse, Ctrl H hide unused sockets, X and Ctrl X delete, Ctrl J frame, J link, Shift D duplicate, Home view all | Same, by Blender's keymap |
 | Frames shrink to their nodes | Same; frames are Babylon's editor frames |
 | Muting a node passes its input through, drawn red | Blender nodes and compositor blocks; Babylon's material blocks cannot mute |
-| Node groups, Tab | Not yet: Babylon graphs have no groups |
+| Node groups, Tab | Not yet: Babylon graphs have no groups; a Geometry Nodes group's group nodes show, Tab does not enter them yet |
+| Geometry Node Editor | The active modifier's node group, edited and evaluated by Blender |
 
 ## Files
 
 - `src/nodes/blender/`: the node types (`node-types.json`), Blender's GLSL (`gpu-library.js`, `glsl.js`), sockets, the code steps (`node-code.js`) and the block classes (`shader-nodes.js`, `compositor-nodes.js`).
-- `src/editors/space_node/`: the editor: `node-tree.js` (a Babylon graph as a node tree), `node-layout.js` (where node parts go), `node-editor-controller.js` (Blender's operators and modal handlers), `NodeEditor.vue`, `NodeView.vue`, `NodeValue.vue`, `NodeColorRamp.vue` (a Color Ramp's ramp, as `uiTemplateColorRamp`), `node-add-menu.js`, `blender-node-editor.js` (mounting and keys), `babylon/` (forked catalogs).
-- Tests: `tests/nodes.test.js` (graphs with both kinds of nodes build, save and load), `tests/nodes-gpu.test.js` (192 cases of Math, Mix, Noise Texture and Color Ramp run in WebGL 2 match Blender's GPU compositor output, `tests/fixtures/blender-nodes.json` from `tools/blender-reference/node-fixtures.py`), `tests/node-editor.test.js` (menus, linking, cutting, keymap, the lava material of `docs/lava-material.md` built from the Add menu), `tests/e2e/smoke.mjs` (the same in the app, shown in Material Preview).
+- `src/editors/space_node/`: the editor: `node-tree.js` (a Babylon graph as a node tree), `main-node-tree.js` (a node group of Main's as a node tree), `node-layout.js` (where node parts go), `node-editor-controller.js` (Blender's operators and modal handlers), `NodeEditor.vue`, `NodeView.vue`, `NodeValue.vue`, `NodeColorRamp.vue` (a Color Ramp's ramp, as `uiTemplateColorRamp`), `node-add-menu.js`, `blender-node-editor.js` (mounting and keys), `babylon/` (forked catalogs).
+- Tests: `tests/nodes.test.js` (graphs with both kinds of nodes build, save and load), `tests/nodes-gpu.test.js` (192 cases of Math, Mix, Noise Texture and Color Ramp run in WebGL 2 match Blender's GPU compositor output, `tests/fixtures/blender-nodes.json` from `tools/blender-reference/node-fixtures.py`), `tests/node-editor.test.js` (menus, linking, cutting, keymap, the lava material of `docs/lava-material.md` built from the Add menu), `tests/geometry-node-editor.test.js` (the Hair Dynamics example's Generate Hair Curves group: drawn, edited, evaluated by Blender), `tests/e2e/smoke.mjs` (the same in the app, shown in Material Preview).
 
 ## Next
 
@@ -44,3 +47,4 @@ How the Shader Editor and the Compositor work: one Babylon graph per tree, holdi
 4. Link drag search (dropping a link on empty space), node insertion on links with auto-offset, Shift S swap menu from Blender's swap menus.
 5. Node groups and Tab, as Babylon custom blocks over a subgraph.
 6. The sidebar (N): Node and Properties panels from Blender's `space_node.py` panels.
+7. Geometry Nodes: Tab into group nodes, values of Menu, Object, Material and String sockets, zones from the Add menu (`node.add_zone`), and the rest of the editor's edits through Blender's node operators.

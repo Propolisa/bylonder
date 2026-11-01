@@ -35,6 +35,7 @@
   --bl-socket-value:#a1a1a1;--bl-socket-int:#598c5c;--bl-socket-boolean:#cca6d6;--bl-socket-vector:#6363c7;--bl-socket-rgba:#c7c729;
   --bl-socket-shader:#63c763;--bl-socket-menu:#666666;--bl-socket-rotation:#a663c7;--bl-socket-matrix:#b83385;--bl-socket-string:#70b2ff;
   --bl-socket-object:#ed9e5c;--bl-socket-collection:#f5f5f5;--bl-socket-geometry:#00d6a3;--bl-socket-custom:#333333;
+  --bl-socket-bundle:#4d8080;--bl-socket-closure:#7d7d3b;--bl-socket-material:#eb7582;--bl-socket-image:#633863;--bl-socket-font:#635742;
   --bl-header-h:26px;--bl-topbar-h:24px;--bl-statusbar-h:21px;--bl-row:20px;--bl-radius:4px;
   /* Blender's widget colors (userdef_default_theme.c, read from Blender 5.2): inner, inner when pressed or selected,
      item (a slider's fill, a check mark, a menu's arrow), outline. Hover lightens inner (widget_state). Panels: header,

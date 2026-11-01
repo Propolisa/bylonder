@@ -1,5 +1,5 @@
 // Bylonder's Node Editor, Blender's (see docs/node-editors.md), on a Babylon graph: a NodeMaterial or NodeRenderGraph
-// holding Babylon's blocks and Blender's nodes. Keys run Blender's Node Editor keymaps, then View2D, Frames, Screen
+// holding Babylon's blocks and Blender's nodes, or on a tree given (a node group of Main's, main-node-tree.js). Keys run Blender's Node Editor keymaps, then View2D, Frames, Screen
 // and Window. `changed(rebuild)` follows every edit: rebuild when the graph's code or links changed.
 import { createApp, h } from 'vue';
 import '../interface/components/tailwind.css';
@@ -13,8 +13,7 @@ import { keyType } from '../../windowmanager/input/keymap.js';
 import { inArea } from '../../windowmanager/wm-operators.js';
 
 
-export function mountBlenderNodeEditor(host, graph, { changed = () => {} } = {}) {
-  const tree = createNodeTree(graph, { changed: (rebuild) => changed(rebuild) });
+export function mountBlenderNodeEditor(host, graph, { changed = () => {}, tree = createNodeTree(graph, { changed: (rebuild) => changed(rebuild) }) } = {}) {
   const screen = (at) => {
     const r = host.getBoundingClientRect();
     return { x: r.left + at[0], y: r.top + at[1] };
@@ -46,7 +45,7 @@ export function mountBlenderNodeEditor(host, graph, { changed = () => {} } = {})
   app.mount(host);
   if (import.meta.env?.DEV) host.nodeEditor = editor;
   // Undo and Babylon's own editor rebuild the graph: redraw from it.
-  const built = graph.onBuildObservable.add(() => editor.refresh());
+  const built = graph.onBuildObservable?.add(() => editor.refresh());
   // The view frames the nodes once the region has a size; resized, it keeps its center, as View2D does.
   let size = [0, 0];
   const resized = new ResizeObserver(() => {
@@ -60,7 +59,7 @@ export function mountBlenderNodeEditor(host, graph, { changed = () => {} } = {})
     editor,
     frameAll: () => editor.viewAll(),
     dispose() {
-      graph.onBuildObservable.remove(built);
+      graph.onBuildObservable?.remove(built);
       resized.disconnect();
       app.unmount();
     },

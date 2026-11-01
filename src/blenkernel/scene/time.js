@@ -11,7 +11,8 @@ export function validateTime(input = {}) {
   for (const key of ['frameCurrent', 'frameStart', 'frameEnd', 'frameStep', 'fps', 'fpsBase', 'framePreviewStart', 'framePreviewEnd']) if (!Number.isFinite(t[key]) || Math.abs(t[key]) > limit) throw Error('Invalid scene time: ' + key);
   for (const key of ['usePreviewRange', 'autoKey', 'loop']) if (typeof t[key] !== 'boolean') throw Error('Invalid scene time: ' + key);
   if (!syncModes[t.syncMode]) throw Error('Invalid scene time: syncMode');
-  if (t.frameStart >= t.frameEnd || t.framePreviewStart >= t.framePreviewEnd) throw Error('Invalid frame range');
+  // blender-port: rna_scene.cc rna_Scene_end_frame_set (an end frame at least the start, so one frame is a range)
+  if (t.frameStart > t.frameEnd || t.framePreviewStart > t.framePreviewEnd) throw Error('Invalid frame range');
   if (t.fps < 1 || t.fps > 240 || !(t.fpsBase >= 1e-5 && t.fpsBase <= 1e6) || t.frameStep < 1 || !Number.isInteger(t.frameStep)) throw Error('Invalid frame rate or step');
   return Object.fromEntries(Object.keys(timeDefaults).map(key => [key, t[key]]));
 }

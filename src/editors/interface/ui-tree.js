@@ -13,6 +13,8 @@ const json = (pointer) => { const text = cString(pointer); return text ? JSON.pa
 
 export const regionPanels = (C) => json(x.ui_region_panels(C));
 export const regionHeader = (C) => json(x.ui_region_header(C));
+// A node's buttons as its draw_buttons lays them out, or null for a node that draws none.
+export const nodeButtonsTree = (C, ntree, node) => json(x.ui_node_buttons(C, ntree, node));
 export const menuTree = (C, name) => withString(name, (p) => json(x.ui_menu(C, p)));
 export const menuLabel = (name) => withString(name, (p) => cString(x.menu_type_label(p)));
 // `fn` with the menus it lays out drawn for a menu search (the context's is_menu_search) or as a popup (wm.call_menu).

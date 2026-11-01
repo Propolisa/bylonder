@@ -85,12 +85,13 @@ export function mountNodeEditor({ world, host, header, contexts, backdrop, stora
   const render = async (force = false) => {
     syncBackdrop();
     const tree = treeTypes[type], ctx = contexts[type]?.() || {};
-    const both = !!(ctx.mount && tree.load);
+    const both = !!(ctx.mount && tree.load && ctx.babylon !== false);
     babylonButton.hidden = !both;
     babylonButton.setAttribute('aria-pressed', String(babylonEditor));
     if (both && babylonEditor) delete ctx.mount;
     const key = type + '|' + (ctx.key ?? ctx.graph?.uniqueId ?? '') + (both && babylonEditor ? '|babylon' : '');
-    if (!force && key === lastKey) return;
+    // The same tree, changed (undone, or edited elsewhere): drawn again.
+    if (!force && key === lastKey) return mounted?.refresh?.();
     lastKey = key;
     typeButton.replaceChildren(iconEl(tree.icon));
     title.textContent = ctx.title || tree.label;

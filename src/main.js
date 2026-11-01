@@ -460,7 +460,7 @@ const backdrop = createCompositorBackdrop({
   shadingChanged: () => shadingReady && viewportCtx.shadingChanged(),
 });
 views.add(backdrop.view);
-const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportDock.header("nodes"), contexts: createNodeContexts({ world, editor }), backdrop });
+const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportDock.header("nodes"), contexts: createNodeContexts({ world, editor, commit }), backdrop });
 nodeSection.addEventListener("node-tree", (e) => nodeEditor.setType(e.detail));
 world.openNodeEditor = (type) => { nodeEditor.setType(type); viewportDock.show("nodes"); };
 for (const source of [documentState, world.particles, world.modifiers]) source.subscribe(() => nodeEditor.refresh());

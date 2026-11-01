@@ -37,7 +37,7 @@ const label = (name) => name.replace(/Block$/, '').replace(/([a-z0-9])([A-Z])/g,
 // A Babylon sub-menu at the end of each Blender category Babylon has blocks for, as an add-on adds its own menus.
 const babylonMenus = new Set();
 function addBabylonMenus(tree) {
-  for (const [category, catalogs] of Object.entries(BABYLON_CATEGORIES[tree.kind])) {
+  for (const [category, catalogs] of Object.entries(BABYLON_CATEGORIES[tree.kind] ?? {})) {
     const menu = `${category}_babylon`;
     const names = catalogs.flatMap((c) => tree.catalog.categories[c] ?? []);
     if (babylonMenus.has(menu) || !names.length) continue;
@@ -62,17 +62,20 @@ const buttons = (node) => (node.kind === 'button' ? [node] : (node.children ?? [
 const areas = new WeakMap();
 function addMenuUI(editor) {
   if (areas.has(editor)) return areas.get(editor);
-  const { tree } = editor, area = new AnimArea(blenderMain(), SPACE_NODE);
-  area.layout(RGN_TYPE_WINDOW, 0, 0, 800, 600);
-  pointerStruct(structFind('SpaceNodeEditor'), 0, blenderModule.exports.anim_area_space(area.pointer) >>> 0).tree_type = TREE_TYPES[tree.kind];
+  const { tree } = editor, area = tree.area ?? new AnimArea(blenderMain(), SPACE_NODE);
+  if (!tree.area) {
+    area.layout(RGN_TYPE_WINDOW, 0, 0, 800, 600);
+    pointerStruct(structFind('SpaceNodeEditor'), 0, blenderModule.exports.anim_area_space(area.pointer) >>> 0).tree_type = TREE_TYPES[tree.kind];
+  }
   addBabylonMenus(tree);
-  const runs = new Set([...Object.keys(tree.blenderClasses), 'NodeReroute', 'NodeFrame', ...Object.values(tree.catalog.categories).flat()]);
+  const runs = tree.runs ?? ((type) => types.has(type));
+  const types = new Set([...Object.keys(tree.blenderClasses), 'NodeReroute', 'NodeFrame', ...Object.values(tree.catalog.categories).flat()]);
   const ui = {
     inContext: (fn) => area.inContext(RGN_TYPE_WINDOW, fn),
     runs: (idname) => idname === 'node.add_node' || SEARCH.has(idname),
     run: (idname, props) => (idname === 'node.add_node' ? editor.add(props.type, settings(props.settings)) : editor.openAddSearch()),
     // A node Bylonder does not run is shown greyed out.
-    adjust: (menu) => buttons(menu).forEach((b) => { if (b.operator === 'node.add_node' && !runs.has(b.properties?.type)) b.disabled = true; }),
+    adjust: (menu) => buttons(menu).forEach((b) => { if (b.operator === 'node.add_node' && !runs(b.properties?.type)) b.disabled = true; }),
     undoPush() {},
     refresh() {},
   };
