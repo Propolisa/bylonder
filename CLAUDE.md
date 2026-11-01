@@ -29,8 +29,8 @@ name, Open in Bylonder link, Blender manual link). A feature is done when its pa
 
 ## Runtimes
 
-A feature that exists on both sides (Blender data and a Babylon class) runs as Blender, Mapped or Babylon, chosen per
-data block: `docs/runtimes.md` is the model. A feature joins through one wrapper module in `src/runtimes/`, registered
+A feature that exists on both sides (Blender data and a Babylon class) can offer a runtime: Blender, Babylon (mapped)
+or Babylon (native), chosen per instance; `docs/runtimes.md` is the model (settings, evaluation, drawing). A feature joins through one wrapper module in `src/runtimes/`, registered
 with `src/runtimes/runtimes.js`, never by changing other code; Bylonder's own panels, settings, operators and modifiers
 carry the Bylonder icon (`BYLONDER`), Blender's own UI none.
 
