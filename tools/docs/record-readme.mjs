@@ -1,6 +1,6 @@
-// Records README.md's images from the Volcanic Island (examples/island/story.js), the whole window at 1280 x 720 (2x):
+// Records README.md's images from the Volcanic Island (examples/island/story.js), the whole window at 1440 x 810 (2x):
 // the nest through the scene camera in Rendered shading, then the 3D Viewport split: the camera's render on the left
-// (wide, overlays off) and the nest in Edit Mode on the right, at the asteroid's strike and after.
+// (wide, overlays off) and the Lava Point boulder in Edit Mode with X-ray on the right, at the asteroid's strike and after.
 // usage: node tools/docs/record-readme.mjs [nest:<frame> ...] [split:<frame> ...]   (DOCS_PORT: the dev server's port)
 import { record } from "./record.mjs";
 
@@ -11,11 +11,11 @@ const frames = (kind, fallback) => {
 const NEST = frames("nest", [2545]), SPLIT = frames("split", [3266, 3366, 5259]);
 const RENDER_WIDTH = 0.65;
 
-await record("readme", { example: "island", node: null, media: "readme", size: { width: 1280, height: 720 }, scale: 2 }, async (r) => {
+await record("readme", { example: "island", node: null, media: "readme", size: { width: 1440, height: 810 }, scale: 2 }, async (r) => {
   const { app, page } = r;
   // The recorder's pointer dot hidden: a still shows no pointer.
   const shot = async (name) => {
-    await page.mouse.move(640, 716);
+    await page.mouse.move(720, 806);
     for (const where of [page, app.frame()]) await where.evaluate(() => document.querySelectorAll("div[style*='border-radius: 50%']").forEach((d) => (d.style.display = "none")));
     await r.pause(2500);
     await r.shot(name);
@@ -46,8 +46,9 @@ await record("readme", { example: "island", node: null, media: "readme", size: {
   await app.bylonder((b) => { b.views.input.state.overlays = false; b.views.input.setShading("rendered"); });
   await page.mouse.move(...center(canvases[1]));
   await app.bylonder((b) => {
+    b.views.input.state.xray = true;
     b.views.input.setShading("solid");
-    b.editor.selection.replace([b.world.scene.getNodeByName("Nest")]);
+    b.editor.selection.replace([b.world.scene.getNodeByName("Lava Point")]);
     b.editor.reconcile();
   });
   await page.keyboard.press("Tab");
