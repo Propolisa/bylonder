@@ -516,6 +516,7 @@ const STRUCTS = {
     }, sync: true },
     lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); }, sync: true },
     angle: settable('fov'),
+    ortho_scale: { get: (camera) => camera.metadata?.orthoScale ?? 6, set: (camera, scale) => { camera.metadata = { ...camera.metadata, orthoScale: scale }; }, sync: true },
     // How the lens is shown (millimeters or field of view), kept with the camera.
     lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; }, sync: true },
     clip_start: synced(settable('minZ')),
