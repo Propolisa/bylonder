@@ -300,7 +300,7 @@
  {
   "id": "rigging",
   "title": "Rigging and Posing",
-  "summary": "Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, and paint a mesh's weights.",
+  "summary": "Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, keep poses in the pose library's asset shelf, and paint a mesh's weights.",
   "status": "partial",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -309,7 +309,8 @@
    "https://docs.blender.org/manual/en/5.2/animation/armatures/properties/bone_collections.html",
    "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/bone_constraints/index.html",
    "https://docs.blender.org/manual/en/5.2/sculpt_paint/weight_paint/index.html",
-   "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/editing/pose_library.html"
+   "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/editing/pose_library.html",
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/display/overlays.html"
   ],
   "example": "rigged-character",
   "thumbnail": "rigging/thumbnail.png",
@@ -321,6 +322,7 @@
    "rigging/keyframe.gif",
    "rigging/bone-collections.gif",
    "rigging/constraint.gif",
+   "rigging/pose-library.gif",
    "rigging/weight-paint.gif"
   ],
   "ui": [
@@ -332,7 +334,9 @@
    "PROPERTIES",
    "DATA_PT_bone_collections",
    "BONE_PT_constraints",
-   "TIMELINE"
+   "TIMELINE",
+   "VIEW3D_MT_view",
+   "VIEW3D_PT_overlay_weight_paint"
   ],
   "operators": [
    "object.posemode_toggle",
@@ -352,7 +356,9 @@
    "pose.constraint_add",
    "paint.weight_paint",
    "poselib.create_pose_asset",
-   "poselib.apply_pose_asset"
+   "poselib.apply_pose_asset",
+   "poselib.blend_pose_asset",
+   "view3d.view_selected"
   ],
   "code": [
    "src/blenkernel/armature/armature.js",
@@ -361,19 +367,23 @@
    "tools/blender-port/wasm/armature-draw.cc",
    "tools/blender-port/wasm/gpu-select.cc",
    "src/editors/object/main-modes.js",
-   "src/draw/overlay-paint-weight.js"
+   "src/draw/overlay-paint-weight.js",
+   "src/editors/space_view3d/view3d-regions.js"
   ],
   "tests": [
    "tests/armature-wasm.test.js",
    "tests/rigging-wasm.test.js",
    "tests/armature-draw-wasm.test.js",
    "tests/bone-select-wasm.test.js",
-   "tests/weight-paint-wasm.test.js"
+   "tests/weight-paint-wasm.test.js",
+   "tests/pose-library-wasm.test.js"
   ],
   "limits": [
    "Bone selection does not test depth against the scene's meshes: a box also selects bones behind them, as in X-ray.",
-   "The pose library's asset shelf is not drawn; Create Pose Asset works from the Pose menu, Apply Pose only with an asset reference (a script or the console).",
-   "Weight Paint draws at full opacity without contour lines; the Weight Paint tool icons are not shipped.",
+   "Pose assets have no preview image (Blender renders it on the GPU); a tile shows the pose's name.",
+   "Create Pose Asset saves into the Current File only; there is no User Library on disk.",
+   "The asset shelf's tiles have no hover highlight or tooltip, and the shelf does not scroll past the rows it shows.",
+   "Weight Paint's Show Wire is not drawn.",
    "Bylonder's own meshes get vertex groups only from Blender's operators (With Automatic Weights); meshes read from a .blend keep theirs.",
    "Selecting the armature in Object Mode outlines its child mesh too."
   ],

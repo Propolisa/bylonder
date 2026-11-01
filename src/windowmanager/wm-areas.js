@@ -5,13 +5,19 @@ import { Window, configureWindow } from './wm-window.js';
 import { blenderMain } from '../bmesh/bmesh-wasm.js';
 import './wm-clipboard.js';
 
-const hosts = new Set();
+const hosts = new Set(), watchers = new Set();
 let window = null, active = null;
 
 // host: { element, area, layout(), redraw(regions), finished(operators), keys(event) }.
 export function registerArea(host) {
   hosts.add(host);
   return () => { hosts.delete(host); if (active === host) active = null; };
+}
+// fn(redraw) after each event and tick of the window, with the regions Blender tagged ([area, regiontype] pairs), for
+// regions of areas that are not Blender's editors (a 3D View's asset shelf).
+export function watchRedraws(fn) {
+  watchers.add(fn);
+  return () => watchers.delete(fn);
 }
 export const blenderWindow = () => (window ??= new Window(blenderMain()));
 
@@ -32,6 +38,7 @@ function deliver(result) {
     if (regions.length || (host === active && result.finished.length)) host.redraw(regions);
     if (host === active && result.finished.length) host.finished(result.finished);
   }
+  for (const fn of watchers) fn(result.redraw);
   ticking();
   return result;
 }

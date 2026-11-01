@@ -29,6 +29,7 @@
 #include "RNA_access.hh"
 #include "RNA_prototypes.hh"
 #include "UI_abstract_view.hh"
+#include "UI_grid_view.hh"
 #include "UI_interface_c.hh"
 #include "UI_interface_layout.hh"
 #include "WM_api.hh"
@@ -49,6 +50,12 @@ namespace blender::ui {
 
 /* A popup menu's laid out block, as the running invoke's popup (anim-api.cc). */
 void popup_layout_open(const std::string &title, const std::string &layout);
+}  // namespace blender::ui
+namespace blender {
+extern void (*operator_call_handover)(wmOperatorType *ot, PointerRNA *properties);
+std::string operator_values_json(PointerRNA *ptr);
+}  // namespace blender
+namespace blender::ui {
 
 /* What interface_layout.cc's ButtonItem and LayoutRoot hold (it defines the structs privately). */
 struct RecordedItem : public Item {
@@ -240,6 +247,13 @@ static void button_json(std::ostringstream &out, Button *but)
   if (!but->tip.is_empty()) {
     key(out, "tip");
     quote(out, but->tip);
+  }
+  /* A grid view's preview item's name, which its tile shows (or its tooltip, where the tile hides it). */
+  if (but->type == ButtonType::ViewItem) {
+    if (const auto *item = dynamic_cast<const PreviewGridItem *>(static_cast<ButtonViewItem *>(but)->view_item)) {
+      key(out, "label");
+      quote(out, item->label);
+    }
   }
   char size[64];
   SNPRINTF(size, ",\"w\":%.3g,\"h\":%.3g", BLI_rctf_size_x(&but->rect) / UI_UNIT_X, BLI_rctf_size_y(&but->rect) / UI_UNIT_Y);
@@ -664,26 +678,45 @@ EXPORT(ui_panel_closed_set) void ui_panel_closed_set(bContext *C, const char *id
   }
 }
 
-/* The context region's header as Blender lays it out (ED_region_header_layout: each header type's draw), as a JSON
- * array of rows. */
-EXPORT(ui_region_header) const char *ui_region_header(bContext *C)
+/* A laid out region's blocks as a JSON array. */
+static const char *region_blocks_json(bContext *C, ARegion *region, const char *kind)
 {
   static std::string json;
-  ARegion *region = region_drawn(C);
-  ED_region_header_layout(C, region);
   layout_end(C, region);
   std::ostringstream out;
   out << '[';
   bool first = true;
   for (Block &block : region->runtime->uiblocks) {
     out << (first ? "" : ",");
-    out << block_json(&block, "header");
+    out << block_json(&block, kind);
     first = false;
   }
   out << ']';
   json = out.str();
   return json.c_str();
 }
+
+/* The context region's header as Blender lays it out (ED_region_header_layout: each header type's draw), as a JSON
+ * array of rows. */
+EXPORT(ui_region_header) const char *ui_region_header(bContext *C)
+{
+  ARegion *region = region_drawn(C);
+  ED_region_header_layout(C, region);
+  return region_blocks_json(C, region, "header");
+}
+
+/* The context region laid out by its type (ED_region_do_layout: the asset shelf's grid of assets), as a JSON array of
+ * its blocks. */
+EXPORT(ui_region_layout) const char *ui_region_layout(bContext *C)
+{
+  if (!region_sized(C)) {
+    return "[]";
+  }
+  ARegion *region = region_drawn(C);
+  ED_region_do_layout(C, region);
+  return region_blocks_json(C, region, "region");
+}
+
 
 /* Node bodies. */
 
@@ -949,6 +982,49 @@ EXPORT(ui_button_rename) bool ui_button_rename(bContext *C, Button *but)
   view_item_begin_rename(item);
   return true;
 }
+/* A view's item dragged: what its drag controller starts (view_item_drag_start, as do_but_VIEW_ITEM starts it once
+ * the press moves past the drag threshold), which is an operator call (an asset shelf's drag operator, the pose
+ * library's Blend Pose Asset) handed to the page's window manager to invoke from the drag: JSON { operator,
+ * properties }, or an empty string. */
+EXPORT(ui_view_item_drag) const char *ui_view_item_drag(bContext *C, Button *but)
+{
+  static std::string json;
+  json.clear();
+  if (!button_live(C, but) || but->type != ButtonType::ViewItem) {
+    return "";
+  }
+  operator_call_handover = [](wmOperatorType *ot, PointerRNA *properties) {
+    char idname[OP_MAX_TYPENAME];
+    WM_operator_py_idname(idname, ot->idname);
+    json = std::string("{\"operator\":\"") + idname + "\",\"properties\":" + operator_values_json(properties) + "}";
+  };
+  CTX_store_set(C, but->context);
+  view_item_drag_start(*C, *static_cast<ButtonViewItem *>(but)->view_item);
+  CTX_store_set(C, nullptr);
+  operator_call_handover = nullptr;
+  return json.c_str();
+}
+
+/* A view's item's context menu (ui_popup_context_menu_for_button: its build_context_menu, in the item's context), as a
+ * menu tree. */
+EXPORT(ui_view_item_context_menu) const char *ui_view_item_context_menu(bContext *C, Button *but)
+{
+  static std::string json;
+  if (!button_live(C, but) || but->type != ButtonType::ViewItem) {
+    return "";
+  }
+  Block *block = menu_block_new(C, __func__, EmbossType::Pulldown, menu_root(but->block));
+  Layout &layout = menu_layout(C, block);
+  if (but->context) {
+    layout.context_copy(but->context);
+  }
+  CTX_store_set(C, but->context);
+  static_cast<ButtonViewItem *>(but)->view_item->build_context_menu(*C, layout.column(false));
+  CTX_store_set(C, nullptr);
+  block_layout_resolve(block);
+  json = menu_json(C, block);
+  return json.c_str();
+}
 /* An operator button pressed, as ui_apply_but_funcs_after runs it: its operator in the button's context with the button
  * active (template_ID's New assigns what it makes to the template's property), then the button's functions. Returns the
  * operator's wmOperatorStatus. */
@@ -1063,3 +1139,4 @@ std::string operator_props_layout(bContext *C, wmOperator *op)
 }
 
 }  // namespace blender::ui
+

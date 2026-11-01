@@ -3,13 +3,13 @@
 // scene sync keeps equal to the scene: flushed before Blender's code runs, viewed after, with the selected meshes'
 // geometry given to it while an operator runs, an undo step when one finishes, and the popups it opens drawn by the
 // page. What Blender leaves unhandled goes to the page's keymaps (wm-event-system.js).
-import { Window, configureWindow, allowOperators, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../../windowmanager/wm-window.js';
+import { Window, configureWindow, allowOperators, SPACE_VIEW3D, RGN_TYPE_WINDOW, RGN_TYPE_ASSET_SHELF, RGN_TYPE_ASSET_SHELF_HEADER } from '../../windowmanager/wm-window.js';
 import { hasOperator } from '../../windowmanager/wm-operators.js';
 import { operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { regionView3D } from './view3d-project.js';
 import { openModulePopup, runBlenderOperator } from '../object/object-operators.js';
 import { tagRedraw } from '../../draw/overlay-tool.js';
-import { ticking } from '../../windowmanager/wm-areas.js';
+import { ticking, watchRedraws } from '../../windowmanager/wm-areas.js';
 
 // The popups an invoke opens (operator_popup's numbers).
 const POPUPS = [null, 'CONFIRM', 'ENUM_MENU', 'PROPS', 'LAYOUT'];
@@ -22,6 +22,11 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   const window = new Window(sync.blender);
   const areas = new Map();
   let running = false;
+  // A view's asset shelf draws again when Blender tags it (its asset list read, a hover).
+  const redrawn = (redraw) => {
+    for (const [view, a] of areas) if (redraw.some(([p, type]) => p === a.pointer && (type === RGN_TYPE_ASSET_SHELF || type === RGN_TYPE_ASSET_SHELF_HEADER))) view.regions?.draw();
+  };
+  watchRedraws(redrawn);
 
   // A view's area, laid out from the page (unless `layout` is false: as it last was).
   let configured = false;
@@ -60,6 +65,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     }
     let result;
     host.keying(() => { result = window.event(kind, data, strings); });
+    redrawn(result.redraw);
     if (!acting) return result;
     running = result.modal;
     if (running) sync.view();

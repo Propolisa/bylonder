@@ -20,3 +20,15 @@
 .bl-region-tabs{display:flex;flex-direction:column;gap:2px;width:var(--bl-row);padding-top:calc(var(--bl-row)*.2);pointer-events:auto}
 .bl-region-tab{writing-mode:vertical-rl;padding:calc(var(--bl-row)*.4) 0;border:0;border-radius:calc(var(--bl-row)*.2) 0 0 calc(var(--bl-row)*.2);background:var(--bl-back);color:var(--bl-text-dim);font:inherit;cursor:default}
 .bl-region-tab[aria-selected=true]{background:var(--bl-panel);color:var(--bl-text)}
+
+/* The asset shelf (RGN_TYPE_ASSET_SHELF and its header) along the view's bottom, at the heights Blender gives them; its
+   tiles are a grid view's (block-view.js gridTile). */
+.bl-asset-shelf{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;flex-direction:column;color:var(--bl-text);font:var(--bl-widget-font)}
+.bl-asset-shelf[hidden]{display:none}
+.bl-asset-shelf-header{display:flex;align-items:center;box-sizing:border-box;padding:0 calc(var(--bl-row)*.4);background:var(--bl-header);border-bottom:1px solid var(--bl-wcol-outline)}
+.bl-asset-shelf-header .bl-widget{flex:none}
+.bl-asset-shelf-main{box-sizing:border-box;padding:calc(var(--bl-row)*.2);overflow:hidden auto;background:var(--bl-region)}
+.bl-grid-tile:hover{background:var(--bl-hover)}
+.bl-grid-tile.is-active{background:var(--bl-select)}
+.bl-preview-icon{width:50%;height:50%}
+.bl-asset-shelf .bl-overlap>:not(:first-child){pointer-events:none}

@@ -11,14 +11,16 @@
 //   treeMenu(tree, ui)                  a menu tree as menu.js entries (tree-menu.js)
 // `ui`: { inContext(fn(C)): runs fn with the region's context, refresh(), undoPush(name), run(idname, props, event),
 //   keys(idname, props): a shortcut, panelClosed(id, closed), report(error), button(b): a property button as the
-//   active button its keymap and context menu act on (keyframing-button.js blenderButton) }
+//   active button its keymap and context menu act on (keyframing-button.js blenderButton), dragged(b, event): a grid
+//   view's item dragged (what its drag starts runs on in Blender's window) }
 import { cloneVNode, defineComponent, h } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
-import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename } from './ui-tree.js';
+import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu } from './ui-tree.js';
+import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { treeMenu, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
@@ -143,10 +145,13 @@ function widgetNode(b, env) {
       return h('button', { type: 'button', class: 'bl-decorator flex h-unit w-unit shrink-0 items-center justify-center', 'aria-label': b.tip || 'Decorator', title: b.tip,
         disabled: common.disabled, onClick: () => press(b, ui) }, icon(iconName));
     case 'LISTBOX': return null;
+    // A preview the module cannot render (no GPU) shows its item's name in its place.
+    case 'PREVIEW_TILE': return previewTile(b, shown || (b.icon === 'NONE' ? env.tileLabel : ''), style);
     case 'ROW': case 'LISTROW': case 'VIEW_ITEM': case 'TAB': {
       const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
       const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
         value: item?.identifier, onClick: () => press(b, ui) }));
+      if (b.type === 'VIEW_ITEM' && b.h > 1) return gridTile(b, ui);
       if (b.type === 'VIEW_ITEM') return cloneVNode(vnode, { onDblclick: () => ui.inContext((C) => buttonRename(C, b)) && ui.refresh() });
       return b.type === 'TAB' ? cloneVNode(vnode, { role: 'tab', 'aria-selected': String(!!b.selected), 'aria-label': shown || item?.name || b.tip }) : vnode;
     }
@@ -158,6 +163,35 @@ function widgetNode(b, env) {
         onClick: (event) => (b.operator ? runOperator(b, ui, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
   }
 }
+
+const unitSize = (b) => ({ width: `calc(var(--bl-row) * ${b.w})`, height: `calc(var(--bl-row) * ${b.h})` });
+
+// A grid view's tile (do_but_VIEW_ITEM): a click activates its item, a press that moves past the drag threshold starts
+// its drag, and a right click opens its context menu.
+function gridTile(b, ui) {
+  let down = null;
+  return h('div', {
+    class: ['bl-grid-tile shrink-0 rounded-md', b.selected && 'is-active'], style: unitSize(b), role: 'button', title: b.label ?? b.tip, 'aria-label': b.label,
+    'aria-pressed': String(!!b.selected), 'data-blender': 'VIEW_ITEM',
+    onPointerdown: (e) => { down = e.button === 0 && { x: e.clientX, y: e.clientY, dragged: false }; },
+    onPointermove: (e) => {
+      if (!down || down.dragged || Math.hypot(e.clientX - down.x, e.clientY - down.y) < WM_DRAG_THRESHOLD_MOUSE) return;
+      down.dragged = true;
+      ui.dragged?.(b, e);
+    },
+    onClick: () => { if (!down?.dragged) press(b, ui); down = null; },
+    onContextmenu: (e) => {
+      e.preventDefault();
+      const tree = ui.inContext((C) => viewItemContextMenu(C, b));
+      if (tree) openMenu(treeMenu(tree, ui), { x: e.clientX, y: e.clientY });
+    },
+  });
+}
+
+// A grid tile's preview (PreviewGridItem): its icon over its label.
+const previewTile = (b, shown, style) => h('div', { class: 'bl-preview-tile pointer-events-none flex min-w-0 flex-col items-center justify-center', style: { ...style, ...unitSize(b) } }, [
+  icon(b.icon, 'bl-preview-icon'), shown ? h('span', { class: 'w-full truncate text-center text-xs' }, shown) : null,
+]);
 
 const LAYOUT_CLASS = {
   row: 'bl-row flex min-w-0 items-center', split: 'bl-split flex min-w-0', box: 'bl-box flex flex-col rounded-md p-1.5',
@@ -180,6 +214,7 @@ function layoutNode(node, env) {
   const inner = { ...env, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false, emboss: node.emboss ?? env.emboss,
     header: env.header || (node.kind === 'row' && env.root) };
   delete inner.root;
+  if (node.kind === 'overlap' && node.children[0]?.type === 'VIEW_ITEM') inner.tileLabel = node.children[0].label;
   if (node.kind === 'header' && env.layoutPanels) return layoutPanelHeader(node, inner);
   const children = node.children.map((child) => {
     const drawn = layoutNode(child, inner);

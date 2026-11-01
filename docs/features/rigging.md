@@ -1,7 +1,7 @@
 ---
 id: rigging
 title: Rigging and Posing
-summary: Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, and paint a mesh's weights.
+summary: Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, keep poses in the pose library's asset shelf, and paint a mesh's weights.
 status: partial
 blender_version: 5.2.3
 blender_manual:
@@ -11,6 +11,7 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/bone_constraints/index.html
   - https://docs.blender.org/manual/en/5.2/sculpt_paint/weight_paint/index.html
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/editing/pose_library.html
+  - https://docs.blender.org/manual/en/5.2/editors/3dview/display/overlays.html
 example: rigged-character
 thumbnail: rigging/thumbnail.png
 media:
@@ -21,6 +22,7 @@ media:
   - rigging/keyframe.gif
   - rigging/bone-collections.gif
   - rigging/constraint.gif
+  - rigging/pose-library.gif
   - rigging/weight-paint.gif
 ui:
   - VIEW_3D
@@ -32,6 +34,8 @@ ui:
   - DATA_PT_bone_collections
   - BONE_PT_constraints
   - TIMELINE
+  - VIEW3D_MT_view
+  - VIEW3D_PT_overlay_weight_paint
 operators:
   - object.posemode_toggle
   - view3d.select
@@ -51,6 +55,8 @@ operators:
   - paint.weight_paint
   - poselib.create_pose_asset
   - poselib.apply_pose_asset
+  - poselib.blend_pose_asset
+  - view3d.view_selected
 code:
   - src/blenkernel/armature/armature.js
   - src/draw/overlay-armature.js
@@ -59,16 +65,20 @@ code:
   - tools/blender-port/wasm/gpu-select.cc
   - src/editors/object/main-modes.js
   - src/draw/overlay-paint-weight.js
+  - src/editors/space_view3d/view3d-regions.js
 tests:
   - tests/armature-wasm.test.js
   - tests/rigging-wasm.test.js
   - tests/armature-draw-wasm.test.js
   - tests/bone-select-wasm.test.js
   - tests/weight-paint-wasm.test.js
+  - tests/pose-library-wasm.test.js
 limits:
   - Bone selection does not test depth against the scene's meshes: a box also selects bones behind them, as in X-ray.
-  - The pose library's asset shelf is not drawn; Create Pose Asset works from the Pose menu, Apply Pose only with an asset reference (a script or the console).
-  - Weight Paint draws at full opacity without contour lines; the Weight Paint tool icons are not shipped.
+  - Pose assets have no preview image (Blender renders it on the GPU); a tile shows the pose's name.
+  - Create Pose Asset saves into the Current File only; there is no User Library on disk.
+  - The asset shelf's tiles have no hover highlight or tooltip, and the shelf does not scroll past the rows it shows.
+  - Weight Paint's Show Wire is not drawn.
   - Bylonder's own meshes get vertex groups only from Blender's operators (With Automatic Weights); meshes read from a .blend keep theirs.
   - Selecting the armature in Object Mode outlines its child mesh too.
 ---
@@ -121,11 +131,17 @@ script (`rigged-character.py`), so the steps below start from the example and po
 
 7. **Weight Paint.** Back in Object Mode, select the Rig, then Shift click the Body so it is active, and pick Weight
    Paint in the header's mode menu: the Rig goes to Pose Mode with it. Alt click a bone to paint its vertex group,
-   then drag over the body. Blue is no weight, red full weight; Ctrl paints the inverse.
+   then drag over the body. Blue is no weight, red full weight; Ctrl paints the inverse. The Overlays popover's Weight
+   Paint panel sets the weights' Opacity, Zero Weights and Show Weight Contours.
 
    ![Alt click the chest, then a stroke across it](../media/features/rigging/weight-paint.gif)
 
-8. **Pose library.** In Pose Mode, Pose > Create Pose Asset saves the selected bones' pose as an asset in the file.
+8. **Pose library.** In Pose Mode, select the bones (A) and pick Pose > Create Pose Asset: name the pose and press
+   Create; it is saved in the Current File. View > Asset Shelf shows the pose library along the bottom of the 3D
+   Viewport. Click a pose to apply it; drag from a pose to the right to blend it in by how far you drag, then release.
+   Right click a pose for Apply Pose Flipped, Blend Pose and Select Pose Bones.
+
+   ![Create Pose Asset, the asset shelf, a click on the pose and a drag that blends it](../media/features/rigging/pose-library.gif)
 
 > **Note** Every step is an undo step: Ctrl Z undoes it as in Blender.
 

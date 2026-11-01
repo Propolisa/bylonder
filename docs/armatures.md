@@ -42,8 +42,13 @@ evaluation and the Armature modifier, in the module (`src/bmesh/bmesh.wasm`). De
   the scene. Names are drawn as the overlay's text over each view. Shading, outlines and joints are the shaders' own;
   the colors are written in display space as Blender's sRGB overlay buffer holds them.
 - The overlay syncs an armature again when Main evaluated it (`main-view.js` calls `armatureChanged`) or when its
-  object's selection changed, which is flushed into Main first: Object Mode draws an armature in its object's wire
+  object's selection changed, which is flushed into Main first. `armature_draw` evaluates the depsgraph's pending
+  updates before it syncs, as Blender's window evaluates them before drawing: an operator that tagged the armature
+  (Add Bone Constraint in the Properties editor) otherwise leaves its evaluated copy without a pose, and no bones draw.
+  Object Mode draws an armature in its object's wire
   color. The armature's Babylon object is an empty mesh, its object's transform.
+- View Selected (Numpad .) frames an armature by its posed bones, in Pose Mode by the selected ones, as Blender's does
+  (`armature-api.cc` `armature_view_bounds`: `BKE_object_minmax`, `BKE_pose_minmax`).
 - The status bar shows Blender's statistics in an armature's Edit and Pose Modes (`main_statistics`,
   `ED_info_statusbar_string_ex`): Joints and Bones.
 - The Armature modifier (`ARMATURE`, a scene modifier in `src/modifiers/blender.js`) holds its armature by Bylonder id,
@@ -97,7 +102,31 @@ puts the armature in Pose Mode, as `posemode_set_for_weight_paint` does. A drag 
 inverse, and Alt click selects a bone, which makes its group active (`view3d.select` with the Weight Paint keymap's
 bone selection, through the GPU selection above). The view draws the mesh's weights as Blender's overlay does
 (`src/draw/overlay-paint-weight.js`): `overlay_paint_weight_vert/frag.glsl` with the weight ramp, each vertex's weight
-in the active group as `extract_weights` gives the draw cache (`main-api.cc` `mesh_paint_weights`).
+in the active group as `extract_weights` gives the draw cache (`main-api.cc` `mesh_paint_weights`). Each view draws
+them with its own Overlays > Weight Paint settings, Blender's `View3DOverlay` (`weight_paint_mode_opacity`,
+`show_wpaint_contours`) as its popover sets them: in Solid shading without X-ray over the mesh at the opacity
+(`overlay_paint.hh`'s masked transparency pass), else opaque, with the shader's contour lines; Zero Weights is the tool
+settings' (`vertex_group_user`). The Weight Paint tools are Blender's, with their icons (`tools/blender-ui/tool_icons.py`).
+
+## Pose library
+
+Blender's `pose_library` add-on and its asset shelf (`VIEW3D_AST_pose_library`). The 3D View's asset shelf regions
+(`RGN_TYPE_ASSET_SHELF` and its header) are shown as Blender shows them: `wm-api.cc` `wm_area_regions_shown` runs
+Blender's region polls (`area_regions_poll`: a shelf type's poll, the pose library's in Pose Mode) and reads the regions'
+flags, so View > Asset Shelf (`show_region_asset_shelf`) shows and hides it, hidden at first as Blender creates the pose
+library's shelf; the page lays the regions out along the view's bottom at the heights Blender gives them
+(`view3d-regions.js`). The shelf is laid out by Blender (`asset::shelf::region_layout`, `ui-tree.cc` `ui_region_layout`:
+its grid view of the asset list Blender reads, a window job) and its header by its header type (catalog tabs, search);
+the grid's tiles are drawn by `block-view.js`. A click on a tile activates its item as Blender's handlers do, which runs
+the shelf's activate operator (`poselib.apply_pose_asset`); a drag past the threshold starts what the item's drag
+controller starts (`view_item_drag_start`), the shelf's drag operator (`poselib.blend_pose_asset`), which
+`drag-drop.cc`'s `WM_operator_name_call_ptr` hands to the page (`operator_call_handover`) to invoke from the drag, so the
+pointer blends the pose until the release; a right click opens the item's context menu (`build_context_menu`: Apply
+Pose, Apply Pose Flipped, Blend Pose, Select Pose Bones, ...). Pose > Create Pose Asset (`poselib.create_pose_asset`)
+opens Blender's dialog with the Current File as its library: Bylonder has no User Library on disk, where Blender's
+default would save (it finds none and refuses), so pose assets live in the project's file and are saved with it.
+Previews are rendered on the GPU (`render_preview.cc`), past the seam: a pose asset's preview stays empty
+(`region-draw.cc` `icon_render_id`, `icon_ensure_deferred`) and its tile shows its name.
 
 ## Animation
 
@@ -133,6 +162,13 @@ Blender's window in the module and compares the selected bones and joints after 
 Alt click bone selection, a stroke and a Ctrl click; `tests/weight-paint-wasm.test.js` replays them and compares every
 vertex's weights, the active group and the pose selection, and the weights the overlay draws.
 
+`tools/blender-reference/pose-library-fixtures.py` records Blender 5.2.3 with real input on a two bone chain in Pose
+Mode with a pose asset: the asset shelf hidden, then shown by View > Asset Shelf (its regions' heights), a click on the
+pose's tile and a drag from it. `tests/pose-library-wasm.test.js` shows the shelf through Blender's polls and flags, lays
+it out, presses and drags the tile through the same code and compares the poses (the blend's factor), checks the
+tile's context menu and Create Pose Asset's dialog, and that a pose asset in the Current File survives a .blend save and
+applies after reopening.
+
 `tools/blender-reference/armature-draw-fixtures.py` makes a rig in Blender 5.2.3 (three bones, a curved B-Bone of
 four segments, an unconnected child, posed, names and axes shown) and writes its pose matrices, B-Bone segment points,
 radii, edit bones and theme colors. `tests/armature-draw-wasm.test.js` makes the same rig in the module and checks what
@@ -154,22 +190,18 @@ on a module without `armature-api.cc`.
   depth and cycling through overlapping bones; In Front is drawn over the whole scene, not over Blender's in front
   depth; line anti-aliasing and wider outlines (Blender's line pass); the weight paint pass (locked weights, wire
   alpha); curve and text objects as custom shapes.
-- Framing an armature (View Selected): its Babylon object has no bounds.
 - An Armature modifier read from a .blend, or added in Main by Blender's operators (`object.parent_set` with
   `ARMATURE`), is not taken into Bylonder's stack; the object field of its panel is not checked yet.
 - A stack evaluated in Main applies every Blender modifier of the object there, so a Geometry Nodes Array after the
   Armature modifier that Main holds as Blender's Array applies twice.
 - Edit Mode's modifier preview (`editFinal`) evaluates in a worker without the armature.
-- The pose library: Blender's `pose_library` add-on is enabled from the Preferences' default add-ons as Blender
-  enables it, and Pose > Create Pose Asset (`poselib.create_pose_asset`) makes a pose asset in the file. The 3D View's
-  asset shelf (`VIEW3D_AST_pose_library`, registered) is not drawn, so a pose is applied (`poselib.apply_pose_asset`)
-  only with an asset reference (`asset_library_type`, `asset_library_identifier`, `relative_asset_identifier`), as the
-  shelf passes it, from a script or the console.
+- The pose library: pose assets have no preview image (Blender renders it on the GPU); the shelf's tiles are not
+  drawn by Blender's widget code (no hover highlight or tooltip), and it does not scroll; pose assets go only to the
+  Current File (there is no User Library on disk).
 - Selection without occlusion: a box selects bones behind other objects, as in X-ray; the select engine's depth test
   against the scene's meshes is not drawn.
-- Weight Paint Mode: the overlay draws at Blender's default opacity without contour lines (the View3D overlay's
-  `weight_paint_mode_opacity` and `show_wpaint_contours` are not read yet); Bylonder's own meshes still have no vertex
-  groups until Blender's code makes them (`object.parent_set` with automatic weights does).
+- Weight Paint Mode: Bylonder's own meshes have no vertex groups until Blender's code makes them (`object.parent_set`
+  with automatic weights does); Show Wire is not drawn.
 - A Dope Sheet made from another editor keeps the Timeline's hidden channel region (View > Channels shows it).
 - Export: `.blend` files carry the armature (Blender reads its bones and pose); the `.babylon` and JavaScript exports
   write it as a Babylon `Skeleton` with the meshes it deforms skinned and the pose as bone animations
