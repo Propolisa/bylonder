@@ -704,6 +704,24 @@ const checks = {
     camera.forEach((v, i) => assert.ok(Math.abs(v - eye[i]) < 1e-3, `camera ${camera} at the view's eye ${eye}`));
   } },
 
+  // A sculpt stroke is one undo step (Blender's sculpt undo pushes it): Ctrl Z takes it back and stays in Sculpt Mode.
+  // A smaller window shows the cube larger, under the whole brush.
+  "Ctrl Z undoes a sculpt stroke in Sculpt Mode": { open: { size: { width: 1280, height: 720 } }, async run() {
+    const state = () => app.bylonder((b) => ({ mode: b.world.mainModes.mode(), size: b.world.scene.getMeshByName("Cube").getVerticesData("position").reduce((sum, v) => sum + Math.abs(v), 0) }));
+    await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "SCULPT" }));
+    await app.settled();
+    const before = await state();
+    const [x, y] = await app.point(0.5, 0.5);
+    await app.page.mouse.move(x - 60, y);
+    await app.page.mouse.down();
+    for (let i = 1; i <= 30; i++) await app.page.mouse.move(x - 60 + i * 4, y + i);
+    await app.page.mouse.up();
+    await app.until((b, size) => Math.abs(b.world.scene.getMeshByName("Cube").getVerticesData("position").reduce((sum, v) => sum + Math.abs(v), 0) - size) > 1e-3, before.size);
+    await app.page.keyboard.press("Control+z");
+    await app.settled();
+    assert.deepEqual(await state(), before);
+  } },
+
   // The Shader Editor edits the active object's active material for any object type with materials: a Curves object's.
   "the Shader Editor edits a Curves object's material": { open: { example: "Hair Dynamics", node: "Hair" }, async run() {
     await app.bylonder((b) => { b.editor.selection.replace([b.world.scene.getNodeByName("Hair")]); b.world.openNodeEditor("shader"); });

@@ -444,6 +444,8 @@ export class BlenderMain {
     x.undo_stack_init(this.#C);
     this.#undo = true;
   }
+  // The active step, which the last push or load made (a sculpt stroke pushes its own).
+  get undoStep() { return x.undo_active(this.#C) >>> 0; }
   undoPush(name) { return withString(name, (p) => x.undo_push(this.#C, p)) >>> 0; }
   undoLoad(step) {
     const loaded = x.undo_load(this.#C, step);
