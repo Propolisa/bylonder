@@ -73,7 +73,7 @@ export class Area {
     return withArrays([Int32Array.from(types)], ([p]) => JSON.parse(cString(x.wm_area_regions_shown(this.window.C, this.pointer, p, types.length))));
   }
   // A 3D View's view, as regionView3D (editors/space_view3d/view3d-project.js) gives it.
-  set view3d({ viewmat, winmat, persp, ofs, dist, cameraView }) {
+  set view3d({ viewmat, winmat, persp, ofs = [0, 0, 0], dist = 0, cameraView = false }) {
     withArrays([Float32Array.from(viewmat), Float32Array.from(winmat), Float32Array.from(ofs)],
       ([v, w, o]) => x.wm_view3d_set(this.window.C, this.pointer, v, w, persp, o, dist, cameraView));
   }

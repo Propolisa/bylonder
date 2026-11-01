@@ -529,7 +529,7 @@ export class BlenderMain {
   // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
   modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
   // The 3D View Object Mode's operators act in (main_view_set), as regionView3D gives it.
-  set view({ viewmat, winmat, winx, winy, persp, ofs, dist, cameraView }) {
+  set view({ viewmat, winmat, winx, winy, persp, ofs = [0, 0, 0], dist = 0, cameraView = false }) {
     withArrays([Float32Array.from(viewmat), Float32Array.from(winmat), Float32Array.from(ofs)],
       ([v, w, o]) => x.main_view_set(this.#context, v, w, winx, winy, persp, o, dist, cameraView));
   }
