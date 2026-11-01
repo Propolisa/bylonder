@@ -2,6 +2,10 @@
 
 Setup: `npm ci`, `npm test`, `npm run dev`. Commit and push to `main` when done.
 
+Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
+saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to
+`main`: `npm test`, `npm run build` and `npm run test:prod` pass (the Pages deploy runs the same).
+
 ## Writing style for docs
 
 In all project docs (README, docs/, example READMEs, comments meant as docs): no emoji, no em

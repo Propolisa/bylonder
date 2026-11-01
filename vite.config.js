@@ -7,11 +7,13 @@ import { blenderIcons } from "./scripts/blender-icons.mjs";
 import { execFileSync } from "node:child_process";
 import pkg from "./package.json" with { type: "json" };
 
-// Commits for the splash's version and changelog, newest first; none when git or its history is unavailable.
+// Commits for the splash's version and changelog, newest first, without merges and work-in-progress commits; none when
+// git or its history is unavailable.
 const commits = () => {
   try {
-    return execFileSync("git", ["log", "-100", "--format=%h%x09%cI%x09%s"], { encoding: "utf8" }).trim().split("\n").filter(Boolean)
-      .map((line) => { const [hash, time, subject] = line.split("\t"); return { hash, time, subject }; });
+    return execFileSync("git", ["log", "-100", "--no-merges", "--format=%h%x09%cI%x09%s"], { encoding: "utf8" }).trim().split("\n").filter(Boolean)
+      .map((line) => { const [hash, time, subject] = line.split("\t"); return { hash, time, subject }; })
+      .filter(({ subject }) => !/^WIP\b/.test(subject));
   } catch {
     return [];
   }
