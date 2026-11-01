@@ -10,6 +10,7 @@ import { examples } from "./examples.js";
 import { openOPFS } from "./opfs";
 import { createRepository } from "./repository";
 import { defaultFiles, blendProjectSource } from "./default-project";
+import { resetApp } from "./reset.js";
 import {
   normalizePath,
   validateFiles,
@@ -30,7 +31,7 @@ await preloadIcons();
 const reveal = () => document.body.classList.remove("bl-loading");
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
-const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin), sceneTopbar: () => frame?.contentWindow?.__bylonder?.topbar });
+const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), resetApp: () => resetApp(() => { dirty = false; clearTimeout(saveTimer); document.querySelectorAll("iframe").forEach((f) => f.remove()); }), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin), sceneTopbar: () => frame?.contentWindow?.__bylonder?.topbar });
 let repo,
   project,
   active = "index.js",
