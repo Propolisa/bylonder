@@ -40,10 +40,17 @@ ROOTS = [
 # library of their own: (its name, the file, the functions' signatures).
 BSL = [('workbench_hair.glsl', 'source/blender/draw/engines/workbench/shaders/workbench_prepass.bsl.hh',
         ['float3 hair_random_normal(', 'void hair_random_material('])]
-# Draw engines' shaders the view runs whole (src/draw/overlay-particle.js), by file.
+# Draw engines' shaders the view runs whole (src/draw/overlay-particle.js, overlay-armature.js), by file.
 DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_particle_shape_vert.glsl', 'overlay_particle_shape_frag.glsl',
         'overlay_particle_hair_vert.glsl', 'overlay_edit_particle_strand_vert.glsl', 'overlay_varying_color.glsl',
-        'overlay_edit_particle_point_vert.glsl', 'overlay_point_varying_color_frag.glsl']
+        'overlay_edit_particle_point_vert.glsl', 'overlay_point_varying_color_frag.glsl', 'overlay_common_lib.glsl',
+        'overlay_armature_shape_solid_vert.glsl', 'overlay_armature_shape_solid_frag.glsl', 'overlay_armature_shape_outline_vert.glsl',
+        'overlay_armature_shape_wire_vert.glsl', 'overlay_armature_shape_wire_frag.glsl', 'overlay_armature_wire_frag.glsl',
+        'overlay_armature_sphere_solid_vert.glsl', 'overlay_armature_sphere_solid_frag.glsl', 'overlay_armature_sphere_outline_vert.glsl',
+        'overlay_armature_envelope_solid_vert.glsl', 'overlay_armature_envelope_solid_frag.glsl',
+        'overlay_armature_envelope_outline_vert.glsl', 'overlay_armature_stick_vert.glsl', 'overlay_armature_stick_frag.glsl',
+        'overlay_armature_wire_vert.glsl', 'overlay_armature_dof_vert.glsl', 'overlay_armature_dof_solid_frag.glsl',
+        'overlay_extra_vert.glsl', 'overlay_extra_frag.glsl', 'overlay_extra_wire_vert.glsl', 'overlay_extra_wire_frag.glsl']
 DRAW_DIR = 'source/blender/draw/engines/overlay/shaders'
 # name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items).
 TABLES = {

@@ -142,3 +142,68 @@ export const SHAPES = {
     return verts;
   },
 };
+
+// blender-port: overlay_shape.cc ShapeCache, the bone shapes. Solid shapes are triangle lists of { position, normal }
+// with their outline's line adjacencies (indices into the triangles' vertices); the sphere is a fan and the envelope a
+// strip as Blender draws them, the stick's vertices carry their StickBoneFlag, the envelope outline's its three points.
+const bone_box_solid_tris = [[0, 2, 1], [0, 3, 2], [0, 1, 5], [0, 5, 4], [1, 2, 6], [1, 6, 5], [2, 3, 7], [2, 7, 6], [3, 0, 4], [3, 4, 7], [4, 5, 6], [4, 6, 7]];
+const bone_box_wire_lines_adjacency = [[4, 2, 0, 11], [0, 1, 2, 8], [2, 4, 1, 14], [1, 0, 4, 20], [0, 8, 11, 14], [2, 14, 8, 20], [1, 20, 14, 11], [4, 11, 20, 8], [20, 0, 11, 2], [11, 2, 8, 1], [8, 1, 14, 4], [14, 4, 20, 0]];
+const bone_box_solid_normals = [[0, -1, 0], [0, -1, 0], [1, 0, 0], [1, 0, 0], [0, 0, -1], [0, 0, -1], [-1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, 1], [0, 1, 0], [0, 1, 0]];
+const bone_octahedral_verts = [[0, 0, 0], [0.1, 0.1, 0.1], [0.1, 0.1, -0.1], [-0.1, 0.1, -0.1], [-0.1, 0.1, 0.1], [0, 1, 0]];
+const bone_octahedral_solid_tris = [[2, 1, 0], [3, 2, 0], [4, 3, 0], [1, 4, 0], [5, 1, 2], [5, 2, 3], [5, 3, 4], [5, 4, 1]];
+const bone_octahedral_wire_lines_adjacency = [[0, 1, 2, 6], [0, 12, 1, 6], [0, 3, 12, 6], [0, 2, 3, 6], [1, 6, 2, 3], [1, 12, 6, 3], [1, 0, 12, 3], [1, 2, 0, 3], [2, 0, 1, 12], [2, 3, 0, 12], [2, 6, 3, 12], [2, 1, 6, 12]];
+const S = Math.SQRT1_2;
+const bone_octahedral_solid_normals = [[S, -S, 0], [0, -S, -S], [-S, -S, 0], [0, -S, S], [0.99388373, 0.11043154, 0], [0, 0.11043154, -0.99388373], [-0.99388373, 0.11043154, 0], [0, 0.11043154, 0.99388373]];
+const solid = (verts, tris, normals, adjacency) => ({
+  positions: tris.flatMap((tri) => tri.flatMap((v) => verts[v])), normals: normals.flatMap((n) => [...n, ...n, ...n]), adjacency: adjacency.flat(),
+});
+export const STICK = { COL_WIRE: 1 << 0, COL_HEAD: 1 << 1, COL_TAIL: 1 << 2, COL_BONE: 1 << 3, POS_HEAD: 1 << 4, POS_TAIL: 1 << 5, POS_BONE: 1 << 6 };
+export const BONE_SHAPES = {
+  bone_octahedron: () => solid(bone_octahedral_verts, bone_octahedral_solid_tris, bone_octahedral_solid_normals, bone_octahedral_wire_lines_adjacency),
+  bone_box: () => solid(bone_box_verts, bone_box_solid_tris, bone_box_solid_normals, bone_box_wire_lines_adjacency),
+  bone_sphere: () => { const ring = ring_vertices(0.05, 64); return Array.from({ length: 65 }, (_, a) => ring[a % 64]); },
+  bone_stick: () => {
+    const { COL_WIRE, COL_HEAD, COL_TAIL, COL_BONE, POS_HEAD, POS_TAIL, POS_BONE } = STICK, bone = COL_BONE | POS_BONE;
+    const strip = [[0, 1, bone | POS_HEAD | COL_HEAD | COL_WIRE], [0, 1, bone | POS_TAIL | COL_TAIL | COL_WIRE], [0, 0, bone | POS_HEAD | COL_HEAD],
+      [0, 0, bone | POS_TAIL | COL_TAIL], [0, -1, bone | POS_HEAD | COL_HEAD | COL_WIRE], [0, -1, bone | POS_TAIL | COL_TAIL | COL_WIRE]];
+    const verts = strip.slice(0, -2).flatMap((_, t) => [strip[t], strip[t + 1], strip[t + 2]]), ring = ring_vertices(2, 12);
+    for (let a = 0; a < 12; a++) {
+      const [cv1, cv2] = [ring[a], ring[(a + 1) % 12]];
+      for (const at of [POS_HEAD | COL_HEAD, POS_TAIL | COL_TAIL]) verts.push([0, 0, at], [...cv1, at | COL_WIRE], [...cv2, at | COL_WIRE]);
+    }
+    return verts;
+  },
+  bone_envelope: () => {
+    const res = 24, lon_inc = (2 * Math.PI) / res, lat_inc = Math.PI / res, verts = [];
+    const co = (lat, lon) => [Math.sin(lat) * Math.cos(lon), Math.sin(lat) * Math.sin(lon), Math.cos(lat)];
+    for (let i = 0, lon = 0; i < res; i++, lon += lon_inc) {
+      for (let j = 0, lat = 0; j < res; j++, lat += lat_inc) verts.push(co(lat, lon), co(lat, lon + lon_inc));
+      verts.push(co(Math.PI, lon), co(Math.PI, lon + lon_inc));
+    }
+    return verts;
+  },
+  bone_envelope_wire: () => {
+    const resolution = 64, pt = (a) => [Math.sin((2 * Math.PI * a) / resolution), Math.cos((2 * Math.PI * a) / resolution)], verts = [];
+    for (let a = 0; a <= resolution; a++) verts.push([pt(a - 2), pt(a - 1), pt(a)]);
+    return verts;
+  },
+  bone_degrees_of_freedom: () => {
+    const resolution = 16, verts = [], set = (x, y, quarter) => verts.push([quarter % 2 === 0 ? -x : x, quarter < 2 ? -y : y]);
+    for (let quarter = 0; quarter < 4; quarter++) {
+      let prev_z = 0;
+      for (let i = 1; i < resolution; i++) {
+        const z = Math.sin((Math.PI / 2) * i / (resolution - 1));
+        let prev_x = 0;
+        for (let j = 1; j <= resolution - i; j++) {
+          const x = Math.sin((Math.PI / 2) * j / (resolution - 1));
+          if (j === resolution - i) { set(prev_x, z, quarter); set(prev_x, prev_z, quarter); set(x, prev_z, quarter); }
+          else { set(x, z, quarter); set(x, prev_z, quarter); set(prev_x, z, quarter); set(x, prev_z, quarter); set(prev_x, prev_z, quarter); set(prev_x, z, quarter); }
+          prev_x = x;
+        }
+        prev_z = z;
+      }
+    }
+    return verts;
+  },
+  bone_degrees_of_freedom_wire: () => { const ring = ring_vertices(1, 64); return Array.from({ length: 65 }, (_, a) => ring[a % 64]); },
+};

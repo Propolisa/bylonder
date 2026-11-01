@@ -239,6 +239,8 @@ export class BlenderMain {
 
   // Main evaluated by Blender's depsgraph for what was tagged; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }
+  // The scene's statistics as Blender's status bar shows them (main-api.cc main_statistics).
+  statistics() { return cString(x.main_statistics(this.#context)); }
   // The scene at a frame, evaluated by its depsgraph (animation, drivers and what depends on them).
   set frame(frame) { x.view_frame_set(this.#C, frame); }
   // The curves Main's objects draw (main-api.cc main_curves): their evaluated curves (system -1) and particle hair,

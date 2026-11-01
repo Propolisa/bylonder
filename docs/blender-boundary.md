@@ -168,10 +168,12 @@ can be maintained on its own:
   it), `main_curves` (strand points with radii as `CurvesEvalCache::ensure_positions` gives them, and the topology
   indirection), `main_particle_edit` (Particle Edit Mode's strands, inner keys and tips with their selection, as
   `particle_batch_cache_ensure_edit_pos_and_seg` and its key counterparts give them), next to the mesh extraction
-  (`extraction.hh`).
+  (`extraction.hh`). Where an overlay's sync is Blender code that needs no GPU, it is compiled as it is, with
+  stand-ins for the draw manager's buffers: `armature-draw.cc` builds `overlay_armature.cc` (its header an empty one
+  in the build, `blender_build.py` `OVERLAY_STAND_INS`) and `armature_draw` gives every buffer it fills.
 - **Blender's shaders, reused.** `tools/blender-nodes/gpu.py` fetches Blender's GLSL at the tag into
   `src/nodes/blender/gpu-library.js`: libraries (the nodes', `draw_curves_lib.glsl`), functions of shaders in Blender's
-  shader language (`workbench_prepass.bsl.hh`'s hair functions) and whole draw shaders (`draw`: the particle overlay's and Particle Edit Mode's).
+  shader language (`workbench_prepass.bsl.hh`'s hair functions) and whole draw shaders (`draw`: the particle overlay's, Particle Edit Mode's and the armature overlay's).
   `src/nodes/blender/glsl.js` converts them to GLSL ES as Blender's shader preprocessor would: compatibility macros,
   namespaces as prefixes, resource accessors as globals, references as `inout`, buffer reads as data texture reads,
   and named fixes where GLSL ES is stricter (`FIXES`). A prelude in each user stands in for what a shader's create
@@ -183,7 +185,8 @@ can be maintained on its own:
   node material is the mesh's, or with `CURVES` defined the curves' and EEVEE's curves interface, so one material draws
   the emitter and its hair), `RawTexture` data textures
   (Blender's buffers) and materials per render pass (Workbench per view).
-- **The drawing modules** (`src/draw`): `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
+- **The drawing modules** (`src/draw`): `overlay-armature.js` (bones in every display type, custom shapes, names,
+  axes and relationship lines, as `docs/armatures.md` says), `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
   Mode as the overlay draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`
   (Solid, with curves as Workbench's hair), called by the view (`main-view.js` `drawInstances`, `drawCurves`,
   `particleEditOverlay`).

@@ -17,8 +17,8 @@ import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bm
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
-import { armatureData, armatureDrawn } from './armature/armature.js';
-import { armature_draw } from '../draw/overlay-armature.js';
+import { armatureData } from './armature/armature.js';
+import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { nodeMaterialFromTree, nodeProperties } from '../nodes/blender/shader-nodes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
@@ -119,13 +119,14 @@ export function createMainView(state) {
       entry.drawn = false;
     } else if (type === 'ARMATURE') pullArmature(entry, true);
   }
-  // What Blender's code changed of an armature (bones, pose, its mode), after Main is evaluated.
+  // What Blender's code changed of an armature (bones, pose, its mode), after Main is evaluated; its overlay draws
+  // what Main evaluated anew.
   function pullArmature(entry, always = false) {
     const { node, ob } = entry, data = armatureData(ob), signature = JSON.stringify(data), mode = dnaGet('Object', ob, 'mode');
+    armatureChanged(node);
     if (!always && signature === entry.armature && mode === node.metadata.wbMode) return;
     entry.armature = signature;
     node.metadata = { ...node.metadata, wbCreation: { armature: data }, wbMode: mode };
-    armature_draw(armatureDrawn(ob), node);
   }
 
   // A mesh object in Blender's Edit Mode in Main: its edit mesh drawn as the edit overlay over its evaluated mesh (which

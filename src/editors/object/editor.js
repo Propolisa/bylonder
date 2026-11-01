@@ -28,11 +28,15 @@ export function createEditor(world, views, history, changed, capture) {
     return { x: rect.left + (p.x * rect.width) / width, y: rect.top + (p.y * rect.height) / height };
   };
   // Client coordinates to the selectable object under them in a view: an overlay extra (an empty) within reach, else
-  // the topmost mesh. Objects in a group pick as the group.
+  // the nearest of the topmost mesh and an armature's bones. Objects in a group pick as the group.
   const pickIn = (view, clientX, clientY) => {
     const p = views.pickPoint(view, clientX, clientY);
     let node = world.pickExtra?.(p.x, p.y, view.camera, selectable);
-    if (!node) { const hit = scene.pick(p.x, p.y, selectable, false, view.camera); node = hit?.hit ? owner(hit.pickedMesh) : null; }
+    if (!node) {
+      const hit = scene.pick(p.x, p.y, selectable, false, view.camera), bones = world.pickArmature?.(p.x, p.y, view.camera, selectable);
+      const depth = hit?.hit ? Vector3.Project(hit.pickedPoint, Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width: 1, height: 1 }).z : Infinity;
+      node = bones && bones.depth < depth ? bones.node : hit?.hit ? owner(hit.pickedMesh) : null;
+    }
     while (node?.parent?.metadata?.group && !node.parent.metadata.wbDeleted) node = node.parent;
     return node;
   };

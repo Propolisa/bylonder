@@ -4,27 +4,30 @@ import { createExtrasOverlay } from '../../draw/overlay-extra.js';
 import { createCursorOverlay } from '../../draw/overlay-cursor.js';
 import { createOriginOverlay } from '../../draw/overlay-origin.js';
 import { createOutlineOverlay } from '../../draw/overlay-outline.js';
+import { createArmatureOverlay } from '../../draw/overlay-armature.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
-// and outlines, and the extras of cameras, lights and empties. Each view's header, gizmo and shading live in view3d.js.
+// and outlines, the extras of cameras, lights and empties, and armatures' bones. Each view's header, gizmo and shading live in view3d.js.
 //   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js);
-//   outlines: of createOutlineOverlay (overlay-outline.js); view3dCursor(): the scene's 3D cursor
-export function createViewportOverlays(scene, { extras, origins, outlines, view3dCursor }) {
+//   outlines: of createOutlineOverlay (overlay-outline.js); armatures: of createArmatureOverlay (overlay-armature.js);
+//   view3dCursor(): the scene's 3D cursor
+export function createViewportOverlays(scene, { extras, origins, outlines, armatures, view3dCursor }) {
   const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene, view3dCursor), origin = createOriginOverlay(scene, origins);
   const outline = createOutlineOverlay(scene, outlines);
-  const extra = createExtrasOverlay(scene, extras), meshes = [...grid.meshes, ...cursor.meshes];
+  const extra = createExtrasOverlay(scene, extras), armature = createArmatureOverlay(scene, armatures), meshes = [...grid.meshes, ...cursor.meshes];
   let shown = true;
   return {
     extras: extra,
     // Called per view right before it renders, with its state (view3d.js).
     setEnabled(value, { shading, xray } = {}) {
       extra.setEnabled(value);
+      armature.setEnabled(value, { shading, xray });
       origin.update(value);
       // Wireframe draws selected objects' edges in the selection colors instead (workbench.js).
       outline.update(value && shading !== 'wire', { xray: !!xray });
       if (shown !== value) { shown = value; meshes.forEach((mesh) => mesh.setEnabled(value)); }
     },
-    dispose() { grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); },
+    dispose() { grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); armature.dispose(); },
   };
 }
 
@@ -47,12 +50,15 @@ export function createViewportStatus({ world, editor, views, send }) {
       : [[['mouse_lmb'], 'Select'], [['mouse_mmb'], 'Rotate View'], [['mouse_rmb'], 'Object Context Menu']];
     const fps = views.idle ? 'Idle' : Math.round(world.engine.getFps()) + ' FPS';
     const edit = world.editMode?.stats, count = (n) => n.toLocaleString(), ratio = ([sel, total]) => `${count(sel)}/${count(total)}`;
+    // An armature's Edit and Pose Modes count its joints and bones, as Blender's status bar does (info_stats.cc).
+    const armatureMode = active?.metadata?.wbCreation?.armature && ['EDIT', 'POSE'].includes(active.metadata.wbMode);
     // stats_object_edit: a curve counts its control points only.
     const geometry = edit?.edges
       ? `Verts:${ratio(edit.verts)} | Edges:${ratio(edit.edges)} | Faces:${ratio(edit.faces)} | Tris:${count(edit.tris)}`
       : edit ? `Verts:${ratio(edit.verts)}`
       : `Verts:${count(verts)} | Tris:${count(Math.round(tris))}`;
-    const stats = `${collection}${active ? ' | ' + active.name : ''} | ${geometry} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
+    const stats = armatureMode ? `${world.mainSync.blender.statistics()} | ${fps}`
+      : `${collection}${active ? ' | ' + active.name : ''} | ${geometry} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
     const viewLayers = cols && { list: cols.viewLayers().map(({ id, name }) => [id, name]), active: cols.layer().id };
     const next = JSON.stringify([hints, stats, viewLayers]);
     if (next !== last) { last = next; send('status', { hints, stats, viewLayers }); }

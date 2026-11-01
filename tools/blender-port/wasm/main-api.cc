@@ -11,6 +11,7 @@
 #include "BKE_curve_to_mesh.hh"
 #include "BKE_curves.hh"
 #include "BKE_pointcache.h"
+#include "ED_info.hh"
 #include "ED_particle.hh"
 #include "BKE_geometry_set.hh"
 #include "BKE_idprop.hh"
@@ -539,6 +540,14 @@ static Depsgraph *depsgraph_of(BlenderMain *ctx) { return CTX_data_depsgraph_poi
 /* Main evaluated by Blender's depsgraph for what was tagged since the last evaluation, as the window manager does
  * after each event (wm_event_do_depsgraph). */
 EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx) { BKE_scene_graph_update_tagged(depsgraph_of(ctx), ctx->bmain); }
+
+/* The scene's statistics as the status bar shows them (ED_info_statusbar_string_ex with the statistics only), counted
+ * anew: the window manager clears them on its notifiers. */
+EXPORT(main_statistics) const char *main_statistics(BlenderMain *ctx)
+{
+  ED_info_stats_clear(ctx->wm, ctx->view_layer);
+  return ED_info_statusbar_string_ex(ctx->bmain, ctx->scene, ctx->view_layer, STATUSBAR_SHOW_STATS);
+}
 
 /* The IDs the depsgraph updated since the last call, taken: their count, then each one (main_update) and its flags. */
 EXPORT(main_updates) int main_updates()
