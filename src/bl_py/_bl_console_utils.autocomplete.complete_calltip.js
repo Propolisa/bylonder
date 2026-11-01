@@ -11,6 +11,162 @@ __nest__ (inspect, '', __module_inspect__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = '_bl_console_utils.autocomplete.complete_calltip';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var DEF_DOC = '{:s}\\s*(\\(.*?\\))';
 export var DEF_SOURCE = 'def\\s+{:s}\\s*(\\(.*?\\)):';
 export var RE_EMPTY_LINE = (function () {
@@ -152,7 +308,7 @@ export var get_argspec = function (func) {
 			return __call__ (__accu1__.format, __accu1__, func_name);
 		}) (), doc, RE_FLAG);
 	}) ();
-	if (!(match)) {
+	if (!(__call__ (_truth, null, match))) {
 		if (source === null) {
 			try {
 				var source = (function () {
@@ -169,7 +325,7 @@ export var get_argspec = function (func) {
 				}
 			}
 		}
-		if (source) {
+		if (__call__ (_truth, null, source)) {
 			var match = (function () {
 				var __accu0__ = re;
 				return __call__ (__accu0__.search, __accu0__, (function () {
@@ -179,7 +335,7 @@ export var get_argspec = function (func) {
 			}) ();
 		}
 	}
-	if (match) {
+	if (__call__ (_truth, null, match)) {
 		var argspec = __call__ (reduce_spaces, null, (function () {
 			var __accu0__ = match;
 			return __call__ (__accu0__.group, __accu0__, 1);
@@ -209,7 +365,7 @@ export var get_argspec = function (func) {
 				var argspec = '';
 			}
 		}
-		if (strip_self) {
+		if (__call__ (_truth, null, strip_self)) {
 			var argspec = (function () {
 				var __accu0__ = argspec;
 				return __call__ (__accu0__.py_replace, __accu0__, 'self, ', '');
@@ -241,7 +397,7 @@ export var complete = function (line, cursor, namespace) {
 		var __accu0__ = RE_DEF_COMPLETE;
 		return __call__ (__accu0__.search, __accu0__, __getslice__ (line, null, cursor, 1));
 	}) ();
-	if (match) {
+	if (__call__ (_truth, null, match)) {
 		var word = (function () {
 			var __accu0__ = match;
 			return __call__ (__accu0__.group, __accu0__, 1);
@@ -261,20 +417,20 @@ export var complete = function (line, cursor, namespace) {
 				throw __except0__;
 			}
 		}
-		if (func) {
+		if (__call__ (_truth, null, func)) {
 			var doc = __call__ (get_doc, null, func);
 			var argspec = __call__ (get_argspec, null, func, __kwargtrans__ ({doc: doc}));
 			var scrollback = __add__ (__getitem__ ((function () {
 				var __accu0__ = func_word;
 				return __call__ (__accu0__.py_split, __accu0__, '.');
 			}) (), __neg__ (1)), argspec || '()');
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = doc;
 				return __call__ (__accu0__.startswith, __accu0__, scrollback);
-			}) ()) {
+			}) ())) {
 				var scrollback = doc;
 			}
-			else if (doc) {
+			else if (__call__ (_truth, null, doc)) {
 				var scrollback = __call__ (__iadd__, null, scrollback, __add__ ('\n', doc));
 			}
 			var scrollback = __call__ (reduce_newlines, null, scrollback);
@@ -288,6 +444,14 @@ export {_globals, _import, _lazy, _member, _module, _py_eval, _py_exec};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'DEF_DOC': DEF_DOC = value; break;
 		case 'DEF_SOURCE': DEF_SOURCE = value; break;
 		case 'RE_EMPTY_LINE': RE_EMPTY_LINE = value; break;

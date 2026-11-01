@@ -104,6 +104,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -168,10 +184,10 @@ export var build_property_typemap = function (skip_classes, skip_typemap) {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var attr = __getitem__ (__iterable0__, __index0__);
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = attr;
 			return __call__ (__accu0__.startswith, __accu0__, '_');
-		}) ()) {
+		}) ())) {
 			continue;
 		}
 		var cls = __call__ (getattr, null, bpy.types, attr);
@@ -192,7 +208,7 @@ export var build_property_typemap = function (skip_classes, skip_typemap) {
 			var __left0__ = __getitem__ (__iterable1__, __index1__);
 			var prop_id = __left0__ [0];
 			var prop = __left0__ [1];
-			if (!(prop.is_skip_save)) {
+			if (!(__call__ (_truth, null, prop.is_skip_save))) {
 				(function () {
 					var __accu0__ = properties;
 					return __call__ (__accu0__.append, __accu0__, prop_id);
@@ -205,7 +221,7 @@ export var build_property_typemap = function (skip_classes, skip_typemap) {
 		}) ();
 		__setitem__ (property_typemap, attr, properties);
 	}
-	if (skip_typemap) {
+	if (__call__ (_truth, null, skip_typemap)) {
 		var __iterable0__ = (function () {
 			var __accu0__ = skip_typemap;
 			return __call__ (__accu0__.py_items, __accu0__);
@@ -353,7 +369,7 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 			}) ();
 		}
 		else if (__eq__ (val_type, bool)) {
-			return (val ? 'TRUE' : 'FALSE');
+			return (__call__ (_truth, null, val) ? 'TRUE' : 'FALSE');
 		}
 		else {
 			var __except0__ = __call__ (NotImplementedError, null, (function () {
@@ -564,8 +580,8 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 				}
 			}
 		}
-		if (pretty_format) {
-			if (node_attrs) {
+		if (__call__ (_truth, null, pretty_format)) {
+			if (__call__ (_truth, null, node_attrs)) {
 				__call__ (fw, null, (function () {
 					var __accu0__ = '{:s}<{:s}\n';
 					return __call__ (__accu0__.format, __accu0__, ident, value_type_name);
@@ -646,7 +662,7 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 			return __call__ (__accu0__.format, __accu0__, ident, value_type_name);
 		}) ());
 	};
-	if (root_node) {
+	if (__call__ (_truth, null, root_node)) {
 		__call__ (fw, null, (function () {
 			var __accu0__ = '{:s}<{:s}>\n';
 			return __call__ (__accu0__.format, __accu0__, root_ident, root_node);
@@ -658,10 +674,10 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var attr = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = attr;
 				return __call__ (__accu0__.startswith, __accu0__, '_');
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			else if (__in__ (attr, root_rna_skip)) {
@@ -700,7 +716,7 @@ export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_iden
 	else if (__eq__ (method, 'ATTR')) {
 		__call__ (rna2xml_node, null, root_ident, root_rna, null);
 	}
-	if (root_node) {
+	if (__call__ (_truth, null, root_node)) {
 		__call__ (fw, null, (function () {
 			var __accu0__ = '{:s}</{:s}>\n';
 			return __call__ (__accu0__.format, __accu0__, root_ident, root_node);
@@ -777,10 +793,10 @@ export var xml2rna = function (root_xml) {
 					var value_xml_coerce = value_xml;
 				}
 				else if (__call__ (hasattr, null, subvalue, '__len__')) {
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = value_xml;
 						return __call__ (__accu0__.startswith, __accu0__, '#');
-					}) ()) {
+					}) ())) {
 						var value_xml_split = __getslice__ (value_xml, 1, null, 1);
 						var value_xml_coerce = (function () {
 							var __accu0__ = [];
@@ -1067,6 +1083,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

@@ -11,6 +11,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_filebrowser';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var FILEBROWSER_HT_header =  __class__ ('FILEBROWSER_HT_header', [Header], {
 	__module__: __name__,
 	bl_space_type: 'FILE_BROWSER',
@@ -92,10 +248,10 @@ export var FILEBROWSER_HT_header =  __class__ ('FILEBROWSER_HT_header', [Header]
 				return __call__ (__accu0__.template_header, __accu0__);
 			}) ();
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = SpaceAssetInfo;
 			return __call__ (__accu0__.is_asset_browser, __accu0__, space_data);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = ASSETBROWSER_MT_editor_menus;
 				return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
@@ -119,7 +275,7 @@ export var FILEBROWSER_HT_header =  __class__ ('FILEBROWSER_HT_header', [Header]
 				return __call__ (__accu0__.separator_spacer, __accu0__);
 			}) ();
 		}
-		if (!(context.screen.show_statusbar)) {
+		if (!(__call__ (_truth, null, context.screen.show_statusbar))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_running_jobs, __accu0__);
@@ -255,7 +411,7 @@ export var FILEBROWSER_PT_filter =  __class__ ('FILEBROWSER_PT_filter', [FileBro
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, params, 'use_filter_folder', __kwargtrans__ ({text: 'Folders', toggle: false}));
 		}) ();
-		if (params.filter_glob) {
+		if (__call__ (_truth, null, params.filter_glob)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: params.filter_glob}));
@@ -375,7 +531,7 @@ export var FILEBROWSER_PT_filter =  __class__ ('FILEBROWSER_PT_filter', [FileBro
 			var __accu0__ = col;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (is_lib_browser) {
+		if (__call__ (_truth, null, is_lib_browser)) {
 			var row = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.row, __accu0__);
@@ -388,7 +544,7 @@ export var FILEBROWSER_PT_filter =  __class__ ('FILEBROWSER_PT_filter', [FileBro
 				var __accu0__ = row;
 				return __call__ (__accu0__.prop, __accu0__, params, 'use_filter_blendid', __kwargtrans__ ({text: 'Blender IDs', toggle: false}));
 			}) ();
-			if (params.use_filter_blendid) {
+			if (__call__ (_truth, null, params.use_filter_blendid)) {
 				var row = (function () {
 					var __accu0__ = col;
 					return __call__ (__accu0__.row, __accu0__);
@@ -410,10 +566,10 @@ export var FILEBROWSER_PT_filter =  __class__ ('FILEBROWSER_PT_filter', [FileBro
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var identifier = __getitem__ (__iterable0__, __index0__);
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = identifier;
 						return __call__ (__accu0__.startswith, __accu0__, 'category_');
-					}) ()) {
+					}) ())) {
 						var subrow = (function () {
 							var __accu0__ = sub;
 							return __call__ (__accu0__.row, __accu0__);
@@ -505,10 +661,10 @@ export var FILEBROWSER_UL_dir =  __class__ ('FILEBROWSER_UL_dir', [UIList], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = direntry;
 			return __call__ (__accu0__.is_property_readonly, __accu0__, 'name');
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: direntry.py_name, icon_value: icon}));
@@ -544,7 +700,7 @@ export var FILEBROWSER_PT_bookmarks_volumes =  __class__ ('FILEBROWSER_PT_bookma
 		}
 		else {
 		}
-		return __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (panel_poll_is_asset_browsing, null, context));
+		return __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (_truth, null, __call__ (panel_poll_is_asset_browsing, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -563,7 +719,7 @@ export var FILEBROWSER_PT_bookmarks_volumes =  __class__ ('FILEBROWSER_PT_bookma
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		if (space.system_folders) {
+		if (__call__ (_truth, null, space.system_folders)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -596,7 +752,7 @@ export var FILEBROWSER_PT_bookmarks_system =  __class__ ('FILEBROWSER_PT_bookmar
 		}
 		else {
 		}
-		return context.preferences.filepaths.show_system_bookmarks && __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (panel_poll_is_asset_browsing, null, context));
+		return context.preferences.filepaths.show_system_bookmarks && __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (_truth, null, __call__ (panel_poll_is_asset_browsing, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -615,7 +771,7 @@ export var FILEBROWSER_PT_bookmarks_system =  __class__ ('FILEBROWSER_PT_bookmar
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		if (space.system_bookmarks) {
+		if (__call__ (_truth, null, space.system_bookmarks)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -685,7 +841,7 @@ export var FILEBROWSER_PT_bookmarks_favorites =  __class__ ('FILEBROWSER_PT_book
 		}
 		else {
 		}
-		return __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (panel_poll_is_asset_browsing, null, context));
+		return __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (_truth, null, __call__ (panel_poll_is_asset_browsing, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -704,7 +860,7 @@ export var FILEBROWSER_PT_bookmarks_favorites =  __class__ ('FILEBROWSER_PT_book
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		if (space.bookmarks) {
+		if (__call__ (_truth, null, space.bookmarks)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -803,7 +959,7 @@ export var FILEBROWSER_PT_bookmarks_recents =  __class__ ('FILEBROWSER_PT_bookma
 		}
 		else {
 		}
-		return context.preferences.filepaths.show_recent_locations && __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (panel_poll_is_asset_browsing, null, context));
+		return context.preferences.filepaths.show_recent_locations && __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (_truth, null, __call__ (panel_poll_is_asset_browsing, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -822,7 +978,7 @@ export var FILEBROWSER_PT_bookmarks_recents =  __class__ ('FILEBROWSER_PT_bookma
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		if (space.recent_folders) {
+		if (__call__ (_truth, null, space.recent_folders)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -863,7 +1019,7 @@ export var FILEBROWSER_PT_advanced_filter =  __class__ ('FILEBROWSER_PT_advanced
 		}
 		else {
 		}
-		return context.space_data.params && context.space_data.params.use_library_browsing && __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (panel_poll_is_asset_browsing, null, context));
+		return context.space_data.params && context.space_data.params.use_library_browsing && __call__ (panel_poll_is_upper_region, null, context.region) && !(__call__ (_truth, null, __call__ (panel_poll_is_asset_browsing, null, context)));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -887,7 +1043,7 @@ export var FILEBROWSER_PT_advanced_filter =  __class__ ('FILEBROWSER_PT_advanced
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, params, 'use_filter_blendid');
 		}) ();
-		if (params.use_filter_blendid) {
+		if (__call__ (_truth, null, params.use_filter_blendid)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -905,10 +1061,10 @@ export var FILEBROWSER_PT_advanced_filter =  __class__ ('FILEBROWSER_PT_advanced
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var identifier = __getitem__ (__iterable0__, __index0__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = identifier;
 					return __call__ (__accu0__.startswith, __accu0__, 'filter_');
-				}) ()) {
+				}) ())) {
 					var row = (function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.row, __accu0__);
@@ -942,13 +1098,13 @@ export var is_option_region_visible = function (context, space) {
 	else {
 	}
 	var SpaceAssetInfo = __call__ (_member, null, 'bpy_extras.asset_utils', 'SpaceAssetInfo');
-	if ((function () {
+	if (__call__ (_truth, null, (function () {
 		var __accu0__ = SpaceAssetInfo;
 		return __call__ (__accu0__.is_asset_browser, __accu0__, space);
-	}) ()) {
+	}) ())) {
 		// pass;
 	}
-	else if (!(space.active_operator)) {
+	else if (!(__call__ (_truth, null, space.active_operator))) {
 		return false;
 	}
 	var __iterable0__ = context.area.regions;
@@ -1106,13 +1262,13 @@ export var FILEBROWSER_PT_directory_path =  __class__ ('FILEBROWSER_PT_directory
 		}) ();
 		(function () {
 			var __accu0__ = subsubrow;
-			return __call__ (__accu0__.prop, __accu0__, params, 'use_filter', __kwargtrans__ ({toggle: true, icon: (params.use_filter ? 'FILTER_FILLED' : 'FILTER'), icon_only: true}));
+			return __call__ (__accu0__.prop, __accu0__, params, 'use_filter', __kwargtrans__ ({toggle: true, icon: (__call__ (_truth, null, params.use_filter) ? 'FILTER_FILLED' : 'FILTER'), icon_only: true}));
 		}) ();
 		(function () {
 			var __accu0__ = subsubrow;
 			return __call__ (__accu0__.popover, __accu0__, 'FILEBROWSER_PT_filter', __kwargtrans__ ({text: ''}));
 		}) ();
-		if (space.active_operator) {
+		if (__call__ (_truth, null, space.active_operator)) {
 			(function () {
 				var __accu0__ = subrow;
 				return __call__ (__accu0__.operator, __accu0__, 'screen.region_toggle', __kwargtrans__ ({text: '', icon: 'PREFERENCES', depress: __call__ (is_option_region_visible, null, context, space)}));
@@ -1506,7 +1662,7 @@ export var ASSETBROWSER_PT_filter =  __class__ ('ASSETBROWSER_PT_filter', [asset
 		var experimental = context.preferences.experimental;
 		var use_extended_browser = experimental.use_extended_asset_browser;
 		var use_remote_asset_libraries = experimental.use_remote_asset_libraries;
-		if (params.use_filter_blendid) {
+		if (__call__ (_truth, null, params.use_filter_blendid)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1516,13 +1672,13 @@ export var ASSETBROWSER_PT_filter =  __class__ ('ASSETBROWSER_PT_filter', [asset
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var identifier = __getitem__ (__iterable0__, __index0__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = identifier;
 					return __call__ (__accu0__.startswith, __accu0__, 'filter_');
-				}) () || (function () {
+				}) ()) || __call__ (_truth, null, (function () {
 					var __accu0__ = identifier;
 					return __call__ (__accu0__.startswith, __accu0__, 'experimental_filter_');
-				}) () && use_extended_browser) {
+				}) ()) && __call__ (_truth, null, use_extended_browser)) {
 					var row = (function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.row, __accu0__);
@@ -1538,7 +1694,7 @@ export var ASSETBROWSER_PT_filter =  __class__ ('ASSETBROWSER_PT_filter', [asset
 				}
 			}
 		}
-		if (use_remote_asset_libraries) {
+		if (__call__ (_truth, null, use_remote_asset_libraries)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -1841,10 +1997,10 @@ export var ASSETBROWSER_PT_metadata =  __class__ ('ASSETBROWSER_PT_metadata', [a
 		}
 		else {
 		}
-		if (__call__ (getattr, null, asset_metadata, propname) || !((function () {
+		if (__call__ (_truth, null, __call__ (getattr, null, asset_metadata, propname)) || !(__call__ (_truth, null, (function () {
 			var __accu0__ = asset_metadata;
 			return __call__ (__accu0__.is_property_readonly, __accu0__, propname);
-		}) ())) {
+		}) ()))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, asset_metadata, propname);
@@ -1881,12 +2037,12 @@ export var ASSETBROWSER_PT_metadata =  __class__ ('ASSETBROWSER_PT_metadata', [a
 		var is_local_asset = __call__ (bool, null, asset.local_id);
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		if (is_local_asset) {
+		if (__call__ (_truth, null, is_local_asset)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, asset.local_id, 'name');
 			}) ();
-			if (show_asset_debug_info) {
+			if (__call__ (_truth, null, show_asset_debug_info)) {
 				var col = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1910,7 +2066,7 @@ export var ASSETBROWSER_PT_metadata =  __class__ ('ASSETBROWSER_PT_metadata', [a
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, asset, 'name');
 			}) ();
-			if (show_asset_debug_info) {
+			if (__call__ (_truth, null, show_asset_debug_info)) {
 				var col = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1930,14 +2086,14 @@ export var ASSETBROWSER_PT_metadata =  __class__ ('ASSETBROWSER_PT_metadata', [a
 				}) ();
 			}
 		}
-		if (!(asset.is_online)) {
+		if (!(__call__ (_truth, null, asset.is_online))) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.prop, __accu0__, wm, 'asset_path_dummy', __kwargtrans__ ({text: 'Source', icon: (is_local_asset ? 'CURRENT_FILE' : 'NONE')}));
+				return __call__ (__accu0__.prop, __accu0__, wm, 'asset_path_dummy', __kwargtrans__ ({text: 'Source', icon: (__call__ (_truth, null, is_local_asset) ? 'CURRENT_FILE' : 'NONE')}));
 			}) ();
 			(function () {
 				var __accu0__ = row;
@@ -1983,17 +2139,17 @@ export var ASSETBROWSER_PT_import =  __class__ ('ASSETBROWSER_PT_import', [asset
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = asset_utils.AssetMetaDataPanel;
 			return __call__ (__accu0__.poll, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var metadata = context.asset.metadata;
-		var is_editable = !((function () {
+		var is_editable = !(__call__ (_truth, null, (function () {
 			var __accu0__ = metadata;
 			return __call__ (__accu0__.is_property_readonly, __accu0__, 'use_preferred_import_method');
-		}) ());
+		}) ()));
 		return is_editable || metadata.use_preferred_import_method;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
@@ -2016,10 +2172,10 @@ export var ASSETBROWSER_PT_import =  __class__ ('ASSETBROWSER_PT_import', [asset
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var heading = 'Preferred Method';
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = metadata;
 			return __call__ (__accu0__.is_property_readonly, __accu0__, 'use_preferred_import_method');
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, metadata, 'preferred_import_method', __kwargtrans__ ({text: heading}));
@@ -2209,10 +2365,10 @@ export var ASSETBROWSER_UL_metadata_tags =  __class__ ('ASSETBROWSER_UL_metadata
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = tag;
 			return __call__ (__accu0__.is_property_readonly, __accu0__, 'name');
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: tag.py_name, icon_value: icon, translate: false}));
@@ -2247,10 +2403,10 @@ export var ASSETBROWSER_MT_context_menu =  __class__ ('ASSETBROWSER_MT_context_m
 		var layout = self.layout;
 		var st = context.space_data;
 		var params = st.params;
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = bpy.ops.asset.assets_download;
 			return __call__ (__accu0__.poll, __accu0__);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'asset.assets_download', __kwargtrans__ ({icon: 'DOWNLOAD'}));
@@ -2332,7 +2488,7 @@ export var asset_path_str_get = function (_self) {
 	if (asset === null) {
 		return '';
 	}
-	if (asset.local_id) {
+	if (__call__ (_truth, null, asset.local_id)) {
 		return 'Current File';
 	}
 	return asset.full_library_path;
@@ -2366,6 +2522,14 @@ export {Header, Menu, Panel, UIList, _globals, _import, _lazy, _member, _module,
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'FILEBROWSER_HT_header': FILEBROWSER_HT_header = value; break;
 		case 'FileBrowserPanel': FileBrowserPanel = value; break;
 		case 'FILEBROWSER_PT_display': FILEBROWSER_PT_display = value; break;

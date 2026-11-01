@@ -658,11 +658,29 @@ function annotations(cls, seen = new Map()) {
   return seen;
 }
 
+// By identity: a built app's functions have minified names.
+const propertyFunction = (deferred) => Object.keys(KINDS).find((n) => globalThis.__py_modules['_bpy.props'][n] === deferred?.function);
+
 function defineProperties(type, cls) {
   for (const [name, deferred] of annotations(cls)) {
-    // By identity: a built app's functions have minified names.
-    const functionName = Object.keys(KINDS).find((n) => globalThis.__py_modules['_bpy.props'][n] === deferred?.function);
+    const functionName = propertyFunction(deferred);
     if (functionName) defineProperty(type, name, functionName, KINDS[functionName], deferred.keywords ?? {});
+  }
+  properties.clear();
+}
+
+// Properties a script assigned to RNA's own types (bpy.types.Object.selection_sets = CollectionProperty(...)), defined
+// as pyrna_struct_meta_idprop_setattro defines them, since a JS class has no hook for the assignment.
+const assigned = new Set();
+export function defineAssignedProperties() {
+  for (const [identifier, cls] of Object.entries(bpyTypes())) {
+    if (typeof cls !== 'function' || typeOfClass.has(cls) || !cls.__bases__) continue;
+    for (const [name, { value }] of Object.entries(Object.getOwnPropertyDescriptors(cls))) {
+      const functionName = propertyFunction(value), key = `${identifier}.${name}`;
+      if (!functionName || assigned.has(key)) continue;
+      assigned.add(key);
+      defineProperty(structFind(identifier), name, functionName, KINDS[functionName], value.keywords ?? {});
+    }
   }
   properties.clear();
 }

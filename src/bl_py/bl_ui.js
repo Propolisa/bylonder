@@ -85,6 +85,162 @@ import {reload} from './importlib.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 export {properties_material_gpencil, asset_shelf, space_dopesheet, properties_view_layer, _globals, properties_paint_common, properties_particle, properties_constraint, space_properties, properties_physics_softbody, properties_physics_fluid, properties_workspace, properties_object, properties_physics_common, properties_data_lattice, properties_mask_common, node_add_menu_compositor, node_add_menu_geometry, space_image, properties_data_curves, space_filebrowser, space_toolsystem_toolbar, reload, properties_data_mesh, properties_data_empty, properties_data_shaderfx, properties_material, space_toolsystem_common, properties_scene, _module, generic_ui_list, space_spreadsheet, properties_data_light, properties_strip, properties_world, properties_strip_modifier, space_topbar, space_console, node_add_menu_shader, _lazy, space_sequencer, properties_physics_geometry_nodes, space_outliner, properties_data_bone, properties_data_curve, properties_physics_rigidbody, space_info, properties_data_metaball, properties_animviz, space_nla, node_add_menu_texture, properties_physics_cloth, space_node, space_time, space_clip, properties_grease_pencil_common, properties_data_grease_pencil, space_graph, _member, properties_texture, properties_data_modifier, space_text, space_view3d_sidebar, properties_data_speaker, properties_physics_field, space_userpref, properties_output, properties_collection, space_statusbar, space_view3d, properties_data_volume, properties_physics_dynamicpaint, anim, node_add_menu, properties_render, properties_data_armature, properties_data_camera, properties_physics_rigidbody_constraint, _import, properties_data_pointcloud, properties_data_lightprobe, space_view3d_toolbar};
 var __name__ = 'bl_ui';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 if (false) {
 	__setslice__ (_modules_loaded, 0, null, null, (function () {
 		var __accu0__ = [];
@@ -102,7 +258,7 @@ if (false) {
 	// pass;
 }
 export var _modules = ['anim', 'asset_shelf', 'node_add_menu', 'node_add_menu_compositor', 'node_add_menu_geometry', 'node_add_menu_shader', 'node_add_menu_texture', 'properties_animviz', 'properties_constraint', 'properties_data_armature', 'properties_data_bone', 'properties_data_camera', 'properties_data_curve', 'properties_data_curves', 'properties_data_empty', 'properties_data_grease_pencil', 'properties_data_light', 'properties_data_lattice', 'properties_data_mesh', 'properties_data_metaball', 'properties_data_modifier', 'properties_data_pointcloud', 'properties_data_shaderfx', 'properties_data_lightprobe', 'properties_data_speaker', 'properties_data_volume', 'properties_mask_common', 'properties_material', 'properties_material_gpencil', 'properties_object', 'properties_paint_common', 'properties_grease_pencil_common', 'properties_particle', 'properties_physics_cloth', 'properties_physics_common', 'properties_physics_dynamicpaint', 'properties_physics_field', 'properties_physics_geometry_nodes', 'properties_physics_rigidbody', 'properties_physics_rigidbody_constraint', 'properties_physics_fluid', 'properties_physics_softbody', 'properties_render', 'properties_output', 'properties_view_layer', 'properties_scene', 'properties_texture', 'properties_world', 'properties_collection', 'properties_strip', 'properties_strip_modifier', 'generic_ui_list', 'space_toolsystem_common', 'space_toolsystem_toolbar', 'space_clip', 'space_console', 'space_dopesheet', 'space_filebrowser', 'space_graph', 'space_image', 'space_info', 'space_nla', 'space_node', 'space_outliner', 'space_properties', 'space_sequencer', 'space_spreadsheet', 'space_statusbar', 'space_text', 'space_time', 'space_topbar', 'space_userpref', 'space_view3d', 'space_view3d_sidebar', 'space_view3d_toolbar', 'properties_workspace'];
-if (bpy.app.build_options.freestyle) {
+if (__call__ (_truth, null, bpy.app.build_options.freestyle)) {
 	(function () {
 		var __accu0__ = _modules;
 		return __call__ (__accu0__.append, __accu0__, 'properties_freestyle');
@@ -273,7 +429,7 @@ export var unregister = function () {
 		__iterable1__ = __i__ (__iterable1__);
 		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 			var cls = __getitem__ (__iterable1__, __index1__);
-			if (cls.is_registered) {
+			if (__call__ (_truth, null, cls.is_registered)) {
 				__call__ (unregister_class, null, cls);
 			}
 		}
@@ -282,7 +438,7 @@ export var unregister = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var cls = __getitem__ (__iterable0__, __index0__);
-		if (cls.is_registered) {
+		if (__call__ (_truth, null, cls.is_registered)) {
 			__call__ (unregister_class, null, cls);
 		}
 	}
@@ -333,7 +489,7 @@ export var UI_UL_list =  __class__ ('UI_UL_list', [bpy.types.UIList], {
 		}
 		var fnmatch = __call__ (_module, null, 'fnmatch');
 		var re = __call__ (_module, null, 're');
-		if (!(pattern) || !(py_items)) {
+		if (!(__call__ (_truth, null, pattern)) || !(__call__ (_truth, null, py_items))) {
 			return flags || [];
 		}
 		if (flags === null) {
@@ -511,6 +667,14 @@ export var classes = tuple ([UI_UL_list, UI_MT_list_item_context_menu, UI_MT_but
 //# sourceMappingURL=bl_ui.map
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_modules': _modules = value; break;
 		case '_namespace': _namespace = value; break;
 		case '_modules_loaded': _modules_loaded = value; break;

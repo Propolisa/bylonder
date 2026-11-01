@@ -107,6 +107,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -216,10 +232,10 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var filename_only = __getitem__ (__iterable1__, __index1__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu1__ = filename_only;
 					return __call__ (__accu1__.isidentifier, __accu1__);
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, filename_only);
@@ -246,13 +262,13 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.join, __accu0__, path_base, f);
 			}) ();
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.isdir, __accu0__, f_full);
-			}) () && !((function () {
+			}) ()) && !(__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.islink, __accu0__, f_full);
-			}) ())) {
+			}) ()))) {
 				(function () {
 					var __accu0__ = shutil;
 					return __call__ (__accu0__.rmtree, __accu0__, f_full, __kwargtrans__ ({ignore_errors: true}));
@@ -274,10 +290,10 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 					}
 				}
 			}
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, f_full);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = paths_stale;
 					return __call__ (__accu0__.append, __accu0__, f_full);
@@ -285,7 +301,7 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 			}
 		}
 	}
-	if (paths_stale) {
+	if (__call__ (_truth, null, paths_stale)) {
 		var addon_utils = __call__ (_module, null, 'addon_utils');
 		(function () {
 			var __accu0__ = addon_utils;
@@ -315,7 +331,7 @@ export var _wm_wait_cursor = function (value) {
 		__iterable1__ = __i__ (__iterable1__);
 		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 			var window = __getitem__ (__iterable1__, __index1__);
-			if (value) {
+			if (__call__ (_truth, null, value)) {
 				(function () {
 					var __accu0__ = window;
 					return __call__ (__accu0__.cursor_modal_set, __accu0__, 'WAIT');
@@ -349,10 +365,10 @@ export var PREFERENCES_OT_keyconfig_activate =  __class__ ('PREFERENCES_OT_keyco
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.keyconfig_set, __accu0__, self.filepath, __kwargtrans__ ({report: self.report}));
-		}) ()) {
+		}) ())) {
 			return new set (['FINISHED']);
 		}
 		else {
@@ -405,13 +421,13 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		var version_old = [__getitem__ (version_new, 0), __sub__ (__getitem__ (version_new, 1), 1)];
 		while (true) {
 			while (__ge__ (__getitem__ (version_old, 1), 0)) {
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.isdir, __accu0__, (function () {
 						var __accu1__ = cls;
 						return __call__ (__accu1__._old_version_path, __accu1__, version_old);
 					}) ());
-				}) ()) {
+				}) ())) {
 					return __call__ (tuple, null, version_old);
 				}
 				__setitem__ (version_old, 1, __call__ (__isub__, null, __getitem__ (version_old, 1), 1));
@@ -444,7 +460,7 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 			var __accu0__ = cls;
 			return __call__ (__accu0__.previous_version, __accu0__);
 		}) ();
-		return (version_old ? (function () {
+		return (__call__ (_truth, null, version_old) ? (function () {
 			var __accu0__ = cls;
 			return __call__ (__accu0__._old_version_path, __accu0__, version_old);
 		}) () : null);
@@ -492,7 +508,7 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 			var __accu0__ = cls;
 			return __call__ (__accu0__._new_path, __accu0__);
 		}) ();
-		if (!(old)) {
+		if (!(__call__ (_truth, null, old))) {
 			return false;
 		}
 		var userconfig_path = (function () {
@@ -512,13 +528,13 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		if (__ne__ (userconfig_path, new_userconfig_path)) {
 			return false;
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, old);
-		}) () && !((function () {
+		}) ()) && !(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, py_new);
-		}) ())) {
+		}) ()))) {
 			return true;
 		}
 		var old_userpref = (function () {
@@ -532,10 +548,10 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		return (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isfile, __accu0__, old_userpref);
-		}) () && !((function () {
+		}) () && !(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isfile, __accu0__, new_userpref);
-		}) ());
+		}) ()));
 	});},
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
@@ -612,10 +628,10 @@ export var PREFERENCES_OT_keyconfig_test =  __class__ ('PREFERENCES_OT_keyconfig
 		var keyconfig_utils = __call__ (_member, null, 'bpy_extras', 'keyconfig_utils');
 		var wm = context.window_manager;
 		var kc = wm.keyconfigs.py_default;
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = keyconfig_utils;
 			return __call__ (__accu0__.keyconfig_test, __accu0__, kc);
-		}) ()) {
+		}) ())) {
 			__call__ (print, null, 'CONFLICT');
 		}
 		return new set (['FINISHED']);
@@ -660,7 +676,7 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.preset_find, __accu0__, config_name_noext, 'keyconfig', __kwargtrans__ ({ext: '.py'}));
 		}) ();
-		if (preset_path !== null && __call__ (is_path_builtin, null, preset_path)) {
+		if (preset_path !== null && __call__ (_truth, null, __call__ (is_path_builtin, null, preset_path))) {
 			var config_name_final = (function () {
 				var __accu0__ = '{:s} (User){:s}';
 				return __call__ (__accu0__.format, __accu0__, config_name_noext, config_name_ext);
@@ -688,7 +704,7 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		var shutil = __call__ (_module, null, 'shutil');
 		var basename = __call__ (_member, null, 'os.path', 'basename');
-		if (!(self.filepath)) {
+		if (!(__call__ (_truth, null, self.filepath))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Filepath not set');
@@ -701,7 +717,7 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 			return __call__ (__accu0__._preset_prevent_name_collision, __accu0__, config_name);
 		}) ();
 		try {
-			if (self.keep_original) {
+			if (__call__ (_truth, null, self.keep_original)) {
 				(function () {
 					var __accu0__ = shutil;
 					return __call__ (__accu0__.py_copy, __accu0__, self.filepath, path);
@@ -730,10 +746,10 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 				throw __except0__;
 			}
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.keyconfig_set, __accu0__, path, __kwargtrans__ ({report: self.report}));
-		}) ()) {
+		}) ())) {
 			return new set (['FINISHED']);
 		}
 		else {
@@ -785,15 +801,15 @@ export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconf
 		else {
 		}
 		var keyconfig_export_as_data = __call__ (_member, null, 'bl_keymap_utils.io', 'keyconfig_export_as_data');
-		if (!(self.filepath)) {
+		if (!(__call__ (_truth, null, self.filepath))) {
 			var __except0__ = __call__ (Exception, null, 'Filepath not set');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = self.filepath;
 			return __call__ (__accu0__.endswith, __accu0__, '.py');
-		}) ())) {
+		}) ()))) {
 			self.filepath = __call__ (__iadd__, null, self.filepath, '.py');
 		}
 		var wm = context.window_manager;
@@ -818,7 +834,7 @@ export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		var os = __call__ (_module, null, 'os');
 		var wm = context.window_manager;
-		if (!(self.filepath)) {
+		if (!(__call__ (_truth, null, self.filepath))) {
 			self.filepath = (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.join, __accu0__, (function () {
@@ -858,7 +874,7 @@ export var PREFERENCES_OT_keymap_restore =  __class__ ('PREFERENCES_OT_keymap_re
 		else {
 		}
 		var wm = context.window_manager;
-		if (self.all) {
+		if (__call__ (_truth, null, self.all)) {
 			var __iterable0__ = wm.keyconfigs.user.keymaps;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -923,7 +939,7 @@ export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_
 			var __accu0__ = km.keymap_items;
 			return __call__ (__accu0__.from_id, __accu0__, self.item_id);
 		}) ();
-		if (!(kmi.is_user_defined) && kmi.is_user_modified) {
+		if (!(__call__ (_truth, null, kmi.is_user_defined)) && __call__ (_truth, null, kmi.is_user_modified)) {
 			(function () {
 				var __accu0__ = km;
 				return __call__ (__accu0__.restore_item_to_default, __accu0__, kmi);
@@ -954,7 +970,7 @@ export var PREFERENCES_OT_keyitem_add =  __class__ ('PREFERENCES_OT_keyitem_add'
 		else {
 		}
 		var km = context.keymap;
-		if (km.is_modal) {
+		if (__call__ (_truth, null, km.is_modal)) {
 			(function () {
 				var __accu0__ = km.keymap_items;
 				return __call__ (__accu0__.new_modal, __accu0__, '', 'A', 'PRESS');
@@ -1115,7 +1131,7 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 			err_str = __call__ (str, null, ex);
 		};
 		var cursor_set = self.options.is_invoke;
-		if (cursor_set) {
+		if (__call__ (_truth, null, cursor_set)) {
 			__call__ (_wm_wait_cursor, null, true);
 		}
 		var module_name = self.module;
@@ -1123,7 +1139,7 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 			var __accu0__ = addon_utils;
 			return __call__ (__accu0__.enable, __accu0__, module_name, __kwargtrans__ ({default_set: true, handle_error: err_cb}));
 		}) ();
-		if (mod) {
+		if (__call__ (_truth, null, mod)) {
 			var bl_info = (function () {
 				var __accu0__ = addon_utils;
 				return __call__ (__accu0__.module_bl_info, __accu0__, mod);
@@ -1144,7 +1160,7 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 			var result = new set (['FINISHED']);
 		}
 		else {
-			if (err_str) {
+			if (__call__ (_truth, null, err_str)) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), err_str);
@@ -1152,7 +1168,7 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 			}
 			var result = new set (['CANCELLED']);
 		}
-		if (cursor_set) {
+		if (__call__ (_truth, null, cursor_set)) {
 			__call__ (_wm_wait_cursor, null, false);
 		}
 		return result;
@@ -1202,7 +1218,7 @@ export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disa
 			__call__ (print, null, err_str);
 		};
 		var cursor_set = self.options.is_invoke;
-		if (cursor_set) {
+		if (__call__ (_truth, null, cursor_set)) {
 			__call__ (_wm_wait_cursor, null, true);
 		}
 		var module_name = self.module;
@@ -1210,13 +1226,13 @@ export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disa
 			var __accu0__ = addon_utils;
 			return __call__ (__accu0__.disable, __accu0__, module_name, __kwargtrans__ ({default_set: true, handle_error: err_cb}));
 		}) ();
-		if (err_str) {
+		if (__call__ (_truth, null, err_str)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), err_str);
 			}) ();
 		}
-		if (cursor_set) {
+		if (__call__ (_truth, null, cursor_set)) {
 			__call__ (_wm_wait_cursor, null, false);
 		}
 		return new set (['FINISHED']);
@@ -1253,7 +1269,7 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 				return __call__ (__accu1__.join, __accu1__, 'presets', 'interface_theme');
 			}) (), create: true}));
 		}) ();
-		if (!(path_themes)) {
+		if (!(__call__ (_truth, null, path_themes))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get themes path');
@@ -1267,11 +1283,11 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 				return __call__ (__accu1__.basename, __accu1__, xmlfile);
 			}) ());
 		}) ();
-		if (!(self.overwrite)) {
-			if ((function () {
+		if (!(__call__ (_truth, null, self.overwrite))) {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, path_dest);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -1386,7 +1402,7 @@ export var _PREFERENCES_OT_addon_install__target_path_items = function (_self, c
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var index = __left0__ [0];
 			var item = __left0__ [1];
-			if (item.directory) {
+			if (__call__ (_truth, null, item.directory)) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, tuple ([item.py_name, item.py_name, '']));
@@ -1395,7 +1411,7 @@ export var _PREFERENCES_OT_addon_install__target_path_items = function (_self, c
 		}
 		return __accu0__;
 	}) ();
-	return (script_directories_items ? __call__ (_joined, null, [default_item, null], script_directories_items) : tuple ([default_item]));
+	return (__call__ (_truth, null, script_directories_items) ? __call__ (_joined, null, [default_item, null], script_directories_items) : tuple ([default_item]));
 };
 export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_install', [Operator], {
 	__module__: __name__,
@@ -1444,17 +1460,17 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 				}
 			}
 		}
-		if (!(path_addons)) {
+		if (!(__call__ (_truth, null, path_addons))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get add-ons path');
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, path_addons);
-		}) ())) {
+		}) ()))) {
 			try {
 				(function () {
 					var __accu0__ = os;
@@ -1485,10 +1501,10 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var addon_path = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.samefile, __accu0__, pyfile_dir, addon_path);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -1517,10 +1533,10 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 			}
 			return set (__accu0__);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = zipfile;
 			return __call__ (__accu0__.is_zipfile, __accu0__, pyfile);
-		}) ()) {
+		}) ())) {
 			try {
 				var file_to_extract = (function () {
 					var __accu0__ = zipfile;
@@ -1547,7 +1563,7 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 				}) ();
 				return new set (['CANCELLED']);
 			}
-			if (self.overwrite) {
+			if (__call__ (_truth, null, self.overwrite)) {
 				__call__ (_module_filesystem_remove, null, path_addons, file_to_extract_root);
 			}
 			else {
@@ -1562,10 +1578,10 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 							return __call__ (__accu1__.basename, __accu1__, f);
 						}) ());
 					}) ();
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = os.path;
 						return __call__ (__accu0__.exists, __accu0__, path_dest);
-					}) ()) {
+					}) ())) {
 						(function () {
 							var __accu0__ = self;
 							return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -1604,16 +1620,16 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 					return __call__ (__accu1__.basename, __accu1__, pyfile);
 				}) ());
 			}) ();
-			if (self.overwrite) {
+			if (__call__ (_truth, null, self.overwrite)) {
 				__call__ (_module_filesystem_remove, null, path_addons, [(function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.basename, __accu0__, pyfile);
 				}) ()]);
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = os.path;
 				return __call__ (__accu0__.exists, __accu0__, path_dest);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -1693,7 +1709,7 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.refresh_script_paths, __accu0__);
 		}) ();
-		if (self.enable_on_install) {
+		if (__call__ (_truth, null, self.enable_on_install)) {
 			var __iterable0__ = (function () {
 				var __accu0__ = addon_utils;
 				return __call__ (__accu0__.modules, __accu0__, __kwargtrans__ ({refresh: false}));
@@ -1777,10 +1793,10 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 			var mod = __getitem__ (__iterable0__, __index0__);
 			if (__eq__ (mod.__name__, module)) {
 				var filepath = mod.__file__;
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.exists, __accu0__, filepath);
-				}) ()) {
+				}) ())) {
 					if (__eq__ (__getitem__ ((function () {
 						var __accu0__ = os.path;
 						return __call__ (__accu0__.splitext, __accu0__, (function () {
@@ -1839,10 +1855,10 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 			return __call__ (__accu0__.disable, __accu0__, self.module, __kwargtrans__ ({default_set: true}));
 		}) ();
 		var shutil = __call__ (_module, null, 'shutil');
-		if (isdir && !((function () {
+		if (__call__ (_truth, null, isdir) && !(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.islink, __accu0__, path);
-		}) ())) {
+		}) ()))) {
 			(function () {
 				var __accu0__ = shutil;
 				return __call__ (__accu0__.rmtree, __accu0__, path, __kwargtrans__ ({ignore_errors: true}));
@@ -1864,10 +1880,10 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 				}
 			}
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.exists, __accu0__, path);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = addon_utils;
 				return __call__ (__accu0__.stale_pending_stage_paths, __accu0__, (function () {
@@ -1981,7 +1997,7 @@ export var PREFERENCES_OT_addon_expand =  __class__ ('PREFERENCES_OT_addon_expan
 				var __accu0__ = addon_utils;
 				return __call__ (__accu0__.module_bl_info, __accu0__, mod);
 			}) ();
-			__setitem__ (bl_info, 'show_expanded', !(__getitem__ (bl_info, 'show_expanded')));
+			__setitem__ (bl_info, 'show_expanded', !(__call__ (_truth, null, __getitem__ (bl_info, 'show_expanded'))));
 		}
 		return new set (['FINISHED']);
 	});}
@@ -2080,17 +2096,17 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 				return __call__ (__accu1__.join, __accu1__, 'startup', 'bl_app_templates_user');
 			}) (), create: true}));
 		}) ();
-		if (!(path_app_templates)) {
+		if (!(__call__ (_truth, null, path_app_templates))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get add-ons path');
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isdir, __accu0__, path_app_templates);
-		}) ())) {
+		}) ()))) {
 			try {
 				(function () {
 					var __accu0__ = os;
@@ -2113,10 +2129,10 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 			var __accu0__ = os;
 			return __call__ (__accu0__.listdir, __accu0__, path_app_templates);
 		}) ());
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = zipfile;
 			return __call__ (__accu0__.is_zipfile, __accu0__, filepath);
-		}) ()) {
+		}) ())) {
 			try {
 				var file_to_extract = (function () {
 					var __accu0__ = zipfile;
@@ -2136,7 +2152,7 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 				}
 			}
 			var file_to_extract_root = __call__ (_zipfile_root_namelist, null, file_to_extract);
-			if (self.overwrite) {
+			if (__call__ (_truth, null, self.overwrite)) {
 				__call__ (_module_filesystem_remove, null, path_app_templates, file_to_extract_root);
 			}
 			else {
@@ -2151,10 +2167,10 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 							return __call__ (__accu1__.basename, __accu1__, f);
 						}) ());
 					}) ();
-					if ((function () {
+					if (__call__ (_truth, null, (function () {
 						var __accu0__ = os.path;
 						return __call__ (__accu0__.exists, __accu0__, path_dest);
-					}) ()) {
+					}) ())) {
 						(function () {
 							var __accu0__ = self;
 							return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -2275,7 +2291,7 @@ export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_stud
 			var __accu0__ = bpy.utils;
 			return __call__ (__accu0__.user_resource, __accu0__, 'DATAFILES', __kwargtrans__ ({path: path_studiolights, create: true}));
 		}) ();
-		if (!(path_studiolights)) {
+		if (!(__call__ (_truth, null, path_studiolights))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to create Studio Light path');
@@ -2389,7 +2405,7 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 				return __call__ (__accu1__.join, __accu1__, 'studiolights', 'studio');
 			}) (), create: true}));
 		}) ();
-		if (!(path_studiolights)) {
+		if (!(__call__ (_truth, null, path_studiolights))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get Studio Light path');
@@ -2400,11 +2416,11 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.join, __accu0__, path_studiolights, filename);
 		}) ();
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isfile, __accu0__, filepath_final);
-		}) ()) {
-			if (!(self.ask_override)) {
+		}) ())) {
+			if (!(__call__ (_truth, null, self.ask_override))) {
 				self.ask_override = true;
 				return (function () {
 					var __accu0__ = wm;
@@ -2456,7 +2472,7 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 		else {
 		}
 		var layout = self.layout;
-		if (self.ask_override) {
+		if (__call__ (_truth, null, self.ask_override)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Warning, file already exists. Overwrite existing file?'}));
@@ -2520,10 +2536,10 @@ export var PREFERENCES_OT_studiolight_uninstall =  __class__ ('PREFERENCES_OT_st
 			var studio_light = __getitem__ (__iterable0__, __index0__);
 			if (__eq__ (studio_light.index, self.index)) {
 				var filepath = studio_light.path;
-				if (filepath && (function () {
+				if (__call__ (_truth, null, filepath) && __call__ (_truth, null, (function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.exists, __accu0__, filepath);
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu0__ = os;
 						return __call__ (__accu0__.unlink, __accu0__, filepath);
@@ -2696,6 +2712,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '_zipfile_root_namelist': _zipfile_root_namelist = value; break;

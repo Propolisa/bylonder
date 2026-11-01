@@ -14,6 +14,162 @@ __nest__ (bpy, '', __module_bpy__);
 import {namedtuple} from './collections.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.image_as_planes';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['classes']);
 export var COMPATIBLE_ENGINES = new set (['CYCLES', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH']);
 export var ImageSpec = __call__ (namedtuple, null, 'ImageSpec', tuple (['image', 'size', 'frame_start', 'frame_offset', 'frame_duration']));
@@ -95,7 +251,7 @@ export var find_image_sequences = function* (files) {
 				continue;
 			}
 		}
-		if (prev_file) {
+		if (__call__ (_truth, null, prev_file)) {
 			if (__gt__ (length, 1)) {
 				yield tuple ([prev_file, __getitem__ (matches, segment), length]);
 			}
@@ -109,7 +265,7 @@ export var find_image_sequences = function* (files) {
 		var segment = null;
 		var length = 1;
 	}
-	if (prev_file) {
+	if (__call__ (_truth, null, prev_file)) {
 		if (__gt__ (length, 1)) {
 			yield tuple ([prev_file, __getitem__ (matches, segment), length]);
 		}
@@ -148,7 +304,7 @@ export var load_images = function* (filenames, directory, force_reload, frame_st
 	var os = __call__ (_module, null, 'os');
 	var repeat = __call__ (_member, null, 'itertools', 'repeat');
 	var load_image = __call__ (_member, null, 'bpy_extras.image_utils', 'load_image');
-	if (find_sequences) {
+	if (__call__ (_truth, null, find_sequences)) {
 		var file_iter = __call__ (find_image_sequences, null, filenames);
 	}
 	else {
@@ -161,7 +317,7 @@ export var load_images = function* (filenames, directory, force_reload, frame_st
 		var filename = __left0__ [0];
 		var offset = __left0__ [1];
 		var frames = __left0__ [2];
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = os.path;
 			return __call__ (__accu0__.isfile, __accu0__, (function () {
 				var __accu1__ = bpy.path;
@@ -170,7 +326,7 @@ export var load_images = function* (filenames, directory, force_reload, frame_st
 					return __call__ (__accu2__.join, __accu2__, directory, filename);
 				}) ());
 			}) ());
-		}) ())) {
+		}) ()))) {
 			continue;
 		}
 		var image = __call__ (load_image, null, filename, directory, __kwargtrans__ ({check_existing: true, force_reload: force_reload}));
@@ -404,7 +560,7 @@ export var MaterialProperties_MixIn =  __class__ ('MaterialProperties_MixIn', [o
 			var __accu0__ = header;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Material'}));
 		}) ();
-		if (body) {
+		if (__call__ (_truth, null, body)) {
 			(function () {
 				var __accu0__ = body;
 				return __call__ (__accu0__.prop, __accu0__, self, 'shader');
@@ -477,7 +633,7 @@ export var TextureProperties_MixIn =  __class__ ('TextureProperties_MixIn', [obj
 			var __accu0__ = header;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Texture'}));
 		}) ();
-		if (body) {
+		if (__call__ (_truth, null, body)) {
 			(function () {
 				var __accu0__ = body;
 				return __call__ (__accu0__.prop, __accu0__, self, 'interpolation');
@@ -572,7 +728,7 @@ export var create_cycles_material = function (self, context, img_spec, py_name) 
 	else {
 	}
 	var material = null;
-	if (self.overwrite_material) {
+	if (__call__ (_truth, null, self.overwrite_material)) {
 		var material = (function () {
 			var __accu0__ = bpy.data.materials;
 			return __call__ (__accu0__.py_get, __accu0__, tuple ([py_name, null]));
@@ -627,7 +783,7 @@ export var create_cycles_material = function (self, context, img_spec, py_name) 
 			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (core_shader.inputs, 'Emission Color'), __getitem__ (tex_image.outputs, 'Color'));
 		}) ();
 	}
-	if (self.use_transparency) {
+	if (__call__ (_truth, null, self.use_transparency)) {
 		if (__in__ (self.shader, new set (['PRINCIPLED', 'EMISSION']))) {
 			(function () {
 				var __accu0__ = node_tree.links;
@@ -1053,7 +1209,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 			var __accu0__ = header;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Options'}));
 		}) ();
-		if (body) {
+		if (__call__ (_truth, null, body)) {
 			var row = (function () {
 				var __accu0__ = body;
 				return __call__ (__accu0__.row, __accu0__);
@@ -1099,7 +1255,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 			var __accu0__ = header;
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Transform'}));
 		}) ();
-		if (body) {
+		if (__call__ (_truth, null, body)) {
 			(function () {
 				var __accu0__ = body;
 				return __call__ (__accu0__.prop, __accu0__, self, 'size_mode');
@@ -1246,12 +1402,12 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		else {
 		}
-		if (!(bpy.data.is_saved)) {
+		if (!(__call__ (_truth, null, bpy.data.is_saved))) {
 			self.relative = false;
 		}
 		var editmode = context.preferences.edit.use_enter_edit_mode;
 		context.preferences.edit.use_enter_edit_mode = false;
-		if (context.active_object && __ne__ (context.active_object.mode, 'OBJECT')) {
+		if (__call__ (_truth, null, context.active_object) && __ne__ (context.active_object.mode, 'OBJECT')) {
 			(function () {
 				var __accu0__ = bpy.ops.object;
 				return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'OBJECT'}));
@@ -1292,7 +1448,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 			}
 			return __accu0__;
 		}) (), self.directory, __kwargtrans__ ({force_reload: self.force_reload, find_sequences: self.image_sequence})));
-		if (!(images)) {
+		if (!(__call__ (_truth, null, images))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Please select at least one image');
@@ -1319,10 +1475,10 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 			var __accu0__ = context.view_layer;
 			return __call__ (__accu0__.py_update, __accu0__);
 		}) ();
-		if (self.offset) {
+		if (__call__ (_truth, null, self.offset)) {
 			var offset_axis = __getitem__ (self.axis_id_to_vector, self.offset_axis);
 			__call__ (offset_planes, null, planes, self.offset_amount, offset_axis);
-			if (__eq__ (self.size_mode, 'CAMERA') && offset_axis.z) {
+			if (__eq__ (self.size_mode, 'CAMERA') && __call__ (_truth, null, offset_axis.z)) {
 				var __iterable0__ = planes;
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1402,10 +1558,10 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		}
 		else {
 		}
-		if (!(self.use_transparency)) {
+		if (!(__call__ (_truth, null, self.use_transparency))) {
 			image.alpha_mode = 'NONE';
 		}
-		if (self.relative) {
+		if (__call__ (_truth, null, self.relative)) {
 			try {
 				image.filepath = (function () {
 					var __accu0__ = bpy.path;
@@ -1439,7 +1595,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		else {
 		}
 		var shader = self.shader;
-		if (self.use_transparency) {
+		if (__call__ (_truth, null, self.use_transparency)) {
 			material.alpha = 0.0;
 			material.specular_alpha = 0.0;
 			slot.use_map_alpha = true;
@@ -1509,7 +1665,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 					var i = __getitem__ (__iterable0__, __index0__);
 					(function () {
 						var __accu1__ = __accu0__;
-						return __call__ (__accu1__.append, __accu1__, (__getitem__ (offset_axis, i) ? 0 : 1));
+						return __call__ (__accu1__.append, __accu1__, (__call__ (_truth, null, __getitem__ (offset_axis, i)) ? 0 : 1));
 					}) ();
 				}
 				return __accu0__;
@@ -1611,7 +1767,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 		else {
 			var axis = __getitem__ (self.axis_id_to_vector, self.align_axis);
 		}
-		if (!(axis.z)) {
+		if (!(__call__ (_truth, null, axis.z))) {
 			plane.rotation_euler.x = __truediv__ (pi, 2);
 			if (__gt__ (axis.y, 0)) {
 				plane.rotation_euler.z = pi;
@@ -1639,7 +1795,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 			constraint.use_x = __left0__;
 			constraint.use_y = __left0__;
 			constraint.use_z = __left0__;
-			if (!(self.align_track)) {
+			if (!(__call__ (_truth, null, self.align_track))) {
 				(function () {
 					var __accu0__ = bpy.ops.object;
 					return __call__ (__accu0__.visual_transform_apply, __accu0__);
@@ -1650,7 +1806,7 @@ export var IMAGE_OT_import_as_mesh_planes =  __class__ ('IMAGE_OT_import_as_mesh
 				}) ();
 			}
 		}
-		if (__eq__ (self.align_axis, 'CAM_AX') && self.align_track) {
+		if (__eq__ (self.align_axis, 'CAM_AX') && __call__ (_truth, null, self.align_track)) {
 			var constraint = (function () {
 				var __accu0__ = plane.constraints;
 				return __call__ (__accu0__.py_new, __accu0__, 'LOCKED_TRACK');
@@ -1782,10 +1938,10 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var ob = __getitem__ (__iterable0__, __index0__);
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._is_object_empty_image, __accu0__, ob);
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
 			var img = ob.data;
@@ -1837,7 +1993,7 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 				var __accu0__ = plane.data.materials;
 				return __call__ (__accu0__.append, __accu0__, material);
 			}) ();
-			if (self.delete_ref) {
+			if (__call__ (_truth, null, self.delete_ref)) {
 				var __iterable1__ = users_collection;
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
@@ -1856,7 +2012,7 @@ export var IMAGE_OT_convert_to_mesh_plane =  __class__ ('IMAGE_OT_convert_to_mes
 			}) ();
 			var converted = __call__ (__iadd__, null, converted, 1);
 		}
-		if (!(converted)) {
+		if (!(__call__ (_truth, null, converted))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No images converted');
@@ -1923,6 +2079,14 @@ export {AddObjectHelper, BoolProperty, CollectionProperty, EnumProperty, FloatPr
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'COMPATIBLE_ENGINES': COMPATIBLE_ENGINES = value; break;
 		case 'ImageSpec': ImageSpec = value; break;

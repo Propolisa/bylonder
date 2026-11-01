@@ -109,6 +109,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -205,7 +221,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 			var _f1 = __left0__ [0];
 			var lens1 = __left0__ [1];
 			var lens1ord = __left0__ [2];
-			if (__getitem__ (data, 1)) {
+			if (__call__ (_truth, null, __getitem__ (data, 1))) {
 				var __left0__ = __getitem__ (data, 1);
 				var _f2 = __left0__ [0];
 				var lens2 = __left0__ [1];
@@ -361,7 +377,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		}
 		else {
 		}
-		if (self.uv && __eq__ (__call__ (len, null, self.uv), 4)) {
+		if (__call__ (_truth, null, self.uv) && __eq__ (__call__ (len, null, self.uv), 4)) {
 			self.uv = tuple ([__getitem__ (self.uv, 1), __getitem__ (self.uv, 2), __getitem__ (self.uv, 3), __getitem__ (self.uv, 0)]);
 		}
 		var __left0__ = tuple ([self.height, self.width]);
@@ -370,7 +386,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 		var __left0__ = tuple ([self.yoff, self.xoff]);
 		self.xoff = __left0__ [0];
 		self.yoff = __left0__ [1];
-		self.rot = !(self.rot);
+		self.rot = !(__call__ (_truth, null, self.rot));
 		var __iterable0__ = self.children;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -414,7 +430,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 			}) ();
 		}
 		var uv = self.uv;
-		if (!(uv)) {
+		if (!(__call__ (_truth, null, uv))) {
 			return ;
 		}
 		var x1 = xoff;
@@ -516,7 +532,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 					}
 					return __accu0__;
 				}) ();
-				if (self.rot) {
+				if (__call__ (_truth, null, self.rot)) {
 					__setslice__ (__getitem__ (fuv, __getitem__ (I, 2)), 0, null, null, p1);
 					__setslice__ (__getitem__ (fuv, __getitem__ (I, 1)), 0, null, null, p2);
 					__setslice__ (__getitem__ (fuv, __getitem__ (I, 0)), 0, null, null, p3);
@@ -529,7 +545,7 @@ export var prettyface =  __class__ ('prettyface', [object], {
 			};
 			var f = __getitem__ (__getitem__ (uv, 0), 0);
 			__call__ (set_uv, null, f, tuple ([x1, y1]), tuple ([x1, __sub__ (y2, margin_h)]), tuple ([__sub__ (x2, margin_w), y1]));
-			if (__getitem__ (uv, 1)) {
+			if (__call__ (_truth, null, __getitem__ (uv, 1))) {
 				var f = __getitem__ (__getitem__ (uv, 1), 0);
 				__call__ (set_uv, null, f, tuple ([x2, y2]), tuple ([x2, __add__ (y1, margin_h)]), tuple ([__add__ (x1, margin_w), y2]));
 			}
@@ -607,14 +623,14 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 	}
 	var time = __call__ (_module, null, 'time');
 	var sqrt = __call__ (_member, null, 'math', 'sqrt');
-	if (!(meshes)) {
+	if (!(__call__ (_truth, null, meshes))) {
 		return ;
 	}
 	var t = (function () {
 		var __accu0__ = time;
 		return __call__ (__accu0__.time, __accu0__);
 	}) ();
-	if (PREF_PACK_IN_ONE) {
+	if (__call__ (_truth, null, PREF_PACK_IN_ONE)) {
 		var face_groups = [[]];
 	}
 	else {
@@ -624,14 +640,14 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var me = __getitem__ (__iterable0__, __index0__);
-		if (PREF_SEL_ONLY) {
+		if (__call__ (_truth, null, PREF_SEL_ONLY)) {
 			var faces = (function () {
 				var __accu0__ = [];
 				var __iterable1__ = me.polygons;
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var f = __getitem__ (__iterable1__, __index1__);
-					if (f.select) {
+					if (__call__ (_truth, null, f.select)) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, f);
@@ -644,7 +660,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 		else {
 			var faces = __getslice__ (me.polygons, null, null, 1);
 		}
-		if (PREF_PACK_IN_ONE) {
+		if (__call__ (_truth, null, PREF_PACK_IN_ONE)) {
 			(function () {
 				var __accu0__ = __getitem__ (face_groups, 0);
 				return __call__ (__accu0__.extend, __accu0__, faces);
@@ -656,13 +672,13 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 				return __call__ (__accu0__.append, __accu0__, faces);
 			}) ();
 		}
-		if (PREF_NEW_UVLAYER) {
+		if (__call__ (_truth, null, PREF_NEW_UVLAYER)) {
 			(function () {
 				var __accu0__ = me.uv_layers;
 				return __call__ (__accu0__.py_new, __accu0__);
 			}) ();
 		}
-		if (!(me.uv_layers)) {
+		if (!(__call__ (_truth, null, me.uv_layers))) {
 			(function () {
 				var __accu0__ = me.uv_layers;
 				return __call__ (__accu0__.py_new, __accu0__);
@@ -674,7 +690,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var face_sel = __getitem__ (__iterable0__, __index0__);
 		__call__ (print, null, '\nStarting unwrap');
-		if (!(face_sel)) {
+		if (!(__call__ (_truth, null, face_sel))) {
 			continue;
 		}
 		var pretty_faces = (function () {
@@ -780,7 +796,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 			var pairs_added = 0;
 			var tri_equality_threshold = 1e-05;
 			for (var i = 0; i < __call__ (len, null, tri_lengths); i++) {
-				if (__getitem__ (added_ids, i)) {
+				if (__call__ (_truth, null, __getitem__ (added_ids, i))) {
 					continue;
 				}
 				var tri1 = __getitem__ (tri_lengths, i);
@@ -806,13 +822,13 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 						}
 						else {
 						}
-						return !(__getitem__ (added_ids, idx));
+						return !(__call__ (_truth, null, __getitem__ (added_ids, idx)));
 					})}));
 				}) ();
 				var _vec = __left0__ [0];
 				var nearest = __left0__ [1];
 				var dist = __left0__ [2];
-				if (!(nearest) || __lt__ (nearest, 0)) {
+				if (!(__call__ (_truth, null, nearest)) || __lt__ (nearest, 0)) {
 					(function () {
 						var __accu0__ = pretty_faces;
 						return __call__ (__accu0__.append, __accu0__, __call__ (prettyface, null, tuple ([tri1, null])));
@@ -839,7 +855,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 							var _ = __left0__ [0];
 							var idx = __left0__ [1];
 							var _ = __left0__ [2];
-							if (!(__getitem__ (added_ids, idx))) {
+							if (!(__call__ (_truth, null, __getitem__ (added_ids, idx)))) {
 								(function () {
 									var __accu1__ = __accu0__;
 									return __call__ (__accu1__.append, __accu1__, idx);
@@ -895,7 +911,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 				break;
 			}
 		}
-		if (!(lengths)) {
+		if (!(__call__ (_truth, null, lengths))) {
 			(function () {
 				var __accu0__ = lengths;
 				return __call__ (__accu0__.append, __accu0__, curr_len);
@@ -995,7 +1011,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 			var max_int_dimension = 0.0;
 			var ok = false;
 		}
-		while (ok) {
+		while (__call__ (_truth, null, ok)) {
 			var ok = false;
 			var __iterable1__ = __call__ (list, null, (function () {
 				var __accu0__ = odd_dict;
@@ -1114,7 +1130,7 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var pf = __getitem__ (__iterable1__, __index1__);
-				if (!(pf.has_parent)) {
+				if (!(__call__ (_truth, null, pf.has_parent))) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, pf);
@@ -1125,12 +1141,12 @@ export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, 
 		}) ();
 		var i = __call__ (len, null, pretty_faces);
 		var d = 0;
-		while (i) {
+		while (__call__ (_truth, null, i)) {
 			var i = __call__ (__isub__, null, i, 1);
 			var pf = __getitem__ (pretty_faces, i);
 			if (__ne__ (pf.width, pf.height)) {
 				var d = __call__ (__iadd__, null, d, 1);
-				if (__mod__ (d, 2)) {
+				if (__call__ (_truth, null, __mod__ (d, 2))) {
 					(function () {
 						var __accu0__ = pf;
 						return __call__ (__accu0__.spin, __accu0__);
@@ -1216,7 +1232,7 @@ export var unwrap = function (operator, context) {
 	else {
 	}
 	var is_editmode = context.object && __eq__ (context.object.mode, 'EDIT');
-	if (is_editmode) {
+	if (__call__ (_truth, null, is_editmode)) {
 		var objects = context.objects_in_mode_unique_data;
 		(function () {
 			var __accu0__ = bpy.ops.object;
@@ -1237,7 +1253,7 @@ export var unwrap = function (operator, context) {
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var me = __getitem__ (__iterable1__, __index1__);
-					if (me.polygons && me.is_editable) {
+					if (__call__ (_truth, null, me.polygons) && __call__ (_truth, null, me.is_editable)) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, me);
@@ -1248,7 +1264,7 @@ export var unwrap = function (operator, context) {
 		}
 		return set (__accu0__);
 	}) ());
-	if (!(meshes)) {
+	if (!(__call__ (_truth, null, meshes))) {
 		(function () {
 			var __accu0__ = operator;
 			return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No mesh object');
@@ -1256,7 +1272,7 @@ export var unwrap = function (operator, context) {
 		return new set (['CANCELLED']);
 	}
 	__call__ (lightmap_uvpack, null, meshes, __kwargtrans__ (__call__ (_merged, null, kwargs)));
-	if (is_editmode) {
+	if (__call__ (_truth, null, is_editmode)) {
 		(function () {
 			var __accu0__ = bpy.ops.object;
 			return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'EDIT', toggle: false}));
@@ -1288,7 +1304,7 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var is_editmode = __eq__ (context.active_object.mode, 'EDIT');
-		if (is_editmode) {
+		if (__call__ (_truth, null, is_editmode)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, self, 'PREF_CONTEXT');
@@ -1353,7 +1369,7 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 			return __call__ (__accu0__.py_pop, __accu0__, 'PREF_CONTEXT');
 		}) ();
 		var is_editmode = __eq__ (context.active_object.mode, 'EDIT');
-		if (!(is_editmode)) {
+		if (!(__call__ (_truth, null, is_editmode))) {
 			__setitem__ (kwargs, 'PREF_SEL_ONLY', false);
 		}
 		else if (__eq__ (PREF_CONTEXT, 'SEL_FACES')) {
@@ -1409,6 +1425,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'prettyface': prettyface = value; break;

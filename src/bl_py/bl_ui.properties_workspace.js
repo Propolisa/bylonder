@@ -11,6 +11,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_workspace';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var WorkSpaceButtonsPanel =  __class__ ('WorkSpaceButtonsPanel', [object], {
 	__module__: __name__,
 	bl_space_type: 'VIEW_3D',
@@ -160,7 +316,7 @@ export var WORKSPACE_PT_addons =  __class__ ('WORKSPACE_PT_addons', [WorkSpaceBu
 			var __accu0__ = layout;
 			return __call__ (__accu0__.template_list, __accu0__, 'WORKSPACE_UL_addons_items', '', context.preferences, 'addons', context.workspace, 'active_addon', __kwargtrans__ ({rows: 8}));
 		}) ();
-		if (unknown_addons) {
+		if (__call__ (_truth, null, unknown_addons)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Unknown add-ons', icon: 'ERROR'}));
@@ -210,7 +366,7 @@ export var WORKSPACE_UL_addons_items =  __class__ ('WORKSPACE_UL_addons_items', 
 			var __accu0__ = WORKSPACE_PT_addons.addon_map;
 			return __call__ (__accu0__.py_get, __accu0__, addon.module);
 		}) ();
-		if (!(module)) {
+		if (!(__call__ (_truth, null, module))) {
 			return addon.module;
 		}
 		var bl_info = (function () {
@@ -242,7 +398,7 @@ export var WORKSPACE_UL_addons_items =  __class__ ('WORKSPACE_UL_addons_items', 
 		}
 		else {
 		}
-		if (!(pattern) || !(addons)) {
+		if (!(__call__ (_truth, null, pattern)) || !(__call__ (_truth, null, addons))) {
 			return [];
 		}
 		var fnmatch = __call__ (_module, null, 'fnmatch');
@@ -349,13 +505,13 @@ export var WORKSPACE_UL_addons_items =  __class__ ('WORKSPACE_UL_addons_items', 
 		var addons = __call__ (getattr, null, data, property);
 		var flags = [];
 		var indices = [];
-		if (self.filter_name) {
+		if (__call__ (_truth, null, self.filter_name)) {
 			var flags = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._filter_addons_by_category_name, __accu0__, self.filter_name, self.bitflag_filter_item, addons, __kwargtrans__ ({reverse: self.use_filter_invert}));
 			}) ();
 		}
-		if (!(flags)) {
+		if (!(__call__ (_truth, null, flags))) {
 			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, addons));
 		}
 		var __iterable0__ = __call__ (py_enumerate, null, addons);
@@ -364,14 +520,14 @@ export var WORKSPACE_UL_addons_items =  __class__ ('WORKSPACE_UL_addons_items', 
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var idx = __left0__ [0];
 			var addon = __left0__ [1];
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = WORKSPACE_PT_addons.addon_map;
 				return __call__ (__accu0__.py_get, __accu0__, addon.module);
-			}) ())) {
+			}) ()))) {
 				__setitem__ (flags, idx, 0);
 			}
 		}
-		if (self.use_filter_sort_alpha) {
+		if (__call__ (_truth, null, self.use_filter_sort_alpha)) {
 			var indices = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__._sort_addons_by_category_name, __accu0__, addons);
@@ -422,7 +578,7 @@ export var WORKSPACE_UL_addons_items =  __class__ ('WORKSPACE_UL_addons_items', 
 		var is_enabled = __in__ (addon.module, WORKSPACE_PT_addons.owner_ids);
 		(function () {
 			var __accu0__ = row;
-			return __call__ (__accu0__.operator, __accu0__, (is_enabled ? 'wm.owner_disable' : 'wm.owner_enable'), __kwargtrans__ ({icon: (is_enabled ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: ''}));
+			return __call__ (__accu0__.operator, __accu0__, (__call__ (_truth, null, is_enabled) ? 'wm.owner_disable' : 'wm.owner_enable'), __kwargtrans__ ({icon: (__call__ (_truth, null, is_enabled) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: ''}));
 		}) ().owner_id = addon.module;
 	});}
 });
@@ -451,6 +607,14 @@ export {Panel, PropertyPanel, UIList, _globals, _import, _lazy, _member, _module
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'WorkSpaceButtonsPanel': WorkSpaceButtonsPanel = value; break;
 		case 'WORKSPACE_PT_main': WORKSPACE_PT_main = value; break;
 		case 'WORKSPACE_PT_addons': WORKSPACE_PT_addons = value; break;

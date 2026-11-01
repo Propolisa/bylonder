@@ -7,6 +7,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_rna_info';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['BuildRNAInfo', 'InfoFunctionRNA', 'InfoOperatorRNA', 'InfoPropertyRNA', 'InfoStructRNA', 'rna_id_ignore']);
 export var script_paths = (function () {
 	var __accu0__ = bpy.utils;
@@ -32,7 +188,7 @@ export var _get_direct_attr = function (rna_type, attr) {
 	}
 	var props = __call__ (getattr, null, rna_type, attr);
 	var base = rna_type.base;
-	if (!(base)) {
+	if (!(__call__ (_truth, null, base))) {
 		return (function () {
 			var __accu0__ = [];
 			var __iterable0__ = props;
@@ -310,7 +466,7 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 		self.references = [];
 		self.properties = [];
 		self.py_class = __call__ (get_py_class_from_rna, null, self.bl_rna);
-		self.module_name = (self.py_class && !(__call__ (hasattr, null, bpy.types, self.identifier)) ? self.py_class.__module__ : 'bpy.types');
+		self.module_name = (__call__ (_truth, null, self.py_class) && !(__call__ (hasattr, null, bpy.types, self.identifier)) ? self.py_class.__module__ : 'bpy.types');
 		if (__eq__ (self.module_name, '_bpy_types')) {
 			self.module_name = 'bpy.types';
 		}
@@ -376,9 +532,9 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 		}
 		var bases = [];
 		var item = self;
-		while (item) {
+		while (__call__ (_truth, null, item)) {
 			var item = item.base;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				(function () {
 					var __accu0__ = bases;
 					return __call__ (__accu0__.append, __accu0__, item);
@@ -405,10 +561,10 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 		}
 		else {
 		}
-		if (!(ls)) {
+		if (!(__call__ (_truth, null, ls))) {
 			var ls = __getslice__ (self.properties, null, null, 1);
 		}
-		if (self.nested) {
+		if (__call__ (_truth, null, self.nested)) {
 			(function () {
 				var __accu0__ = self.nested;
 				return __call__ (__accu0__.get_nested_properties, __accu0__, ls);
@@ -436,10 +592,10 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var attr_str = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = attr_str;
 				return __call__ (__accu0__.startswith, __accu0__, '_');
-			}) ()) {
+			}) ())) {
 				continue;
 			}
 			(function () {
@@ -517,7 +673,7 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 			else if (__in__ (py_typeof (attr), new set ([types.FunctionType, types.MethodType]))) {
 				var ok = true;
 			}
-			if (ok) {
+			if (__call__ (_truth, null, ok)) {
 				(function () {
 					var __accu0__ = functions;
 					return __call__ (__accu0__.append, __accu0__, tuple ([identifier, attr]));
@@ -566,7 +722,7 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 					var ok = true;
 				}
 			}
-			if (ok) {
+			if (__call__ (_truth, null, ok)) {
 				(function () {
 					var __accu0__ = functions;
 					return __call__ (__accu0__.append, __accu0__, tuple ([identifier, attr]));
@@ -641,7 +797,7 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 		}
 		var txt = '';
 		var txt = __call__ (__iadd__, null, txt, self.identifier);
-		if (self.base) {
+		if (__call__ (_truth, null, self.base)) {
 			var txt = __call__ (__iadd__, null, txt, (function () {
 				var __accu0__ = '({:s})';
 				return __call__ (__accu0__.format, __accu0__, self.base.identifier);
@@ -717,7 +873,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 		self.max = __call__ (getattr, null, rna_prop, 'hard_max', __neg__ (1));
 		self.array_length = __call__ (getattr, null, rna_prop, 'array_length', 0);
 		var array_dimensions = __call__ (tuple, null, __call__ (getattr, null, rna_prop, 'array_dimensions', tuple ([])));
-		while (array_dimensions && __eq__ (__getitem__ (array_dimensions, __neg__ (1)), 0)) {
+		while (__call__ (_truth, null, array_dimensions) && __eq__ (__getitem__ (array_dimensions, __neg__ (1)), 0)) {
 			var array_dimensions = __getslice__ (array_dimensions, null, __neg__ (1), 1);
 		}
 		self.array_dimensions = array_dimensions;
@@ -730,7 +886,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 		self.is_argument_optional = rna_prop.is_argument_optional;
 		self.is_path_supports_blend_relative = rna_prop.is_path_supports_blend_relative;
 		self.is_path_supports_templates = rna_prop.is_path_supports_templates;
-		if (rna_prop.is_deprecated) {
+		if (__call__ (_truth, null, rna_prop.is_deprecated)) {
 			self.deprecated = tuple ([rna_prop.deprecated_note, __call__ (tuple, null, rna_prop.deprecated_version), __call__ (tuple, null, rna_prop.deprecated_removal_version)]);
 		}
 		else {
@@ -741,7 +897,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 			return __call__ (__accu0__.lower, __accu0__);
 		}) ();
 		var fixed_type = __call__ (getattr, null, rna_prop, 'fixed_type', '');
-		if (fixed_type) {
+		if (__call__ (_truth, null, fixed_type)) {
 			self.fixed_type = __call__ (GetInfoStructRNA, null, fixed_type);
 		}
 		else {
@@ -766,7 +922,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 			}) ());
 			self.is_enum_flag = rna_prop.is_enum_flag;
 			var item = items_static || py_items;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				self.enum_pointer = (function () {
 					var __accu0__ = __getitem__ (item, 0);
 					return __call__ (__accu0__.as_pointer, __accu0__);
@@ -778,7 +934,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 			self.is_enum_flag = false;
 		}
 		self.default_str = '';
-		if (self.array_length) {
+		if (__call__ (_truth, null, self.array_length)) {
 			self.py_default = __call__ (tuple, null, __call__ (getattr, null, rna_prop, 'default_array', tuple ([])));
 			if (__gt__ (__call__ (len, null, self.array_dimensions), 1)) {
 				self.default_str = __call__ (tuple, null, (function () {
@@ -836,7 +992,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 				self.default_str = __getitem__ (self.default_str, 0);
 			}
 		}
-		else if (__eq__ (self.py_metatype, 'enum') && self.is_enum_flag) {
+		else if (__eq__ (self.py_metatype, 'enum') && __call__ (_truth, null, self.is_enum_flag)) {
 			self.py_default = __call__ (getattr, null, rna_prop, 'default_flag', __call__ (set, null));
 		}
 		else {
@@ -861,8 +1017,8 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 			}
 		}
 		else if (__eq__ (self.py_metatype, 'enum')) {
-			if (self.is_enum_flag) {
-				if (self.py_default) {
+			if (__call__ (_truth, null, self.is_enum_flag)) {
+				if (__call__ (_truth, null, self.py_default)) {
 					self.default_str = (function () {
 						var __accu0__ = '{{{:s}}}';
 						return __call__ (__accu0__.format, __accu0__, __getslice__ (__call__ (repr, null, __call__ (list, null, __call__ (sorted, null, self.py_default))), 1, __neg__ (1), 1));
@@ -876,7 +1032,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 				self.default_str = __call__ (repr, null, self.py_default);
 			}
 		}
-		else if (self.array_length) {
+		else if (__call__ (_truth, null, self.array_length)) {
 			if (__eq__ (__call__ (len, null, self.array_dimensions), 1)) {
 				if (__eq__ (self.py_metatype, 'float') && __gt__ (__call__ (len, null, self.py_default), 0)) {
 					self.default_str = __call__ (seq_as_tuple_str, null, (function () {
@@ -925,7 +1081,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 		else {
 		}
 		var py_default = self.default_str;
-		if (py_default && (force || self.is_required === false)) {
+		if (__call__ (_truth, null, py_default) && (__call__ (_truth, null, force) || self.is_required === false)) {
 			return (function () {
 				var __accu0__ = '{:s}={:s}';
 				return __call__ (__accu0__.format, __accu0__, self.identifier, py_default);
@@ -971,9 +1127,9 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 			if (__eq__ (self.py_metatype, 'string') && __eq__ (self.subtype, 'BYTE_STRING')) {
 				var type_str = 'bytes';
 			}
-			if (self.is_array) {
+			if (__call__ (_truth, null, self.is_array)) {
 				var array_dimensions_len = __call__ (len, null, self.array_dimensions);
-				if (self.array_length) {
+				if (__call__ (_truth, null, self.array_length)) {
 					if (__gt__ (array_dimensions_len, 1)) {
 						(function () {
 							var __accu0__ = type_info;
@@ -1041,8 +1197,8 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 						}
 					}
 				}
-				if (mathutils_type) {
-					if (as_arg) {
+				if (__call__ (_truth, null, mathutils_type)) {
+					if (__call__ (_truth, null, as_arg)) {
 						if (__eq__ (mathutils_type, 'Matrix')) {
 							var seq_type = (function () {
 								var __accu0__ = 'Sequence[Sequence[{:s}]]';
@@ -1071,7 +1227,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 					}
 				}
 				if (__eq__ (type_str, base_type_str)) {
-					if (as_arg) {
+					if (__call__ (_truth, null, as_arg)) {
 						var wrap_fmt = 'Sequence[{:s}]';
 					}
 					else {
@@ -1098,7 +1254,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 				}) ();
 			}
 			else if (__eq__ (self.py_metatype, 'enum')) {
-				if (enum_descr_override) {
+				if (__call__ (_truth, null, enum_descr_override)) {
 					var enum_items_str = enum_descr_override;
 				}
 				else {
@@ -1122,18 +1278,18 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 						}) ());
 					}) ();
 				}
-				if (as_arg && __eq__ (self.py_default, '') && enum_items_str) {
+				if (__call__ (_truth, null, as_arg) && __eq__ (self.py_default, '') && __call__ (_truth, null, enum_items_str)) {
 					var enum_items_str = __add__ ("'', ", enum_items_str);
 				}
-				if (!(enum_items_str)) {
-					if (self.is_enum_flag) {
+				if (!(__call__ (_truth, null, enum_items_str))) {
+					if (__call__ (_truth, null, self.is_enum_flag)) {
 						var type_str = 'set[str]';
 					}
 					else {
 						var type_str = 'str';
 					}
 				}
-				else if (self.is_enum_flag) {
+				else if (__call__ (_truth, null, self.is_enum_flag)) {
 					var type_str = (function () {
 						var __accu0__ = 'set[Literal[{:s}]]';
 						return __call__ (__accu0__.format, __accu0__, enum_items_str);
@@ -1149,7 +1305,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 		}
 		else if (__eq__ (self.py_metatype, 'collection')) {
 			var bracket_open = (__in__ ('`', class_fmt) ? '\\ [' : '[');
-			if (self.collection_type) {
+			if (__call__ (_truth, null, self.collection_type)) {
 				var type_str = __call__ (__iadd__, null, type_str, (function () {
 					var __accu0__ = '{:s}{:s}{:s}]';
 					return __call__ (__accu0__.format, __accu0__, (function () {
@@ -1178,20 +1334,20 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 				return __call__ (__accu0__.format, __accu0__, self.fixed_type.identifier);
 			}) ());
 		}
-		if (as_arg && __eq__ (self.default_str, 'None')) {
+		if (__call__ (_truth, null, as_arg) && __eq__ (self.default_str, 'None')) {
 			var type_str = __call__ (__iadd__, null, type_str, ' | None');
 		}
-		else if (!(as_arg || as_ret) && __eq__ (self.py_metatype, 'pointer') && !(self.is_never_none)) {
+		else if (!(__call__ (_truth, null, as_arg) || __call__ (_truth, null, as_ret)) && __eq__ (self.py_metatype, 'pointer') && !(__call__ (_truth, null, self.is_never_none))) {
 			var type_str = __call__ (__iadd__, null, type_str, ' | None');
 		}
-		if (!(as_arg || as_ret)) {
+		if (!(__call__ (_truth, null, as_arg) || __call__ (_truth, null, as_ret))) {
 			var _match_subject = self.py_metatype;
 			if (__eq__ (_match_subject, 'pointer')) {
 				// pass;
 			}
 			else if (__eq__ (_match_subject, 'enum')) {
-				if (self.is_enum_flag) {
-					if (self.py_default) {
+				if (__call__ (_truth, null, self.is_enum_flag)) {
+					if (__call__ (_truth, null, self.py_default)) {
 						var default_str = (function () {
 							var __accu0__ = '{{{:s}}}';
 							return __call__ (__accu0__.format, __accu0__, (function () {
@@ -1226,7 +1382,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 						}) ());
 					}) ();
 				}
-				else if (self.py_default) {
+				else if (__call__ (_truth, null, self.py_default)) {
 					(function () {
 						var __accu0__ = type_info;
 						return __call__ (__accu0__.append, __accu0__, (function () {
@@ -1250,42 +1406,42 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 			}
 		}
 		var qualifiers = [];
-		if (as_ret) {
+		if (__call__ (_truth, null, as_ret)) {
 			// pass;
 		}
-		else if (as_arg) {
-			if (!(self.is_required)) {
+		else if (__call__ (_truth, null, as_arg)) {
+			if (!(__call__ (_truth, null, self.is_required))) {
 				(function () {
 					var __accu0__ = qualifiers;
 					return __call__ (__accu0__.append, __accu0__, 'optional');
 				}) ();
 			}
-			if (self.is_argument_optional) {
+			if (__call__ (_truth, null, self.is_argument_optional)) {
 				(function () {
 					var __accu0__ = qualifiers;
 					return __call__ (__accu0__.append, __accu0__, 'optional for registration');
 				}) ();
 			}
 		}
-		else if (self.is_readonly) {
+		else if (__call__ (_truth, null, self.is_readonly)) {
 			(function () {
 				var __accu0__ = qualifiers;
 				return __call__ (__accu0__.append, __accu0__, 'readonly');
 			}) ();
 		}
-		if (self.is_never_none) {
+		if (__call__ (_truth, null, self.is_never_none)) {
 			(function () {
 				var __accu0__ = qualifiers;
 				return __call__ (__accu0__.append, __accu0__, 'never None');
 			}) ();
 		}
-		if (self.is_path_supports_blend_relative) {
+		if (__call__ (_truth, null, self.is_path_supports_blend_relative)) {
 			(function () {
 				var __accu0__ = qualifiers;
 				return __call__ (__accu0__.append, __accu0__, 'blend relative ``//`` prefix supported');
 			}) ();
 		}
-		if (self.is_path_supports_templates) {
+		if (__call__ (_truth, null, self.is_path_supports_templates)) {
 			(function () {
 				var __accu0__ = qualifiers;
 				return __call__ (__accu0__.append, __accu0__, (function () {
@@ -1294,7 +1450,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 				}) ());
 			}) ();
 		}
-		if (qualifiers) {
+		if (__call__ (_truth, null, qualifiers)) {
 			(function () {
 				var __accu0__ = type_info;
 				return __call__ (__accu0__.extend, __accu0__, qualifiers);
@@ -1346,7 +1502,7 @@ export var InfoFunctionRNA =  __class__ ('InfoFunctionRNA', [object], {
 			var __accu0__ = rna_func.description;
 			return __call__ (__accu0__.strip, __accu0__);
 		}) ();
-		self.is_classmethod = !(rna_func.use_self);
+		self.is_classmethod = !(__call__ (_truth, null, rna_func.use_self));
 		self.args = [];
 		self.return_values = tuple ([]);
 	});},
@@ -1375,7 +1531,7 @@ export var InfoFunctionRNA =  __class__ ('InfoFunctionRNA', [object], {
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var rna_prop = __getitem__ (__iterable0__, __index0__);
 			var prop = __call__ (GetInfoPropertyRNA, null, rna_prop, parent_id);
-			if (rna_prop.is_output) {
+			if (__call__ (_truth, null, rna_prop.is_output)) {
 				(function () {
 					var __accu0__ = self.return_values;
 					return __call__ (__accu0__.append, __accu0__, prop);
@@ -1521,7 +1677,7 @@ export var InfoOperatorRNA =  __class__ ('InfoOperatorRNA', [object], {
 		if (op_func === null) {
 			var op_func = __call__ (getattr, null, op_class, 'poll', null);
 		}
-		if (op_func) {
+		if (__call__ (_truth, null, op_func)) {
 			var op_code = op_func.__code__;
 			var source_path = op_code.co_filename;
 			var __iterable0__ = script_paths;
@@ -1687,7 +1843,7 @@ export var BuildRNAInfo = function () {
 		else {
 		}
 		var nested = rna_struct.nested;
-		if (nested) {
+		if (__call__ (_truth, null, nested)) {
 			return (function () {
 				var __accu0__ = '{:s}.{:s}';
 				return __call__ (__accu0__.format, __accu0__, __call__ (full_rna_struct_path, null, nested), rna_struct.identifier);
@@ -1755,10 +1911,10 @@ export var BuildRNAInfo = function () {
 				}) ();
 				yield tuple ([rna_type_name, rna_struct]);
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = rna_type_name;
 				return __call__ (__accu0__.startswith, __accu0__, '_');
-			}) ()) {
+			}) ())) {
 				// pass;
 			}
 			else if (__in__ (rna_type_name, suppress_warning)) {
@@ -1804,7 +1960,7 @@ export var BuildRNAInfo = function () {
 		var _rna_type_name = __left0__ [0];
 		var rna_struct = __left0__ [1];
 		var identifier = rna_struct.identifier;
-		if (!(__call__ (rna_id_ignore, null, identifier))) {
+		if (!(__call__ (_truth, null, __call__ (rna_id_ignore, null, identifier)))) {
 			(function () {
 				var __accu0__ = structs;
 				return __call__ (__accu0__.append, __accu0__, tuple ([__call__ (base_id, null, rna_struct), identifier, rna_struct]));
@@ -1836,7 +1992,7 @@ export var BuildRNAInfo = function () {
 				var __accu0__ = rna_done;
 				return __call__ (__accu0__.add, __accu0__, identifier);
 			}) ();
-			if (rna_base && !__in__ (rna_base, rna_done)) {
+			if (__call__ (_truth, null, rna_base) && !__in__ (rna_base, rna_done)) {
 				var deps_ok = false;
 				var data = (function () {
 					var __accu0__ = structs;
@@ -1854,7 +2010,7 @@ export var BuildRNAInfo = function () {
 					}
 					var i = __call__ (__iadd__, null, i, 1);
 				}
-				if (!(ok)) {
+				if (!(__call__ (_truth, null, ok))) {
 					__call__ (print, null, (function () {
 						var __accu0__ = 'Dependency "{:s}" could not be found for "{:s}"';
 						return __call__ (__accu0__.format, __accu0__, identifier, rna_base);
@@ -1877,14 +2033,14 @@ export var BuildRNAInfo = function () {
 		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 			var rna_prop = __getitem__ (__iterable1__, __index1__);
 			var rna_prop_identifier = rna_prop.identifier;
-			if (__eq__ (rna_prop_identifier, 'RNA') || __call__ (rna_id_ignore, null, rna_prop_identifier)) {
+			if (__eq__ (rna_prop_identifier, 'RNA') || __call__ (_truth, null, __call__ (rna_id_ignore, null, rna_prop_identifier))) {
 				continue;
 			}
 			var __iterable2__ = tuple ([__call__ (getattr, null, rna_prop, 'fixed_type', null), __call__ (getattr, null, rna_prop, 'srna', null)]);
 			__iterable2__ = __i__ (__iterable2__);
 			for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
 				var rna_prop_ptr = __getitem__ (__iterable2__, __index2__);
-				if (rna_prop_ptr && __in__ (rna_prop_ptr.identifier, rna_references_dict)) {
+				if (__call__ (_truth, null, rna_prop_ptr) && __in__ (rna_prop_ptr.identifier, rna_references_dict)) {
 					(function () {
 						var __accu0__ = __getitem__ (rna_references_dict, rna_prop_ptr.identifier);
 						return __call__ (__accu0__.append, __accu0__, (function () {
@@ -1908,11 +2064,11 @@ export var BuildRNAInfo = function () {
 				var __left0__ = __getitem__ (__iterable2__, __index2__);
 				var rna_prop_identifier = __left0__ [0];
 				var rna_prop = __left0__ [1];
-				if (__eq__ (rna_prop_identifier, 'RNA') || __call__ (rna_id_ignore, null, rna_prop_identifier)) {
+				if (__eq__ (rna_prop_identifier, 'RNA') || __call__ (_truth, null, __call__ (rna_id_ignore, null, rna_prop_identifier))) {
 					continue;
 				}
 				var rna_prop_ptr = __call__ (getattr, null, rna_prop, 'fixed_type', null);
-				if (rna_prop_ptr && __in__ (rna_prop_ptr.identifier, rna_references_dict)) {
+				if (__call__ (_truth, null, rna_prop_ptr) && __in__ (rna_prop_ptr.identifier, rna_references_dict)) {
 					(function () {
 						var __accu0__ = __getitem__ (rna_references_dict, rna_prop_ptr.identifier);
 						return __call__ (__accu0__.append, __accu0__, (function () {
@@ -1924,7 +2080,7 @@ export var BuildRNAInfo = function () {
 			}
 		}
 		var nested = rna_struct.nested;
-		if (nested) {
+		if (__call__ (_truth, null, nested)) {
 			(function () {
 				var __accu0__ = __getitem__ (rna_children_dict, nested.identifier);
 				return __call__ (__accu0__.append, __accu0__, rna_struct);
@@ -1952,7 +2108,7 @@ export var BuildRNAInfo = function () {
 		var identifier = __left0__ [1];
 		var rna_struct = __left0__ [2];
 		var info_struct = __call__ (GetInfoStructRNA, null, rna_struct);
-		if (rna_base) {
+		if (__call__ (_truth, null, rna_base)) {
 			info_struct.base = __call__ (GetInfoStructRNA, null, __getitem__ (rna_struct_dict, rna_base));
 		}
 		info_struct.nested = __call__ (GetInfoStructRNA, null, rna_struct.nested);
@@ -1993,7 +2149,7 @@ export var BuildRNAInfo = function () {
 		var __accu0__ = InfoStructRNA.global_lookup;
 		return __call__ (__accu0__.py_keys, __accu0__);
 	}) ());
-	while (new_keys) {
+	while (__call__ (_truth, null, new_keys)) {
 		var __iterable0__ = new_keys;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -2075,10 +2231,10 @@ export var BuildRNAInfo = function () {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var op_mod_name = __getitem__ (__iterable0__, __index0__);
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = op_mod_name;
 			return __call__ (__accu0__.startswith, __accu0__, '__');
-		}) ()) {
+		}) ())) {
 			continue;
 		}
 		var op_mod = __call__ (getattr, null, bpy.ops, op_mod_name);
@@ -2104,7 +2260,7 @@ export var BuildRNAInfo = function () {
 					throw __except0__;
 				}
 			}
-			if (rna_prop) {
+			if (__call__ (_truth, null, rna_prop)) {
 				__call__ (GetInfoOperatorRNA, null, rna_prop);
 			}
 		}
@@ -2194,7 +2350,7 @@ export var main = function () {
 				var __accu0__ = data;
 				return __call__ (__accu0__.append, __accu0__, (function () {
 					var __accu1__ = '{:s}.{:s} -> {:s}:    {:s}{:s}    {:s}';
-					return __call__ (__accu1__.format, __accu1__, struct_id_str, prop.identifier, prop.identifier, prop_type, (prop.is_readonly ? ', (read-only)' : ''), prop.description);
+					return __call__ (__accu1__.format, __accu1__, struct_id_str, prop.identifier, prop.identifier, prop_type, (__call__ (_truth, null, prop.is_readonly) ? ', (read-only)' : ''), prop.description);
 				}) ());
 			}) ();
 		}
@@ -2203,7 +2359,7 @@ export var main = function () {
 			return __call__ (__accu0__.py_sort, __accu0__);
 		}) ();
 	}
-	if (bpy.app.background) {
+	if (__call__ (_truth, null, bpy.app.background)) {
 		var sys = __call__ (_module, null, 'sys');
 		(function () {
 			var __accu0__ = sys.stderr;
@@ -2240,6 +2396,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'script_paths': script_paths = value; break;
 		case '_OperatorProperties': _OperatorProperties = value; break;

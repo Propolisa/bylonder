@@ -6,6 +6,162 @@ import {BoolProperty, EnumProperty} from './_bpy.props.js';
 import {Vector} from './mathutils.js';
 import {Operator} from './_bpy.types.js';
 var __name__ = 'bl_operators.object_align';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var worldspace_bounds_from_object_bounds = function (bb_world) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -80,7 +236,7 @@ export var worldspace_bounds_from_object_data = function (depsgraph, obj) {
 		return __call__ (__accu0__.to_mesh, __accu0__);
 	}) ();
 	var verts = me.vertices;
-	var val = __matmul__ (matrix_world, (verts ? __getitem__ (verts, __neg__ (1)).co : __call__ (Vector, null, tuple ([0.0, 0.0, 0.0]))));
+	var val = __matmul__ (matrix_world, (__call__ (_truth, null, verts) ? __getitem__ (verts, __neg__ (1)).co : __call__ (Vector, null, tuple ([0.0, 0.0, 0.0]))));
 	var __left0__ = tuple ([__getitem__ (val, 0), __getitem__ (val, 0), __getitem__ (val, 1), __getitem__ (val, 1), __getitem__ (val, 2), __getitem__ (val, 2)]);
 	var left = __left0__ [0];
 	var right = __left0__ [1];
@@ -181,7 +337,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 			return __call__ (__accu0__.append, __accu0__, tuple ([obj, bb_world]));
 		}) ();
 	}
-	if (!(objects)) {
+	if (!(__call__ (_truth, null, objects))) {
 		return false;
 	}
 	var __iterable0__ = objects;
@@ -190,7 +346,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 		var __left0__ = __getitem__ (__iterable0__, __index0__);
 		var obj = __left0__ [0];
 		var bb_world = __left0__ [1];
-		if (bb_quality && __eq__ (obj.py_metatype, 'MESH')) {
+		if (__call__ (_truth, null, bb_quality) && __eq__ (obj.py_metatype, 'MESH')) {
 			var GBB = __call__ (worldspace_bounds_from_object_data, null, depsgraph, obj);
 		}
 		else {
@@ -206,7 +362,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 			var size_active_y = __truediv__ (__sub__ (__getitem__ (Right_Back_Down, 1), __getitem__ (Left_Front_Up, 1)), 2.0);
 			var size_active_z = __truediv__ (__sub__ (__getitem__ (Left_Front_Up, 2), __getitem__ (Right_Back_Down, 2)), 2.0);
 		}
-		if (flag_first) {
+		if (__call__ (_truth, null, flag_first)) {
 			var flag_first = false;
 			__setitem__ (Left_Front_Up_SEL, 0, __getitem__ (Left_Front_Up, 0));
 			__setitem__ (Left_Front_Up_SEL, 1, __getitem__ (Left_Front_Up, 1));
@@ -262,7 +418,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 			}
 			return __accu0__;
 		}) ();
-		if (bb_quality && __eq__ (obj.py_metatype, 'MESH')) {
+		if (__call__ (_truth, null, bb_quality) && __eq__ (obj.py_metatype, 'MESH')) {
 			var GBB = __call__ (worldspace_bounds_from_object_data, null, depsgraph, obj);
 		}
 		else {
@@ -280,7 +436,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 		var negative_y = __getitem__ (Left_Front_Up, 1);
 		var negative_z = __getitem__ (Right_Back_Down, 2);
 		var obj_loc = obj.location;
-		if (align_x) {
+		if (__call__ (_truth, null, align_x)) {
 			if (__eq__ (relative_to, 'OPT_4')) {
 				if (__eq__ (align_mode, 'OPT_1')) {
 					var obj_x = __sub__ (__sub__ (__getitem__ (obj_loc, 0), negative_x), size_active_x);
@@ -312,7 +468,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 			}
 			__setitem__ (obj.location, 0, loc_x);
 		}
-		if (align_y) {
+		if (__call__ (_truth, null, align_y)) {
 			if (__eq__ (relative_to, 'OPT_4')) {
 				if (__eq__ (align_mode, 'OPT_1')) {
 					var obj_y = __sub__ (__sub__ (__getitem__ (obj_loc, 1), negative_y), size_active_y);
@@ -344,7 +500,7 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 			}
 			__setitem__ (obj.location, 1, loc_y);
 		}
-		if (align_z) {
+		if (__call__ (_truth, null, align_z)) {
 			if (__eq__ (relative_to, 'OPT_4')) {
 				if (__eq__ (align_mode, 'OPT_1')) {
 					var obj_z = __sub__ (__sub__ (__getitem__ (obj_loc, 2), negative_z), size_active_z);
@@ -418,7 +574,7 @@ export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 		}
 		var align_axis = self.align_axis;
 		var ret = __call__ (align_objects, null, context, __in__ ('X', align_axis), __in__ ('Y', align_axis), __in__ ('Z', align_axis), self.align_mode, self.relative_to, self.bb_quality);
-		if (!(ret)) {
+		if (!(__call__ (_truth, null, ret))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No objects with bound-box selected');
@@ -438,6 +594,14 @@ export {BoolProperty, EnumProperty, Operator, Vector};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'worldspace_bounds_from_object_bounds': worldspace_bounds_from_object_bounds = value; break;
 		case 'worldspace_bounds_from_object_data': worldspace_bounds_from_object_data = value; break;
 		case 'align_objects': align_objects = value; break;

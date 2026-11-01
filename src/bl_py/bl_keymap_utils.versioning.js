@@ -101,6 +101,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -246,7 +262,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 				var item_op = __left0__ [1][0];
 				var item_event = __left0__ [1][1];
 				var item_prop = __left0__ [1][2];
-				if (item_prop && __in__ (item_op, op_prop_map)) {
+				if (__call__ (_truth, null, item_prop) && __in__ (item_op, op_prop_map)) {
 					var properties = (function () {
 						var __accu0__ = item_prop;
 						return __call__ (__accu0__.py_get, __accu0__, 'properties', []);
@@ -278,7 +294,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 						}
 						return __accu0__;
 					}) ();
-					if (!(filtered_properties)) {
+					if (!(__call__ (_truth, null, filtered_properties))) {
 						var filtered_properties = null;
 					}
 					if (filtered_properties === null || __lt__ (__call__ (len, null, filtered_properties), __call__ (len, null, properties))) {
@@ -290,8 +306,8 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 				}
 			}
 		}
-		if (changed_items) {
-			if (!(has_copy)) {
+		if (__call__ (_truth, null, changed_items)) {
+			if (!(__call__ (_truth, null, has_copy))) {
 				keyconfig_data = (function () {
 					var __accu0__ = py_copy;
 					return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -343,7 +359,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 			if (km_name_dst === null) {
 				continue;
 			}
-			if (!(has_copy)) {
+			if (!(__call__ (_truth, null, has_copy))) {
 				keyconfig_data = (function () {
 					var __accu0__ = py_copy;
 					return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -354,7 +370,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 	};
 	if (__le__ (keyconfig_version, tuple ([2, 92, 0]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -385,7 +401,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 	}
 	if (__le__ (keyconfig_version, tuple ([3, 2, 5]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -413,7 +429,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 						return __call__ (__accu1__.py_get, __accu1__, 'type');
 					}) ());
 				}) ();
-				if (ty_new) {
+				if (__call__ (_truth, null, ty_new)) {
 					__setitem__ (item_event, 'type', ty_new);
 					var value = __getitem__ (item_event, 'value');
 					if (__ne__ (value, 'ANY')) {
@@ -425,7 +441,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 	}
 	if (__le__ (keyconfig_version, tuple ([3, 2, 6]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -453,14 +469,14 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 						return __call__ (__accu1__.py_get, __accu1__, 'type');
 					}) ());
 				}) ();
-				if (ty_new) {
+				if (__call__ (_truth, null, ty_new)) {
 					__setitem__ (item_event, 'type', ty_new);
 				}
 			}
 		}
 	}
 	if (__le__ (keyconfig_version, tuple ([3, 6, 0]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -468,7 +484,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 			var has_copy = true;
 		}
 		var km_items_data = __call__ (get_transform_modal_map, null);
-		if (km_items_data) {
+		if (__call__ (_truth, null, km_items_data)) {
 			var km_items = __getitem__ (km_items_data, 'items');
 			var __iterable0__ = km_items;
 			__iterable0__ = __i__ (__iterable0__);
@@ -497,7 +513,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 	}
 	if (__le__ (keyconfig_version, tuple ([4, 0, 3]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -505,7 +521,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 			var has_copy = true;
 		}
 		var km_items_data = __call__ (get_transform_modal_map, null);
-		if (km_items_data) {
+		if (__call__ (_truth, null, km_items_data)) {
 			(function () {
 				var __accu0__ = __getitem__ (km_items_data, 'items');
 				return __call__ (__accu0__.append, __accu0__, tuple (['EDIT_SNAP_SOURCE_ON', dict ({'type': 'B', 'value': 'PRESS'}), null]));
@@ -519,7 +535,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 	if (__le__ (keyconfig_version, tuple ([4, 1, 5]))) {
 		__call__ (remove_properties, null, dict ({'transform.edge_slide': ['alt_navigation'], 'transform.resize': ['alt_navigation'], 'transform.rotate': ['alt_navigation'], 'transform.shrink_fatten': ['alt_navigation'], 'transform.transform': ['alt_navigation'], 'transform.translate': ['alt_navigation'], 'transform.vert_slide': ['alt_navigation'], 'view3d.edit_mesh_extrude_move_normal': ['alt_navigation'], 'armature.extrude_move': ['TRANSFORM_OT_translate'], 'curve.extrude_move': ['TRANSFORM_OT_translate'], 'gpencil.extrude_move': ['TRANSFORM_OT_translate'], 'mesh.rip_edge_move': ['TRANSFORM_OT_translate'], 'mesh.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move_linked': ['TRANSFORM_OT_translate']}));
 		var km_items_data = __call__ (get_transform_modal_map, null);
-		if (km_items_data) {
+		if (__call__ (_truth, null, km_items_data)) {
 			var use_alt_navigate = function () {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -546,14 +562,14 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 					}
 					return __accu0__;
 				}) ()), null);
-				if (km_item) {
+				if (__call__ (_truth, null, km_item)) {
 					return !__in__ ('alt', __getitem__ (km_item, 1)) || __getitem__ (__getitem__ (km_item, 1), 'alt') === false;
 				}
 				var bpy = __call__ (_module, null, 'bpy');
 				return __call__ (getattr, null, bpy.context.window_manager.keyconfigs.active.preferences, 'use_alt_navigation', false);
 			};
-			if (__call__ (use_alt_navigate, null)) {
-				if (!(has_copy)) {
+			if (__call__ (_truth, null, __call__ (use_alt_navigate, null))) {
+				if (!(__call__ (_truth, null, has_copy))) {
 					var keyconfig_data = (function () {
 						var __accu0__ = py_copy;
 						return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -597,7 +613,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		__call__ (rename_keymap, null, dict ({'Sequencer Tool: Scale': 'Preview Tool: Scale'}));
 	}
 	if (__lt__ (keyconfig_version, tuple ([5, 0, 53]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -636,10 +652,10 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 						var prop_id = __left0__ [1][0];
 						var prop_path = __left0__ [1][1];
 						if (__eq__ (prop_id, 'data_path_primary')) {
-							if ((function () {
+							if (__call__ (_truth, null, (function () {
 								var __accu0__ = re_toolsetting_brush;
 								return __call__ (__accu0__.fullmatch, __accu0__, prop_path);
-							}) ()) {
+							}) ())) {
 								var updated_path_elements = __getslice__ ((function () {
 									var __accu0__ = prop_path;
 									return __call__ (__accu0__.py_split, __accu0__, '.');
@@ -651,10 +667,10 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 							}
 						}
 						else if (__eq__ (prop_id, 'data_path_secondary')) {
-							if ((function () {
+							if (__call__ (_truth, null, (function () {
 								var __accu0__ = prop_path;
 								return __call__ (__accu0__.startswith, __accu0__, 'tool_settings.unified_paint_settings.');
-							}) ()) {
+							}) ())) {
 								var secondary_path_index = prop_index;
 								var secondary_path_identifier = __getitem__ ((function () {
 									var __accu0__ = prop_path;
@@ -663,10 +679,10 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 							}
 						}
 						else if (__eq__ (prop_id, 'use_secondary')) {
-							if ((function () {
+							if (__call__ (_truth, null, (function () {
 								var __accu0__ = prop_path;
 								return __call__ (__accu0__.startswith, __accu0__, 'tool_settings.unified_paint_settings.');
-							}) ()) {
+							}) ())) {
 								var toggle_path_index = prop_index;
 								var toggle_path_identifier = __getitem__ ((function () {
 									var __accu0__ = prop_path;
@@ -675,7 +691,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 							}
 						}
 					}
-					if (updated_path_elements && __ne__ (secondary_path_index, __neg__ (1)) && __ne__ (toggle_path_index, __neg__ (1))) {
+					if (__call__ (_truth, null, updated_path_elements) && __ne__ (secondary_path_index, __neg__ (1)) && __ne__ (toggle_path_index, __neg__ (1))) {
 						__setitem__ (__getitem__ (item_prop, 'properties'), secondary_path_index, tuple (['data_path_secondary', (function () {
 							var __accu0__ = '.';
 							return __call__ (__accu0__.join, __accu0__, __call__ (_joined, null, updated_path_elements, [secondary_path_identifier]));
@@ -693,7 +709,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		var has_view_select = false;
 		var has_view_scroll = false;
 		var km_ui_items_data = __call__ (get_ui_keymap, null);
-		if (km_ui_items_data) {
+		if (__call__ (_truth, null, km_ui_items_data)) {
 			var __iterable0__ = __getitem__ (km_ui_items_data, 'items');
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -708,8 +724,8 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 					var has_view_scroll = true;
 				}
 			}
-			if (!(has_view_select)) {
-				if (!(has_copy)) {
+			if (!(__call__ (_truth, null, has_view_select))) {
+				if (!(__call__ (_truth, null, has_copy))) {
 					var keyconfig_data = (function () {
 						var __accu0__ = py_copy;
 						return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -723,8 +739,8 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 					return __call__ (__accu0__.extend, __accu0__, select_items);
 				}) ();
 			}
-			if (!(has_view_scroll)) {
-				if (!(has_copy)) {
+			if (!(__call__ (_truth, null, has_view_scroll))) {
+				if (!(__call__ (_truth, null, has_copy))) {
 					var keyconfig_data = (function () {
 						var __accu0__ = py_copy;
 						return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -747,7 +763,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		__call__ (rename_keymap, null, dict ({'Grease Pencil Paint Mode': 'Grease Pencil Draw Mode'}));
 	}
 	if (__lt__ (keyconfig_version, tuple ([5, 2, 21]))) {
-		if (!(has_copy)) {
+		if (!(__call__ (_truth, null, has_copy))) {
 			var keyconfig_data = (function () {
 				var __accu0__ = py_copy;
 				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
@@ -768,7 +784,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 				var item_op = __left0__ [0];
 				var _item_event = __left0__ [1];
 				var item_prop = __left0__ [2];
-				if (__in__ (item_op, new set (['grease_pencil.brush_stroke', 'grease_pencil.sculpt_paint', 'paint.image_paint', 'paint.vertex_paint', 'paint.weight_paint', 'sculpt.brush_stroke', 'sculpt_curves.brush_stroke'])) && item_prop) {
+				if (__in__ (item_op, new set (['grease_pencil.brush_stroke', 'grease_pencil.sculpt_paint', 'paint.image_paint', 'paint.vertex_paint', 'paint.weight_paint', 'sculpt.brush_stroke', 'sculpt_curves.brush_stroke'])) && __call__ (_truth, null, item_prop)) {
 					var index_to_fix = __neg__ (1);
 					var value_to_copy = null;
 					var __iterable2__ = __call__ (py_enumerate, null, __getitem__ (item_prop, 'properties'));
@@ -804,6 +820,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

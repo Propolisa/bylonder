@@ -4,6 +4,162 @@ import * as __self__ from './_bpy_internal.system_info.text_generate_runtime.js'
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bpy_internal.system_info.text_generate_runtime';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['write']);
 export var write = function (output) {
 	if (arguments.length) {
@@ -346,7 +502,7 @@ export var write = function (output) {
 		return __call__ (__accu0__.write, __accu0__, __call__ (title, null, 'FFmpeg'));
 	}) ();
 	var ffmpeg = bpy.app.ffmpeg;
-	if (ffmpeg.supported) {
+	if (__call__ (_truth, null, ffmpeg.supported)) {
 		var __iterable0__ = tuple (['avcodec', 'avdevice', 'avformat', 'avutil', 'swscale']);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -366,7 +522,7 @@ export var write = function (output) {
 			return __call__ (__accu0__.write, __accu0__, 'Blender was built without FFmpeg support\n');
 		}) ();
 	}
-	if (bpy.app.build_options.sdl) {
+	if (__call__ (_truth, null, bpy.app.build_options.sdl)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, __call__ (title, null, 'SDL'));
@@ -388,7 +544,7 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'OpenColorIO: ');
 	}) ();
-	if (ocio.supported) {
+	if (__call__ (_truth, null, ocio.supported)) {
 		if (__eq__ (ocio.version_string, 'fallback')) {
 			(function () {
 				var __accu0__ = output;
@@ -416,7 +572,7 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'OpenImageIO: ');
 	}) ();
-	if (ocio.supported) {
+	if (__call__ (_truth, null, ocio.supported)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, (function () {
@@ -435,8 +591,8 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'OpenShadingLanguage: ');
 	}) ();
-	if (bpy.app.build_options.cycles) {
-		if (bpy.app.build_options.cycles_osl) {
+	if (__call__ (_truth, null, bpy.app.build_options.cycles)) {
+		if (__call__ (_truth, null, bpy.app.build_options.cycles_osl)) {
 			var osl_version_string = __call__ (_member, null, '_cycles', 'osl_version_string');
 			(function () {
 				var __accu0__ = output;
@@ -464,7 +620,7 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'OpenSubdiv: ');
 	}) ();
-	if (opensubdiv.supported) {
+	if (__call__ (_truth, null, opensubdiv.supported)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, (function () {
@@ -484,7 +640,7 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'OpenVDB: ');
 	}) ();
-	if (openvdb.supported) {
+	if (__call__ (_truth, null, openvdb.supported)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, (function () {
@@ -504,7 +660,7 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'Alembic: ');
 	}) ();
-	if (alembic.supported) {
+	if (__call__ (_truth, null, alembic.supported)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, (function () {
@@ -524,7 +680,7 @@ export var write = function (output) {
 		var __accu0__ = output;
 		return __call__ (__accu0__.write, __accu0__, 'USD: ');
 	}) ();
-	if (usd.supported) {
+	if (__call__ (_truth, null, usd.supported)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, (function () {
@@ -539,13 +695,13 @@ export var write = function (output) {
 			return __call__ (__accu0__.write, __accu0__, 'Blender was built without USD support\n');
 		}) ();
 	}
-	if (!(bpy.app.build_options.sdl)) {
+	if (!(__call__ (_truth, null, bpy.app.build_options.sdl))) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, 'SDL: Blender was built without SDL support\n');
 		}) ();
 	}
-	if (bpy.app.background) {
+	if (__call__ (_truth, null, bpy.app.background)) {
 		(function () {
 			var __accu0__ = output;
 			return __call__ (__accu0__.write, __accu0__, '\nGPU: missing, background mode\n');
@@ -735,7 +891,7 @@ export var write = function (output) {
 			}) ());
 		}) ();
 	}
-	if (bpy.app.build_options.cycles) {
+	if (__call__ (_truth, null, bpy.app.build_options.cycles)) {
 		var cycles = __call__ (_module, null, 'cycles');
 		(function () {
 			var __accu0__ = output;
@@ -798,6 +954,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'write': write = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);

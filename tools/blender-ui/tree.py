@@ -353,6 +353,9 @@ def stub_boundary(build, trees):
 def prepare(build):
     """The passes over every module; returns the modules' names."""
     trees = {}
+    sources = [os.path.join(root, file) for root, _, names in os.walk(build) for file in names if file.endswith('.py')]
+    transpile.TranscryptFixes.module_functions = {
+        module_name(build, path): {n.name for n in ast.parse(open(path).read()).body if isinstance(n, ast.FunctionDef)} for path in sources}
     for root, _, names in os.walk(build):
         for file in names:
             if file.endswith('.py'):

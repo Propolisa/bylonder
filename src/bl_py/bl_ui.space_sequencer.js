@@ -15,6 +15,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_sequencer';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var _space_view_types = function (st) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -158,8 +314,8 @@ export var SEQUENCER_HT_header =  __class__ ('SEQUENCER_HT_header', [Header], {
 			return __call__ (__accu0__.separator_spacer, __accu0__);
 		}) ();
 		var scene = context.sequencer_scene;
-		var tool_settings = (scene ? scene.tool_settings : null);
-		var sequencer_tool_settings = (tool_settings ? tool_settings.sequencer_tool_settings : null);
+		var tool_settings = (__call__ (_truth, null, scene) ? scene.tool_settings : null);
+		var sequencer_tool_settings = (__call__ (_truth, null, tool_settings) ? tool_settings.sequencer_tool_settings : null);
 		if (__in__ (st.view_type, new set (['SEQUENCER', 'SEQUENCER_PREVIEW']))) {
 			var row = (function () {
 				var __accu0__ = layout;
@@ -170,13 +326,13 @@ export var SEQUENCER_HT_header =  __class__ ('SEQUENCER_HT_header', [Header], {
 				return __call__ (__accu0__.template_ID, __accu0__, context.workspace, 'sequencer_scene', __kwargtrans__ ({py_new: 'scene.new_sequencer_scene'}));
 			}) ();
 		}
-		if (sequencer_tool_settings && __eq__ (st.view_type, 'PREVIEW')) {
+		if (__call__ (_truth, null, sequencer_tool_settings) && __eq__ (st.view_type, 'PREVIEW')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, sequencer_tool_settings, 'pivot_point', __kwargtrans__ ({text: '', icon_only: true}));
 			}) ();
 		}
-		if (sequencer_tool_settings && __in__ (st.view_type, new set (['SEQUENCER', 'SEQUENCER_PREVIEW']))) {
+		if (__call__ (_truth, null, sequencer_tool_settings) && __in__ (st.view_type, new set (['SEQUENCER', 'SEQUENCER_PREVIEW']))) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -186,7 +342,7 @@ export var SEQUENCER_HT_header =  __class__ ('SEQUENCER_HT_header', [Header], {
 				return __call__ (__accu0__.prop, __accu0__, sequencer_tool_settings, 'overlap_mode', __kwargtrans__ ({text: ''}));
 			}) ();
 		}
-		if (tool_settings) {
+		if (__call__ (_truth, null, tool_settings)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -309,8 +465,8 @@ export var SEQUENCER_MT_editor_menus =  __class__ ('SEQUENCER_MT_editor_menus', 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_select');
 		}) ();
-		if (has_sequencer && context.sequencer_scene) {
-			if (st.show_markers) {
+		if (__call__ (_truth, null, has_sequencer) && __call__ (_truth, null, context.sequencer_scene)) {
+			if (__call__ (_truth, null, st.show_markers)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_marker');
@@ -851,7 +1007,7 @@ export var SEQUENCER_MT_preview_zoom =  __class__ ('SEQUENCER_MT_preview_zoom', 
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.view_zoom_ratio', __kwargtrans__ ({text: (function () {
 					var __accu1__ = '{:g}% ({:d}:{:d})';
 					return __call__ (__accu1__.format, __accu1__, percent, a, b);
-				}) (), translate: false, icon: (__call__ (isclose, null, percent, current_zoom, __kwargtrans__ ({abs_tol: 0.5})) ? 'LAYER_ACTIVE' : 'NONE')}));
+				}) (), translate: false, icon: (__call__ (_truth, null, __call__ (isclose, null, percent, current_zoom, __kwargtrans__ ({abs_tol: 0.5}))) ? 'LAYER_ACTIVE' : 'NONE')}));
 			}) ().ratio = ratio;
 		}
 		(function () {
@@ -984,13 +1140,13 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 			return __call__ (__accu0__.prop, __accu0__, st, 'show_region_tool_header');
 		}) ();
 		layout.operator_context = 'INVOKE_DEFAULT';
-		if (is_sequencer_view) {
+		if (__call__ (_truth, null, is_sequencer_view)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, st, 'show_region_hud');
 			}) ();
 		}
-		if (is_sequencer_only) {
+		if (__call__ (_truth, null, is_sequencer_only)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, st, 'show_region_channels');
@@ -1004,7 +1160,7 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (is_preview) {
+		if (__call__ (_truth, null, is_preview)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, st, 'show_transform_preview', __kwargtrans__ ({text: 'Preview During Transform'}));
@@ -1032,7 +1188,7 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'sequencer.view_selected', __kwargtrans__ ({text: 'Frame Selected'}));
 		}) ();
-		if (is_sequencer_view && context.sequencer_scene) {
+		if (__call__ (_truth, null, is_sequencer_view) && __call__ (_truth, null, context.sequencer_scene)) {
 			layout.operator_context = 'INVOKE_REGION_WIN';
 			(function () {
 				var __accu0__ = layout;
@@ -1040,7 +1196,7 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 			}) ();
 			(function () {
 				var __accu0__ = layout;
-				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: (context.sequencer_scene.use_preview_range ? 'Frame Preview Range' : 'Frame Scene Range')}));
+				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: (__call__ (_truth, null, context.sequencer_scene.use_preview_range) ? 'Frame Preview Range' : 'Frame Scene Range')}));
 			}) ();
 			(function () {
 				var __accu0__ = layout;
@@ -1051,8 +1207,8 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 				return __call__ (__accu0__.prop, __accu0__, st, 'use_clamp_view');
 			}) ();
 		}
-		if (is_preview) {
-			if (is_sequencer_view) {
+		if (__call__ (_truth, null, is_preview)) {
+			if (__call__ (_truth, null, is_sequencer_view)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -1063,7 +1219,7 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.view_all_preview', __kwargtrans__ ({text: 'Fit Preview in Window'}));
 			}) ();
-			if (is_sequencer_view) {
+			if (__call__ (_truth, null, is_sequencer_view)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_preview_zoom', __kwargtrans__ ({text: 'Preview Zoom'}));
@@ -1097,7 +1253,7 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, st, 'show_seconds');
 		}) ();
-		if (is_sequencer_view) {
+		if (__call__ (_truth, null, is_sequencer_view)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, st, 'show_markers');
@@ -1146,10 +1302,10 @@ export var SEQUENCER_MT_view =  __class__ ('SEQUENCER_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		layout.operator_context = (is_preview ? 'INVOKE_REGION_PREVIEW' : 'INVOKE_REGION_WIN');
+		layout.operator_context = (__call__ (_truth, null, is_preview) ? 'INVOKE_REGION_PREVIEW' : 'INVOKE_REGION_WIN');
 		var props = (function () {
 			var __accu0__ = layout;
-			return __call__ (__accu0__.operator, __accu0__, 'wm.context_toggle_enum', __kwargtrans__ ({text: 'Toggle Sequencer/Preview', icon: (is_preview ? 'SEQ_SEQUENCER' : 'SEQ_PREVIEW')}));
+			return __call__ (__accu0__.operator, __accu0__, 'wm.context_toggle_enum', __kwargtrans__ ({text: 'Toggle Sequencer/Preview', icon: (__call__ (_truth, null, is_preview) ? 'SEQ_SEQUENCER' : 'SEQ_PREVIEW')}));
 		}) ();
 		props.data_path = 'space_data.view_type';
 		props.value_1 = 'SEQUENCER';
@@ -1275,7 +1431,7 @@ export var SEQUENCER_MT_select =  __class__ ('SEQUENCER_MT_select', [Menu], {
 		var has_sequencer = __left0__ [0];
 		var has_preview = __left0__ [1];
 		var is_retiming = context.sequencer_scene !== null && context.sequencer_scene.sequence_editor !== null && context.sequencer_scene.sequence_editor.selected_retiming_keys;
-		if (has_preview) {
+		if (__call__ (_truth, null, has_preview)) {
 			layout.operator_context = 'INVOKE_REGION_PREVIEW';
 		}
 		else {
@@ -1301,7 +1457,7 @@ export var SEQUENCER_MT_select =  __class__ ('SEQUENCER_MT_select', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.select_box', __kwargtrans__ ({text: 'Box Select'}));
@@ -1312,7 +1468,7 @@ export var SEQUENCER_MT_select =  __class__ ('SEQUENCER_MT_select', [Menu], {
 			}) ();
 			props.include_handles = true;
 		}
-		else if (has_preview) {
+		else if (__call__ (_truth, null, has_preview)) {
 			col.operator_context = 'INVOKE_REGION_PREVIEW';
 			(function () {
 				var __accu0__ = col;
@@ -1323,7 +1479,7 @@ export var SEQUENCER_MT_select =  __class__ ('SEQUENCER_MT_select', [Menu], {
 			var __accu0__ = col;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.select_more', __kwargtrans__ ({text: 'More'}));
@@ -1341,8 +1497,8 @@ export var SEQUENCER_MT_select =  __class__ ('SEQUENCER_MT_select', [Menu], {
 			var __accu0__ = col;
 			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'sequencer.select_grouped', 'type', __kwargtrans__ ({text: 'Select Grouped'}));
 		}) ();
-		col.enabled = !(is_retiming);
-		if (has_sequencer) {
+		col.enabled = !(__call__ (_truth, null, is_retiming));
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.select_linked', __kwargtrans__ ({text: 'Select Linked'}));
@@ -1352,7 +1508,7 @@ export var SEQUENCER_MT_select =  __class__ ('SEQUENCER_MT_select', [Menu], {
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator_menu_enum, __accu0__, 'sequencer.select_side_of_frame', 'side', __kwargtrans__ ({text: 'Side of Frame'}));
@@ -1391,7 +1547,7 @@ export var SEQUENCER_MT_marker =  __class__ ('SEQUENCER_MT_marker', [Menu], {
 		var is_sequencer_view = __in__ (st.view_type, new set (['SEQUENCER', 'SEQUENCER_PREVIEW']));
 		var marker_menu_generic = __call__ (_member, null, 'bl_ui.space_time', 'marker_menu_generic');
 		__call__ (marker_menu_generic, null, layout, context);
-		if (is_sequencer_view) {
+		if (__call__ (_truth, null, is_sequencer_view)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, st, 'use_marker_sync');
@@ -1420,7 +1576,7 @@ export var SEQUENCER_MT_change =  __class__ ('SEQUENCER_MT_change', [Menu], {
 		var layout = self.layout;
 		var strip = context.active_strip;
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		if (strip && __eq__ (strip.py_metatype, 'SCENE')) {
+		if (__call__ (_truth, null, strip) && __eq__ (strip.py_metatype, 'SCENE')) {
 			var bpy_data_scenes_len = __call__ (len, null, bpy.data.scenes);
 			if (__gt__ (bpy_data_scenes_len, 10)) {
 				layout.operator_context = 'INVOKE_DEFAULT';
@@ -1438,7 +1594,7 @@ export var SEQUENCER_MT_change =  __class__ ('SEQUENCER_MT_change', [Menu], {
 			// pass;
 		}
 		layout.operator_context = 'INVOKE_DEFAULT';
-		if (strip && __in__ (strip.py_metatype, new set (['CROSS', 'ADD', 'SUBTRACT', 'ALPHA_OVER', 'ALPHA_UNDER', 'GAMMA_CROSS', 'COMPOSITOR', 'MULTIPLY', 'WIPE', 'GLOW', 'SPEED', 'MULTICAM', 'ADJUSTMENT', 'GAUSSIAN_BLUR']))) {
+		if (__call__ (_truth, null, strip) && __in__ (strip.py_metatype, new set (['CROSS', 'ADD', 'SUBTRACT', 'ALPHA_OVER', 'ALPHA_UNDER', 'GAMMA_CROSS', 'COMPOSITOR', 'MULTIPLY', 'WIPE', 'GLOW', 'SPEED', 'MULTICAM', 'ADJUSTMENT', 'GAUSSIAN_BLUR']))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_strip_effect_change');
@@ -1452,7 +1608,7 @@ export var SEQUENCER_MT_change =  __class__ ('SEQUENCER_MT_change', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'sequencer.change_path', __kwargtrans__ ({text: 'Path/Files'}));
 		}) ();
-		if (strip) {
+		if (__call__ (_truth, null, strip)) {
 			var strip_type = strip.py_metatype;
 			if (__eq__ (strip_type, 'IMAGE')) {
 				props.filter_image = true;
@@ -1873,7 +2029,7 @@ export var SEQUENCER_MT_strip_transform =  __class__ ('SEQUENCER_MT_strip_transf
 		var __left0__ = __call__ (_space_view_types, null, st);
 		var has_sequencer = __left0__ [0];
 		var has_preview = __left0__ [1];
-		if (has_preview) {
+		if (__call__ (_truth, null, has_preview)) {
 			layout.operator_context = 'INVOKE_REGION_PREVIEW';
 		}
 		else {
@@ -1883,7 +2039,7 @@ export var SEQUENCER_MT_strip_transform =  __class__ ('SEQUENCER_MT_strip_transf
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (has_preview) {
+		if (__call__ (_truth, null, has_preview)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator, __accu0__, 'transform.translate', __kwargtrans__ ({text: 'Move'}));
@@ -1911,7 +2067,7 @@ export var SEQUENCER_MT_strip_transform =  __class__ ('SEQUENCER_MT_strip_transf
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.slip', __kwargtrans__ ({text: 'Slip Strip Contents'}));
 			}) ();
 		}
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1929,7 +2085,7 @@ export var SEQUENCER_MT_strip_transform =  __class__ ('SEQUENCER_MT_strip_transf
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator_menu_enum, __accu0__, 'sequencer.swap', 'side');
@@ -2207,7 +2363,7 @@ export var SEQUENCER_MT_strip_input =  __class__ ('SEQUENCER_MT_strip_input', [M
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'sequencer.swap_data', __kwargtrans__ ({text: 'Swap Data'}));
 		}) ();
-		if (strip) {
+		if (__call__ (_truth, null, strip)) {
 			var strip_type = strip.py_metatype;
 			if (__eq__ (strip_type, 'IMAGE')) {
 				props.filter_image = true;
@@ -2528,7 +2684,7 @@ export var SEQUENCER_MT_strip_retiming =  __class__ ('SEQUENCER_MT_strip_retimin
 			var __accu0__ = col;
 			return __call__ (__accu0__.operator, __accu0__, 'sequencer.retiming_reset');
 		}) ();
-		col.enabled = !(is_retiming);
+		col.enabled = !(__call__ (_truth, null, is_retiming));
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
@@ -2539,7 +2695,7 @@ export var SEQUENCER_MT_strip_retiming =  __class__ ('SEQUENCER_MT_strip_retimin
 		}) ();
 		(function () {
 			var __accu0__ = layout;
-			return __call__ (__accu0__.operator, __accu0__, 'sequencer.retiming_show', __kwargtrans__ ({icon: (strip && strip.show_retiming_keys ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: 'Show Retiming Keys'}));
+			return __call__ (__accu0__.operator, __accu0__, 'sequencer.retiming_show', __kwargtrans__ ({icon: (__call__ (_truth, null, strip) && __call__ (_truth, null, strip.show_retiming_keys) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT'), text: 'Show Retiming Keys'}));
 		}) ();
 	});}
 });
@@ -2571,14 +2727,14 @@ export var SEQUENCER_MT_strip =  __class__ ('SEQUENCER_MT_strip', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_strip_transform');
 		}) ();
-		if (has_preview) {
+		if (__call__ (_truth, null, has_preview)) {
 			layout.operator_context = 'INVOKE_REGION_PREVIEW';
 		}
 		else {
 			layout.operator_context = 'INVOKE_REGION_WIN';
 		}
 		var strip = context.active_strip;
-		if (has_preview) {
+		if (__call__ (_truth, null, has_preview)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_strip_mirror');
@@ -2619,14 +2775,14 @@ export var SEQUENCER_MT_strip =  __class__ ('SEQUENCER_MT_strip', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
-			if (strip && __eq__ (strip.py_metatype, 'TEXT')) {
+			if (__call__ (_truth, null, strip) && __eq__ (strip.py_metatype, 'TEXT')) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_strip_text');
 				}) ();
 			}
 		}
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'SEQUENCER_MT_strip_retiming');
@@ -2684,7 +2840,7 @@ export var SEQUENCER_MT_strip =  __class__ ('SEQUENCER_MT_strip', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'sequencer.delete', __kwargtrans__ ({text: 'Delete'}));
 		}) ();
-		if (strip && __eq__ (strip.py_metatype, 'SCENE')) {
+		if (__call__ (_truth, null, strip) && __eq__ (strip.py_metatype, 'SCENE')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.delete', __kwargtrans__ ({text: 'Delete Strip & Data'}));
@@ -2694,8 +2850,8 @@ export var SEQUENCER_MT_strip =  __class__ ('SEQUENCER_MT_strip', [Menu], {
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.scene_frame_range_update');
 			}) ();
 		}
-		if (has_sequencer) {
-			if (strip) {
+		if (__call__ (_truth, null, has_sequencer)) {
+			if (__call__ (_truth, null, strip)) {
 				var strip_type = strip.py_metatype;
 				(function () {
 					var __accu0__ = layout;
@@ -2773,7 +2929,7 @@ export var SEQUENCER_MT_strip =  __class__ ('SEQUENCER_MT_strip', [Menu], {
 				}
 			}
 		}
-		if (has_sequencer) {
+		if (__call__ (_truth, null, has_sequencer)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -3065,7 +3221,7 @@ export var SEQUENCER_MT_context_menu =  __class__ ('SEQUENCER_MT_context_menu', 
 			return __call__ (__accu0__.operator, __accu0__, 'sequencer.delete', __kwargtrans__ ({text: 'Delete'}));
 		}) ();
 		var strip = context.active_strip;
-		if (strip && __eq__ (strip.py_metatype, 'SCENE')) {
+		if (__call__ (_truth, null, strip) && __eq__ (strip.py_metatype, 'SCENE')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.delete', __kwargtrans__ ({text: 'Delete Strip & Data'}));
@@ -3111,7 +3267,7 @@ export var SEQUENCER_MT_context_menu =  __class__ ('SEQUENCER_MT_context_menu', 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (strip) {
+		if (__call__ (_truth, null, strip)) {
 			var strip_type = strip.py_metatype;
 			var __left0__ = __call__ (selected_strips_count, null, context);
 			var total = __left0__ [0];
@@ -3277,7 +3433,7 @@ export var SEQUENCER_MT_context_menu =  __class__ ('SEQUENCER_MT_context_menu', 
 		}
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
-		if (context.sequencer_scene.sequence_editor.selected_retiming_keys) {
+		if (__call__ (_truth, null, context.sequencer_scene.sequence_editor.selected_retiming_keys)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'sequencer.retiming_add_freeze_frame_slide');
@@ -3320,7 +3476,7 @@ export var SEQUENCER_MT_context_menu =  __class__ ('SEQUENCER_MT_context_menu', 
 		else {
 		}
 		var ed = context.sequencer_scene.sequence_editor;
-		if (ed.selected_retiming_keys) {
+		if (__call__ (_truth, null, ed.selected_retiming_keys)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.draw_retime, __accu0__, context);
@@ -3385,7 +3541,7 @@ export var SEQUENCER_MT_pivot_pie =  __class__ ('SEQUENCER_MT_pivot_pie', [Menu]
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu_pie, __accu0__);
 		}) ();
-		if (context.sequencer_scene) {
+		if (__call__ (_truth, null, context.sequencer_scene)) {
 			var sequencer_tool_settings = context.sequencer_scene.tool_settings.sequencer_tool_settings;
 			(function () {
 				var __accu0__ = pie;
@@ -3441,7 +3597,7 @@ export var SEQUENCER_MT_view_pie =  __class__ ('SEQUENCER_MT_view_pie', [Menu], 
 			var __accu0__ = pie;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (context.sequencer_scene.use_preview_range) {
+		if (__call__ (_truth, null, context.sequencer_scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = pie;
 				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
@@ -3566,7 +3722,7 @@ export var SEQUENCER_MT_modifier_add =  __class__ ('SEQUENCER_MT_modifier_add', 
 		}
 		var layout = self.layout;
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return ;
 		}
 		if (__eq__ (layout.operator_context, 'EXEC_REGION_WIN')) {
@@ -3878,7 +4034,7 @@ export var SEQUENCER_PT_cache_settings =  __class__ ('SEQUENCER_PT_cache_setting
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (ed) {
+		if (__call__ (_truth, null, ed)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, ed, 'use_prefetch');
@@ -3970,7 +4126,7 @@ export var SEQUENCER_PT_cache_view_settings =  __class__ ('SEQUENCER_PT_cache_vi
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Cache', align: true}));
 		}) ();
 		var show_developer_ui = context.preferences.view.show_developer_ui;
-		if (show_developer_ui) {
+		if (__call__ (_truth, null, show_developer_ui)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, cache_settings, 'show_cache_raw', __kwargtrans__ ({text: 'Raw'}));
@@ -3981,7 +4137,7 @@ export var SEQUENCER_PT_cache_view_settings =  __class__ ('SEQUENCER_PT_cache_vi
 			return __call__ (__accu0__.prop, __accu0__, cache_settings, 'show_cache_final_out', __kwargtrans__ ({text: 'Final'}));
 		}) ();
 		var show_cache_size = show_developer_ui && (ed.use_cache_raw || ed.use_cache_final);
-		if (show_cache_size) {
+		if (__call__ (_truth, null, show_cache_size)) {
 			var cache_raw_size = ed.cache_raw_size;
 			var cache_final_size = ed.cache_final_size;
 			var col = (function () {
@@ -4136,14 +4292,14 @@ export var SEQUENCER_PT_strip_proxy =  __class__ ('SEQUENCER_PT_strip_proxy', [S
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = cls;
 			return __call__ (__accu0__.has_sequencer, __accu0__, context);
-		}) ()) || !(context.sequencer_scene) || !(context.sequencer_scene.sequence_editor)) {
+		}) ())) || !(__call__ (_truth, null, context.sequencer_scene)) || !(__call__ (_truth, null, context.sequencer_scene.sequence_editor))) {
 			return false;
 		}
 		var strip = context.active_strip;
-		if (!(strip)) {
+		if (!(__call__ (_truth, null, strip))) {
 			return false;
 		}
 		return __in__ (strip.py_metatype, new set (['MOVIE', 'IMAGE']));
@@ -4189,7 +4345,7 @@ export var SEQUENCER_PT_strip_proxy =  __class__ ('SEQUENCER_PT_strip_proxy', [S
 		layout.use_property_decorate = false;
 		var ed = context.sequencer_scene.sequence_editor;
 		var strip = context.active_strip;
-		if (strip.proxy) {
+		if (__call__ (_truth, null, strip.proxy)) {
 			var proxy = strip.proxy;
 			if (__eq__ (ed.proxy_storage, 'PER_STRIP')) {
 				var col = (function () {
@@ -4200,7 +4356,7 @@ export var SEQUENCER_PT_strip_proxy =  __class__ ('SEQUENCER_PT_strip_proxy', [S
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, proxy, 'use_proxy_custom_directory', __kwargtrans__ ({text: 'Directory'}));
 				}) ();
-				if (proxy.use_proxy_custom_directory && !(proxy.use_proxy_custom_file)) {
+				if (__call__ (_truth, null, proxy.use_proxy_custom_directory) && !(__call__ (_truth, null, proxy.use_proxy_custom_file))) {
 					(function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.prop, __accu0__, proxy, 'directory');
@@ -4210,7 +4366,7 @@ export var SEQUENCER_PT_strip_proxy =  __class__ ('SEQUENCER_PT_strip_proxy', [S
 					var __accu0__ = col;
 					return __call__ (__accu0__.prop, __accu0__, proxy, 'use_proxy_custom_file', __kwargtrans__ ({text: 'File'}));
 				}) ();
-				if (proxy.use_proxy_custom_file) {
+				if (__call__ (_truth, null, proxy.use_proxy_custom_file)) {
 					(function () {
 						var __accu0__ = col;
 						return __call__ (__accu0__.prop, __accu0__, proxy, 'filepath');
@@ -4377,7 +4533,7 @@ export var SEQUENCER_PT_view =  __class__ ('SEQUENCER_PT_view', [SequencerButton
 				return __call__ (__accu0__.prop, __accu0__, st, 'show_overexposed');
 			}) ();
 		}
-		if (ed) {
+		if (__call__ (_truth, null, ed)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, ed, 'show_missing_media');
@@ -4438,7 +4594,7 @@ export var SEQUENCER_PT_frame_overlay =  __class__ ('SEQUENCER_PT_frame_overlay'
 		}
 		else {
 		}
-		if (!(context.sequencer_scene) || !(context.sequencer_scene.sequence_editor)) {
+		if (!(__call__ (_truth, null, context.sequencer_scene)) || !(__call__ (_truth, null, context.sequencer_scene.sequence_editor))) {
 			return false;
 		}
 		return (function () {
@@ -5038,6 +5194,14 @@ export {AnnotationDataPanel, AnnotationOnionSkin, DATA_PT_camera_display_composi
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_space_view_types': _space_view_types = value; break;
 		case 'selected_strips_count': selected_strips_count = value; break;
 		case 'SEQUENCER_PT_active_tool': SEQUENCER_PT_active_tool = value; break;

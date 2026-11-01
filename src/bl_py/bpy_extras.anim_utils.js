@@ -112,6 +112,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -215,7 +231,7 @@ export var action_get_channelbag_for_slot = function (action, slot) {
 	}
 	else {
 	}
-	if (!(action) || !(slot)) {
+	if (!(__call__ (_truth, null, action)) || !(__call__ (_truth, null, slot))) {
 		return null;
 	}
 	var __iterable0__ = action.layers;
@@ -230,7 +246,7 @@ export var action_get_channelbag_for_slot = function (action, slot) {
 				var __accu0__ = strip;
 				return __call__ (__accu0__.channelbag, __accu0__, slot);
 			}) ();
-			if (channelbag) {
+			if (__call__ (_truth, null, channelbag)) {
 				return channelbag;
 			}
 		}
@@ -252,7 +268,7 @@ export var action_get_first_suitable_slot = function (action, target_id_type) {
 	}
 	else {
 	}
-	if (!(action)) {
+	if (!(__call__ (_truth, null, action))) {
 		return null;
 	}
 	var slot_types = tuple (['UNSPECIFIED', target_id_type]);
@@ -328,10 +344,10 @@ export var animdata_get_channelbag_for_assigned_slot = function (anim_data) {
 	}
 	else {
 	}
-	if (!(anim_data)) {
+	if (!(__call__ (_truth, null, anim_data))) {
 		return null;
 	}
-	if (!(anim_data.action) || !(anim_data.action_slot)) {
+	if (!(__call__ (_truth, null, anim_data.action)) || !(__call__ (_truth, null, anim_data.action_slot))) {
 		return null;
 	}
 	return __call__ (action_get_channelbag_for_slot, null, anim_data.action, anim_data.action_slot);
@@ -353,7 +369,7 @@ export var bake_action = function (obj) {
 	}
 	else {
 	}
-	if (!(bake_options.do_pose || bake_options.do_object)) {
+	if (!(__call__ (_truth, null, bake_options.do_pose) || __call__ (_truth, null, bake_options.do_object))) {
 		return null;
 	}
 	var __left0__ = __call__ (bake_action_objects, null, [tuple ([obj, action])], __kwargtrans__ ({frames: frames, bake_options: bake_options}));
@@ -376,7 +392,7 @@ export var bake_action_objects = function (object_action_pairs) {
 	}
 	else {
 	}
-	if (!(bake_options.do_pose || bake_options.do_object)) {
+	if (!(__call__ (_truth, null, bake_options.do_pose) || __call__ (_truth, null, bake_options.do_object))) {
 		return [];
 	}
 	var py_iter = __call__ (bake_action_objects_iter, null, object_action_pairs, __kwargtrans__ ({bake_options: bake_options}));
@@ -536,7 +552,7 @@ export var bake_action_iter = function* (obj) {
 		}
 		else {
 		}
-		if (!(bake_options.do_custom_props)) {
+		if (!(__call__ (_truth, null, bake_options.do_custom_props))) {
 			return dict ({});
 		}
 		var clean_props = (function () {
@@ -580,7 +596,7 @@ export var bake_action_iter = function* (obj) {
 		else {
 		}
 		var idprop = __call__ (_module, null, 'idprop');
-		if (frame === null || !(custom_props)) {
+		if (frame === null || !(__call__ (_truth, null, custom_props))) {
 			return ;
 		}
 		var __iterable0__ = (function () {
@@ -592,14 +608,14 @@ export var bake_action_iter = function* (obj) {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var key = __left0__ [0];
 			var value = __left0__ [1];
-			if (__in__ (key, obj.bl_rna.properties) && !(__getitem__ (obj.bl_rna.properties, key).is_animatable)) {
+			if (__in__ (key, obj.bl_rna.properties) && !(__call__ (_truth, null, __getitem__ (obj.bl_rna.properties, key).is_animatable))) {
 				continue;
 			}
 			if (__call__ (isinstance, null, __getitem__ (obj, key), idprop.types.IDPropertyGroup)) {
 				continue;
 			}
 			__setitem__ (obj, key, value);
-			if (__in__ (key, obj.bl_rna.properties) && __getitem__ (obj.bl_rna.properties, key).is_runtime) {
+			if (__in__ (key, obj.bl_rna.properties) && __call__ (_truth, null, __getitem__ (obj.bl_rna.properties, key).is_runtime)) {
 				var rna_path = key;
 			}
 			else {
@@ -653,7 +669,7 @@ export var bake_action_iter = function* (obj) {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var py_name = __left0__ [0];
 			var pbone = __left0__ [1];
-			if (bake_options.do_visual_keying) {
+			if (__call__ (_truth, null, bake_options.do_visual_keying)) {
 				__setitem__ (matrix, py_name, (function () {
 					var __accu0__ = obj;
 					return __call__ (__accu0__.convert_space, __accu0__, __kwargtrans__ ({pose_bone: pbone, matrix: pbone.matrix, from_space: 'POSE', to_space: 'LOCAL'}));
@@ -703,8 +719,8 @@ export var bake_action_iter = function* (obj) {
 		}
 		return __call__ (clean_custom_properties, null, obj);
 	};
-	if (bake_options.do_parents_clear) {
-		if (bake_options.do_visual_keying) {
+	if (__call__ (_truth, null, bake_options.do_parents_clear)) {
+		if (__call__ (_truth, null, bake_options.do_visual_keying)) {
 			var obj_frame_info = function (obj) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -742,7 +758,7 @@ export var bake_action_iter = function* (obj) {
 				}
 				var parent = obj.parent;
 				var matrix = obj.matrix_basis;
-				if (parent) {
+				if (__call__ (_truth, null, parent)) {
 					return tuple ([__matmul__ (parent.matrix_world, matrix), __call__ (clean_custom_properties, null, obj)]);
 				}
 				else {
@@ -754,7 +770,7 @@ export var bake_action_iter = function* (obj) {
 			};
 		}
 	}
-	else if (bake_options.do_visual_keying) {
+	else if (__call__ (_truth, null, bake_options.do_visual_keying)) {
 		var obj_frame_info = function (obj) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -771,7 +787,7 @@ export var bake_action_iter = function* (obj) {
 			}
 			var parent = obj.parent;
 			var matrix = obj.matrix_world;
-			if (parent) {
+			if (__call__ (_truth, null, parent)) {
 				return tuple ([__matmul__ ((function () {
 					var __accu0__ = parent.matrix_world;
 					return __call__ (__accu0__.inverted_safe, __accu0__);
@@ -809,7 +825,7 @@ export var bake_action_iter = function* (obj) {
 	if (obj.pose === null) {
 		bake_options.do_pose = false;
 	}
-	if (!(bake_options.do_pose || bake_options.do_object)) {
+	if (!(__call__ (_truth, null, bake_options.do_pose) || __call__ (_truth, null, bake_options.do_object))) {
 		var __except0__ = __call__ (Exception, null, 'Pose and object baking is disabled, no action needed');
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -822,7 +838,7 @@ export var bake_action_iter = function* (obj) {
 		if (frame === null) {
 			break;
 		}
-		if (bake_options.do_pose) {
+		if (__call__ (_truth, null, bake_options.do_pose)) {
 			(function () {
 				var __accu0__ = pose_info;
 				return __call__ (__accu0__.append, __accu0__, __call__ (_joined, null, [frame], __call__ (pose_frame_info, null, obj)));
@@ -832,7 +848,7 @@ export var bake_action_iter = function* (obj) {
 				return __call__ (__accu0__.append, __accu0__, tuple ([frame, __call__ (armature_frame_info, null, obj)]));
 			}) ();
 		}
-		if (bake_options.do_object) {
+		if (__call__ (_truth, null, bake_options.do_object)) {
 			(function () {
 				var __accu0__ = obj_info;
 				return __call__ (__accu0__.append, __accu0__, __call__ (_joined, null, [frame], __call__ (obj_frame_info, null, obj)));
@@ -845,30 +861,30 @@ export var bake_action_iter = function* (obj) {
 	}) ();
 	var old_slot_name = __getslice__ (atd.last_slot_identifier, 2, null, 1);
 	var is_new_action = action === null;
-	if (is_new_action) {
+	if (__call__ (_truth, null, is_new_action)) {
 		var action = (function () {
 			var __accu0__ = bpy.data.actions;
 			return __call__ (__accu0__.py_new, __accu0__, 'Action');
 		}) ();
 	}
 	if (__ne__ (action, atd.action)) {
-		if (atd.use_tweak_mode) {
+		if (__call__ (_truth, null, atd.use_tweak_mode)) {
 			atd.use_tweak_mode = false;
 		}
 		atd.action = action;
 	}
-	if (!(atd.action_slot)) {
+	if (!(__call__ (_truth, null, atd.action_slot))) {
 		var slot = (function () {
 			var __accu0__ = action.slots;
 			return __call__ (__accu0__.py_new, __accu0__, obj.id_type, old_slot_name || obj.py_name);
 		}) ();
 		atd.action_slot = slot;
 	}
-	if (!(atd.use_tweak_mode)) {
+	if (!(__call__ (_truth, null, atd.use_tweak_mode))) {
 		atd.action_blend_type = 'REPLACE';
 	}
 	var channelbag = __call__ (action_ensure_channelbag_for_slot, null, atd.action, atd.action_slot);
-	if (bake_options.do_clean) {
+	if (__call__ (_truth, null, bake_options.do_clean)) {
 		var clean_orig_data = (function () {
 			var __accu0__ = [];
 			var __iterable0__ = channelbag.fcurves;
@@ -911,7 +927,7 @@ export var bake_action_iter = function* (obj) {
 		}
 		return dict (__accu0__);
 	}) ();
-	if (bake_options.do_pose) {
+	if (__call__ (_truth, null, bake_options.do_pose)) {
 		var __iterable0__ = armature_info;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -929,15 +945,15 @@ export var bake_action_iter = function* (obj) {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var py_name = __left0__ [0];
 			var pbone = __left0__ [1];
-			if (bake_options.only_selected && !(pbone.select)) {
+			if (__call__ (_truth, null, bake_options.only_selected) && !(__call__ (_truth, null, pbone.select))) {
 				continue;
 			}
-			if (bake_options.do_constraint_clear) {
+			if (__call__ (_truth, null, bake_options.do_constraint_clear)) {
 				var __iterable1__ = __getslice__ (pbone.constraints, null, null, 1);
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 					var con = __getitem__ (__iterable1__, __index1__);
-					if (!(con.is_override_data)) {
+					if (!(__call__ (_truth, null, con.is_override_data))) {
 						(function () {
 							var __accu0__ = pbone.constraints;
 							return __call__ (__accu0__.remove, __accu0__, con);
@@ -970,13 +986,13 @@ export var bake_action_iter = function* (obj) {
 				return __accu0__;
 			}) ();
 			var keyframes = __call__ (KeyframesCo, null);
-			if (bake_options.do_location) {
+			if (__call__ (_truth, null, bake_options.do_location)) {
 				(function () {
 					var __accu0__ = keyframes;
 					return __call__ (__accu0__.add_paths, __accu0__, path_location, 3);
 				}) ();
 			}
-			if (bake_options.do_rotation) {
+			if (__call__ (_truth, null, bake_options.do_rotation)) {
 				(function () {
 					var __accu0__ = keyframes;
 					return __call__ (__accu0__.add_paths, __accu0__, path_quaternion, 4);
@@ -990,13 +1006,13 @@ export var bake_action_iter = function* (obj) {
 					return __call__ (__accu0__.add_paths, __accu0__, path_euler, 3);
 				}) ();
 			}
-			if (bake_options.do_scale) {
+			if (__call__ (_truth, null, bake_options.do_scale)) {
 				(function () {
 					var __accu0__ = keyframes;
 					return __call__ (__accu0__.add_paths, __accu0__, path_scale, 3);
 				}) ();
 			}
-			if (bake_options.do_bbone && __gt__ (pbone.bone.bbone_segments, 1)) {
+			if (__call__ (_truth, null, bake_options.do_bbone) && __gt__ (pbone.bone.bbone_segments, 1)) {
 				var __iterable1__ = __call__ (zip, null, BBONE_PROPS, paths_bbprops);
 				__iterable1__ = __i__ (__iterable1__);
 				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
@@ -1023,13 +1039,13 @@ export var bake_action_iter = function* (obj) {
 					var __accu0__ = __getitem__ (matrix, py_name);
 					return __call__ (__accu0__.py_copy, __accu0__);
 				}) ();
-				if (bake_options.do_location) {
+				if (__call__ (_truth, null, bake_options.do_location)) {
 					(function () {
 						var __accu0__ = keyframes;
 						return __call__ (__accu0__.extend_co_values, __accu0__, path_location, 3, f, pbone.location);
 					}) ();
 				}
-				if (bake_options.do_rotation) {
+				if (__call__ (_truth, null, bake_options.do_rotation)) {
 					if (__eq__ (rotation_mode, 'QUATERNION')) {
 						if (quat_prev !== null) {
 							var quat = (function () {
@@ -1080,13 +1096,13 @@ export var bake_action_iter = function* (obj) {
 						}) ();
 					}
 				}
-				if (bake_options.do_scale) {
+				if (__call__ (_truth, null, bake_options.do_scale)) {
 					(function () {
 						var __accu0__ = keyframes;
 						return __call__ (__accu0__.extend_co_values, __accu0__, path_scale, 3, f, pbone.scale);
 					}) ();
 				}
-				if (bake_options.do_bbone && __gt__ (pbone.bone.bbone_segments, 1)) {
+				if (__call__ (_truth, null, bake_options.do_bbone) && __gt__ (pbone.bone.bbone_segments, 1)) {
 					var bbone_shape = __getitem__ (bbones, py_name);
 					var __iterable2__ = __call__ (py_enumerate, null, BBONE_PROPS);
 					__iterable2__ = __i__ (__iterable2__);
@@ -1109,11 +1125,11 @@ export var bake_action_iter = function* (obj) {
 						}
 					}
 				}
-				if (bake_options.do_custom_props) {
+				if (__call__ (_truth, null, bake_options.do_custom_props)) {
 					__call__ (bake_custom_properties, null, pbone, __kwargtrans__ ({custom_props: __getitem__ (custom_props, py_name), frame: f, group_name: py_name}));
 				}
 			}
-			if (is_new_action) {
+			if (__call__ (_truth, null, is_new_action)) {
 				(function () {
 					var __accu0__ = keyframes;
 					return __call__ (__accu0__.insert_keyframes_into_new_action, __accu0__, total_new_keys, channelbag, py_name);
@@ -1127,13 +1143,13 @@ export var bake_action_iter = function* (obj) {
 			}
 		}
 	}
-	if (bake_options.do_object) {
-		if (bake_options.do_constraint_clear) {
+	if (__call__ (_truth, null, bake_options.do_object)) {
+		if (__call__ (_truth, null, bake_options.do_constraint_clear)) {
 			var __iterable0__ = __getslice__ (obj.constraints, null, null, 1);
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var con = __getitem__ (__iterable0__, __index0__);
-				if (!(con.is_override_data)) {
+				if (!(__call__ (_truth, null, con.is_override_data))) {
 					(function () {
 						var __accu0__ = obj.constraints;
 						return __call__ (__accu0__.remove, __accu0__, con);
@@ -1149,13 +1165,13 @@ export var bake_action_iter = function* (obj) {
 		var path_euler = 'rotation_euler';
 		var path_scale = 'scale';
 		var keyframes = __call__ (KeyframesCo, null);
-		if (bake_options.do_location) {
+		if (__call__ (_truth, null, bake_options.do_location)) {
 			(function () {
 				var __accu0__ = keyframes;
 				return __call__ (__accu0__.add_paths, __accu0__, path_location, 3);
 			}) ();
 		}
-		if (bake_options.do_rotation) {
+		if (__call__ (_truth, null, bake_options.do_rotation)) {
 			(function () {
 				var __accu0__ = keyframes;
 				return __call__ (__accu0__.add_paths, __accu0__, path_quaternion, 4);
@@ -1169,7 +1185,7 @@ export var bake_action_iter = function* (obj) {
 				return __call__ (__accu0__.add_paths, __accu0__, path_euler, 3);
 			}) ();
 		}
-		if (bake_options.do_scale) {
+		if (__call__ (_truth, null, bake_options.do_scale)) {
 			(function () {
 				var __accu0__ = keyframes;
 				return __call__ (__accu0__.add_paths, __accu0__, path_scale, 3);
@@ -1186,13 +1202,13 @@ export var bake_action_iter = function* (obj) {
 			var custom_props = __left0__ [2];
 			var py_name = 'Action Bake';
 			obj.matrix_basis = matrix;
-			if (bake_options.do_location) {
+			if (__call__ (_truth, null, bake_options.do_location)) {
 				(function () {
 					var __accu0__ = keyframes;
 					return __call__ (__accu0__.extend_co_values, __accu0__, path_location, 3, f, obj.location);
 				}) ();
 			}
-			if (bake_options.do_rotation) {
+			if (__call__ (_truth, null, bake_options.do_rotation)) {
 				if (__eq__ (rotation_mode, 'QUATERNION')) {
 					if (quat_prev !== null) {
 						var quat = (function () {
@@ -1241,17 +1257,17 @@ export var bake_action_iter = function* (obj) {
 					}) ();
 				}
 			}
-			if (bake_options.do_scale) {
+			if (__call__ (_truth, null, bake_options.do_scale)) {
 				(function () {
 					var __accu0__ = keyframes;
 					return __call__ (__accu0__.extend_co_values, __accu0__, path_scale, 3, f, obj.scale);
 				}) ();
 			}
-			if (bake_options.do_custom_props) {
+			if (__call__ (_truth, null, bake_options.do_custom_props)) {
 				__call__ (bake_custom_properties, null, obj, __kwargtrans__ ({custom_props: custom_props, frame: f, group_name: py_name}));
 			}
 		}
-		if (is_new_action) {
+		if (__call__ (_truth, null, is_new_action)) {
 			(function () {
 				var __accu0__ = keyframes;
 				return __call__ (__accu0__.insert_keyframes_into_new_action, __accu0__, total_new_keys, channelbag, py_name);
@@ -1263,11 +1279,11 @@ export var bake_action_iter = function* (obj) {
 				return __call__ (__accu0__.insert_keyframes_into_existing_action, __accu0__, lookup_fcurves, total_new_keys, channelbag);
 			}) ();
 		}
-		if (bake_options.do_parents_clear) {
+		if (__call__ (_truth, null, bake_options.do_parents_clear)) {
 			obj.parent = null;
 		}
 	}
-	if (bake_options.do_clean) {
+	if (__call__ (_truth, null, bake_options.do_clean)) {
 		var __iterable0__ = channelbag.fcurves;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1613,19 +1629,19 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 		var prefs = context.preferences;
 		var ts = context.scene.tool_settings;
 		var options = __call__ (set, null);
-		if (prefs.edit.use_visual_keying) {
+		if (__call__ (_truth, null, prefs.edit.use_visual_keying)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_VISUAL');
 			}) ();
 		}
-		if (prefs.edit.use_keyframe_insert_needed) {
+		if (__call__ (_truth, null, prefs.edit.use_keyframe_insert_needed)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_NEEDED');
 			}) ();
 		}
-		if (ts.use_keyframe_cycle_aware) {
+		if (__call__ (_truth, null, ts.use_keyframe_cycle_aware)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_CYCLE_AWARE');
@@ -1651,19 +1667,19 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 		}
 		var ts = context.scene.tool_settings;
 		var options = __call__ (set, null);
-		if (keyingset.use_insertkey_visual) {
+		if (__call__ (_truth, null, keyingset.use_insertkey_visual)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_VISUAL');
 			}) ();
 		}
-		if (keyingset.use_insertkey_needed) {
+		if (__call__ (_truth, null, keyingset.use_insertkey_needed)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_NEEDED');
 			}) ();
 		}
-		if (ts.use_keyframe_cycle_aware) {
+		if (__call__ (_truth, null, ts.use_keyframe_cycle_aware)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_CYCLE_AWARE');
@@ -1687,11 +1703,11 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 		else {
 		}
 		var ts = context.scene.tool_settings;
-		if (!(cls._force_autokey || ts.use_keyframe_insert_auto)) {
+		if (!(__call__ (_truth, null, cls._force_autokey) || __call__ (_truth, null, ts.use_keyframe_insert_auto))) {
 			return null;
 		}
 		var active_keyingset = context.scene.keying_sets_all.active;
-		if (ts.use_keyframe_insert_keyingset && active_keyingset) {
+		if (__call__ (_truth, null, ts.use_keyframe_insert_keyingset) && __call__ (_truth, null, active_keyingset)) {
 			var __except0__ = __call__ (RuntimeError, null, 'This function should not be called when there is an active keying set');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1701,7 +1717,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 			var __accu0__ = cls;
 			return __call__ (__accu0__.keying_options, __accu0__, context);
 		}) ();
-		if (prefs.edit.use_keyframe_insert_available) {
+		if (__call__ (_truth, null, prefs.edit.use_keyframe_insert_available)) {
 			(function () {
 				var __accu0__ = options;
 				return __call__ (__accu0__.add, __accu0__, 'INSERTKEY_AVAILABLE');
@@ -1729,7 +1745,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 		}
 		else {
 		}
-		if (bone.lock_rotations_4d) {
+		if (__call__ (_truth, null, bone.lock_rotations_4d)) {
 			return __call__ (_joined, null, [bone.lock_rotation_w], bone.lock_rotation);
 		}
 		return __mul__ ([__call__ (all, null, bone.lock_rotation)], 4);
@@ -1769,7 +1785,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var index = __left0__ [0];
 			var lock = __left0__ [1];
-			if (lock) {
+			if (__call__ (_truth, null, lock)) {
 				continue;
 			}
 			(function () {
@@ -1795,7 +1811,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 		else {
 		}
 		var is_bone = __call__ (isinstance, null, target, PoseBone);
-		if (is_bone) {
+		if (__call__ (_truth, null, is_bone)) {
 			var group = target.py_name;
 		}
 		else {
@@ -1821,10 +1837,10 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 				return __call__ (__accu0__.keyframe_channels, __accu0__, target, options, data_path, group, locks);
 			}) ();
 		};
-		if (cls._use_loc && !(is_bone && target.bone.use_connect)) {
+		if (__call__ (_truth, null, cls._use_loc) && !(__call__ (_truth, null, is_bone) && __call__ (_truth, null, target.bone.use_connect))) {
 			__call__ (keyframe, null, 'location', target.lock_location);
 		}
-		if (cls._use_rot) {
+		if (__call__ (_truth, null, cls._use_rot)) {
 			if (__eq__ (target.rotation_mode, 'QUATERNION')) {
 				__call__ (keyframe, null, 'rotation_quaternion', (function () {
 					var __accu0__ = cls;
@@ -1841,7 +1857,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 				__call__ (keyframe, null, 'rotation_euler', target.lock_rotation);
 			}
 		}
-		if (cls._use_scale) {
+		if (__call__ (_truth, null, cls._use_scale)) {
 			__call__ (keyframe, null, 'scale', target.lock_scale);
 		}
 	});},
@@ -1929,10 +1945,10 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 				return __call__ (__accu0__.keyframe_channels, __accu0__, target, options, data_path, group, locks);
 			}) ();
 		};
-		if (cls._use_loc && !(is_bone && target.bone.use_connect)) {
+		if (__call__ (_truth, null, cls._use_loc) && !(__call__ (_truth, null, is_bone) && __call__ (_truth, null, target.bone.use_connect))) {
 			__call__ (keyframe, null, 'location', target.lock_location);
 		}
-		if (cls._use_rot) {
+		if (__call__ (_truth, null, cls._use_rot)) {
 			if (__eq__ (target.rotation_mode, 'QUATERNION')) {
 				__call__ (keyframe, null, 'rotation_quaternion', (function () {
 					var __accu0__ = cls;
@@ -1949,7 +1965,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 				__call__ (keyframe, null, 'rotation_euler', target.lock_rotation);
 			}
 		}
-		if (cls._use_scale) {
+		if (__call__ (_truth, null, cls._use_scale)) {
 			__call__ (keyframe, null, 'scale', target.lock_scale);
 		}
 	});},
@@ -1969,18 +1985,18 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 		else {
 		}
 		var ts = context.scene.tool_settings;
-		if (!(ts.use_keyframe_insert_keyingset)) {
+		if (!(__call__ (_truth, null, ts.use_keyframe_insert_keyingset))) {
 			return null;
 		}
 		var active_keyingset = context.scene.keying_sets_all.active;
-		if (!(active_keyingset)) {
+		if (!(__call__ (_truth, null, active_keyingset))) {
 			return null;
 		}
 		(function () {
 			var __accu0__ = active_keyingset;
 			return __call__ (__accu0__.refresh, __accu0__);
 		}) ();
-		if (active_keyingset.is_path_absolute) {
+		if (__call__ (_truth, null, active_keyingset.is_path_absolute)) {
 			return null;
 		}
 		return active_keyingset;
@@ -2005,7 +2021,7 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 			var __accu0__ = cls;
 			return __call__ (__accu0__.active_keyingset, __accu0__, context);
 		}) ();
-		if (keyingset) {
+		if (__call__ (_truth, null, keyingset)) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.key_transformation_via_keyingset, __accu0__, context, target, keyingset);
@@ -2036,6 +2052,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;

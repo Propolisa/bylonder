@@ -10,6 +10,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_topbar';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 	__module__: __name__,
 	bl_space_type: 'TOPBAR',
@@ -68,7 +224,7 @@ export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({py_metatype: 'LINE'}));
 		}) ();
-		if (!(screen.show_fullscreen)) {
+		if (!(__call__ (_truth, null, screen.show_fullscreen))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID_tabs, __accu0__, window, 'workspace', __kwargtrans__ ({py_new: 'workspace.add', menu: 'TOPBAR_MT_workspace_menu'}));
@@ -100,7 +256,7 @@ export var TOPBAR_HT_upper_bar =  __class__ ('TOPBAR_HT_upper_bar', [Header], {
 		var window = context.window;
 		var screen = context.screen;
 		var scene = window.scene;
-		if (!(screen.show_statusbar)) {
+		if (!(__call__ (_truth, null, screen.show_statusbar))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_reports_banner, __accu0__);
@@ -231,7 +387,7 @@ export var TOPBAR_MT_editor_menus =  __class__ ('TOPBAR_MT_editor_menus', [Menu]
 		else {
 		}
 		var layout = self.layout;
-		if (__call__ (getattr, null, context.area, 'show_menus', false)) {
+		if (__call__ (_truth, null, __call__ (getattr, null, context.area, 'show_menus', false))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_blender', __kwargtrans__ ({text: '', icon: 'BLENDER'}));
@@ -387,7 +543,7 @@ export var TOPBAR_MT_file =  __class__ ('TOPBAR_MT_file', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		layout.operator_context = (context.blend_data.is_saved ? 'EXEC_AREA' : 'INVOKE_AREA');
+		layout.operator_context = (__call__ (_truth, null, context.blend_data.is_saved) ? 'EXEC_AREA' : 'INVOKE_AREA');
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'wm.save_mainfile', __kwargtrans__ ({text: 'Save', icon: 'FILE_TICK'}));
@@ -515,20 +671,20 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 			__iterable1__ = __i__ (__iterable1__);
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var d = __getitem__ (__iterable1__, __index1__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = d;
 					return __call__ (__accu0__.startswith, __accu0__, tuple (['__', '.']));
-				}) ()) {
+				}) ())) {
 					continue;
 				}
 				var template = (function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.join, __accu0__, path, d);
 				}) ();
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = os.path;
 					return __call__ (__accu0__.isdir, __accu0__, template);
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu0__ = app_templates;
 						return __call__ (__accu0__.add, __accu0__, d);
@@ -563,20 +719,20 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 			return __call__ (__accu0__.app_template_paths, __accu0__);
 		}) ();
 		var splash_limit = 6;
-		if (use_splash) {
+		if (__call__ (_truth, null, use_splash)) {
 			var show_more = __gt__ (__call__ (len, null, paths), __sub__ (splash_limit, 1));
-			if (show_more) {
+			if (__call__ (_truth, null, show_more)) {
 				var paths = __getslice__ (paths, null, __sub__ (splash_limit, 2), 1);
 			}
 		}
-		else if (use_more) {
+		else if (__call__ (_truth, null, use_more)) {
 			var paths = __getslice__ (paths, __sub__ (splash_limit, 2), null, 1);
 			var show_more = false;
 		}
 		else {
 			var show_more = false;
 		}
-		if (!(use_more)) {
+		if (!(__call__ (_truth, null, use_more))) {
 			var props = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.read_homefile', __kwargtrans__ ({text: 'General', icon: 'FILE_NEW'}));
@@ -613,7 +769,7 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 			props.app_template = d;
 		}
 		layout.operator_context = 'EXEC_DEFAULT';
-		if (show_more) {
+		if (__call__ (_truth, null, show_more)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'TOPBAR_MT_templates_more', __kwargtrans__ ({text: 'More...'}));
@@ -700,7 +856,7 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 		else {
 			var app_template = null;
 		}
-		if (app_template) {
+		if (__call__ (_truth, null, app_template)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __call__ (iface_, null, (function () {
@@ -713,7 +869,7 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'wm.save_homefile');
 		}) ();
-		if (app_template) {
+		if (__call__ (_truth, null, app_template)) {
 			var display_name = (function () {
 				var __accu0__ = bpy.path;
 				return __call__ (__accu0__.display_name, __accu0__, __call__ (iface_, null, app_template));
@@ -839,43 +995,43 @@ export var TOPBAR_MT_file_import =  __class__ ('TOPBAR_MT_file_import', [Menu], 
 		}
 		else {
 		}
-		if (bpy.app.build_options.alembic) {
+		if (__call__ (_truth, null, bpy.app.build_options.alembic)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.alembic_import', __kwargtrans__ ({text: 'Alembic (.abc)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.usd) {
+		if (__call__ (_truth, null, bpy.app.build_options.usd)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.usd_import', __kwargtrans__ ({text: 'Universal Scene Description (.usd*)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_gpencil) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_gpencil)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.grease_pencil_import_svg', __kwargtrans__ ({text: 'SVG as Grease Pencil'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_wavefront_obj) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_wavefront_obj)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.obj_import', __kwargtrans__ ({text: 'Wavefront (.obj)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_ply) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_ply)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.ply_import', __kwargtrans__ ({text: 'Stanford PLY (.ply)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_stl) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_stl)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.stl_import', __kwargtrans__ ({text: 'STL (.stl)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_fbx) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_fbx)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.fbx_import', __kwargtrans__ ({text: 'FBX (.fbx)'}));
@@ -903,45 +1059,45 @@ export var TOPBAR_MT_file_export =  __class__ ('TOPBAR_MT_file_export', [Menu], 
 		}
 		else {
 		}
-		if (bpy.app.build_options.alembic) {
+		if (__call__ (_truth, null, bpy.app.build_options.alembic)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.alembic_export', __kwargtrans__ ({text: 'Alembic (.abc)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.usd) {
+		if (__call__ (_truth, null, bpy.app.build_options.usd)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.usd_export', __kwargtrans__ ({text: 'Universal Scene Description (.usd*)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_gpencil) {
-			if (bpy.app.build_options.pugixml) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_gpencil)) {
+			if (__call__ (_truth, null, bpy.app.build_options.pugixml)) {
 				(function () {
 					var __accu0__ = self.layout;
 					return __call__ (__accu0__.operator, __accu0__, 'wm.grease_pencil_export_svg', __kwargtrans__ ({text: 'Grease Pencil as SVG'}));
 				}) ();
 			}
-			if (bpy.app.build_options.haru) {
+			if (__call__ (_truth, null, bpy.app.build_options.haru)) {
 				(function () {
 					var __accu0__ = self.layout;
 					return __call__ (__accu0__.operator, __accu0__, 'wm.grease_pencil_export_pdf', __kwargtrans__ ({text: 'Grease Pencil as PDF'}));
 				}) ();
 			}
 		}
-		if (bpy.app.build_options.io_wavefront_obj) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_wavefront_obj)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.obj_export', __kwargtrans__ ({text: 'Wavefront (.obj)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_ply) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_ply)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.ply_export', __kwargtrans__ ({text: 'Stanford PLY (.ply)'}));
 			}) ();
 		}
-		if (bpy.app.build_options.io_stl) {
+		if (__call__ (_truth, null, bpy.app.build_options.io_stl)) {
 			(function () {
 				var __accu0__ = self.layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.stl_export', __kwargtrans__ ({text: 'STL (.stl)'}));
@@ -968,7 +1124,7 @@ export var TOPBAR_MT_file_external_data =  __class__ ('TOPBAR_MT_file_external_d
 		else {
 		}
 		var layout = self.layout;
-		var icon = (bpy.data.use_autopack ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT');
+		var icon = (__call__ (_truth, null, bpy.data.use_autopack) ? 'CHECKBOX_HLT' : 'CHECKBOX_DEHLT');
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'file.autopack_toggle', __kwargtrans__ ({icon: icon}));
@@ -981,7 +1137,7 @@ export var TOPBAR_MT_file_external_data =  __class__ ('TOPBAR_MT_file_external_d
 			var __accu0__ = pack_all;
 			return __call__ (__accu0__.operator, __accu0__, 'file.pack_all');
 		}) ();
-		pack_all.active = !(bpy.data.use_autopack);
+		pack_all.active = !(__call__ (_truth, null, bpy.data.use_autopack));
 		var unpack_all = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
@@ -990,7 +1146,7 @@ export var TOPBAR_MT_file_external_data =  __class__ ('TOPBAR_MT_file_external_d
 			var __accu0__ = unpack_all;
 			return __call__ (__accu0__.operator, __accu0__, 'file.unpack_all');
 		}) ();
-		unpack_all.active = !(bpy.data.use_autopack);
+		unpack_all.active = !(__call__ (_truth, null, bpy.data.use_autopack));
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
@@ -1108,7 +1264,7 @@ export var TOPBAR_MT_render =  __class__ ('TOPBAR_MT_render', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (can_render_seq && __ne__ (seq_scene, scene)) {
+		if (__call__ (_truth, null, can_render_seq) && __ne__ (seq_scene, scene)) {
 			var props = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'render.render', __kwargtrans__ ({text: 'Render Sequencer Image', icon: 'RENDER_STILL'}));
@@ -1209,7 +1365,7 @@ export var TOPBAR_MT_edit =  __class__ ('TOPBAR_MT_edit', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'wm.search_menu', __kwargtrans__ ({text: 'Menu Search...', icon: 'VIEWZOOM'}));
 		}) ();
-		if (show_developer) {
+		if (__call__ (_truth, null, show_developer)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.search_operator', __kwargtrans__ ({text: 'Operator Search...'}));
@@ -1337,7 +1493,7 @@ export var TOPBAR_MT_window =  __class__ ('TOPBAR_MT_window', [Menu], {
 				return __call__ (__accu0__.operator, __accu0__, 'wm.console_toggle', __kwargtrans__ ({icon: 'CONSOLE'}));
 			}) ();
 		}
-		if (context.scene.render.use_multiview) {
+		if (__call__ (_truth, null, context.scene.render.use_multiview)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1393,7 +1549,7 @@ export var TOPBAR_MT_help =  __class__ ('TOPBAR_MT_help', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (show_developer) {
+		if (__call__ (_truth, null, show_developer)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.url_open', __kwargtrans__ ({text: 'Developer Documentation', icon: 'URL'}));
@@ -1643,7 +1799,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Sequence Strip Name'}));
 			}) ();
 			var item = context.active_strip;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				var row = __call__ (row_with_icon, null, layout, 'SEQUENCE');
 				(function () {
 					var __accu0__ = row;
@@ -1658,7 +1814,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Node Label'}));
 			}) ();
 			var item = context.active_node;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				var row = __call__ (row_with_icon, null, layout, 'NODE');
 				(function () {
 					var __accu0__ = row;
@@ -1678,7 +1834,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 					var strip = __getitem__ (__iterable0__, __index0__);
-					if (strip.active) {
+					if (__call__ (_truth, null, strip.active)) {
 						(function () {
 							var __accu1__ = __accu0__;
 							return __call__ (__accu1__.append, __accu1__, strip);
@@ -1687,7 +1843,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				}
 				return __accu0__;
 			}) ()), null);
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				var row = __call__ (row_with_icon, null, layout, 'NLA');
 				(function () {
 					var __accu0__ = row;
@@ -1696,13 +1852,13 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				var found = true;
 			}
 		}
-		else if (__eq__ (mode, 'POSE') || __eq__ (mode, 'WEIGHT_PAINT') && context.pose_object) {
+		else if (__eq__ (mode, 'POSE') || __eq__ (mode, 'WEIGHT_PAINT') && __call__ (_truth, null, context.pose_object)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Bone Name'}));
 			}) ();
 			var item = context.active_pose_bone;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				var row = __call__ (row_with_icon, null, layout, 'BONE_DATA');
 				(function () {
 					var __accu0__ = row;
@@ -1717,7 +1873,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Bone Name'}));
 			}) ();
 			var item = context.active_bone;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				var row = __call__ (row_with_icon, null, layout, 'BONE_DATA');
 				(function () {
 					var __accu0__ = row;
@@ -1732,7 +1888,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Object Name'}));
 			}) ();
 			var item = context.object;
-			if (item) {
+			if (__call__ (_truth, null, item)) {
 				var row = __call__ (row_with_icon, null, layout, 'OBJECT_DATA');
 				(function () {
 					var __accu0__ = row;
@@ -1741,7 +1897,7 @@ export var TOPBAR_PT_name =  __class__ ('TOPBAR_PT_name', [Panel], {
 				var found = true;
 			}
 		}
-		if (!(found)) {
+		if (!(__call__ (_truth, null, found))) {
 			var row = __call__ (row_with_icon, null, layout, 'ERROR');
 			(function () {
 				var __accu0__ = row;
@@ -1804,16 +1960,16 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		}
 		else {
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = TOPBAR_PT_name_marker;
 			return __call__ (__accu0__.is_using_pose_markers, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			var markers = context.active_action.pose_markers;
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = TOPBAR_PT_name_marker;
 			return __call__ (__accu0__.is_using_sequencer, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			var markers = context.sequencer_scene.timeline_markers;
 		}
 		else {
@@ -1823,7 +1979,7 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var marker = __getitem__ (__iterable0__, __index0__);
-			if (marker.select) {
+			if (__call__ (_truth, null, marker.select)) {
 				return marker;
 			}
 		}
@@ -1876,7 +2032,7 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Marker Name'}));
 		}) ();
 		var scene = context.scene;
-		if (scene.tool_settings.lock_markers) {
+		if (__call__ (_truth, null, scene.tool_settings.lock_markers)) {
 			var row = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.row_with_icon, __accu0__, layout, 'ERROR');
@@ -1907,10 +2063,10 @@ export var TOPBAR_PT_name_marker =  __class__ ('TOPBAR_PT_name_marker', [Panel],
 		if (marker.camera !== null) {
 			var icon = 'CAMERA_DATA';
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.is_using_pose_markers, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			var icon = 'ARMATURE_DATA';
 		}
 		var row = (function () {
@@ -1992,6 +2148,14 @@ export {Header, Menu, Panel, _globals, _import, _lazy, _member, _module, i18n_co
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'TOPBAR_HT_upper_bar': TOPBAR_HT_upper_bar = value; break;
 		case 'TOPBAR_PT_tool_settings_extra': TOPBAR_PT_tool_settings_extra = value; break;
 		case 'TOPBAR_PT_tool_fallback': TOPBAR_PT_tool_fallback = value; break;

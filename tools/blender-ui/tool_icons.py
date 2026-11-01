@@ -13,7 +13,7 @@ from collections import defaultdict
 import transpile
 
 OUT = os.path.join(transpile.REPO, 'public', 'icons', 'blender', 'tools')
-MODES = ['OBJECT', 'EDIT_MESH', 'PARTICLE', 'SCULPT']
+MODES = ['OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_ARMATURE', 'POSE', 'PARTICLE', 'SCULPT']
 # The icons the tools of MODES name (a None context gives every tool, as the tools' polls take it), and Blender's
 # fallback for a missing one.
 ICONS = '''

@@ -10,6 +10,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.anim';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', [Operator], {
 	__module__: __name__,
 	bl_idname: 'anim.keying_set_export',
@@ -30,13 +186,13 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 		else {
 		}
 		var escape_identifier = __call__ (_member, null, 'bpy.utils', 'escape_identifier');
-		if (!(self.filepath)) {
+		if (!(__call__ (_truth, null, self.filepath))) {
 			var __except0__ = __call__ (Exception, null, 'Filepath not set');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 		var f = __call__ (open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf8'}));
-		if (!(f)) {
+		if (!(__call__ (_truth, null, f))) {
 			var __except0__ = __call__ (Exception, null, 'Could not open file');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -109,10 +265,10 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 			if (__in__ (ksp.id, id_to_paths_cache)) {
 				continue;
 			}
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = ksp.id.bl_rna.identifier;
 				return __call__ (__accu0__.startswith, __accu0__, 'ShaderNodeTree');
-			}) ()) {
+			}) ())) {
 				var id_bpy_path = 'bpy.data.nodes["{:s}"]';
 				var found = false;
 				var __iterable1__ = bpy.data.materials;
@@ -128,7 +284,7 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 						break;
 					}
 				}
-				if (!(found)) {
+				if (!(__call__ (_truth, null, found))) {
 					var __iterable1__ = bpy.data.lights;
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
@@ -143,7 +299,7 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 						}
 					}
 				}
-				if (!(found)) {
+				if (!(__call__ (_truth, null, found))) {
 					(function () {
 						var __accu0__ = self;
 						return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -153,10 +309,10 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 					}) ();
 				}
 			}
-			else if ((function () {
+			else if (__call__ (_truth, null, (function () {
 				var __accu0__ = ksp.id.bl_rna.identifier;
 				return __call__ (__accu0__.startswith, __accu0__, 'CompositorNodeTree');
-			}) ()) {
+			}) ())) {
 				var __break1__ = false;
 				var __iterable1__ = bpy.data.scenes;
 				__iterable1__ = __i__ (__iterable1__);
@@ -238,7 +394,7 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 				var __accu0__ = f;
 				return __call__ (__accu0__.write, __accu0__, 'ksp = ks.paths.add(');
 			}) ();
-			if (ksp.id) {
+			if (__call__ (_truth, null, ksp.id)) {
 				var id_bpy_path = __getitem__ (__getitem__ (id_to_paths_cache, ksp.id), 0);
 			}
 			else {
@@ -251,7 +407,7 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 					return __call__ (__accu1__.format, __accu1__, id_bpy_path, ksp.data_path);
 				}) ());
 			}) ();
-			if (ksp.use_entire_array) {
+			if (__call__ (_truth, null, ksp.use_entire_array)) {
 				(function () {
 					var __accu0__ = f;
 					return __call__ (__accu0__.write, __accu0__, ', index=-1');
@@ -349,7 +505,7 @@ export var NLA_OT_bake =  __class__ ('NLA_OT_bake', [Operator], {
 			var __accu0__ = anim_utils;
 			return __call__ (__accu0__.BakeOptions, __accu0__, __kwargtrans__ ({only_selected: self.only_selected, do_pose: __in__ ('POSE', self.bake_types), do_object: __in__ ('OBJECT', self.bake_types), do_visual_keying: self.visual_keying, do_constraint_clear: self.clear_constraints, do_parents_clear: self.clear_parents, do_clean: self.clean_curves, do_location: __in__ ('LOCATION', self.channel_types), do_rotation: __in__ ('ROTATION', self.channel_types), do_scale: __in__ ('SCALE', self.channel_types), do_bbone: __in__ ('BBONE', self.channel_types), do_custom_props: __in__ ('PROPS', self.channel_types)}));
 		}) ();
-		if (bake_options.do_pose && self.only_selected) {
+		if (__call__ (_truth, null, bake_options.do_pose) && __call__ (_truth, null, self.only_selected)) {
 			var pose_bones = context.selected_pose_bones || [];
 			var armatures = (function () {
 				var __accu0__ = [];
@@ -368,9 +524,9 @@ export var NLA_OT_bake =  __class__ ('NLA_OT_bake', [Operator], {
 		}
 		else {
 			var objects = context.selected_editable_objects;
-			if (bake_options.do_pose && !(bake_options.do_object)) {
+			if (__call__ (_truth, null, bake_options.do_pose) && !(__call__ (_truth, null, bake_options.do_object))) {
 				var pose_object = __call__ (getattr, null, context, 'pose_object', null);
-				if (pose_object && !__in__ (pose_object, objects)) {
+				if (__call__ (_truth, null, pose_object) && !__in__ (pose_object, objects)) {
 					(function () {
 						var __accu0__ = objects;
 						return __call__ (__accu0__.append, __accu0__, pose_object);
@@ -393,7 +549,7 @@ export var NLA_OT_bake =  __class__ ('NLA_OT_bake', [Operator], {
 				}) ();
 			}
 		}
-		var object_action_pairs = (self.use_current_action ? (function () {
+		var object_action_pairs = (__call__ (_truth, null, self.use_current_action) ? (function () {
 			var __accu0__ = [];
 			var __iterable0__ = objects;
 			__iterable0__ = __i__ (__iterable0__);
@@ -448,7 +604,7 @@ export var NLA_OT_bake =  __class__ ('NLA_OT_bake', [Operator], {
 		else {
 		}
 		var scene = context.scene;
-		if (scene.use_preview_range) {
+		if (__call__ (_truth, null, scene.use_preview_range)) {
 			self.frame_start = scene.frame_preview_start;
 			self.frame_end = scene.frame_preview_end;
 		}
@@ -513,7 +669,7 @@ export var ClearUselessActions =  __class__ ('ClearUselessActions', [Operator], 
 				__iterable2__ = __i__ (__iterable2__);
 				for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
 					var channelbag = __getitem__ (__iterable2__, __index2__);
-					if (channelbag.fcurves) {
+					if (__call__ (_truth, null, channelbag.fcurves)) {
 						return true;
 					}
 				}
@@ -541,11 +697,11 @@ export var ClearUselessActions =  __class__ ('ClearUselessActions', [Operator], 
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var action = __getitem__ (__iterable0__, __index0__);
-			if (self.only_unused === false || action.use_fake_user && __eq__ (action.users, 1)) {
-				if (!((function () {
+			if (self.only_unused === false || __call__ (_truth, null, action.use_fake_user) && __eq__ (action.users, 1)) {
+				if (!(__call__ (_truth, null, (function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.has_fcurves, __accu0__, action);
-				}) ())) {
+				}) ()))) {
 					(function () {
 						var __accu0__ = action;
 						return __call__ (__accu0__.user_clear, __accu0__);
@@ -649,14 +805,14 @@ export var ARMATURE_OT_copy_bone_color_to_selected =  __class__ ('ARMATURE_OT_co
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!(bone_source)) {
+		if (!(__call__ (_truth, null, bone_source))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No active bone to copy from');
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!(bones_dest)) {
+		if (!(__call__ (_truth, null, bones_dest))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No selected bones to copy to');
@@ -678,14 +834,14 @@ export var ARMATURE_OT_copy_bone_color_to_selected =  __class__ ('ARMATURE_OT_co
 				var color = __call__ (getattr, null, bone_source.color.custom, custom_field);
 				__call__ (setattr, null, bone_dest.color.custom, custom_field, color);
 			}
-			if (__eq__ (self.bone_type, 'EDIT') && pose_bones_to_check) {
+			if (__eq__ (self.bone_type, 'EDIT') && __call__ (_truth, null, pose_bones_to_check)) {
 				var pose_bone = __getitem__ (pose_bones_to_check, index);
 				if (__ne__ (pose_bone.color.palette, 'DEFAULT')) {
 					var num_pose_color_overrides = __call__ (__iadd__, null, num_pose_color_overrides, 1);
 				}
 			}
 		}
-		if (num_pose_color_overrides) {
+		if (__call__ (_truth, null, num_pose_color_overrides)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
@@ -713,11 +869,11 @@ export var _armature_from_context = function (context) {
 	else {
 	}
 	var pin_armature = __call__ (getattr, null, context, 'armature', null);
-	if (pin_armature) {
+	if (__call__ (_truth, null, pin_armature)) {
 		return pin_armature;
 	}
 	var ob = context.object;
-	if (ob && __eq__ (ob.py_metatype, 'ARMATURE')) {
+	if (__call__ (_truth, null, ob) && __eq__ (ob.py_metatype, 'ARMATURE')) {
 		return ob.data;
 	}
 	return null;
@@ -790,10 +946,10 @@ export var ARMATURE_OT_collection_unsolo_all =  __class__ ('ARMATURE_OT_collecti
 		else {
 		}
 		var armature = __call__ (_armature_from_context, null, context);
-		if (!(armature)) {
+		if (!(__call__ (_truth, null, armature))) {
 			return false;
 		}
-		if (!(armature.collections.is_solo_active)) {
+		if (!(__call__ (_truth, null, armature.collections.is_solo_active))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, "None of the bone collections is marked 'solo'");
@@ -848,7 +1004,7 @@ export var ARMATURE_OT_collection_remove_unused =  __class__ ('ARMATURE_OT_colle
 		else {
 		}
 		var armature = __call__ (_armature_from_context, null, context);
-		if (!(armature)) {
+		if (!(__call__ (_truth, null, armature))) {
 			return false;
 		}
 		return __gt__ (__call__ (len, null, armature.collections), 0);
@@ -890,7 +1046,7 @@ export var ARMATURE_OT_collection_remove_unused =  __class__ ('ARMATURE_OT_colle
 			}
 			return set (__accu0__);
 		}) ();
-		if (!(bcolls_to_remove)) {
+		if (!(__call__ (_truth, null, bcolls_to_remove))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'All bone collections are in use');
@@ -947,7 +1103,7 @@ export var ARMATURE_OT_collection_remove_unused =  __class__ ('ARMATURE_OT_colle
 				return __call__ (__accu0__.visit, __accu0__, root, bcolls_with_bones, bcolls_to_remove);
 			}) ();
 		}
-		if (!(bcolls_to_remove)) {
+		if (!(__call__ (_truth, null, bcolls_to_remove))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'All bone collections are in use');
@@ -988,7 +1144,7 @@ export var ARMATURE_OT_collection_remove_unused =  __class__ ('ARMATURE_OT_colle
 			}) ();
 			var has_bones = has_bones || child_has_bones;
 		}
-		if (!(has_bones)) {
+		if (!(__call__ (_truth, null, has_bones))) {
 			(function () {
 				var __accu0__ = bcolls_to_remove;
 				return __call__ (__accu0__.append, __accu0__, bcoll);
@@ -1054,17 +1210,17 @@ export var ANIM_OT_slot_new_for_id =  __class__ ('ANIM_OT_slot_new_for_id', [Ope
 		else {
 		}
 		var animated_id = __call__ (getattr, null, context, 'animated_id', null);
-		if (!(animated_id)) {
+		if (!(__call__ (_truth, null, animated_id))) {
 			return false;
 		}
-		if (!(animated_id.animation_data) || !(animated_id.animation_data.action)) {
+		if (!(__call__ (_truth, null, animated_id.animation_data)) || !(__call__ (_truth, null, animated_id.animation_data.action))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'An action slot can only be created when an action is assigned');
 			}) ();
 			return false;
 		}
-		if (!(animated_id.animation_data.action.is_editable)) {
+		if (!(__call__ (_truth, null, animated_id.animation_data.action.is_editable))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'Creating a new Slot is not possible on a linked Action');
@@ -1090,7 +1246,7 @@ export var ANIM_OT_slot_new_for_id =  __class__ ('ANIM_OT_slot_new_for_id', [Ope
 		}
 		var animated_id = context.animated_id;
 		var adt = animated_id.animation_data;
-		if (adt.action_slot) {
+		if (__call__ (_truth, null, adt.action_slot)) {
 			var slot = (function () {
 				var __accu0__ = adt.action_slot;
 				return __call__ (__accu0__.duplicate, __accu0__);
@@ -1129,10 +1285,10 @@ export var ANIM_OT_slot_unassign_from_id =  __class__ ('ANIM_OT_slot_unassign_fr
 		else {
 		}
 		var animated_id = __call__ (getattr, null, context, 'animated_id', null);
-		if (!(animated_id)) {
+		if (!(__call__ (_truth, null, animated_id))) {
 			return false;
 		}
-		if (!(animated_id.animation_data) || !(animated_id.animation_data.action_slot)) {
+		if (!(__call__ (_truth, null, animated_id.animation_data)) || !(__call__ (_truth, null, animated_id.animation_data.action_slot))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'This data-block has no Action slot assigned');
@@ -1180,10 +1336,10 @@ export var generic_slot_unassign_mixin =  __class__ ('generic_slot_unassign_mixi
 		else {
 		}
 		var slot_user = __call__ (getattr, null, context, cls.context_property_name, null);
-		if (!(slot_user)) {
+		if (!(__call__ (_truth, null, slot_user))) {
 			return false;
 		}
-		if (!(slot_user.action_slot)) {
+		if (!(__call__ (_truth, null, slot_user.action_slot))) {
 			(function () {
 				var __accu0__ = cls;
 				return __call__ (__accu0__.poll_message_set, __accu0__, 'No Action slot is assigned, so there is nothing to un-assign');
@@ -1277,13 +1433,13 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var fcurve = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = fcurve.data_path;
 				return __call__ (__accu0__.startswith, __accu0__, 'bones[');
-			}) () && (function () {
+			}) ()) && __call__ (_truth, null, (function () {
 				var __accu0__ = fcurve.data_path;
 				return __call__ (__accu0__.endswith, __accu0__, '].hide');
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu0__ = fcurves;
 					return __call__ (__accu0__.append, __accu0__, fcurve);
@@ -1313,7 +1469,7 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var arm_ob = __getitem__ (__iterable0__, __index0__);
-			if (__ne__ (arm_ob.py_metatype, 'ARMATURE') || !(arm_ob.data)) {
+			if (__ne__ (arm_ob.py_metatype, 'ARMATURE') || !(__call__ (_truth, null, arm_ob.data))) {
 				continue;
 			}
 			var armature = arm_ob.data;
@@ -1321,7 +1477,7 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 				var __accu0__ = anim_utils;
 				return __call__ (__accu0__.animdata_get_channelbag_for_assigned_slot, __accu0__, armature.animation_data);
 			}) ();
-			if (!(assigned_channelbag)) {
+			if (!(__call__ (_truth, null, assigned_channelbag))) {
 				continue;
 			}
 			(function () {
@@ -1329,7 +1485,7 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 				return __call__ (__accu0__.append, __accu0__, arm_ob);
 			}) ();
 		}
-		if (!(selected_armatures)) {
+		if (!(__call__ (_truth, null, selected_armatures))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), __call__ (rpt_, null, 'No animated armatures selected'));
@@ -1344,7 +1500,7 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 			var arm_ob = __getitem__ (__iterable0__, __index0__);
 			var ob_adt = arm_ob.animation_data;
 			var arm_adt = arm_ob.data.animation_data;
-			if (warn && (!(ob_adt) || !(ob_adt.action) || !(ob_adt.action_slot))) {
+			if (__call__ (_truth, null, warn) && (!(__call__ (_truth, null, ob_adt)) || !(__call__ (_truth, null, ob_adt.action)) || !(__call__ (_truth, null, ob_adt.action_slot)))) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), __call__ (rpt_, null, 'Not all armature objects have an action and slot assigned'));
@@ -1356,14 +1512,14 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 				var __accu0__ = anim_utils;
 				return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, arm_adt.action, arm_adt.action_slot);
 			}) ();
-			if (!(armature_channelbag)) {
+			if (!(__call__ (_truth, null, armature_channelbag))) {
 				continue;
 			}
 			var fcurves = (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.find_property_fcurves, __accu0__, armature_channelbag);
 			}) ();
-			if (!(fcurves)) {
+			if (!(__call__ (_truth, null, fcurves))) {
 				continue;
 			}
 			var ob_channelbag = (function () {
@@ -1375,10 +1531,10 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 				var fcurve = __getitem__ (__iterable1__, __index1__);
 				var new_path = __add__ ('pose.', fcurve.data_path);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu0__ = ob_channelbag.fcurves;
 					return __call__ (__accu0__.find, __accu0__, new_path);
-				}) ()) {
+				}) ())) {
 					continue;
 				}
 				(function () {
@@ -1391,7 +1547,7 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 				return __call__ (__accu0__.append, __accu0__, arm_ob);
 			}) ();
 		}
-		if (!(modified_armatures)) {
+		if (!(__call__ (_truth, null, modified_armatures))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), __call__ (rpt_, null, 'No armature animation was modified'));
@@ -1429,6 +1585,14 @@ export {BoolProperty, EnumProperty, IntProperty, Operator, StringProperty, _glob
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'ANIM_OT_keying_set_export': ANIM_OT_keying_set_export = value; break;
 		case 'NLA_OT_bake': NLA_OT_bake = value; break;
 		case 'ClearUselessActions': ClearUselessActions = value; break;

@@ -7,6 +7,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_keyingsets_utils';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['path_add_property', 'RKS_POLL_selected_objects', 'RKS_POLL_selected_bones', 'RKS_POLL_selected_items', 'RKS_ITER_selected_objects', 'RKS_ITER_selected_bones', 'RKS_ITER_selected_item', 'RKS_GEN_available', 'RKS_GEN_custom_props', 'RKS_GEN_location', 'RKS_GEN_rotation', 'RKS_GEN_scaling', 'RKS_GEN_bendy_bones']);
 export var path_add_property = function (path, prop) {
 	if (arguments.length) {
@@ -23,7 +179,7 @@ export var path_add_property = function (path, prop) {
 	}
 	else {
 	}
-	if (path) {
+	if (__call__ (_truth, null, path)) {
 		return __add__ (__add__ (path, '.'), prop);
 	}
 	else {
@@ -49,7 +205,7 @@ export var RKS_POLL_selected_objects = function (_ksi, context) {
 		return false;
 	}
 	var ob = context.active_object;
-	if (ob) {
+	if (__call__ (_truth, null, ob)) {
 		return __eq__ (ob.mode, 'OBJECT');
 	}
 	else {
@@ -75,8 +231,8 @@ export var RKS_POLL_selected_bones = function (_ksi, context) {
 		return false;
 	}
 	var ob = context.active_object;
-	if (ob && __eq__ (ob.mode, 'POSE')) {
-		if (context.active_pose_bone || context.selected_pose_bones) {
+	if (__call__ (_truth, null, ob) && __eq__ (ob.mode, 'POSE')) {
+		if (__call__ (_truth, null, context.active_pose_bone) || __call__ (_truth, null, context.selected_pose_bones)) {
 			return true;
 		}
 	}
@@ -97,7 +253,7 @@ export var RKS_POLL_selected_strip = function (_ksi, context) {
 	}
 	else {
 	}
-	if (context.active_strip || context.selected_strips) {
+	if (__call__ (_truth, null, context.active_strip) || __call__ (_truth, null, context.selected_strips)) {
 		return true;
 	}
 	return false;
@@ -153,7 +309,7 @@ export var RKS_ITER_selected_item = function (ksi, context, ks) {
 	else {
 	}
 	if (__eq__ (context.area.py_metatype, 'SEQUENCE_EDITOR')) {
-		if (context.selected_strips) {
+		if (__call__ (_truth, null, context.selected_strips)) {
 			var __iterable0__ = context.selected_strips;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -167,7 +323,7 @@ export var RKS_ITER_selected_item = function (ksi, context, ks) {
 		return ;
 	}
 	var ob = context.active_object;
-	if (ob && __eq__ (ob.mode, 'POSE')) {
+	if (__call__ (_truth, null, ob) && __eq__ (ob.mode, 'POSE')) {
 		var __iterable0__ = context.selected_pose_bones;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -178,7 +334,7 @@ export var RKS_ITER_selected_item = function (ksi, context, ks) {
 			}) ();
 		}
 	}
-	else if (context.selected_objects) {
+	else if (__call__ (_truth, null, context.selected_objects)) {
 		var __iterable0__ = context.selected_objects;
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -278,14 +434,14 @@ export var RKS_GEN_available = function (_ksi, _context, ks, data) {
 		var __accu0__ = anim_utils;
 		return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, adt.action, adt.action_slot);
 	}) ();
-	if (!(cbag)) {
+	if (!(__call__ (_truth, null, cbag))) {
 		return ;
 	}
 	var __iterable0__ = cbag.fcurves;
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var fcu = __getitem__ (__iterable0__, __index0__);
-		if (basePath) {
+		if (__call__ (_truth, null, basePath)) {
 			if (__in__ (basePath, fcu.data_path)) {
 				(function () {
 					var __accu0__ = ks.paths;
@@ -353,7 +509,7 @@ export var RKS_GEN_location = function (_ksi, _context, ks, data) {
 	if (__call__ (isinstance, null, data, bpy.types.Strip)) {
 		var path_x = __call__ (path_add_property, null, base_path, 'transform.offset_x');
 		var path_y = __call__ (path_add_property, null, base_path, 'transform.offset_y');
-		if (grouping) {
+		if (__call__ (_truth, null, grouping)) {
 			(function () {
 				var __accu0__ = ks.paths;
 				return __call__ (__accu0__.add, __accu0__, id_block, path_x, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -376,7 +532,7 @@ export var RKS_GEN_location = function (_ksi, _context, ks, data) {
 		return ;
 	}
 	var path = __call__ (path_add_property, null, base_path, 'location');
-	if (grouping) {
+	if (__call__ (_truth, null, grouping)) {
 		(function () {
 			var __accu0__ = ks.paths;
 			return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -412,7 +568,7 @@ export var RKS_GEN_rotation = function (_ksi, _context, ks, data) {
 	var grouping = __left0__ [2];
 	if (__call__ (isinstance, null, data, bpy.types.Strip)) {
 		var path = __call__ (path_add_property, null, base_path, 'transform.rotation');
-		if (grouping) {
+		if (__call__ (_truth, null, grouping)) {
 			(function () {
 				var __accu0__ = ks.paths;
 				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -435,7 +591,7 @@ export var RKS_GEN_rotation = function (_ksi, _context, ks, data) {
 	else {
 		var path = __call__ (path_add_property, null, base_path, 'rotation_euler');
 	}
-	if (grouping) {
+	if (__call__ (_truth, null, grouping)) {
 		(function () {
 			var __accu0__ = ks.paths;
 			return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -472,7 +628,7 @@ export var RKS_GEN_scaling = function (_ksi, _context, ks, data) {
 	if (__call__ (isinstance, null, data, bpy.types.Strip)) {
 		var path_x = __call__ (path_add_property, null, base_path, 'transform.scale_x');
 		var path_y = __call__ (path_add_property, null, base_path, 'transform.scale_y');
-		if (grouping) {
+		if (__call__ (_truth, null, grouping)) {
 			(function () {
 				var __accu0__ = ks.paths;
 				return __call__ (__accu0__.add, __accu0__, id_block, path_x, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -495,7 +651,7 @@ export var RKS_GEN_scaling = function (_ksi, _context, ks, data) {
 		return ;
 	}
 	var path = __call__ (path_add_property, null, base_path, 'scale');
-	if (grouping) {
+	if (__call__ (_truth, null, grouping)) {
 		(function () {
 			var __accu0__ = ks.paths;
 			return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -540,7 +696,7 @@ export var RKS_GEN_custom_props = function (_ksi, _context, ks, data) {
 		if (__eq__ (cprop_name, '_RNA_UI')) {
 			continue;
 		}
-		if (__in__ (cprop_name, data.bl_rna.properties) && !(__getitem__ (data.bl_rna.properties, cprop_name).is_animatable)) {
+		if (__in__ (cprop_name, data.bl_rna.properties) && !(__call__ (_truth, null, __getitem__ (data.bl_rna.properties, cprop_name).is_animatable))) {
 			continue;
 		}
 		if (__in__ (cprop_name, data.bl_rna.properties)) {
@@ -579,7 +735,7 @@ export var RKS_GEN_custom_props = function (_ksi, _context, ks, data) {
 			var __accu0__ = '{:s}{:s}';
 			return __call__ (__accu0__.format, __accu0__, base_path, prop_path);
 		}) ();
-		if (grouping) {
+		if (__call__ (_truth, null, grouping)) {
 			(function () {
 				var __accu0__ = ks.paths;
 				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -620,7 +776,7 @@ export var RKS_GEN_bendy_bones = function (_ksi, _context, ks, data) {
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var propname = __getitem__ (__iterable0__, __index0__);
 		var path = __call__ (path_add_property, null, base_path, propname);
-		if (grouping) {
+		if (__call__ (_truth, null, grouping)) {
 			(function () {
 				var __accu0__ = ks.paths;
 				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
@@ -640,6 +796,14 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'path_add_property': path_add_property = value; break;
 		case 'RKS_POLL_selected_objects': RKS_POLL_selected_objects = value; break;

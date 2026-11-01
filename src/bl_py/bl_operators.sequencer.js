@@ -10,6 +10,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.sequencer';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var _animated_properties_get = function (strip) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -60,7 +216,7 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 		else {
 		}
 		var sequencer_scene = context.sequencer_scene;
-		if (!(sequencer_scene)) {
+		if (!(__call__ (_truth, null, sequencer_scene))) {
 			return false;
 		}
 		var strip = context.active_strip;
@@ -88,7 +244,7 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var strip = __getitem__ (__iterable0__, __index0__);
-			if (strip.select && __eq__ (strip.py_metatype, 'SOUND')) {
+			if (__call__ (_truth, null, strip.select) && __eq__ (strip.py_metatype, 'SOUND')) {
 				if (strip1 === null) {
 					var strip1 = strip;
 				}
@@ -162,7 +318,7 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 		else {
 		}
 		var sequencer_scene = context.sequencer_scene;
-		if (!(sequencer_scene)) {
+		if (!(__call__ (_truth, null, sequencer_scene))) {
 			return false;
 		}
 		var strip = context.active_strip;
@@ -194,7 +350,7 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 			var __accu0__ = strip;
 			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({frame: cfra, split_method: 'SOFT'}));
 		}) ();
-		if (right_strip) {
+		if (__call__ (_truth, null, right_strip)) {
 			strip.select = false;
 			right_strip.select = true;
 			scene.sequence_editor.active_strip = right_strip;
@@ -247,7 +403,7 @@ export var SequencerDeinterlaceSelectedMovies =  __class__ ('SequencerDeinterlac
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var strip = __getitem__ (__iterable0__, __index0__);
-			if (strip.select && __eq__ (strip.py_metatype, 'MOVIE')) {
+			if (__call__ (_truth, null, strip.select) && __eq__ (strip.py_metatype, 'MOVIE')) {
 				strip.use_deinterlace = true;
 			}
 		}
@@ -275,7 +431,7 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 		else {
 		}
 		var sequencer_scene = context.sequencer_scene;
-		if (!(sequencer_scene)) {
+		if (!(__call__ (_truth, null, sequencer_scene))) {
 			return false;
 		}
 		var strip = context.active_strip;
@@ -316,10 +472,10 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var curve = __getitem__ (__iterable0__, __index0__);
-				if ((function () {
+				if (__call__ (_truth, null, (function () {
 					var __accu1__ = curve.data_path;
 					return __call__ (__accu1__.startswith, __accu1__, 'sequence_editor.strips');
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, [curve.data_path, curve]);
@@ -344,7 +500,7 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 					var __accu0__ = fcurve_map;
 					return __call__ (__accu0__.py_get, __accu0__, data_path);
 				}) ();
-				if (curve) {
+				if (__call__ (_truth, null, curve)) {
 					(function () {
 						var __accu0__ = fcurves;
 						return __call__ (__accu0__.remove, __accu0__, curve);
@@ -381,7 +537,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		else {
 		}
 		var sequencer_scene = context.sequencer_scene;
-		if (!(sequencer_scene)) {
+		if (!(__call__ (_truth, null, sequencer_scene))) {
 			return false;
 		}
 		var strip = context.active_strip;
@@ -404,13 +560,13 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		}
 		var floor = __call__ (_member, null, 'math', 'floor');
 		var scene = context.sequencer_scene;
-		if (!(scene.animation_data)) {
+		if (!(__call__ (_truth, null, scene.animation_data))) {
 			(function () {
 				var __accu0__ = scene;
 				return __call__ (__accu0__.animation_data_create, __accu0__);
 			}) ();
 		}
-		if (!(scene.animation_data.action)) {
+		if (!(__call__ (_truth, null, scene.animation_data.action))) {
 			var action = (function () {
 				var __accu0__ = bpy.data.actions;
 				return __call__ (__accu0__.py_new, __accu0__, __add__ (scene.py_name, 'Action'));
@@ -418,7 +574,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 			scene.animation_data.action = action;
 		}
 		var strips = context.selected_strips;
-		if (!(strips)) {
+		if (!(__call__ (_truth, null, strips))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No strips selected');
@@ -441,7 +597,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 				}
 				return __accu0__;
 			}) ();
-			if (!(strips)) {
+			if (!(__call__ (_truth, null, strips))) {
 				(function () {
 					var __accu0__ = self;
 					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Current frame not within strip framerange');
@@ -476,10 +632,10 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 				return __call__ (__accu0__.calculate_fade_duration, __accu0__, context, strip);
 			}) ();
 			var duration = __call__ (min, null, duration, max_duration);
-			if (!((function () {
+			if (!(__call__ (_truth, null, (function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.is_long_enough, __accu0__, strip, duration);
-			}) ())) {
+			}) ()))) {
 				continue;
 			}
 			var __iterable1__ = __call__ (_animated_properties_get, null, strip);
@@ -780,7 +936,7 @@ export var Fade =  __class__ ('Fade', [object], {
 		else {
 		}
 		var max_value = 0.0;
-		if (!(fade_fcurve.keyframe_points)) {
+		if (!(__call__ (_truth, null, fade_fcurve.keyframe_points))) {
 			var max_value = __call__ (getattr, null, strip, self.animated_property, 1.0);
 		}
 		else {
@@ -928,6 +1084,14 @@ export {EnumProperty, FileHandler, FloatProperty, IntProperty, Operator, _global
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_animated_properties_get': _animated_properties_get = value; break;
 		case 'SequencerCrossfadeSounds': SequencerCrossfadeSounds = value; break;
 		case 'SequencerSplitMulticam': SequencerSplitMulticam = value; break;

@@ -11,6 +11,162 @@ import {BrushAssetShelf, BrushSelectPanel, ClonePanel, ColorPalettePanel, Displa
 import {AssetShelf, Header, Menu, Panel, UIList} from './_bpy.types.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_image';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var ImagePaintPanel =  __class__ ('ImagePaintPanel', [UnifiedPaintPanel], {
 	__module__: __name__,
 	bl_space_type: 'IMAGE_EDITOR',
@@ -107,7 +263,7 @@ export var IMAGE_MT_view =  __class__ ('IMAGE_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (show_uvedit || show_maskedit) {
+		if (__call__ (_truth, null, show_uvedit) || __call__ (_truth, null, show_maskedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'image.view_selected', __kwargtrans__ ({text: 'Frame Selected'}));
@@ -129,7 +285,7 @@ export var IMAGE_MT_view =  __class__ ('IMAGE_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (show_render) {
+		if (__call__ (_truth, null, show_render)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'image.render_border');
@@ -155,7 +311,7 @@ export var IMAGE_MT_view =  __class__ ('IMAGE_MT_view', [Menu], {
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (paint.brush && (context.image_paint_object || __eq__ (sima.mode, 'PAINT'))) {
+		if (__call__ (_truth, null, paint.brush) && (__call__ (_truth, null, context.image_paint_object) || __eq__ (sima.mode, 'PAINT'))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'show_uv_local_view', __kwargtrans__ ({text: 'Show Same Material'}));
@@ -202,7 +358,7 @@ export var IMAGE_MT_view_zoom =  __class__ ('IMAGE_MT_view_zoom', [Menu], {
 				return __call__ (__accu0__.operator, __accu0__, 'image.view_zoom_ratio', __kwargtrans__ ({text: (function () {
 					var __accu1__ = '{:g}% ({:d}:{:d})';
 					return __call__ (__accu1__.format, __accu1__, percent, a, b);
-				}) (), translate: false, icon: (__call__ (isclose, null, percent, current_zoom, __kwargtrans__ ({abs_tol: 0.5})) ? 'LAYER_ACTIVE' : 'NONE')}));
+				}) (), translate: false, icon: (__call__ (_truth, null, __call__ (isclose, null, percent, current_zoom, __kwargtrans__ ({abs_tol: 0.5}))) ? 'LAYER_ACTIVE' : 'NONE')}));
 			}) ().ratio = ratio;
 		}
 		(function () {
@@ -417,12 +573,12 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'image.read_viewlayers');
 		}) ();
-		if (ima) {
+		if (__call__ (_truth, null, ima)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
-			if (!(show_render)) {
+			if (!(__call__ (_truth, null, show_render))) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.operator, __accu0__, 'image.replace', __kwargtrans__ ({text: 'Replace...'}));
@@ -452,7 +608,7 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 			}
 			// pass;
 		}
-		if (has_image_clipboard) {
+		if (__call__ (_truth, null, has_image_clipboard)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'image.clipboard_copy', __kwargtrans__ ({text: 'Copy'}));
@@ -466,7 +622,7 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
 		}
-		if (ima) {
+		if (__call__ (_truth, null, ima)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'image.save', __kwargtrans__ ({text: 'Save', icon: 'FILE_TICK'}));
@@ -480,7 +636,7 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 				return __call__ (__accu0__.operator, __accu0__, 'image.save_as', __kwargtrans__ ({text: 'Save a Copy...'}));
 			}) ().py_copy = true;
 		}
-		if (ima && __eq__ (ima.source, 'SEQUENCE')) {
+		if (__call__ (_truth, null, ima) && __eq__ (ima.source, 'SEQUENCE')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'image.save_sequence');
@@ -490,7 +646,7 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'image.save_all_modified', __kwargtrans__ ({text: 'Save All Images'}));
 		}) ();
-		if (ima) {
+		if (__call__ (_truth, null, ima)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -507,8 +663,8 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'IMAGE_MT_image_transform');
 			}) ();
-			if (ima.packed_file) {
-				if (ima.filepath) {
+			if (__call__ (_truth, null, ima.packed_file)) {
+				if (__call__ (_truth, null, ima.filepath)) {
 					(function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.separator, __accu0__);
@@ -530,7 +686,7 @@ export var IMAGE_MT_image =  __class__ ('IMAGE_MT_image', [Menu], {
 				}) ();
 			}
 		}
-		if (ima && __eq__ (context.area.ui_type, 'IMAGE_EDITOR')) {
+		if (__call__ (_truth, null, ima) && __eq__ (context.area.ui_type, 'IMAGE_EDITOR')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1190,7 +1346,7 @@ export var IMAGE_MT_uvs_select_mode =  __class__ ('IMAGE_MT_uvs_select_mode', [M
 		var layout = self.layout;
 		layout.operator_context = 'INVOKE_REGION_WIN';
 		var tool_settings = context.tool_settings;
-		if (tool_settings.use_uv_select_sync) {
+		if (__call__ (_truth, null, tool_settings.use_uv_select_sync)) {
 			var props = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'wm.context_set_value', __kwargtrans__ ({text: 'Vertex', icon: 'VERTEXSEL'}));
@@ -1260,9 +1416,9 @@ export var IMAGE_MT_uvs_context_menu =  __class__ ('IMAGE_MT_uvs_context_menu', 
 		}
 		var layout = self.layout;
 		var sima = context.space_data;
-		if (sima.show_uvedit) {
+		if (__call__ (_truth, null, sima.show_uvedit)) {
 			var ts = context.tool_settings;
-			if (ts.use_uv_select_sync) {
+			if (__call__ (_truth, null, ts.use_uv_select_sync)) {
 				var __left0__ = ts.mesh_select_mode;
 				var is_vert_mode = __left0__ [0];
 				var is_edge_mode = __left0__ [1];
@@ -1321,15 +1477,15 @@ export var IMAGE_MT_uvs_context_menu =  __class__ ('IMAGE_MT_uvs_context_menu', 
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
-			if (is_vert_mode || is_edge_mode) {
+			if (__call__ (_truth, null, is_vert_mode) || __call__ (_truth, null, is_edge_mode)) {
 				layout.operator_context = 'INVOKE_DEFAULT';
-				if (is_vert_mode) {
+				if (__call__ (_truth, null, is_vert_mode)) {
 					(function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.operator, __accu0__, 'transform.vert_slide');
 					}) ();
 				}
-				if (is_edge_mode) {
+				if (__call__ (_truth, null, is_edge_mode)) {
 					(function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.operator, __accu0__, 'transform.edge_slide');
@@ -1484,7 +1640,7 @@ export var IMAGE_MT_view_pie =  __class__ ('IMAGE_MT_view_pie', [Menu], {
 			var __accu0__ = pie;
 			return __call__ (__accu0__.operator, __accu0__, 'image.view_all');
 		}) ();
-		if (show_uvedit || show_maskedit) {
+		if (__call__ (_truth, null, show_uvedit) || __call__ (_truth, null, show_maskedit)) {
 			(function () {
 				var __accu0__ = pie;
 				return __call__ (__accu0__.operator, __accu0__, 'image.view_selected', __kwargtrans__ ({text: 'Frame Selected', icon: 'ZOOM_SELECTED'}));
@@ -1574,7 +1730,7 @@ export var IMAGE_HT_tool_header =  __class__ ('IMAGE_HT_tool_header', [Header], 
 			__call__ (draw_fn, null, context, layout, tool);
 		}
 		if (__eq__ (tool_mode, 'PAINT')) {
-			if (tool !== null && tool.use_brushes) {
+			if (tool !== null && __call__ (_truth, null, tool.use_brushes)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_paint_settings_advanced');
@@ -1650,12 +1806,12 @@ export var _draw_tool_settings_context_mode =  __class__ ('_draw_tool_settings_c
 		}
 		else {
 		}
-		if (tool && tool.use_brushes) {
+		if (__call__ (_truth, null, tool) && __call__ (_truth, null, tool.use_brushes)) {
 			if (__eq__ (context.mode, 'EDIT_MESH')) {
 				var tool_settings = context.tool_settings;
 				var uv_sculpt = tool_settings.uv_sculpt;
 				var brush = uv_sculpt.brush;
-				if (brush) {
+				if (__call__ (_truth, null, brush)) {
 					(function () {
 						var __accu0__ = UnifiedPaintPanel;
 						return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', slider: true, header: true}));
@@ -1684,7 +1840,7 @@ export var _draw_tool_settings_context_mode =  __class__ ('_draw_tool_settings_c
 		}
 		else {
 		}
-		if (tool === null || !(tool.use_brushes)) {
+		if (tool === null || !(__call__ (_truth, null, tool.use_brushes))) {
 			return ;
 		}
 		var paint = context.tool_settings.image_paint;
@@ -1719,13 +1875,13 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 		}
 		var sima = context.space_data;
 		var show_uvedit = sima.show_uvedit;
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, sima, 'pivot_point', __kwargtrans__ ({icon_only: true}));
 			}) ();
 		}
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			var tool_settings = context.tool_settings;
 			var snap_uv_elements = tool_settings.snap_uv_element;
 			if (__eq__ (__call__ (len, null, snap_uv_elements), 1)) {
@@ -1759,7 +1915,7 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 			}) ();
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_proportional_edit', __kwargtrans__ ({icon_only: true, icon: (tool_settings.use_proportional_connected ? 'PROP_CON' : 'PROP_ON')}));
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_proportional_edit', __kwargtrans__ ({icon_only: true, icon: (__call__ (_truth, null, tool_settings.use_proportional_connected) ? 'PROP_CON' : 'PROP_ON')}));
 			}) ();
 			var sub = (function () {
 				var __accu0__ = row;
@@ -1806,12 +1962,12 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 				return __call__ (__accu0__.prop, __accu0__, sima, 'ui_mode', __kwargtrans__ ({text: ''}));
 			}) ();
 		}
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_uv_select_sync', __kwargtrans__ ({text: ''}));
 			}) ();
-			if (tool_settings.use_uv_select_sync) {
+			if (__call__ (_truth, null, tool_settings.use_uv_select_sync)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.template_edit_mode_selection, __accu0__);
@@ -1861,7 +2017,7 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.template_ID, __accu0__, sima, 'image', __kwargtrans__ ({py_new: 'image.new', open: 'image.open'}));
 		}) ();
-		if (show_maskedit) {
+		if (__call__ (_truth, null, show_maskedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, sima, 'mask', __kwargtrans__ ({py_new: 'mask.new'}));
@@ -1888,7 +2044,7 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 				return __call__ (__accu0__.prop_with_popover, __accu0__, tool_settings, 'proportional_edit_falloff', __kwargtrans__ ({text: '', icon_only: true, panel: 'IMAGE_PT_proportional_edit'}));
 			}) ();
 		}
-		if (!(show_render)) {
+		if (!(__call__ (_truth, null, show_render))) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, sima, 'use_image_pin', __kwargtrans__ ({text: '', emboss: false}));
@@ -1932,17 +2088,17 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 			var __accu0__ = sub;
 			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'IMAGE_PT_overlay', text: ''}));
 		}) ();
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			var mesh = context.edit_object.data;
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop_search, __accu0__, mesh.uv_layers, 'active', mesh, 'uv_layers', __kwargtrans__ ({text: '', icon: 'GROUP_UVS'}));
 			}) ();
 		}
-		if (ima) {
+		if (__call__ (_truth, null, ima)) {
 			var seq_scene = context.sequencer_scene;
 			var scene = context.scene;
-			if (show_render && seq_scene && __ne__ (seq_scene, scene)) {
+			if (__call__ (_truth, null, show_render) && __call__ (_truth, null, seq_scene) && __ne__ (seq_scene, scene)) {
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
@@ -1952,7 +2108,7 @@ export var IMAGE_HT_header =  __class__ ('IMAGE_HT_header', [Header], {
 					return __call__ (__accu0__.prop, __accu0__, sima, 'show_sequencer_scene', __kwargtrans__ ({text: ''}));
 				}) ();
 			}
-			if (ima.is_stereo_3d) {
+			if (__call__ (_truth, null, ima.is_stereo_3d)) {
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
@@ -2005,19 +2161,19 @@ export var IMAGE_MT_editor_menus =  __class__ ('IMAGE_MT_editor_menus', [Menu], 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'IMAGE_MT_view');
 		}) ();
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'IMAGE_MT_select');
 			}) ();
 		}
-		if (show_maskedit) {
+		if (__call__ (_truth, null, show_maskedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'MASK_MT_select');
 			}) ();
 		}
-		if (ima && ima.is_dirty) {
+		if (__call__ (_truth, null, ima) && __call__ (_truth, null, ima.is_dirty)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'IMAGE_MT_image', __kwargtrans__ ({text: '* Image'}));
@@ -2029,13 +2185,13 @@ export var IMAGE_MT_editor_menus =  __class__ ('IMAGE_MT_editor_menus', [Menu], 
 				return __call__ (__accu0__.menu, __accu0__, 'IMAGE_MT_image', __kwargtrans__ ({text: 'Image'}));
 			}) ();
 		}
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'IMAGE_MT_uvs');
 			}) ();
 		}
-		if (show_maskedit) {
+		if (__call__ (_truth, null, show_maskedit)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'MASK_MT_add');
@@ -2352,7 +2508,7 @@ export var IMAGE_PT_view_display =  __class__ ('IMAGE_PT_view_display', [Panel],
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (ima) {
+		if (__call__ (_truth, null, ima)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, ima, 'display_aspect', __kwargtrans__ ({text: 'Aspect Ratio'}));
@@ -2367,7 +2523,7 @@ export var IMAGE_PT_view_display =  __class__ ('IMAGE_PT_view_display', [Panel],
 				return __call__ (__accu0__.prop, __accu0__, sima, 'show_repeat', __kwargtrans__ ({text: 'Repeat Image'}));
 			}) ();
 		}
-		if (show_uvedit) {
+		if (__call__ (_truth, null, show_uvedit)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, uvedit, 'show_pixel_coords', __kwargtrans__ ({text: 'Pixel Coordinates'}));
@@ -2584,7 +2740,7 @@ export var IMAGE_PT_udim_tiles =  __class__ ('IMAGE_PT_udim_tiles', [Panel], {
 			return __call__ (__accu0__.operator, __accu0__, 'image.tile_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
 		}) ();
 		var tile = ima.tiles.active;
-		if (tile) {
+		if (__call__ (_truth, null, tile)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2651,7 +2807,7 @@ export var IMAGE_PT_paint_settings =  __class__ ('IMAGE_PT_paint_settings', [Pan
 			return __call__ (__accu0__.paint_settings, __accu0__, context);
 		}) ();
 		var brush = settings.brush;
-		if (brush) {
+		if (__call__ (_truth, null, brush)) {
 			__call__ (brush_settings, null, (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -2710,7 +2866,7 @@ export var IMAGE_PT_paint_settings_advanced =  __class__ ('IMAGE_PT_paint_settin
 			return __call__ (__accu0__.paint_settings, __accu0__, context);
 		}) ();
 		var brush = settings.brush;
-		if (brush) {
+		if (__call__ (_truth, null, brush)) {
 			__call__ (brush_settings_advanced, null, (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -2741,7 +2897,7 @@ export var IMAGE_PT_paint_color =  __class__ ('IMAGE_PT_paint_color', [Panel, Im
 		}
 		var settings = context.tool_settings.image_paint;
 		var brush = settings.brush;
-		if (!(brush)) {
+		if (!(__call__ (_truth, null, brush))) {
 			return false;
 		}
 		var capabilities = brush.image_paint_capabilities;
@@ -2765,7 +2921,7 @@ export var IMAGE_PT_paint_color =  __class__ ('IMAGE_PT_paint_color', [Panel, Im
 		var layout = self.layout;
 		var settings = context.tool_settings.image_paint;
 		var brush = settings.brush;
-		if (brush) {
+		if (__call__ (_truth, null, brush)) {
 			__call__ (draw_color_settings, null, context, layout, brush, __kwargtrans__ ({color_type: true}));
 		}
 	});}
@@ -3004,14 +3160,14 @@ export var ImageScopesPanel =  __class__ ('ImageScopesPanel', [object], {
 		else {
 		}
 		var sima = context.space_data;
-		if (!(sima && sima.image)) {
+		if (!(__call__ (_truth, null, sima) && __call__ (_truth, null, sima.image))) {
 			return false;
 		}
 		if (__eq__ (sima.mode, 'PAINT')) {
 			return false;
 		}
 		var ob = context.active_object;
-		if (ob && __in__ (ob.mode, new set (['TEXTURE_PAINT', 'EDIT']))) {
+		if (__call__ (_truth, null, ob) && __in__ (ob.mode, new set (['TEXTURE_PAINT', 'EDIT']))) {
 			return false;
 		}
 		return true;
@@ -3228,7 +3384,7 @@ export var IMAGE_PT_scope_sample =  __class__ ('IMAGE_PT_scope_sample', [ImageSc
 			var __accu0__ = flow;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		col.active = !(sima.scopes.use_full_resolution);
+		col.active = !(__call__ (_truth, null, sima.scopes.use_full_resolution));
 		(function () {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, sima.scopes, 'accuracy');
@@ -3334,7 +3490,7 @@ export var IMAGE_PT_gizmo_display =  __class__ ('IMAGE_PT_gizmo_display', [Panel
 		}) ();
 		var image = view.image;
 		var show_compositor_gizmos = image !== null && __eq__ (image.py_metatype, 'COMPOSITING') && __in__ (view.ui_mode, tuple (['VIEW', 'MASK']));
-		if (show_compositor_gizmos) {
+		if (__call__ (_truth, null, show_compositor_gizmos)) {
 			var colsub = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.column, __accu0__);
@@ -3404,7 +3560,7 @@ export var IMAGE_PT_overlay_guides =  __class__ ('IMAGE_PT_overlay_guides', [Pan
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, overlay, 'show_grid_background', __kwargtrans__ ({text: 'Grid'}));
 		}) ();
-		if (overlay.show_grid_background) {
+		if (__call__ (_truth, null, overlay.show_grid_background)) {
 			var sub = (function () {
 				var __accu0__ = row;
 				return __call__ (__accu0__.row, __accu0__);
@@ -3573,7 +3729,7 @@ export var IMAGE_PT_overlay_uv_edit_geometry =  __class__ ('IMAGE_PT_overlay_uv_
 			var __accu0__ = col;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		row.active = !(uvedit.show_stretch);
+		row.active = !(__call__ (_truth, null, uvedit.show_stretch));
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, uvedit, 'show_faces', __kwargtrans__ ({text: 'Faces'}));
@@ -3602,7 +3758,7 @@ export var IMAGE_PT_overlay_uv_display =  __class__ ('IMAGE_PT_overlay_uv_displa
 		else {
 		}
 		var sima = context.space_data;
-		return sima && __in__ (sima.mode, new set (['UV', 'PAINT'])) && !(sima.show_uvedit || sima.show_render);
+		return sima && __in__ (sima.mode, new set (['UV', 'PAINT'])) && !(__call__ (_truth, null, sima.show_uvedit) || __call__ (_truth, null, sima.show_render));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -3706,14 +3862,14 @@ export var IMAGE_PT_overlay_render_guides =  __class__ ('IMAGE_PT_overlay_render
 		}
 		var sima = context.space_data;
 		var _walrus1 = __in__ (sima.mode, new set (['MASK', 'VIEW']));
-		if (_walrus1) {
+		if (__call__ (_truth, null, _walrus1)) {
 			var image = sima.image;
 			var _walrus1 = image !== null;
 		}
-		if (_walrus1) {
+		if (__call__ (_truth, null, _walrus1)) {
 			var _walrus1 = __eq__ (image.source, 'VIEWER');
 		}
-		if (_walrus1) {
+		if (__call__ (_truth, null, _walrus1)) {
 			var _walrus1 = __eq__ (image.py_metatype, 'COMPOSITING');
 		}
 		return _walrus1;
@@ -3835,6 +3991,14 @@ export {AnnotationDataPanel, AssetShelf, BrushAssetShelf, BrushSelectPanel, Clon
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'ImagePaintPanel': ImagePaintPanel = value; break;
 		case 'BrushButtonsPanel': BrushButtonsPanel = value; break;
 		case 'IMAGE_PT_active_tool': IMAGE_PT_active_tool = value; break;

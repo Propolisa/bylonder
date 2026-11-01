@@ -10,6 +10,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.object';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 	__module__: __name__,
 	bl_idname: 'object.select_pattern',
@@ -32,7 +188,7 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 		else {
 		}
 		var fnmatch = __call__ (_module, null, 'fnmatch');
-		if (self.case_sensitive) {
+		if (__call__ (_truth, null, self.case_sensitive)) {
 			var pattern_match = fnmatch.fnmatchcase;
 		}
 		else {
@@ -66,9 +222,9 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 		var is_ebone = false;
 		var is_pbone = false;
 		var obj = context.object;
-		if (obj && __eq__ (obj.mode, 'POSE')) {
+		if (__call__ (_truth, null, obj) && __eq__ (obj.mode, 'POSE')) {
 			var py_items = obj.pose.bones;
-			if (!(self.extend)) {
+			if (!(__call__ (_truth, null, self.extend))) {
 				(function () {
 					var __accu0__ = bpy.ops.pose;
 					return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
@@ -76,9 +232,9 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 			}
 			var is_pbone = true;
 		}
-		else if (obj && __eq__ (obj.py_metatype, 'ARMATURE') && __eq__ (obj.mode, 'EDIT')) {
+		else if (__call__ (_truth, null, obj) && __eq__ (obj.py_metatype, 'ARMATURE') && __eq__ (obj.mode, 'EDIT')) {
 			var py_items = obj.data.edit_bones;
-			if (!(self.extend)) {
+			if (!(__call__ (_truth, null, self.extend))) {
 				(function () {
 					var __accu0__ = bpy.ops.armature;
 					return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
@@ -88,7 +244,7 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 		}
 		else {
 			var py_items = context.visible_objects;
-			if (!(self.extend)) {
+			if (!(__call__ (_truth, null, self.extend))) {
 				(function () {
 					var __accu0__ = bpy.ops.object;
 					return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
@@ -99,19 +255,19 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var item = __getitem__ (__iterable0__, __index0__);
-			if (__call__ (pattern_match, null, item.py_name, self.pattern)) {
-				if (is_ebone) {
+			if (__call__ (_truth, null, __call__ (pattern_match, null, item.py_name, self.pattern))) {
+				if (__call__ (_truth, null, is_ebone)) {
 					item.select = true;
 					item.select_head = true;
 					item.select_tail = true;
-					if (item.use_connect) {
+					if (__call__ (_truth, null, item.use_connect)) {
 						var item_parent = item.parent;
 						if (item_parent !== null) {
 							item_parent.select_tail = true;
 						}
 					}
 				}
-				else if (is_pbone) {
+				else if (__call__ (_truth, null, is_pbone)) {
 					item.select = true;
 				}
 				else {
@@ -195,7 +351,7 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 		else {
 		}
 		var obj = context.object;
-		return !(obj) || __eq__ (obj.mode, 'OBJECT') || __eq__ (obj.py_metatype, 'ARMATURE');
+		return !(__call__ (_truth, null, obj)) || __eq__ (obj.mode, 'OBJECT') || __eq__ (obj.py_metatype, 'ARMATURE');
 	});}
 });
 SelectPattern.__annotations__ = dict ({'pattern': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Pattern', translation_context: i18n_contexts.id_text, description: "Name filter using '*', '?' and '[abc]' unix style wildcards", maxlen: 256, py_default: '*'})), 'case_sensitive': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Case Sensitive', description: 'Do a case sensitive compare', py_default: false})), 'extend': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Extend', description: 'Extend the existing selection', py_default: true}))});
@@ -222,7 +378,7 @@ export var SelectCamera =  __class__ ('SelectCamera', [Operator], {
 		var scene = context.scene;
 		var view_layer = context.view_layer;
 		var view = context.space_data;
-		if (view && __eq__ (view.py_metatype, 'VIEW_3D') && view.use_local_camera) {
+		if (__call__ (_truth, null, view) && __eq__ (view.py_metatype, 'VIEW_3D') && __call__ (_truth, null, view.use_local_camera)) {
 			var camera = view.camera;
 		}
 		else {
@@ -241,7 +397,7 @@ export var SelectCamera =  __class__ ('SelectCamera', [Operator], {
 			}) ();
 		}
 		else {
-			if (!(self.extend)) {
+			if (!(__call__ (_truth, null, self.extend))) {
 				(function () {
 					var __accu0__ = bpy.ops.object;
 					return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
@@ -312,10 +468,10 @@ export var SelectHierarchy =  __class__ ('SelectHierarchy', [Operator], {
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var obj = __getitem__ (__iterable0__, __index0__);
 				var parent = obj.parent;
-				if (parent && (function () {
+				if (__call__ (_truth, null, parent) && __call__ (_truth, null, (function () {
 					var __accu0__ = parent;
 					return __call__ (__accu0__.visible_get, __accu0__);
-				}) ()) {
+				}) ())) {
 					if (__eq__ (obj_act, obj)) {
 						var act_new = parent;
 					}
@@ -339,10 +495,10 @@ export var SelectHierarchy =  __class__ ('SelectHierarchy', [Operator], {
 						__iterable1__ = __i__ (__iterable1__);
 						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
 							var child = __getitem__ (__iterable1__, __index1__);
-							if ((function () {
+							if (__call__ (_truth, null, (function () {
 								var __accu2__ = child;
 								return __call__ (__accu2__.visible_get, __accu2__);
-							}) ()) {
+							}) ())) {
 								(function () {
 									var __accu2__ = __accu1__;
 									return __call__ (__accu2__.append, __accu2__, child);
@@ -353,7 +509,7 @@ export var SelectHierarchy =  __class__ ('SelectHierarchy', [Operator], {
 					}) ());
 				}) ();
 			}
-			if (select_new) {
+			if (__call__ (_truth, null, select_new)) {
 				(function () {
 					var __accu0__ = select_new;
 					return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (obj_iter) {
@@ -376,8 +532,8 @@ export var SelectHierarchy =  __class__ ('SelectHierarchy', [Operator], {
 				var act_new = __getitem__ (select_new, 0);
 			}
 		}
-		if (select_new) {
-			if (!(self.extend)) {
+		if (__call__ (_truth, null, select_new)) {
+			if (!(__call__ (_truth, null, self.extend))) {
 				(function () {
 					var __accu0__ = bpy.ops.object;
 					return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
@@ -423,23 +579,23 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 		var relative = self.relative;
 		var ensure_modifier = self.ensure_modifier;
 		var active_object = context.active_object;
-		if (active_object && __in__ (active_object.mode, new set (['SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT']))) {
+		if (__call__ (_truth, null, active_object) && __in__ (active_object.mode, new set (['SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT']))) {
 			var objs = [active_object];
 		}
 		else {
 			var objs = context.selected_editable_objects;
 		}
-		if (!(objs)) {
+		if (!(__call__ (_truth, null, objs))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No selected editable objects to operate on');
 			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (relative && __eq__ (level, 0)) {
+		if (__call__ (_truth, null, relative) && __eq__ (level, 0)) {
 			return new set (['CANCELLED']);
 		}
-		if (!(ensure_modifier)) {
+		if (!(__call__ (_truth, null, ensure_modifier))) {
 			var any_object_has_relevant_modifier = false;
 			var __iterable0__ = objs;
 			__iterable0__ = __i__ (__iterable0__);
@@ -475,11 +631,11 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 						return __accu0__;
 					}) ()));
 				}
-				if (any_object_has_relevant_modifier) {
+				if (__call__ (_truth, null, any_object_has_relevant_modifier)) {
 					break;
 				}
 			}
-			if (!(any_object_has_relevant_modifier)) {
+			if (!(__call__ (_truth, null, any_object_has_relevant_modifier))) {
 				var mod_name = '';
 				if (__eq__ (obj.mode, 'SCULPT')) {
 					var mod_name = 'Multiresolution';
@@ -497,7 +653,7 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 				return new set (['CANCELLED']);
 			}
 		}
-		if (!(relative) && __lt__ (level, 0)) {
+		if (!(__call__ (_truth, null, relative)) && __lt__ (level, 0)) {
 			var __left0__ = 0;
 			self.level = __left0__;
 			var level = __left0__;
@@ -521,7 +677,7 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var mod = __getitem__ (__iterable0__, __index0__);
 				if (__eq__ (mod.py_metatype, 'MULTIRES')) {
-					if (!(relative)) {
+					if (!(__call__ (_truth, null, relative))) {
 						if (__gt__ (level, mod.total_levels)) {
 							var sub = __sub__ (level, mod.total_levels);
 							for (var _ = 0; _ < sub; _++) {
@@ -558,7 +714,7 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 					}
 				}
 				else if (__eq__ (mod.py_metatype, 'SUBSURF')) {
-					if (relative) {
+					if (__call__ (_truth, null, relative)) {
 						mod.levels = __call__ (__iadd__, null, mod.levels, level);
 					}
 					else if (__ne__ (mod.levels, level)) {
@@ -567,7 +723,7 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 					return ;
 				}
 			}
-			if (ensure_modifier) {
+			if (__call__ (_truth, null, ensure_modifier)) {
 				try {
 					if (__eq__ (obj.mode, 'SCULPT')) {
 						var mod = (function () {
@@ -742,7 +898,7 @@ export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 		};
 		var barycentric_transform = __call__ (_member, null, 'mathutils.geometry', 'barycentric_transform');
 		var Vector = __call__ (_member, null, 'mathutils', 'Vector');
-		if (use_clamp && __eq__ (mode, 'OFFSET')) {
+		if (__call__ (_truth, null, use_clamp) && __eq__ (mode, 'OFFSET')) {
 			var use_clamp = false;
 		}
 		var me = ob_act.data;
@@ -776,7 +932,7 @@ export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 				continue;
 			}
 			var target_normals = __call__ (me_nos, null, me_other.vertices);
-			if (me_other.shape_keys) {
+			if (__call__ (_truth, null, me_other.shape_keys)) {
 				var target_coords = __call__ (me_cos, null, __getitem__ (me_other.shape_keys.key_blocks, 0).data);
 			}
 			else {
@@ -884,9 +1040,9 @@ export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 				var __left0__ = __getitem__ (__iterable1__, __index1__);
 				var i = __left0__ [0];
 				var vert_cos = __left0__ [1];
-				if (vert_cos) {
+				if (__call__ (_truth, null, vert_cos)) {
 					var co = __truediv__ (__call__ (reduce, null, VectorAdd, vert_cos), __call__ (len, null, vert_cos));
-					if (use_clamp) {
+					if (__call__ (_truth, null, use_clamp)) {
 						var len_from = (__sub__ (__getitem__ (orig_shape_coords, i), __getitem__ (orig_coords, i))).length;
 						var ofs = __sub__ (co, __getitem__ (target_coords, i));
 						ofs.length = len_from;
@@ -1020,13 +1176,13 @@ export var JoinUVs =  __class__ ('JoinUVs', [Operator], {
 		var obj = context.active_object;
 		var mesh = obj.data;
 		var is_editmode = __eq__ (obj.mode, 'EDIT');
-		if (is_editmode) {
+		if (__call__ (_truth, null, is_editmode)) {
 			(function () {
 				var __accu0__ = bpy.ops.object;
 				return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'OBJECT', toggle: false}));
 			}) ();
 		}
-		if (!(mesh.uv_layers)) {
+		if (!(__call__ (_truth, null, mesh.uv_layers))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
@@ -1080,13 +1236,13 @@ export var JoinUVs =  __class__ ('JoinUVs', [Operator], {
 				}
 				else {
 					var uv_other = mesh_other.uv_layers.active;
-					if (!(uv_other)) {
+					if (!(__call__ (_truth, null, uv_other))) {
 						(function () {
 							var __accu0__ = mesh_other.uv_layers;
 							return __call__ (__accu0__.py_new, __accu0__);
 						}) ();
 						var uv_other = mesh_other.uv_layers.active;
-						if (!(uv_other)) {
+						if (!(__call__ (_truth, null, uv_other))) {
 							(function () {
 								var __accu0__ = self;
 								return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
@@ -1107,7 +1263,7 @@ export var JoinUVs =  __class__ ('JoinUVs', [Operator], {
 				}
 			}
 		}
-		if (is_editmode) {
+		if (__call__ (_truth, null, is_editmode)) {
 			(function () {
 				var __accu0__ = bpy.ops.object;
 				return __call__ (__accu0__.mode_set, __accu0__, __kwargtrans__ ({mode: 'EDIT', toggle: false}));
@@ -1207,7 +1363,7 @@ export var MakeDupliFace =  __class__ ('MakeDupliFace', [Operator], {
 					return __call__ (__accu0__.append, __accu0__, obj);
 				}) ();
 			}
-			else if (__eq__ (obj.py_metatype, 'EMPTY') && __eq__ (obj.instance_type, 'COLLECTION') && obj.instance_collection) {
+			else if (__eq__ (obj.py_metatype, 'EMPTY') && __eq__ (obj.instance_type, 'COLLECTION') && __call__ (_truth, null, obj.instance_collection)) {
 				(function () {
 					var __accu0__ = __getitem__ (linked, obj.instance_collection);
 					return __call__ (__accu0__.append, __accu0__, obj);
@@ -1400,10 +1556,10 @@ export var IsolateTypeRender =  __class__ ('IsolateTypeRender', [Operator], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var obj = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu0__ = obj;
 				return __call__ (__accu0__.select_get, __accu0__);
-			}) ()) {
+			}) ())) {
 				obj.hide_render = false;
 			}
 			else if (__eq__ (obj.py_metatype, act_type)) {
@@ -1480,7 +1636,7 @@ export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 		else {
 		}
 		var objects = context.selected_editable_objects;
-		if (!(objects)) {
+		if (!(__call__ (_truth, null, objects))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No selected editable objects to operate on');
@@ -1528,7 +1684,7 @@ export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 		else {
 		}
 		obj.delta_location = __call__ (__iadd__, null, obj.delta_location, obj.location);
-		if (self.reset_values) {
+		if (__call__ (_truth, null, self.reset_values)) {
 			(function () {
 				var __accu0__ = obj.location;
 				return __call__ (__accu0__.zero, __accu0__);
@@ -1560,7 +1716,7 @@ export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 				var __accu0__ = obj.delta_rotation_quaternion;
 				return __call__ (__accu0__.rotate, __accu0__, delta);
 			}) ();
-			if (self.reset_values) {
+			if (__call__ (_truth, null, self.reset_values)) {
 				(function () {
 					var __accu0__ = obj.rotation_quaternion;
 					return __call__ (__accu0__.identity, __accu0__);
@@ -1580,7 +1736,7 @@ export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 				var __accu0__ = obj.delta_rotation_euler;
 				return __call__ (__accu0__.rotate, __accu0__, delta);
 			}) ();
-			if (self.reset_values) {
+			if (__call__ (_truth, null, self.reset_values)) {
 				(function () {
 					var __accu0__ = obj.rotation_euler;
 					return __call__ (__accu0__.zero, __accu0__);
@@ -1606,7 +1762,7 @@ export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 		__setitem__ (obj.delta_scale, 0, __call__ (__imul__, null, __getitem__ (obj.delta_scale, 0), __getitem__ (obj.scale, 0)));
 		__setitem__ (obj.delta_scale, 1, __call__ (__imul__, null, __getitem__ (obj.delta_scale, 1), __getitem__ (obj.scale, 1)));
 		__setitem__ (obj.delta_scale, 2, __call__ (__imul__, null, __getitem__ (obj.delta_scale, 2), __getitem__ (obj.scale, 2)));
-		if (self.reset_values) {
+		if (__call__ (_truth, null, self.reset_values)) {
 			__setslice__ (obj.scale, 0, null, null, tuple ([1, 1, 1]));
 		}
 	});}
@@ -1656,7 +1812,7 @@ export var TransformsToDeltasAnim =  __class__ ('TransformsToDeltasAnim', [Opera
 			return __call__ (__accu0__.py_values, __accu0__);
 		}) ();
 		var objects = context.selected_editable_objects;
-		if (!(objects)) {
+		if (!(__call__ (_truth, null, objects))) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No selected editable objects to operate on');
@@ -1683,7 +1839,7 @@ export var TransformsToDeltasAnim =  __class__ ('TransformsToDeltasAnim', [Opera
 				var __accu0__ = anim_utils;
 				return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, adt.action, adt.action_slot);
 			}) ();
-			if (!(channelbag)) {
+			if (!(__call__ (_truth, null, channelbag))) {
 				continue;
 			}
 			var __iterable1__ = channelbag.fcurves;
@@ -1895,7 +2051,7 @@ export var OBJECT_OT_assign_property_defaults =  __class__ ('OBJECT_OT_assign_pr
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var prop = __getitem__ (__iterable0__, __index0__);
-				if (prop.is_runtime) {
+				if (__call__ (_truth, null, prop.is_runtime)) {
 					(function () {
 						var __accu1__ = __accu0__;
 						return __call__ (__accu1__.append, __accu1__, prop.identifier);
@@ -1938,7 +2094,7 @@ export var OBJECT_OT_assign_property_defaults =  __class__ ('OBJECT_OT_assign_pr
 			var __accu0__ = self;
 			return __call__ (__accu0__.assign_defaults, __accu0__, obj);
 		}) ();
-		if (self.process_bones && obj.pose) {
+		if (__call__ (_truth, null, self.process_bones) && __call__ (_truth, null, obj.pose)) {
 			var __iterable0__ = obj.pose.bones;
 			__iterable0__ = __i__ (__iterable0__);
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1949,12 +2105,12 @@ export var OBJECT_OT_assign_property_defaults =  __class__ ('OBJECT_OT_assign_pr
 				}) ();
 			}
 		}
-		if (self.process_data && obj.data && obj.data.is_editable) {
+		if (__call__ (_truth, null, self.process_data) && __call__ (_truth, null, obj.data) && __call__ (_truth, null, obj.data.is_editable)) {
 			(function () {
 				var __accu0__ = self;
 				return __call__ (__accu0__.assign_defaults, __accu0__, obj.data);
 			}) ();
-			if (self.process_bones && __call__ (isinstance, null, obj.data, bpy.types.Armature)) {
+			if (__call__ (_truth, null, self.process_bones) && __call__ (isinstance, null, obj.data, bpy.types.Armature)) {
 				var __iterable0__ = obj.data.bones;
 				__iterable0__ = __i__ (__iterable0__);
 				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
@@ -1977,6 +2133,14 @@ export {BoolProperty, EnumProperty, IntProperty, Operator, StringProperty, _glob
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'SelectPattern': SelectPattern = value; break;
 		case 'SelectCamera': SelectCamera = value; break;
 		case 'SelectHierarchy': SelectHierarchy = value; break;

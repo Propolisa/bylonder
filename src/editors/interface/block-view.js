@@ -110,13 +110,13 @@ function buttonNode(b, env) {
 
 function widgetNode(b, env) {
   const { ui } = env, text = b.text ?? '', shown = b.display ?? text, iconName = b.icon;
-  // A scaled layout's buttons (scale_y) keep the height Blender gave them.
-  const style = { ...corners(b.aligned), ...(b.h > 1 && { height: `calc(var(--bl-row) * ${b.h})` }) };
+  // A scaled layout's buttons (scale_y), and a tree view's spacer labels, keep the height Blender gave them.
+  const style = { ...corners(b.aligned), ...((b.h > 1 || (b.type === 'LABEL' && b.h < 1)) && { height: `calc(var(--bl-row) * ${b.h})` }) };
   const common = { disabled: b.disabled || !env.enabled, inactive: b.inactive || !env.active, title: b.tip };
   const flat = b.emboss === 'NONE' || b.emboss === 'NONE_OR_STATUS' || env.emboss === 'NONE';
   const withStyle = (vnode) => { if (vnode) vnode.props = { ...vnode.props, style: { ...vnode.props?.style, ...style }, 'data-blender': b.operator ?? b.rna?.prop }; return vnode; };
   switch (b.type) {
-    case 'LABEL': return label(shown, { iconName, align: b.text_right ? 'right' : 'left', className: common.inactive ? 'opacity-50' : '' });
+    case 'LABEL': return withStyle(label(shown, { iconName, align: b.text_right ? 'right' : 'left', className: common.inactive ? 'opacity-50' : '' }));
     case 'SEPR': return h('div', { class: 'bl-separator shrink-0' });
     case 'SEPR_LINE': return h('div', { class: 'bl-separator shrink-0', 'data-type': 'LINE' });
     case 'SEPR_SPACER': return h('div', { class: 'flex-1' });
@@ -142,9 +142,9 @@ function widgetNode(b, env) {
       return h('button', { type: 'button', class: 'bl-decorator flex h-unit w-unit shrink-0 items-center justify-center', 'aria-label': b.tip || 'Decorator', title: b.tip,
         disabled: common.disabled, onClick: () => press(b, ui) }, icon(iconName));
     case 'LISTBOX': return null;
-    case 'ROW': case 'LISTROW': case 'TAB': {
-      const item = b.type === 'LISTROW' ? undefined : enumItem(b);
-      const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, className: 'flex-1',
+    case 'ROW': case 'LISTROW': case 'VIEW_ITEM': case 'TAB': {
+      const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
+      const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
         value: item?.identifier, onClick: () => press(b, ui) }));
       return b.type === 'TAB' ? cloneVNode(vnode, { role: 'tab', 'aria-selected': String(!!b.selected), 'aria-label': shown || item?.name || b.tip }) : vnode;
     }

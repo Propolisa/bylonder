@@ -106,6 +106,22 @@ export var _formatted = function (value, conversion, spec) {
 		return __call__ (__accu0__.format, __accu0__, value);
 	}) () : __call__ (str, null, value));
 };
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -196,7 +212,7 @@ export var _NeedSelSetMixin =  __class__ ('_NeedSelSetMixin', [_PoseModeOnlyMixi
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, _NeedSelSetMixin, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, _NeedSelSetMixin, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var arm = context.object;
@@ -298,7 +314,7 @@ export var POSE_OT_selection_set_move =  __class__ ('POSE_OT_selection_set_move'
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (_super_classmethod, null, POSE_OT_selection_set_move, cls, 'poll'), null, context))) {
+		if (!(__call__ (_truth, null, __call__ (__call__ (_super_classmethod, null, POSE_OT_selection_set_move, cls, 'poll'), null, context)))) {
 			return false;
 		}
 		var arm = context.object;
@@ -717,10 +733,10 @@ export var _uniqify = function (py_name, other_names) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var n = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu1__ = n;
 				return __call__ (__accu1__.startswith, __accu1__, __add__ (py_name, '.'));
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, __getslice__ (n, offset, null, 1));
@@ -735,10 +751,10 @@ export var _uniqify = function (py_name, other_names) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var suffix = __getitem__ (__iterable0__, __index0__);
-			if ((function () {
+			if (__call__ (_truth, null, (function () {
 				var __accu1__ = suffix;
 				return __call__ (__accu1__.isdigit, __accu1__);
-			}) ()) {
+			}) ())) {
 				(function () {
 					var __accu1__ = __accu0__;
 					return __call__ (__accu1__.append, __accu1__, __call__ (int, null, suffix));
@@ -786,7 +802,7 @@ export var _to_json = function (context) {
 		var __left0__ = __getitem__ (__iterable0__, __index0__);
 		var idx = __left0__ [0];
 		var sel_set = __left0__ [1];
-		if (__eq__ (idx, active_idx) || sel_set.is_selected) {
+		if (__eq__ (idx, active_idx) || __call__ (_truth, null, sel_set.is_selected)) {
 			var bones = (function () {
 				var __accu0__ = [];
 				var __iterable1__ = sel_set.bone_ids;
@@ -898,6 +914,7 @@ export function __py_setattr__ (key, value) {
 		case '_new_object': _new_object = value; break;
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
 		case '_joined': _joined = value; break;
 		case '_super_classmethod': _super_classmethod = value; break;
 		case 'SelectionEntry': SelectionEntry = value; break;

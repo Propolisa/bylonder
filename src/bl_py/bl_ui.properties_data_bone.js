@@ -12,6 +12,162 @@ import {Panel} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_data_bone';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var BoneButtonsPanel =  __class__ ('BoneButtonsPanel', [object], {
 	__module__: __name__,
 	bl_space_type: 'PROPERTIES',
@@ -56,7 +212,7 @@ export var BONE_PT_context_bone =  __class__ ('BONE_PT_context_bone', [BoneButto
 		}
 		var layout = self.layout;
 		var bone = context.bone;
-		if (!(bone)) {
+		if (!(__call__ (_truth, null, bone))) {
 			var bone = context.edit_bone;
 		}
 		var row = (function () {
@@ -91,7 +247,7 @@ export var BONE_PT_transform =  __class__ ('BONE_PT_transform', [BoneButtonsPane
 		}
 		else {
 		}
-		if (context.edit_bone) {
+		if (__call__ (_truth, null, context.edit_bone)) {
 			return true;
 		}
 		var ob = context.object;
@@ -120,9 +276,9 @@ export var BONE_PT_transform =  __class__ ('BONE_PT_transform', [BoneButtonsPane
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (bone && ob) {
+		if (__call__ (_truth, null, bone) && __call__ (_truth, null, ob)) {
 			var pchan = __getitem__ (ob.pose.bones, bone.py_name);
-			col.active = !(bone.parent && bone.use_connect);
+			col.active = !(__call__ (_truth, null, bone.parent) && __call__ (_truth, null, bone.use_connect));
 			var row = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -240,7 +396,7 @@ export var BONE_PT_transform =  __class__ ('BONE_PT_transform', [BoneButtonsPane
 				return __call__ (__accu0__.prop, __accu0__, pchan, 'lock_scale', __kwargtrans__ ({text: '', emboss: false, icon: 'DECORATE_UNLOCKED'}));
 			}) ();
 		}
-		else if (context.edit_bone) {
+		else if (__call__ (_truth, null, context.edit_bone)) {
 			var bone = context.edit_bone;
 			var col = (function () {
 				var __accu0__ = layout;
@@ -296,7 +452,7 @@ export var BONE_PT_curved =  __class__ ('BONE_PT_curved', [BoneButtonsPanel, Pan
 		var bone = context.bone;
 		var arm = context.armature;
 		var bone_list = 'bones';
-		if (ob && bone) {
+		if (__call__ (_truth, null, ob) && __call__ (_truth, null, bone)) {
 			var bbone = __getitem__ (ob.pose.bones, bone.py_name);
 		}
 		else if (bone === null) {
@@ -551,7 +707,7 @@ export var BONE_PT_relations =  __class__ ('BONE_PT_relations', [BoneButtonsPane
 		var bone = context.bone;
 		var arm = context.armature;
 		var pchan = null;
-		if (ob && bone) {
+		if (__call__ (_truth, null, ob) && __call__ (_truth, null, bone)) {
 			var pchan = __getitem__ (ob.pose.bones, bone.py_name);
 		}
 		else if (bone === null) {
@@ -561,7 +717,7 @@ export var BONE_PT_relations =  __class__ ('BONE_PT_relations', [BoneButtonsPane
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (context.bone) {
+		if (__call__ (_truth, null, context.bone)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, bone, 'parent');
@@ -573,7 +729,7 @@ export var BONE_PT_relations =  __class__ ('BONE_PT_relations', [BoneButtonsPane
 				return __call__ (__accu0__.prop_search, __accu0__, bone, 'parent', arm, 'edit_bones');
 			}) ();
 		}
-		if (ob && pchan) {
+		if (__call__ (_truth, null, ob) && __call__ (_truth, null, pchan)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, bone, 'use_relative_parent');
@@ -592,7 +748,7 @@ export var BONE_PT_relations =  __class__ ('BONE_PT_relations', [BoneButtonsPane
 			var __accu0__ = col;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		sub.active = !(bone.parent) || !(bone.use_connect);
+		sub.active = !(__call__ (_truth, null, bone.parent)) || !(__call__ (_truth, null, bone.use_connect));
 		(function () {
 			var __accu0__ = sub;
 			return __call__ (__accu0__.prop, __accu0__, bone, 'use_local_location');
@@ -652,7 +808,7 @@ export var BONE_PT_collections =  __class__ ('BONE_PT_collections', [BoneButtons
 		layout.use_property_split = false;
 		var bone = context.bone || context.edit_bone;
 		var object = context.pose_object || context.edit_object || context.object;
-		if (!(object)) {
+		if (!(__call__ (_truth, null, object))) {
 			layout.active = false;
 			var sub = (function () {
 				var __accu0__ = layout;
@@ -670,7 +826,7 @@ export var BONE_PT_collections =  __class__ ('BONE_PT_collections', [BoneButtons
 		}
 		var armature = object.data;
 		var is_solo_active = armature.collections.is_solo_active;
-		if (!(bone.collections)) {
+		if (!(__call__ (_truth, null, bone.collections))) {
 			layout.active = false;
 			(function () {
 				var __accu0__ = layout;
@@ -707,14 +863,14 @@ export var BONE_PT_collections =  __class__ ('BONE_PT_collections', [BoneButtons
 				var __accu0__ = row;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 			}) ();
-			sub_visible.active = !(is_solo_active) && bcoll.is_visible_ancestors;
+			sub_visible.active = !(__call__ (_truth, null, is_solo_active)) && bcoll.is_visible_ancestors;
 			(function () {
 				var __accu0__ = sub_visible;
-				return __call__ (__accu0__.prop, __accu0__, bcoll, 'is_visible', __kwargtrans__ ({text: '', icon: (bcoll.is_visible ? 'HIDE_OFF' : 'HIDE_ON')}));
+				return __call__ (__accu0__.prop, __accu0__, bcoll, 'is_visible', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, bcoll.is_visible) ? 'HIDE_OFF' : 'HIDE_ON')}));
 			}) ();
 			(function () {
 				var __accu0__ = row;
-				return __call__ (__accu0__.prop, __accu0__, bcoll, 'is_solo', __kwargtrans__ ({text: '', icon: (bcoll.is_solo ? 'SOLO_ON' : 'SOLO_OFF')}));
+				return __call__ (__accu0__.prop, __accu0__, bcoll, 'is_solo', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, bcoll.is_solo) ? 'SOLO_ON' : 'SOLO_OFF')}));
 			}) ();
 			var props = (function () {
 				var __accu0__ = bcoll_row;
@@ -803,12 +959,12 @@ export var BONE_PT_display =  __class__ ('BONE_PT_display', [BoneButtonsPanel, P
 			var __accu0__ = col;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		if (pose_bone) {
+		if (__call__ (_truth, null, pose_bone)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, pose_bone, 'hide', __kwargtrans__ ({text: 'Hide', toggle: false}));
 			}) ();
-			hide_select_sub.active = !(pose_bone.hide);
+			hide_select_sub.active = !(__call__ (_truth, null, pose_bone.hide));
 		}
 		(function () {
 			var __accu0__ = hide_select_sub;
@@ -818,7 +974,7 @@ export var BONE_PT_display =  __class__ ('BONE_PT_display', [BoneButtonsPanel, P
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, bone, 'display_type', __kwargtrans__ ({text: 'Display As'}));
 		}) ();
-		if (!(pose_bone)) {
+		if (!(__call__ (_truth, null, pose_bone))) {
 			return ;
 		}
 		layout.use_property_decorate = false;
@@ -889,7 +1045,7 @@ export var BONE_PT_display =  __class__ ('BONE_PT_display', [BoneButtonsPanel, P
 			var __accu0__ = col;
 			return __call__ (__accu0__.column, __accu0__);
 		}) ();
-		hide_select_sub.active = !(bone.hide);
+		hide_select_sub.active = !(__call__ (_truth, null, bone.hide));
 		(function () {
 			var __accu0__ = hide_select_sub;
 			return __call__ (__accu0__.prop, __accu0__, bone, 'hide_select', __kwargtrans__ ({invert_checkbox: true}));
@@ -923,7 +1079,7 @@ export var BONE_PT_display =  __class__ ('BONE_PT_display', [BoneButtonsPanel, P
 		}
 		else {
 		}
-		if (!(bone_color.is_custom)) {
+		if (!(__call__ (_truth, null, bone_color.is_custom))) {
 			return ;
 		}
 		var py_split = (function () {
@@ -1007,13 +1163,13 @@ export var BONE_PT_display_custom_shape =  __class__ ('BONE_PT_display_custom_sh
 		var ob = context.object;
 		var bone = context.bone;
 		var pchan = null;
-		if (ob && bone) {
+		if (__call__ (_truth, null, ob) && __call__ (_truth, null, bone)) {
 			var pchan = __getitem__ (ob.pose.bones, bone.py_name);
 		}
 		else if (bone === null) {
 			var bone = context.edit_bone;
 		}
-		if (bone && pchan) {
+		if (__call__ (_truth, null, bone) && __call__ (_truth, null, pchan)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__);
@@ -1311,7 +1467,7 @@ export var BONE_PT_deform =  __class__ ('BONE_PT_deform', [BoneButtonsPanel, Pan
 		else {
 		}
 		var bone = context.bone;
-		if (!(bone)) {
+		if (!(__call__ (_truth, null, bone))) {
 			var bone = context.edit_bone;
 		}
 		(function () {
@@ -1337,7 +1493,7 @@ export var BONE_PT_deform =  __class__ ('BONE_PT_deform', [BoneButtonsPanel, Pan
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var bone = context.bone;
-		if (!(bone)) {
+		if (!(__call__ (_truth, null, bone))) {
 			var bone = context.edit_bone;
 		}
 		layout.active = bone.use_deform;
@@ -1448,7 +1604,7 @@ export var BONE_PT_custom_props =  __class__ ('BONE_PT_custom_props', [BoneButto
 			return 'edit_bone';
 		}
 		var obj = context.object;
-		if (!(obj)) {
+		if (!(__call__ (_truth, null, obj))) {
 			return 'bone';
 		}
 		if (__ne__ (obj.mode, 'POSE')) {
@@ -1482,6 +1638,14 @@ export {Panel, i18n_contexts, register_class};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'BoneButtonsPanel': BoneButtonsPanel = value; break;
 		case 'BONE_PT_context_bone': BONE_PT_context_bone = value; break;
 		case 'BONE_PT_transform': BONE_PT_transform = value; break;

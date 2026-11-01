@@ -7,6 +7,162 @@ import {basic_force_field_falloff_ui, basic_force_field_settings_ui} from './bl_
 import {contexts as i18n_contexts} from './_bpy.app.translations.js';
 import {Panel} from './_bpy.types.js';
 var __name__ = 'bl_ui.properties_physics_field';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 	__module__: __name__,
 	bl_space_type: 'PROPERTIES',
@@ -66,10 +222,10 @@ export var PHYSICS_PT_field =  __class__ ('PHYSICS_PT_field', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -119,10 +275,10 @@ export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', 
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -341,10 +497,10 @@ export var PHYSICS_PT_field_settings_kink =  __class__ ('PHYSICS_PT_field_settin
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var ob = context.object;
@@ -425,10 +581,10 @@ export var PHYSICS_PT_field_settings_texture_select =  __class__ ('PHYSICS_PT_fi
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var ob = context.object;
@@ -481,10 +637,10 @@ export var PHYSICS_PT_field_falloff =  __class__ ('PHYSICS_PT_field_falloff', [P
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var ob = context.object;
@@ -536,10 +692,10 @@ export var PHYSICS_PT_field_falloff_angular =  __class__ ('PHYSICS_PT_field_fall
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var ob = context.object;
@@ -632,10 +788,10 @@ export var PHYSICS_PT_field_falloff_radial =  __class__ ('PHYSICS_PT_field_fallo
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_force_field, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		var ob = context.object;
@@ -751,10 +907,10 @@ export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicBut
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_collision, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -778,7 +934,7 @@ export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicBut
 		layout.use_property_split = true;
 		var md = context.collision;
 		var coll = md.settings;
-		if (!(coll)) {
+		if (!(__call__ (_truth, null, coll))) {
 			__call__ (collision_warning, null, layout);
 			return ;
 		}
@@ -814,10 +970,10 @@ export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_par
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_collision, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -845,7 +1001,7 @@ export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_par
 			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
 		}) ();
 		var coll = md.settings;
-		if (!(coll)) {
+		if (!(__call__ (_truth, null, coll))) {
 			__call__ (collision_warning, null, layout);
 			return ;
 		}
@@ -921,10 +1077,10 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 		}
 		else {
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = PhysicButtonsPanel;
 			return __call__ (__accu0__.poll_collision, __accu0__, context);
-		}) ())) {
+		}) ()))) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -952,7 +1108,7 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 		}) ();
 		var md = context.collision;
 		var coll = md.settings;
-		if (!(coll)) {
+		if (!(__call__ (_truth, null, coll))) {
 			__call__ (collision_warning, null, layout);
 			return ;
 		}
@@ -1023,6 +1179,14 @@ export {Panel, basic_force_field_falloff_ui, basic_force_field_settings_ui, i18n
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
 		case 'PHYSICS_PT_field': PHYSICS_PT_field = value; break;
 		case 'PHYSICS_PT_field_settings': PHYSICS_PT_field_settings = value; break;

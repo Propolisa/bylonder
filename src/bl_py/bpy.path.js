@@ -7,6 +7,162 @@ import {extensions_audio, extensions_image, extensions_movie, is_autoexec} from 
 import * as _os from './os.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy.path';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var __all__ = tuple (['abspath', 'basename', 'clean_name', 'display_name', 'display_name_to_filepath', 'display_name_from_filepath', 'ensure_ext', 'extensions_image', 'extensions_movie', 'extensions_audio', 'is_subdir', 'is_autoexec', 'module_names', 'native_pathsep', 'reduce_dirs', 'relpath', 'resolve_ncase']);
 export var _bpy = __cycle0__;
 export var _getattr_bytes = function (var_, attr) {
@@ -51,11 +207,11 @@ export var abspath = function (path) {
 	else {
 	}
 	if (__call__ (isinstance, null, path, bytes)) {
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = path;
 			return __call__ (__accu0__.startswith, __accu0__, __call__ (bytes, null, [47, 47]));
-		}) ()) {
-			if (library) {
+		}) ())) {
+			if (__call__ (_truth, null, library)) {
 				var start = (function () {
 					var __accu0__ = _os.path;
 					return __call__ (__accu0__.dirname, __accu0__, __call__ (abspath, null, __call__ (_getattr_bytes, null, library, 'filepath')));
@@ -70,11 +226,11 @@ export var abspath = function (path) {
 			}) ();
 		}
 	}
-	else if ((function () {
+	else if (__call__ (_truth, null, (function () {
 		var __accu0__ = path;
 		return __call__ (__accu0__.startswith, __accu0__, '//');
-	}) ()) {
-		if (library) {
+	}) ())) {
+		if (__call__ (_truth, null, library)) {
 			var start = (function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.dirname, __accu0__, __call__ (abspath, null, library.filepath));
@@ -107,10 +263,10 @@ export var relpath = function (path) {
 	else {
 	}
 	if (__call__ (isinstance, null, path, bytes)) {
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = path;
 			return __call__ (__accu0__.startswith, __accu0__, __call__ (bytes, null, [47, 47]));
-		}) ())) {
+		}) ()))) {
 			if (start === null) {
 				var start = (function () {
 					var __accu0__ = _os.path;
@@ -123,10 +279,10 @@ export var relpath = function (path) {
 			}) ());
 		}
 	}
-	else if (!((function () {
+	else if (!(__call__ (_truth, null, (function () {
 		var __accu0__ = path;
 		return __call__ (__accu0__.startswith, __accu0__, '//');
-	}) ())) {
+	}) ()))) {
 		if (start === null) {
 			var start = (function () {
 				var __accu0__ = _os.path;
@@ -165,13 +321,13 @@ export var is_subdir = function (path, directory) {
 			var __accu0__ = sep;
 			return __call__ (__accu0__.encode, __accu0__, 'ascii');
 		}) () : sep);
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = path;
 			return __call__ (__accu0__.startswith, __accu0__, __add__ ((function () {
 				var __accu1__ = directory;
 				return __call__ (__accu1__.rstrip, __accu1__, sep);
 			}) (), sep));
-		}) ()) {
+		}) ())) {
 			return true;
 		}
 	}
@@ -294,7 +450,7 @@ export var display_name = function (py_name) {
 	}
 	else {
 	}
-	if (has_ext) {
+	if (__call__ (_truth, null, has_ext)) {
 		var py_name = __getitem__ ((function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.splitext, __accu0__, __call__ (basename, null, py_name));
@@ -321,10 +477,10 @@ export var display_name = function (py_name) {
 		}) ();
 		return __call__ (__accu0__.lstrip, __accu0__, ' ');
 	}) ();
-	if (title_case && (function () {
+	if (__call__ (_truth, null, title_case) && __call__ (_truth, null, (function () {
 		var __accu0__ = py_name;
 		return __call__ (__accu0__.islower, __accu0__);
-	}) ()) {
+	}) ())) {
 		var py_name = (function () {
 			var __accu0__ = (function () {
 				var __accu1__ = py_name;
@@ -415,10 +571,10 @@ export var resolve_ncase = function (path) {
 		}
 		else {
 		}
-		if (!(path) || (function () {
+		if (!(__call__ (_truth, null, path)) || __call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.exists, __accu0__, path);
-		}) ()) {
+		}) ())) {
 			return tuple ([path, true]);
 		}
 		var filename = (function () {
@@ -430,7 +586,7 @@ export var resolve_ncase = function (path) {
 			return __call__ (__accu0__.dirname, __accu0__, path);
 		}) ();
 		var suffix = __getslice__ (path, null, 0, 1);
-		if (!(filename)) {
+		if (!(__call__ (_truth, null, filename))) {
 			if (__lt__ (__call__ (len, null, dirpath), __call__ (len, null, path))) {
 				var suffix = __getslice__ (path, null, __sub__ (__call__ (len, null, path), __call__ (len, null, dirpath)), 1);
 			}
@@ -443,24 +599,24 @@ export var resolve_ncase = function (path) {
 				return __call__ (__accu0__.dirname, __accu0__, dirpath);
 			}) ();
 		}
-		if (!((function () {
+		if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.exists, __accu0__, dirpath);
-		}) ())) {
+		}) ()))) {
 			if (__eq__ (dirpath, path)) {
 				return tuple ([path, false]);
 			}
 			var __left0__ = __call__ (_ncase_path_found, null, dirpath);
 			var dirpath = __left0__ [0];
 			var found = __left0__ [1];
-			if (!(found)) {
+			if (!(__call__ (_truth, null, found))) {
 				return tuple ([path, false]);
 			}
 		}
-		if ((function () {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = _os.path;
 			return __call__ (__accu0__.isdir, __accu0__, dirpath);
-		}) ()) {
+		}) ())) {
 			try {
 				var files = (function () {
 					var __accu0__ = _os;
@@ -496,7 +652,7 @@ export var resolve_ncase = function (path) {
 				break;
 			}
 		}
-		if (f_iter_nocase) {
+		if (__call__ (_truth, null, f_iter_nocase)) {
 			return tuple ([__add__ ((function () {
 				var __accu0__ = _os.path;
 				return __call__ (__accu0__.join, __accu0__, dirpath, f_iter_nocase);
@@ -509,7 +665,7 @@ export var resolve_ncase = function (path) {
 	var __left0__ = __call__ (_ncase_path_found, null, path);
 	var ncase_path = __left0__ [0];
 	var found = __left0__ [1];
-	return (found ? ncase_path : path);
+	return (__call__ (_truth, null, found) ? ncase_path : path);
 };
 export var ensure_ext = function (filepath, ext) {
 	var case_sensitive = false;
@@ -528,15 +684,15 @@ export var ensure_ext = function (filepath, ext) {
 	}
 	else {
 	}
-	if (case_sensitive) {
-		if ((function () {
+	if (__call__ (_truth, null, case_sensitive)) {
+		if (__call__ (_truth, null, (function () {
 			var __accu0__ = filepath;
 			return __call__ (__accu0__.endswith, __accu0__, ext);
-		}) ()) {
+		}) ())) {
 			return filepath;
 		}
 	}
-	else if ((function () {
+	else if (__call__ (_truth, null, (function () {
 		var __accu0__ = (function () {
 			var __accu1__ = __getslice__ (filepath, __neg__ (__call__ (len, null, ext)), null, 1);
 			return __call__ (__accu1__.lower, __accu1__);
@@ -545,7 +701,7 @@ export var ensure_ext = function (filepath, ext) {
 			var __accu1__ = ext;
 			return __call__ (__accu1__.lower, __accu1__);
 		}) ());
-	}) ()) {
+	}) ())) {
 		return filepath;
 	}
 	return __add__ (filepath, ext);
@@ -571,7 +727,7 @@ export var module_names = function (path) {
 	var join = __call__ (_member, null, 'os.path', 'join');
 	var isfile = __call__ (_member, null, 'os.path', 'isfile');
 	var modules = [];
-	var package_prefix = (package_ ? __add__ (package_, '.') : '');
+	var package_prefix = (__call__ (_truth, null, package_) ? __add__ (package_, '.') : '');
 	var __iterable0__ = __call__ (sorted, null, (function () {
 		var __accu0__ = _os;
 		return __call__ (__accu0__.listdir, __accu0__, path);
@@ -579,31 +735,31 @@ export var module_names = function (path) {
 	__iterable0__ = __i__ (__iterable0__);
 	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 		var filename = __getitem__ (__iterable0__, __index0__);
-		if (__eq__ (filename, 'modules') && !(package_prefix)) {
+		if (__eq__ (filename, 'modules') && !(__call__ (_truth, null, package_prefix))) {
 			// pass;
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = filename;
 			return __call__ (__accu0__.endswith, __accu0__, '.py');
-		}) () && __ne__ (filename, '__init__.py')) {
+		}) ()) && __ne__ (filename, '__init__.py')) {
 			var fullpath = __call__ (join, null, path, filename);
 			(function () {
 				var __accu0__ = modules;
 				return __call__ (__accu0__.append, __accu0__, tuple ([__add__ (package_prefix, __getslice__ (filename, 0, __neg__ (3), 1)), fullpath]));
 			}) ();
 		}
-		else if (!((function () {
+		else if (!(__call__ (_truth, null, (function () {
 			var __accu0__ = filename;
 			return __call__ (__accu0__.startswith, __accu0__, '.');
-		}) ())) {
+		}) ()))) {
 			var directory = __call__ (join, null, path, filename);
 			var fullpath = __call__ (join, null, directory, '__init__.py');
-			if (__call__ (isfile, null, fullpath)) {
+			if (__call__ (_truth, null, __call__ (isfile, null, fullpath))) {
 				(function () {
 					var __accu0__ = modules;
 					return __call__ (__accu0__.append, __accu0__, tuple ([__add__ (package_prefix, filename), fullpath]));
 				}) ();
-				if (recursive) {
+				if (__call__ (_truth, null, recursive)) {
 					var __iterable1__ = __call__ (module_names, null, directory, __kwargtrans__ ({recursive: true}));
 					__iterable1__ = __i__ (__iterable1__);
 					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
@@ -664,10 +820,10 @@ export var native_pathsep = function (path) {
 				return __call__ (__accu0__.py_replace, __accu0__, '\\', '/');
 			}) ();
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = path;
 			return __call__ (__accu0__.startswith, __accu0__, '//');
-		}) ()) {
+		}) ())) {
 			return __add__ ('//', (function () {
 				var __accu0__ = __getslice__ (path, 2, null, 1);
 				return __call__ (__accu0__.py_replace, __accu0__, '/', '\\');
@@ -686,10 +842,10 @@ export var native_pathsep = function (path) {
 			return __call__ (__accu0__.py_replace, __accu0__, __call__ (bytes, null, [92]), __call__ (bytes, null, [47]));
 		}) ();
 	}
-	else if ((function () {
+	else if (__call__ (_truth, null, (function () {
 		var __accu0__ = path;
 		return __call__ (__accu0__.startswith, __accu0__, __call__ (bytes, null, [47, 47]));
-	}) ()) {
+	}) ())) {
 		return __add__ (__call__ (bytes, null, [47, 47]), (function () {
 			var __accu0__ = __getslice__ (path, 2, null, 1);
 			return __call__ (__accu0__.py_replace, __accu0__, __call__ (bytes, null, [47]), __call__ (bytes, null, [92]));
@@ -759,7 +915,7 @@ export var reduce_dirs = function (dirs) {
 			if (__eq__ (__call__ (len, null, __getitem__ (dirs, i)), __call__ (len, null, __getitem__ (dirs, j)))) {
 				break;
 			}
-			else if (__call__ (is_subdir, null, __getitem__ (dirs, i), __getitem__ (dirs, j))) {
+			else if (__call__ (_truth, null, __call__ (is_subdir, null, __getitem__ (dirs, i), __getitem__ (dirs, j)))) {
 				(function () {
 					var __accu0__ = dirs;
 					return __call__ (__accu0__.py_pop, __accu0__, i);
@@ -776,6 +932,14 @@ export {_globals, _import, _lazy, _member, _module, extensions_audio, extensions
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case '_bpy': _bpy = value; break;
 		case '_getattr_bytes': _getattr_bytes = value; break;

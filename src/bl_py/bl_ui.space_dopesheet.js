@@ -13,6 +13,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_dopesheet';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var dopesheet_filter = function (layout, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -30,12 +186,12 @@ export var dopesheet_filter = function (layout, context) {
 	}
 	var dopesheet = context.space_data.dopesheet;
 	var is_nla = __eq__ (context.area.py_metatype, 'NLA_EDITOR');
-	var is_action_editor = !(is_nla) && __eq__ (context.space_data.mode, 'ACTION');
+	var is_action_editor = !(__call__ (_truth, null, is_nla)) && __eq__ (context.space_data.mode, 'ACTION');
 	var row = (function () {
 		var __accu0__ = layout;
 		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
 	}) ();
-	if (is_action_editor) {
+	if (__call__ (_truth, null, is_action_editor)) {
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_only_slot_of_active_object', __kwargtrans__ ({text: ''}));
@@ -49,7 +205,7 @@ export var dopesheet_filter = function (layout, context) {
 		var __accu0__ = row;
 		return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_hidden', __kwargtrans__ ({text: ''}));
 	}) ();
-	if (is_nla) {
+	if (__call__ (_truth, null, is_nla)) {
 		(function () {
 			var __accu0__ = row;
 			return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_missing_nla', __kwargtrans__ ({text: ''}));
@@ -96,7 +252,7 @@ export var DopesheetFilterPopoverBase =  __class__ ('DopesheetFilterPopoverBase'
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_hidden', __kwargtrans__ ({icon: 'NONE'}));
 		}) ();
-		if (is_nla) {
+		if (__call__ (_truth, null, is_nla)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_missing_nla', __kwargtrans__ ({icon: 'NONE'}));
@@ -135,7 +291,7 @@ export var DopesheetFilterPopoverBase =  __class__ ('DopesheetFilterPopoverBase'
 			var __accu0__ = layout;
 			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
 		}) ();
-		if (!(is_nla)) {
+		if (!(__call__ (_truth, null, is_nla))) {
 			var row = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -155,7 +311,7 @@ export var DopesheetFilterPopoverBase =  __class__ ('DopesheetFilterPopoverBase'
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'filter_text', __kwargtrans__ ({text: ''}));
 			}) ();
 		}
-		if (!(generic_filters_only) && bpy.data.collections) {
+		if (!(__call__ (_truth, null, generic_filters_only)) && __call__ (_truth, null, bpy.data.collections)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -199,73 +355,73 @@ export var DopesheetFilterPopoverBase =  __class__ ('DopesheetFilterPopoverBase'
 			var __accu0__ = flow;
 			return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_nodes', __kwargtrans__ ({text: 'Node Trees'}));
 		}) ();
-		if (bpy.data.armatures) {
+		if (__call__ (_truth, null, bpy.data.armatures)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_armatures', __kwargtrans__ ({text: 'Armatures'}));
 			}) ();
 		}
-		if (bpy.data.cameras) {
+		if (__call__ (_truth, null, bpy.data.cameras)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_cameras', __kwargtrans__ ({text: 'Cameras'}));
 			}) ();
 		}
-		if (bpy.data.grease_pencils) {
+		if (__call__ (_truth, null, bpy.data.grease_pencils)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_gpencil', __kwargtrans__ ({text: 'Grease Pencil Objects'}));
 			}) ();
 		}
-		if (bpy.data.lights) {
+		if (__call__ (_truth, null, bpy.data.lights)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_lights', __kwargtrans__ ({text: 'Lights'}));
 			}) ();
 		}
-		if (bpy.data.meshes) {
+		if (__call__ (_truth, null, bpy.data.meshes)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_meshes', __kwargtrans__ ({text: 'Meshes'}));
 			}) ();
 		}
-		if (bpy.data.curves) {
+		if (__call__ (_truth, null, bpy.data.curves)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_curves', __kwargtrans__ ({text: 'Curves'}));
 			}) ();
 		}
-		if (bpy.data.lattices) {
+		if (__call__ (_truth, null, bpy.data.lattices)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_lattices', __kwargtrans__ ({text: 'Lattices'}));
 			}) ();
 		}
-		if (bpy.data.metaballs) {
+		if (__call__ (_truth, null, bpy.data.metaballs)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_metaballs', __kwargtrans__ ({text: 'Metaballs'}));
 			}) ();
 		}
-		if (__call__ (hasattr, null, bpy.data, 'hair_curves') && bpy.data.hair_curves) {
+		if (__call__ (hasattr, null, bpy.data, 'hair_curves') && __call__ (_truth, null, bpy.data.hair_curves)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_hair_curves', __kwargtrans__ ({text: 'Hair Curves'}));
 			}) ();
 		}
-		if (__call__ (hasattr, null, bpy.data, 'pointclouds') && bpy.data.pointclouds) {
+		if (__call__ (hasattr, null, bpy.data, 'pointclouds') && __call__ (_truth, null, bpy.data.pointclouds)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_pointclouds', __kwargtrans__ ({text: 'Point Clouds'}));
 			}) ();
 		}
-		if (bpy.data.volumes) {
+		if (__call__ (_truth, null, bpy.data.volumes)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_volumes', __kwargtrans__ ({text: 'Volumes'}));
 			}) ();
 		}
-		if (bpy.data.lightprobes) {
+		if (__call__ (_truth, null, bpy.data.lightprobes)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_lightprobes', __kwargtrans__ ({text: 'Light Probes'}));
@@ -275,49 +431,49 @@ export var DopesheetFilterPopoverBase =  __class__ ('DopesheetFilterPopoverBase'
 			var __accu0__ = flow;
 			return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_worlds', __kwargtrans__ ({text: 'Worlds'}));
 		}) ();
-		if (bpy.data.particles) {
+		if (__call__ (_truth, null, bpy.data.particles)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_particles', __kwargtrans__ ({text: 'Particles'}));
 			}) ();
 		}
-		if (bpy.data.linestyles) {
+		if (__call__ (_truth, null, bpy.data.linestyles)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_linestyles', __kwargtrans__ ({text: 'Line Styles'}));
 			}) ();
 		}
-		if (bpy.data.speakers) {
+		if (__call__ (_truth, null, bpy.data.speakers)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_speakers', __kwargtrans__ ({text: 'Speakers'}));
 			}) ();
 		}
-		if (bpy.data.materials) {
+		if (__call__ (_truth, null, bpy.data.materials)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_materials', __kwargtrans__ ({text: 'Materials'}));
 			}) ();
 		}
-		if (bpy.data.textures) {
+		if (__call__ (_truth, null, bpy.data.textures)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_textures', __kwargtrans__ ({text: 'Textures'}));
 			}) ();
 		}
-		if (bpy.data.shape_keys) {
+		if (__call__ (_truth, null, bpy.data.shape_keys)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_shapekeys', __kwargtrans__ ({text: 'Shape Keys'}));
 			}) ();
 		}
-		if (bpy.data.cache_files) {
+		if (__call__ (_truth, null, bpy.data.cache_files)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_cache_files', __kwargtrans__ ({text: 'Cache Files'}));
 			}) ();
 		}
-		if (bpy.data.movieclips) {
+		if (__call__ (_truth, null, bpy.data.movieclips)) {
 			(function () {
 				var __accu0__ = flow;
 				return __call__ (__accu0__.prop, __accu0__, dopesheet, 'show_movieclips', __kwargtrans__ ({text: 'Movie Clips'}));
@@ -490,7 +646,7 @@ export var DOPESHEET_HT_editor_buttons =  __class__ ('DOPESHEET_HT_editor_button
 			}) ();
 			return ;
 		}
-		if (__in__ (st.mode, new set (['ACTION', 'SHAPEKEY'])) && context.object) {
+		if (__in__ (st.mode, new set (['ACTION', 'SHAPEKEY'])) && __call__ (_truth, null, context.object)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator_spacer, __accu0__);
@@ -672,14 +828,14 @@ export var DOPESHEET_HT_editor_buttons =  __class__ ('DOPESHEET_HT_editor_button
 			var __accu0__ = cls;
 			return __call__ (__accu0__._get_animated_id, __accu0__, context);
 		}) ();
-		if (!(animated_id)) {
+		if (!(__call__ (_truth, null, animated_id))) {
 			return ;
 		}
 		var row = (function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.row, __accu0__);
 		}) ();
-		if (animated_id.animation_data && animated_id.animation_data.use_tweak_mode) {
+		if (__call__ (_truth, null, animated_id.animation_data) && __call__ (_truth, null, animated_id.animation_data.use_tweak_mode)) {
 			row.enabled = false;
 		}
 		(function () {
@@ -687,7 +843,7 @@ export var DOPESHEET_HT_editor_buttons =  __class__ ('DOPESHEET_HT_editor_button
 			return __call__ (__accu0__.template_action, __accu0__, animated_id, __kwargtrans__ ({py_new: 'action.new', unlink: 'action.unlink'}));
 		}) ();
 		var adt = animated_id && animated_id.animation_data;
-		if (!(adt) || !(adt.action)) {
+		if (!(__call__ (_truth, null, adt)) || !(__call__ (_truth, null, adt.action))) {
 			return ;
 		}
 		(function () {
@@ -857,7 +1013,7 @@ export var DOPESHEET_MT_editor_menus =  __class__ ('DOPESHEET_MT_editor_menus', 
 		var active_action = context.active_action;
 		if (__eq__ (st.mode, 'TIMELINE')) {
 			var horizontal = __eq__ (layout.direction, 'VERTICAL');
-			if (horizontal) {
+			if (__call__ (_truth, null, horizontal)) {
 				var row = (function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
@@ -874,7 +1030,7 @@ export var DOPESHEET_MT_editor_menus =  __class__ ('DOPESHEET_MT_editor_menus', 
 				var __accu0__ = sub;
 				return __call__ (__accu0__.menu, __accu0__, 'TIME_MT_view');
 			}) ();
-			if (st.show_markers) {
+			if (__call__ (_truth, null, st.show_markers)) {
 				(function () {
 					var __accu0__ = sub;
 					return __call__ (__accu0__.menu, __accu0__, 'DOPESHEET_MT_marker');
@@ -890,7 +1046,7 @@ export var DOPESHEET_MT_editor_menus =  __class__ ('DOPESHEET_MT_editor_menus', 
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'DOPESHEET_MT_select');
 		}) ();
-		if (st.show_markers) {
+		if (__call__ (_truth, null, st.show_markers)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.menu, __accu0__, 'DOPESHEET_MT_marker');
@@ -968,7 +1124,7 @@ export var DOPESHEET_MT_view =  __class__ ('DOPESHEET_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'action.view_all');
 		}) ();
-		if (context.scene.use_preview_range) {
+		if (__call__ (_truth, null, context.scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
@@ -1116,7 +1272,7 @@ export var DOPESHEET_MT_view_pie =  __class__ ('DOPESHEET_MT_view_pie', [Menu], 
 			var __accu0__ = pie;
 			return __call__ (__accu0__.operator, __accu0__, 'action.view_frame');
 		}) ();
-		if (context.scene.use_preview_range) {
+		if (__call__ (_truth, null, context.scene.use_preview_range)) {
 			(function () {
 				var __accu0__ = pie;
 				return __call__ (__accu0__.operator, __accu0__, 'anim.scene_range_frame', __kwargtrans__ ({text: 'Frame Preview Range'}));
@@ -1330,7 +1486,7 @@ export var DOPESHEET_MT_marker =  __class__ ('DOPESHEET_MT_marker', [Menu], {
 		var marker_menu_generic = __call__ (_member, null, 'bl_ui.space_time', 'marker_menu_generic');
 		__call__ (marker_menu_generic, null, layout, context);
 		var st = context.space_data;
-		if (__in__ (st.mode, new set (['ACTION', 'SHAPEKEY'])) && context.active_action) {
+		if (__in__ (st.mode, new set (['ACTION', 'SHAPEKEY'])) && __call__ (_truth, null, context.active_action)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1591,7 +1747,7 @@ export var DOPESHEET_MT_key =  __class__ ('DOPESHEET_MT_key', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'action.delete');
 		}) ();
-		if (ob && __eq__ (ob.py_metatype, 'GREASEPENCIL')) {
+		if (__call__ (_truth, null, ob) && __eq__ (ob.py_metatype, 'GREASEPENCIL')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.delete_breakdown');
@@ -2142,7 +2298,7 @@ export var DOPESHEET_MT_channel_context_menu =  __class__ ('DOPESHEET_MT_channel
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'anim.channels_editable_toggle');
 		}) ();
-		if (is_graph_editor) {
+		if (__call__ (_truth, null, is_graph_editor)) {
 			var operator = 'graph.extrapolation_type';
 		}
 		else {
@@ -2152,7 +2308,7 @@ export var DOPESHEET_MT_channel_context_menu =  __class__ ('DOPESHEET_MT_channel
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator_menu_enum, __accu0__, operator, 'type', __kwargtrans__ ({text: 'Extrapolation Mode'}));
 		}) ();
-		if (is_graph_editor) {
+		if (__call__ (_truth, null, is_graph_editor)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator_menu_enum, __accu0__, 'graph.fmodifier_add', 'type', __kwargtrans__ ({text: 'Add F-Curve Modifier'}));
@@ -2206,7 +2362,7 @@ export var DOPESHEET_MT_channel_context_menu =  __class__ ('DOPESHEET_MT_channel
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'anim.channels_delete');
 		}) ();
-		if (is_graph_editor && __eq__ (context.space_data.mode, 'DRIVERS')) {
+		if (__call__ (_truth, null, is_graph_editor) && __eq__ (context.space_data.mode, 'DRIVERS')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'graph.driver_delete_invalid');
@@ -2282,7 +2438,7 @@ export var GreasePencilLayersDopeSheetPanel =  __class__ ('GreasePencilLayersDop
 		}
 		var grease_pencil = ob.data;
 		var active_layer = grease_pencil.layers.active;
-		if (active_layer) {
+		if (__call__ (_truth, null, active_layer)) {
 			return true;
 		}
 		return false;
@@ -2312,7 +2468,7 @@ export var DOPESHEET_PT_grease_pencil_mode =  __class__ ('DOPESHEET_PT_grease_pe
 		var ob = context.object;
 		var grease_pencil = ob.data;
 		var active_layer = grease_pencil.layers.active;
-		if (active_layer) {
+		if (__call__ (_truth, null, active_layer)) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -2399,7 +2555,7 @@ export var DOPESHEET_PT_ShapeKey =  __class__ ('DOPESHEET_PT_ShapeKey', [Panel],
 		if (ob === null || ob.active_shape_key === null) {
 			return false;
 		}
-		if (!(ob.data.shape_keys.use_relative)) {
+		if (!(__call__ (_truth, null, ob.data.shape_keys.use_relative))) {
 			return false;
 		}
 		return __gt__ (ob.active_shape_key_index, 0);
@@ -2498,6 +2654,14 @@ export {GreasePencil_LayerAdjustmentsPanel, GreasePencil_LayerDisplayPanel, Grea
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'dopesheet_filter': dopesheet_filter = value; break;
 		case 'DopesheetFilterPopoverBase': DopesheetFilterPopoverBase = value; break;
 		case 'DOPESHEET_PT_filters': DOPESHEET_PT_filters = value; break;

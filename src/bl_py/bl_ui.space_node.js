@@ -22,6 +22,162 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_node';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 	__module__: __name__,
 	bl_space_type: 'NODE_EDITOR',
@@ -59,7 +215,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 				return __call__ (__accu0__.prop, __accu0__, snode, 'shader_type', __kwargtrans__ ({text: ''}));
 			}) ();
 			var ob = context.object;
-			if (__eq__ (snode.shader_type, 'OBJECT') && ob) {
+			if (__eq__ (snode.shader_type, 'OBJECT') && __call__ (_truth, null, ob)) {
 				var ob_type = ob.py_metatype;
 				(function () {
 					var __accu0__ = NODE_MT_editor_menus;
@@ -70,7 +226,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.separator_spacer, __accu0__);
 				}) ();
-				var has_material_slots = !(snode.pin) && __in__ (ob_type, types_that_support_material);
+				var has_material_slots = !(__call__ (_truth, null, snode.pin)) && __in__ (ob_type, types_that_support_material);
 				if (__ne__ (ob_type, 'LIGHT')) {
 					var row = (function () {
 						var __accu0__ = layout;
@@ -88,13 +244,13 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					return __call__ (__accu0__.row, __accu0__);
 				}) ();
 				row.enabled = has_material_slots;
-				if (!(id_from) && __in__ (ob_type, types_that_support_material)) {
+				if (!(__call__ (_truth, null, id_from)) && __in__ (ob_type, types_that_support_material)) {
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.template_ID, __accu0__, ob, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
 					}) ();
 				}
-				if (id_from && __ne__ (ob_type, 'LIGHT')) {
+				if (__call__ (_truth, null, id_from) && __ne__ (ob_type, 'LIGHT')) {
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.template_ID, __accu0__, id_from, 'active_material', __kwargtrans__ ({py_new: 'material.new'}));
@@ -107,12 +263,12 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
 				}) ();
 				var world = scene.world;
-				if (snode_id) {
+				if (__call__ (_truth, null, snode_id)) {
 					var row = (function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.row, __accu0__);
 					}) ();
-					if (world && world.use_eevee_finite_volume) {
+					if (__call__ (_truth, null, world) && __call__ (_truth, null, world.use_eevee_finite_volume)) {
 						(function () {
 							var __accu0__ = row;
 							return __call__ (__accu0__.operator, __accu0__, 'world.convert_volume_to_mesh', __kwargtrans__ ({emboss: false, icon: 'WORLD', text: 'Convert Volume'}));
@@ -127,7 +283,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
 				}) ();
-				row.enabled = !(snode.pin);
+				row.enabled = !(__call__ (_truth, null, snode.pin));
 				(function () {
 					var __accu0__ = row;
 					return __call__ (__accu0__.template_ID, __accu0__, scene, 'world', __kwargtrans__ ({py_new: 'world.new'}));
@@ -141,7 +297,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 						var __accu0__ = NODE_MT_editor_menus;
 						return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
 					}) ();
-					if (snode_id) {
+					if (__call__ (_truth, null, snode_id)) {
 						var row = (function () {
 							var __accu0__ = layout;
 							return __call__ (__accu0__.row, __accu0__);
@@ -159,7 +315,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.row, __accu0__);
 					}) ();
-					row.enabled = !(snode.pin);
+					row.enabled = !(__call__ (_truth, null, snode.pin));
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.template_ID, __accu0__, lineset, 'linestyle', __kwargtrans__ ({py_new: 'scene.freestyle_linestyle_new'}));
@@ -176,7 +332,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 				var __accu0__ = NODE_MT_editor_menus;
 				return __call__ (__accu0__.draw_collapsible, __accu0__, context, layout);
 			}) ();
-			if (snode_id) {
+			if (__call__ (_truth, null, snode_id)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.prop, __accu0__, snode_id, 'use_nodes');
@@ -186,7 +342,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator_spacer, __accu0__);
 			}) ();
-			if (id_from) {
+			if (__call__ (_truth, null, id_from)) {
 				if (__eq__ (snode.texture_type, 'BRUSH')) {
 					(function () {
 						var __accu0__ = layout;
@@ -219,14 +375,14 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
 				}) ();
-				if (snode.pin) {
+				if (__call__ (_truth, null, snode.pin)) {
 					row.enabled = false;
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_compositing_node_group'}));
 					}) ();
 				}
-				else if (scene.compositing_node_group) {
+				else if (__call__ (_truth, null, scene.compositing_node_group)) {
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.template_ID, __accu0__, scene, 'compositing_node_group', __kwargtrans__ ({py_new: 'node.duplicate_compositing_node_group'}));
@@ -245,20 +401,20 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					return __call__ (__accu0__.row, __accu0__);
 				}) ();
 				var sequencer_scene = context.workspace.sequencer_scene;
-				var sequencer_editor = (sequencer_scene ? sequencer_scene.sequence_editor : null);
-				var active_strip = (sequencer_editor ? sequencer_editor.active_strip : null);
-				if (active_strip) {
+				var sequencer_editor = (__call__ (_truth, null, sequencer_scene) ? sequencer_scene.sequence_editor : null);
+				var active_strip = (__call__ (_truth, null, sequencer_editor) ? sequencer_editor.active_strip : null);
+				if (__call__ (_truth, null, active_strip)) {
 					var active_modifier = active_strip.modifiers.active;
 					var is_compositor_modifier_active = active_modifier && __eq__ (active_modifier.py_metatype, 'COMPOSITOR');
 					var is_compositor_effect_active = __eq__ (active_strip.py_metatype, 'COMPOSITOR');
-					if (is_compositor_effect_active && !(snode.pin)) {
+					if (__call__ (_truth, null, is_compositor_effect_active) && !(__call__ (_truth, null, snode.pin))) {
 						(function () {
 							var __accu0__ = row;
 							return __call__ (__accu0__.template_ID, __accu0__, active_strip, 'node_group', __kwargtrans__ ({py_new: 'node.new_compositor_sequencer_node_group'}));
 						}) ();
 					}
-					else if (is_compositor_modifier_active && !(snode.pin)) {
-						if (active_modifier.node_group) {
+					else if (__call__ (_truth, null, is_compositor_modifier_active) && !(__call__ (_truth, null, snode.pin))) {
+						if (__call__ (_truth, null, active_modifier.node_group)) {
 							(function () {
 								var __accu0__ = row;
 								return __call__ (__accu0__.template_ID, __accu0__, active_modifier, 'node_group', __kwargtrans__ ({py_new: 'node.duplicate_compositing_modifier_node_group'}));
@@ -299,18 +455,18 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.row, __accu0__);
 				}) ();
-				if (snode.pin) {
+				if (__call__ (_truth, null, snode.pin)) {
 					row.enabled = false;
 					(function () {
 						var __accu0__ = row;
 						return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_assign'}));
 					}) ();
 				}
-				else if (ob) {
+				else if (__call__ (_truth, null, ob)) {
 					row.enabled = __call__ (geometry_modifier_poll, null, context);
 					var active_modifier = ob.modifiers.active;
-					if (active_modifier && __eq__ (active_modifier.py_metatype, 'NODES')) {
-						if (active_modifier.node_group) {
+					if (__call__ (_truth, null, active_modifier) && __eq__ (active_modifier.py_metatype, 'NODES')) {
+						if (__call__ (_truth, null, active_modifier.node_group)) {
 							(function () {
 								var __accu0__ = row;
 								return __call__ (__accu0__.template_ID, __accu0__, active_modifier, 'node_group', __kwargtrans__ ({py_new: 'object.geometry_node_tree_copy_assign'}));
@@ -336,7 +492,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.template_ID, __accu0__, snode, 'selected_node_group', __kwargtrans__ ({py_new: 'node.new_geometry_node_group_tool'}));
 				}) ();
-				if (snode.node_tree) {
+				if (__call__ (_truth, null, snode.node_tree)) {
 					(function () {
 						var __accu0__ = layout;
 						return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'NODE_PT_geometry_node_tool_object_types', text: 'Types'}));
@@ -367,7 +523,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 				return __call__ (__accu0__.template_ID, __accu0__, snode, 'node_tree', __kwargtrans__ ({py_new: 'node.new_node_tree'}));
 			}) ();
 		}
-		if (display_pin) {
+		if (__call__ (_truth, null, display_pin)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, snode, 'pin', __kwargtrans__ ({text: '', emboss: false}));
@@ -384,7 +540,7 @@ export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 			}) ();
 			op.parent_tree_index = __sub__ (__call__ (len, null, snode.path), 2);
 		}
-		if (is_compositor && __eq__ (snode.node_tree_sub_type, 'SCENE')) {
+		if (__call__ (_truth, null, is_compositor) && __eq__ (snode.node_tree_sub_type, 'SCENE')) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -475,7 +631,7 @@ export var NODE_PT_gizmo_display =  __class__ ('NODE_PT_gizmo_display', [Panel],
 		var layout = self.layout;
 		var snode = context.space_data;
 		var is_compositor = __eq__ (snode.tree_type, 'CompositorNodeTree');
-		if (!(is_compositor)) {
+		if (!(__call__ (_truth, null, is_compositor))) {
 			return ;
 		}
 		var col = (function () {
@@ -600,10 +756,10 @@ export var NODE_MT_add =  __class__ ('NODE_MT_add', [node_add_menu.AddNodeMenu],
 				return __call__ (__accu0__.menu_contents, __accu0__, 'NODE_MT_texture_node_add_all');
 			}) ();
 		}
-		else if ((function () {
+		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = nodeitems_utils;
 			return __call__ (__accu0__.has_node_categories, __accu0__, context);
-		}) ()) {
+		}) ())) {
 			(function () {
 				var __accu0__ = nodeitems_utils;
 				return __call__ (__accu0__.draw_node_categories_menu, __accu0__, self, context);
@@ -701,7 +857,7 @@ export var NODE_MT_view =  __class__ ('NODE_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, snode, 'show_region_ui');
 		}) ();
-		if (is_compositor) {
+		if (__call__ (_truth, null, is_compositor)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.prop, __accu0__, snode, 'show_region_asset_shelf');
@@ -737,7 +893,7 @@ export var NODE_MT_view =  __class__ ('NODE_MT_view', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'node.view_all');
 		}) ();
-		if (context.space_data.show_backdrop) {
+		if (__call__ (_truth, null, context.space_data.show_backdrop)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -983,7 +1139,7 @@ export var NODE_MT_node =  __class__ ('NODE_MT_node', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'node.links_mute');
 		}) ();
-		if (!(group) || group.bl_use_group_interface) {
+		if (!(__call__ (_truth, null, group)) || __call__ (_truth, null, group.bl_use_group_interface)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1017,7 +1173,7 @@ export var NODE_MT_node =  __class__ ('NODE_MT_node', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_context_menu_show_hide_menu');
 		}) ();
-		if (is_compositor) {
+		if (__call__ (_truth, null, is_compositor)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -1090,7 +1246,7 @@ export var NODE_PT_material_slots =  __class__ ('NODE_PT_material_slots', [Panel
 		else {
 		}
 		var ob = context.object;
-		self.bl_label = (ob.material_slots ? (function () {
+		self.bl_label = (__call__ (_truth, null, ob.material_slots) ? (function () {
 			var __accu0__ = __call__ (iface_, null, 'Slot {:d}');
 			return __call__ (__accu0__.format, __accu0__, __add__ (ob.active_material_index, 1));
 		}) () : __call__ (iface_, null, 'Slot'));
@@ -1282,7 +1438,7 @@ export var NODE_PT_geometry_node_tool_mode =  __class__ ('NODE_PT_geometry_node_
 				return __call__ (__accu0__.prop, __accu0__, group, prop, __kwargtrans__ ({text: ''}));
 			}) ();
 		}
-		if (group.is_type_grease_pencil) {
+		if (__call__ (_truth, null, group.is_type_grease_pencil)) {
 			var row = (function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
@@ -1401,7 +1557,7 @@ export var NODE_MT_context_menu_show_hide_menu =  __class__ ('NODE_MT_context_me
 			var __accu0__ = layout;
 			return __call__ (__accu0__.operator, __accu0__, 'node.mute_toggle', __kwargtrans__ ({text: 'Mute'}));
 		}) ();
-		if (is_compositor) {
+		if (__call__ (_truth, null, is_compositor)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'node.preview_toggle', __kwargtrans__ ({text: 'Node Preview'}));
@@ -1526,7 +1682,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
 			}) ();
-			if (is_geometrynodes) {
+			if (__call__ (_truth, null, is_geometrynodes)) {
 				layout.operator_context = 'INVOKE_DEFAULT';
 				(function () {
 					var __accu0__ = layout;
@@ -1541,7 +1697,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'node.links_mute');
 			}) ();
-			if (is_nested) {
+			if (__call__ (_truth, null, is_nested)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.separator, __accu0__);
@@ -1553,7 +1709,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 			}
 			return ;
 		}
-		if (is_geometrynodes) {
+		if (__call__ (_truth, null, is_geometrynodes)) {
 			layout.operator_context = 'INVOKE_DEFAULT';
 			(function () {
 				var __accu0__ = layout;
@@ -1616,7 +1772,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.separator, __accu0__);
 		}) ();
-		if (group && group.bl_use_group_interface) {
+		if (__call__ (_truth, null, group) && __call__ (_truth, null, group.bl_use_group_interface)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'node.group_make', __kwargtrans__ ({text: 'Make Group', icon: 'NODETREE'}));
@@ -1625,7 +1781,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'node.group_insert', __kwargtrans__ ({text: 'Insert Into Group'}));
 			}) ();
-			if (active_node && __eq__ (active_node.py_metatype, 'GROUP')) {
+			if (__call__ (_truth, null, active_node) && __eq__ (active_node.py_metatype, 'GROUP')) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.operator, __accu0__, 'node.group_edit');
@@ -1635,7 +1791,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 					return __call__ (__accu0__.operator, __accu0__, 'node.group_ungroup', __kwargtrans__ ({text: 'Ungroup'}));
 				}) ();
 			}
-			if (is_nested) {
+			if (__call__ (_truth, null, is_nested)) {
 				(function () {
 					var __accu0__ = layout;
 					return __call__ (__accu0__.operator, __accu0__, 'node.tree_path_parent', __kwargtrans__ ({text: 'Exit Group', icon: 'FILE_PARENT'}));
@@ -1676,7 +1832,7 @@ export var NODE_MT_context_menu =  __class__ ('NODE_MT_context_menu', [Menu], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.menu, __accu0__, 'NODE_MT_context_menu_show_hide_menu');
 		}) ();
-		if (active_node) {
+		if (__call__ (_truth, null, active_node)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -2145,7 +2301,7 @@ export var NODE_PT_overlay =  __class__ ('NODE_PT_overlay', [Panel], {
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, snode, 'show_annotation', __kwargtrans__ ({text: 'Annotations'}));
 		}) ();
-		if (snode.supports_previews) {
+		if (__call__ (_truth, null, snode.supports_previews)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -2273,7 +2429,7 @@ export var NODE_MT_node_tree_interface_new_item =  __class__ ('NODE_MT_node_tree
 			return __call__ (__accu0__.operator_enum, __accu0__, 'node.interface_item_new', 'item_type');
 		}) ();
 		var active_item = context.space_data.edit_tree.interface.active;
-		if (active_item && __eq__ (active_item.item_type, 'PANEL')) {
+		if (__call__ (_truth, null, active_item) && __eq__ (active_item.item_type, 'PANEL')) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.operator, __accu0__, 'node.interface_item_new_panel_toggle', __kwargtrans__ ({text: 'Panel Toggle'}));
@@ -2311,7 +2467,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 		if (group === null) {
 			return false;
 		}
-		if (group.is_embedded_data) {
+		if (__call__ (_truth, null, group.is_embedded_data)) {
 			return false;
 		}
 		return true;
@@ -2344,7 +2500,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 			var __accu0__ = col;
 			return __call__ (__accu0__.prop, __accu0__, group, 'name', __kwargtrans__ ({text: 'Name', placeholder: 'Name'}));
 		}) ();
-		if (group.asset_data) {
+		if (__call__ (_truth, null, group.asset_data)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.prop, __accu0__, group.asset_data, 'description', __kwargtrans__ ({text: 'Description', placeholder: 'Description'}));
@@ -2356,7 +2512,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 				return __call__ (__accu0__.prop, __accu0__, group, 'description', __kwargtrans__ ({text: 'Description', placeholder: 'Description'}));
 			}) ();
 		}
-		if (!(group.bl_use_group_interface)) {
+		if (!(__call__ (_truth, null, group.bl_use_group_interface))) {
 			return ;
 		}
 		(function () {
@@ -2395,7 +2551,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 				var __accu0__ = header;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Usage'}));
 			}) ();
-			if (body) {
+			if (__call__ (_truth, null, body)) {
 				var col = (function () {
 					var __accu0__ = body;
 					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2421,7 +2577,7 @@ export var NODE_PT_node_tree_properties =  __class__ ('NODE_PT_node_tree_propert
 				var __accu0__ = header;
 				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Usage'}));
 			}) ();
-			if (body) {
+			if (__call__ (_truth, null, body)) {
 				var col = (function () {
 					var __accu0__ = body;
 					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -2465,7 +2621,7 @@ export var NODE_PT_node_tree_animation =  __class__ ('NODE_PT_node_tree_animatio
 		if (group === null) {
 			return false;
 		}
-		if (group.is_embedded_data) {
+		if (__call__ (_truth, null, group.is_embedded_data)) {
 			return false;
 		}
 		return true;
@@ -2637,6 +2793,14 @@ export {AnnotationDataPanel, DATA_PT_EEVEE_light, DATA_PT_light, EEVEE_MATERIAL_
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'NODE_HT_header': NODE_HT_header = value; break;
 		case 'NODE_PT_gizmo_display': NODE_PT_gizmo_display = value; break;
 		case 'NODE_MT_editor_menus': NODE_MT_editor_menus = value; break;

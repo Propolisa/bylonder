@@ -11,6 +11,162 @@ import {Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_ui.properties_data_mesh';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
 export var MESH_MT_vertex_group_context_menu =  __class__ ('MESH_MT_vertex_group_context_menu', [Menu], {
 	__module__: __name__,
 	bl_label: 'Vertex Group Specials',
@@ -342,7 +498,7 @@ export var MESH_UL_vgroups =  __class__ ('MESH_UL_vgroups', [UIList], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, vgroup, 'name', __kwargtrans__ ({text: '', emboss: false, icon_value: icon}));
 		}) ();
-		var icon = (vgroup.lock_weight ? 'LOCKED' : 'UNLOCKED');
+		var icon = (__call__ (_truth, null, vgroup.lock_weight) ? 'LOCKED' : 'UNLOCKED');
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, vgroup, 'lock_weight', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
@@ -377,7 +533,7 @@ export var MESH_UL_uvmaps =  __class__ ('MESH_UL_uvmaps', [UIList], {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: '', emboss: false, icon: 'GROUP_UVS'}));
 		}) ();
-		var icon = (item.active_render ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON');
+		var icon = (__call__ (_truth, null, item.active_render) ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON');
 		(function () {
 			var __accu0__ = layout;
 			return __call__ (__accu0__.prop, __accu0__, item, 'active_render', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
@@ -432,13 +588,13 @@ export var DATA_PT_context_mesh =  __class__ ('DATA_PT_context_mesh', [MeshButto
 		var ob = context.object;
 		var mesh = context.mesh;
 		var space = context.space_data;
-		if (ob) {
+		if (__call__ (_truth, null, ob)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
 			}) ();
 		}
-		else if (mesh) {
+		else if (__call__ (_truth, null, mesh)) {
 			(function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
@@ -533,7 +689,7 @@ export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshBut
 		var ob = context.object;
 		var group = ob.vertex_groups.active;
 		var rows = 3;
-		if (group) {
+		if (__call__ (_truth, null, group)) {
 			var rows = 5;
 		}
 		var row = (function () {
@@ -567,7 +723,7 @@ export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshBut
 			var __accu0__ = col;
 			return __call__ (__accu0__.menu, __accu0__, 'MESH_MT_vertex_group_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
 		}) ();
-		if (group) {
+		if (__call__ (_truth, null, group)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -581,7 +737,7 @@ export var DATA_PT_vertex_groups =  __class__ ('DATA_PT_vertex_groups', [MeshBut
 				return __call__ (__accu0__.operator, __accu0__, 'object.vertex_group_move', __kwargtrans__ ({icon: 'TRIA_DOWN', text: ''}));
 			}) ().direction = 'DOWN';
 		}
-		if (ob.vertex_groups && (__eq__ (ob.mode, 'EDIT') || __eq__ (ob.mode, 'WEIGHT_PAINT') && __eq__ (ob.py_metatype, 'MESH') && ob.data.use_paint_mask_vertex)) {
+		if (__call__ (_truth, null, ob.vertex_groups) && (__eq__ (ob.mode, 'EDIT') || __eq__ (ob.mode, 'WEIGHT_PAINT') && __eq__ (ob.py_metatype, 'MESH') && __call__ (_truth, null, ob.data.use_paint_mask_vertex))) {
 			var row = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.row, __accu0__);
@@ -653,13 +809,13 @@ export var draw_shape_key_properties = function (context, layout) {
 	var kb = ob.active_shape_key;
 	var enable_edit = __ne__ (ob.mode, 'EDIT');
 	var enable_edit_value = false;
-	if (enable_edit || ob.use_shape_key_edit_mode && __eq__ (ob.py_metatype, 'MESH')) {
+	if (__call__ (_truth, null, enable_edit) || __call__ (_truth, null, ob.use_shape_key_edit_mode) && __eq__ (ob.py_metatype, 'MESH')) {
 		if (ob.show_only_shape_key === false) {
 			var enable_edit_value = true;
 		}
 	}
 	layout.use_property_split = true;
-	if (key.use_relative) {
+	if (__call__ (_truth, null, key.use_relative)) {
 		if (__ne__ (ob.active_shape_key_index, 0)) {
 			var row = (function () {
 				var __accu0__ = layout;
@@ -757,7 +913,7 @@ export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPa
 		var kb = ob.active_shape_key;
 		var enable_edit = __ne__ (ob.mode, 'EDIT');
 		var enable_pin = false;
-		if (enable_edit || ob.use_shape_key_edit_mode && __eq__ (ob.py_metatype, 'MESH')) {
+		if (__call__ (_truth, null, enable_edit) || __call__ (_truth, null, ob.use_shape_key_edit_mode) && __eq__ (ob.py_metatype, 'MESH')) {
 			var enable_pin = true;
 		}
 		var row = (function () {
@@ -800,7 +956,7 @@ export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPa
 				return __call__ (__accu0__.prop, __accu0__, ob, 'add_rest_position_attribute');
 			}) ();
 		}
-		if (kb) {
+		if (__call__ (_truth, null, kb)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.separator, __accu0__);
@@ -860,7 +1016,7 @@ export var DATA_PT_shape_keys =  __class__ ('DATA_PT_shape_keys', [MeshButtonsPa
 				var __accu0__ = row;
 				return __call__ (__accu0__.row, __accu0__);
 			}) ();
-			if (key.use_relative) {
+			if (__call__ (_truth, null, key.use_relative)) {
 				(function () {
 					var __accu0__ = sub;
 					return __call__ (__accu0__.operator, __accu0__, 'object.shape_key_clear', __kwargtrans__ ({icon: 'X', text: ''}));
@@ -1043,7 +1199,7 @@ export var DATA_PT_customdata =  __class__ ('DATA_PT_customdata', [MeshButtonsPa
 			var __accu0__ = col;
 			return __call__ (__accu0__.operator, __accu0__, 'mesh.reorder_vertices_spatial');
 		}) ();
-		if (me.has_custom_normals) {
+		if (__call__ (_truth, null, me.has_custom_normals)) {
 			(function () {
 				var __accu0__ = col;
 				return __call__ (__accu0__.operator, __accu0__, 'mesh.customdata_custom_splitnormals_clear', __kwargtrans__ ({icon: 'X'}));
@@ -1092,7 +1248,7 @@ export var DATA_PT_mesh_animation =  __class__ ('DATA_PT_mesh_animation', [MeshB
 			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, mesh);
 		}) ();
 		var shape_keys = mesh.shape_keys;
-		if (shape_keys) {
+		if (__call__ (_truth, null, shape_keys)) {
 			var col = (function () {
 				var __accu0__ = layout;
 				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
@@ -1149,13 +1305,13 @@ export var MESH_UL_attributes =  __class__ ('MESH_UL_attributes', [UIList], {
 			}
 			return __accu0__;
 		}) ();
-		if (self.filter_name) {
+		if (__call__ (_truth, null, self.filter_name)) {
 			var flags = (function () {
 				var __accu0__ = bpy.types.UI_UL_list;
 				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
 			}) ();
 		}
-		if (!(flags)) {
+		if (!(__call__ (_truth, null, flags))) {
 			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
 		var __iterable0__ = __call__ (py_enumerate, null, attributes);
@@ -1164,9 +1320,9 @@ export var MESH_UL_attributes =  __class__ ('MESH_UL_attributes', [UIList], {
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var idx = __left0__ [0];
 			var item = __left0__ [1];
-			__setitem__ (flags, idx, (item.is_internal ? self.bitflag_item_never_show : __getitem__ (flags, idx)));
+			__setitem__ (flags, idx, (__call__ (_truth, null, item.is_internal) ? self.bitflag_item_never_show : __getitem__ (flags, idx)));
 		}
-		if (self.use_filter_sort_alpha) {
+		if (__call__ (_truth, null, self.use_filter_sort_alpha)) {
 			var indices = (function () {
 				var __accu0__ = bpy.types.UI_UL_list;
 				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
@@ -1300,7 +1456,7 @@ export var draw_attribute_warnings = function (context, layout, attributes) {
 	}
 	var ob = context.object;
 	var mesh = context.mesh;
-	if (!(mesh)) {
+	if (!(__call__ (_truth, null, mesh))) {
 		return ;
 	}
 	var unique_names = __call__ (set, null);
@@ -1329,10 +1485,10 @@ export var draw_attribute_warnings = function (context, layout, attributes) {
 				return __call__ (__accu0__.add, __accu0__, py_name);
 			}) ();
 			if (__eq__ (__call__ (len, null, unique_names), unique_names_len)) {
-				if (!(attributes) || (function () {
+				if (!(__call__ (_truth, null, attributes)) || __call__ (_truth, null, (function () {
 					var __accu0__ = attributes;
 					return __call__ (__accu0__.py_get, __accu0__, py_name);
-				}) ()) {
+				}) ())) {
 					(function () {
 						var __accu0__ = colliding_names;
 						return __call__ (__accu0__.append, __accu0__, py_name);
@@ -1341,7 +1497,7 @@ export var draw_attribute_warnings = function (context, layout, attributes) {
 			}
 		}
 	}
-	if (!(colliding_names)) {
+	if (!(__call__ (_truth, null, colliding_names))) {
 		return ;
 	}
 	(function () {
@@ -1387,13 +1543,13 @@ export var ColorAttributesListBase =  __class__ ('ColorAttributesListBase', [obj
 			}
 			return __accu0__;
 		}) ();
-		if (self.filter_name) {
+		if (__call__ (_truth, null, self.filter_name)) {
 			var flags = (function () {
 				var __accu0__ = bpy.types.UI_UL_list;
 				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
 			}) ();
 		}
-		if (!(flags)) {
+		if (!(__call__ (_truth, null, flags))) {
 			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
 		var __iterable0__ = __call__ (py_enumerate, null, attributes);
@@ -1403,9 +1559,9 @@ export var ColorAttributesListBase =  __class__ ('ColorAttributesListBase', [obj
 			var idx = __left0__ [0];
 			var item = __left0__ [1];
 			var skip = !__in__ (item.domain, new set (['POINT', 'CORNER'])) || !__in__ (item.data_type, new set (['FLOAT_COLOR', 'BYTE_COLOR'])) || item.is_internal;
-			__setitem__ (flags, idx, (skip ? 0 : __getitem__ (flags, idx)));
+			__setitem__ (flags, idx, (__call__ (_truth, null, skip) ? 0 : __getitem__ (flags, idx)));
 		}
-		if (self.use_filter_sort_alpha) {
+		if (__call__ (_truth, null, self.use_filter_sort_alpha)) {
 			var indices = (function () {
 				var __accu0__ = bpy.types.UI_UL_list;
 				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
@@ -1473,7 +1629,7 @@ export var MESH_UL_color_attributes =  __class__ ('MESH_UL_color_attributes', [U
 		row.emboss = 'NONE';
 		var props = (function () {
 			var __accu0__ = row;
-			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_render_set', __kwargtrans__ ({text: '', icon: (active_render ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON')}));
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.color_attribute_render_set', __kwargtrans__ ({text: '', icon: (__call__ (_truth, null, active_render) ? 'RESTRICT_RENDER_OFF' : 'RESTRICT_RENDER_ON')}));
 		}) ();
 		props.py_name = attribute.py_name;
 	});}
@@ -1581,6 +1737,14 @@ export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, iface_, re
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'MESH_MT_vertex_group_context_menu': MESH_MT_vertex_group_context_menu = value; break;
 		case 'MESH_MT_shape_key_context_menu': MESH_MT_shape_key_context_menu = value; break;
 		case 'MESH_MT_shape_key_tree_context_menu': MESH_MT_shape_key_tree_context_menu = value; break;
