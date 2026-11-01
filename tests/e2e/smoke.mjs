@@ -4,6 +4,7 @@
 // usage: npm run test:e2e [-- name filter]
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
 import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
@@ -857,7 +858,97 @@ const checks = {
     assert.equal(out.channels, 2);
     assert.ok(out.rms > 0.01, `the scene's sound is in the mix (rms ${out.rms})`);
   } },
+
+  // Strips' media comes from the media library after a reload (the URLs saved in the edit die with the page), and a
+  // render keeps the Scene Audio it opened with when the scene changes meanwhile. A still mixes no sound.
+  "Sequencer media renders after a reload": { open: { example: "Volcanic Island", node: "Island", persistent: true }, async run() {
+    await addClipStrip();
+    await app.bylonder(async (b) => { await (await b.sequencer.menus()).Add.find((entry) => entry.label === "Scene Audio").items()[0].run(); });
+    await reloadWithEdit();
+    const mix = await app.bylonder(async (b) => {
+      const compositor = await b.sequencer.openCompositor({ frameStart: 1, frameEnd: 12, width: 64, height: 36 });
+      b.sceneAudio.changed();
+      const audio = await compositor.audio();
+      compositor.dispose();
+      return { seconds: audio.samples[0].length / audio.sampleRate, warnings: compositor.warnings };
+    });
+    assert.ok(mix.seconds > 0, "the held Scene Audio mixes after the scene changed");
+    assert.deepEqual(mix.warnings, []);
+
+    const image = await renderStatuses("Render Image");
+    assert.match(image.at(-1), /^Finished frame 1 /);
+    assert.ok(!image.some((s) => s.startsWith("Mixing")), `a still mixes no sound: ${image.join(" / ")}`);
+    const center = await app.locator(".render-result canvas").evaluate((canvas) => [...canvas.getContext("2d").getImageData(canvas.width / 2, canvas.height / 2, 1, 1).data]);
+    assert.ok(center.slice(0, 3).some((v) => v > 40), `the clip shows in the still: ${center}`);
+
+    const download = app.page.waitForEvent("download", { timeout: 120000 });
+    const video = await renderStatuses("Render Animation");
+    assert.match(video.at(-1), /^Finished 12 frames/);
+    const file = `${tmpdir()}/smoke-sequencer.webm`;
+    await (await download).saveAs(file);
+    const streams = JSON.parse(execFileSync("ffprobe", ["-v", "error", "-show_streams", "-of", "json", file])).streams;
+    assert.deepEqual(streams.map((s) => s.codec_type).sort(), ["audio", "video"]);
+    // Known and harmless here: the headless <video> fallback KubeezCut preloads does not load the clip (Mediabunny
+    // decodes it), and KubeezCut's embed bundles a Mediabunny of its own next to Bylonder's.
+    app.errors.splice(0, app.errors.length, ...app.errors.filter((error) => !/Video load error|Mediabunny was loaded twice/.test(error)));
+  } },
+
+  // A strip whose media is gone from the library renders without it, named in the result, with no endless retries.
+  "Sequencer media missing after a reload is reported, not waited for": { open: { persistent: true }, async run() {
+    await addClipStrip();
+    await reloadWithEdit();
+    await app.bylonder(async () => { await (await navigator.storage.getDirectory()).removeEntry("clip.webm"); });
+    const statuses = await renderStatuses("Render Animation");
+    assert.match(statuses.at(-1), /^Finished 12 frames .*Strip "clip\.webm" has missing media/);
+    // The media library logs the missing file as an error.
+    app.errors.splice(0, app.errors.length, ...app.errors.filter((error) => !/clip\.webm|requested file or directory could not be found/.test(error)));
+  } },
 };
+
+// A one-second clip with sound imported into the Sequencer's media library (the origin's private file system) and
+// placed at frame 1.
+async function addClipStrip() {
+  const file = `${tmpdir()}/smoke-clip.webm`;
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=64x36:rate=24:duration=1", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-c:v", "libvpx", "-c:a", "libopus", "-shortest", file]);
+  await app.bylonder(async (b, bytes) => {
+    const handle = await (await navigator.storage.getDirectory()).getFileHandle("clip.webm", { create: true });
+    const writable = await handle.createWritable();
+    await writable.write(new Uint8Array(bytes));
+    await writable.close();
+    const [media] = await b.sequencer.importMedia([handle]);
+    await b.sequencer.addMediaStrip(media.id, { frame: 1 });
+  }, [...readFileSync(file)]);
+}
+
+// Reloads the page once the edit is saved, waits until it has the same strips again and sets the output to frames
+// 1 to 12 of WebM video with Opus sound.
+async function reloadWithEdit() {
+  const strips = await app.bylonder((b) => b.world.sequenceEditor.state.edit.timeline.items.length);
+  await app.page.waitForTimeout(1500);
+  await app.page.waitForFunction(() => document.getElementById("save-status").textContent === "Saved locally", null, { timeout: 30000 });
+  await app.page.reload();
+  await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.editor, null, { timeout: 120000 });
+  await app.until((b, n) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length === n, strips, 30000);
+  await app.bylonder((b) => {
+    b.world.animation.time.configure({ frameStart: 1, frameEnd: 12 });
+    b.world.animation.seek(1);
+    Object.assign(b.mainScene.render.image_settings, { media_type: "VIDEO", file_format: "FFMPEG" });
+    Object.assign(b.mainScene.render.ffmpeg, { format: "WEBM", codec: "WEBM", audio_codec: "OPUS" });
+  });
+}
+
+// Runs a Render menu entry and returns the render window's statuses until it ends; fails if it takes over 2 minutes.
+async function renderStatuses(entry) {
+  const statuses = [], until = Date.now() + 120000;
+  await menu("TOPBAR_MT_render", entry);
+  while (!/^(Finished|Render failed|Render cancelled)/.test(statuses.at(-1))) {
+    assert.ok(Date.now() < until, `${entry} never ended: ${statuses.join(" / ")}`);
+    const status = await app.frame().evaluate((selector) => document.querySelector(selector).textContent, renderStatus);
+    if (statuses.at(-1) !== status) statuses.push(status);
+    await app.page.waitForTimeout(100);
+  }
+  return statuses;
+}
 
 // Edit Mode on the cube with everything selected, and a tool from the toolbar: one in a group from the flyout its
 // button opens when held.
