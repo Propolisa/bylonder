@@ -17,43 +17,6 @@
 
 namespace blender {
 
-/* As view3d_select.cc defines it. */
-float ED_view3d_select_dist_px() { return 75.0f * U.pixelsize; }
-
-/* port-override: the view has no clipping planes (Alt B), so no point is clipped. */
-bool ED_view3d_clipping_test(const RegionView3D * /*rv3d*/, const float /*co*/[3], const bool /*is_local*/) { return false; }
-
-/* port-override: the view's clip range as BKE_camera_params_from_view3d gives it for a view without a camera. */
-bool ED_view3d_clip_range_get(const Depsgraph * /*depsgraph*/, const View3D *v3d, const RegionView3D *rv3d, const bool use_ortho_factor,
-                              float *r_clip_start, float *r_clip_end)
-{
-  const bool is_ortho = !rv3d->is_persp;
-  float clip_start = is_ortho ? -v3d->clip_end * 0.5f : v3d->clip_start;
-  float clip_end = is_ortho ? v3d->clip_end * 0.5f : v3d->clip_end;
-  if (use_ortho_factor && is_ortho) {
-    const float fac = 2.0f / (clip_end - clip_start);
-    clip_start *= fac;
-    clip_end *= fac;
-  }
-  if (r_clip_start) {
-    *r_clip_start = clip_start;
-  }
-  if (r_clip_end) {
-    *r_clip_end = clip_end;
-  }
-  return is_ortho;
-}
-
-/* As view3d_draw.cc defines them, without the finer steps of orthographic axis views. */
-float ED_view3d_grid_scale(const Scene *scene, const View3D *v3d, const char **r_grid_unit)
-{
-  return v3d->grid * ED_scene_grid_scale(scene, r_grid_unit);
-}
-float ED_view3d_grid_view_scale(const Scene *scene, const View3D *v3d, const ARegion * /*region*/, const char **r_grid_unit)
-{
-  return ED_view3d_grid_scale(scene, v3d, r_grid_unit);
-}
-
 /* As gpu_matrix.cc defines them; the rest of that file keeps the GPU's matrix stack, which the module has none of. */
 void GPU_matrix_project_3fv(const float world[3], const float model[4][4], const float proj[4][4], const int view[4], float r_win[3])
 {

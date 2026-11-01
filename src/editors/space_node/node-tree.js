@@ -264,8 +264,6 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       changed(false);
       return frame;
     },
-    frameOf: (block) => editor().frames.find((f) => f.blocks.includes(block.uniqueId)),
-    removeFrame(frame) { const data = editor(); data.frames.splice(data.frames.indexOf(frame), 1); changed(false); },
   };
   return tree;
 }

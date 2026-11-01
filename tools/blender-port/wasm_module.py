@@ -518,7 +518,8 @@ def build(root, name, spec, tag):
     # instead of writing over the module's data.
     link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
             '-Wl,-z,stack-size=8388608', '-Wl,--stack-first',
-            '-Wl,--export=malloc', '-Wl,--export=free', *own.values(), *archives, *archives, '-lwasi-emulated-process-clocks']
+            '-Wl,--export=malloc', '-Wl,--export=free', *(f'-Wl,--wrap={w}' for w in PLATFORM_WRAPPED), *own.values(), *archives, *archives,
+            '-lwasi-emulated-process-clocks']
     # A dry link names every unresolved symbol, for the data check; the module itself imports missing functions by name.
     check = subprocess.run([*link, '-Wl,--warn-unresolved-symbols', '-o', os.devnull], capture_output=True, text=True)
     unresolved = {line.split('undefined symbol: ')[-1] for line in check.stderr.splitlines() if 'undefined symbol: ' in line}
@@ -533,6 +534,10 @@ def build(root, name, spec, tag):
     missing = live_imports(out)
     print(f'built src/{name}: {os.path.getsize(out)} bytes, {operators.count(chr(10))} operators; {len(missing)} imports, which throw when '
           f'called:\n  ' + '\n  '.join(missing), file=sys.stderr)
+
+
+# Blender's functions platform.cc replaces in every module, as __wrap_ definitions (linked with --wrap).
+PLATFORM_WRAPPED = ['_ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE', '_ZN7blender21BLI_threadpool_insertEPNS_9ListBaseTINS_10ThreadSlotEEEPv']
 
 
 # Data sizes a module is linked with ahead of its own, for check_layouts. The first two move it across alignments

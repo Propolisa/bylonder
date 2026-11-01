@@ -489,36 +489,6 @@ void WM_modalkeymap_assign(wmKeyMap *km, const char *opname)
   }
 }
 
-/* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
-Object *ed::object::context_object(const bContext *C)
-{
-  return static_cast<Object *>(CTX_data_pointer_get_type(C, "object", RNA_Object).data);
-}
-Object *ed::object::context_active_object(const bContext *C)
-{
-  Object *ob = nullptr;
-  if (C) {
-    ob = context_object(C);
-    if (!ob) {
-      ob = CTX_data_active_object(C);
-    }
-  }
-  return ob;
-}
-
-/* As object_shapekey.cc checks a mesh: an operator that moves vertices refuses a locked active shape key. */
-bool ed::object::shape_key_report_if_locked(const Object *obedit, ReportList *reports)
-{
-  const KeyBlock *key_block = obedit->type == OB_MESH ? ED_mesh_get_edit_shape_key(id_cast<Mesh *>(obedit->data)) : nullptr;
-  if (key_block && (key_block->flag & KEYBLOCK_LOCKED_SHAPE) != 0) {
-    if (reports) {
-      BKE_reportf(reports, RPT_ERROR, "The active shape key of %s is locked", obedit->id.name + 2);
-    }
-    return true;
-  }
-  return false;
-}
-
 /* port-override: Blender's poll (screen_ops.cc), which comes with Blender's screens. */
 bool ED_operator_editmesh(bContext *C)
 {
@@ -529,25 +499,6 @@ bool ED_operator_editable_mesh(bContext *C) { return ED_operator_editmesh(C); }
 /* As wm_operators.cc defines it, for operators run by their exec, which is how the editor runs them: the grid scale
  * applies to an invoked operator's distances only. */
 void WM_operator_view3d_unit_defaults(bContext * /*C*/, wmOperator *op) { BLI_assert(!(op->flag & OP_IS_INVOKE)); }
-
-/* As view3d_draw.cc defines it. */
-float ED_scene_grid_scale(const Scene *scene, const char **r_grid_unit)
-{
-  if (scene->unit.system) {
-    const void *usys;
-    int len;
-    BKE_unit_system_get(scene->unit.system, B_UNIT_LENGTH, &usys, &len);
-    if (usys) {
-      int i = BKE_unit_base_get(usys);
-      if (r_grid_unit) {
-        *r_grid_unit = IFACE_(BKE_unit_display_name_get(usys, i));
-      }
-      return float(BKE_unit_scalar_get(usys, i)) / scene->unit.scale_length;
-    }
-  }
-  return 1.0f;
-}
-
 
 /* port-override: the editor draws its own status bar for its tools, so what operators put there goes nowhere. */
 WorkspaceStatus::WorkspaceStatus(bContext * /*C*/) : workspace_(nullptr), wm_(nullptr) {}
@@ -621,48 +572,6 @@ wmGizmoGroupType *blender::WM_gizmogrouptype_append(void (* /*wtfunc*/)(wmGizmoG
   static wmGizmoGroupType type = {};
   return &type;
 }
-
-/* As view3d_context.cc defines it, for the region the context has: without its view (regiondata), sorting by view axis
- * reports that there is none. */
-RegionView3D *ED_view3d_context_rv3d(bContext *C)
-{
-  ARegion *region = CTX_wm_region(C);
-  return region ? static_cast<RegionView3D *>(region->regiondata) : nullptr;
-}
-
-/* As view3d_select.cc defines them; the rest of the 3D View stays in JS. */
-ViewContext ED_view3d_viewcontext_init(bContext *C, Depsgraph *depsgraph)
-{
-  ViewContext vc = {};
-  vc.C = C;
-  vc.region = CTX_wm_region(C);
-  vc.bmain = CTX_data_main(C);
-  vc.depsgraph = depsgraph;
-  vc.scene = CTX_data_scene(C);
-  vc.view_layer = CTX_data_view_layer(C);
-  vc.v3d = CTX_wm_view3d(C);
-  vc.win = CTX_wm_window(C);
-  vc.rv3d = CTX_wm_region_view3d(C);
-  vc.obact = CTX_data_active_object(C);
-  vc.obedit = CTX_data_edit_object(C);
-  return vc;
-}
-void ED_view3d_viewcontext_init_object(ViewContext *vc, Object *obact)
-{
-  vc->obact = obact;
-  if (vc->obedit) {
-    vc->obedit = obact;
-    if (vc->em) {
-      vc->em = BKE_editmesh_from_object(vc->obedit);
-    }
-  }
-}
-
-/* Blender's globals, defined as blender.cc and rna_access.cc define them: their types' member defaults are Blender's
- * defaults. (blf.cc, built into the module with Blender's fonts, defines blf_mono_font.) */
-Global G;
-UserDef U;
-extern const PointerRNA PointerRNA_NULL = {};
 
 /* Marks the properties after it as advanced in Blender's UI. */
 void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}

@@ -1357,11 +1357,6 @@ extern "C" const char datatoc_startup_blend[] = {0};
 
 namespace blender {
 
-/* port-override: the module has no shader nodes, so a new light gets no node tree (BKE_light_add); Bylonder's lights
- * draw without one. */
-void nodes::node_tree_shader_default(const bContext * /*C*/, Main * /*bmain*/, ID * /*id*/) {}
-
-
 /* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
 void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}
 
@@ -1371,85 +1366,6 @@ FileReader *BLI_filereader_new_gzip(FileReader * /*base*/) { return nullptr; }
 
 /* port-override: the module has no GPU materials, so a material's list of them is empty. */
 void GPU_material_free(ListBaseT<LinkData> * /*gpumaterial*/) {}
-
-/* port-override: the module has no OpenColorIO, so a new scene's color management names what Blender's bundled
- * configuration gives (its default display and sequencer role), which Bylonder's view settings then set. */
-const char *IMB_colormanagement_role_colorspace_name_get(int /*role*/) { return "sRGB"; }
-const char *IMB_colormanagement_display_get_default_name() { return "sRGB"; }
-const ColorManagedDisplay *IMB_colormanagement_display_get_named(const char * /*name*/) { return nullptr; }
-void IMB_colormanagement_validate_settings(const ColorManagedDisplaySettings * /*display_settings*/,
-                                           ColorManagedViewSettings * /*view_settings*/)
-{
-}
-
-/* As sequencer.cc defines it; the module has no sequencer. */
-SequencerToolSettings *seq::tool_settings_init()
-{
-  SequencerToolSettings *tool_settings = MEM_new<SequencerToolSettings>("Sequencer tool settings");
-  tool_settings->fit_method = SEQ_SCALE_TO_FIT;
-  tool_settings->snap_mode = SEQ_SNAP_TO_STRIPS | SEQ_SNAP_TO_CURRENT_FRAME | SEQ_SNAP_TO_STRIP_HOLD | SEQ_SNAP_TO_MARKERS |
-                             SEQ_SNAP_TO_RETIMING | SEQ_SNAP_TO_PREVIEW_BORDERS | SEQ_SNAP_TO_PREVIEW_CENTER |
-                             SEQ_SNAP_TO_STRIPS_PREVIEW | SEQ_SNAP_TO_FRAME_RANGE;
-  tool_settings->snap_flag = SEQ_SNAP_TO_ALL_CHANNEL_STRIPS;
-  tool_settings->snap_distance = 15;
-  tool_settings->overlap_mode = SEQ_OVERLAP_SHUFFLE;
-  tool_settings->pivot_point = V3D_AROUND_LOCAL_ORIGINS;
-  return tool_settings;
-}
-
-/* port-override: the module renders nothing and has no OpenColorIO, so opening a file frees no render results and
- * checks no color configuration. */
-void RE_FreeAllRenderResults() {}
-void RE_FreeInteractiveCompositorRenders() {}
-void RE_FreeAllPersistentData() {}
-void IMB_colormanagement_working_space_check(Main * /*bmain*/, bool /*for_undo*/, bool /*have_editable_assets*/) {}
-void IMB_colormanagement_check_file_config(Main * /*bmain*/) {}
-
-/* As blender.cc defines it, for a file opened: the old Main is freed (BKE_blender_globals_clear). */
-void BKE_blender_globals_main_replace(Main *bmain)
-{
-  BKE_main_free(G_MAIN);
-  bmain->is_global_main = true;
-  G_MAIN = bmain;
-}
-
-/* As blender.cc defines it, for versioning that runs code on the Main it reads as the global one. */
-Main *BKE_blender_globals_main_swap(Main *new_gmain)
-{
-  Main *old_gmain = G_MAIN;
-  new_gmain->is_global_main = true;
-  G_MAIN = new_gmain;
-  old_gmain->is_global_main = false;
-  return old_gmain;
-}
-
-/* port-override: the module has no OpenColorIO, so a read file's colors stay in their working space (Blender's default,
- * linear Rec.709, which Bylonder's colors are in). */
-void IMB_colormanagement_working_space_init_default(Main * /*bmain*/) {}
-void IMB_colormanagement_working_space_convert(Main * /*bmain*/, const Main * /*reference_bmain*/) {}
-
-/* port-override: the module has no asset libraries, whose import method a read file is checked against. */
-void AS_asset_library_import_method_ensure_valid(Main & /*bmain*/) {}
-
-
-
-/* port-override: a read file's scenes are freed without the sequencer, sound or depsgraphs the module does not have;
- * Bylonder's scene keeps neither strips nor sounds. */
-void seq::editing_free(Scene * /*scene*/, bool /*do_id_user*/) {}
-void seq::tool_settings_free(SequencerToolSettings *tool_settings) { MEM_delete(tool_settings); }
-void BKE_sound_destroy_scene(Scene * /*scene*/) {}
-/* port-override: a read scene's strips are left out (their data is the sequencer's to read), as Bylonder has none. */
-void seq::blend_read(BlendDataReader * /*reader*/, ListBaseT<Strip> *seqbase) { BLI_listbase_clear(seqbase); }
-void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, ForEachFunc /*callback*/, void * /*user_data*/) {}
-void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, FunctionRef<bool(Strip *)> /*callback*/) {}
-
-/* port-override: the module's IDs are never assets, so none has an asset type's pre-save step (asset_mark_clear.cc). */
-namespace ed::asset {
-void pre_save_assets(Main * /*bmain*/) {}
-}  // namespace ed::asset
-
-/* port-override: the module has no file browser, whose bookmarks and recent directories a saved file updates. */
-void ED_file_read_bookmarks() {}
 
 /* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
 bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }
@@ -1467,9 +1383,6 @@ ViewLayer *WM_window_get_active_view_layer(const wmWindow *win)
 }
 WorkSpace *WM_window_get_active_workspace(const wmWindow *win) { return BKE_workspace_active_get(win->workspace_hook); }
 bScreen *WM_window_get_active_screen(const wmWindow *win) { return BKE_workspace_active_screen_get(win->workspace_hook); }
-
-/* As sound.cc defines it without audio (WITH_AUDASPACE), which the module has none of. */
-void BKE_sound_refresh_callback_bmain(Main * /*bmain*/) {}
 
 /* As screen_ops.cc defines it. */
 bool ED_operator_objectmode(bContext *C)

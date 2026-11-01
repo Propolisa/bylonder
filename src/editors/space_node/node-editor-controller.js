@@ -16,6 +16,8 @@ registerOperators({
   'node.hide_socket_toggle': on('node.hide_socket_toggle'),
   'node.delete': on('node.delete'),
   'node.delete_reconnect': on('node.delete_reconnect'),
+  'node.join': on('node.join'),
+  'node.join_named': on('node.join'),
   'node.join_nodes': on('node.join_nodes'),
   'node.link_make': on('node.link_make'),
   'node.duplicate_move': on('node.duplicate_move'),
@@ -86,8 +88,19 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
       else state.selected.clear();
     },
 
+    // Blender's own operator on the selection, where Blender holds the tree (main-node-tree.js); false elsewhere.
+    blender(idname, props) {
+      if (!tree.operate) return false;
+      const selected = tree.operate(idname, selectedBlocks(), props);
+      state.selected = new Set(selected.map((b) => b.uniqueId));
+      if (!state.selected.has(state.active)) state.active = null;
+      refresh();
+      return true;
+    },
+
     // node.mute_toggle, node.hide_toggle, node.hide_socket_toggle (each sets all selected from the active's state).
     toggle(kind) {
+      if (editor.blender({ mute: 'node.mute_toggle', hide: 'node.hide_toggle', sockets: 'node.hide_socket_toggle' }[kind])) return;
       const blocks = selectedBlocks();
       if (!blocks.length) return;
       const first = tree.node(blocks[0]);
@@ -101,6 +114,7 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
 
     // node.delete and node.delete_reconnect: the latter links what fed each removed node to what it fed.
     remove(reconnect = false) {
+      if (editor.blender(reconnect ? 'node.delete_reconnect' : 'node.delete')) return;
       const blocks = selectedBlocks();
       if (reconnect) {
         for (const block of blocks) {
@@ -116,6 +130,7 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
 
     // node.join: a frame around the selected nodes.
     join() {
+      if (editor.blender('node.join')) return;
       const blocks = selectedBlocks();
       if (!blocks.length) return;
       tree.join(blocks);
@@ -123,7 +138,8 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
     },
 
     // node.link_make: links the selected nodes' first free matching sockets, left to right.
-    makeLinks() {
+    makeLinks(replace = false) {
+      if (editor.blender('node.link_make', { replace })) return;
       const list = layouts().filter((l) => state.selected.has(l.node.id) && !l.node.reroute).sort((a, b) => a.node.x - b.node.x);
       for (let i = 0; i + 1 < list.length; i++) {
         const out = list[i].node.outputs.find((o) => list[i + 1].node.inputs.some((s) => !s.linked && tree.canLink(o.point, s.point)));
@@ -261,8 +277,9 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
       'node.hide_socket_toggle': () => editor.toggle('sockets'),
       'node.delete': () => editor.remove(false),
       'node.delete_reconnect': () => editor.remove(true),
-      'node.join_nodes': () => editor.join(),
-      'node.link_make': () => editor.makeLinks(),
+      'node.join': () => editor.join(),
+      'node.join_nodes': () => editor.blender('node.join_nodes'),
+      'node.link_make': ({ replace }) => editor.makeLinks(replace),
       'node.duplicate_move': () => editor.duplicate(),
       'node.view_all': () => editor.viewAll(),
       'node.view_selected': () => editor.viewAll(true),

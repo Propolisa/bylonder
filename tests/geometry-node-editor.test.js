@@ -64,21 +64,24 @@ const moved = points();
 assert.equal(moved.length, before.length);
 assert(moved.every((p, i) => Math.abs(p[2] - before[i][2] - 1) < 1e-5), 'every point moves up by the Translation');
 
-// Shift D duplicates by Blender's node.duplicate, the copy keeping the Translation; Ctrl J frames it by node.join.
+// Duplicate is Blender's node.duplicate, the copy keeping the Translation; Join in New Frame is node.join; X on the
+// frame and the copy is node.delete.
 const [copy] = tree.duplicate([transform], 40, 40);
 assert.equal(copy.rna.bl_idname, 'GeometryNodeTransform');
 assert.deepEqual([...copy.rna.inputs.get('Translation').default_value], [0, 0, 1]);
 assert.deepEqual(Object.values(tree.location(copy)).map(Math.round), Object.values(tree.location(transform)).map((v) => Math.round(v + 40)));
-const frame = tree.join([copy]);
-assert.deepEqual(frame.blocks, [copy.uniqueId]);
-tree.remove([copy]);
-tree.removeFrame(frame);
+editor.state.selected = new Set([copy.uniqueId]);
+assert(editor.run('node.join'));
+const frame = tree.frames().find((f) => f.blocks.includes(copy.uniqueId));
+assert(frame, 'the copy is in a new frame');
+tree.operate('node.delete', [copy, frame]);
+assert(!tree.blocks().some((b) => b.uniqueId === copy.uniqueId) && !tree.frames().some((f) => f.name === frame.name));
 
 // M mutes the selected node by Blender's keymap: muted, it passes its geometry through.
 const keys = keymapHandler(['Node Editor', 'Node Generic']);
 editor.state.selected = new Set([transform.uniqueId]);
 assert(inArea({ nodeEditor: editor }, () => keys({ type: 'M', value: 'PRESS' })));
-assert.equal(transform.rna.mute, true);
+assert.equal(transform.rna.mute, true, 'M runs node.mute_toggle');
 assert(points().every((p, i) => Math.abs(p[2] - before[i][2]) < 1e-5), 'a muted node passes its input through');
 // X deletes it, as Blender's keymap's node.delete; the curves no longer reach the output.
 assert(inArea({ nodeEditor: editor }, () => keys({ type: 'X', value: 'PRESS' })));

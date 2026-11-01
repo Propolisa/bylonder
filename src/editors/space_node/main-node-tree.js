@@ -58,14 +58,15 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
   const nodesOf = () => [...rnaTree.nodes];
   let area;
   const inEditor = (fn) => (area ??= nodeArea(rnaTree)).inContext(RGN_TYPE_WINDOW, fn);
-  // Blender's operator on the nodes, selected as its own selection; returns the nodes selected after it.
-  const operate = (list, idname, props) => {
-    const ids = new Set(list.map((b) => b.uniqueId));
+  const isFrame = (node) => node.bl_idname === 'NodeFrame';
+  // Blender's node operator on the nodes and frames, selected as its selection; returns the nodes selected after it.
+  const operate = (idname, list, props) => {
+    const ids = new Set(list.map((b) => b.uniqueId ?? idOf(b.rna)));
     for (const n of nodesOf()) n.select = ids.has(idOf(n));
     inEditor(() => blenderMain().run(idname, props));
-    return nodesOf().filter((n) => n.select);
+    changed(true);
+    return nodesOf().filter((n) => n.select && !isFrame(n)).map(blockOf);
   };
-  const isFrame = (node) => node.bl_idname === 'NodeFrame';
 
   // A socket as the node draws it: Blender's type, shape and label, and its value while unlinked.
   const socket = (s, block, output) => {
@@ -100,7 +101,7 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
     if (n.bl_idname === 'NodeReroute') return { id: block.uniqueId, block, reroute: true, x, y, inputs: [...n.inputs].map((s) => socket(s, block, false)), outputs: [...n.outputs].map((s) => socket(s, block, true)) };
     return {
       id: block.uniqueId, block, blender: n.bl_idname, label: label(n), tag: n.color_tag, x, y, width: n.width,
-      hidden: n.hide, socketsHidden: false, muted: n.mute,
+      hidden: n.hide, muted: n.mute,
       outputs: [...n.outputs].filter(shown).map((s) => socket(s, block, true)),
       inputs: [...n.inputs].filter(shown).map((s) => socket(s, block, false)),
       buttons: buttons(n), ramp: null,
@@ -109,6 +110,7 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
 
   const tree = {
     get area() { inEditor(() => {}); return area; },
+    operate,
     kind: 'geometry', graph: rnaTree, catalog: { categories: {} }, blenderClasses: {},
     // Every node type Blender has: its code runs them all.
     runs: () => true,
@@ -147,9 +149,8 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
     },
     // node.duplicate, moved by (dx, dy).
     duplicate(list, dx, dy) {
-      const copies = operate(list, 'node.duplicate').map(blockOf);
+      const copies = operate('node.duplicate', list);
       for (const block of copies) { const { x, y } = at(block.rna); tree.setLocation(block, x + dx, y + dy); }
-      changed(true);
       return copies;
     },
     // node.add_reroute: a reroute on the link, at (x, y).
@@ -162,23 +163,8 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
       changed(true);
       return blockOf(reroute);
     },
-    remove(list) {
-      for (const block of list) { blocks.delete(block.uniqueId); rnaTree.nodes.remove(block.rna); }
-      points.clear();
-      changed(true);
-    },
-    setMuted(block, value) { block.rna.mute = value; changed(true); },
-    setHidden(block, value) { block.rna.hide = value; changed(false); },
-    // node.hide_socket_toggle: the unlinked sockets hidden, or all shown again.
-    setSocketsHidden(block, value) { for (const s of [...block.rna.inputs, ...block.rna.outputs]) if (!s.is_linked) s.hide = value; changed(false); },
-    // node.join: a frame around the nodes.
-    join(list) {
-      operate(list, 'node.join');
-      changed(false);
-      return tree.frames().find((f) => idOf(f.rna) === idOf(rnaTree.nodes.active));
-    },
-    frameOf: (block) => tree.frames().find((f) => f.blocks.includes(block.uniqueId)),
-    removeFrame(frame) { rnaTree.nodes.remove(frame.rna); changed(false); },
+    // The collapse button: node.hide_toggle on its node.
+    setHidden(block) { operate('node.hide_toggle', [block]); },
   };
   return tree;
 }

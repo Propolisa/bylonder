@@ -893,9 +893,6 @@ enum Gesture { GESTURE_NONE, GESTURE_BOX, GESTURE_CIRCLE, GESTURE_LASSO };
 static Gesture gesture_started = GESTURE_NONE;
 static Vector<int2> lasso_path;
 
-/* The point (region pixels, y up) a running operator draws a dashed line from to the mouse, or null. */
-static const float *mouse_line_from = nullptr;
-EXPORT(region_mouse_line) const float *region_mouse_line() { return mouse_line_from; }
 
 /* The gesture the last invoke started (Gesture), cleared by asking. */
 EXPORT(operator_gesture) int operator_gesture() { return std::exchange(gesture_started, GESTURE_NONE); }
@@ -1137,33 +1134,6 @@ void WM_cursor_modal_set(wmWindow * /*win*/, int /*val*/) {}
 void WM_cursor_modal_restore(wmWindow * /*win*/) {}
 void WM_cursor_wait(bool /*val*/) {}
 
-/* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
- * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with
- * region_mouse_line. */
-void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (*draw)(const bContext *, ARegion *, void *), void *customdata,
-                                 int /*type*/)
-{
-  static int handle;
-  if (draw == ED_region_draw_mouse_line_cb) {
-    mouse_line_from = static_cast<const float *>(customdata);
-    return &mouse_line_from;
-  }
-  return &handle;
-}
-bool ED_region_draw_cb_exit(ARegionType * /*art*/, void *handle)
-{
-  if (handle == &mouse_line_from) {
-    mouse_line_from = nullptr;
-  }
-  return true;
-}
-
-/* port-override: Bylonder's objects have no point caches, so the Timeline draws no cache ranges (timeline_draw_cache). */
-void BKE_ptcache_ids_from_object(ListBaseT<PTCacheID> *lb, Object * /*ob*/, Scene * /*scene*/, int /*duplis*/)
-{
-  BLI_listbase_clear(lb);
-}
-
 /* port-override: Bylonder lays an area's regions out on its next draw, from their flags. */
 void ED_region_visibility_change_update(bContext * /*C*/, ScrArea * /*area*/, ARegion * /*region*/) {}
 
@@ -1238,23 +1208,16 @@ bool ED_operator_region_animview_active(bContext *C)
   return true;
 }
 
-/* port-override: the module's markers have no cameras bound (Bylonder's scene camera is its own), so moving markers
- * switches no camera. */
-bool BKE_scene_camera_switch_update(Scene * /*scene*/) { return false; }
-
 /* As wm_operators.cc defines it. */
 int WM_operator_smooth_viewtx_get(const wmOperator *op)
 {
   return (op->flag & OP_IS_INVOKE && !(U.uiflag & USER_REDUCE_MOTION)) ? U.smooth_viewtx : 0;
 }
 
-/* port-override: no message bus (its subscribers are the UI's); the 3D View navigates in JS, so transform has no
- * 3D View navigation to pass events to. */
+/* port-override: no message bus (its subscribers are the UI's). */
 void WM_msg_publish_rna_params(wmMsgBus * /*mbus*/, const wmMsgParams_RNA * /*msg_key_params*/) {}
-ViewOpsData *ED_view3d_navigation_init(bContext * /*C*/, const wmKeyMapItem * /*kmi_merge*/) { return nullptr; }
 
-/* port-override: Bylonder's RNA updates follow an operator's run (JS), and it draws the transform's cursor. */
-void RNA_property_update_main(Main * /*bmain*/, Scene * /*scene*/, PointerRNA * /*ptr*/, PropertyRNA * /*prop*/) {}
+/* port-override: Bylonder draws the transform's cursor. */
 wmPaintCursor *WM_paint_cursor_activate(short /*space_type*/, short /*region_type*/, bool (* /*poll*/)(bContext *),
                                         wmPaintCursorDraw /*draw*/, void * /*customdata*/)
 {

@@ -4,9 +4,13 @@
  * BKE_modifier_init copies one of each whole into its virtual modifiers, which a stand-in's bare ModifierData is not. */
 #include "modifier-standins.hh"
 
+#include <ctime>
+
 #include "BKE_global.hh"
+#include "BKE_node.hh"
 #include "BKE_idtype.hh"
 #include "BLO_readfile.hh"
+#include "BLI_math_base.h"
 #include "BLT_translation.hh"
 #include "DNA_armature_types.h"
 #include "DNA_node_types.h"
@@ -16,10 +20,12 @@
 
 namespace blender {
 
-/* As blender.cc and editor-context.cc define them: Blender's globals start zeroed. */
+/* As blender.cc defines them: Blender's globals start zeroed. */
 Global G;
 UserDef U;
 extern const PointerRNA PointerRNA_NULL = {};
+/* As blf.cc defines it: image.cc's stamps read it; the module has no fonts, so none is loaded. */
+int blf_mono_font_render = -1;
 
 /* As readfile.cc defines them for data not read from a file, which is all this module's data (the scene module reads files). */
 ID_Readfile_Data::Tags BLO_readfile_id_runtime_tags(const ID & /*id*/) { return {}; }
@@ -27,6 +33,37 @@ void BLO_readfile_id_runtime_data_free(ID & /*id*/) {}
 
 IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t size, const char *name,
                                 const char *name_plural, const char *context, uint32_t flags);
+/* Not in modifier-api.cc: the scene module has Blender's own. */
+int64_t BLI_time_now_seconds_i() { return int64_t(time(nullptr)); }
+double BLI_time_now_seconds()
+{
+  timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  return ts.tv_sec + ts.tv_nsec * 1e-9;
+}
+
+/* As scene.cc defines them; scene.cc comes with Blender's scenes, which the module's one scene does without. */
+int get_render_subsurf_level(const RenderData *r, int lvl, bool for_render)
+{
+  if (r->mode & R_SIMPLIFY) {
+    return for_render ? min_ii(r->simplify_subsurf_render, lvl) : min_ii(r->simplify_subsurf, lvl);
+  }
+  return lvl;
+}
+float BKE_scene_ctime_get(const Scene *scene) { return (scene->r.cfra + scene->r.subframe) * scene->r.framelen; }
+
+/* As node_shader_tree.cc registers it, its identifiers only: the module has no shader nodes, and a new World's tree
+ * (world.cc) is named by it. */
+static bke::bNodeTreeType *shader_tree_type()
+{
+  static bke::bNodeTreeType type;
+  type.type = NTREE_SHADER;
+  type.idname = UString("ShaderNodeTree");
+  type.group_idname = UString("ShaderNodeGroup");
+  return &type;
+}
+bke::bNodeTreeType *ntreeType_Shader = shader_tree_type();
+
 /* Scenes and node trees, without scene.cc and node.cc: the module's one scene is outside Main. */
 IDTypeInfo IDType_ID_SCE = id_type_without_data(ID_SCE, FILTER_ID_SCE, INDEX_ID_SCE, sizeof(Scene), "Scene", "scenes",
                                                 BLT_I18NCONTEXT_ID_SCENE, 0);

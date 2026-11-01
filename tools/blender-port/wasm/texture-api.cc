@@ -73,18 +73,4 @@ void colorband_table(int tot, const float *stops, int ipotype, int ipotype_hue, 
 
 namespace blender {
 
-/* port-override: image.cc does not build for wasm32 (it shifts a size_t by 32) and the module has no images, so a
- * texture's image pool holds none (the procedural types read no images). */
-ImagePool *BKE_image_pool_new() { return nullptr; }
-void BKE_image_pool_free(ImagePool * /*pool*/) {}
-ImBuf *BKE_image_pool_acquire_ibuf(Image * /*ima*/, ImageUser * /*iuser*/, ImagePool * /*pool*/) { return nullptr; }
-void BKE_image_pool_release_ibuf(Image * /*ima*/, ImBuf * /*ibuf*/, ImagePool * /*pool*/) {}
-/* As image.cc defines it, for a new texture's image user. */
-void BKE_imageuser_default(ImageUser *iuser)
-{
-  *iuser = ImageUser{};
-  iuser->frames = 100;
-  iuser->sfra = 1;
-}
-
 }  // namespace blender

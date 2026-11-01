@@ -331,17 +331,14 @@ def main():
     link_module(host, out, entries, extra, archives, module_libraries)
 
 
-# Bylonder's own path resolution for its custom properties (rna-runtime.cc).
-WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE']
+# Blender's functions the module's API wraps: the UI layout's resolve (ui-tree.cc), and platform.cc's.
+WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', *wasm_module.PLATFORM_WRAPPED]
 
 
 NULL_DATA = os.path.join(WASM, 'null-data.txt')
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
 # fonts, video); everywhere else Blender's definition wins over the API's stand-in.
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie'}
-# The API's seam implementations in other libraries (each a port-override in tools/blender-port/wasm), which win too:
-# what Bylonder's own editor does in Blender's place.
-SEAM_FUNCTIONS = {'blender::BLI_threadpool_insert'}
 
 
 def link_module(host, out, entries, extra, archives, module_libraries):
@@ -413,7 +410,7 @@ def duplicate_losers(stderr, preferred):
             loser = next(p for p in places if p not in own)
         elif objects and members:
             library = os.path.basename(members[0][0]).removesuffix('.a')
-            seam = library in SEAM_LIBRARIES or symbol.split('(')[0] in SEAM_FUNCTIONS
+            seam = library in SEAM_LIBRARIES
             loser = members[0] if seam else objects[0]
         else:
             loser = places[1]

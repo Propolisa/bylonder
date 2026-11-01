@@ -233,24 +233,6 @@ bool modifier_left_out_is_disabled(const Scene * /*scene*/, ModifierData * /*md*
 /* port-override: no GPU in the module, so subdivision is evaluated on the CPU. */
 GPUBackendType GPU_backend_get_type() { return GPU_BACKEND_NONE; }
 
-int64_t BLI_time_now_seconds_i() { return int64_t(time(nullptr)); }
-double BLI_time_now_seconds()
-{
-  timespec ts;
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  return ts.tv_sec + ts.tv_nsec * 1e-9;
-}
-
-/* As scene.cc defines them; scene.cc comes with Blender's scenes, which the module's one scene does without. */
-int get_render_subsurf_level(const RenderData *r, int lvl, bool for_render)
-{
-  if (r->mode & R_SIMPLIFY) {
-    return for_render ? min_ii(r->simplify_subsurf_render, lvl) : min_ii(r->simplify_subsurf, lvl);
-  }
-  return lvl;
-}
-float BKE_scene_ctime_get(const Scene *scene) { return (scene->r.cfra + scene->r.subframe) * scene->r.framelen; }
-
 
 /* A read ID of a type without its source keeps only its ID: the rest of it, the file's pointers among it, is cleared. */
 static void read_without_data(BlendDataReader * /*reader*/, ID *id)
@@ -291,26 +273,10 @@ IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t s
   return info;
 }
 
-IDTypeInfo IDType_ID_IM = id_type_without_data(ID_IM, FILTER_ID_IM, INDEX_ID_IM, sizeof(Image), "Image", "images",
-                                               BLT_I18NCONTEXT_ID_IMAGE, IDTYPE_FLAGS_NO_ANIMDATA | IDTYPE_FLAGS_APPEND_IS_REUSABLE);
-IDTypeInfo IDType_ID_SO = id_type_without_data(ID_SO, FILTER_ID_SO, INDEX_ID_SO, sizeof(bSound), "Sound", "sounds",
-                                               BLT_I18NCONTEXT_ID_SOUND, IDTYPE_FLAGS_NO_ANIMDATA | IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 /* The module's one window manager is its context's, outside Main. */
 IDTypeInfo IDType_ID_WM = id_type_without_data(ID_WM, FILTER_ID_WM, INDEX_ID_WM, sizeof(wmWindowManager), "WindowManager",
                                                "window_managers", BLT_I18NCONTEXT_ID_WINDOWMANAGER,
                                                IDTYPE_FLAGS_NO_COPY | IDTYPE_FLAGS_NO_LIBLINKING | IDTYPE_FLAGS_NO_ANIMDATA |
                                                    IDTYPE_FLAGS_NO_MEMFILE_UNDO | IDTYPE_FLAGS_NEVER_UNUSED);
-
-/* As node_shader_tree.cc registers it, its identifiers only: the module has no shader nodes, and a new World's tree
- * (world.cc) is named by it. */
-static bke::bNodeTreeType *shader_tree_type()
-{
-  static bke::bNodeTreeType type;
-  type.type = NTREE_SHADER;
-  type.idname = UString("ShaderNodeTree");
-  type.group_idname = UString("ShaderNodeGroup");
-  return &type;
-}
-bke::bNodeTreeType *ntreeType_Shader = shader_tree_type();
 
 }  // namespace blender

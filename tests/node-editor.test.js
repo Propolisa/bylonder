@@ -1,5 +1,5 @@
 // The Node Editor behaves as Blender's: Blender's Add menu adds Blender's and Babylon's nodes, links drag between
-// sockets of both, Ctrl right-drag cuts links, and Blender's Node Editor keymap runs M, H, X, Ctrl J and A.
+// sockets of both, Ctrl right-drag cuts links, and Blender's Node Editor keymap runs M, H, X and A, and Join in New Frame frames nodes.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3 } from '@babylonjs/core';
 import { createNodeTree } from '../src/editors/space_node/node-tree.js';
@@ -80,7 +80,7 @@ editor.pointerMove([middle[0], middle[1] + 40]);
 editor.pointerUp([middle[0], middle[1] + 40], { button: 2 });
 assert.equal(mix.getInputByName('Factor_Float').connectedPoint, null, 'the cut link is removed');
 
-// Blender's Node Editor keymap: M mutes, H collapses, Ctrl J frames, A selects all, X deletes.
+// Blender's Node Editor keymap: M mutes, H collapses, A selects all, X deletes; Node > Join in New Frame frames.
 const keys = keymapHandler(['Node Editor']), area = { nodeEditor: editor, menu: () => null };
 const press = (type, mods = {}) => inArea(area, () => keys({ type, value: 'PRESS', shift: false, ctrl: false, alt: false, ...mods }));
 editor.selectAll('DESELECT');
@@ -91,7 +91,9 @@ assert.ok(press('a') && editor.state.selected.size === tree.blocks().length, 'A 
 press('a', { alt: true });
 editor.state.selected.add(math.uniqueId);
 editor.state.selected.add(mix.uniqueId);
-assert.ok(press('j', { ctrl: true }) && tree.frames().some((f) => f.blocks.includes(math.uniqueId) && f.blocks.includes(mix.uniqueId)), 'Ctrl J frames the selection');
+press('j', { ctrl: true });
+assert.equal(tree.frames().length, 0, 'Ctrl J joins Group Inputs, which a Babylon graph has none of');
+assert.ok(editor.run('node.join') && tree.frames().some((f) => f.blocks.includes(math.uniqueId) && f.blocks.includes(mix.uniqueId)), 'Join in New Frame frames the selection');
 assert.ok(press('x') && !tree.blocks().includes(mix) && !tree.blocks().includes(math), 'X deletes');
 assert.ok(rebuilds > 0);
 

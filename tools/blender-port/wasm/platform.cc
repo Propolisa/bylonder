@@ -64,7 +64,7 @@ WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
 WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
 /* port-override: WASI has no threads: a thread pool's work (a window manager job's: a point cache bake, a background
  * task pool's queue) runs where it is inserted, to its end, which frees its slot for the next; the window then ends a
- * job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). */
+ * job (wm_jobs_handle_finished, wm-api.cc wm_window_handle). Linked with --wrap (wasm_module.PLATFORM_WRAPPED). */
 struct ThreadSlot {
   ThreadSlot *next, *prev;
   void *(*do_thread)(void *);
@@ -72,18 +72,6 @@ struct ThreadSlot {
   pthread_t pthread;
   int avail;
 };
-void BLI_threadpool_insert(ListBaseT<ThreadSlot> *threadbase, void *callerdata)
-{
-  for (ThreadSlot &slot : *threadbase) {
-    if (slot.avail) {
-      slot.avail = 0;
-      slot.callerdata = callerdata;
-      slot.do_thread(callerdata);
-      slot.avail = 1;
-      return;
-    }
-  }
-}
 /* port-override: image files are the browser's to decode; OpenImageIO and OpenEXR are past the seam. */
 WEAK void OIIO_init() {}
 /* blender-port: imbuf/intern/format_*.cc and openexr_api.cpp: the file extensions of the image formats whose readers
@@ -133,8 +121,21 @@ void BLI_mmap_free(BLI_mmap_file * /*file*/) {}
 }  // namespace blender
 
 #define QUEUE_POP _ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE
+#define THREADPOOL_INSERT _ZN7blender21BLI_threadpool_insertEPNS_9ListBaseTINS_10ThreadSlotEEEPv
 #define WRAP_(prefix, name) prefix##name
 #define WRAP(prefix, name) WRAP_(prefix, name)
+extern "C" void WRAP(__wrap_, THREADPOOL_INSERT)(blender::ListBaseT<blender::ThreadSlot> *threadbase, void *callerdata)
+{
+  for (blender::ThreadSlot &slot : *threadbase) {
+    if (slot.avail) {
+      slot.avail = 0;
+      slot.callerdata = callerdata;
+      slot.do_thread(callerdata);
+      slot.avail = 1;
+      return;
+    }
+  }
+}
 extern "C" void *WRAP(__real_, QUEUE_POP)(blender::ThreadQueue *queue);
 /* port-override: with one thread nothing else can add work to a queue being waited on, so an empty queue gives no work
  * (a background task pool's worker then ends) instead of waiting forever. */
