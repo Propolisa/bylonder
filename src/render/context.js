@@ -36,8 +36,8 @@ async function useCamera(name) {
   return camera;
 }
 
-// Opens the scene for rendering; with `audio` ({ frameStart, frameEnd, fps, sampleRate }), for rendering its sound
-// over those frames (renderAudio).
+// Opens the scene for rendering; with `audio` ({ frameStart, frameEnd, fps, sampleRate }), for mixing its sound over
+// those frames (mixUntil, renderAudio).
 let sound = null;
 async function open(input, { width, height }, { camera: cameraName, audio } = {}) {
   resize(width, height);
@@ -52,7 +52,7 @@ async function open(input, { width, height }, { camera: cameraName, audio } = {}
   world.beforeViewRender({ rendered: true, compositor: true });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
   await scene.whenReadyAsync();
-  return { camera: camera.name, warnings };
+  return { camera: camera.name, warnings, audible: audible() };
 }
 
 // The scene's own render settings: final frames use its samples and motion blur.
@@ -131,31 +131,59 @@ async function renderSample(t, offset, { start, fps, width, height }) {
   engine.endFrame();
 }
 
+// A frame of the scene without drawing it: what its sound follows (its animations, its camera, and the logic its code
+// runs around each render), at a fraction of a render's cost.
+function advance(scene) {
+  scene.onBeforeAnimationsObservable.notifyObservers(scene);
+  scene.animate();
+  scene.activeCamera?.update();
+  scene.onBeforeRenderObservable.notifyObservers(scene);
+  scene.onAfterRenderObservable.notifyObservers(scene);
+}
+
 // The scene's sound over the frames it was opened for, as its camera hears it (Blender's mixdown of a scene): its own
-// Babylon audio engines play into the offline audio context while the scene steps a frame at a time, the audio
-// pausing at each frame for the scene to move its sources and listener there. Null for a scene that makes no sound.
-// progress(done, total) hears of each frame.
-async function renderAudio(progress = () => {}) {
-  if (!built.audible) return null;
-  const { frameStart, frameEnd, fps, context } = sound, { animation, scene } = built, start = animation.time.state.frameStart;
-  await useCamera();
-  animation.time.play();
-  // A frame that fails stops the mix with its error rather than leaving it suspended.
+// Babylon audio engines play into the offline audio context, which pauses at each frame for the scene to move its
+// sources and listener there. A render mixes it along with its frames (mixUntil after each frame, then renderAudio
+// for the rest); alone, renderAudio mixes it all. Null for a scene that makes no sound. progress(done, total) hears
+// of each frame mixed.
+let mixing = null;
+const audible = () => !!sound && built.audible;
+function startMixing() {
+  const { frameStart, frameEnd, fps, context } = sound, reached = new Map();
   let failed;
   const stopped = new Promise((resolve, reject) => { failed = reject; });
   for (let frame = frameStart; frame <= frameEnd; frame++) {
-    context.suspend((frame - frameStart) / fps).then(() => {
-      clock.set(frameMs(frame, start, fps));
-      animation.time.configure({ frameCurrent: frame }, { record: false });
-      scene.render();
-      progress(frame - frameStart + 1, frameEnd - frameStart + 1);
-      return context.resume();
-    }).catch(failed);
+    reached.set(frame, context.suspend((frame - frameStart) / fps));
   }
-  const buffer = await Promise.race([context.startRendering(), stopped]);
-  animation.time.pause();
+  built.animation.time.play();
+  mixing = { next: frameStart, reached, rendering: Promise.race([context.startRendering(), stopped]), failed };
+}
+
+// Mixes the scene's sound from each frame not yet mixed up to `frame`, from the scene as it is at each.
+async function mixUntil(frame, progress = () => {}) {
+  if (!audible()) return;
+  if (!mixing) startMixing();
+  const { frameStart, frameEnd, fps } = sound, { animation, scene } = built, start = animation.time.state.frameStart;
+  for (; mixing.next <= Math.min(frame, frameEnd); mixing.next++) {
+    const at = mixing.next;
+    await mixing.reached.get(at);
+    clock.set(frameMs(at, start, fps));
+    animation.time.configure({ frameCurrent: at }, { record: false });
+    try { advance(scene); } catch (error) { mixing.failed(error); throw error; }
+    progress(at - frameStart + 1, frameEnd - frameStart + 1);
+    sound.context.resume();
+  }
+}
+
+async function renderAudio(progress) {
+  if (!audible()) return null;
+  await useCamera();
+  await mixUntil(sound.frameEnd, progress);
+  const buffer = await mixing.rendering;
+  built.animation.time.pause();
+  mixing = null;
   return { samples: Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c)), sampleRate: buffer.sampleRate };
 }
 
-window.bylonderRender = { open, renderFrame, renderAudio, warnings, get clock() { return clock.ms; } };
+window.bylonderRender = { open, renderFrame, mixUntil, renderAudio, warnings, get clock() { return clock.ms; } };
 dispatchEvent(new Event('bylonder-render'));

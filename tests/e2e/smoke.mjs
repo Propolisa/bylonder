@@ -4,6 +4,7 @@
 // usage: npm run test:e2e [-- name filter]
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
+import { execFileSync, spawnSync } from "node:child_process";
 import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
 import { displacedSphere, lavaMaterial } from "./lava.mjs";
@@ -745,35 +746,37 @@ const checks = {
     assert.deepEqual(await fps(), [24, 1, 24]);
   },
 
-  // Video with sound mixes the scene's sound first, with a progress bar; a second render of the same scene reuses the
-  // mix, and Cancel stops a mix at once.
-  "Render Animation to video mixes the scene's sound with progress, once": { open: { example: "Volcanic Island", node: "Island" }, async run() {
+  // Video with sound mixes the scene's sound along with its frames, in the frames' own render context: frames come in
+  // from the start, with no mixing beforehand, the video has the sound, and Cancel stops it at once.
+  "Render Animation to video mixes the scene's sound along with its frames": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     await app.bylonder((b) => {
       b.world.animation.time.configure({ frameEnd: 24 });
       Object.assign(b.mainScene.render.image_settings, { media_type: "VIDEO", file_format: "FFMPEG" });
       Object.assign(b.mainScene.render.ffmpeg, { format: "WEBM", codec: "WEBM", audio_codec: "OPUS" });
     });
-    const statuses = [], progress = [];
-    app.page.on("console", (m) => /MIXKEY/.test(m.text()) && console.log(m.text()));
-    const watch = () => app.frame().evaluate(() => [document.querySelector(".render-result [data-status]").textContent, getComputedStyle(document.querySelector(".render-result-progress")).display !== "none"]);
-    const renderAndWatch = async () => {
-      statuses.length = 0;
-      await menu("TOPBAR_MT_render", "Render Animation");
-      while (true) {
-        const [status, bar] = await watch();
-        statuses.push(status); progress.push(bar);
-        if (/^(Finished|Render failed|Render cancelled)/.test(status)) return status;
-        await app.page.waitForTimeout(100);
-      }
-    };
-    assert.match(await renderAndWatch(), /^Finished 24 frames/);
-    assert.ok(statuses.some((s) => /^Mixing scene sound \| \d+ \/ 24/.test(s)), "the mix shows its progress");
-    assert.ok(progress.some(Boolean), "with a progress bar");
-    assert.match(await renderAndWatch(), /^Finished 24 frames/);
-    assert.ok(!statuses.some((s) => s.startsWith("Mixing")), "a second render of the same scene reuses the mix");
+    const statuses = [];
+    const download = app.page.waitForEvent("download", { timeout: 300000 });
+    await menu("TOPBAR_MT_render", "Render Animation");
+    while (true) {
+      const status = await app.frame().evaluate((selector) => document.querySelector(selector).textContent, renderStatus);
+      if (statuses.at(-1) !== status) statuses.push(status);
+      if (/^(Finished|Render failed|Render cancelled)/.test(status)) break;
+      await app.page.waitForTimeout(100);
+    }
+    assert.match(statuses.at(-1), /^Finished 24 frames/);
+    assert.ok(!statuses.some((s) => s.startsWith("Mixing")), `no mix before the frames: ${statuses.join(" / ")}`);
+    assert.match(statuses.find((s) => !s.startsWith("Preparing")), /^Frame \d+ \|/);
+    const file = `${tmpdir()}/smoke-render.webm`;
+    await (await download).saveAs(file);
+    const streams = JSON.parse(execFileSync("ffprobe", ["-v", "error", "-show_streams", "-of", "json", file])).streams;
+    const audio = streams.find((stream) => stream.codec_type === "audio");
+    assert.ok(audio, "the video has a sound track");
+    const { stderr } = spawnSync("ffmpeg", ["-hide_banner", "-i", file, "-map", "0:a", "-af", "volumedetect", "-f", "null", "-"], { encoding: "utf8" });
+    const mean = Number(stderr.match(/mean_volume: (-?[\d.]+) dB/)?.[1]);
+    assert.ok(mean > -60, `the sound track carries the scene's sound (mean ${mean} dB)`);
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 400 }));
     await menu("TOPBAR_MT_render", "Render Animation");
-    await app.until((b, selector) => /^Mixing/.test(document.querySelector(selector).textContent), renderStatus, 60000);
+    await app.until((b, selector) => /^Frame \d+/.test(document.querySelector(selector).textContent), renderStatus, 60000);
     await app.locator(".render-result [data-cancel]").click();
     await app.until((b, selector) => document.querySelector(selector).textContent === "Render cancelled", renderStatus, 5000);
   } },

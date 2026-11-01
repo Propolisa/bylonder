@@ -47,9 +47,11 @@ Blender mixes a scene's sound (its speakers and its own sequencer) into a scene 
 scene's sound is whatever its code plays through Babylon's spatial audio, heard from its camera. Add > Scene Audio puts
 that sound in the edit as an audio strip of its own; the scene renders it in a render context, on an offline audio
 context, a frame at a time at the scene's frame rate (`src/sequencer/scene-audio.js`, `renderAudio` in
-`src/render/context.js`), and again when the scene changes. While the sequencer follows the scene's time, the active
-scene plays its sound live, so its strip is silent in the preview; renders mix it. Render Animation without the
-sequencer mixes the same sound into video formats with audio. Blender's speakers could feed the same source later.
+`src/render/context.js`), and again when the scene changes. Each frame of sound advances the scene's logic and
+animations without drawing it. While the sequencer follows the scene's time, the active scene plays its sound live,
+so its strip is silent in the preview; renders mix it. Render Animation without the sequencer mixes the same sound
+into video formats with audio along with the frames, in their own render context (`mixUntil`): frames start at once
+and the sound is added to the video at the end. Blender's speakers could feed the same source later.
 
 Opening the Video Sequencer on an empty edit offers Blender's video editing setup: FFmpeg output in MPEG-4 (H.264,
 AAC) instead of PNG images, the scene as a strip and its Scene Audio. Remember keeps the choice, and Edit >
