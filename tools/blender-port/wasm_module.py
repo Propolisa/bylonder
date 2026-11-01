@@ -111,12 +111,48 @@ def dependencies(build, deps):
             else:
                 subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path],
                                check=True)
+        apply_patches(path, [os.path.join(WASM, 'patches', 'deps', p) for p in dep.get('patches', [])])
         for target, variables in dep.get('configure', {}).items():
-            configure(os.path.join(path, target), variables)
+            configure(os.path.join(path, target), variables, path)
         paths[name] = path
         if not dep.get('private'):
-            includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
+            includes += include_flags(path, dep)
+    for name, dep in deps.items():
+        install(paths, name, dep.get('install', {}))
     return paths, includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()) if not d.get('private'))
+
+
+def apply_patches(path, patches):
+    """A dependency's `patches` (wasm/patches/deps): what WASI needs that the library does not handle yet. Applied once;
+    when they change, the fetched files are restored first (a checkout of the dependency's clone)."""
+    stamp = os.path.join(path, '.patches')
+    digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in patches)).hexdigest()
+    if not patches or (open(stamp).read() if os.path.exists(stamp) else '') == digest:
+        return
+    if os.path.exists(stamp):
+        subprocess.run(['git', '-C', path, 'checkout', '--', '.'], check=True)
+    for patch in patches:
+        subprocess.run(['patch', '-p1', '-s', '-d', path, '-i', patch], check=True)
+    open(stamp, 'w').write(digest)
+
+
+def include_flags(path, dep):
+    """A dependency's include directories (`include`: one or a list, in its tree)."""
+    include = dep.get('include', '')
+    return [f'-I{os.path.join(path, d)}' for d in ([include] if isinstance(include, str) else include)]
+
+
+def install(paths, name, layout):
+    """Headers copied where its users include them from, as its CMake install lays them out: {directory: [glob, ...]},
+    each glob in its own tree or, as `@other/...`, in another dependency's (headers it bundles, OIIO's fmt)."""
+    for directory, patterns in layout.items():
+        os.makedirs(os.path.join(paths[name], directory), exist_ok=True)
+        for pattern in patterns:
+            other, _, rest = pattern[1:].partition('/') if pattern.startswith('@') else (name, '', pattern)
+            for source in glob.glob(os.path.join(paths[other], rest)):
+                target = os.path.join(paths[name], directory, os.path.basename(source))
+                if not os.path.exists(target) or open(source, 'rb').read() != open(target, 'rb').read():
+                    shutil.copyfile(source, target)
 
 
 def library_flags(entry, tree, deps, spec):
@@ -127,7 +163,7 @@ def library_flags(entry, tree, deps, spec):
     specs = spec.get('dependencies', {})
     used = [n for n in [entry.get('dependency'), *entry.get('uses', [])] if n and specs[n].get('private')]
     # An include under wasm/ is the module's own (wasm/fstream), the rest are Blender's.
-    flags = ([f'-I{os.path.join(deps[n], specs[n].get("include", ""))}' for n in used]
+    flags = ([f for n in used for f in include_flags(deps[n], specs[n])]
              + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
              + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
     key = ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
@@ -176,11 +212,21 @@ def datatoc(build, paths, tag):
     return out
 
 
-def configure(target, variables):
-    """A header CMake would configure from target.in: ${NAME} replaced (empty when not given, as CMake leaves an unset
-    variable), `#cmakedefine NAME` lines left undefined."""
-    text = re.sub(r'\$\{(\w+)\}', lambda m: str(variables.get(m[1], '')), open(target + '.in').read())
-    text = re.sub(r'^#cmakedefine (\w+).*$', r'/* #undef \1 */', text, flags=re.M)
+def configure(target, variables, root):
+    """A header CMake would configure (configure_file) from target.in, or from the template `from` names in the
+    dependency's tree: ${NAME} and @NAME@ replaced (empty when not given, as CMake leaves an unset variable; a file's
+    bytes when given as {"bytes": path}),
+    `#cmakedefine NAME ...` defined when NAME is given and true, else left undefined, `#cmakedefine01 NAME` 1 or 0."""
+    template = os.path.join(root, variables['from']) if 'from' in variables else target + '.in'
+    def value(name):
+        given = variables.get(name, '')
+        if isinstance(given, dict):  # A file of the dependency's as a C array of its bytes, null-terminated.
+            return ','.join(f'0x{b:02x}' for b in open(os.path.join(root, given['bytes']), 'rb').read() + b'\0')
+        return str(given)
+    text = re.sub(r'\$\{([\w.-]+)\}|@([\w.-]+)@', lambda m: value(m[1] or m[2]), open(template).read())
+    text = re.sub(r'^#(\s*)cmakedefine01 (\w+).*$', lambda m: f'#{m[1]}define {m[2]} {1 if variables.get(m[2]) else 0}', text, flags=re.M)
+    text = re.sub(r'^#(\s*)cmakedefine (\w+)(.*)$', lambda m: f'#{m[1]}define {m[2]}{m[3]}' if variables.get(m[2]) else f'/* #undef {m[2]} */', text, flags=re.M)
+    os.makedirs(os.path.dirname(target), exist_ok=True)
     if not os.path.exists(target) or open(target).read() != text:
         open(target, 'w').write(text)
 
@@ -341,7 +387,7 @@ def library_sources(entry, tree, deps):
     if 'sources' in entry:
         return [os.path.join(path, f) for f in entry['sources']]
     sources = sorted(glob.glob(os.path.join(path, '*.c*'))) if os.path.isdir(path) else [path]
-    return [s for s in sources if os.path.basename(s) not in set(entry.get('exclude', [])) and not s.endswith('_test.cc')]
+    return [s for s in sources if os.path.basename(s) not in set(entry.get('exclude', [])) and not s.endswith(('_test.cc', '_test.cpp'))]
 
 
 def compiler(src, args):

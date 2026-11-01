@@ -1,0 +1,123 @@
+diff -ru a/src/libutil/filesystem.cpp b/src/libutil/filesystem.cpp
+--- a/src/libutil/filesystem.cpp	2026-11-01 21:20:37.118130849 +0000
++++ b/src/libutil/filesystem.cpp	2026-11-01 21:20:37.634479541 +0000
+@@ -676,6 +676,9 @@
+ #ifdef _WIN32
+     FILE* in = _wpopen(Strutil::utf8_to_utf16wstring(command).c_str(),
+                        Strutil::utf8_to_utf16wstring("r").c_str());
++#elif defined(__wasi__)
++    // WASI cannot run commands.
++    FILE* in = nullptr;
+ #else
+     FILE* in = popen(std::string(command).c_str(), "r");
+ #endif
+@@ -694,7 +697,7 @@
+     }
+ #ifdef _WIN32
+     _pclose(in);
+-#else
++#elif !defined(__wasi__)
+     pclose(in);
+ #endif
+     str = contents.str();
+diff -ru a/src/libutil/plugin.cpp b/src/libutil/plugin.cpp
+--- a/src/libutil/plugin.cpp	2026-11-01 20:53:16.566324986 +0000
++++ b/src/libutil/plugin.cpp	2026-11-01 20:53:34.445007760 +0000
+@@ -16,7 +16,7 @@
+ 
+ #ifdef _WIN32
+ #    include <windows.h>
+-#else
++#elif !defined(__wasi__)
+ #    include <dlfcn.h>
+ #endif
+ 
+@@ -94,6 +94,35 @@
+     LocalFree(lpMsgBuf);
+     return win32Error;
+ }
++#elif defined(__wasi__)
++
++// WASI has no dynamic loading: plugins are embedded (EMBED_PLUGINS).
++#    define RTLD_LAZY 0
++#    define RTLD_GLOBAL 0
++
++static Handle
++dlopen(const char*, int)
++{
++    return nullptr;
++}
++
++static int
++dlclose(Handle)
++{
++    return 0;
++}
++
++static void*
++dlsym(Handle, const char*)
++{
++    return nullptr;
++}
++
++static std::string
++dlerror()
++{
++    return "WASI has no dynamic loading";
++}
+ #endif
+ 
+ Handle
+diff -ru a/src/libutil/strutil.cpp b/src/libutil/strutil.cpp
+--- a/src/libutil/strutil.cpp	2026-11-01 20:53:16.566374774 +0000
++++ b/src/libutil/strutil.cpp	2026-11-01 20:53:34.444740030 +0000
+@@ -79,7 +79,7 @@
+ // On systems that support it, get a location independent locale.
+ #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) \
+     || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)           \
+-    || defined(__GLIBC__) || defined(__NetBSD__)
++    || defined(__GLIBC__) || defined(__NetBSD__) || defined(__wasi__)
+ static locale_t c_loc = newlocale(LC_ALL_MASK, "C", nullptr);
+ #elif defined(_WIN32)
+ static _locale_t c_loc = _create_locale(LC_ALL, "C");
+@@ -527,7 +527,7 @@
+ {
+ #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) \
+     || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)           \
+-    || defined(__GLIBC__)
++    || defined(__GLIBC__) || defined(__wasi__)
+     return strcasecmp_l(a, b, c_loc);
+ #elif defined(_WIN32)
+     return _stricmp_l(a, b, c_loc);
+@@ -550,7 +550,7 @@
+ {
+ #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) \
+     || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)           \
+-    || defined(__GLIBC__)
++    || defined(__GLIBC__) || defined(__wasi__)
+     return strncasecmp_l(a, b, size, c_loc);
+ #elif defined(_WIN32)
+     return _strnicmp_l(a, b, size, c_loc);
+diff -ru a/src/libutil/sysutil.cpp b/src/libutil/sysutil.cpp
+--- a/src/libutil/sysutil.cpp	2026-11-01 21:13:28.886050965 +0000
++++ b/src/libutil/sysutil.cpp	2026-11-01 21:39:51.050061773 +0000
+@@ -204,6 +204,10 @@
+     sysctl(mib, 2, &physical_memory, &length, NULL, 0);
+     return physical_memory;
+ 
++#elif defined(__wasi__)
++    // A wasm32 module addresses 4 GiB at most.
++    return size_t(-1);
++
+ #else
+     // No idea what platform this is
+     OIIO_ASSERT(
+@@ -270,7 +274,7 @@
+     size_t cb = sizeof(filename);
+     int r     = 1;
+     sysctl(mib, 4, filename, &cb, NULL, 0);
+-#elif defined(__GNU__) || defined(__OpenBSD__) || defined(_WIN32)
++#elif defined(__GNU__) || defined(__OpenBSD__) || defined(_WIN32) || defined(__wasi__)
+     int r = 0;
+ #else
+     // No idea what platform this is

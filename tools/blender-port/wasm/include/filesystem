@@ -1,0 +1,240 @@
+/* The wasm32-wasi libc++ this build uses is configured without <filesystem> (_LIBCPP_HAS_NO_FILESYSTEM). This is the
+ * part of std::filesystem OpenImageIO's Filesystem utilities use (libutil/filesystem.cpp), over WASI's POSIX calls:
+ * paths with '/' separators, status, directory listing, and creating, copying, renaming and removing files. */
+#pragma once
+
+#include <__config>
+#include <cstdint>
+#include <cstdio>
+#include <dirent.h>
+#include <string>
+#include <sys/stat.h>
+#include <system_error>
+#include <unistd.h>
+#include <utility>
+#include <vector>
+
+/* In libc++'s own namespace for it (std::__fs::filesystem), which its other headers already declare. */
+_LIBCPP_BEGIN_NAMESPACE_FILESYSTEM
+
+class path {
+  std::string s_;
+
+ public:
+  using value_type = char;
+  using string_type = std::string;
+  path() = default;
+  path(std::string s) : s_(std::move(s)) {}
+  path(const char *s) : s_(s) {}
+  template<class It> path(It first, It last) : s_(first, last) {}
+  const std::string &native() const noexcept { return s_; }
+  const char *c_str() const noexcept { return s_.c_str(); }
+  std::string string() const { return s_; }
+  std::string generic_string() const { return s_; }
+  bool empty() const noexcept { return s_.empty(); }
+  bool is_absolute() const { return !s_.empty() && s_[0] == '/'; }
+  path filename() const
+  {
+    const size_t slash = s_.rfind('/');
+    return slash == std::string::npos ? *this : path(s_.substr(slash + 1));
+  }
+  path parent_path() const
+  {
+    const size_t slash = s_.rfind('/');
+    return slash == std::string::npos ? path() : path(slash == 0 ? "/" : s_.substr(0, slash));
+  }
+  path stem() const
+  {
+    const std::string name = filename().s_;
+    const size_t dot = name.rfind('.');
+    return dot == std::string::npos || dot == 0 || name == ".." ? path(name) : path(name.substr(0, dot));
+  }
+  path extension() const
+  {
+    const std::string name = filename().s_;
+    const size_t dot = name.rfind('.');
+    return dot == std::string::npos || dot == 0 || name == ".." ? path() : path(name.substr(dot));
+  }
+  path &replace_extension(const path &replacement = path())
+  {
+    s_.resize(s_.size() - extension().s_.size());
+    if (!replacement.empty()) {
+      s_ += (replacement.s_[0] == '.' ? "" : ".") + replacement.s_;
+    }
+    return *this;
+  }
+  path &operator/=(const path &p)
+  {
+    if (p.is_absolute() || s_.empty()) {
+      s_ = p.s_;
+    }
+    else {
+      s_ += (s_.back() == '/' ? "" : "/") + p.s_;
+    }
+    return *this;
+  }
+  friend path operator/(path a, const path &b) { return a /= b; }
+  friend bool operator==(const path &a, const path &b) { return a.s_ == b.s_; }
+};
+
+enum class perms : unsigned {
+  none = 0, owner_exec = 0100, group_exec = 010, others_exec = 01, unknown = 0xFFFF
+};
+constexpr perms operator&(perms a, perms b) { return perms(unsigned(a) & unsigned(b)); }
+enum class file_type { none, not_found, regular, directory, unknown };
+
+class file_status {
+  file_type type_ = file_type::none;
+  perms perms_ = perms::unknown;
+
+ public:
+  file_status() = default;
+  file_status(file_type type, perms p = perms::unknown) : type_(type), perms_(p) {}
+  file_type type() const noexcept { return type_; }
+  perms permissions() const noexcept { return perms_; }
+};
+
+inline file_status status(const path &p, error_code &ec) noexcept
+{
+  struct stat st;
+  if (::stat(p.c_str(), &st) != 0) {
+    ec.assign(errno, generic_category());
+    return file_status(file_type::not_found);
+  }
+  ec.clear();
+  return file_status(S_ISDIR(st.st_mode) ? file_type::directory : S_ISREG(st.st_mode) ? file_type::regular : file_type::unknown,
+                     perms(st.st_mode & 0777));
+}
+inline bool exists(const path &p, error_code &ec) noexcept { return status(p, ec).type() != file_type::not_found; }
+inline bool is_directory(const path &p, error_code &ec) noexcept { return status(p, ec).type() == file_type::directory; }
+inline bool is_regular_file(const path &p, error_code &ec) noexcept { return status(p, ec).type() == file_type::regular; }
+inline uintmax_t file_size(const path &p, error_code &ec) noexcept
+{
+  struct stat st;
+  if (::stat(p.c_str(), &st) != 0) {
+    ec.assign(errno, generic_category());
+    return uintmax_t(-1);
+  }
+  ec.clear();
+  return uintmax_t(st.st_size);
+}
+
+class directory_entry {
+  filesystem::path path_;
+
+ public:
+  directory_entry() = default;
+  explicit directory_entry(filesystem::path p) : path_(std::move(p)) {}
+  const filesystem::path &path() const noexcept { return path_; }
+};
+
+/* A directory's entries, read when it is opened; recursively, its subdirectories' after their own entry. */
+class directory_iterator {
+  vector<directory_entry> entries_;
+  size_t index_ = 0;
+
+ protected:
+  void read(const path &p, bool recursive, error_code &ec)
+  {
+    DIR *dir = opendir(p.c_str());
+    if (!dir) {
+      ec.assign(errno, generic_category());
+      return;
+    }
+    while (const dirent *entry = readdir(dir)) {
+      const std::string name = entry->d_name;
+      if (name == "." || name == "..") {
+        continue;
+      }
+      entries_.emplace_back(p / path(name));
+      error_code sub;
+      if (recursive && is_directory(entries_.back().path(), sub)) {
+        read(entries_.back().path(), true, sub);
+      }
+    }
+    closedir(dir);
+    ec.clear();
+  }
+
+ public:
+  directory_iterator() = default;
+  directory_iterator(const path &p, error_code &ec) { read(p, false, ec); }
+  const directory_entry &operator*() const { return entries_[index_]; }
+  const directory_entry *operator->() const { return &entries_[index_]; }
+  directory_iterator &increment(error_code &ec)
+  {
+    ec.clear();
+    index_++;
+    return *this;
+  }
+  directory_iterator &operator++() { index_++; return *this; }
+  bool done() const { return index_ >= entries_.size(); }
+  friend bool operator==(const directory_iterator &a, const directory_iterator &b) { return a.done() && b.done(); }
+  friend bool operator!=(const directory_iterator &a, const directory_iterator &b) { return !(a == b); }
+};
+class recursive_directory_iterator : public directory_iterator {
+ public:
+  recursive_directory_iterator() = default;
+  recursive_directory_iterator(const path &p, error_code &ec) { read(p, true, ec); }
+};
+
+inline bool result(bool ok, error_code &ec)
+{
+  ok ? ec.clear() : ec.assign(errno, generic_category());
+  return ok;
+}
+inline bool create_directory(const path &p, error_code &ec) noexcept { return result(::mkdir(p.c_str(), 0777) == 0, ec); }
+inline bool create_directories(const path &p, error_code &ec) noexcept
+{
+  if (p.empty() || is_directory(p, ec)) {
+    ec.clear();
+    return false;
+  }
+  create_directories(p.parent_path(), ec);
+  return create_directory(p, ec);
+}
+inline bool remove(const path &p, error_code &ec) noexcept
+{
+  return result((is_directory(p, ec) ? ::rmdir(p.c_str()) : ::unlink(p.c_str())) == 0, ec);
+}
+inline uintmax_t remove_all(const path &p, error_code &ec) noexcept
+{
+  uintmax_t removed = 0;
+  if (is_directory(p, ec)) {
+    for (directory_iterator it(p, ec), end; !ec && it != end; it.increment(ec)) {
+      removed += remove_all(it->path(), ec);
+    }
+  }
+  return removed + (remove(p, ec) ? 1 : 0);
+}
+inline void rename(const path &from, const path &to, error_code &ec) noexcept { result(::rename(from.c_str(), to.c_str()) == 0, ec); }
+inline void copy(const path &from, const path &to, error_code &ec) noexcept
+{
+  FILE *in = fopen(from.c_str(), "rb"), *out = in ? fopen(to.c_str(), "wb") : nullptr;
+  char buffer[65536];
+  size_t n;
+  bool ok = in && out;
+  while (ok && (n = fread(buffer, 1, sizeof(buffer), in)) > 0) {
+    ok = fwrite(buffer, 1, n, out) == n;
+  }
+  if (in) {
+    fclose(in);
+  }
+  if (out) {
+    fclose(out);
+  }
+  result(ok, ec);
+}
+inline path current_path(error_code &ec)
+{
+  char buffer[1024];
+  return result(getcwd(buffer, sizeof(buffer)) != nullptr, ec) ? path(buffer) : path();
+}
+inline path absolute(const path &p) { error_code ec; return p.is_absolute() ? p : current_path(ec) / p; }
+inline path temp_directory_path(error_code &ec)
+{
+  ec.clear();
+  return path("/tmp");
+}
+
+_LIBCPP_END_NAMESPACE_FILESYSTEM

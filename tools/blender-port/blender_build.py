@@ -25,7 +25,7 @@ import wasm_weaken
 from wasm_module import WASM, demangle
 
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
-SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace|bf_imbuf_openexr'
+SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Host flags that have no meaning for wasm32 or name host paths.
@@ -71,6 +71,13 @@ def module_archives(host, out):
         archives.append(archive)
         print(f'{entry.get("dependency", "renamed")}/{entry["path"]}: {len(built)} sources', file=sys.stderr)
     return archives
+
+
+def target_flags(tree, spec, out):
+    """What the manifest's `targets` add to a CMake target's sources: the private dependencies it `uses` and its
+    `defines`, as for a library entry (wasm_module.library_flags), so only that target's sources build again."""
+    deps, _, _ = wasm_module.dependencies(out, spec['dependencies'])
+    return {target: wasm_module.library_flags(entry, tree, deps, spec)[0] for target, entry in spec.get('targets', {}).items()}
 
 
 def target_of(output):
@@ -284,8 +291,9 @@ def main():
     objects = os.path.join(out, 'objects')
     os.makedirs(objects, exist_ok=True)
     # Every source sees the fetched dependencies and the wasm32 DNA tables (wasm_module.sdna, made in generate()).
-    _, _, includes = module_inputs(host, out)
+    tree, spec, includes = module_inputs(host, out)
     extra = [f'-I{os.path.join(out, "generated", "sdna")}', *includes]
+    own = target_flags(tree, spec, out)
     entries = [e for e in json.load(open(os.path.join(host, 'compile_commands.json'))) if target_of(e['output'] if 'output' in e else e['command'])]
     by_any = {}
     for entry in entries:
@@ -304,7 +312,7 @@ def main():
     results = {}
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get("JOBS", os.cpu_count()))) as pool:
         for target, group in sorted(by_target.items()):
-            done = list(pool.map(lambda e: compile_one(objects, e, extra), group))
+            done = list(pool.map(lambda e: compile_one(objects, e, extra + own.get(target, [])), group))
             results[target] = done
             failed = [s for s, o, _ in done if not o]
             print(f'{target}: {len(done) - len(failed)} of {len(done)} compile', file=sys.stderr, flush=True)
@@ -325,7 +333,7 @@ def main():
     archives += module_libraries
     # Everything linked as one reactor with every symbol kept, so each library's unresolved symbols show.
     link = ['clang++', '--target=wasm32-wasi', '-mexec-model=reactor', '-Wl,--whole-archive', *archives, '-Wl,--no-whole-archive',
-            '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-Wl,--error-limit=0', '-Wl,--warn-unresolved-symbols', '-Wl,--allow-undefined',
+            '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-lwasi-emulated-signal', '-Wl,--error-limit=0', '-Wl,--warn-unresolved-symbols', '-Wl,--allow-undefined',
             '-o', os.path.join(out, 'blender-all.wasm')]
     result = subprocess.run(link, capture_output=True, text=True)
     unresolved = sorted({line.split('undefined symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'undefined symbol: ' in line})
@@ -384,7 +392,7 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     while True:
         link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
-                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
+                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-lwasi-emulated-signal',
                 # Undefined functions are imports, which throw when called; undefined data fails the link, as it would read
                 # as null, unless null-data.txt names it.
                 '-Wl,--import-undefined', '-Wl,--unresolved-symbols=report-all', f'-Wl,--allow-undefined-file={NULL_DATA}', '-o', module]

@@ -1,0 +1,62 @@
+/* libc++ without threads has no <future>. A module has one thread: a task runs where it is called (a thread pool
+ * without workers runs it as it is pushed, OpenImageIO's thread_pool::push), so a future is ready once its task ran. */
+#pragma once
+
+#include <chrono>
+#include <condition_variable>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <type_traits>
+#include <utility>
+
+namespace std {
+enum class future_status { ready, timeout, deferred };
+
+template<class T> struct __future_state {
+  optional<T> value;
+};
+template<> struct __future_state<void> {
+  bool done = false;
+};
+
+template<class T> class future {
+  shared_ptr<__future_state<T>> state_;
+
+ public:
+  future() noexcept = default;
+  explicit future(shared_ptr<__future_state<T>> state) : state_(std::move(state)) {}
+  bool valid() const noexcept { return bool(state_); }
+  void wait() const {}
+  template<class Rep, class Period> future_status wait_for(const chrono::duration<Rep, Period> &) const { return future_status::ready; }
+  T get()
+  {
+    auto state = std::move(state_);
+    if constexpr (!is_void_v<T>) {
+      return std::move(*state->value);
+    }
+  }
+};
+
+template<class> class packaged_task;
+template<class R, class... Args> class packaged_task<R(Args...)> {
+  function<R(Args...)> fn_;
+  shared_ptr<__future_state<R>> state_ = make_shared<__future_state<R>>();
+
+ public:
+  packaged_task() noexcept = default;
+  template<class F> explicit packaged_task(F &&f) : fn_(std::forward<F>(f)) {}
+  bool valid() const noexcept { return bool(fn_); }
+  future<R> get_future() { return future<R>(state_); }
+  void operator()(Args... args)
+  {
+    if constexpr (is_void_v<R>) {
+      fn_(std::forward<Args>(args)...);
+      state_->done = true;
+    }
+    else {
+      state_->value = fn_(std::forward<Args>(args)...);
+    }
+  }
+};
+}  // namespace std
