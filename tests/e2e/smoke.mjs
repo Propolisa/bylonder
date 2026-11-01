@@ -697,23 +697,24 @@ const checks = {
   // Align Active Camera to View (Ctrl Alt Numpad 0) moves the scene camera to the view's eye and looks through it.
   "Align Active Camera to View moves the camera to the view": { open: { example: "Rigged Character", node: "Rig" }, async run() {
     await app.hover(0.5, 0.5);
-    const eye = await app.bylonder((b) => b.views.input.camera.globalPosition.asArray());
+    const eye = await app.bylonder((b) => b.views.input.camera.computeWorldMatrix(true).getTranslation().asArray());
     await app.page.keyboard.press("Control+Alt+Numpad0");
     await app.until((b) => b.views.input.state.cameraView);
-    const camera = await app.bylonder((b) => b.views.input.camera.globalPosition.asArray());
+    const camera = await app.bylonder((b) => b.views.input.camera.computeWorldMatrix(true).getTranslation().asArray());
     camera.forEach((v, i) => assert.ok(Math.abs(v - eye[i]) < 1e-3, `camera ${camera} at the view's eye ${eye}`));
   } },
 
   // A sculpt stroke is one undo step (Blender's sculpt undo pushes it): Ctrl Z takes it back and stays in Sculpt Mode.
-  "Ctrl Z undoes a sculpt stroke in Sculpt Mode": { open: {}, async run() {
+  // A smaller window shows the cube larger, under the whole brush.
+  "Ctrl Z undoes a sculpt stroke in Sculpt Mode": { open: { size: { width: 1280, height: 720 } }, async run() {
     const state = () => app.bylonder((b) => ({ mode: b.world.mainModes.mode(), size: b.world.scene.getMeshByName("Cube").getVerticesData("position").reduce((sum, v) => sum + Math.abs(v), 0) }));
     await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "SCULPT" }));
     await app.settled();
     const before = await state();
     const [x, y] = await app.point(0.5, 0.5);
-    await app.page.mouse.move(x - 40, y);
+    await app.page.mouse.move(x - 60, y);
     await app.page.mouse.down();
-    for (let i = 1; i <= 10; i++) await app.page.mouse.move(x - 40 + i * 8, y + i * 2);
+    for (let i = 1; i <= 30; i++) await app.page.mouse.move(x - 60 + i * 4, y + i);
     await app.page.mouse.up();
     await app.until((b, size) => Math.abs(b.world.scene.getMeshByName("Cube").getVerticesData("position").reduce((sum, v) => sum + Math.abs(v), 0) - size) > 1e-3, before.size);
     await app.page.keyboard.press("Control+z");
