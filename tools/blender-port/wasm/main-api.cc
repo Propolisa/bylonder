@@ -11,6 +11,7 @@
 #include "BKE_curve_to_mesh.hh"
 #include "BKE_curves.hh"
 #include "BKE_pointcache.h"
+#include "ED_info.hh"
 #include "ED_particle.hh"
 #include "BKE_geometry_set.hh"
 #include "BKE_idprop.hh"
@@ -146,6 +147,8 @@ EXPORT(main_new) BlenderMain *main_new()
   ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
   /* Auto keying is off until the scene sync sets Bylonder's. */
   ctx->scene->toolsettings->autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
+  /* As screen_add names it: an ID RNA types by its code (Screen, for the scripts' context.screen). */
+  STRNCPY(ctx->screen.id.name, "SRLayout");
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
   /* As BKE_workspace_add makes it: an ID (RNA's WorkSpace, its tools for the scripts) whose status transforms clear when
@@ -537,6 +540,14 @@ static Depsgraph *depsgraph_of(BlenderMain *ctx) { return CTX_data_depsgraph_poi
 /* Main evaluated by Blender's depsgraph for what was tagged since the last evaluation, as the window manager does
  * after each event (wm_event_do_depsgraph). */
 EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx) { BKE_scene_graph_update_tagged(depsgraph_of(ctx), ctx->bmain); }
+
+/* The scene's statistics as the status bar shows them (ED_info_statusbar_string_ex with the statistics only), counted
+ * anew: the window manager clears them on its notifiers. */
+EXPORT(main_statistics) const char *main_statistics(BlenderMain *ctx)
+{
+  ED_info_stats_clear(ctx->wm, ctx->view_layer);
+  return ED_info_statusbar_string_ex(ctx->bmain, ctx->scene, ctx->view_layer, STATUSBAR_SHOW_STATS);
+}
 
 /* The IDs the depsgraph updated since the last call, taken: their count, then each one (main_update) and its flags. */
 EXPORT(main_updates) int main_updates()
