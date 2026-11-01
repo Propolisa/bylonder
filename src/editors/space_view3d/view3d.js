@@ -1,7 +1,7 @@
 import { ArcRotateCamera, Color4, Vector3 } from '@babylonjs/core';
 import { iconEl, iconButton } from '../interface/icon.js';
 import { UILayout } from '../interface/layout.js';
-import { createNavigation } from './navigation.js';
+import { createNavigation, LENS_HALF_TAN } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { menuUI } from '../../windowmanager/wm-operators.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
@@ -36,10 +36,8 @@ const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic'
 
 const background = new Color4(...view_3d.background);
 // Blender's startup 3D View (startup.blend: region_3d view_rotation, view_distance and view_location) as an orbit
-// around its location, and its lens: View3D.lens 50 mm on the 36 mm viewport sensor at the viewport's zoom of 2
-// (CAMERA_PARAM_ZOOM_INIT_PERSP), fitted to the longer side.
+// around its location, and its lens (LENS_HALF_TAN).
 const STARTUP_VIEW = { alpha: -0.415918, beta: 1.108752, radius: 18.388048, target: new Vector3(-0.020693, 0.000669, -0.046025) };
-const LENS_HALF_TAN = (36 / 2 / 50) * 2;
 // A bound property's check item, named as Blender's RNA names it (Toolbar for show_region_toolbar) once loaded.
 const namedBinding = (binding) => (data, name) => {
   const bound = binding(data, name);
@@ -70,9 +68,10 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
     get camera() { return state.cameraView && ctx.sceneCamera() ? ctx.sceneCamera() : editorCamera; },
-    get rendered() { return state.shading === 'rendered' || state.cameraView; },
+    // Camera view looks through the scene camera in the view's own shading and overlays, as Blender's does.
+    get rendered() { return state.shading === 'rendered'; },
     // Material Preview: the scene's materials in studio lighting.
-    get preview() { return state.shading === 'material' && !state.cameraView; },
+    get preview() { return state.shading === 'material'; },
   };
 
   // Overlays: view name, navigation gizmo and buttons.
@@ -101,7 +100,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.toggleCameraView = toggleCameraView;
   view.setShading = id => { state.shading = id; sync(); ctx.shadingChanged(); };
   // The scene camera changed while this view looks through it.
-  view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); next?.attachControl(canvas, true); ctx.shadingChanged(); };
+  view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); next?.attachControl(canvas, true); sync(); ctx.shadingChanged(); };
 
   const header = dock.header(headerId);
   const editMode = () => world.editMode?.active;
@@ -190,12 +189,15 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     projection.replaceChildren(iconEl(editorCamera.mode === 0 ? 'view_perspective' : 'view_ortho'));
   };
 
+  // The camera whose workbench shading this view set: the editor camera's, or the scene camera's in camera view.
+  let shadedCamera = editorCamera;
   const sync = () => {
     name.textContent = state.cameraView ? 'Camera Perspective' : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
-    section.classList.toggle('overlays-off', !state.overlays || state.cameraView);
+    section.classList.toggle('overlays-off', !state.overlays);
     section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
-    world.workbench.setShading(editorCamera, view.rendered || view.preview ? null : state.shading === 'solid' && state.xray ? 'xray' : state.shading);
+    if (shadedCamera !== view.camera) { world.workbench.setShading(shadedCamera, null); shadedCamera = view.camera; }
+    world.workbench.setShading(shadedCamera, view.rendered || view.preview ? null : state.shading === 'solid' && state.xray ? 'xray' : state.shading);
     toolbar.el.hidden = !state.show_region_toolbar;
     if (state.show_region_toolbar) toolbar.draw();
     section.classList.toggle('toolbar-shown', state.show_region_toolbar);

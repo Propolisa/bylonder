@@ -683,6 +683,30 @@ const checks = {
     await app.until((b) => Math.abs(b.editor.selection.nodes.at(-1).position.x - 2) < 1e-6, null, 60000);
   },
 
+  // Camera view looks through the scene camera in the view's own Solid shading, with its overlays (the bones).
+  "camera view keeps Solid shading and overlays": { open: { example: "Rigged Character", node: "Rig" }, async run() {
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("Numpad0");
+    await app.until((b) => b.views.input.state.cameraView);
+    const view = await app.bylonder((b) => { const v = b.views.input; return { rendered: v.rendered, shading: b.world.workbench.shading(v.camera), overlaysOff: v.section.classList.contains("overlays-off") }; });
+    assert.deepEqual(view, { rendered: false, shading: "solid", overlaysOff: false });
+  } },
+
+  // The Shader Editor edits the active object's active material for any object type with materials: a Curves object's.
+  "the Shader Editor edits a Curves object's material": { open: { example: "Hair Dynamics", node: "Hair" }, async run() {
+    await app.bylonder((b) => { b.editor.selection.replace([b.world.scene.getNodeByName("Hair")]); b.world.openNodeEditor("shader"); });
+    await app.until(() => document.querySelector("#nodes-section .node-editor-empty").hidden);
+  } },
+
+  // The Geometry Nodes workspace's screen: the 3D Viewport, the Geometry Node Editor and the Timeline, the Outliner and
+  // the Properties editor.
+  async "the Geometry Nodes workspace shows the Geometry Node Editor"() {
+    await app.page.click('[data-workspace="geometry-nodes"]');
+    for (const id of ["viewport", "nodes", "timeline", "objects", "properties"]) await app.locator(`.dock-content[data-section="${id}"]`).waitFor();
+    assert.equal(await app.locator('.dock-content[data-section="info"]').isVisible(), false);
+    await app.until(() => /has no Geometry Nodes modifier/.test(document.querySelector("#nodes-section .node-editor-empty").textContent));
+  },
+
   // Opening the Video Sequencer on an empty edit offers to set it up; Remember keeps the choice for next time.
   "opening the Video Sequencer offers to set it up for video": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 48 }));

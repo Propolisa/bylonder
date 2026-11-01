@@ -49,7 +49,7 @@ Per-view state, applied in that hook and restored after:
 | --- | --- | --- |
 | Camera (editor camera or scene camera) | View3D region, camera view | `view.camera` |
 | Shading: Wireframe, Solid, Material, Rendered | View3D shading | The rendered gate becomes per view: world background and fog, render effects (camera-attached pipelines on that view's camera only) and compositor |
-| Compositor in camera view | Viewport compositor | Set `scene.frameGraph` for that view, clear it for others (switching is cheap; correctness per view is unverified) |
+| Compositor in Rendered shading | Viewport compositor | Set `scene.frameGraph` for that view, clear it for others (switching is cheap; correctness per view is unverified) |
 | Overlays (grid, outlines, gizmos) | Overlays popover | `layerMask` or `renderingGroupId` per view camera |
 | Local view, collection visibility | Local View, viewport visibility | Camera `layerMask` |
 
@@ -63,7 +63,7 @@ Everything here runs inside the existing viewport iframe on the existing engine.
 
 | Blender | Bylonder |
 | --- | --- |
-| Viewport compositor (camera view, Rendered) | A view whose camera is the scene camera with the frame graph enabled, as above |
+| Viewport compositor (Rendered shading) | A view whose camera is the scene camera with the frame graph enabled, as above |
 | Compositor backdrop and Viewer node | A view in the Node Editor area at output aspect and a preview percentage; the Viewer target is the frame graph's output texture |
 | Render Result after F12 | Offline tier, below |
 

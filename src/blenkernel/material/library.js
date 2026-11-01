@@ -27,7 +27,8 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   const all = () => scene.materials.filter(m => !internal(m) && !m.metadata?.wbRemoved);
   const byId = id => all().find(m => materialId(m) === id) || null;
   const meshes = () => world.objects.filter(n => n.getTotalVertices && !deleted(n) && !n.isDisposed());
-  const slots = mesh => mesh.material instanceof MultiMaterial ? [...mesh.material.subMaterials] : mesh.material ? [mesh.material] : Array(mesh.metadata?.wbSlotCount || 0).fill(null);
+  // A mesh's slots are drawn on it; any other object's (Curves, Text) are Main's.
+  const slots = mesh => (!mesh.getTotalVertices && world.mainSync?.slots(mesh)) || (mesh.material instanceof MultiMaterial ? [...mesh.material.subMaterials] : mesh.material ? [mesh.material] : Array(mesh.metadata?.wbSlotCount || 0).fill(null));
   const users = material => meshes().reduce((n, mesh) => n + slots(mesh).filter(m => m === material).length, 0) + (material.metadata?.wbFakeUser ? 1 : 0);
   const unique = (name, except) => {
     const taken = new Set(all().filter(m => m !== except).map(m => m.name));

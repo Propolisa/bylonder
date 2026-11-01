@@ -3,7 +3,7 @@ import { seededRandom } from '../../render/clock.js';
 
 // Babylon adapter for render settings. The only code that writes scene.imageProcessingConfiguration
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
-// cameras of views in Rendered shading or camera view (like EEVEE in Blender's viewport), so views with
+// cameras of views in Rendered shading (like EEVEE in Blender's viewport), so views with
 // different shading render side by side without rebuilding anything.
 // Effects that need scene geometry (Raytracing, Motion Blur) read Babylon's geometry buffer renderer, which renders
 // for whichever camera the scene renders through, never its prepass renderer: the prepass is one scene-wide switch

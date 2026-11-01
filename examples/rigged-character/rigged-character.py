@@ -59,6 +59,8 @@ bpy.ops.object.select_all(action='DESELECT')
 body.select_set(True); rig.select_set(True)
 bpy.context.view_layer.objects.active = rig
 bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+# The file opens with the rig alone selected, as clicking it selects it.
+body.select_set(False)
 cam_data = bpy.data.cameras.new('Camera'); cam_data.lens = 50
 cam = bpy.data.objects.new('Camera', cam_data); scene.collection.objects.link(cam)
 cam.location = (0, -6.5, 1.3); cam.rotation_euler = (1.5708, 0, 0); scene.camera = cam

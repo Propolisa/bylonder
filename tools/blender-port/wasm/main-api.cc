@@ -851,10 +851,14 @@ static void curves_draw_end(CurvesDraw &draw)
     curves_draws.append(draw);
   }
 }
-/* An object's evaluated curves, drawn by every engine; a cyclic curve's first point again after its last, as Blender's
- * evaluated buffer holds it (evaluated_point_count_with_cyclic). System is -1. */
+/* A Curves object's evaluated curves, drawn by every engine (workbench_engine.cc, eevee_instance.cc: OB_CURVES only; a
+ * legacy curve's evaluated Curves are its wire, draw_cache_impl_curve.cc curve_eval); a cyclic curve's first point again
+ * after its last, as Blender's evaluated buffer holds it (evaluated_point_count_with_cyclic). System is -1. */
 static void curves_geometry(const Scene &scene, Object &ob, Object *evaluated)
 {
+  if (ob.type != OB_CURVES) {
+    return;
+  }
   const bke::GeometrySet *geometry = evaluated->runtime->geometry_set_eval;
   const Curves *curves_id = geometry ? geometry->get_curves() : nullptr;
   if (!curves_id) {

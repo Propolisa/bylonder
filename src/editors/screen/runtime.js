@@ -15,6 +15,12 @@ const SHADING_SPLITS={root:share(292,1627),rest:share(1285,342),middle:share(516
 const SHADING_AREAS=['files','viewport','nodes','objects','properties'];
 // The Modeling and Sculpting screens: the 3D Viewport, and the Outliner over the Properties editor as in Layout.
 const MODELING_AREAS=['viewport','objects','properties'];
+// The Geometry Nodes screen: the 3D Viewport over the Geometry Node Editor over the Timeline, and the Outliner over the
+// Properties editor (Blender's Spreadsheet left of the 3D Viewport is not there yet, so the 3D Viewport takes its row).
+const GEOMETRY_NODES_SPLITS={root:LAYOUT_SPLITS.root,main:share(476,557),lower:share(480,77),inspector:LAYOUT_SPLITS.inspector};
+const GEOMETRY_NODES_AREAS=['viewport','nodes','timeline','objects','properties'];
+const hiddenBut=(items,areas)=>items.map(x=>x.id).filter(id=>!areas.includes(id));
+const areaOrder=(items,areas)=>[...areas,...hiddenBut(items,areas)];
 export function mountRuntimeLayout(){
   const host=document.querySelector('main');host.classList.add('runtime-dock');
   const viewport=document.createElement('section');viewport.id='viewport-section';
@@ -36,17 +42,21 @@ export function mountRuntimeLayout(){
   const items=[{id:'viewport',blenderHeader:true,title:'3D Viewport',icon:'view3d',element:viewport,overlap:true},{id:'objects',blenderHeader:true,title:'Outliner',icon:'outliner',element:panel},{id:'properties',blenderHeader:true,title:'Properties',icon:'properties',element:properties},{id:'timeline',blenderHeader:true,title:'Timeline',icon:'time',element:timeline},{id:'dopesheet',blenderHeader:true,title:'Dope Sheet',icon:'action',element:dopesheet},{id:'graph',blenderHeader:true,title:'Graph Editor',icon:'graph',element:graph},{id:'drivers',blenderHeader:true,title:'Drivers',icon:'driver',element:drivers},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants},{id:'sequencer',title:'Video Sequencer',icon:'sequence',element:sequencer},{id:'files',title:'File Browser',icon:'filebrowser',element:files},{id:'text',blenderHeader:true,title:'Text Editor',icon:'text',element:text},{id:'console',title:'Python Console',icon:'console',element:pythonConsole},{id:'info',title:'Info',icon:'info',element:info}];
   const scripting={
     tree:{id:'root',children:[{id:'left',children:[0,{id:'console',children:[1,2]}]},{id:'rest',children:[3,{id:'side',children:[4,5]}]}]},
-    defaults:()=>({order:[...SCRIPTING_AREAS,...items.map(x=>x.id).filter(id=>!SCRIPTING_AREAS.includes(id))],hidden:items.map(x=>x.id).filter(id=>!SCRIPTING_AREAS.includes(id)),sizes:structuredClone(SCRIPTING_SPLITS),horizontal:{root:false,left:true,console:true,rest:false,side:true}}),
+    defaults:()=>({order:areaOrder(items,SCRIPTING_AREAS),hidden:hiddenBut(items,SCRIPTING_AREAS),sizes:structuredClone(SCRIPTING_SPLITS),horizontal:{root:false,left:true,console:true,rest:false,side:true}}),
     headerless:['info'],
   };
   const shading={
     tree:{id:'root',children:[0,{id:'rest',children:[{id:'middle',children:[1,2]},{id:'side',children:[3,4]}]}]},
-    defaults:()=>({order:[...SHADING_AREAS,...items.map(x=>x.id).filter(id=>!SHADING_AREAS.includes(id))],hidden:items.map(x=>x.id).filter(id=>!SHADING_AREAS.includes(id)),sizes:structuredClone(SHADING_SPLITS),horizontal:{root:false,rest:false,middle:true,side:true}}),
+    defaults:()=>({order:areaOrder(items,SHADING_AREAS),hidden:hiddenBut(items,SHADING_AREAS),sizes:structuredClone(SHADING_SPLITS),horizontal:{root:false,rest:false,middle:true,side:true}}),
   };
   const modeling={
     tree:{id:'root',children:[0,{id:'inspector',children:[1,2]}]},
-    defaults:()=>({order:[...MODELING_AREAS,...items.map(x=>x.id).filter(id=>!MODELING_AREAS.includes(id))],hidden:items.map(x=>x.id).filter(id=>!MODELING_AREAS.includes(id)),sizes:{root:LAYOUT_SPLITS.root,inspector:LAYOUT_SPLITS.inspector},horizontal:{root:false,inspector:true}}),
+    defaults:()=>({order:areaOrder(items,MODELING_AREAS),hidden:hiddenBut(items,MODELING_AREAS),sizes:{root:LAYOUT_SPLITS.root,inspector:LAYOUT_SPLITS.inspector},horizontal:{root:false,inspector:true}}),
   };
-  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','console','info']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','console','info'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling}});
+  const geometryNodes={
+    tree:{id:'root',children:[{id:'main',children:[0,{id:'lower',children:[1,2]}]},{id:'inspector',children:[3,4]}]},
+    defaults:()=>({order:areaOrder(items,GEOMETRY_NODES_AREAS),hidden:hiddenBut(items,GEOMETRY_NODES_AREAS),sizes:structuredClone(GEOMETRY_NODES_SPLITS),horizontal:{root:false,main:true,lower:true,inspector:true}}),
+  };
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','console','info']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','console','info'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes}});
   return dock;
 }

@@ -41,6 +41,6 @@ export function compositingPanel({ world, row, panel }) {
     row({ id: 'compositor.enabled', label: 'Use Nodes', default: false, get: () => c.enabled, set: v => c.setEnabled(v) }),
     ...(c.enabled ? inputRows(c.fields(), row, 'Post-process blocks expose their settings here.') : []),
     openButton('Open Compositor', 'NODE_COMPOSITING', () => world.openNodeEditor?.('compositor')),
-    c.enabled ? h('p', { class: 'bl-message' }, 'Shown in the viewport in Rendered shading and camera view.') : null,
+    c.enabled ? h('p', { class: 'bl-message' }, 'Shown in the viewport in Rendered shading.') : null,
   ], { defaultClosed: !c.enabled });
 }

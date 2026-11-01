@@ -70,7 +70,10 @@ assert.match(material._fragmentCompilationState._builtCompilationString, /bl_nod
 const empty = [980, 20];
 drag(screen(socketOf(mix, 'in', 'Factor_Float')), empty);
 assert.equal(mix.getInputByName('Factor_Float').connectedPoint, null);
-drag(screen(socketOf(math, 'out', 'Value')), screen(socketOf(mix, 'in', 'Factor_Float')));
+// Dropped within the socket's reach, outside its node (an input socket sits on the node's edge), it links there.
+const factor = socketOf(mix, 'in', 'Factor_Float');
+drag(screen(socketOf(math, 'out', 'Value')), screen([factor.x - 4, factor.y]));
+assert.equal(mix.getInputByName('Factor_Float').connectedPoint, math.getOutputByName('Value'), 'a link dropped beside its socket');
 
 // Ctrl right-drag across a link cuts it (node.links_cut).
 const a = socketOf(math, 'out', 'Value'), b = socketOf(mix, 'in', 'Factor_Float'), middle = screen([(a.x + b.x) / 2, (a.y + b.y) / 2]);

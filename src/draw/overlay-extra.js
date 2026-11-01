@@ -275,12 +275,15 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       const depth = ortho ? -1 : -drawsize / Math.tan(node.fov / 2);
       const facx = fac * (vertical ? ratio : 1), facy = fac * (vertical ? 1 : 1 / ratio);
       const cx = facx / Math.abs(depth), cy = facy / Math.abs(depth);
+      // Looked through (camera view), only its frame is drawn, without the wires behind it (overlay_camera.hh).
+      const lookedThrough = scene.activeCamera === node;
       if (shape === 'camera_frame') { m[3] = cx; m[7] = cy; m[11] = 0; m[15] = 0; }
+      else if (lookedThrough) m[3] = m[7] = 0;
       else {
         const tria_size = 0.7 * drawsize / Math.abs(depth), tria_margin = 0.1 * drawsize / Math.abs(depth);
         m[3] = m[7] = -tria_size; m[11] = 0; m[15] = cy + tria_margin + tria_size;
       }
-      color[3] = depth;
+      color[3] = lookedThrough ? -depth : depth;
     } else if (entry.kind === 'light') {
       const light = node, type = entry.lightType;
       position.copyFrom(light.getAbsolutePosition?.() ?? light.position ?? Vector3.ZeroReadOnly);

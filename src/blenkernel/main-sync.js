@@ -136,6 +136,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       apply: (node, slots) => setSlots(node, slots.map(materialFor)),
     },
   };
+  // blender-port: DNA_object_types.h OB_TYPE_SUPPORT_MATERIAL
+  const MATERIAL_TYPES = ['MESH', 'CURVE', 'SURFACE', 'FONT', 'META', 'GREASEPENCIL', 'CURVES', 'POINTCLOUD', 'VOLUME'];
+  const hasMaterials = (entry) => MATERIAL_TYPES.includes(entry?.type);
   const slotsOf = (node) => world.materials?.slots(node) ?? (node.material instanceof MultiMaterial ? node.material.subMaterials : node.material ? [node.material] : []);
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   function setSlots(node, list) {
@@ -782,16 +785,22 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const record = materials.get(owner) ?? worlds.get(owner?.id);
       if (record) blender.setFakeUser(record.ptr, value);
     },
-    // A mesh object's material slots as Main holds them (Blender's, each a Material or empty), then drawn; false for an
-    // object Main does not hold.
+    // An object's material slots as Main holds them (Blender's, each a Material or empty), then drawn; false for an
+    // object Main does not hold or whose type has no materials.
     setSlots(node, list) {
       const entry = objects.get(node);
-      if (entry?.type !== 'MESH') return false;
+      if (!hasMaterials(entry)) return false;
       flush();
       blender.setMaterials(entry.ob, list.map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)));
       evaluate();
-      RELATIONS.material_slots.apply(node, blender.materials(entry.ob));
+      if (entry.type === 'MESH') RELATIONS.material_slots.apply(node, blender.materials(entry.ob));
       return true;
+    },
+    // An object's material slots in Main, as Babylon's materials; null for an object Main does not hold or whose type
+    // has no materials.
+    slots: (node) => {
+      const entry = objects.get(node);
+      return hasMaterials(entry) ? blender.materials(entry.ob).map(materialFor) : null;
     },
     // Values of an object Main holds (RNA names), written there; false for one it does not hold.
     setObject: (node, values) => objects.has(node) && write(objects.get(node), values),

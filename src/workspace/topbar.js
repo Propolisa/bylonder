@@ -12,8 +12,8 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const autoRun = $('auto-run');
   // Blender's default workspaces with their object modes (startup.blend's WorkSpace.object_mode), each opening the screen
   // the scene's window has for it (docs/blender-boundary.md, Workspaces): Scripting's, Shading's, Modeling's (Modeling
-  // and Sculpting), else Layout's.
-  const SCREENS = { Scripting: 'scripting', Shading: 'shading', Modeling: 'modeling', Sculpting: 'modeling' };
+  // and Sculpting), Geometry Nodes', else Layout's.
+  const SCREENS = { Scripting: 'scripting', Shading: 'shading', Modeling: 'modeling', Sculpting: 'modeling', 'Geometry Nodes': 'geometry-nodes' };
   const workspaces = [['Layout', 'OBJECT'], ['Modeling', 'EDIT'], ['Sculpting', 'SCULPT'], ['UV Editing', 'EDIT'], ['Texture Paint', 'TEXTURE_PAINT'], ['Shading', 'OBJECT'],
     ['Animation', 'POSE'], ['Rendering', 'OBJECT'], ['Compositing', 'OBJECT'], ['Geometry Nodes', 'OBJECT'], ['Scripting', 'OBJECT']]
     .map(([name, mode]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, screen: SCREENS[name] ?? 'layout' }));

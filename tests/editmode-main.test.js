@@ -68,4 +68,9 @@ history.undo();
 assert.equal(mode.stats.faces[1], 24);
 assert(mode.exit() && !mode.active);
 assert.equal(blender.mesh(sync.objectOf(cube)).faces_num, 24);
+// A Bezier curve in Edit Mode draws its evaluated wire, not hair: only Curves objects' curves are drawn as curves.
+assert.equal(run('curve.primitive_bezier_curve_add').status, OPERATOR_FINISHED);
+assert.equal(run('object.editmode_toggle').status, OPERATOR_FINISHED);
+assert.deepEqual(blender.curves(), [], 'a curve in Edit Mode draws no curves');
+assert.equal(run('object.editmode_toggle').status, OPERATOR_FINISHED);
 console.log("Edit Mode on Main: Blender's operators enter, edit and leave it, the view draws it, undo is Blender's edit-mode undo");

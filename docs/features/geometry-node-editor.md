@@ -36,7 +36,7 @@ tests:
   - tests/node-editor.test.js
 limits:
   - Bylonder's own Geometry Nodes modifier keeps its Babylon graph and opens in Babylon's Node Geometry Editor, not here.
-  - The Geometry Nodes workspace tab opens the Layout screen; switch an area's editor type to Geometry Node Editor instead.
+  - The Geometry Nodes workspace has no Spreadsheet yet; its 3D Viewport takes the Spreadsheet's place.
 ---
 # Geometry Node Editor
 

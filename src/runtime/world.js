@@ -130,7 +130,7 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   world.collections = documentState.register("collections", createCollections(world, { commit }));
   world.sequenceEditor = documentState.register("sequenceEditor", createSequenceEditor({ commit }));
   world.annotations = documentState.register("annotations", createAnnotations({ frame: () => Math.round(animation.time.frame) }));
-  // Views in Rendered shading or camera view show the world background and volume, render-engine effects and
+  // Views in Rendered shading show the world background and volume, render-engine effects and
   // (in one view at a time) the compositor. setViewShading runs when view shading or cameras change: it attaches
   // effects to the rendered cameras and binds the compositor camera. beforeViewRender runs per view, per frame,
   // and only flips switches.

@@ -18,7 +18,7 @@ export function createViewportTouch(world, editor, creator, views){
     tap(point,double){
       if(state.modal){press('ret');return;}
       const node=picked(point);
-      if(double&&node){world.beforeSelection?.();editor.selection.replace([node]);editor.reconcile();nav.frame(editor.selected);}
+      if(double&&node){world.beforeSelection?.();editor.selection.replace([node]);editor.reconcile();nav.frame(editor.selection.nodes);}
       else editor.select(node,state.multi);
     },
     hold(point){views.setInput(view);world.callMenu(contextMenu(),point);},

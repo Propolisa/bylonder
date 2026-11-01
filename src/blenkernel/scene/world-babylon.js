@@ -109,7 +109,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       if (volume) Object.assign(scene, { fogColor: Color3.FromArray(volume.color), fogDensity: volume.density, fogStart: volume.start, fogEnd: volume.end });
       gate();
     },
-    // Rendered shading or camera view for the view about to render. Cheap; called per view.
+    // Rendered shading for the view about to render. Cheap; called per view.
     setRendered(value) { if (rendered !== value) { rendered = value; gate(); } },
     dispose() {
       skybox?.dispose(false, true);

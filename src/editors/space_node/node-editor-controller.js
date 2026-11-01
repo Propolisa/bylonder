@@ -313,14 +313,16 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
     } else state.modal = { type: 'link', from: markRaw(start), to: at, side: start.side };
   }
 
-  // Released over a node, the link goes to its first socket of the other side it can link to, nearest the pointer.
+  // Released on a socket within reach, the link goes to it (node_find_indicated_socket); over a node, to its first socket
+  // of the other side it can link to, nearest the pointer.
   function finishLink(at) {
     const { from, side } = state.modal;
     state.modal = null;
-    const p = toWorld(at), target = nodeAt(p);
+    const p = toWorld(at), indicated = socketAt(p), socket = indicated?.side !== side ? indicated : undefined;
+    const target = socket ? layouts().find((l) => l.sockets.includes(socket)) : nodeAt(p);
     if (target && target.node.block !== from.socket.point.ownerBlock) {
       const candidates = target.sockets.filter((s) => s.side !== side && (side === 'out' ? tree.canLink(from.socket.point, s.socket.point) : tree.canLink(s.socket.point, from.socket.point)));
-      const best = candidates.sort((a, b) => Math.abs(a.y - p[1]) - Math.abs(b.y - p[1]))[0];
+      const best = candidates.includes(socket) ? socket : candidates.sort((a, b) => Math.abs(a.y - p[1]) - Math.abs(b.y - p[1]))[0];
       if (best) side === 'out' ? tree.link(from.socket.point, best.socket.point) : tree.link(best.socket.point, from.socket.point);
     }
     refresh();

@@ -99,7 +99,7 @@ Babylon: one rasterizer. Quality and effects come from `DefaultRenderingPipeline
 
 Mapping notes: Blender view transforms Standard, ACES and Khronos PBR Neutral have direct Babylon tone mapping counterparts; AgX and Filmic do not (would need a LUT or custom post process, unverified). Film transparent maps to clear color alpha. Engine selection could map to presets of these pipelines rather than to separate renderers.
 
-Ours: Properties > Render with Render Engine (Babylon), Sampling > Viewport Samples (MSAA), Raytracing (Screen-Trace = SSR, Fast GI Ambient Occlusion = SSAO2), Motion Blur (shutter), Color Management (sRGB, view transform, look, exposure). Applies in Rendered shading and camera view. Bloom stays in the Compositor. The Render menu's hardware scaling is a device setting, like Blender's Preferences resolution scale.
+Ours: Properties > Render with Render Engine (Babylon), Sampling > Viewport Samples (MSAA), Raytracing (Screen-Trace = SSR, Fast GI Ambient Occlusion = SSAO2), Motion Blur (shutter), Color Management (sRGB, view transform, look, exposure). Applies in Rendered shading. Bloom stays in the Compositor. The Render menu's hardware scaling is a device setting, like Blender's Preferences resolution scale.
 
 ## Output settings
 

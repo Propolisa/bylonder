@@ -1,4 +1,8 @@
 import { Camera, Vector3 } from "@babylonjs/core";
+// The 3D View's lens: View3D.lens 50 mm on the 36 mm viewport sensor at the viewport's zoom of 2
+// (CAMERA_PARAM_ZOOM_INIT_PERSP), as the tangent of half its angle, fitted to the longer side.
+export const LENS_HALF_TAN = (36 / 2 / 50) * 2;
+const VIEW3D_MARGIN = 1.4;
 // Editor-camera navigation for one 3D Viewport: orbit, pan and wheel zoom (view3d.rotate, view3d.move and
 // view3d.zoom, bound by the window manager's 3D View keymap) and the numpad views.
 // enabled(): false while the view looks through the scene camera. onSync(): the view's label needs updating.
@@ -77,13 +81,25 @@ export function createNavigation({ camera, engine, canvas, capture, enabled = ()
       viewName = { front: ["Front", "Back"], right: ["Right", "Left"], top: ["Top", "Bottom"] }[name][opposite ? 1 : 0];
       sync();
     },
-    frame(mesh) {
-      if (!mesh) return;
-      camera.target.copyFrom(mesh.getAbsolutePosition());
-      camera.radius = Math.max(
-        2,
-        (mesh.getBoundingInfo?.().boundingSphere.radiusWorld || 1.5) * 3.8,
-      );
+    // view3d.view_selected: the view centers the objects' bounds (an object without geometry by its origin) and fits
+    // their longest side (view3d_from_minmax).
+    frame(nodes) {
+      if (!nodes.length) return;
+      const min = new Vector3(Infinity, Infinity, Infinity), max = min.negate();
+      for (const node of nodes) {
+        node.computeWorldMatrix(true);
+        const box = node.getTotalVertices?.() ? node.getBoundingInfo().boundingBox : null;
+        min.minimizeInPlace(box?.minimumWorld ?? node.getAbsolutePosition());
+        max.maximizeInPlace(box?.maximumWorld ?? node.getAbsolutePosition());
+      }
+      camera.target.copyFrom(min.add(max).scale(0.5));
+      const size = Math.max(...max.subtract(min).asArray()), persp = camera.mode === Camera.PERSPECTIVE_CAMERA;
+      if (persp || size >= 1e-4) {
+        // blender-port: view3d_utils.cc ED_view3d_radius_to_dist and ED_view3d_dist_soft_min_get (clip start 1.5 times)
+        const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+        const dist = ((size / 2) * VIEW3D_MARGIN / LENS_HALF_TAN) * Math.max(aspect, 1 / aspect);
+        camera.radius = persp ? Math.max(dist, camera.minZ * 1.5) : dist;
+      }
       sync();
     },
     dispose() {

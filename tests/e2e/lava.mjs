@@ -1,5 +1,6 @@
 // The workflow of docs/lava-material.md through real input, for the smoke test and the visual parity harness
 // (tools/blender-reference/ui-shots.py builds the same in Blender).
+import assert from "node:assert/strict";
 
 // The cube deleted, a UV Sphere added, Subdivision Surface and Displace with a new Clouds texture; the Properties
 // editor left on the Texture tab.
@@ -93,4 +94,17 @@ export async function lavaMaterial(app) {
   await ramp.locator("input:not([type])").fill("0.5");
   await app.page.keyboard.press("Enter");
   await principled.locator('input[type="color"]').first().fill("#0a0a0a");
+  // The material as the input built it, so a step whose input missed fails here.
+  await app.settled();
+  const built = await app.bylonder((b) => {
+    const blocks = b.world.scene.getMeshByName("Sphere").material.attachedBlocks, of = (name) => blocks.find((block) => block.getClassName() === name);
+    const round = (color) => color.slice(0, 3).map((c) => Math.round(c * 100) / 100);
+    return {
+      links: blocks.flatMap((block) => block.inputs.filter((i) => i.connectedPoint && block.declared?.(i.name))).length,
+      noise: blocks.filter((block) => block.getClassName() === "ShaderNodeTexNoise").map((n) => [n.properties.noise_dimensions, n.values.Detail]),
+      ramp: of("ShaderNodeValToRGB").properties.color_ramp.elements.map((e) => [e.position, round(e.color)]),
+      base: round(of("ShaderNodeBsdfPrincipled").values["Base Color"]),
+    };
+  });
+  assert.deepEqual(built, { links: 8, noise: [["4D", 2], ["4D", 8]], ramp: [[0.5, [0, 0, 0]], [1, [1, 0.12, 0]]], base: [0, 0, 0] }, "the lava material");
 }

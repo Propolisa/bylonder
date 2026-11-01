@@ -36,6 +36,8 @@ const newButton = (run) => {
 
 export function createNodeContexts({ world, editor, commit = () => {} }) {
   const activeMesh = () => { const node = editor.selection.nodes.at(-1); return node?.getTotalVertices ? node : null; };
+  // The active object where its type has materials (a mesh, or Main's Curves, Text and the like).
+  const activeWithMaterials = () => { const node = editor.selection.nodes.at(-1); return node && (node.getTotalVertices || world.mainSync?.slots(node)) ? node : null; };
   // The node group of the active object's active Geometry Nodes modifier, as Blender's Geometry Node Editor shows it.
   const mainNodeGroup = (node) => {
     const ob = node && world.mainSync.objectOf(node), modifier = ob && idStruct(ob).modifiers.active;
@@ -43,9 +45,9 @@ export function createNodeContexts({ world, editor, commit = () => {} }) {
   };
   return {
     shader() {
-      const mesh = activeMesh(), material = world.materials.activeMaterial(mesh);
-      if (!mesh) return { key: 'none', message: 'Select a mesh object to edit its material nodes.' };
-      if (!material) return { key: 'empty:' + mesh.uniqueId, title: mesh.name, message: 'The active material slot is empty.', buttons: [['New Material', () => world.materials.newMaterial(mesh, undefined, 'node'), 'add']] };
+      const object = activeWithMaterials(), material = world.materials.activeMaterial(object);
+      if (!object) return { key: 'none', message: 'Select an object with materials to edit its material nodes.' };
+      if (!material) return { key: 'empty:' + object.uniqueId, title: object.name, message: 'The active material slot is empty.', buttons: [['New Material', () => world.materials.newMaterial(object, undefined, 'node'), 'add']] };
       if (!(material instanceof NodeMaterial)) return { key: 'flat:' + material.uniqueId, title: material.name, message: material.name + ' is a ' + world.materials.types[world.materials.type(material)]?.title + ' material.', buttons: [['Use Nodes', () => world.materials.convert(material, 'node'), 'node_material']] };
       const edited = debounce(() => world.materials.markGraphEdited(material));
       return {
@@ -80,7 +82,7 @@ export function createNodeContexts({ world, editor, commit = () => {} }) {
       if (!c.enabled || !c.graph) return { key: 'off:' + c.enabled, title: '', actions: [newButton(() => c.setEnabled(true))], message: 'Add a compositor node group to composite the scene through a Babylon frame graph.', buttons: [['New', () => c.setEnabled(true), 'add']] };
       return {
         key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [iconButton('x', 'Remove the compositor', () => c.setEnabled(false))], graph: c.graph,
-        hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading or camera view.',
+        hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading.',
         mount: blenderEditor(c.graph, (rebuild) => c.edit(rebuild)),
       };
     },

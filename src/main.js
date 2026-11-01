@@ -382,7 +382,7 @@ const editor = createEditor(
 );
 const activeView = () => views.input;
 // Object actions and menus act on the 3D Viewport under the pointer, as in Blender.
-const nav = { frame: (node) => activeView()?.nav.frame(node) };
+const nav = { frame: (nodes) => activeView()?.nav.frame(nodes) };
 const commands = createObjectCommands(world, editor, history, () =>
   refreshUI(),
 );
@@ -551,14 +551,17 @@ const mountView = (options) => {
 };
 shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
-// Each screen's 3D Viewport keeps its own shading, as each of Blender's screens has its own: Shading's starts in
-// Material Preview.
+// Each screen's 3D Viewport keeps its own shading and its Node Editor its own tree type, as each of Blender's screens
+// has its own: Shading's starts in Material Preview over the Shader Editor, Geometry Nodes' in the Geometry Node Editor.
 const screenShading = { shading: "material" };
+const screenNodeTree = { shading: "shader", "geometry-nodes": "geometry" };
 function setScreen(name) {
   const previous = viewportDock.screen ?? "layout";
   viewportDock.setScreen(name);
   screenShading[previous] = primary.state.shading;
+  screenNodeTree[previous] = nodeEditor.type;
   primary.setShading(screenShading[name] ?? "solid");
+  if (screenNodeTree[name] && screenNodeTree[name] !== nodeEditor.type) nodeEditor.setType(screenNodeTree[name]);
 }
 viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
 views.setInput(primary);
@@ -663,7 +666,7 @@ registerOperators({
   "view3d.toggle_xray": { poll: () => !!activeView(), run: () => { const view = activeView(); view.state.xray = !view.state.xray; view.sync(); } },
   "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
   "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
-  "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },
+  "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selection.nodes) },
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(screenArea()) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },

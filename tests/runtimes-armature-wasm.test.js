@@ -66,6 +66,9 @@ setContextPointer(blender.C);
 const node = (name) => objects.find((n) => n.name === name);
 const body = node('Body'), rigOb = sync.objectOf(node('Rig')), bodyOb = sync.objectOf(body);
 const rig = idStruct(rigOb), bodyData = idStruct(bodyOb);
+// The example opens with the rig alone selected, so its body is not outlined (overlay_outline outlines selected objects).
+assert.deepEqual(selection.nodes.map((n) => n.name), ['Rig'], 'the opened example selects the rig alone');
+assert.deepEqual(selection.outlined(), [], 'nothing of the rig is outlined');
 const reports = [];
 subscribeReports((r) => reports.push(r));
 
