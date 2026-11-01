@@ -141,5 +141,6 @@ Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its buil
 
 ## object.armature_add
 Armatures are Blender's: their bones, Edit Mode, Pose Mode, the evaluated pose and the Armature modifier run in the
-module; Bylonder draws the bones as Octahedral bones from Blender's evaluated matrices. Bone picking finds the bone with
-Bylonder's own picking (the module has no GPU selection buffer). See `docs/armatures.md`.
+module, and so does the overlay's armature drawing (`overlay_armature.cc`, every display type, custom shapes, names,
+axes and relationship lines), drawn with Blender's overlay shaders. A click picks the bone part the overlay draws under
+the pointer on the CPU (the module has no GPU selection buffer). See `docs/armatures.md`.

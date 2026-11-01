@@ -63,6 +63,7 @@ import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
 import { tagRedraw } from "./draw/overlay-tool.js";
+import { pickArmature } from "./draw/overlay-armature-select.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
@@ -200,9 +201,19 @@ const overlays = createViewportOverlays(scene, {
   },
   origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
   outlines: { outlined: () => editor?.selection.outlined() ?? [], isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!world.wm?.modal },
+  armatures: {
+    sync: () => world.mainSync, objects: () => world.objects,
+    visible: (node) => visible(node) && (world.collections?.status(node).visible ?? true),
+    selected: (node) => !!editor?.selection.has(node), active: (node) => editor?.selection.nodes.at(-1) === node,
+    wake: () => views?.wake(),
+  },
   view3dCursor: () => world.sceneSettings.state.cursor,
 });
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
+// The armature whose bones a click hits nearest in Object Mode, with its depth: { node, depth }, or null.
+world.pickArmature = (x, y, camera, accept) => world.objects.filter((node) => node.metadata?.wbCreation?.armature && accept(node))
+  .map((node) => ({ node, depth: pickArmature(world.mainSync.blender.C, world.mainSync.objectOf(node), { x, y, camera }) }))
+  .filter(({ depth }) => depth !== null).sort((a, b) => a.depth - b.depth)[0] ?? null;
 world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
 // particles, video; otherwise they stop until the next input or change.

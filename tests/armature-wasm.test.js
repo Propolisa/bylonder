@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { blenderMain, meshFromFaces, OPERATOR_FINISHED, OPERATOR_CANCELLED } from '../src/bmesh/bmesh-wasm.js';
 import { dnaGet } from '../src/makesrna/dna-struct.js';
-import { hasArmatures, armatureData, armatureDrawn, setArmatureData } from '../src/blenkernel/armature/armature.js';
+import { hasArmatures, armatureData, armatureDraw, setArmatureData, DRAW } from '../src/blenkernel/armature/armature.js';
 import { moduleModifiers } from '../src/modifiers/blender.js';
-import { NullEngine, Scene, FreeCamera, Vector3 } from '@babylonjs/core';
+import { NullEngine, Scene, FreeCamera, Vector3, Matrix } from '@babylonjs/core';
 import { createMainModes } from '../src/editors/object/main-modes.js';
 import { registerObjectOperators } from '../src/editors/object/object-operators.js';
 import { createContext } from '../src/blenkernel/context.js';
@@ -33,23 +33,38 @@ const close = (actual, expected, tolerance = 1e-4) => {
   return a.length === e.length && a.every((v, i) => Math.abs(v - e[i]) < tolerance);
 };
 const columns = (m) => [0, 1, 2, 3].map((c) => m.slice(c * 4, c * 4 + 4));
+// Each bone's matrix in armature space as Blender's overlay draws it (Octahedral display): its octahedron's matrix,
+// without the object's and the bone's length, by the bone's index (a selection sync's ids, else the drawing order); a
+// bone of no length draws nothing to take its axes from.
+function drawnMatrices(ob) {
+  const { data, ids } = armatureDraw(blender.C, ob, DRAW.SELECTING).buffers.octahedral_fill;
+  const toArmature = Matrix.FromArray(blender.transform(ob).matrix_world).invert(), matrices = [];
+  ids.forEach((id, i) => {
+    const m = Array.from(data.subarray(i * 16, i * 16 + 16)), length = Math.hypot(m[4], m[5], m[6]);
+    if (!length) return;
+    [m[3], m[7], m[11], m[15]] = [0, 0, 0, 1];
+    for (let k = 0; k < 12; k++) if (k % 4 !== 3) m[k] /= length;
+    matrices[id === 0xffffffff ? i : (id & 0x1fffffff) >>> 16] = Array.from(Matrix.FromArray(m).multiply(toArmature).m);
+  });
+  return matrices;
+}
 
 function compare(label, ob, box, expected) {
   const mode = dnaGet('Object', ob, 'mode');
   if (mode !== expected.mode) failed.push(`${label}: mode ${mode}, Blender ${expected.mode}`);
-  const { bones } = armatureData(ob), drawn = armatureDrawn(ob), editing = mode === 'EDIT';
+  const { bones } = armatureData(ob), drawn = drawnMatrices(ob), editing = mode === 'EDIT';
   if (bones.length !== expected.bones.length) return failed.push(`${label}: ${bones.length} bones, Blender ${expected.bones.length}`);
   expected.bones.forEach((want, i) => {
     const bone = bones[i], keys = ['name', 'parent', 'use_connect', ...(editing ? ['select', 'select_head', 'select_tail'] : [])];
     for (const key of keys) if (bone[key] !== want[key]) failed.push(`${label}: ${want.name}.${key} ${bone[key]}, Blender ${want[key]}`);
     for (const key of ['head', 'tail', ...(editing ? ['roll'] : [])]) if (!close(bone[key], want[key])) failed.push(`${label}: ${want.name}.${key} ${bone[key]}, Blender ${want[key]}`);
-    if (editing && !close(columns(drawn[i].matrix), want.matrix)) failed.push(`${label}: ${want.name}.matrix ${drawn[i].matrix}, Blender ${want.matrix.flat()}`);
+    if (editing && drawn[i] && !close(columns(drawn[i]), want.matrix)) failed.push(`${label}: ${want.name}.matrix ${drawn[i]}, Blender ${want.matrix.flat()}`);
   });
   if (!editing) expected.pose.forEach((want, i) => {
     const { pose } = bones[i];
     for (const key of ['location', 'rotation_quaternion', 'scale']) if (!close(pose[key], want[key])) failed.push(`${label}: pose ${want.name}.${key} ${pose[key]}, Blender ${want[key]}`);
     if (pose.select !== want.select) failed.push(`${label}: pose ${want.name}.select ${pose.select}, Blender ${want.select}`);
-    if (!close(columns(drawn[i].matrix), want.matrix)) failed.push(`${label}: pose ${want.name}.matrix ${drawn[i].matrix}, Blender ${want.matrix.flat()}`);
+    if (drawn[i] && !close(columns(drawn[i]), want.matrix)) failed.push(`${label}: pose ${want.name}.matrix ${drawn[i]}, Blender ${want.matrix.flat()}`);
   });
   if (expected.box) {
     const positions = Array.from(blender.evaluatedMesh(box).vert_positions);
@@ -137,7 +152,8 @@ const node = objects.find((n) => n.metadata?.wbCreation?.armature);
 assert.ok(node && selection.nodes.includes(node), 'the new armature is a selected Babylon object');
 const object = rna.pointer('Object', node);
 assert.equal(object.type, 'ARMATURE');
-assert.equal(node.getTotalIndices(), 24, 'one octahedral bone');
+const octahedra = () => armatureDraw(blender.C, sync.objectOf(node), 0).buffers.octahedral_fill.ids.length;
+assert.equal(octahedra(), 1, 'one octahedral bone');
 app('object.mode_set', { mode: 'EDIT' });
 assert.equal(object.mode, 'EDIT');
 app('armature.extrude', { forked: false });
@@ -146,7 +162,7 @@ app('object.mode_set', { mode: 'POSE' });
 assert.equal(object.mode, 'POSE');
 const bones = () => node.metadata.wbCreation.armature.bones;
 assert.deepEqual(bones().map((b) => b.name), ['Bone', 'Bone.001']);
-assert.equal(node.getTotalIndices(), 48, 'two bones drawn');
+assert.equal(octahedra(), 2, 'two bones drawn');
 const { box: boxData } = JSON.parse(fs.readFileSync(new URL('deform.json', dir)));
 const boxNode = createMesh('Box', { vertices: boxData.positions, faces: boxData.faces }, scene);
 objects.push(boxNode);
@@ -160,7 +176,7 @@ node.metadata = { ...node.metadata, wbCreation: { armature: one } };
 assert.equal(app('transform.rotate', { value: 0.6, orient_axis: 'X', orient_type: 'GLOBAL' }), OPERATOR_FINISHED);
 const rotated = steps('pose-rotate').at(-1).pose[1];
 assert.ok(close(bones()[1].pose.rotation_quaternion, rotated.rotation_quaternion), 'the pose bone rotated as in Blender');
-assert.ok(close(columns(armatureDrawn(sync.objectOf(node))[1].matrix), rotated.matrix), "and it is drawn by Blender's evaluated pose");
+assert.ok(close(columns(drawnMatrices(sync.objectOf(node))[1]), rotated.matrix), "and it is drawn by Blender's evaluated pose");
 const deformedBox = steps('deform').at(-1).box.positions;
 assert.ok(close(Array.from(sync.evaluatedMesh(boxNode).vert_positions), deformedBox), 'the Armature modifier deforms the mesh as in Blender');
 // Babylon draws face corners in its axes: (x, y, z) is Blender's (x, z, y).
@@ -171,7 +187,7 @@ assert.deepEqual([...shown].sort(), [...new Set(deformedBox.map(([x, y, z]) => k
 node.metadata = { ...node.metadata, wbCreation: { armature: { bones: one.bones.slice(0, 1), active: null } } };
 sync.flush();
 assert.equal(armatureData(sync.objectOf(node)).bones.length, 1);
-assert.equal(node.getTotalIndices(), 24);
+assert.equal(octahedra(), 1);
 assert.deepEqual(sync.check(), []);
 
 // The modes in the app: Object Mode's operators (Blender's mode_set) for an armature, its keymaps and context mode, and

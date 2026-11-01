@@ -3,13 +3,13 @@
 // the mode toggles are Object Mode's operators, Blender's in Main (object-operators.js); every armature.* and pose.*
 // operator the module has runs by idname for Blender's Armature and Pose keymaps and menus (runBlenderOperator, modally
 // from an event), particle.* ones are Object Mode's fallbacks, and a click on an armature selects with Blender's pick
-// (armature_select_pick) the bone Bylonder's picking finds under the pointer. Transforms in these modes are Object Mode's,
-// Blender's in Main.
+// (armature_select_pick) the bone part the overlay draws under the pointer (overlay-armature-select.js). Transforms in
+// these modes are Object Mode's, Blender's in Main.
 import { registerOperator } from '../../windowmanager/wm-operators.js';
 import { runBlenderOperator } from './object-operators.js';
 import { SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET, SEL_OP_XOR } from '../space_view3d/view3d-select.js';
 import { selectBone } from '../../blenkernel/armature/armature.js';
-import { boneOfFace } from '../../draw/overlay-armature.js';
+import { pickBone } from '../../draw/overlay-armature-select.js';
 
 // Each mode's context mode (CTX_data_mode_enum) and keymap; Edit Mode is Main's for armatures only.
 const MODES = { EDIT: { context: 'EDIT_ARMATURE', keymap: 'Armature' }, POSE: { context: 'POSE', keymap: 'Pose' }, PARTICLE_EDIT: { context: 'PARTICLE', keymap: 'Particle' } };
@@ -27,17 +27,16 @@ export function createMainModes({ sync, selection, views, options }) {
     enumItems: (prop) => sync.blender.enumItems(idname, prop),
   });
 
-  // view3d.select: Blender's in Particle Edit Mode, else the bone drawn under the pointer, picked as Blender picks it.
+  // view3d.select: Blender's in Particle Edit Mode, else the bone part drawn under the pointer, picked as Blender picks it.
   function selectOperator(event, props) {
     if (mode() === 'PARTICLE_EDIT') return runBlenderOperator(sync, 'view3d.select', props, { ...options, event });
     const { extend, deselect, toggle, deselect_all, select_passthrough } = props;
     const node = active(), view = event.view, p = views.pickPoint(view, event.x, event.y);
-    const hit = node.getScene().pick(p.x, p.y, (mesh) => mesh === node, false, view.camera);
-    const index = hit?.hit ? boneOfFace(node, hit.faceId) : -1;
     const sel_op = extend ? SEL_OP_ADD : deselect ? SEL_OP_SUB : toggle ? SEL_OP_XOR : SEL_OP_SET;
     let changed = false;
     options.transaction(() => sync.run(() => {
-      changed = selectBone(sync.blender.C, sync.objectOf(node), index, { sel_op, deselect_all, select_passthrough });
+      const ob = sync.objectOf(node), picked = pickBone(sync.blender.C, ob, { ...p, camera: view.camera, xray: view.state?.xray });
+      changed = selectBone(sync.blender.C, ob, picked?.index ?? -1, { part: picked?.part, sel_op, deselect_all, select_passthrough });
     }));
     return select_passthrough && !changed ? 'PASS_THROUGH' : 'FINISHED';
   }

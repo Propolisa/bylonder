@@ -232,6 +232,26 @@ def generate(host, out, missing, by_any, extra):
 STAND_INS = {'operator-properties.cc', 'rna-fcurve.cc', 'rna-space.cc'}
 
 
+# Blender headers a source of the API compiles without, by source: each is an empty header in its place (a clang file
+# overlay), the source defining what it needs of it. armature-draw.cc compiles Blender's overlay_armature.cc with
+# stand-ins for the draw manager that header brings.
+OVERLAY_STAND_INS = {'armature-draw.cc': ['source/blender/draw/engines/overlay/overlay_armature.hh']}
+
+
+def stand_ins(tree, out, source):
+    """The clang arguments that put an empty header in place of each header OVERLAY_STAND_INS names for a source."""
+    headers = OVERLAY_STAND_INS.get(os.path.basename(source))
+    if not headers:
+        return []
+    empty = os.path.join(out, 'generated', 'stand-in.hh')
+    open(empty, 'w').close()
+    overlay = os.path.join(out, 'generated', os.path.basename(source) + '.overlay.json')
+    roots = [{'name': os.path.dirname(os.path.join(tree, h)), 'type': 'directory',
+              'contents': [{'name': os.path.basename(h), 'type': 'file', 'external-contents': empty}]} for h in headers]
+    json.dump({'version': 0, 'roots': roots}, open(overlay, 'w'))
+    return ['-ivfsoverlay', overlay]
+
+
 def glue(host, out, entries, extra):
     """Bylonder's API over Blender (the module build's `api` sources, without its stand-ins), compiled against Blender's
     own headers as this build has them: every include directory Blender's sources use, the generated operator table
@@ -243,7 +263,7 @@ def glue(host, out, entries, extra):
             *(f'-I{os.path.join(tree, "source/blender", d)}' for d in wasm_module.EDITOR_INCLUDES), *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
     wasm_module.operator_table(tree, out, args + FLAGS, spec)
     sources = [os.path.join(WASM, f) for f in [*spec['api'], 'rna-runtime.cc', 'platform.cc', 'ghost-paths.cc', 'draw-seam.cc'] if f not in STAND_INS]
-    entry = lambda src: {'directory': host, 'file': src, 'command': ' '.join(['clang++', *args, '-c', src])}
+    entry = lambda src: {'directory': host, 'file': src, 'command': ' '.join(['clang++', *args, *stand_ins(tree, out, src), '-c', src])}
     objects = os.path.join(out, 'objects')
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get('JOBS', os.cpu_count()))) as pool:
         return list(pool.map(lambda src: compile_one(objects, entry(src), []), sources))

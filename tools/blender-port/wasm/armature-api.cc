@@ -1,7 +1,7 @@
 /* Blender's Armature objects in the module's Main (main-api.cc makes them with main_object_add, OB_ARMATURE): their bones
  * and pose in and out, Edit Mode's edit bones (armature_utils.cc's ED_armature_to_edit and ED_armature_from_edit, which
- * object.mode_set runs), the pose Blender evaluates (BKE_pose_where_is, in main_evaluate), which Bylonder draws, and
- * picking a bone in Edit and Pose Mode. */
+ * object.mode_set runs), the pose Blender evaluates (BKE_pose_where_is, in main_evaluate), and picking a bone in Edit and
+ * Pose Mode. armature-draw.cc gives what the overlay draws of them. */
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_build.hh"
 #include "BKE_action.hh"
@@ -28,11 +28,10 @@ using namespace blender;
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
 /* Per bone BONE_INTS ints: its parent's index (-1 for none), its flag (eBone_Flag), its pose channel's flag
- * (ePchan_Flag, of which armature_bones_set sets POSE_SELECTED) and rotation mode; then 40 floats: head, tail and roll in
- * armature space, envelope distance, head and tail radius, the pose channel's location, rotation quaternion, Euler
- * rotation and scale (SET_FLOATS so far), then what Blender draws (read only): the bone's matrix in armature space (the
- * edit bone's in Edit Mode, else the evaluated pose) and its length. */
-enum { BONE_INTS = 4, SET_FLOATS = 23 };
+ * (ePchan_Flag, of which armature_bones_set sets POSE_SELECTED) and rotation mode; then BONE_FLOATS floats: head, tail
+ * and roll in armature space, envelope distance, head and tail radius, the pose channel's location, rotation quaternion,
+ * Euler rotation and scale. */
+enum { BONE_INTS = 4, BONE_FLOATS = 23 };
 
 struct BonesHeader {
   int bones_num;
@@ -82,10 +81,6 @@ EXPORT(armature_bones_get) const BonesHeader *armature_bones_get(Object *ob)
       floats.extend(Span(ebone.tail, 3));
       floats.extend({ebone.roll, ebone.dist, ebone.rad_head, ebone.rad_tail});
       pose_values(pchan, floats);
-      float mat[4][4];
-      ED_armature_ebone_to_mat4(&ebone, mat);
-      floats.extend(Span(&mat[0][0], 16));
-      floats.append(len_v3v3(ebone.head, ebone.tail));
       names += std::string(ebone.name) + "\n";
       active = &ebone == arm.act_edbone ? count : active;
       count++;
@@ -101,8 +96,6 @@ EXPORT(armature_bones_get) const BonesHeader *armature_bones_get(Object *ob)
       floats.extend(Span(bone->arm_tail, 3));
       floats.extend({bone->arm_roll, bone->dist, bone->rad_head, bone->rad_tail});
       pose_values(pchan, floats);
-      floats.extend(Span(&(pchan ? pchan->pose_mat : bone->arm_mat)[0][0], 16));
-      floats.append(bone->length);
       names += std::string(bone->name) + "\n";
       active = bone == arm.act_bone ? count : active;
       count++;
@@ -112,8 +105,7 @@ EXPORT(armature_bones_get) const BonesHeader *armature_bones_get(Object *ob)
   return &header;
 }
 
-/* Replaces the bones (the edit bones in Edit Mode) with those given in armature_bones_get's layout, SET_FLOATS floats each
- * (what it gives before the drawn matrix), and sets their pose channels' values. Outside Edit Mode the bones are made as
+/* Replaces the bones (the edit bones in Edit Mode) with those given in armature_bones_get's layout, and sets their pose channels' values. Outside Edit Mode the bones are made as
  * leaving Edit Mode makes them (ED_armature_from_edit) and the pose is rebuilt. */
 EXPORT(armature_bones_set)
 void armature_bones_set(Main *bmain, Object *ob, int bones_num, const int *ints, const float *floats, const char *names, int active)
@@ -131,7 +123,7 @@ void armature_bones_set(Main *bmain, Object *ob, int bones_num, const int *ints,
   const char *name = names;
   for (const int i : IndexRange(bones_num)) {
     const int *n = ints + i * BONE_INTS;
-    const float *f = floats + i * SET_FLOATS;
+    const float *f = floats + i * BONE_FLOATS;
     const char *end = strchr(name, '\n');
     const std::string bone_name(name, end - name);
     name = end + 1;
@@ -164,7 +156,7 @@ void armature_bones_set(Main *bmain, Object *ob, int bones_num, const int *ints,
       continue;
     }
     const int *n = ints + i * BONE_INTS;
-    const float *f = floats + i * SET_FLOATS + 10;
+    const float *f = floats + i * BONE_FLOATS + 10;
     pchan->flag = ePchan_Flag((pchan->flag & ~POSE_SELECTED) | (n[2] & POSE_SELECTED));
     pchan->rotmode = eRotationModes(n[3]);
     copy_v3_v3(pchan->loc, f);
