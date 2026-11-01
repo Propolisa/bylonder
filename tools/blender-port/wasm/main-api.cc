@@ -46,6 +46,8 @@
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
+#include "BKE_paint.hh"
+#include "BKE_paint_bvh.hh"
 #include "BKE_particle.h"
 #include "BKE_curves.hh"
 #include "DNA_particle_types.h"
@@ -631,6 +633,12 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
     geometry->replace_mesh(bke::curve_to_wire_mesh(geometry->get_curves()->geometry.wrap()));
   }
   const Mesh *mesh = geometry ? geometry->get_mesh() : BKE_object_get_evaluated_mesh(evaluated);
+  /* In Sculpt Mode Blender's engines draw the object's pbvh::Tree, its Mesh's own positions with the normals the draw
+   * updates (draw_sculpt.cc sculpt_batches_get_ex), which a stroke changes without evaluating the object. */
+  if (BKE_sculptsession_use_pbvh_draw(ob, nullptr)) {
+    bke::pbvh::update_normals_from_eval(*evaluated, *bke::object::pbvh_get(*ob));
+    mesh = id_cast<const Mesh *>(ob->data);
+  }
   if (!mesh) {
     return nullptr;
   }

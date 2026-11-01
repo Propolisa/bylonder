@@ -10,7 +10,7 @@ import { registerOperators, kw } from './wm-operators.js';
 const { exports: x, cString } = blenderModule;
 // WM_toolsystem_default_tool for the 3D View's modes Bylonder has, and whether Blender's startup file also has it as the
 // fallback tool (Select Text and the brushes are in no select group, so have none).
-const DEFAULT_TOOLS = { EDIT_TEXT: 'builtin.select_text', PARTICLE: 'builtin_brush.Comb' };
+const DEFAULT_TOOLS = { EDIT_TEXT: 'builtin.select_text', PARTICLE: 'builtin_brush.Comb', SCULPT: 'builtin.brush' };
 const defaultTool = (mode) => (DEFAULT_TOOLS[mode] ? [DEFAULT_TOOLS[mode], [false]] : ['builtin.select_box', [false, true]]);
 // The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo
 // (wm_toolsystem.cc keeps a fallback keymap only for those, by the flag editor-context.cc gives them).

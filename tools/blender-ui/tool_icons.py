@@ -13,12 +13,13 @@ from collections import defaultdict
 import transpile
 
 OUT = os.path.join(transpile.REPO, 'public', 'icons', 'blender', 'tools')
-MODES = ['OBJECT', 'EDIT_MESH', 'PARTICLE']
-# The icons the tools of MODES name, and Blender's fallback for a missing one.
+MODES = ['OBJECT', 'EDIT_MESH', 'PARTICLE', 'SCULPT']
+# The icons the tools of MODES name (a None context gives every tool, as the tools' polls take it), and Blender's
+# fallback for a missing one.
 ICONS = '''
 const { registered: { VIEW3D_PT_tools_active: P } } = await import('./src/python/bpy_interface.js');
 const names = new Set(['none']);
-for (const mode of %s) for (const item of P.tools_from_context({ mode })) for (const tool of [item ?? []].flat()) names.add(tool.icon);
+for (const mode of %s) for (const item of P.tools_from_context(null, mode)) for (const tool of [item ?? []].flat()) names.add(tool.icon);
 console.log(JSON.stringify([...names]));
 '''
 

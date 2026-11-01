@@ -1,8 +1,8 @@
 // The object modes Blender runs on Main without an editor of Bylonder's: an armature's Edit and Pose Modes
-// (blenkernel/main-sync.js keeps the armature equal on both sides) and a mesh's Particle Edit Mode. object.mode_set and
+// (blenkernel/main-sync.js keeps the armature equal on both sides) and a mesh's Particle Edit and Sculpt Modes. object.mode_set and
 // the mode toggles are Object Mode's operators, Blender's in Main (object-operators.js); every armature.* and pose.*
 // operator the module has runs by idname for Blender's Armature and Pose keymaps and menus (runBlenderOperator, modally
-// from an event), particle.* ones are Object Mode's fallbacks, and a click on an armature selects with Blender's pick
+// from an event), particle.*, sculpt.*, paint.* and brush.* ones are Object Mode's fallbacks, and a click on an armature selects with Blender's pick
 // (armature_select_pick) the bone part the overlay draws under the pointer (overlay-armature-select.js). Transforms in
 // these modes are Object Mode's, Blender's in Main.
 import { registerOperator } from '../../windowmanager/wm-operators.js';
@@ -12,7 +12,8 @@ import { selectBone } from '../../blenkernel/armature/armature.js';
 import { pickBone } from '../../draw/overlay-armature-select.js';
 
 // Each mode's context mode (CTX_data_mode_enum) and keymap; Edit Mode is Main's for armatures only.
-const MODES = { EDIT: { context: 'EDIT_ARMATURE', keymap: 'Armature' }, POSE: { context: 'POSE', keymap: 'Pose' }, PARTICLE_EDIT: { context: 'PARTICLE', keymap: 'Particle' } };
+const MODES = { EDIT: { context: 'EDIT_ARMATURE', keymap: 'Armature' }, POSE: { context: 'POSE', keymap: 'Pose' }, PARTICLE_EDIT: { context: 'PARTICLE', keymap: 'Particle' },
+  SCULPT: { context: 'SCULPT', keymap: 'Sculpt' } };
 const KEYMAPS = Object.values(MODES).map((m) => m.keymap);
 
 //   sync: the scene's (createMainSync); selection; views (pickPoint); options: runBlenderOperator's host (transaction,

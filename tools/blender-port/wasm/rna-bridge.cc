@@ -183,6 +183,7 @@ EXPORT(bpy_property) PropertyRNA *bpy_property(StructRNA *type, ID *id, void *da
 }
 
 enum { INFO_ENUM_FLAG = 1, INFO_EDITABLE = 2, INFO_IDPROP = 4, INFO_DYNAMIC = 8, INFO_NEVER_NULL = 16 };
+/* INFO_EDITABLE is the flag pyrna_struct_setattro checks, so a panel's draw_header sets its bl_label as in Blender. */
 /* A property's type (PropertyType), returning its subtype with its unit, array length, flags (INFO_*) and the struct
  * a pointer or collection holds in `out`. */
 EXPORT(bpy_property_info) int bpy_property_info(StructRNA *type, ID *id, void *data, PropertyRNA *prop)
@@ -193,7 +194,7 @@ EXPORT(bpy_property_info) int bpy_property_info(StructRNA *type, ID *id, void *d
   out[0] = uintptr_t(RNA_property_subtype(prop) | RNA_property_unit(prop));
   out[1] = uintptr_t(RNA_property_array_check(prop) ? RNA_property_array_length(&ptr, prop) : 0);
   out[2] = uintptr_t((kind == PROP_ENUM && (flag & PROP_ENUM_FLAG) ? INFO_ENUM_FLAG : 0) |
-                     (data && RNA_property_editable(&ptr, prop) ? INFO_EDITABLE : 0) |
+                     (data && RNA_property_editable_flag(&ptr, prop) ? INFO_EDITABLE : 0) |
                      (RNA_property_is_idprop(prop) ? INFO_IDPROP : 0) | (flag & PROP_DYNAMIC ? INFO_DYNAMIC : 0) |
                      (flag & PROP_NEVER_NULL ? INFO_NEVER_NULL : 0));
   out[3] = uintptr_t(ELEM(kind, PROP_POINTER, PROP_COLLECTION) ? RNA_property_pointer_type(&ptr, prop) : nullptr);

@@ -158,6 +158,7 @@
         {"path": "source/blender/blenlib/intern/filereader_memory.cc", "includes": ["wasm/fstream"]},
         {"dependency": "zstd", "path": "lib/common", "defines": ["ZSTD_DISABLE_ASM"]},
         {"dependency": "zstd", "path": "lib/decompress", "defines": ["ZSTD_DISABLE_ASM"]},
+        {"dependency": "zstd", "path": "lib/compress", "defines": ["ZSTD_DISABLE_ASM"]},
         {"path": "source/blender/blenlib/intern/filereader_zstd.cc", "uses": ["zstd"], "includes": ["wasm/fstream"]},
         {"path": "source/blender/blenlib/intern/storage.cc", "includes": ["wasm/storage"]},
         {"path": "source/blender/blenlib/intern/expr_pylike_eval.cc", "flags": ["-DFE_DIVBYZERO=0", "-DFE_INVALID=0"]},

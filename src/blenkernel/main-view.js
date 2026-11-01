@@ -13,7 +13,7 @@ import { nodeId, deleted } from '../editors/object/identity.js';
 import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
-import { ID_RECALC_GEOMETRY, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
+import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
@@ -297,6 +297,7 @@ export function createMainView(state) {
   // Babylon drawn from Main, after Blender's code ran: what it deleted is deleted, every object's values, relations,
   // base and tagged geometry, objects it added made, then materials, worlds and the scene.
   function view() {
+    let modeChanged = false;
     state.applying = true;
     try {
       const alive = new Set(blender.ids(ID_OB)), chosen = [], active = [];
@@ -311,12 +312,16 @@ export function createMainView(state) {
         const name = blender.name(ob);
         if (name !== entry.name) [node.name, entry.name, entry.babylonName] = [name, name, name];
         // Its mode is Main's (an armature's, with its record, pullArmature's).
-        if (entry.type !== 'ARMATURE') node.metadata = { ...node.metadata, wbMode: blender.mode(ob) };
+        const mode = blender.mode(ob);
+        if (entry.type !== 'ARMATURE' && mode !== node.metadata?.wbMode) {
+          node.metadata = { ...node.metadata, wbMode: mode };
+          modeChanged = true;
+        }
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
-        const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL);
+        const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL) || sculpted(entry, tags.object);
         if (entry.type === 'MESH' && drawEditMode(entry)) continue;
         if (changed && entry.type === 'MESH') keepMesh(entry, blender);
         else if (changed && entry.type !== 'ARMATURE') drawData(entry);
@@ -340,6 +345,7 @@ export function createMainView(state) {
     // Last, as the collections' subscribers (the Outliner) draw from Main as soon as they change.
     if (world.collections) state.readCollections();
     world.modifiers?.refresh();
+    if (modeChanged) world.onModeChange?.();
   }
 
   // What the depsgraph updated, drawn (docs/model.md): every updated object's and its data's values (a light's, a
@@ -371,7 +377,7 @@ export function createMainView(state) {
         const matrix = babylonMatrix(blender.transform(entry.ob).matrix_world);
         if (entry.node.freezeWorldMatrix) entry.node.freezeWorldMatrix(matrix);
         else setEvaluatedMatrix(entry.node, matrix);
-        if (recalc & ID_RECALC_GEOMETRY && drawsGeometry(entry)) drawGeometry(entry);
+        if ((recalc & ID_RECALC_GEOMETRY || sculpted(entry, recalc)) && drawsGeometry(entry)) drawGeometry(entry);
       }
       const shading = [...materials.values()].map((record) => record.ma).concat([...worlds.values()].map((record) => record.wo));
       const nodeTrees = [...updates.keys()].some((id) => !drawn.has(id) && id !== blender.scene && !shading.includes(id));
@@ -465,6 +471,9 @@ export function createMainView(state) {
   }
   // Main's evaluated geometry is drawn for a mesh whose Mesh it holds, a curve or text, in Edit Mode too, and the types
   // drawn only as evaluated.
+  // A sculpt stroke tags its object's shading only: Blender's engines draw the stroke from the object's pbvh::Tree,
+  // which object_mesh_eval gives.
+  const sculpted = (entry, recalc) => entry.type === 'MESH' && entry.node.metadata?.wbMode === 'SCULPT' && !!(recalc & ID_RECALC_SHADING);
   const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) || EVALUATED.includes(type));
   function drawGeometry({ node, ob }) {
     const mesh = blender.evaluatedMesh(ob);
