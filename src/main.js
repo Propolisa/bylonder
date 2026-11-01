@@ -61,13 +61,19 @@ import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { registerRuntimeTypes } from "./runtimes/runtimes.js";
+import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences } from "./windowmanager/wm-userdef.js";
+import { applyTheme } from "./editors/interface/theme-tokens.js";
+import { registerBylonderPreferences, bylonderPreferences } from "./workspace/preferences.js";
+import { loadKeyconfig } from "./windowmanager/wm-window.js";
+import { mountPreferences } from "./editors/space_userpref/editor.js";
+import { registerUserprefOperators } from "./editors/space_userpref/userpref-operators.js";
 import "./runtimes/armature.js";
 import { bylonderIcon } from "./python/bpy_icons.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
 import { tagRedraw } from "./draw/overlay-tool.js";
-import { armaturePickDepth, armatureViewBounds } from "./blenkernel/armature/armature.js";
+import { armaturePickDepth } from "./blenkernel/armature/armature.js";
 import { regionView3D } from "./editors/space_view3d/view3d-project.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
@@ -89,7 +95,7 @@ import { registerConsoleOperators } from "./editors/space_console/console-ops.js
 import { mountInfo } from "./editors/space_info/info.js";
 // Boot phases, as performance marks (the workspace marks its own).
 performance.mark("bl:viewport-imported");
-await preloadIcons();
+await Promise.all([preloadIcons(), restorePreferences()]);
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -261,7 +267,9 @@ const settled = async () => {
   await new Promise((done) => requestAnimationFrame(() => done()));
   await world.modifiers.settled();
 };
-window.__bylonder ={ world, renderHost, runOperator, settled,
+window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreferences,
+  // The Preferences and the key configurations, for tests.
+  userdef: { preferences, changed: preferencesChanged, keyconfigs: () => bpyRna.contextStruct(blenderMain().C).window_manager.keyconfigs },
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
@@ -371,7 +379,7 @@ const blenderWindow = {
   send: (kind, data, strings, view, native) => (blenderAreas.takes(native) ? blenderAreas.send(native, kind, data, strings) : view3dWindow.send(kind, data, strings, view)),
   pressHandled: () => blenderAreas.blenderWindow().pressHandled(),
 };
-world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow });
+world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow, input: inputPreferences });
 const editor = createEditor(
   world,
   views,
@@ -381,12 +389,6 @@ const editor = createEditor(
 );
 const activeView = () => views.input;
 // Object actions and menus act on the 3D Viewport under the pointer, as in Blender.
-// An armature is framed by its bones, as Blender's View Selected frames it (in Pose Mode its selected bones).
-const armatureBounds = (node) => {
-  const ob = node.metadata?.wbCreation?.armature && world.mainSync.objectOf(node);
-  return ob ? armatureViewBounds(world.mainSync.blender.C, ob) : null;
-};
-const nav = { frame: (nodes) => activeView()?.nav.frame(nodes, armatureBounds) };
 const commands = createObjectCommands(world, editor, history, () =>
   refreshUI(),
 );
@@ -415,6 +417,11 @@ world.beforeSelection = () => creator.finish();
 world.objectActions = createObjectActions({ world, editor, commands, creator });
 // bpy.data.texts: the project's text files, as Main's Texts.
 setContextPointer(blenderMain().C);
+// The Preferences as WM_init reads them (this browser's saved ones, else factory settings), Bylonder's own among them,
+// then Blender's key configuration with them, before any editor uses them.
+readPreferences();
+registerBylonderPreferences(bylonderIcon());
+loadKeyconfig(blenderMain().C);
 world.texts = createTextFiles({ files: input.texts, save: (name, content) => send("text", { name, content }) });
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit, notify });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
@@ -468,9 +475,25 @@ registerCurveAddOperators({ sync: world.mainSync, host: objectOperatorHost, edit
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
 // The runtimes' properties and panels (docs/runtimes.md), as an add-on registers its classes.
 registerRuntimeTypes(bylonderIcon());
+// The theme on the design tokens of this window and the app's.
+const themed = () => applyTheme(preferences().themes[0], [document, parent.document]);
+themed();
+onPreferencesChanged(() => { themed(); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
+// The Preferences editor: an area's editor (Editor Type), mounted once it is first shown, and Edit > Preferences.
+const mountWhenShown = (host, mount) => {
+  const observer = new ResizeObserver(() => { if (host.clientWidth) { observer.disconnect(); mount(); } });
+  observer.observe(host);
+};
+const preferencesEditor = (host, id) => mountWhenShown(host, () => mountPreferences(host, { headerHost: viewportDock.header(id) }));
+preferencesEditor(document.querySelector("#preferences-section"), "preferences");
+viewportDock.setFactory("preferences", preferencesEditor);
+registerUserprefOperators({ showArea: () => viewportDock.show("preferences", true) });
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost,
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
+// The navigation gizmo's and touch's ways into Blender's navigation operators (view3d-window.js).
+world.view3dInvoke = (view, idname, props, native) => view3dWindow.invoke(view, idname, props, native);
+world.view3dTrackpad = (view, gesture) => view3dWindow.trackpad(view, gesture);
 // The modes Blender runs on Main: an armature's Edit and Pose Modes, Particle Edit Mode.
 world.mainModes = createMainModes({ sync: world.mainSync, selection: editor.selection, options: objectOperatorHost });
 registerAddOperators(creator);
@@ -663,16 +686,12 @@ const meshGesture = (idname, props, event) => world.editMode.kind === "MESH" && 
 const mainMode = () => !world.editMode.active && world.mainModes.mode();
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
-const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
 registerOperators({
   // Blender's keying of the selected objects (keyframing.cc, with the scene's keying set), on Main.
   ...Object.fromEntries(["anim.keyframe_insert", "anim.keyframe_delete_v3d"].map((idname) => [idname, {
     blender: true,
     run: (props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }),
   }])),
-  "view3d.rotate": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.rotate(event) },
-  "view3d.move": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.move(event) },
-  "view3d.zoom": { supports: ({ delta }) => !!delta, poll: () => !!activeView(), run: ({ delta }, event) => (event?.view ?? activeView()).nav.wheelZoom(delta) },
   "ed.undo": { run: () => undoRedo(false) },
   "ed.redo": { run: () => undoRedo(true) },
   "screen.redo_last": { run: () => creator.reopen() },
@@ -681,9 +700,6 @@ registerOperators({
   "render.view_show": { run: () => renderHost.viewRender() },
   "view3d.view_camera": { run: () => activeView()?.toggleCameraView() },
   "view3d.toggle_xray": { poll: () => !!activeView(), run: () => { const view = activeView(); view.state.xray = !view.state.xray; view.sync(); } },
-  "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
-  "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
-  "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selection.nodes) },
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(screenArea()) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },

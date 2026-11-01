@@ -4,7 +4,6 @@
 import assert from 'node:assert/strict';
 import { blenderMain, operatorNames } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/windowmanager/wm-window.js';
 import { regionHeader } from '../src/editors/interface/ui-tree.js';
 import { createTextFiles } from '../src/blenkernel/text-files.js';
@@ -18,7 +17,7 @@ const main = blenderMain();
 setContextPointer(main.C);
 const window = new Window(main);
 window.size = { width: 1200, height: 800 };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(operatorNames().filter((idname) => /^(text|console)\./.test(idname)));
 const rect = { x: 0, y: 0, width: 1200, height: 800 };
 const regions = { [RGN_TYPE_HEADER]: { x: 0, y: 0, width: 1200, height: 26 }, [RGN_TYPE_WINDOW]: { x: 0, y: 26, width: 1200, height: 774 } };

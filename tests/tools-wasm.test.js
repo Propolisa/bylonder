@@ -4,10 +4,11 @@
 // ONLY=prefix runs the fixtures whose tools start with it.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { meshFromFaces, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED } from '../src/bmesh/bmesh-wasm.js';
+import { meshFromFaces, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED, blenderMain } from '../src/bmesh/bmesh-wasm.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
 import { editOnMain } from './edit-main.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps, modalItem } from '../src/windowmanager/keyconfig.js';
+import { keyconfig, modalItem } from '../src/windowmanager/keyconfig.js';
 import { dragDirection, WM_DRAG_THRESHOLD_MOUSE } from '../src/windowmanager/wm-event-system.js';
 import { SCE_SELECT_VERTEX } from '../src/bmesh/intern/bmesh-marking.js';
 
@@ -15,7 +16,8 @@ import { SCE_SELECT_VERTEX } from '../src/bmesh/intern/bmesh-marking.js';
 const LACKING = ['builtin.poly_build'];
 const fixtures = JSON.parse(await readFile(new URL('./fixtures/tools/edit-mesh.json', import.meta.url), 'utf8'))
   .filter(({ tool }) => tool.startsWith(process.env.ONLY ?? '') && !LACKING.includes(tool));
-const keymaps = new Map(defaultKeymaps().map(([name, , { items }]) => [name, items]));
+loadKeyconfig(blenderMain().C);
+const keymaps = keyconfig();
 // The tools' keymaps, as their definitions in Blender's toolbar name them.
 const TOOL_KEYMAPS = {
   'builtin.shrink_fatten': 'Shrink/Fatten', 'builtin.push_pull': 'Push/Pull', 'builtin.to_sphere': 'To Sphere',

@@ -4,7 +4,6 @@
 //     tail_radius, the EditBone booleans of BONE_FLAGS, pose: { location, rotation_mode, rotation_quaternion,
 //     rotation_euler, scale, select, hide } }], active (a bone's name or null) }
 // Edit Mode's edit bones are the bones while editing. What Blender's overlay draws of them is armatureDraw's.
-import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { moduleAccess } from '../../bmesh/bmesh-wasm.js';
 
 const { x, withArrays, withString, cString } = moduleAccess;
@@ -61,15 +60,6 @@ export function setArmatureData(bmain, ob, { bones, active = null }) {
 export function armaturePickDepth(C, ob, { viewmat, winmat, winx, winy }, px, py) {
   const depth = withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.armature_pick_depth(C, ob, v, w, winx, winy, px, winy - py));
   return depth < 0 ? null : depth;
-}
-
-// An armature object's bounds as View Selected frames it (armature-api.cc armature_view_bounds: its bones, in Pose Mode
-// the selected ones), in world space and Babylon's axes ({ min, max }), or null.
-export function armatureViewBounds(C, ob) {
-  const bounds = withArrays([new Float32Array(6)], ([p]) => (x.armature_view_bounds(C, ob, p) ? Array.from(new Float32Array(x.memory.buffer, p, 6)) : null));
-  if (!bounds) return null;
-  const [x0, y0, z0, x1, y1, z1] = bounds;
-  return { min: new Vector3(x0, z0, y0), max: new Vector3(x1, z1, y1) };
 }
 
 // The overlay's buffers (armature-draw.cc) by name, with their floats per instance: bone matrices with packed colors

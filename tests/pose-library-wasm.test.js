@@ -8,7 +8,6 @@ import { readFile } from 'node:fs/promises';
 import { BlenderMain, datafiles } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW, RGN_TYPE_ASSET_SHELF, RGN_TYPE_ASSET_SHELF_HEADER } from '../src/windowmanager/wm-window.js';
 import { regionLayout, buttonPress, viewItemDrag, viewItemContextMenu } from '../src/editors/interface/ui-tree.js';
 
@@ -35,7 +34,7 @@ main.run('pose.rot_clear');
 const window = new Window(main);
 const [, , winx, winy] = fixture.cases.shown.regions.WINDOW;
 window.size = { width: winx, height: winy };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 const view = window.area(SPACE_VIEW3D);
 const SHELF = [RGN_TYPE_ASSET_SHELF, RGN_TYPE_ASSET_SHELF_HEADER];
 const whole = { x: 0, y: 0, width: winx, height: winy };

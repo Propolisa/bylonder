@@ -9,6 +9,11 @@ import { SCE_SELECT_VERTEX } from '../src/bmesh/intern/bmesh-marking.js';
 import { BM_VERT } from '../src/bmesh/intern/bmesh-class.js';
 import '../src/python/bpy_interface.js';
 import { modalItem } from '../src/windowmanager/keyconfig.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
+
+// Blender's key configuration, as the app loads it at startup.
+loadKeyconfig(blenderMain().C);
 
 const TOP = { viewmat: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -10, 1], winmat: [0.2, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, -0.02, 0, 0, 0, 0, 1], winx: 1000, winy: 1000, persp: false };
 const CENTER = [500, 500];

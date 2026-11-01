@@ -4,7 +4,6 @@
 import assert from 'node:assert/strict';
 import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 import { createEventSystem } from '../src/windowmanager/wm-event-system.js';
 
@@ -19,7 +18,7 @@ main.setBase(ob, { select: true, active: true });
 main.evaluate();
 const window = new Window(main);
 window.size = { width: 1000, height: 1000 };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(['transform.translate']);
 const area = window.area(SPACE_VIEW3D), rect = { x: 0, y: 0, width: 1000, height: 1000 };
 area.layout(rect, { [RGN_TYPE_WINDOW]: rect });

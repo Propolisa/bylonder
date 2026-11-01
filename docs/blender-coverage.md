@@ -36,7 +36,39 @@ Status: partial
 New Project creates a project from code. Blender's templates map to File > New from Example.
 
 ## PREFERENCES > *
-Edit > Preferences holds Bylonder's own settings (Keep Scenes Loaded). Blender's sections follow as features need them.
+Status: partial
+The Preferences editor is Blender's own `space_userpref` in the module (`editors/space_userpref`), over Blender's `U`:
+its header, navigation bar, execute region and every section's panels are Blender's Python UI. Edit > Preferences opens
+it in a window of the page, or maximized in the app's area per Temporary Editors > Preferences; Editor Type shows it in
+any area. Settings Blender's own code reads work as in Blender; what a browser cannot honor or Bylonder does not yet is
+greyed out with its reason (`support.js`), never hidden. Save Preferences, Revert and Load Factory Preferences are
+Blender's operators over Blender's user directory (`/user` in the module's file system, `ghost-paths.cc`), which the
+page keeps in IndexedDB (`wm-userdef.js`); auto-save runs as WM_exit's when the page is hidden. Bylonder's own settings
+are the AddonPreferences of a built-in add-on, `bylonder`, in System > Bylonder. Themes reach the interface through
+the design tokens (`theme-tokens.js`); theme colors no token stands for are greyed out.
+
+## PREFERENCES > Keymap
+Status: partial
+Blender's key configuration is loaded as `bpy.utils.keyconfig_init` loads it: the Blender preset (`Blender.py`, its
+KeyConfigPreferences registered) and the active one, generated with the Preferences, into Main's window manager; a
+change that alters keymaps (Select With, Spacebar Action, Emulate 3 Button Mouse) loads it again, as
+WM_keyconfig_reload does. The page's own keymaps read the user key configuration Blender makes
+(`windowmanager/keyconfig.js`), so edits apply everywhere. A compiled preset runs once with the tree, so its
+`__main__` block and its keymap data binding are run by `keyconfigSet` (`wm-window.js`).
+
+## PREFERENCES > Input
+Status: partial
+Emulate 3 Button Mouse, Emulate Numpad, double click, drag thresholds and the touchpad's scroll direction are Blender's
+own (`wm_event_add_ghostevent`); the page applies the two emulations to the events it handles itself
+(`wm-event-system.js` `emulateInput`). A trackpad's two-finger drag and pinch arrive as GHOST's trackpad events, a
+pen's pressure and tilt as GHOST's tablet data. NDOF is built out of the module.
+
+## VIEW_3D > Navigation
+Status: partial
+The 3D View's navigation is Blender's operators (view3d.rotate, move, zoom, dolly, view_axis, view_persportho,
+view_selected, view_all, smooth view) on the area's RegionView3D; the editor camera follows it (`navigation.js`
+`follow`), so the Navigation preferences apply. The navigation gizmo invokes them as Blender's gizmo does
+(`wm_area_operator_invoke`) and touch gestures map onto trackpad events. Auto Depth has no depth buffer.
 
 ## SEQUENCE_EDITOR > *
 The Video Sequencer and File Browser are KubeezCut islands. Their Blender identifiers live in the KubeezCut fork, which this scan does not read yet.
