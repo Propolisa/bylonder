@@ -398,11 +398,18 @@ static const char *root_kind(LayoutType type)
   }
 }
 
-/* A block's roots, as one tree per root; forgets them. */
+/* A block's roots, as one tree per root, or its buttons as a column where it has no layout (a search popup's, which
+ * template_common_search_menu places itself); forgets them. */
 static void block_roots_json(std::ostringstream &out, const Block *block)
 {
   auto found = recorded.find(block);
   if (found == recorded.end()) {
+    out << "{\"kind\":\"column\",\"children\":[";
+    for (const int64_t i : block->buttons_ptrs.index_range()) {
+      out << (i ? "," : "");
+      button_json(out, block->buttons_ptrs[i].get());
+    }
+    out << "]}";
     return;
   }
   for (const int64_t i : found->second.index_range()) {
@@ -1087,6 +1094,102 @@ EXPORT(ui_button_text_set) void ui_button_text_set(bContext *C, Button *but, con
       text_but->rename_func(*C, old);
     }
   }
+  button_applied(C, but);
+}
+
+/* Searches. */
+
+/* A search button's items, as its update function adds them (search_item_add, linked with --wrap), for the page's
+ * search popup in place of Blender's search box region (interface_region_search.cc). */
+struct SearchItem {
+  std::string name;
+  void *poin;
+  int icon;
+  int flag;
+};
+static Vector<SearchItem> *listed = nullptr;
+static Vector<SearchItem> search_items(bContext *C, ButtonSearch *but, const char *text)
+{
+  /* What the update function is given: an empty SearchItems (zeroed), whose items the wrap takes. */
+  alignas(8) static char empty[256] = {};
+  Vector<SearchItem> items;
+  listed = &items;
+  but->items_update_fn(C, but->arg, text, reinterpret_cast<SearchItems *>(empty), !but->changed);
+  listed = nullptr;
+  return items;
+}
+
+}  // namespace blender::ui
+
+#define SEARCH_ITEM_ADD _ZN7blender2ui15search_item_addEPNS0_11SearchItemsENS_9StringRefEPviih
+extern "C" bool WRAP(__real_, SEARCH_ITEM_ADD)(ui::SearchItems *items, StringRef name, void *poin, int iconid, int but_flag,
+                                                uint8_t name_prefix_offset);
+/* port-override: while the page lists a search's items, they are taken instead of written into a search box. */
+extern "C" bool WRAP(__wrap_, SEARCH_ITEM_ADD)(ui::SearchItems *items, StringRef name, void *poin, int iconid, int but_flag,
+                                                uint8_t name_prefix_offset)
+{
+  if (!ui::listed) {
+    return WRAP(__real_, SEARCH_ITEM_ADD)(items, name, poin, iconid, but_flag, name_prefix_offset);
+  }
+  ui::listed->append({name.drop_prefix(name_prefix_offset), poin, iconid, but_flag});
+  return true;
+}
+
+namespace blender::ui {
+
+static ButtonSearch *searchable(const bContext *C, Button *but)
+{
+  return button_live(C, but) && but->type == ButtonType::SearchMenu && static_cast<ButtonSearch *>(but)->items_update_fn ?
+             static_cast<ButtonSearch *>(but) :
+             nullptr;
+}
+
+/* A search button's items for `text`, as its search box lists them: [{ name, icon, disabled, active }], or an empty
+ * string for a button without a search function. */
+EXPORT(ui_button_search) const char *ui_button_search(bContext *C, Button *but, const char *text)
+{
+  static std::string json;
+  ButtonSearch *search = searchable(C, but);
+  if (!search) {
+    return "";
+  }
+  std::ostringstream out;
+  out << '[';
+  bool first = true;
+  for (const SearchItem &item : search_items(C, search, text)) {
+    out << (first ? "{\"name\":" : ",{\"name\":");
+    first = false;
+    quote(out, item.name);
+    if (item.icon) {
+      key(out, "icon");
+      quote(out, ui_icon_name(item.icon));
+    }
+    if (item.flag & BUT_DISABLED) {
+      out << ",\"disabled\":true";
+    }
+    if (item.poin && item.poin == search->item_active) {
+      out << ",\"active\":true";
+    }
+    out << '}';
+  }
+  out << ']';
+  json = out.str();
+  return json.c_str();
+}
+
+/* The search's item `index` for `text` chosen, as its search box applies it (searchbox_apply): the button's functions
+ * run with the item (template_ID's assigns the ID). */
+EXPORT(ui_button_search_apply) void ui_button_search_apply(bContext *C, Button *but, const char *text, int index)
+{
+  ButtonSearch *search = searchable(C, but);
+  if (!search) {
+    return;
+  }
+  const Vector<SearchItem> items = search_items(C, search, text);
+  if (index < 0 || index >= items.size() || (items[index].flag & BUT_DISABLED)) {
+    return;
+  }
+  but->func_arg2 = items[index].poin;
   button_applied(C, but);
 }
 
