@@ -2,7 +2,7 @@
 // editors' areas, and the browser as GHOST's system. The page lays the areas out and gives their rectangles, one way;
 // its input becomes GHOST's events, which Blender's own event system handles with Blender's keymaps, modal handlers,
 // macros and gestures. Each event returns the regions Blender tagged for redrawing.
-import { blenderModule } from '../bmesh/bmesh-wasm.js';
+import { blenderModule, RV3D_CAMOB } from '../bmesh/bmesh-wasm.js';
 import { contextStruct, contextPointer, setContextPointer } from '../python/bpy_rna.js';
 import '../python/bpy_interface.js';
 import { defaultKeymaps } from './keyconfig.js';
@@ -73,9 +73,12 @@ export class Area {
     return withArrays([Int32Array.from(types)], ([p]) => JSON.parse(cString(x.wm_area_regions_shown(this.window.C, this.pointer, p, types.length))));
   }
   // A 3D View's view, as regionView3D (editors/space_view3d/view3d-project.js) gives it.
-  set view3d({ viewmat, winmat, persp }) {
-    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.wm_view3d_set(this.pointer, v, w, persp));
+  set view3d({ viewmat, winmat, persp, ofs = [0, 0, 0], dist = 0, cameraView = false }) {
+    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat), Float32Array.from(ofs)],
+      ([v, w, o]) => x.wm_view3d_set(this.window.C, this.pointer, v, w, persp, o, dist, cameraView));
   }
+  // Whether an operator left the 3D View looking through the scene camera (RV3D_CAMOB).
+  get cameraView() { return x.wm_view3d_persp(this.pointer) === RV3D_CAMOB; }
   // A region drawn by its type (or its overlay), as region-draw.cc records it.
   draw(regiontype, overlay = false) { return JSON.parse(cString(x.wm_region_draw(this.window.C, this.pointer, regiontype, overlay))); }
   // Runs fn(C) with this area's region as the context's.

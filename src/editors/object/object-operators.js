@@ -13,7 +13,7 @@ const ENUMS = {};
 // Blender's Object Mode operators, run by Blender's code in the module (tests/objects-wasm.test.js) where Bylonder has no
 // action of its own for them, with its physics: particle systems and their settings, point caches, rigid bodies,
 // boids and dynamic paint; Sculpt Mode's; and Ctrl Tab's mode toggle (an armature's Pose Mode).
-const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh|particle|ptcache|rigidbody|boid|dpaint|sculpt|paint|brush)\.|^view3d\.object_mode_pie_or_toggle$/.test(idname));
+const blenderOperators = (blender) => blender.operators().filter((idname) => /^(object|mesh|particle|ptcache|rigidbody|boid|dpaint|sculpt|paint|brush)\.|^view3d\.(object_mode_pie_or_toggle|camera_to_view)$/.test(idname));
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
 //   host: commit() an undo step, wm() the window manager, pointer() its last pointer event, view() the 3D View under it.
@@ -44,6 +44,7 @@ export function runBlenderOperator(sync, idname, props, options) {
     end: (status) => {
       sync.end();
       if (status & OPERATOR_FINISHED) commit();
+      if (status & OPERATOR_FINISHED && sync.blender.cameraView) view.enterCameraView();
       if (invoked.menu) invokeOperator('wm.call_menu', { name: invoked.menu }, event);
       const finish = invoked.dialog
         ? (chosen) => (chosen ? inMain(sync, options, () => sync.blender.finishPopup(invoked.dialog, true)) : sync.blender.finishPopup(invoked.dialog, false))

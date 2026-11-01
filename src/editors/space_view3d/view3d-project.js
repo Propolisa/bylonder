@@ -88,8 +88,12 @@ export const drawn = (mesh) => mesh.isEnabled() && mesh.isVisible && mesh.isPick
   !mesh.name.startsWith('__') && mesh.getTotalVertices() > 0;
 
 // The view as Blender's RegionView3D has it: its view and window matrices (Blender's axes, column-major, the window
-// matrix Babylon's projection of a view looking down -Z), its size in pixels and whether it is a perspective view.
-export function regionView3D({ camera, canvas }) {
+// matrix Babylon's projection of a view looking down -Z), its size in pixels, whether it is a perspective view, the
+// navigation's offset (minus its center) and distance, and whether it looks through the scene camera.
+export function regionView3D({ camera, canvas, editorCamera = camera, state }) {
   const winmat = Array.from(camera.getProjectionMatrix().m, (v, i) => (i >= 8 && i < 12 ? -v : v));
-  return { viewmat: toBlenderView(camera.getViewMatrix()), winmat, winx: canvas.clientWidth, winy: canvas.clientHeight, persp: camera.mode === 0 };
+  return {
+    viewmat: toBlenderView(camera.getViewMatrix()), winmat, winx: canvas.clientWidth, winy: canvas.clientHeight, persp: camera.mode === 0,
+    ofs: editorCamera.target ? toBlender(editorCamera.target).map((v) => -v) : [0, 0, 0], dist: editorCamera.radius ?? 0, cameraView: !!state?.cameraView,
+  };
 }

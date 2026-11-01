@@ -97,6 +97,8 @@ function operatorEnumItems(C, idname, prop) {
 }
 
 // wmOperatorStatus flags.
+// RegionView3D.persp's camera view (DNA_view3d_types.h).
+export const RV3D_CAMOB = 2;
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4, OPERATOR_PASS_THROUGH = 8;
 
 // Blender's enums by identifier (rna_enum_text): event types (0), event values (1) and property subtypes (2).
@@ -525,9 +527,12 @@ export class BlenderMain {
   // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
   modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
   // The 3D View Object Mode's operators act in (main_view_set), as regionView3D gives it.
-  set view({ viewmat, winmat, winx, winy, persp }) {
-    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.main_view_set(this.#context, v, w, winx, winy, persp));
+  set view({ viewmat, winmat, winx, winy, persp, ofs = [0, 0, 0], dist = 0, cameraView = false }) {
+    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat), Float32Array.from(ofs)],
+      ([v, w, o]) => x.main_view_set(this.#context, v, w, winx, winy, persp, o, dist, cameraView));
   }
+  // Whether an operator left the view looking through the scene camera.
+  get cameraView() { return x.main_view_persp(this.#context) === RV3D_CAMOB; }
   // What the last operator showed in the view's header, or ''.
   get status() { return cString(x.main_status(this.#context)); }
   // The context properties edited in a popup run in.

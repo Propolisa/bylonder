@@ -53,6 +53,7 @@ extern "C" void region_draw_begin(int winx, int winy);
 extern "C" const char *region_draw_end();
 GHOST_TKey ghost_key_from_browser(const char *code, const char *key);
 void view3d_matrices_set(blender::RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp);
+void view3d_navigation_set(blender::View3D &v3d, blender::RegionView3D &rv3d, blender::Scene *scene, const float *ofs, float dist, bool camera_view);
 
 namespace blender {
 
@@ -256,10 +257,20 @@ EXPORT(wm_area_regions_shown) const char *wm_area_regions_shown(bContext *C, Scr
 /* A 3D View's view as the page's camera has it (port-override: Bylonder navigates the view, ED_view3d_update_viewmat
  * with Babylon's camera as its matrices): view and window matrices (Blender's axes, column-major) and whether it is a
  * perspective view, for its window region. */
-EXPORT(wm_view3d_set) void wm_view3d_set(ScrArea *area, const float *viewmat, const float *winmat, bool is_persp)
+EXPORT(wm_view3d_set)
+void wm_view3d_set(bContext *C, ScrArea *area, const float *viewmat, const float *winmat, bool is_persp, const float *ofs, float dist, bool camera_view)
 {
   ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_WINDOW);
-  view3d_matrices_set(*static_cast<RegionView3D *>(region->regiondata), viewmat, winmat, region->winx, region->winy, is_persp);
+  RegionView3D &rv3d = *static_cast<RegionView3D *>(region->regiondata);
+  view3d_matrices_set(rv3d, viewmat, winmat, region->winx, region->winy, is_persp);
+  view3d_navigation_set(*static_cast<View3D *>(area->spacedata.first), rv3d, CTX_data_scene(C), ofs, dist, camera_view);
+}
+/* The 3D View's projection after an operator (RV3D_ORTHO, RV3D_PERSP, RV3D_CAMOB): Align Active Camera to View leaves
+ * it looking through the camera, which the page follows. */
+EXPORT(wm_view3d_persp) int wm_view3d_persp(ScrArea *area)
+{
+  ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_WINDOW);
+  return static_cast<RegionView3D *>(region->regiondata)->persp;
 }
 
 /* The browser's input as GHOST's events: the pointer's place (page pixels), a button pressed or released (the DOM's
