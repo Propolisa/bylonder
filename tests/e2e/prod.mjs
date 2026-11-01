@@ -87,6 +87,16 @@ try {
     });
   };
   const view = await frame.locator(".viewport-canvas").first().boundingBox(), center = [view.x + view.width / 2, view.y + view.height / 2];
+  const selected = () => app.bylonder((b) => b.editor.selection.size);
+  await step("a left click in the 3D View selects the object under it", async () => {
+    await page.mouse.click(view.x + view.width * 0.95, view.y + view.height * 0.9);
+    await app.settled();
+    assert.equal(await selected(), 0, "a click on empty space deselects");
+    await page.mouse.click(...center);
+    await app.settled();
+    assert.equal(await selected(), 1, "a click on the object selects it");
+    noErrors("a 3D View click");
+  });
   const selectFirst = () => app.bylonder((b) => { b.editor.selection.replace([b.world.objects.find((n) => n.getTotalVertices?.())]); b.editor.reconcile(); });
   await contextMenu("VIEW3D_MT_object_context_menu", center, selectFirst);
   await contextMenu("VIEW3D_MT_edit_mesh_context_menu", center, async () => {
