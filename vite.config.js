@@ -51,6 +51,8 @@ export default defineConfig({
   plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
+  // Agents' worktrees live under .claude/: their edits must not reload this checkout's pages.
+  server: { watch: { ignored: ["**/.claude/**"] } },
   build: {
     target: "esnext",
     rollupOptions: {

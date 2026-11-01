@@ -171,13 +171,13 @@ function refreshUI() {
   ui?.refresh();
   for (const view of viewports()) view.regions?.draw();
 }
-let built;
+let built, sequenceEdit = () => input.animation?.sequenceEditor ?? null;
 try {
   performance.mark("bl:world");
   built = await createWorld({ input, engine, canvas, hooks: {
     commit,
     saveOverrides: () => saveOverrides(),
-    onAnimation: (data) => send("animation", data),
+    onAnimation: (data) => send("animation", { ...data, sequenceEditor: sequenceEdit() }),
     notify,
     // The scene's name belongs to the project's scene list, kept by the workspace.
     renameScene: (name) => send("rename-scene", name),
@@ -436,6 +436,17 @@ const tools = createView3DTools({
 // Blender's Main, which owns the scene and its undo, drawn by Babylon (blenkernel/main-sync.js, main-view.js). Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
+// The video edit is kept with the action, the scene data saved whatever Remember Scene Edits says, and in Main's scene
+// as a custom property, so a .blend carries it too.
+{
+  const blender = world.mainSync.blender, property = "bylonder_sequence_editor";
+  const saved = input.animation?.sequenceEditor ?? JSON.parse(blender.property(blender.scene, property) || "null");
+  sequenceEdit = () => world.sequenceEditor.state ?? null;
+  const keep = () => blender.setProperty(blender.scene, property, JSON.stringify(sequenceEdit()));
+  world.sequenceEditor.subscribe(() => { keep(); send("animation", { ...animation.serialize(), sequenceEditor: sequenceEdit() }); });
+  if (saved) world.sequenceEditor.apply(saved);
+  keep();
+}
 // A frame change evaluates Main with Blender's animation system and draws it (main-sync.js frameChanged).
 animation.evaluateMain = (frame) => world.mainSync.frameChanged(frame);
 for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
@@ -584,7 +595,7 @@ const hostScenes = () => sceneRecords().map((record) => {
 const revisions = new Map();
 const sceneState = ({ builder, overrides, animation: action }) => {
   const { sequenceEditor, ...rest } = overrides || {};
-  return [input.code, builder, rest, action && { ...action, time: { ...action.time, frameCurrent: 0 } }];
+  return [input.code, builder, rest, action && { ...action, sequenceEditor: undefined, time: { ...action.time, frameCurrent: 0 } }];
 };
 const sceneFrames = createSceneFrames({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "" });
 // The active scene plays its sound live while the sequencer follows the scene's time (Sync Scene Time).

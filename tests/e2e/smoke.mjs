@@ -781,6 +781,40 @@ const checks = {
     await app.until((b, selector) => document.querySelector(selector).textContent === "Render cancelled", renderStatus, 5000);
   } },
 
+  // The video edit is saved with the action, whatever Remember Scene Edits says: it survives a reload, a project ZIP's
+  // export and import, and a .blend's save and open.
+  async "The Video Sequencer's edit survives a reload, a project ZIP and a .blend"() {
+    const strips = () => app.bylonder((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length ?? 0);
+    const ready = () => app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.editor, null, { timeout: 120000 });
+    await app.bylonder(async (b) => { await (await b.sequencer.menus()).Add.find((entry) => entry.label === "Scene").items()[0].run(); });
+    await app.until((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length === 1);
+    await app.page.waitForTimeout(1500);
+    await app.page.reload();
+    await ready();
+    await app.until((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length === 1, null, 30000);
+
+    const zip = app.page.waitForEvent("download", { timeout: 60000 });
+    await app.page.evaluate(() => document.getElementById("export").click());
+    const zipFile = `${tmpdir()}/smoke-vse.zip`;
+    await (await zip).saveAs(zipFile);
+    await app.page.setInputFiles("#import-input", zipFile);
+    await app.page.waitForTimeout(2000);
+    await ready();
+    await app.until((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length === 1, null, 30000);
+
+    const blend = app.page.waitForEvent("download", { timeout: 60000 });
+    await menu("TOPBAR_MT_file", "Save As...");
+    const blendFile = `${tmpdir()}/smoke-vse.blend`;
+    await (await blend).saveAs(blendFile);
+    const chooser = app.page.waitForEvent("filechooser");
+    await menu("TOPBAR_MT_file", "Open...");
+    await (await chooser).setFiles(blendFile);
+    await app.page.waitForTimeout(2000);
+    await ready();
+    await app.until((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length === 1, null, 30000);
+    assert.equal(await strips(), 1);
+  },
+
   // The island makes its sound with Babylon's audio; a Scene Audio strip carries it into the sequencer's mix.
   "Add > Scene Audio puts the scene's sound in the edit": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     const out = await app.bylonder(async (b) => {
