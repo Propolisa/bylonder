@@ -40,7 +40,7 @@ import { createRenderHost } from "./editors/render/host.js";
 import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
 import { timeDefaults, frameRate } from "./blenkernel/scene/time.js";
 import { createSceneFrames } from "./sequencer/scene-frames.js";
-import { createSceneAudio, renderSceneAudio } from "./sequencer/scene-audio.js";
+import { createSceneAudio } from "./sequencer/scene-audio.js";
 import { strips } from "./sequencer/sequence-editor.js";
 import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
@@ -240,20 +240,11 @@ let creator;
 const systems = sdk.systems;
 // Main's scene as Blender's RNA reads it.
 const mainScene = () => pointerStruct(structFind("Scene"), world.mainSync.blender.scene, world.mainSync.blender.scene);
-// Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
 // Render jobs and scene strips render from a snapshot of the scene, whether or not scene edits are remembered.
 const liveSnapshot = () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() });
-// The last mixdown of the scene's sound for a render, kept while the scene, its frames and rates stay the same.
-let mixed = null;
-const mixdown = (payload, range, options) => {
-  const key = JSON.stringify([sceneState(payload), range]);
-  if (mixed?.key !== key) mixed = { key, audio: renderSceneAudio(payload, { ...range, ...options }).catch((error) => { mixed = null; throw error; }) };
-  return mixed.audio;
-};
 const renderHost = createRenderHost({
   world,
   snapshot: liveSnapshot,
-  sceneAudio: (range, options) => mixdown(liveSnapshot(), { ...range, fps: frameRate(animation.time.state) }, options),
   sequencer: { hasStrips: () => strips(world.sequenceEditor.state).length > 0, openCompositor: (range) => sequencerAdapter.openCompositor(range) },
   name: () => world.sceneSettings.state.name || "render",
 });

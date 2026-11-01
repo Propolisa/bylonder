@@ -4,8 +4,8 @@ import { zipSync } from 'fflate';
 // unmodified as a dependency); images through canvas encoding. An animation in an image format becomes a ZIP
 // of numbered frames, as Blender writes one file per frame.
 //   spec: outputSpec(render) from formats.js; size: even dimensions for video
-//   audio: { samples: Float32Array[] per channel, sampleRate } mixed by the sequencer, for video formats with an audio codec
-export async function createWriter(spec, { width, height, fps, name, frames = 1, audio = null }) {
+//   audio: whether the video gets a sound track (for video formats with an audio codec); its sound comes with addAudio
+export async function createWriter(spec, { width, height, fps, name, frames = 1, audio = false }) {
   if (spec.kind === 'image') {
     const files = {};
     const encode = async (canvas) => new Uint8Array(await (await canvas.convertToBlob({ type: spec.mime, quality: spec.quality })).arrayBuffer());
@@ -27,9 +27,8 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1,
   const output = new mb.Output({ format, target });
   const source = new mb.VideoSampleSource({ codec: spec.codec, bitrate, latencyMode: spec.latencyMode, keyFrameInterval: Math.max(1, spec.gopsize) / fps, sizeChangeBehavior: 'deny' });
   output.addVideoTrack(source, { frameRate: fps });
-  const sound = audio && spec.audio && await audioTrack(mb, output, spec, audio);
+  const sound = audio && spec.audio && await audioTrack(mb, output, spec);
   await output.start();
-  await sound?.();
   let index = 0;
   return {
     // The frame is consumed: callers must not use it afterwards.
@@ -38,6 +37,8 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1,
       index++;
       try { await source.add(sample); } finally { sample.close(); videoFrame.close(); }
     },
+    // The sound, { samples: Float32Array[] per channel, sampleRate }, once for the whole video.
+    async addAudio(mix) { await sound?.(mix); },
     async finish() {
       await output.finalize();
       return { blob: new Blob([target.buffer], { type: spec.mime }), filename: `${name}.${spec.ext}` };
@@ -46,20 +47,20 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1,
   };
 }
 
-// Adds the sequencer's mixed audio as the output's audio settings ask (spec.audio): its codec and bitrate, mixed to
-// their channels and sample rate at their volume. Fails when the browser cannot encode them.
-async function audioTrack(mb, output, spec, { samples, sampleRate }) {
+// The video's sound track as the output's audio settings ask (spec.audio), and what adds the sound to it: its codec
+// and bitrate, mixed to their channels and sample rate at their volume. Fails when the browser cannot encode them.
+async function audioTrack(mb, output, spec) {
   const { codec, bitrate, channels, rate, volume } = spec.audio;
-  if (!samples.length) return null;
   if (!(await mb.canEncodeAudio(codec, { numberOfChannels: channels, sampleRate: rate, bitrate }))) throw Error(`This browser cannot encode ${codec.toUpperCase()} audio with ${channels} channels at ${rate} Hz. Change Properties > Output > Encoding > Audio.`);
-  const mix = new AudioBuffer({ length: samples[0].length, numberOfChannels: samples.length, sampleRate });
-  samples.forEach((channel, i) => mix.copyToChannel(channel, i));
-  const context = new OfflineAudioContext(channels, Math.ceil(mix.duration * rate), rate);
-  const node = new AudioBufferSourceNode(context, { buffer: mix }), gain = new GainNode(context, { gain: volume });
-  node.connect(gain).connect(context.destination);
-  node.start();
   const source = new mb.AudioBufferSource({ codec, bitrate });
   output.addAudioTrack(source);
-  const buffer = await context.startRendering();
-  return () => source.add(buffer);
+  return async ({ samples, sampleRate }) => {
+    const mix = new AudioBuffer({ length: samples[0].length, numberOfChannels: samples.length, sampleRate });
+    samples.forEach((channel, i) => mix.copyToChannel(channel, i));
+    const context = new OfflineAudioContext(channels, Math.ceil(mix.duration * rate), rate);
+    const node = new AudioBufferSourceNode(context, { buffer: mix }), gain = new GainNode(context, { gain: volume });
+    node.connect(gain).connect(context.destination);
+    node.start();
+    await source.add(await context.startRendering());
+  };
 }

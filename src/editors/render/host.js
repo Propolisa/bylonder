@@ -19,9 +19,7 @@ const untilCancelled = (promise, signal) => new Promise((resolve, reject) => {
 // result in a Render Result window, like Blender's render window.
 //   snapshot() -> run payload with the current scene edits and animation, independent of Remember Scene Edits
 //   sequencer: { hasStrips(), openCompositor({ frameStart, frameEnd, width, height }) } for Post Processing > Sequencer
-//   sceneAudio({ frameStart, frameEnd, sampleRate }, { progress(done, total), signal }) -> the scene's sound over those
-//   frames, for video with audio
-export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name = () => 'render' }) {
+export function createRenderHost({ world, snapshot, sequencer, name = () => 'render' }) {
   let job = null, last = null;
   const win = document.createElement('section');
   win.className = 'render-result';
@@ -68,8 +66,9 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
       source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames, spec.audio?.rate);
       const mixing = (done, total) => { setStatus(`Mixing scene sound | ${done} / ${total} | ${clock(started)}`); setProgress(done / total); };
-      const audio = spec.audio ? await source.audio?.(signal, mixing) : null;
-      writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio });
+      // The sequencer mixes its sound first; the camera's mixes along with its frames.
+      let audio = spec.audio && !source.mixUntil ? await source.audio?.(signal, mixing) : null;
+      writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio: !!(spec.audio && (audio || source.audible)) });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
         if (signal.aborted) throw cancelled();
@@ -80,9 +79,12 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
         draw(await createImageBitmap(out));
         if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / frameRate(time)) }));
         else await writer.add(out, frames[index]);
+        if (spec.audio) await source.mixUntil?.(frames[index]);
         setProgress((index + 1) / frames.length);
         setStatus(`Frame ${frames[index]} | ${index + 1} / ${frames.length} | ${size.width} x ${size.height} | ${source.label} | ${clock(started)}`);
       }
+      if (spec.audio && source.mixUntil) audio = await untilCancelled(source.audio(), signal);
+      if (audio) await writer.addAudio(audio);
       last = await writer.finish();
       writer = null;
       setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${source.warnings?.length ? ' | ' + source.warnings[0] : ''}`);
@@ -98,11 +100,15 @@ export function createRenderHost({ world, snapshot, sequencer, sceneAudio, name 
     }
   }
 
-  // The scene camera through the compositor, rendered in an isolated render context, with the scene's sound.
+  // The scene camera through the compositor, rendered in an isolated render context, with the scene's sound mixed there
+  // along with the frames.
   async function cameraSource(size, frames, sampleRate) {
-    const { context, opened, dispose } = await openRenderContext(snapshot(), size);
-    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, dispose, renderFrame: (frame, progress) => context.renderFrame({ frame, ...size, quality: 'final', progress }),
-      audio: (signal, progress) => sceneAudio?.({ frameStart: frames[0], frameEnd: frames.at(-1), sampleRate }, { signal, progress }) };
+    const audio = sampleRate && { frameStart: frames[0], frameEnd: frames.at(-1), fps: frameRate(world.animation.time.state), sampleRate };
+    const { context, opened, dispose } = await openRenderContext(snapshot(), size, { audio });
+    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, audible: opened.audible, dispose,
+      renderFrame: (frame, progress) => context.renderFrame({ frame, ...size, quality: 'final', progress }),
+      mixUntil: (frame) => context.mixUntil(frame),
+      audio: () => context.renderAudio().then((mix) => mix && { samples: mix.samples.map((channel) => new Float32Array(channel)), sampleRate: mix.sampleRate }) };
   }
 
   cancelButton.onclick = () => job?.controller.abort();
