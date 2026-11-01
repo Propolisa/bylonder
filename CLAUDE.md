@@ -8,6 +8,32 @@ In all project docs (README, docs/, example READMEs, comments meant as docs): no
 dashes or en dashes, no arrow glyphs (write menu paths as `File > Export`), and no AI-style
 filler or flourishes. Keep prose short, plain and factual.
 
+## Feature docs
+
+Every user-facing feature has a page in `docs/features/<id>.md`, shown by the docs viewer (`docs.html`, styled as
+Blender's manual) and listed on its index page (`docs/features/README.md`, built from the pages' front matter: thumbnail,
+name, Open in Bylonder link, Blender manual link). A feature is done when its page, demo project and tests exist.
+
+- **Front matter (YAML), required, machine-indexable**: it is the source for the index, for AI context prompts and
+  for mapping docs to the UI. Keys: `id`, `title`, `summary` (one sentence), `status` (`complete` or `partial`),
+  `blender_version` (the tracked version, from `tools/blender-port/manifest.json`), `blender_manual` (links into
+  `https://docs.blender.org/manual/en/<major.minor>/`), `example` (the `examples/<id>` project the page recreates),
+  `thumbnail` and `media` (files in `docs/media/features/`), `ui` (Blender identifiers of the spaces, modes, menus,
+  panels and tools the feature uses: `VIEW3D_MT_pose`, `BONE_PT_transform`, `POSE`), `operators` (idnames), `code`
+  (main source files), `tests` (test files), `limits` (one line each). `scripts/feature-docs.mjs` checks every page
+  and writes `docs/features/index.json`; the test suite runs it.
+- **Body**: what the feature is, an Open in Bylonder link (the live site with the example opened), numbered steps that
+  recreate the demo from an empty scene with a GIF or screenshot per step (recorded from the app with Playwright,
+  `tools/docs/record-*.mjs`, so they can be regenerated), the project files of the demo, and what is not done yet.
+- Media: GIFs short and small (under 1 MB), screenshots cropped to what the step shows, all regenerable.
+
+## Runtimes
+
+A feature that exists on both sides (Blender data and a Babylon class) can offer a runtime: Blender, Babylon (mapped)
+or Babylon (native), chosen per instance; `docs/runtimes.md` is the model (settings, evaluation, drawing). A feature joins through one wrapper module in `src/runtimes/`, registered
+with `src/runtimes/runtimes.js`, never by changing other code; Bylonder's own panels, settings, operators and modifiers
+carry the Bylonder icon (`BYLONDER`), Blender's own UI none.
+
 ## UI components
 
 New UI is Vue single-file components built from shadcn-vue (reka-ui primitives), in

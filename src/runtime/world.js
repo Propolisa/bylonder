@@ -92,7 +92,8 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   const authored = (n) => !n.name.startsWith("__") && n.metadata?.editable !== false;
   // Skyboxes (infinite-distance meshes) belong to the World, which shows them in rendered views only (world-babylon.js).
   const objects = [
-    ...scene.meshes.filter((m) => hasMesh(m) && !m.infiniteDistance && m.metadata?.editable !== false),
+    // An armature's mesh is empty: the overlay draws its bones.
+    ...scene.meshes.filter((m) => (hasMesh(m) || m.metadata?.wbCreation?.armature) && !m.infiniteDistance && m.metadata?.editable !== false),
     ...scene.transformNodes.filter(authored),
     ...[...scene.lights, ...scene.cameras].filter(authored).map(asObject),
   ];
