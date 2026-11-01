@@ -712,7 +712,8 @@ const checks = {
   // Opening the Video Sequencer on an empty edit offers to set it up; Remember keeps the choice for next time.
   "opening the Video Sequencer offers to set it up for video": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 48 }));
-    await app.locator('button[title="Editor Type · Timeline"]').click();
+    // The Timeline's header is Blender's: its Editor Type is the area's ui_type.
+    await app.locator(".dock-heading").filter({ has: app.frame().getByRole("button", { name: "Marker", exact: true }) }).locator('[data-blender="ui_type"]').click();
     await app.frame().getByRole("menuitem", { name: "Video Sequencer" }).click();
     const dialog = app.frame().getByRole("dialog", { name: "Set Up for Video Editing" });
     await dialog.getByRole("checkbox").last().click();
