@@ -19,7 +19,9 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
   return {
     extras: extra,
     // Called per view right before it renders, with its state (view3d.js).
-    setEnabled(value, { shading, xray } = {}) {
+    setEnabled(value, { shading, xray, overlays = true } = {}) {
+      // Edit Mode's overlay follows the view's Overlays toggle only: Blender shows it in Rendered shading too.
+      for (const mesh of scene.meshes) if (mesh.metadata?.editMode) mesh.isVisible = overlays;
       extra.setEnabled(value);
       armature.setEnabled(value, { shading, xray });
       origin.update(value);
