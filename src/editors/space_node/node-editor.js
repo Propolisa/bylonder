@@ -2,15 +2,18 @@ import { iconEl } from '../interface/icon.js';
 import { menuButton } from '../interface/menu.js';
 import './node-editor.css';
 import { installEditorTheme } from './editor-theme.js';
+import { registerNodeTree } from '../../python/bpy_interface.js';
 
 const pick = (module, name) => module[name] || module.default?.[name] || module.default;
 export const treeTypes = {
   shader: { label: 'Shader Editor', icon: 'node_material', load: async () => pick(await import('@babylonjs/node-editor'), 'NodeEditor'), options: (graph) => ({ nodeMaterial: graph }) },
   geometry: { label: 'Geometry Node Editor', icon: 'geometry_nodes', load: async () => pick(await import('@babylonjs/node-geometry-editor'), 'NodeGeometryEditor'), options: (graph, ctx) => ({ nodeGeometry: graph, hostScene: ctx.scene, hostMesh: ctx.mesh }) },
   compositor: { label: 'Compositor', icon: 'node_compositing', load: async () => pick(await import('@babylonjs/node-render-graph-editor'), 'NodeRenderGraphEditor'), options: (graph, ctx) => ({ nodeRenderGraph: graph, hostScene: ctx.scene }) },
-  particles: { label: 'Particle Node Editor', icon: 'particles', load: async () => pick(await import('@babylonjs/node-particle-editor'), 'NodeParticleEditor'), options: (graph, ctx) => ({ nodeParticleSet: graph, hostScene: ctx.scene }) },
-  logic: { label: 'Logic Editor', icon: 'nodetree' },
+  particles: { label: 'Particle Node Editor', icon: 'particles', idname: 'BylonderParticleNodeTree', load: async () => pick(await import('@babylonjs/node-particle-editor'), 'NodeParticleEditor'), options: (graph, ctx) => ({ nodeParticleSet: graph, hostScene: ctx.scene }) },
+  logic: { label: 'Logic Editor', icon: 'nodetree', idname: 'BylonderLogicNodeTree' },
 };
+// Bylonder's own node trees are node tree types, as an add-on registers them, so Blender's editor type menu lists them.
+for (const { idname, label, icon } of Object.values(treeTypes)) if (idname) registerNodeTree(idname, label, icon.toUpperCase());
 
 async function show(Editor, options) {
   const alert = window.alert;

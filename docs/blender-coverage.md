@@ -144,3 +144,7 @@ Armatures are Blender's: their bones, Edit Mode, Pose Mode, the evaluated pose a
 module, and so does the overlay's armature drawing (`overlay_armature.cc`, every display type, custom shapes, names,
 axes and relationship lines), drawn with Blender's overlay shaders. A click picks the bone part the overlay draws under
 the pointer on the CPU (the module has no GPU selection buffer). See `docs/armatures.md`.
+
+## sculpt.brush_stroke
+Status: partial
+Sculpt Mode is Blender's on Main, with the Essentials brushes, the tool header and the sculpt tools; see `docs/blender-boundary.md` (3D View regions). The asset shelf region, the brush cursor and the mask, face set and dyntopo overlays are not drawn yet.

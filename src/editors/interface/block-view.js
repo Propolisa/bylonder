@@ -59,7 +59,8 @@ function open(b, ui, event) {
   const tree = ui.inContext((C) => buttonMenu(C, b));
   if (!tree) return;
   if (b.popover || b.type === 'POPOVER') return openPopover(tree, ui, event.currentTarget);
-  openMenu(treeMenu(tree, ui), event.currentTarget, b.type === 'MENU' ? b.text : undefined);
+  const editorType = b.rna?.owner === 'Area' && b.rna.prop === 'ui_type';
+  openMenu(treeMenu(tree, ui, editorType ? event.currentTarget : undefined), event.currentTarget, b.type === 'MENU' ? b.text : undefined);
 }
 
 

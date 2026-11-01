@@ -3,6 +3,7 @@
  * draws through wm_region_draw; its operators run in its context (wm_area_context_set) by editor-context's invoke and
  * exec. */
 #include "BKE_context.hh"
+#include "BKE_icons.hh"
 #include "BKE_layer.hh"
 #include "BKE_lib_remap.hh"
 #include "BKE_screen.hh"
@@ -32,7 +33,8 @@ using namespace blender;
 
 
 /* As WM_init initializes the interface (UI_init): the resolution WM_window_dpi_set_userdef sets at Blender's default
- * scale of 1, the default theme (userdef_default_theme.c), the default style and the icons. */
+ * scale of 1, the default theme (userdef_default_theme.c), the default style and the icons, whose dynamic ids (tool
+ * icons, previews) follow the static ones (BKE_icons_init). */
 void ui_init()
 {
   U.dpi = 72;
@@ -44,6 +46,7 @@ void ui_init()
   U.smooth_viewtx = 0;
   ui::theme::init_default();
   ui::style_init_default();
+  BKE_icons_init(BIFICONID_LAST_STATIC);
   ui::icons_init();
 }
 

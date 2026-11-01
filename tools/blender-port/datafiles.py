@@ -1,5 +1,5 @@
 """Blender's datafiles, from a Blender install at the manifest's tag: the asset libraries of Blender's Essentials the
-module reads at run time (node groups such as Hair Dynamics, the curve sculpt brushes) and their catalogs, which the
+module reads at run time (node groups such as Hair Dynamics, the curve and mesh sculpt brushes) and their catalogs, which the
 module's realm puts in its file system at Blender's system directory (src/bmesh/bmesh-wasm.js, ghost-paths.cc); and the
 studio light Material Preview lights the view with (STUDIOLIGHT_WORLD_DEFAULT, studiolight.cc), which the view loads.
 Writes src/bmesh/datafiles/ and src/bmesh/datafiles.js.

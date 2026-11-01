@@ -33,9 +33,18 @@ export function runOperator(b, ui, event) {
   return status & OPERATOR_FINISHED ? ui.undoPush(b.tip || b.operator) : ui.refresh();
 }
 
+// The editor type menu's items (Area.ui_type's) choose the area's editor, which the page's screen lays out
+// (screen/dock.js): an `editor-type` event from the menu's button asks it whether it has the editor (`available`) or to
+// show it (`choose`).
+function editorType(owner, label, choose) {
+  const detail = { label, choose, available: false };
+  owner.dispatchEvent(new CustomEvent('editor-type', { bubbles: true, detail }));
+  return detail.available;
+}
+
 // A menu tree's items as menu.js entries: operators, toggles and enum items, labels as headings, separators and
-// sub-menus, opened when shown.
-export function treeMenu(tree, ui) {
+// sub-menus, opened when shown. `editorTypeOwner`: the editor type button that opened it.
+export function treeMenu(tree, ui, editorTypeOwner) {
   ui.adjust?.(tree);
   const items = [];
   const visit = (node) => {
@@ -51,6 +60,10 @@ export function treeMenu(tree, ui) {
         items.push({ label: text, icon: iconName, blender: node.menu, items: () => treeMenu(ui.inContext((C) => buttonMenu(C, node)) ?? { children: [] }, ui) });
         break;
       default:
+        if (editorTypeOwner) {
+          items.push({ label: text, icon: iconName, title: node.tip, keys: shortcut, enabled: () => editorType(editorTypeOwner, text, false), run: () => editorType(editorTypeOwner, text, true) });
+          break;
+        }
         items.push({
           label: text, icon: iconName, title: node.tip, blender: node.operator,
           enabled: () => !node.disabled,

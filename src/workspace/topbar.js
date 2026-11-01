@@ -10,17 +10,22 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const bar = $('appbar');
   const menus = $('topbar-menus');
   const autoRun = $('auto-run');
-  // Blender's default workspaces, each opening the screen the scene's window has for it (docs/blender-boundary.md,
-  // Workspaces): Scripting's and Shading's, else Layout's.
-  const workspaces = ['Layout', 'Modeling', 'Sculpting', 'UV Editing', 'Texture Paint', 'Shading', 'Animation', 'Rendering', 'Compositing', 'Geometry Nodes', 'Scripting']
-    .map((name) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, screen: ['Scripting', 'Shading'].includes(name) ? name.toLowerCase() : 'layout' }));
+  // Blender's default workspaces with their object modes (startup.blend's WorkSpace.object_mode), each opening the screen
+  // the scene's window has for it (docs/blender-boundary.md, Workspaces): Scripting's, Shading's, Modeling's (Modeling
+  // and Sculpting), else Layout's.
+  const SCREENS = { Scripting: 'scripting', Shading: 'shading', Modeling: 'modeling', Sculpting: 'modeling' };
+  const workspaces = [['Layout', 'OBJECT'], ['Modeling', 'EDIT'], ['Sculpting', 'SCULPT'], ['UV Editing', 'EDIT'], ['Texture Paint', 'TEXTURE_PAINT'], ['Shading', 'OBJECT'],
+    ['Animation', 'POSE'], ['Rendering', 'OBJECT'], ['Compositing', 'OBJECT'], ['Geometry Nodes', 'OBJECT'], ['Scripting', 'OBJECT']]
+    .map(([name, mode]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, screen: SCREENS[name] ?? 'layout' }));
   let selected = 'layout';
   const current = () => selected;
   const screen = () => workspaces.find((w) => w.id === selected).screen;
+  // As ED_workspace_change: the workspace's object mode where it differs from the last one's.
   const setWorkspace = id => {
+    const mode = (w) => workspaces.find((x) => x.id === w).mode, changed = mode(id) !== mode(selected);
     selected = id;
     if (dock.maximized !== 'scene') dock.maximize('scene');
-    send('screen', screen());
+    send('screen', { screen: screen(), mode: changed ? mode(id) : null });
     sync();
   };
   const recent = [];

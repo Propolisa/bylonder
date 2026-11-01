@@ -106,6 +106,14 @@ export function registerMenu(bl_idname, bl_label, draw) {
   registerClass(registered[bl_idname]);
 }
 
+// A node tree type of Bylonder's, as an add-on registers a NodeTree: the Node Editor's type, listed in Blender's editor
+// type menu.
+export function registerNodeTree(bl_idname, bl_label, bl_icon) {
+  if (registered[bl_idname]) return;
+  registered[bl_idname] = __class__(bl_idname, [globalThis.__py_modules['_bpy.types'].NodeTree], { bl_idname, bl_label, bl_icon });
+  registerClass(registered[bl_idname]);
+}
+
 const ofKind = (kind) => Object.fromEntries(Object.entries(registered).filter(([idname]) => idname.includes(kind)));
 export const menus = ofKind('_MT_');
 export const panels = ofKind('_PT_');

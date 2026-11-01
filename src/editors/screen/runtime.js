@@ -13,6 +13,8 @@ const SCRIPTING_AREAS=['viewport','console','info','text','objects','properties'
 // editor (Blender's Image Editor under the File Browser is not there yet, so the File Browser takes its column).
 const SHADING_SPLITS={root:share(292,1627),rest:share(1285,342),middle:share(516,517),side:share(191,842)};
 const SHADING_AREAS=['files','viewport','nodes','objects','properties'];
+// The Modeling and Sculpting screens: the 3D Viewport, and the Outliner over the Properties editor as in Layout.
+const MODELING_AREAS=['viewport','objects','properties'];
 export function mountRuntimeLayout(){
   const host=document.querySelector('main');host.classList.add('runtime-dock');
   const viewport=document.createElement('section');viewport.id='viewport-section';
@@ -31,7 +33,7 @@ export function mountRuntimeLayout(){
   const files=document.createElement('section');files.id='files-section';
   const [text,pythonConsole,info]=['text','console','info'].map(id=>Object.assign(document.createElement('section'),{id:id+'-section'}));
   const variants=Object.entries(treeTypes).map(([id,t])=>({label:t.label,icon:t.icon,run:()=>nodes.dispatchEvent(new CustomEvent('node-tree',{detail:id}))}));
-  const items=[{id:'viewport',title:'3D Viewport',icon:'view3d',element:viewport,overlap:true},{id:'objects',title:'Outliner',icon:'outliner',element:panel},{id:'properties',title:'Properties',icon:'properties',element:properties},{id:'timeline',title:'Timeline',icon:'time',element:timeline},{id:'dopesheet',title:'Dope Sheet',icon:'action',element:dopesheet},{id:'graph',title:'Graph Editor',icon:'graph',element:graph},{id:'drivers',title:'Drivers',icon:'driver',element:drivers},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants},{id:'sequencer',title:'Video Sequencer',icon:'sequence',element:sequencer},{id:'files',title:'File Browser',icon:'filebrowser',element:files},{id:'text',title:'Text Editor',icon:'text',element:text},{id:'console',title:'Python Console',icon:'console',element:pythonConsole},{id:'info',title:'Info',icon:'info',element:info}];
+  const items=[{id:'viewport',blenderHeader:true,title:'3D Viewport',icon:'view3d',element:viewport,overlap:true},{id:'objects',blenderHeader:true,title:'Outliner',icon:'outliner',element:panel},{id:'properties',blenderHeader:true,title:'Properties',icon:'properties',element:properties},{id:'timeline',blenderHeader:true,title:'Timeline',icon:'time',element:timeline},{id:'dopesheet',blenderHeader:true,title:'Dope Sheet',icon:'action',element:dopesheet},{id:'graph',blenderHeader:true,title:'Graph Editor',icon:'graph',element:graph},{id:'drivers',blenderHeader:true,title:'Drivers',icon:'driver',element:drivers},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants},{id:'sequencer',title:'Video Sequencer',icon:'sequence',element:sequencer},{id:'files',title:'File Browser',icon:'filebrowser',element:files},{id:'text',blenderHeader:true,title:'Text Editor',icon:'text',element:text},{id:'console',title:'Python Console',icon:'console',element:pythonConsole},{id:'info',title:'Info',icon:'info',element:info}];
   const scripting={
     tree:{id:'root',children:[{id:'left',children:[0,{id:'console',children:[1,2]}]},{id:'rest',children:[3,{id:'side',children:[4,5]}]}]},
     defaults:()=>({order:[...SCRIPTING_AREAS,...items.map(x=>x.id).filter(id=>!SCRIPTING_AREAS.includes(id))],hidden:items.map(x=>x.id).filter(id=>!SCRIPTING_AREAS.includes(id)),sizes:structuredClone(SCRIPTING_SPLITS),horizontal:{root:false,left:true,console:true,rest:false,side:true}}),
@@ -41,6 +43,10 @@ export function mountRuntimeLayout(){
     tree:{id:'root',children:[0,{id:'rest',children:[{id:'middle',children:[1,2]},{id:'side',children:[3,4]}]}]},
     defaults:()=>({order:[...SHADING_AREAS,...items.map(x=>x.id).filter(id=>!SHADING_AREAS.includes(id))],hidden:items.map(x=>x.id).filter(id=>!SHADING_AREAS.includes(id)),sizes:structuredClone(SHADING_SPLITS),horizontal:{root:false,rest:false,middle:true,side:true}}),
   };
-  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','console','info']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','console','info'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading}});
+  const modeling={
+    tree:{id:'root',children:[0,{id:'inspector',children:[1,2]}]},
+    defaults:()=>({order:[...MODELING_AREAS,...items.map(x=>x.id).filter(id=>!MODELING_AREAS.includes(id))],hidden:items.map(x=>x.id).filter(id=>!MODELING_AREAS.includes(id)),sizes:{root:LAYOUT_SPLITS.root,inspector:LAYOUT_SPLITS.inspector},horizontal:{root:false,inspector:true}}),
+  };
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','console','info']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','console','info'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling}});
   return dock;
 }

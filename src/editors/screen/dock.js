@@ -20,7 +20,8 @@ export function areaSizes([a,b],size,horizontal,top){
   return {pixels:[first,panes-first],percent:[100*first/panes,100*(panes-first)/panes]};
 }
 
-// An item with `overlap` draws under its header, as an editor whose header overlaps its main region (region overlap).
+// An item with `overlap` draws under its header, as an editor whose header overlaps its main region (region overlap);
+// one with `blenderHeader` has Blender's header, whose editor type menu chooses the area's editor (`editor-type`).
 // `screens` are further screens ({ name: { tree, defaults, headerless } }, Blender's workspaces' screens) over the same
 // items; `tree` and `defaults` are the first screen's. A screen's `headerless` items hide their header.
 export function mountDock({host, items, tree: firstTree, defaults: firstDefaults, screens={}, storageKey, bareFocus=false, focus: defaultFocus=null}) {
@@ -47,7 +48,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const key=()=>state.screen?state.screen+':'+state.profile:state.profile;
   const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
   for(const extra of extras)if(typeof extra.id==='string'&&extra.id.startsWith('area:')&&items.slice(0,baseCount).some(item=>item.id===extra.type)){
-    const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,overlap:original.overlap,element});ids.push(extra.id);
+    const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,overlap:original.overlap,blenderHeader:original.blenderHeader,element});ids.push(extra.id);
   }
   const load=()=>{
     const initial=defaults(state.profile);initial.order=[...initial.order,...ids.slice(baseCount)];initial.hidden=[...initial.hidden,...ids.slice(baseCount)];
@@ -121,9 +122,10 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   function renderNode(node,extent=state.content){
     if(typeof node==='number'){
       const id=state.layout.order[node];
-      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)}],onPointerenter:()=>hovered=node},[
+      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)}],onPointerenter:()=>hovered=node,onEditorType:e=>editorType(e.detail,node)},[
         h('div',{class:'dock-heading',onContextmenu:e=>{e.preventDefault();e.stopPropagation();headerMenu(id,e);}},[
-          h('button',{type:'button',class:'dock-editor-type',title:'Editor Type · '+(items.find(item=>item.id===id)?.title||''),'aria-label':'Editor Type',onClick:e=>editorMenu(e.currentTarget,node)},[icon((items.find(item=>item.id===(items.find(i=>i.id===id)?.type||id))||{}).icon||'properties')]),
+          // An editor whose header is not Blender's yet has the screen's editor type button in place of Blender's.
+          items.find(item=>item.id===id)?.blenderHeader?null:h('button',{type:'button',class:'dock-editor-type',title:'Editor Type · '+(items.find(item=>item.id===id)?.title||''),'aria-label':'Editor Type',onClick:e=>openPopup(editorChoices(node),e.currentTarget,'Editor Type')},[icon((items.find(item=>item.id===(items.find(i=>i.id===id)?.type||id))||{}).icon||'properties')]),
           h('div',{class:'dock-header-host',ref:el=>{const content=header(id);if(el&&content.parentElement!==el)el.replaceChildren(content);}}),
           h('span',{class:'dock-corner',title:'Drag inward to split; drag into another area to join; Ctrl-drag to swap',onPointerdown:e=>corner(e,node)})
         ]),
@@ -146,7 +148,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     const original=items.find(item=>item.id===state.layout.order[slot]),type=original.type||original.id;
     const selected=factories.has(type)?type:factories.has('properties')?'properties':null;
     if(!selected)return;
-    const id='area:'+crypto.randomUUID(),element=document.createElement('section'),item={id,type:selected,title:items.find(i=>i.id===selected).title,overlap:items.find(i=>i.id===selected).overlap,element};
+    const id='area:'+crypto.randomUUID(),element=document.createElement('section'),item={id,type:selected,title:items.find(i=>i.id===selected).title,overlap:items.find(i=>i.id===selected).overlap,blenderHeader:items.find(i=>i.id===selected).blenderHeader,element};
     const index=ids.length;items.push(item);ids.push(id);state.layout.order.push(id);
     const panel=document.createElement('div');panel.className='dock-content';panel.dataset.section=id;panel.append(element);host.append(panel);panels.set(id,panel);instances.set(id,factories.get(selected)(element,id));
     const splitId='split:'+crypto.randomUUID();state.tree=mapArea(state.tree,slot,()=>({id:splitId,children:[slot,index]}));state.layout.horizontal[splitId]=horizontal;state.layout.sizes[splitId]=[50,50];state.focus=null;persist();
@@ -161,7 +163,14 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     };el.onpointercancel=()=>window.removeEventListener('keydown',escape);
   };
   const chooseEditor=(slot,id)=>{const old=state.layout.order[slot];if(old===id)return;swapSections(state.layout,slot,id);if(state.layout.hidden.includes(id))state.layout.hidden=[...state.layout.hidden.filter(x=>x!==id),old];persist();};
-  const editorMenu=(button,slot)=>openPopup(items.slice(0,baseCount).flatMap(item=>item.variants?item.variants.map(v=>({label:v.label,icon:v.icon,run:()=>{chooseEditor(slot,item.id);v.run();}})):[{label:item.title,icon:item.icon,run:()=>chooseEditor(slot,item.id)}]),button,'Editor Type');
+  // The editors an area can show, a node tree type's by its own label.
+  const editorChoices=slot=>items.slice(0,baseCount).flatMap(item=>item.variants?item.variants.map(v=>({label:v.label,icon:v.icon,run:()=>{chooseEditor(slot,item.id);v.run();}})):[{label:item.title,icon:item.icon,run:()=>chooseEditor(slot,item.id)}]);
+  // Blender's editor type menu in an area's header (tree-menu.js), by the editors' labels.
+  const editorType=(detail,slot)=>{
+    const choice=editorChoices(slot).find(c=>c.label===detail.label);
+    detail.available=!!choice;
+    if(choice&&detail.choose)choice.run();
+  };
   const closeArea=slot=>{if(typeof state.tree==='number')return;const next=removeArea(state.tree,slot);if(next===null)return;state.tree=next;const id=state.layout.order[slot];if(!state.layout.hidden.includes(id))state.layout.hidden.push(id);state.focus=null;persist();};
   const labels={animation:'Timeline split',root:'Main split',main:'Output split',editors:'Editor split',inspector:'Inspector split'};
   const app=createApp({setup(){

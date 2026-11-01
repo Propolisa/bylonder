@@ -330,8 +330,15 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "suspend") animation.pause();
   if (e.data.type === "resume") views.wake();
   if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
-  // The workspace's screen (Scripting or Layout), and a project text file changed in the Code workspace.
-  if (e.data.type === "screen") setScreen(e.data.payload);
+  // The workspace's screen, and its object mode where it changed, one Bylonder has, for an active object that has the
+  // mode (ED_workspace_change); a project text file changed in the Code workspace.
+  if (e.data.type === "screen") {
+    const { screen, mode } = e.data.payload;
+    setScreen(screen);
+    world.mainSync.flush();
+    const has = mode && (mode === "OBJECT" || world.mainModes.modes.includes(mode)) && world.mainSync.blender.enumItems("object.mode_set", "mode").some(([id]) => id === mode);
+    if (has) runOperator("object.mode_set", { mode });
+  }
   if (e.data.type === "text") world.texts.load(e.data.payload.name, e.data.payload.content);
 });
 let ui;

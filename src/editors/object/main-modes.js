@@ -48,6 +48,7 @@ export function createMainModes({ sync, selection, views, options }) {
     // Whether a keymap of Blender's runs now: Object Mode's outside these modes, a mode's own in it.
     keymapActive: (name) => (name === 'Object Mode' ? !mode() : KEYMAPS.includes(name) ? MODES[mode()]?.keymap === name : true),
     keymaps: KEYMAPS,
+    modes: Object.keys(MODES),
     selectOperator,
   };
 }
