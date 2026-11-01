@@ -1,6 +1,7 @@
 // Drives Bylonder's production build in Chromium, for the smoke tests and the visual parity harness.
 import { execFileSync, spawnSync } from "node:child_process";
-import { statSync } from "node:fs";
+import { mkdtempSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { createRequire } from "node:module";
 import { preview } from "vite";
 
@@ -13,6 +14,9 @@ const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PR
 // Blender's 4D noise.
 const gl = ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist"];
 export const chromium = { launch: (options) => playwright.chromium.launch({ ...proxy, args: gl, ...options }) };
+// Chromium's incognito contexts crash on file handles read back from IndexedDB (the Sequencer's media library): checks
+// that reload with media open the app in a profile of its own.
+const persistentContext = (options) => playwright.chromium.launchPersistentContext(mkdtempSync(`${tmpdir()}/bylonder-profile-`), { ...proxy, args: gl, ...options });
 
 const mtime = (file) => statSync(root + file, { throwIfNoEntry: false })?.mtimeMs ?? 0;
 const stale = () => {
@@ -37,9 +41,10 @@ export async function startServer({ build = true } = {}) {
 // Opens Bylonder in a fresh browser context (fresh project storage), opens `example` from the splash (none: the new
 // project's scene) and waits until the 3D Viewport shows the node `node`. Page errors of every frame land in `errors`.
 // `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
-// session to.
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video } = {}) {
-  const context = await browser.newContext({ viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) });
+// session to. `persistent`: a browser profile of its own instead of an incognito context.
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent } = {}) {
+  const options = { viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) };
+  const context = await (persistent ? persistentContext(options) : browser.newContext(options));
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));

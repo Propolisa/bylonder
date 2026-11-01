@@ -12,6 +12,11 @@ const untilCancelled = (promise, signal) => new Promise((resolve, reject) => {
   signal.addEventListener('abort', () => reject(cancelled()), { once: true });
   promise.then(resolve, reject);
 });
+// A source still opening on Cancel is closed once it opens.
+const openUntilCancelled = (opening, signal) => untilCancelled(opening, signal).catch((error) => {
+  if (signal.aborted) opening.then((source) => source.dispose(), () => {});
+  throw error;
+});
 
 // Render Image (F12), Render Animation (Ctrl F12) and View Render (F11). A job renders the live scene through its
 // camera, or the Video Sequencer's edit, and shows progress and the result in a Render Result window, like Blender's
@@ -67,10 +72,10 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
     let source = null, writer = null;
     try {
       const edit = settings.render.useSequencer && sequencer?.hasStrips();
-      source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size, frames, spec.audio?.rate, signal);
+      source = edit ? await openUntilCancelled(sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }), signal) : await cameraSource(size, frames, spec.audio?.rate, signal);
       const mixing = (done, total) => { setStatus(`Mixing scene sound | ${done} / ${total} | ${clock(started)}`); setProgress(done / total); };
       // The sequencer mixes its sound first; the camera's mixes while its frames render.
-      let audio = spec.audio && edit ? await source.audio?.(signal, mixing) : null;
+      let audio = spec.audio && edit ? await untilCancelled(source.audio(signal, mixing), signal) : null;
       writer = await createWriter(spec, { ...size, fps: frameRate(time), name: name(), frames: frames.length, audio: !!(spec.audio && (audio || !edit)) });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
@@ -92,7 +97,7 @@ export function createRenderHost({ world, live, sceneAudio, sequencer, name = ()
       if (audio) await writer.addAudio(audio);
       last = await writer.finish();
       writer = null;
-      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${source.warnings?.length ? ' | ' + source.warnings[0] : ''}`);
+      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${source.warnings?.length ? ' | ' + source.warnings.join(' | ') : ''}`);
       if (kind === 'animation') download(last);
     } catch (error) {
       await writer?.cancel();
