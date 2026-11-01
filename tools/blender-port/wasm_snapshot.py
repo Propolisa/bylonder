@@ -114,13 +114,15 @@ def initialized_memory(module):
         return open(out, 'rb').read()
 
 
-def snapshot(module, out):
+def snapshot(module, out, named=None):
+    """The initialized module at out, without names; with named, also a copy that keeps the name section (same code
+    offsets, for naming the frames of a crash in the shipped module)."""
     data = open(module, 'rb').read()
     memory = initialized_memory(module)
     parts = dict(sections(data))
     top = stack_top(parts[GLOBAL])
     pages = len(memory) // 65536
-    result = bytearray(data[:8])
+    result, names = bytearray(data[:8]), b''
     for sid, body in sections(data):
         if sid == MEMORY:
             # One memory, its minimum the pages initialization grew it to (malloc's sbrk reads memory.size).
@@ -131,10 +133,14 @@ def snapshot(module, out):
             body = exports_without_initializers(body)
         elif sid == DATA:
             body = data_segments(memory, top)
-        elif sid == CUSTOM and not body[1:].startswith(b'name'):
+        elif sid == CUSTOM:
+            if body[1:].startswith(b'name'):
+                names = section(sid, body)
             continue
         result += section(sid, body)
     open(out, 'wb').write(result)
+    if named:
+        open(named, 'wb').write(result + names)
     print(f'{out}: initialized ({len(memory) >> 20} MiB memory), {len(result)} bytes', file=sys.stderr)
 
 
