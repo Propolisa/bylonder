@@ -2,7 +2,7 @@
 id: rigging
 title: Rigging and Posing
 summary: Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, keep poses in the pose library's asset shelf, and paint a mesh's weights.
-status: partial
+expect: Posing, selecting, keying, bone collections, constraints, weight paint and the pose library work as in Blender; bone selection ignores depth and pose assets have no preview.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/animation/armatures/posing/index.html
@@ -28,14 +28,23 @@ ui:
   - VIEW_3D
   - POSE
   - WEIGHT_PAINT
-  - VIEW3D_MT_pose
-  - VIEW3D_MT_select_pose
   - PROPERTIES
-  - DATA_PT_bone_collections
-  - BONE_PT_constraints
   - TIMELINE
+  - VIEW3D_MT_pose*
+  - VIEW3D_MT_select_pose*
+  - VIEW3D_MT_bone*
   - VIEW3D_MT_view
+  - BONE_PT_*
+  - DATA_PT_bone_collections
+  - DATA_PT_pose
+  - DATA_PT_display
+  - ARMATURE_MT_collection*
+  - POSE_*
+  - VIEW3D_MT_paint_weight*
+  - VIEW3D_MT_wpaint*
+  - VIEW3D_PT_overlay_bones
   - VIEW3D_PT_overlay_weight_paint
+  - VIEW3D_PT_slots_vertex_groups
 operators:
   - object.posemode_toggle
   - view3d.select

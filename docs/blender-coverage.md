@@ -140,6 +140,14 @@ Typed values, the Global and Local cycling of repeated axis keys and the header 
 ## node.add_node
 Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with search as you type. It adds the Blender nodes Bylonder runs (Math, Mix, Color Balance so far); Babylon's blocks are in a Babylon sub-menu of each category. See `docs/node-editors.md`.
 
+## node.select
+Status: partial
+Click, Shift click and box selection of nodes work in every Node Editor, by the editor's own pointer handling (`node-editor-controller.js`, after node_select.cc), not by Blender's operator with its properties.
+
+## node.link
+Status: partial
+Dragging from a socket to another links them, replacing a single input's link, by the editor's own pointer handling (`node-editor-controller.js`, after node_relationships.cc), not by Blender's operator.
+
 ## TIMELINE > *
 The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). Markers are the scene's (Scene.timeline_markers in the module), saved with the animation. The header's mode menu switches between the Dope Sheet, Action Editor, Shape Key Editor, Grease Pencil, Mask and Cache File modes through rna_space.cc's own mode update; The Timeline's summary shows Grease Pencil layers' keys; Bylonder has no shape keys, masks or cache files yet, so those modes list nothing. A Dope Sheet keeps the Timeline's collapsed summary wherever it is opened, as when Blender switches the Timeline's area, so in another area it differs from Blender's new Dope Sheet.
 

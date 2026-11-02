@@ -2,7 +2,7 @@
 id: hair-dynamics
 title: Hair Dynamics
 summary: Hair curves grown by Generate Hair Curves and simulated by Blender's Hair Dynamics node group in a simulation zone.
-status: partial
+expect: The simulation matches Blender frame by frame; a jump to a far frame simulates every frame up to it, and the Shader Editor does not show the hair's material.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/simulation/hair_dynamics.html
@@ -18,7 +18,12 @@ ui:
   - VIEW_3D
   - TIMELINE
   - PROPERTIES
-  - OBJECT_MT_modifier_add
+  - OBJECT_MT_modifier_add*
+  - DATA_PT_modifiers
+  - DATA_PT_curves*
+  - DATA_PT_CURVES*
+  - CURVES_MT*
+  - TIME_*
 operators:
   - screen.animation_play
   - object.modifier_add

@@ -1,12 +1,14 @@
-// Production check: the built app (dist/) boots in headless Chromium without a page error or console error, its
+// Production check: the built app (dist/) boots in headless Chromium without a page error or console error, runs the
+// Blender operators and classes src/coverage/runtime.json lists, its
 // topbar menus, the 3D View header menus and the context menus open with items, every workspace tab shows a screen in
 // its object mode, examples made in Blender open with their objects in the scene sync, an #example= link opens its
 // example and the manual (docs.html) shows its feature pages with their media. CI runs it after the build and before
 // deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { chromium, openApp, startServer } from "./app.mjs";
+import { BOOT, chromium, openApp, runtimeCoverage, startServer } from "./app.mjs";
 
 const TOPBAR = ["TOPBAR_MT_file", "TOPBAR_MT_edit", "TOPBAR_MT_render", "TOPBAR_MT_window", "TOPBAR_MT_help"];
 const started = Date.now();
@@ -40,9 +42,14 @@ const browser = await chromium.launch();
 let app;
 try {
   // The new project's scene, as a first visit opens it.
-  await step("boots", async () => { app = await openApp(browser, server.url, { example: null, node: "sphere" }); });
+  await step("boots", async () => { app = await openApp(browser, server.url, BOOT); });
   const { page } = app;
   const noErrors = (what) => assert.deepEqual(app.errors, [], `page errors after ${what}`);
+  // The feature pages' coverage counts (docs/features/index.json) are made from the saved run-time list.
+  await step("run-time coverage list is saved", async () => {
+    const saved = readFileSync(new URL("../../src/coverage/runtime.json", import.meta.url), "utf8");
+    assert.ok(JSON.stringify(await runtimeCoverage(app), null, 1) + "\n" === saved, "the run-time coverage list changed: run node scripts/feature-docs.mjs --runtime");
+  });
   noErrors("booting");
 
   for (const id of TOPBAR) {

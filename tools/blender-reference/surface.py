@@ -33,11 +33,32 @@ EDITORS = [
     ("CLIP_EDITOR", "Movie Clip Editor", "CLIP_MT_editor_menus"),
     ("PREFERENCES", "Preferences", None),
 ]
-MODES = [("OBJECT", "Object Mode"), ("EDIT", "Edit Mode"), ("SCULPT", "Sculpt Mode"), ("VERTEX_PAINT", "Vertex Paint"),
-         ("WEIGHT_PAINT", "Weight Paint"), ("TEXTURE_PAINT", "Texture Paint")]
-# Keymaps that belong to a 3D Viewport mode rather than an editor.
-MODE_KEYMAPS = {"OBJECT": ["Object Mode", "Object Non-modal"], "EDIT": ["Mesh"], "SCULPT": ["Sculpt"],
-                "VERTEX_PAINT": ["Vertex Paint"], "WEIGHT_PAINT": ["Weight Paint"], "TEXTURE_PAINT": ["Image Paint"]}
+# The 3D Viewport's modes, each on an object of a type that has it: (object, object mode, id, label, the keymaps that
+# belong to the mode rather than an editor). The mesh's modes are named by their object mode, the others by Blender's
+# context mode (CTX_data_mode_string).
+MODES = [
+    ("Cube", "OBJECT", "OBJECT", "Object Mode", ["Object Mode", "Object Non-modal"]),
+    ("Cube", "EDIT", "EDIT", "Edit Mode", ["Mesh"]),
+    ("Cube", "SCULPT", "SCULPT", "Sculpt Mode", ["Sculpt"]),
+    ("Cube", "VERTEX_PAINT", "VERTEX_PAINT", "Vertex Paint", ["Vertex Paint"]),
+    ("Cube", "WEIGHT_PAINT", "WEIGHT_PAINT", "Weight Paint", ["Weight Paint"]),
+    ("Cube", "TEXTURE_PAINT", "TEXTURE_PAINT", "Texture Paint", ["Image Paint"]),
+    ("Hair", "PARTICLE_EDIT", "PARTICLE", "Particle Edit", ["Particle"]),
+    ("Armature", "EDIT", "EDIT_ARMATURE", "Armature Edit Mode", ["Armature"]),
+    ("Armature", "POSE", "POSE", "Pose Mode", ["Pose"]),
+    ("Curve", "EDIT", "EDIT_CURVE", "Curve Edit Mode", ["Curve"]),
+    ("Surface", "EDIT", "EDIT_SURFACE", "Surface Edit Mode", ["Curve"]),
+    ("Text", "EDIT", "EDIT_TEXT", "Text Edit Mode", ["Font"]),
+    ("Curves", "EDIT", "EDIT_CURVES", "Curves Edit Mode", ["Curves"]),
+    ("Curves", "SCULPT_CURVES", "SCULPT_CURVES", "Curves Sculpt Mode", ["Sculpt Curves"]),
+    ("Lattice", "EDIT", "EDIT_LATTICE", "Lattice Edit Mode", ["Lattice"]),
+    ("Metaball", "EDIT", "EDIT_METABALL", "Metaball Edit Mode", ["Metaball"]),
+    ("GreasePencil", "EDIT", "EDIT_GREASE_PENCIL", "Grease Pencil Edit Mode", ["Grease Pencil Edit Mode"]),
+    ("GreasePencil", "PAINT_GREASE_PENCIL", "PAINT_GREASE_PENCIL", "Grease Pencil Draw Mode", ["Grease Pencil Paint Mode", "Grease Pencil Draw Mode"]),
+    ("GreasePencil", "SCULPT_GREASE_PENCIL", "SCULPT_GREASE_PENCIL", "Grease Pencil Sculpt Mode", ["Grease Pencil Sculpt Mode"]),
+    ("GreasePencil", "WEIGHT_GREASE_PENCIL", "WEIGHT_GREASE_PENCIL", "Grease Pencil Weight Paint", ["Grease Pencil Weight Paint"]),
+    ("GreasePencil", "VERTEX_GREASE_PENCIL", "VERTEX_GREASE_PENCIL", "Grease Pencil Vertex Paint", ["Grease Pencil Vertex Paint"]),
+]
 SPACE_OF = {"TIMELINE": "DOPESHEET_EDITOR", "DOPESHEET": "DOPESHEET_EDITOR", "ShaderNodeTree": "NODE_EDITOR",
             "CompositorNodeTree": "NODE_EDITOR", "GeometryNodeTree": "NODE_EDITOR", "UV": "IMAGE_EDITOR",
             "FILES": "FILE_BROWSER", "ASSETS": "FILE_BROWSER", "FCURVES": "GRAPH_EDITOR", "DRIVERS": "GRAPH_EDITOR", "TOPBAR": "TOPBAR", "PREFERENCES": "PREFERENCES"}
@@ -295,8 +316,42 @@ def node_tree(tree_type):
     return tree
 
 
-def set_mode(mode):
-    if bpy.context.object.mode != mode:
+def mode_objects():
+    """An object of each type MODES names, besides the startup file's Cube; Hair is a mesh with a hair particle system."""
+    collection = bpy.context.scene.collection
+    def add(name, data):
+        ob = bpy.data.objects.new(name, data)
+        collection.objects.link(ob)
+        return ob
+    hair = add("Hair", bpy.data.meshes["Cube"].copy())
+    hair.modifiers.new("Hair", "PARTICLE_SYSTEM").particle_system.settings.type = "HAIR"
+    armature = bpy.data.armatures.new("Armature")
+    add("Armature", armature)
+    set_mode("EDIT", "Armature")
+    armature.edit_bones.new("Bone").tail = (0, 0, 1)
+    set_mode("OBJECT", "Armature")
+    curve = bpy.data.curves.new("Curve", "CURVE")
+    curve.splines.new("BEZIER").bezier_points.add(1)
+    add("Curve", curve)
+    surface = bpy.data.curves.new("Surface", "SURFACE")
+    surface.splines.new("NURBS").points.add(3)
+    add("Surface", surface)
+    add("Text", bpy.data.curves.new("Text", "FONT"))
+    add("Curves", bpy.data.hair_curves.new("Curves"))
+    add("Lattice", bpy.data.lattices.new("Lattice"))
+    metaball = bpy.data.metaballs.new("Metaball")
+    metaball.elements.new()
+    add("Metaball", metaball)
+    add("GreasePencil", bpy.data.grease_pencils.new("GreasePencil")).data.layers.new("Layer").frames.new(1)
+
+
+def set_mode(mode, name="Cube"):
+    ob = bpy.data.objects[name]
+    if bpy.context.view_layer.objects.active != ob:
+        if bpy.context.object.mode != "OBJECT":
+            bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.context.view_layer.objects.active = ob
+    if ob.mode != mode:
         bpy.ops.object.mode_set(mode=mode)
 
 
@@ -319,11 +374,12 @@ for ui_type, label, menus in EDITORS:
             space.node_tree = node_tree(ui_type)
         ctx = Context(area=area, space_data=space, region=area.regions[0])
         if ui_type == "VIEW_3D":
-            for mode, mode_label in MODES:
-                set_mode(mode)
-                mode_children = [{"k": "group", "id": "VIEW_3D:" + mode + ":menus", "l": "Header Menus", "c": draw_menu(menus, ctx, set())}]
-                mode_children += [keymap_node(n) for n in MODE_KEYMAPS[mode] if n in KEYMAPS]
-                children.append({"k": "mode", "id": "VIEW_3D:" + mode, "l": mode_label, "c": mode_children})
+            mode_objects()
+            for name, mode, mode_id, mode_label, keymaps in MODES:
+                set_mode(mode, name)
+                mode_children = [{"k": "group", "id": "VIEW_3D:" + mode_id + ":menus", "l": "Header Menus", "c": draw_menu(menus, ctx, set())}]
+                mode_children += [keymap_node(n) for n in dict.fromkeys(keymaps) if n in KEYMAPS]
+                children.append({"k": "mode", "id": "VIEW_3D:" + mode_id, "l": mode_label, "c": mode_children})
             set_mode("OBJECT")
         elif menus:
             children.append({"k": "group", "id": ui_type + ":menus", "l": "Header Menus", "c": draw_menu(menus, ctx, set())})

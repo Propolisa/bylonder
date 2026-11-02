@@ -41,15 +41,32 @@ const REGISTRY = 'registry';
 
 // What the scene window provides from Blender's own code (window.__bylonder.coverage()) counts where it has the editor
 // and mode: operators it registers, those registered for a space type only in that space's editors, and the menus and
-// panels it draws from Blender's scripts.
+// panels it draws from Blender's scripts. A typed item of an Add menu (object.modifier_add:ARRAY) counts when the window
+// runs that type (its `variants`, asked for with variantItems); another item with a value (view3d.view_axis:FRONT) counts
+// as its operator does.
 const EDITORS = new Set(['TOPBAR', 'VIEW_3D', 'OUTLINER', 'PROPERTIES', 'TIMELINE', 'DOPESHEET', 'FCURVES', 'DRIVERS', 'NLA_EDITOR', 'ShaderNodeTree',
-  'CompositorNodeTree', 'SEQUENCE_EDITOR', 'TEXT_EDITOR', 'CONSOLE', 'INFO']);
-const MODES = new Set(['VIEW_3D:OBJECT', 'VIEW_3D:EDIT']);
+  'CompositorNodeTree', 'GeometryNodeTree', 'SEQUENCE_EDITOR', 'IMAGE_EDITOR', 'UV', 'TEXT_EDITOR', 'CONSOLE', 'INFO', 'SPREADSHEET', 'PREFERENCES']);
+const TYPED = ['object.modifier_add', 'node.add_node'];
+const typed = (id) => TYPED.includes(id.split(':')[0]) && id.includes(':');
+
+// The typed Add menu items of Blender's surface, as [area, id], for window.__bylonder.coverage(variants).
+export function variantItems(surface) {
+  const items = new Map();
+  const visit = (node, area) => {
+    if (node.k === 'op' && typed(node.id)) items.set(area + ' ' + node.id, [area, node.id]);
+    node.c?.forEach((child) => visit(child, area));
+  };
+  surface.tree.filter((area) => EDITORS.has(area.id)).forEach((area) => visit(area, area.id));
+  return [...items.values()];
+}
+// The 3D Viewport modes Bylonder has (editors/object/main-modes.js, and Edit Mode of meshes, curves and texts).
+const MODES = new Set(['OBJECT', 'EDIT', 'EDIT_CURVE', 'EDIT_TEXT', 'EDIT_ARMATURE', 'POSE', 'PARTICLE', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT',
+  'TEXTURE_PAINT', 'EDIT_GREASE_PENCIL', 'PAINT_GREASE_PENCIL', 'SCULPT_GREASE_PENCIL', 'WEIGHT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL'].map((mode) => 'VIEW_3D:' + mode));
 // A space type's editors, as the surface names them (by ui_type).
 const SPACE_AREAS = { DOPESHEET_EDITOR: ['TIMELINE', 'DOPESHEET'], GRAPH_EDITOR: ['FCURVES', 'DRIVERS'] };
 
-export function runtimeAvailable({ operators = [], spaceOperators = {}, classes = [] } = {}) {
-  const ui = new Set(classes), everywhere = new Set(operators), inSpaces = new Set(Object.values(spaceOperators).flat()), byArea = {};
+export function runtimeAvailable({ operators = [], spaceOperators = {}, classes = [], variants = [] } = {}) {
+  const ui = new Set(classes), runsType = new Set(variants), everywhere = new Set(operators), inSpaces = new Set(Object.values(spaceOperators).flat()), byArea = {};
   for (const [space, ids] of Object.entries(spaceOperators)) for (const area of SPACE_AREAS[space] ?? [space]) ids.forEach((id) => (byArea[area] ??= new Set()).add(id));
   // The Top Bar holds the keymaps editors share (Markers, View2D): a binding there runs in the editors that register
   // its operator.
@@ -58,7 +75,9 @@ export function runtimeAvailable({ operators = [], spaceOperators = {}, classes 
     const area = ancestors.find((a) => a.k === 'area')?.id, mode = ancestors.find((a) => a.k === 'mode')?.id;
     if (!EDITORS.has(area) || (mode && !MODES.has(mode))) return false;
     if (node.k !== 'op') return (node.k === 'menu' || node.k === 'panel') && ui.has(node.id);
-    return everywhere.has(node.id) || !!byArea[area]?.has(node.id) || shared(area, ancestors, node.id);
+    if (typed(node.id)) return runsType.has(area + ' ' + node.id);
+    const id = node.id.split(':')[0];
+    return everywhere.has(id) || !!byArea[area]?.has(id) || shared(area, ancestors, id);
   };
 }
 

@@ -2,7 +2,7 @@
 id: shape-keys
 title: Shape Keys
 summary: Shape a mesh with Blender's shape keys, their values, ranges, vertex groups, relative keys, pinning and locks, edit a key in Edit Mode and key its value, drawn as Blender evaluates them or blended by Babylon's morph targets on the GPU.
-status: partial
+expect: Shape keys, their values, ranges, pinning and Edit Mode work as in Blender; on Babylon (mapped) shading differs slightly between keys and only relative keys on unmodified meshes blend on the GPU.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/animation/shape_keys/introduction.html
@@ -19,13 +19,13 @@ media:
   - shape-keys/runtime.png
 ui:
   - PROPERTIES
-  - DATA_PT_shape_keys
-  - MESH_MT_shape_key_context_menu
-  - MESH_MT_shape_key_tree_context_menu
-  - VIEW3D_MT_edit_mesh_vertices
   - VIEW_3D
   - EDIT
   - TIMELINE
+  - DATA_PT_shape_keys
+  - MESH_MT_shape_key*
+  - VIEW3D_MT_edit_mesh_vertices
+  - DOPESHEET_PT_ShapeKey
 operators:
   - object.shape_key_add
   - object.shape_key_remove

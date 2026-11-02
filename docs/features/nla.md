@@ -2,7 +2,7 @@
 id: nla
 title: Nonlinear Animation
 summary: Layer and mix actions as strips on tracks in Blender's Nonlinear Animation editor, with push down, tweak mode, strip blending, influence and repeats, evaluated by Blender's animation system.
-status: partial
+expect: Tracks, strips, push down, tweak mode and strip blending run Blender's code and evaluate as in Blender; sound strips and control curves are listed but not checked against Blender's drawing.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/nla/index.html
@@ -20,17 +20,7 @@ media:
   - nla/play.gif
 ui:
   - NLA_EDITOR
-  - NLA_HT_header
-  - NLA_MT_view
-  - NLA_MT_select
-  - NLA_MT_marker
-  - NLA_MT_add
-  - NLA_MT_tracks
-  - NLA_MT_strips
-  - NLA_MT_context_menu
-  - NLA_MT_channel_context_menu
-  - NLA_PT_action
-  - NLA_PT_filters
+  - NLA_*
 operators:
   - nla.click_select
   - nla.select_box

@@ -2,7 +2,7 @@
 id: curves-and-text
 title: Curves and Text
 summary: Add a text object, type into it in Edit Mode, give it depth with Extrude and Bevel, and extrude a Bézier curve's points.
-status: partial
+expect: Text and Bezier curves are typed, edited, extruded and beveled as in Blender; the 3D Text demo's Google Fonts title needs network access.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/modeling/texts/index.html
@@ -18,13 +18,18 @@ media:
   - curves-and-text/curve.gif
 ui:
   - VIEW_3D
+  - EDIT
   - VIEW3D_MT_add
   - VIEW3D_MT_curve_add
-  - VIEW3D_MT_edit_font
+  - VIEW3D_MT_edit_font*
+  - VIEW3D_MT_edit_curve_*
   - VIEW3D_MT_edit_curve
-  - DATA_PT_geometry_curve
-  - DATA_PT_font
-  - EDIT
+  - DATA_PT_font*
+  - DATA_PT_geometry_curve*
+  - DATA_PT_paragraph*
+  - DATA_PT_text_boxes
+  - DATA_PT_shape_curve
+  - DATA_PT_pathanim
 operators:
   - object.text_add
   - font.text_insert

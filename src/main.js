@@ -21,7 +21,7 @@ import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
 import { windowCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
-import { createView3DWindow } from "./editors/space_view3d/view3d-window.js";
+import { blenderView3DOperators, createView3DWindow } from "./editors/space_view3d/view3d-window.js";
 import { RGN_TYPE_TOOLS } from "./windowmanager/wm-window.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
@@ -89,6 +89,8 @@ import { createTextFiles } from "./blenkernel/text-files.js";
 import * as bpyRna from "./python/bpy_rna.js";
 const { setContextPointer, pointerStruct, structFind } = bpyRna;
 import * as shaderNodes from "./nodes/blender/shader-nodes.js";
+import { variantRuns } from "./coverage/variants.js";
+import { preferencesOperators } from "./editors/space_userpref/support.js";
 import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
@@ -293,8 +295,10 @@ window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreference
   userdef: { preferences, changed: preferencesChanged, keyconfigs: () => bpyRna.contextStruct(blenderMain().C).window_manager.keyconfigs },
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
-  // What this window runs of Blender (the Blender Coverage view): its operators, those for a space type by type, and Blender's registered classes.
-  coverage: () => ({ operators: operatorIds(), spaceOperators: spaceOperatorIds(), classes: Object.keys(registered) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); },
+  // What this window runs of Blender (the Blender Coverage view): its operators and Blender's own it runs in the 3D View, those for a space type by
+  // type (the Preferences' buttons run Blender's own), Blender's registered classes, and of the typed Add menu items asked about ([area, id], coverage.js variantItems) those it runs.
+  coverage: (variants = []) => ({ operators: [...operatorIds(), ...blenderView3DOperators()], spaceOperators: { ...spaceOperatorIds(), PREFERENCES: preferencesOperators() }, classes: Object.keys(registered),
+    variants: variants.filter(([area, id]) => variantRuns(area, id)).map((item) => item.join(" ")) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); },
   get mainScene() { return mainScene(); },
   // Modules of this window for tests (an import of the page's own would be a second instance).
   modules: { bpyRna, shaderNodes } };

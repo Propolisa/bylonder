@@ -1,6 +1,7 @@
 // Drives Bylonder's production build in Chromium, for the smoke tests and the visual parity harness.
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, statSync } from "node:fs";
+import { variantItems } from "../../src/coverage/coverage.js";
 import { tmpdir } from "node:os";
 import { createRequire } from "node:module";
 import { preview } from "vite";
@@ -90,4 +91,15 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
     close: () => context.close(),
   };
   return app;
+}
+
+// What the scene window runs of Blender's own code once a first visit boots (the Blender Coverage view's run-time
+// list), sorted. scripts/feature-docs.mjs --runtime saves it; npm run test:prod checks the saved copy.
+export const BOOT = { example: null, node: "sphere" };
+export async function runtimeCoverage(app) {
+  const surface = JSON.parse(readFileSync(new URL("../../src/coverage/blender-surface.json", import.meta.url), "utf8"));
+  const { operators, spaceOperators, classes, variants } = await app.bylonder((b, items) => b.coverage(items), variantItems(surface));
+  const sorted = (ids) => [...new Set(ids)].sort();
+  return { operators: sorted(operators), spaceOperators: Object.fromEntries(Object.entries(spaceOperators).sort().map(([space, ids]) => [space, sorted(ids)])),
+    classes: sorted(classes), variants: sorted(variants) };
 }

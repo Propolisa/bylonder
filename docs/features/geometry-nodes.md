@@ -2,11 +2,11 @@
 id: geometry-nodes
 title: Geometry Nodes
 summary: Build a Geometry Nodes modifier from an empty node group, expose its inputs, make node groups, and see the evaluated mesh, points and instances drawn.
-status: partial
+expect: Meshes, points and mesh instances evaluate and draw as in Blender; volumes and instanced curves are not drawn, and instances take their mesh's first material.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/index.html
-  - https://docs.blender.org/manual/en/5.2/modeling/modifiers/generate/geometry_nodes.html
+  - https://docs.blender.org/manual/en/5.2/modeling/modifiers/geometry_nodes.html
   - https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/instances.html
   - https://docs.blender.org/manual/en/5.2/interface/controls/nodes/groups.html
 example: geometry-nodes
@@ -22,10 +22,14 @@ media:
 ui:
   - GeometryNodeTree
   - NODE_EDITOR
-  - NODE_MT_add
-  - OBJECT_MT_modifier_add
   - PROPERTIES
   - VIEW_3D
+  - OBJECT_MT_modifier_add*
+  - DATA_PT_modifiers
+  - NODE_MT_add
+  - NODE_MT_geometry*
+  - NODE_MT_group*
+  - NODE_PT_geometry*
 operators:
   - object.modifier_add
   - node.new_geometry_node_group_assign

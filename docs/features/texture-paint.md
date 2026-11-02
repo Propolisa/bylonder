@@ -2,7 +2,7 @@
 id: texture-paint
 title: Texture Paint and Vertex Paint
 summary: Paint an object's image texture in the 3D Viewport or the Image Editor with Blender's brushes and projection painting, and paint its color attribute in Vertex Paint Mode, one undo step per stroke.
-status: partial
+expect: Painting in the 3D Viewport, the Image Editor and Vertex Paint runs Blender's brushes; colors show with the Standard view, and brush textures are not drawn in the cursor.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/sculpt_paint/texture_paint/index.html
@@ -21,10 +21,18 @@ ui:
   - VERTEX_PAINT
   - VIEW_3D
   - IMAGE_EDITOR
+  - builtin.brush
+  - VIEW3D_MT_paint_vertex
   - VIEW3D_PT_slots_projectpaint
   - VIEW3D_PT_slots_color_attributes
+  - VIEW3D_PT_slots_paint_canvas
+  - VIEW3D_PT_tools_brush*
+  - VIEW3D_PT_tools_imagepaint*
+  - VIEW3D_PT_tools_vertexpaint*
+  - VIEW3D_PT_paint_texture_context_menu
+  - VIEW3D_PT_paint_vertex_context_menu
+  - IMAGE_PT_paint*
   - IMAGE_PT_tools_active
-  - builtin.brush
 operators:
   - paint.texture_paint_toggle
   - paint.vertex_paint_toggle
@@ -88,9 +96,8 @@ from the example.
 
 ## Project files
 
-- `examples/texture-paint/texture-paint.py`: the Blender script that builds the demo.
-- `examples/texture-paint/texture-paint.blend`: the demo, with its image packed.
-
-## Not done yet
-
-See the limits above.
+- [texture-paint.py](../../examples/texture-paint/texture-paint.py): the Blender script that builds the demo.
+- [texture-paint.blend](../../examples/texture-paint/texture-paint.blend): the file the script saves, with its image
+  packed.
+- [index.js](../../examples/texture-paint/index.js): opens the .blend with Blender's reader.
+- Recorded by [record-texture-paint.mjs](../../tools/docs/record-texture-paint.mjs).

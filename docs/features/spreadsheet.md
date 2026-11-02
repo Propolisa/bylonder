@@ -2,7 +2,7 @@
 id: spreadsheet
 title: Spreadsheet
 summary: Blender's Spreadsheet editor, listing the active object's evaluated or original geometry by component and domain, with its attributes as columns.
-status: partial
+expect: Components, domains and evaluated or original data list as in Blender; the sidebar's row filters are missing and columns cannot be resized or reordered.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/spreadsheet.html
@@ -15,8 +15,7 @@ media:
   - spreadsheet/original.gif
 ui:
   - SPREADSHEET
-  - SPREADSHEET_HT_header
-  - SPREADSHEET_MT_view
+  - SPREADSHEET_*
 operators:
   - spreadsheet.toggle_pin
 code:

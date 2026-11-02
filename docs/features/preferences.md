@@ -2,7 +2,7 @@
 id: preferences
 title: Preferences
 summary: Blender's Preferences editor with all of its sections and settings, kept in this browser, with laptop input (Emulate 3 Button Mouse, Emulate Numpad, trackpad gestures), Blender's keymaps to edit, and its themes on the interface.
-status: partial
+expect: Input, navigation, keymaps and themes work and are kept in this browser; settings a browser cannot honor (NDOF, file paths, viewport quality, add-on installs) are greyed out.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/preferences/index.html
@@ -21,18 +21,9 @@ media:
   - preferences/bylonder.png
 ui:
   - PREFERENCES
-  - USERPREF_HT_header
-  - USERPREF_PT_navigation_bar
-  - USERPREF_PT_save_preferences
-  - USERPREF_PT_input_mouse
-  - USERPREF_PT_input_keyboard
-  - USERPREF_PT_input_touchpad
-  - USERPREF_PT_navigation_orbit
-  - USERPREF_PT_navigation_zoom
-  - USERPREF_PT_keymap
-  - USERPREF_PT_theme
-  - TOPBAR_MT_edit
   - VIEW_3D
+  - TOPBAR_MT_edit
+  - USERPREF_*
 operators:
   - screen.userpref_show
   - wm.save_userpref
@@ -98,13 +89,24 @@ The demo is the Default Cube; the steps below change Preferences over it.
 
    ![Edit > Preferences opens Blender's Preferences window](../media/features/preferences/open.png)
 
-2. **Set up a laptop.** In Input, turn on Emulate 3 Button Mouse: Alt and a left drag orbits the 3D Viewport, Shift
-   Alt pans and Ctrl Alt zooms. Turn on Emulate Numpad: the number row is the numpad, so 1, 3 and 7 view from the
-   front, right and top, 5 switches perspective and 0 looks through the camera. Touchpad > Multi-touch Gestures on
-   makes a two-finger drag orbit, with Shift pan and with Ctrl zoom, and a pinch zoom; Scroll Direction sets natural
-   scrolling. Without a numpad, the View pie on the backtick key (\`) and the navigation gizmo's axes reach every view.
+2. **Set up a laptop.** In Input, turn on Emulate 3 Button Mouse and Emulate Numpad (the number row is the numpad).
+   Touchpad > Multi-touch Gestures turns on trackpad gestures, and Scroll Direction sets natural scrolling. The table
+   below lists each view and navigation action's route without a numpad or a middle mouse button.
 
    ![Input with Emulate 3 Button Mouse and Emulate Numpad on](../media/features/preferences/input.png)
+
+   | Action | Mouse with a middle button and numpad | Laptop |
+   | --- | --- | --- |
+   | Orbit | Middle drag | Alt left drag (Emulate 3 Button Mouse), two-finger drag, or drag the navigation gizmo |
+   | Pan | Shift middle drag | Shift Alt left drag, Shift two-finger drag, or drag the hand button |
+   | Zoom | Wheel, Ctrl middle drag | Ctrl Alt left drag, pinch, Ctrl two-finger drag, or drag the magnifier button |
+   | Front, Right, Top views | Numpad 1, 3, 7 | 1, 3, 7 (Emulate Numpad), the backtick View pie, or click the gizmo's axes |
+   | Opposite views | Ctrl Numpad 1, 3, 7 | Ctrl 1, 3, 7 (Emulate Numpad), or click an axis again |
+   | Perspective and orthographic | Numpad 5 | 5 (Emulate Numpad), or the projection button |
+   | Camera view | Numpad 0 | 0 (Emulate Numpad), or the camera button |
+   | Frame selected | Numpad . | View > Frame Selected |
+
+   Touch screens map their gestures onto the same trackpad events: one finger orbits, two fingers pan and pinch.
 
 3. **Navigate as you prefer.** Navigation's Orbit Method (Turntable or Trackball), Orbit Around Selection, Auto
    Perspective, Zoom to Mouse Position and Invert Zoom Wheel apply to the 3D Viewport at once: its navigation is
@@ -129,27 +131,7 @@ The demo is the Default Cube; the steps below change Preferences over it.
 7. **Keep them.** Save Preferences (or Auto-Save Preferences) keeps them in this browser; reload the page and they
    apply at startup.
 
-## Laptop input
-
-Every view and navigation action has a route without a numpad or a middle mouse button:
-
-| Action | Mouse with a middle button and numpad | Laptop |
-| --- | --- | --- |
-| Orbit | Middle drag | Alt left drag (Emulate 3 Button Mouse), two-finger drag, or drag the navigation gizmo |
-| Pan | Shift middle drag | Shift Alt left drag, Shift two-finger drag, or drag the hand button |
-| Zoom | Wheel, Ctrl middle drag | Ctrl Alt left drag, pinch, Ctrl two-finger drag, or drag the magnifier button |
-| Front, Right, Top views | Numpad 1, 3, 7 | 1, 3, 7 (Emulate Numpad), the backtick View pie, or click the gizmo's axes |
-| Opposite views | Ctrl Numpad 1, 3, 7 | Ctrl 1, 3, 7 (Emulate Numpad), or click an axis again |
-| Perspective and orthographic | Numpad 5 | 5 (Emulate Numpad), or the projection button |
-| Camera view | Numpad 0 | 0 (Emulate Numpad), or the camera button |
-| Frame selected | Numpad . | View > Frame Selected |
-
-Touch screens map their gestures onto the same trackpad events: one finger orbits, two fingers pan and pinch.
-
 ## Project files
 
-The demo is the Default Cube example (`examples/cube`); Preferences are not part of a project.
-
-## Not done yet
-
-What the page lists under `limits` above.
+- [index.js](../../examples/cube/index.js): the Default Cube. Preferences belong to the browser, not to a project.
+- Recorded by [record-preferences.mjs](../../tools/docs/record-preferences.mjs).

@@ -2,7 +2,7 @@
 id: modifiers
 title: Modifiers
 summary: Add, edit and stack modifiers in Properties > Modifiers, here two Array modifiers that turn a cube into a floor of tiles.
-status: partial
+expect: Blender's modifiers run Blender's code and give its result; modifier panels cut long labels short.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/modeling/modifiers/index.html
@@ -15,9 +15,9 @@ media:
   - modifiers/second-array.gif
 ui:
   - PROPERTIES
-  - OBJECT_MT_modifier_add
-  - DATA_PT_modifiers
   - VIEW_3D
+  - OBJECT_MT_modifier*
+  - DATA_PT_modifiers
 operators:
   - object.modifier_add
   - object.modifier_remove

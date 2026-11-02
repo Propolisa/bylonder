@@ -15,6 +15,9 @@ import { ticking, watchRedraws } from '../../windowmanager/wm-areas.js';
 // The popups an invoke opens (operator_popup's numbers).
 const POPUPS = [null, 'CONFIRM', 'ENUM_MENU', 'PROPS', 'LAYOUT'];
 const pageRect = (rect) => ({ x: rect.left, y: rect.top, width: rect.width, height: rect.height });
+// Mesh Edit Mode, the Grease Pencil modes and the 3D View's navigation (view3d.rotate, view_axis, ...) are Blender's on
+// Main: their operators the page has no code of its own for are Blender's (the Knife, brush strokes, the view's).
+export const blenderView3DOperators = () => operatorNames().filter((idname) => /^(mesh|grease_pencil|view3d)\./.test(idname) && !hasOperator(idname));
 
 //   sync: the scene's (createMainSync); views(): the 3D Views; takes(): whether Blender's window takes input now (Object
 //   Mode); host: runBlenderOperator's options (transaction, notify, keying, commit, wm, pointer, view), menu(name, event)
@@ -61,15 +64,13 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     openModulePopup(sync, { type: POPUPS[type], title, text }, event, { idname, finish });
   }
 
-  // Mesh Edit Mode, the Grease Pencil modes and the 3D View's navigation (view3d.rotate, view_axis, ...) are Blender's on
-  // Main: their operators the page has no code of its own for are Blender's (the Knife, brush strokes, the view's).
-  // Decided at the first input, once the page has registered its own (view3d.select and the other picks), which areas
-  // are laid out before.
+  // Blender's 3D View operators, decided at the first input, once the page has registered its own (view3d.select and
+  // the other picks), which areas are laid out before.
   let inputTaken = false;
   function takeInput() {
     if (inputTaken) return;
     inputTaken = true;
-    allowOperators(window, operatorNames().filter((idname) => /^(mesh|grease_pencil|view3d)\./.test(idname) && !hasOperator(idname)));
+    allowOperators(window, blenderView3DOperators());
   }
 
   function send(kind, data, strings, view) {

@@ -2,7 +2,7 @@
 id: uv-editing
 title: UV Editing
 summary: Unwrap a mesh with UV > Unwrap, Smart UV Project or Project from View, mark seams, and select, move, pin, stitch and pack its UVs in the UV Editor over the image they map.
-status: partial
+expect: Unwrapping and UV editing run Blender's operators; UV Sculpt has no brush cursor and Display Stretch is not drawn.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/modeling/meshes/uv/index.html
@@ -17,12 +17,16 @@ media:
   - uv-editing/select-move.gif
 ui:
   - IMAGE_EDITOR
+  - UV
   - EDIT
   - IMAGE_HT_header
-  - IMAGE_MT_uvs
-  - IMAGE_MT_select
-  - VIEW3D_MT_uv_map
+  - IMAGE_HT_tool_header
+  - IMAGE_MT_editor_menus
+  - IMAGE_MT_uvs*
+  - IMAGE_MT_select*
+  - IMAGE_PT_uv*
   - IMAGE_PT_tools_active
+  - VIEW3D_MT_uv_map
 operators:
   - uv.unwrap
   - uv.smart_project
@@ -78,9 +82,8 @@ The demo, Texture Paint, has Suzanne unwrapped with Smart UV Project and painted
 
 ## Project files
 
-- `examples/texture-paint/texture-paint.py`: the Blender script that builds the demo.
-- `examples/texture-paint/texture-paint.blend`: the demo.
-
-## Not done yet
-
-See the limits above.
+- [texture-paint.py](../../examples/texture-paint/texture-paint.py): the Blender script that builds the demo.
+- [texture-paint.blend](../../examples/texture-paint/texture-paint.blend): the file the script saves, with its image
+  packed.
+- [index.js](../../examples/texture-paint/index.js): opens the .blend with Blender's reader.
+- Recorded by [record-texture-paint.mjs](../../tools/docs/record-texture-paint.mjs).
