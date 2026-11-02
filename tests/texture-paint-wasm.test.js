@@ -149,4 +149,11 @@ const displace = grid.modifiers.new('Displace', 'DISPLACE');
 Object.assign(displace, { texture: displaceTexture, texture_coords: 'UV', strength: 1, mid_level: 0 });
 const offsets = [...main.evaluatedMesh(ob).vert_positions].map((v, i) => v - grid.data.vertices[Math.floor(i / 3)].co[i % 3]);
 assert.ok(offsets.some((d) => Math.abs(d) > 0.5) && offsets.some((d) => Math.abs(d) < 1e-6), 'Displace moves the painted vertices only');
-console.log('texture paint: Blender\'s UVs, pixels and colors; the texture follows strokes by region; image sampling runtime; Displace by the image');
+
+// Saving packs the painted image into the .blend, which opens with its strokes.
+const paintedPixels = [...image.pixels];
+main.readBlend(main.writeBlend());
+const reopened = blendData().images.get('Paint');
+assert.ok(reopened.packed_file, 'the saved file holds the image');
+assert.ok(near([...reopened.pixels], paintedPixels, 0.01), 'with its strokes');
+console.log('texture paint: Blender\'s UVs, pixels and colors; the texture follows strokes by region; image sampling runtime; Displace by the image; saved packed');

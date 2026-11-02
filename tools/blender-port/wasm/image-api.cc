@@ -137,13 +137,19 @@ EXPORT(image_partial_update_collect) int image_partial_update_collect(Image *ima
 }
 
 /* An image's buffers packed into the file, as Image > Pack does: an edited or generated image as PNG (or OpenEXR for a
- * float buffer, BKE_image_memorypack), one read from a file as that file. */
+ * float buffer, BKE_image_memorypack), one read from a file as that file unless it is packed already. Only still
+ * images of a file or generated pack (not render results, movies or sequences). */
 EXPORT(image_pack) bool image_pack(Main *bmain, Image *ima)
 {
+  if (ELEM(ima->type, IMA_TYPE_R_RESULT, IMA_TYPE_COMPOSITE) || !ELEM(ima->source, IMA_SRC_FILE, IMA_SRC_GENERATED)) {
+    return false;
+  }
   if (BKE_image_is_dirty(ima) || ima->source == IMA_SRC_GENERATED) {
     return BKE_image_memorypack(ima);
   }
-  BKE_image_packfiles(nullptr, ima, ID_BLEND_PATH(bmain, &ima->id));
+  if (!BKE_image_has_packedfile(ima)) {
+    BKE_image_packfiles(nullptr, ima, ID_BLEND_PATH(bmain, &ima->id));
+  }
   return BKE_image_has_packedfile(ima);
 }
 

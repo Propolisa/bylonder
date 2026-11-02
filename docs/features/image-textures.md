@@ -51,6 +51,7 @@ limits:
   - Box, Sphere and Tube projection of the Image Texture node are drawn as Flat.
   - UDIM images draw their first tile only.
   - Compressed GPU texture formats are not offered.
+  - A file libpng cannot read or write stops the module: libpng reports errors by longjmp, which the module cannot catch yet.
 ---
 # Images and Image Textures
 
@@ -73,8 +74,9 @@ The demo, Texture Paint, has a packed image, Suzanne Paint, in the Base Color of
    ![The Image Editor showing Suzanne Paint](../media/features/image-textures/image-editor.png)
 
 2. **Open or create an image.** Image > Open reads a file from your computer with Blender's reader for its format.
-   Image > New makes a generated image: Blank, UV Grid or Color Grid, at the size and color given. Image > Pack
-   keeps it in the .blend; Image > Save As writes a PNG copy to download.
+   Image > New makes a generated image: Blank, UV Grid or Color Grid, at the size and color given. Image > Save As
+   writes a PNG copy to download. Saving the project or a .blend packs every image into it (painted and generated ones
+   as they are), since image files live only in the page's memory.
 
    ![Image > New, Color Grid](../media/features/image-textures/new-image.gif)
 

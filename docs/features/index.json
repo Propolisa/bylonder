@@ -211,7 +211,8 @@
    "Cubic and Smart interpolation sample linearly.",
    "Box, Sphere and Tube projection of the Image Texture node are drawn as Flat.",
    "UDIM images draw their first tile only.",
-   "Compressed GPU texture formats are not offered."
+   "Compressed GPU texture formats are not offered.",
+   "A file libpng cannot read or write stops the module: libpng reports errors by longjmp, which the module cannot catch yet."
   ],
   "page": "docs/features/image-textures.md",
   "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
