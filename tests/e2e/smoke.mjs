@@ -89,6 +89,35 @@ const checks = {
     assert.deepEqual(over, [], "spheres that differ from EEVEE");
   } },
 
+  // A render of one sample, at the gallery's portrait size, after the viewport looked through the same orthographic
+  // camera at its landscape aspect: every sphere is drawn where it is, and the background holds nothing else.
+  "Render Image shows nothing of a view of another aspect": { open: { link: "shader-gallery", node: "Checker" }, async run() {
+    await app.hover();
+    await app.page.keyboard.press("Numpad0");
+    await app.settled();
+    await app.bylonder((b) => { b.world.renderSettings.state.eevee.taaRenderSamples = 1; });
+    await menu("TOPBAR_MT_render", "Render Image");
+    await rendered();
+    const { spheres, background } = await app.frame().evaluate(() => {
+      const source = document.querySelector(".render-result canvas");
+      const pixels = source.getContext("2d")?.getImageData(0, 0, 256, 320).data ?? (() => {
+        const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 320 }), context = canvas.getContext("2d");
+        context.drawImage(source, 0, 0);
+        return context.getImageData(0, 0, 256, 320).data;
+      })();
+      const at = (x, y) => Array.from(pixels.subarray((y * 256 + x) * 4, (y * 256 + x) * 4 + 3));
+      const clear = at(0, 0), off = (x, y) => Math.max(...at(x, y).map((v, k) => Math.abs(v - clear[k])));
+      let background = 0;
+      for (let y = 0; y < 320; y++) for (let x = 0; x < 256; x++) {
+        const dx = (x % 64) - 31.5, dy = (y % 64) - 31.5;
+        if (dx * dx + dy * dy > 31 * 31) background = Math.max(background, off(x, y));
+      }
+      return { spheres: Array.from({ length: 20 }, (_, i) => off(32 + (i & 3) * 64, 32 + (i >> 2) * 64)), background };
+    });
+    assert.ok(spheres.every((d) => d > 3), `spheres drawn: ${spheres}`);
+    assert.ok(background <= 2, `background differs by ${background}`);
+  } },
+
   async "Render Animation renders the frame range"() {
     await app.locator('[role="spinbutton"][aria-label="End"]').click();
     await app.page.keyboard.press("Control+A");

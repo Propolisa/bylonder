@@ -85,6 +85,8 @@ export function setEvaluatedMatrix(node, matrix) {
         const m = evaluatedMatrices.get(node), eye = m.getTranslation(), target = node.lockedTarget?.getAbsolutePosition?.() ?? node.lockedTarget;
         if (target) Matrix.LookAtLHToRef(eye, target, node.upVector ?? Vector3.Up(), node._viewMatrix);
         else Matrix.LookAtLHToRef(eye, eye.add(Vector3.TransformNormal(BLENDER_FORWARD, m)), Vector3.TransformNormal(BLENDER_UP, m), node._viewMatrix);
+        // What materials see from (the scene's eye position), as Babylon's own _computeViewMatrix keeps it.
+        node._globalPosition.copyFrom(eye);
         return node._viewMatrix;
       };
     }

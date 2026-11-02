@@ -10,16 +10,18 @@ const VIEW_NAMES = ["User", "Front", "Back", "Left", "Right", "Top", "Bottom"];
 export const fitOrtho = (camera, halfHeight, aspect) =>
   Object.assign(camera, { orthoTop: halfHeight, orthoBottom: -halfHeight, orthoLeft: -halfHeight * aspect, orthoRight: halfHeight * aspect });
 // A scene camera, while orthographic, takes its bounds from Blender's Orthographic Scale (6 unless set), which spans the
-// longer side of each view it renders (sensor fit Auto).
+// longer side of each view it renders (sensor fit Auto). Getters, as Babylon computes a projection before its camera
+// render observers run; the scale is Main's, so Babylon's own writes are ignored.
+const ORTHO_SIDES = { orthoTop: [1, 0], orthoBottom: [-1, 0], orthoLeft: [0, -1], orthoRight: [0, 1] };
 const fitted = new WeakSet();
 export function fitsOrthoScale(camera) {
   if (fitted.has(camera)) return camera;
   fitted.add(camera);
-  camera.getScene().onBeforeCameraRenderObservable.add((rendered) => {
-    if (rendered !== camera || camera.mode !== Camera.ORTHOGRAPHIC_CAMERA) return;
-    const aspect = camera.getEngine().getAspectRatio(camera);
-    fitOrtho(camera, (camera.metadata?.orthoScale ?? 6) / 2 / Math.max(aspect, 1), aspect);
-  });
+  const aspect = () => camera.getEngine().getAspectRatio(camera);
+  const half = () => (camera.metadata?.orthoScale ?? 6) / 2 / Math.max(aspect(), 1);
+  for (const [side, [up, right]] of Object.entries(ORTHO_SIDES)) {
+    Object.defineProperty(camera, side, { configurable: true, get: () => half() * (up || right * aspect()), set() {} });
+  }
   return camera;
 }
 
