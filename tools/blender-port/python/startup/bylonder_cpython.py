@@ -14,8 +14,6 @@ import traceback
 
 import bpy
 from _bpy_types import _GenericUI
-from bl_operators import console, userpref
-from bl_ui import space_userpref
 
 
 def add_on_ui(cls):
@@ -23,10 +21,41 @@ def add_on_ui(cls):
     return name.startswith("userpref_") and ("addon" in name or "extension" in name)
 
 
-classes = (*console.classes, *userpref.classes, *filter(add_on_ui, space_userpref.classes))
+classes = ()
 
 
 def register():
+    """The classes register in the first step after Python's start (start_step), which keeps that start short."""
+
+
+def _import_packages(names):
+    """Blender's packages imported a module per step: the packages are made, the modules each __init__ lists
+    (`_modules`) are imported into them one at a time, then each __init__ runs, finding them imported, as `import bl_ui`
+    would. The packages are all made first, as their modules import from each other."""
+    import ast
+    import importlib
+    import importlib.util
+    packages = []
+    for name in names:
+        spec = importlib.util.find_spec(name)
+        sys.modules[name] = importlib.util.module_from_spec(spec)
+        tree = ast.parse(spec.loader.get_source(name))
+        listed = next(node.value for node in tree.body if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "_modules" for t in node.targets))
+        packages.append((name, spec, ast.literal_eval(listed)))
+    for name, _spec, modules in packages:
+        for module in modules:
+            importlib.import_module(f"{name}.{module}")
+            yield
+    for name, spec, _modules in packages:
+        spec.loader.exec_module(sys.modules[name])
+        yield
+
+
+def _register_classes():
+    global classes
+    from bl_operators import console, userpref
+    from bl_ui import space_userpref
+    classes = (*console.classes, *userpref.classes, *filter(add_on_ui, space_userpref.classes))
     for cls in classes:
         bpy.utils.register_class(cls)
 
@@ -77,6 +106,53 @@ def _blender_ext_json_0(args, use_idle, *, python_args):
     finally:
         sys.stdout = out
     yield [tuple(json.loads(message)) for message in output.split("\0") if message.strip()]
+
+
+def _load_scripts_extensions():
+    """This script's classes, then blender-port: bpy.utils.load_scripts_extensions and addon_utils._initialize_once
+    (scripts/modules), one add-on per step, so that the page runs between them (python.cc python_start_step). Blender enables its core add-ons from a set,
+    whose order changes with each launch's hash seed; they are enabled sorted, so their menu entries keep one order."""
+    import addon_utils
+    yield from _import_packages(("bl_ui", "bl_operators"))
+    _register_classes()
+    yield
+    if any(bpy.utils.app_template_paths()):
+        import bl_app_template_utils
+        bl_app_template_utils.reset(reload_scripts=False)
+        yield
+    for path in addon_utils.paths():
+        bpy.utils._sys_path_ensure_append(path)
+    addon_utils._stale_pending_check_and_remove_once()
+    addon_utils._initialize_extensions_repos_once()
+    yield
+    for module_name in sorted(addon_utils._addons_hidden_core):
+        addon_utils.enable(module_name, refresh_handled=True, default_set=False, persistent=True)
+        yield
+    for module_name in [addon.module for addon in bpy.context.preferences.addons]:
+        if module_name not in addon_utils._addons_hidden_core:
+            addon_utils.enable(module_name, refresh_handled=True)
+            yield
+    del addon_utils._initialize_once
+    extensions_loaded()
+
+
+_steps = None
+
+
+def start_step():
+    """The next step of loading the add-ons and extensions the Preferences enable: whether more follow."""
+    global _steps
+    _steps = _steps or _load_scripts_extensions()
+    try:
+        done = next(_steps, StopIteration) is StopIteration
+    except BaseException:
+        # As Blender prints what fails while its scripts load.
+        traceback.print_exc()
+        raise
+    if done:
+        _steps = None
+        return False
+    return True
 
 
 def extensions_loaded():
