@@ -66,7 +66,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   if (from) { editorCamera.upVector = from.upVector.clone(); editorCamera.setTarget(from.target.clone()); editorCamera.setPosition(from.position.clone()); editorCamera.mode = from.mode; }
   // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar), and the
   // overlay's Weight Paint settings (View3DOverlay's defaults).
-  const state = { shading: 'solid', overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
+  const state = { shading: 'solid', color_type: 'MATERIAL', overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
     show_region_ui: false, weight_paint_mode_opacity: 1, show_wpaint_contours: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
@@ -201,7 +201,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
     if (shadedCamera !== view.camera) { world.workbench.setShading(shadedCamera, null); shadedCamera = view.camera; }
-    world.workbench.setShading(shadedCamera, view.rendered || view.preview ? null : state.shading === 'solid' && state.xray ? 'xray' : state.shading);
+    world.workbench.setShading(shadedCamera, view.rendered || view.preview ? null : state.shading === 'solid' && state.xray ? 'xray' : state.shading, state.color_type);
     toolbar.el.hidden = !state.show_region_toolbar;
     if (state.show_region_toolbar) toolbar.draw();
     section.classList.toggle('toolbar-shown', state.show_region_toolbar);

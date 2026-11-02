@@ -19,7 +19,7 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 | Object | a Babylon node in `world.objects` | `name`, `type` (MESH, EMPTY, CAMERA, LIGHT, FONT, CURVE, ARMATURE), `mode`, `data`, `location`, `rotation_mode`, `rotation_euler`, `rotation_quaternion`, `scale`, `parent`, `children`, `modifiers`, `material_slots`, `active_material`, `hide_select`, and the functions `hide_get`, `hide_set`, `visible_get`, `select_get`, `select_set` | vertex groups, constraints, delta transforms, display settings |
 | Mesh | the same node, which holds its mesh | `name`, `total_vert_sel`, `total_edge_sel`, `total_face_sel`, `count_selected_items()`, from the edit mesh in Edit Mode | element collections (Babylon's split vertices are not Blender's; later from the object's Mesh data) |
 | Modifier | Blender's: Main's own (`modifiers/main-modifiers.js`); Bylonder's own: a record on the object (`metadata.wbModifiers`) | `name`, `type`, `show_viewport`, `show_render`, a Blender modifier's settings by RNA identifier, and `texture` (Displace's: its Tex) | Bylonder's own types (Array as Geometry Nodes) are `NODES` |
-| Texture | Main's Tex, seen through the textures slice (`blenkernel/texture/textures.js`), which reads and writes it by RNA identifier; Blender's undo and file hold it, and modifiers point at it | `name`, `use_fake_user`, `users`, `type` and its type's settings (CloudsTexture's `noise_scale`, ...) at their DNA fields (`dna-textures.json`) | images (Bylonder has no Image IDs) |
+| Texture | Main's Tex, seen through the textures slice (`blenkernel/texture/textures.js`), which reads and writes it by RNA identifier; Blender's undo and file hold it, and modifiers point at it | `name`, `use_fake_user`, `users`, `type` and its type's settings (CloudsTexture's `noise_scale`, ...) at their DNA fields (`dna-textures.json`) | |
 | Scene | the world | `name`, `frame_current`, `frame_start`, `frame_end`, `frame_step`, `use_preview_range`, `frame_preview_start`, `frame_preview_end`, `sync_mode`, `camera`, `objects`, `use_gravity`, `gravity`, `render`, `unit_settings`, `tool_settings` | keying sets, rigid body world, audio |
 | ToolSettings | the world | `mesh_select_mode`, `use_keyframe_insert_auto` | snapping and proportional editing (Bylonder has no toggles; Ctrl snaps during a transform) |
 | RenderSettings | the render slice | `fps`, `resolution_x`, `resolution_y`, `resolution_percentage`, `use_motion_blur`, `motion_blur_shutter`, `use_sequencer` | `engine` (Babylon is not one of Blender's engines) |
@@ -120,7 +120,7 @@ what).
 - **Opening** runs Blender's own path: `readfile.cc` with all of versioning reads the file from memory
   (`BLO_read_from_memory`, zstd-compressed too) and `BKE_blendfile_read_setup_readfile` makes it the Main, as
   `wm_file_read_post` does without UI (`main_open`). The file's scene, settings, view layers and collections are then
-  Main's. The ID types the module does not build (images, sounds, the window manager) are read as their ID alone, and sequencer strips are left out.
+  Main's. The ID types the module does not build (sounds, the window manager) are read as their ID alone, and sequencer strips are left out.
 - **Adopting.** The view's `adopt()` draws what Main holds that Babylon does not, through the same mapping and
   `RELATIONS`: objects of their type (Main keeps their data), materials of Bylonder's kind with their Principled BSDF
   inputs, or, where the node tree is more than a Principled BSDF, as a node material of the blocks for Blender's nodes
@@ -135,6 +135,31 @@ what).
   checks them against Blender's reading.
 - **Bylonder's own modifiers** (Array (Nodes), Babylon Node Geometry) are Babylon-native: a saved file has Blender's
   modifiers only, which are Main's own.
+
+### Import and export
+
+Decided 2026-11-02. File > Import and File > Export are Blender's importers and exporters in the module (`editors/io`,
+`io/wavefront_obj`, `io/ply`, `io/stl`, `io/fbx` with ufbx), registered by `ED_operatortypes_io` as Blender registers
+them, in Blender's menus (`TOPBAR_MT_file_import`, `TOPBAR_MT_file_export`). A menu entry whose operator the page does not
+register is called as Blender's menus call it, through `WM_operator_call_py` in its call context (`tree-menu.js`), so its
+invoke runs.
+
+- **The File Browser is the browser's dialog.** `WM_event_add_fileselect` is wrapped (`fileselect.cc`): Blender's
+  fileselect handler keeps the operator, and the page (`windowmanager/wm-fileselect.js`) asks the browser for files
+  from the app page, which has the click's user activation. An import's files go into the module's file system, the
+  operator's options (`fileselect_options`: its `ui`, as the File Browser's sidebar draws it, in the properties dialog)
+  are confirmed, and `EVT_FILESELECT_EXEC` runs it. An export's options come first, then the save picker; the file goes
+  there, or downloads, and files written beside it download. The scene window makes Main current first (an export
+  fills the stand-ins of meshes Babylon built), views what the operator changed after and pushes its undo step.
+- **Drawing what an import makes.** The view adopts the new objects. Their normals are Blender's: where Blender draws
+  them per face corner (custom normals, sharp edges: `Mesh::normals_domain`), the extraction gives them
+  (`extraction_corner_normals`, kept beside the extraction's header).
+- **Not built.** Alembic (its reader relies on caught C++ exceptions; the module is built with `-fignore-exceptions`)
+  and USD (OpenUSD's threads and run-time plugins). The default add-ons (io_scene_gltf2, io_scene_fbx, io_anim_bvh,
+  io_curve_svg) are Python; `editors/io/io-ops.js` lists their entries greyed out until Blender's Python runs them.
+- **Checked.** `tests/io-wasm.test.js` imports files Blender 5.2.3 wrote and compares with Blender's own import
+  (`tools/blender-reference/io-fixtures.py`), exports Blender's scene and imports it again, and draws an import;
+  `tests/e2e/smoke.mjs` runs File > Import > Wavefront (.obj) and File > Export > Wavefront (.obj) in the browser.
 
 ### Assets and geometry nodes
 
@@ -443,7 +468,7 @@ Consumers and running:
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs.
 
-- The topbar has Blender's eleven default workspace tabs. A tab sets the scene window's screen (`dock.setScreen`, one layout per screen and profile over the same areas): Scripting opens startup.blend's Scripting screen (see Scripting), Shading startup.blend's Shading screen (the File Browser, the 3D Viewport in Material Preview over the Shader Editor, the Outliner over the Properties editor; no Image Editor yet), Modeling and Sculpting startup.blend's screen of theirs (the 3D Viewport, the Outliner over the Properties editor), Geometry Nodes startup.blend's Geometry Nodes screen (the 3D Viewport over the Geometry Node Editor over the Timeline, the Outliner over the Properties editor; no Spreadsheet yet, so the 3D Viewport takes its place), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, the asset shelf). As `ED_workspace_change` does, a tab whose workspace has another object mode than the last one's (startup.blend's `WorkSpace.object_mode`: Edit Mode for Modeling and UV Editing, Sculpt Mode for Sculpting, Pose Mode for Animation, Texture Paint for Texture Paint) sets it on the active object where the object has that mode and Bylonder has it (not Texture Paint yet). Each screen's 3D Viewport keeps its own shading and its Node Editor its own tree type. The project's JavaScript workbench (Monaco, files, the browser console) is Window > Toggle Project Code.
+- The topbar has Blender's eleven default workspace tabs. A tab sets the scene window's screen (`dock.setScreen`, one layout per screen and profile over the same areas): Scripting opens startup.blend's Scripting screen (see Scripting), Shading startup.blend's Shading screen (the File Browser over the Image Editor, the 3D Viewport in Material Preview over the Shader Editor, the Outliner over the Properties editor), UV Editing and Texture Paint the Image Editor (as the UV Editor, or in Paint mode) beside the 3D Viewport, Modeling and Sculpting startup.blend's screen of theirs (the 3D Viewport, the Outliner over the Properties editor), Geometry Nodes startup.blend's Geometry Nodes screen (the 3D Viewport over the Geometry Node Editor over the Timeline, the Outliner over the Properties editor; no Spreadsheet yet, so the 3D Viewport takes its place), every other tab the Layout screen, until Bylonder has their editors (Spreadsheet, the asset shelf). As `ED_workspace_change` does, a tab whose workspace has another object mode than the last one's (startup.blend's `WorkSpace.object_mode`: Edit Mode for Modeling and UV Editing, Sculpt Mode for Sculpting, Pose Mode for Animation, Texture Paint for Texture Paint) sets it on the active object where the object has that mode and Bylonder has it. Each screen's 3D Viewport keeps its own shading and its Node Editor its own tree type. The project's JavaScript workbench (Monaco, files, the browser console) is Window > Toggle Project Code.
 - Each area has Blender's one editor type selector, its header's (`ED_area_header_switchbutton`, Area.ui_type). Its menu is Blender's; an entry shows that editor in the area through the screen's layout (an `editor-type` event to `editors/screen/dock.js`, which swaps the editor in, as an area of Blender's would change its space), and the editors Bylonder does not have yet are greyed. Bylonder's own node editors (the Particle Node Editor and the Logic Editor) are node tree types registered as an add-on registers them (`registerNodeTree`), so Blender's menu lists them with its node editors. Decided 2026-11-01.
 - The Layout screen is startup.blend's: its split positions are read from the file's area vertices (1920 x 1080) and kept as fractions, which Blender scales with the window; areas stay at least one header high. The topbar and status bar are fixed heights in pixels at UI scale, as Blender's global areas.
 - Area geometry is Blender's (`areaSizes` in `editors/screen/dock.js`): a split's edge is a screen vertex at its fraction of the vertex range, rounded from the left or bottom (`screen_geom_vertices_scale`), and areas sit 2 px inside their vertices, 1 px below the topbar (`area_calc_totrct`), so areas are 3 px apart. At 1600 x 950 every area matches Blender's to the pixel.

@@ -27,6 +27,7 @@ ROOTS = [
     'gpu_shader_material_mix_color.glsl',
     'gpu_shader_compositor_color_balance.glsl',
     'gpu_shader_material_tex_noise.glsl',
+    'gpu_shader_material_tex_image.glsl',
     'gpu_shader_common_color_ramp.glsl',
     'gpu_shader_material_bump.glsl',
     'gpu_shader_material_hair_info.glsl',

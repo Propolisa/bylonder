@@ -694,6 +694,12 @@ EXPORT(wm_pending) bool wm_pending(bContext *C)
   if (!BLI_listbase_is_empty(&wm->runtime->notifier_queue)) {
     return true;
   }
+  /* Events added outside the page's input (a file dialog's choice, fileselect.cc). */
+  for (const wmWindow &win : wm->windows) {
+    if (!BLI_listbase_is_empty(&win.runtime->event_queue)) {
+      return true;
+    }
+  }
   for (const wmTimer &wt : wm->runtime->timers) {
     if (!wt.sleep && !(wt.flags & WM_TIMER_TAGGED_FOR_REMOVAL) && wt.event_type != TIMERAUTOSAVE &&
         (wt.event_type == TIMERJOBS || BLI_findindex(&wm->windows, wt.win) != -1))

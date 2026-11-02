@@ -1144,6 +1144,23 @@ EXPORT(extracted_material_index) const int *extracted_material_index()
   return materialized.data();
 }
 
+/* A color attribute of the mesh object_mesh_eval last gave (its active one when name is null) per face corner, in
+ * scene linear RGBA as the draw cache extracts it for the engines (a byte color decoded from sRGB), or null without
+ * one; valid until the next call. */
+EXPORT(extracted_color) const float *extracted_color(const char *name)
+{
+  static Array<ColorGeometry4f> colors;
+  const Mesh &mesh = *extracted_mesh;
+  const StringRef attribute = name ? StringRef(name) : StringRef(mesh.active_color_attribute ? mesh.active_color_attribute : "");
+  const VArray<ColorGeometry4f> values = *mesh.attributes().lookup<ColorGeometry4f>(attribute, bke::AttrDomain::Corner);
+  if (attribute.is_empty() || !values) {
+    return nullptr;
+  }
+  colors.reinitialize(values.size());
+  values.materialize(colors);
+  return &colors.data()->r;
+}
+
 /* An object's modifier stack, edited as Blender's modifier operators edit it (object_modifier.cc): a modifier added
  * last (type: ModifierType; with what some types need, such as a Skin's vertices), removed, moved to an index, renamed
  * (unique in the stack), copied after itself, and applied to the object's data, the result Blender's evaluation of

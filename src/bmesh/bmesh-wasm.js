@@ -151,6 +151,8 @@ export const OBJECT_MODES = { OBJECT: 0, EDIT: 1, SCULPT: 2, VERTEX_PAINT: 4, WE
 const OBJECT_MODES_BY_FLAG = new Map(Object.entries(OBJECT_MODES).map(([name, flag]) => [flag, name]));
 export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS'];
 export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13, ID_RECALC_ALL = 0xffffffff;
+// ID codes (DNA_ID_enums.h): Image.
+const ID_IM = 0x4d49;
 const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11, ARMATURE: 25 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 // A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
@@ -349,6 +351,9 @@ export class BlenderMain {
   // The weight of each vertex of the mesh evaluatedMesh last gave, as Weight Paint Mode's overlay draws it (main-api.cc
   // mesh_paint_weights), a copy.
   paintWeights(ob, count) { return new Float32Array(x.memory.buffer, x.mesh_paint_weights(this.#context, ob) >>> 0, count).slice(); }
+  // The active color attribute of the mesh evaluatedMesh last gave, per face corner in scene linear RGBA (main-api.cc
+  // extracted_color), a copy; null without one.
+  paintColors(count) { const p = x.extracted_color(0) >>> 0; return p ? new Float32Array(x.memory.buffer, p, count * 4).slice() : null; }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
   setModifiers(ob, modifiers) {
     const { errors } = setModifiers(ob, modifiers);
@@ -446,8 +451,10 @@ export class BlenderMain {
   collectionChildren(collection) { return addresses((p) => x.collection_items(collection, false, p)); }
   collectionObjects(collection) { return addresses((p) => x.collection_items(collection, true, p)); }
   // Main as a .blend file, written by Blender's own writer (writefile.cc and each ID type's blend_write) through its
-  // wm.save_as_mainfile operator, as a copy: the file's bytes.
+  // wm.save_as_mainfile operator, as a copy: the file's bytes. Image files live in the module only while the page runs,
+  // so every image is packed into the file first, painted and generated ones as they are now (image-api.cc image_pack).
   writeBlend(filepath = '/untitled.blend') {
+    for (const image of this.ids(ID_IM)) x.image_pack(this.bmain, image);
     x.main_save_preferences();
     const { status, report } = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
     const bytes = files.get(filepath);
@@ -515,6 +522,8 @@ export class BlenderMain {
       if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
       if (type === 'PROPS') result.dialog = op, kept = true;
       if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
+      // Blender's file browser handler holds it until the page's file dialog answers (wm-fileselect.js).
+      if (status & OPERATOR_RUNNING_MODAL && !kept && x.fileselect_held(this.#C, op)) kept = true;
       const menu = cString(x.operator_menu_called());
       if (menu) {
         const popup = this.menu(menu);

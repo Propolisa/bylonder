@@ -67,6 +67,11 @@ struct mutex {
   void unlock() {}
 };
 struct recursive_mutex : mutex {};
+struct timed_mutex : mutex {
+  template<class Duration> bool try_lock_for(const Duration &) { return true; }
+  template<class TimePoint> bool try_lock_until(const TimePoint &) { return true; }
+};
+struct recursive_timed_mutex : timed_mutex {};
 template<class M> struct lock_guard {
   explicit lock_guard(M &) {}
 };
@@ -90,11 +95,12 @@ template<class... M> struct scoped_lock {
   explicit scoped_lock(M &...) {}
 };
 }  // namespace std
-/* libc++ without threads leaves out the atomic shared_ptr functions; on one thread they are a plain load and store. */
+/* libc++ without threads leaves out the atomic shared_ptr functions; on one thread they are a plain load, store and exchange. */
 #    include <memory>
 namespace std {
 template<class T> shared_ptr<T> atomic_load(const shared_ptr<T> *p) { return *p; }
 template<class T> void atomic_store(shared_ptr<T> *p, shared_ptr<T> r) { *p = std::move(r); }
+template<class T> shared_ptr<T> atomic_exchange(shared_ptr<T> *p, shared_ptr<T> r) { return std::exchange(*p, std::move(r)); }
 }  // namespace std
 #  endif
 #endif

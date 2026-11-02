@@ -2,6 +2,7 @@
 // Babylon's and Blender's alike, its connections links, and its editorData (locations, collapsed state, frames) the
 // layout, kept in Babylon's format so the graph opens the same in Babylon's own editors. Every edit goes through
 // here and ends in `changed(rebuild)`.
+import { blendData } from '../../python/bpy_rna.js';
 import { InputBlock, NodeMaterial, NodeMaterialBlockConnectionPointTypes as M, NodeRenderGraphBlockConnectionPointTypes as R } from '@babylonjs/core';
 import { isBlenderShader, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
 import { BlenderCompositorBlock, compositorNodeClasses } from '../../nodes/blender/compositor-nodes.js';
@@ -127,8 +128,10 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
         const point = block.getInputByName(s.identifier) ?? { name: s.identifier, isConnected: false };
         return { ...socket(point, s), label: shown.labels[s.identifier] ?? s.name, value: s.hide_value ? null : { socket: s, get: () => block.values[s.identifier], set: (v) => { block.values[s.identifier] = v; changed(s.type === 'MENU'); } } };
       });
-      buttons = Object.entries(blender.properties).filter(([key, p]) => (p.type === 'ENUM' || p.type === 'BOOLEAN') && drawn(block.idname, key, block.properties)).map(([key, p]) => ({
-        key, label: p.name, type: p.type, items: p.items, get: () => block.properties[key], set: (v) => { block.properties[key] = v; changed(true); },
+      // An ID pointer (an Image Texture's image, template_ID) chooses among Main's IDs of its type by name.
+      buttons = Object.entries(blender.properties).filter(([key, p]) => (['ENUM', 'BOOLEAN'].includes(p.type) || (p.type === 'POINTER' && key in ID_COLLECTIONS)) && drawn(block.idname, key, block.properties)).map(([key, p]) => ({
+        key, label: p.name, type: p.type === 'POINTER' ? 'ENUM' : p.type, items: p.type === 'POINTER' ? idItems(key) : p.items,
+        get: () => block.properties[key], set: (v) => { block.properties[key] = v; changed(true); },
       }));
       // A Color Ramp's ramp (template_color_ramp): its stops' edits rebuild, choosing the active one does not.
       if (block.properties.color_ramp) ramp = { get: () => block.properties.color_ramp, changed };
@@ -267,6 +270,10 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
   };
   return tree;
 }
+
+// Main's IDs a pointer property can point to, by name.
+const ID_COLLECTIONS = { image: 'images' };
+const idItems = (key) => [...blendData()[ID_COLLECTIONS[key]]].map((id) => [id.name, id.name, '']);
 
 // A node's header label where its type draws one from its properties (node_math_label, node_mix_label).
 const itemName = (decl, key, value) => decl.properties[key].items.find(([id]) => id === value)?.[1];

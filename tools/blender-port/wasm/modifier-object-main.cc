@@ -46,6 +46,7 @@ EXPORT(modifier_object_new) ModifierObject *modifier_object_new()
 
 EXPORT(modifier_object_free) void modifier_object_free(ModifierObject *mo)
 {
+  extraction_free(mo->header);
   BKE_main_free(mo->bmain);
   MEM_delete(mo);
 }

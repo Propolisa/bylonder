@@ -17,11 +17,7 @@ using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
-extern "C" void operator_free(wmOperator *op);
-
 namespace blender {
-
-void WM_operator_free(wmOperator *op) { operator_free(op); }
 
 /* As wm_event_system.cc defines them, for operators run in the context's area and region. */
 bool WM_operator_poll(bContext *C, wmOperatorType *ot) { return !ot->poll || ot->poll(C); }

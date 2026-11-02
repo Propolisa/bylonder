@@ -2,7 +2,8 @@
 // node_composite_*.cc), for the blocks that run Blender nodes in Babylon's graphs. A node links steps of
 // [function, arguments, outputs]: an argument is an input socket's identifier, an output's as '@identifier' (its link so
 // far), a value of the shaded point as '$name' (shader-nodes.js), or a constant (a number, an array for a vector,
-// { glsl } for anything else, { texture } for a sampler of an RGBA table, as GPU_color_band); each output listed is
+// { glsl } for anything else, { texture } for a sampler of an RGBA table, as GPU_color_band, { image } for one of an
+// Image, as GPU_image); each output listed is
 // written by the call and links to its result from then on.
 import { glslFunction, glslName } from './glsl.js';
 import { convert, converts, glslType, glslValue, socketType } from './sockets.js';
@@ -19,18 +20,22 @@ export const kindOfSocket = (decl, id) => socketType(socketOf(decl, id).type)?.k
 const constant = (arg, sampler) => {
   if (typeof arg === 'number') return glslValue(arg, 'float');
   if (Array.isArray(arg)) return glslValue(arg, arg.length === 4 ? 'vec4' : arg.length === 2 ? 'vec2' : 'vec3');
-  if (arg?.texture) return sampler(arg.texture);
+  if (arg?.texture || arg?.image) return sampler(arg);
   return arg?.glsl;
 };
 
 // The statements running the steps; `links` gives and takes the GLSL of socket links, `emit(name, code)` declares a
-// function once, `free(prefix)` gives a fresh variable name, `sampler(table)` a sampler of a texture of the table, and
+// function once, `free(prefix)` gives a fresh variable name, `sampler(arg)` a sampler of its table or image, and
 // `functions` GLSL of the caller's own (Bylonder's stand-ins for Blender's engine code) by name.
 export function compileSteps(decl, steps, links, { emit, free, sampler, functions = {} }) {
   let code = '';
   for (const [name, args, outs] of steps.filter(Boolean)) {
     if (functions[name]) emit(name, functions[name]);
-    else for (const [key, text] of glslFunction(name)) emit(key, text);
+    else for (const [key, text] of glslFunction(name)) {
+      // Bylonder's stand-ins for engine functions Blender's GLSL calls, before their callers.
+      for (const [standIn, code] of Object.entries(functions)) if (new RegExp(`\\b${standIn}\\(`).test(text)) emit(standIn, code);
+      emit(key, text);
+    }
     const results = outs.map((out) => {
       const kind = kindOfSocket(decl, out), v = free(glslIdentifier(out));
       code += `${glslType(kind)} ${v} = ${glslValue(0, kind)};\n`;

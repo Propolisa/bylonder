@@ -35,6 +35,14 @@ Save Version stores a version in the project history. There is no .blend file; p
 Status: partial
 New Project creates a project from code. Blender's templates map to File > New from Example.
 
+## TOPBAR_MT_file_import > *
+Status: partial
+Blender's importers in the module (OBJ, PLY, STL, FBX) through the browser's file dialog, their options drawn from the operator's ui (`wm-fileselect.js`). Alembic and USD are greyed out with the reason; the default add-ons' entries (glTF 2.0, FBX (Legacy), Motion Capture, SVG as Curves) wait for Blender's Python.
+
+## TOPBAR_MT_file_export > *
+Status: partial
+Blender's exporters in the module (OBJ, PLY, STL): options, then the browser's save dialog; files written beside the chosen one (an OBJ's .mtl) download. Bylonder adds Babylon, JavaScript and Project ZIP. Alembic, USD and the add-ons' glTF 2.0, FBX and Motion Capture are greyed out with the reason.
+
 ## PREFERENCES > *
 Status: partial
 The Preferences editor is Blender's own `space_userpref` in the module (`editors/space_userpref`), over Blender's `U`:
@@ -190,3 +198,20 @@ the pointer on the CPU (the module has no GPU selection buffer). See `docs/armat
 ## sculpt.brush_stroke
 Status: partial
 Sculpt Mode is Blender's on Main, with the Essentials brushes, the tool header and the sculpt tools; see `docs/blender-boundary.md` (3D View regions). The asset shelf region, the brush cursor and the mask, face set and dyntopo overlays are not drawn yet.
+
+## IMAGE_EDITOR > *
+The Image Editor and the UV Editor are Blender's own SpaceImage (`src/editors/space_image/image-editor.js`, through
+`src/editors/screen/blender-area.js`): Blender lays out the header, menus, toolbar, tool settings and sidebar, and
+runs the `image.*`, `uv.*` and `paint.*` operators with its keymaps. Images are read and written by Blender's image
+libraries in the module (libjpeg-turbo, libpng, OpenEXR, OpenImageIO, OpenColorIO). Babylon draws the main region:
+the image through the region's View2D and the edit mesh's UVs with Blender's overlay flags (`image-api.cc`
+`view_edit_uv_extract`). Image > Open and Save As use the browser's file dialog and a download. The view transform
+(AgX, Filmic) is not applied to what Babylon draws yet.
+
+## paint.image_paint
+Texture Paint and Vertex Paint are Blender's modes on Main (`src/editors/object/main-modes.js`); strokes run Blender's
+projection and 2D painting. Each Image is one Babylon texture shared by all its users (`src/imbuf/image-textures.js`),
+updated from Blender's partial updates of the image (only the regions a stroke changed), its mipmaps made again once
+painting pauses. Solid shading shows the paint slot's image in Texture Paint and the color attribute in Vertex Paint,
+and the Texture and Attribute colors in every mode. An image's sampling can be Babylon's own (`src/runtimes/image.js`,
+docs/runtimes.md).

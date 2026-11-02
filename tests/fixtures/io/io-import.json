@@ -1,0 +1,252 @@
+{
+ "source": {
+  "name": "Suzanne",
+  "vertices": 507,
+  "edges": 1005,
+  "faces": 500,
+  "corners": 1968,
+  "bounds": [
+   [
+    -0.3204,
+    -3.0846,
+    -0.6113
+   ],
+   [
+    2.1045,
+    -0.7787,
+    1.5199
+   ]
+  ],
+  "location": [
+   1.0,
+   -2.0,
+   0.5
+  ],
+  "rotation": [
+   0.3,
+   0.0,
+   0.7
+  ],
+  "uv_layers": [
+   "UVMap"
+  ],
+  "uv_bounds": [
+   [
+    0.0001,
+    0.0094,
+    0.9999,
+    0.9851
+   ]
+  ],
+  "color_attributes": [
+   [
+    "Col",
+    "POINT",
+    "BYTE_COLOR"
+   ]
+  ],
+  "smooth_faces": 250,
+  "custom_normals": false,
+  "corner_normals": -1605.891,
+  "materials": [
+   "Skin"
+  ]
+ },
+ "imports": {
+  "obj": [
+   {
+    "name": "Suzanne",
+    "vertices": 507,
+    "edges": 1005,
+    "faces": 500,
+    "corners": 1968,
+    "bounds": [
+     [
+      -0.3204,
+      -3.0846,
+      -0.6113
+     ],
+     [
+      2.1045,
+      -0.7787,
+      1.5199
+     ]
+    ],
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     1.5708,
+     -0.0,
+     0.0
+    ],
+    "uv_layers": [
+     "UVMap"
+    ],
+    "uv_bounds": [
+     [
+      0.0001,
+      0.0094,
+      0.9999,
+      0.9851
+     ]
+    ],
+    "color_attributes": [],
+    "smooth_faces": 500,
+    "custom_normals": true,
+    "corner_normals": 1416.254,
+    "materials": [
+     "Skin"
+    ]
+   }
+  ],
+  "ply": [
+   {
+    "name": "suzanne",
+    "vertices": 555,
+    "edges": 1054,
+    "faces": 500,
+    "corners": 1968,
+    "bounds": [
+     [
+      -0.3204,
+      -3.0846,
+      -0.6113
+     ],
+     [
+      2.1045,
+      -0.7787,
+      1.5199
+     ]
+    ],
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     -0.0,
+     0.0
+    ],
+    "uv_layers": [
+     "UVMap"
+    ],
+    "uv_bounds": [
+     [
+      0.0001,
+      0.0094,
+      0.9999,
+      0.9851
+     ]
+    ],
+    "color_attributes": [
+     [
+      "Col",
+      "POINT",
+      "FLOAT_COLOR"
+     ]
+    ],
+    "smooth_faces": 0,
+    "custom_normals": false,
+    "corner_normals": -1318.15,
+    "materials": []
+   }
+  ],
+  "stl": [
+   {
+    "name": "suzanne",
+    "vertices": 505,
+    "edges": 1473,
+    "faces": 968,
+    "corners": 2904,
+    "bounds": [
+     [
+      -0.3204,
+      -3.0846,
+      -0.6113
+     ],
+     [
+      2.1045,
+      -0.7787,
+      1.5199
+     ]
+    ],
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     -0.0,
+     0.0
+    ],
+    "uv_layers": [],
+    "uv_bounds": [],
+    "color_attributes": [],
+    "smooth_faces": 0,
+    "custom_normals": false,
+    "corner_normals": -1900.042,
+    "materials": []
+   }
+  ],
+  "fbx": [
+   {
+    "name": "Suzanne",
+    "vertices": 507,
+    "edges": 1005,
+    "faces": 500,
+    "corners": 1968,
+    "bounds": [
+     [
+      -0.3204,
+      -3.0846,
+      -0.6113
+     ],
+     [
+      2.1045,
+      -0.7787,
+      1.5199
+     ]
+    ],
+    "location": [
+     1.0,
+     -2.0,
+     0.5
+    ],
+    "rotation": [
+     0.3,
+     0.0,
+     0.7
+    ],
+    "uv_layers": [
+     "UVMap"
+    ],
+    "uv_bounds": [
+     [
+      0.0001,
+      0.0094,
+      0.9999,
+      0.9851
+     ]
+    ],
+    "color_attributes": [
+     [
+      "Col",
+      "CORNER",
+      "BYTE_COLOR"
+     ]
+    ],
+    "smooth_faces": 500,
+    "custom_normals": true,
+    "corner_normals": -1605.891,
+    "materials": [
+     "Skin"
+    ]
+   }
+  ]
+ }
+}

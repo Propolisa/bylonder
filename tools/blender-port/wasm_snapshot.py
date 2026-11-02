@@ -19,10 +19,14 @@ INITIALIZERS = {'_initialize', 'blender_init'}
 # segments are fewer than engines take (V8: 100000).
 GAP = 16
 SEGMENTS = 50000
+# Blender's datafiles are in its file system as in the app (bmesh-wasm.js), for what initialization reads: color
+# management's config.
 DUMP = """
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
-const { instantiate } = await import(pathToFileURL(process.argv[1]));
+const { instantiate, files } = await import(pathToFileURL(process.argv[1]));
+const { DATAFILES, COLOR_MANAGEMENT } = await import(pathToFileURL(process.argv[4]));
+for (const [name, url] of [...DATAFILES, ...COLOR_MANAGEMENT]) files.set(`/blender/datafiles/${name}`, new Uint8Array(fs.readFileSync(url)));
 const heap = await instantiate(pathToFileURL(process.argv[2]));
 fs.writeFileSync(process.argv[3], new Uint8Array(heap.exports.memory.buffer));
 """
@@ -109,7 +113,8 @@ def exports_without_initializers(body):
 def initialized_memory(module):
     with tempfile.TemporaryDirectory() as work:
         out = os.path.join(work, 'memory')
-        subprocess.run(['node', '--input-type=module', '-e', DUMP, os.path.join(REPO, 'src', 'port', 'wasm.js'), module, out],
+        subprocess.run(['node', '--input-type=module', '-e', DUMP, os.path.join(REPO, 'src', 'port', 'wasm.js'), module, out,
+                        os.path.join(REPO, 'src', 'bmesh', 'datafiles.js')],
                        check=True, stdout=subprocess.DEVNULL)
         return open(out, 'rb').read()
 

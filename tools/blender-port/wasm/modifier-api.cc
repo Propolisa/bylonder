@@ -32,6 +32,7 @@
 #include "BKE_object_types.hh"
 #include "BKE_scene.hh"
 #include "BLI_listbase.h"
+#include "BLI_map.hh"
 #include "BLI_math_base.h"
 #include "BLI_time.h"
 #include "BLO_read_write.hh"
@@ -178,6 +179,11 @@ Mesh *blender::mesh_from_arrays(int verts_num, const float3 *positions, int edge
 
 /* Subdivision Surface last in the stack defers to the wrapper, which holds the subdivided mesh. */
 const Mesh *blender::extracted_mesh = nullptr;
+static Map<const ExtractionHeader *, const float3 *> &corner_normals_of()
+{
+  static Map<const ExtractionHeader *, const float3 *> map;
+  return map;
+}
 
 void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
 {
@@ -224,7 +230,18 @@ void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
   if (uvs && uvs.is_span()) {
     h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));
   }
+  corner_normals_of().add_overwrite(&h, mesh->normals_domain() == bke::MeshNormalDomain::Corner ? mesh->corner_normals().data() : nullptr);
 }
+
+/* The normals per face corner of an extraction's Mesh where Blender draws them so (custom normals, sharp edges:
+ * Mesh::normals_domain), or null; apart from the header, whose layout other modules' JS reads. */
+EXPORT(extraction_corner_normals) const float3 *extraction_corner_normals(const ExtractionHeader *header)
+{
+  return corner_normals_of().lookup_default(header, nullptr);
+}
+void blender::extraction_free(const ExtractionHeader &header) { corner_normals_of().remove(&header); }
+/* How many headers have corner normals kept beside them, for checking that freeing a header frees them. */
+EXPORT(extraction_corner_normals_count) int extraction_corner_normals_count() { return int(corner_normals_of().size()); }
 
 /* A Mesh of positions and faces whose edges Blender derives, as a script's mesh.update() does (rna_Mesh_update), read
  * through the header until the next call. */

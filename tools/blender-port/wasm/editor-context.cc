@@ -294,7 +294,7 @@ EXPORT(operator_has_exec) bool operator_has_exec(int index) { return operators()
 EXPORT(operator_name) const char *operator_name(int index) { return operators()[index]->idname; }
 
 EXPORT(operator_new) wmOperator *operator_new(int type) { return operator_create(operator_type(type)); }
-EXPORT(operator_free) void operator_free(wmOperator *op) { operator_destroy(op); }
+EXPORT(operator_free) void operator_free(wmOperator *op) { WM_operator_free(op); }
 
 /* Sets a property: numbers (len of them), or a string or enum identifiers. */
 EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const double *numbers, int len, const char *text)
@@ -348,7 +348,7 @@ EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int typ
   if (free) {
     MEM_delete(const_cast<EnumPropertyItem *>(items));
   }
-  operator_destroy(op);
+  WM_operator_free(op);
   return text.c_str();
 }
 
@@ -411,12 +411,12 @@ wmEvent *wm_event_set(bContext *C, int type, int val, int x, int y, int modifier
 }
 
 /* The operator the last invoke added a modal handler for (WM_event_add_modal_handler), or null: its handler leaves the
- * window, as JS gives it its events (operator_modal). */
+ * window, as JS gives it its events (operator_modal). A file browser's handler stays (fileselect.cc). */
 EXPORT(operator_modal_added) wmOperator *operator_modal_added(bContext *C)
 {
   wmWindow *win = CTX_wm_window(C);
   for (wmEventHandler &handler : win->runtime->modalhandlers) {
-    if (handler.type == WM_HANDLER_TYPE_OP) {
+    if (handler.type == WM_HANDLER_TYPE_OP && !reinterpret_cast<wmEventHandler_Op *>(&handler)->is_fileselect) {
       wmOperator *op = reinterpret_cast<wmEventHandler_Op *>(&handler)->op;
       WM_event_remove_modal_handler(&win->runtime->modalhandlers, op, false);
       return op;

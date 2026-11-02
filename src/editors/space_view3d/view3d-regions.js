@@ -4,8 +4,8 @@
 // block-view.js. In Bylonder's own mesh Edit Mode, which Main
 // does not know, the header and sidebar still draw Blender's scripts through the JS layout (layout-view.js).
 import { createApp, h, reactive, markRaw } from 'vue';
-import { BlockView, PanelsView } from '../interface/block-view.js';
-import { regionHeader, regionLayout, regionPanels, categorySet, panelClosedSet, viewItemDrag } from '../interface/ui-tree.js';
+import { BlockView, sidebarView } from '../interface/block-view.js';
+import { regionHeader, regionLayout, panelClosedSet, viewItemDrag } from '../interface/ui-tree.js';
 import { contextStruct } from '../../python/bpy_rna.js';
 import { panels, headers, menus } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
@@ -28,6 +28,7 @@ const SPACE_STATE = [
   ['show_gizmo', ['show_gizmo']],
   ['overlays', ['overlay', 'show_overlays']],
   ['xray', ['shading', 'show_xray'], (value) => !!value],
+  ['color_type', ['shading', 'color_type']],
   ['shading', ['shading', 'type'], (value) => SHADING[value], (type) => Object.keys(SHADING).find((id) => SHADING[id] === type)],
   ['weight_paint_mode_opacity', ['overlay', 'weight_paint_mode_opacity']],
   ['show_wpaint_contours', ['overlay', 'show_wpaint_contours']],
@@ -130,16 +131,6 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     if (call) ui.run(call.operator, properties, { type: 'leftmouse', value: 'PRESS', x: e.clientX, y: e.clientY, clientX: e.clientX, clientY: e.clientY, view, invoke: true });
   };
   const blenderHeader = (type) => (blenderUIs[type].inContext((C) => regionHeader(C)) ?? []).map((tree) => h(BlockView, { tree, ui: blenderUIs[type], header: true }));
-  const blenderSidebar = () => {
-    const sidebarUI = blenderUIs[RGN_TYPE_UI], { category, categories, panels: drawn } = sidebarUI.inContext((C) => regionPanels(C));
-    return [
-      h(PanelsView, { panels: drawn, ui: sidebarUI }),
-      h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
-        type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category),
-        onClick: () => { area().inContext(RGN_TYPE_UI, (C) => categorySet(C, name)); state.revision++; },
-      }, name))),
-    ];
-  };
 
   // The asset shelf shows as Blender shows it (its shelf types' polls, the pose library's in Pose Mode, and View > Asset
   // Shelf), at Blender's heights, once per redraw.
@@ -194,7 +185,7 @@ export function createRegions({ view, area, scene, legacy, context, ui, menu, te
     mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header)), () => blenderHeader(RGN_TYPE_HEADER)),
     // The tool settings are the workspace's tools' (WorkSpace.tools) in every mode.
     mount(toolHeader, () => toolSettings(), () => toolSettings()),
-    mount(sidebar, sidebarRegion, () => (sidebar.hidden ? null : blenderSidebar())),
+    mount(sidebar, sidebarRegion, () => (sidebar.hidden ? null : sidebarView(blenderUIs[RGN_TYPE_UI]))),
     mount(shelfHeader, () => null, () => shelfRegion(RGN_TYPE_ASSET_SHELF_HEADER, (C) => regionHeader(C))),
     mount(shelfMain, () => null, () => shelfRegion(RGN_TYPE_ASSET_SHELF, (C) => regionLayout(C))),
   ];

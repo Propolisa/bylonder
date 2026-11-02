@@ -6,6 +6,7 @@ var EBADF = 8;
 var EEXIST = 20;
 var EINVAL = 28;
 var ENOENT = 44;
+var ENOSYS = 52;
 var ENOTDIR = 54;
 var FILETYPE_DIRECTORY = 3;
 var FILETYPE_REGULAR = 4;
@@ -28,6 +29,31 @@ function wasiFor(memory) {
   const open = /* @__PURE__ */ new Map([[ROOT, { directory: "/" }]]);
   let next = ROOT + 1;
   const iovecs = (iovs, count) => Array.from({ length: count }, (_, i) => [view().getUint32(iovs + i * 8, true), view().getUint32(iovs + i * 8 + 4, true)]);
+  function readAt(file, iovs, count, position, out) {
+    const data = files.get(file.path);
+    let total = 0;
+    for (const [pointer, length] of iovecs(iovs, count)) {
+      const part = data.subarray(position + total, position + total + length);
+      new Uint8Array(memory().buffer, pointer, part.length).set(part);
+      total += part.length;
+    }
+    view().setUint32(out, total, true);
+    return total;
+  }
+  function writeAt(file, iovs, count, position, out) {
+    const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length).slice());
+    const total = chunks.reduce((n, c) => n + c.length, 0), data = files.get(file.path), end = position + total;
+    const grown = end > data.length ? new Uint8Array(Math.max(end, data.length * 2)) : data;
+    if (grown !== data) grown.set(data);
+    let at = position;
+    for (const c of chunks) {
+      grown.set(c, at);
+      at += c.length;
+    }
+    files.set(file.path, end > data.length ? grown.subarray(0, end) : grown);
+    view().setUint32(out, total, true);
+    return total;
+  }
   function filestat(at, name) {
     const v = view(), file = files.get(name);
     for (let i = 0; i < 64; i += 8) v.setBigUint64(at + i, 0n, true);
@@ -96,36 +122,33 @@ function wasiFor(memory) {
       return ESUCCESS;
     },
     fd_write(fd, iovs, count, nwritten) {
-      const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length).slice());
-      const total = chunks.reduce((n, c) => n + c.length, 0);
-      if (fd === 1 || fd === 2) chunks.forEach((c) => write(decoder.decode(c)));
-      else {
-        const file = open.get(fd);
-        if (!file?.path) return EBADF;
-        const data = files.get(file.path), end = file.position + total;
-        const grown = end > data.length ? new Uint8Array(Math.max(end, data.length * 2)) : data;
-        if (grown !== data) grown.set(data);
-        for (const c of chunks) {
-          grown.set(c, file.position);
-          file.position += c.length;
-        }
-        files.set(file.path, end > data.length ? grown.subarray(0, end) : grown);
+      if (fd === 1 || fd === 2) {
+        const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length));
+        chunks.forEach((c) => write(decoder.decode(c)));
+        view().setUint32(nwritten, chunks.reduce((n, c) => n + c.length, 0), true);
+        return ESUCCESS;
       }
-      view().setUint32(nwritten, total, true);
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      file.position += writeAt(file, iovs, count, file.position, nwritten);
+      return ESUCCESS;
+    },
+    fd_pwrite(fd, iovs, count, offset, nwritten) {
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      writeAt(file, iovs, count, Number(offset), nwritten);
       return ESUCCESS;
     },
     fd_read(fd, iovs, count, nread) {
       const file = open.get(fd);
       if (!file?.path) return fd === 0 ? (view().setUint32(nread, 0, true), ESUCCESS) : EBADF;
-      const data = files.get(file.path);
-      let total = 0;
-      for (const [pointer, length] of iovecs(iovs, count)) {
-        const part = data.subarray(file.position, file.position + length);
-        new Uint8Array(memory().buffer, pointer, part.length).set(part);
-        file.position += part.length;
-        total += part.length;
-      }
-      view().setUint32(nread, total, true);
+      file.position += readAt(file, iovs, count, file.position, nread);
+      return ESUCCESS;
+    },
+    fd_pread(fd, iovs, count, offset, nread) {
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      readAt(file, iovs, count, Number(offset), nread);
       return ESUCCESS;
     },
     fd_seek(fd, offset, whence, at) {
@@ -169,8 +192,38 @@ function wasiFor(memory) {
       return ESUCCESS;
     },
     path_unlink_file: (dir, at, length) => files.delete(path(at, length, dir)) ? ESUCCESS : ENOENT,
-    path_remove_directory: (dir, at, length) => isDirectory(path(at, length, dir)) ? ENOTDIR : ESUCCESS
-  }, { get: (calls, name) => calls[name] ?? (() => 0) });
+    path_remove_directory: (dir, at, length) => isDirectory(path(at, length, dir)) ? ENOTDIR : ESUCCESS,
+    // Every directory exists, and no file is a link.
+    path_create_directory: () => ESUCCESS,
+    path_readlink: () => EINVAL,
+    // No environment variables.
+    environ_sizes_get(count, size2) {
+      view().setUint32(count, 0, true);
+      view().setUint32(size2, 0, true);
+      return ESUCCESS;
+    },
+    environ_get: () => ESUCCESS,
+    fd_fdstat_set_flags: (fd) => open.has(fd) || fd < ROOT ? ESUCCESS : EBADF,
+    random_get(at, length) {
+      for (let i = 0; i < length; i += 65536) crypto.getRandomValues(new Uint8Array(memory().buffer, at + i, Math.min(65536, length - i)));
+      return ESUCCESS;
+    },
+    // One thread cannot wait for another: each subscription (a sleep's clock) is answered at once, as elapsed.
+    poll_oneoff(subscriptions, events, count, nevents) {
+      const v = view();
+      for (let i = 0; i < count; i++) {
+        const event = events + i * 32;
+        for (let b = 0; b < 32; b += 8) v.setBigUint64(event + b, 0n, true);
+        v.setBigUint64(event, v.getBigUint64(subscriptions + i * 48, true), true);
+        v.setUint8(event + 10, v.getUint8(subscriptions + i * 48 + 8));
+      }
+      v.setUint32(nevents, count, true);
+      return ESUCCESS;
+    }
+  }, { get: (calls, name) => calls[name] ?? ((...args) => {
+    console.error(`WASI ${name} is not implemented`, args);
+    return ENOSYS;
+  }) });
 }
 var provided = {};
 var logMissing = globalThis.process?.env?.BLENDER_WASM_MISSING === "log";
@@ -304,7 +357,9 @@ function moduleMesh(x, createMesh) {
       tri_faces: [Int32Array, at(8), tris],
       UVMap: [Float32Array, at(9), corners * 2],
       ...Object.fromEntries(FLAGS.map(([name, domain], i) => [name, [Uint8Array, at(10 + i), sizes[domain]]])),
-      ...Object.fromEntries(["POINT", "EDGE", "FACE"].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]]))
+      ...Object.fromEntries(["POINT", "EDGE", "FACE"].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]])),
+      // The polyfill's modifiers.wasm, built before extraction_corner_normals, has none.
+      corner_normals: [Float32Array, (x.extraction_corner_normals?.(header) ?? 0) >>> 0, corners * 3]
     };
     let buffer = null, views = {};
     const view = (name) => {
@@ -335,6 +390,8 @@ function moduleMesh(x, createMesh) {
       corner_tri_faces: () => buffer("tri_faces"),
       face_normals: () => buffer("face_normals"),
       vert_normals: () => buffer("vert_normals"),
+      // Normals per face corner where Blender draws them so (custom normals, sharp edges), or null.
+      corner_normals: () => has("corner_normals") ? buffer("corner_normals") : null,
       // An evaluated mesh's original element of each of its own in a domain (CD_ORIGINDEX, -1 for none), or null.
       orig_index: (domain) => has(`orig_index_${domain}`) ? buffer(`orig_index_${domain}`) : null
     });
@@ -389,10 +446,11 @@ function mesh_batch_cache_vertex_buffers(mesh) {
   const positions = new Float32Array(corners * 3), normals = new Float32Array(corners * 3);
   const sharp_face = mesh.attribute("sharp_face");
   const face_normals = mesh.face_normals(), vert_normals = sharp_face?.every(Boolean) ? null : mesh.vert_normals();
+  const corner_normals = mesh.corner_normals?.();
   for (let f = 0; f < mesh.faces_num; f++) {
     const flat = !vert_normals || sharp_face?.[f];
     for (let c = face_offsets[f]; c < face_offsets[f + 1]; c++) {
-      const v = corner_verts[c] * 3, n = flat ? face_normals : vert_normals, i = flat ? f * 3 : v;
+      const v = corner_verts[c] * 3, n = corner_normals ?? (flat ? face_normals : vert_normals), i = corner_normals ? c * 3 : flat ? f * 3 : v;
       positions[c * 3] = p[v];
       positions[c * 3 + 1] = p[v + 2];
       positions[c * 3 + 2] = p[v + 1];

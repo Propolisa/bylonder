@@ -86,6 +86,36 @@ const checks = {
     assert.deepEqual(Array.from(zip["bylonder-modifiers/modifiers.wasm"].subarray(0, 4)), [0, 0x61, 0x73, 0x6d], "a WebAssembly module");
   },
 
+  // Blender's own importer and exporter through the browser's file dialogs: the chosen files, the operator's options in
+  // a dialog drawn from its ui, then the import in Main and in the view; the export downloads with its .mtl beside it.
+  async "File > Import > Wavefront (.obj) and File > Export > Wavefront (.obj) run Blender's importer and exporter"() {
+    const fileMenu = async (submenu, item) => {
+      await app.page.click('[data-blender="TOPBAR_MT_file"]');
+      await app.page.getByRole("menuitem", { name: new RegExp(`^${submenu}`) }).first().hover();
+      await app.page.getByRole("menuitem", { name: item }).click();
+    };
+    const confirm = (title) => app.frame().getByRole("dialog", { name: title }).getByRole("button", { name: title }).click();
+    const chooser = app.page.waitForEvent("filechooser");
+    await fileMenu("Import", "Wavefront (.obj)");
+    await (await chooser).setFiles(["suzanne.obj", "suzanne.mtl"].map((name) => new URL(`../fixtures/io/${name}`, import.meta.url).pathname));
+    await confirm("Import Wavefront OBJ");
+    await app.until((b) => b.world.objects.some((node) => node.name === "Suzanne" && node.getTotalVertices() === 1968));
+    // Without the save picker the export downloads, as in browsers that lack it.
+    await app.page.evaluate(() => { window.showSaveFilePicker = undefined; });
+    const downloads = [];
+    app.page.on("download", (download) => downloads.push(download));
+    await fileMenu("Export", "Wavefront (.obj)");
+    await confirm("Export Wavefront OBJ");
+    for (let i = 0; i < 100 && downloads.length < 2; i++) await app.page.waitForTimeout(100);
+    const names = downloads.map((download) => download.suggestedFilename()).sort();
+    assert.deepEqual(names.map((name) => name.split(".").pop()), ["mtl", "obj"], `the .obj and its .mtl (${names})`);
+    const chunks = [];
+    for await (const chunk of await downloads.find((download) => download.suggestedFilename().endsWith(".obj")).createReadStream()) chunks.push(chunk);
+    const obj = Buffer.concat(chunks).toString();
+    assert.match(obj, /^o Suzanne$/m);
+    assert.ok(obj.match(/^f /gm).length >= 500, "with Suzanne's faces");
+  },
+
   async "topbar File menu and 3D View Object menu open"() {
     await app.page.click('[data-blender="TOPBAR_MT_file"]');
     await app.page.getByRole("menuitem", { name: /^Open/ }).first().waitFor();
@@ -788,6 +818,42 @@ const checks = {
     await app.page.keyboard.press("Control+z");
     await app.settled();
     assert.deepEqual(await state(), before);
+  } },
+
+  // Texture Paint: a stroke on Suzanne in the 3D Viewport and one in the Image Editor paint her image, Ctrl Z takes a
+  // stroke back, and the UV Editing workspace shows her UVs over it.
+  "Texture Paint paints in the 3D Viewport and the Image Editor": { open: { link: "texture-paint", node: "Suzanne" }, async run() {
+    const painted = () => app.bylonder((b) => {
+      const pixels = b.modules.bpyRna.blendData().images.get("Suzanne Paint").pixels;
+      let sum = 0;
+      for (let i = 0; i < pixels.length; i += 401) sum += pixels[i];
+      return sum;
+    });
+    const stroke = async (box, [x0, y0], [x1, y1]) => {
+      await app.page.mouse.move(box.x + box.width * x0, box.y + box.height * y0);
+      await app.page.mouse.down();
+      for (let i = 1; i <= 20; i++) await app.page.mouse.move(box.x + box.width * (x0 + (x1 - x0) * i / 20), box.y + box.height * (y0 + (y1 - y0) * i / 20));
+      await app.page.mouse.up();
+      await app.settled();
+    };
+    await app.page.click('[data-workspace="texture-paint"]');
+    await app.settled();
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("NumpadDecimal");
+    await app.settled();
+    const view = await app.frame().locator(".viewport-canvas").first().boundingBox();
+    const before = await painted();
+    await stroke(view, [0.4, 0.45], [0.6, 0.5]);
+    const stroked = await painted();
+    assert.notEqual(stroked, before, "the 3D stroke paints the image");
+    await app.page.keyboard.press("Control+z");
+    await app.settled();
+    assert.equal(await painted(), before, "Ctrl Z takes the stroke back");
+    await stroke(await app.frame().locator("#image-section").boundingBox(), [0.2, 0.7], [0.5, 0.4]);
+    assert.notEqual(await painted(), before, "the Image Editor stroke paints the image");
+    await app.page.click('[data-workspace="uv-editing"]');
+    await app.settled();
+    assert.ok(await app.frame().locator("#image-section canvas.bl-image-view").isVisible(), "the UV Editor draws");
   } },
 
   // Grease Pencil: the Bouncing Ball's drawings draw as GreasedLine and fill meshes; a drag in Draw Mode draws a stroke

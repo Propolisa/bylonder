@@ -32,7 +32,7 @@ wmOperator *operator_create(wmOperatorType *ot, const IDProperty *values)
   op->properties = values ? IDP_CopyProperty(values) : nullptr;
   WM_operator_properties_alloc(&op->ptr, &op->properties, ot->idname);
   op->reports = MEM_new<ReportList>(__func__);
-  BKE_reports_init(op->reports, RPT_STORE);
+  BKE_reports_init(op->reports, RPT_STORE | RPT_FREE);
   operator_macro_fill(op);
   return op;
 }
@@ -42,7 +42,7 @@ wmOperator *operator_create(wmOperatorType *ot, const IDProperty *values)
 void operator_macro_fill(wmOperator *op)
 {
   while (wmOperator *opm = static_cast<wmOperator *>(BLI_pophead(&op->macro))) {
-    operator_destroy(opm);
+    WM_operator_free(opm);
   }
   wmOperatorTypeMacro *otmacro = static_cast<wmOperatorTypeMacro *>(op->type->macro.first);
   RNA_STRUCT_BEGIN (op->ptr, prop) {
@@ -59,18 +59,6 @@ void operator_macro_fill(wmOperator *op)
     }
   }
   RNA_STRUCT_END;
-}
-
-void operator_destroy(wmOperator *op)
-{
-  while (wmOperator *opm = static_cast<wmOperator *>(BLI_pophead(&op->macro))) {
-    operator_destroy(opm);
-  }
-  WM_operator_properties_free(op->ptr);
-  MEM_delete(op->ptr);
-  BKE_reports_free(op->reports);
-  MEM_delete(op->reports);
-  MEM_delete(op);
 }
 
 /* One element of a number, boolean or enum property as a number. */

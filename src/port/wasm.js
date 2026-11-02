@@ -7,7 +7,7 @@
 export const files = new Map();
 
 // WASI errno values and file types (wasi_snapshot_preview1).
-const ESUCCESS = 0, EBADF = 8, EEXIST = 20, EINVAL = 28, ENOENT = 44, ENOTDIR = 54;
+const ESUCCESS = 0, EBADF = 8, EEXIST = 20, EINVAL = 28, ENOENT = 44, ENOSYS = 52, ENOTDIR = 54;
 const FILETYPE_DIRECTORY = 3, FILETYPE_REGULAR = 4;
 const O_CREAT = 1, O_DIRECTORY = 2, O_EXCL = 4, O_TRUNC = 8;
 // The one preopened directory, the root, as fd 3 (after stdin, stdout and stderr).
@@ -31,6 +31,30 @@ function wasiFor(memory) {
   const open = new Map([[ROOT, { directory: '/' }]]);
   let next = ROOT + 1;
   const iovecs = (iovs, count) => Array.from({ length: count }, (_, i) => [view().getUint32(iovs + i * 8, true), view().getUint32(iovs + i * 8 + 4, true)]);
+  // A file's bytes from a position into the iovecs, or from them into the file (which grows), as fd_read and fd_write
+  // do at the file's position and fd_pread and fd_pwrite at an offset; writes the count and returns it.
+  function readAt(file, iovs, count, position, out) {
+    const data = files.get(file.path);
+    let total = 0;
+    for (const [pointer, length] of iovecs(iovs, count)) {
+      const part = data.subarray(position + total, position + total + length);
+      new Uint8Array(memory().buffer, pointer, part.length).set(part);
+      total += part.length;
+    }
+    view().setUint32(out, total, true);
+    return total;
+  }
+  function writeAt(file, iovs, count, position, out) {
+    const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length).slice());
+    const total = chunks.reduce((n, c) => n + c.length, 0), data = files.get(file.path), end = position + total;
+    const grown = end > data.length ? new Uint8Array(Math.max(end, data.length * 2)) : data;
+    if (grown !== data) grown.set(data);
+    let at = position;
+    for (const c of chunks) { grown.set(c, at); at += c.length; }
+    files.set(file.path, end > data.length ? grown.subarray(0, end) : grown);
+    view().setUint32(out, total, true);
+    return total;
+  }
   function filestat(at, name) {
     const v = view(), file = files.get(name);
     for (let i = 0; i < 64; i += 8) v.setBigUint64(at + i, 0n, true);
@@ -97,33 +121,33 @@ function wasiFor(memory) {
       return ESUCCESS;
     },
     fd_write(fd, iovs, count, nwritten) {
-      const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length).slice());
-      const total = chunks.reduce((n, c) => n + c.length, 0);
-      if (fd === 1 || fd === 2) chunks.forEach((c) => write(decoder.decode(c)));
-      else {
-        const file = open.get(fd);
-        if (!file?.path) return EBADF;
-        const data = files.get(file.path), end = file.position + total;
-        const grown = end > data.length ? new Uint8Array(Math.max(end, data.length * 2)) : data;
-        if (grown !== data) grown.set(data);
-        for (const c of chunks) { grown.set(c, file.position); file.position += c.length; }
-        files.set(file.path, end > data.length ? grown.subarray(0, end) : grown);
+      if (fd === 1 || fd === 2) {
+        const chunks = iovecs(iovs, count).map(([pointer, length]) => new Uint8Array(memory().buffer, pointer, length));
+        chunks.forEach((c) => write(decoder.decode(c)));
+        view().setUint32(nwritten, chunks.reduce((n, c) => n + c.length, 0), true);
+        return ESUCCESS;
       }
-      view().setUint32(nwritten, total, true);
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      file.position += writeAt(file, iovs, count, file.position, nwritten);
+      return ESUCCESS;
+    },
+    fd_pwrite(fd, iovs, count, offset, nwritten) {
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      writeAt(file, iovs, count, Number(offset), nwritten);
       return ESUCCESS;
     },
     fd_read(fd, iovs, count, nread) {
       const file = open.get(fd);
       if (!file?.path) return fd === 0 ? (view().setUint32(nread, 0, true), ESUCCESS) : EBADF;
-      const data = files.get(file.path);
-      let total = 0;
-      for (const [pointer, length] of iovecs(iovs, count)) {
-        const part = data.subarray(file.position, file.position + length);
-        new Uint8Array(memory().buffer, pointer, part.length).set(part);
-        file.position += part.length;
-        total += part.length;
-      }
-      view().setUint32(nread, total, true);
+      file.position += readAt(file, iovs, count, file.position, nread);
+      return ESUCCESS;
+    },
+    fd_pread(fd, iovs, count, offset, nread) {
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      readAt(file, iovs, count, Number(offset), nread);
       return ESUCCESS;
     },
     fd_seek(fd, offset, whence, at) {
@@ -165,7 +189,30 @@ function wasiFor(memory) {
     },
     path_unlink_file: (dir, at, length) => (files.delete(path(at, length, dir)) ? ESUCCESS : ENOENT),
     path_remove_directory: (dir, at, length) => (isDirectory(path(at, length, dir)) ? ENOTDIR : ESUCCESS),
-  }, { get: (calls, name) => calls[name] ?? (() => 0) });
+    // Every directory exists, and no file is a link.
+    path_create_directory: () => ESUCCESS,
+    path_readlink: () => EINVAL,
+    // No environment variables.
+    environ_sizes_get(count, size) { view().setUint32(count, 0, true); view().setUint32(size, 0, true); return ESUCCESS; },
+    environ_get: () => ESUCCESS,
+    fd_fdstat_set_flags: (fd) => (open.has(fd) || fd < ROOT ? ESUCCESS : EBADF),
+    random_get(at, length) {
+      for (let i = 0; i < length; i += 65536) crypto.getRandomValues(new Uint8Array(memory().buffer, at + i, Math.min(65536, length - i)));
+      return ESUCCESS;
+    },
+    // One thread cannot wait for another: each subscription (a sleep's clock) is answered at once, as elapsed.
+    poll_oneoff(subscriptions, events, count, nevents) {
+      const v = view();
+      for (let i = 0; i < count; i++) {
+        const event = events + i * 32;
+        for (let b = 0; b < 32; b += 8) v.setBigUint64(event + b, 0n, true);
+        v.setBigUint64(event, v.getBigUint64(subscriptions + i * 48, true), true);
+        v.setUint8(event + 10, v.getUint8(subscriptions + i * 48 + 8));
+      }
+      v.setUint32(nevents, count, true);
+      return ESUCCESS;
+    },
+  }, { get: (calls, name) => calls[name] ?? ((...args) => { console.error(`WASI ${name} is not implemented`, args); return ENOSYS; }) });
 }
 
 // What a module's own API files import from JS (IMPORT in region-draw.cc), by name. Any other import is a Blender
