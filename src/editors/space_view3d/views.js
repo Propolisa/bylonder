@@ -9,7 +9,8 @@ import { Viewport } from '@babylonjs/core';
 //   is scaled up by CSS (the compositor's frame graph ignores camera viewports, so it needs the full canvas).
 // - Views stop rendering when nothing is happening: no input, no playback, no animated or loading content.
 //
-// A view is { canvas, camera, active (bool, renders or not), wantsCompositor (bool), beforeRender(), afterRender() }.
+// A view is { canvas, camera, active (bool, renders or not), wantsCompositor (bool), beforeRender(), afterRender(), input
+// (bool, default true: a 3D View taking the scene's input; an editor drawing a scene of its own takes none) }.
 export function createViews({ engine, scene, live = () => false }) {
   const views = new Map(); // canvas -> { view, engineView }
   let anchor = null, workSize = [0, 0], lastWake = 0, inputView = null, focused = null, layoutDirty = true, idle = false, held = false;
@@ -77,12 +78,13 @@ export function createViews({ engine, scene, live = () => false }) {
       engineView.customResize = () => {};
       views.set(view.canvas, { view, engineView });
       observer.observe(view.canvas);
+      layoutDirty = true;
+      if (view.input === false) { api.wake(); return view; }
       const enter = () => { api.setInput(view); takeKeys(view.canvas); };
       const down = () => { api.setInput(view); if (focused !== view) { focused = view; api.onFocus?.(view); } };
       view.canvas.addEventListener('pointerenter', enter);
       view.canvas.addEventListener('pointerdown', down, true);
       view.detach = () => { view.canvas.removeEventListener('pointerenter', enter); view.canvas.removeEventListener('pointerdown', down, true); };
-      layoutDirty = true;
       if (!inputView) api.setInput(view);
       api.wake();
       return view;
@@ -94,7 +96,7 @@ export function createViews({ engine, scene, live = () => false }) {
       engine.unRegisterView(view.canvas);
       views.delete(view.canvas);
       if (focused === view) focused = null;
-      if (inputView === view) { inputView = null; const next = views.values().next().value?.view; if (next) api.setInput(next); }
+      if (inputView === view) { inputView = null; const next = [...views.values()].find(({ view: v }) => v.input !== false)?.view; if (next) api.setInput(next); }
       layoutDirty = true; api.wake();
     },
     // The view under the pointer receives Babylon's scene input (gizmos, camera controls) and defines
@@ -103,7 +105,7 @@ export function createViews({ engine, scene, live = () => false }) {
       if (inputView === view || held) return;
       inputView = view;
       engine.inputElement = view.canvas;
-      scene.activeCamera = view.camera;
+      view.camera.getScene().activeCamera = view.camera;
       api.wake();
     },
     get input() { return inputView; },

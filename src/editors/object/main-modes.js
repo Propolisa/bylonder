@@ -16,6 +16,7 @@ import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js'
 // Each mode's context mode (CTX_data_mode_enum) and keymap; Edit Mode is Main's for armatures and Grease Pencil only.
 const MODES = { EDIT: { context: 'EDIT_ARMATURE', keymap: 'Armature' }, POSE: { context: 'POSE', keymap: 'Pose' }, PARTICLE_EDIT: { context: 'PARTICLE', keymap: 'Particle' },
   SCULPT: { context: 'SCULPT', keymap: 'Sculpt' }, WEIGHT_PAINT: { context: 'PAINT_WEIGHT', keymap: 'Weight Paint' },
+  VERTEX_PAINT: { context: 'PAINT_VERTEX', keymap: 'Vertex Paint' }, TEXTURE_PAINT: { context: 'PAINT_TEXTURE', keymap: 'Image Paint' },
   PAINT_GREASE_PENCIL: { context: 'PAINT_GREASE_PENCIL', keymap: 'Grease Pencil Draw Mode' },
   SCULPT_GREASE_PENCIL: { context: 'SCULPT_GREASE_PENCIL', keymap: 'Grease Pencil Sculpt Mode' },
   WEIGHT_GREASE_PENCIL: { context: 'WEIGHT_GREASE_PENCIL', keymap: 'Grease Pencil Weight Paint' },

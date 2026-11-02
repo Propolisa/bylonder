@@ -190,3 +190,20 @@ the pointer on the CPU (the module has no GPU selection buffer). See `docs/armat
 ## sculpt.brush_stroke
 Status: partial
 Sculpt Mode is Blender's on Main, with the Essentials brushes, the tool header and the sculpt tools; see `docs/blender-boundary.md` (3D View regions). The asset shelf region, the brush cursor and the mask, face set and dyntopo overlays are not drawn yet.
+
+## IMAGE_EDITOR > *
+The Image Editor and the UV Editor are Blender's own SpaceImage (`src/editors/space_image/image-editor.js`, through
+`src/editors/screen/blender-area.js`): Blender lays out the header, menus, toolbar, tool settings and sidebar, and
+runs the `image.*`, `uv.*` and `paint.*` operators with its keymaps. Images are read and written by Blender's image
+libraries in the module (libjpeg-turbo, libpng, OpenEXR, OpenImageIO, OpenColorIO). Babylon draws the main region:
+the image through the region's View2D and the edit mesh's UVs with Blender's overlay flags (`image-api.cc`
+`view_edit_uv_extract`). Image > Open and Save As use the browser's file dialog and a download. The view transform
+(AgX, Filmic) is not applied to what Babylon draws yet.
+
+## paint.image_paint
+Texture Paint and Vertex Paint are Blender's modes on Main (`src/editors/object/main-modes.js`); strokes run Blender's
+projection and 2D painting. Each Image is one Babylon texture shared by all its users (`src/imbuf/image-textures.js`),
+updated from Blender's partial updates of the image (only the regions a stroke changed), its mipmaps made again once
+painting pauses. Solid shading shows the paint slot's image in Texture Paint and the color attribute in Vertex Paint,
+and the Texture and Attribute colors in every mode. An image's sampling can be Babylon's own (`src/runtimes/image.js`,
+docs/runtimes.md).

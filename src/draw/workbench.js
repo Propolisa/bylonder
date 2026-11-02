@@ -6,6 +6,7 @@
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
+import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture.js';
 import { LinesMesh } from '@babylonjs/core/Meshes/linesMesh.js';
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
@@ -40,7 +41,21 @@ uniform mat4 view;
 uniform mat4 viewProjection;
 varying vec3 vNormalView;
 varying vec3 vPositionView;
+#ifdef TEXTURE_COLOR
+attribute vec2 uv;
+varying vec2 vUV;
+#endif
+#ifdef ATTRIBUTE_COLOR
+attribute vec4 color;
+varying vec4 vColor;
+#endif
 void main() {
+#ifdef TEXTURE_COLOR
+  vUV = uv;
+#endif
+#ifdef ATTRIBUTE_COLOR
+  vColor = color;
+#endif
   vec3 positionUpdated = position;
   vec3 normalUpdated = normal;
 #include<morphTargetsVertexGlobal>
@@ -160,12 +175,24 @@ vec3 linear_to_srgb(vec3 c) {
   c = clamp(c, 0.0, 1.0);
   return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
 }
+// The color type (V3D_SHADING_*_COLOR): the material's, the paint slot's image (Texture Paint) or the active color
+// attribute (Vertex Paint), as workbench_engine.cc forces them in those modes; both are linear here.
+#if defined(TEXTURE_COLOR)
+uniform sampler2D colorTexture;
+varying vec2 vUV;
+#define BASE_COLOR texture(colorTexture, vUV).rgb
+#elif defined(ATTRIBUTE_COLOR)
+varying vec4 vColor;
+#define BASE_COLOR vColor.rgb
+#else
+#define BASE_COLOR baseColor
+#endif
 vec3 shaded_color() {
   vec3 N = normalize(vec3(vNormalView.xy, -vNormalView.z));
   vec3 P = vec3(vPositionView.xy, -vPositionView.z);
   vec3 I = projection[3][3] == 0.0 ? normalize(-P) : vec3(0.0, 0.0, 1.0);
   if (dot(N, I) < 0.0) N = -N;
-  return get_world_lighting(baseColor, roughness, metallic, N, I);
+  return get_world_lighting(BASE_COLOR, roughness, metallic, N, I);
 }`;
 const FRAGMENT = `${LIGHTING}
 void main() { gl_FragColor = vec4(linear_to_srgb(shaded_color()), 1.0); }`;
@@ -244,16 +271,30 @@ function surface(material, out) {
   return out;
 }
 
-//   wireColor(mesh) -> RGBA theme color of a mesh's wire (selected, active or not)
-export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
+//   wireColor(mesh) -> RGBA theme color of a mesh's wire (selected, active or not); paintTexture(mesh) -> the Babylon
+//   texture of the image its active material's paint slot paints (Texture Paint, and Solid's Texture color), or null
+export function createWorkbench(scene, { wireColor = () => theme.wire, paintTexture: textureOf = () => null } = {}) {
+  // Looked up once per frame for each mesh, whichever views draw it.
+  const textures = new WeakMap();
+  const paintTexture = (mesh) => {
+    const frame = scene.getFrameId(), known = textures.get(mesh);
+    if (known?.frame === frame) return known.texture;
+    const texture = textureOf(mesh);
+    textures.set(mesh, { frame, texture });
+    return texture;
+  };
   const shaded = new Map(); // camera -> 'solid' | 'xray' | 'wire'
+  const colorTypes = new Map(); // camera -> View3DShading.color_type
   const current = { color: [0, 0, 0], roughness: 0, metallic: 0 };
   // A lit material: of meshes, or of curves of a Hair shape (`curves`: its mesh, for its defines).
-  const lit = (name, fragmentSource, uniforms = [], curves = null) => {
+  // `colorType`: the color type's attribute ('uv' for the paint slot's image, 'color' for the color attribute), if not the
+  // material's.
+  const lit = (name, fragmentSource, uniforms = [], curves = null, colorType = null) => {
     const material = new ShaderMaterial(name, scene, { vertexSource: curves ? CURVES_VERTEX : VERTEX, fragmentSource }, curves
       ? { attributes: ['position'], uniforms: ['view', 'viewProjection', 'projection', 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...CURVES_UNIFORMS, ...uniforms],
         samplers: CURVES_SAMPLERS, defines: ['#define CURVES', ...curvesDefines(curves.metadata.curves.faces)] }
-      : { attributes: ['position', 'normal'], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms], samplers: SAMPLERS });
+      : { attributes: ['position', 'normal', ...(colorType ? [colorType] : [])], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms],
+        samplers: [...SAMPLERS, ...(colorType === 'uv' ? ['colorTexture'] : [])], defines: { uv: ['#define TEXTURE_COLOR'], color: ['#define ATTRIBUTE_COLOR'] }[colorType] ?? [] });
     material.backFaceCulling = false;
     material.setArray4('lightDirection', STUDIO_LIGHT_DEFAULT.flatMap(([d]) => [...d, 0]));
     material.setArray4('lightDiffuseWrap', STUDIO_LIGHT_DEFAULT.flatMap(([, c]) => c));
@@ -265,10 +306,24 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
       effect.setFloat('roughness', roughness);
       effect.setFloat('metallic', metallic);
       if (curves) bindCurves(effect, mesh);
+      if (colorType === 'uv') effect.setTexture('colorTexture', paintTexture(mesh) ?? missing());
     });
     return material;
   };
+  // What an object without a paint slot shows in Texture Paint: the missing texture's magenta, as Blender's engines.
+  let missingTexture = null;
+  const missing = () => (missingTexture ??= new RawTexture(new Uint8Array([255, 0, 255, 255]), 1, 1, Constants.TEXTUREFORMAT_RGBA, scene));
   const solid = lit('__workbenchSolid', FRAGMENT);
+  const paint = { TEXTURE_PAINT: lit('__workbenchTexture', FRAGMENT, [], null, 'uv'), VERTEX_PAINT: lit('__workbenchAttribute', FRAGMENT, [], null, 'color') };
+  // Solid's Texture and Attribute colors (workbench_material.cc): the active image texture or the color attribute, the
+  // material's color without one. Texture Paint and Vertex Paint show them whatever the view's color, Texture Paint
+  // magenta without an image.
+  const paintMaterial = (mesh, colorType) => {
+    const mode = mesh.metadata?.wbMode;
+    if (mode === 'TEXTURE_PAINT' || (colorType === 'TEXTURE' && paintTexture(mesh))) return paint.TEXTURE_PAINT;
+    if ((mode === 'VERTEX_PAINT' || colorType === 'VERTEX') && mesh.isVerticesDataPresent?.('color')) return paint.VERTEX_PAINT;
+    return null;
+  };
   const accum = lit('__workbenchTransparentAccum', ACCUM_FRAGMENT, ['xray_alpha']);
   Object.assign(accum, { alphaMode: Constants.ALPHA_ONEONE_ONEONE, disableDepthWrite: true, depthFunction: Constants.ALWAYS, transparencyMode: Material.MATERIAL_ALPHABLEND });
   accum.setFloat('xray_alpha', XRAY_ALPHA);
@@ -299,10 +354,11 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
     }
     return curvesMaterials.get(key);
   };
-  const materialOf = (mesh, type) => (mesh.metadata?.curves ? curvesMaterial(mesh, type === 'xray' ? 'accum' : type) : materials[type]);
+  const materialOf = (mesh, type, colorType) => (mesh.metadata?.curves ? curvesMaterial(mesh, type === 'xray' ? 'accum' : type)
+    : (type === 'solid' && paintMaterial(mesh, colorType)) || materials[type]);
   // Overlays (grid, extras, Edit Mode) and line meshes draw themselves; curves draw as Workbench's hair.
   const shadedMesh = (mesh) => (mesh.metadata?.curves ? !mesh.metadata.overlay : !mesh.name.startsWith('__') && !mesh.metadata?.overlay && !(mesh instanceof LinesMesh) && mesh.getTotalVertices() > 0);
-  const assign = (mesh, camera) => mesh.setMaterialForRenderPass(camera.renderPassId, materialOf(mesh, shaded.get(camera)));
+  const assign = (mesh, camera) => mesh.setMaterialForRenderPass(camera.renderPassId, materialOf(mesh, shaded.get(camera), colorTypes.get(camera)));
   const added = scene.onNewMeshAddedObservable.add((mesh) => {
     // Builders add vertices after construction; decide once the mesh is set up.
     scene.onBeforeRenderObservable.addOnce(() => { if (shadedMesh(mesh)) for (const camera of shaded.keys()) assign(mesh, camera); });
@@ -361,14 +417,17 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
     scene.resetCachedMaterial();
   });
   return {
+    // A mesh's Workbench materials again, after its mode or color data changed.
+    refresh(mesh) { if (mesh.getTotalVertices && shadedMesh(mesh)) for (const camera of shaded.keys()) assign(mesh, camera); },
     // What `camera` renders: 'solid', 'xray', 'wire', or undefined for the scene's materials.
     shading: (camera) => shaded.get(camera),
     // Solid ('solid'), Solid with X-ray ('xray'), Wireframe ('wire') or the scene's materials (null) for what `camera`
-    // renders. Not per frame.
-    setShading(camera, type) {
-      if ((shaded.get(camera) ?? null) === type) return;
+    // renders, with Solid's color type (View3DShading.color_type). Not per frame.
+    setShading(camera, type, colorType = 'MATERIAL') {
+      if ((shaded.get(camera) ?? null) === type && colorTypes.get(camera) === colorType) return;
       if (type) shaded.set(camera, type); else shaded.delete(camera);
-      for (const mesh of scene.meshes) if (shadedMesh(mesh)) mesh.setMaterialForRenderPass(camera.renderPassId, type ? materialOf(mesh, type) : undefined);
+      colorTypes.set(camera, colorType);
+      for (const mesh of scene.meshes) if (shadedMesh(mesh)) mesh.setMaterialForRenderPass(camera.renderPassId, type ? materialOf(mesh, type, colorType) : undefined);
       const targets = camera.customRenderTargets, index = targets.indexOf(transparent);
       if (type === 'xray' && index < 0) targets.push(transparent);
       else if (type !== 'xray' && index >= 0) targets.splice(index, 1);

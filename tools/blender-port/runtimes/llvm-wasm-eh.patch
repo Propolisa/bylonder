@@ -1,0 +1,69 @@
+diff --git a/libcxx/include/__exception/exception_ptr.h b/libcxx/include/__exception/exception_ptr.h
+index 53e2f718..a200f163 100644
+--- a/libcxx/include/__exception/exception_ptr.h
++++ b/libcxx/include/__exception/exception_ptr.h
+@@ -36,11 +36,15 @@ struct __cxa_exception;
+ _LIBCPP_OVERRIDABLE_FUNC_VIS __cxa_exception* __cxa_init_primary_exception(
+     void*,
+     std::type_info*,
++#  if defined(__USING_WASM_EXCEPTIONS__)
++    void* (*)(void*)) throw();
++#  else
+     void(
+-#  if defined(_WIN32)
++#    if defined(_WIN32)
+         __thiscall
+-#  endif
++#    endif
+             *)(void*)) throw();
++#  endif
+ }
+ 
+ } // namespace __cxxabiv1
+@@ -90,6 +94,9 @@ _LIBCPP_HIDE_FROM_ABI exception_ptr make_exception_ptr(_Ep __e) _NOEXCEPT {
+   void* __ex = __cxxabiv1::__cxa_allocate_exception(sizeof(_Ep));
+   (void)__cxxabiv1::__cxa_init_primary_exception(__ex, const_cast<std::type_info*>(&typeid(_Ep)), [](void* __p) {
+     std::__destroy_at(static_cast<_Ep2*>(__p));
++#      if defined(__USING_WASM_EXCEPTIONS__)
++    return __p;
++#      endif
+   });
+ 
+   try {
+diff --git a/libcxxabi/include/cxxabi.h b/libcxxabi/include/cxxabi.h
+index d0701181..f6d6962c 100644
+--- a/libcxxabi/include/cxxabi.h
++++ b/libcxxabi/include/cxxabi.h
+@@ -48,7 +48,13 @@ extern _LIBCXXABI_FUNC_VIS void
+ __cxa_free_exception(void *thrown_exception) throw();
+ // This function is an LLVM extension, which mirrors the same extension in libsupc++ and libcxxrt
+ extern _LIBCXXABI_FUNC_VIS __cxa_exception*
+-__cxa_init_primary_exception(void* object, std::type_info* tinfo, void(_LIBCXXABI_DTOR_FUNC* dest)(void*)) throw();
++__cxa_init_primary_exception(void* object, std::type_info* tinfo,
++#ifdef __USING_WASM_EXCEPTIONS__
++    void *(_LIBCXXABI_DTOR_FUNC* dest)(void*)
++#else
++    void(_LIBCXXABI_DTOR_FUNC* dest)(void*)
++#endif
++) throw();
+ 
+ // 2.4.3 Throwing the Exception Object
+ extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void
+diff --git a/libcxxabi/src/cxa_exception.cpp b/libcxxabi/src/cxa_exception.cpp
+index 65e9f450..c340beb6 100644
+--- a/libcxxabi/src/cxa_exception.cpp
++++ b/libcxxabi/src/cxa_exception.cpp
+@@ -207,7 +207,12 @@ void __cxa_free_exception(void *thrown_object) throw() {
+ }
+ 
+ __cxa_exception* __cxa_init_primary_exception(void* object, std::type_info* tinfo,
+-                                              void(_LIBCXXABI_DTOR_FUNC* dest)(void*)) throw() {
++#ifdef __USING_WASM_EXCEPTIONS__
++    void *(_LIBCXXABI_DTOR_FUNC* dest)(void*)
++#else
++    void(_LIBCXXABI_DTOR_FUNC* dest)(void*)
++#endif
++) throw() {
+   __cxa_exception* exception_header = cxa_exception_from_thrown_object(object);
+   exception_header->referenceCount = 0;
+   exception_header->unexpectedHandler = std::get_unexpected();

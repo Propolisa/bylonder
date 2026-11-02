@@ -71,6 +71,7 @@ On the struct Blender keeps the feature's evaluated state in, so each instance c
   with the meshes it deforms following it;
 - a light's on its **Light** data;
 - a particle system's on its **ParticleSettings**.
+- an image's sampling on its **Image** (its panel is in the Image Editor's sidebar, which shows the Image).
 
 For scripts and tools the path is `<struct>.bylonder.runtime` (`'BLENDER'`, `'MAPPED'`, `'NATIVE'`),
 `<struct>.bylonder.babylon` (the native settings) and `<struct>.bylonder.issues` (read only: each approximation or
@@ -117,6 +118,7 @@ carries no mark: an unmarked control behaves as in Blender 5.2.
 | Armature deform | Object | Yes | Skeleton, GPU skinning | Not offered |
 | Light | Light | Yes | Not offered | Planned |
 | Particle system | ParticleSettings | Yes | Planned | Planned |
+| Image sampling | Image (Image Editor > Sidebar > Image) | Yes | Not offered | Anisotropic filtering, mipmaps |
 
 Bylonder-only features (Babylon particle systems, Array (Nodes), Babylon node blocks in material graphs) have no
 Blender counterpart: they are not runtimes, and carry the Bylonder icon.

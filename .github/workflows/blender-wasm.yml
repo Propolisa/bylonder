@@ -62,6 +62,10 @@ jobs:
           merge-multiple: true
       - name: Link and report
         run: python3 tools/blender-port/blender_build.py work/build-host --report seam-report.json
+      # Sources that include a host header instead of the module's (non-blocking until the WASI-only sysroot lands).
+      - name: Host headers
+        continue-on-error: true
+        run: cd tools/blender-port && python3 host_headers.py ../../work/build-host
       - name: Publish the module
         env:
           GH_TOKEN: ${{ github.token }}

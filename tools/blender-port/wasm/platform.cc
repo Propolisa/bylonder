@@ -3,6 +3,9 @@
 #include "BLI_mmap.h"
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <new>
 
 #include "BLI_expr_pylike_eval.h"
@@ -74,26 +77,6 @@ struct ThreadSlot {
   pthread_t pthread;
   int avail;
 };
-/* port-override: image files are the browser's to decode; OpenImageIO and OpenEXR are past the seam. */
-WEAK void OIIO_init() {}
-/* blender-port: imbuf/intern/format_*.cc and openexr_api.cpp: the file extensions of the image formats whose readers
- * are past the seam, which the file types (filetype.cc) and so file lists still name. */
-const char *imb_file_extensions_avif[] = {".avif", nullptr};
-const char *imb_file_extensions_bmp[] = {".bmp", ".dib", nullptr};
-const char *imb_file_extensions_cineon[] = {".cin", nullptr};
-const char *imb_file_extensions_dds[] = {".dds", nullptr};
-const char *imb_file_extensions_dpx[] = {".dpx", nullptr};
-const char *imb_file_extensions_hdr[] = {".hdr", nullptr};
-const char *imb_file_extensions_iris[] = {".sgi", ".rgb", ".rgba", ".bw", nullptr};
-const char *imb_file_extensions_jpeg[] = {".jpg", ".jpeg", nullptr};
-const char *imb_file_extensions_openexr[] = {".exr", nullptr};
-const char *imb_file_extensions_png[] = {".png", nullptr};
-const char *imb_file_extensions_psd[] = {".psd", ".pdd", ".psb", nullptr};
-const char *imb_file_extensions_tga[] = {".tga", ".tpic", nullptr};
-const char *imb_file_extensions_tiff[] = {".tif", ".tiff", ".tx", nullptr};
-WEAK void imb_initopenexr() {}
-WEAK void imb_exitopenexr() {}
-WEAK void imb_init_dds() {}
 }  // namespace blender
 #undef WEAK
 
@@ -112,14 +95,43 @@ bool BPY_run_string_as_number(bContext * /*C*/, const char * /*imports*/[], cons
 }  // namespace blender
 
 namespace blender {
-/* port-override: WASI has no memory mapping, nor the signals BLI_mmap.cc handles a mapped file's read errors with: a file
- * is never mapped, so Blender's readers read it (blo_core_file_reader.cc falls back to BLI_filereader_new_file). */
-BLI_mmap_file *BLI_mmap_open(int /*fd*/) { return nullptr; }
-bool BLI_mmap_read(BLI_mmap_file * /*file*/, void * /*dest*/, size_t /*offset*/, size_t /*length*/) { return false; }
-void *BLI_mmap_get_pointer(BLI_mmap_file * /*file*/) { return nullptr; }
-size_t BLI_mmap_get_length(const BLI_mmap_file * /*file*/) { return 0; }
+/* port-override: WASI has no memory mapping, nor the signals BLI_mmap.cc handles a mapped file's read errors with: a
+ * file's mapping is its bytes read into memory, which the module's file system holds in memory already. */
+struct BLI_mmap_file {
+  char *memory;
+  size_t length;
+};
+BLI_mmap_file *BLI_mmap_open(int fd)
+{
+  struct stat st;
+  char *memory = fstat(fd, &st) == 0 && st.st_size > 0 ? static_cast<char *>(malloc(size_t(st.st_size))) : nullptr;
+  const size_t length = memory ? size_t(st.st_size) : 0;
+  for (size_t done = 0; memory && done < length;) {
+    const ssize_t got = pread(fd, memory + done, length - done, off_t(done));
+    if (got <= 0) {
+      free(memory);
+      memory = nullptr;
+    }
+    done += size_t(got);
+  }
+  return memory ? new BLI_mmap_file{memory, length} : nullptr;
+}
+bool BLI_mmap_read(BLI_mmap_file *file, void *dest, size_t offset, size_t length)
+{
+  if (offset > file->length || length > file->length - offset) {
+    return false;
+  }
+  memcpy(dest, file->memory + offset, length);
+  return true;
+}
+void *BLI_mmap_get_pointer(BLI_mmap_file *file) { return file->memory; }
+size_t BLI_mmap_get_length(const BLI_mmap_file *file) { return file->length; }
 bool BLI_mmap_any_io_error(const BLI_mmap_file * /*file*/) { return false; }
-void BLI_mmap_free(BLI_mmap_file * /*file*/) {}
+void BLI_mmap_free(BLI_mmap_file *file)
+{
+  free(file->memory);
+  delete file;
+}
 }  // namespace blender
 
 #define QUEUE_POP _ZN7blender20BLI_thread_queue_popEPNS_11ThreadQueueE

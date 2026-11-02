@@ -351,7 +351,10 @@ export function createMainView(state) {
     // Last, as the collections' subscribers (the Outliner) draw from Main as soon as they change.
     if (world.collections) state.readCollections();
     world.modifiers?.refresh();
-    if (modeChanged) world.onModeChange?.();
+    if (modeChanged) {
+      for (const node of objects.keys()) world.workbench?.refresh(node);
+      world.onModeChange?.();
+    }
   }
 
   // What the depsgraph updated, drawn (docs/model.md): every updated object's and its data's values (a light's, a
@@ -496,9 +499,21 @@ export function createMainView(state) {
   function drawGeometry(entry) {
     const mesh = blender.evaluatedMesh(entry.ob);
     if (!mesh) return;
-    const weights = blender.mode(entry.ob) === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;
+    const mode = blender.mode(entry.ob);
+    const weights = mode === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;
+    const colors = blender.paintColors(mesh.corners_num);
     drawMesh(entry, mesh, blender.modifiers(entry.ob).map(({ error }) => error));
     entry.paintWeight = paintWeightOverlay(entry.node, mesh, weights, entry.paintWeight);
+    drawColors(entry.node, colors);
+  }
+  // The active color attribute, which Solid shows in Vertex Paint Mode and with its Attribute color (workbench.js), one
+  // color per face corner as the mesh's vertices are; materials do not multiply it (Babylon's would), as Blender's do not.
+  function drawColors(node, colors) {
+    const had = node.isVerticesDataPresent('color');
+    if (colors && node.getTotalVertices() * 4 === colors.length) node.setVerticesData('color', colors, true, 4);
+    else if (had) node.removeVerticesData('color');
+    node.useVertexColors = false;
+    if (had !== node.isVerticesDataPresent('color')) world.workbench?.refresh(node);
   }
   function drawMesh({ node }, mesh, errors = []) {
     if (world.modifiers) world.modifiers.draw(node, mesh, errors);

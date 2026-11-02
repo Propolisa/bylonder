@@ -34,7 +34,7 @@ function shaderProgram({ node, properties, inputs, output }) {
   const steps = SHADER_NODES[node](p, decl, { connected: (id) => id in inputs, linked: (id) => id === output });
   const body = compileSteps(decl, steps, links, {
     emit: (k, c) => functions.set(k, c), free: (n) => n + '_' + functions.size + '_' + Math.random().toString(36).slice(2, 7),
-    sampler: (table) => { const name = 'bl_table_' + textures.length; textures.push([name, Array.from(halfFloats(table))]); return name; },
+    sampler: ({ texture: table }) => { const name = 'bl_table_' + textures.length; textures.push([name, Array.from(halfFloats(table))]); return name; },
     functions: STAND_INS,
   });
   const kind = kindOfSocket(decl, '@' + output);

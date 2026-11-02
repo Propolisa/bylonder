@@ -790,6 +790,42 @@ const checks = {
     assert.deepEqual(await state(), before);
   } },
 
+  // Texture Paint: a stroke on Suzanne in the 3D Viewport and one in the Image Editor paint her image, Ctrl Z takes a
+  // stroke back, and the UV Editing workspace shows her UVs over it.
+  "Texture Paint paints in the 3D Viewport and the Image Editor": { open: { link: "texture-paint", node: "Suzanne" }, async run() {
+    const painted = () => app.bylonder((b) => {
+      const pixels = b.modules.bpyRna.blendData().images.get("Suzanne Paint").pixels;
+      let sum = 0;
+      for (let i = 0; i < pixels.length; i += 401) sum += pixels[i];
+      return sum;
+    });
+    const stroke = async (box, [x0, y0], [x1, y1]) => {
+      await app.page.mouse.move(box.x + box.width * x0, box.y + box.height * y0);
+      await app.page.mouse.down();
+      for (let i = 1; i <= 20; i++) await app.page.mouse.move(box.x + box.width * (x0 + (x1 - x0) * i / 20), box.y + box.height * (y0 + (y1 - y0) * i / 20));
+      await app.page.mouse.up();
+      await app.settled();
+    };
+    await app.page.click('[data-workspace="texture-paint"]');
+    await app.settled();
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("NumpadDecimal");
+    await app.settled();
+    const view = await app.frame().locator(".viewport-canvas").first().boundingBox();
+    const before = await painted();
+    await stroke(view, [0.4, 0.45], [0.6, 0.5]);
+    const stroked = await painted();
+    assert.notEqual(stroked, before, "the 3D stroke paints the image");
+    await app.page.keyboard.press("Control+z");
+    await app.settled();
+    assert.equal(await painted(), before, "Ctrl Z takes the stroke back");
+    await stroke(await app.frame().locator("#image-section").boundingBox(), [0.2, 0.7], [0.5, 0.4]);
+    assert.notEqual(await painted(), before, "the Image Editor stroke paints the image");
+    await app.page.click('[data-workspace="uv-editing"]');
+    await app.settled();
+    assert.ok(await app.frame().locator("#image-section canvas.bl-image-view").isVisible(), "the UV Editor draws");
+  } },
+
   // Grease Pencil: the Bouncing Ball's drawings draw as GreasedLine and fill meshes; a drag in Draw Mode draws a stroke
   // (one undo step), and the Fill tool's Pixel solver, rendered on Babylon, fills a closed shape.
   "Grease Pencil draws, fills and undoes a stroke": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
