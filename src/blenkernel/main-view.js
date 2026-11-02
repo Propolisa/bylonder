@@ -280,13 +280,13 @@ export function createMainView(state) {
     if (pbr) applyPBR(owner, pbr);
     pullTree(record.ptr, rna.pointer(struct, owner), owner.name, warnings, !pbr);
   }
-  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types, where they differ
-  // (when `values`); a warning names the node types it has no binding for.
+  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's node of the same name (else the first of the
+  // same type), where they differ (when `values`); a warning names the node types it has no binding for.
   function pullTree(id, data, label, warnings = [], values = true) {
     const held = blender.nodeTree(id).nodes, mapped = new Set(['ShaderNodeOutputMaterial', 'ShaderNodeOutputWorld']);
     const visit = (node) => {
       mapped.add(node[INFO].struct);
-      const from = held.find((h) => h.idname === node[INFO].struct);
+      const from = held.find((h) => h.name === node.name && h.idname === node[INFO].struct) ?? held.find((h) => h.idname === node[INFO].struct);
       for (const input of node.inputs) {
         if (input.is_linked) { visit(input.links[0].from_node); continue; }
         if (!values) continue;

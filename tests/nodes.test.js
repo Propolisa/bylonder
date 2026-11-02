@@ -2,7 +2,7 @@
 // Blender's socket conversions, built, saved and loaded.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
-import { shaderNodeClasses, SHADER_NODES } from '../src/nodes/blender/shader-nodes.js';
+import { nodeMaterialFromTree, shaderNodeClasses, SHADER_NODES } from '../src/nodes/blender/shader-nodes.js';
 import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js';
 import { availability, declaration } from '../src/nodes/blender/declarations.js';
 import { glslFunction } from '../src/nodes/blender/glsl.js';
@@ -100,5 +100,22 @@ assert.deepEqual(imageAlpha(true, 'STRAIGHT', true), ['color_alpha_unpremultiply
 assert.deepEqual(imageAlpha(true, 'PREMUL', false), ['color_alpha_clear']);
 assert.deepEqual(imageAlpha(true, 'PREMUL', true), ['color_alpha_unpremultiply']);
 assert.deepEqual(imageAlpha(true, 'CHANNEL_PACKED', true), ['color_alpha_clear']);
+
+// Reflections lit as EEVEE's closure bins: a Diffuse with a Glossy, and two Glossy BSDFs, each lobe by a surface of its
+// own, the second in a scope of its own over the first's radiance.
+const lobes = async (nodes) => {
+  const tree = { nodes: [...nodes.map((idname, i) => ({ idname, name: 'BSDF ' + i })), { idname: 'ShaderNodeMixShader', name: 'Mix' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+    links: [['BSDF 0', 'BSDF', 'Mix', 'Shader'], ['BSDF 1', 'BSDF', 'Mix', 'Shader_001'], ['Mix', 'Shader', 'Material Output', 'Surface']] };
+  const built = nodeMaterialFromTree('Lobes', scene, tree).material;
+  if (built._buildIsInProgress) await new Promise((resolve) => built.onBuildObservable.addOnce(resolve));
+  return { surfaces: built.attachedBlocks.filter((b) => b.getClassName() === 'BlenderSurfaceBlock').map((b) => b.lobe), code: built._fragmentCompilationState._builtCompilationString };
+};
+const mixed = await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfAnisotropic']);
+assert.deepEqual(mixed.surfaces, [0, 1], 'a Glossy over a Diffuse is a lobe of its own');
+assert.match(mixed.code, /bl_node_bsdf_glossy\([^;]*, 1\.0, /);
+assert.match(mixed.code, /\n\{\n[\s\S]*lobeLit\w* = finalColor\.rgb;\n\}\n/, "the lobe's PBR code runs in a scope of its own");
+const two = await lobes(['ShaderNodeBsdfAnisotropic', 'ShaderNodeBsdfAnisotropic']);
+assert.deepEqual(two.surfaces, [0, 1], 'two Glossy BSDFs take the base and a lobe');
+assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse'])).surfaces, [0], 'diffuse closures share the base');
 
 console.log('nodes: ok');
