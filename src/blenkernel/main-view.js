@@ -14,14 +14,13 @@ import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
-import { Camera, Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
 import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
-import { fitOrthoScale } from '../editors/space_view3d/navigation.js';
 import { nodeMaterialFromTree, nodeProperties } from '../nodes/blender/shader-nodes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
@@ -46,17 +45,10 @@ export const plain = (value) => (value && typeof value === 'object' ? Array.from
 const close = (a, b) => Math.abs(a - b) <= 1e-5 * Math.max(1, Math.abs(a), Math.abs(b));
 export const same = (a, b) => (Array.isArray(a) ? Array.isArray(b) && a.length === b.length && a.every((v, i) => same(v, b[i]))
   : typeof a === 'number' && typeof b === 'number' ? close(a, b) : a === b);
-// A camera of Main's, drawn orthographic, takes its bounds from its Orthographic Scale and each view's aspect.
-const fitsOrthoScale = (camera) => {
-  camera.getScene().onBeforeCameraRenderObservable.add((rendered) => {
-    if (rendered === camera && camera.mode === Camera.ORTHOGRAPHIC_CAMERA) fitOrthoScale(camera, camera.getEngine().getAspectRatio(camera));
-  });
-  return camera;
-};
 // The Babylon objects an Object of Main's becomes, by its type.
 const MAKERS = {
   EMPTY: (scene, name) => new TransformNode(name, scene),
-  CAMERA: (scene, name) => asObject(fitsOrthoScale(new FreeCamera(name, Vector3.Zero(), scene))),
+  CAMERA: (scene, name) => asObject(new FreeCamera(name, Vector3.Zero(), scene)),
   // A light Blender's code made is Blender's (docs/blender-boundary.md point 4a); the view fills its settings from Main.
   LIGHT: (scene, name, ob, blender) => createLight(name, dnaGet('Light', blender.data(ob), 'type'), {}, scene),
   MESH: (scene, name) => new Mesh(name, scene),
