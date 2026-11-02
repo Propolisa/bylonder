@@ -94,12 +94,19 @@ def patched_tree(root):
     return tree, digest
 
 
-def dependencies(build, deps):
+def dependencies(build, deps, build_all=True):
     """Libraries Blender builds against, at the versions Blender pins (build_files/build_environment/cmake/versions.cmake),
     fetched once; returns their directories, the include directories and a key of the versions of those every source
-    sees. A `private` dependency is seen only by the libraries built from it or naming it in `uses` (library_flags)."""
+    sees. A `private` dependency is seen only by the libraries built from it or naming it in `uses` (library_flags). One
+    with a `build` is built by its own build system (build.script, deps/: CPython's configure, numpy's meson) after the
+    dependencies it `uses`, and its directory is that build's output; without `build_all` those are left out (a tool that
+    reads Blender's headers only)."""
     paths, includes = {}, []
-    for name, dep in sorted(deps.items()):
+
+    def provide(name):
+        if name in paths:
+            return paths[name]
+        dep = deps[name]
         path = os.path.join(build, 'deps', f'{name}-{dep["tag"]}')
         if not os.path.exists(path):
             if 'sha256' in dep:  # An archive, checked against the hash Blender pins.
@@ -107,19 +114,50 @@ def dependencies(build, deps):
                 if hashlib.sha256(data).hexdigest() != dep['sha256']:
                     sys.exit(f'{name}: {dep["url"]} does not match its pinned hash')
                 os.makedirs(path)
-                subprocess.run(['tar', '-xz', '--strip-components=1', '-C', path], input=data, check=True)
+                subprocess.run(['tar', '-xJ' if dep['url'].endswith('.xz') else '-xz', '--strip-components=1', '-C', path], input=data, check=True)
             else:
                 subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path],
                                check=True)
         apply_patches(path, [os.path.join(WASM, 'patches', 'deps', p) for p in dep.get('patches', [])])
         for target, variables in dep.get('configure', {}).items():
             configure(os.path.join(path, target), variables, path)
+        if 'build' in dep:
+            path = built(name, dep, path, [provide(u) for u in dep['build'].get('uses', [])])
         paths[name] = path
-        if not dep.get('private'):
-            includes += include_flags(path, dep)
-    for name, dep in deps.items():
-        install(paths, name, dep.get('install', {}))
+        return path
+
+    def built(name, dep, source, uses):
+        """The dependency built by its script into <name>-<tag>-build, again when the script or what it uses changes."""
+        out = source + '-build'
+        script = os.path.join(HERE, dep['build']['script'])
+        # The script, the helpers beside it (deps/clang-wasi, deps/config.site-cpython) but the other scripts, and the
+        # module build's files it uses (build.inputs).
+        scripts = [script, *sorted(p for p in glob.glob(os.path.join(os.path.dirname(script), '*')) if not p.endswith('.sh')),
+                   *(os.path.join(HERE, p) for p in dep['build'].get('inputs', []))]
+        digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in scripts if os.path.isfile(p)) + ' '.join(uses).encode()).hexdigest()[:16]
+        stamp = os.path.join(out, '.built')
+        if not (os.path.exists(stamp) and open(stamp).read() == digest):
+            print(f'{name}: building with {dep["build"]["script"]}', file=sys.stderr, flush=True)
+            subprocess.run([script, source, *uses, out], check=True)
+            open(stamp, 'w').write(digest)
+        return out
+
+    for name in sorted(n for n in deps if build_all or 'build' not in deps[n]):
+        path = provide(name)
+        if not deps[name].get('private'):
+            includes += include_flags(path, deps[name])
+    for name in list(paths):
+        install(paths, name, deps[name].get('install', {}))
     return paths, includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()) if not d.get('private'))
+
+
+def dependency_archives(paths, deps):
+    """The archives the built dependencies give the module's link (build.archives), a user's before what it uses (numpy's
+    before CPython's), as the linker reads each once, and their link flags (build.link)."""
+    built = {n: d['build'] for n, d in deps.items() if 'build' in d}
+    depth = lambda n: 1 + max((depth(u) for u in built[n].get('uses', []) if u in built), default=0)
+    archives = [os.path.join(paths[n], a) for n in sorted(built, key=depth, reverse=True) for a in built[n].get('archives', [])]
+    return archives, [f for d in deps.values() for f in d.get('build', {}).get('link', [])]
 
 
 def apply_patches(path, patches):

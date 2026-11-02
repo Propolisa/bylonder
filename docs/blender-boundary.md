@@ -177,7 +177,7 @@ object is placed by the view and its evaluated curves drawn (`main-view.js` draw
 
 ### Building Blender as Blender builds itself
 
-`tools/blender-port/configure_host.sh` configures Blender at the manifest's tag with its own CMake (headless, without the libraries past the seams below) for its compile commands, and `tools/blender-port/blender_build.py` compiles every library they list for wasm32: Blender decides what is in a library, not a list kept here. Blender's build tools run where their output depends on the platform as wasm32 programs under Node's WASI (`makesrna`, and `makesdna` through `wasm_module.sdna`). The seams, left out: the window system (GHOST), the GPU module and draw engines, Python's C API (Bylonder's Python is transpiled), Cycles and audio. Blender's movie library is built without FFmpeg, as Blender builds it without a codec library; video is written by the browser (WebCodecs): `movie-api.cc` defines the Video file format and the encoding settings the browser honors over Blender's own DNA (`RenderData.ffcodecdata`), and the render reads them from Main (`src/render/formats.js`). The build reports what does not compile and every symbol nothing defines, by library (`seam-report.json`). Objects are cached by their source and flags without paths, so the CI build (`.github/workflows/blender-wasm.yml`, eight jobs) and a local one share them. `link_module` links Bylonder's API (`tools/blender-port/wasm/*-api.cc`, `rna-runtime.cc` over Blender's own RNA and window manager) before Blender's libraries into the module the app loads; where both define a symbol, the losing definition is made weak (`wasm_weaken.py`; wasm-ld has no `--allow-multiple-definition`), so no Blender object is left out: the API wins in the window manager, UI and font libraries (its seams there), Blender everywhere else. `replaced.json` lists both sides, the API's stand-ins to remove one by one. The configure builds what the shipped module builds (Bullet, OpenSubdiv, OpenVDB on the module's serial tbb headers), and the libraries Blender takes from outside its tree come from the manifest's `dependency` libraries, built as the module build builds them. Undefined functions link as imports that throw when called; undefined data fails the link (it would read as null), except what `wasm/null-data.txt` names with its reason. Headers Blender's build writes as it builds (`buildinfo.h`, the checkout's hash that saved files carry) are made by its own CMake target first. This module is `src/bmesh/bmesh.wasm`. It starts as Blender's main does (`blender_init`: RNA, node types, color management, render engines), run once at build time and kept in its data (`wasm_snapshot.py`). Its other seams: GHOST's paths (`ghost-paths.cc`), the draw module's engines by identity only (`draw-seam.cc`), image formats (the browser decodes), and the Blender functions the API wraps (`--wrap`: `platform.cc`'s thread pool and queue, in every module, and `ui-tree.cc`'s layout resolve). The interface is compiled as a Blender with a window compiles it, as its drawing is recorded. Blender's depsgraph evaluates Main: the API's writes into Main tag what they change, as Blender's RNA updates and operators do.
+`tools/blender-port/configure_host.sh` configures Blender at the manifest's tag with its own CMake (headless, without the libraries past the seams below) for its compile commands, and `tools/blender-port/blender_build.py` compiles every library they list for wasm32: Blender decides what is in a library, not a list kept here. Blender's build tools run where their output depends on the platform as wasm32 programs under Node's WASI (`makesrna`, and `makesdna` through `wasm_module.sdna`). The seams, left out: the window system (GHOST), the GPU module and draw engines, Python's `gpu` module, Cycles and audio; Python is the manifest's CPython (Python). Blender's movie library is built without FFmpeg, as Blender builds it without a codec library; video is written by the browser (WebCodecs): `movie-api.cc` defines the Video file format and the encoding settings the browser honors over Blender's own DNA (`RenderData.ffcodecdata`), and the render reads them from Main (`src/render/formats.js`). The build reports what does not compile and every symbol nothing defines, by library (`seam-report.json`). Objects are cached by their source and flags without paths, so the CI build (`.github/workflows/blender-wasm.yml`, eight jobs) and a local one share them. `link_module` links Bylonder's API (`tools/blender-port/wasm/*-api.cc`, `rna-runtime.cc` over Blender's own RNA and window manager) before Blender's libraries into the module the app loads; where both define a symbol, the losing definition is made weak (`wasm_weaken.py`; wasm-ld has no `--allow-multiple-definition`), so no Blender object is left out: the API wins in the window manager, UI and font libraries (its seams there), Blender everywhere else. `replaced.json` lists both sides, the API's stand-ins to remove one by one. The configure builds what the shipped module builds (Bullet, OpenSubdiv, OpenVDB on the module's serial tbb headers), and the libraries Blender takes from outside its tree come from the manifest's `dependency` libraries, built as the module build builds them. Undefined functions link as imports that throw when called; undefined data fails the link (it would read as null), except what `wasm/null-data.txt` names with its reason. Headers Blender's build writes as it builds (`buildinfo.h`, the checkout's hash that saved files carry) are made by its own CMake target first. This module is `src/bmesh/bmesh.wasm`. It starts as Blender's main does (`blender_init`: RNA, node types, color management, render engines), run once at build time and kept in its data (`wasm_snapshot.py`). Its other seams: GHOST's paths (`ghost-paths.cc`), the draw module's engines by identity only (`draw-seam.cc`), image formats (the browser decodes), and the Blender functions the API wraps (`--wrap`, each one an API file's `__wrap_` definition: `platform.cc`'s thread pool and queue, `ui-tree.cc`'s layout resolve, `python.cc`'s calls into Python before it starts). The interface is compiled as a Blender with a window compiles it, as its drawing is recorded. Blender's depsgraph evaluates Main: the API's writes into Main tag what they change, as Blender's RNA updates and operators do.
 
 ### Adding a subsystem
 
@@ -483,21 +483,78 @@ The app opens in the Layout workspace: the window is Blender's (topbar, editors,
 
 Decided 2026-10-28. The Scripting screen is startup.blend's: the 3D Viewport over the Python Console and Info, the Text Editor, the Outliner over the Properties editor (Blender's two Outliners are one), split at its area vertices as Layout is; Info has no header there, as in Blender. The three editors are Blender's spaces in the scene window, where `bpy.context` and RNA live.
 
-- The Text Editor is Blender's own `space_text` in the module: an area of Blender's window (`editors/screen/blender-area.js`) whose header Blender's uiLayout lays out and whose main region `text_draw.cc` draws, monospaced through `BLF_draw_mono`. Its input goes to Blender's window (`windowmanager/wm-areas.js`), which runs Blender's text operators with the Text keymaps; Blender's clipboard is the browser's (`clipboard.cc`, `windowmanager/wm-clipboard.js`). The page registers only what reaches outside Blender: `text.open`, `text.save`, `text.save_as`, `text.run_script` and `text.unlink` (which keeps `index.js`). Any editor that is Blender's own mounts the same way.
-- The Python Console and Info still draw Blender's headers and menus from the tree (`CONSOLE_HT_header`, `INFO_HT_header`) through `editors/interface/area-ui.js` and run their keymaps (Console, Info, then Screen and Window) inside their areas. Their operators are JS after Blender's C (`console_ops.cc`, `textview.cc`), stand-ins until they move onto Blender's spaces as the Text Editor did.
+- The Text Editor is Blender's own `space_text` in the module: an area of Blender's window (`editors/screen/blender-area.js`) whose header Blender's uiLayout lays out and whose main region `text_draw.cc` draws, monospaced through `BLF_draw_mono`. Its input goes to Blender's window (`windowmanager/wm-areas.js`), which runs Blender's text operators with the Text keymaps; Blender's clipboard is the browser's (`clipboard.cc`, `windowmanager/wm-clipboard.js`). The page registers only what reaches outside Blender: `text.open`, `text.save`, `text.save_as`, `text.unlink` (which keeps `index.js`) and `text.run_script`, which starts Python and then runs Blender's own. Any editor that is Blender's own mounts the same way.
+- The Python Console and Info are Blender's own spaces too (`space_console`, `space_info`), mounted the same way; the console's Python operators run in CPython (Python, below).
 - Texts are Blender's Texts in Main and the project's text files (`blenkernel/text-files.js`): `bpy.data.texts` lists them (`index.js` too), and after edits the files follow Main's Texts (written, renamed, removed), as a .blend holds its texts. All are internal (`filepath` empty): Save needs a file, so it is Save As, which downloads the text; Open reads a local file into a new text.
 - Reports: a finished operator with Blender's REGISTER option (`windowmanager/operator-register.json`, from `tools/blender-reference/operator-register.py`) reports its call as Python, Python operators report through `self.report`, and Run Script reports a failed script's traceback and moves the cursor to its line. Info lists them (`windowmanager/wm-reports.js`). `print` goes to the system console, the browser's, which the project's workbench shows.
 
 ### Python
 
-CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.jsdelivr.net at a pinned version (`python/pyodide.js`), loaded when a Python Console opens or a script first runs, never at startup.
+Decided 2026-11-01. Two Pythons run Blender's scripts in one Blender. The interface is the transpiled tree (above: fast
+to draw, ready at startup). Scripts, the Python Console and user add-ons run in CPython 3.13.13 (Blender's pin), built
+for wasm32-wasi into the module itself, in the same linear memory, with Blender's own `bf_python`: `bpy` (`bpy_rna`,
+`bpy_props`, `bpy.ops`, `bpy.app` and its handlers and timers), `mathutils`, `bmesh`, `idprop`, `bl_math` and `blf`, and
+numpy 2.3.4 statically linked. A script's `bpy.data` and `bpy.context` are Main and the window manager's context, as in
+Blender.
 
-- `python/bridge.py` is the one bridge: a module CPython lacks (`bpy`, `mathutils`, `bpy_extras`, `bl_ui`, ...) imports from the tree's module registry as a JS-backed module, and its values are proxies that forward attribute access, calls, items, iteration and operators to the tree's own objects. `bpy.context`, `bpy.data`, `bpy.ops` and `bpy.types` are therefore the objects the interface uses: `bpy.ops.mesh.primitive_cube_add()` runs Bylonder's operator and `bpy.context.object.location.x = 2` writes through RNA. The bridge translates only conventions: Transcrypt's renamed names (`type` is `py_metatype`), keyword arguments (`__kwargtrans__`), None as null, negative indices and collection keys.
-- The console's language module and its completion run as Blender's own Python in CPython (`_console_python`, `_bl_console_utils`, copied unchanged into `src/python/scripts` by `tools/blender-ui/python_sources.py`), since they need `code.InteractiveConsole` and the console's live namespace. Bylonder registers `console.execute`, `console.autocomplete`, `console.banner` and `console.copy_as_script` to call it, as `bl_operators/console.py` does by the console's language.
-- Writes go through RNA's bindings only (the same mapping the interface writes through), never to Babylon objects from the bridge.
-- `foreach_get` and `foreach_set` copy a collection's property in one typed array each way (into NumPy arrays where the script passes one), never element by element. Large data stays with its one owner: `Mesh.vertices` reads and writes the Babylon mesh's position buffer (`co` in Blender's axes; Babylon's split vertices for now).
-- A script runs as `__main__` in the Text Editor's context and area.
-- Limits: classes defined in CPython cannot subclass `bpy.types` (no `register_class` of a script's operators or panels yet); `mathutils` is the boundary's; JS numbers come back as int or float by value; the Text Editor's autocomplete and live edit are not there yet.
+- **Built from source** as manifest dependencies (`tools/blender-port/manifest.json`, built by `tools/blender-port/deps/`):
+  CPython by its own configure with `Tools/wasm/config.site-wasm32-wasi` on the module's clang and wasi-libc, against the
+  module's own zlib and expat (the libraries Blender's image code links, so each is linked once), numpy by its own meson as a cross build. wasm32-wasi has no shared libraries: each numpy extension
+  module is linked from its objects as its shared library would be, its definitions made local but its `PyInit` function
+  (`wasm_weaken.py`), and they are CPython built-in modules by package name (`numpy._core._multiarray_umath`). Blender
+  is configured with `WITH_PYTHON` (`configure_host.sh`), the host's Python headers replaced by the module's CPython's
+  (`host_include`). The `gpu` module is left out (the GPU module is past the seam).
+- **Its files** ship beside the module, fetched on first use: `python313.zip` (CPython's library and numpy, compiled,
+  with their sources), read in place by zipimport at Blender's system Python directory, and `scripts.zip`, Blender's
+  `scripts/modules`, `startup`, `addons_core` and `presets`, unpacked at Blender's system scripts directory
+  (`/blender/scripts`, `ghost-paths.cc`), as an installed Blender has them.
+- **Lazy start.** Python is never started at startup nor in the module's snapshot. `src/python/python.js` starts it when
+  a script runs, a Python Console is shown, a Python driver is evaluated, Preferences' Add-ons or Extensions section
+  opens, or a file whose drivers or registered texts need it is read (where scripts may run automatically, Blender's
+  `G_FLAG_SCRIPT_AUTOEXEC`; otherwise they are blocked as in Blender). Until then Blender's calls into Python act as
+  Blender without Python (`python.cc`, `--wrap`): a typed value's expression is evaluated by Blender's
+  `expr_pylike_eval.cc`, simple driver expressions too, as in Blender. `python_start` runs what Blender's `WM_init`
+  runs: `BPY_python_start`, `BPY_python_reset`, then importing `bpy` loads the startup scripts and
+  `bpy.utils.load_scripts_extensions()` the add-ons and extensions Preferences enable. Blender's startup packages
+  (`bl_ui`, `bl_operators`) ship as modules there, importable but not registered (the interface they define is the
+  tree's); the one startup script is Bylonder's (`tools/blender-port/python/startup/bylonder_cpython.py`).
+- **One registry.** Both Pythons register their classes through RNA's register functions (`rna_wm.cc`, `rna_ui.cc`),
+  each extension carrying its own Python's call (`bpy_class_call`, or `rna-bridge.cc`'s for the tree). Blender's code
+  calls each class back in its own Python; the module's window manager runs every operator and the page draws every
+  panel, header and menu through the module's uiLayout (`ui-tree.cc`), so a script's operators, panels, menus, headers,
+  UI lists and properties appear and work like Blender's. A type's Python slots (`StructRNA.py_type`, an operator's
+  `py_instance`) are CPython's, as in Blender; the tree keeps its classes and instances in JS. An operator class's
+  properties are defined by the Python that registered it (`python.cc`, `BPY_RNA_operator_wrapper`).
+- **Across the two.** A function a script adds to a type the tree registered (`bpy.types.VIEW3D_MT_add.append(fn)`)
+  draws in that type's layout before or after the tree's own draw (`python_draw_added`). Key maps a script adds go into
+  the window manager's add-on key configuration, which Blender merges into the user's.
+- **What runs Python itself registers in CPython** when it starts (its startup script), replacing the tree's classes of
+  the same names: the console's operators (`bl_operators/console.py` with `_console_python`), the operators that
+  manage add-ons (`bl_operators/userpref.py`) and Preferences' add-on and extension panels, which list add-ons through
+  Blender's `addon_utils`. Then the add-ons and extensions Preferences enable load (`bpy.utils.load_scripts_extensions`),
+  among them Blender's `bl_pkg`, whose Install from Disk installs a `.py` add-on or an extension's `.zip` into the user
+  directory (`/user/5.2`, kept by the browser). WebAssembly starts no process, so `bl_pkg`'s command line tool
+  (`cli/blender_ext.py`) runs in the same interpreter (a `port-override` in the startup script).
+- **Editors.** The Text Editor's Run Script and the Python Console are Blender's own spaces (`space_text`,
+  `space_console`) and operators in the module.
+- **WebAssembly's indirect calls check signatures**: CPython calls a `METH_NOARGS` function with two arguments, so
+  Blender's that are defined with one would trap; `wasm/patches/python_noargs.patch` (written by a script from the
+  method tables) gives them the unused second one, defaulted so direct calls stay as they are.
+- **Limits**: one thread (`threading` starts no thread), no `ctypes`, no network (`urllib` and pip do not reach out), no
+  `gpu` module (draw handlers that draw with GPU shaders draw nothing).
+
+### File dialogs
+
+Decided 2026-11-02. Blender's File Browser for an operator (`fileselect_add`: Install from Disk, an add-on's ImportHelper
+or ExportHelper, Open Image, the importers and exporters) is the browser's own file dialog, one implementation for every
+caller (`tools/blender-port/wasm/fileselect.cc`, `src/windowmanager/wm-fileselect.js`). Blender's
+`WM_event_add_fileselect` runs and its handler keeps the operator; the event that would open the File Browser area is
+taken back and the page shows the dialog, filtered by the operator's `filter_glob` (several files when it has `files`,
+a directory picker when it takes a directory). The chosen files go into the module's file system and the operator gets
+`filepath`, `directory`, `filename` and `files` as the File Browser sets them, then the File Browser's execute (or
+cancel) event, from the operator's area. A saving operator (one with `check_existing`, as ExportHelper's) writes into the
+file system and the file goes where the user chose (the File System Access save picker) or downloads. A File Browser
+area (to browse inside a .blend for Link and Append) can take over later.
 
 ## Menus
 

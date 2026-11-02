@@ -98,14 +98,14 @@ export function structNames(value) {
   return names;
 }
 
-// Registered classes by the id their type keeps (RNA_struct_py_type_get), and each class's type.
+// Registered classes by the id their type's extension keeps, each class's type and each type's class. A type's Python
+// slots (StructRNA.py_type) are CPython's, as in Blender.
 const classes = [null];
-const typeOfClass = new Map();
+const typeOfClass = new Map(), classOfType = new Map();
 const bpyTypes = () => globalThis.__py_modules?.['_bpy.types'] ?? {};
 // The class of a struct of `type`: its registered class, else the bpy.types class of its type or nearest base.
 function classOf(type) {
-  const registered = x.bpy_struct_class(type);
-  if (registered) return classes[registered];
+  if (classOfType.has(type)) return classOfType.get(type);
   for (let t = type; t; t = baseOf(t)) {
     const cls = Object.hasOwn(bpyTypes(), structIdentifier(t)) && bpyTypes()[structIdentifier(t)];
     if (cls) return cls;
@@ -212,6 +212,9 @@ const isContext = (ptr) => structIdentifier(ptr[0]) === 'Context';
 // An operator's own properties read and written on the operator, as _bpy_types.Operator's __getattribute__ and
 // __setattr__ give them (Transcrypt has neither hook).
 const operatorTypes = new Map();
+// Menus, panels and headers, whose draw functions CPython can add to (python.cc python_draw_added).
+const uiTypes = new Map();
+const isUI = (type) => uiTypes.get(type) ?? uiTypes.set(type, ['Menu', 'Panel', 'Header'].some((base) => x.bpy_struct_is_a(type, structFind(base)))).get(type);
 const isOperator = (type) => operatorTypes.get(type) ?? operatorTypes.set(type, x.bpy_struct_is_a(type, structFind('Operator'))).get(type);
 function operatorProperty(ptr, name) {
   if (!isOperator(ptr[0])) return null;
@@ -565,14 +568,17 @@ let classCalls = 0;
 export const inClassCall = () => classCalls > 0;
 provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => inPythonContext(CPointer || C, () => {
   classCalls++;
-  const ptr = [type >>> 0, owner >>> 0, data >>> 0], cls = classes[x.bpy_struct_class(ptr[0])];
+  const ptr = [type >>> 0, owner >>> 0, data >>> 0], cls = classOfType.get(ptr[0]);
   const { flag, parameters } = functionInfo(func >>> 0);
   try {
     const args = [], outputs = [];
     parameters.forEach((parameter, index) => (parameter[3] & PARM_OUTPUT ? outputs.push(index) : args.push(getParameter(parms >>> 0, index, parameter))));
     const method = functionName(func >>> 0);
     const self = flag & FUNC_NO_SELF ? cls : instance(ptr, cls);
+    const added = method === 'draw' && isUI(ptr[0]);
+    if (added) x.python_draw_added(CPointer || C, ...ptr, true);
     const result = self[method](...args);
+    if (added) x.python_draw_added(CPointer || C, ...ptr, false);
     if (outputs.length === 1) setParameter(parms >>> 0, outputs[0], parameters[outputs[0]], result);
     else outputs.forEach((index, i) => setParameter(parms >>> 0, index, parameters[index], result[i]));
     return 0;
@@ -584,6 +590,7 @@ provided.bpy_class_call = (CPointer, type, owner, data, func, parms) => inPython
   }
 });
 provided.bpy_class_free = (id) => {
+  classOfType.delete(typeOfClass.get(classes[id]));
   typeOfClass.delete(classes[id]);
   classes[id] = null;
 };
@@ -595,9 +602,10 @@ function functionName(func) {
   return functionNames.get(func);
 }
 
-// The instance a callback runs on: kept with the data when its type keeps one (an operator's, RNA_struct_instance), for
-// its next callbacks (invoke, then modal), else the struct.
+// The instance a callback runs on: an operator's is kept for its next callbacks (invoke, then modal) until the operator
+// is freed (bpy_instance_free), any other struct's is the struct.
 const kept = [null];
+provided.bpy_instance_free = (id) => { kept[id] = null; };
 function instance(ptr, cls) {
   const id = x.bpy_instance(...ptr);
   if (id > 0) return kept[id];
@@ -629,6 +637,7 @@ export function registerClass(cls) {
     throw ValueError(`register_class(...): ${cString(x.bpy_register_error())}`);
   }
   typeOfClass.set(cls, type);
+  classOfType.set(type, cls);
   if (!definedByType.has(cls)) defineProperties(type, cls);
   return type;
 }

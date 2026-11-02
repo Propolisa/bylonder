@@ -1,0 +1,23 @@
+/* libc++ without threads has no <shared_mutex>. On one thread a lock is always free. */
+#pragma once
+
+namespace std {
+class shared_mutex {
+ public:
+  void lock() {}
+  bool try_lock() { return true; }
+  void unlock() {}
+  void lock_shared() {}
+  bool try_lock_shared() { return true; }
+  void unlock_shared() {}
+};
+
+template<class Mutex> class shared_lock {
+ public:
+  explicit shared_lock(Mutex &mutex) : mutex_(mutex) { mutex_.lock_shared(); }
+  ~shared_lock() { mutex_.unlock_shared(); }
+
+ private:
+  Mutex &mutex_;
+};
+}  // namespace std

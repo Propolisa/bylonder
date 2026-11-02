@@ -47,7 +47,6 @@ export const UNSUPPORTED = {
     navigation_mode: NOT_YET, walk_navigation: NOT_YET,
   },
   PreferencesFilePaths: { '*': 'Bylonder keeps its files in the browser, not in folders' },
-  PreferencesExtensions: { '*': BROWSER },
   PreferencesApps: { '*': BROWSER },
   PreferencesExperimental: { '*': NOT_YET },
   StudioLight: { '*': NOT_YET },
@@ -57,18 +56,9 @@ const UNTHEMED = 'No part of the interface Bylonder draws takes this color yet';
 export const unsupported = (owner, prop) => UNSUPPORTED[owner]?.[prop] ?? UNSUPPORTED[owner]?.['*']
   ?? (owner.startsWith('Theme') && !THEMED[owner]?.has(prop) ? UNTHEMED : null);
 
-// The add-ons whose code the app holds (the tree's, and Bylonder's own); the others Blender ships are listed greyed out.
-const ADDONS_INCLUDED = new Set(['pose_library', 'bylonder']);
-const NOT_INCLUDED = 'Not included in Bylonder', USER_ADDONS = 'User add-ons are not supported yet';
-const USER_ADDON_OPERATORS = new Set(['preferences.addon_install', 'preferences.addon_remove', 'preferences.addon_refresh', 'wm.path_open',
-  'preferences.extension_repo_add', 'preferences.extension_repo_remove', 'extensions.userpref_allow_online', 'extensions.repo_sync_all',
-  'extensions.package_install', 'extensions.package_install_files', 'preferences.theme_install', 'preferences.studiolight_install']);
-const property = (node, name) => node.properties?.find?.(([key]) => key === name)?.[1] ?? node.properties?.[name];
-function unsupportedOperator(node) {
-  if (USER_ADDON_OPERATORS.has(node.operator)) return USER_ADDONS;
-  if (/^preferences\.addon_(enable|disable|expand)$/.test(node.operator) && !ADDONS_INCLUDED.has(property(node, 'module'))) return NOT_INCLUDED;
-  return null;
-}
+// Add-ons and extensions install from files (Install from Disk), not from online repositories, and no folder opens.
+const BROWSER_OPERATORS = new Set(['extensions.userpref_allow_online', 'extensions.repo_sync_all', 'extensions.package_install', 'wm.path_open']);
+const unsupportedOperator = (node) => (BROWSER_OPERATORS.has(node.operator) ? BROWSER : null);
 
 // What the Preferences' buttons run: Blender's own operators in the module (tree-menu.js runOperator), but those greyed
 // out here.

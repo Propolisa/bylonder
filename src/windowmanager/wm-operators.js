@@ -49,6 +49,8 @@ export const unavailableReason = (idname) => operatorFor(idname)?.unavailable;
 export const runsOperator = (idname) => !!operatorFor(idname);
 // Whether Bylonder runs an operator its own way, not Blender's behind it (`blender: true`).
 export const ownsOperator = (idname) => runsOperator(idname) && !operatorFor(idname).blender;
+// Whether Bylonder runs an operator itself and supports a run now (a button's needs a hovered button), whatever the context.
+export const takesOperator = (idname) => ownsOperator(idname) && (operatorFor(idname).supports?.({}) ?? true);
 
 // Who is told of each finished operator (wm-reports.js, in the realm that runs Blender).
 const finishedListeners = new Set();

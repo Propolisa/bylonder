@@ -1,5 +1,6 @@
 """Marks defined symbols of wasm object files (and of archive members) weak, so that a strong definition elsewhere wins
-at link time. llvm-objcopy cannot change wasm symbols; the weak flag is bit 0 of a symbol's flags in the object's
+at link time, or local, so that an object linked from a shared library's inputs (wasm-ld -r) keeps its own definitions
+as the library would. llvm-objcopy cannot change wasm symbols; the weak flag is bit 0 of a symbol's flags in the object's
 `linking` section, and setting it never changes the flags' LEB128 length, so the file is patched in place. Names are
 matched mangled or demangled, as wasm-ld reports them demangled whatever --no-demangle says."""
 import os
@@ -8,9 +9,9 @@ import tempfile
 
 from wasm_module import demangle
 
-WEAK, UNDEFINED, EXPLICIT_NAME = 0x1, 0x10, 0x40
+WEAK, LOCAL, UNDEFINED, EXPLICIT_NAME = 0x1, 0x2, 0x10, 0x40
 FUNCTION, DATA, GLOBAL, SECTION, TAG, TABLE = range(6)
-SYMBOL_TABLE = 8
+SYMBOL_TABLE, COMDAT_INFO = 8, 7
 
 
 def leb(data, at):
@@ -65,6 +66,46 @@ def weaken_object(path, names):
     return changed
 
 
+def localize_object(path, keep):
+    """Makes every definition in the object at `path` local but those whose names start with `keep`, and its COMDAT
+    groups its own (so the linker keeps its copy of an inline function rather than another object's of that name)."""
+    data = bytearray(open(path, 'rb').read())
+    for name, flags_at in defined(data):
+        if not name.startswith(keep):
+            data[flags_at] = (data[flags_at] | LOCAL) & ~WEAK
+    open(path, 'wb').write(without_comdats(data))
+
+
+def uleb(value):
+    out = bytearray()
+    while True:
+        byte, value = value & 0x7f, value >> 7
+        out.append(byte | (0x80 if value else 0))
+        if not value:
+            return bytes(out)
+
+
+def without_comdats(data):
+    """The object without its linking section's COMDAT_INFO subsection."""
+    at = 8
+    while at < len(data):
+        section, (size, start) = data[at], leb(data, at + 1)
+        end = start + size
+        length, body = leb(data, start)
+        if section == 0 and bytes(data[body:body + length]) == b'linking':
+            _, sub = leb(data, body + length)
+            payload = bytearray(data[start:sub])
+            while sub < end:
+                kind = data[sub]
+                sub_size, content = leb(data, sub + 1)
+                if kind != COMDAT_INFO:
+                    payload += data[sub:content + sub_size]
+                sub = content + sub_size
+            return data[:at] + bytes([0]) + uleb(len(payload)) + payload + data[end:]
+        at = end
+    return data
+
+
 def defined(data):
     """(name, flags offset) of each symbol the object defines."""
     at = 8
@@ -93,3 +134,8 @@ def weaken_member(ar, archive, member, names):
         if changed:
             subprocess.run([ar, 'r', os.path.abspath(archive), member], cwd=work, check=True)
     return changed
+
+
+if __name__ == '__main__':
+    import sys
+    localize_object(sys.argv[1], sys.argv[2])

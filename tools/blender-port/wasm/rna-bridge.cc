@@ -17,6 +17,7 @@
 #include "BLI_string.h"
 #include "MEM_guardedalloc.h"
 #include "DNA_ID.h"
+#include "DNA_windowmanager_types.h"
 #include "DNA_workspace_types.h"
 #include "RNA_access.hh"
 #include "RNA_path.hh"
@@ -84,8 +85,6 @@ static std::string json_string(const char *value)
 EXPORT(bpy_struct_identifier) const char *bpy_struct_identifier(StructRNA *type) { return RNA_struct_identifier(type); }
 EXPORT(bpy_struct_base) StructRNA *bpy_struct_base(StructRNA *type) { return RNA_struct_base(type); }
 EXPORT(bpy_struct_is_a) bool bpy_struct_is_a(StructRNA *type, StructRNA *base) { return RNA_struct_is_a(type, base); }
-/* The JS class registered for a type (RNA_struct_py_type_get), or 0. */
-EXPORT(bpy_struct_class) int bpy_struct_class(StructRNA *type) { return int(intptr_t(RNA_struct_py_type_get(type))); }
 EXPORT(bpy_struct_name) const char *bpy_struct_name(StructRNA *type, ID *id, void *data)
 {
   PointerRNA ptr = pointer(type, id, data);
@@ -117,20 +116,34 @@ EXPORT(bpy_id_pointer) void bpy_id_pointer(ID *id) { put(RNA_id_pointer_create(i
 /* The struct `type`'s pointer to data (refined, as RNA refines a pointer to a base type). */
 EXPORT(bpy_pointer) void bpy_pointer(StructRNA *type, ID *id, void *data) { put(pointer(type, id, data)); }
 
-/* A JS instance kept with the data (an operator's, RNA_struct_instance), 0 for none yet, or -1 where the type keeps
- * none. */
-EXPORT(bpy_instance) int bpy_instance(StructRNA *type, ID *id, void *data)
+/* A JS operator's instance, kept from its invoke to its modal calls (as CPython's in wmOperator.py_instance), 0 for none
+ * yet, or -1 for a struct that is not an operator. */
+static std::map<const void *, std::pair<StructRNA *, int>> operator_instances;
+IMPORT(bpy_instance_free) void js_instance_free(int instance);
+EXPORT(bpy_instance) int bpy_instance(StructRNA *type, ID * /*id*/, void *data)
 {
-  PointerRNA ptr = pointer(type, id, data);
-  void **instance = RNA_struct_instance(&ptr);
-  return instance ? int(intptr_t(*instance)) : -1;
-}
-EXPORT(bpy_instance_set) void bpy_instance_set(StructRNA *type, ID *id, void *data, int value)
-{
-  PointerRNA ptr = pointer(type, id, data);
-  if (void **instance = RNA_struct_instance(&ptr)) {
-    *instance = reinterpret_cast<void *>(intptr_t(value));
+  if (!RNA_struct_is_a(type, RNA_Operator)) {
+    return -1;
   }
+  const auto found = operator_instances.find(data);
+  return found == operator_instances.end() || found->second.first != type ? 0 : found->second.second;
+}
+EXPORT(bpy_instance_set) void bpy_instance_set(StructRNA *type, ID * /*id*/, void *data, int value)
+{
+  operator_instances[data] = {type, value};
+}
+#define WM_OPERATOR_FREE _ZN7blender16WM_operator_freeEPNS_10wmOperatorE
+#define WRAP_(prefix, name) prefix##name
+#define WRAP(prefix, name) WRAP_(prefix, name)
+extern "C" void WRAP(__real_, WM_OPERATOR_FREE)(wmOperator *op);
+/* port-override: a JS operator's instance goes with it, as WM_operator_free releases CPython's. */
+extern "C" void WRAP(__wrap_, WM_OPERATOR_FREE)(wmOperator *op)
+{
+  if (const auto found = operator_instances.find(op); found != operator_instances.end()) {
+    js_instance_free(found->second.second);
+    operator_instances.erase(found);
+  }
+  WRAP(__real_, WM_OPERATOR_FREE)(op);
 }
 
 /* Context members (bpy_rna's pyrna_struct_getattro for a Context): a pointer (1), a collection (2, its items by
@@ -757,18 +770,18 @@ static int class_call(bContext *C, PointerRNA *ptr, FunctionRNA *func, Parameter
 }
 static void class_free(void *data) { js_class_free(int(intptr_t(data))); }
 
+namespace blender {
+/* Whether a registered type is a JS class's (CPython's call bpy_class_call). */
+bool js_extension(const ExtensionRNA &ext) { return ext.call == class_call; }
+}  // namespace blender
+
 static std::string register_error;
 EXPORT(bpy_register_error) const char *bpy_register_error() { return register_error.c_str(); }
 
-namespace blender {
-void operator_registration_ensure();
-}
-
-/* The new type, or null (the reason in bpy_register_error). */
+/* The new type, or null (the reason in bpy_register_error). Its JS class is JS's to keep: a type's Python slots
+ * (StructRNA.py_type, an instance's py_instance) are CPython's, as in Blender. */
 EXPORT(bpy_register) StructRNA *bpy_register(bContext *C, StructRNA *base, int cls, const char *identifier)
 {
-  static const bool operators = (operator_registration_ensure(), true);
-  (void)operators;
   StructRegisterFunc reg = RNA_struct_register(base);
   if (!reg) {
     register_error = std::string(RNA_struct_identifier(base)) + " does not support registration";
@@ -781,9 +794,6 @@ EXPORT(bpy_register) StructRNA *bpy_register(bContext *C, StructRNA *base, int c
   register_error = message ? message : "";
   MEM_SAFE_DELETE(message);
   BKE_reports_free(&reports);
-  if (srna) {
-    RNA_struct_py_type_set(srna, reinterpret_cast<void *>(intptr_t(cls)));
-  }
   return srna;
 }
 EXPORT(bpy_unregister) void bpy_unregister(bContext *C, StructRNA *srna)

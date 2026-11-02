@@ -11,13 +11,17 @@ import { openMenu } from '../interface/menu.js';
 import { inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { preferencesChanged } from '../../windowmanager/wm-userdef.js';
+import { preferences, preferencesChanged } from '../../windowmanager/wm-userdef.js';
+import { startPython, pythonRunning } from '../../python/python.js';
 import { greyUnsupported } from './support.js';
+import { watchRedraws } from '../../windowmanager/wm-areas.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
 
 const SPACE_USERPREF = 19, RGN_TYPE_EXECUTE = 10;
 const KEYMAPS = ['Preferences', 'Window', 'Screen'];
+// The sections Blender's Python lists (addon_utils, the extensions' repositories): showing one starts Python.
+const PYTHON_SECTIONS = new Set(['ADDONS', 'EXTENSIONS']);
 
 export function mountPreferences(host, { headerHost } = {}) {
   const state = reactive({ revision: 0 });
@@ -56,6 +60,7 @@ export function mountPreferences(host, { headerHost } = {}) {
   const app = createApp({
     render() {
       void state.revision;
+      if (PYTHON_SECTIONS.has(preferences().active_section) && !pythonRunning()) startPython().then(refresh);
       layout();
       const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C)) ?? [];
       const headerView = h('div', { class: 'bl-ui bl-area-header flex min-w-0 flex-1 items-center' }, header.map((tree) => h(BlockView, { tree, ui: ui[RGN_TYPE_HEADER], header: true })));
@@ -79,8 +84,10 @@ export function mountPreferences(host, { headerHost } = {}) {
     state.revision++;
   });
   observer.observe(host);
+  // What Blender's window tags for redrawing here, as an add-on install that finishes on a timer tags the Preferences.
+  const unwatch = watchRedraws((redraw) => { if (redraw.some(([tagged]) => tagged === area.pointer)) state.revision++; });
   return {
     refresh() { state.revision++; },
-    dispose() { observer.disconnect(); app.unmount(); area.dispose(); },
+    dispose() { unwatch(); observer.disconnect(); app.unmount(); area.dispose(); },
   };
 }

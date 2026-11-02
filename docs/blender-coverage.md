@@ -17,11 +17,11 @@ Each entry is a level-2 heading naming a node, followed by optional fields and f
 
 ## CONSOLE > *
 Status: partial
-Blender's Python Console in the Scripting workspace: CPython (Pyodide) runs Blender's own `_console_python` with history, Tab completion and `C` and `D`. See `docs/blender-boundary.md` (Scripting).
+Blender's Python Console in the Scripting workspace: Blender's own console space and operators, with `_console_python` in the module's CPython (history, Tab completion, `C` and `D`). See `docs/blender-boundary.md` (Scripting).
 
 ## TEXT_EDITOR > *
 Status: partial
-Texts are the project's text files. Run Script runs CPython (Pyodide) over Bylonder's `bpy`. Autocomplete, live edit, Reload and the conflict tools are not there yet; Save downloads the text.
+Texts are the project's text files. Run Script is Blender's own, in the module's CPython over Blender's own `bpy`. Autocomplete, live edit, Reload and the conflict tools are not there yet; Save downloads the text.
 
 ## INFO > *
 Status: partial

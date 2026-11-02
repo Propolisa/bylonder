@@ -71,6 +71,7 @@
 #include "BLI_set.hh"
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
+#include "BPY_extern_python.hh"
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_build.hh"
 #include "DEG_depsgraph_query.hh"
@@ -1477,6 +1478,8 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int 
     BlendFileReadWMSetupData wm_setup_data = {ctx->wm};
     BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, &wm_setup_data, &read_report, false, nullptr);
     main_context_refresh(ctx);
+    /* The file's drivers and registered texts in Python (python.cc starts it first where scripts may run). */
+    BPY_python_reset(ctx->C);
     file_read_notify(ctx);
   }
   for (const Report &report : reports.list.items_mutable()) {

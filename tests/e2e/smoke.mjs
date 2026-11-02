@@ -746,13 +746,13 @@ const checks = {
     assert.ok(warm > 200, `${warm} orange pixels`);
   },
 
-  // The Scripting workspace's Python Console runs Blender's console in CPython over Bylonder's bpy, and the Text
-  // Editor runs a script; Info reports the operator.
+  // The Scripting workspace's Python Console is Blender's own over the module's CPython, and the Text Editor runs a
+  // script; Info reports the operator.
   async "Scripting: the console adds a cube, a script moves the object"() {
     await app.page.click('[data-workspace="scripting"]');
-    const pythonConsole = app.locator(".bl-console"), textEditor = app.locator('[data-blender="TEXT_EDITOR"]');
+    const pythonConsole = app.locator('[data-blender="CONSOLE"]'), textEditor = app.locator('[data-blender="TEXT_EDITOR"]');
     await pythonConsole.waitFor();
-    await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console").textContent), null, 180000);
+    await app.until(() => /PYTHON\s*INTERACTIVE\s*CONSOLE/.test(document.querySelector('[data-blender="CONSOLE"]').textContent), null, 180000);
     const before = await app.bylonder((b) => b.world.objects.length);
     await pythonConsole.hover();
     await app.page.keyboard.type("bpy.ops.mesh.primitive_cube_add()");
@@ -1153,14 +1153,26 @@ const checks = {
     assert.ok(disabled > 0, "greyed settings");
   },
 
-  // Add-ons lists the add-ons Blender ships: Bylonder's own and the pose library enabled, the others greyed out.
-  async "Add-ons lists Blender's add-ons, those not included greyed out"() {
+  // Add-ons starts Python, lists the add-ons Blender ships, and Install from Disk installs one from the browser's file
+  // dialog; enabled, its operator is in the 3D Viewport's Add menu.
+  async "Add-ons: Install from Disk installs and enables an add-on"() {
     const prefs = await openPreferences();
     await section(prefs, "Add-ons");
     const region = prefs.locator(".bl-preferences-region");
-    for (const name of ["Bylonder", "Pose Library", "FBX format", "glTF 2.0 format", "Node Wrangler"]) await region.getByText(name).first().waitFor();
-    const enable = region.locator('button[data-blender="preferences.addon_enable"]');
-    assert.ok(await enable.count() > 0 && await enable.first().isDisabled(), "add-ons not included are greyed out");
+    for (const name of ["Bylonder", "Pose Library", "Node Wrangler"]) await region.getByText(name).first().waitFor({ timeout: 180000 });
+    const chooser = app.page.waitForEvent("filechooser");
+    await prefs.locator('[data-blender="USERPREF_MT_addons_settings"]').first().click();
+    await app.frame().getByRole("menuitem", { name: "Install from Disk..." }).first().click();
+    await (await chooser).setFiles(new URL("../../examples/python/scatter_cubes.py", import.meta.url).pathname);
+    // The operator's options (Enable on Install), confirmed as the File Browser's sidebar confirms them.
+    await app.frame().getByRole("button", { name: "Install from Disk" }).last().click();
+    await region.getByText("Scatter Cubes").first().waitFor({ timeout: 30000 });
+    await app.until((b) => b.modules.bpyRna.contextStruct().preferences.addons.get("scatter_cubes"), null, 30000);
+    await prefs.press("Escape").catch(() => {});
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("Shift+A");
+    await app.frame().getByRole("menuitem", { name: "Scatter Cubes" }).first().waitFor();
+    await app.page.keyboard.press("Escape");
   },
 
   // Laptops: the number row as the numpad, the left button with Alt as the middle one, two-finger trackpad scrolling.
