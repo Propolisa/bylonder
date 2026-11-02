@@ -15,7 +15,8 @@ import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js'
 
 // Each mode's context mode (CTX_data_mode_enum) and keymap; Edit Mode is Main's for armatures only.
 const MODES = { EDIT: { context: 'EDIT_ARMATURE', keymap: 'Armature' }, POSE: { context: 'POSE', keymap: 'Pose' }, PARTICLE_EDIT: { context: 'PARTICLE', keymap: 'Particle' },
-  SCULPT: { context: 'SCULPT', keymap: 'Sculpt' }, WEIGHT_PAINT: { context: 'PAINT_WEIGHT', keymap: 'Weight Paint' } };
+  SCULPT: { context: 'SCULPT', keymap: 'Sculpt' }, WEIGHT_PAINT: { context: 'PAINT_WEIGHT', keymap: 'Weight Paint' },
+  VERTEX_PAINT: { context: 'PAINT_VERTEX', keymap: 'Vertex Paint' }, TEXTURE_PAINT: { context: 'PAINT_TEXTURE', keymap: 'Image Paint' } };
 const KEYMAPS = Object.values(MODES).map((m) => m.keymap);
 const POSE_ASSETS = ['poselib.create_pose_asset', 'poselib.blend_pose_asset'];
 // Create Pose Asset's dialog saves into the Current File, which the project keeps: Bylonder has no User Library on disk

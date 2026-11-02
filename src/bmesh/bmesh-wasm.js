@@ -332,6 +332,9 @@ export class BlenderMain {
   // The weight of each vertex of the mesh evaluatedMesh last gave, as Weight Paint Mode's overlay draws it (main-api.cc
   // mesh_paint_weights), a copy.
   paintWeights(ob, count) { return new Float32Array(x.memory.buffer, x.mesh_paint_weights(this.#context, ob) >>> 0, count).slice(); }
+  // The active color attribute of the mesh evaluatedMesh last gave, per face corner in scene linear RGBA (main-api.cc
+  // extracted_color), a copy; null without one.
+  paintColors(count) { const p = x.extracted_color(0) >>> 0; return p ? new Float32Array(x.memory.buffer, p, count * 4).slice() : null; }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
   setModifiers(ob, modifiers) {
     const { errors } = setModifiers(ob, modifiers);
