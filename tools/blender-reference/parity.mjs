@@ -84,7 +84,7 @@ const SETUP = {
   "add-menu": async (app) => { await app.hover(); await app.page.keyboard.press("Shift+A"); },
   "edit-mode": async (app) => { await app.hover(...REST); await app.page.keyboard.press("Tab"); },
   "modifier-tab": async (app) => {
-    await app.locator('[role="tab"][aria-label="Modifiers"]').click();
+    await propertiesTab(app, "Cube", "Modifiers");
     await app.frame().getByRole("button", { name: "Add Modifier" }).click();
     await app.frame().getByRole("menuitem", { name: "Generate" }).hover();
     await app.frame().getByRole("menuitem", { name: "Subdivision Surface" }).click();
@@ -124,13 +124,13 @@ const SETUP = {
   },
   "object-tab": (app) => propertiesTab(app, "Cube", "Object"),
   "material-tab": async (app) => {
-    await app.locator('[role="tab"][aria-label="Material"]').click();
+    await propertiesTab(app, "Cube", "Material");
     for (let i = 0; i < 2; i++) await app.frame().getByRole("button", { name: "Add a new material slot" }).click();
     await app.frame().locator('.bl-overlap').first().click();
     await app.hover(...REST);
   },
   "geometry-nodes-modifier": async (app) => {
-    await app.locator('[role="tab"][aria-label="Modifiers"]').click();
+    await propertiesTab(app, "Cube", "Modifiers");
     await app.frame().getByRole("button", { name: "Add Modifier" }).click();
     await app.frame().getByRole("menuitem", { name: "Generate" }).hover();
     await app.frame().getByRole("menuitem", { name: "Geometry Nodes" }).click();
@@ -210,6 +210,7 @@ async function addAndEdit(app, idname) {
 }
 
 // The object selected alone, and the Properties editor on a tab.
+// The object `name` made active, as a click in the Outliner makes it (the startup scene has none), then a Properties tab.
 async function propertiesTab(app, name, tab) {
   await app.bylonder((b, name) => b.editor.selection.replace([b.world.objects.find((ob) => ob.name === name)]), name);
   await app.locator(`[role="tab"][aria-label="${tab}"]`).click();
