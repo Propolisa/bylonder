@@ -461,15 +461,18 @@
  {
   "id": "import-export",
   "title": "Import and Export",
-  "summary": "Bring meshes in and write them out with Blender's own Wavefront OBJ, Stanford PLY, STL and FBX importers and exporters, through the browser's file dialogs with each format's options.",
-  "expect": "OBJ, PLY, STL and FBX import and export with Blender's own code and options; glTF, BVH, SVG and FBX export wait for the Python add-ons, Alembic and USD are greyed out, and an export's extra files download.",
+  "summary": "Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.",
+  "expect": "OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/files/import_export/index.html",
    "https://docs.blender.org/manual/en/5.2/files/import_export/obj.html",
    "https://docs.blender.org/manual/en/5.2/files/import_export/ply.html",
    "https://docs.blender.org/manual/en/5.2/files/import_export/stl.html",
-   "https://docs.blender.org/manual/en/5.2/files/import_export/fbx.html"
+   "https://docs.blender.org/manual/en/5.2/files/import_export/fbx.html",
+   "https://docs.blender.org/manual/en/5.2/addons/import_export/scene_gltf2.html",
+   "https://docs.blender.org/manual/en/5.2/addons/import_export/anim_bvh.html",
+   "https://docs.blender.org/manual/en/5.2/addons/import_export/curve_svg.html"
   ],
   "example": "import-export",
   "thumbnail": "import-export/thumbnail.png",
@@ -482,8 +485,8 @@
   ],
   "ui": [
    "TOPBAR_MT_file",
-   "TOPBAR_MT_file_import",
-   "TOPBAR_MT_file_export",
+   "TOPBAR_MT_file_import*",
+   "TOPBAR_MT_file_export*",
    "VIEW_3D",
    "OBJECT"
   ],
@@ -495,23 +498,34 @@
    "wm.stl_import",
    "wm.stl_export",
    "wm.fbx_import",
+   "import_scene.gltf",
+   "export_scene.gltf",
+   "import_scene.fbx",
+   "export_scene.fbx",
+   "import_anim.bvh",
+   "export_anim.bvh",
+   "import_curve.svg",
    "object.delete"
   ],
   "code": [
    "src/windowmanager/wm-fileselect.js",
    "tools/blender-port/wasm/fileselect.cc",
    "src/editors/io/io-ops.js",
+   "src/editors/io/addon-menus.json",
+   "tools/blender-port/wasm/patches/gltf_ctypes.patch",
    "src/draw/mesh-batch-buffers.js"
   ],
   "tests": [
    "tests/io-wasm.test.js",
+   "tests/io-addons-wasm.test.js",
    "tests/e2e/smoke.mjs"
   ],
   "limits": [
    "Alembic is greyed out until the module is built with C++ exceptions, which its reader relies on.",
    "Universal Scene Description is greyed out; OpenUSD needs threads and run-time plugins the module does not have.",
-   "glTF 2.0, FBX export, Motion Capture (.bvh) and SVG as Curves are Blender's Python add-ons, greyed out until Blender's Python runs in Bylonder.",
-   "The file dialogs are the browser's; an export with several files (an OBJ's .mtl) saves the first where you choose and downloads the others.",
+   "glTF 2.0, FBX export, Motion Capture (.bvh) and SVG as Curves are Blender's Python add-ons: opening File starts Python, and their entries stay greyed out until it has (a few seconds the first time).",
+   "glTF's Draco and meshoptimizer compression are not available; their libraries are native ones Bylonder does not build.",
+   "The file dialogs are the browser's; an export with several files (an OBJ's .mtl, a .gltf's .bin and textures) saves the first where you choose and downloads the others.",
    "Imported color attributes are kept in Main; Solid shading's Attribute color and the Color Attribute node do not draw them yet."
   ],
   "page": "docs/features/import-export.md",

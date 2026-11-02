@@ -1,8 +1,8 @@
 ---
 id: import-export
 title: Import and Export
-summary: Bring meshes in and write them out with Blender's own Wavefront OBJ, Stanford PLY, STL and FBX importers and exporters, through the browser's file dialogs with each format's options.
-expect: OBJ, PLY, STL and FBX import and export with Blender's own code and options; glTF, BVH, SVG and FBX export wait for the Python add-ons, Alembic and USD are greyed out, and an export's extra files download.
+summary: Bring scenes in and write them out with Blender's own importers and exporters (Wavefront OBJ, Stanford PLY, STL, FBX) and its default add-ons (glTF 2.0, FBX export, Motion Capture, SVG as Curves), through the browser's file dialogs with each format's options.
+expect: OBJ, PLY, STL, FBX, glTF 2.0, BVH and SVG import and export with Blender's own code and options; the add-ons' entries wait a few seconds for Python the first time File opens, Alembic and USD are greyed out, and an export's extra files download.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html
@@ -10,6 +10,9 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/ply.html
   - https://docs.blender.org/manual/en/5.2/files/import_export/stl.html
   - https://docs.blender.org/manual/en/5.2/files/import_export/fbx.html
+  - https://docs.blender.org/manual/en/5.2/addons/import_export/scene_gltf2.html
+  - https://docs.blender.org/manual/en/5.2/addons/import_export/anim_bvh.html
+  - https://docs.blender.org/manual/en/5.2/addons/import_export/curve_svg.html
 example: import-export
 thumbnail: import-export/thumbnail.png
 media:
@@ -20,8 +23,8 @@ media:
   - import-export/export-options.png
 ui:
   - TOPBAR_MT_file
-  - TOPBAR_MT_file_import
-  - TOPBAR_MT_file_export
+  - TOPBAR_MT_file_import*
+  - TOPBAR_MT_file_export*
   - VIEW_3D
   - OBJECT
 operators:
@@ -32,26 +35,40 @@ operators:
   - wm.stl_import
   - wm.stl_export
   - wm.fbx_import
+  - import_scene.gltf
+  - export_scene.gltf
+  - import_scene.fbx
+  - export_scene.fbx
+  - import_anim.bvh
+  - export_anim.bvh
+  - import_curve.svg
   - object.delete
 code:
   - src/windowmanager/wm-fileselect.js
   - tools/blender-port/wasm/fileselect.cc
   - src/editors/io/io-ops.js
+  - src/editors/io/addon-menus.json
+  - tools/blender-port/wasm/patches/gltf_ctypes.patch
   - src/draw/mesh-batch-buffers.js
 tests:
   - tests/io-wasm.test.js
+  - tests/io-addons-wasm.test.js
   - tests/e2e/smoke.mjs
 limits:
   - Alembic is greyed out until the module is built with C++ exceptions, which its reader relies on.
   - Universal Scene Description is greyed out; OpenUSD needs threads and run-time plugins the module does not have.
-  - glTF 2.0, FBX export, Motion Capture (.bvh) and SVG as Curves are Blender's Python add-ons, greyed out until Blender's Python runs in Bylonder.
-  - The file dialogs are the browser's; an export with several files (an OBJ's .mtl) saves the first where you choose and downloads the others.
+  - glTF 2.0, FBX export, Motion Capture (.bvh) and SVG as Curves are Blender's Python add-ons: opening File starts Python, and their entries stay greyed out until it has (a few seconds the first time).
+  - glTF's Draco and meshoptimizer compression are not available; their libraries are native ones Bylonder does not build.
+  - The file dialogs are the browser's; an export with several files (an OBJ's .mtl, a .gltf's .bin and textures) saves the first where you choose and downloads the others.
   - Imported color attributes are kept in Main; Solid shading's Attribute color and the Color Attribute node do not draw them yet.
 ---
 # Import and Export
 
 File > Import and File > Export are Blender's own menus, and each format is Blender's own importer or exporter
-compiled into the WebAssembly module: Wavefront OBJ (with its .mtl materials), Stanford PLY, STL and FBX import. Where
+compiled into the WebAssembly module: Wavefront OBJ (with its .mtl materials), Stanford PLY, STL and FBX import. The
+add-ons Blender enables by default, glTF 2.0, FBX export, Motion Capture (.bvh) and SVG as Curves, are Blender's Python,
+which runs in the module's CPython: opening File starts it, and their entries, at Blender's places, become live once
+they have registered. Where
 Blender opens its File Browser, Bylonder opens the browser's file dialog; the format's options are the ones Blender's
 File Browser shows beside the files, drawn from the operator's own layout. What an import makes is in Main, so it is
 undone with Ctrl Z, saved in the project and drawn by Babylon with its UVs, materials and normals, custom normals
@@ -65,8 +82,8 @@ The steps below make it from the Default Cube.
 
 ## Steps
 
-1. **An empty scene.** In the Default Cube example, click the cube and press Delete. Open File > Import: OBJ, PLY, STL
-   and FBX run; the formats Bylonder cannot run yet are greyed out, their tooltip says why.
+1. **An empty scene.** In the Default Cube example, click the cube and press Delete. Open File > Import: OBJ, PLY, STL,
+   FBX, SVG, Motion Capture and glTF 2.0 run; Alembic and USD are greyed out, their tooltip says why.
 
    ![File > Import](../media/features/import-export/import-menu.png)
 
@@ -81,7 +98,7 @@ The steps below make it from the Default Cube.
    ![Suzanne imported](../media/features/import-export/imported.png)
 
 4. **Export.** File > Export lists the exporters. Choose STL (.stl): its options come first (General, Geometry),
-   then the save dialog. Wavefront (.obj) and Stanford PLY (.ply) export the same way.
+   then the save dialog. Wavefront (.obj), Stanford PLY (.ply), FBX and glTF 2.0 export the same way.
 
    ![File > Export](../media/features/import-export/export-menu.png)
 
@@ -93,6 +110,8 @@ The steps below make it from the Default Cube.
   5.2's OBJ exporter, imports them into the Default Cube's scene and saves import-export.blend.
 - [import-export.blend](../../examples/import-export/import-export.blend): the file the script saves.
 - [index.js](../../examples/import-export/index.js): opens the .blend with Blender's reader.
-- [io-fixtures.py](../../tools/blender-reference/io-fixtures.py): the files and Blender's own import results the tests
-  compare with ([io-wasm.test.js](../../tests/io-wasm.test.js)).
+- [io-fixtures.py](../../tools/blender-reference/io-fixtures.py) and
+  [io-addon-fixtures.py](../../tools/blender-reference/io-addon-fixtures.py): the files and Blender's own import results
+  the tests compare with ([io-wasm.test.js](../../tests/io-wasm.test.js),
+  [io-addons-wasm.test.js](../../tests/io-addons-wasm.test.js)).
 - [record-import-export.mjs](../../tools/docs/record-import-export.mjs): records this page's pictures.

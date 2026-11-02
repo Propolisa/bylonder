@@ -37,11 +37,11 @@ New Project creates a project from code. Blender's templates map to File > New f
 
 ## TOPBAR_MT_file_import > *
 Status: partial
-Blender's importers in the module (OBJ, PLY, STL, FBX) through the browser's file dialog, their options drawn from the operator's ui (`wm-fileselect.js`). Alembic and USD are greyed out with the reason; the default add-ons' entries (glTF 2.0, FBX (Legacy), Motion Capture, SVG as Curves) wait for Blender's Python.
+Blender's importers in the module (OBJ, PLY, STL, FBX) and its default add-ons' (glTF 2.0, FBX (Legacy), Motion Capture, SVG as Curves, Blender's Python in the module's CPython) through the browser's file dialog, their options drawn from the operator's ui (`wm-fileselect.js`). Opening File starts Python; the add-ons' entries stand greyed out at their places until they have registered. Alembic and USD are greyed out with the reason. Blender itself orders the add-ons' entries anew at each launch (it enables its core add-ons from a set, under Python's per-launch hash seed); Bylonder enables them sorted by module (`tools/blender-port/python/startup/bylonder_cpython.py`, which loads them one per step while the page runs), so they stay in one order. glTF's Draco and meshoptimizer compression need native libraries and are not available (`wasm/patches/gltf_ctypes.patch`).
 
 ## TOPBAR_MT_file_export > *
 Status: partial
-Blender's exporters in the module (OBJ, PLY, STL): options, then the browser's save dialog; files written beside the chosen one (an OBJ's .mtl) download. Bylonder adds Babylon, JavaScript and Project ZIP. Alembic, USD and the add-ons' glTF 2.0, FBX and Motion Capture are greyed out with the reason.
+Blender's exporters in the module (OBJ, PLY, STL) and the add-ons' (glTF 2.0, FBX, Motion Capture): options, then the browser's save dialog; files written beside the chosen one (an OBJ's .mtl, a .gltf's .bin) download. Bylonder adds Babylon, JavaScript and Project ZIP. Alembic and USD are greyed out with the reason.
 
 ## PREFERENCES > *
 Status: partial

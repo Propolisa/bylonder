@@ -1,0 +1,399 @@
+{
+ "glb": {
+  "Suzanne": {
+   "type": "MESH",
+   "location": [
+    1.0,
+    -2.0,
+    0.5
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "vertices": 1273,
+   "edges": 1990,
+   "faces": 968,
+   "corners": 2904,
+   "bounds": [
+    [
+     -0.3204,
+     -3.0846,
+     -0.6113
+    ],
+    [
+     2.1045,
+     -0.7787,
+     1.5199
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "uv_bounds": [
+    [
+     0.0001,
+     0.0094,
+     0.9999,
+     0.9851
+    ]
+   ],
+   "color_attributes": [
+    [
+     "Color",
+     "CORNER",
+     "BYTE_COLOR"
+    ],
+    [
+     "Color.001",
+     "CORNER",
+     "BYTE_COLOR"
+    ]
+   ],
+   "smooth_faces": 937,
+   "corner_normals": -2349.62,
+   "materials": [
+    "Skin"
+   ]
+  }
+ },
+ "gltf": {
+  "Suzanne": {
+   "type": "MESH",
+   "location": [
+    1.0,
+    -2.0,
+    0.5
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "vertices": 1273,
+   "edges": 1990,
+   "faces": 968,
+   "corners": 2904,
+   "bounds": [
+    [
+     -0.3204,
+     -3.0846,
+     -0.6113
+    ],
+    [
+     2.1045,
+     -0.7787,
+     1.5199
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "uv_bounds": [
+    [
+     0.0001,
+     0.0094,
+     0.9999,
+     0.9851
+    ]
+   ],
+   "color_attributes": [
+    [
+     "Color",
+     "CORNER",
+     "BYTE_COLOR"
+    ],
+    [
+     "Color.001",
+     "CORNER",
+     "BYTE_COLOR"
+    ]
+   ],
+   "smooth_faces": 937,
+   "corner_normals": -2349.62,
+   "materials": [
+    "Skin"
+   ]
+  }
+ },
+ "fbx_legacy": {
+  "Suzanne": {
+   "type": "MESH",
+   "location": [
+    1.0,
+    -2.0,
+    0.5
+   ],
+   "rotation": [
+    0.3,
+    0.0,
+    0.7
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "vertices": 507,
+   "edges": 1005,
+   "faces": 500,
+   "corners": 1968,
+   "bounds": [
+    [
+     -0.3204,
+     -3.0846,
+     -0.6113
+    ],
+    [
+     2.1045,
+     -0.7787,
+     1.5199
+    ]
+   ],
+   "uv_layers": [
+    "UVMap"
+   ],
+   "uv_bounds": [
+    [
+     0.0001,
+     0.0094,
+     0.9999,
+     0.9851
+    ]
+   ],
+   "color_attributes": [
+    [
+     "Col",
+     "CORNER",
+     "BYTE_COLOR"
+    ]
+   ],
+   "smooth_faces": 500,
+   "corner_normals": -1605.89,
+   "materials": [
+    "Skin"
+   ]
+  }
+ },
+ "bvh": {
+  "walk": {
+   "type": "ARMATURE",
+   "location": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "bones": [
+    [
+     "Hip",
+     null
+    ],
+    [
+     "Knee",
+     "Hip"
+    ],
+    [
+     "Foot",
+     "Knee"
+    ]
+   ],
+   "frames": [
+    1,
+    20
+   ],
+   "poses": {
+    "1": {
+     "Hip": [
+      0.0,
+      -2.0,
+      0.0
+     ],
+     "Knee": [
+      0.0,
+      -1.2,
+      0.0
+     ],
+     "Foot": [
+      0.0,
+      -0.4,
+      0.0
+     ]
+    },
+    "10": {
+     "Hip": [
+      0.5,
+      -2.0,
+      0.0
+     ],
+     "Knee": [
+      0.5,
+      -1.2,
+      0.0
+     ],
+     "Foot": [
+      0.5,
+      -0.507,
+      0.4
+     ]
+    },
+    "20": {
+     "Hip": [
+      1.0,
+      -2.0,
+      0.0
+     ],
+     "Knee": [
+      1.0,
+      -1.2,
+      0.0
+     ],
+     "Foot": [
+      1.0,
+      -0.448,
+      -0.274
+     ]
+    }
+   }
+  }
+ },
+ "svg": {
+  "Curve": {
+   "type": "CURVE",
+   "location": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "dimensions": "2D",
+   "splines": [
+    [
+     "BEZIER",
+     4,
+     true
+    ]
+   ],
+   "bounds": [
+    [
+     0.0028,
+     0.0141,
+     0.0
+    ],
+    [
+     0.0198,
+     0.0254,
+     0.0
+    ]
+   ],
+   "materials": 1
+  },
+  "Curve.001": {
+   "type": "CURVE",
+   "location": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "dimensions": "2D",
+   "splines": [
+    [
+     "BEZIER",
+     4,
+     true
+    ]
+   ],
+   "bounds": [
+    [
+     0.0268,
+     0.0099,
+     0.0
+    ],
+    [
+     0.0409,
+     0.024,
+     0.0
+    ]
+   ],
+   "materials": 1
+  },
+  "Curve.002": {
+   "type": "CURVE",
+   "location": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "dimensions": "3D",
+   "splines": [
+    [
+     "BEZIER",
+     2,
+     false
+    ]
+   ],
+   "bounds": [
+    [
+     0.0056,
+     0.0028,
+     0.0
+    ],
+    [
+     0.0508,
+     0.0056,
+     0.0
+    ]
+   ],
+   "materials": 0
+  }
+ }
+}

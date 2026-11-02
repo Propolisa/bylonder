@@ -71,17 +71,29 @@ function rowEl(menu, item, key, level) {
   );
   if (shortcut) b.append(make('kbd', '', shortcut));
   if (item.items) b.append(make('span', 'bl-menu-arrow'));
-  const disabled = item.enabled ? !item.enabled() : false;
-  b.classList.toggle('disabled', disabled);
-  b.setAttribute('aria-disabled', disabled);
-  if (item.title) b.title = item.title;
-  const index = menu.rows.push({ el: b, item, key, disabled }) - 1;
+  const row = { el: b, item, key };
+  rowState(row);
+  const index = menu.rows.push(row) - 1;
   b.onpointermove = e => hover(level, index, e);
   b.onpointerleave = () => leave(level, index);
   b.onclick = e => { e.stopPropagation(); activate(level, index); };
   b.onpointerup = e => { if (dragOpened && !e.button) activate(level, index); };
   return b;
 }
+
+// A row's state from its item: whether it can run now, and its tooltip.
+function rowState(row) {
+  row.disabled = row.item.enabled ? !row.item.enabled() : false;
+  row.el.classList.toggle('disabled', row.disabled);
+  row.el.setAttribute('aria-disabled', row.disabled);
+  const title = typeof row.item.title === 'function' ? row.item.title() : row.item.title;
+  if (title) row.el.title = title;
+  else row.el.removeAttribute('title');
+}
+// The open menus' rows again, after what they show changed (an add-on registered the operators of greyed-out rows).
+export const refreshMenus = () => levels.forEach((menu) => menu?.rows?.forEach(rowState));
+// The page's menus and the 3D Viewport frame's are told alike, each window's to its own (`bl-menus-changed`).
+globalThis.addEventListener?.('bl-menus-changed', refreshMenus);
 
 // A menu that searches as it is typed in (SEARCH_ON_KEY_PRESS) has no accelerator keys.
 function render(items, anchor, level, title, search) {
@@ -399,12 +411,12 @@ function menuKey(e, menu) {
   return !!letter;
 }
 
-addEventListener('pointermove', e => { pointer.x = e.clientX; pointer.y = e.clientY; }, true);
-addEventListener('pointerup', () => { dragOpened = false; });
-addEventListener('pointerdown', e => { if (levels.length && !e.target.closest('.bl-menu,.bl-pulldown.open')) closeMenus(); }, true);
-addEventListener('keydown', e => {
+globalThis.addEventListener?.('pointermove', e => { pointer.x = e.clientX; pointer.y = e.clientY; }, true);
+globalThis.addEventListener?.('pointerup', () => { dragOpened = false; });
+globalThis.addEventListener?.('pointerdown', e => { if (levels.length && !e.target.closest('.bl-menu,.bl-pulldown.open')) closeMenus(); }, true);
+globalThis.addEventListener?.('keydown', e => {
   if (!levels.length) return;
   if (menuKey(e, levels.at(-1))) e.preventDefault();
   e.stopImmediatePropagation();
 }, true);
-addEventListener('blur', closeMenus);
+globalThis.addEventListener?.('blur', closeMenus);

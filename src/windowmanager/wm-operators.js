@@ -41,6 +41,8 @@ export function registerFallback(idname, fallback) {
 export function registerOperators(table, space = null) {
   for (const [idname, operator] of Object.entries(table)) registerOperator(idname, operator, space);
 }
+// Bylonder's registration of an operator gone, so Blender's own runs (one an add-on registered since).
+export const unregisterOperator = (idname) => operators.delete(idname);
 
 const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.get(idname)) ?? operators.get(idname);
 // Why an operator Bylonder lists in Blender's menus cannot run here (`unavailable`), shown with it greyed out, or undefined.
