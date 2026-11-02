@@ -12,6 +12,8 @@
   { "id": "drivers-editor", "title": "Drivers editor in the 3D View's area, a driver on the cube's Y location made active, the sidebar's Drivers tab" },
   { "id": "dope-sheet", "title": "Dope Sheet in the Timeline's area, the cube's location keyed at frames 1 and 40" },
   { "id": "object-tab", "title": "Properties: Object tab of the cube" },
+  { "id": "material-tab", "title": "Properties: Material tab of the cube, two empty slots added below its material" },
+  { "id": "geometry-nodes-modifier", "title": "Properties: Modifiers tab with a Geometry Nodes modifier, its Manage, Bake and Named Attributes sub-panels" },
   { "id": "light-data", "title": "Properties: Light data tab of the point light" },
   { "id": "camera-data", "title": "Properties: Camera data tab of the camera" },
   { "id": "toolbar", "title": "3D View toolbar: the Move tool chosen, with its tool settings and gizmo" },

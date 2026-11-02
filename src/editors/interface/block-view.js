@@ -154,7 +154,7 @@ function widgetNode(b, env) {
     case 'COLOR':
       return withStyle(colorSwatch({ value: b.rna ? [...struct(b.rna)[b.rna.prop]] : [0, 0, 0], ...common, onChange: (v, finish) => setRna({ ...b, rna: { ...b.rna, index: -1 } }, v, ui, finish) }));
     case 'MENU': case 'POPOVER': case 'BLOCK': case 'COLOR_BAND':
-      return withStyle(menuButton({ text: shown, iconName, ...common, iconOnly: !shown && !!iconName, onClick: (e) => open(b, ui, e) }));
+      return withStyle(menuButton({ text: shown, iconName, ...common, iconOnly: !shown && !!iconName, socket: b.node_link, onClick: (e) => open(b, ui, e) }));
     case 'PULLDOWN':
       return env.header ? pulldown({ text: shown, iconName, disabled: common.disabled, menu: b.menu, items: () => treeMenu(ui.inContext((C) => buttonMenu(C, b)) ?? { children: [] }, ui) })
         : withStyle(menuButton({ text: shown, iconName, ...common, onClick: (e) => open(b, ui, e) }));
@@ -173,7 +173,7 @@ function widgetNode(b, env) {
     case 'PREVIEW_TILE': return previewTile(b, shown || (b.icon === 'NONE' ? env.tileLabel : ''), style);
     case 'ROW': case 'LISTROW': case 'VIEW_ITEM': case 'TAB': {
       const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
-      const vnode = withStyle(button({ text: shown, iconName, kind: b.type === 'LISTROW' ? 'list-row' : 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
+      const vnode = withStyle(button({ text: shown, iconName, kind: b.type === 'LISTROW' ? 'list-row' : 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1', textLeft: b.text_left,
         value: item?.identifier, onClick: () => press(b, ui) }));
       if (b.type === 'VIEW_ITEM' && b.h > 1) return gridTile(b, ui);
       if (b.type === 'VIEW_ITEM') return cloneVNode(vnode, { onDblclick: () => ui.inContext((C) => buttonRename(C, b)) && ui.refresh() });
@@ -181,9 +181,9 @@ function widgetNode(b, env) {
     }
     default:
       if (TOGGLES.has(b.type)) {
-        return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, onClick: () => press(b, ui) }));
+        return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, textLeft: b.text_left, onClick: () => press(b, ui) }));
       }
-      return withStyle(button({ text: shown, iconName, kind: 'tool', ...common, iconOnly: !shown && !!iconName, emboss: !flat, pressed: !!b.selected, className: 'flex-1',
+      return withStyle(button({ text: shown, iconName, kind: 'tool', ...common, iconOnly: !shown && !!iconName, emboss: !flat, pressed: !!b.selected, className: 'flex-1', textLeft: b.text_left,
         onClick: (event) => (b.operator ? runOperator(b, ui, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
   }
 }
@@ -235,6 +235,16 @@ function childStyle(child, node, env) {
   return fixed ? { flex: `0 0 calc(var(--bl-row) * ${w})`, width: `calc(var(--bl-row) * ${w})` } : { flex: `${w} ${w} 0`, minWidth: 0 };
 }
 
+// Blender's space before an item along its layout and its indent across it, from where Blender placed them (null for
+// an item without buttons, or a tree without positions).
+const STACKED = new Set(['column', 'menu', 'root', 'box', 'radial', 'header', 'row', 'split']);
+function spacing(child, before, node, horizontal) {
+  if (child.x === undefined || node.x === undefined || !STACKED.has(node.kind)) return null;
+  const units = (n) => (n > 0.01 ? `calc(var(--bl-row) * ${n})` : undefined);
+  const along = horizontal ? child.x - (before ? before.x + before.w : node.x) : child.y - (before ? before.y + before.h : node.y);
+  return { [horizontal ? 'marginLeft' : 'marginTop']: units(along), ...(!horizontal && { marginLeft: units(child.x - node.x) }) };
+}
+
 function layoutNode(node, env) {
   if (node.kind === 'button') return buttonNode(node, env);
   const inner = { ...env, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false, emboss: node.emboss ?? env.emboss,
@@ -242,13 +252,18 @@ function layoutNode(node, env) {
   delete inner.root;
   if (node.kind === 'overlap' && node.children[0]?.type === 'VIEW_ITEM') inner.tileLabel = node.children[0].label;
   if (node.kind === 'header' && env.layoutPanels) return layoutPanelHeader(node, inner);
+  const horizontal = HORIZONTAL.has(node.kind);
+  let before = null, placed = false;
   const children = node.children.map((child) => {
-    const drawn = layoutNode(child, inner);
-    if (drawn) drawn.props = { ...drawn.props, style: { ...drawn.props?.style, ...childStyle(child, node, inner) } };
+    const drawn = layoutNode(child, inner), space = spacing(child, before, node, horizontal);
+    if (space) { before = child; placed = true; }
+    if (drawn) drawn.props = { ...drawn.props, style: { ...drawn.props?.style, ...childStyle(child, node, inner), ...space } };
     return drawn;
   }).filter(Boolean);
-  const horizontal = HORIZONTAL.has(node.kind);
-  const align = node.align ? (horizontal ? 'bl-align-row' : 'bl-align-col') : (horizontal ? 'gap-[var(--bl-row-gap)]' : 'gap-[var(--bl-button-gap)]');
+  // Without Blender's positions, the spaces its style gives: a split's column space (aligned or not), a row's and a
+  // column's button space.
+  const gap = placed ? '' : node.kind === 'split' ? 'gap-[var(--bl-column-space)]' : horizontal ? 'gap-[var(--bl-row-gap)]' : 'gap-[var(--bl-button-gap)]';
+  const align = node.align && node.kind !== 'split' ? (horizontal ? 'bl-align-row' : 'bl-align-col') : gap;
   const justify = { LEFT: 'justify-start', RIGHT: 'justify-end', CENTER: 'justify-center' }[node.alignment] ?? '';
   return h('div', {
     class: [LAYOUT_CLASS[node.kind] ?? 'bl-col flex min-w-0 flex-col', align, justify, node.alert && 'bl-alert', !inner.active && 'bl-inactive',

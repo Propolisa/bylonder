@@ -95,6 +95,22 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
+def material_slots():
+    cube = bpy.data.objects["Cube"]
+    with bpy.context.temp_override(window=window(), object=cube, active_object=cube):
+        for _ in range(2):
+            bpy.ops.object.material_slot_add()
+    cube.active_material_index = 0
+    area("PROPERTIES").spaces.active.context = "MATERIAL"
+
+
+def add_geometry_nodes():
+    cube = bpy.data.objects["Cube"]
+    with bpy.context.temp_override(window=window(), object=cube, active_object=cube):
+        bpy.ops.object.modifier_add(type="NODES")
+    area("PROPERTIES").spaces.active.context = "MODIFIER"
+
+
 # The cube's location keyed at frames 1 and 40, then an area (the Timeline's) showing another editor.
 def animation_editor(ui_type, kind="DOPESHEET_EDITOR"):
     cube = bpy.data.objects["Cube"]
@@ -272,6 +288,8 @@ SETUP = {
     "drivers-editor": drivers_editor,
     "action-editor": dope_sheet_mode("ACTION"),
     "object-tab": properties_tab("Cube", "OBJECT"),
+    "material-tab": material_slots,
+    "geometry-nodes-modifier": add_geometry_nodes,
     "light-data": properties_tab("Light", "DATA"),
     "camera-data": properties_tab("Camera", "DATA"),
     "toolbar": click_tool,

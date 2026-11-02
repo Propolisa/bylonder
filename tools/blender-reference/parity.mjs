@@ -123,6 +123,19 @@ const SETUP = {
     await app.page.mouse.move(...rest);
   },
   "object-tab": (app) => propertiesTab(app, "Cube", "Object"),
+  "material-tab": async (app) => {
+    await app.locator('[role="tab"][aria-label="Material"]').click();
+    for (let i = 0; i < 2; i++) await app.frame().getByRole("button", { name: "Add a new material slot" }).click();
+    await app.frame().locator('.bl-overlap').first().click();
+    await app.hover(...REST);
+  },
+  "geometry-nodes-modifier": async (app) => {
+    await app.locator('[role="tab"][aria-label="Modifiers"]').click();
+    await app.frame().getByRole("button", { name: "Add Modifier" }).click();
+    await app.frame().getByRole("menuitem", { name: "Generate" }).hover();
+    await app.frame().getByRole("menuitem", { name: "Geometry Nodes" }).click();
+    await app.hover(...REST);
+  },
   "light-data": (app) => propertiesTab(app, "Light", "Data"),
   "camera-data": (app) => propertiesTab(app, "Camera", "Data"),
   toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
