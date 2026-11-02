@@ -2,7 +2,8 @@
 // Blender's menus; without components, so that scripts and tests can lay menus out too.
 //   ui: block-view.js's region contract; `runs(idname)` may say which operators ui.run runs itself (else Bylonder's
 //   registry's do), `adjust(tree)` may change a tree before its entries are made.
-import { buttonMenu, buttonPress, buttonOperator, buttonSearch, buttonSearchApply, inButtonContext } from './ui-tree.js';
+import { buttonMenu, buttonPress, buttonOperator, buttonSearch, buttonSearchApply, buttonTextSet, inButtonContext } from './ui-tree.js';
+import { pointerStruct } from '../../python/bpy_rna.js';
 import { takeOperatorPopup, newOperator, blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { runsOperator, unavailableReason } from '../../windowmanager/wm-operators.js';
 
@@ -103,6 +104,20 @@ export function treeSearch(tree, ui) {
     run: () => {
       ui.inContext((C) => buttonSearchApply(C, search, query, index));
       ui.undoPush(search.tip || item.name);
+      ui.refresh();
+    },
+  }));
+}
+
+// A prop_search button's items (its search collection's, by name) as menu.js entries: the one chosen is set by its name
+// as Blender's search box applies it (ui_but_string_set), a string property's text or a pointer property's item.
+export function propSearchItems(b, ui) {
+  const { pointer, prop } = b.search;
+  return [...pointerStruct(...pointer)[prop]].map(({ name }) => ({
+    label: name,
+    run: () => {
+      ui.inContext((C) => buttonTextSet(C, b, name));
+      ui.undoPush(b.tip || b.rna?.prop || name);
       ui.refresh();
     },
   }));

@@ -22,7 +22,7 @@ import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu, regionPanels, categorySet } from './ui-tree.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { treeMenu, treeSearch, press, runOperator } from './tree-menu.js';
+import { treeMenu, treeSearch, propSearchItems, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
@@ -160,8 +160,7 @@ function widgetNode(b, env) {
         : withStyle(menuButton({ text: shown, iconName, ...common, onClick: (e) => open(b, ui, e) }));
     case 'SEARCH_MENU': {
       if (!b.search) return withStyle(textField({ value: shown, iconName, ...common, onChange: (v) => { ui.inContext((C) => buttonTextSet(C, b, v)); ui.refresh(); } }));
-      const items = () => [...struct(b.search)[b.search.prop]].map((item) => ({ label: item.name, run: () => setRna(b, item, ui) }));
-      return withStyle(menuButton({ text: shown, iconName, ...common, items }));
+      return withStyle(menuButton({ text: shown, iconName, ...common, items: () => propSearchItems(b, ui) }));
     }
     case 'HOTKEY_EVENT': case 'KEYEVENT':
       return withStyle(button({ text: shown, ...common, className: 'flex-1', onClick: (e) => captureKey(b, ui, e.currentTarget) }));
