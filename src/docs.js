@@ -1,7 +1,7 @@
 import { marked } from 'marked';
 import { blender } from '../tools/blender-port/manifest.json';
 import features from '../docs/features/index.json';
-import { frontMatter, LIVE_SITE, SOURCE } from './feature-docs.js';
+import { coverageText, frontMatter, LIMITS, LIVE_SITE, REFERENCE, SOURCE } from './feature-docs.js';
 import './theme.css';
 import './docs.css';
 
@@ -52,7 +52,8 @@ function navigation() {
   $('doc-menu').onclick = () => $('doc-menu').setAttribute('aria-expanded', document.body.classList.toggle('nav-open'));
 }
 
-const badge = (status) => el('span', { className: 'doc-badge ' + status, textContent: status });
+const counts = (f) => coverageText(f.coverage ?? {}).map((text) => el('span', { className: 'doc-count', textContent: text }));
+const expect = (f) => (f.expect ? [el('p', { className: 'feature-expect', textContent: f.expect })] : []);
 const buttons = (f, manuals = f.blender_manual) => el('p', { className: 'doc-buttons' },
   link('Open in Bylonder', local(f.open), 'doc-button primary'),
   ...manuals.map((url, i) => Object.assign(link(i ? 'Manual: ' + url.split('/').slice(-2).join('/') : 'Blender Manual', url, 'doc-button'), { target: '_blank' })));
@@ -61,19 +62,19 @@ const buttons = (f, manuals = f.blender_manual) => el('p', { className: 'doc-but
 const featureCards = () => el('div', { className: 'feature-grid' }, ...features.map((f) => el('article', { className: 'feature-card' },
   el('a', { href: '#' + f.page, className: 'feature-thumb' }, el('img', { src: mediaUrl(f.thumbnail), alt: '', loading: 'lazy' })),
   el('div', { className: 'feature-text' },
-    el('h3', {}, link(f.title, '#' + f.page)), el('p', { textContent: f.summary }),
-    el('p', { className: 'feature-meta' }, badge(f.status), el('span', { textContent: `Example: ${f.example_title}` })), buttons(f, f.blender_manual.slice(0, 1))))));
+    el('h3', {}, link(f.title, '#' + f.page)), el('p', { textContent: f.summary }), ...expect(f),
+    el('p', { className: 'feature-meta' }, ...counts(f), el('span', { textContent: `Example: ${f.example_title}` })), buttons(f, f.blender_manual.slice(0, 1))))));
 
 const codeList = (files) => el('ul', {}, ...files.map((file) => el('li', {}, Object.assign(link(file, SOURCE + file), { target: '_blank' }))));
 const codes = (ids) => el('p', { className: 'doc-ids' }, ...ids.map((id) => el('code', { textContent: id })));
 // What a feature page's front matter adds around its body: the summary and links first, the reference last.
 function featurePage(body, f) {
-  const lead = el('div', { className: 'feature-lead' }, el('p', { className: 'feature-summary', textContent: f.summary }),
-    el('p', { className: 'feature-meta' }, badge(f.status), el('span', { textContent: `Blender ${f.blender_version}` }), el('span', { textContent: `Example: ${f.example_title ?? f.example}` })), buttons(f));
+  const lead = el('div', { className: 'feature-lead' }, el('p', { className: 'feature-summary', textContent: f.summary }), ...expect(f),
+    el('p', { className: 'feature-meta' }, ...counts(f), el('span', { textContent: `Blender ${f.blender_version}` }), el('span', { textContent: `Example: ${f.example_title ?? f.example}` })), buttons(f));
   body.querySelector('h1')?.after(lead);
   body.querySelector(`p > a[href^="${LIVE_SITE}"]:only-child`)?.parentElement.remove();
-  body.append(el('h2', { textContent: 'Not done yet' }), el('ul', {}, ...f.limits.map((l) => el('li', { textContent: l }))),
-    el('h2', { textContent: 'Reference' }),
+  body.append(el('h2', { textContent: LIMITS }), el('ul', {}, ...f.limits.map((l) => el('li', { textContent: l }))),
+    el('h2', { textContent: REFERENCE }),
     el('dl', { className: 'doc-reference' },
       el('dt', { textContent: 'Interface' }), el('dd', {}, codes(f.ui)),
       el('dt', { textContent: 'Operators' }), el('dd', {}, codes(f.operators)),

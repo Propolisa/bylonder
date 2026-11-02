@@ -4,6 +4,7 @@
 // (themes, drawing, navigation). By RNA struct, then property ('*' for all of a struct's).
 import { THEMED } from '../interface/theme-tokens.js';
 import { BYLONDER_ICON } from '../../python/bpy_icons.js';
+import { operatorNames } from '../../bmesh/bmesh-wasm.js';
 
 const BROWSER = 'Not available in a browser';
 const GPU = 'The browser chooses the graphics device and drawing backend';
@@ -68,6 +69,10 @@ function unsupportedOperator(node) {
   if (/^preferences\.addon_(enable|disable|expand)$/.test(node.operator) && !ADDONS_INCLUDED.has(property(node, 'module'))) return NOT_INCLUDED;
   return null;
 }
+
+// What the Preferences' buttons run: Blender's own operators in the module (tree-menu.js runOperator), but those greyed
+// out here.
+export const preferencesOperators = () => operatorNames().filter((operator) => !unsupportedOperator({ operator }));
 
 // A Preferences region's tree with the buttons of unsupported settings and operators disabled and their reason in
 // their tooltip.

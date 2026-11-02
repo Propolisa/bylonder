@@ -2,7 +2,7 @@
 id: grease-pencil
 title: Grease Pencil
 summary: Draw and animate 2D strokes in the 3D Viewport with Blender's Grease Pencil, its brushes, modes, layers and onion skins, drawn by Babylon's GreasedLine.
-status: partial
+expect: Drawing, editing, layers and animation run Blender's code; stroke ends are flat, some blend modes, masks, gradient and texture fills and shader effects draw differently.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/grease_pencil/index.html
@@ -25,11 +25,21 @@ ui:
   - SCULPT_GREASE_PENCIL
   - WEIGHT_GREASE_PENCIL
   - VERTEX_GREASE_PENCIL
-  - VIEW3D_MT_paint_grease_pencil
-  - VIEW3D_MT_edit_greasepencil
-  - DATA_PT_grease_pencil_layers
-  - DATA_PT_grease_pencil_onion_skinning
   - PROPERTIES
+  - VIEW3D_MT_paint_grease_pencil
+  - VIEW3D_MT_edit_greasepencil*
+  - VIEW3D_MT_greasepencil*
+  - VIEW3D_MT_grease_pencil*
+  - VIEW3D_MT_weight_grease_pencil
+  - VIEW3D_MT_paint_vertex_grease_pencil
+  - VIEW3D_PT_greasepencil*
+  - VIEW3D_PT_grease_pencil*
+  - VIEW3D_PT_tools_grease_pencil*
+  - DATA_PT_grease_pencil*
+  - GREASE_PENCIL_MT*
+  - MATERIAL_PT_gpencil*
+  - TOPBAR_PT_grease_pencil*
+  - TOPBAR_PT_gpencil*
 operators:
   - object.grease_pencil_add
   - object.mode_set
@@ -54,6 +64,8 @@ limits:
   - Gradient and texture fills draw in their fill color, texture strokes in their stroke color; strokes are not lit.
   - Fills draw under their layer's strokes rather than interleaved stroke by stroke.
   - Shader effects (Blur, Shadow, Rim, ...) and Line Art's evaluation in a render are not drawn.
+  - Line Art objects are added and evaluated in the module but are not checked against Blender's.
+  - The paint cursor (the brush circle) and Bezier handles in Edit Mode are not drawn.
 ---
 # Grease Pencil
 
@@ -111,8 +123,3 @@ template with its 2D Animation and 2D Full Canvas workspaces, in Draw Mode.
 - [index.js](../../examples/grease-pencil/index.js): opens the .blend with Blender's reader.
 - [2d-animation](../../examples/2d-animation/README.md): Blender's 2D Animation template, File > New > 2D Animation.
 - Recorded by [record-grease-pencil.mjs](../../tools/docs/record-grease-pencil.mjs).
-
-## Not done yet
-
-The items under `limits` above, and: Line Art objects are added and evaluate in the module but are not checked
-against Blender's; the paint cursor (the brush circle) is not drawn; Bezier handles in Edit Mode are not drawn.

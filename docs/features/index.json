@@ -3,7 +3,7 @@
   "id": "curves-and-text",
   "title": "Curves and Text",
   "summary": "Add a text object, type into it in Edit Mode, give it depth with Extrude and Bevel, and extrude a Bézier curve's points.",
-  "status": "partial",
+  "expect": "Text and Bezier curves are typed, edited, extruded and beveled as in Blender; the 3D Text demo's Google Fonts title needs network access.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/modeling/texts/index.html",
@@ -21,13 +21,18 @@
   ],
   "ui": [
    "VIEW_3D",
+   "EDIT",
    "VIEW3D_MT_add",
    "VIEW3D_MT_curve_add",
-   "VIEW3D_MT_edit_font",
+   "VIEW3D_MT_edit_font*",
+   "VIEW3D_MT_edit_curve_*",
    "VIEW3D_MT_edit_curve",
-   "DATA_PT_geometry_curve",
-   "DATA_PT_font",
-   "EDIT"
+   "DATA_PT_font*",
+   "DATA_PT_geometry_curve*",
+   "DATA_PT_paragraph*",
+   "DATA_PT_text_boxes",
+   "DATA_PT_shape_curve",
+   "DATA_PT_pathanim"
   ],
   "operators": [
    "object.text_add",
@@ -54,13 +59,25 @@
   ],
   "page": "docs/features/curves-and-text.md",
   "open": "https://propolisa.github.io/bylonder/#example=text",
-  "example_title": "3D Text"
+  "example_title": "3D Text",
+  "coverage": {
+   "operators": {
+    "supported": 103,
+    "partial": 0,
+    "total": 140
+   },
+   "ui": {
+    "supported": 39,
+    "partial": 0,
+    "total": 43
+   }
+  }
  },
  {
   "id": "geometry-node-editor",
   "title": "Geometry Node Editor",
   "summary": "Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.",
-  "status": "partial",
+  "expect": "Node groups open, edit and evaluate as in Blender; the sidebar's Group tab is missing, and Bylonder's own Geometry Nodes modifier opens in Babylon's editor instead.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/geometry_node.html",
@@ -78,8 +95,16 @@
   "ui": [
    "GeometryNodeTree",
    "NODE_EDITOR",
+   "PROPERTIES",
+   "NODE_HT_header",
+   "NODE_MT_editor_menus",
    "NODE_MT_add",
-   "PROPERTIES"
+   "NODE_MT_view*",
+   "NODE_MT_select",
+   "NODE_MT_node*",
+   "NODE_MT_context_menu*",
+   "NODE_MT_group*",
+   "NODE_PT_active*"
   ],
   "operators": [
    "node.add_node",
@@ -104,17 +129,29 @@
   ],
   "page": "docs/features/geometry-node-editor.md",
   "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
-  "example_title": "Hair Dynamics"
+  "example_title": "Hair Dynamics",
+  "coverage": {
+   "operators": {
+    "supported": 371,
+    "partial": 3,
+    "total": 401
+   },
+   "ui": {
+    "supported": 76,
+    "partial": 0,
+    "total": 81
+   }
+  }
  },
  {
   "id": "geometry-nodes",
   "title": "Geometry Nodes",
   "summary": "Build a Geometry Nodes modifier from an empty node group, expose its inputs, make node groups, and see the evaluated mesh, points and instances drawn.",
-  "status": "partial",
+  "expect": "Meshes, points and mesh instances evaluate and draw as in Blender; volumes and instanced curves are not drawn, and instances take their mesh's first material.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/index.html",
-   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/generate/geometry_nodes.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/geometry_nodes.html",
    "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/instances.html",
    "https://docs.blender.org/manual/en/5.2/interface/controls/nodes/groups.html"
   ],
@@ -132,10 +169,14 @@
   "ui": [
    "GeometryNodeTree",
    "NODE_EDITOR",
-   "NODE_MT_add",
-   "OBJECT_MT_modifier_add",
    "PROPERTIES",
-   "VIEW_3D"
+   "VIEW_3D",
+   "OBJECT_MT_modifier_add*",
+   "DATA_PT_modifiers",
+   "NODE_MT_add",
+   "NODE_MT_geometry*",
+   "NODE_MT_group*",
+   "NODE_PT_geometry*"
   ],
   "operators": [
    "object.modifier_add",
@@ -168,13 +209,25 @@
   ],
   "page": "docs/features/geometry-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=geometry-nodes",
-  "example_title": "Geometry Nodes Meadow"
+  "example_title": "Geometry Nodes Meadow",
+  "coverage": {
+   "operators": {
+    "supported": 375,
+    "partial": 1,
+    "total": 406
+   },
+   "ui": {
+    "supported": 73,
+    "partial": 0,
+    "total": 75
+   }
+  }
  },
  {
   "id": "grease-pencil",
   "title": "Grease Pencil",
   "summary": "Draw and animate 2D strokes in the 3D Viewport with Blender's Grease Pencil, its brushes, modes, layers and onion skins, drawn by Babylon's GreasedLine.",
-  "status": "partial",
+  "expect": "Drawing, editing, layers and animation run Blender's code; stroke ends are flat, some blend modes, masks, gradient and texture fills and shader effects draw differently.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/grease_pencil/index.html",
@@ -199,11 +252,21 @@
    "SCULPT_GREASE_PENCIL",
    "WEIGHT_GREASE_PENCIL",
    "VERTEX_GREASE_PENCIL",
+   "PROPERTIES",
    "VIEW3D_MT_paint_grease_pencil",
-   "VIEW3D_MT_edit_greasepencil",
-   "DATA_PT_grease_pencil_layers",
-   "DATA_PT_grease_pencil_onion_skinning",
-   "PROPERTIES"
+   "VIEW3D_MT_edit_greasepencil*",
+   "VIEW3D_MT_greasepencil*",
+   "VIEW3D_MT_grease_pencil*",
+   "VIEW3D_MT_weight_grease_pencil",
+   "VIEW3D_MT_paint_vertex_grease_pencil",
+   "VIEW3D_PT_greasepencil*",
+   "VIEW3D_PT_grease_pencil*",
+   "VIEW3D_PT_tools_grease_pencil*",
+   "DATA_PT_grease_pencil*",
+   "GREASE_PENCIL_MT*",
+   "MATERIAL_PT_gpencil*",
+   "TOPBAR_PT_grease_pencil*",
+   "TOPBAR_PT_gpencil*"
   ],
   "operators": [
    "object.grease_pencil_add",
@@ -231,17 +294,31 @@
    "A layer's opacity applies per stroke; Hard Light and Divide layers blend as Regular; layer masks do not mask.",
    "Gradient and texture fills draw in their fill color, texture strokes in their stroke color; strokes are not lit.",
    "Fills draw under their layer's strokes rather than interleaved stroke by stroke.",
-   "Shader effects (Blur, Shadow, Rim, ...) and Line Art's evaluation in a render are not drawn."
+   "Shader effects (Blur, Shadow, Rim, ...) and Line Art's evaluation in a render are not drawn.",
+   "Line Art objects are added and evaluated in the module but are not checked against Blender's.",
+   "The paint cursor (the brush circle) and Bezier handles in Edit Mode are not drawn."
   ],
   "page": "docs/features/grease-pencil.md",
   "open": "https://propolisa.github.io/bylonder/#example=grease-pencil",
-  "example_title": "Bouncing Ball"
+  "example_title": "Bouncing Ball",
+  "coverage": {
+   "operators": {
+    "supported": 79,
+    "partial": 0,
+    "total": 115
+   },
+   "ui": {
+    "supported": 86,
+    "partial": 0,
+    "total": 103
+   }
+  }
  },
  {
   "id": "hair-dynamics",
   "title": "Hair Dynamics",
   "summary": "Hair curves grown by Generate Hair Curves and simulated by Blender's Hair Dynamics node group in a simulation zone.",
-  "status": "partial",
+  "expect": "The simulation matches Blender frame by frame; a jump to a far frame simulates every frame up to it, and the Shader Editor does not show the hair's material.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/simulation/hair_dynamics.html",
@@ -259,7 +336,12 @@
    "VIEW_3D",
    "TIMELINE",
    "PROPERTIES",
-   "OBJECT_MT_modifier_add"
+   "OBJECT_MT_modifier_add*",
+   "DATA_PT_modifiers",
+   "DATA_PT_curves*",
+   "DATA_PT_CURVES*",
+   "CURVES_MT*",
+   "TIME_*"
   ],
   "operators": [
    "screen.animation_play",
@@ -282,13 +364,25 @@
   ],
   "page": "docs/features/hair-dynamics.md",
   "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
-  "example_title": "Hair Dynamics"
+  "example_title": "Hair Dynamics",
+  "coverage": {
+   "operators": {
+    "supported": 35,
+    "partial": 1,
+    "total": 66
+   },
+   "ui": {
+    "supported": 21,
+    "partial": 0,
+    "total": 22
+   }
+  }
  },
  {
   "id": "image-textures",
   "title": "Images and Image Textures",
   "summary": "Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling.",
-  "status": "partial",
+  "expect": "Images open, save, pack and draw on materials with Blender's readers; colors show with the Standard view, and Clip, Cubic, Box projection and UDIM sampling are simplified.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/image/index.html",
@@ -306,11 +400,14 @@
   ],
   "ui": [
    "IMAGE_EDITOR",
-   "IMAGE_HT_header",
-   "IMAGE_MT_image",
-   "IMAGE_MT_view",
    "NODE_EDITOR",
-   "IMAGE_PT_image_properties"
+   "IMAGE_HT_header",
+   "IMAGE_MT_editor_menus",
+   "IMAGE_MT_image*",
+   "IMAGE_MT_view*",
+   "IMAGE_PT_image*",
+   "IMAGE_PT_view*",
+   "TEXTURE_PT_image*"
   ],
   "operators": [
    "image.open",
@@ -347,7 +444,19 @@
   ],
   "page": "docs/features/image-textures.md",
   "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
-  "example_title": "Texture Paint"
+  "example_title": "Texture Paint",
+  "coverage": {
+   "operators": {
+    "supported": 18,
+    "partial": 1,
+    "total": 19
+   },
+   "ui": {
+    "supported": 19,
+    "partial": 0,
+    "total": 20
+   }
+  }
  },
  {
   "id": "import-export",
@@ -407,13 +516,25 @@
   ],
   "page": "docs/features/import-export.md",
   "open": "https://propolisa.github.io/bylonder/#example=import-export",
-  "example_title": "Import and Export"
+  "example_title": "Import and Export",
+  "coverage": {
+   "operators": {
+    "supported": 9,
+    "partial": 22,
+    "total": 50
+   },
+   "ui": {
+    "supported": 8,
+    "partial": 2,
+    "total": 10
+   }
+  }
  },
  {
   "id": "keyframe-animation",
   "title": "Keyframe Animation",
   "summary": "Key an object's transform with I at two frames on the Timeline and play the animation with Space.",
-  "status": "partial",
+  "expect": "Keying with I, the Timeline and playback work as in Blender; the demo itself is keyed from code, so the steps animate the Default Cube instead.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/animation/keyframes/introduction.html",
@@ -431,8 +552,10 @@
   "ui": [
    "VIEW_3D",
    "TIMELINE",
-   "TIME_MT_view",
-   "DOPESHEET_MT_marker"
+   "TIME_*",
+   "DOPESHEET_MT_marker",
+   "ANIM_MT_keyframe*",
+   "VIEW3D_MT_object_animation"
   ],
   "operators": [
    "anim.keyframe_insert",
@@ -458,13 +581,25 @@
   ],
   "page": "docs/features/keyframe-animation.md",
   "open": "https://propolisa.github.io/bylonder/#example=animation",
-  "example_title": "Keyframe Animation"
+  "example_title": "Keyframe Animation",
+  "coverage": {
+   "operators": {
+    "supported": 32,
+    "partial": 1,
+    "total": 39
+   },
+   "ui": {
+    "supported": 13,
+    "partial": 0,
+    "total": 14
+   }
+  }
  },
  {
   "id": "modifiers",
   "title": "Modifiers",
   "summary": "Add, edit and stack modifiers in Properties > Modifiers, here two Array modifiers that turn a cube into a floor of tiles.",
-  "status": "partial",
+  "expect": "Blender's modifiers run Blender's code and give its result; modifier panels cut long labels short.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/modeling/modifiers/index.html",
@@ -479,9 +614,9 @@
   ],
   "ui": [
    "PROPERTIES",
-   "OBJECT_MT_modifier_add",
-   "DATA_PT_modifiers",
-   "VIEW_3D"
+   "VIEW_3D",
+   "OBJECT_MT_modifier*",
+   "DATA_PT_modifiers"
   ],
   "operators": [
    "object.modifier_add",
@@ -505,13 +640,25 @@
   ],
   "page": "docs/features/modifiers.md",
   "open": "https://propolisa.github.io/bylonder/#example=arrays",
-  "example_title": "Array Modifiers"
+  "example_title": "Array Modifiers",
+  "coverage": {
+   "operators": {
+    "supported": 29,
+    "partial": 0,
+    "total": 59
+   },
+   "ui": {
+    "supported": 8,
+    "partial": 0,
+    "total": 9
+   }
+  }
  },
  {
   "id": "nla",
   "title": "Nonlinear Animation",
   "summary": "Layer and mix actions as strips on tracks in Blender's Nonlinear Animation editor, with push down, tweak mode, strip blending, influence and repeats, evaluated by Blender's animation system.",
-  "status": "partial",
+  "expect": "Tracks, strips, push down, tweak mode and strip blending run Blender's code and evaluate as in Blender; sound strips and control curves are listed but not checked against Blender's drawing.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/nla/index.html",
@@ -531,17 +678,7 @@
   ],
   "ui": [
    "NLA_EDITOR",
-   "NLA_HT_header",
-   "NLA_MT_view",
-   "NLA_MT_select",
-   "NLA_MT_marker",
-   "NLA_MT_add",
-   "NLA_MT_tracks",
-   "NLA_MT_strips",
-   "NLA_MT_context_menu",
-   "NLA_MT_channel_context_menu",
-   "NLA_PT_action",
-   "NLA_PT_filters"
+   "NLA_*"
   ],
   "operators": [
    "nla.click_select",
@@ -581,13 +718,25 @@
   ],
   "page": "docs/features/nla.md",
   "open": "https://propolisa.github.io/bylonder/#example=nla",
-  "example_title": "Nonlinear Animation"
+  "example_title": "Nonlinear Animation",
+  "coverage": {
+   "operators": {
+    "supported": 59,
+    "partial": 1,
+    "total": 70
+   },
+   "ui": {
+    "supported": 15,
+    "partial": 0,
+    "total": 22
+   }
+  }
  },
  {
   "id": "particle-hair",
   "title": "Particle Hair",
   "summary": "A hair particle system on a mesh, shaped with the Comb brush in Particle Edit Mode and set up in Properties > Particles.",
-  "status": "partial",
+  "expect": "Hair systems, children and Particle Edit Mode's brushes run Blender's code; hair UV and color attributes are not drawn.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/physics/particles/hair/index.html",
@@ -604,9 +753,10 @@
   "ui": [
    "VIEW_3D",
    "PARTICLE_EDIT",
-   "VIEW3D_MT_particle",
-   "PARTICLE_PT_context_particles",
-   "PROPERTIES"
+   "PROPERTIES",
+   "VIEW3D_MT_particle*",
+   "PARTICLE_*",
+   "VIEW3D_PT_tools_particle*"
   ],
   "operators": [
    "object.mode_set",
@@ -627,13 +777,25 @@
   ],
   "page": "docs/features/particle-hair.md",
   "open": "https://propolisa.github.io/bylonder/#example=hair",
-  "example_title": "Combed Hair"
+  "example_title": "Combed Hair",
+  "coverage": {
+   "operators": {
+    "supported": 9,
+    "partial": 0,
+    "total": 11
+   },
+   "ui": {
+    "supported": 58,
+    "partial": 0,
+    "total": 59
+   }
+  }
  },
  {
   "id": "preferences",
   "title": "Preferences",
   "summary": "Blender's Preferences editor with all of its sections and settings, kept in this browser, with laptop input (Emulate 3 Button Mouse, Emulate Numpad, trackpad gestures), Blender's keymaps to edit, and its themes on the interface.",
-  "status": "partial",
+  "expect": "Input, navigation, keymaps and themes work and are kept in this browser; settings a browser cannot honor (NDOF, file paths, viewport quality, add-on installs) are greyed out.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/preferences/index.html",
@@ -654,18 +816,9 @@
   ],
   "ui": [
    "PREFERENCES",
-   "USERPREF_HT_header",
-   "USERPREF_PT_navigation_bar",
-   "USERPREF_PT_save_preferences",
-   "USERPREF_PT_input_mouse",
-   "USERPREF_PT_input_keyboard",
-   "USERPREF_PT_input_touchpad",
-   "USERPREF_PT_navigation_orbit",
-   "USERPREF_PT_navigation_zoom",
-   "USERPREF_PT_keymap",
-   "USERPREF_PT_theme",
+   "VIEW_3D",
    "TOPBAR_MT_edit",
-   "VIEW_3D"
+   "USERPREF_*"
   ],
   "operators": [
    "screen.userpref_show",
@@ -713,13 +866,25 @@
   ],
   "page": "docs/features/preferences.md",
   "open": "https://propolisa.github.io/bylonder/#example=cube",
-  "example_title": "Default Cube"
+  "example_title": "Default Cube",
+  "coverage": {
+   "operators": {
+    "supported": 15,
+    "partial": 0,
+    "total": 20
+   },
+   "ui": {
+    "supported": 16,
+    "partial": 164,
+    "total": 188
+   }
+  }
  },
  {
   "id": "rigging",
   "title": "Rigging and Posing",
   "summary": "Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, keep poses in the pose library's asset shelf, and paint a mesh's weights.",
-  "status": "partial",
+  "expect": "Posing, selecting, keying, bone collections, constraints, weight paint and the pose library work as in Blender; bone selection ignores depth and pose assets have no preview.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/animation/armatures/posing/index.html",
@@ -747,14 +912,23 @@
    "VIEW_3D",
    "POSE",
    "WEIGHT_PAINT",
-   "VIEW3D_MT_pose",
-   "VIEW3D_MT_select_pose",
    "PROPERTIES",
-   "DATA_PT_bone_collections",
-   "BONE_PT_constraints",
    "TIMELINE",
+   "VIEW3D_MT_pose*",
+   "VIEW3D_MT_select_pose*",
+   "VIEW3D_MT_bone*",
    "VIEW3D_MT_view",
-   "VIEW3D_PT_overlay_weight_paint"
+   "BONE_PT_*",
+   "DATA_PT_bone_collections",
+   "DATA_PT_pose",
+   "DATA_PT_display",
+   "ARMATURE_MT_collection*",
+   "POSE_*",
+   "VIEW3D_MT_paint_weight*",
+   "VIEW3D_MT_wpaint*",
+   "VIEW3D_PT_overlay_bones",
+   "VIEW3D_PT_overlay_weight_paint",
+   "VIEW3D_PT_slots_vertex_groups"
   ],
   "operators": [
    "object.posemode_toggle",
@@ -807,13 +981,25 @@
   ],
   "page": "docs/features/rigging.md",
   "open": "https://propolisa.github.io/bylonder/#example=rigged-character",
-  "example_title": "Rigged Character"
+  "example_title": "Rigged Character",
+  "coverage": {
+   "operators": {
+    "supported": 136,
+    "partial": 1,
+    "total": 164
+   },
+   "ui": {
+    "supported": 92,
+    "partial": 1,
+    "total": 99
+   }
+  }
  },
  {
   "id": "shader-nodes",
   "title": "Shader Nodes",
   "summary": "Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.",
-  "status": "partial",
+  "expect": "Blender's nodes run Blender's GLSL, so materials match; Material Preview uses Babylon's studio light, and Bump is computed by Blender's fast path.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/shader_editor.html",
@@ -832,10 +1018,15 @@
   "ui": [
    "ShaderNodeTree",
    "NODE_EDITOR",
-   "NODE_MT_add",
    "VIEW_3D",
    "PROPERTIES",
-   "VIEW3D_MT_add"
+   "VIEW3D_MT_add",
+   "NODE_HT_header",
+   "NODE_MT_add",
+   "NODE_MT_category_shader*",
+   "NODE_MT_shader_node_add_all",
+   "NODE_PT_material_slots",
+   "EEVEE_MATERIAL_PT_*"
   ],
   "operators": [
    "node.add_node",
@@ -865,13 +1056,25 @@
   ],
   "page": "docs/features/shader-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=lava",
-  "example_title": "Lava Sphere"
+  "example_title": "Lava Sphere",
+  "coverage": {
+   "operators": {
+    "supported": 105,
+    "partial": 1,
+    "total": 174
+   },
+   "ui": {
+    "supported": 37,
+    "partial": 0,
+    "total": 40
+   }
+  }
  },
  {
   "id": "shape-keys",
   "title": "Shape Keys",
   "summary": "Shape a mesh with Blender's shape keys, their values, ranges, vertex groups, relative keys, pinning and locks, edit a key in Edit Mode and key its value, drawn as Blender evaluates them or blended by Babylon's morph targets on the GPU.",
-  "status": "partial",
+  "expect": "Shape keys, their values, ranges, pinning and Edit Mode work as in Blender; on Babylon (mapped) shading differs slightly between keys and only relative keys on unmodified meshes blend on the GPU.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/animation/shape_keys/introduction.html",
@@ -890,13 +1093,13 @@
   ],
   "ui": [
    "PROPERTIES",
-   "DATA_PT_shape_keys",
-   "MESH_MT_shape_key_context_menu",
-   "MESH_MT_shape_key_tree_context_menu",
-   "VIEW3D_MT_edit_mesh_vertices",
    "VIEW_3D",
    "EDIT",
-   "TIMELINE"
+   "TIMELINE",
+   "DATA_PT_shape_keys",
+   "MESH_MT_shape_key*",
+   "VIEW3D_MT_edit_mesh_vertices",
+   "DOPESHEET_PT_ShapeKey"
   ],
   "operators": [
    "object.shape_key_add",
@@ -928,13 +1131,25 @@
   ],
   "page": "docs/features/shape-keys.md",
   "open": "https://propolisa.github.io/bylonder/#example=shape-keys",
-  "example_title": "Shape Keys"
+  "example_title": "Shape Keys",
+  "coverage": {
+   "operators": {
+    "supported": 26,
+    "partial": 0,
+    "total": 28
+   },
+   "ui": {
+    "supported": 7,
+    "partial": 0,
+    "total": 7
+   }
+  }
  },
  {
   "id": "spreadsheet",
   "title": "Spreadsheet",
   "summary": "Blender's Spreadsheet editor, listing the active object's evaluated or original geometry by component and domain, with its attributes as columns.",
-  "status": "partial",
+  "expect": "Components, domains and evaluated or original data list as in Blender; the sidebar's row filters are missing and columns cannot be resized or reordered.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/spreadsheet.html",
@@ -949,8 +1164,7 @@
   ],
   "ui": [
    "SPREADSHEET",
-   "SPREADSHEET_HT_header",
-   "SPREADSHEET_MT_view"
+   "SPREADSHEET_*"
   ],
   "operators": [
    "spreadsheet.toggle_pin"
@@ -969,13 +1183,25 @@
   ],
   "page": "docs/features/spreadsheet.md",
   "open": "https://propolisa.github.io/bylonder/#example=geometry-nodes",
-  "example_title": "Geometry Nodes Meadow"
+  "example_title": "Geometry Nodes Meadow",
+  "coverage": {
+   "operators": {
+    "supported": 1,
+    "partial": 0,
+    "total": 1
+   },
+   "ui": {
+    "supported": 3,
+    "partial": 0,
+    "total": 3
+   }
+  }
  },
  {
   "id": "texture-paint",
   "title": "Texture Paint and Vertex Paint",
   "summary": "Paint an object's image texture in the 3D Viewport or the Image Editor with Blender's brushes and projection painting, and paint its color attribute in Vertex Paint Mode, one undo step per stroke.",
-  "status": "partial",
+  "expect": "Painting in the 3D Viewport, the Image Editor and Vertex Paint runs Blender's brushes; colors show with the Standard view, and brush textures are not drawn in the cursor.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/sculpt_paint/texture_paint/index.html",
@@ -996,10 +1222,18 @@
    "VERTEX_PAINT",
    "VIEW_3D",
    "IMAGE_EDITOR",
+   "builtin.brush",
+   "VIEW3D_MT_paint_vertex",
    "VIEW3D_PT_slots_projectpaint",
    "VIEW3D_PT_slots_color_attributes",
-   "IMAGE_PT_tools_active",
-   "builtin.brush"
+   "VIEW3D_PT_slots_paint_canvas",
+   "VIEW3D_PT_tools_brush*",
+   "VIEW3D_PT_tools_imagepaint*",
+   "VIEW3D_PT_tools_vertexpaint*",
+   "VIEW3D_PT_paint_texture_context_menu",
+   "VIEW3D_PT_paint_vertex_context_menu",
+   "IMAGE_PT_paint*",
+   "IMAGE_PT_tools_active"
   ],
   "operators": [
    "paint.texture_paint_toggle",
@@ -1030,13 +1264,25 @@
   ],
   "page": "docs/features/texture-paint.md",
   "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
-  "example_title": "Texture Paint"
+  "example_title": "Texture Paint",
+  "coverage": {
+   "operators": {
+    "supported": 16,
+    "partial": 0,
+    "total": 16
+   },
+   "ui": {
+    "supported": 38,
+    "partial": 0,
+    "total": 40
+   }
+  }
  },
  {
   "id": "uv-editing",
   "title": "UV Editing",
   "summary": "Unwrap a mesh with UV > Unwrap, Smart UV Project or Project from View, mark seams, and select, move, pin, stitch and pack its UVs in the UV Editor over the image they map.",
-  "status": "partial",
+  "expect": "Unwrapping and UV editing run Blender's operators; UV Sculpt has no brush cursor and Display Stretch is not drawn.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/modeling/meshes/uv/index.html",
@@ -1053,12 +1299,16 @@
   ],
   "ui": [
    "IMAGE_EDITOR",
+   "UV",
    "EDIT",
    "IMAGE_HT_header",
-   "IMAGE_MT_uvs",
-   "IMAGE_MT_select",
-   "VIEW3D_MT_uv_map",
-   "IMAGE_PT_tools_active"
+   "IMAGE_HT_tool_header",
+   "IMAGE_MT_editor_menus",
+   "IMAGE_MT_uvs*",
+   "IMAGE_MT_select*",
+   "IMAGE_PT_uv*",
+   "IMAGE_PT_tools_active",
+   "VIEW3D_MT_uv_map"
   ],
   "operators": [
    "uv.unwrap",
@@ -1088,6 +1338,18 @@
   ],
   "page": "docs/features/uv-editing.md",
   "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
-  "example_title": "Texture Paint"
+  "example_title": "Texture Paint",
+  "coverage": {
+   "operators": {
+    "supported": 17,
+    "partial": 0,
+    "total": 17
+   },
+   "ui": {
+    "supported": 23,
+    "partial": 0,
+    "total": 23
+   }
+  }
  }
 ]

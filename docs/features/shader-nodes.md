@@ -2,7 +2,7 @@
 id: shader-nodes
 title: Shader Nodes
 summary: Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.
-status: partial
+expect: Blender's nodes run Blender's GLSL, so materials match; Material Preview uses Babylon's studio light, and Bump is computed by Blender's fast path.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/shader_editor.html
@@ -19,10 +19,15 @@ media:
 ui:
   - ShaderNodeTree
   - NODE_EDITOR
-  - NODE_MT_add
   - VIEW_3D
   - PROPERTIES
   - VIEW3D_MT_add
+  - NODE_HT_header
+  - NODE_MT_add
+  - NODE_MT_category_shader*
+  - NODE_MT_shader_node_add_all
+  - NODE_PT_material_slots
+  - EEVEE_MATERIAL_PT_*
 operators:
   - node.add_node
   - node.link

@@ -2,7 +2,7 @@
 id: geometry-node-editor
 title: Geometry Node Editor
 summary: Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.
-status: partial
+expect: Node groups open, edit and evaluate as in Blender; the sidebar's Group tab is missing, and Bylonder's own Geometry Nodes modifier opens in Babylon's editor instead.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/geometry_node.html
@@ -18,8 +18,16 @@ media:
 ui:
   - GeometryNodeTree
   - NODE_EDITOR
-  - NODE_MT_add
   - PROPERTIES
+  - NODE_HT_header
+  - NODE_MT_editor_menus
+  - NODE_MT_add
+  - NODE_MT_view*
+  - NODE_MT_select
+  - NODE_MT_node*
+  - NODE_MT_context_menu*
+  - NODE_MT_group*
+  - NODE_PT_active*
 operators:
   - node.add_node
   - node.mute_toggle

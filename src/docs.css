@@ -58,8 +58,8 @@ html,body{margin:0;background:var(--bl-back)}
 /* A feature page's lead and reference, and the features index's cards. */
 .feature-summary{font-size:1.1em;color:var(--bl-text);margin:0 0 8px}
 .feature-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;color:var(--bl-text-dim);font-size:.85em;margin:8px 0}
-.doc-badge{padding:0 8px;border-radius:999px;color:var(--bl-text-sel);font-size:.95em}
-.doc-badge.complete{background:var(--bl-status-done)}.doc-badge.partial{background:var(--bl-status-partial)}
+.doc-count{padding:0 8px;border-radius:999px;background:var(--bl-widget);color:var(--bl-text);font-size:.95em}
+.feature-expect{color:var(--bl-text);margin:0 0 8px}
 .doc-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 #doc-body .doc-button{padding:5px 12px;border-radius:var(--bl-radius);background:var(--bl-widget);color:var(--bl-text);text-decoration:none;font-size:.85em}
 #doc-body .doc-button:hover{background:var(--bl-widget-hi)}

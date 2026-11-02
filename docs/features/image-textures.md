@@ -2,7 +2,7 @@
 id: image-textures
 title: Images and Image Textures
 summary: Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling.
-status: partial
+expect: Images open, save, pack and draw on materials with Blender's readers; colors show with the Standard view, and Clip, Cubic, Box projection and UDIM sampling are simplified.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/image/index.html
@@ -18,11 +18,14 @@ media:
   - image-textures/runtime.png
 ui:
   - IMAGE_EDITOR
-  - IMAGE_HT_header
-  - IMAGE_MT_image
-  - IMAGE_MT_view
   - NODE_EDITOR
-  - IMAGE_PT_image_properties
+  - IMAGE_HT_header
+  - IMAGE_MT_editor_menus
+  - IMAGE_MT_image*
+  - IMAGE_MT_view*
+  - IMAGE_PT_image*
+  - IMAGE_PT_view*
+  - TEXTURE_PT_image*
 operators:
   - image.open
   - image.new
@@ -95,9 +98,8 @@ The demo, Texture Paint, has a packed image, Suzanne Paint, in the Base Color of
 
 ## Project files
 
-- `examples/texture-paint/texture-paint.py`: the Blender script that builds the demo.
-- `examples/texture-paint/texture-paint.blend`: the demo, with its image packed.
-
-## Not done yet
-
-See the limits above.
+- [texture-paint.py](../../examples/texture-paint/texture-paint.py): the Blender script that builds the demo.
+- [texture-paint.blend](../../examples/texture-paint/texture-paint.blend): the file the script saves, with its image
+  packed.
+- [index.js](../../examples/texture-paint/index.js): opens the .blend with Blender's reader.
+- Recorded by [record-texture-paint.mjs](../../tools/docs/record-texture-paint.mjs).

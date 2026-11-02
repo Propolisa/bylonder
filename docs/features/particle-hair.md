@@ -2,7 +2,7 @@
 id: particle-hair
 title: Particle Hair
 summary: A hair particle system on a mesh, shaped with the Comb brush in Particle Edit Mode and set up in Properties > Particles.
-status: partial
+expect: Hair systems, children and Particle Edit Mode's brushes run Blender's code; hair UV and color attributes are not drawn.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/physics/particles/hair/index.html
@@ -17,9 +17,10 @@ media:
 ui:
   - VIEW_3D
   - PARTICLE_EDIT
-  - VIEW3D_MT_particle
-  - PARTICLE_PT_context_particles
   - PROPERTIES
+  - VIEW3D_MT_particle*
+  - PARTICLE_*
+  - VIEW3D_PT_tools_particle*
 operators:
   - object.mode_set
   - particle.brush_edit

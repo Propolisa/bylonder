@@ -37,17 +37,26 @@ Every user-facing feature has a page in `docs/features/<id>.md`, shown by the do
 Blender's manual) and listed on its index page (`docs/features/README.md`, built from the pages' front matter: thumbnail,
 name, Open in Bylonder link, Blender manual link). A feature is done when its page, demo project and tests exist.
 
-- **Front matter (YAML), required, machine-indexable**: it is the source for the index, for AI context prompts and
-  for mapping docs to the UI. Keys: `id`, `title`, `summary` (one sentence), `status` (`complete` or `partial`),
-  `blender_version` (the tracked version, from `tools/blender-port/manifest.json`), `blender_manual` (links into
+- **Front matter (YAML), required, machine-indexable**: it is the source for the index, for AI context prompts and for
+  mapping docs to the UI. Keys: `id`, `title`, `summary` (one sentence), `expect` (one line on what a user can expect,
+  honest and specific, written from `limits`: what works as in Blender and the surprises), `blender_version` (the
+  tracked version, from `tools/blender-port/manifest.json`), `blender_manual` (links into
   `https://docs.blender.org/manual/en/<major.minor>/`), `example` (the `examples/<id>` project the page recreates),
   `thumbnail` and `media` (files in `docs/media/features/`), `ui` (Blender identifiers of the spaces, modes, menus,
-  panels and tools the feature uses: `VIEW3D_MT_pose`, `BONE_PT_transform`, `POSE`), `operators` (idnames), `code`
-  (main source files), `tests` (test files), `limits` (one line each). `scripts/feature-docs.mjs` checks every page
-  and writes `docs/features/index.json`; the test suite runs it.
-- **Body**: what the feature is, an Open in Bylonder link (the live site with the example opened), numbered steps that
-  recreate the demo from an empty scene with a GIF or screenshot per step (recorded from the app with Playwright,
-  `tools/docs/record-*.mjs`, so they can be regenerated), the project files of the demo, and what is not done yet.
+  panels and tools the feature uses: `VIEW3D_MT_pose`, `BONE_PT_transform`, `POSE`; an id ending in `*` stands for every
+  menu, panel and header Blender names with that prefix, `VIEW3D_MT_pose*`, so `ui` lists the feature's whole Blender
+  surface, not a pick), `operators` (idnames), `code` (main source files), `tests` (test files), `limits` (one line
+  each). `scripts/feature-docs.mjs` checks every page and writes `docs/features/index.json`; the test suite runs it. It
+  also counts each feature's coverage, as the Blender Coverage view does, over the menus, panels and headers in `ui`
+  (with what is inside them) and the `operators`: "Operators: 42 complete, 3 working in part, of 57" (partial in the
+  Blender Coverage view), shown on the index and the page, never hand-written. Blender's operators and classes the app
+  runs are known only at run time: `node scripts/feature-docs.mjs --runtime` saves them to `src/coverage/runtime.json`,
+  and `npm run test:prod` fails when they change.
+- **Body**: what the feature is, an Open in Bylonder link (the live site with the example opened), then two sections:
+  `## Steps`, numbered steps that recreate the demo from an empty scene with a GIF or screenshot per step (recorded
+  from the app with Playwright, `tools/docs/record-*.mjs`, so they can be regenerated), and `## Project files`, the
+  project files of the demo. The viewer adds Not done yet (from `limits`) and Reference (`ui`, `operators`, `code`,
+  `tests`), so the body does not repeat them.
 - Media: GIFs short and small (under 1 MB), screenshots cropped to what the step shows, all regenerable.
 
 ## Runtimes

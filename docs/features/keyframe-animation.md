@@ -2,7 +2,7 @@
 id: keyframe-animation
 title: Keyframe Animation
 summary: Key an object's transform with I at two frames on the Timeline and play the animation with Space.
-status: partial
+expect: Keying with I, the Timeline and playback work as in Blender; the demo itself is keyed from code, so the steps animate the Default Cube instead.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/animation/keyframes/introduction.html
@@ -18,8 +18,10 @@ media:
 ui:
   - VIEW_3D
   - TIMELINE
-  - TIME_MT_view
+  - TIME_*
   - DOPESHEET_MT_marker
+  - ANIM_MT_keyframe*
+  - VIEW3D_MT_object_animation
 operators:
   - anim.keyframe_insert
   - transform.translate

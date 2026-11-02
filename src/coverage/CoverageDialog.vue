@@ -8,7 +8,7 @@ import { Input } from "@/editors/interface/components/ui/input";
 import { Button } from "@/editors/interface/components/ui/button";
 import BlIcon from "@/editors/interface/components/BlIcon.vue";
 import CoverageBar from "./CoverageBar.vue";
-import { STATUS, computeCoverage, runtimeAvailable } from "./coverage.js";
+import { STATUS, computeCoverage, runtimeAvailable, variantItems } from "./coverage.js";
 import { AREA_ICONS, KIND_ICONS, KIND_LABELS, percent } from "./format.js";
 
 const open = defineModel("open", { default: true });
@@ -24,7 +24,7 @@ const scene = () => [...document.querySelectorAll("iframe")].map((f) => f.conten
 
 Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw")])
   .then(([surface, implemented, notes]) => (data.value = computeCoverage(surface.default, implemented.default, notes.default,
-    runtimeAvailable(scene()?.coverage()))));
+    runtimeAvailable(scene()?.coverage(variantItems(surface.default))))));
 
 const FILTERS = {
   all: { label: "All", test: () => true },

@@ -5,6 +5,10 @@ export const LIVE_SITE = "https://propolisa.github.io/bylonder/";
 export const openLink = (example) => `${LIVE_SITE}#example=${example}`;
 export const MEDIA = "docs/media/features/";
 export const SOURCE = "https://github.com/Propolisa/bylonder/blob/main/";
+// A page body's sections, in order; the viewer appends the generated ones from the front matter (limits, then ui,
+// operators, code and tests).
+export const SECTIONS = ["Steps", "Project files"];
+export const LIMITS = "Not done yet", REFERENCE = "Reference";
 
 const scalar = (text) => text.trim().replace(/^(["'])(.*)\1$/, "$2");
 
@@ -27,3 +31,8 @@ export function frontMatter(text) {
   }
   return { data, body: text.slice(match[0].length) };
 }
+
+// A feature's coverage of Blender's surface (index.json, made by scripts/feature-docs.mjs) in words.
+export const coverageText = ({ operators = {}, ui = {} }) => [['Operators', operators], ['Menus and panels', ui]]
+  .filter(([, { total }]) => total)
+  .map(([name, { supported, partial, total }]) => (partial ? `${name}: ${supported} complete, ${partial} working in part, of ${total}` : `${name}: ${supported} of ${total}`));
