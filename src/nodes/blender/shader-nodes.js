@@ -109,9 +109,9 @@ export const SHADER_NODES = {
   ShaderNodeSubsurfaceScattering: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSSRDF']]],
   ShaderNodeBsdfHair: () => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', WORLD_NORMAL], ['@BSDF']]],
   ShaderNodeBsdfHairPrincipled: () => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', WORLD_NORMAL], ['@BSDF']]],
-  ShaderNodeBsdfGlossy: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glossy', ['Color', 'Roughness', normal(connected)], ['@BSDF']]],
-  ShaderNodeBsdfAnisotropic: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glossy', ['Color', 'Roughness', normal(connected)], ['@BSDF']]],
-  ShaderNodeBsdfMetallic: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glossy', ['Base Color', 'Roughness', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfGlossy: (p, decl, { connected, lobe }) => [G_DATA, ['bl_node_bsdf_glossy', ['Color', 'Roughness', normal(connected), lobe()], ['@BSDF']]],
+  ShaderNodeBsdfAnisotropic: (p, decl, { connected, lobe }) => [G_DATA, ['bl_node_bsdf_glossy', ['Color', 'Roughness', normal(connected), lobe()], ['@BSDF']]],
+  ShaderNodeBsdfMetallic: (p, decl, { connected, lobe }) => [G_DATA, ['bl_node_bsdf_glossy', ['Base Color', 'Roughness', normal(connected), lobe()], ['@BSDF']]],
   ShaderNodeBsdfGlass: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glass', ['Color', 'Roughness', 'IOR', normal(connected)], ['@BSDF']]],
   ShaderNodeBsdfRefraction: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glass', ['Color', 'Roughness', 'IOR', normal(connected)], ['@BSDF']]],
   ShaderNodeBsdfTransparent: () => [['bl_node_bsdf_transparent', ['Color'], ['@BSDF']]],
@@ -340,27 +340,45 @@ void bl_engine(mat4 model, mat4 model_inverse, mat4 viewmat, mat4 viewinv, mat4 
   inout vec3 generated, inout vec3 normal, inout vec3 uv, inout vec3 object, inout vec3 camera, inout vec3 window, inout vec3 reflection) {
   generated = orco; normal = normal_in; uv = uv_in; object = object_in; camera = camera_in; window = window_in; reflection = reflection_in;
 }`,
-  // A closure as EEVEE gathers a material's closures before lighting them: each kind of reflection's color with its
-  // weight (dielectric, metal, transmission), its roughness, IOR and normal summed as they weigh, its emission and its
-  // transparency. Mixing and adding closures weighs and sums them; the material's surface lights the sum once
-  // (BlenderSurfaceBlock), as EEVEE merges the closures of one kind.
-  bl_closure: `struct BlClosure { vec3 dielectric; float dielectric_weight; vec3 metal; float metal_weight; vec3 transmission; float transmission_weight;
-  float roughness; float ior; vec3 normal; vec3 emission; float transparency; };
-BlClosure bl_closure_empty() { return BlClosure(vec3(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), vec3(0.0), 0.0); }
+  // A closure as EEVEE gathers a material's closures into its bins before lighting them (eevee_nodetree_lib.bsl.hh
+  // closure_eval): a base lobe, each kind of reflection's color with its weight (dielectric, metal, transmission), its
+  // roughness, IOR and normal summed as they weigh, and two lobes of reflection only (BlLobe, EEVEE's reflection bins),
+  // with its emission and its transparency. Mixing and adding closures weighs and sums them; the material's surface
+  // lights each lobe once (BlenderSurfaceBlock), as EEVEE merges the closures of one bin.
+  bl_closure: `struct BlLobe { vec3 color; float weight; float roughness; vec3 normal; };
+struct BlClosure { vec3 dielectric; float dielectric_weight; vec3 metal; float metal_weight; vec3 transmission; float transmission_weight;
+  float roughness; float ior; vec3 normal; vec3 emission; float transparency; BlLobe lobe1; BlLobe lobe2; };
+BlLobe bl_lobe_weigh(BlLobe l, float w) { return BlLobe(l.color * w, l.weight * w, l.roughness * w, l.normal * w); }
+BlLobe bl_lobe_add(BlLobe a, BlLobe b) { return BlLobe(a.color + b.color, a.weight + b.weight, a.roughness + b.roughness, a.normal + b.normal); }
+const BlLobe bl_lobe_empty = BlLobe(vec3(0.0), 0.0, 0.0, vec3(0.0));
+BlClosure bl_closure_empty() { return BlClosure(vec3(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), vec3(0.0), 0.0, bl_lobe_empty, bl_lobe_empty); }
 BlClosure bl_closure_weigh(BlClosure c, float w) {
   return BlClosure(c.dielectric * w, c.dielectric_weight * w, c.metal * w, c.metal_weight * w, c.transmission * w, c.transmission_weight * w,
-    c.roughness * w, c.ior * w, c.normal * w, c.emission * w, c.transparency * w);
+    c.roughness * w, c.ior * w, c.normal * w, c.emission * w, c.transparency * w, bl_lobe_weigh(c.lobe1, w), bl_lobe_weigh(c.lobe2, w));
 }
 BlClosure bl_closure_add(BlClosure a, BlClosure b) {
   return BlClosure(a.dielectric + b.dielectric, a.dielectric_weight + b.dielectric_weight, a.metal + b.metal, a.metal_weight + b.metal_weight,
     a.transmission + b.transmission, a.transmission_weight + b.transmission_weight, a.roughness + b.roughness, a.ior + b.ior, a.normal + b.normal,
-    a.emission + b.emission, a.transparency + b.transparency);
+    a.emission + b.emission, a.transparency + b.transparency, bl_lobe_add(a.lobe1, b.lobe1), bl_lobe_add(a.lobe2, b.lobe2));
 }
 // A reflection of weight 1, its color split among the kinds by their weights.
 BlClosure bl_closure_bsdf(vec3 color, float dielectric, float metal, float transmission, float roughness, float ior, vec3 N) {
   color = max(color, vec3(0.0));
-  return BlClosure(color * dielectric, dielectric, color * metal, metal, color * transmission, transmission, roughness, ior, normalize(N), vec3(0.0), 0.0);
+  return BlClosure(color * dielectric, dielectric, color * metal, metal, color * transmission, transmission, roughness, ior, normalize(N), vec3(0.0), 0.0,
+    bl_lobe_empty, bl_lobe_empty);
 }
+// A reflection of weight 1 in a lobe: the base's metal (0), or a lobe of its own (1, 2).
+BlClosure bl_closure_reflection(vec3 color, float roughness, vec3 N, float lobe) {
+  if (lobe < 0.5) return bl_closure_bsdf(color, 0.0, 1.0, 0.0, roughness, 1.5, N);
+  BlClosure c = bl_closure_empty();
+  BlLobe l = BlLobe(max(color, vec3(0.0)), 1.0, roughness, normalize(N));
+  if (lobe < 1.5) c.lobe1 = l; else c.lobe2 = l;
+  return c;
+}
+BlLobe bl_closure_lobe(BlClosure c, int lobe) { if (lobe == 1) return c.lobe1; return c.lobe2; }
+vec3 bl_lobe_color(BlLobe l) { return l.weight > 0.0 ? l.color / l.weight : vec3(0.0); }
+float bl_lobe_roughness(BlLobe l) { return l.weight > 0.0 ? l.roughness / l.weight : 0.5; }
+vec3 bl_lobe_normal(BlLobe l) { return dot(l.normal, l.normal) > 0.0 ? normalize(l.normal) : vec3(0.0, 0.0, 1.0); }
 float bl_closure_weight(BlClosure c) { return c.dielectric_weight + c.metal_weight + c.transmission_weight; }
 // A parameter summed as the reflections weigh, as one reflection's (its fallback where none reflects).
 float bl_closure_parameter(BlClosure c, float sum, float fallback) { float w = bl_closure_weight(c); return w > 0.0 ? sum / w : fallback; }
@@ -385,8 +403,8 @@ vec4 bl_closure_radiance(BlClosure c, vec3 lit) {
   // node_bsdf_diffuse and the BSDFs EEVEE shades as diffuse (Sheen, Translucent, Subsurface Scattering, the hair
   // BSDFs: gpu_shader_material_sheen.glsl, gpu_shader_material_hair.glsl): no specular reflection (IOR 1).
   bl_node_bsdf_diffuse: 'void bl_node_bsdf_diffuse(vec4 color, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 1.0, 0.0, 0.0, 1.0, 1.0, N); }',
-  // node_bsdf_glossy, node_bsdf_metallic: a conductor of the color.
-  bl_node_bsdf_glossy: 'void bl_node_bsdf_glossy(vec4 color, float roughness, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 0.0, 1.0, 0.0, roughness, 1.5, N); }',
+  // node_bsdf_glossy, node_bsdf_metallic: a conductor of the color, in its lobe.
+  bl_node_bsdf_glossy: 'void bl_node_bsdf_glossy(vec4 color, float roughness, vec3 N, float lobe, inout BlClosure result) { result = bl_closure_reflection(color.rgb, roughness, N, lobe); }',
   // node_bsdf_glass, node_bsdf_refraction: light through the surface, tinted by the color.
   bl_node_bsdf_glass: 'void bl_node_bsdf_glass(vec4 color, float roughness, float ior, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 0.0, 0.0, 1.0, roughness, ior, N); }',
   // node_bsdf_principled: its base color as metal, transmission and dielectric by their weights, its emission, all
@@ -633,6 +651,7 @@ const blenderShader = (Base) => class extends Base {
       connected: (id) => !!this.getInputByName(id)?.isConnected,
       linked: (id) => !!this.getOutputByName(id)?.hasEndpoints,
       image: () => (this.properties.image ? blendData().images.get(this.properties.image) ?? null : null),
+      lobe: () => this.lobe ?? 0,
     }) ?? [];
   }
 
@@ -812,6 +831,10 @@ function environmentOf(material) {
 // block's inputs are the closure's colors and parameters in proportion to their weights, its reflection Babylon's
 // environment, and a transmission Babylon's refraction of that environment. Its radiance is what the lit part reflects
 // as it weighs, plus the emission, over the coverage the transparency leaves.
+const LOBE = {
+  baseColor: (c, k) => `bl_lobe_color(bl_closure_lobe(${c}, ${k}))`, metallic: () => '1.0', roughness: (c, k) => `bl_lobe_roughness(bl_closure_lobe(${c}, ${k}))`,
+  indexOfRefraction: () => '1.5',
+};
 const SURFACE = {
   baseColor: (c) => `bl_closure_base_color(${c})`, metallic: (c) => `bl_closure_metallic(${c})`, roughness: (c) => `bl_closure_parameter(${c}, ${c}.roughness, 0.5)`,
   indexOfRefraction: (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
@@ -821,9 +844,12 @@ const REFRACTION = {
   'refraction.intensity': (c) => `bl_closure_transmission(${c})`, 'refraction.volumeIndexOfRefraction': (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
 };
 export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
-  constructor(name) {
+  // lobe: 0 for the base, else the reflection lobe it lights over the radiance of the surface before it (`under`).
+  constructor(name, lobe = 0) {
     super(name);
+    this.lobe = lobe;
     this.registerInput('closure', T.Color4, false, Targets.Fragment);
+    this.registerInput('under', T.Color4, true, Targets.Fragment);
     this.registerOutput('radiance', T.Color4, Targets.Fragment);
     this.metallic.isOptional = this.roughness.isOptional = true;
     // Blender's coverage scales the whole closure; Babylon's would keep reflections opaque.
@@ -832,7 +858,10 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
 
   getClassName() { return 'BlenderSurfaceBlock'; }
+  serialize() { return { ...super.serialize(), lobe: this.lobe }; }
+  _deserialize(serializationObject, scene, rootUrl) { super._deserialize(serializationObject, scene, rootUrl); this.lobe = serializationObject.lobe ?? 0; }
   get closure() { return this.getInputByName('closure'); }
+  get under() { return this.getInputByName('under'); }
   get radiance() { return this.getOutputByName('radiance'); }
 
   // A PBR input (or a helper block's, 'subsurface.tintColor') given from the closure: connected while it holds a value.
@@ -842,12 +871,15 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     if (!Object.hasOwn(point, 'isConnected')) Object.defineProperty(point, 'isConnected', { get: () => !!point._blenderValue || !!point.connectedPoint });
     return point;
   }
-  get _values() { return { ...SURFACE, ...(this._helpers.refraction && REFRACTION) }; }
+  get _values() {
+    if (this.lobe) return Object.fromEntries(Object.entries(LOBE).map(([path, value]) => [path, (c) => value(c, this.lobe)]));
+    return { ...SURFACE, ...(this._helpers.refraction && REFRACTION) };
+  }
 
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
-    if (closureHas(this.closure.connectedPoint?.ownerBlock, transmits)) this._refraction(material);
+    if (!this.lobe && closureHas(this.closure.connectedPoint?.ownerBlock, transmits)) this._refraction(material);
     for (const path of Object.keys(this._values)) this._point(path)._blenderValue = null;
     const position = geometryBlock(material, '__position'), world = geometryBlock(material, '__world');
     wire(worldPosition(material).output, this.worldPosition);
@@ -861,12 +893,13 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     wire(worldPosition(material).output, eye.position);
     wire(geometryBlock(material, '__cameraPosition').output, eye.eye);
     wire(eye.output, this.cameraPosition);
-    const reflection = helper(material, '__reflection', (name) => new ReflectionBlock(name));
+    // A reflection block of its own: Babylon's names the uniforms it binds anew for each PBR block that reads it.
+    const reflection = helper(material, this.lobe ? `__reflection lobe ${this.lobe}` : '__reflection', (name) => new ReflectionBlock(name));
     reflection._getTexture = environmentOf(material);
     wire(position.output, reflection.position);
     wire(world.output, reflection.world);
     wire(reflection.reflection, this.reflection);
-    const shading = helper(material, `__shadingNormal ${this.uniqueId}`, (name) => new BlenderClosureNormalBlock(name));
+    const shading = Object.assign(helper(material, `__shadingNormal ${this.uniqueId}`, (name) => new BlenderClosureNormalBlock(name)), { lobe: this.lobe });
     wire(this.closure.connectedPoint, shading.closure);
     wire(shading.output, this.perturbedNormal);
   }
@@ -887,12 +920,27 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
 
   _buildBlock(state) {
-    if (state.target !== Targets.Fragment) return super._buildBlock(state);
+    if (state.target !== Targets.Fragment) return this.lobe ? this._scoped(state, () => super._buildBlock(state)) : super._buildBlock(state);
     state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
     const closure = this.closure.associatedVariableName;
     for (const [path, value] of Object.entries(this._values)) Object.assign(this._point(path), { _blenderValue: value(closure), associatedVariableName: value(closure) });
-    super._buildBlock(state);
-    state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, finalColor.rgb);\n`;
+    if (!this.lobe) {
+      super._buildBlock(state);
+      state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, finalColor.rgb);\n`;
+      return this;
+    }
+    const lit = state._getFreeVariableName('lobeLit');
+    state.compilationString += `vec3 ${lit};\n`;
+    this._scoped(state, () => super._buildBlock(state), `${lit} = finalColor.rgb;\n`);
+    state.compilationString += `${state._declareOutput(this.radiance)} = ${this.under.associatedVariableName} + vec4(${lit} * bl_closure_lobe(${closure}, ${this.lobe}).weight, 0.0);\n`;
+    return this;
+  }
+
+  // Babylon's PBR code declares fixed names: a second one runs in a scope of its own.
+  _scoped(state, build, end = '') {
+    const start = state.compilationString.length;
+    build();
+    state.compilationString = `${state.compilationString.slice(0, start)}{\n${state.compilationString.slice(start)}${end}}\n`;
     return this;
   }
 }
@@ -925,10 +973,11 @@ export class BlenderViewEyeBlock extends NodeMaterialBlock {
 }
 RegisterClass('BABYLON.BlenderViewEyeBlock', BlenderViewEyeBlock);
 
-// A closure's normal, its reflections' as they weigh, as Babylon's shading normal (in its axes, w 0).
+// A closure's normal, its base's or a lobe's reflections' as they weigh, as Babylon's shading normal (in its axes, w 0).
 export class BlenderClosureNormalBlock extends NodeMaterialBlock {
   constructor(name) {
     super(name, Targets.Fragment);
+    this.lobe = 0;
     this.registerInput('closure', T.Color4);
     this.registerOutput('output', T.Vector4);
   }
@@ -938,7 +987,8 @@ export class BlenderClosureNormalBlock extends NodeMaterialBlock {
   _buildBlock(state) {
     super._buildBlock(state);
     state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
-    state.compilationString += `${state._declareOutput(this.output)} = vec4(bl_closure_normal(${this.closure.associatedVariableName}).xzy, 0.0);\n`;
+    const closure = this.closure.associatedVariableName, normal = this.lobe ? `bl_lobe_normal(bl_closure_lobe(${closure}, ${this.lobe}))` : `bl_closure_normal(${closure})`;
+    state.compilationString += `${state._declareOutput(this.output)} = vec4(${normal}.xzy, 0.0);\n`;
     return this;
   }
 }
@@ -953,6 +1003,22 @@ function closureHas(block, is, seen = new Set()) {
 const transparent = (block) => block.idname === 'ShaderNodeBsdfTransparent'
   || (block.idname === 'ShaderNodeBsdfPrincipled' && (block.getInputByName('Alpha').isConnected || block.values.Alpha < 1));
 const reflects = (block) => /^ShaderNodeBsdf(?!Transparent)|^ShaderNodeSubsurfaceScattering$/.test(block.idname);
+const REFLECTION_ONLY = ['ShaderNodeBsdfGlossy', 'ShaderNodeBsdfAnisotropic', 'ShaderNodeBsdfMetallic'];
+// The blocks of a closure's nodes, each once, from the output up.
+function closureBlocks(block, seen = new Set()) {
+  if (!block || seen.has(block)) return [];
+  seen.add(block);
+  return [block, ...block.inputs.flatMap((input) => closureBlocks(input.connectedPoint?.ownerBlock, seen))];
+}
+// blender-port: eevee_nodetree_lib.bsl.hh closure_eval, gpu_material.cc GPU_material_flag_set: EEVEE's bins, a base one
+// and two of reflection; the reflection BSDFs take the reflection bins in turn, the base's when nothing else is there,
+// and the last bin's beyond. Returns the lobes in use past the base.
+function assignLobes(closure) {
+  const blocks = closureBlocks(closure), reflections = blocks.filter((b) => REFLECTION_ONLY.includes(b.idname));
+  const base = blocks.some((b) => reflects(b) && !REFLECTION_ONLY.includes(b.idname));
+  reflections.forEach((block, i) => { block.lobe = Math.min(base ? i + 1 : i, 2); });
+  return [...new Set(reflections.map((b) => b.lobe))].filter(Boolean);
+}
 const transmits = (block) => ['ShaderNodeBsdfGlass', 'ShaderNodeBsdfRefraction'].includes(block.idname) || (block.idname === 'ShaderNodeBsdfPrincipled'
   && (block.getInputByName('Transmission Weight').isConnected || block.values['Transmission Weight'] > 0));
 
@@ -1040,8 +1106,14 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     const processing = helper(material, `__display ${this.uniqueId}`, (name) => new BlenderDisplayBlock(name));
     if (closure) {
       const lit = closureHas(closure.ownerBlock, reflects), Surface = lit ? BlenderSurfaceBlock : BlenderUnlitSurfaceBlock;
-      const surface = helper(material, `__${lit ? 'surface' : 'unlit'} ${this.uniqueId}`, (name) => new Surface(name));
+      let surface = helper(material, `__${lit ? 'surface' : 'unlit'} ${this.uniqueId}`, (name) => new Surface(name));
       wire(closure, surface.closure);
+      for (const lobe of lit ? assignLobes(closure.ownerBlock) : []) {
+        const under = surface;
+        surface = helper(material, `__surface ${this.uniqueId} lobe ${lobe}`, (name) => new BlenderSurfaceBlock(name, lobe));
+        wire(closure, surface.closure);
+        wire(under.radiance, surface.under);
+      }
       wire(surface.radiance, processing.color);
     } else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
     // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
