@@ -1075,6 +1075,16 @@ EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
   }
 }
 
+/* A region about to be freed (its area's): its blocks go now, as ED_screen_state_toggle frees an area's, and none is
+ * left for the next draw to free. */
+extern "C" void region_draw_free(const bContext *C, ARegion *region)
+{
+  ui::blocklist_free(C, region);
+  if (ui::drawn.region == region) {
+    ui::drawn = {};
+  }
+}
+
 /* The recording since region_draw_begin, as JSON: what was drawn, the buttons, and the colors of multicolor icons. */
 EXPORT(region_draw_end) const char *region_draw_end()
 {

@@ -598,6 +598,8 @@ window.addEventListener("message", (e) => {
       location.origin,
     );
   if (type === "text") textChanged(payload);
+  // A library Main links from (blenkernel/libraries.js), kept with the project.
+  if (type === "library") { project.files[payload.path] = binaryFile(payload.bytes); renderTree(); markDirty(false); }
   if (type === "preferences" && !payload.keep_scenes_loaded) unloadParked();
   if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(() => { reveal(); setTimeout(code, 0); }));
   if (type === "running") { topbar.connect(); $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }

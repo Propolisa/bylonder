@@ -11,7 +11,7 @@ const DATA_SET_UNITS = 8;
 
 export function mountSpreadsheet(section, { header, sync }) {
   const area = mountBlenderArea(section, { spacetype: SPACE_SPREADSHEET, name: 'SPREADSHEET', operators: 'spreadsheet.', keymaps: ['Spreadsheet Generic'], header,
-    footer: 'draw', left: { type: RGN_TYPE_TOOLS, units: DATA_SET_UNITS } });
+    footer: 'draw', sides: [{ type: RGN_TYPE_TOOLS, edge: 'left', units: DATA_SET_UNITS }] });
   const unsubscribe = sync.onEvaluated(() => area.tagRedraw());
   return { ...area, dispose() { unsubscribe(); area.dispose(); } };
 }

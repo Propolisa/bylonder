@@ -161,6 +161,37 @@ invoke runs.
   (`tools/blender-reference/io-fixtures.py`), exports Blender's scene and imports it again, and draws an import;
   `tests/e2e/smoke.mjs` runs File > Import > Wavefront (.obj) and File > Export > Wavefront (.obj) in the browser.
 
+### Link and Append
+
+Decided 2026-11-02. File > Link and File > Append are Blender's `wm.link` and `wm.append` (`wm_files_link.cc`,
+`blendfile_link_append.cc`, readfile's library linking) in the module, with their options (Localize All, Instance
+Collections, Select, Active Collection and the others), as Blender's File Browser shows them.
+
+- **The File Browser is Blender's.** The library is chosen in the browser's dialog (`fileselect.cc` tells the page that
+  the operator browses inside a .blend: `filemode` is `FILE_LOADLIB`). The page then opens Blender's own File Browser
+  over it, as `wm_handler_fileselect_do` opens its "Blender File View" window: a `SPACE_FILE` area of the page
+  (`editors/space_file/file-browser.js`) that `fileselect_area_set` gives the operator, with its parameters from the
+  operator (`filepath`, the library, as `wm_link_append_invoke` sets the last one). Blender's filelist reads the
+  library's data-block types and names (`filelist_readjob_lib`), `file_draw.cc` draws the list, its regions (bookmarks,
+  directory path, the operator's options, file name and execute buttons) are laid out by Blender, and Blender's file
+  operators and keymaps run it: a double click opens an ID type or links a data-block, Enter runs the operator, Escape
+  cancels. Closing the window frees the area, which cancels the operator (`ED_fileselect_exit`). The scene window makes
+  Main current before the File Browser opens, and draws what the operator changed and pushes its undo step after it
+  closes, as for an import.
+- **Libraries are project files.** The chosen .blend goes to `/libraries/<name>` in the module's file system, so a
+  `Library` keeps that absolute path (a project's Main has no file path to be relative to, as an unsaved file in
+  Blender). After the operator, the project keeps every library Main lists as a file under `libraries/`
+  (`blenkernel/libraries.js`, the scene window's `library` message); when a project runs, its `libraries/*.blend` are
+  put back at `/libraries/` before its code and its saved `.blend` are read, so Blender's reader resolves the links.
+  The project's code can open a .blend that links them (`openBlend`).
+- **Linked and appended data** is Main's like any other: the view adopts the objects, a linked collection is drawn
+  through its instancing empty, the Outliner's Blender File view lists the library and its data-blocks, and Object >
+  Library Override > Make (`object.make_override_library`) runs Blender's code.
+- **Checked.** `tests/link-append-wasm.test.js` runs File > Link and File > Append from Blender's File menu, browses
+  Blender's File Browser by double clicks, and compares Main with what Blender 5.2.3 makes
+  (`tools/blender-reference/link-append-fixtures.py`) for a collection, an object and a material, a library override,
+  and a saved project read back.
+
 ### Assets and geometry nodes
 
 Blender's Essentials asset libraries are its datafiles (`tools/blender-port/datafiles.py` copies them from a Blender
@@ -564,8 +595,8 @@ taken back and the page shows the dialog, filtered by the operator's `filter_glo
 a directory picker when it takes a directory). The chosen files go into the module's file system and the operator gets
 `filepath`, `directory`, `filename` and `files` as the File Browser sets them, then the File Browser's execute (or
 cancel) event, from the operator's area. A saving operator (one with `check_existing`, as ExportHelper's) writes into the
-file system and the file goes where the user chose (the File System Access save picker) or downloads. A File Browser
-area (to browse inside a .blend for Link and Append) can take over later.
+file system and the file goes where the user chose (the File System Access save picker) or downloads. An operator that
+browses inside a .blend (Link and Append) gets Blender's own File Browser over the chosen file (Link and Append).
 
 ## Menus
 

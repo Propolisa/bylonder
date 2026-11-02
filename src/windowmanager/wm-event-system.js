@@ -68,7 +68,8 @@ export function trackpadGesture(e) {
 // `layers()` returns the handlers below the modal ones, top first; `viewAt(event)` the 3D View a pointer event is
 // over (or null); `accepts(event)` filters out keys meant for text fields and other editors; `hover(event)` gets the
 // pointer's motion while no modal handler runs (the gizmo map's highlighting); `blender` is Blender's window
-// ({ takes(native, view): whether it handles the event, send(kind, data, strings, view): the event's result }).
+// ({ takes(native, view): whether it handles the event, send(kind, data, strings, view): the event's result,
+// keeps(native): whether what it leaves unhandled stays its own, from a window of its own }).
 export function createEventSystem({ layers, viewAt, accepts = () => true, hover = () => {}, blender = null, input = () => ({}) }) {
   const modal = [], emulation = { emulating: false };
   // Every event carries the mouse position, key presses included, as Blender's do.
@@ -112,6 +113,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     if (modal.length || !blender?.takes(native, view)) return false;
     const result = blender.send(kind, data, strings, view, native);
     blenderModal = result.modal;
+    if (blender.keeps?.(native)) return true;
     for (const event of result.unhandled) {
       if (event.value === 'RELEASE' && !event.type.endsWith('mouse')) continue;
       const handled = dispatch(unhandled(native, event));

@@ -3,8 +3,10 @@
 // chosen files go into the module's file system, its options (what the File Browser's sidebar shows: the operator's
 // own ui) are confirmed in a dialog, and it runs as the File Browser would run it. An export's options come first, then
 // where to save: the file it writes goes there (the File System Access save picker) or downloads, and the files it
-// writes beside it (an OBJ's .mtl) download.
-import { blenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
+// writes beside it (an OBJ's .mtl) download. An operator that browses inside a .blend (File > Link, File > Append) has
+// the .blend chosen the same way, then Blender's File Browser over it (editors/space_file/file-browser.js).
+import { blenderMain, blenderModule, setOperatorProperties } from '../bmesh/bmesh-wasm.js';
+import { LIBRARY_FOLDER } from '../blenkernel/libraries.js';
 import { files, provided } from '../port/wasm.js';
 import { tick } from './wm-areas.js';
 
@@ -60,14 +62,15 @@ const browser = {
     }));
   },
   download,
+  browse: (op) => import('../editors/space_file/file-browser.js').then(({ browseFiles }) => browseFiles(op)),
 };
 let chooser = browser;
-// For tests: { open(settings), save(settings), options({ title, layout }), download(name, bytes) } in place of the
-// browser's dialogs.
+// For tests: { open(settings), save(settings), options({ title, layout }), download(name, bytes), browse(op): a promise
+// that settles once the File Browser closed } in place of the browser's dialogs.
 export const setFileChooser = (replacement) => { chooser = replacement ? { ...browser, ...replacement } : browser; };
 
-// The scene window's part: runs fn, which runs the operator, with Main made current (an export's meshes filled), then
-// draws what it changed and takes Blender's undo step.
+// The scene window's part: runs fn, which runs the operator (or returns a promise of the File Browser that runs it), with
+// Main made current (an export's meshes filled), then draws what it changed and takes Blender's undo step.
 let host = (fn) => fn();
 export const setFileselectHost = (run) => { host = run; };
 
@@ -107,7 +110,18 @@ async function save(op, settings, directory) {
   }
 }
 
+// The library chosen, at the project's libraries (blenkernel/libraries.js), browsed from inside, as Blender's File
+// Browser opens at the last library (filepath, wm_link_append_invoke).
+async function browse(op, settings) {
+  const choice = await chooser.open({ ...settings, filter_glob: '*.blend', files: false });
+  if (!choice?.files.length) return cancel(op);
+  const [[name, bytes]] = choice.files, path = `${LIBRARY_FOLDER}/${name}`;
+  files.set(path, bytes);
+  setOperatorProperties(op, { filepath: `${path}/` });
+  await host(() => chooser.browse(op), settings);
+}
+
 provided.fileselect_open = (op, settingsPointer) => {
   const settings = JSON.parse(cString(settingsPointer));
-  (settings.save ? save : open)(op, settings, `/tmp/fileselect/${++chosen}`);
+  (settings.library ? browse : settings.save ? save : open)(op, settings, `/tmp/fileselect/${++chosen}`);
 };

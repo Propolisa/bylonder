@@ -17,7 +17,7 @@
 import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
-import { pointerStruct, structFind } from '../python/bpy_rna.js';
+import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { INFO } from '../makesrna/rna.js';
 import { mainDefinition, writeModifier, createMainModifiers } from '../modifiers/main-modifiers.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
@@ -273,9 +273,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
   }
 
-  // A name is Blender's, unique among its IDs ("Cube.001" for a second "Cube").
+  // A name is Blender's, unique among its IDs ("Cube.001" for a second "Cube"); a linked ID keeps its library's.
   function rename(entry, name) {
-    blender.rename(entry.ob, name);
+    if (!idStruct(entry.ob).library) blender.rename(entry.ob, name);
     entry.node.name = entry.babylonName = entry.name = blender.name(entry.ob);
   }
   // Relations, by RNA name: what both models hold that is not a DNA value.

@@ -21,6 +21,7 @@ import { createCollections } from "../blenkernel/scene/collections.js";
 import { createSequenceEditor } from "../sequencer/sequence-editor.js";
 import { apply } from "../editors/undo/storage.js";
 import { openProject } from "./project-state.js";
+import { loadLibraries } from "../blenkernel/libraries.js";
 registerModifier(geometryNodesDefinition);
 
 // Builds the scene world from a run payload: runs the project's createScene, identifies editable objects
@@ -75,6 +76,8 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   importmap.type = "importmap";
   importmap.textContent = JSON.stringify({ imports, scopes });
   document.head.append(importmap);
+  // The libraries Main links from, before the project's .blend files are read (blenkernel/libraries.js).
+  await loadLibraries(input.files ?? [], async (path) => new Uint8Array(await (await fetch(sdk.asset(path))).arrayBuffer()));
   // The scene builder: an index.js export (createScene unless the scene names another), or none for an empty
   // scene, which starts without objects and does not load the project code.
   const builder = input.scene ? input.scene.builder : "createScene";

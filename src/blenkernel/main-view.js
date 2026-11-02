@@ -171,6 +171,9 @@ export function createMainView(state) {
     return entry;
   }
 
+  // The library a linked ID is read from, or undefined: a linked ID may have a local one's name.
+  const library = (id) => idStruct(id).library?.filepath;
+
   // Main's objects that have no Babylon object: the one their id names (the project's code built it, or Bylonder deleted
   // it and an undo brought it back), else a new one of their type. Returns the new objects, the revived ones and what Bylonder cannot show.
   function adopt(scene = world.scene) {
@@ -191,6 +194,8 @@ export function createMainView(state) {
           continue;
         }
         const node = MAKERS[type](scene, name, ob, blender);
+        // One outside the view layer (a linked collection's, instanced by an empty) is drawn only by what instances it.
+        if (!blender.base(ob)) node.setEnabled(false);
         // A copy Blender's code made (object.duplicate) carries its original's id: it gets one of its own.
         const taken = world.objects.some((other) => !deleted(other) && nodeId(other) === id) || [...objects.keys()].some((other) => nodeId(other) === id);
         node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id };
@@ -302,7 +307,7 @@ export function createMainView(state) {
         record.shadow.clear();
         try { pull(record, world); } catch { /* set on the second pass */ }
       }
-      state.readCollections((pointer) => 'collection:' + blender.name(pointer));
+      state.readCollections((pointer) => 'collection:' + blender.name(pointer) + (library(pointer) ? '@' + library(pointer) : ''));
     } finally {
       state.applying = false;
     }

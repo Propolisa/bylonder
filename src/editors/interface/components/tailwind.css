@@ -11,6 +11,7 @@
 @source "../../space_text/";
 @source "../../space_console/";
 @source "../../space_info/";
+@source "../../space_file/";
 @source "../../../workspace/changelog/";
 
 /* shadcn-vue's semantic tokens, defined by Bylonder's theme tokens (src/theme.css). */
