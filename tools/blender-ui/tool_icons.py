@@ -14,7 +14,8 @@ import transpile
 
 OUT = os.path.join(transpile.REPO, 'public', 'icons', 'blender', 'tools')
 MODES = {'VIEW3D_PT_tools_active': ['OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_ARMATURE', 'POSE', 'PARTICLE', 'SCULPT', 'PAINT_WEIGHT',
-                                    'PAINT_TEXTURE', 'PAINT_VERTEX'],
+                                    'PAINT_TEXTURE', 'PAINT_VERTEX', 'EDIT_GREASE_PENCIL', 'PAINT_GREASE_PENCIL', 'SCULPT_GREASE_PENCIL',
+                                    'WEIGHT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL'],
          'IMAGE_PT_tools_active': ['VIEW', 'UV', 'PAINT']}
 # The icons the tools of MODES name (a None context gives every tool, as the tools' polls take it), and Blender's
 # fallback for a missing one.

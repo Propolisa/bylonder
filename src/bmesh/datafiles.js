@@ -9,6 +9,10 @@ export const DATAFILES = [
   ['assets/brushes/essentials_brushes-mesh_weight.blend', new URL('./datafiles/assets/brushes/essentials_brushes-mesh_weight.blend', import.meta.url)],
   ['assets/brushes/essentials_brushes-mesh_texture.blend', new URL('./datafiles/assets/brushes/essentials_brushes-mesh_texture.blend', import.meta.url)],
   ['assets/brushes/essentials_brushes-mesh_vertex.blend', new URL('./datafiles/assets/brushes/essentials_brushes-mesh_vertex.blend', import.meta.url)],
+  ['assets/brushes/essentials_brushes-gp_draw.blend', new URL('./datafiles/assets/brushes/essentials_brushes-gp_draw.blend', import.meta.url)],
+  ['assets/brushes/essentials_brushes-gp_sculpt.blend', new URL('./datafiles/assets/brushes/essentials_brushes-gp_sculpt.blend', import.meta.url)],
+  ['assets/brushes/essentials_brushes-gp_weight.blend', new URL('./datafiles/assets/brushes/essentials_brushes-gp_weight.blend', import.meta.url)],
+  ['assets/brushes/essentials_brushes-gp_vertex.blend', new URL('./datafiles/assets/brushes/essentials_brushes-gp_vertex.blend', import.meta.url)],
 ];
 // Color management's LUTs and display profiles, fetched when a view, look or color space first needs them.
 export const COLOR_MANAGEMENT = [

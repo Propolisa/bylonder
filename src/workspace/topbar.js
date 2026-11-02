@@ -12,11 +12,13 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   // Blender's default workspaces with their object modes (startup.blend's WorkSpace.object_mode), each opening the screen
   // the scene's window has for it (docs/blender-boundary.md, Workspaces): Scripting's, Shading's, Modeling's (Modeling
   // and Sculpting), UV Editing's, Texture Paint's, Geometry Nodes', else Layout's.
+  // A project made from an application template has the template's workspaces (the 2D Animation template's).
   const SCREENS = { Scripting: 'scripting', Shading: 'shading', Modeling: 'modeling', Sculpting: 'modeling', 'UV Editing': 'uv-editing', 'Texture Paint': 'texture-paint',
-    'Geometry Nodes': 'geometry-nodes' };
-  const workspaces = [['Layout', 'OBJECT'], ['Modeling', 'EDIT'], ['Sculpting', 'SCULPT'], ['UV Editing', 'EDIT'], ['Texture Paint', 'TEXTURE_PAINT'], ['Shading', 'OBJECT'],
-    ['Animation', 'POSE'], ['Rendering', 'OBJECT'], ['Compositing', 'OBJECT'], ['Geometry Nodes', 'OBJECT'], ['Scripting', 'OBJECT']]
-    .map(([name, mode]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, screen: SCREENS[name] ?? 'layout' }));
+    'Geometry Nodes': 'geometry-nodes', '2D Animation': '2d-animation', '2D Full Canvas': '2d-full-canvas' };
+  const GENERAL = [['Layout', 'OBJECT'], ['Modeling', 'EDIT'], ['Sculpting', 'SCULPT'], ['UV Editing', 'EDIT'], ['Texture Paint', 'TEXTURE_PAINT'], ['Shading', 'OBJECT'],
+    ['Animation', 'POSE'], ['Rendering', 'OBJECT'], ['Compositing', 'OBJECT'], ['Geometry Nodes', 'OBJECT'], ['Scripting', 'OBJECT']];
+  const workspacesOf = (list) => list.map(([name, mode]) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, mode, screen: SCREENS[name] ?? 'layout' }));
+  let workspaces = workspacesOf(GENERAL);
   let selected = 'layout';
   const current = () => selected;
   const screen = () => workspaces.find((w) => w.id === selected).screen;
@@ -42,7 +44,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const url = (href) => () => open(href, '_blank', 'noopener');
   const blenderDocs = 'https://docs.blender.org/';
   const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
-  const ids = workspaces.map((w) => w.id);
+  const ids = () => workspaces.map((w) => w.id);
   const operators = {
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
     'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : chooseBlend()) },
@@ -56,7 +58,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     'screen.userpref_show': { run: () => send('invoke', 'screen.userpref_show') },
     'render.render': { keys: ({ animation }) => (animation ? 'Ctrl F12' : 'F12'), run: ({ animation }) => send('render', animation ? 'animation' : 'image') },
     'render.view_show': { keys: () => 'F11', run: () => send('render', 'view') },
-    'screen.workspace_cycle': { run: ({ direction }) => setWorkspace(ids[(ids.indexOf(current()) + (direction === 'PREV' ? ids.length - 1 : 1)) % ids.length]) },
+    'screen.workspace_cycle': { run: ({ direction }) => setWorkspace(ids()[(ids().indexOf(current()) + (direction === 'PREV' ? ids().length - 1 : 1)) % ids().length]) },
     'wm.window_fullscreen_toggle': { run: () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()) },
     'wm.splash': { run: () => splash() },
     'wm.url_open_preset': { supports: ({ type }) => type in URL_PRESETS, run: ({ type }) => url(URL_PRESETS[type])() },
@@ -113,7 +115,10 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     }
     return topbarArea;
   };
+  // The first workspace's object mode, entered once the project's scene runs (ED_workspace_change on opening a file).
+  let entering = null;
   const connect = () => {
+    if (entering && scene()) { send('screen', { screen: screen(), mode: entering }); entering = null; }
     if (menus.childElementCount || !scene()) return;
     for (const { label, menu } of scene().bar()) {
       const logo = menu === 'TOPBAR_MT_blender';
@@ -123,15 +128,17 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     bar.querySelector('.bl-logo')?.remove();
   };
   const tabs = $('workspace-tabs');
-  for (const { id, name } of workspaces) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.dataset.workspace = id;
-    b.textContent = name;
-    b.onclick = () => setWorkspace(id);
-    tabs.append(b);
-  }
+  // The project's workspaces ([name, object mode] pairs, General's by default), the first one active.
+  const setWorkspaces = (list = GENERAL) => {
+    workspaces = workspacesOf(list);
+    tabs.replaceChildren(...workspaces.map(({ id, name }) => Object.assign(document.createElement('button'), { type: 'button', textContent: name, onclick: () => setWorkspace(id) })));
+    tabs.querySelectorAll('button').forEach((b, i) => { b.dataset.workspace = workspaces[i].id; });
+    selected = workspaces[0].id;
+    entering = workspaces[0].mode === 'OBJECT' ? null : workspaces[0].mode;
+    sync();
+  };
   const sync = () => tabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.workspace === current()));
+  setWorkspaces();
   new MutationObserver(sync).observe(document.querySelector('#workspace'), { subtree: true, attributes: true, attributeFilter: ['hidden'] });
   sync();
 
@@ -185,6 +192,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   $('view-layer-actions').append(iconButton('duplicate', 'Add View Layer', viewLayerOp('add')), removeViewLayer);
   return {
     sync,
+    setWorkspaces,
     screen,
     splash,
     connect,

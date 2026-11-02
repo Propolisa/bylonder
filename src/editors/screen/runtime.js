@@ -24,6 +24,12 @@ const MODELING_AREAS=['viewport','objects','properties'];
 // Properties editor (Blender's Spreadsheet left of the 3D Viewport is not there yet, so the 3D Viewport takes its row).
 const GEOMETRY_NODES_SPLITS={root:LAYOUT_SPLITS.root,main:share(476,557),lower:share(480,77),inspector:LAYOUT_SPLITS.inspector};
 const GEOMETRY_NODES_AREAS=['viewport','nodes','timeline','objects','properties'];
+// The 2D Animation template's screens (bl_app_templates_system/2D_Animation/startup.blend): 2D Animation's 3D Viewport
+// over the Dope Sheet beside the Outliner over the Properties editor, and 2D Full Canvas's 3D Viewport over the Dope Sheet.
+const ANIMATION_2D_SPLITS={root:share(1583,330),main:share(856,172),inspector:share(179,849)};
+const ANIMATION_2D_AREAS=['viewport','dopesheet','objects','properties'];
+const FULL_CANVAS_SPLITS={main:share(962,87)};
+const FULL_CANVAS_AREAS=['viewport','dopesheet'];
 const hiddenBut=(items,areas)=>items.map(x=>x.id).filter(id=>!areas.includes(id));
 const areaOrder=(items,areas)=>[...areas,...hiddenBut(items,areas)];
 export function mountRuntimeLayout(){
@@ -68,6 +74,14 @@ export function mountRuntimeLayout(){
     tree:{id:'root',children:[{id:'main',children:[0,{id:'lower',children:[1,2]}]},{id:'inspector',children:[3,4]}]},
     defaults:()=>({order:areaOrder(items,GEOMETRY_NODES_AREAS),hidden:hiddenBut(items,GEOMETRY_NODES_AREAS),sizes:structuredClone(GEOMETRY_NODES_SPLITS),horizontal:{root:false,main:true,lower:true,inspector:true}}),
   };
-  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','image','console','info','preferences']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','image','console','info','preferences'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,'uv-editing':imageScreen,'texture-paint':imageScreen}});
+  const animation2d={
+    tree:{id:'root',children:[{id:'main',children:[0,1]},{id:'inspector',children:[2,3]}]},
+    defaults:()=>({order:areaOrder(items,ANIMATION_2D_AREAS),hidden:hiddenBut(items,ANIMATION_2D_AREAS),sizes:structuredClone(ANIMATION_2D_SPLITS),horizontal:{root:false,main:true,inspector:true}}),
+  };
+  const fullCanvas={
+    tree:{id:'main',children:[0,1]},
+    defaults:()=>({order:areaOrder(items,FULL_CANVAS_AREAS),hidden:hiddenBut(items,FULL_CANVAS_AREAS),sizes:structuredClone(FULL_CANVAS_SPLITS),horizontal:{main:true}}),
+  };
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','image','console','info','preferences']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','image','console','info','preferences'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas}});
   return dock;
 }

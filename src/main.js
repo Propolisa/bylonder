@@ -69,6 +69,7 @@ import { mountPreferences } from "./editors/space_userpref/editor.js";
 import { registerUserprefOperators } from "./editors/space_userpref/userpref-operators.js";
 import "./runtimes/armature.js";
 import "./runtimes/image.js";
+import "./runtimes/grease-pencil.js";
 import { bylonderIcon } from "./python/bpy_icons.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
@@ -502,7 +503,7 @@ const preferencesEditor = (host, id) => mountWhenShown(host, () => mountPreferen
 preferencesEditor(document.querySelector("#preferences-section"), "preferences");
 viewportDock.setFactory("preferences", preferencesEditor);
 registerUserprefOperators({ showArea: () => viewportDock.show("preferences", true) });
-view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost,
+view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost, wake: () => views.wake(),
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
 // The navigation gizmo's and touch's ways into Blender's navigation operators (view3d-window.js).

@@ -197,8 +197,14 @@ can be maintained on its own:
 - **The drawing modules** (`src/draw`): `overlay-armature.js` (bones in every display type, custom shapes, names,
   axes and relationship lines, as `docs/armatures.md` says), `overlay-particle.js` (dots, circles, crosses, axes, hair and Particle Edit
   Mode as the overlay draws them), `curves.js` (curves' data and meshes, the one curves vertex stage every engine uses), `workbench.js`
-  (Solid, with curves as Workbench's hair), called by the view (`main-view.js` `drawInstances`, `drawCurves`,
-  `particleEditOverlay`).
+  (Solid, with curves as Workbench's hair), `grease-pencil.js` (Grease Pencil drawings as GreasedLine meshes and fill
+  meshes, from `grease-pencil-api.cc` `main_grease_pencil`, which packs a drawing again only when it changed), called
+  by the view (`main-view.js` `drawInstances`, `drawCurves`, `drawGreasePencil`, `particleEditOverlay`).
+- **Blender's GPU offscreen on Babylon.** Where Blender's code renders into a GPU offscreen and reads the pixels back
+  (Grease Pencil's `image_render`, which the Fill tool's Pixel solver renders strokes with), the seam records what it
+  draws and the page renders that into a Babylon `RenderTargetTexture` at the requested size and projection, read back
+  synchronously into Blender's image (`grease-pencil-render.cc`, `draw/grease-pencil-render.js`). This is where a GPU
+  offscreen of Blender's maps to Babylon.
 
 What could not be reused is copied, and marked `blender-port: <Blender file and function>` where it is
 (`grep -rn blender-port src tools/blender-port/wasm`): a few lines each, such as the weight ramp, a hair radius, the

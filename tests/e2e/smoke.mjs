@@ -775,6 +775,69 @@ const checks = {
     assert.ok(await app.frame().locator("#image-section canvas.bl-image-view").isVisible(), "the UV Editor draws");
   } },
 
+  // Grease Pencil: the Bouncing Ball's drawings draw as GreasedLine and fill meshes; a drag in Draw Mode draws a stroke
+  // (one undo step), and the Fill tool's Pixel solver, rendered on Babylon, fills a closed shape.
+  "Grease Pencil draws, fills and undoes a stroke": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+    const curves = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.curves.length / 5, 0));
+    assert.ok(await app.bylonder((b) => b.world.scene.meshes.some((m) => m.getClassName() === "GreasedLineMesh" && m.getTotalVertices())), "strokes draw as GreasedLine");
+    await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "PAINT_GREASE_PENCIL" }));
+    await app.settled();
+    const before = await curves();
+    const drag = async (points) => {
+      await app.page.mouse.move(...(await app.point(...points[0])));
+      await app.page.mouse.down();
+      for (let s = 1; s < points.length; s++) for (let k = 1; k <= 10; k++) {
+        const [[x0, y0], [x1, y1]] = [points[s - 1], points[s]];
+        await app.page.mouse.move(...(await app.point(x0 + (x1 - x0) * k / 10, y0 + (y1 - y0) * k / 10)));
+      }
+      // Held still past the moves' redraws: the release alone must draw the finished stroke.
+      await app.page.waitForTimeout(800);
+      const rendered = await app.bylonder((b) => b.world.scene.getRenderId());
+      await app.page.mouse.up();
+      await app.settled();
+      await app.until((b, id) => b.world.scene.getRenderId() > id, rendered);
+    };
+    await drag([[0.35, 0.3], [0.65, 0.3], [0.65, 0.55], [0.35, 0.55], [0.35, 0.3]]);
+    assert.equal(await curves(), before + 1, "the drag drew a stroke");
+    await app.bylonder((b) => b.runOperator("brush.asset_activate", { asset_library_type: "ESSENTIALS", relative_asset_identifier: "brushes/essentials_brushes-gp_draw.blend/Brush/Fill" }));
+    await app.bylonder((b) => { b.modules.bpyRna.contextStruct().tool_settings.gpencil_paint.brush.gpencil_settings.fill_solver = "PIXEL"; });
+    await app.click(0.5, 0.42);
+    await app.settled();
+    assert.equal(await curves(), before + 2, "the Pixel solver filled the square");
+    await app.page.keyboard.press("Control+z");
+    await app.settled();
+    assert.equal(await curves(), before + 1, "Ctrl Z undoes the fill");
+  } },
+
+  // A pen in Draw Mode: one move event carrying coalesced moves draws them all, and the pen's eraser end erases. The
+  // events are the page's own PointerEvents, as a tablet gives them (pressure, tilt, coalesced moves, button 5).
+  "Grease Pencil takes a pen's coalesced moves and its eraser end": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+    const points = () => app.bylonder((b) => b.world.mainSync.blender.greasePencil({ repack: true }).filter((d) => !d.onion).reduce((n, d) => n + d.points.length / 14, 0));
+    await app.bylonder((b) => b.runOperator("object.mode_set", { mode: "PAINT_GREASE_PENCIL" }));
+    await app.settled();
+    const pen = (strokes, { button = 0, buttons = 1 } = {}) => app.bylonder((b, [strokes, button, buttons]) => {
+      const canvas = b.views.input.canvas, rect = canvas.getBoundingClientRect();
+      const at = ([fx, fy], pressure) => ({ clientX: rect.left + rect.width * fx, clientY: rect.top + rect.height * fy, pointerType: "pen", pointerId: 2, pressure, tiltX: 30, tiltY: -10, bubbles: true });
+      for (const path of strokes) {
+        // A pen hovers where it then touches down, as a tablet's pen does.
+        canvas.dispatchEvent(new PointerEvent("pointermove", { ...at(path[0], 0), buttons: 0 }));
+        canvas.dispatchEvent(new PointerEvent("pointerdown", { ...at(path[0], 0.5), button, buttons }));
+        const moves = path.slice(1).map((p, i) => new PointerEvent("pointermove", { ...at(p, 0.5 + 0.4 * i / path.length), buttons }));
+        canvas.dispatchEvent(new PointerEvent("pointermove", { ...at(path.at(-1), 0.9), buttons, coalescedEvents: moves }));
+        canvas.dispatchEvent(new PointerEvent("pointerup", { ...at(path.at(-1), 0), button, buttons: 0 }));
+      }
+    }, [strokes, button, buttons]);
+    const wave = Array.from({ length: 40 }, (_, i) => [0.3 + i * 0.01, 0.35 + 0.08 * Math.sin(i / 4)]);
+    const before = await points();
+    await pen([wave]);
+    await app.settled();
+    const drawn = await points() - before;
+    assert.ok(drawn > 10, `one event's coalesced moves drew a stroke of ${drawn} points`);
+    await pen([[[0.28, 0.25], [0.5, 0.45], [0.72, 0.25]]], { button: 5, buttons: 32 });
+    await app.settled();
+    assert.ok(await points() < before + drawn, "the eraser end erased");
+  } },
+
   // Shade Flat after Shade Smooth draws flat again (every face sharp is stored as one value of sharp_face).
   "Shade Flat after Shade Smooth draws flat faces": { open: {}, async run() {
     const normal = () => app.bylonder((b) => Array.from(b.world.scene.getMeshByName("Cube").getVerticesData("normal").slice(0, 3), (v) => Math.round(Math.abs(v) * 100) / 100));

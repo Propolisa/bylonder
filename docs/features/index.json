@@ -107,6 +107,73 @@
   "example_title": "Hair Dynamics"
  },
  {
+  "id": "grease-pencil",
+  "title": "Grease Pencil",
+  "summary": "Draw and animate 2D strokes in the 3D Viewport with Blender's Grease Pencil, its brushes, modes, layers and onion skins, drawn by Babylon's GreasedLine.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/grease_pencil/index.html",
+   "https://docs.blender.org/manual/en/5.2/grease_pencil/modes/draw/index.html",
+   "https://docs.blender.org/manual/en/5.2/grease_pencil/modes/edit/index.html",
+   "https://docs.blender.org/manual/en/5.2/grease_pencil/properties/layers.html",
+   "https://docs.blender.org/manual/en/5.2/grease_pencil/modes/draw/tools/fill.html"
+  ],
+  "example": "grease-pencil",
+  "thumbnail": "grease-pencil/thumbnail.png",
+  "media": [
+   "grease-pencil/play.gif",
+   "grease-pencil/draw.gif",
+   "grease-pencil/fill.gif",
+   "grease-pencil/edit.gif",
+   "grease-pencil/layers.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PAINT_GREASE_PENCIL",
+   "EDIT",
+   "SCULPT_GREASE_PENCIL",
+   "WEIGHT_GREASE_PENCIL",
+   "VERTEX_GREASE_PENCIL",
+   "VIEW3D_MT_paint_grease_pencil",
+   "VIEW3D_MT_edit_greasepencil",
+   "DATA_PT_grease_pencil_layers",
+   "DATA_PT_grease_pencil_onion_skinning",
+   "PROPERTIES"
+  ],
+  "operators": [
+   "object.grease_pencil_add",
+   "object.mode_set",
+   "grease_pencil.brush_stroke",
+   "grease_pencil.fill",
+   "grease_pencil.select_all",
+   "grease_pencil.stroke_subdivide",
+   "grease_pencil.interpolate_sequence"
+  ],
+  "code": [
+   "tools/blender-port/wasm/grease-pencil-api.cc",
+   "tools/blender-port/wasm/grease-pencil-render.cc",
+   "src/draw/grease-pencil.js",
+   "src/draw/grease-pencil-render.js",
+   "src/runtimes/grease-pencil.js",
+   "src/editors/object/main-modes.js"
+  ],
+  "tests": [
+   "tests/grease-pencil-wasm.test.js",
+   "tests/e2e/smoke.mjs"
+  ],
+  "limits": [
+   "Stroke ends and corners are flat (GreasedLine has no round caps or joins); Dots and Squares strokes draw as lines.",
+   "A layer's opacity applies per stroke; Hard Light and Divide layers blend as Regular; layer masks do not mask.",
+   "Gradient and texture fills draw in their fill color, texture strokes in their stroke color; strokes are not lit.",
+   "Fills draw under their layer's strokes rather than interleaved stroke by stroke.",
+   "Shader effects (Blur, Shadow, Rim, ...) and Line Art's evaluation in a render are not drawn."
+  ],
+  "page": "docs/features/grease-pencil.md",
+  "open": "https://propolisa.github.io/bylonder/#example=grease-pencil",
+  "example_title": "Bouncing Ball"
+ },
+ {
   "id": "hair-dynamics",
   "title": "Hair Dynamics",
   "summary": "Hair curves grown by Generate Hair Curves and simulated by Blender's Hair Dynamics node group in a simulation zone.",

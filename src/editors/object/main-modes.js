@@ -13,11 +13,16 @@ import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js';
 
-// Each mode's context mode (CTX_data_mode_enum) and keymap; Edit Mode is Main's for armatures only.
+// Each mode's context mode (CTX_data_mode_enum) and keymap; Edit Mode is Main's for armatures and Grease Pencil only.
 const MODES = { EDIT: { context: 'EDIT_ARMATURE', keymap: 'Armature' }, POSE: { context: 'POSE', keymap: 'Pose' }, PARTICLE_EDIT: { context: 'PARTICLE', keymap: 'Particle' },
   SCULPT: { context: 'SCULPT', keymap: 'Sculpt' }, WEIGHT_PAINT: { context: 'PAINT_WEIGHT', keymap: 'Weight Paint' },
-  VERTEX_PAINT: { context: 'PAINT_VERTEX', keymap: 'Vertex Paint' }, TEXTURE_PAINT: { context: 'PAINT_TEXTURE', keymap: 'Image Paint' } };
-const KEYMAPS = Object.values(MODES).map((m) => m.keymap);
+  VERTEX_PAINT: { context: 'PAINT_VERTEX', keymap: 'Vertex Paint' }, TEXTURE_PAINT: { context: 'PAINT_TEXTURE', keymap: 'Image Paint' },
+  PAINT_GREASE_PENCIL: { context: 'PAINT_GREASE_PENCIL', keymap: 'Grease Pencil Draw Mode' },
+  SCULPT_GREASE_PENCIL: { context: 'SCULPT_GREASE_PENCIL', keymap: 'Grease Pencil Sculpt Mode' },
+  WEIGHT_GREASE_PENCIL: { context: 'WEIGHT_GREASE_PENCIL', keymap: 'Grease Pencil Weight Paint' },
+  VERTEX_GREASE_PENCIL: { context: 'VERTEX_GREASE_PENCIL', keymap: 'Grease Pencil Vertex Paint' } };
+const GREASE_PENCIL_EDIT = { context: 'EDIT_GREASE_PENCIL', keymap: 'Grease Pencil Edit Mode' };
+const KEYMAPS = [...Object.values(MODES), GREASE_PENCIL_EDIT].map((m) => m.keymap);
 const POSE_ASSETS = ['poselib.create_pose_asset', 'poselib.blend_pose_asset'];
 // Create Pose Asset's dialog saves into the Current File, which the project keeps: Bylonder has no User Library on disk
 // for its default (get_user_library_ref_for_save finds none, and Blender then refuses).
@@ -28,7 +33,9 @@ const presets = { 'poselib.create_pose_asset': { asset_library_reference: 'LOCAL
 export function createMainModes({ sync, selection, options }) {
   const active = () => selection.nodes.at(-1);
   // The active object's mode while it is one of these, else null.
-  const mode = () => { const node = active(), m = node?.metadata?.wbMode; return MODES[m] && (m !== 'EDIT' || node.metadata.wbCreation?.armature) ? m : null; };
+  const greasePencil = () => active()?.metadata?.wbType === 'GREASEPENCIL';
+  const mode = () => { const node = active(), m = node?.metadata?.wbMode; return MODES[m] && (m !== 'EDIT' || node.metadata.wbCreation?.armature || greasePencil()) ? m : null; };
+  const modeOf = () => (mode() === 'EDIT' && greasePencil() ? GREASE_PENCIL_EDIT : MODES[mode()]);
   // Those that only invoke too (select_linked_pick, shortest_path_pick), which run from an event.
   for (const idname of operatorNames().filter((id) => /^(armature|pose)\./.test(id) || POSE_ASSETS.includes(id))) registerOperator(idname, {
     poll: () => { sync.flush(); return sync.blender.poll(idname); },
@@ -48,9 +55,9 @@ export function createMainModes({ sync, selection, options }) {
 
   return {
     mode,
-    get contextMode() { return MODES[mode()]?.context ?? null; },
+    get contextMode() { return modeOf()?.context ?? null; },
     // Whether a keymap of Blender's runs now: Object Mode's outside these modes, a mode's own in it.
-    keymapActive: (name) => (name === 'Object Mode' ? !mode() : KEYMAPS.includes(name) ? MODES[mode()]?.keymap === name : true),
+    keymapActive: (name) => (name === 'Object Mode' ? !mode() : KEYMAPS.includes(name) ? modeOf()?.keymap === name : true),
     keymaps: KEYMAPS,
     modes: Object.keys(MODES),
     // view3d.select: Blender's, from the event.

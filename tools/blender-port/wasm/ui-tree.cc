@@ -1,7 +1,7 @@
 /* Blender's uiLayout lays out every panel, header, menu and popup, and each finished block leaves the module as one
  * layout tree (JSON) that the browser draws (src/editors/interface/layout-view.js): layouts with their alignment, scale
- * and state, and buttons by kind with their RNA property or operator and its properties, text, icon and size in UI
- * units; no coordinates. A block's layouts are recorded when Blender resolves them (block_layout_resolve, linked with
+ * and state, and buttons by kind with their RNA property or operator and its properties, text, icon, and where
+ * Blender placed them, in UI units. A block's layouts are recorded when Blender resolves them (block_layout_resolve, linked with
  * --wrap), as it frees them then; its buttons are written once the block ends. Buttons stay valid until the next
  * draw of what holds them, and JS presses them by their address. */
 #include <map>
@@ -225,6 +225,15 @@ static bool is_toggle(const Button *but)
               ButtonType::ButToggle, ButtonType::Checkbox, ButtonType::CheckboxN);
 }
 
+/* Where Blender placed a button or a layout's buttons, in UI units from the block's top left (y down), and its size. */
+static void rect_json(std::ostringstream &out, const rctf &rect)
+{
+  char numbers[128];
+  SNPRINTF(numbers, ",\"x\":%.3g,\"y\":%.3g,\"w\":%.3g,\"h\":%.3g", rect.xmin / UI_UNIT_X, -rect.ymax / UI_UNIT_Y,
+           BLI_rctf_size_x(&rect) / UI_UNIT_X, BLI_rctf_size_y(&rect) / UI_UNIT_Y);
+  out << numbers;
+}
+
 /* A button: its kind, address, text (its label, and what it shows when that differs: a number's value with its unit,
  * an enum's item), icon, size, state, and what it edits or runs. */
 static void button_json(std::ostringstream &out, Button *but)
@@ -256,9 +265,7 @@ static void button_json(std::ostringstream &out, Button *but)
       quote(out, item->label);
     }
   }
-  char size[64];
-  SNPRINTF(size, ",\"w\":%.3g,\"h\":%.3g", BLI_rctf_size_x(&but->rect) / UI_UNIT_X, BLI_rctf_size_y(&but->rect) / UI_UNIT_Y);
-  out << size;
+  rect_json(out, but->rect);
   if (but->emboss != EmbossType::Emboss) {
     out << ",\"emboss\":\"" << EMBOSS[int(but->emboss)] << '"';
   }
@@ -385,8 +392,7 @@ static rctf node_json(std::ostringstream &out, const Node &node)
     out << numbers;
   }
   if (BLI_rctf_is_valid(&rect)) {
-    SNPRINTF(numbers, ",\"w\":%.3g,\"h\":%.3g", BLI_rctf_size_x(&rect) / UI_UNIT_X, BLI_rctf_size_y(&rect) / UI_UNIT_Y);
-    out << numbers;
+    rect_json(out, rect);
   }
   out << ",\"children\":[" << children.str() << "]}";
   return rect;

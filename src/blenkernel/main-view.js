@@ -24,13 +24,16 @@ import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { nodeMaterialFromTree, nodeProperties } from '../nodes/blender/shader-nodes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
+import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
+import { provideGreasePencilRender } from '../draw/grease-pencil-render.js';
 import * as runtimes from '../runtimes/runtimes.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
 // Types of Blender's the view draws only as the depsgraph evaluates them: as their evaluated mesh, or placed where they
-// are (what they do, a lattice's deform or a speaker's sound, is Blender's; a Curves object's curves, drawCurves).
-const EVALUATED = ['SURFACE', 'META'], PLACED = ['LATTICE', 'SPEAKER', 'LIGHT_PROBE', 'CURVES'];
+// are (what they do, a lattice's deform or a speaker's sound, is Blender's; a Curves object's curves, drawCurves; a Grease
+// Pencil object's drawings, drawGreasePencil).
+const EVALUATED = ['SURFACE', 'META'], PLACED = ['LATTICE', 'SPEAKER', 'LIGHT_PROBE', 'CURVES', 'GREASEPENCIL'];
 // The objects drawn from what the depsgraph evaluated.
 const DRAWN = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA', ...CURVE_TYPES, ...EVALUATED, ...PLACED];
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
@@ -169,7 +172,8 @@ export function createMainView(state) {
     const warnings = [], made = [], revived = [], was = state.applying;
     state.applying = true;
     try {
-      for (const ma of blender.ids(ID_MA)) if (!materialFor(ma)) adoptMaterial(ma, scene, warnings);
+      // A Grease Pencil material is drawn with its strokes (grease-pencil-api.cc), not as a Babylon material.
+      for (const ma of blender.ids(ID_MA)) if (!materialFor(ma) && !idStruct(ma).is_grease_pencil) adoptMaterial(ma, scene, warnings);
       for (const ob of blender.ids(ID_OB)) {
         if (state.nodeOf(ob)) continue;
         const type = dnaGet('Object', ob, 'type'), name = blender.name(ob), id = blender.property(ob, PROPERTIES.id) ?? name;
@@ -390,7 +394,7 @@ export function createMainView(state) {
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
       if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
-      if (updates.size) { drawInstances(); drawCurves(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
+      if (updates.size) { drawInstances(); drawCurves(); drawGreasePencil(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
     } finally {
       state.applying = was;
     }
@@ -455,6 +459,16 @@ export function createMainView(state) {
       curved.set(key, { data, mesh, overlay });
     }
     for (const [key, { data, mesh, overlay }] of curved) if (!drawn.has(key)) { disposeCurvesData(data); mesh.dispose(); overlay?.dispose(); curved.delete(key); }
+  }
+  // Grease Pencil objects' visible drawings (draw/grease-pencil.js), onion skins but in a render or playback.
+  let greasePencil = null, repack = false;
+  function drawGreasePencil() {
+    if (!greasePencil) {
+      greasePencil = createGreasePencilDraw(world.scene, { matrix: babylonMatrix, look: (ob) => runtimes.look(idStruct(ob).data) ?? BLENDER_LOOK });
+      provideGreasePencilRender(world.scene.getEngine());
+    }
+    const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), onion = !world.collections?.rendering && !world.animation?.playing;
+    repack = greasePencil.update(blender.greasePencil({ onion, repack }), (ob) => byOb.get(ob));
   }
   // A light whose type Blender changed (its Properties' Type) is drawn by a Babylon light of the new type, which takes the
   // old one's place: its name, ids, parent, children and selection.

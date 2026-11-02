@@ -55,6 +55,9 @@ const TRACKPAD_SCROLL = 1, TRACKPAD_MAGNIFY = 4;
 const TABLET_STYLUS = 1, TABLET_ERASER = 2;
 export const pen = (e) => (e.pointerType !== 'pen' ? [0, 0, 0, 0]
   : [e.buttons & 32 || e.button === 5 ? TABLET_ERASER : TABLET_STYLUS, Math.round(e.pressure * 1000), Math.round((e.tiltX / 90) * 1000), Math.round((e.tiltY / 90) * 1000)]);
+// GHOST reports a pen's eraser contact (the Pointer Events' button 5) as the left button with the eraser's tablet mode.
+const ERASER_CONTACT = 5;
+const ghostButton = (e) => (e.pointerType === 'pen' && e.button === ERASER_CONTACT ? 0 : e.button);
 export function trackpadGesture(e) {
   if (e.deltaMode !== 0) return null;
   if (e.ctrlKey && !Number.isInteger(e.deltaY)) return { subtype: TRACKPAD_MAGNIFY, dx: Math.round(-e.deltaY * 4), dy: 0 };
@@ -132,7 +135,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   };
   const pointerdown = (e) => {
     if (e.pointerType === 'touch') return;
-    if (toBlender(e, 'buttondown', [e.button, 0, ...pen(e)])) { buttons++; return; }
+    if (toBlender(e, 'buttondown', [ghostButton(e), 0, ...pen(e)])) { buttons++; return; }
     const view = viewAt(e);
     if (!view && !modal.length) return;
     const type = BUTTONS[e.button];
@@ -157,7 +160,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   };
   const pointerup = (e) => {
     if (e.pointerType === 'touch') return;
-    if (toBlender(e, 'buttonup', [e.button, 0, ...pen(e)])) { buttons = Math.max(0, buttons - 1); return; }
+    if (toBlender(e, 'buttonup', [ghostButton(e), 0, ...pen(e)])) { buttons = Math.max(0, buttons - 1); return; }
     buttons = 0;
     const type = BUTTONS[e.button], down = press?.type === type ? press : null;
     if (modal.length || down) dispatch(wmEvent(e, type, 'RELEASE', { view: viewAt(e), press: down }));

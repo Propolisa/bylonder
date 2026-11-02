@@ -1,7 +1,9 @@
 """Blender's datafiles, from a Blender install at the manifest's tag: the asset libraries of Blender's Essentials the
-module reads at run time (node groups such as Hair Dynamics, the curve and mesh sculpt, weight, vertex and texture paint brushes) and their catalogs,
-and its color management (OpenColorIO's config.ocio, its LUTs and display ICC profiles), which the module's realm puts in its file system at Blender's system directory (src/bmesh/bmesh-wasm.js, ghost-paths.cc); and the
-studio light Material Preview lights the view with (STUDIOLIGHT_WORLD_DEFAULT, studiolight.cc), which the view loads.
+module reads at run time (node groups such as Hair Dynamics, the curve and mesh sculpt, weight, vertex and texture
+paint brushes, the grease pencil brushes) and their catalogs, and its color management (OpenColorIO's config.ocio, its
+LUTs and display ICC profiles), which the module's realm puts in its file system at Blender's system directory
+(src/bmesh/bmesh-wasm.js, ghost-paths.cc); and the studio light Material Preview lights the view with
+(STUDIOLIGHT_WORLD_DEFAULT, studiolight.cc), which the view loads.
 Writes src/bmesh/datafiles/ and src/bmesh/datafiles.js.
 
 usage: python3 tools/blender-port/datafiles.py [BLENDER_INSTALL]   (default .blender-reference/blender-<tag>-linux-x64)
@@ -18,7 +20,9 @@ FILES = ['assets/blender_assets.cats.txt', 'assets/nodes/geometry_nodes_essentia
          'assets/nodes/geometry_nodes_dynamics_assets.blend', 'assets/nodes/procedural_hair_node_assets.blend',
          'assets/brushes/essentials_brushes-curve_sculpt.blend', 'assets/brushes/essentials_brushes-mesh_sculpt.blend',
          'assets/brushes/essentials_brushes-mesh_weight.blend', 'assets/brushes/essentials_brushes-mesh_texture.blend',
-         'assets/brushes/essentials_brushes-mesh_vertex.blend']
+         'assets/brushes/essentials_brushes-mesh_vertex.blend', 'assets/brushes/essentials_brushes-gp_draw.blend',
+         'assets/brushes/essentials_brushes-gp_sculpt.blend', 'assets/brushes/essentials_brushes-gp_weight.blend',
+         'assets/brushes/essentials_brushes-gp_vertex.blend']
 # Color management (its config is in the module from its snapshot, which ran colormanagement_init): what its processors
 # and OpenImageIO read, fetched when first needed.
 COLOR_MANAGEMENT = ['colormanagement/config.ocio', 'colormanagement/luts/*', 'colormanagement/filmic/*', 'colormanagement/icc/*.icc']
