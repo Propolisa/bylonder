@@ -149,7 +149,7 @@ export const meshFromFaces = (positions, face_offsets, corner_verts) =>
 export const OBJECT_MODES = { OBJECT: 0, EDIT: 1, SCULPT: 2, VERTEX_PAINT: 4, WEIGHT_PAINT: 8, TEXTURE_PAINT: 16, PARTICLE_EDIT: 32, POSE: 64,
   EDIT_GPENCIL: 128, PAINT_GREASE_PENCIL: 256, SCULPT_GREASE_PENCIL: 512, WEIGHT_GREASE_PENCIL: 1024, VERTEX_GREASE_PENCIL: 2048, SCULPT_CURVES: 4096 };
 const OBJECT_MODES_BY_FLAG = new Map(Object.entries(OBJECT_MODES).map(([name, flag]) => [flag, name]));
-export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS'];
+export const INSTANCE_SHAPES = ['OBJECT', 'DOT', 'CIRCLE', 'CROSS', 'AXIS', 'MESH'];
 export const ID_RECALC_TRANSFORM = 1 << 0, ID_RECALC_GEOMETRY = 1 << 1, ID_RECALC_SHADING = 1 << 7, ID_RECALC_SYNC_TO_EVAL = 1 << 13, ID_RECALC_ALL = 0xffffffff;
 // ID codes (DNA_ID_enums.h): Image.
 const ID_IM = 0x4d49;
@@ -293,16 +293,40 @@ export class BlenderMain {
       indices: new Uint32Array(x.memory.buffer, x.main_particle_edit_indices() >>> 0, indices) };
   }
   // What Main's objects draw as instances (main-api.cc main_instances): groups of one shape, { instancer, ob (the
-  // object instanced, or 0), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), drawSize, color, data (16
-  // floats per instance: an object's world matrix in Babylon's layout, else a particle's point data
-  // in Blender's axes: position, value, rotation) }, the data a view into the module's memory valid until the next call.
+  // object instanced, or 0), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), drawSize, color, geometry
+  // (a MESH group's Mesh, for instanceMesh), material (the geometry's first Material, or 0), data (16 floats per
+  // instance: a world matrix in Babylon's layout, else a particle's point data in Blender's axes: position, value,
+  // rotation) }, the data a view into the module's memory valid until the next call.
   instances() {
-    const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, data = x.main_instance_matrices() >>> 0;
-    const ints = new Int32Array(x.memory.buffer, at, count * 10), floats = new Float32Array(x.memory.buffer, at, count * 10);
+    const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, data = x.main_instance_matrices() >>> 0, size = 12;
+    const ints = new Int32Array(x.memory.buffer, at, count * size), floats = new Float32Array(x.memory.buffer, at, count * size);
     return Array.from({ length: count }, (_, i) => {
-      const [instancer, ob, shape, overlay, first, n] = ints.subarray(i * 10, i * 10 + 6);
-      return { instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, drawSize: floats[i * 10 + 6],
-        color: Array.from(floats.subarray(i * 10 + 7, i * 10 + 10)), data: new Float32Array(x.memory.buffer, data + first * 64, n * 16) };
+      const [instancer, ob, shape, overlay, first, n] = ints.subarray(i * size, i * size + 6), [geometry, material] = ints.subarray(i * size + 10, i * size + 12);
+      return { instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, drawSize: floats[i * size + 6],
+        color: Array.from(floats.subarray(i * size + 7, i * size + 10)), geometry: geometry >>> 0, material: material >>> 0,
+        data: new Float32Array(x.memory.buffer, data + first * 64, n * 16) };
+    });
+  }
+  // The Mesh of an instances() MESH group, valid until the next call.
+  instanceMesh(mesh) { return extractedMesh(x.main_instance_mesh(this.#context, mesh) >>> 0); }
+  // An object's dupli list (main-api.cc main_duplis, object_duplilist), the reference instances() is checked against:
+  // { ob (an object instanced), data (a mesh instanced), matrix (16 floats, Babylon's layout) }, a copy.
+  duplis(ob) {
+    const count = x.main_duplis(this.#context, ob), at = x.main_dupli_records() >>> 0, size = 18;
+    const ints = new Int32Array(x.memory.buffer, at, count * size);
+    return Array.from({ length: count }, (_, i) => ({ ob: ints[i * size] >>> 0, data: ints[i * size + 1] >>> 0,
+      matrix: Array.from(new Float32Array(x.memory.buffer, at + (i * size + 2) * 4, 16)) }));
+  }
+  // The point clouds the last instances() found (main-api.cc main_pointclouds): { instancer, pointcloud, material,
+  // matrix (16 floats, Babylon's layout), points (4 floats each: position in Blender's axes, radius) }, the arrays views
+  // into the module's memory valid until the next instances().
+  pointClouds() {
+    const count = x.main_pointclouds(), size = 21, at = x.main_pointcloud_draws() >>> 0, points = x.main_pointcloud_points() >>> 0;
+    const ints = new Int32Array(x.memory.buffer, at, count * size);
+    return Array.from({ length: count }, (_, i) => {
+      const [instancer, pointcloud, material] = ints.subarray(i * size, i * size + 3), [first, n] = ints.subarray(i * size + 19, i * size + 21);
+      return { instancer: instancer >>> 0, pointcloud: pointcloud >>> 0, material: material >>> 0, matrix: new Float32Array(x.memory.buffer, at + (i * size + 3) * 4, 16),
+        points: new Float32Array(x.memory.buffer, points + first * 16, n * 4) };
     });
   }
   // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.

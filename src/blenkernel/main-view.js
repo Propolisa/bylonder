@@ -8,7 +8,7 @@ import { syncBindings, LIGHT_STRUCTS } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
 import { createLight } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
-import { mesh_serialize } from './mesh/mesh.js';
+import { createMesh, mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { CurveObject } from './curve/curve.js';
 import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
@@ -16,6 +16,7 @@ import { asObject, setEvaluatedMatrix } from '../runtime/object-transform.js';
 import { ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL, ID_RECALC_ALL } from '../bmesh/bmesh-wasm.js';
 import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
+import { drawPointClouds } from '../draw/pointcloud.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
 import { armatureData } from './armature/armature.js';
@@ -78,6 +79,9 @@ export const blenderMatrix = (matrix) => swapped(matrix.m);
 
 //   state: the scene sync's records (main-sync.js): rna, world, selection, blender, ids, objects, materials, worlds,
 //   sceneRecords(), readCollections(), relations(entry), nodeOf, forget(node, entry), and `applying`, which mutes its hooks.
+const emptyMesh = () => createMesh({ vert_positions: new Float32Array(), edges: new Int32Array(), face_offsets: new Int32Array(1), corner_verts: new Int32Array(),
+  corner_edges: new Int32Array() });
+
 export function createMainView(state) {
   const { rna, world, selection, blender, ids, objects, materials, worlds } = state;
 
@@ -398,30 +402,37 @@ export function createMainView(state) {
     } finally {
       state.applying = was;
     }
+    if (updates.size) state.evaluated();
   }
   // What objects draw as instances (main-api.cc main_instances), as Blender's draw engines draw them, each group as
   // thin instances on a mesh of the view's own sharing its shape's geometry: an instanced object's at their world
-  // matrices in its material, a particle system's overlay shape drawn by Blender's shaders from each particle's point
-  // (overlay-particle.js). The instance data is copied once, from the module's memory
+  // matrices in its material; geometry nodes' instances of a mesh in that mesh's geometry and first material; a
+  // particle system's overlay shape drawn by Blender's shaders from each particle's point (overlay-particle.js); and the
+  // point clouds found with them, each point a sphere (pointcloud.js). The instance data is copied once, from the module's memory
   // into a thin instance buffer that grows by doubling and is otherwise reused. A render leaves out the overlay.
-  const instanced = new Map();
+  const instanced = new Map(), pointClouds = new Map();
   // Particle Edit Mode's overlay (overlay-particle.js particleEditOverlay), made on first use.
   let particleEdit = null;
   function drawInstances() {
     const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
-    for (const { instancer, ob, shape, overlay, drawSize, color, data } of blender.instances()) {
-      const key = `${instancer}:${ob || shape}:${color}:${drawSize}`;
-      const source = shape === 'OBJECT' ? byOb.get(ob) : particleShapeMesh(scene, shape);
-      if (!source?.geometry || (overlay && rendering)) continue;
+    // A mesh group's Mesh, and a point cloud, are new at each evaluation: each is kept as its instancer's nth.
+    const nth = new Map(), nthOf = (place) => nth.set(place, (nth.get(place) ?? -1) + 1).get(place);
+    for (const { instancer, ob, shape, overlay, drawSize, color, geometry, material, data } of blender.instances()) {
+      const geometric = shape === 'MESH';
+      const key = geometric ? `${instancer}:MESH:${nthOf(instancer + ':MESH')}` : `${instancer}:${ob || shape}:${color}:${drawSize}`;
+      const source = shape === 'OBJECT' ? byOb.get(ob) : geometric ? null : particleShapeMesh(scene, shape);
+      if ((!source?.geometry && !geometric) || (overlay && rendering)) continue;
       drawn.add(key);
       let carrier = instanced.get(key);
       if (!carrier) {
         instanced.set(key, carrier = Object.assign(new Mesh('__instances ' + key, scene), { isPickable: false, alwaysSelectAsActiveMesh: true, metadata: {} }));
-        if (shape !== 'OBJECT') carrier.material = particleShapeMaterial(scene, shape, color, drawSize);
+        if (!geometric && shape !== 'OBJECT') carrier.material = particleShapeMaterial(scene, shape, color, drawSize);
         if (carrier.material) carrier.onDisposeObservable.add(() => carrier.material.dispose());
       }
-      if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
+      if (geometric) mesh_batch_cache_apply(blender.instanceMesh(geometry), carrier);
+      else if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
       if (shape === 'OBJECT') carrier.material = source.material;
+      if (geometric) carrier.material = materialFor(material);
       let buffer = carrier.metadata.instances;
       if (!(buffer?.length >= data.length)) {
         buffer = carrier.metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(data.length))));
@@ -432,6 +443,9 @@ export function createMainView(state) {
       carrier.thinInstanceCount = data.length / 16;
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
+    const clouds = blender.pointClouds().map((record) => ({ ...record, key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
+    const shown = drawPointClouds(scene, clouds, pointClouds, materialFor);
+    for (const [key, mesh] of pointClouds) if (!shown.has(key)) { mesh.dispose(); pointClouds.delete(key); }
   }
   // The curves objects draw (Curves objects' evaluated curves, particle hair), as Blender's engines draw them (curves.js),
   // one data each for: the render engines' mesh in the object's slot material (Workbench's hair in Solid views, workbench.js), and the overlay's
@@ -495,9 +509,10 @@ export function createMainView(state) {
   // which object_mesh_eval gives.
   const sculpted = (entry, recalc) => entry.type === 'MESH' && entry.node.metadata?.wbMode === 'SCULPT' && !!(recalc & ID_RECALC_SHADING);
   const drawsGeometry = ({ type, owned }) => (type === 'MESH' ? owned : CURVE_TYPES.includes(type) || EVALUATED.includes(type));
-  // In Weight Paint Mode the weights are drawn over it (overlay-paint-weight.js), read with the mesh they are of.
+  // In Weight Paint Mode the weights are drawn over it (overlay-paint-weight.js), read with the mesh they are of. A mesh
+  // object whose evaluated geometry has no mesh (geometry nodes made points or curves of it) draws none.
   function drawGeometry(entry) {
-    const mesh = blender.evaluatedMesh(entry.ob);
+    const mesh = blender.evaluatedMesh(entry.ob) ?? (entry.type === 'MESH' ? emptyMesh() : null);
     if (!mesh) return;
     const mode = blender.mode(entry.ob);
     const weights = mode === 'WEIGHT_PAINT' ? blender.paintWeights(entry.ob, mesh.verts_num) : null;

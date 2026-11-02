@@ -14,6 +14,11 @@
 #include "ED_info.hh"
 #include "ED_particle.hh"
 #include "BKE_geometry_set.hh"
+#include "DNA_pointcloud_types.h"
+#include "BKE_pointcloud.hh"
+#include "BKE_geometry_set_instances.hh"
+#include "BKE_instances.hh"
+#include "BLI_math_matrix.hh"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
 #include "AS_asset_library.hh"
@@ -758,14 +763,18 @@ static void babylon_matrix(const float m[4][4], float *out)
  * geometry's instances (object_duplilist), grouped by instancer and object, each a world matrix in Babylon's axes; their
  * particle systems' overlay (overlay_particle.hh), a shape at each particle drawn by Blender's own shaders from its
  * point data as the draw cache gives it (particle_batch_cache_ensure_pos: position, value, rotation, in Blender's
- * axes). Hair is curves (main_curves). A group is { instancer, ob (the object instanced, or null),
- * shape (ParticleShape), overlay (the viewport's only), first, count, draw size, color (rgb: its material's) }; its
- * instances' 16 floats are contiguous in one buffer. Valid until the next call; returns the number of groups. */
-enum ParticleShape { SHAPE_OBJECT, SHAPE_DOT, SHAPE_CIRCLE, SHAPE_CROSS, SHAPE_AXIS };
+ * axes). Geometry instances of a mesh no object holds are grouped by their Mesh (data, drawn as main_instance_mesh
+ * gives it), at world matrices in its first material. Point clouds are main_pointclouds', hair is curves
+ * (main_curves). A group is { instancer, ob (the object instanced, or null), shape (InstanceShape), overlay
+ * (the viewport's only), first, count, draw size, color (rgb: its material's), data, material }; its instances' 16
+ * floats are contiguous in one buffer. Valid until the next call; returns the number of groups. */
+enum InstanceShape { SHAPE_OBJECT, SHAPE_DOT, SHAPE_CIRCLE, SHAPE_CROSS, SHAPE_AXIS, SHAPE_MESH };
 struct InstanceGroup {
   Object *instancer, *ob;
   int shape, overlay, first, count;
   float draw_size, color[3];
+  const ID *data;
+  const Material *material;
 };
 static Vector<InstanceGroup> instance_groups;
 static Vector<float> instance_matrices;
@@ -781,29 +790,137 @@ static void instance_group_add(InstanceGroup group)
     instance_groups.append(group);
   }
 }
+/* The first material of geometry an instance draws (its own slots, as the draw engines take a dupli's data's). */
+static const Material *data_material(const ID *data)
+{
+  const short *len = BKE_id_material_len_p(const_cast<ID *>(data));
+  return len && *len ? (*BKE_id_material_array_p(const_cast<ID *>(data)))[0] : nullptr;
+}
+
+/* The point clouds Main's objects draw (an evaluated geometry's, its instances' too), as Workbench and EEVEE draw
+ * point clouds: a sphere at each point (draw_pointcloud_lib.glsl). A record is { instancer, pointcloud, material (its
+ * first), object_to_world (Babylon's axes), first point, points }; each point is 4 floats, its position (Blender's
+ * axes, the point cloud's space) and radius. Valid until the next main_instances; main_pointclouds returns the count. */
+struct PointCloudDraw {
+  Object *instancer;
+  const PointCloud *pointcloud;
+  const Material *material;
+  float object_to_world[16];
+  int first, points;
+};
+static Vector<PointCloudDraw> pointcloud_draws;
+static Vector<float4> pointcloud_points;
+static void pointcloud_add(Object &ob, const PointCloud &pointcloud, const float4x4 &transform)
+{
+  PointCloudDraw draw = {&ob, &pointcloud, data_material(&pointcloud.id), {}, int(pointcloud_points.size()), int(pointcloud.totpoint)};
+  babylon_matrix(transform.ptr(), draw.object_to_world);
+  const Span<float3> positions = pointcloud.positions();
+  const VArray<float> radii = pointcloud.radius();
+  pointcloud_points.reserve(pointcloud_points.size() + positions.size());
+  for (const int i : positions.index_range()) {
+    pointcloud_points.append(float4(positions[i], radii[i]));
+  }
+  if (draw.points) {
+    pointcloud_draws.append(draw);
+  }
+}
+
+/* Where geometry nodes' instances are, read from the geometry's instances without a dupli per instance: by object, and
+ * by the mesh they instance, each a world matrix; the point clouds in the geometry and its instances. The object's own
+ * mesh is the view's (object_mesh_eval).
+ * blender-port: source/blender/blenkernel/intern/object_dupli.cc make_duplis_geometry_set_impl, its composition of the
+ * parent, instance and collection offset transforms (a static function, so not callable). */
+struct GeometryInstances {
+  Map<Object *, Vector<float4x4>> objects;
+  Map<const ID *, Vector<float4x4>> meshes;
+};
+static void geometry_instances(Object &ob, const Object &evaluated, const bke::GeometrySet &geometry, const float4x4 &transform,
+                               const bool is_instance, GeometryInstances &found)
+{
+  if (is_instance && geometry.has_mesh()) {
+    found.meshes.lookup_or_add_default(&geometry.get_mesh()->id).append(transform);
+  }
+  if (geometry.has_pointcloud()) {
+    pointcloud_add(ob, *geometry.get_pointcloud(), transform);
+  }
+  const bke::Instances *instances = geometry.get_instances();
+  if (!instances) {
+    return;
+  }
+  const Span<float4x4> transforms = instances->transforms();
+  const Span<int> handles = instances->reference_handles();
+  const Span<bke::InstanceReference> references = instances->references();
+  for (const int i : transforms.index_range()) {
+    const bke::InstanceReference &reference = references[handles[i]];
+    const float4x4 instance = transform * transforms[i];
+    switch (reference.type()) {
+      case bke::InstanceReference::Type::Object:
+        found.objects.lookup_or_add_default(DEG_get_original(&reference.object())).append(instance);
+        break;
+      case bke::InstanceReference::Type::Collection: {
+        Collection &collection = reference.collection();
+        const float4x4 collection_matrix = instance * math::from_location<float4x4>(-float3(collection.instance_offset));
+        FOREACH_COLLECTION_VISIBLE_OBJECT_RECURSIVE_BEGIN (&collection, object, DAG_EVAL_VIEWPORT) {
+          if (object != &evaluated) {
+            found.objects.lookup_or_add_default(DEG_get_original(object)).append(collection_matrix * object->object_to_world());
+          }
+        }
+        FOREACH_COLLECTION_VISIBLE_OBJECT_RECURSIVE_END;
+        break;
+      }
+      case bke::InstanceReference::Type::GeometrySet:
+        geometry_instances(ob, evaluated, reference.geometry_set(), instance, true, found);
+        break;
+      case bke::InstanceReference::Type::None:
+        break;
+    }
+  }
+}
+/* Groups of world matrices, contiguous in the one buffer: by the object instanced, or by the mesh. */
+template<typename Key> static void matrix_groups(Object &ob, const Map<Key, Vector<float4x4>> &groups, const int shape)
+{
+  for (const auto item : groups.items()) {
+    InstanceGroup group = {&ob, nullptr, shape, false, int(instance_matrices.size() / 16)};
+    if constexpr (std::is_same_v<Key, Object *>) {
+      group.ob = item.key;
+    }
+    else {
+      group.data = item.key;
+      group.material = data_material(item.key);
+    }
+    instance_matrices.reserve(instance_matrices.size() + item.value.size() * 16);
+    for (const float4x4 &matrix : item.value) {
+      babylon_matrix(matrix.ptr(), instance_matrix_add());
+    }
+    instance_group_add(group);
+  }
+}
+/* An evaluated geometry with instances or components besides the object's own by geometry_instances, as
+ * object_dupli.cc's generator choice prefers it; else classic instancing (vertices, faces, a collection) by
+ * object_duplilist. */
 static void object_instances(Depsgraph *depsgraph, Object &ob, Object *evaluated)
 {
   const bke::GeometrySet *geometry = evaluated->runtime->geometry_set_eval;
-  if (!(evaluated->transflag & OB_DUPLI) && !(geometry && geometry->has_instances())) {
+  if (geometry && bke::object_has_geometry_set_instances(*evaluated)) {
+    GeometryInstances found;
+    geometry_instances(ob, *evaluated, *geometry, evaluated->object_to_world(), false, found);
+    matrix_groups(ob, found.objects, SHAPE_OBJECT);
+    matrix_groups(ob, found.meshes, SHAPE_MESH);
+    return;
+  }
+  if (!(evaluated->transflag & OB_DUPLI)) {
     return;
   }
   DupliList duplis;
   object_duplilist(depsgraph, evaluated, nullptr, duplis);
-  Map<Object *, Vector<const DupliObject *>> grouped;
+  Map<Object *, Vector<float4x4>> objects;
   for (const DupliObject &dupli : duplis) {
-    /* Instances of geometry no object of Main's holds have nothing for the view to draw them with. */
     Object *instanced = DEG_get_original(dupli.ob);
     if (!dupli.no_draw && instanced && instanced != dupli.ob && instanced != &ob) {
-      grouped.lookup_or_add_default(instanced).append(&dupli);
+      objects.lookup_or_add_default(instanced).append(float4x4(dupli.mat));
     }
   }
-  for (const auto item : grouped.items()) {
-    InstanceGroup group = {&ob, item.key, SHAPE_OBJECT, false, int(instance_matrices.size() / 16)};
-    for (const DupliObject *dupli : item.value) {
-      babylon_matrix(dupli->mat, instance_matrix_add());
-    }
-    instance_group_add(group);
-  }
+  matrix_groups(ob, objects, SHAPE_OBJECT);
 }
 static void particle_shapes(Depsgraph *depsgraph, Object &ob, Object *evaluated)
 {
@@ -852,6 +969,8 @@ EXPORT(main_instances) int main_instances(BlenderMain *ctx)
 {
   instance_groups.clear();
   instance_matrices.clear();
+  pointcloud_draws.clear();
+  pointcloud_points.clear();
   Depsgraph *depsgraph = depsgraph_of(ctx);
   for (Object &ob : ctx->bmain->objects) {
     Object *evaluated = DEG_get_evaluated(depsgraph, &ob);
@@ -863,6 +982,51 @@ EXPORT(main_instances) int main_instances(BlenderMain *ctx)
   return instance_groups.size();
 }
 EXPORT(main_instance_groups) const InstanceGroup *main_instance_groups() { return instance_groups.data(); }
+/* An object's dupli list (object_duplilist), the reference main_instances is checked against: each dupli the object
+ * instanced (its original, data null) or the mesh it instances (ob null), at its world matrix in Babylon's axes, the
+ * object's own mesh left out. Valid until the next call; returns their count. */
+struct DupliRecord {
+  Object *ob;
+  const ID *data;
+  float matrix[16];
+};
+static Vector<DupliRecord> dupli_records;
+EXPORT(main_duplis) int main_duplis(BlenderMain *ctx, Object *ob)
+{
+  dupli_records.clear();
+  Depsgraph *depsgraph = depsgraph_of(ctx);
+  Object *evaluated = DEG_get_evaluated(depsgraph, ob);
+  const bke::GeometrySet *own = evaluated->runtime->geometry_set_eval;
+  const ID *own_mesh = own && own->has_mesh() ? &own->get_mesh()->id : nullptr;
+  DupliList duplis;
+  object_duplilist(depsgraph, evaluated, nullptr, duplis);
+  for (const DupliObject &dupli : duplis) {
+    Object *instanced = DEG_get_original(dupli.ob);
+    DupliRecord record = {};
+    if (instanced && instanced != dupli.ob && instanced != ob) {
+      record.ob = instanced;
+    }
+    else if (dupli.ob_data && dupli.ob_data != own_mesh && GS(dupli.ob_data->name) == ID_ME) {
+      record.data = dupli.ob_data;
+    }
+    else {
+      continue;
+    }
+    babylon_matrix(dupli.mat, record.matrix);
+    dupli_records.append(record);
+  }
+  return dupli_records.size();
+}
+EXPORT(main_dupli_records) const DupliRecord *main_dupli_records() { return dupli_records.data(); }
+EXPORT(main_pointclouds) int main_pointclouds() { return pointcloud_draws.size(); }
+EXPORT(main_pointcloud_draws) const PointCloudDraw *main_pointcloud_draws() { return pointcloud_draws.data(); }
+EXPORT(main_pointcloud_points) const float4 *main_pointcloud_points() { return pointcloud_points.data(); }
+/* The Mesh of a SHAPE_MESH group, read through the header until the next call. */
+EXPORT(main_instance_mesh) const ExtractionHeader *main_instance_mesh(BlenderMain *ctx, const Mesh *mesh)
+{
+  mesh_extraction(*mesh, ctx->extraction);
+  return &ctx->extraction;
+}
 
 /* The curves Main's objects draw as Blender's draw engines draw curves (draw_curves_lib.glsl): the curves of their
  * evaluated geometry (a Curves object's, geometry nodes' output; draw_cache_impl_curves.cc
