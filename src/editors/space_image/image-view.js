@@ -5,7 +5,7 @@
 import { Color4, Constants, Effect, FreeCamera, Mesh, MeshBuilder, Scene, ShaderMaterial, Vector3, VertexBuffer, VertexData } from '@babylonjs/core';
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { contextStruct, pointerOf } from '../../python/bpy_rna.js';
-import { imageTexture } from '../../imbuf/image-textures.js';
+import { imageTexture, imagePremultiplied } from '../../imbuf/image-textures.js';
 import { overlayMaterial } from '../../draw/overlay-edit-mesh.js';
 
 const { exports: x, withArrays } = blenderModule;
@@ -20,10 +20,11 @@ Effect.ShadersStore.blImageVertexShader = `precision highp float;
 attribute vec3 position; attribute vec2 uv; uniform mat4 worldViewProjection; varying vec2 vUV;
 void main() { vUV = uv; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
 Effect.ShadersStore.blImageFragmentShader = `precision highp float;
-varying vec2 vUV; uniform sampler2D image; uniform float checkerSize; uniform vec3 checkerA; uniform vec3 checkerB;
+varying vec2 vUV; uniform sampler2D image; uniform bool imagePremultiplied; uniform float checkerSize; uniform vec3 checkerA; uniform vec3 checkerB;
 vec3 srgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
 void main() {
   vec4 color = texture(image, vUV);
+  if (imagePremultiplied && !(color.a == 0.0 || color.a == 1.0)) color.rgb /= color.a;
   vec2 cell = floor(gl_FragCoord.xy / checkerSize);
   vec3 checker = mod(cell.x + cell.y, 2.0) < 1.0 ? checkerA : checkerB;
   gl_FragColor = vec4(mix(checker, srgb(max(color.rgb, 0.0)), clamp(color.a, 0.0, 1.0)), 1.0);
@@ -46,7 +47,7 @@ export function createImageView(main, engine, views) {
   const quad = MeshBuilder.CreatePlane('Image', { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
   quad.position.set(0.5, 0.5, 0.5);
   quad.isPickable = false;
-  const material = new ShaderMaterial('Image', scene, 'blImage', { attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'checkerSize', 'checkerA', 'checkerB'], samplers: ['image'] });
+  const material = new ShaderMaterial('Image', scene, 'blImage', { attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'imagePremultiplied', 'checkerSize', 'checkerA', 'checkerB'], samplers: ['image'] });
   material.backFaceCulling = false;
   material.setFloat('checkerSize', 8);
   material.setColor3('checkerA', { r: 0.15, g: 0.15, b: 0.15 });
@@ -117,6 +118,7 @@ export function createImageView(main, engine, views) {
       const texture = key !== shown && image ? imageTexture(image, scene, { extension: 'EXTEND' }) : null;
       if (texture) {
         material.setTexture('image', texture);
+        material.setInt('imagePremultiplied', imagePremultiplied(texture) ? 1 : 0);
         shown = key;
       }
       quad.setEnabled(!!image && shown === key);

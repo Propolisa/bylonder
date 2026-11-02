@@ -16,6 +16,7 @@ import { mesh_batch_cache_wire_indices } from './mesh-batch-cache.js';
 import { createFullscreenPass } from './fullscreen-pass.js';
 import { CURVES_VERTEX_GLSL, CURVES_UNIFORMS, CURVES_SAMPLERS, curvesDefines, bindCurves } from './curves.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
+import { imagePremultiplied } from '../imbuf/image-textures.js';
 
 // BKE_studiolight_default (studiolight.cc): direction, diffuse color with wrap (smooth), specular color.
 const STUDIO_LIGHT_DEFAULT = [
@@ -179,8 +180,15 @@ vec3 linear_to_srgb(vec3 c) {
 // attribute (Vertex Paint), as workbench_engine.cc forces them in those modes; both are linear here.
 #if defined(TEXTURE_COLOR)
 uniform sampler2D colorTexture;
+uniform bool imagePremultiplied;
 varying vec2 vUV;
-#define BASE_COLOR texture(colorTexture, vUV).rgb
+// blender-port: workbench_image_lib.glsl workbench_image_color, straight alpha from a premultiplied texture.
+vec3 image_color() {
+  vec4 color = texture(colorTexture, vUV);
+  if (imagePremultiplied && !(color.a == 0.0 || color.a == 1.0)) color.rgb /= color.a;
+  return color.rgb;
+}
+#define BASE_COLOR image_color()
 #elif defined(ATTRIBUTE_COLOR)
 varying vec4 vColor;
 #define BASE_COLOR vColor.rgb
@@ -293,7 +301,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     const material = new ShaderMaterial(name, scene, { vertexSource: curves ? CURVES_VERTEX : VERTEX, fragmentSource }, curves
       ? { attributes: ['position'], uniforms: ['view', 'viewProjection', 'projection', 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...CURVES_UNIFORMS, ...uniforms],
         samplers: CURVES_SAMPLERS, defines: ['#define CURVES', ...curvesDefines(curves.metadata.curves.faces)] }
-      : { attributes: ['position', 'normal', ...(colorType ? [colorType] : [])], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms],
+      : { attributes: ['position', 'normal', ...(colorType ? [colorType] : [])], uniforms: [...UNIFORMS, 'baseColor', 'roughness', 'metallic', 'lightDirection', 'lightDiffuseWrap', 'lightSpecular', ...uniforms, ...(colorType === 'uv' ? ['imagePremultiplied'] : [])],
         samplers: [...SAMPLERS, ...(colorType === 'uv' ? ['colorTexture'] : [])], defines: { uv: ['#define TEXTURE_COLOR'], color: ['#define ATTRIBUTE_COLOR'] }[colorType] ?? [] });
     material.backFaceCulling = false;
     material.setArray4('lightDirection', STUDIO_LIGHT_DEFAULT.flatMap(([d]) => [...d, 0]));
@@ -306,7 +314,11 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
       effect.setFloat('roughness', roughness);
       effect.setFloat('metallic', metallic);
       if (curves) bindCurves(effect, mesh);
-      if (colorType === 'uv') effect.setTexture('colorTexture', paintTexture(mesh) ?? missing());
+      if (colorType === 'uv') {
+        const texture = paintTexture(mesh) ?? missing();
+        effect.setTexture('colorTexture', texture);
+        effect.setBool('imagePremultiplied', imagePremultiplied(texture));
+      }
     });
     return material;
   };

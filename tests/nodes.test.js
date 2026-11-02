@@ -2,7 +2,7 @@
 // Blender's socket conversions, built, saved and loaded.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
-import { shaderNodeClasses } from '../src/nodes/blender/shader-nodes.js';
+import { shaderNodeClasses, SHADER_NODES } from '../src/nodes/blender/shader-nodes.js';
 import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js';
 import { availability, declaration } from '../src/nodes/blender/declarations.js';
 import { glslFunction } from '../src/nodes/blender/glsl.js';
@@ -86,5 +86,19 @@ const balanceAgain = reloaded.attachedBlocks.find((b) => b.getClassName() === 'C
 assert.ok(balanceAgain, 'a Blender compositor node loads from Babylon serialization');
 assert.equal(reloaded.outputBlock.texture.connectedPoint.ownerBlock, balanceAgain);
 assert.match(balanceAgain._fragment().code, /bl_node_composite_color_balance\(texture2D\(textureSampler, vUV\), bl_Fac/);
+
+// Image Texture's Color alpha as node_shader_gpu_tex_image gives it from Blender's texture: a float buffer's texture
+// holds premultiplied alpha (straight in Blender's for a straight image), a byte buffer's straight.
+const imageAlpha = (is_float, alpha_mode, alphaLinked) => SHADER_NODES.ShaderNodeTexImage({ interpolation: 'Linear' }, null, {
+  connected: () => false, linked: (name) => name === 'Color' || (name === 'Alpha' && alphaLinked),
+  image: () => ({ is_float, alpha_mode, colorspace_settings: { is_data: false } }),
+}).slice(1).map(([name]) => name);
+assert.deepEqual(imageAlpha(false, 'STRAIGHT', false), ['color_alpha_premultiply']);
+assert.deepEqual(imageAlpha(false, 'STRAIGHT', true), ['color_alpha_clear']);
+assert.deepEqual(imageAlpha(true, 'STRAIGHT', false), [], 'a premultiplied texture is the premultiplied color');
+assert.deepEqual(imageAlpha(true, 'STRAIGHT', true), ['color_alpha_unpremultiply', 'color_alpha_clear']);
+assert.deepEqual(imageAlpha(true, 'PREMUL', false), ['color_alpha_clear']);
+assert.deepEqual(imageAlpha(true, 'PREMUL', true), ['color_alpha_unpremultiply']);
+assert.deepEqual(imageAlpha(true, 'CHANNEL_PACKED', true), ['color_alpha_clear']);
 
 console.log('nodes: ok');
