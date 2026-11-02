@@ -54,7 +54,11 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
   const frame = () => page.frames().findLast((f) => f.url().includes("viewport.html") && !f.isDetached());
   const splash = page.locator("dialog.bl-splash");
   if (link) await page.waitForURL((url) => !url.hash);
-  else if (example) await splash.getByRole("button", { name: example }).click();
+  else if (example) {
+    const button = splash.getByRole("button", { name: example, exact: true });
+    if (!(await button.count())) await splash.getByRole("button", { name: "Examples…" }).click();
+    await button.click();
+  }
   else {
     await splash.waitFor();
     await page.keyboard.press("Escape");
