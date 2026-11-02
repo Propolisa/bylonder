@@ -69,4 +69,8 @@ assert.equal([...expected.values()].flat().length, 9 * 8 + 8, "the dupli list ha
 assert.deepEqual(new Set(drawn.keys()), new Set(expected.keys()), 'the same instanced meshes');
 for (const [key, matrices] of expected) assert.deepEqual([...drawn.get(key)].sort(), [...matrices].sort(), `instances of ${key} where Blender places them`);
 assert.equal(blender.evaluatedMesh(ob).faces_num, 8 * 20, "the realized spheres are the object's own mesh");
+// A group's data stays readable after a call that grows the module's memory (the view draws each group's mesh first).
+const [first] = blender.instances(), { memory } = (await import('../src/bmesh/bmesh-wasm.js')).blenderModule.exports, before = Array.from(first.data);
+memory.grow(1);
+assert.deepEqual(Array.from(first.data), before, "a group's data is read anew after the module's memory grew");
 console.log("Instances: an instance of instances, Object Info's object and a realized branch drawn where Blender's dupli list places them");
