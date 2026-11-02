@@ -15,25 +15,27 @@ const idOf = (struct) => pointerOf(struct)[2];
 const same = (a, b) => !!a && pointerOf(a)[0] === pointerOf(b)[0] && pointerOf(a)[2] === pointerOf(b)[2];
 const SPACE_NODE = 16;
 
-// A Node Editor area of the module's showing the tree, where Blender's node operators and menus run.
+// A Node Editor area of the module's showing the tree, where Blender's node operators and menus run, and its space.
 function nodeArea(rnaTree) {
   const area = new AnimArea(blenderMain(), SPACE_NODE);
   area.layout(RGN_TYPE_WINDOW, 0, 0, 800, 600);
   const space = pointerStruct(structFind('SpaceNodeEditor'), 0, blenderModule.exports.anim_area_space(area.pointer) >>> 0);
   space.tree_type = rnaTree.bl_idname;
   space.node_tree = rnaTree;
-  return area;
+  return { area, space };
 }
 
-export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
+// The tree shown is the area's edit tree (SpaceNode.edit_tree): the group its path entered (node.group_edit), else
+// rootTree itself.
+export function createMainNodeTree(rootTree, { changed = () => {} } = {}) {
   const blocks = new Map(), points = new Map();
   const point = (socket, block, output) => {
     const id = idOf(socket);
     if (!same(points.get(id)?.socket, socket)) {
       points.set(id, {
         socket, ownerBlock: block, output, name: socket.identifier,
-        get connectedPoint() { const link = !output && [...rnaTree.links].find((l) => idOf(l.to_socket) === id); return link ? pointOf(link.from_socket, link.from_node, true) : null; },
-        get endpoints() { return output ? [...rnaTree.links].filter((l) => idOf(l.from_socket) === id).map((l) => pointOf(l.to_socket, l.to_node, false)) : []; },
+        get connectedPoint() { const link = !output && [...edited().links].find((l) => idOf(l.to_socket) === id); return link ? pointOf(link.from_socket, link.from_node, true) : null; },
+        get endpoints() { return output ? [...edited().links].filter((l) => idOf(l.from_socket) === id).map((l) => pointOf(l.to_socket, l.to_node, false)) : []; },
         disconnectFrom(to) { unlinkBetween(this, to); },
       });
     }
@@ -53,16 +55,20 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
   };
   const pointOf = (socket, node, output) => point(socket, blockOf(node), output);
   const unlinkBetween = (from, to) => {
-    for (const link of [...rnaTree.links]) if (idOf(link.from_socket) === idOf(from.socket) && idOf(link.to_socket) === idOf(to.socket)) rnaTree.links.remove(link);
+    for (const link of [...edited().links]) if (idOf(link.from_socket) === idOf(from.socket) && idOf(link.to_socket) === idOf(to.socket)) edited().links.remove(link);
   };
-  const nodesOf = () => [...rnaTree.nodes];
-  let area;
-  const inEditor = (fn) => (area ??= nodeArea(rnaTree)).inContext(RGN_TYPE_WINDOW, fn);
+  let editor;
+  const editorArea = () => (editor ??= nodeArea(rootTree));
+  const inEditor = (fn) => editorArea().area.inContext(RGN_TYPE_WINDOW, fn);
+  const edited = () => (editor ? editor.space.edit_tree : null) ?? rootTree;
+  const nodesOf = () => [...edited().nodes];
   const isFrame = (node) => node.bl_idname === 'NodeFrame';
   // Blender's node operator on the nodes and frames, selected as its selection; returns the nodes selected after it.
   const operate = (idname, list, props) => {
     const ids = new Set(list.map((b) => b.uniqueId ?? idOf(b.rna)));
     for (const n of nodesOf()) n.select = ids.has(idOf(n));
+    // The operators that act on one node (node.group_edit) take the active one, the last selected.
+    if (list.length) edited().nodes.active = list.at(-1).rna;
     inEditor(() => blenderMain().run(idname, props));
     changed(true);
     return nodesOf().filter((n) => n.select && !isFrame(n)).map(blockOf);
@@ -78,7 +84,7 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
     } : null;
     return { point: p, id: s.identifier, type: s.type, shape: s.display_shape, label: s.label || s.name, linked: s.is_linked, value };
   };
-  const shown = (s) => s.enabled && !s.hide && s.identifier !== '__extend__';
+  const shown = (s) => s.enabled && !s.hide;
   // The node's properties its draw_buttons lays out, in its order, edited through RNA: a checkbox with its text, a menu
   // (whose text is its item) without.
   const buttons = (node) => {
@@ -87,7 +93,7 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
       if (prop && (prop.type === 'ENUM' || prop.type === 'BOOLEAN') && !drawn.has(prop.identifier)) drawn.set(prop.identifier, { prop, label: prop.type === 'BOOLEAN' ? item.text ?? '' : '' });
       item.children?.forEach(visit);
     };
-    visit(inEditor((C) => nodeButtonsTree(C, idOf(rnaTree), idOf(node))) ?? {});
+    visit(inEditor((C) => nodeButtonsTree(C, idOf(edited()), idOf(node))) ?? {});
     return [...drawn.values()].map(({ prop, label }) => ({
       key: prop.identifier, label, type: prop.type, items: prop.type === 'ENUM' ? [...prop.enum_items].map((i) => [i.identifier, i.name, i.description]) : undefined,
       get: () => node[prop.identifier], set: (v) => { node[prop.identifier] = v; changed(true); },
@@ -109,15 +115,15 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
   }
 
   const tree = {
-    get area() { inEditor(() => {}); return area; },
+    get area() { return editorArea().area; },
     operate,
-    kind: 'geometry', graph: rnaTree, catalog: { categories: {} }, blenderClasses: {},
+    kind: 'geometry', get graph() { return edited(); }, catalog: { categories: {} }, blenderClasses: {},
     // Every node type Blender has: its code runs them all.
     runs: () => true,
     blocks: () => nodesOf().filter((n) => !isFrame(n)).map(blockOf),
     byId: (id) => tree.blocks().find((b) => b.uniqueId === id),
     node,
-    links: () => [...rnaTree.links].filter((l) => !l.is_hidden).map((l) => ({ from: pointOf(l.from_socket, l.from_node, true), to: pointOf(l.to_socket, l.to_node, false) })),
+    links: () => [...edited().links].filter((l) => !l.is_hidden).map((l) => ({ from: pointOf(l.from_socket, l.from_node, true), to: pointOf(l.to_socket, l.to_node, false) })),
     nodes: () => tree.blocks().map(node),
     // Frames with the nodes they hold, sized by the editor to them.
     frames: () => nodesOf().filter(isFrame).map((frame) => {
@@ -128,17 +134,17 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
     setLocation(block, x, y) { block.rna.location_absolute = [x, Y * y]; },
     moved: () => changed(false),
     canLink: (from, to) => from.output && !to.output && from.ownerBlock !== to.ownerBlock,
-    // node.link: Blender replaces the link a single input had.
+    // node.link: Blender replaces the link a single input had, and a link to a Group Input's or Output's empty socket
+    // adds the group input or output it stands for (handle_dynamic_sockets).
     link(from, to) {
-      if (!tree.canLink(from, to)) return false;
-      rnaTree.links.new(from.socket, to.socket);
+      if (!tree.canLink(from, to) || !edited().links.new(from.socket, to.socket, true, true)) return false;
       changed(true);
       return true;
     },
-    unlink(to) { for (const link of [...rnaTree.links]) if (idOf(link.to_socket) === idOf(to.socket)) rnaTree.links.remove(link); changed(true); },
+    unlink(to) { for (const link of [...edited().links]) if (idOf(link.to_socket) === idOf(to.socket)) edited().links.remove(link); changed(true); },
     // node.add_node: a node of the type, with the settings its Add menu entry gives.
     add(name, x, y, settings = {}) {
-      const n = rnaTree.nodes.new(name);
+      const n = edited().nodes.new(name);
       n.location_absolute = [x, Y * y];
       for (const [key, value] of Object.entries(settings)) {
         const input = /^inputs\["(.+)"\]\.default_value$/.exec(key);
@@ -155,11 +161,11 @@ export function createMainNodeTree(rnaTree, { changed = () => {} } = {}) {
     },
     // node.add_reroute: a reroute on the link, at (x, y).
     insertReroute(from, to, x, y) {
-      const reroute = rnaTree.nodes.new('NodeReroute');
+      const reroute = edited().nodes.new('NodeReroute');
       reroute.location_absolute = [x, Y * y];
       unlinkBetween(from, to);
-      rnaTree.links.new(from.socket, reroute.inputs[0]);
-      rnaTree.links.new(reroute.outputs[0], to.socket);
+      edited().links.new(from.socket, reroute.inputs[0]);
+      edited().links.new(reroute.outputs[0], to.socket);
       changed(true);
       return blockOf(reroute);
     },

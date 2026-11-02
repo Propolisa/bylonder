@@ -36,7 +36,7 @@ tests:
   - tests/node-editor.test.js
 limits:
   - Bylonder's own Geometry Nodes modifier keeps its Babylon graph and opens in Babylon's Node Geometry Editor, not here.
-  - The Geometry Nodes workspace has no Spreadsheet yet; its 3D Viewport takes the Spreadsheet's place.
+  - The sidebar's Group tab (interface panels) is not shown yet; inputs are added from Group Input's empty socket.
 ---
 # Geometry Node Editor
 

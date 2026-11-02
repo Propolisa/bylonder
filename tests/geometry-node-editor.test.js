@@ -88,3 +88,24 @@ assert(inArea({ nodeEditor: editor }, () => keys({ type: 'X', value: 'PRESS' }))
 assert(!tree.nodes().some((n) => n.blender === 'GeometryNodeTransform'));
 assert.equal(points().length, 0, 'with the link gone, the modifier outputs no curves');
 assert(commits > 0, 'each edit is an undo step');
+
+// Ctrl G makes a node group of the selection, Tab enters the group node and Ctrl Tab leaves it, by Blender's
+// operators in the editor's area: the editor shows the area's edit tree, and the group evaluates as the nodes did.
+const lifted = tree.add('GeometryNodeTransform', output.x - 200, output.y, {});
+assert(tree.link(from, tree.node(lifted).inputs.find((s) => s.id === 'Geometry').point));
+assert(tree.link(tree.node(lifted).outputs[0].point, geometryIn.point));
+tree.node(lifted).inputs.find((s) => s.id === 'Translation').value.set([0, 0, 1]);
+const groupsBefore = new Set(byType('GeometryNodeGroup').map((n) => n.id));
+editor.state.selected = new Set([lifted.uniqueId]);
+assert(inArea({ nodeEditor: editor }, () => keys({ type: 'G', value: 'PRESS', ctrl: true })), 'Ctrl G runs node.group_make');
+if (tree.graph.name !== group.name) assert(inArea({ nodeEditor: editor }, () => keys({ type: 'TAB', value: 'PRESS', ctrl: true })), 'Ctrl Tab leaves the group');
+assert.equal(tree.graph.name, group.name);
+const groupNode = byType('GeometryNodeGroup').find((n) => !groupsBefore.has(n.id));
+assert(groupNode && !byType('GeometryNodeTransform').length, 'the Transform node is in a group node');
+assert(points().every((p, i) => Math.abs(p[2] - before[i][2] - 1) < 1e-5), 'the group evaluates as its nodes did');
+editor.state.selected = new Set([groupNode.id]);
+assert(inArea({ nodeEditor: editor }, () => keys({ type: 'TAB', value: 'PRESS' })), 'Tab runs node.group_edit');
+assert.equal(tree.graph.name, groupNode.block.rna.node_tree.name, 'the editor shows the group');
+assert.equal(byType('GeometryNodeTransform').length, 1);
+assert(inArea({ nodeEditor: editor }, () => keys({ type: 'TAB', value: 'PRESS', ctrl: true })));
+assert.equal(tree.graph.name, group.name, 'Ctrl Tab goes back to the modifier\'s group');
