@@ -34,7 +34,7 @@ import "@babylonjs/core/Debug/debugLayer";
 
 import { createEditor } from "./editors/object/editor";
 import { createHistory } from "./editors/undo/storage";
-import { projectState } from "./runtime/project-state.js";
+import { projectState, projectStateInWorker } from "./runtime/project-state.js";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./editors/render/host.js";
 import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
@@ -304,16 +304,42 @@ window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreference
   modules: { bpyRna, shaderNodes } };
 let remember = input.remember,
   lastOverride = "";
-const currentOverrides = () => ({ ...projectState(world), stores: sdk.values(), ...documentState.capture({ save: true }) });
-saveOverrides = () => {
+const withStores = (scene) => ({ ...scene, stores: sdk.values(), ...documentState.capture({ save: true }) });
+const currentOverrides = () => withStores(projectState(world));
+// A state saved: the scene's revision follows it, and with Remember Scene Edits the workspace's project.
+const deliver = (state) => {
+  sceneChanged(state);
   if (!remember || creator?.pending || animation.evaluating || animation.playing) return;
-  const state = currentOverrides();
   const serialized = JSON.stringify(state);
   if (serialized !== lastOverride) {
     lastOverride = serialized;
     send("overrides", state);
   }
 };
+// A change is saved off the interaction's path: a second after the last one, its .blend gzipped by a worker, only the
+// latest state kept. Hiding or leaving the page saves what is pending at once.
+let saveTimer = 0, saving = false, pending = false, saved = 0;
+const saveLatest = async () => {
+  if (saving || !pending) return;
+  [saving, pending] = [true, false];
+  const generation = ++saved, stores = withStores({}), scene = await projectStateInWorker(world);
+  saving = false;
+  if (generation === saved) deliver({ ...scene, ...stores });
+  saveLatest();
+};
+saveOverrides = () => {
+  pending = true;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveLatest, 1000);
+};
+const flushSave = () => {
+  if (!pending && !saving) return;
+  clearTimeout(saveTimer);
+  [pending, saved] = [false, saved + 1];
+  deliver(currentOverrides());
+};
+document.addEventListener("visibilitychange", () => document.visibilityState === "hidden" && flushSave());
+window.addEventListener("pagehide", flushSave);
 const storage = {
   get enabled() {
     return remember;
@@ -380,8 +406,7 @@ window.addEventListener("message", (e) => {
 let ui;
 let sceneChanged = () => {};
 history = createHistory(world.objects, () => {
-  storage.save();
-  sceneChanged();
+  saveOverrides();
   world.particles.refresh();
   registerObjects(animation, objects);
   world.modifiers.refresh();
@@ -477,6 +502,7 @@ const tools = createView3DTools({
 // Blender's Main, which owns the scene and its undo, drawn by Babylon (blenkernel/main-sync.js, main-view.js). Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
+world.mainSync.onEvaluated(saveOverrides);
 // The video edit is kept with the action, the scene data saved whatever Remember Scene Edits says, and in Main's scene
 // as a custom property, so a .blend carries it too.
 {
@@ -686,7 +712,7 @@ const updateRevision = async (id, state) => {
   sceneAudio.changed();
 };
 for (const record of sceneRecords()) if (record.id !== activeSceneId) updateRevision(record.id, sceneState(record));
-sceneChanged = () => updateRevision(activeSceneId, sceneState({ builder: input.scene?.builder, overrides: currentOverrides(), animation: animation.serialize() }));
+sceneChanged = (overrides = currentOverrides()) => updateRevision(activeSceneId, sceneState({ builder: input.scene?.builder, overrides, animation: animation.serialize() }));
 sceneChanged();
 const sequencerFormat = () => ({ ...outputSize(world.renderSettings.state.render), fps: frameRate(animation.time.state) });
 const sequencerAdapter = createSequencerAdapter({
@@ -862,7 +888,7 @@ const keyLayers = () => {
   return [blenderAreas.areaKeys, gizmoKeys, world.editMode.keymap, blenderKeymaps, bylonderKeys];
 };
 
-let last = 0;
+let last = 0, lastRest = "";
 // Once per animation frame, before views decide whether to render.
 const perFrame = engine.onBeginFrameObservable.add(() => {
   animation.tick(performance.now());
@@ -875,7 +901,12 @@ const perFrame = engine.onBeginFrameObservable.add(() => {
   if (performance.now() - last > 500) {
     world.outliner.refresh();
     nodeEditor.refresh();
-    saveOverrides();
+    // What changes outside undo steps and Main: the stores and the document (a view's camera).
+    const rest = JSON.stringify(withStores({}));
+    if (rest !== lastRest) {
+      lastRest = rest;
+      saveOverrides();
+    }
     last = performance.now();
   }
 }, undefined, true);
@@ -885,7 +916,7 @@ const renderScene = () => (engine.activeView?.camera?.getScene() ?? scene).rende
 engine.runRenderLoop(renderScene);
 
 function dispose() {
-  storage.save();
+  flushSave();
   animEditors.forEach((animEditor) => animEditor.dispose());
   world.texts.flush();
   scriptingEditors.forEach((area) => area.dispose());
