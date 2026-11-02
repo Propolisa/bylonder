@@ -98,12 +98,12 @@ export const label = (text, { iconName, iconValue, className = '', align = 'left
 }, [icon(toolIconName(iconValue)), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
 // As widget_draw_text_icon draws a button: its icon at its left, its text centered in the rest, or after the icon
-// where it is aligned left (`textLeft`, BUT_TEXT_LEFT).
-export function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value, textLeft = false }) {
+// where it is aligned left (`textLeft`, BUT_TEXT_LEFT) or right (`textRight`, a tree view item's hint).
+export function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value, textLeft = false, textRight = false }) {
   const shown = text && !iconOnly;
   return h('button', {
     type: 'button', title, disabled, 'aria-pressed': pressed, 'aria-label': text || title, 'data-value': value,
-    class: [W, `bl-${kind} flex h-unit min-w-0 items-center gap-1 rounded-md px-1.5 text-xs`, textLeft || (shown && iconName) ? 'justify-start' : 'justify-center',
+    class: [W, `bl-${kind} flex h-unit min-w-0 items-center gap-1 rounded-md px-1.5 text-xs`, textLeft || (shown && iconName) ? 'justify-start' : textRight ? 'justify-end' : 'justify-center',
       emboss ? '' : 'bl-flat', pressed && 'is-pressed', inactive && 'opacity-50', iconOnly && 'bl-icon-only px-0', className],
     onClick,
   }, [icon(iconName), shown ? h('span', { class: ['truncate', iconName && !textLeft && 'flex-1 text-center'] }, text) : null]);

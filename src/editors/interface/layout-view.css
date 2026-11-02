@@ -65,9 +65,12 @@
 .bl-row>.bl-fit{flex:0 0 auto}
 .bl-icon-only{flex:0 0 var(--bl-row)!important;width:var(--bl-row)}
 .bl-emboss-none .bl-widget{background:none;box-shadow:none}
-/* An overlap layout (a list row's): its items in one cell, the later on top; a flat text over the row lets clicks reach it. */
+/* An overlap layout (a list row's, a tree view item's): its items in one cell, the later on top; only their widgets take
+   clicks, and a flat text or label over the row lets them reach it. */
 .bl-overlap>*{grid-area:1/1}
 .bl-overlap>:first-child .bl-icon-only{flex:1 1 0!important;width:auto}
+.bl-overlap>:not(:first-child){pointer-events:none}
+.bl-overlap>:not(:first-child) :where(button,input,select,[role=button],[role=spinbutton]){pointer-events:auto}
 .bl-overlap .bl-text.bl-flat,.bl-overlap .bl-label{pointer-events:none}
 /* Aligned layouts: widgets touch, sharing their outline, with square corners where they meet. */
 .bl-align-col>*+*{margin-top:-1px}

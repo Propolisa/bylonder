@@ -41,6 +41,7 @@ code:
   - src/draw/pointcloud.js
   - tools/blender-port/wasm/main-api.cc
 tests:
+  - tests/spreadsheet-wasm.test.js
   - tests/geometry-node-editor.test.js
   - tests/instances-wasm.test.js
 limits:

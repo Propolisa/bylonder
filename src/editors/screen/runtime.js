@@ -20,10 +20,10 @@ const IMAGE_AREAS=['image','viewport','objects','properties'];
 export const IMAGE_MODES={shading:'VIEW','uv-editing':'UV','texture-paint':'PAINT'};
 // The Modeling and Sculpting screens: the 3D Viewport, and the Outliner over the Properties editor as in Layout.
 const MODELING_AREAS=['viewport','objects','properties'];
-// The Geometry Nodes screen: the 3D Viewport over the Geometry Node Editor over the Timeline, and the Outliner over the
-// Properties editor (Blender's Spreadsheet left of the 3D Viewport is not there yet, so the 3D Viewport takes its row).
-const GEOMETRY_NODES_SPLITS={root:LAYOUT_SPLITS.root,main:share(476,557),lower:share(480,77),inspector:LAYOUT_SPLITS.inspector};
-const GEOMETRY_NODES_AREAS=['viewport','nodes','timeline','objects','properties'];
+// The Geometry Nodes screen: the Spreadsheet beside the 3D Viewport, over the Geometry Node Editor over the Timeline,
+// and the Outliner over the Properties editor.
+const GEOMETRY_NODES_SPLITS={root:LAYOUT_SPLITS.root,main:share(476,557),top:share(657,920),lower:share(480,77),inspector:LAYOUT_SPLITS.inspector};
+const GEOMETRY_NODES_AREAS=['spreadsheet','viewport','nodes','timeline','objects','properties'];
 // The 2D Animation template's screens (bl_app_templates_system/2D_Animation/startup.blend): 2D Animation's 3D Viewport
 // over the Dope Sheet beside the Outliner over the Properties editor, and 2D Full Canvas's 3D Viewport over the Dope Sheet.
 const ANIMATION_2D_SPLITS={root:share(1583,330),main:share(856,172),inspector:share(179,849)};
@@ -46,13 +46,14 @@ export function mountRuntimeLayout(){
   const graph=document.createElement('section');graph.id='graph-section';
   const drivers=document.createElement('section');drivers.id='drivers-section';
   const nodes=document.createElement('section');nodes.id='nodes-section';
+  const spreadsheet=document.createElement('section');spreadsheet.id='spreadsheet-section';
   const sequencer=document.createElement('section');sequencer.id='sequencer-section';
   const files=document.createElement('section');files.id='files-section';
   const [text,pythonConsole,info,image,preferences]=['text','console','info','image','preferences'].map(id=>Object.assign(document.createElement('section'),{id:id+'-section'}));
   // Blender's SpaceImage is the Image Editor and the UV Editor (its editor type menu's two entries, Area.ui_type).
   const imageModes=[['Image Editor','image','VIEW'],['UV Editor','uv','UV']].map(([label,icon,mode])=>({label,icon,run:()=>image.dispatchEvent(new CustomEvent('image-mode',{detail:mode}))}));
   const variants=Object.entries(treeTypes).map(([id,t])=>({label:t.label,icon:t.icon,run:()=>nodes.dispatchEvent(new CustomEvent('node-tree',{detail:id}))}));
-  const items=[{id:'viewport',blenderHeader:true,title:'3D Viewport',icon:'view3d',element:viewport,overlap:true},{id:'objects',blenderHeader:true,title:'Outliner',icon:'outliner',element:panel},{id:'properties',blenderHeader:true,title:'Properties',icon:'properties',element:properties},{id:'timeline',blenderHeader:true,title:'Timeline',icon:'time',element:timeline},{id:'dopesheet',blenderHeader:true,title:'Dope Sheet',icon:'action',element:dopesheet},{id:'graph',blenderHeader:true,title:'Graph Editor',icon:'graph',element:graph},{id:'drivers',blenderHeader:true,title:'Drivers',icon:'driver',element:drivers},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants},{id:'sequencer',title:'Video Sequencer',icon:'sequence',element:sequencer},{id:'files',title:'File Browser',icon:'filebrowser',element:files},{id:'text',blenderHeader:true,title:'Text Editor',icon:'text',element:text},{id:'image',blenderHeader:true,title:'Image Editor',icon:'image',element:image,variants:imageModes},{id:'console',title:'Python Console',icon:'console',element:pythonConsole},{id:'info',title:'Info',icon:'info',element:info},{id:'preferences',blenderHeader:true,title:'Preferences',icon:'preferences',element:preferences}];
+  const items=[{id:'viewport',blenderHeader:true,title:'3D Viewport',icon:'view3d',element:viewport,overlap:true},{id:'objects',blenderHeader:true,title:'Outliner',icon:'outliner',element:panel},{id:'properties',blenderHeader:true,title:'Properties',icon:'properties',element:properties},{id:'timeline',blenderHeader:true,title:'Timeline',icon:'time',element:timeline},{id:'dopesheet',blenderHeader:true,title:'Dope Sheet',icon:'action',element:dopesheet},{id:'graph',blenderHeader:true,title:'Graph Editor',icon:'graph',element:graph},{id:'drivers',blenderHeader:true,title:'Drivers',icon:'driver',element:drivers},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants},{id:'spreadsheet',blenderHeader:true,title:'Spreadsheet',icon:'spreadsheet',element:spreadsheet},{id:'sequencer',title:'Video Sequencer',icon:'sequence',element:sequencer},{id:'files',title:'File Browser',icon:'filebrowser',element:files},{id:'text',blenderHeader:true,title:'Text Editor',icon:'text',element:text},{id:'image',blenderHeader:true,title:'Image Editor',icon:'image',element:image,variants:imageModes},{id:'console',title:'Python Console',icon:'console',element:pythonConsole},{id:'info',title:'Info',icon:'info',element:info},{id:'preferences',blenderHeader:true,title:'Preferences',icon:'preferences',element:preferences}];
   const scripting={
     tree:{id:'root',children:[{id:'left',children:[0,{id:'console',children:[1,2]}]},{id:'rest',children:[3,{id:'side',children:[4,5]}]}]},
     defaults:()=>({order:areaOrder(items,SCRIPTING_AREAS),hidden:hiddenBut(items,SCRIPTING_AREAS),sizes:structuredClone(SCRIPTING_SPLITS),horizontal:{root:false,left:true,console:true,rest:false,side:true}}),
@@ -71,8 +72,8 @@ export function mountRuntimeLayout(){
     defaults:()=>({order:areaOrder(items,MODELING_AREAS),hidden:hiddenBut(items,MODELING_AREAS),sizes:{root:LAYOUT_SPLITS.root,inspector:LAYOUT_SPLITS.inspector},horizontal:{root:false,inspector:true}}),
   };
   const geometryNodes={
-    tree:{id:'root',children:[{id:'main',children:[0,{id:'lower',children:[1,2]}]},{id:'inspector',children:[3,4]}]},
-    defaults:()=>({order:areaOrder(items,GEOMETRY_NODES_AREAS),hidden:hiddenBut(items,GEOMETRY_NODES_AREAS),sizes:structuredClone(GEOMETRY_NODES_SPLITS),horizontal:{root:false,main:true,lower:true,inspector:true}}),
+    tree:{id:'root',children:[{id:'main',children:[{id:'top',children:[0,1]},{id:'lower',children:[2,3]}]},{id:'inspector',children:[4,5]}]},
+    defaults:()=>({order:areaOrder(items,GEOMETRY_NODES_AREAS),hidden:hiddenBut(items,GEOMETRY_NODES_AREAS),sizes:structuredClone(GEOMETRY_NODES_SPLITS),horizontal:{root:false,main:true,top:false,lower:true,inspector:true}}),
   };
   const animation2d={
     tree:{id:'root',children:[{id:'main',children:[0,1]},{id:'inspector',children:[2,3]}]},
@@ -82,6 +83,6 @@ export function mountRuntimeLayout(){
     tree:{id:'main',children:[0,1]},
     defaults:()=>({order:areaOrder(items,FULL_CANVAS_AREAS),hidden:hiddenBut(items,FULL_CANVAS_AREAS),sizes:structuredClone(FULL_CANVAS_SPLITS),horizontal:{main:true}}),
   };
-  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','sequencer','files','text','image','console','info','preferences']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','sequencer','files','text','image','console','info','preferences'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas}});
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['dopesheet','graph','drivers','nodes','spreadsheet','sequencer','files','text','image','console','info','preferences']:['objects','properties','timeline','dopesheet','graph','drivers','nodes','spreadsheet','sequencer','files','text','image','console','info','preferences'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}}),screens:{scripting,shading,modeling,'geometry-nodes':geometryNodes,'uv-editing':imageScreen,'texture-paint':imageScreen,'2d-animation':animation2d,'2d-full-canvas':fullCanvas}});
   return dock;
 }

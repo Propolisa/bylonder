@@ -154,6 +154,7 @@
    "tools/blender-port/wasm/main-api.cc"
   ],
   "tests": [
+   "tests/spreadsheet-wasm.test.js",
    "tests/geometry-node-editor.test.js",
    "tests/instances-wasm.test.js"
   ],
@@ -789,6 +790,47 @@
   "page": "docs/features/shader-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=lava",
   "example_title": "Lava Sphere"
+ },
+ {
+  "id": "spreadsheet",
+  "title": "Spreadsheet",
+  "summary": "Blender's Spreadsheet editor, listing the active object's evaluated or original geometry by component and domain, with its attributes as columns.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/spreadsheet.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/attributes_reference.html"
+  ],
+  "example": "geometry-nodes",
+  "thumbnail": "spreadsheet/thumbnail.png",
+  "media": [
+   "spreadsheet/open.gif",
+   "spreadsheet/domains.gif",
+   "spreadsheet/original.gif"
+  ],
+  "ui": [
+   "SPREADSHEET",
+   "SPREADSHEET_HT_header",
+   "SPREADSHEET_MT_view"
+  ],
+  "operators": [
+   "spreadsheet.toggle_pin"
+  ],
+  "code": [
+   "src/editors/space_spreadsheet/spreadsheet.js",
+   "src/editors/screen/blender-area.js",
+   "tools/blender-port/wasm/region-draw.cc"
+  ],
+  "tests": [
+   "tests/spreadsheet-wasm.test.js"
+  ],
+  "limits": [
+   "The sidebar (N) with its row filters is not shown yet, and columns are not resized or reordered by dragging.",
+   "Selection filtering of rows in Edit Mode follows Blender's code but is not checked against Blender yet."
+  ],
+  "page": "docs/features/spreadsheet.md",
+  "open": "https://propolisa.github.io/bylonder/#example=geometry-nodes",
+  "example_title": "Geometry Nodes Meadow"
  },
  {
   "id": "texture-paint",

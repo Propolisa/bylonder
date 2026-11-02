@@ -173,9 +173,9 @@ function widgetNode(b, env) {
     case 'PREVIEW_TILE': return previewTile(b, shown || (b.icon === 'NONE' ? env.tileLabel : ''), style);
     case 'ROW': case 'LISTROW': case 'VIEW_ITEM': case 'TAB': {
       const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
-      const vnode = withStyle(button({ text: shown, iconName, kind: b.type === 'LISTROW' ? 'list-row' : 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1', textLeft: b.text_left,
+      const vnode = withStyle(button({ text: shown, iconName, kind: b.type === 'LISTROW' ? 'list-row' : 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1', textLeft: b.text_left, textRight: b.type === 'VIEW_ITEM',
         value: item?.identifier, onClick: () => press(b, ui) }));
-      if (b.type === 'VIEW_ITEM' && b.h > 1) return gridTile(b, ui);
+      if (b.type === 'VIEW_ITEM' && b.label !== undefined) return gridTile(b, ui);
       if (b.type === 'VIEW_ITEM') return cloneVNode(vnode, { onDblclick: () => ui.inContext((C) => buttonRename(C, b)) && ui.refresh() });
       return b.type === 'TAB' ? cloneVNode(vnode, { role: 'tab', 'aria-selected': String(!!b.selected), 'aria-label': shown || item?.name || b.tip }) : vnode;
     }
