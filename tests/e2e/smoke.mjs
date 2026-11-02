@@ -4,7 +4,7 @@
 // usage: npm run test:e2e [-- name filter]
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
 import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
@@ -13,6 +13,11 @@ import { displacedSphere, lavaMaterial } from "./lava.mjs";
 const renderStatus = ".render-result [data-status]";
 const rendered = () => app.until((b, selector) => /^(Finished|Render failed)/.test(document.querySelector(selector).textContent), renderStatus, 60000);
 let app;
+// The mean color difference (of 255) each Shader Node Gallery sphere may have from EEVEE's, row by row: the textures
+// and converters through an Emission (their edges and fine detail differ by anti-aliasing: Brick's thin mortar most),
+// then the shaders lit by Babylon (a sun without EEVEE's angle makes sharp highlights hotter; Glass refracts no world
+// in Render Image; Metal is a Principled BSDF Babylon's PBR material draws).
+const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 12, 65, 15, 8, 12, 15, 55, 60, 35, 65];
 
 const checks = {
   // The new project's scene (sphere and ground), as a first visit shows it.
@@ -46,6 +51,43 @@ const checks = {
     assert.ok(opaque > 0.99, `opaque fraction ${opaque}`);
     assert.ok(colors > 8, `${colors} distinct colors`);
   },
+
+  // examples/shader-gallery: Render Image of Blender's common shader nodes against EEVEE's render of the same file
+  // (tests/fixtures/shader-gallery-eevee.png, made by shader_gallery.py), as each sphere's mean color difference.
+  "Shader Node Gallery renders as EEVEE does": { open: { link: "shader-gallery", node: "Checker" }, async run() {
+    await menu("TOPBAR_MT_render", "Render Image");
+    await rendered();
+    const reference = `data:image/png;base64,${readFileSync(new URL("../fixtures/shader-gallery-eevee.png", import.meta.url)).toString("base64")}`;
+    const differences = await app.frame().evaluate(async (reference) => {
+      const pixels = (source) => {
+        const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 320 }), context = canvas.getContext("2d");
+        context.drawImage(source, 0, 0, 256, 320);
+        return context.getImageData(0, 0, 256, 320).data;
+      };
+      const image = new Image();
+      image.src = reference;
+      await image.decode();
+      const [eevee, bylonder] = [pixels(image), pixels(document.querySelector(".render-result canvas"))];
+      // Inside each sphere's disk (radius 0.45 of a 64 pixel tile, less its edge).
+      return Array.from({ length: 20 }, (_, tile) => {
+        let sum = 0, count = 0;
+        for (let y = -24; y <= 24; y++) for (let x = -24; x <= 24; x++) {
+          if (x * x + y * y > 24 * 24) continue;
+          const i = ((32 + (tile >> 2) * 64 + y) * 256 + 32 + (tile & 3) * 64 + x) * 4;
+          for (let k = 0; k < 3; k++) sum += Math.abs(eevee[i + k] - bylonder[i + k]);
+          count += 3;
+        }
+        return Math.round((sum / count) * 10) / 10;
+      });
+    }, reference);
+    console.log(`      mean difference per sphere (of 255): ${differences.join(", ")}`);
+    // For tools/blender-reference/shader-gallery-diff.py.
+    const render = `${tmpdir()}/shader-gallery-bylonder.png`;
+    writeFileSync(render, Buffer.from((await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"))).split(",")[1], "base64"));
+    console.log(`      render: ${render}`);
+    const over = differences.map((d, i) => d > SHADER_GALLERY_LIMITS[i] && `sphere ${i + 1}: ${d}`).filter(Boolean);
+    assert.deepEqual(over, [], "spheres that differ from EEVEE");
+  } },
 
   async "Render Animation renders the frame range"() {
     await app.locator('[role="spinbutton"][aria-label="End"]').click();

@@ -32,6 +32,7 @@ export const examples = [
   { id: "geometry-nodes", title: "Geometry Nodes Meadow" },
   { id: "rigged-character", title: "Rigged Character" },
   { id: "lava", title: "Lava Sphere" },
+  { id: "shader-gallery", title: "Shader Node Gallery" },
   { id: "python", title: "Python Scripts and Add-ons" },
   { id: "texture-paint", title: "Texture Paint" },
   { id: "grease-pencil", title: "Bouncing Ball" },
