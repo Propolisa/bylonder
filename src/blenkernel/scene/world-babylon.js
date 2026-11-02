@@ -24,7 +24,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   const authoredTexture = scene.environmentTexture;
   const authoredSkyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
-  let skybox = null, skyboxKey = '', rendered = false, useAuthored = false;
+  let skybox = null, skyboxKey = '', rendered = false, sceneLinear = false, useAuthored = false, backgroundColor = new Color3();
   const probe = worldProbe(scene);
   const texture = key => {
     if (!key) return null;
@@ -45,6 +45,11 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     authoredSkyboxes.forEach(mesh => mesh.setEnabled(useAuthored && rendered));
     skybox?.setEnabled(rendered);
     scene.fogEnabled = rendered;
+    // A view not rendered draws its own background.
+    if (rendered) showBackground();
+  };
+  const showBackground = () => {
+    scene.clearColor = Color4.FromColor3(rendered && sceneLinear ? backgroundColor : backgroundColor.toGammaSpace().clampToRef(0, 1, new Color3()));
   };
   // The scene's own sky meshes show for its own world: lit by its environment, or without one (a shader sky).
   const setSkybox = (key, tex, background, authoredWorld) => {
@@ -96,7 +101,8 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       if (lights) probe.set(color);
       scene.environmentTexture = env ?? (lights ? probe.texture : null);
       scene.environmentIntensity = env ? background.strength : 1;
-      scene.clearColor = Color4.FromColor3(color.toGammaSpace().clampToRef(0, 1, new Color3()));
+      backgroundColor = color;
+      showBackground();
       setSkybox(background?.image, env && world.visibility.camera ? env : null, background, world?.home === 'BABYLON' && world.visibility.camera);
       if (preview) {
         Object.assign(preview, { env: scene.environmentTexture, intensity: scene.environmentIntensity });
@@ -107,7 +113,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       gate();
     },
     // Rendered shading for the view about to render. Cheap; called per view.
-    setRendered(value) { if (rendered !== value) { rendered = value; gate(); } },
+    setRendered(value, linear = false) { if (rendered !== value || sceneLinear !== linear) { rendered = value; sceneLinear = linear; gate(); } },
     dispose() {
       skybox?.dispose(false, true);
       if (scene.environmentTexture === probe.texture) scene.environmentTexture = null;

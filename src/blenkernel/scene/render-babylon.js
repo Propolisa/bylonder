@@ -54,7 +54,8 @@ export function createRenderEngine(scene) {
     const e = settings.eevee, r = settings.render, effects = {};
     // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
     const name = id => `__${id}:${camera.uniqueId}`;
-    if (samples > 1) { effects.pipeline = new DefaultRenderingPipeline(name('renderSamples'), false, scene, [camera]); effects.pipeline.imageProcessingEnabled = false; }
+    // Drawn in half float, displayed by its image processing: the view transform, after blending, as Blender's.
+    effects.pipeline = new DefaultRenderingPipeline(name('display'), true, scene, [camera]);
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
     if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true)), { useViewportInCombineStage: false });
@@ -74,16 +75,17 @@ export function createRenderEngine(scene) {
       const samples = Math.min(e.taaSamples, scene.getEngine().getCaps().maxMSAASamples || 1);
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
       for (const camera of [...attached.keys()]) if (!wanted.has(camera)) drop(camera);
-      const key = [samples > 1, e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
+      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
       for (const camera of wanted) {
         if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings, samples) }); }
         const effects = attached.get(camera).effects;
-        if (effects.pipeline) effects.pipeline.samples = samples;
+        effects.pipeline.samples = samples;
         if (effects.ssao) effects.ssao.radius = e.fastGiDistance;
         if (effects.ssr) Object.assign(effects.ssr, { thickness: e.screenTraceThickness, step: Math.max(1, Math.round(1 + (1 - e.screenTraceQuality) * 7)) });
         if (effects.motion) effects.motion.motionStrength = r.motionBlurShutter * 2;
       }
     },
+    setSceneLinear(value) { scene.imageProcessingConfiguration.applyByPostProcess = value; },
     dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
   };
 }
