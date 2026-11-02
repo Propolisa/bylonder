@@ -51,13 +51,14 @@ const image = blendData().images.get('Paint');
 
 // The image's texture, before the stroke: then the stroke's changed regions only reach the GPU.
 const engine = new NullEngine(), scene = new Scene(engine);
-const texture = imageTexture(image, scene, { interpolation: 'Linear', extension: 'REPEAT' });
-assert.ok(texture, 'the image has a Babylon texture');
 const uploads = [];
 // A NullEngine has no GL: the uploads are only recorded.
-engine.updateTextureData = (...args) => { uploads.push(['region', args[4], args[5]]); };
-engine.updateRawTexture = () => { uploads.push(['whole']); };
+// A whole upload makes its mipmaps (updateTextureData's generateMipMaps); a region's are made once strokes stop.
+engine.updateTextureData = (...args) => { uploads.push([args[8] ? 'whole' : 'region', args[4], args[5]]); };
 engine.generateMipmaps = () => {};
+const texture = imageTexture(image, scene, { interpolation: 'Linear', extension: 'REPEAT' });
+assert.ok(texture, 'the image has a Babylon texture');
+assert.deepEqual(uploads.splice(0), [['whole', ...image.size]], 'the texture is filled whole');
 
 const window = new Window(main);
 const { winx, winy } = fixture.view;

@@ -3,6 +3,7 @@
 import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture, VertexBuffer } from '@babylonjs/core';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
+import { straightImageData } from '../imbuf/image-textures.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -197,6 +198,7 @@ async function serializeMapped(world, { geometry, live, mapped }) {
   const content = exportedContent(scene);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
+  const straight = new Map(scene.textures.filter((t) => t instanceof Texture).map((t) => [t, straightImageData(t)]).filter(([, data]) => data));
   // Sampled before the export's flags and metadata are set, which channels read to know they are available.
   const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   const restores = [
@@ -204,6 +206,8 @@ async function serializeMapped(world, { geometry, live, mapped }) {
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
     geometry ? () => {} : withoutGeometry(scene.getGeometries()),
     setFor(scene.textures.filter((t) => t instanceof Texture && !t.isRenderTarget), '_forceSerialize', (t) => t._forceSerialize || !portable(t.url ?? '')),
+    // A float image's texture is written from Blender's straight pixels (Texture.serialize's data URL buffer), not read back.
+    setFor([...straight.keys()], '_buffer', (t) => straight.get(t)),
     setFor(all, 'metadata', authoredMetadata),
     setFor([scene], 'metadata', () => null),
     uniqueIds(content.nodes),

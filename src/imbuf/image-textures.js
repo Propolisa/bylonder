@@ -3,6 +3,7 @@
 // changed regions only), with its mipmaps made again once it stops changing. Each user samples it through a Texture of
 // its own wrapping (an Image Texture node's extension), all sharing the one GPU texture.
 import { Constants, Texture } from '@babylonjs/core';
+import { GenerateBase64StringFromPixelData } from '@babylonjs/core/Misc/copyTools.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, pointerOf } from '../python/bpy_rna.js';
 
@@ -47,16 +48,32 @@ function upload(engine, image, pointer) {
   if (!buffer) return false;
   // The texture has every change so far: the next collect gives only those after it (a new user's first is all of it).
   x.image_partial_update_collect(pointer, image.user, 0, 0);
-  const { width, height, float, srgb } = buffer, internal = image.internal;
-  if (internal && internal.width === width && internal.height === height && internal.type === (float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE) && internal._useSRGBBuffer === srgb) {
-    engine.updateRawTexture(internal, buffer.pixels, Constants.TEXTUREFORMAT_RGBA, false, null, internal.type, srgb);
-    engine.generateMipmaps?.(internal);
-    return true;
+  const { width, height, float, srgb } = buffer, internal = image.internal, type = float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE;
+  if (!(internal && internal.width === width && internal.height === height && internal.type === type && internal._useSRGBBuffer === srgb)) {
+    // Made empty, then filled by a call that keeps no view of the module's memory: a lost context's restore makes it
+    // empty again, and the scene's redrawAll fills it.
+    const created = engine.createRawTexture(null, width, height, Constants.TEXTUREFORMAT_RGBA, true, false, Texture.TRILINEAR_SAMPLINGMODE, null, type, 0, srgb);
+    if (internal) internal._swapAndDie(created);
+    else image.internal = created;
   }
-  const created = engine.createRawTexture(buffer.pixels, width, height, Constants.TEXTUREFORMAT_RGBA, true, false,
-    Texture.TRILINEAR_SAMPLINGMODE, null, float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE, 0, srgb);
-  if (internal) { internal._swapAndDie(created); } else image.internal = created;
+  engine.updateTextureData(image.internal, buffer.pixels, 0, 0, width, height, 0, 0, true);
   return true;
+}
+
+// A float image's texture as an export writes it, straight as Babylon's own materials sample it: Blender's pixels
+// (Image.pixels, straight) as the PNG data URL Babylon's read-back would encode (GenerateBase64StringFromPixelData);
+// null for any other texture, whose read-back is what it holds.
+export function straightImageData(texture) {
+  const internal = texture.getInternalTexture();
+  if (!premultiplied(internal)) return null;
+  const uid = [...images].find(([, image]) => image.internal === internal)?.[0];
+  const image = uid !== undefined && [...blendData().images].find((candidate) => candidate.session_uid === uid);
+  return image ? GenerateBase64StringFromPixelData(Float32Array.from(image.pixels), texture.getSize(), internal.invertY) : null;
+}
+
+// Every image's texture filled again from Blender's buffer (after a lost context).
+export function uploadImageTextures(engine) {
+  for (const image of images.values()) upload(engine, image, image.pointer);
 }
 
 // Blender's changes to an image since its texture last followed them: all of it, or its changed regions.
@@ -157,7 +174,8 @@ export function sample(texture, anisotropy, mode) {
 
 // Whether an image's texture holds premultiplied alpha (BKE_image_has_gpu_texture_premultiplied_alpha): a float buffer's,
 // uploaded as Blender keeps it.
-export const imagePremultiplied = (texture) => texture?.getInternalTexture()?.type === Constants.TEXTURETYPE_FLOAT;
+const premultiplied = (internal) => internal?.type === Constants.TEXTURETYPE_FLOAT;
+export const imagePremultiplied = (texture) => premultiplied(texture?.getInternalTexture());
 
 // What redraws the views when an image's texture changed.
 export function onImageTexturesChanged(fn) { woken = fn; }

@@ -1,6 +1,7 @@
 // Mesh to Babylon geometry (draw_cache_impl_mesh.cc, mesh_extractors). Babylon vertices are Blender face corners;
 // triangles come from corner_tris. Mesh data is in Blender's axes (Z up, right-handed); this is the one place it
-// meets Babylon's (Y up, left-handed): (x, y, z) becomes (x, z, y). Swapping axes also flips handedness, so
+// meets Babylon's (Y up, left-handed): (x, y, z) becomes (x, z, y), here or in the module for Blender's draw buffers
+// (draw-mesh.cc). Swapping axes also flips handedness, so
 // Blender's counter-clockwise faces stay front facing in Babylon with their winding unchanged.
 import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
@@ -10,6 +11,7 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh.js';
 import { mesh_batch_cache_vertex_buffers } from './mesh-batch-buffers.js';
+import { DRAW_LINES } from '../bmesh/bmesh-wasm.js';
 
 // VertexData's field of each vertex buffer kind it can hold.
 const BUFFERS = { [VertexBuffer.PositionKind]: 'positions', [VertexBuffer.NormalKind]: 'normals', [VertexBuffer.UVKind]: 'uvs', [VertexBuffer.ColorKind]: 'colors', [VertexBuffer.TangentKind]: 'tangents' };
@@ -104,24 +106,12 @@ export function mesh_batch_cache_edge_detection(babylonMesh) {
   return Uint32Array.from(out);
 }
 
-// Faces become the mesh's geometry; loose edges a line child that picks as its owner. With `topology` false only
-// positions changed since the last apply, so the buffers are updated in place.
-export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = {}) {
-  if (!topology && !mesh.loose_edges().length) {
-    const data = mesh_batch_cache_vertex_data(mesh);
-    babylonMesh.updateVerticesData(VertexBuffer.PositionKind, data.positions);
-    babylonMesh.updateVerticesData(VertexBuffer.NormalKind, data.normals);
-    babylonMesh.updateIndices(data.indices);
-    setBounds(mesh, babylonMesh);
-    return;
-  }
+// Faces become the mesh's geometry, from Blender's draw buffers where the Mesh has them (an evaluated Mesh of Main's,
+// extracted in the module), else built here; loose edges a line child that picks as its owner.
+export function mesh_batch_cache_apply(mesh, babylonMesh) {
   babylonMesh.makeGeometryUnique?.();
-  const data = mesh_batch_cache_vertex_data(mesh);
-  // A buffer the mesh no longer has (a UV map an evaluation left out) goes, so every buffer has its vertex count.
-  for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) if (BUFFERS[kind] && !data[BUFFERS[kind]]) babylonMesh.removeVerticesData(kind);
-  data.applyToMesh(babylonMesh, true);
-  faceEdges.set(babylonMesh, face_edge_corners(mesh));
-  setSubMeshes(babylonMesh, data.groups);
+  const buffers = mesh.drawBuffers?.(DRAW_LINES);
+  setSubMeshes(babylonMesh, buffers ? drawn(babylonMesh, buffers) : built(babylonMesh, mesh));
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
   if (loose.length) {
@@ -133,4 +123,35 @@ export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = 
     wire.metadata = { drawOwner: babylonMesh };
   }
   setBounds(mesh, babylonMesh);
+}
+
+// The geometry of a Mesh's draw buffers built here (mesh-batch-buffers.js); its material groups.
+function built(babylonMesh, mesh) {
+  const data = mesh_batch_cache_vertex_data(mesh);
+  removeOthers(babylonMesh, (kind) => data[BUFFERS[kind]]);
+  data.applyToMesh(babylonMesh, true);
+  faceEdges.set(babylonMesh, face_edge_corners(mesh));
+  return data.groups;
+}
+
+// The geometry of Blender's draw buffers (bmesh-wasm.js drawBuffers), copied out of the module's memory; its material
+// groups, by the triangles of each slot.
+function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tris_by_material: counts, free }) {
+  const kinds = [VertexBuffer.PositionKind, VertexBuffer.NormalKind, ...(uvs ? [VertexBuffer.UVKind] : [])];
+  removeOthers(babylonMesh, (kind) => kinds.includes(kind));
+  babylonMesh.setVerticesData(VertexBuffer.PositionKind, positions.slice(), false);
+  babylonMesh.setVerticesBuffer(new VertexBuffer(babylonMesh.getEngine(), normals.slice(), VertexBuffer.NormalKind,
+    { size: 3, stride: 4, type: VertexBuffer.SHORT, normalized: true }));
+  if (uvs) babylonMesh.setVerticesData(VertexBuffer.UVKind, uvs.slice(), false);
+  babylonMesh.setIndices(tris.slice(), positions.length / 3);
+  faceEdges.set(babylonMesh, lines.slice());
+  free();
+  if (counts.length < 2) return null;
+  let start = 0;
+  return counts.flatMap((tris, slot) => (tris ? [{ slot, start: (start += tris * 3) - tris * 3, count: tris * 3 }] : []));
+}
+
+// A buffer the new geometry does not have goes (a UV map an evaluation left out), so every buffer has its vertex count.
+function removeOthers(babylonMesh, kept) {
+  for (const kind of babylonMesh.getVerticesDataKinds?.() ?? []) if (BUFFERS[kind] && !kept(kind)) babylonMesh.removeVerticesData(kind);
 }

@@ -75,7 +75,10 @@ globalThis.Worker = class {
 };
 
 const geometry = (mesh) => ['position', 'normal'].map((kind) => Array.from(mesh.getVerticesData(kind))).concat([Array.from(mesh.getIndices())]);
-const same = (a, b) => a.length === b.length && a.every((array, i) => array.length === b[i].length && array.every((v, j) => Math.abs(v - b[i][j]) < 1e-5));
+// Normals within a 16-bit snorm step: the app draws Blender's draw buffers' normals (draw-mesh.cc), the export's
+// polyfill its own float ones.
+const TOLERANCE = [1e-5, 1 / 32767, 0];
+const same = (a, b) => a.length === b.length && a.every((array, i) => array.length === b[i].length && array.every((v, j) => Math.abs(v - b[i][j]) <= TOLERANCE[i] + 1e-6));
 
 const built = await (await import(pathToFileURL(join(dir, 'scene.mjs')).href)).createScene(new NullEngine(), null);
 const live = built.metadata.liveModifiers;

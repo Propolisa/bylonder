@@ -28,6 +28,7 @@ import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
 import { provideGreasePencilRender } from '../draw/grease-pencil-render.js';
 import * as runtimes from '../runtimes/runtimes.js';
+import { uploadImageTextures } from '../imbuf/image-textures.js';
 
 export const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d, ID_WO = 0x4f57;
 export const CURVE_TYPES = ['CURVE', 'FONT'];
@@ -545,8 +546,14 @@ export function createMainView(state) {
     for (const [material, record] of materials) drawShading(record, material, 'Material');
     for (const [id, record] of worlds) if (world.worlds.byId(id)) drawShading(record, world.worlds.byId(id), 'World');
   }
+  // What is drawn from the module's memory, drawn again from Blender: after a lost GPU context, whose restore keeps no
+  // view of that memory.
+  function redrawAll() {
+    uploadImageTextures(world.scene.getEngine());
+  }
+
   return {
-    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated,
+    pull, view, adopt, adoptScene, drawData, drawShading, drawEvaluated, redrawAll,
     keepMesh: (entry) => { keepMesh(entry, blender); return true; },
   };
 }

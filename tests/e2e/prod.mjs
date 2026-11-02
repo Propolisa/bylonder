@@ -157,6 +157,52 @@ try {
     });
   }
 
+  // A lost WebGL context, once the module's memory has grown: its restore draws the scene as before, and Blender's
+  // images' textures (a byte and a float buffer) hold their pixels again, uploaded anew from Blender.
+  await step("a lost WebGL context is restored from Blender", async () => {
+    const texturePixels = () => app.bylonder(async (b) => {
+      const read = async (name) => Array.from(await b.modules.imageTextures.imageTexture(b.modules.bpyRna.blendData().images.get(name), b.world.scene).readPixels());
+      return [await read("Byte"), await read("Float")];
+    });
+    await app.bylonder((b) => {
+      for (const [name, float] of [["Byte", false], ["Float", true]]) b.modules.bpyRna.blendData().images.new(name, 16, 16, true, float).generated_type = "UV_GRID";
+    });
+    const canvas = frame.locator(".viewport-canvas").first(), pixels = await texturePixels();
+    await app.bylonder((b) => { b.runOperator("mesh.primitive_grid_add", { x_subdivisions: 500, y_subdivisions: 500 }); b.runOperator("object.delete", {}); });
+    await app.settled();
+    const shot = await canvas.screenshot();
+    await app.bylonder((b) => new Promise((restored) => {
+      const engine = b.world.scene.getEngine(), lose = engine._gl.getExtension("WEBGL_lose_context");
+      engine.onContextRestoredObservable.addOnce(() => restored());
+      engine.onContextLostObservable.addOnce(() => setTimeout(() => lose.restoreContext(), 0));
+      lose.loseContext();
+    }));
+    await app.settled();
+    assert.deepEqual(await texturePixels(), pixels, "the images' textures hold Blender's pixels");
+    assert.ok((await canvas.screenshot()).equals(shot), "the 3D View draws as before");
+    noErrors("restoring the WebGL context");
+  });
+
+  // An export writes a float image's texture with straight alpha, Blender's pixels, though it is drawn premultiplied.
+  await step("an export writes float images straight", async () => {
+    const { written, straight, serialized } = await app.bylonder(async (b) => {
+      const { blendData } = b.modules.bpyRna, { imageTexture, straightImageData } = b.modules.imageTextures;
+      const image = blendData().images.new("Half", 4, 4, true, true);
+      image.generated_color = [1, 0.5, 0.25, 0.5];
+      const texture = imageTexture(image, b.world.scene), data = straightImageData(texture);
+      const png = Object.assign(new Image(), { src: data }), canvas = Object.assign(document.createElement("canvas"), { width: 4, height: 4 });
+      await png.decode();
+      canvas.getContext("2d").drawImage(png, 0, 0);
+      const buffer = texture._buffer;
+      texture._buffer = data;
+      const serialized = texture.serialize().base64String === data;
+      texture._buffer = buffer;
+      return { written: Array.from(canvas.getContext("2d").getImageData(0, 0, 1, 1).data), straight: Array.from(image.pixels).slice(0, 4), serialized };
+    });
+    assert.ok(serialized, "Texture.serialize writes the data");
+    assert.ok(written.every((v, i) => Math.abs(v - straight[i] * 255) <= 2), `Blender's straight pixel ${straight}, written ${written}`);
+  });
+
   // Examples made in Blender open with every object of Main in the scene sync, once (an armature left out of it was
   // invisible to every tool), and without a page error.
   for (const example of ["Rigged Character", "Hair Dynamics"]) {

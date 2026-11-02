@@ -660,6 +660,15 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   return &ctx->extraction;
 }
 
+/* The draw buffers of the mesh object_mesh_eval last gave (draw-mesh.cc), with the index buffers `what` asks for
+ * (DrawRequest), valid until the next call or draw_buffers_free. */
+EXPORT(object_draw_buffers) const DrawBuffers *object_draw_buffers(BlenderMain *ctx, Object *ob, int what)
+{
+  Object *evaluated = DEG_get_evaluated(depsgraph_of(ctx), ob);
+  return extracted_mesh ? mesh_draw_buffers(*ctx->scene, *evaluated, *const_cast<Mesh *>(extracted_mesh), what) : nullptr;
+}
+EXPORT(draw_buffers_free) void draw_buffers_free_export() { draw_buffers_free(); }
+
 /* What Weight Paint Mode shows of the vertex groups (draw_cache_extract.hh DRW_MeshWeightState). */
 struct WeightState {
   int defgroup_active, defgroup_len;

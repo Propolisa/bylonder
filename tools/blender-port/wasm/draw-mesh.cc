@@ -1,0 +1,172 @@
+/* A mesh's draw buffers as Blender's draw cache extracts them (draw_cache_extract_mesh.cc
+ * mesh_buffer_cache_create_requested and its mesh_extractors, compiled as they are): one vertex per face corner with
+ * its position, normal and UV, the triangles sorted by material, the face edges and the edges with their adjacent
+ * corners. They fill Blender's own dummy GPU backend, whose buffers keep their data in module memory, where JS uploads
+ * each from (src/draw/mesh-batch-cache.js) before freeing them. */
+#include "BKE_mesh_wrapper.hh"
+#include "BKE_object.hh"
+#include "BKE_subdiv_modifier.hh"
+#include "BLI_task.h"
+#include "DNA_object_types.h"
+#include "DNA_scene_types.h"
+#include "draw_cache_extract.hh"
+#include "dummy/dummy_vertex_buffer.hh"
+#include "gpu_backend.hh"
+#include "gpu_capabilities_private.hh"
+#include "extraction.hh"
+
+namespace blender::gpu {
+
+/* port-override: Blender's dummy backend makes no index buffers; this one keeps its indices where JS reads them. */
+class ModuleIndexBuf : public IndexBuf {
+ public:
+  const void *indices() const { return data_; }
+  uint32_t base() const { return index_base_; }
+  void upload_data() override {}
+  void bind_as_ssbo(uint /*binding*/) override {}
+  void read(uint32_t * /*data*/) const override {}
+  void update_sub(uint /*start*/, uint /*len*/, const void * /*data*/) override {}
+
+ private:
+  void strip_restart_indices() override {}
+};
+
+/* port-override: the GPU module's backend: vertex buffers are Blender's dummy backend's (GPU_BACKEND_NONE, as in
+ * background mode), which keep their data in module memory; it makes nothing else, as the module draws nothing. */
+class ModuleBackend : public GPUBackend {
+ public:
+  VertBuf *vertbuf_alloc() override { return new DummyVertexBuffer; }
+  IndexBuf *indexbuf_alloc() override { return new ModuleIndexBuf; }
+  void init_resources() override {}
+  void delete_resources() override {}
+  void compute_dispatch(int /*x*/, int /*y*/, int /*z*/) override {}
+  void compute_dispatch_indirect(StorageBuf * /*indirect_buf*/) override {}
+  Context *context_alloc(GHOST_IWindow * /*window*/, GHOST_IContext * /*context*/) override { return nullptr; }
+  Batch *batch_alloc() override { return nullptr; }
+  Fence *fence_alloc() override { return nullptr; }
+  FrameBuffer *framebuffer_alloc(const char * /*name*/) override { return nullptr; }
+  PixelBuffer *pixelbuf_alloc(size_t /*size*/) override { return nullptr; }
+  QueryPool *querypool_alloc() override { return nullptr; }
+  Shader *shader_alloc(const char * /*name*/) override { return nullptr; }
+  Texture *texture_alloc(const char * /*name*/) override { return nullptr; }
+  TexturePool *texturepool_alloc() override { return nullptr; }
+  UniformBuf *uniformbuf_alloc(size_t /*size*/, const char * /*name*/) override { return nullptr; }
+  StorageBuf *storagebuf_alloc(size_t /*size*/, GPUUsageType /*usage*/, const char * /*name*/) override { return nullptr; }
+  void shader_cache_dir_clear_old() override {}
+  void render_begin() override {}
+  void render_end() override {}
+  void render_step(bool /*force_resource_release*/) override {}
+};
+
+GPUBackend *GPUBackend::get()
+{
+  static ModuleBackend backend;
+  return &backend;
+}
+
+}  // namespace blender::gpu
+
+namespace blender {
+
+/* blender-port: draw_context.cc DRW_object_get_editmesh_cage_for_drawing (the draw manager is past the seam), which the
+ * extraction reads of an object in Edit Mode. */
+const Mesh *DRW_object_get_editmesh_cage_for_drawing(const Object &object)
+{
+  const Mesh *cage_mesh = BKE_object_get_editmesh_eval_cage(&object);
+  if (cage_mesh == nullptr) {
+    return nullptr;
+  }
+  if (BKE_subsurf_modifier_has_gpu_subdiv(cage_mesh)) {
+    return cage_mesh;
+  }
+  return BKE_mesh_wrapper_ensure_subdivision(cage_mesh);
+}
+
+using draw::IBOType;
+using draw::VBOType;
+
+static draw::MeshBatchCache cache;
+static DrawBuffers buffers;
+
+/* Blender's axes as Babylon's, (x, y, z) as (x, z, y), in one pass over the positions and the normals; goes when
+ * the swap becomes the object's transform (roadmap Optimizations: no CPU copy of vertex data). */
+static void swap_yz(gpu::VertBuf &vbo)
+{
+  switch (vbo.format.attrs[0].type.format) {
+    case gpu::VertAttrType::SFLOAT_32_32_32:
+      for (float3 &position : vbo.data<float3>()) {
+        std::swap(position.y, position.z);
+      }
+      break;
+    case gpu::VertAttrType::SNORM_16_16_16_16:
+      for (short4 &normal : vbo.data<short4>()) {
+        std::swap(normal.y, normal.z);
+      }
+      break;
+    default:
+      BLI_assert_unreachable();
+  }
+}
+
+static DrawBuffer vertex_buffer(VBOType type)
+{
+  const auto *found = cache.final.buff.vbos.lookup_ptr(type);
+  if (!found) {
+    return {};
+  }
+  gpu::VertBuf *vbo = found->get();
+  const MutableSpan<uchar> data = vbo->data<uchar>();
+  return {data.data(), int(data.size()), int(vbo->format.attrs[0].type.format), int(vbo->format.stride), int(vbo->vertex_len)};
+}
+
+static DrawBuffer index_buffer(IBOType type)
+{
+  const auto *found = cache.final.buff.ibos.lookup_ptr(type);
+  if (!found) {
+    return {};
+  }
+  const auto *ibo = static_cast<const gpu::ModuleIndexBuf *>(found->get());
+  BLI_assert(ibo->base() == 0);
+  return {ibo->indices(), int(ibo->size_get()), ibo->is_32bit() ? 32 : 16, ibo->is_32bit() ? 4 : 2, int(ibo->index_len_get())};
+}
+
+void draw_buffers_free()
+{
+  cache.final.buff.vbos.clear();
+  cache.final.buff.ibos.clear();
+  cache.final.face_sorted = {};
+  cache.final.loose_geom = {};
+}
+
+const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &mesh, const int what)
+{
+  draw_buffers_free();
+  /* port-override: normals as 16-bit snorm, as Blender's HQ normals give them: Babylon has no 10_10_10_2 vertex type. */
+  gpu::GCaps.use_hq_normals_workaround = true;
+  cache.cd_used = {};
+  if (const StringRef uv = mesh.active_or_default_uv_map_name(); !uv.is_empty()) {
+    cache.cd_used.uv.add(uv);
+  }
+  Vector<VBOType> vbos = {VBOType::Position, VBOType::CornerNormal, VBOType::UVs};
+  Vector<IBOType> ibos = {IBOType::Tris};
+  if (what & DRAW_LINES) {
+    ibos.append(IBOType::Lines);
+  }
+  if (what & DRAW_LINES_ADJACENCY) {
+    ibos.append(IBOType::LinesAdjacency);
+  }
+  TaskGraph *graph = BLI_task_graph_create();
+  draw::mesh_buffer_cache_create_requested(*graph, scene, cache, cache.final, ibos, vbos, object, mesh, false, false, true, false, false);
+  BLI_task_graph_free(graph);
+  for (const VBOType type : {VBOType::Position, VBOType::CornerNormal}) {
+    swap_yz(*cache.final.buff.vbos.lookup(type));
+  }
+  const draw::SortedFaceData &sorted = cache.final.face_sorted;
+  buffers = {vertex_buffer(VBOType::Position), vertex_buffer(VBOType::CornerNormal),
+             cache.cd_used.uv.is_empty() ? DrawBuffer{} : vertex_buffer(VBOType::UVs), index_buffer(IBOType::Tris),
+             index_buffer(IBOType::Lines), index_buffer(IBOType::LinesAdjacency), int(sorted.tris_num_by_material.size()),
+             sorted.tris_num_by_material.data()};
+  return &buffers;
+}
+
+}  // namespace blender

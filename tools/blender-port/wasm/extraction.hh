@@ -50,4 +50,27 @@ extern const Mesh *extracted_mesh;
 Mesh *mesh_from_arrays(int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num, const int *face_offsets,
                        const int *corner_verts, const int *corner_edges, const float2 *uvs);
 
+struct Object;
+struct Scene;
+
+/* One draw buffer in module memory: its bytes, its type (a vertex buffer's gpu::VertAttrType, an index buffer's 16 or
+ * 32 bits), the bytes of one element and how many elements it has. */
+struct DrawBuffer {
+  const void *data;
+  int bytes, type, stride, count;
+};
+/* Read by JS as 32-bit words: a mesh's draw buffers (draw-mesh.cc), absent ones empty, and its triangles by material. */
+struct DrawBuffers {
+  DrawBuffer positions, normals, uvs, tris, lines, lines_adjacency;
+  int materials_num;
+  const int *tris_by_material;
+};
+/* The index buffers drawn on demand besides the triangles: the face edges (Wireframe) and the edges with their
+ * adjacent corners (the outline). */
+enum DrawRequest { DRAW_LINES = 1, DRAW_LINES_ADJACENCY = 2 };
+
+/* A mesh object's draw buffers as Blender's draw cache extracts them, valid until the next call or draw_buffers_free. */
+const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &mesh, int what);
+void draw_buffers_free();
+
 }  // namespace blender

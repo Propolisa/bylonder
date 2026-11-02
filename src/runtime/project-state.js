@@ -2,29 +2,36 @@
 // project's JSON), and what Babylon owns of each object the project's code built. On opening, the code builds the scene
 // first; an object whose id the .blend holds then takes Blender's state from it (main-view.js links them by id), one
 // the code built that the .blend no longer holds was deleted, and objects the .blend adds are made.
-import { gzipSync, gunzipSync } from 'fflate';
+import { gzipBase64, gunzipBase64 } from './project-gzip.js';
 import { dnaGet } from '../makesrna/dna-struct.js';
 import { nativeSnapshot, applyNative } from '../editors/undo/storage.js';
 import { nodeId } from '../editors/object/identity.js';
 import { PROPERTIES } from '../blenkernel/main-view.js';
 
 const ID_OB = 0x424f;
-const toBase64 = (bytes) => {
-  let text = '';
-  for (let i = 0; i < bytes.length; i += 32768) text += String.fromCharCode(...bytes.subarray(i, i + 32768));
-  return btoa(text);
-};
-const fromBase64 = (text) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 
 // The scene's state to save: Main's .blend and every object's native data, deleted ones included (their ids).
-// Without gzip's time stamp, the same scene saves as the same text.
-export const projectState = (world) => ({ blend: toBase64(gzipSync(world.mainSync.projectBlend(), { mtime: 0 })), objects: nativeSnapshot(world.objects) });
+export const projectState = (world) => ({ blend: gzipBase64(world.mainSync.projectBlend()), objects: nativeSnapshot(world.objects) });
+
+// projectState's, its .blend gzipped by a worker (project-gzip-worker.js): this thread only writes the .blend.
+let worker = null, requests = 0;
+const replies = new Map();
+export function projectStateInWorker(world) {
+  const bytes = world.mainSync.projectBlend(), objects = nativeSnapshot(world.objects), id = ++requests;
+  worker ??= Object.assign(new Worker(new URL('./project-gzip-worker.js', import.meta.url), { type: 'module' }), {
+    onmessage: ({ data }) => { replies.get(data.id)(data.text); replies.delete(data.id); },
+  });
+  return new Promise((resolve) => {
+    replies.set(id, (blend) => resolve({ blend, objects }));
+    worker.postMessage({ id, bytes }, [bytes.buffer]);
+  });
+}
 
 // Opens a saved state over the objects the project's code built, before the scene sync starts: Main becomes the
 // .blend's, its objects the ones of the ids they carry (blender-ids.js), and the saved native data is applied.
 export function openProject(world, ids, { blend, objects: rows = [] }) {
   const { blender } = ids;
-  blender.readBlend(gunzipSync(fromBase64(blend)));
+  blender.readBlend(gunzipBase64(blend));
   ids.clear();
   const held = new Set();
   for (const ob of blender.ids(ID_OB)) {

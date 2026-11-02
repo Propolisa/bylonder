@@ -125,6 +125,23 @@ function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifi
 // What changed since the last extraction (ExtractFlag in extraction.hh): topology, which refills everything, positions
 // (with normals and triangles), flags, or the UV map.
 export const EXTRACT_TOPOLOGY = 1, EXTRACT_POSITIONS = 2, EXTRACT_FLAGS = 4, EXTRACT_UV = 8, EXTRACT_ALL = 15;
+// The index buffers a mesh's draw buffers add to its triangles (extraction.hh DrawRequest).
+export const DRAW_LINES = 1, DRAW_LINES_ADJACENCY = 2;
+const DRAW_BUFFERS = [['positions', Float32Array, 3], ['normals', Int16Array, 4], ['uvs', Float32Array, 2], ['tris'], ['lines'], ['lines_adjacency']];
+// A mesh's draw buffers as Blender's draw cache extracts them (draw-mesh.cc), in Babylon's axes, as views of the module's
+// memory until the next extraction: per face corner, then per loose edge's and loose vertex's point, its position, its
+// normal (16-bit snorm, xyz and a 0) and its UV; the triangles sorted by material slot, with each slot's count; the face
+// edges and the outline's edges with their adjacent corners, when asked; absent ones null. free() lets their memory go.
+function drawBuffers(header) {
+  if (!header) return null;
+  const words = new Int32Array(x.memory.buffer, header, DRAW_BUFFERS.length * 5 + 2);
+  const view = ([, Type, size], i) => {
+    const [data, , type, , count] = words.subarray(i * 5, i * 5 + 5);
+    return data ? new (Type ?? (type === 32 ? Uint32Array : Uint16Array))(x.memory.buffer, data >>> 0, count * (size ?? 1)) : null;
+  };
+  const slots = words[DRAW_BUFFERS.length * 5], counts = slots ? Array.from(new Int32Array(x.memory.buffer, words[DRAW_BUFFERS.length * 5 + 1] >>> 0, slots)) : [];
+  return { ...Object.fromEntries(DRAW_BUFFERS.map((entry, i) => [entry[0], view(entry, i)])), tris_by_material: counts, free: () => x.draw_buffers_free() };
+}
 
 // A copy of a Mesh's arrays and attributes, as createMesh takes them, that can be posted to another realm.
 export function meshData(mesh) {
@@ -385,6 +402,7 @@ export class BlenderMain {
     if (!header) return null;
     const mesh = extractedMesh(header), slots = x.extracted_material_index() >>> 0;
     if (slots) mesh.attributes.set('material_index', { domain: 'FACE', type: 'INT', get data() { return new Int32Array(x.memory.buffer, slots, mesh.faces_num); } });
+    mesh.drawBuffers = (what = 0) => drawBuffers(x.object_draw_buffers(this.#context, ob, what) >>> 0);
     return mesh;
   }
   // A lasso gesture's path in the view's region pixels, for view3d.select_lasso's exec (anim-api.cc).

@@ -309,7 +309,12 @@ def main():
         by_any.setdefault(target_of(entry.get('output') or entry['command']), []).append(entry)
     source_of = lambda e: e['file'] if os.path.isabs(e['file']) else os.path.join(e['directory'], e['file'])
     generate(host, out, [source_of(e) for e in entries if not os.path.exists(source_of(e))], by_any, extra)
-    by_target = {t: group for t, group in by_any.items() if not SEAMS.match(t)}
+    # Sources of the seams' libraries the module compiles as Blender does (the manifest's `seam_sources`, paths under
+    # source/blender, a directory's with it): Blender's mesh draw extraction on its dummy GPU backend (draw-mesh.cc).
+    kept = [f'/source/blender/{path}' for path in spec.get('seam_sources', [])]
+    compiled = lambda target, e: not SEAMS.match(target) or any(path in source_of(e) for path in kept)
+    by_target = {t: [e for e in group if compiled(t, e)] for t, group in by_any.items()}
+    by_target = {t: group for t, group in by_target.items() if group}
     # SHARD=i/n compiles every n-th library only (CI jobs in parallel; the link job then finds all objects cached).
     shard = os.environ.get('SHARD')
     if shard:
