@@ -32,6 +32,53 @@ ROOTS = [
     'gpu_shader_material_bump.glsl',
     'gpu_shader_material_hair_info.glsl',
     'gpu_shader_material_set.glsl',
+    'gpu_shader_material_vector_math.glsl',
+    'gpu_shader_material_map_range.glsl',
+    'gpu_shader_material_mapping.glsl',
+    'gpu_shader_common_mix_rgb.glsl',
+    'gpu_shader_material_hue_sat_val.glsl',
+    'gpu_shader_material_bright_contrast.glsl',
+    'gpu_shader_material_invert.glsl',
+    'gpu_shader_material_gamma.glsl',
+    'gpu_shader_material_separate_xyz.glsl',
+    'gpu_shader_material_combine_xyz.glsl',
+    'gpu_shader_material_separate_color.glsl',
+    'gpu_shader_material_combine_color.glsl',
+    'gpu_shader_material_rgb_to_bw.glsl',
+    'gpu_shader_material_normal.glsl',
+    'gpu_shader_material_vector_rotate.glsl',
+    'gpu_shader_material_tex_gradient.glsl',
+    'gpu_shader_material_tex_wave.glsl',
+    'gpu_shader_material_tex_voronoi.glsl',
+    'gpu_shader_material_tex_checker.glsl',
+    'gpu_shader_material_tex_brick.glsl',
+    'gpu_shader_material_tex_magic.glsl',
+    'gpu_shader_material_tex_white_noise.glsl',
+    'gpu_shader_material_geometry.glsl',
+    'gpu_shader_material_object_info.glsl',
+    'gpu_shader_material_attribute.glsl',
+    'gpu_shader_material_vertex_color.glsl',
+    'gpu_shader_material_uv_map.glsl',
+    'gpu_shader_material_fresnel.glsl',
+    'gpu_shader_material_layer_weight.glsl',
+    'gpu_shader_material_normal_map.glsl',
+    'gpu_shader_material_light_path.glsl',
+    'gpu_shader_material_camera.glsl',
+    'gpu_shader_material_tangent.glsl',
+    'gpu_shader_material_wireframe.glsl',
+    'gpu_shader_material_blackbody.glsl',
+    'gpu_shader_material_wavelength.glsl',
+    'gpu_shader_common_curves.glsl',
+    'gpu_shader_material_tex_gabor.glsl',
+    'gpu_shader_material_squeeze.glsl',
+    'gpu_shader_material_radial_tiling.glsl',
+    'gpu_shader_material_light_falloff.glsl',
+    'gpu_shader_material_bevel.glsl',
+    'gpu_shader_material_ambient_occlusion.glsl',
+    'gpu_shader_material_displacement.glsl',
+    'gpu_shader_material_vector_displacement.glsl',
+    'gpu_shader_material_transform_utils.glsl',
+    'gpu_shader_common_math_utils.glsl',
     # Curves drawing (particle hair, Curves objects): the curve shape library and the hash its strands vary by.
     'draw_curves_lib.glsl',
     'gpu_shader_common_hash.glsl',
@@ -54,7 +101,10 @@ DRAW = ['overlay_particle_vert.glsl', 'overlay_particle_frag.glsl', 'overlay_par
         'overlay_extra_vert.glsl', 'overlay_extra_frag.glsl', 'overlay_extra_wire_vert.glsl', 'overlay_extra_wire_frag.glsl',
         'overlay_paint_weight_vert.glsl', 'overlay_paint_weight_frag.glsl']
 DRAW_DIR = 'source/blender/draw/engines/overlay/shaders'
-# name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items).
+# name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items, and
+# where in the C++ file to look when it has two such functions).
+NODES, RNA = 'source/blender/nodes/shader/nodes/', 'source/blender/makesrna/intern/rna_nodetree.cc'
+GET_NAME = 'static const char *gpu_shader_get_name('
 TABLES = {
     'math': ('source/blender/nodes/intern/math_functions.cc', 'FloatMathOperationInfo *get_float_math_operation_info(const int operation)',
              'source/blender/makesrna/intern/rna_nodetree.cc', 'rna_enum_node_math_items'),
@@ -63,6 +113,16 @@ TABLES = {
     # Per type, its functions by dimension (1D to 4D).
     'noise': ('source/blender/nodes/shader/nodes/node_shader_tex_noise.cc', 'static const char *gpu_shader_get_name(',
               'source/blender/makesrna/intern/rna_nodetree.cc', 'prop_noise_type'),
+    'vector_math': (NODES + 'node_shader_vector_math.cc', GET_NAME, RNA, 'rna_enum_node_vec_math_items'),
+    # The float functions; the vector ones are named with vector_ before them.
+    'map_range': (NODES + 'node_shader_map_range.cc', GET_NAME, RNA, 'rna_enum_node_map_range_items'),
+    'mapping': (NODES + 'node_shader_mapping.cc', GET_NAME, RNA, 'rna_enum_mapping_type_items'),
+    'mix_rgb': (NODES + 'node_shader_mix_rgb.cc', GET_NAME, 'source/blender/makesrna/intern/rna_material.cc', 'rna_enum_ramp_blend_items'),
+    'separate_color': (NODES + 'node_shader_sepcomb_color.cc', GET_NAME, RNA, 'rna_enum_node_combsep_color_items', 'node_shader_separate_color_cc {'),
+    'combine_color': (NODES + 'node_shader_sepcomb_color.cc', GET_NAME, RNA, 'rna_enum_node_combsep_color_items', 'node_shader_combine_color_cc {'),
+    'vector_rotate': (NODES + 'node_shader_vector_rotate.cc', GET_NAME, RNA, 'rna_enum_vector_rotate_type_items'),
+    # Per feature, its functions by dimension (1D to 4D).
+    'voronoi': (NODES + 'node_shader_tex_voronoi.cc', 'static const char *gpu_shader_get_name(const int feature', RNA, 'prop_feature_items'),
 }
 # The nodes Bylonder runs, by their C++ file.
 DECLARATIONS = {
@@ -110,9 +170,10 @@ def body(source, signature):
     raise ValueError(signature)
 
 
-def table(cc, function, rna, items):
+def table(cc, function, rna, items, after=''):
     """An enum identifier to its function name, or to their list where the switch picks one from an array."""
-    switch = body(fetch(cc), function)
+    source = fetch(cc)
+    switch = body(source[source.index(after):], function)
     names = dict(re.findall(r'case (\w+):\s*(?:RETURN_OPERATION_INFO\(\s*"[^"]*",\s*|return\s+)"(\w+)"', switch))
     names.update({macro: re.findall(r'"(\w+)"', array) for macro, array in re.findall(r'case (\w+):\s*return std::array\{([^}]*)\}', switch)})
     identifiers = dict(re.findall(r'\{(\w+),\s*"(\w+)"', body(fetch(rna), f'EnumPropertyItem {items}[]')))

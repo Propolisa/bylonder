@@ -5366,6 +5366,6641 @@
    ]
   },
   {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "ADD"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    1.0,
+    -0.35,
+    -0.3,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "SUBTRACT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    -0.4,
+    -0.85,
+    2.7,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "MULTIPLY"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.21,
+    -0.15,
+    -1.8,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "DIVIDE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.428571,
+    -2.4,
+    -0.8,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "MULTIPLY_ADD"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.71,
+    0.35,
+    -1.3,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "CROSS_PRODUCT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.6,
+    1.29,
+    0.495,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "PROJECT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    -0.434612,
+    -0.155219,
+    0.931311,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "REFLECT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    1.169224,
+    -0.289563,
+    -0.662622,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "REFRACT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.784696,
+    -0.921894,
+    1.451366,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "FACEFORWARD"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    -0.6,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "DOT_PRODUCT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Value",
+   "result": [
+    -1.74,
+    -1.74,
+    -1.74,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "DISTANCE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Value",
+   "result": [
+    2.858759,
+    2.858759,
+    2.858759,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "LENGTH"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Value",
+   "result": [
+    1.374773,
+    1.374773,
+    1.374773,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "SCALE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.51,
+    -1.02,
+    2.04,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "NORMALIZE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.218218,
+    -0.436436,
+    0.872872,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "ABSOLUTE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    0.6,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "POWER"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.430512,
+    -0.880112,
+    0.760726,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "SIGN"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    1.0,
+    -1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "MINIMUM"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    -0.6,
+    -1.5,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "MAXIMUM"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.7,
+    0.25,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "ROUND"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.0,
+    -1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "FLOOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.0,
+    -1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "CEIL"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    1.0,
+    -0.0,
+    2.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "FRACTION"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    0.4,
+    0.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "MODULO"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    -0.1,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "WRAP"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.5,
+    0.4,
+    -0.8,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "SNAP"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.0,
+    -0.75,
+    1.5,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "SINE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.29552,
+    -0.564642,
+    0.932039,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "COSINE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.955337,
+    0.825336,
+    0.362358,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorMath",
+   "properties": {
+    "operation": "TANGENT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Vector_001": [
+     0.7,
+     0.25,
+     -1.5
+    ],
+    "Vector_002": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "Scale": 1.7
+   },
+   "output": "Vector",
+   "result": [
+    0.309336,
+    -0.684137,
+    2.572152,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "LINEAR",
+    "clamp": true
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    3.0,
+    3.0,
+    3.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "LINEAR",
+    "clamp": true,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.111111,
+    2.0,
+    0.4,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "LINEAR",
+    "clamp": false
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    4.111111,
+    4.111111,
+    4.111111,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "LINEAR",
+    "clamp": false,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.111111,
+    2.6,
+    0.4,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "STEPPED",
+    "clamp": true
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    3.0,
+    3.0,
+    3.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "STEPPED",
+    "clamp": true,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -1.0,
+    2.0,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "STEPPED",
+    "clamp": false
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    5.666667,
+    5.666667,
+    5.666667,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "STEPPED",
+    "clamp": false,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -1.0,
+    3.0,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHSTEP",
+    "clamp": true
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    3.0,
+    3.0,
+    3.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHSTEP",
+    "clamp": true,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.495199,
+    2.0,
+    0.352,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHSTEP",
+    "clamp": false
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    3.0,
+    3.0,
+    3.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHSTEP",
+    "clamp": false,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.495199,
+    2.0,
+    0.352,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHERSTEP",
+    "clamp": true
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    3.0,
+    3.0,
+    3.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHERSTEP",
+    "clamp": true,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.694355,
+    2.0,
+    0.31744,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHERSTEP",
+    "clamp": false
+   },
+   "inputs": {
+    "Value": 1.35,
+    "From Min": 0.2,
+    "From Max": 1.1,
+    "To Min": -1.0,
+    "To Max": 3.0,
+    "Steps": 3.0
+   },
+   "output": "Result",
+   "result": [
+    3.0,
+    3.0,
+    3.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMapRange",
+   "properties": {
+    "interpolation_type": "SMOOTHERSTEP",
+    "clamp": false,
+    "data_type": "FLOAT_VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.4,
+     1.3,
+     -0.2
+    ],
+    "From_Min_FLOAT3": [
+     0.2,
+     0.0,
+     -1.0
+    ],
+    "From_Max_FLOAT3": [
+     1.1,
+     1.0,
+     1.0
+    ],
+    "To_Min_FLOAT3": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "To_Max_FLOAT3": [
+     3.0,
+     2.0,
+     1.0
+    ],
+    "Steps_FLOAT3": [
+     3.0,
+     4.0,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.694355,
+    2.0,
+    0.31744,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeClamp",
+   "properties": {
+    "clamp_type": "MINMAX"
+   },
+   "inputs": {
+    "Value": 0.7,
+    "Min": 0.9,
+    "Max": 0.2
+   },
+   "output": "Result",
+   "result": [
+    0.2,
+    0.2,
+    0.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeClamp",
+   "properties": {
+    "clamp_type": "RANGE"
+   },
+   "inputs": {
+    "Value": 0.7,
+    "Min": 0.9,
+    "Max": 0.2
+   },
+   "output": "Result",
+   "result": [
+    0.7,
+    0.7,
+    0.7,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "MIX"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.56,
+    0.38,
+    0.42,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "DARKEN"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.2,
+    0.38,
+    0.42,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "MULTIPLY"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.176,
+    0.29,
+    0.414,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "BURN"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.090909,
+    0.137931,
+    0.782609,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "LIGHTEN"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.56,
+    0.5,
+    0.9,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "SCREEN"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.584,
+    0.59,
+    0.906,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "DODGE"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.384615,
+    0.609756,
+    0.957447,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "ADD"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.68,
+    0.68,
+    0.96,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "OVERLAY"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.272,
+    0.38,
+    0.852,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "SOFT_LIGHT"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.2576,
+    0.44,
+    0.8568,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "LINEAR_LIGHT"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.56,
+    0.26,
+    0.42,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "DIFFERENCE"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.44,
+    0.32,
+    0.84,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "EXCLUSION"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.488,
+    0.5,
+    0.852,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "SUBTRACT"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    -0.28,
+    0.32,
+    0.84,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "DIVIDE"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.23,
+    1.2,
+    5.76,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "HUE"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.62,
+    0.44,
+    0.48,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "SATURATION"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.1475,
+    0.47,
+    0.9,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "COLOR"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.62,
+    0.4025,
+    0.4275,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "VALUE"
+   },
+   "inputs": {
+    "Fac": 0.6,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.186667,
+    0.466667,
+    0.84,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeMixRGB",
+   "properties": {
+    "blend_type": "ADD",
+    "use_clamp": true
+   },
+   "inputs": {
+    "Fac": 1.4,
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    1.0,
+    0.8,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeGamma",
+   "properties": {},
+   "inputs": {
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Gamma": 2.2
+   },
+   "output": "Color",
+   "result": [
+    0.028991,
+    0.217638,
+    0.79311,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeSeparateXYZ",
+   "properties": {},
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ]
+   },
+   "output": "X",
+   "result": [
+    0.3,
+    0.3,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeSeparateXYZ",
+   "properties": {},
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ]
+   },
+   "output": "Y",
+   "result": [
+    -0.6,
+    -0.6,
+    -0.6,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeSeparateXYZ",
+   "properties": {},
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ]
+   },
+   "output": "Z",
+   "result": [
+    1.2,
+    1.2,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeCombineXYZ",
+   "properties": {},
+   "inputs": {
+    "X": 0.3,
+    "Y": -0.6,
+    "Z": 1.2
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    -0.6,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "AXIS_ANGLE",
+    "invert": false
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    1.026712,
+    -0.515229,
+    0.645908,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "AXIS_ANGLE",
+    "invert": true
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.586467,
+    -0.372469,
+    1.131289,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "X_AXIS",
+    "invert": false
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    -1.002986,
+    0.353151,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "X_AXIS",
+    "invert": true
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.3,
+    0.288255,
+    1.500921,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "Y_AXIS",
+    "invert": false
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.884962,
+    -0.6,
+    0.783565,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "Y_AXIS",
+    "invert": true
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.406279,
+    -0.6,
+    1.070507,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "Z_AXIS",
+    "invert": false
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.813226,
+    -0.213894,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "Z_AXIS",
+    "invert": true
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.334544,
+    -0.500837,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "EULER_XYZ",
+    "invert": false
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.962204,
+    -0.377243,
+    0.942958,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorRotate",
+   "properties": {
+    "rotation_type": "EULER_XYZ",
+    "invert": true
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Center": [
+     0.1,
+     0.2,
+     0.3
+    ],
+    "Axis": [
+     0.2,
+     0.9,
+     0.4
+    ],
+    "Angle": 0.8,
+    "Rotation": [
+     0.3,
+     -0.5,
+     1.1
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.01459,
+    0.004619,
+    1.499456,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "LINEAR"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.37,
+    0.37,
+    0.37,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "LINEAR"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.37,
+    0.37,
+    0.37,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "QUADRATIC"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.1369,
+    0.1369,
+    0.1369,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "QUADRATIC"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.1369,
+    0.1369,
+    0.1369,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "EASING"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.309394,
+    0.309394,
+    0.309394,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "EASING"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.309394,
+    0.309394,
+    0.309394,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "DIAGONAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.54,
+    0.54,
+    0.54,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "DIAGONAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.54,
+    0.54,
+    0.54,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "SPHERICAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.148471,
+    0.148471,
+    0.148471,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "SPHERICAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.148471,
+    0.148471,
+    0.148471,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "QUADRATIC_SPHERE"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.022044,
+    0.022044,
+    0.022044,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "QUADRATIC_SPHERE"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.022044,
+    0.022044,
+    0.022044,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "RADIAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.673541,
+    0.673541,
+    0.673541,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGradient",
+   "properties": {
+    "gradient_type": "RADIAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     -0.29
+    ]
+   },
+   "output": "Fac",
+   "result": [
+    0.673541,
+    0.673541,
+    0.673541,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SIN",
+    "bands_direction": "X"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.963278,
+    0.963278,
+    0.963278,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SAW",
+    "bands_direction": "X"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.561378,
+    0.561378,
+    0.561378,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "TRI",
+    "bands_direction": "X"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.877245,
+    0.877245,
+    0.877245,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SIN",
+    "bands_direction": "Y"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.321399,
+    0.321399,
+    0.321399,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SAW",
+    "bands_direction": "Y"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.808135,
+    0.808135,
+    0.808135,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "TRI",
+    "bands_direction": "Y"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.383731,
+    0.383731,
+    0.383731,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SIN",
+    "bands_direction": "Z"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.353177,
+    0.353177,
+    0.353177,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SAW",
+    "bands_direction": "Z"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.797434,
+    0.797434,
+    0.797434,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "TRI",
+    "bands_direction": "Z"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.405131,
+    0.405131,
+    0.405131,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SIN",
+    "bands_direction": "DIAGONAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.953208,
+    0.953208,
+    0.953208,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "SAW",
+    "bands_direction": "DIAGONAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.569404,
+    0.569404,
+    0.569404,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "BANDS",
+    "wave_profile": "TRI",
+    "bands_direction": "DIAGONAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.861193,
+    0.861193,
+    0.861193,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SIN",
+    "rings_direction": "X"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.79868,
+    0.79868,
+    0.79868,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SAW",
+    "rings_direction": "X"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.351892,
+    0.351892,
+    0.351892,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "TRI",
+    "rings_direction": "X"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.703783,
+    0.703783,
+    0.703783,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SIN",
+    "rings_direction": "Y"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.997041,
+    0.997041,
+    0.997041,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SAW",
+    "rings_direction": "Y"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.517323,
+    0.517323,
+    0.517323,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "TRI",
+    "rings_direction": "Y"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.965353,
+    0.965353,
+    0.965353,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SIN",
+    "rings_direction": "Z"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.731079,
+    0.731079,
+    0.731079,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SAW",
+    "rings_direction": "Z"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.673538,
+    0.673538,
+    0.673538,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "TRI",
+    "rings_direction": "Z"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.652925,
+    0.652925,
+    0.652925,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SIN",
+    "rings_direction": "SPHERICAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.231102,
+    0.231102,
+    0.231102,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "SAW",
+    "rings_direction": "SPHERICAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.159629,
+    0.159629,
+    0.159629,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {
+    "wave_type": "RINGS",
+    "wave_profile": "TRI",
+    "rings_direction": "SPHERICAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.319258,
+    0.319258,
+    0.319258,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWave",
+   "properties": {},
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 3.0,
+    "Distortion": 1.5,
+    "Detail": 3.0,
+    "Detail Scale": 1.2,
+    "Detail Roughness": 0.6,
+    "Phase Offset": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.963278,
+    0.963278,
+    0.963278,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.92699,
+    0.92699,
+    0.92699,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.565204,
+    0.988797,
+    1.273358,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "W",
+   "result": [
+    0.781785,
+    0.781785,
+    0.781785,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.699321,
+    0.699321,
+    0.699321,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    0.825813,
+    0.730301,
+    0.837233,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.360386,
+    0.730392,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.967529,
+    0.967529,
+    0.967529,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    0.520559,
+    1.493755,
+    1.221761,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.373089,
+    0.700952,
+    0.312218,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.107579,
+    1.107579,
+    1.107579,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.492404,
+    0.470567,
+    0.637959,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.423758,
+    0.704768,
+    0.289154,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "W",
+   "result": [
+    0.793481,
+    0.793481,
+    0.793481,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.460831,
+    1.460831,
+    1.460831,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.44058,
+    1.041134,
+    1.405584,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "W",
+   "result": [
+    0.81117,
+    0.81117,
+    0.81117,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.453288,
+    1.453288,
+    1.453288,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.127862,
+    0.774087,
+    0.531785,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.320308,
+    0.656747,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.467006,
+    1.467006,
+    1.467006,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.661101,
+    1.008475,
+    1.494657,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.369148,
+    0.716738,
+    0.33179,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.637682,
+    1.637682,
+    1.637682,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.054451,
+    0.874437,
+    1.371763,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.339338,
+    0.768794,
+    0.26374,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "F2",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "W",
+   "result": [
+    0.768514,
+    0.768514,
+    0.768514,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.884616,
+    0.884616,
+    0.884616,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.524445,
+    0.978564,
+    1.219488,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "W",
+   "result": [
+    0.796738,
+    0.796738,
+    0.796738,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.692729,
+    0.692729,
+    0.692729,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    0.804617,
+    0.714809,
+    0.850042,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.358433,
+    0.730518,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.936313,
+    0.936313,
+    0.936313,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    0.56686,
+    1.492544,
+    1.190878,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.362987,
+    0.701008,
+    0.312467,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.981808,
+    0.981808,
+    0.981808,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Color",
+   "result": [
+    1.117981,
+    0.437697,
+    0.518888,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Position",
+   "result": [
+    0.370133,
+    0.718117,
+    0.277354,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "SMOOTH_F1",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "W",
+   "result": [
+    0.787237,
+    0.787237,
+    0.787237,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "DISTANCE_TO_EDGE",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.045302,
+    0.045302,
+    0.045302,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "DISTANCE_TO_EDGE",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.104827,
+    0.104827,
+    0.104827,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "DISTANCE_TO_EDGE",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.084741,
+    0.084741,
+    0.084741,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "DISTANCE_TO_EDGE",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.072513,
+    0.072513,
+    0.072513,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "N_SPHERE_RADIUS",
+    "voronoi_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8,
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Radius",
+   "result": [
+    0.458981,
+    0.458981,
+    0.458981,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "N_SPHERE_RADIUS",
+    "voronoi_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Radius",
+   "result": [
+    0.33221,
+    0.33221,
+    0.33221,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "N_SPHERE_RADIUS",
+    "voronoi_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Radius",
+   "result": [
+    0.325713,
+    0.325713,
+    0.325713,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "feature": "N_SPHERE_RADIUS",
+    "voronoi_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Radius",
+   "result": [
+    0.261724,
+    0.261724,
+    0.261724,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "distance": "MANHATTAN"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.37207,
+    1.37207,
+    1.37207,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "distance": "CHEBYCHEV"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.862305,
+    0.862305,
+    0.862305,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "distance": "MINKOWSKI"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 2.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    1.069336,
+    1.069336,
+    1.069336,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeTexVoronoi",
+   "properties": {
+    "normalize": true,
+    "feature": "F2"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8,
+    "Scale": 4.0,
+    "Detail": 0.0,
+    "Roughness": 0.6,
+    "Lacunarity": 2.0,
+    "Smoothness": 0.7,
+    "Exponent": 1.5,
+    "Randomness": 0.9
+   },
+   "output": "Distance",
+   "result": [
+    0.268555,
+    0.268555,
+    0.268555,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexChecker",
+   "properties": {},
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ],
+    "Scale": 7.0
+   },
+   "output": "Color",
+   "result": [
+    0.8,
+    0.3,
+    0.1,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexBrick",
+   "properties": {
+    "offset": 0.3,
+    "offset_frequency": 3,
+    "squash": 1.4,
+    "squash_frequency": 2
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ],
+    "Scale": 6.0,
+    "Mortar Size": 0.05,
+    "Mortar Smooth": 0.2,
+    "Bias": 0.1,
+    "Brick Width": 0.6,
+    "Row Height": 0.3
+   },
+   "output": "Color",
+   "result": [
+    0.581434,
+    0.372855,
+    0.391421,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexMagic",
+   "properties": {
+    "turbulence_depth": 0
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Distortion": 1.3
+   },
+   "output": "Color",
+   "result": [
+    0.204955,
+    0.292191,
+    0.117012,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexMagic",
+   "properties": {
+    "turbulence_depth": 2
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Distortion": 1.3
+   },
+   "output": "Color",
+   "result": [
+    0.025599,
+    0.49072,
+    0.002116,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexMagic",
+   "properties": {
+    "turbulence_depth": 7
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Distortion": 1.3
+   },
+   "output": "Color",
+   "result": [
+    0.999922,
+    0.995131,
+    0.777982,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexChecker",
+   "properties": {},
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ],
+    "Scale": 7.0
+   },
+   "output": "Fac",
+   "result": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexBrick",
+   "properties": {
+    "offset": 0.3,
+    "offset_frequency": 3,
+    "squash": 1.4,
+    "squash_frequency": 2
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Color1": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Color2": [
+     0.8,
+     0.3,
+     0.1,
+     1.0
+    ],
+    "Scale": 6.0,
+    "Mortar Size": 0.05,
+    "Mortar Smooth": 0.2,
+    "Bias": 0.1,
+    "Brick Width": 0.6,
+    "Row Height": 0.3
+   },
+   "output": "Fac",
+   "result": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexMagic",
+   "properties": {
+    "turbulence_depth": 0
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Distortion": 1.3
+   },
+   "output": "Fac",
+   "result": [
+    0.204719,
+    0.204719,
+    0.204719,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexMagic",
+   "properties": {
+    "turbulence_depth": 2
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Distortion": 1.3
+   },
+   "output": "Fac",
+   "result": [
+    0.172812,
+    0.172812,
+    0.172812,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexMagic",
+   "properties": {
+    "turbulence_depth": 7
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Distortion": 1.3
+   },
+   "output": "Fac",
+   "result": [
+    0.924345,
+    0.924345,
+    0.924345,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8
+   },
+   "output": "Value",
+   "result": [
+    0.691726,
+    0.691726,
+    0.691726,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 0.8
+   },
+   "output": "Color",
+   "result": [
+    0.691726,
+    0.497587,
+    0.926119,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8
+   },
+   "output": "Value",
+   "result": [
+    0.241764,
+    0.241764,
+    0.241764,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8
+   },
+   "output": "Color",
+   "result": [
+    0.241764,
+    0.574676,
+    0.205502,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8
+   },
+   "output": "Value",
+   "result": [
+    0.895589,
+    0.895589,
+    0.895589,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8
+   },
+   "output": "Color",
+   "result": [
+    0.895589,
+    0.894145,
+    0.856258,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8
+   },
+   "output": "Value",
+   "result": [
+    0.871465,
+    0.871465,
+    0.871465,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexWhiteNoise",
+   "properties": {
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "W": 0.8
+   },
+   "output": "Color",
+   "result": [
+    0.871465,
+    0.138999,
+    0.55613,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeRGBCurve",
+   "properties": {
+    "mapping": {
+     "use_clip": true,
+     "extend": "EXTRAPOLATED",
+     "clip": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ],
+     "curves": [
+      [
+       {
+        "location": [
+         0.0,
+         0.1
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         0.4,
+         0.7
+        ],
+        "handle_type": "AUTO_CLAMPED"
+       },
+       {
+        "location": [
+         1.0,
+         0.9
+        ],
+        "handle_type": "VECTOR"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.0
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         1.0
+        ],
+        "handle_type": "AUTO"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.1
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         0.4,
+         0.7
+        ],
+        "handle_type": "AUTO_CLAMPED"
+       },
+       {
+        "location": [
+         1.0,
+         0.9
+        ],
+        "handle_type": "VECTOR"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.0
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         1.0
+        ],
+        "handle_type": "AUTO"
+       }
+      ]
+     ]
+    }
+   },
+   "inputs": {
+    "Color": [
+     0.3,
+     0.6,
+     1.2,
+     1.0
+    ],
+    "Fac": 0.8
+   },
+   "output": "Color",
+   "result": [
+    0.551172,
+    0.6,
+    1.013255,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeRGBCurve",
+   "properties": {
+    "mapping": {
+     "use_clip": true,
+     "extend": "HORIZONTAL",
+     "clip": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ],
+     "curves": [
+      [
+       {
+        "location": [
+         0.0,
+         0.0
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         1.0
+        ],
+        "handle_type": "AUTO"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.0
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         1.0
+        ],
+        "handle_type": "AUTO"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.0
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         1.0
+        ],
+        "handle_type": "AUTO"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.1
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         0.4,
+         0.7
+        ],
+        "handle_type": "AUTO_CLAMPED"
+       },
+       {
+        "location": [
+         1.0,
+         0.9
+        ],
+        "handle_type": "VECTOR"
+       }
+      ]
+     ]
+    }
+   },
+   "inputs": {
+    "Color": [
+     0.3,
+     0.6,
+     1.2,
+     1.0
+    ],
+    "Fac": 0.8
+   },
+   "output": "Color",
+   "result": [
+    0.551172,
+    0.763281,
+    0.959922,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeVectorCurve",
+   "properties": {
+    "mapping": {
+     "use_clip": true,
+     "extend": "EXTRAPOLATED",
+     "clip": [
+      -1.0,
+      -1.0,
+      1.0,
+      1.0
+     ],
+     "curves": [
+      [
+       {
+        "location": [
+         -1.0,
+         -0.8
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         0.2,
+         0.5
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         0.9
+        ],
+        "handle_type": "AUTO"
+       }
+      ],
+      [
+       {
+        "location": [
+         0.0,
+         0.0
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         1.0
+        ],
+        "handle_type": "AUTO"
+       }
+      ],
+      [
+       {
+        "location": [
+         -1.0,
+         -0.8
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         0.2,
+         0.5
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         1.0,
+         0.9
+        ],
+        "handle_type": "AUTO"
+       }
+      ]
+     ]
+    }
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     0.8
+    ],
+    "Fac": 0.9
+   },
+   "output": "Vector",
+   "result": [
+    0.544775,
+    -0.6,
+    0.823291,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeFloatCurve",
+   "properties": {
+    "mapping": {
+     "use_clip": true,
+     "extend": "EXTRAPOLATED",
+     "clip": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ],
+     "curves": [
+      [
+       {
+        "location": [
+         0.0,
+         0.1
+        ],
+        "handle_type": "AUTO"
+       },
+       {
+        "location": [
+         0.4,
+         0.7
+        ],
+        "handle_type": "AUTO_CLAMPED"
+       },
+       {
+        "location": [
+         1.0,
+         0.9
+        ],
+        "handle_type": "VECTOR"
+       }
+      ]
+     ]
+    }
+   },
+   "inputs": {
+    "Value": 0.35,
+    "Factor": 1.0
+   },
+   "output": "Value",
+   "result": [
+    0.659766,
+    0.659766,
+    0.659766,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeBlackbody",
+   "properties": {},
+   "inputs": {
+    "Temperature": 1500.0
+   },
+   "output": "Color",
+   "result": [
+    3.307983,
+    0.421402,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeBlackbody",
+   "properties": {},
+   "inputs": {
+    "Temperature": 6500.0
+   },
+   "output": "Color",
+   "result": [
+    1.044059,
+    0.983887,
+    1.032287,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGabor",
+   "properties": {
+    "gabor_type": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Frequency": 2.5,
+    "Anisotropy": 0.7,
+    "Orientation 2D": 0.6
+   },
+   "output": "Value",
+   "result": [
+    0.470616,
+    0.470616,
+    0.470616,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGabor",
+   "properties": {
+    "gabor_type": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Frequency": 2.5,
+    "Anisotropy": 0.7,
+    "Orientation 2D": 0.6
+   },
+   "output": "Phase",
+   "result": [
+    0.456547,
+    0.456547,
+    0.456547,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGabor",
+   "properties": {
+    "gabor_type": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Frequency": 2.5,
+    "Anisotropy": 0.7,
+    "Orientation 2D": 0.6
+   },
+   "output": "Intensity",
+   "result": [
+    0.217949,
+    0.217949,
+    0.217949,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGabor",
+   "properties": {
+    "gabor_type": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Frequency": 2.5,
+    "Anisotropy": 0.7,
+    "Orientation 2D": 0.6
+   },
+   "output": "Value",
+   "result": [
+    0.402971,
+    0.402971,
+    0.402971,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGabor",
+   "properties": {
+    "gabor_type": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Frequency": 2.5,
+    "Anisotropy": 0.7,
+    "Orientation 2D": 0.6
+   },
+   "output": "Phase",
+   "result": [
+    0.404444,
+    0.404444,
+    0.404444,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexGabor",
+   "properties": {
+    "gabor_type": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.37,
+     0.71,
+     0.29
+    ],
+    "Scale": 4.0,
+    "Frequency": 2.5,
+    "Anisotropy": 0.7,
+    "Orientation 2D": 0.6
+   },
+   "output": "Intensity",
+   "result": [
+    0.343485,
+    0.343485,
+    0.343485,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeWavelength",
+   "properties": {},
+   "inputs": {
+    "Wavelength": 540.0
+   },
+   "output": "Color",
+   "result": [
+    0.0,
+    0.597656,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeMapping",
+   "properties": {
+    "vector_type": "POINT"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Location": [
+     0.5,
+     -0.2,
+     0.1
+    ],
+    "Rotation": [
+     0.3,
+     0.6,
+     -0.9
+    ],
+    "Scale": [
+     1.5,
+     0.7,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.62207,
+    -2.138672,
+    1.635742,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeMapping",
+   "properties": {
+    "vector_type": "TEXTURE"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Location": [
+     0.5,
+     -0.2,
+     0.1
+    ],
+    "Rotation": [
+     0.3,
+     0.6,
+     -0.9
+    ],
+    "Scale": [
+     1.5,
+     0.7,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.310059,
+    -0.124817,
+    0.544434,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeMapping",
+   "properties": {
+    "vector_type": "VECTOR"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Location": [
+     0.5,
+     -0.2,
+     0.1
+    ],
+    "Rotation": [
+     0.3,
+     0.6,
+     -0.9
+    ],
+    "Scale": [
+     1.5,
+     0.7,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    0.122131,
+    -1.94043,
+    1.535156,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeMapping",
+   "properties": {
+    "vector_type": "NORMAL"
+   },
+   "inputs": {
+    "Vector": [
+     0.3,
+     -0.6,
+     1.2
+    ],
+    "Location": [
+     0.5,
+     -0.2,
+     0.1
+    ],
+    "Rotation": [
+     0.3,
+     0.6,
+     -0.9
+    ],
+    "Scale": [
+     1.5,
+     0.7,
+     2.0
+    ]
+   },
+   "output": "Vector",
+   "result": [
+    -0.530762,
+    -0.835449,
+    0.141724,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeHueSaturation",
+   "properties": {},
+   "inputs": {
+    "Hue": 0.3,
+    "Saturation": 1.4,
+    "Value": 0.8,
+    "Fac": 0.9,
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.019989,
+    0.697754,
+    0.330566,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeBrightContrast",
+   "properties": {},
+   "inputs": {
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ],
+    "Bright": 0.1,
+    "Contrast": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.179932,
+    0.599609,
+    1.15918,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeInvert",
+   "properties": {},
+   "inputs": {
+    "Fac": 0.7,
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.619629,
+    0.5,
+    0.339844,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeSeparateColor",
+   "properties": {
+    "mode": "RGB"
+   },
+   "inputs": {
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ]
+   },
+   "output": "Green",
+   "result": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeCombineColor",
+   "properties": {
+    "mode": "RGB"
+   },
+   "inputs": {
+    "Red": 0.6,
+    "Green": 0.4,
+    "Blue": 0.7
+   },
+   "output": "Color",
+   "result": [
+    0.599609,
+    0.399902,
+    0.699707,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeSeparateColor",
+   "properties": {
+    "mode": "HSV"
+   },
+   "inputs": {
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ]
+   },
+   "output": "Green",
+   "result": [
+    0.777344,
+    0.777344,
+    0.777344,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeCombineColor",
+   "properties": {
+    "mode": "HSV"
+   },
+   "inputs": {
+    "Red": 0.6,
+    "Green": 0.4,
+    "Blue": 0.7
+   },
+   "output": "Color",
+   "result": [
+    0.419922,
+    0.531738,
+    0.699707,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeSeparateColor",
+   "properties": {
+    "mode": "HSL"
+   },
+   "inputs": {
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ]
+   },
+   "output": "Green",
+   "result": [
+    0.777344,
+    0.777344,
+    0.777344,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeCombineColor",
+   "properties": {
+    "mode": "HSL"
+   },
+   "inputs": {
+    "Red": 0.6,
+    "Green": 0.4,
+    "Blue": 0.7
+   },
+   "output": "Color",
+   "result": [
+    0.57959,
+    0.675781,
+    0.819824,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeRGBToBW",
+   "properties": {},
+   "inputs": {
+    "Color": [
+     0.2,
+     0.5,
+     0.9,
+     1.0
+    ]
+   },
+   "output": "Val",
+   "result": [
+    0.465088,
+    0.465088,
+    0.465088,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeNormal",
+   "properties": {},
+   "inputs": {
+    "Normal": [
+     0.3,
+     0.5,
+     0.8
+    ],
+    "=Normal": [
+     0.6,
+     0.0,
+     0.8
+    ]
+   },
+   "output": "Normal",
+   "result": [
+    0.599609,
+    0.0,
+    0.799805,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeNormal",
+   "properties": {},
+   "inputs": {
+    "Normal": [
+     0.3,
+     0.5,
+     0.8
+    ],
+    "=Normal": [
+     0.6,
+     0.0,
+     0.8
+    ]
+   },
+   "output": "Dot",
+   "result": [
+    0.828125,
+    0.828125,
+    0.828125,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeValue",
+   "properties": {},
+   "inputs": {
+    "=Value": 0.37
+   },
+   "output": "Value",
+   "result": [
+    0.369873,
+    0.369873,
+    0.369873,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "engine": "EEVEE",
+   "node": "ShaderNodeRGB",
+   "properties": {},
+   "inputs": {
+    "=Color": [
+     0.1,
+     0.6,
+     0.3,
+     1.0
+    ]
+   },
+   "output": "Color",
+   "result": [
+    0.099976,
+    0.599609,
+    0.299805,
+    1.0
+   ]
+  },
+  {
    "tree": "compositor",
    "node": "CompositorNodeColorBalance",
    "properties": {},

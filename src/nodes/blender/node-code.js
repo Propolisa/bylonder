@@ -1,10 +1,11 @@
 // A Blender node's GPU code as its C++ links it (GPU_stack_link and GPU_link in node_shader_*.cc and
 // node_composite_*.cc), for the blocks that run Blender nodes in Babylon's graphs. A node links steps of
 // [function, arguments, outputs]: an argument is an input socket's identifier, an output's as '@identifier' (its link so
-// far), a value of the shaded point as '$name' (shader-nodes.js), or a constant (a number, an array for a vector,
-// { glsl } for anything else, { texture } for a sampler of an RGBA table, as GPU_color_band, { image } for one of an
-// Image, as GPU_image); each output listed is
-// written by the call and links to its result from then on.
+// far), an output socket's own value as '=identifier', a value of the shaded point as '$name' (shader-nodes.js), a
+// local value a step wrote as '#name', or a constant (a number, an array for a vector, { glsl } for anything else,
+// { texture } for a sampler of an RGBA table, as GPU_color_band, { image } for one of an Image, as GPU_image); each
+// output listed (a socket, or [#name, kind] for a local value) is written by the call and links to its result from then
+// on. An argument is converted to its parameter's type, as GPU_link converts it.
 import { glslFunction, glslName } from './glsl.js';
 import { convert, converts, glslType, glslValue, socketType } from './sockets.js';
 
@@ -14,7 +15,8 @@ export const stack = (name, decl, extra = []) =>
 
 export const glslIdentifier = (name) => ('bl_' + name.replace(/\W+/g, '_')).replace(/_{2,}/g, '_');
 
-const socketOf = (decl, id) => (id.startsWith('@') ? decl.outputs.find((s) => '@' + s.identifier === id) : decl.inputs.find((s) => s.identifier === id));
+// A step's socket: an output ('@identifier'), an output's own value ('=identifier', as a Value node holds it) or an input.
+export const socketOf = (decl, id) => (id[0] === '@' || id[0] === '=' ? decl.outputs.find((s) => id.slice(1) === s.identifier) : decl.inputs.find((s) => s.identifier === id));
 export const kindOfSocket = (decl, id) => socketType(socketOf(decl, id).type)?.kind;
 
 const constant = (arg, sampler) => {
@@ -26,25 +28,46 @@ const constant = (arg, sampler) => {
 
 // The statements running the steps; `links` gives and takes the GLSL of socket links, `emit(name, code)` declares a
 // function once, `free(prefix)` gives a fresh variable name, `sampler(arg)` a sampler of its table or image, and
-// `functions` GLSL of the caller's own (Bylonder's stand-ins for Blender's engine code) by name.
-export function compileSteps(decl, steps, links, { emit, free, sampler, functions = {} }) {
+// `functions` GLSL of the caller's own (Bylonder's stand-ins for Blender's engine code) by name; `pointKind(name)`
+// the kind of a value of the shaded point, where it may differ from its parameter's.
+export function compileSteps(decl, steps, links, { emit, free, sampler, functions = {}, pointKind = () => undefined }) {
   let code = '';
+  const locals = new Map();
+  const kindOfArg = (a) => (typeof a !== 'string' ? undefined : a[0] === '#' ? locals.get(a) : a[0] === '$' ? pointKind(a) : socketOf(decl, a) && kindOfSocket(decl, a));
   for (const [name, args, outs] of steps.filter(Boolean)) {
-    if (functions[name]) emit(name, functions[name]);
-    else for (const [key, text] of glslFunction(name)) {
+    let text = functions[name];
+    if (text) emit(name, text);
+    else for (const [key, glsl] of glslFunction(name)) {
       // Bylonder's stand-ins for engine functions Blender's GLSL calls, before their callers.
-      for (const [standIn, code] of Object.entries(functions)) if (new RegExp(`\\b${standIn}\\(`).test(text)) emit(standIn, code);
-      emit(key, text);
+      for (const [standIn, standInGlsl] of Object.entries(functions)) if (new RegExp(`\\b${standIn}\\(`).test(glsl)) emit(standIn, standInGlsl);
+      emit(key, glsl);
+      text = glsl;
     }
+    const params = parameterKinds(text, functions[name] ? name : glslName(name), args.length + outs.length);
     const results = outs.map((out) => {
-      const kind = kindOfSocket(decl, out), v = free(glslIdentifier(out));
+      const [id, kind] = Array.isArray(out) ? out : [out, kindOfSocket(decl, out)], v = free(glslIdentifier(id));
+      if (Array.isArray(out)) locals.set(id, kind);
       code += `${glslType(kind)} ${v} = ${glslValue(0, kind)};\n`;
-      return [out, v];
+      return [id, v];
     });
-    code += `${functions[name] ? name : glslName(name)}(${[...args.map((a) => constant(a, sampler) ?? links.get(a)), ...results.map(([, v]) => v)].join(', ')});\n`;
-    for (const [out, v] of results) links.set(out, v);
+    const values = args.map((a, i) => {
+      const e = constant(a, sampler) ?? links.get(a), from = kindOfArg(a);
+      return from && params[i] ? convert(e, from, params[i]) : e;
+    });
+    code += `${functions[name] ? name : glslName(name)}(${[...values, ...results.map(([, v]) => v)].join(', ')});\n`;
+    for (const [id, v] of results) links.set(id, v);
   }
   return code;
+}
+
+// The kinds of a function's parameters (of its overload taking `count`), as its GLSL declares them.
+const PARAMETER_KINDS = { float: 'float', vec2: 'vec2', vec3: 'vec3', vec4: 'vec4' };
+function parameterKinds(text, name, count) {
+  for (const [, list] of text.matchAll(new RegExp(`\\b${name}\\s*\\(([^)]*)\\)\\s*\\{`, 'g'))) {
+    const params = list.split(',').map((p) => p.trim()).filter(Boolean);
+    if (params.length === count) return params.map((p) => PARAMETER_KINDS[/^(?:(?:inout|out|in|const)\s+)*(\w+)/.exec(p)?.[1]]);
+  }
+  return [];
 }
 
 // A muted node (node_internal_links): each output takes the first available input of its type, else of a type it

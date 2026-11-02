@@ -5,29 +5,36 @@
 //
 // What Blender's GPU code reads of the point it shades (g_data, attributes, the object's texture space) comes from
 // Babylon's geometry: hidden inputs (named `__...`) linked to Babylon blocks named `blender:...`, which Bylonder's
-// editor does not draw. A closure (a SHADER socket) is the radiance it sends toward the view and its alpha: Principled
-// BSDF is Babylon's PBR block lit by Babylon's lights, Emission adds its radiance, and Material Output writes the
-// fragment through Babylon's image processing.
+// editor does not draw. A closure (a SHADER socket) is what a surface reflects, emits and lets through, as EEVEE gathers
+// it (STAND_INS bl_closure); Material Output lights it once with Babylon's PBR block (BlenderSurfaceBlock) and writes
+// it through the scene's image processing (BlenderDisplayBlock).
 import {
-  Color4, Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, NodeMaterial, NodeMaterialBlock, NodeMaterialBlockConnectionPointTypes as T,
-  NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, PBRMetallicRoughnessBlock, RawTexture, ReflectionBlock, RegisterClass,
-  Texture, TransformBlock, VertexOutputBlock,
+  Color4, Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, Matrix, NodeMaterial, NodeMaterialBlock,
+  NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
+  RawTexture, ReflectionBlock, RefractionBlock, RegisterClass, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
+import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { functions } from './gpu-library.js';
-import { BABYLON_TYPES, convert, converts, glslValue, kindOf, socketType } from './sockets.js';
+import { BABYLON_TYPES, convert, converts, glslType, glslValue, kindOf, LUMINANCE, socketType } from './sockets.js';
 import { availability, declaration, defaults } from './declarations.js';
-import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, stack } from './node-code.js';
+import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, socketOf, stack } from './node-code.js';
 import { colorRampTable, defaultColorRamp, halfFloats, TABLE_SIZE } from '../../blenkernel/colorband.js';
+import { blackbodyTable, curveMappingGPU, defaultCurveMapping, plainCurveMapping, wavelengthTable } from '../../blenkernel/colortools.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import { imageTexture } from '../../imbuf/image-textures.js';
 import { blendData } from '../../python/bpy_rna.js';
 import '../graph-roots.js';
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
+// The outputs whose socket holds the node's value ('=identifier' in its values), drawn on the node (custom_draw).
+export const OUTPUT_VALUES = { ShaderNodeValue: ['Value'], ShaderNodeRGB: ['Color'], ShaderNodeNormal: ['Normal'] };
 const sortedStops = (ramp) => [...ramp.elements].sort((a, b) => a.position - b.position);
 
-// g_data as EEVEE's surface shaders fill it (eevee_surf_common.bsl.hh init_globals, init_globals_curves).
-const G_DATA = ['bl_g_data', ['$P', '$N', '$is_strand', '$hair_radius', '$hair_curve_N', '$hair_strand_id'], []];
+// g_data as EEVEE's surface shaders fill it (eevee_surf_common.bsl.hh init_globals, init_globals_curves), and the
+// object's and view's matrices and infos its draw manager binds (draw_resource.hh ObjectInfos, ObjectMatrices).
+const G_DATA = ['bl_g_data', ['$P', '$N', '$camera_position', '$is_strand', '$hair_radius', '$hair_curve_N', '$hair_strand_id'], []];
+const ENGINE = ['bl_engine', ['$model', '$model_inverse', '$viewmat', '$viewinv', '$winmat', '$object_color', '$object_info'], []];
+const ENGINE_STEPS = [G_DATA, ENGINE];
 // Each node's steps from its properties (see node-code.js), as its C++ GPU function links them. `connected(id)` tells
 // whether an input is linked, `linked(id)` whether an output is (GPUNodeStack's link and hasoutput).
 export const SHADER_NODES = {
@@ -49,10 +56,8 @@ export const SHADER_NODES = {
     ];
   },
   // node_shader_tex_noise.cc, node_shader_gpu_tex_noise: an unlinked vector is Generated (node_shader_gpu_default_tex_coord).
-  ShaderNodeTexNoise: (p, decl, { connected, linked }) => {
-    const [name, args, outs] = stack(functions.noise[p.noise_type][DIMENSIONS.indexOf(p.noise_dimensions)], decl, [p.normalize ? 1 : 0, linked('Color') ? 1 : 0]);
-    return [[name, args.map((a) => (a === 'Vector' && !connected('Vector') ? '$orco' : a)), outs]];
-  },
+  ShaderNodeTexNoise: (p, decl, context) =>
+    texture(decl, context, functions.noise[p.noise_type][DIMENSIONS.indexOf(p.noise_dimensions)], [p.normalize ? 1 : 0, context.linked('Color') ? 1 : 0]),
   // node_shader_tex_image.cc, node_shader_gpu_tex_image: an unlinked vector is the default UV map; the Color output's
   // alpha as the Alpha output's use asks, from what the texture holds: a float buffer premultiplied, a byte buffer
   // straight (imbuf/image-textures.js imagePremultiplied), where Blender's holds a straight float image straight.
@@ -92,20 +97,240 @@ export const SHADER_NODES = {
   },
   // node_shader_hair_info.cc, node_shader_gpu_hair_info
   ShaderNodeHairInfo: (p, decl) => [G_DATA, ['node_hair_info', ['$hair_intercept', '$hair_length'], decl.outputs.map((s) => '@' + s.identifier)]],
-  // node_shader_emission.cc, node_shader_gpu_emission
-  ShaderNodeEmission: (p, decl) => [['bl_node_emission', ['Color', 'Strength', 'Weight'], ['@Emission']]],
+  // node_shader_emission.cc, node_shader_bsdf_*.cc, node_shader_mix_shader.cc, node_shader_add_shader.cc,
+  // node_shader_holdout.cc: closures (STAND_INS bl_closure); an unlinked normal is the shaded point's.
+  ShaderNodeEmission: () => [['bl_node_emission', ['Color', 'Strength'], ['@Emission']]],
+  ShaderNodeBsdfPrincipled: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_principled', ['Base Color', 'Metallic', 'Roughness', 'IOR', 'Alpha',
+    normal(connected), 'Transmission Weight', 'Emission Color', 'Emission Strength'], ['@BSDF']]],
+  ShaderNodeBsdfDiffuse: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfSheen: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfTranslucent: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
+  ShaderNodeSubsurfaceScattering: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSSRDF']]],
+  ShaderNodeBsdfHair: () => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', WORLD_NORMAL], ['@BSDF']]],
+  ShaderNodeBsdfHairPrincipled: () => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', WORLD_NORMAL], ['@BSDF']]],
+  ShaderNodeBsdfGlossy: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glossy', ['Color', 'Roughness', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfAnisotropic: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glossy', ['Color', 'Roughness', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfMetallic: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glossy', ['Base Color', 'Roughness', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfGlass: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glass', ['Color', 'Roughness', 'IOR', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfRefraction: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_glass', ['Color', 'Roughness', 'IOR', normal(connected)], ['@BSDF']]],
+  ShaderNodeBsdfTransparent: () => [['bl_node_bsdf_transparent', ['Color'], ['@BSDF']]],
+  ShaderNodeHoldout: () => [['bl_node_holdout', [], ['@Holdout']]],
+  ShaderNodeMixShader: (p, decl) => [stack('bl_node_mix_shader', decl)],
+  ShaderNodeAddShader: (p, decl) => [stack('bl_node_add_shader', decl)],
+  // node_shader_curves.cc, gpu_shader_curve_rgb, gpu_shader_curve_vec, gpu_shader_curve_float: shader nodes do no
+  // white balancing; when R, G and B map identity only the combined curve applies.
+  ShaderNodeRGBCurve: (p, decl) => {
+    const curves = curveMappingGPU(p.mapping), levels = [[0, 0, 0, 1], [1, 1, 1, 1], { texture: curves.table }, 0.5];
+    const only = curves.identity.slice(0, 3).every(Boolean);
+    return [stack(only ? 'curves_combined_only' : 'curves_combined_rgb', decl, [...levels, ...curveParameters(curves, only ? (v) => v[3] : (v) => v)])];
+  },
+  ShaderNodeVectorCurve: (p, decl) => {
+    const curves = curveMappingGPU(p.mapping);
+    return [stack('curves_vector_mixed', decl, [{ texture: curves.table }, 0.5, ...curveParameters(curves, (v) => v.slice(0, 3))])];
+  },
+  ShaderNodeFloatCurve: (p, decl) => {
+    const curves = curveMappingGPU(p.mapping);
+    return [stack('curves_float_mixed', decl, [{ texture: curves.table }, 0.5, ...curveParameters(curves, (v) => v[0])])];
+  },
+  // node_shader_blackbody.cc, node_shader_wavelength.cc
+  ShaderNodeBlackbody: (p, decl) => [stack('node_blackbody', decl, [{ texture: blackbodyTable() }, 0.5])],
+  ShaderNodeWavelength: (p, decl) => [stack('node_wavelength', decl, [{ texture: wavelengthTable() }, 0.5])],
+  // node_shader_vector_math.cc, gpu_shader_vector_math
+  ShaderNodeVectorMath: (p, decl) => [stack(functions.vector_math[p.operation], decl)],
+  // node_shader_map_range.cc, gpu_shader_map_range
+  ShaderNodeMapRange: (p, decl) => {
+    const vector = p.data_type === 'FLOAT_VECTOR', name = functions.map_range[p.interpolation_type];
+    return [
+      stack(vector ? 'vector_' + name : name, decl, [p.clamp ? 1 : 0]),
+      p.clamp && !vector && !['SMOOTHSTEP', 'SMOOTHERSTEP'].includes(p.interpolation_type) && ['clamp_range', ['@Result', 'To Min', 'To Max'], ['@Result']],
+    ];
+  },
+  // node_shader_clamp.cc, gpu_shader_clamp
+  ShaderNodeClamp: (p, decl) => [stack(p.clamp_type === 'MINMAX' ? 'clamp_minmax' : 'clamp_range', decl)],
+  // node_shader_mapping.cc, gpu_shader_mapping
+  ShaderNodeMapping: (p, decl) => [stack(functions.mapping[p.vector_type], decl)],
+  // node_shader_mix_rgb.cc, gpu_shader_mix_rgb
+  ShaderNodeMixRGB: (p, decl) => [
+    ['clamp_value', ['Fac', 0, 1], ['Fac']],
+    stack(functions.mix_rgb[p.blend_type], decl),
+    // Blender passes its three-float limits as clamp_color's four: the color's alpha clamps to 0.
+    p.use_clamp && ['clamp_color', ['@Color', [0, 0, 0, 0], [1, 1, 1, 0]], ['@Color']],
+  ],
+  // node_shader_hueSatVal.cc, node_shader_brightness.cc, node_shader_invert.cc, node_shader_gamma.cc
+  ShaderNodeHueSaturation: (p, decl) => [stack('hue_sat', decl)],
+  ShaderNodeBrightContrast: (p, decl) => [stack('brightness_contrast', decl)],
+  ShaderNodeInvert: (p, decl) => [stack('invert', decl)],
+  ShaderNodeGamma: (p, decl) => [stack('node_gamma', decl)],
+  // node_shader_sepcomb_xyz.cc, node_shader_sepcomb_color.cc
+  ShaderNodeSeparateXYZ: (p, decl) => [stack('separate_xyz', decl)],
+  ShaderNodeCombineXYZ: (p, decl) => [stack('combine_xyz', decl)],
+  ShaderNodeSeparateColor: (p, decl) => [stack(functions.separate_color[p.mode], decl)],
+  ShaderNodeCombineColor: (p, decl) => [stack(functions.combine_color[p.mode], decl)],
+  // node_shader_rgb_to_bw.cc, gpu_shader_rgbtobw: the scene linear luminance of Blender's default color management.
+  ShaderNodeRGBToBW: (p, decl) => [stack('rgbtobw', decl, [LUMINANCE])],
+  // node_shader_normal.cc, gpu_shader_normal: the direction is the output socket's value.
+  ShaderNodeNormal: (p, decl) => [stack('normal_new_shading', decl, ['=Normal'])],
+  // node_shader_vector_rotate.cc, gpu_shader_vector_rotate
+  ShaderNodeVectorRotate: (p, decl) => [stack(functions.vector_rotate[p.rotation_type], decl, [p.invert ? -1 : 1])],
+  // node_shader_value.cc, node_shader_rgb.cc: the output socket's value.
+  ShaderNodeValue: () => [['set_value', ['=Value'], ['@Value']]],
+  ShaderNodeRGB: () => [['set_rgba', ['=Color'], ['@Color']]],
+  // node_shader_tex_*.cc, node_shader_gpu_tex_*: an unlinked vector is Generated (node_shader_gpu_default_tex_coord).
+  ShaderNodeTexGradient: (p, decl, context) => texture(decl, context, 'node_tex_gradient', [enumValue(decl, p, 'gradient_type')]),
+  ShaderNodeTexWave: (p, decl, context) => texture(decl, context, 'node_tex_wave', ['wave_type', 'bands_direction', 'rings_direction', 'wave_profile'].map((key) => enumValue(decl, p, key))),
+  ShaderNodeTexVoronoi: (p, decl, context) => texture(decl, context, functions.voronoi[p.feature][DIMENSIONS.indexOf(p.voronoi_dimensions)], [enumValue(decl, p, 'distance'), p.normalize ? 1 : 0]),
+  ShaderNodeTexChecker: (p, decl, context) => texture(decl, context, 'node_tex_checker'),
+  ShaderNodeTexBrick: (p, decl, context) => texture(decl, context, 'node_tex_brick', [p.offset, p.offset_frequency, p.squash, p.squash_frequency]),
+  ShaderNodeTexMagic: (p, decl, context) => texture(decl, context, 'node_tex_magic', [p.turbulence_depth]),
+  // node_shader_tex_white_noise.cc, gpu_shader_tex_white_noise: no default coordinates.
+  ShaderNodeTexWhiteNoise: (p, decl) => [stack(`node_white_noise_${p.noise_dimensions.toLowerCase()}`, decl)],
+  // node_shader_tex_gabor.cc, node_shader_squeeze.cc, node_shader_radial_tiling.cc
+  ShaderNodeTexGabor: (p, decl, context) => texture(decl, context, 'node_tex_gabor', [enumValue(decl, p, 'gabor_type')]),
+  ShaderNodeSqueeze: (p, decl) => [stack('squeeze', decl)],
+  ShaderNodeRadialTiling: (p, decl, { linked }) => [stack('node_radial_tiling', decl, [p.normalize ? 1 : 0, ...outputs(decl).map((id) => (linked(id.slice(1)) ? 1 : 0))])],
+  // node_shader_light_falloff.cc: a material's surface is lit by no light of its own, so its strength passes through.
+  ShaderNodeLightFalloff: (p, decl) => [stack('node_light_falloff', decl)],
+  // node_shader_bevel.cc, node_shader_ambient_occlusion.cc, node_shader_displacement.cc,
+  // node_shader_vector_displacement.cc: an unlinked normal is the shaded point's.
+  ShaderNodeBevel: (p, decl, { connected }) => [G_DATA, ['node_bevel', ['Radius', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Normal']]],
+  ShaderNodeAmbientOcclusion: (p, decl, { connected }) => [G_DATA,
+    ['node_ambient_occlusion', ['Color', 'Distance', connected('Normal') ? 'Normal' : WORLD_NORMAL, p.inside ? 1 : 0, Math.ceil(p.samples / 4)], outputs(decl)]],
+  ShaderNodeDisplacement: (p, decl, { connected }) => [...ENGINE_STEPS,
+    [p.space === 'OBJECT' ? 'node_displacement_object' : 'node_displacement_world', ['Height', 'Midlevel', 'Scale', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Displacement']]],
+  ShaderNodeVectorDisplacement: (p, decl) => [...ENGINE_STEPS, p.space === 'TANGENT' ? stack('node_vector_displacement_tangent', decl, [tangent('')])
+    : stack(p.space === 'OBJECT' ? 'node_vector_displacement_object' : 'node_vector_displacement_world', decl)],
+  // node_shader_vector_transform.cc, gpu_shader_vect_transform: get_gpufn_name_from_to names the transform by its
+  // type and spaces; camera space looks down -z where the view's looks down z.
+  ShaderNodeVectorTransform: (p) => {
+    const space = { OBJECT: 'object', WORLD: 'world', CAMERA: 'view' }, type = { POINT: 'point', VECTOR: 'direction', NORMAL: 'normal' }[p.vector_type];
+    const same = p.convert_from === p.convert_to;
+    return [...ENGINE_STEPS,
+      !same && p.convert_from === 'CAMERA' && ['invert_z', ['Vector'], ['Vector']],
+      [same ? 'set_rgb' : `${type}_transform_${space[p.convert_from]}_to_${space[p.convert_to]}`, ['Vector'], ['@Vector']],
+      !same && p.convert_to === 'CAMERA' && ['invert_z', ['@Vector'], ['@Vector']],
+      p.vector_type === 'NORMAL' && ['vector_normalize', ['@Vector'], ['@Vector']]];
+  },
+  // node_shader_geometry.cc, node_shader_gpu_geometry
+  ShaderNodeNewGeometry: (p, decl) => [...ENGINE_STEPS, ['node_geometry', ['$orco'], outputs(decl)]],
+  // node_shader_object_info.cc, node_shader_gpu_object_info: the material's pass index is not Bylonder's.
+  ShaderNodeObjectInfo: (p, decl) => [...ENGINE_STEPS, ['node_object_info', [0], outputs(decl)]],
+  // node_shader_camera.cc, node_shader_light_path.cc: every ray is a camera ray, as in EEVEE's main view.
+  ShaderNodeCameraData: (p, decl) => [...ENGINE_STEPS, stack('camera', decl)],
+  ShaderNodeLightPath: (p, decl) => [G_DATA, stack('node_light_path', decl)],
+  // node_shader_fresnel.cc, node_shader_layer_weight.cc: an unlinked normal is the shaded point's (world_normals_get).
+  ShaderNodeFresnel: (p, decl, { connected }) => [...ENGINE_STEPS, ['node_fresnel', ['IOR', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Fac']]],
+  ShaderNodeLayerWeight: (p, decl, { connected }) => [...ENGINE_STEPS, ['node_layer_weight', ['Blend', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Fresnel', '@Facing']]],
+  // node_shader_attribute.cc, node_shader_gpu_attribute: a geometry attribute by name (color and temperature as Blender
+  // reads them), else the object's, its instancer's or the view layer's value of that name.
+  ShaderNodeAttribute: (p, decl) => {
+    const name = p.attribute_name;
+    if (p.attribute_type !== 'GEOMETRY') return [['node_attribute', [`$uniform_attribute:${p.attribute_type}:${name}`], outputs(decl)]];
+    const post = { color: 'node_attribute_color', temperature: 'node_attribute_temperature' }[name];
+    return [post && [post, [attribute(name)], [['#attribute', 'vec4']]], ['node_attribute', [post ? '#attribute' : attribute(name)], outputs(decl)]];
+  },
+  // node_shader_vertex_color.cc, node_shader_uvmap.cc: an empty name is the default color attribute, the default UV map.
+  ShaderNodeVertexColor: (p, decl) => [['node_vertex_color', [attribute(p.layer_name, 'color')], outputs(decl)]],
+  ShaderNodeUVMap: (p, decl) => [['node_uvmap', [p.uv_map ? attribute(p.uv_map) : '$uv'], outputs(decl)]],
+  // node_shader_tangent.cc, node_shader_gpu_tangent
+  ShaderNodeTangent: (p, decl) => (p.direction_type === 'UV_MAP' ? [...ENGINE_STEPS, ['node_tangentmap', [tangent(p.uv_map)], ['@Tangent']]]
+    : [...ENGINE_STEPS, [`tangent_orco_${p.axis.toLowerCase()}`, ['$orco'], [['#orco', 'vec3']]], ['node_tangent', ['#orco'], ['@Tangent']]]),
+  // node_shader_normal_map.cc, gpu_shader_normal_map
+  ShaderNodeNormalMap: (p, decl) => {
+    const steps = [...ENGINE_STEPS,
+      [p.space.startsWith('BLENDER_') ? 'color_to_blender_normal_new_shading' : 'color_to_normal_new_shading', ['Color'], [['#normal', 'vec3']]],
+      p.convention === 'DIRECTX' && ['color_invert_green_channel', ['#normal'], [['#normal', 'vec3']]],
+      [p.base === 'DISPLACED' ? 'input_normal_displaced' : 'input_normal_original', [], [['#input', 'vec3']]]];
+    if (p.space === 'TANGENT') return [...steps, ['node_normal_map', [tangent(p.uv_map), 'Strength', '#normal', '#input'], ['@Normal']]];
+    return [...steps, p.space.endsWith('OBJECT') && ['normal_transform_object_to_world', ['#normal'], [['#normal', 'vec3']]],
+      ['node_normal_map_mix', ['Strength', '#normal'], ['@Normal']]];
+  },
 };
 
-// Bylonder's GLSL where Blender's is its render engine's (EEVEE's g_data and closures, gpu_shader_codegen_lib.glsl).
-// port-override: the shaded point comes from Babylon's geometry and a closure is its radiance, so these stand in.
+const outputs = (decl) => decl.outputs.map((s) => '@' + s.identifier);
+// A BSDF's Normal socket, the shaded point's normal when unlinked.
+const normal = (connected) => (connected('Normal') ? 'Normal' : WORLD_NORMAL);
+// A curve mapping's range minimums, dividers, start and end slopes, each as `pick` takes its curves' values.
+const curveParameters = (curves, pick) => [curves.minimums, curves.dividers, curves.startSlopes, curves.endSlopes].map(pick);
+// The curve mappings nodes start with (their init functions' BKE_curvemapping_add): curves and range.
+const CURVE_MAPPINGS = { ShaderNodeRGBCurve: [4, [0, 1]], ShaderNodeVectorCurve: [3, [-1, 1]], ShaderNodeFloatCurve: [1, [0, 1]] };
+// A geometry attribute's value by name ('$attribute:...'), as GPU_attribute(CD_AUTO_FROM_NAME) reads it; `fallback`
+// names the default layer an empty name reads (GPU_attribute_default_color).
+const attribute = (name, fallback = '') => `$attribute:${name || (fallback && ':' + fallback)}`;
+// A UV map's tangent (GPU_attribute(CD_TANGENT)).
+const tangent = (uvMap) => `$tangent:${uvMap}`;
+
+// A texture node's function linked with its vector, Generated when unlinked (node_shader_gpu_default_tex_coord).
+function texture(decl, { connected }, name, extra) {
+  const [, args, outs] = stack(name, decl, extra);
+  return [[name, args.map((a) => (a === 'Vector' && !connected('Vector') ? '$orco' : a)), outs]];
+}
+// An enum property as the DNA value Blender's GPU code passes.
+const enumValue = (decl, p, key) => decl.properties[key].values?.[p[key]] ?? decl.properties[key].items.findIndex(([id]) => id === p[key]);
+
+// Bylonder's GLSL where Blender's is its render engine's (EEVEE's g_data, draw manager resources and closures,
+// gpu_shader_codegen_lib.glsl). port-override: the shaded point comes from Babylon's geometry and a closure is its
+// radiance, so these stand in.
 export const STAND_INS = {
-  // g_data as Blender's code generation fills it, and the derivatives node_bump reads (the film's scale is 1).
-  bl_g_data: `struct GlobalData { vec3 P; vec3 N; bool is_strand; float hair_diameter; vec3 curve_N; int hair_strand_id; };
+  // blender-port: eevee_surf_common.bsl.hh init_globals, init_globals_curves: every ray is a camera ray (EEVEE's main
+  // view); a strand's normal is its cylinder's, which curves.js gives. The derivatives node_bump reads (the film's scale is 1).
+  bl_g_data: `#define FrontFacing gl_FrontFacing
+#define RAY_TYPE_CAMERA 0
+#define RAY_TYPE_SHADOW 1
+#define RAY_TYPE_DIFFUSE 2
+#define RAY_TYPE_GLOSSY 3
+struct GlobalData { vec3 P; vec3 N; vec3 Ni; vec3 Ng; vec3 curve_T; vec3 curve_B; vec3 curve_N; vec2 barycentric_coords; vec3 barycentric_dists;
+  float hair_diameter; int hair_strand_id; float ray_depth; float ray_length; int ray_type; bool is_strand; };
 GlobalData g_data;
-#define FrontFacing gl_FrontFacing
 float derivative_scale_get() { return 1.0; }
-void bl_g_data(vec3 P, vec3 N, float is_strand, float hair_radius, vec3 curve_N, float hair_strand_id) {
-  g_data = GlobalData(P, N, is_strand > 0.5, hair_radius * 2.0, curve_N, int(hair_strand_id));
+void bl_g_data(vec3 P, vec3 N, vec3 camera, float is_strand, float hair_radius, vec3 curve_N, float hair_strand_id) {
+  bool flip = !gl_FrontFacing && is_strand < 0.5;
+  g_data.P = P;
+  g_data.Ni = flip ? -N : N;
+  g_data.N = normalize(g_data.Ni);
+  g_data.Ng = normalize(cross(dFdx(P), dFdy(P)));
+  g_data.curve_T = vec3(0.0);
+  g_data.curve_B = vec3(0.0);
+  g_data.curve_N = curve_N;
+  g_data.barycentric_coords = vec2(0.0);
+  g_data.barycentric_dists = vec3(0.0);
+  g_data.hair_diameter = hair_radius * 2.0;
+  g_data.hair_strand_id = int(hair_strand_id);
+  g_data.ray_depth = 0.0;
+  g_data.ray_length = distance(P, camera);
+  g_data.ray_type = RAY_TYPE_CAMERA;
+  g_data.is_strand = is_strand > 0.5;
+}`,
+  // The draw manager's object and view resources (draw_resource.hh ObjectInfos, ObjectMatrices; ViewMatrices).
+  bl_engine: `#define OBJECT_NEGATIVE_SCALE 16u
+struct ObjectMatrices { mat4 model; mat4 model_inverse; };
+struct ViewMatrices { mat4 viewmat; mat4 viewinv; mat4 winmat; };
+struct ObjectInfos { vec4 ob_color; float index; float random; uint flag; };
+ObjectMatrices bl_object_matrices;
+ViewMatrices bl_view_matrices;
+ObjectInfos bl_object_infos;
+void bl_engine(mat4 model, mat4 model_inverse, mat4 viewmat, mat4 viewinv, mat4 winmat, vec4 color, vec3 info) {
+  bl_object_matrices = ObjectMatrices(model, model_inverse);
+  bl_view_matrices = ViewMatrices(viewmat, viewinv, winmat);
+  bl_object_infos = ObjectInfos(color, info.x, info.y, uint(info.z));
+}`,
+  object_matrices_get: 'ObjectMatrices object_matrices_get() { return bl_object_matrices; }',
+  view_matrices_get: 'ViewMatrices view_matrices_get() { return bl_view_matrices; }',
+  object_infos_get: 'ObjectInfos object_infos_get() { return bl_object_infos; }',
+  // blender-port: eevee_nodetree_lib.bsl.hh coordinate_incoming, draw_view_lib.glsl drw_world_incident_vector
+  coordinate_incoming: `vec3 coordinate_incoming(vec3 P) {
+  return bl_view_matrices.winmat[3][3] == 0.0 ? normalize(bl_view_matrices.viewinv[3].xyz - P) : bl_view_matrices.viewinv[2].xyz;
+}`,
+  // A UV map's tangent: the mesh's (Blender's MikkTSpace tangents, object space) in world space, as EEVEE's
+  // attr_load_tangent gives it. port-override: where the mesh gives none (another UV map's, a mesh not Blender's), from
+  // the screen derivatives of the point and its UV, its sign (w) orienting the bitangent as Blender's does.
+  bl_uv_tangent: `vec4 bl_uv_tangent(vec4 extracted, mat4 model_inverse, vec3 P, vec3 N, vec2 uv) {
+  if (dot(extracted.xyz, extracted.xyz) > 0.0) return vec4(normalize(extracted.xyz * mat3(model_inverse)), extracted.w);
+  vec3 dp1 = dFdx(P), dp2 = dFdy(P);
+  vec2 duv1 = dFdx(uv), duv2 = dFdy(uv);
+  vec3 dp2perp = cross(dp2, N), dp1perp = cross(N, dp1);
+  vec3 T = dp2perp * duv1.x + dp1perp * duv2.x, B = dp2perp * duv1.y + dp1perp * duv2.y;
+  T -= N * dot(N, T);
+  return dot(T, T) > 0.0 ? vec4(normalize(T), dot(cross(N, T), B) < 0.0 ? -1.0 : 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
 }`,
   bl_vector_copy: 'void bl_vector_copy(vec3 v, inout vec3 result) { result = v; }',
   // EEVEE's texture LOD bias (the film's, 1 at full resolution).
@@ -114,34 +339,158 @@ void bl_g_data(vec3 P, vec3 N, float is_strand, float hair_radius, vec3 curve_N,
   inout vec3 generated, inout vec3 normal, inout vec3 uv, inout vec3 object, inout vec3 camera, inout vec3 window, inout vec3 reflection) {
   generated = orco; normal = normal_in; uv = uv_in; object = object_in; camera = camera_in; window = window_in; reflection = reflection_in;
 }`,
-  // node_emission's closure: its emission, max(color, 0) times max(strength, 0), as radiance.
-  bl_node_emission: 'void bl_node_emission(vec4 color, float strength, float weight, inout vec4 result) { result = vec4(max(color.rgb, 0.0) * max(strength, 0.0), 1.0); }',
+  // A closure as EEVEE gathers a material's closures before lighting them: each kind of reflection's color with its
+  // weight (dielectric, metal, transmission), its roughness, IOR and normal summed as they weigh, its emission and its
+  // transparency. Mixing and adding closures weighs and sums them; the material's surface lights the sum once
+  // (BlenderSurfaceBlock), as EEVEE merges the closures of one kind.
+  bl_closure: `struct BlClosure { vec3 dielectric; float dielectric_weight; vec3 metal; float metal_weight; vec3 transmission; float transmission_weight;
+  float roughness; float ior; vec3 normal; vec3 emission; float transparency; };
+BlClosure bl_closure_empty() { return BlClosure(vec3(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), vec3(0.0), 0.0); }
+BlClosure bl_closure_weigh(BlClosure c, float w) {
+  return BlClosure(c.dielectric * w, c.dielectric_weight * w, c.metal * w, c.metal_weight * w, c.transmission * w, c.transmission_weight * w,
+    c.roughness * w, c.ior * w, c.normal * w, c.emission * w, c.transparency * w);
+}
+BlClosure bl_closure_add(BlClosure a, BlClosure b) {
+  return BlClosure(a.dielectric + b.dielectric, a.dielectric_weight + b.dielectric_weight, a.metal + b.metal, a.metal_weight + b.metal_weight,
+    a.transmission + b.transmission, a.transmission_weight + b.transmission_weight, a.roughness + b.roughness, a.ior + b.ior, a.normal + b.normal,
+    a.emission + b.emission, a.transparency + b.transparency);
+}
+// A reflection of weight 1, its color split among the kinds by their weights.
+BlClosure bl_closure_bsdf(vec3 color, float dielectric, float metal, float transmission, float roughness, float ior, vec3 N) {
+  color = max(color, vec3(0.0));
+  return BlClosure(color * dielectric, dielectric, color * metal, metal, color * transmission, transmission, roughness, ior, normalize(N), vec3(0.0), 0.0);
+}
+float bl_closure_weight(BlClosure c) { return c.dielectric_weight + c.metal_weight + c.transmission_weight; }
+// A parameter summed as the reflections weigh, as one reflection's (its fallback where none reflects).
+float bl_closure_parameter(BlClosure c, float sum, float fallback) { float w = bl_closure_weight(c); return w > 0.0 ? sum / w : fallback; }
+vec3 bl_closure_base_color(BlClosure c) {
+  float w = c.dielectric_weight + c.metal_weight;
+  return w > 0.0 ? (c.dielectric + c.metal) / w : vec3(0.0);
+}
+float bl_closure_metallic(BlClosure c) { float w = c.dielectric_weight + c.metal_weight; return w > 0.0 ? c.metal_weight / w : 0.0; }
+float bl_closure_transmission(BlClosure c) { return bl_closure_parameter(c, c.transmission_weight, 0.0); }
+vec3 bl_closure_transmission_tint(BlClosure c) { return c.transmission_weight > 0.0 ? c.transmission / c.transmission_weight : vec3(1.0); }
+vec3 bl_closure_normal(BlClosure c) { return dot(c.normal, c.normal) > 0.0 ? normalize(c.normal) : vec3(0.0, 0.0, 1.0); }
+// The light the surface sends toward the view, premultiplied by its coverage, and that coverage.
+vec4 bl_closure_radiance(BlClosure c, vec3 lit) {
+  return vec4(lit * bl_closure_weight(c) + c.emission, 1.0 - clamp(c.transparency, 0.0, 1.0));
+}`,
+  // blender-port: node_shader_tree.cc ntree_shader_weight_tree_invert: the mix's factor clamped, its closures weighted.
+  bl_node_mix_shader: `void bl_node_mix_shader(float fac, BlClosure shader1, BlClosure shader2, inout BlClosure shader) {
+  fac = clamp(fac, 0.0, 1.0);
+  shader = bl_closure_add(bl_closure_weigh(shader1, 1.0 - fac), bl_closure_weigh(shader2, fac));
+}`,
+  bl_node_add_shader: 'void bl_node_add_shader(BlClosure shader1, BlClosure shader2, inout BlClosure shader) { shader = bl_closure_add(shader1, shader2); }',
+  // node_bsdf_diffuse and the BSDFs EEVEE shades as diffuse (Sheen, Translucent, Subsurface Scattering, the hair
+  // BSDFs: gpu_shader_material_sheen.glsl, gpu_shader_material_hair.glsl): no specular reflection (IOR 1).
+  bl_node_bsdf_diffuse: 'void bl_node_bsdf_diffuse(vec4 color, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 1.0, 0.0, 0.0, 1.0, 1.0, N); }',
+  // node_bsdf_glossy, node_bsdf_metallic: a conductor of the color.
+  bl_node_bsdf_glossy: 'void bl_node_bsdf_glossy(vec4 color, float roughness, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 0.0, 1.0, 0.0, roughness, 1.5, N); }',
+  // node_bsdf_glass, node_bsdf_refraction: light through the surface, tinted by the color.
+  bl_node_bsdf_glass: 'void bl_node_bsdf_glass(vec4 color, float roughness, float ior, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 0.0, 0.0, 1.0, roughness, ior, N); }',
+  // node_bsdf_principled: its base color as metal, transmission and dielectric by their weights, its emission, all
+  // weighed by its alpha, the rest transparent.
+  bl_node_bsdf_principled: `void bl_node_bsdf_principled(vec4 base_color, float metallic, float roughness, float ior, float alpha, vec3 N, float transmission,
+  vec4 emission, float emission_strength, inout BlClosure result) {
+  metallic = clamp(metallic, 0.0, 1.0);
+  transmission = clamp(transmission, 0.0, 1.0);
+  alpha = clamp(alpha, 0.0, 1.0);
+  result = bl_closure_bsdf(base_color.rgb, (1.0 - metallic) * (1.0 - transmission), metallic, (1.0 - metallic) * transmission, roughness, ior, N);
+  result.emission = max(emission.rgb, vec3(0.0)) * max(emission_strength, 0.0);
+  result = bl_closure_weigh(result, alpha);
+  result.transparency = 1.0 - alpha;
+}`,
+  // node_emission: max(color, 0) times max(strength, 0).
+  bl_node_emission: `void bl_node_emission(vec4 color, float strength, inout BlClosure result) {
+  result = bl_closure_empty();
+  result.emission = max(color.rgb, vec3(0.0)) * max(strength, 0.0);
+}`,
+  // node_bsdf_transparent: its transmittance, max(color, 0), as one transparency.
+  bl_node_bsdf_transparent: `void bl_node_bsdf_transparent(vec4 color, inout BlClosure result) {
+  result = bl_closure_empty();
+  result.transparency = dot(max(color.rgb, vec3(0.0)), vec3(1.0 / 3.0));
+}`,
+  // node_holdout: nothing of the surface or what is behind it.
+  bl_node_holdout: 'void bl_node_holdout(inout BlClosure result) { result = bl_closure_empty(); }',
+  // port-override: EEVEE's horizon scan; Babylon has no occlusion of the view to read, so nothing is occluded.
+  ambient_occlusion_eval: 'float ambient_occlusion_eval(vec3 normal, float max_distance, float inverted, float sample_count) { return 1.0; }',
 };
+// What a node reads of the world's normal (world_normals_get).
+const WORLD_NORMAL = { glsl: 'g_data.N' };
 
 // The geometry a node's code reads, as Babylon blocks: an attribute, a system value, or what the mesh's geometry block
 // gives (a mesh's position and normal, or a curves vertex's and its curve's values: curves.js CurvesGeometryBlock), by the
-// hidden input's name.
+// hidden input's name; a geometry attribute of Blender's ('__attribute name') is the vertex buffer the mesh gives for it.
 const GEOMETRY = {
   __position: ['geometry', 'position', T.Vector3], __normal: ['geometry', 'normal', T.Vector3], __uv: ['attribute', 'uv', T.Vector2],
   __hair_intercept: ['geometry', 'intercept', T.Float], __hair_length: ['geometry', 'length', T.Float], __hair_radius: ['geometry', 'radius', T.Float],
   __hair_curve_N: ['geometry', 'curveN', T.Vector3], __hair_strand_id: ['geometry', 'strandId', T.Float], __is_strand: ['geometry', 'isStrand', T.Float],
   __world: ['system', System.World, T.Matrix], __view: ['system', System.View, T.Matrix], __viewProjection: ['system', System.ViewProjection, T.Matrix],
-  __cameraPosition: ['system', System.CameraPosition, T.Vector3],
+  __cameraPosition: ['system', System.CameraPosition, T.Vector3], __tangent: ['attribute', TANGENT_KIND, T.Vector4],
 };
+const ATTRIBUTE = '__attribute ';
+const geometrySpec = (name) => GEOMETRY[name] ?? ['attribute', attributeKind(name.slice(ATTRIBUTE.length)), T.Vector4];
 // The values of the shaded point ('$name') in Blender's axes, from the geometry inputs they use.
 const POINT = {
   $P: ['__position', '__world'], $N: ['__normal', '__world'], $orco: ['__position'], $object: ['__position'], $object_normal: ['__normal'],
   $uv: ['__uv'], $camera: ['__position', '__world', '__view'], $window: ['__position', '__world', '__viewProjection'],
-  $reflection: ['__position', '__normal', '__world', '__cameraPosition'], $height_xy: [],
+  $reflection: ['__position', '__normal', '__world', '__cameraPosition'], $camera_position: ['__cameraPosition'],
   $is_strand: ['__is_strand'], $hair_radius: ['__hair_radius'], $hair_curve_N: ['__hair_curve_N'], $hair_strand_id: ['__hair_strand_id'],
   $hair_intercept: ['__hair_intercept'], $hair_length: ['__hair_length'],
 };
-const G_DATA_POINTS = ['$P', '$N', '$is_strand', '$hair_radius', '$hair_curve_N', '$hair_strand_id'];
-const NEEDS = {
-  ShaderNodeTexNoise: ['$orco'], ShaderNodeTexImage: ['$uv'], ShaderNodeBump: G_DATA_POINTS, ShaderNodeHairInfo: [...G_DATA_POINTS, '$hair_intercept', '$hair_length'],
-  ShaderNodeTexCoord: ['$orco', '$object_normal', '$uv', '$object', '$camera', '$window', '$reflection'],
+const pointGeometry = (id) => {
+  const [kind, name] = id.split(':');
+  if (kind === '$attribute') return [ATTRIBUTE + id.slice(kind.length + 1)];
+  if (kind === '$tangent') return [...POINT.$P, ...POINT.$N, ...(name ? [ATTRIBUTE + name] : [...POINT.$uv, '__tangent'])];
+  return POINT[id] ?? [];
 };
-const geometryOf = (idname) => [...new Set((NEEDS[idname] ?? []).flatMap((value) => POINT[value]))];
+// The geometry inputs a node's steps read.
+const geometryOf = (steps) => [...new Set(steps.filter(Boolean).flatMap(([, args]) => args.filter((a) => typeof a === 'string' && a[0] === '$').flatMap(pointGeometry)))];
+
+// A mesh drawn with a material whose nodes read attributes its draw buffers lack asks to be drawn again with them
+// (main-view.js), once for what the material reads.
+export const attributesWanted = new Observable();
+const asked = new WeakMap();
+function askForAttributes(material, mesh) {
+  const requests = requestedAttributes(material);
+  if (!requests.length) return;
+  const kinds = requests.map((r) => r.kind), key = kinds.join();
+  if (asked.get(mesh) === key || kinds.every((kind) => mesh.isVerticesDataPresent(kind))) return;
+  asked.set(mesh, key);
+  attributesWanted.notifyObservers(mesh);
+}
+
+// The object a mesh draws (ObjectInfos: color, pass index, random; its object and instancer attributes, and the view
+// layer's), as Bylonder's Main gives it (setObjectInfo); without one, an object's defaults.
+let objectInfo = () => ({ color: [1, 1, 1, 1], index: 0, random: 0, attribute: () => [0, 0, 0, 0] });
+export const setObjectInfo = (provide) => { objectInfo = provide; };
+// A Babylon matrix in Blender's axes: (x, y, z) is Babylon's (x, z, y) on both sides; a view looks down -z.
+const SWAP = [0, 2, 1, 3];
+const blenderAxes = (m, { rows = SWAP, flipRow = -1, flipColumn = -1 } = {}) => Matrix.FromArray(Array.from({ length: 16 }, (_, i) => {
+  const c = i >> 2, r = i & 3;
+  return m.m[SWAP[c] * 4 + rows[r]] * (r === flipRow ? -1 : 1) * (c === flipColumn ? -1 : 1);
+}));
+const IDENTITY_ROWS = [0, 1, 2, 3];
+const model = (mesh) => blenderAxes(mesh.getWorldMatrix());
+const viewmat = (scene) => blenderAxes(scene.getViewMatrix(), { rows: IDENTITY_ROWS, flipRow: 2 });
+const winmat = (scene) => Matrix.FromArray(Array.from(scene.getProjectionMatrix().m, (v, i) => ((i >> 2) === 2 ? -v : v)));
+// Per drawn mesh values ('$name' read as uniforms): [Babylon type, value from the mesh and scene].
+const MESH_VALUES = {
+  $model: [T.Matrix, (mesh) => model(mesh)],
+  $model_inverse: [T.Matrix, (mesh) => model(mesh).invert()],
+  $viewmat: [T.Matrix, (mesh, scene) => viewmat(scene)],
+  $viewinv: [T.Matrix, (mesh, scene) => viewmat(scene).invert()],
+  $winmat: [T.Matrix, (mesh, scene) => winmat(scene)],
+  $object_color: [T.Vector4, (mesh) => objectInfo(mesh).color],
+  // Pass index, random and flags (OBJECT_NEGATIVE_SCALE).
+  $object_info: [T.Vector3, (mesh) => [objectInfo(mesh).index, objectInfo(mesh).random, mesh.getWorldMatrix().determinant() < 0 ? 16 : 0]],
+  $texspace_location: [T.Vector3, (mesh) => texspace(mesh)[0]],
+  $texspace_size: [T.Vector3, (mesh) => texspace(mesh)[1]],
+};
+const meshValue = (id) => MESH_VALUES[id] ?? (id.startsWith('$uniform_attribute:') && [T.Vector4, (mesh) => {
+  const [, type, ...name] = id.split(':');
+  return objectInfo(mesh).attribute(type, name.join(':'));
+}]);
 
 // A Bylonder helper block of a material, found by name or made (`blender:` and the name: GLSL takes a block's name
 // into its variables' names, where two underscores are reserved).
@@ -175,7 +524,9 @@ function shadingNormal(material) {
   return normal;
 }
 function geometryBlock(material, name) {
-  const [kind, value, type] = GEOMETRY[name];
+  const [kind, value, type] = geometrySpec(name);
+  if (kind === 'attribute' && name.startsWith(ATTRIBUTE)) return Object.assign(attributeBlock(material, value, type), { blenderAttribute: { name: name.slice(ATTRIBUTE.length), kind: value } });
+  if (name === '__tangent') return Object.assign(attributeBlock(material, value, type), { blenderAttribute: { tangent: true, kind: value } });
   if (kind === 'attribute') return attributeBlock(material, value, type);
   if (name === '__normal') return shadingNormal(material);
   if (kind === 'geometry') return { output: curvesGeometry(material).getOutputByName(value) };
@@ -249,14 +600,13 @@ const blenderShader = (Base) => class extends Base {
       this.registerInput(s.identifier, type, true, Targets.Fragment);
       Object.assign(this.getInputByName(s.identifier), { displayName: s.name, acceptedConnectionPointTypes: [...BABYLON_TYPES] });
     }
+    for (const id of OUTPUT_VALUES[idname] ?? []) this.values['=' + id] = structuredClone(socketOf(this.declaration, '=' + id).default);
     for (const s of this.declaration.outputs) {
       const type = socketType(s.type)?.babylon;
       if (type === undefined) continue;
       this.registerOutput(s.identifier, type, Targets.Fragment);
       adaptOutput(Object.assign(this.getOutputByName(s.identifier), { displayName: s.name }), type, s.type);
     }
-    // Read in the fragment shader: Babylon carries an attribute there as a varying.
-    for (const name of geometryOf(idname)) this.registerInput(name, GEOMETRY[name][2], true, Targets.Fragment);
   }
 
   getClassName() { return this.idname; }
@@ -264,33 +614,57 @@ const blenderShader = (Base) => class extends Base {
   // Whether a socket is the node's own, not one Bylonder links its geometry or Babylon's code through.
   declared(name) { return this.declaration.inputs.some((s) => s.identifier === name) || this.declaration.outputs.some((s) => s.identifier === name); }
 
+  // The geometry its steps read, as hidden inputs read in the fragment shader (Babylon carries an attribute there as a
+  // varying), linked to the material's geometry blocks.
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
-    for (const name of geometryOf(this.idname)) wire(geometryBlock(material, name).output, this.getInputByName(name));
+    for (const name of geometryOf(this._steps())) wire(geometryBlock(material, name).output, this._geometryInput(name));
+  }
+
+  _geometryInput(name) {
+    if (!this.getInputByName(name)) this.registerInput(name, geometrySpec(name)[2], true, Targets.Fragment);
+    return this.getInputByName(name);
+  }
+
+  _steps() {
+    return SHADER_NODES[this.idname]?.(this.properties, this.declaration, {
+      connected: (id) => !!this.getInputByName(id)?.isConnected,
+      linked: (id) => !!this.getOutputByName(id)?.hasEndpoints,
+      image: () => (this.properties.image ? blendData().images.get(this.properties.image) ?? null : null),
+    }) ?? [];
   }
 
   // The GLSL of each socket's link, made when first used: a linked input converted to the socket's type, a menu as
   // its item, else the input's uniform; an output's once a step writes it; a value of the shaded point ('$name').
   _links(state) {
-    if (this._built !== state.sharedData) Object.assign(this, { _built: state.sharedData, _uniforms: [], _textures: [], _texspace: null });
+    if (this._built !== state.sharedData) Object.assign(this, { _built: state.sharedData, _uniforms: [], _textures: [], _meshUniforms: [] });
     const links = new Map();
     const input = (id) => {
-      const s = this.declaration.inputs.find((d) => d.identifier === id), type = socketType(s.type), point = this.getInputByName(id);
+      const s = socketOf(this.declaration, id), type = socketType(s.type), point = this.getInputByName(id);
       if (point?.isConnected) return convert(point.associatedVariableName, kindOf(point.connectedPoint.type), type.kind);
       if (s.type === 'MENU') return menuValue(s, this.values[id]);
+      // Nothing (Closure(0)), which covers what is behind.
+      if (s.type === 'SHADER') return glslValue(0, 'closure');
       const name = state._getFreeVariableName(glslIdentifier(id));
       state._emitUniformFromString(name, type.babylon);
       this._uniforms.push([name, id, type.kind]);
       return name;
     };
-    const geometry = (name) => this.getInputByName(name).associatedVariableName;
+    const geometry = (name) => this._geometryInput(name).associatedVariableName;
     const declare = (prefix, type, value) => {
       const name = state._getFreeVariableName(prefix);
       state.compilationString += `${type} ${name} = ${value};\n`;
       return name;
     };
+    const meshUniform = (id) => {
+      const name = state._getFreeVariableName(glslIdentifier(id.slice(1)));
+      state._emitUniformFromString(name, meshValue(id)[0]);
+      this._meshUniforms.push([name, id]);
+      return name;
+    };
     const point = (id) => {
+      if (meshValue(id)) return meshUniform(id);
       const position = () => geometry('__position'), world = () => geometry('__world');
       const worldPosition = () => `(${world()} * vec4(${position()}, 1.0))`;
       switch (id) {
@@ -299,6 +673,7 @@ const blenderShader = (Base) => class extends Base {
         case '$object': return declare('bl_object', 'vec3', `${position()}.xzy`);
         case '$object_normal': return declare('bl_object_normal', 'vec3', `normalize(${geometry('__normal')}).xzy`);
         case '$uv': return declare('bl_uv', 'vec3', `vec3(${geometry('__uv')}, 0.0)`);
+        case '$camera_position': return `${geometry('__cameraPosition')}.xzy`;
         case '$camera': return declare('bl_camera', 'vec3', `(${geometry('__view')} * ${worldPosition()}).xyz`);
         case '$window': {
           const clip = declare('bl_clip', 'vec4', `${geometry('__viewProjection')} * ${worldPosition()}`);
@@ -309,15 +684,7 @@ const blenderShader = (Base) => class extends Base {
           return declare('bl_reflection', 'vec3', `-reflect(${incident}, ${N})`);
         }
         // Generated: the position in the mesh's texture space, from [-1, 1] to [0, 1] as the orco attribute is.
-        case '$orco': {
-          this._texspace ??= ['bl_texspace_location', 'bl_texspace_size'].map((prefix) => {
-            const name = state._getFreeVariableName(prefix);
-            state._emitUniformFromString(name, T.Vector3);
-            return name;
-          });
-          const [location, size] = this._texspace;
-          return declare('bl_orco', 'vec3', `(${position()}.xzy - ${location}) / ${size} * 0.5 + 0.5`);
-        }
+        case '$orco': return declare('bl_orco', 'vec3', `(${position()}.xzy - ${link('$texspace_location')}) / ${link('$texspace_size')} * 0.5 + 0.5`);
         // port-override: Blender evaluates the height again at offset positions (GPU_differentiate_float_function);
         // the height's screen derivatives stand for that, as Blender's GPU_FAST_DERIVATIVE path takes them.
         case '$height_xy': {
@@ -326,7 +693,16 @@ const blenderShader = (Base) => class extends Base {
         }
         // A curve's values (none for a mesh), as the geometry block gives them.
         case '$is_strand': case '$hair_radius': case '$hair_curve_N': case '$hair_strand_id': case '$hair_intercept': case '$hair_length': return geometry(POINT[id][0]);
-        default: throw Error(`${this.name}: no ${id}`);
+        default: {
+          const [kind, name] = id.split(':');
+          if (kind === '$attribute') return geometry(ATTRIBUTE + id.slice(kind.length + 1));
+          if (kind === '$tangent') {
+            state._emitFunction('bl_uv_tangent', STAND_INS.bl_uv_tangent, '');
+            const uv = name ? link(attribute(name)) : link('$uv'), extracted = name ? 'vec4(0.0)' : geometry('__tangent');
+            return declare('bl_tangent', 'vec4', `bl_uv_tangent(${extracted}, ${link('$model_inverse')}, ${link('$P')}, ${link('$N')}, ${uv}.xy)`);
+          }
+          throw Error(`${this.name}: no ${id}`);
+        }
       }
     };
     const link = (id) => (links.has(id) || id.startsWith('@') ? links.get(id) : links.set(id, id.startsWith('$') ? point(id) : input(id)).get(id));
@@ -338,13 +714,10 @@ const blenderShader = (Base) => class extends Base {
     const links = this._links(state);
     if (this.mute) muteLinks(this.declaration, this.availability.inputs, links);
     else {
-      const steps = SHADER_NODES[this.idname](this.properties, this.declaration, {
-        connected: (id) => !!this.getInputByName(id)?.isConnected,
-        linked: (id) => !!this.getOutputByName(id)?.hasEndpoints,
-        image: () => (this.properties.image ? blendData().images.get(this.properties.image) ?? null : null),
-      });
+      const steps = this._steps();
       // Blender's hashes take 32 bit integers, which a fragment shader's default (mediump) need not be.
       state._emitFunction('bl_precision', 'precision highp int;\n', '');
+      if ([...this.declaration.inputs, ...this.declaration.outputs].some((s) => s.type === 'SHADER')) state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
       // Compiled before it is added: the values of the shaded point are declared as the steps first use them.
       const code = compileSteps(this.declaration, steps, links, {
         emit: (key, code) => state._emitFunction(key, code, ''),
@@ -357,6 +730,7 @@ const blenderShader = (Base) => class extends Base {
           return name;
         },
         functions: STAND_INS,
+        pointKind: (id) => (/^\$(attribute|tangent|uniform_attribute):/.test(id) ? 'vec4' : id === '$uv' ? 'vec3' : undefined),
       });
       state.compilationString += code;
     }
@@ -366,8 +740,10 @@ const blenderShader = (Base) => class extends Base {
   _writeOutputs(state, links) {
     for (const output of this.outputs) {
       if (!output.hasEndpoints || !this.declared(output.name)) continue;
-      const kind = kindOfSocket(this.declaration, '@' + output.name);
-      state.compilationString += `${state._declareOutput(output)} = ${convert(links.get('@' + output.name) ?? glslValue(0, kind), kind, kindOf(output.type))};\n`;
+      const kind = kindOfSocket(this.declaration, '@' + output.name), value = links.get('@' + output.name) ?? glslValue(0, kind);
+      // A closure is a struct of Blender's (STAND_INS bl_closure), which links only to closures.
+      if (kind === 'closure') state.compilationString += `${glslType(kind)} ${output.associatedVariableName} = ${value};\n`;
+      else state.compilationString += `${state._declareOutput(output)} = ${convert(value, kind, kindOf(output.type))};\n`;
     }
   }
 
@@ -384,10 +760,12 @@ const blenderShader = (Base) => class extends Base {
     super.bind?.(effect, nodeMaterial, mesh);
     setUniforms(effect, this._uniforms ?? [], this.values);
     for (const [name, texture] of this._textures ?? []) effect.setTexture(name, texture);
-    if (this._texspace) {
-      const [location, size] = texspace(mesh);
-      effect.setFloat3(this._texspace[0], ...location);
-      effect.setFloat3(this._texspace[1], ...size);
+    if (!mesh) return;
+    for (const [name, id] of this._meshUniforms ?? []) {
+      const [type, value] = meshValue(id), v = value(mesh, nodeMaterial.getScene());
+      if (type === T.Matrix) effect.setMatrix(name, v);
+      else if (type === T.Vector3) effect.setFloat3(name, ...v);
+      else effect.setFloat4(name, ...v);
     }
   }
 
@@ -408,6 +786,7 @@ export class BlenderShaderBlock extends blenderShader(NodeMaterialBlock) {
   constructor(name, idname) {
     super(name, idname, Targets.Neutral);
     if (idname === 'ShaderNodeValToRGB') this.properties.color_ramp ??= defaultColorRamp();
+    if (CURVE_MAPPINGS[idname]) this.properties.mapping ??= defaultCurveMapping(...CURVE_MAPPINGS[idname]);
   }
 }
 
@@ -428,39 +807,47 @@ function environmentOf(material) {
   return () => material[ENVIRONMENT].texture;
 }
 
-// The BSDFs Bylonder shades with Babylon's PBR block, which lights them with Babylon's lights and environment: what
-// each socket gives a PBR input ([PBR input, socket, conversion], or a constant's GLSL), and its alpha, normal and
-// emission sockets. EEVEE shades the hair BSDFs as a diffuse closure of their color (gpu_shader_material_hair.glsl),
-// here a surface without specular reflection (IOR 1), lit along the strand's cylinder normal.
-const rgb = (v) => `${v}.rgb`, same = (v) => v;
-const DIFFUSE = (roughness) => [['baseColor', 'Color', rgb], ['metallic', '0.0'], roughness, ['indexOfRefraction', '1.0']];
-const BSDFS = {
-  ShaderNodeBsdfPrincipled: {
-    inputs: [['baseColor', 'Base Color', rgb], ['metallic', 'Metallic', same], ['roughness', 'Roughness', same], ['indexOfRefraction', 'IOR', same]],
-    alpha: 'Alpha', normal: 'Normal', emission: ['Emission Color', 'Emission Strength'],
-  },
-  ShaderNodeBsdfDiffuse: { inputs: DIFFUSE(['roughness', 'Roughness', same]), normal: 'Normal' },
-  ShaderNodeBsdfHair: { inputs: DIFFUSE(['roughness', '1.0']) },
-  ShaderNodeBsdfHairPrincipled: { inputs: DIFFUSE(['roughness', '1.0']) },
+// A material's surface closure lit once by Babylon's PBR block, as EEVEE lights the closures a material gathers: the
+// block's inputs are the closure's colors and parameters in proportion to their weights, its reflection Babylon's
+// environment, and a transmission Babylon's refraction of that environment. Its radiance is what the lit part reflects
+// as it weighs, plus the emission, over the coverage the transparency leaves.
+const SURFACE = {
+  baseColor: (c) => `bl_closure_base_color(${c})`, metallic: (c) => `bl_closure_metallic(${c})`, roughness: (c) => `bl_closure_parameter(${c}, ${c}.roughness, 0.5)`,
+  indexOfRefraction: (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
 };
-
-// A BSDF (node_shader_bsdf_*.cc) as Babylon's PBR block: its inputs from the BSDF's sockets, its emission added to
-// what it reflects.
-class BlenderBsdf extends blenderShader(PBRMetallicRoughnessBlock) {
-  constructor(name, idname) {
-    super(name || declaration('shader', idname).name, idname);
+const REFRACTION = {
+  'subsurface.thickness': () => '0.0', 'subsurface.tintColor': (c) => `bl_closure_transmission_tint(${c})`,
+  'refraction.intensity': (c) => `bl_closure_transmission(${c})`, 'refraction.volumeIndexOfRefraction': (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
+};
+export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
+  constructor(name) {
+    super(name);
+    this.registerInput('closure', T.Color4, false, Targets.Fragment);
+    this.registerOutput('radiance', T.Color4, Targets.Fragment);
     this.metallic.isOptional = this.roughness.isOptional = true;
-    // The PBR inputs given from sockets: connected while they hold a socket's value.
-    for (const point of this._pbrInputs) Object.defineProperty(point, 'isConnected', { get: () => !!point._blenderValue || !!point.connectedPoint });
+    // Blender's coverage scales the whole closure; Babylon's would keep reflections opaque.
+    this.useRadianceOverAlpha = this.useSpecularOverAlpha = false;
+    this._helpers = {};
   }
 
-  get _bsdf() { return BSDFS[this.idname]; }
-  get _pbrInputs() { return [this.baseColor, this.metallic, this.roughness, this.indexOfRefraction, this.opacity]; }
+  getClassName() { return 'BlenderSurfaceBlock'; }
+  get closure() { return this.getInputByName('closure'); }
+  get radiance() { return this.getOutputByName('radiance'); }
+
+  // A PBR input (or a helper block's, 'subsurface.tintColor') given from the closure: connected while it holds a value.
+  _point(path) {
+    const [owner, name] = path.includes('.') ? [this._helpers[path.split('.')[0]], path.split('.')[1]] : [this, path];
+    const point = owner[name];
+    if (!Object.hasOwn(point, 'isConnected')) Object.defineProperty(point, 'isConnected', { get: () => !!point._blenderValue || !!point.connectedPoint });
+    return point;
+  }
+  get _values() { return { ...SURFACE, ...(this._helpers.refraction && REFRACTION) }; }
 
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
-    for (const point of this._pbrInputs) point._blenderValue = null;
+    if (closureHas(this.closure.connectedPoint?.ownerBlock, transmits)) this._refraction(material);
+    for (const path of Object.keys(this._values)) this._point(path)._blenderValue = null;
     const position = geometryBlock(material, '__position'), world = geometryBlock(material, '__world');
     wire(worldPosition(material).output, this.worldPosition);
     // In the fragment stage, where the normal is shaded (a strand's: curves.js CurvesNormalBlock).
@@ -475,49 +862,120 @@ class BlenderBsdf extends blenderShader(PBRMetallicRoughnessBlock) {
     wire(position.output, reflection.position);
     wire(world.output, reflection.world);
     wire(reflection.reflection, this.reflection);
-    // The Normal socket's source as Babylon's world normal.
-    const source = this._bsdf.normal && this.getInputByName(this._bsdf.normal).connectedPoint;
-    if (!source) this.perturbedNormal.connectedPoint?.disconnectFrom(this.perturbedNormal);
-    else {
-      const axes = helper(material, `__normal ${this.uniqueId}`, (name) => new BlenderAxesBlock(name));
-      wire(source, axes.vector);
-      wire(axes.output, this.perturbedNormal);
-    }
+    const shading = helper(material, `__shadingNormal ${this.uniqueId}`, (name) => new BlenderClosureNormalBlock(name));
+    wire(this.closure.connectedPoint, shading.closure);
+    wire(shading.output, this.perturbedNormal);
+  }
+
+  // Babylon's sub-surface block refracting the environment, as the reflection reflects it.
+  _refraction(material) {
+    const subsurface = this._helpers.subsurface = helper(material, '__subsurface', (name) => new SubSurfaceBlock(name));
+    const refraction = this._helpers.refraction = helper(material, '__refraction', (name) => new RefractionBlock(name));
+    refraction._getTexture = environmentOf(material);
+    // Given at this block's build, after theirs.
+    subsurface.thickness.isOptional = refraction.intensity.isOptional = true;
+    wire(refraction.refraction, subsurface.refraction);
+    wire(subsurface.subsurface, this.subsurface);
   }
 
   _buildBlock(state) {
-    if (state.target !== Targets.Fragment) return PBRMetallicRoughnessBlock.prototype._buildBlock.call(this, state);
-    const links = this._links(state), { inputs, alpha, emission } = this._bsdf;
-    const value = (point, glsl) => { point._blenderValue = glsl; point.associatedVariableName = glsl; };
-    for (const [pbr, socket, as] of inputs) value(this[pbr], as ? as(links.get(socket)) : socket);
-    if (alpha && (this.getInputByName(alpha).isConnected || this.values[alpha] !== 1)) value(this.opacity, links.get(alpha));
-    PBRMetallicRoughnessBlock.prototype._buildBlock.call(this, state);
-    const emitted = emission ? ` + ${links.get(emission[0])}.rgb * ${links.get(emission[1])}` : '';
-    links.set('@BSDF', `vec4(finalColor.rgb${emitted}, alpha)`);
-    this._writeOutputs(state, links);
+    if (state.target !== Targets.Fragment) return super._buildBlock(state);
+    state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
+    const closure = this.closure.associatedVariableName;
+    for (const [path, value] of Object.entries(this._values)) Object.assign(this._point(path), { _blenderValue: value(closure), associatedVariableName: value(closure) });
+    super._buildBlock(state);
+    state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, finalColor.rgb);\n`;
     return this;
   }
 }
-const bsdfClass = (idname) => ({ [idname]: class extends BlenderBsdf { constructor(name) { super(name, idname); } } })[idname];
-export const ShaderNodeBsdfPrincipled = bsdfClass('ShaderNodeBsdfPrincipled');
+RegisterClass('BABYLON.BlenderSurfaceBlock', BlenderSurfaceBlock);
 
-// A Blender world vector (Bump's normal) as Babylon's: (x, z, y), w 0.
-export class BlenderAxesBlock extends NodeMaterialBlock {
+// A closure's normal, its reflections' as they weigh, as Babylon's shading normal (in its axes, w 0).
+export class BlenderClosureNormalBlock extends NodeMaterialBlock {
   constructor(name) {
     super(name, Targets.Fragment);
-    this.registerInput('vector', T.Vector3);
+    this.registerInput('closure', T.Color4);
     this.registerOutput('output', T.Vector4);
   }
-  getClassName() { return 'BlenderAxesBlock'; }
-  get vector() { return this._inputs[0]; }
+  getClassName() { return 'BlenderClosureNormalBlock'; }
+  get closure() { return this._inputs[0]; }
   get output() { return this._outputs[0]; }
   _buildBlock(state) {
     super._buildBlock(state);
-    state.compilationString += `${state._declareOutput(this.output)} = vec4(${this.vector.associatedVariableName}.xzy, 0.0);\n`;
+    state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
+    state.compilationString += `${state._declareOutput(this.output)} = vec4(bl_closure_normal(${this.closure.associatedVariableName}).xzy, 0.0);\n`;
     return this;
   }
 }
-RegisterClass('BABYLON.BlenderAxesBlock', BlenderAxesBlock);
+RegisterClass('BABYLON.BlenderClosureNormalBlock', BlenderClosureNormalBlock);
+// Whether a closure's nodes are one that `is` tells: one that reflects light (a BSDF), one that transmits it (a Glass or
+// Refraction BSDF, a Principled BSDF's transmission).
+function closureHas(block, is, seen = new Set()) {
+  if (!block || seen.has(block)) return false;
+  seen.add(block);
+  return is(block) || block.inputs.some((input) => closureHas(input.connectedPoint?.ownerBlock, is, seen));
+}
+const transparent = (block) => block.idname === 'ShaderNodeBsdfTransparent'
+  || (block.idname === 'ShaderNodeBsdfPrincipled' && (block.getInputByName('Alpha').isConnected || block.values.Alpha < 1));
+const reflects = (block) => /^ShaderNodeBsdf(?!Transparent)|^ShaderNodeSubsurfaceScattering$/.test(block.idname);
+const transmits = (block) => ['ShaderNodeBsdfGlass', 'ShaderNodeBsdfRefraction'].includes(block.idname) || (block.idname === 'ShaderNodeBsdfPrincipled'
+  && (block.getInputByName('Transmission Weight').isConnected || block.values['Transmission Weight'] > 0));
+
+// A closure that reflects nothing (emission, transparency) as its radiance, without lighting.
+export class BlenderUnlitSurfaceBlock extends NodeMaterialBlock {
+  constructor(name) {
+    super(name, Targets.Fragment);
+    this.registerInput('closure', T.Color4);
+    this.registerOutput('radiance', T.Color4);
+  }
+  getClassName() { return 'BlenderUnlitSurfaceBlock'; }
+  get closure() { return this._inputs[0]; }
+  get radiance() { return this._outputs[0]; }
+  _buildBlock(state) {
+    super._buildBlock(state);
+    state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
+    state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${this.closure.associatedVariableName}, vec3(0.0));\n`;
+    return this;
+  }
+}
+RegisterClass('BABYLON.BlenderUnlitSurfaceBlock', BlenderUnlitSurfaceBlock);
+
+// Babylon's image processing of a material's scene linear color, as its display shows it: every block before it (the
+// surface's PBR block among them) keeps colors linear, as with image processing by post-process, and this block
+// applies the scene's (its exposure and tone mapping, then the encoding to the display's sRGB), unless a post-process
+// does. Babylon's own block encodes only when one of its effects is on, and its PBR block encodes within.
+export class BlenderDisplayBlock extends ImageProcessingBlock {
+  constructor(name) {
+    super(name);
+    this.convertInputToLinearSpace = false;
+    this.registerOutput('displayRgba', T.Color4);
+    this.registerOutput('displayRgb', T.Color3);
+  }
+  getClassName() { return 'BlenderDisplayBlock'; }
+
+  bind(effect, nodeMaterial, mesh) {
+    super.bind(effect, nodeMaterial, mesh);
+    if (mesh) askForAttributes(nodeMaterial, mesh);
+  }
+
+  prepareDefines(defines, nodeMaterial) {
+    super.prepareDefines(defines, nodeMaterial);
+    const ip = nodeMaterial.imageProcessingConfiguration;
+    defines.setValue(this._displayDefine, !!ip?.isEnabled && !ip.applyByPostProcess, true);
+    defines.setValue('IMAGEPROCESSINGPOSTPROCESS', true, true);
+  }
+
+  _buildBlock(state) {
+    super._buildBlock(state);
+    this._displayDefine = state._getFreeDefineName('BL_DISPLAY');
+    const [rgba, rgb] = [this.getOutputByName('displayRgba'), this.getOutputByName('displayRgb')];
+    state.compilationString += `${state._declareOutput(rgba)} = ${this.output.associatedVariableName};\n#ifdef ${this._displayDefine}\n`
+      + `${rgba.associatedVariableName} = applyImageProcessing(${rgba.associatedVariableName});\n#endif\n`
+      + `${state._declareOutput(rgb)} = ${rgba.associatedVariableName}.rgb;\n`;
+    return this;
+  }
+}
+RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
 // Babylon's image processing, as the material's color. A material it is added to gets the vertex output Babylon needs.
@@ -540,11 +998,23 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
-    const processing = helper(material, `__imageProcessing ${this.uniqueId}`, (name) => Object.assign(new ImageProcessingBlock(name), { convertInputToLinearSpace: false }));
-    const surface = this.getInputByName('Surface').connectedPoint;
-    if (surface) wire(surface, processing.color);
-    else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
-    wire(processing.output, this.rgba);
+    material.alphaMode = Constants.ALPHA_PREMULTIPLIED_PORTERDUFF;
+    const closure = this.getInputByName('Surface').connectedPoint;
+    // A blended surface's back faces drawn before its front ones, as EEVEE draws its transparency overlap.
+    material.separateCullingPass = true;
+    const processing = helper(material, `__display ${this.uniqueId}`, (name) => new BlenderDisplayBlock(name));
+    if (closure) {
+      const lit = closureHas(closure.ownerBlock, reflects), Surface = lit ? BlenderSurfaceBlock : BlenderUnlitSurfaceBlock;
+      const surface = helper(material, `__${lit ? 'surface' : 'unlit'} ${this.uniqueId}`, (name) => new Surface(name));
+      wire(closure, surface.closure);
+      wire(surface.radiance, processing.color);
+    } else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
+    // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
+    // blends it).
+    const [from, to, other] = closureHas(closure?.ownerBlock, transparent) ? [processing.getOutputByName('displayRgba'), this.rgba, this.rgb]
+      : [processing.getOutputByName('displayRgb'), this.rgb, this.rgba];
+    other.connectedPoint?.disconnectFrom(other);
+    wire(from, to);
   }
 
   _buildBlock(state) {
@@ -575,13 +1045,14 @@ function adaptOutput(point, own, socket) {
 }
 
 // The block classes, one per Blender node Bylonder links, registered for Babylon's serialization.
-const OWN_CLASSES = { ...Object.fromEntries(Object.keys(BSDFS).map((idname) => [idname, idname === 'ShaderNodeBsdfPrincipled' ? ShaderNodeBsdfPrincipled : bsdfClass(idname)])), ShaderNodeOutputMaterial };
+const OWN_CLASSES = { ShaderNodeOutputMaterial };
 export const shaderNodeClasses = Object.fromEntries([...Object.keys(SHADER_NODES), ...Object.keys(OWN_CLASSES)].map((idname) => {
   const label = declaration('shader', idname).name;
   const Block = OWN_CLASSES[idname] ?? { [idname]: class extends BlenderShaderBlock { constructor(name) { super(name || label, idname); } } }[idname];
   RegisterClass('BABYLON.' + idname, Block);
   return [idname, Block];
 }));
+export const { ShaderNodeBsdfPrincipled } = shaderNodeClasses;
 
 // Blender's new material (material.new): a Principled BSDF into a Material Output, where Blender places them.
 export function blenderDefaultTree(material) {
@@ -593,16 +1064,24 @@ export function blenderDefaultTree(material) {
   material.editorData = { locations: [{ blockId: principled.uniqueId, x: 10, y: -300 }, { blockId: output.uniqueId, x: 300, y: -300 }], frames: [] };
 }
 
-// A node's properties as its block keeps them, from Blender's node (RNA): those its declaration has, and its color ramp.
+// A node's properties as its block keeps them, from Blender's node (RNA): those its declaration has, its color ramp and its
+// curve mapping.
 export function nodeProperties(node) {
-  const decl = declaration('shader', node.bl_idname), ramp = node.color_ramp;
+  const decl = declaration('shader', node.bl_idname), ramp = node.color_ramp, mapping = CURVE_MAPPINGS[node.bl_idname] && node.mapping;
   return {
     // An ID pointer (an Image Texture's image) by its name.
     ...Object.fromEntries(Object.entries(decl?.properties ?? {}).map(([key, { type }]) => [key, type === 'POINTER' ? node[key]?.name ?? null : node[key]])),
     ...(ramp && { color_ramp: { color_mode: ramp.color_mode, interpolation: ramp.interpolation, hue_interpolation: ramp.hue_interpolation,
       elements: [...ramp.elements].map((e) => ({ position: e.position, color: [...e.color] })) } }),
+    ...(mapping && { mapping: plainCurveMapping(mapping) }),
   };
 }
+
+// A node's output socket values (a Value node's), as its block keeps them ('=identifier').
+export const outputValues = (node) => Object.fromEntries((OUTPUT_VALUES[node.bl_idname] ?? []).map((id) => {
+  const value = [...node.outputs].find((s) => s.identifier === id).default_value;
+  return ['=' + id, typeof value === 'number' ? value : [...value]];
+}));
 
 // A Blender node tree (plain: { nodes: [{ idname, name, properties, values }], links: [[from node, output, to node,
 // input]] }, as a read .blend's Main holds it) as a node material of the blocks for Blender's nodes, linked as in the

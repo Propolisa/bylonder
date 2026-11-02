@@ -34,7 +34,7 @@ const menu = addMenuItems(editor);
 assert.deepEqual(menu.filter((i) => i !== '-').map((i) => i.label), ['Search...', 'Input', 'Output', 'Shader', 'Displacement', 'Color', 'Texture', 'Utilities', 'Group', 'Layout']);
 const mathMenu = subitems(subitems(menu.find((i) => i.label === 'Utilities')).find((i) => i.label === 'Math'));
 assert.ok(mathMenu.find((i) => i.label === 'Math').enabled(), 'Math is added by Blender\'s menu entry');
-assert.ok(!mathMenu.find((i) => i.label === 'Map Range').enabled(), 'a node Bylonder does not run is shown greyed out');
+assert.ok(!subitems(menu.find((i) => i.label === 'Shader')).find((i) => i.label === 'Specular BSDF').enabled(), 'a node Bylonder does not run is shown greyed out');
 assert.ok(subitems(mathMenu.find((i) => i.label === 'Babylon')).some((i) => i.label === 'Cos'), 'Babylon blocks are in a Babylon sub-menu');
 const search = addMenuEntries(editor);
 const multiply = search.find((e) => e.item.label === 'Math ▸ Multiply');

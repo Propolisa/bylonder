@@ -1,15 +1,15 @@
 // Blender's nodes in Bylonder output what they output in Blender: each case of tests/fixtures/blender-nodes.json
-// (Blender's GPU compositor, tools/blender-reference/node-fixtures.py) runs the node's steps on its constant inputs
+// (Blender's GPU compositor or EEVEE, tools/blender-reference/node-fixtures.py) runs the node's steps on its constant inputs
 // in WebGL 2 (headless Chromium) and reads the pixel back. Compositor nodes run their block's own fragment shader.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { NullEngine, Scene, FrameGraph } from '@babylonjs/core';
-import { SHADER_NODES, STAND_INS } from '../src/nodes/blender/shader-nodes.js';
+import { OUTPUT_VALUES, SHADER_NODES, STAND_INS } from '../src/nodes/blender/shader-nodes.js';
 import { halfFloats } from '../src/blenkernel/colorband.js';
 import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js';
-import { declaration } from '../src/nodes/blender/declarations.js';
-import { compileSteps, kindOfSocket, menuValue } from '../src/nodes/blender/node-code.js';
+import { declaration, defaults } from '../src/nodes/blender/declarations.js';
+import { compileSteps, kindOfSocket, menuValue, socketOf } from '../src/nodes/blender/node-code.js';
 import { convert, glslValue, socketType } from '../src/nodes/blender/sockets.js';
 
 let chromium;
@@ -24,9 +24,9 @@ const engine = new NullEngine(), scene = new Scene(engine), frameGraph = new Fra
 // A shader node's steps on constants, as a fragment shader writing the output socket.
 function shaderProgram({ node, properties, inputs, output }) {
   const decl = declaration('shader', node), functions = new Map();
-  const values = { ...Object.fromEntries(decl.inputs.map((s) => [s.identifier, s.default])), ...inputs };
-  const links = new Map(decl.inputs.filter((s) => socketType(s.type)).map((s) => [s.identifier,
-    s.type === 'MENU' ? menuValue(s, values[s.identifier]) : glslValue(values[s.identifier], socketType(s.type).kind)]));
+  const values = { ...defaults(decl).values, ...Object.fromEntries((OUTPUT_VALUES[node] ?? []).map((id) => ['=' + id, socketOf(decl, '=' + id).default])), ...inputs };
+  const links = new Map(Object.entries(values).map(([id, value]) => [id, socketOf(decl, id)]).filter(([, s]) => socketType(s.type)).map(([id, s]) => [id,
+    s.type === 'MENU' ? menuValue(s, values[id]) : glslValue(values[id], socketType(s.type).kind)]));
   const p = { ...Object.fromEntries(Object.entries(decl.properties).map(([k, v]) => [k, v.default])), ...properties };
   // Generated coordinates, which an unlinked vector takes, are unused where an input is unlinked here (1D noise).
   links.set('$orco', 'vec3(0.0)');
@@ -72,7 +72,8 @@ function run(programs) {
   };
   const vertex = shader(gl.VERTEX_SHADER, '#version 300 es\nout vec2 vUV;\nvoid main() { vec2 p = vec2(float((gl_VertexID & 1) * 4 - 1), float((gl_VertexID & 2) * 2 - 1)); vUV = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }');
   const image = gl.createTexture();
-  return programs.map(({ code, uniforms, image: texel, textures = [] }) => {
+  // A case's pixel, or the first line of the GL error that kept its program from running.
+  return programs.map(({ code, uniforms, image: texel, textures = [] }) => { try {
     // Babylon's GLSL 100 style (varying, texture2D, gl_FragColor) as GLSL ES 3.
     const source = '#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\nout vec4 fragColor;\n' +
       code.replace(/\bvarying\b/g, 'in').replace(/\btexture2D\b/g, 'texture').replace(/\bgl_FragColor\b/g, 'fragColor');
@@ -107,7 +108,10 @@ function run(programs) {
     const out = new Float32Array(4);
     gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, out);
     return [...out];
-  });
+  } catch (error) {
+    const lines = error.message.split('\n'), first = lines.find((line) => /ERROR/.test(line)) ?? lines[0], at = /ERROR: \d+:(\d+)/.exec(first)?.[1];
+    return { error: at ? `${first} in: ${lines[lines.findIndex((line) => line.startsWith('#version')) + Number(at) - 1]?.trim()}` : first };
+  } });
 }
 
 // Mesa's llvmpipe through ANGLE, the software OpenGL the fixtures were rendered with: Chromium's default SwiftShader
@@ -123,8 +127,11 @@ try {
     await page.close();
   }
   const failures = cases.flatMap((c, i) => {
+    if (results[i].error) return [`${c.node} ${JSON.stringify(c.properties)}: ${results[i].error}`];
     const got = results[i], channels = c.tree === 'shader' && socketType(declaration('shader', c.node).outputs.find((s) => s.identifier === c.output).type).kind === 'float' ? 1 : 4;
-    const off = c.result.slice(0, channels).some((v, k) => v !== null && Math.abs(v - got[k]) > 1e-4 * Math.max(1, Math.abs(v)));
+    // EEVEE's AOVs hold half floats.
+    const tolerance = c.engine === 'EEVEE' ? 2e-3 : 1e-4;
+    const off = c.result.slice(0, channels).some((v, k) => v !== null && Math.abs(v - got[k]) > tolerance * Math.max(1, Math.abs(v)));
     return off ? [`${c.node} ${JSON.stringify(c.properties)}: Blender ${c.result.slice(0, channels)}, Bylonder ${got.slice(0, channels).map((v) => +v.toFixed(6))}`] : [];
   });
   assert.deepEqual(failures, [], `nodes differ from Blender:\n${failures.join('\n')}`);
