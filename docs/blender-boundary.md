@@ -515,7 +515,8 @@ Blender.
   Blender without Python (`python.cc`, `--wrap`): a typed value's expression is evaluated by Blender's
   `expr_pylike_eval.cc`, simple driver expressions too, as in Blender. `python_start` runs what Blender's `WM_init`
   runs: `BPY_python_start`, `BPY_python_reset`, then importing `bpy` loads the startup scripts and
-  `bpy.utils.load_scripts_extensions()` the add-ons and extensions Preferences enable. Blender's startup packages
+  `bpy.utils.load_scripts_extensions()` the add-ons and extensions Preferences enable. Blender's scripts ship as
+  scripts.zip and its core add-ons (glTF 2.0, FBX, Motion Capture, SVG, ...) as addons.zip, both fetched when Python starts. Blender's startup packages
   (`bl_ui`, `bl_operators`) ship as modules there, importable but not registered (the interface they define is the
   tree's); the one startup script is Bylonder's (`tools/blender-port/python/startup/bylonder_cpython.py`).
 - **One registry.** Both Pythons register their classes through RNA's register functions (`rna_wm.cc`, `rna_ui.cc`),
@@ -540,6 +541,16 @@ Blender.
 - **WebAssembly's indirect calls check signatures**: CPython calls a `METH_NOARGS` function with two arguments, so
   Blender's that are defined with one would trap; `wasm/patches/python_noargs.patch` (written by a script from the
   method tables) gives them the unused second one, defaulted so direct calls stay as they are.
+- **Start in steps**: Python starts in Blender's order, one step per task, so the page keeps drawing
+  (`python.cc` `python_start_step`): `BPY_python_start`, `BPY_python_reset`, then `bl_ui`'s and `bl_operators`' modules
+  one each, Bylonder's startup classes, the extension repositories and each enabled add-on (`bylonder_cpython.py`).
+- **Open: a trap seen once in mathutils.** With `bl_ui` and `bl_operators` entered as empty package modules (in
+  `sys.modules` without their `__init__` ever running, a shortcut the start no longer takes), a script ending with
+  `mesh = bpy.data.meshes[0]` and `view = memoryview(mesh.vertices[0].co)` traps when its namespace is freed: the
+  memoryview's release frees the Vector, whose `BaseMathObject_dealloc` calls a `tp_free` that is no function. With
+  their `__init__` run, as now, it does not happen, and a memoryview of each mathutils type leaves the value's reference
+  count as it was (`tests/python-wasm.test.js`). Not yet explained: something a skipped `__init__` would have kept alive
+  is freed early.
 - **Limits**: one thread (`threading` starts no thread), no `ctypes`, no network (`urllib` and pip do not reach out), no
   `gpu` module (draw handlers that draw with GPU shaders draw nothing).
 

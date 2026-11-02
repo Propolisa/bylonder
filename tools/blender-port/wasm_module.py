@@ -134,7 +134,7 @@ def dependencies(build, deps, build_all=True):
         # module build's files it uses (build.inputs).
         scripts = [script, *sorted(p for p in glob.glob(os.path.join(os.path.dirname(script), '*')) if not p.endswith('.sh')),
                    *(os.path.join(HERE, p) for p in dep['build'].get('inputs', []))]
-        digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in scripts if os.path.isfile(p)) + ' '.join(uses).encode()).hexdigest()[:16]
+        digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in scripts if os.path.isfile(p)) + ' '.join(map(os.path.realpath, uses)).encode()).hexdigest()[:16]
         stamp = os.path.join(out, '.built')
         if not (os.path.exists(stamp) and open(stamp).read() == digest):
             print(f'{name}: building with {dep["build"]["script"]}', file=sys.stderr, flush=True)

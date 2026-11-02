@@ -3,7 +3,7 @@ name: Blender WebAssembly build
 # Blender built as Blender builds itself, for wasm32 (tools/blender-port/blender_build.py): its libraries compiled in
 # parallel jobs, each keeping its objects in the Actions cache (an unchanged source is never compiled twice), then
 # linked and reported (seam-report.json: what does not compile and what nothing defines). The module and the files its
-# CPython reads (python313.zip, scripts.zip) are published as the release module-<tools/blender-port tree hash>
+# CPython reads (python313.zip, scripts.zip, addons.zip) are published as the release module-<tools/blender-port tree hash>
 # (scripts/module.mjs), which the Pages deploy calls this for when missing.
 on:
   workflow_dispatch:
@@ -80,8 +80,8 @@ jobs:
           key=$(node scripts/module.mjs key)
           cp work/wasm-build/bylonder.wasm bmesh.wasm
           cp work/wasm-build/bylonder-names.wasm bmesh-names.wasm
-          cp work/wasm-build/python/python313.zip work/wasm-build/python/scripts.zip .
-          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm python313.zip scripts.zip --latest=false \
+          cp work/wasm-build/python/python313.zip work/wasm-build/python/scripts.zip work/wasm-build/python/addons.zip .
+          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm python313.zip scripts.zip addons.zip --latest=false \
             --title "$key" --notes "Blender's module built from tools/blender-port at ${{ github.sha }}." --target "${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         if: always()

@@ -454,13 +454,16 @@ def link_module(host, out, entries, extra, archives, module_libraries):
 PYTHON_EXCLUDED = re.compile(r'^(test|idlelib|tkinter|turtledemo|ensurepip|lib2to3|pydoc_data|venv|__phello__)/|/tests?/')
 # Blender's scripts in CPython: its modules, its startup packages as modules (the interface they define is the
 # transpiled tree's), its core add-ons and presets; and Bylonder's startup script (python/startup).
-BLENDER_SCRIPTS = {'modules': 'modules', 'startup': 'modules', 'addons_core': 'addons_core', 'presets': 'presets'}
+# Blender's scripts by the zip that ships them and their place in it: its startup packages as modules (the tree registers
+# the interface), and its core add-ons (glTF, FBX, BVH, SVG, ...) in their own zip.
+SCRIPT_ZIPS = {'scripts.zip': {'modules': 'modules', 'startup': 'modules', 'presets': 'presets'}, 'addons.zip': {'addons_core': 'addons_core'}}
 
 
 def python_files(out, tree, deps):
     """The files Python reads at its start (src/python/python.js puts them in the module's file system): python313.zip,
     CPython's library and numpy, which zipimport reads in place (compiled, with their sources for tracebacks), and
-    scripts.zip, Blender's scripts and Bylonder's startup script, unpacked at Blender's system scripts directory."""
+    scripts.zip, Blender's scripts and Bylonder's startup script, and addons.zip, Blender's core add-ons, both unpacked at
+    Blender's system scripts directory."""
     python, library = os.path.join(out, 'python'), os.path.join(out, 'python', 'lib')
     shutil.rmtree(library, ignore_errors=True)
     for root in (os.path.join(deps['cpython'].removesuffix('-build'), 'Lib'), os.path.join(deps['numpy'], 'site')):
@@ -477,15 +480,16 @@ def python_files(out, tree, deps):
             for name in sorted(names):
                 archive.write(os.path.join(directory, name), os.path.relpath(os.path.join(directory, name), library))
     own = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'python')
-    folders = [(os.path.join(tree, 'scripts', folder), target) for folder, target in BLENDER_SCRIPTS.items()] + [(own, '')]
-    with zipfile.ZipFile(os.path.join(python, 'scripts.zip'), 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for folder, target in folders:
-            for directory, _, names in os.walk(folder):
-                for name in sorted(names):
-                    if '__pycache__' not in directory:
-                        path = os.path.join(directory, name)
-                        archive.write(path, os.path.join(target, os.path.relpath(path, folder)))
-    return [os.path.join(python, name) for name in ('python313.zip', 'scripts.zip')]
+    for zip_name, places in SCRIPT_ZIPS.items():
+        folders = [(os.path.join(tree, 'scripts', folder), target) for folder, target in places.items()]
+        with zipfile.ZipFile(os.path.join(python, zip_name), 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+            for folder, target in folders + ([(own, '')] if zip_name == 'scripts.zip' else []):
+                for directory, _, names in os.walk(folder):
+                    for name in sorted(names):
+                        if '__pycache__' not in directory:
+                            path = os.path.join(directory, name)
+                            archive.write(path, os.path.join(target, os.path.relpath(path, folder)))
+    return [os.path.join(python, name) for name in ('python313.zip', *SCRIPT_ZIPS)]
 
 
 def install(module, files):

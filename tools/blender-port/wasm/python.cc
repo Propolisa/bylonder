@@ -42,18 +42,34 @@ void bpy_context_clear(bContext *C, const PyGILState_STATE *gilstate);
 }  // namespace blender
 
 static bool started() { return Py_IsInitialized(); }
-EXPORT(python_running) bool python_running() { return started(); }
+static bool ready = false;
+EXPORT(python_running) bool python_running() { return ready; }
 
-/* Python started as Blender's WM_init starts it: BPY_python_start, BPY_python_reset, then its scripts (importing bpy
- * registers the startup scripts, bylonder_cpython.py) and the add-ons and extensions the Preferences enable. */
-EXPORT(python_start) bool python_start(bContext *C)
+/* Python started as Blender's WM_init starts it, one step per call, so the page stays responsive between them:
+ * BPY_python_start (importing bpy registers the startup scripts, bylonder_cpython.py), BPY_python_reset, then the
+ * add-ons and extensions the Preferences enable, one per step. Returns the next step, 0 when Python has started, -1
+ * when a step failed. */
+EXPORT(python_start_step) int python_start_step(bContext *C, int step)
 {
-  PyImport_ExtendInittab(numpy_inittab);
-  BPY_python_start(C, 0, nullptr);
-  BPY_python_reset(C);
-  const char *startup[] = {"bpy", "bylonder_cpython", nullptr};
-  return BPY_run_string_exec(
-      C, startup, "bpy.utils.load_scripts_extensions()\nbylonder_cpython.extensions_loaded()");
+  switch (step) {
+    case 0:
+      PyImport_ExtendInittab(numpy_inittab);
+      BPY_python_start(C, 0, nullptr);
+      return 1;
+    case 1:
+      BPY_python_reset(C);
+      return 2;
+    default: {
+      /* bpy.utils.load_scripts_extensions(), an add-on per step (bylonder_cpython.start_step). */
+      const char *imports[] = {"bylonder_cpython", nullptr};
+      intptr_t more = 0;
+      if (!BPY_run_string_as_intptr(C, imports, "bylonder_cpython.start_step()", nullptr, &more)) {
+        return -1;
+      }
+      ready = !more;
+      return more ? 2 : 0;
+    }
+  }
 }
 
 /* The draw functions CPython added (prepended, `before`, or appended) to a UI type the transpiled tree registered

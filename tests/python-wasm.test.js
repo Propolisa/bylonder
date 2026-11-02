@@ -60,6 +60,18 @@ view = memoryview(mesh.vertices[0].co)
 bpy.data.texts.new("out").write(f"{sys.version.split()[0]} {np.__version__} {len(co)} {mesh.vertices[0].co.z:.1f} {view.format}")
 `);
 assert.equal(output(), '3.13.13 2.3.4 8 0.0 f', 'bpy, numpy, foreach_get and foreach_set, and mathutils buffers in the embedded CPython');
+// A memoryview of a mathutils value holds a reference of its own: releasing it leaves the value's count as it was.
+blendData().texts.remove(blendData().texts.get('out'));
+run(`import bpy, sys, mathutils
+counts = []
+for value in (mathutils.Vector((1, 2, 3)), mathutils.Matrix(), mathutils.Euler(), mathutils.Quaternion(), mathutils.Color()):
+    before = sys.getrefcount(value)
+    view = memoryview(value)
+    view.release()
+    counts.append(sys.getrefcount(value) - before)
+bpy.data.texts.new("out").write(str(counts))
+`);
+assert.equal(output(), '[0, 0, 0, 0, 0]', "a mathutils value's memoryview keeps the value's reference count");
 
 // A driver whose expression needs Python (not one expr_pylike_eval.cc evaluates), where scripts may run automatically.
 run(`import bpy

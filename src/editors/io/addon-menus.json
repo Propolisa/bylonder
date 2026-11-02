@@ -1,0 +1,34 @@
+{
+ "TOPBAR_MT_file_import": [
+  [
+   "import_anim.bvh",
+   "Motion Capture (.bvh)"
+  ],
+  [
+   "import_curve.svg",
+   "SVG as Curves (.svg)"
+  ],
+  [
+   "import_scene.fbx",
+   "FBX (.fbx) (Legacy)"
+  ],
+  [
+   "import_scene.gltf",
+   "glTF 2.0 (.glb/.gltf)"
+  ]
+ ],
+ "TOPBAR_MT_file_export": [
+  [
+   "export_anim.bvh",
+   "Motion Capture (.bvh)"
+  ],
+  [
+   "export_scene.fbx",
+   "FBX (.fbx)"
+  ],
+  [
+   "export_scene.gltf",
+   "glTF 2.0 (.glb/.gltf)"
+  ]
+ ]
+}

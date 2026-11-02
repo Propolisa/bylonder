@@ -78,10 +78,10 @@ export function treeMenu(tree, ui, editorTypeOwner) {
           items.push({ label: text, icon: iconName, title: node.tip, keys: shortcut, enabled: () => editorType(editorTypeOwner, text, false), run: () => editorType(editorTypeOwner, text, true) });
           break;
         }
-        const unavailable = node.operator && unavailableReason(node.operator);
+        const unavailable = () => node.operator && unavailableReason(node.operator);
         items.push({
-          label: text, icon: iconName, title: unavailable || node.tip, blender: node.operator,
-          enabled: () => !node.disabled && !unavailable,
+          label: text, icon: iconName, title: () => unavailable() || node.tip, blender: node.operator,
+          enabled: () => !node.disabled && !unavailable(),
           ...(['TOGGLE', 'TOGGLE_N', 'ICON_TOGGLE', 'ICON_TOGGLE_N', 'CHECKBOX', 'CHECKBOX_N', 'ROW'].includes(node.type) && { checked: () => !!node.selected }),
           ...(node.operator && { keys: shortcut ?? ui.keys?.(node.operator, node.properties ?? {}) }),
           run: (event) => (node.operator ? runOperator(node, ui, event, { invoke: true }) : press(node, ui)),
