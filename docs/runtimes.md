@@ -72,6 +72,7 @@ On the struct Blender keeps the feature's evaluated state in, so each instance c
 - a light's on its **Light** data;
 - a particle system's on its **ParticleSettings**.
 - an image's sampling on its **Image** (its panel is in the Image Editor's sidebar, which shows the Image).
+- a mesh's shape keys on its **Key** (the keys' values are the Key's; objects sharing the Mesh choose together).
 
 For scripts and tools the path is `<struct>.bylonder.runtime` (`'BLENDER'`, `'MAPPED'`, `'NATIVE'`),
 `<struct>.bylonder.babylon` (the native settings) and `<struct>.bylonder.issues` (read only: each approximation or
@@ -116,6 +117,7 @@ carries no mark: an unmarked control behaves as in Blender 5.2.
 | Feature | Lives on | Blender | Babylon (mapped) | Babylon (native) |
 |---|---|---|---|---|
 | Armature deform | Object | Yes | Skeleton, GPU skinning | Not offered |
+| Shape keys | Key | Yes | MorphTargetManager, GPU blending | Not offered |
 | Light | Light | Yes | Not offered | Planned |
 | Particle system | ParticleSettings | Yes | Planned | Planned |
 | Image sampling | Image (Image Editor > Sidebar > Image) | Yes | Not offered | Anisotropic filtering, mipmaps |
@@ -148,7 +150,7 @@ One wrapper module per feature, without changing the code of other features or t
   animatable; `babylon`, a `BYLONDER_PG_<struct>_babylon` of their Babylon-only settings; `issues`, read only) and
   assigns it as `<struct>.bylonder`, as an add-on assigns a `PointerProperty`. Blender stores it as ID properties, so
   it saves in the .blend and undoes with Main's memfile steps.
-- **Panels.** `<CONTEXT>_PT_bylonder_runtime` per feature (`DATA_PT_bylonder_runtime` for armatures) and
+- **Panels.** `<CONTEXT>_PT_bylonder_<feature>_runtime` per feature (`DATA_PT_bylonder_armature_runtime` for armatures) and
   `SCENE_PT_bylonder_runtimes` are `bpy.types.Panel` classes registered into the module, so Blender's Properties editor
   lays them out like its own panels. Issues are listed under Approximated (`INFO` icon) and Evaluated as Blender
   (`ERROR` icon). The Blender Coverage scan leaves out ids with `bylonder` in them, which are not Blender's.
@@ -202,3 +204,31 @@ Not yet: B-Bone segments as Babylon bones (Blender's segment matrices, `PoseBone
 weighted by `bbone_segment_index`); the Outliner mark; the Scene tab's rows as links to their panels; a module export
 that skips the Armature modifier of a mapped mesh, and one that gives the mesh evaluated before it (so modifiers and
 shape keys before the Armature modifier stop being fallbacks).
+
+## Shape keys
+
+`src/runtimes/shape-keys.js`. With Babylon (mapped) on a mesh's Key, for each object of that Mesh in Object Mode:
+
+- **Targets.** The object is drawn from its Mesh as Main holds it, and a `MorphTargetManager` holds one target per key
+  but Basis: per Babylon vertex (face corner) Basis plus the key's offset from its relative key, scaled by the key's
+  vertex group as `key.cc` `key_evaluate_relative_float3` scales it, with the key's own normals (`normals_split_get`,
+  or its face and vertex normals as the mesh draws them).
+- **Influence.** After each evaluation each target's influence is its key's value, 0 when muted; with the object's
+  shape pinned (`show_only_shape_key`) the active key's is 1 and the others' 0. Nothing else changes per frame: the
+  targets are made again only when the Mesh alone was tagged (an edit of its weights or attributes) or the keys'
+  structure or coordinates changed (compared with copies). The bounds grow by each target's offset box at its
+  influence.
+- **Exact.** The blended positions are Main's evaluated positions to float precision
+  (`tests/shape-keys-wasm.test.js`).
+- **Approximation:** normals (Babylon blends the keys' normals linearly; Blender recomputes them from the blended
+  positions).
+- **Fallbacks:** absolute keys (Relative off), a modifier shown in the viewport (the keys come first in Blender's stack),
+  Bylonder's own modifiers, a Mesh whose positions differ from Basis, a pinned key relative to a key other than Basis,
+  and a mesh whose geometry is Babylon's own. Edit and Sculpt Mode evaluate as Blender while editing.
+- **Settings** Blender has none for: Morph Normals (`enableNormalMorphing`) and Targets in Texture
+  (`useTextureToStoreTargets`).
+- **Export.** File > Export > Babylon writes the targets and, when the Key is animated, one `influence` animation per
+  target sampled at every frame of the scene range. A Key on Blender is mapped for the export's duration.
+
+As with armatures, Blender's depsgraph still evaluates the keys into the mesh on the CPU; the saving is the mesh's
+extraction and upload each frame (`bench/shape-keys.bench.js`: 16 ms against 4 ms a frame on 32k vertices).

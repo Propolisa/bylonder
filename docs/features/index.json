@@ -792,6 +792,69 @@
   "example_title": "Lava Sphere"
  },
  {
+  "id": "shape-keys",
+  "title": "Shape Keys",
+  "summary": "Shape a mesh with Blender's shape keys, their values, ranges, vertex groups, relative keys, pinning and locks, edit a key in Edit Mode and key its value, drawn as Blender evaluates them or blended by Babylon's morph targets on the GPU.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/animation/shape_keys/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/animation/shape_keys/shape_keys_panel.html",
+   "https://docs.blender.org/manual/en/5.2/animation/shape_keys/workflow.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/vertex/blend_from_shape.html"
+  ],
+  "example": "shape-keys",
+  "thumbnail": "shape-keys/thumbnail.png",
+  "media": [
+   "shape-keys/panel.png",
+   "shape-keys/value.gif",
+   "shape-keys/edit.gif",
+   "shape-keys/play.gif",
+   "shape-keys/runtime.png"
+  ],
+  "ui": [
+   "PROPERTIES",
+   "DATA_PT_shape_keys",
+   "MESH_MT_shape_key_context_menu",
+   "MESH_MT_shape_key_tree_context_menu",
+   "VIEW3D_MT_edit_mesh_vertices",
+   "VIEW_3D",
+   "EDIT",
+   "TIMELINE"
+  ],
+  "operators": [
+   "object.shape_key_add",
+   "object.shape_key_remove",
+   "object.shape_key_move",
+   "object.shape_key_clear",
+   "object.shape_key_lock",
+   "object.shape_key_mirror",
+   "object.shape_key_transfer",
+   "object.shape_key_apply_to_basis",
+   "mesh.blend_from_shape",
+   "mesh.shape_propagate_to_all",
+   "anim.keyframe_insert_button",
+   "object.editmode_toggle"
+  ],
+  "code": [
+   "src/runtimes/shape-keys.js",
+   "src/draw/mesh-batch-buffers.js",
+   "src/editors/interface/block-view.js",
+   "tools/blender-port/wasm/ui-tree.cc"
+  ],
+  "tests": [
+   "tests/shape-keys-wasm.test.js"
+  ],
+  "limits": [
+   "Babylon (mapped) blends each key's own normals linearly; Blender recomputes the normals of the blended positions, so shading differs slightly between keys.",
+   "Babylon (mapped) blends relative keys only, on a mesh with no modifier shown in the viewport; absolute keys (Relative off) and meshes with modifiers evaluate as Blender.",
+   "On Babylon (mapped) Blender's animation system still evaluates the keys into the mesh each frame (about 4 ms on 32k vertices), though nothing reads that mesh; the depsgraph has no hook to evaluate it only when read."
+  ],
+  "page": "docs/features/shape-keys.md",
+  "open": "https://propolisa.github.io/bylonder/#example=shape-keys",
+  "example_title": "Shape Keys"
+ },
+ {
   "id": "spreadsheet",
   "title": "Spreadsheet",
   "summary": "Blender's Spreadsheet editor, listing the active object's evaluated or original geometry by component and domain, with its attributes as columns.",

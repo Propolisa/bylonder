@@ -142,7 +142,7 @@ and Paste Pose (Ctrl C, Ctrl V, Shift Ctrl V flipped: `pose.copy`, `pose.paste`)
 ## Runtime
 
 An armature object's deform can run on Babylon (`docs/runtimes.md`, Armature deform): the Armature tab's Runtime panel
-(`DATA_PT_bylonder_runtime`, `object.bylonder.runtime`) switches it between Blender and Babylon (mapped), where Babylon
+(`DATA_PT_bylonder_armature_runtime`, `object.bylonder.runtime`) switches it between Blender and Babylon (mapped), where Babylon
 skins the meshes it deforms on the GPU with a `Skeleton` posed from Main's evaluated pose. Blender is the default.
 
 ## Tests
