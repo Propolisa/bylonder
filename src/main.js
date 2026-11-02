@@ -8,7 +8,7 @@ import { createCompositorBackdrop } from './editors/space_node/compositor-backdr
 import { createNodeContexts } from './editors/space_node/contexts.js';
 import { registerObjects } from './blenkernel/animation/bindings.js';
 import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim-editor.js';
-import { mountRuntimeLayout } from "./editors/screen/runtime.js";
+import { mountRuntimeLayout, IMAGE_MODES } from "./editors/screen/runtime.js";
 import { createViewportTouch } from "./windowmanager/input/viewport-touch.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
 import { createObjectActions } from "./editors/object/object-actions";
@@ -62,6 +62,7 @@ import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, c
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { registerRuntimeTypes } from "./runtimes/runtimes.js";
 import "./runtimes/armature.js";
+import "./runtimes/image.js";
 import { bylonderIcon } from "./python/bpy_icons.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
@@ -84,6 +85,8 @@ import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
+import { updateImageTextures, onImageTexturesChanged, imageTexture } from "./imbuf/image-textures.js";
+import { mountImageEditor } from "./editors/space_image/image-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
@@ -223,7 +226,16 @@ world.pickArmature = (view, x, y, accept) => {
     .map((node) => ({ node, depth: armaturePickDepth(world.mainSync.blender.C, world.mainSync.objectOf(node), region, x / k, y / k) }))
     .filter(({ depth }) => depth !== null).sort((a, b) => a.depth - b.depth)[0] ?? null;
 };
-world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
+// Texture Paint and Solid's Texture color show the image painted: the canvas, or the active material's paint slot,
+// which is its active Image Texture node outside Texture Paint (ED_object_get_active_image).
+const paintTexture = (mesh) => {
+  const ob = world.mainSync?.objectOf(mesh), { image_paint: paint } = bpyRna.contextStruct().tool_settings;
+  const material = ob && bpyRna.idStruct(ob).active_material, active = material?.node_tree?.nodes.active;
+  const image = paint.mode === "IMAGE" ? paint.canvas
+    : material?.texture_paint_images[material.paint_active_slot] ?? (active?.bl_idname === "ShaderNodeTexImage" ? active.image : null);
+  return image ? imageTexture(image, scene) : null;
+};
+world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh), paintTexture });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
 // particles, video; otherwise they stop until the next input or change.
 const observerCount = () => scene.onBeforeRenderObservable.observers.length + scene.onAfterRenderObservable.observers.length;
@@ -235,6 +247,7 @@ const live = () =>
   scene.animatables.length > 0 || scene.particleSystems.some((p) => p.isStarted?.() && p.isAlive?.()) ||
   scene.textures.some((t) => t.video && !t.video.paused);
 views = createViews({ engine, scene, live });
+onImageTexturesChanged(() => views.wake());
 syncLightDirections(scene);
 world.views = views;
 let creator;
@@ -337,6 +350,7 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "screen") {
     const { screen, mode } = e.data.payload;
     setScreen(screen);
+    if (IMAGE_MODES[screen]) imageEditor.setMode(IMAGE_MODES[screen]);
     world.mainSync.flush();
     const has = mode && (mode === "OBJECT" || world.mainModes.modes.includes(mode)) && world.mainSync.blender.enumItems("object.mode_set", "mode").some(([id]) => id === mode);
     if (has) runOperator("object.mode_set", { mode });
@@ -519,6 +533,13 @@ const scriptingEditors = [
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
   mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info") }),
 ];
+// The Image Editor and UV Editor: Blender's SpaceImage, its image and UVs drawn by Babylon on the app's engine.
+const editObject = () => {
+  const node = editor.selection.nodes.at(-1), ob = node?.metadata?.wbMode === "EDIT" ? world.mainSync.objectOf(node) : null;
+  const edit = ob && world.mainSync.blender.editMesh(ob);
+  return edit ? { ob, mesh: edit.mesh } : null;
+};
+const imageEditor = mountImageEditor(document.querySelector("#image-section"), { header: viewportDock.header("image"), engine, views, sync: world.mainSync, editObject });
 let inspectorBusy = false;
 async function inspector() {
   if (inspectorBusy) return;
@@ -806,6 +827,7 @@ const perFrame = engine.onBeginFrameObservable.add(() => {
   // Blender's window timers, as its main loop runs them: a job started outside an event (a menu's asset list) ends.
   blenderAreas.ticking();
   world.modifiers.refresh();
+  updateImageTextures(engine);
   for (const view of viewports()) if (!view.state.cameraView) view.nav.updateBounds();
   status.tick();
   if (performance.now() - last > 500) {
@@ -816,7 +838,8 @@ const perFrame = engine.onBeginFrameObservable.add(() => {
   }
 }, undefined, true);
 // Runs once per visible view per frame (engine views); the view manager applies per-view state around it.
-const renderScene = () => scene.render();
+// The scene of the view being drawn: the 3D Views', or an editor's own (the Image Editor's).
+const renderScene = () => (engine.activeView?.camera?.getScene() ?? scene).render();
 engine.runRenderLoop(renderScene);
 
 function dispose() {
@@ -824,6 +847,7 @@ function dispose() {
   animEditors.forEach((animEditor) => animEditor.dispose());
   world.texts.flush();
   scriptingEditors.forEach((area) => area.dispose());
+  imageEditor.dispose();
   engine.onBeginFrameObservable.remove(perFrame);
   for (const view of viewports()) view.dispose();
   views.dispose();

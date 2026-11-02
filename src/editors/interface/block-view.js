@@ -19,7 +19,7 @@ import { openMenu } from './menu.js';
 import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
-import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu } from './ui-tree.js';
+import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu, regionPanels, categorySet } from './ui-tree.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { treeMenu, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
@@ -282,3 +282,16 @@ export const PanelsView = defineComponent({
   props: { panels: Array, ui: Object },
   setup: (props, { slots }) => () => h('div', { class: 'bl-ui bl-region-panels flex flex-col' }, [...props.panels.map((p) => panelNode(p, props.ui)), slots.default?.()]),
 });
+
+// A sidebar region (RGN_TYPE_UI) as Blender lays it out in `ui`'s context: the active category's panels, and the
+// category tabs on its right edge.
+export function sidebarView(ui) {
+  const { category, categories, panels } = ui.inContext((C) => regionPanels(C));
+  return [
+    h(PanelsView, { panels, ui }),
+    h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
+      type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category),
+      onClick: () => { ui.inContext((C) => categorySet(C, name)); ui.refresh(); },
+    }, name))),
+  ];
+}

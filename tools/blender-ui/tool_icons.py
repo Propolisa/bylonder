@@ -1,4 +1,4 @@
-"""The 3D View's tool icons as SVG: Blender draws each from the triangles of release/datafiles/icons/NAME.dat, with
+"""The 3D View's and the Image Editor's tool icons as SVG: Blender draws each from the triangles of release/datafiles/icons/NAME.dat, with
 colors per vertex; here each triangle takes its vertices' average color, triangles of one color forming one path.
 Writes public/icons/blender/tools/NAME.svg for the tools of the modes Bylonder has (from Blender's Python tree).
 
@@ -13,13 +13,15 @@ from collections import defaultdict
 import transpile
 
 OUT = os.path.join(transpile.REPO, 'public', 'icons', 'blender', 'tools')
-MODES = ['OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_ARMATURE', 'POSE', 'PARTICLE', 'SCULPT', 'PAINT_WEIGHT']
+MODES = {'VIEW3D_PT_tools_active': ['OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_ARMATURE', 'POSE', 'PARTICLE', 'SCULPT', 'PAINT_WEIGHT',
+                                    'PAINT_TEXTURE', 'PAINT_VERTEX'],
+         'IMAGE_PT_tools_active': ['VIEW', 'UV', 'PAINT']}
 # The icons the tools of MODES name (a None context gives every tool, as the tools' polls take it), and Blender's
 # fallback for a missing one.
 ICONS = '''
-const { registered: { VIEW3D_PT_tools_active: P } } = await import('./src/python/bpy_interface.js');
+const { registered } = await import('./src/python/bpy_interface.js');
 const names = new Set(['none']);
-for (const mode of %s) for (const item of P.tools_from_context(null, mode)) for (const tool of [item ?? []].flat()) names.add(tool.icon);
+for (const [panel, modes] of Object.entries(%s)) for (const mode of modes) for (const item of registered[panel].tools_from_context(null, mode)) for (const tool of [item ?? []].flat()) names.add(tool.icon);
 console.log(JSON.stringify([...names]));
 '''
 
