@@ -1326,6 +1326,9 @@ export var IntProperty =  __class__ ('IntProperty', [Property], {
 export var Itasc =  __class__ ('Itasc', [IKParam], {
 	__module__: __name__,
 });
+export var Key =  __class__ ('Key', [ID], {
+	__module__: __name__,
+});
 export var KeyConfig =  __class__ ('KeyConfig', [bpy_struct], {
 	__module__: __name__,
 });
@@ -10636,6 +10639,7 @@ export function __py_setattr__ (key, value) {
 		case 'IntAttributeValue': IntAttributeValue = value; break;
 		case 'IntProperty': IntProperty = value; break;
 		case 'Itasc': Itasc = value; break;
+		case 'Key': Key = value; break;
 		case 'KeyConfig': KeyConfig = value; break;
 		case 'KeyConfigPreferences': KeyConfigPreferences = value; break;
 		case 'KeyConfigurations': KeyConfigurations = value; break;

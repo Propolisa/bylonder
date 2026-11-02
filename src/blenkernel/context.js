@@ -4,7 +4,7 @@
 //   Viewport's view, editors/space_view3d/view3d.js), or none for Blender's defaults.
 import { rna, collection } from '../makesrna/rna.js';
 
-const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor', GRAPH_EDITOR: 'SpaceGraphEditor',
+const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor', GRAPH_EDITOR: 'SpaceGraphEditor', NLA_EDITOR: 'SpaceNLA',
   NODE_EDITOR: 'SpaceNodeEditor', SEQUENCE_EDITOR: 'SpaceSequenceEditor', TEXT_EDITOR: 'SpaceTextEditor', FILE_BROWSER: 'SpaceFileBrowser', TOPBAR: 'Space',
   CONSOLE: 'SpaceConsole', INFO: 'SpaceInfo' };
 const REGION_DATA = { VIEW_3D: 'RegionView3D' };

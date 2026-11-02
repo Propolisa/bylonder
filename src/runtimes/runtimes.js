@@ -16,7 +16,8 @@ export const RUNTIMES = {
 export const APPROXIMATION = 'APPROXIMATION', FALLBACK = 'FALLBACK';
 
 // Each feature: { id, label, struct (the RNA type it lives on), context (its Properties tab, a panel's bl_context), or
-// sidebar ({ space, category }: its panel's place in an editor's sidebar instead), owner (the context member holding it),
+// sidebar ({ space, category }: its panel's place in an editor's sidebar instead), owner (the context member holding it,
+// or a function of the context giving it),
 // runtimes (the identifiers it offers), settings (its Babylon-only settings, bpy.props by name), poll(struct),
 // issues(struct): [{ kind, setting, message }], instances(view): the structs it evaluates, evaluates(entry),
 // evaluate(view), export(world): { issues, animations, restore } }.
@@ -82,10 +83,10 @@ function propertyGroup(struct, list) {
 const ISSUE_ICONS = { APPROXIMATION: 'INFO', FALLBACK: 'ERROR' };
 // A feature's runtime panel in its Properties tab or editor sidebar: the runtime, its Babylon settings, then its issues.
 function runtimePanel(feature, icon) {
-  const owner = (context) => context[feature.owner];
+  const owner = (context) => (typeof feature.owner === 'function' ? feature.owner(context) : context[feature.owner]);
   const place = feature.sidebar ? { bl_space_type: feature.sidebar.space, bl_region_type: 'UI', bl_category: feature.sidebar.category }
     : { bl_space_type: 'PROPERTIES', bl_region_type: 'WINDOW', bl_context: feature.context };
-  return __class__(`${feature.context.toUpperCase()}_PT_bylonder_runtime`, [types().Panel], {
+  return __class__(`${feature.context.toUpperCase()}_PT_bylonder_${feature.id.toLowerCase()}_runtime`, [types().Panel], {
     bl_label: 'Runtime', ...place,
     poll: (context) => !!owner(context) && feature.poll(owner(context)),
     draw_header(context) { this.layout.label(kw({ text: '', icon_value: icon })); },

@@ -41,7 +41,7 @@ function meshFallbacks(ob, arm) {
   if (at > 0) out.push(issue(FALLBACK, ob, path('show_viewport'), `Armature after ${stack[0].name}`));
   if (stack.length > at + 1) out.push(issue(FALLBACK, ob, path('show_viewport'), `${stack[at + 1].name} after Armature`));
   if (modifier.use_multi_modifier) out.push(issue(FALLBACK, ob, path('use_multi_modifier'), 'Multi Modifier'));
-  if (ob.data.shape_keys) out.push(issue(FALLBACK, ob, 'data.shape_keys', 'shape keys (no morph targets yet)'));
+  if (ob.data.shape_keys) out.push(issue(FALLBACK, ob, 'data.shape_keys', 'shape keys before Armature'));
   return out;
 }
 

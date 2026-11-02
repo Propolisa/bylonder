@@ -508,6 +508,82 @@
   "example_title": "Array Modifiers"
  },
  {
+  "id": "nla",
+  "title": "Nonlinear Animation",
+  "summary": "Layer and mix actions as strips on tracks in Blender's Nonlinear Animation editor, with push down, tweak mode, strip blending, influence and repeats, evaluated by Blender's animation system.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/nla/index.html",
+   "https://docs.blender.org/manual/en/5.2/editors/nla/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/editors/nla/tracks.html",
+   "https://docs.blender.org/manual/en/5.2/editors/nla/strips.html",
+   "https://docs.blender.org/manual/en/5.2/editors/nla/sidebar.html",
+   "https://docs.blender.org/manual/en/5.2/editors/nla/tweaking.html"
+  ],
+  "example": "nla",
+  "thumbnail": "nla/thumbnail.png",
+  "media": [
+   "nla/open.gif",
+   "nla/select.gif",
+   "nla/tweak.gif",
+   "nla/play.gif"
+  ],
+  "ui": [
+   "NLA_EDITOR",
+   "NLA_HT_header",
+   "NLA_MT_view",
+   "NLA_MT_select",
+   "NLA_MT_marker",
+   "NLA_MT_add",
+   "NLA_MT_tracks",
+   "NLA_MT_strips",
+   "NLA_MT_context_menu",
+   "NLA_MT_channel_context_menu",
+   "NLA_PT_action",
+   "NLA_PT_filters"
+  ],
+  "operators": [
+   "nla.click_select",
+   "nla.select_box",
+   "nla.select_all",
+   "nla.action_pushdown",
+   "nla.tweakmode_enter",
+   "nla.tweakmode_exit",
+   "nla.actionclip_add",
+   "nla.transition_add",
+   "nla.tracks_add",
+   "nla.tracks_delete",
+   "nla.split",
+   "nla.duplicate_move",
+   "nla.delete",
+   "nla.mute_toggle",
+   "nla.meta_add",
+   "nla.move_up",
+   "nla.move_down",
+   "nla.fmodifier_add",
+   "transform.translate",
+   "screen.animation_play"
+  ],
+  "code": [
+   "src/editors/animation/anim-editor.js",
+   "src/editors/animation/anim-area.js",
+   "src/editors/interface/region-draw.js",
+   "tools/blender-port/wasm/region-draw.cc",
+   "tools/blender-port/wasm/anim-api.cc"
+  ],
+  "tests": [
+   "tests/nla-wasm.test.js"
+  ],
+  "limits": [
+   "Strips of sound clips and NLA control curves are listed but their sounds and curves are not checked against Blender's drawing.",
+   "Keyframe shapes on the action line are drawn without their extreme markers (the Dope Sheet's up and down arrows)."
+  ],
+  "page": "docs/features/nla.md",
+  "open": "https://propolisa.github.io/bylonder/#example=nla",
+  "example_title": "Nonlinear Animation"
+ },
+ {
   "id": "particle-hair",
   "title": "Particle Hair",
   "summary": "A hair particle system on a mesh, shaped with the Comb brush in Particle Edit Mode and set up in Properties > Particles.",
@@ -790,6 +866,69 @@
   "page": "docs/features/shader-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=lava",
   "example_title": "Lava Sphere"
+ },
+ {
+  "id": "shape-keys",
+  "title": "Shape Keys",
+  "summary": "Shape a mesh with Blender's shape keys, their values, ranges, vertex groups, relative keys, pinning and locks, edit a key in Edit Mode and key its value, drawn as Blender evaluates them or blended by Babylon's morph targets on the GPU.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/animation/shape_keys/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/animation/shape_keys/shape_keys_panel.html",
+   "https://docs.blender.org/manual/en/5.2/animation/shape_keys/workflow.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/vertex/blend_from_shape.html"
+  ],
+  "example": "shape-keys",
+  "thumbnail": "shape-keys/thumbnail.png",
+  "media": [
+   "shape-keys/panel.png",
+   "shape-keys/value.gif",
+   "shape-keys/edit.gif",
+   "shape-keys/play.gif",
+   "shape-keys/runtime.png"
+  ],
+  "ui": [
+   "PROPERTIES",
+   "DATA_PT_shape_keys",
+   "MESH_MT_shape_key_context_menu",
+   "MESH_MT_shape_key_tree_context_menu",
+   "VIEW3D_MT_edit_mesh_vertices",
+   "VIEW_3D",
+   "EDIT",
+   "TIMELINE"
+  ],
+  "operators": [
+   "object.shape_key_add",
+   "object.shape_key_remove",
+   "object.shape_key_move",
+   "object.shape_key_clear",
+   "object.shape_key_lock",
+   "object.shape_key_mirror",
+   "object.shape_key_transfer",
+   "object.shape_key_apply_to_basis",
+   "mesh.blend_from_shape",
+   "mesh.shape_propagate_to_all",
+   "anim.keyframe_insert_button",
+   "object.editmode_toggle"
+  ],
+  "code": [
+   "src/runtimes/shape-keys.js",
+   "src/draw/mesh-batch-buffers.js",
+   "src/editors/interface/block-view.js",
+   "tools/blender-port/wasm/ui-tree.cc"
+  ],
+  "tests": [
+   "tests/shape-keys-wasm.test.js"
+  ],
+  "limits": [
+   "Babylon (mapped) blends each key's own normals linearly; Blender recomputes the normals of the blended positions, so shading differs slightly between keys.",
+   "Babylon (mapped) blends relative keys only, on a mesh with no modifier shown in the viewport; absolute keys (Relative off) and meshes with modifiers evaluate as Blender.",
+   "On Babylon (mapped) Blender's animation system still evaluates the keys into the mesh each frame (about 4 ms on 32k vertices), though nothing reads that mesh; the depsgraph has no hook to evaluate it only when read."
+  ],
+  "page": "docs/features/shape-keys.md",
+  "open": "https://propolisa.github.io/bylonder/#example=shape-keys",
+  "example_title": "Shape Keys"
  },
  {
   "id": "spreadsheet",

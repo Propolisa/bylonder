@@ -441,16 +441,24 @@ function writeValues(view, address, layouts, values) {
 
 // src/draw/mesh-batch-buffers.js
 function mesh_batch_cache_vertex_buffers(mesh) {
-  const { vert_positions: p, corner_verts, face_offsets } = mesh;
-  const corners = mesh.corners_num;
+  const corner = mesh.corner_normals?.(), flat = mesh_batch_cache_flat(mesh);
+  const { positions, normals } = mesh_batch_cache_corner_buffers(
+    mesh,
+    mesh.vert_positions,
+    corner ? { corner } : { face: mesh.face_normals(), vert: flat ? null : mesh.vert_normals() }
+  );
+  const uvs = mesh.attribute("UVMap");
+  return { positions, normals, ...trianglesBySlot(mesh), ...uvs && { uvs: Float32Array.from(uvs) } };
+}
+var mesh_batch_cache_flat = (mesh) => !!mesh.attribute("sharp_face")?.every(Boolean);
+function mesh_batch_cache_corner_buffers(mesh, p, { corner, face, vert }) {
+  const { corner_verts, face_offsets } = mesh, corners = mesh.corners_num;
   const positions = new Float32Array(corners * 3), normals = new Float32Array(corners * 3);
   const sharp_face = mesh.attribute("sharp_face");
-  const face_normals = mesh.face_normals(), vert_normals = sharp_face?.every(Boolean) ? null : mesh.vert_normals();
-  const corner_normals = mesh.corner_normals?.();
   for (let f = 0; f < mesh.faces_num; f++) {
-    const flat = !vert_normals || sharp_face?.[f];
+    const flat = !vert || sharp_face?.[f];
     for (let c = face_offsets[f]; c < face_offsets[f + 1]; c++) {
-      const v = corner_verts[c] * 3, n = corner_normals ?? (flat ? face_normals : vert_normals), i = corner_normals ? c * 3 : flat ? f * 3 : v;
+      const v = corner_verts[c] * 3, n = corner ?? (flat ? face : vert), i = corner ? c * 3 : flat ? f * 3 : v;
       positions[c * 3] = p[v];
       positions[c * 3 + 1] = p[v + 2];
       positions[c * 3 + 2] = p[v + 1];
@@ -459,8 +467,7 @@ function mesh_batch_cache_vertex_buffers(mesh) {
       normals[c * 3 + 2] = n[i + 1];
     }
   }
-  const uvs = mesh.attribute("UVMap");
-  return { positions, normals, ...trianglesBySlot(mesh), ...uvs && { uvs: Float32Array.from(uvs) } };
+  return { positions, normals };
 }
 function trianglesBySlot(mesh) {
   const tris = mesh.corner_tris(), slots = mesh.attribute("material_index");

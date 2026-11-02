@@ -125,7 +125,7 @@ def bpy_types(build):
     # gives the registered class (its __getattr__ below).
     scripts = {n.name for root, _, files in os.walk(build) if os.path.relpath(root, build).split(os.sep)[0] not in ('_bpy',)
                for f in files if f.endswith('.py') and f != '_bpy_types.py'
-               for n in ast.walk(ast.parse(open(os.path.join(root, f)).read())) if isinstance(n, ast.ClassDef)}
+               for n in ast.parse(open(os.path.join(root, f)).read()).body if isinstance(n, ast.ClassDef)}
     for name in sorted(structs):
         if name not in scripts:
             visit(name)

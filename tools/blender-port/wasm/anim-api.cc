@@ -446,11 +446,18 @@ EXPORT(anim_area_refresh) void anim_area_refresh(bContext *C, AnimArea *a)
   }
 }
 
-/* The space's settings the editors draw and their headers show: its flag (eGraphEdit_Flag or eSAction_Flag), mode, the
- * dope sheet's filter flags and the pivot point (SpaceGraph.around). */
+/* The space's settings the editors draw and their headers show: its flag (eGraphEdit_Flag, eSAction_Flag or
+ * eSpaceNla_Flag), mode, the dope sheet's filter flags and the pivot point (SpaceGraph.around). */
 static bDopeSheet *space_dopesheet(SpaceLink *sl)
 {
-  return sl->spacetype == SPACE_GRAPH ? reinterpret_cast<SpaceGraph *>(sl)->ads : &reinterpret_cast<SpaceAction *>(sl)->ads;
+  switch (sl->spacetype) {
+    case SPACE_GRAPH:
+      return reinterpret_cast<SpaceGraph *>(sl)->ads;
+    case SPACE_NLA:
+      return reinterpret_cast<SpaceNla *>(sl)->ads;
+    default:
+      return &reinterpret_cast<SpaceAction *>(sl)->ads;
+  }
 }
 EXPORT(anim_area_settings) const int *anim_area_settings(AnimArea *a)
 {
@@ -461,6 +468,11 @@ EXPORT(anim_area_settings) const int *anim_area_settings(AnimArea *a)
     settings[0] = sipo->flag;
     settings[1] = sipo->mode;
     settings[3] = sipo->around;
+  }
+  else if (sl->spacetype == SPACE_NLA) {
+    settings[0] = reinterpret_cast<SpaceNla *>(sl)->flag;
+    settings[1] = 0;
+    settings[3] = 0;
   }
   else {
     SpaceAction *saction = reinterpret_cast<SpaceAction *>(sl);
@@ -477,6 +489,9 @@ EXPORT(anim_area_settings_set) void anim_area_settings_set(AnimArea *a, int flag
   if (sl->spacetype == SPACE_GRAPH) {
     reinterpret_cast<SpaceGraph *>(sl)->flag = eGraphEdit_Flag(flag);
     reinterpret_cast<SpaceGraph *>(sl)->around = char(around);
+  }
+  else if (sl->spacetype == SPACE_NLA) {
+    reinterpret_cast<SpaceNla *>(sl)->flag = eSpaceNla_Flag(flag);
   }
   else {
     reinterpret_cast<SpaceAction *>(sl)->flag = eSAction_Flag(flag);

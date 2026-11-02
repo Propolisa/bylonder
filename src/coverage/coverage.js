@@ -42,7 +42,7 @@ const REGISTRY = 'registry';
 // What the scene window provides from Blender's own code (window.__bylonder.coverage()) counts where it has the editor
 // and mode: operators it registers, those registered for a space type only in that space's editors, and the menus and
 // panels it draws from Blender's scripts.
-const EDITORS = new Set(['TOPBAR', 'VIEW_3D', 'OUTLINER', 'PROPERTIES', 'TIMELINE', 'DOPESHEET', 'FCURVES', 'DRIVERS', 'ShaderNodeTree',
+const EDITORS = new Set(['TOPBAR', 'VIEW_3D', 'OUTLINER', 'PROPERTIES', 'TIMELINE', 'DOPESHEET', 'FCURVES', 'DRIVERS', 'NLA_EDITOR', 'ShaderNodeTree',
   'CompositorNodeTree', 'SEQUENCE_EDITOR', 'TEXT_EDITOR', 'CONSOLE', 'INFO']);
 const MODES = new Set(['VIEW_3D:OBJECT', 'VIEW_3D:EDIT']);
 // A space type's editors, as the surface names them (by ui_type).

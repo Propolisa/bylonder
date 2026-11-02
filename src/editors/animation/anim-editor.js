@@ -1,10 +1,11 @@
-// The Timeline, Dope Sheet and Graph Editor: Blender's DOPESHEET_EDITOR (ui_type TIMELINE or DOPESHEET) and
-// GRAPH_EDITOR. Each is an area in the module (anim-area.js) holding Blender's space and regions; events go through
+// The Timeline, Dope Sheet, Graph Editor and Nonlinear Animation editor: Blender's DOPESHEET_EDITOR (ui_type TIMELINE
+// or DOPESHEET), GRAPH_EDITOR and NLA_EDITOR. Each is an area in the module (anim-area.js) holding Blender's space and regions; events go through
 // Blender's keymaps for the region under the pointer, as its handlers run them, with this editor as the context area,
 // and Blender's operators run there in Blender's C, modal ones (transform, frame change, view panning) getting the
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
-// the header and menus are Blender's scripts' (space_graph.py, space_dopesheet.py, space_time.py) laid out by Blender.
-import { AnimArea, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
+// the header and menus are Blender's scripts' (space_graph.py, space_dopesheet.py, space_time.py, space_nla.py) laid out
+// by Blender. The NLA's main region is drawn whole by Blender's draw code (nla_draw.cc), recorded.
+import { AnimArea, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, SPACE_NLA, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
 import { regionDrawing, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
@@ -37,34 +38,43 @@ const KEYMAPS = {
     [RGN_TYPE_WINDOW]: ['View2D', 'Markers', 'Time Scrub', 'Animation', 'Frames', 'Dopesheet', 'Dopesheet Generic', 'Screen', 'Window'],
     [RGN_TYPE_CHANNELS]: ['View2D', 'Frames', 'Animation Channels', 'Dopesheet Generic', 'Screen', 'Window'],
   },
+  NLA_EDITOR: {
+    [RGN_TYPE_WINDOW]: ['View2D', 'Markers', 'Time Scrub', 'Animation', 'Frames', 'NLA Editor', 'NLA Generic', 'Screen', 'Window'],
+    [RGN_TYPE_CHANNELS]: ['View2D', 'Frames', 'NLA Tracks', 'Animation Channels', 'NLA Generic', 'Screen', 'Window'],
+  },
 };
 // HEADERY: a header region's height in pixels at 1x scale.
 const HEADER_HEIGHT = 26;
-const SPACE_TYPES = { GRAPH_EDITOR: SPACE_GRAPH, DOPESHEET_EDITOR: SPACE_ACTION };
+const SPACE_TYPES = { GRAPH_EDITOR: SPACE_GRAPH, DOPESHEET_EDITOR: SPACE_ACTION, NLA_EDITOR: SPACE_NLA };
 // The channel region's width (its region type's prefsizex): the Graph Editor's leaves room for its scroll bar.
 // The editors' own keymaps, which the marker strip's events skip.
 const EDITOR_KEYMAPS = new Set(['Dopesheet', 'Graph Editor']);
-const CHANNELS_WIDTH = { GRAPH_EDITOR: 200 + 11, DOPESHEET_EDITOR: 200 }, UI_SIDEBAR_PANEL_WIDTH = 280;
+const CHANNELS_WIDTH = { GRAPH_EDITOR: 200 + 11, DOPESHEET_EDITOR: 200, NLA_EDITOR: 200 }, UI_SIDEBAR_PANEL_WIDTH = 280;
 const BUTTONS = ['LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE', 'BUTTON4MOUSE', 'BUTTON5MOUSE'];
 const KEYMAP_EVENT_TYPES = { SPACEBAR: 'SPACE' };
 // The Blender operators this editor runs in the module, and Blender's macros of them (wm_operator_type.cc's macros
-// as ED_operatormacros_graph and ED_operatormacros_action define them).
-const MODULE_OPERATOR = /^(graph|action|anim|marker|view2d|transform)\./;
+// as ED_operatormacros_graph, ED_operatormacros_action and ED_operatormacros_nla define them): each space's own and the
+// ones every animation editor shares.
+const MODULE_OPERATOR = /^(graph|action|nla|anim|marker|view2d|transform)\./;
+const SPACE_OPERATOR = { GRAPH_EDITOR: /^(graph|anim|marker|view2d|transform)\./, DOPESHEET_EDITOR: /^(action|anim|marker|view2d|transform)\./,
+  NLA_EDITOR: /^(nla|anim|marker|view2d|transform)\./ };
 const MACROS = {
   'graph.duplicate_move': [['graph.duplicate', {}], ['transform.translate', {}]],
   'action.duplicate_move': [['action.duplicate', {}], ['transform.transform', { mode: 'TIME_TRANSLATE' }]],
+  'nla.duplicate_move': [['nla.duplicate', { linked: false }], ['transform.translate', {}]],
+  'nla.duplicate_linked_move': [['nla.duplicate', { linked: true }], ['transform.translate', {}]],
 };
 
 const animEditor = () => contextArea()?.animEditor;
 
-// Registers Blender's animation editor operators for the Dope Sheet and Graph Editor spaces, once: each runs on the
+// Registers Blender's animation editor operators for the Dope Sheet, Graph Editor and NLA spaces, once: each runs on the
 // editor that is the context area. Screen operators over the scene's time are registered for every area.
 export function registerAnimOperators(animation) {
   for (const space of Object.keys(SPACE_TYPES)) {
-    for (const idname of operatorNames().filter((name) => MODULE_OPERATOR.test(name))) {
+    for (const idname of operatorNames().filter((name) => SPACE_OPERATOR[space].test(name))) {
       registerOperator(idname, { poll: (props, event) => !!animEditor()?.poll(idname, event), run: (props, event) => animEditor().invoke(idname, props, event) }, space);
     }
-    for (const [idname, steps] of Object.entries(MACROS)) registerOperator(idname, { run: (props, event) => animEditor().macro(steps, event) }, space);
+    for (const [idname, steps] of Object.entries(MACROS).filter(([name]) => SPACE_OPERATOR[space].test(name))) registerOperator(idname, { run: (props, event) => animEditor().macro(steps, event) }, space);
     registerOperators({
       'wm.context_toggle': { supports: ({ data_path }) => /^(space_data|tool_settings|scene)\./.test(data_path ?? ''), run: ({ data_path }) => animEditor().toggle(data_path) },
       'wm.call_menu_pie': { run: ({ name }, event) => animEditor().menu(name)(event) },
@@ -97,13 +107,13 @@ const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' 
 export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, sync: scene, commit = () => {} }) {
   // A Dope Sheet's space is made as the startup file's Timeline area's, whose Dope Sheet it becomes, keeping its regions
   // (channels and sidebar hidden), as Blender switches an area's sub-type.
-  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : GRAPH_MODES[uiType]);
+  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : GRAPH_MODES[uiType] ?? -1);
   if (uiType === 'DOPESHEET') {
     area.subtype = ACTION_MODES.DOPESHEET;
     area.show(RGN_TYPE_UI, false);
   }
   // The Drivers editor's X axis is a driver's input, not time: no scrubbing, frame range or markers.
-  const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR', drivers = uiType === 'DRIVERS';
+  const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR', drivers = uiType === 'DRIVERS', nla = space === 'NLA_EDITOR';
   section.classList.add('anim-editor');
   section.tabIndex = 0;
   const svg = (className) => {
@@ -305,8 +315,8 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const into = region ?? (x < size.channels ? RGN_TYPE_CHANNELS : RGN_TYPE_WINDOW), left = into === RGN_TYPE_CHANNELS ? 0 : size.channels;
     return { type, value, x: x - left, y, region: into, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, oskey: e.metaKey, modifier: modifiers(e), native: e };
   }
-  // ED_markers_region_visible: the space shows markers (SACTION_SHOW_MARKERS, SIPO_SHOW_MARKERS).
-  const markersShown = () => !!(area.settings.flag & (graph ? 1 << 16 : 1 << 14));
+  // ED_markers_region_visible: the space shows markers (SACTION_SHOW_MARKERS, SIPO_SHOW_MARKERS, SNLA_SHOW_MARKERS).
+  const markersShown = () => !!(area.settings.flag & (graph ? 1 << 16 : nla ? 1 << 8 : 1 << 14));
   // Which of a region's keymaps take an event now (their handlers' polls).
   function keymapActive(name, event) {
     if (name === 'Time Scrub') return event.region === RGN_TYPE_WINDOW && event.y >= size.height - area.metrics().scrubHeight;
@@ -420,17 +430,12 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   function redraw() {
     if (!scheduled) scheduled = requestAnimationFrame(draw);
   }
-  function draw() {
-    scheduled = 0;
-    if (!section.isConnected || !layout()) return;
-    sync();
-    area.refresh();
+  // The Dope Sheet's and Graph Editor's main region, drawn here as their draw code draws it (anim-draw.js).
+  function drawMainRegion(main) {
     const t = animation.time.state;
     frame = animation.time.frame;
     const range = { start: t.frameStart, end: t.frameEnd, previewStart: t.framePreviewStart, previewEnd: t.framePreviewEnd, preview: t.usePreviewRange };
     const settings = area.settings, metrics = area.metrics(), v2d = area.v2d();
-    const channels = area.channels();
-    const main = regionDrawing(size.width - size.channels - size.ui, size.height);
     const spaceTheme = graph ? theme.graph_editor : theme.dopesheet_editor;
     const back = spaceTheme.space.back;
     main.ctx.fillStyle = `rgb(${back.map((c) => Math.round(c * 255)).join(',')})`;
@@ -441,12 +446,21 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       drawCurves(main, v2d, area.curves(), { showHandles: !(settings.flag & (1 << 2)), onlySelectedHandles: !!(settings.flag & (1 << 9)) });
     } else {
       drawGrid(main, v2d, spaceTheme.grid, { fps: frameRate(t) });
-      const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
+      const { cur } = v2d, rows = channelRows(area.channels(), v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
     if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame);
-    if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
     if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: frameRate(t), fractions: graph });
+  }
+  function draw() {
+    scheduled = 0;
+    if (!section.isConnected || !layout()) return;
+    sync();
+    area.refresh();
+    const main = regionDrawing(size.width - size.channels - size.ui, size.height);
+    if (nla) drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW), { height: size.height });
+    else drawMainRegion(main);
+    if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
     drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height });
     main.ctx.flush(mainView);
     if (size.channels) {

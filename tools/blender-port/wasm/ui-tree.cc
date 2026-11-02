@@ -360,7 +360,8 @@ static rctf node_json(std::ostringstream &out, const Node &node)
   for (const size_t i : IndexRange(node.children.size())) {
     children << (i ? "," : "");
     const rctf child = node_json(children, node.children[i]);
-    if (BLI_rctf_is_valid(&child)) {
+    /* An empty item (a zero-width separator a layout leaves at its origin) has no extent. */
+    if (BLI_rctf_is_valid(&child) && (BLI_rctf_size_x(&child) > 0.0f || BLI_rctf_size_y(&child) > 0.0f)) {
       BLI_rctf_union(&rect, &child);
     }
   }

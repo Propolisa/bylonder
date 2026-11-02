@@ -111,7 +111,7 @@ imageArea.layout(imageRect, { [RGN_TYPE_WINDOW]: imageRect, [RGN_TYPE_UI]: { x: 
 pointerStruct(structFind('Area'), 0, imageArea.pointer).spaces.active.image = image;
 imageArea.inContext(RGN_TYPE_UI, (C) => { regionPanels(C); categorySet(C, 'Image'); });
 const sidebar = imageArea.inContext(RGN_TYPE_UI, (C) => regionPanels(C));
-const runtimePanel = sidebar.panels.find((panel) => panel.id === 'IMAGE_PT_bylonder_runtime');
+const runtimePanel = sidebar.panels.find((panel) => panel.id === 'IMAGE_PT_bylonder_image_runtime');
 const nodes = (tree) => [tree, ...(tree.children ?? []).flatMap(nodes)];
 assert.ok(runtimePanel, 'the Image Editor\'s sidebar has the image\'s Runtime panel');
 assert.ok(runtimePanel.parts.flatMap((part) => nodes(part.layout)).some((b) => b.icon === BYLONDER_ICON), 'with the Bylonder icon');

@@ -126,12 +126,12 @@ function drawn(context) {
   for (const panel of panels()) area.inContext(RGN_TYPE_WINDOW, (C) => panelClosedSet(C, panel.id, false));
   return Object.fromEntries(panels().map((panel) => [panel.id, panel.parts.flatMap((part) => nodes(part.layout))]));
 }
-const runtimePanel = () => drawn('DATA').DATA_PT_bylonder_runtime;
+const runtimePanel = () => drawn('DATA').DATA_PT_bylonder_armature_runtime;
 assert.ok(runtimePanel(), 'the Armature tab has the Runtime panel');
 const props = (panel) => panel.filter((b) => b.rna).map((b) => b.rna.prop);
 assert.ok(props(runtimePanel()).includes('runtime') && props(runtimePanel()).includes('influencers'), 'it shows the runtime and Babylon\'s settings');
 assert.ok(runtimePanel().some((b) => b.icon === BYLONDER_ICON), 'its header carries the Bylonder icon');
-assert.ok(!drawn('DATA').DATA_PT_bylonder_runtime?.some((b) => b.icon === 'ERROR'), 'no issues on Blender');
+assert.ok(!drawn('DATA').DATA_PT_bylonder_armature_runtime?.some((b) => b.icon === 'ERROR'), 'no issues on Blender');
 
 // Babylon (mapped): Babylon skins the body as Main deforms it, at several poses.
 rig.bylonder.runtime = 'MAPPED';

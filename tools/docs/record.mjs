@@ -1,7 +1,8 @@
 // Records a feature page's media from the app (CLAUDE.md, Feature docs): PNG steps and GIFs into
 // docs/media/features/<feature>/, from a dev server on port 5205 (DOCS_PORT) (started here when none runs) driven by Playwright's
 // Chromium. A GIF is a CDP screencast of the page while the step runs, cropped to the step's region and encoded by
-// ffmpeg (palettegen and paletteuse, 12 fps, 640 wide), smaller until it is under 1 MB.
+// ffmpeg (palettegen and paletteuse, 12 fps, 640 wide), smaller until it is under 1 MB. Frames are scaled to the page's
+// device pixels first: a screencast under load can send smaller ones.
 import { spawn, execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -178,7 +179,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
       const file = `${out}${name}.gif`;
       for (const [width, colors, fps] of [[640, 128, 12], [560, 96, 10], [480, 64, 10], [400, 48, 8]]) {
         ffmpeg("-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf",
-          `crop=${crop.width}:${crop.height}:${crop.x}:${crop.y},fps=${fps},scale='min(${width},iw)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`,
+          `scale=${size.width * scale}:${size.height * scale},crop=${crop.width * scale}:${crop.height * scale}:${crop.x * scale}:${crop.y * scale},fps=${fps},scale='min(${width},iw)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`,
           "-loop", "0", file);
         if (statSync(file).size < MAX_GIF) break;
       }

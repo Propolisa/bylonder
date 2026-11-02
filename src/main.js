@@ -70,6 +70,7 @@ import { registerUserprefOperators } from "./editors/space_userpref/userpref-ope
 import "./runtimes/armature.js";
 import "./runtimes/image.js";
 import "./runtimes/grease-pencil.js";
+import "./runtimes/shape-keys.js";
 import { bylonderIcon } from "./python/bpy_icons.js";
 import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
@@ -557,9 +558,9 @@ world.openNodeEditor = (type) => { nodeEditor.setType(type); viewportDock.show("
 for (const source of [documentState, world.particles, world.modifiers]) source.subscribe(() => nodeEditor.refresh());
 world.modifiers.subscribe(() => world.editMode.modifiersChanged());
 viewportDock.setFactory('properties',(host,id)=>ui.create(host,id));
-// The Timeline, Dope Sheet and Graph Editor: Blender's animation editors, each area its own space (editors/animation).
+// The Timeline, Dope Sheet, Graph Editor and Nonlinear Animation: Blender's animation editors, each area its own space (editors/animation).
 registerAnimOperators(animation);
-const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['DOPESHEET_EDITOR', 'DOPESHEET'], graph: ['GRAPH_EDITOR', 'FCURVES'], drivers: ['GRAPH_EDITOR', 'DRIVERS'] };
+const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['DOPESHEET_EDITOR', 'DOPESHEET'], graph: ['GRAPH_EDITOR', 'FCURVES'], drivers: ['GRAPH_EDITOR', 'DRIVERS'], nla: ['NLA_EDITOR', 'NLA_EDITOR'] };
 const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, sync: world.mainSync, commit });
 const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
