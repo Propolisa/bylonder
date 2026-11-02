@@ -30,3 +30,13 @@ The proposed safeguards, to be proven before this is done:
 - All parts load in the background right after startup.
 - A test mode that holds back the background load and fails on any call into a part that is not loaded, run over the
   whole unit and browser test suites.
+
+## Optimizations
+
+| User story | Change | Possible gain |
+| --- | --- | --- |
+| Faster environment map and other float image loads | Upload a float image's buffer as Blender keeps it (premultiplied) and unpremultiply in the shader, instead of copying it in JavaScript first (`src/imbuf/image-textures.js` `straight`) | One full-image copy and one pass over every pixel less per upload: for a 4K HDR (128 MB of floats) an estimated 100 to 300 ms (not yet measured) and 128 MB of peak memory |
+| Smoother texture painting on large images | Upload a stroke's changed regions straight from the image buffer with WebGL2's `UNPACK_ROW_LENGTH` and `UNPACK_SKIP_PIXELS`/`UNPACK_SKIP_ROWS`, instead of packing each region into a new array (`region`) | No per-region copy or allocation: less frame time and garbage collection per stroke, growing with brush size |
+| Lower latency when dragging a modifier value or editing a dense mesh | Build a mesh's per-corner draw buffers in the module, as Blender's draw cache extractors do, and upload them to the GPU straight from views of module memory, instead of a JavaScript pass over every corner (`src/draw/mesh-batch-buffers.js`) | No JavaScript per-corner loop and no intermediate arrays per evaluation; to be measured on a 1M-face mesh |
+| Less memory for large scenes | Babylon meshes keep no CPU copy of their vertex data: picking and bounds read Blender's data, and the Y/Z axis swap is one parent transform instead of a per-vertex rewrite | About two fewer copies of every mesh's vertex data |
+| Views of module memory that survive its growth, and a path to Blender's threads | Shared module memory (cross-origin isolation through the module host's service worker), so Babylon can hold long-lived views and Blender's thread pools can run on workers | Fewer copies wherever views are kept; parallel image decoding, Geometry Nodes and modifier evaluation later |
