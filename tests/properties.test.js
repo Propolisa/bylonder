@@ -74,6 +74,13 @@ assert.ok(Math.abs(lamp.intensity - 2000 / (4 * Math.PI)) < 1e-9, 'exposure doub
 lampData.energy = 400;
 assert.ok(Math.abs(lamp.intensity - 800 / (4 * Math.PI)) < 1e-9);
 assert.deepEqual(lightLosses(lamp), ['"' + lamp.name + '": its color temperature has no Babylon equivalent']);
+lampData.shadow_soft_size = 0.2;
+assert.equal(lamp.radius, 0.2, "a point light's radius is its soft size, as EEVEE's shape radius");
+lampData.shadow_soft_size = 0;
+assert.equal(lamp.radius, 0.001, 'at least 0.001');
+const sunLamp = new DirectionalLight('Sun Lamp', new Vector3(0, -1, 0), scene);
+makeBlenderLight(sunLamp, 'SUN', { angle: Math.PI / 2 });
+assert.ok(Math.abs(sunLamp.radius - 1) < 1e-9, "a sun's radius at unit distance is the tangent of its half angle");
 const cameraObject = pointer(camera);
 cameraObject.data.lens = 50;
 const degrees = (radians) => [...radians].map((r) => Math.round(r * 180 / Math.PI * 1000) / 1000 + 0);

@@ -66,7 +66,7 @@ limits:
   - A material's closures are merged into one set of parameters (their colors, roughness, IOR and normals as they weigh) and lit once by Babylon's PBR model, so a mix of a rough and a sharp Glossy is one lobe of middle roughness, not two (Shader Node Gallery sphere 17, mean dE 17.7, max 23).
   - Glossy, Metallic and Anisotropic BSDF draw without their distribution choice, anisotropy, F82 tint or thin film.
   - Sheen draws as a diffuse closure of its color, as EEVEE does; Subsurface Scattering and Translucent draw as diffuse, without scattering or light from behind.
-  - Lights have no angle or soft radius.
+  - A sun's angle and a light's soft size widen its highlights as Babylon widens them (the surface's roughness plus the radius over the distance), not by EEVEE's integration over the light's disk, and cast no soft shadows.
   - A world color lights as EEVEE's world probe; an environment image lights as Babylon's environment, filtered as Babylon filters it, not as EEVEE's sphere probe.
   - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.1, max 3).
   - Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).
@@ -122,15 +122,15 @@ percentile inside the sphere). Measured with Render Image at 256 by 320 (the aim
 | Sphere | dE mean | dE 99% | Sphere | dE mean | dE 99% |
 |---|---|---|---|---|---|
 | 1 Checker | 4.8 | 18.8 | 11 Principled | 2.3 | 4.4 |
-| 2 Voronoi | 1.9 | 16.0 | 12 Glossy | 2.6 | 4.1 |
-| 3 Wave | 2.8 | 15.5 | 13 Diffuse and Glossy mix | 4.7 | 19.9 |
+| 2 Voronoi | 1.9 | 16.0 | 12 Glossy | 2.7 | 4.1 |
+| 3 Wave | 2.8 | 15.5 | 13 Diffuse and Glossy mix | 4.7 | 20.0 |
 | 4 Brick | 8.9 | 33.9 | 14 Diffuse plus Emission | 0.7 | 1.3 |
 | 5 Magic | 1.6 | 5.9 | 15 Sheen | 1.9 | 3.6 |
 | 6 Gradient | 0.8 | 1.3 | 16 Normal Map | 4.2 | 14.5 |
-| 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 17.7 | 23.0 |
+| 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 17.6 | 23.0 |
 | 8 Fresnel | 0.8 | 1.4 | 18 Glass | 2.1 | 2.7 |
 | 9 Layer Weight | 2.8 | 4.2 | 19 Half transparent | 2.8 | 3.5 |
-| 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 2.4 | 3.7 |
+| 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 2.5 | 3.3 |
 
 > **Note** The header's Babylon Editor toggle opens the same graph in Babylon's Node Material Editor; both editors
 > keep one layout.
