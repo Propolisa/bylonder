@@ -23,6 +23,7 @@ import { blackbodyTable, curveMappingGPU, defaultCurveMapping, plainCurveMapping
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import { imageTexture } from '../../imbuf/image-textures.js';
 import { blendData } from '../../python/bpy_rna.js';
+import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import '../graph-roots.js';
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
@@ -856,7 +857,10 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     wire(world.output, normal.transform);
     wire(normal.output, this.worldNormal);
     wire(geometryBlock(material, '__view').output, this.view);
-    wire(geometryBlock(material, '__cameraPosition').output, this.cameraPosition);
+    const eye = helper(material, '__viewEye', (name) => new BlenderViewEyeBlock(name));
+    wire(worldPosition(material).output, eye.position);
+    wire(geometryBlock(material, '__cameraPosition').output, eye.eye);
+    wire(eye.output, this.cameraPosition);
     const reflection = helper(material, '__reflection', (name) => new ReflectionBlock(name));
     reflection._getTexture = environmentOf(material);
     wire(position.output, reflection.position);
@@ -893,6 +897,33 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
 }
 RegisterClass('BABYLON.BlenderSurfaceBlock', BlenderSurfaceBlock);
+
+// The eye Babylon's lighting reads at the shaded point (draw-view.js viewEye), global as Babylon's camera position is:
+// its reflection reads it in a function of its own.
+export class BlenderViewEyeBlock extends NodeMaterialBlock {
+  constructor(name) {
+    super(name, Targets.Fragment);
+    this.registerInput('position', T.Vector4);
+    this.registerInput('eye', T.Vector3);
+    this.registerOutput('output', T.Vector3);
+  }
+  getClassName() { return 'BlenderViewEyeBlock'; }
+  get position() { return this._inputs[0]; }
+  get eye() { return this._inputs[1]; }
+  get output() { return this._outputs[0]; }
+  bind(effect, nodeMaterial) { effect.setVector4(this._forward, viewForward(nodeMaterial.getScene().activeCamera)); }
+  _buildBlock(state) {
+    super._buildBlock(state);
+    this._forward = state._getFreeVariableName(VIEW_FORWARD);
+    state._emitUniformFromString(this._forward, T.Vector4);
+    state._emitFunction('blViewEye', 'vec3 blViewEye;\n', '');
+    state.sharedData.bindableBlocks.push(this);
+    state.compilationString += `blViewEye = ${viewEye(`${this.position.associatedVariableName}.xyz`, this.eye.associatedVariableName, this._forward)};\n`;
+    this.output.associatedVariableName = 'blViewEye';
+    return this;
+  }
+}
+RegisterClass('BABYLON.BlenderViewEyeBlock', BlenderViewEyeBlock);
 
 // A closure's normal, its reflections' as they weigh, as Babylon's shading normal (in its axes, w 0).
 export class BlenderClosureNormalBlock extends NodeMaterialBlock {

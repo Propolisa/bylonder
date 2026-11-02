@@ -43,6 +43,7 @@ code:
   - src/nodes/blender/shader-nodes.js
   - src/nodes/blender/node-code.js
   - src/nodes/blender/glsl.js
+  - src/draw/draw-view.js
   - src/blenkernel/colortools.js
   - tools/blender-nodes/gpu.py
   - tools/blender-port/wasm/shader-node-api.cc
@@ -50,6 +51,7 @@ code:
 tests:
   - tests/nodes-gpu.test.js
   - tests/nodes.test.js
+  - tests/draw-view.test.js
   - tests/textures-wasm.test.js
   - tests/e2e/lava.mjs
   - tests/e2e/smoke.mjs
@@ -61,12 +63,12 @@ limits:
   - Bump takes the height's screen derivatives (Blender's fast path), not the height again at offset points.
   - Principled BSDF's sockets are one list, without Blender's collapsible panels.
   - The Texture tab's preview is empty.
-  - A material's closures are merged into one set of parameters (their colors, roughness, IOR and normals as they weigh) and lit once by Babylon's PBR model, so a mix of a rough and a sharp Glossy is one lobe of middle roughness, not two (Shader Node Gallery sphere 17, mean dE 18.4, max 25).
+  - A material's closures are merged into one set of parameters (their colors, roughness, IOR and normals as they weigh) and lit once by Babylon's PBR model, so a mix of a rough and a sharp Glossy is one lobe of middle roughness, not two (Shader Node Gallery sphere 17, mean dE 17.7, max 23).
   - Glossy, Metallic and Anisotropic BSDF draw without their distribution choice, anisotropy, F82 tint or thin film.
   - Sheen draws as a diffuse closure of its color, as EEVEE does; Subsurface Scattering and Translucent draw as diffuse, without scattering or light from behind.
-  - Lights have no angle or soft radius: a sun's highlight is wider and dimmer at its core than EEVEE's (Glossy, sphere 12, mean dE 5.4, max 35; Metal, sphere 20, mean dE 6.4, max 49).
+  - Lights have no angle or soft radius.
   - A world color lights as EEVEE's world probe; an environment image lights as Babylon's environment, filtered as Babylon filters it, not as EEVEE's sphere probe.
-  - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.4, max 3).
+  - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.1, max 3).
   - Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).
   - Blender's view transforms other than Standard are approximated by Babylon's tone mapping.
   - Material Preview lays blended surfaces over what is behind them in display space; Rendered shading and Render Image blend in scene linear, as EEVEE does.
@@ -119,16 +121,16 @@ percentile inside the sphere). Measured with Render Image at 256 by 320 (the aim
 
 | Sphere | dE mean | dE 99% | Sphere | dE mean | dE 99% |
 |---|---|---|---|---|---|
-| 1 Checker | 4.8 | 18.8 | 11 Principled | 2.5 | 5.1 |
-| 2 Voronoi | 1.9 | 16.0 | 12 Glossy | 5.4 | 35.0 |
+| 1 Checker | 4.8 | 18.8 | 11 Principled | 2.3 | 4.4 |
+| 2 Voronoi | 1.9 | 16.0 | 12 Glossy | 2.6 | 4.1 |
 | 3 Wave | 2.8 | 15.5 | 13 Diffuse and Glossy mix | 4.7 | 19.9 |
 | 4 Brick | 8.9 | 33.9 | 14 Diffuse plus Emission | 0.7 | 1.3 |
 | 5 Magic | 1.6 | 5.9 | 15 Sheen | 1.9 | 3.6 |
 | 6 Gradient | 0.8 | 1.3 | 16 Normal Map | 4.2 | 14.5 |
-| 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 18.4 | 25.3 |
-| 8 Fresnel | 0.8 | 1.4 | 18 Glass | 2.4 | 3.2 |
-| 9 Layer Weight | 2.8 | 4.2 | 19 Half transparent | 2.8 | 3.7 |
-| 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 6.4 | 49.0 |
+| 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 17.7 | 23.0 |
+| 8 Fresnel | 0.8 | 1.4 | 18 Glass | 2.1 | 2.7 |
+| 9 Layer Weight | 2.8 | 4.2 | 19 Half transparent | 2.8 | 3.5 |
+| 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 2.4 | 3.7 |
 
 > **Note** The header's Babylon Editor toggle opens the same graph in Babylon's Node Material Editor; both editors
 > keep one layout.
