@@ -1,0 +1,1523 @@
+WebAssembly checks an indirect call's signature: CPython calls a METH_NOARGS function with two arguments (self
+and NULL), so one defined with only self traps. They take the unused second argument, defaulted so direct calls
+stay as they are, and mathutils' helpers that call them pass it.
+diff --git a/source/blender/python/bmesh/bmesh_py_ops.cc b/source/blender/python/bmesh/bmesh_py_ops.cc
+--- a/source/blender/python/bmesh/bmesh_py_ops.cc
++++ b/source/blender/python/bmesh/bmesh_py_ops.cc
+@@ -217,7 +217,7 @@
+   return nullptr;
+ }
+ 
+-static PyObject *bpy_bmesh_ops_module_dir(PyObject * /*self*/)
++static PyObject *bpy_bmesh_ops_module_dir(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+   const uint tot = bmo_opdefines_total;
+   uint i;
+diff --git a/source/blender/python/bmesh/bmesh_py_types.cc b/source/blender/python/bmesh/bmesh_py_types.cc
+--- a/source/blender/python/bmesh/bmesh_py_types.cc
++++ b/source/blender/python/bmesh/bmesh_py_types.cc
+@@ -1284,7 +1284,7 @@
+     "\n"
+     "   :return: A copy of this BMesh.\n"
+     "   :rtype: :class:`bmesh.types.BMesh`\n");
+-static PyObject *bpy_bmesh_copy(BPy_BMesh *self)
++static PyObject *bpy_bmesh_copy(BPy_BMesh *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -1305,7 +1305,7 @@
+     ".. method:: clear()\n"
+     "\n"
+     "   Clear all mesh data.\n");
+-static PyObject *bpy_bmesh_clear(BPy_BMesh *self)
++static PyObject *bpy_bmesh_clear(BPy_BMesh *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -1328,7 +1328,7 @@
+     "      The BMesh is freed automatically, typically when the script finishes executing.\n"
+     "      However in some cases it's hard to predict when this will be and it's useful to\n"
+     "      explicitly free the data.\n");
+-static PyObject *bpy_bmesh_free(BPy_BMesh *self)
++static PyObject *bpy_bmesh_free(BPy_BMesh *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (self->bm) {
+     BMesh *bm = self->bm;
+@@ -1823,7 +1823,7 @@
+     ".. method:: uv_select_sync_to_mesh()\n"
+     "\n"
+     "   Sync selection from UVs to the mesh.\n");
+-static PyObject *bpy_bmesh_uv_select_sync_to_mesh(BPy_BMesh *self)
++static PyObject *bpy_bmesh_uv_select_sync_to_mesh(BPy_BMesh *self, PyObject * /*unused*/ = nullptr)
+ {
+   const char *error_prefix = "uv_select_sync_to_mesh(...)";
+ 
+@@ -2139,7 +2139,7 @@
+     "   .. note::\n"
+     "\n"
+     "      The normal of any vertex where :attr:`is_wire` is True will be a zero vector.\n");
+-static PyObject *bpy_bmesh_normal_update(BPy_BMesh *self)
++static PyObject *bpy_bmesh_normal_update(BPy_BMesh *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -2258,7 +2258,7 @@
+     "   :rtype: list[tuple[:class:`bmesh.types.BMLoop`, "
+     ":class:`bmesh.types.BMLoop`, "
+     ":class:`bmesh.types.BMLoop`]]\n");
+-static PyObject *bpy_bmesh_calc_loop_triangles(BPy_BMElem *self)
++static PyObject *bpy_bmesh_calc_loop_triangles(BPy_BMElem *self, PyObject * /*unused*/ = nullptr)
+ {
+   int corner_tris_tot;
+ 
+@@ -2531,7 +2531,7 @@
+     "\n"
+     "   :return: offset multiplier\n"
+     "   :rtype: float\n");
+-static PyObject *bpy_bmvert_calc_shell_factor(BPy_BMVert *self)
++static PyObject *bpy_bmvert_calc_shell_factor(BPy_BMVert *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   return PyFloat_FromDouble(BM_vert_calc_shell_factor(self->v));
+@@ -2548,7 +2548,7 @@
+     "   .. note::\n"
+     "\n"
+     "      The vertex normal will be a zero vector if vertex :attr:`is_wire` is True.\n");
+-static PyObject *bpy_bmvert_normal_update(BPy_BMVert *self)
++static PyObject *bpy_bmvert_normal_update(BPy_BMVert *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -2569,7 +2569,7 @@
+     "\n"
+     "   :return: The length between both verts.\n"
+     "   :rtype: float\n");
+-static PyObject *bpy_bmedge_calc_length(BPy_BMEdge *self)
++static PyObject *bpy_bmedge_calc_length(BPy_BMEdge *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   return PyFloat_FromDouble(len_v3v3(self->e->v1->co, self->e->v2->co));
+@@ -2734,7 +2734,7 @@
+     "   .. note::\n"
+     "\n"
+     "      The normal of edge vertex will be a zero vector if vertex :attr:`is_wire` is True.\n");
+-static PyObject *bpy_bmedge_normal_update(BPy_BMEdge *self)
++static PyObject *bpy_bmedge_normal_update(BPy_BMEdge *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -2866,7 +2866,7 @@
+     "\n"
+     "   :return: The area of the face.\n"
+     "   :rtype: float\n");
+-static PyObject *bpy_bmface_calc_area(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_area(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   return PyFloat_FromDouble(BM_face_calc_area(self->f));
+@@ -2881,7 +2881,7 @@
+     "\n"
+     "   :return: The perimeter of the face.\n"
+     "   :rtype: float\n");
+-static PyObject *bpy_bmface_calc_perimeter(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_perimeter(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   return PyFloat_FromDouble(BM_face_calc_perimeter(self->f));
+@@ -2896,7 +2896,7 @@
+     "\n"
+     "   :return: a normalized vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_tangent_edge(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_tangent_edge(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float tangent[3];
+ 
+@@ -2918,7 +2918,7 @@
+     "\n"
+     "   :return: a normalized vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_tangent_edge_pair(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_tangent_edge_pair(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float tangent[3];
+ 
+@@ -2936,7 +2936,7 @@
+     "\n"
+     "   :return: a normalized vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_tangent_edge_diagonal(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_tangent_edge_diagonal(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float tangent[3];
+ 
+@@ -2954,7 +2954,7 @@
+     "\n"
+     "   :return: a normalized vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_tangent_vert_diagonal(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_tangent_vert_diagonal(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float tangent[3];
+ 
+@@ -2972,7 +2972,7 @@
+     "\n"
+     "   :return: a 3D vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_center_mean(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_center_mean(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float cent[3];
+ 
+@@ -2990,7 +2990,7 @@
+     "\n"
+     "   :return: a 3D vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_center_median_weighted(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_center_median_weighted(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float cent[3];
+ 
+@@ -3008,7 +3008,7 @@
+     "\n"
+     "   :return: a 3D vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmface_calc_center_bounds(BPy_BMFace *self)
++static PyObject *bpy_bmface_calc_center_bounds(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   float cent[3];
+ 
+@@ -3024,7 +3024,7 @@
+     "\n"
+     "   Update face normal based on the positions of the face verts.\n"
+     "   This does not update the normals of face verts.\n");
+-static PyObject *bpy_bmface_normal_update(BPy_BMFace *self)
++static PyObject *bpy_bmface_normal_update(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -3039,7 +3039,7 @@
+     ".. method:: normal_flip()\n"
+     "\n"
+     "   Reverses winding of a face, which flips its normal.\n");
+-static PyObject *bpy_bmface_normal_flip(BPy_BMFace *self)
++static PyObject *bpy_bmface_normal_flip(BPy_BMFace *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+@@ -3163,7 +3163,7 @@
+     "\n"
+     "   :return: The angle in radians.\n"
+     "   :rtype: float\n");
+-static PyObject *bpy_bmloop_calc_angle(BPy_BMLoop *self)
++static PyObject *bpy_bmloop_calc_angle(BPy_BMLoop *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   return PyFloat_FromDouble(BM_loop_calc_face_angle(self->l));
+@@ -3179,7 +3179,7 @@
+     "\n"
+     "   :return: a normalized vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmloop_calc_normal(BPy_BMLoop *self)
++static PyObject *bpy_bmloop_calc_normal(BPy_BMLoop *self, PyObject * /*unused*/ = nullptr)
+ {
+   float vec[3];
+   BPY_BM_CHECK_OBJ(self);
+@@ -3197,7 +3197,7 @@
+     "\n"
+     "   :return: a normalized vector.\n"
+     "   :rtype: :class:`mathutils.Vector`\n");
+-static PyObject *bpy_bmloop_calc_tangent(BPy_BMLoop *self)
++static PyObject *bpy_bmloop_calc_tangent(BPy_BMLoop *self, PyObject * /*unused*/ = nullptr)
+ {
+   float vec[3];
+   BPY_BM_CHECK_OBJ(self);
+@@ -3660,7 +3660,7 @@
+     ":class:`bmesh.types.BMesh.faces`\n"
+     "      works but won't result in each element having a valid index, instead its order in the "
+     "sequence will be set.\n");
+-static PyObject *bpy_bmelemseq_index_update(BPy_BMElemSeq *self)
++static PyObject *bpy_bmelemseq_index_update(BPy_BMElemSeq *self, PyObject * /*unused*/ = nullptr)
+ {
+   BMesh *bm = self->bm;
+ 
+@@ -3707,7 +3707,7 @@
+     "verts/edges/faces, eg ``bm.verts[index]``.\n"
+     "\n"
+     "   This needs to be called again after adding/removing data in this sequence.\n");
+-static PyObject *bpy_bmelemseq_ensure_lookup_table(BPy_BMElemSeq *self)
++static PyObject *bpy_bmelemseq_ensure_lookup_table(BPy_BMElemSeq *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+ 
+diff --git a/source/blender/python/bmesh/bmesh_py_types_customdata.cc b/source/blender/python/bmesh/bmesh_py_types_customdata.cc
+--- a/source/blender/python/bmesh/bmesh_py_types_customdata.cc
++++ b/source/blender/python/bmesh/bmesh_py_types_customdata.cc
+@@ -472,7 +472,7 @@
+     "\n"
+     "   :return: The newly created layer, or the existing active layer.\n"
+     "   :rtype: :class:`bmesh.types.BMLayerItem`\n");
+-static PyObject *bpy_bmlayercollection_verify(BPy_BMLayerCollection *self)
++static PyObject *bpy_bmlayercollection_verify(BPy_BMLayerCollection *self, PyObject * /*unused*/ = nullptr)
+ {
+   int index;
+   CustomData *data;
+@@ -595,7 +595,7 @@
+     "\n"
+     "   :return: the identifiers for each member of this collection.\n"
+     "   :rtype: list[str]\n");
+-static PyObject *bpy_bmlayercollection_keys(BPy_BMLayerCollection *self)
++static PyObject *bpy_bmlayercollection_keys(BPy_BMLayerCollection *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   PyObject *item;
+@@ -632,7 +632,7 @@
+     "\n"
+     "   :return: (key, value) pairs for each member of this collection.\n"
+     "   :rtype: list[tuple[str, :class:`bmesh.types.BMLayerItem`]]\n");
+-static PyObject *bpy_bmlayercollection_items(BPy_BMLayerCollection *self)
++static PyObject *bpy_bmlayercollection_items(BPy_BMLayerCollection *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   PyObject *item;
+@@ -669,7 +669,7 @@
+     "\n"
+     "   :return: the members of this collection.\n"
+     "   :rtype: list[:class:`bmesh.types.BMLayerItem`]\n");
+-static PyObject *bpy_bmlayercollection_values(BPy_BMLayerCollection *self)
++static PyObject *bpy_bmlayercollection_values(BPy_BMLayerCollection *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   PyObject *item;
+diff --git a/source/blender/python/bmesh/bmesh_py_types_meshdata.cc b/source/blender/python/bmesh/bmesh_py_types_meshdata.cc
+--- a/source/blender/python/bmesh/bmesh_py_types_meshdata.cc
++++ b/source/blender/python/bmesh/bmesh_py_types_meshdata.cc
+@@ -581,7 +581,7 @@
+     "\n"
+     "   :return: The deform group indices this vertex uses.\n"
+     "   :rtype: list[int]\n");
+-static PyObject *bpy_bmdeformvert_keys(BPy_BMDeformVert *self)
++static PyObject *bpy_bmdeformvert_keys(BPy_BMDeformVert *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   int i;
+@@ -605,7 +605,7 @@
+     "\n"
+     "   :return: The weights that influence this vertex\n"
+     "   :rtype: list[float]\n");
+-static PyObject *bpy_bmdeformvert_values(BPy_BMDeformVert *self)
++static PyObject *bpy_bmdeformvert_values(BPy_BMDeformVert *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   int i;
+@@ -629,7 +629,7 @@
+     "\n"
+     "   :return: (key, value) pairs for each deform weight of this vertex.\n"
+     "   :rtype: list[tuple[int, float]]\n");
+-static PyObject *bpy_bmdeformvert_items(BPy_BMDeformVert *self)
++static PyObject *bpy_bmdeformvert_items(BPy_BMDeformVert *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   PyObject *item;
+@@ -685,7 +685,7 @@
+     ".. method:: clear()\n"
+     "\n"
+     "   Clears all weights.\n");
+-static PyObject *bpy_bmdeformvert_clear(BPy_BMDeformVert *self)
++static PyObject *bpy_bmdeformvert_clear(BPy_BMDeformVert *self, PyObject * /*unused*/ = nullptr)
+ {
+   BKE_defvert_clear(self->data);
+ 
+diff --git a/source/blender/python/bmesh/bmesh_py_types_select.cc b/source/blender/python/bmesh/bmesh_py_types_select.cc
+--- a/source/blender/python/bmesh/bmesh_py_types_select.cc
++++ b/source/blender/python/bmesh/bmesh_py_types_select.cc
+@@ -60,7 +60,7 @@
+     ".. method:: validate()\n"
+     "\n"
+     "   Ensures all elements in the selection history are selected.\n");
+-static PyObject *bpy_bmeditselseq_validate(BPy_BMEditSelSeq *self)
++static PyObject *bpy_bmeditselseq_validate(BPy_BMEditSelSeq *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   BM_select_history_validate(self->bm);
+@@ -73,7 +73,7 @@
+     ".. method:: clear()\n"
+     "\n"
+     "   Empties the selection history.\n");
+-static PyObject *bpy_bmeditselseq_clear(BPy_BMEditSelSeq *self)
++static PyObject *bpy_bmeditselseq_clear(BPy_BMEditSelSeq *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPY_BM_CHECK_OBJ(self);
+   BM_select_history_clear(self->bm);
+diff --git a/source/blender/python/generic/blf_py_api.cc b/source/blender/python/generic/blf_py_api.cc
+--- a/source/blender/python/generic/blf_py_api.cc
++++ b/source/blender/python/generic/blf_py_api.cc
+@@ -512,7 +512,7 @@
+  * Context manager for #ImBuf.
+  * \{ */
+ 
+-static PyObject *py_blf_bind_imbuf_enter(BPyBLFImBufContext *self)
++static PyObject *py_blf_bind_imbuf_enter(BPyBLFImBufContext *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (UNLIKELY(self->buffer_state)) {
+     PyErr_SetString(PyExc_ValueError,
+diff --git a/source/blender/python/generic/idprop_py_api.cc b/source/blender/python/generic/idprop_py_api.cc
+--- a/source/blender/python/generic/idprop_py_api.cc
++++ b/source/blender/python/generic/idprop_py_api.cc
+@@ -1900,7 +1900,7 @@
+     "\n"
+     "   :return: A view of the keys.\n"
+     "   :rtype: :class:`IDPropertyGroupViewKeys`\n");
+-static PyObject *BPy_IDGroup_keys(BPy_IDProperty *self)
++static PyObject *BPy_IDGroup_keys(BPy_IDProperty *self, PyObject * /*unused*/ = nullptr)
+ {
+   return BPy_IDGroup_ViewKeys_CreatePyObject(self);
+ }
+@@ -1914,7 +1914,7 @@
+     "\n"
+     "   :return: A view of the values.\n"
+     "   :rtype: :class:`IDPropertyGroupViewValues`\n");
+-static PyObject *BPy_IDGroup_values(BPy_IDProperty *self)
++static PyObject *BPy_IDGroup_values(BPy_IDProperty *self, PyObject * /*unused*/ = nullptr)
+ {
+   return BPy_IDGroup_ViewValues_CreatePyObject(self);
+ }
+@@ -1928,7 +1928,7 @@
+     "\n"
+     "   :return: A view of the items.\n"
+     "   :rtype: :class:`IDPropertyGroupViewItems`\n");
+-static PyObject *BPy_IDGroup_items(BPy_IDProperty *self)
++static PyObject *BPy_IDGroup_items(BPy_IDProperty *self, PyObject * /*unused*/ = nullptr)
+ {
+   return BPy_IDGroup_ViewItems_CreatePyObject(self);
+ }
+@@ -2000,7 +2000,7 @@
+     "\n"
+     "   :return: A dictionary representation of the group.\n"
+     "   :rtype: dict[str, Any]\n");
+-static PyObject *BPy_IDGroup_to_dict(BPy_IDProperty *self)
++static PyObject *BPy_IDGroup_to_dict(BPy_IDProperty *self, PyObject * /*unused*/ = nullptr)
+ {
+   return BPy_IDGroup_MapDataToPy(self->prop);
+ }
+@@ -2011,7 +2011,7 @@
+     ".. method:: clear()\n"
+     "\n"
+     "   Clear all members from this group.\n");
+-static PyObject *BPy_IDGroup_clear(BPy_IDProperty *self)
++static PyObject *BPy_IDGroup_clear(BPy_IDProperty *self, PyObject * /*unused*/ = nullptr)
+ {
+   IDP_ClearProperty(self->prop);
+   Py_RETURN_NONE;
+@@ -2270,7 +2270,7 @@
+     "\n"
+     "   :return: The array as a list.\n"
+     "   :rtype: list[int] | list[float] | list[bool]\n");
+-static PyObject *BPy_IDArray_to_list(BPy_IDArray *self)
++static PyObject *BPy_IDArray_to_list(BPy_IDArray *self, PyObject * /*unused*/ = nullptr)
+ {
+   return BPy_IDGroup_MapDataToPy(self->prop);
+ }
+diff --git a/source/blender/python/generic/idprop_py_ui_api.cc b/source/blender/python/generic/idprop_py_ui_api.cc
+--- a/source/blender/python/generic/idprop_py_ui_api.cc
++++ b/source/blender/python/generic/idprop_py_ui_api.cc
+@@ -891,7 +891,7 @@
+     "\n"
+     "   Return a dictionary of the property's RNA UI data. The fields in the\n"
+     "   returned dictionary and their types will depend on the property's type.\n");
+-static PyObject *BPy_IDIDPropertyUIManager_as_dict(BPy_IDPropertyUIManager *self)
++static PyObject *BPy_IDIDPropertyUIManager_as_dict(BPy_IDPropertyUIManager *self, PyObject * /*unused*/ = nullptr)
+ {
+   IDProperty *property = self->property;
+   BLI_assert(IDP_ui_data_supported(property));
+@@ -953,7 +953,7 @@
+     ".. method:: clear()\n"
+     "\n"
+     "   Remove the RNA UI data from this IDProperty.\n");
+-static PyObject *BPy_IDPropertyUIManager_clear(BPy_IDPropertyUIManager *self)
++static PyObject *BPy_IDPropertyUIManager_clear(BPy_IDPropertyUIManager *self, PyObject * /*unused*/ = nullptr)
+ {
+   IDProperty *property = self->property;
+   BLI_assert(IDP_ui_data_supported(property));
+diff --git a/source/blender/python/generic/imbuf_py_api.cc b/source/blender/python/generic/imbuf_py_api.cc
+--- a/source/blender/python/generic/imbuf_py_api.cc
++++ b/source/blender/python/generic/imbuf_py_api.cc
+@@ -357,7 +357,7 @@
+     "\n"
+     "   :return: A copy of the image.\n"
+     "   :rtype: :class:`ImBuf`\n");
+-static PyObject *py_imbuf_copy(Py_ImBuf *self)
++static PyObject *py_imbuf_copy(Py_ImBuf *self, PyObject * /*unused*/ = nullptr)
+ {
+   PY_IMBUF_CHECK_OBJ(self);
+   ImBuf *ibuf_copy = IMB_dupImBuf(self->ibuf);
+@@ -505,7 +505,7 @@
+     ".. method:: free()\n"
+     "\n"
+     "   Clear image data immediately (causing an error on re-use).\n");
+-static PyObject *py_imbuf_free(Py_ImBuf *self)
++static PyObject *py_imbuf_free(Py_ImBuf *self, PyObject * /*unused*/ = nullptr)
+ {
+   PY_IMBUF_CHECK_BUFFER_USERS_OBJ(self);
+   if (self->ibuf) {
+@@ -953,7 +953,7 @@
+   return PyUnicode_FromString("<ImBufBuffer: invalid>");
+ }
+ 
+-static PyObject *py_imbuf_buffer_enter(Py_ImBufBuffer *self)
++static PyObject *py_imbuf_buffer_enter(Py_ImBufBuffer *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (UNLIKELY(self->is_entered)) {
+     PyErr_SetString(PyExc_RuntimeError, "ImBufBuffer context is already entered");
+diff --git a/source/blender/python/intern/bpy.cc b/source/blender/python/intern/bpy.cc
+--- a/source/blender/python/intern/bpy.cc
++++ b/source/blender/python/intern/bpy.cc
+@@ -76,7 +76,7 @@
+     "\n"
+     "   :return: (system, user) strings will be empty when not found.\n"
+     "   :rtype: tuple[str, str]\n");
+-static PyObject *bpy_script_paths(PyObject * /*self*/)
++static PyObject *bpy_script_paths(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret = PyTuple_New(2);
+   PyObject *item;
+@@ -528,7 +528,7 @@
+     "\n"
+     "   :return: A dict where the key is the context and the value is a tuple of it's members.\n"
+     "   :rtype: dict[str, tuple[str]]\n");
+-static PyObject *bpy_context_members(PyObject * /*self*/)
++static PyObject *bpy_context_members(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+ 
+   struct {
+@@ -576,7 +576,7 @@
+     "\n"
+     "   :return: A dict where the key the name of the enum, the value is a tuple of enum items.\n"
+     "   :rtype: dict[str, tuple[:class:`bpy.types.EnumPropertyItem`]]\n");
+-static PyObject *bpy_rna_enum_items_static(PyObject * /*self*/)
++static PyObject *bpy_rna_enum_items_static(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+ #define DEF_ENUM(id) {STRINGIFY(id), id},
+   struct {
+@@ -610,7 +610,7 @@
+     "\n"
+     "   :return: An identifier for the GHOST back-end.\n"
+     "   :rtype: str\n");
+-static PyObject *bpy_ghost_backend(PyObject * /*self*/)
++static PyObject *bpy_ghost_backend(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+   return PyUnicode_FromString(WM_ghost_backend());
+ }
+@@ -629,7 +629,7 @@
+     "\n"
+     "   :return: A dictionary of capabilities (string keys, boolean values).\n"
+     "   :rtype: dict[str, bool]\n");
+-static PyObject *bpy_wm_capabilities(PyObject *self)
++static PyObject *bpy_wm_capabilities(PyObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *py_id_capabilities = PyUnicode_FromString("_wm_capabilities_");
+   PyObject *result = nullptr;
+diff --git a/source/blender/python/intern/bpy_geometry_set.cc b/source/blender/python/intern/bpy_geometry_set.cc
+--- a/source/blender/python/intern/bpy_geometry_set.cc
++++ b/source/blender/python/intern/bpy_geometry_set.cc
+@@ -186,7 +186,7 @@
+     "   indexing into the list returned by :func:`bpy.types.GeometrySet.instance_references`.\n"
+     "\n"
+     "   :rtype: bpy.types.PointCloud\n");
+-static PyObject *BPy_GeometrySet_get_instances_pointcloud(BPy_GeometrySet *self)
++static PyObject *BPy_GeometrySet_get_instances_pointcloud(BPy_GeometrySet *self, PyObject * /*unused*/ = nullptr)
+ {
+   const bke::Instances *instances = self->geometry.get_instances();
+   if (!instances) {
+@@ -217,7 +217,7 @@
+     "   It may contain other geometry sets, objects, collections and None values.\n"
+     "\n"
+     "   :rtype: list[None | bpy.types.Object | bpy.types.Collection | bpy.types.GeometrySet]\n");
+-static PyObject *BPy_GeometrySet_get_instance_references(BPy_GeometrySet *self)
++static PyObject *BPy_GeometrySet_get_instance_references(BPy_GeometrySet *self, PyObject * /*unused*/ = nullptr)
+ {
+   const bke::Instances *instances = self->geometry.get_instances();
+   if (!instances) {
+diff --git a/source/blender/python/intern/bpy_library_load.cc b/source/blender/python/intern/bpy_library_load.cc
+--- a/source/blender/python/intern/bpy_library_load.cc
++++ b/source/blender/python/intern/bpy_library_load.cc
+@@ -162,9 +162,9 @@
+ };
+ 
+ static PyObject *bpy_lib_load(BPy_PropertyRNA *self, PyObject *args, PyObject *kw);
+-static PyObject *bpy_lib_enter(BPy_Library *self);
++static PyObject *bpy_lib_enter(BPy_Library *self, PyObject * /*unused*/ = nullptr);
+ static PyObject *bpy_lib_exit(BPy_Library *self, PyObject *args);
+-static PyObject *bpy_lib_dir(BPy_Library *self);
++static PyObject *bpy_lib_dir(BPy_Library *self, PyObject * /*unused*/ = nullptr);
+ 
+ #ifdef __GNUC__
+ #  ifdef __clang__
+@@ -548,7 +548,7 @@
+   return list;
+ }
+ 
+-static PyObject *bpy_lib_enter(BPy_Library *self)
++static PyObject *bpy_lib_enter(BPy_Library *self, PyObject * /*unused*/)
+ {
+   /* The dummy returned as `data_from` has no `bmain` to link into.
+    * A non-null `blo_handle` means this context is already entered, re-entering
+@@ -886,7 +886,7 @@
+   Py_RETURN_NONE;
+ }
+ 
+-static PyObject *bpy_lib_dir(BPy_Library *self)
++static PyObject *bpy_lib_dir(BPy_Library *self, PyObject * /*unused*/)
+ {
+   return PyDict_Keys(self->dict);
+ }
+diff --git a/source/blender/python/intern/bpy_operator.cc b/source/blender/python/intern/bpy_operator.cc
+--- a/source/blender/python/intern/bpy_operator.cc
++++ b/source/blender/python/intern/bpy_operator.cc
+@@ -30,7 +30,7 @@
+ /** \name Python Module
+  * \{ */
+ 
+-static PyObject *pyop_dir(PyObject * /*self*/)
++static PyObject *pyop_dir(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+   const Span<wmOperatorType *> types = WM_operatortypes_registered_get();
+   PyObject *list = PyList_New(types.size());
+diff --git a/source/blender/python/intern/bpy_rna.cc b/source/blender/python/intern/bpy_rna.cc
+--- a/source/blender/python/intern/bpy_rna.cc
++++ b/source/blender/python/intern/bpy_rna.cc
+@@ -128,7 +128,7 @@
+ 
+ static PyObject *pyrna_srna_Subtype(StructRNA *srna);
+ static PyObject *pyrna_struct_Subtype(PointerRNA *ptr);
+-static PyObject *pyrna_prop_collection_values(BPy_PropertyRNA *self);
++static PyObject *pyrna_prop_collection_values(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr);
+ 
+ static PyObject *pyrna_register_class(PyObject *self, PyObject *py_class);
+ static PyObject *pyrna_unregister_class(PyObject *self, PyObject *py_class);
+@@ -3777,7 +3777,7 @@
+     "   :return: custom property keys.\n"
+     "   :rtype: :class:`idprop.types.IDPropertyGroupViewKeys`\n"
+     "\n" BPY_DOC_ID_PROP_TYPE_NOTE);
+-static PyObject *pyrna_struct_keys(BPy_StructRNA *self)
++static PyObject *pyrna_struct_keys(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PYRNA_STRUCT_CHECK_OBJ(self);
+ 
+@@ -3802,7 +3802,7 @@
+     "   :return: custom property key, value pairs.\n"
+     "   :rtype: :class:`idprop.types.IDPropertyGroupViewItems`\n"
+     "\n" BPY_DOC_ID_PROP_TYPE_NOTE);
+-static PyObject *pyrna_struct_items(BPy_StructRNA *self)
++static PyObject *pyrna_struct_items(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PYRNA_STRUCT_CHECK_OBJ(self);
+ 
+@@ -3827,7 +3827,7 @@
+     "   :return: custom property values.\n"
+     "   :rtype: :class:`idprop.types.IDPropertyGroupViewValues`\n"
+     "\n" BPY_DOC_ID_PROP_TYPE_NOTE);
+-static PyObject *pyrna_struct_values(BPy_StructRNA *self)
++static PyObject *pyrna_struct_values(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PYRNA_STRUCT_CHECK_OBJ(self);
+ 
+@@ -4223,7 +4223,7 @@
+     "      .. note:: Even if all input data is correct, this function might\n"
+     "         error out because Blender cannot derive a valid path.\n"
+     "         The incomplete path will be printed in the error message.\n");
+-static PyObject *pyrna_prop_path_from_module(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_path_from_module(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PropertyRNA *prop = self->prop;
+ 
+@@ -4320,7 +4320,7 @@
+     "\n"
+     "   :return: The path from :class:`bpy.types.bpy_struct.id_data` to this property.\n"
+     "   :rtype: str\n");
+-static PyObject *pyrna_prop_path_from_id(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_path_from_id(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PropertyRNA *prop = self->prop;
+ 
+@@ -4347,7 +4347,7 @@
+     "\n"
+     "   :return: The string as bytes.\n"
+     "   :rtype: bytes\n");
+-static PyObject *pyrna_prop_as_bytes(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_as_bytes(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+ 
+   if (RNA_property_type(self->prop) != PROP_STRING) {
+@@ -4384,7 +4384,7 @@
+     "   .. note::\n"
+     "      This is called when assigning a property,\n"
+     "      however in rare cases it's useful to call explicitly.\n");
+-static PyObject *pyrna_prop_update(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_update(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   RNA_property_update(BPY_context_get(), &self->ptr.value(), self->prop);
+   Py_RETURN_NONE;
+@@ -4400,7 +4400,7 @@
+     "\n"
+     "   :return: a new instance of this object with the type initialized again.\n"
+     "   :rtype: :class:`bpy.types.bpy_struct`\n");
+-static PyObject *pyrna_struct_type_recast(BPy_StructRNA *self)
++static PyObject *pyrna_struct_type_recast(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+ 
+   PYRNA_STRUCT_CHECK_OBJ(self);
+@@ -4539,7 +4539,7 @@
+     "\n"
+     "   :return: a list of this object's ancestors.\n"
+     "   :rtype: list[:class:`bpy.types.bpy_struct`]\n");
+-static PyObject *pyrna_struct_get_ancestors(BPy_StructRNA *self)
++static PyObject *pyrna_struct_get_ancestors(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PYRNA_STRUCT_CHECK_OBJ(self);
+ 
+@@ -4639,7 +4639,7 @@
+   }
+ }
+ 
+-static PyObject *pyrna_struct_dir(BPy_StructRNA *self)
++static PyObject *pyrna_struct_dir(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+ 
+@@ -4686,7 +4686,7 @@
+     "\n"
+     "   :return: the parent group for an RNA struct's custom IDProperties.\n"
+     "   :rtype: :class:`idprop.types.IDPropertyGroup`\n");
+-static PyObject *pyrna_struct_id_properties_ensure(BPy_StructRNA *self)
++static PyObject *pyrna_struct_id_properties_ensure(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PYRNA_STRUCT_CHECK_OBJ(self);
+ 
+@@ -4764,7 +4764,7 @@
+     ".. method:: id_properties_clear()\n"
+     "\n"
+     "   Remove the parent group for an RNA struct's custom IDProperties.\n");
+-static PyObject *pyrna_struct_id_properties_clear(BPy_StructRNA *self)
++static PyObject *pyrna_struct_id_properties_clear(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PYRNA_STRUCT_CHECK_OBJ(self);
+ 
+@@ -5159,7 +5159,7 @@
+   return PyObject_GenericSetAttr(reinterpret_cast<PyObject *>(self), pyname, value);
+ }
+ 
+-static PyObject *pyrna_prop_dir(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_dir(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   PointerRNA r_ptr;
+@@ -5308,7 +5308,7 @@
+     "\n"
+     "   :return: A newly created item.\n"
+     "   :rtype: Any\n");
+-static PyObject *pyrna_prop_collection_idprop_add(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_collection_idprop_add(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PointerRNA r_ptr;
+ 
+@@ -5367,7 +5367,7 @@
+     ".. method:: clear()\n"
+     "\n"
+     "   This is a function to remove all items from a collection.\n");
+-static PyObject *pyrna_prop_collection_idprop_clear(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_collection_idprop_clear(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+ #ifdef USE_PEDANTIC_WRITE
+   if (rna_disallow_writes && rna_id_write_error(&self->ptr.value(), nullptr)) {
+@@ -5509,7 +5509,7 @@
+     "\n"
+     "   :return: the identifiers for each member of this collection.\n"
+     "   :rtype: list[str]\n");
+-static PyObject *pyrna_prop_collection_keys(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_collection_keys(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret = PyList_New(0);
+ 
+@@ -5534,7 +5534,7 @@
+     "\n"
+     "   :return: (key, value) pairs for each member of this collection.\n"
+     "   :rtype: list[tuple[str, :class:`bpy.types.bpy_struct`]]\n");
+-static PyObject *pyrna_prop_collection_items(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_collection_items(BPy_PropertyRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret = PyList_New(0);
+   int i = 0;
+@@ -5571,7 +5571,7 @@
+     "\n"
+     "   :return: The members of this collection.\n"
+     "   :rtype: list[:class:`bpy.types.bpy_struct` | None]\n");
+-static PyObject *pyrna_prop_collection_values(BPy_PropertyRNA *self)
++static PyObject *pyrna_prop_collection_values(BPy_PropertyRNA *self, PyObject * /*unused*/)
+ {
+   /* Re-use slice. */
+   return pyrna_prop_collection_subscript_slice(self, 0, PY_SSIZE_T_MAX);
+@@ -5694,7 +5694,7 @@
+     "\n"
+     "   .. note:: This is intended only for advanced script writers who need to\n"
+     "      pass blender data to their own C/Python modules.\n");
+-static PyObject *pyrna_struct_as_pointer(BPy_StructRNA *self)
++static PyObject *pyrna_struct_as_pointer(BPy_StructRNA *self, PyObject * /*unused*/ = nullptr)
+ {
+   return PyLong_FromVoidPtr(self->ptr->data);
+ }
+@@ -9035,7 +9035,7 @@
+   return ret;
+ }
+ 
+-static PyObject *bpy_types_module_dir(PyObject *self)
++static PyObject *bpy_types_module_dir(PyObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPy_TypesModule_State *state = static_cast<BPy_TypesModule_State *>(PyModule_GetState(self));
+   BLI_assert(state->ptr.has_value());
+@@ -10846,7 +10846,7 @@
+ 
+ /* Access to the 'owner_id' so work-spaces can filter by add-on. */
+ 
+-static PyObject *pyrna_bl_owner_id_get(PyObject * /*self*/)
++static PyObject *pyrna_bl_owner_id_get(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+   const char *name = RNA_struct_state_owner_get();
+   if (name) {
+diff --git a/source/blender/python/intern/bpy_rna_context.cc b/source/blender/python/intern/bpy_rna_context.cc
+--- a/source/blender/python/intern/bpy_rna_context.cc
++++ b/source/blender/python/intern/bpy_rna_context.cc
+@@ -289,7 +289,7 @@
+   return true;
+ }
+ 
+-static PyObject *bpy_rna_context_temp_override_enter(BPyContextTempOverride *self)
++static PyObject *bpy_rna_context_temp_override_enter(BPyContextTempOverride *self, PyObject * /*unused*/ = nullptr)
+ {
+   bContext *C = self->context;
+   Main *bmain = CTX_data_main(C);
+diff --git a/source/blender/python/intern/bpy_rna_data.cc b/source/blender/python/intern/bpy_rna_data.cc
+--- a/source/blender/python/intern/bpy_rna_data.cc
++++ b/source/blender/python/intern/bpy_rna_data.cc
+@@ -40,7 +40,7 @@
+ };
+ 
+ static PyObject *bpy_rna_data_temp_data(PyObject *self, PyObject *args, PyObject *kw);
+-static PyObject *bpy_rna_data_context_enter(BPy_DataContext *self);
++static PyObject *bpy_rna_data_context_enter(BPy_DataContext *self, PyObject * /*unused*/ = nullptr);
+ static PyObject *bpy_rna_data_context_exit(BPy_DataContext *self, PyObject *args);
+ 
+ #ifdef __GNUC__
+@@ -176,7 +176,7 @@
+   return reinterpret_cast<PyObject *>(ret);
+ }
+ 
+-static PyObject *bpy_rna_data_context_enter(BPy_DataContext *self)
++static PyObject *bpy_rna_data_context_enter(BPy_DataContext *self, PyObject * /*unused*/)
+ {
+   Main *bmain_temp = BKE_main_new();
+   STRNCPY(bmain_temp->filepath, self->filepath);
+diff --git a/source/blender/python/intern/bpy_rna_ui.cc b/source/blender/python/intern/bpy_rna_ui.cc
+--- a/source/blender/python/intern/bpy_rna_ui.cc
++++ b/source/blender/python/intern/bpy_rna_ui.cc
+@@ -29,7 +29,7 @@
+     "   Return a list of dictionaries containing a textual representation of the UI layout.\n"
+     "\n"
+     "   :rtype: list[dict[str, Any]]\n");
+-static PyObject *bpy_rna_uilayout_introspect(PyObject *self)
++static PyObject *bpy_rna_uilayout_introspect(PyObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   BPy_StructRNA *pyrna = reinterpret_cast<BPy_StructRNA *>(self);
+   ui::Layout *layout = pyrna->ptr->data_as<ui::Layout>();
+diff --git a/source/blender/python/mathutils/mathutils.cc b/source/blender/python/mathutils/mathutils.cc
+--- a/source/blender/python/mathutils/mathutils.cc
++++ b/source/blender/python/mathutils/mathutils.cc
+@@ -710,7 +710,7 @@
+     "\n"
+     "   :return: An instance of this object.\n"
+     "   :rtype: Self\n";
+-PyObject *BaseMathObject_freeze(BaseMathObject *self)
++PyObject *BaseMathObject_freeze(BaseMathObject *self, PyObject * /*unused*/)
+ {
+   if ((self->flag & BASE_MATH_FLAG_IS_WRAP) || (self->cb_user != nullptr)) {
+     PyErr_SetString(PyExc_TypeError, "Cannot freeze wrapped/owned data");
+diff --git a/source/blender/python/mathutils/mathutils.hh b/source/blender/python/mathutils/mathutils.hh
+--- a/source/blender/python/mathutils/mathutils.hh
++++ b/source/blender/python/mathutils/mathutils.hh
+@@ -91,7 +91,7 @@
+ [[nodiscard]] PyObject *BaseMathObject_is_valid_get(BaseMathObject *self, void *);
+ 
+ extern char BaseMathObject_freeze_doc[];
+-[[nodiscard]] PyObject *BaseMathObject_freeze(BaseMathObject *self);
++[[nodiscard]] PyObject *BaseMathObject_freeze(BaseMathObject *self, PyObject * /*unused*/ = nullptr);
+ 
+ int BaseMathObject_traverse(BaseMathObject *self, visitproc visit, void *arg);
+ int BaseMathObject_clear(BaseMathObject *self);
+diff --git a/source/blender/python/mathutils/mathutils_Color.cc b/source/blender/python/mathutils/mathutils_Color.cc
+--- a/source/blender/python/mathutils/mathutils_Color.cc
++++ b/source/blender/python/mathutils/mathutils_Color.cc
+@@ -130,7 +130,7 @@
+     "\n"
+     "   :return: A color in sRGB color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_scene_linear_to_srgb(ColorObject *self)
++static PyObject *Color_from_scene_linear_to_srgb(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_scene_linear_to_srgb_v3(col, self->col);
+@@ -146,7 +146,7 @@
+     "\n"
+     "   :return: A color in scene linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_srgb_to_scene_linear(ColorObject *self)
++static PyObject *Color_from_srgb_to_scene_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_srgb_to_scene_linear_v3(col, self->col);
+@@ -162,7 +162,7 @@
+     "\n"
+     "   :return: A color in XYZ color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_scene_linear_to_xyz_d65(ColorObject *self)
++static PyObject *Color_from_scene_linear_to_xyz_d65(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_scene_linear_to_xyz(col, self->col);
+@@ -178,7 +178,7 @@
+     "\n"
+     "   :return: A color in scene linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_xyz_d65_to_scene_linear(ColorObject *self)
++static PyObject *Color_from_xyz_d65_to_scene_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_xyz_to_scene_linear(col, self->col);
+@@ -194,7 +194,7 @@
+     "\n"
+     "   :return: A color in ACES2065-1 linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_scene_linear_to_aces(ColorObject *self)
++static PyObject *Color_from_scene_linear_to_aces(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_scene_linear_to_aces(col, self->col);
+@@ -210,7 +210,7 @@
+     "\n"
+     "   :return: A color in scene linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_aces_to_scene_linear(ColorObject *self)
++static PyObject *Color_from_aces_to_scene_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_aces_to_scene_linear(col, self->col);
+@@ -226,7 +226,7 @@
+     "\n"
+     "   :return: A color in ACEScg linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_scene_linear_to_acescg(ColorObject *self)
++static PyObject *Color_from_scene_linear_to_acescg(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_scene_linear_to_acescg(col, self->col);
+@@ -242,7 +242,7 @@
+     "\n"
+     "   :return: A color in scene linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_acescg_to_scene_linear(ColorObject *self)
++static PyObject *Color_from_acescg_to_scene_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_acescg_to_scene_linear(col, self->col);
+@@ -258,7 +258,7 @@
+     "\n"
+     "   :return: A color in Rec.709 linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_scene_linear_to_rec709_linear(ColorObject *self)
++static PyObject *Color_from_scene_linear_to_rec709_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_scene_linear_to_rec709(col, self->col);
+@@ -274,7 +274,7 @@
+     "\n"
+     "   :return: A color in scene linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_rec709_linear_to_scene_linear(ColorObject *self)
++static PyObject *Color_from_rec709_linear_to_scene_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_rec709_to_scene_linear(col, self->col);
+@@ -290,7 +290,7 @@
+     "\n"
+     "   :return: A color in Rec.2020 linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_scene_linear_to_rec2020_linear(ColorObject *self)
++static PyObject *Color_from_scene_linear_to_rec2020_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_scene_linear_to_rec2020(col, self->col);
+@@ -306,7 +306,7 @@
+     "\n"
+     "   :return: A color in scene linear color space.\n"
+     "   :rtype: :class:`Color`\n");
+-static PyObject *Color_from_rec2020_linear_to_scene_linear(ColorObject *self)
++static PyObject *Color_from_rec2020_linear_to_scene_linear(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float col[3];
+   IMB_colormanagement_rec2020_to_scene_linear(col, self->col);
+@@ -333,7 +333,7 @@
+     "\n"
+     "   .. note:: use this to get a copy of a wrapped color with\n"
+     "      no reference to the original data.\n");
+-static PyObject *Color_copy(ColorObject *self)
++static PyObject *Color_copy(ColorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+diff --git a/source/blender/python/mathutils/mathutils_Euler.cc b/source/blender/python/mathutils/mathutils_Euler.cc
+--- a/source/blender/python/mathutils/mathutils_Euler.cc
++++ b/source/blender/python/mathutils/mathutils_Euler.cc
+@@ -178,7 +178,7 @@
+     "\n"
+     "   :return: Quaternion representation of the euler.\n"
+     "   :rtype: :class:`Quaternion`\n");
+-static PyObject *Euler_to_quaternion(EulerObject *self)
++static PyObject *Euler_to_quaternion(EulerObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float quat[4];
+ 
+@@ -200,7 +200,7 @@
+     "\n"
+     "   :return: A 3x3 rotation matrix representation of the euler.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Euler_to_matrix(EulerObject *self)
++static PyObject *Euler_to_matrix(EulerObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float mat[9];
+ 
+@@ -219,7 +219,7 @@
+     ".. method:: zero()\n"
+     "\n"
+     "   Set all values to zero.\n");
+-static PyObject *Euler_zero(EulerObject *self)
++static PyObject *Euler_zero(EulerObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_Prepare_ForWrite(self) == -1) {
+     return nullptr;
+@@ -354,7 +354,7 @@
+     "\n"
+     "   .. note:: use this to get a copy of a wrapped euler with\n"
+     "      no reference to the original data.\n");
+-static PyObject *Euler_copy(EulerObject *self)
++static PyObject *Euler_copy(EulerObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+diff --git a/source/blender/python/mathutils/mathutils_Matrix.cc b/source/blender/python/mathutils/mathutils_Matrix.cc
+--- a/source/blender/python/mathutils/mathutils_Matrix.cc
++++ b/source/blender/python/mathutils/mathutils_Matrix.cc
+@@ -33,14 +33,14 @@
+ };
+ 
+ static PyObject *Matrix_copy_notest(MatrixObject *self, const float *matrix);
+-static PyObject *Matrix_copy(MatrixObject *self);
++static PyObject *Matrix_copy(MatrixObject *self, PyObject * /*unused*/ = nullptr);
+ static PyObject *Matrix_deepcopy(MatrixObject *self, PyObject *args);
+ static int Matrix_ass_slice(MatrixObject *self,
+                             Py_ssize_t start,
+                             Py_ssize_t step,
+                             Py_ssize_t slice_length,
+                             PyObject *value);
+-static PyObject *matrix__apply_to_copy(PyObject *(*matrix_func)(MatrixObject *),
++static PyObject *matrix__apply_to_copy(PyObject *(*matrix_func)(MatrixObject *, PyObject *),
+                                        MatrixObject *self);
+ static PyObject *MatrixAccess_CreatePyObject(MatrixObject *matrix, const eMatrixAccess_t type);
+ 
+@@ -286,12 +286,12 @@
+   matrix_invert_with_det_n_internal(r_mat, in_mat, det, self->col_num);
+ }
+ 
+-static PyObject *matrix__apply_to_copy(PyObject *(*matrix_func)(MatrixObject *),
++static PyObject *matrix__apply_to_copy(PyObject *(*matrix_func)(MatrixObject *, PyObject *),
+                                        MatrixObject *self)
+ {
+   PyObject *ret = Matrix_copy(self);
+   if (ret) {
+-    PyObject *ret_dummy = matrix_func(reinterpret_cast<MatrixObject *>(ret));
++    PyObject *ret_dummy = matrix_func(reinterpret_cast<MatrixObject *>(ret), nullptr);
+     if (ret_dummy) {
+       Py_DECREF(ret_dummy);
+       return ret;
+@@ -1291,7 +1291,7 @@
+     "\n"
+     "   :return: Quaternion representation of the rotation matrix.\n"
+     "   :rtype: :class:`Quaternion`\n");
+-static PyObject *Matrix_to_quaternion(MatrixObject *self)
++static PyObject *Matrix_to_quaternion(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float quat[4];
+ 
+@@ -1430,7 +1430,7 @@
+     ".. method:: resize_4x4()\n"
+     "\n"
+     "   Resize the matrix to 4x4.\n");
+-static PyObject *Matrix_resize_4x4(MatrixObject *self)
++static PyObject *Matrix_resize_4x4(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float mat[4][4];
+   int col;
+@@ -1501,7 +1501,7 @@
+     "\n"
+     "   :return: a new matrix.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Matrix_to_2x2(MatrixObject *self)
++static PyObject *Matrix_to_2x2(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+@@ -1518,7 +1518,7 @@
+     "\n"
+     "   :return: a new matrix.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Matrix_to_3x3(MatrixObject *self)
++static PyObject *Matrix_to_3x3(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+@@ -1535,7 +1535,7 @@
+     "\n"
+     "   :return: a new matrix.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Matrix_to_4x4(MatrixObject *self)
++static PyObject *Matrix_to_4x4(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+ 
+   if (BaseMath_ReadCallback(self) == -1) {
+@@ -1559,7 +1559,7 @@
+     "\n"
+     "   :return: Return the translation of a matrix.\n"
+     "   :rtype: :class:`Vector`\n");
+-static PyObject *Matrix_to_translation(MatrixObject *self)
++static PyObject *Matrix_to_translation(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+@@ -1587,7 +1587,7 @@
+     "\n"
+     "   .. note:: This method does not return a negative scale on any axis because it is "
+     "not possible to obtain this data from the matrix alone.\n");
+-static PyObject *Matrix_to_scale(MatrixObject *self)
++static PyObject *Matrix_to_scale(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float rot[3][3];
+   float mat[3][3];
+@@ -1807,7 +1807,7 @@
+     "\n"
+     "   .. seealso:: `Inverse Matrix <https://en.wikipedia.org/wiki/Inverse_matrix>`__ on "
+     "Wikipedia.\n");
+-static PyObject *Matrix_invert_safe(MatrixObject *self)
++static PyObject *Matrix_invert_safe(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -1835,7 +1835,7 @@
+     "\n"
+     "   :return: the inverted matrix.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Matrix_inverted_safe(MatrixObject *self)
++static PyObject *Matrix_inverted_safe(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float mat[MATRIX_MAX_DIM * MATRIX_MAX_DIM];
+ 
+@@ -1869,7 +1869,7 @@
+     "\n"
+     "   .. seealso:: `Adjugate matrix <https://en.wikipedia.org/wiki/Adjugate_matrix>`__ on "
+     "Wikipedia.\n");
+-static PyObject *Matrix_adjugate(MatrixObject *self)
++static PyObject *Matrix_adjugate(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -1906,7 +1906,7 @@
+     "   :return: the adjugated matrix.\n"
+     "   :rtype: :class:`Matrix`\n"
+     "   :raises ValueError: if the matrix cannot be adjugated\n");
+-static PyObject *Matrix_adjugated(MatrixObject *self)
++static PyObject *Matrix_adjugated(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return matrix__apply_to_copy(Matrix_adjugate, self);
+ }
+@@ -1967,7 +1967,7 @@
+     "\n"
+     "   :return: Tuple of translation, rotation, and scale.\n"
+     "   :rtype: tuple[:class:`Vector`, :class:`Quaternion`, :class:`Vector`]\n");
+-static PyObject *Matrix_decompose(MatrixObject *self)
++static PyObject *Matrix_decompose(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+   float loc[3];
+@@ -2079,7 +2079,7 @@
+     "   :rtype: float\n"
+     "\n"
+     "   .. seealso:: `Determinant <https://en.wikipedia.org/wiki/Determinant>`__ on Wikipedia.\n");
+-static PyObject *Matrix_determinant(MatrixObject *self)
++static PyObject *Matrix_determinant(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+@@ -2109,7 +2109,7 @@
+     "   Set the matrix to its transpose.\n"
+     "\n"
+     "   .. seealso:: `Transpose <https://en.wikipedia.org/wiki/Transpose>`__ on Wikipedia.\n");
+-static PyObject *Matrix_transpose(MatrixObject *self)
++static PyObject *Matrix_transpose(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -2147,7 +2147,7 @@
+     "\n"
+     "   :return: a transposed matrix\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Matrix_transposed(MatrixObject *self)
++static PyObject *Matrix_transposed(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return matrix__apply_to_copy(Matrix_transpose, self);
+ }
+@@ -2166,7 +2166,7 @@
+     "   Normalize each of the matrix columns (3x3 and 4x4 only).\n"
+     "\n"
+     "   .. note:: for 4x4 matrices, the 4th column (translation) is left untouched.\n");
+-static PyObject *Matrix_normalize(MatrixObject *self)
++static PyObject *Matrix_normalize(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -2206,7 +2206,7 @@
+     "   :rtype: :class:`Matrix`\n"
+     "\n"
+     "   .. note:: for 4x4 matrices, the 4th column (translation) is left untouched.\n");
+-static PyObject *Matrix_normalized(MatrixObject *self)
++static PyObject *Matrix_normalized(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return matrix__apply_to_copy(Matrix_normalize, self);
+ }
+@@ -2223,7 +2223,7 @@
+     ".. method:: zero()\n"
+     "\n"
+     "   Set all the matrix values to zero.\n");
+-static PyObject *Matrix_zero(MatrixObject *self)
++static PyObject *Matrix_zero(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_Prepare_ForWrite(self) == -1) {
+     return nullptr;
+@@ -2271,7 +2271,7 @@
+     "\n"
+     "   .. seealso:: `Identity matrix <https://en.wikipedia.org/wiki/Identity_matrix>`__ "
+     "on Wikipedia.\n");
+-static PyObject *Matrix_identity(MatrixObject *self)
++static PyObject *Matrix_identity(MatrixObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -2314,7 +2314,7 @@
+     "\n"
+     "   :return: A copy of the matrix.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Matrix_copy(MatrixObject *self)
++static PyObject *Matrix_copy(MatrixObject *self, PyObject * /*unused*/)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+diff --git a/source/blender/python/mathutils/mathutils_Quaternion.cc b/source/blender/python/mathutils/mathutils_Quaternion.cc
+--- a/source/blender/python/mathutils/mathutils_Quaternion.cc
++++ b/source/blender/python/mathutils/mathutils_Quaternion.cc
+@@ -29,21 +29,21 @@
+ 
+ #define QUAT_SIZE 4
+ 
+-static PyObject *quat__apply_to_copy(PyObject *(*quat_func)(QuaternionObject *),
++static PyObject *quat__apply_to_copy(PyObject *(*quat_func)(QuaternionObject *, PyObject *),
+                                      QuaternionObject *self);
+ static void quat__axis_angle_sanitize(float axis[3], float *angle);
+-static PyObject *Quaternion_copy(QuaternionObject *self);
++static PyObject *Quaternion_copy(QuaternionObject *self, PyObject * /*unused*/ = nullptr);
+ static PyObject *Quaternion_deepcopy(QuaternionObject *self, PyObject *args);
+ 
+ /* -------------------------------------------------------------------- */
+ /** \name Utilities
+  * \{ */
+ 
+-static PyObject *quat__apply_to_copy(PyObject *(*quat_func)(QuaternionObject *),
++static PyObject *quat__apply_to_copy(PyObject *(*quat_func)(QuaternionObject *, PyObject *),
+                                      QuaternionObject *self)
+ {
+   PyObject *ret = Quaternion_copy(self);
+-  PyObject *ret_dummy = quat_func(reinterpret_cast<QuaternionObject *>(ret));
++  PyObject *ret_dummy = quat_func(reinterpret_cast<QuaternionObject *>(ret), nullptr);
+   if (ret_dummy) {
+     Py_DECREF(ret_dummy);
+     return ret;
+@@ -287,7 +287,7 @@
+     "\n"
+     "   :return: A 3x3 rotation matrix representation of the quaternion.\n"
+     "   :rtype: :class:`Matrix`\n");
+-static PyObject *Quaternion_to_matrix(QuaternionObject *self)
++static PyObject *Quaternion_to_matrix(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float mat[9]; /* all values are set */
+ 
+@@ -314,7 +314,7 @@
+     "\n"
+     "   :return: Axis, angle.\n"
+     "   :rtype: tuple[:class:`Vector`, float]\n");
+-static PyObject *Quaternion_to_axis_angle(QuaternionObject *self)
++static PyObject *Quaternion_to_axis_angle(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   PyObject *ret;
+ 
+@@ -410,7 +410,7 @@
+     "   :rtype: :class:`Vector`\n"
+     "\n"
+     "   To convert back to a quaternion, pass it to the :class:`Quaternion` constructor.\n");
+-static PyObject *Quaternion_to_exponential_map(QuaternionObject *self)
++static PyObject *Quaternion_to_exponential_map(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float expmap[3];
+ 
+@@ -676,7 +676,7 @@
+     ".. method:: normalize()\n"
+     "\n"
+     "   Normalize the quaternion.\n");
+-static PyObject *Quaternion_normalize(QuaternionObject *self)
++static PyObject *Quaternion_normalize(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -696,7 +696,7 @@
+     "\n"
+     "   :return: a normalized copy.\n"
+     "   :rtype: :class:`Quaternion`\n");
+-static PyObject *Quaternion_normalized(QuaternionObject *self)
++static PyObject *Quaternion_normalized(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return quat__apply_to_copy(Quaternion_normalize, self);
+ }
+@@ -715,7 +715,7 @@
+     ".. method:: invert()\n"
+     "\n"
+     "   Set the quaternion to its inverse.\n");
+-static PyObject *Quaternion_invert(QuaternionObject *self)
++static PyObject *Quaternion_invert(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -735,7 +735,7 @@
+     "\n"
+     "   :return: the inverted value.\n"
+     "   :rtype: :class:`Quaternion`\n");
+-static PyObject *Quaternion_inverted(QuaternionObject *self)
++static PyObject *Quaternion_inverted(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return quat__apply_to_copy(Quaternion_invert, self);
+ }
+@@ -752,7 +752,7 @@
+     ".. method:: identity()\n"
+     "\n"
+     "   Set the quaternion to an identity quaternion.\n");
+-static PyObject *Quaternion_identity(QuaternionObject *self)
++static PyObject *Quaternion_identity(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -776,7 +776,7 @@
+     ".. method:: negate()\n"
+     "\n"
+     "   Set the quaternion to its negative.\n");
+-static PyObject *Quaternion_negate(QuaternionObject *self)
++static PyObject *Quaternion_negate(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -800,7 +800,7 @@
+     ".. method:: conjugate()\n"
+     "\n"
+     "   Set the quaternion to its conjugate (negate x, y, z).\n");
+-static PyObject *Quaternion_conjugate(QuaternionObject *self)
++static PyObject *Quaternion_conjugate(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+     return nullptr;
+@@ -820,7 +820,7 @@
+     "\n"
+     "   :return: a new quaternion.\n"
+     "   :rtype: :class:`Quaternion`\n");
+-static PyObject *Quaternion_conjugated(QuaternionObject *self)
++static PyObject *Quaternion_conjugated(QuaternionObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return quat__apply_to_copy(Quaternion_conjugate, self);
+ }
+@@ -843,7 +843,7 @@
+     "\n"
+     "   .. note:: use this to get a copy of a wrapped quaternion with\n"
+     "      no reference to the original data.\n");
+-static PyObject *Quaternion_copy(QuaternionObject *self)
++static PyObject *Quaternion_copy(QuaternionObject *self, PyObject * /*unused*/)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+diff --git a/source/blender/python/mathutils/mathutils_Vector.cc b/source/blender/python/mathutils/mathutils_Vector.cc
+--- a/source/blender/python/mathutils/mathutils_Vector.cc
++++ b/source/blender/python/mathutils/mathutils_Vector.cc
+@@ -42,7 +42,7 @@
+ #define SWIZZLE_VALID_AXIS 0x4
+ #define SWIZZLE_AXIS 0x3
+ 
+-static PyObject *Vector_copy(VectorObject *self);
++static PyObject *Vector_copy(VectorObject *self, PyObject * /*unused*/ = nullptr);
+ static PyObject *Vector_deepcopy(VectorObject *self, PyObject *args);
+ 
+ /* -------------------------------------------------------------------- */
+@@ -95,10 +95,10 @@
+   return 0;
+ }
+ 
+-static PyObject *vec__apply_to_copy(PyObject *(*vec_func)(VectorObject *), VectorObject *self)
++static PyObject *vec__apply_to_copy(PyObject *(*vec_func)(VectorObject *, PyObject *), VectorObject *self)
+ {
+   PyObject *ret = Vector_copy(self);
+-  PyObject *ret_dummy = vec_func(reinterpret_cast<VectorObject *>(ret));
++  PyObject *ret_dummy = vec_func(reinterpret_cast<VectorObject *>(ret), nullptr);
+   if (ret_dummy) {
+     Py_DECREF(ret_dummy);
+     return ret;
+@@ -456,7 +456,7 @@
+     ".. method:: zero()\n"
+     "\n"
+     "   Set all values to zero.\n");
+-static PyObject *Vector_zero(VectorObject *self)
++static PyObject *Vector_zero(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_Prepare_ForWrite(self) == -1) {
+     return nullptr;
+@@ -489,7 +489,7 @@
+     "   .. note:: For 4D vectors, only the x, y, z components are normalized;\n"
+     "      the w component is left untouched.\n"
+     "      The resulting 4D vector may not have unit length.\n");
+-static PyObject *Vector_normalize(VectorObject *self)
++static PyObject *Vector_normalize(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   const int vec_num = (self->vec_num == 4 ? 3 : self->vec_num);
+   if (BaseMath_ReadCallback_ForWrite(self) == -1) {
+@@ -514,7 +514,7 @@
+     "\n"
+     "   :return: a normalized copy of the vector\n"
+     "   :rtype: :class:`Vector`\n");
+-static PyObject *Vector_normalized(VectorObject *self)
++static PyObject *Vector_normalized(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   return vec__apply_to_copy(Vector_normalize, self);
+ }
+@@ -619,7 +619,7 @@
+     ".. method:: resize_2d()\n"
+     "\n"
+     "   Resize the vector to 2D (x, y).\n");
+-static PyObject *Vector_resize_2d(VectorObject *self)
++static PyObject *Vector_resize_2d(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (UNLIKELY(BaseMathObject_Prepare_ForResize(self, "Vector.resize_2d()") == -1)) {
+     /* An exception has been raised. */
+@@ -644,7 +644,7 @@
+     ".. method:: resize_3d()\n"
+     "\n"
+     "   Resize the vector to 3D (x, y, z).\n");
+-static PyObject *Vector_resize_3d(VectorObject *self)
++static PyObject *Vector_resize_3d(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (UNLIKELY(BaseMathObject_Prepare_ForResize(self, "Vector.resize_3d()") == -1)) {
+     /* An exception has been raised. */
+@@ -673,7 +673,7 @@
+     ".. method:: resize_4d()\n"
+     "\n"
+     "   Resize the vector to 4D (x, y, z, w).\n");
+-static PyObject *Vector_resize_4d(VectorObject *self)
++static PyObject *Vector_resize_4d(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (UNLIKELY(BaseMathObject_Prepare_ForResize(self, "Vector.resize_4d()") == -1)) {
+     /* An exception has been raised. */
+@@ -714,7 +714,7 @@
+     "\n"
+     "   :return: a new vector\n"
+     "   :rtype: :class:`Vector`\n");
+-static PyObject *Vector_to_2d(VectorObject *self)
++static PyObject *Vector_to_2d(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+@@ -731,7 +731,7 @@
+     "\n"
+     "   :return: a new vector\n"
+     "   :rtype: :class:`Vector`\n");
+-static PyObject *Vector_to_3d(VectorObject *self)
++static PyObject *Vector_to_3d(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float tvec[3] = {0.0f};
+ 
+@@ -751,7 +751,7 @@
+     "\n"
+     "   :return: a new vector\n"
+     "   :rtype: :class:`Vector`\n");
+-static PyObject *Vector_to_4d(VectorObject *self)
++static PyObject *Vector_to_4d(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float tvec[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+ 
+@@ -958,7 +958,7 @@
+     "   :rtype: :class:`Vector`\n"
+     "\n"
+     "   .. note:: the axis is undefined, only use when any orthogonal vector is acceptable.\n");
+-static PyObject *Vector_orthogonal(VectorObject *self)
++static PyObject *Vector_orthogonal(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   float vec[3];
+ 
+@@ -1560,7 +1560,7 @@
+     ".. method:: negate()\n"
+     "\n"
+     "   Set all values to their negative.\n");
+-static PyObject *Vector_negate(VectorObject *self)
++static PyObject *Vector_negate(VectorObject *self, PyObject * /*unused*/ = nullptr)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+@@ -1590,7 +1590,7 @@
+     "\n"
+     "   .. note:: use this to get a copy of a wrapped vector with\n"
+     "      no reference to the original data.\n");
+-static PyObject *Vector_copy(VectorObject *self)
++static PyObject *Vector_copy(VectorObject *self, PyObject * /*unused*/)
+ {
+   if (BaseMath_ReadCallback(self) == -1) {
+     return nullptr;
+diff --git a/source/blender/python/mathutils/mathutils_kdtree.cc b/source/blender/python/mathutils/mathutils_kdtree.cc
+--- a/source/blender/python/mathutils/mathutils_kdtree.cc
++++ b/source/blender/python/mathutils/mathutils_kdtree.cc
+@@ -166,7 +166,7 @@
+     "   .. note::\n"
+     "\n"
+     "      This builds the entire tree, avoid calling after each insertion.\n");
+-static PyObject *py_kdtree_balance(PyKDTree *self)
++static PyObject *py_kdtree_balance(PyKDTree *self, PyObject * /*unused*/ = nullptr)
+ {
+   kdtree_balance<float3>(self->obj);
+   self->count_balance = self->count;
+diff --git a/source/blender/python/mathutils/mathutils_noise.cc b/source/blender/python/mathutils/mathutils_noise.cc
+--- a/source/blender/python/mathutils/mathutils_noise.cc
++++ b/source/blender/python/mathutils/mathutils_noise.cc
+@@ -290,7 +290,7 @@
+     "\n"
+     "   :return: The random number.\n"
+     "   :rtype: float\n");
+-static PyObject *M_Noise_random(PyObject * /*self*/)
++static PyObject *M_Noise_random(PyObject * /*self*/, PyObject * /*unused*/ = nullptr)
+ {
+   return PyFloat_FromDouble(frand());
+ }

@@ -1,12 +1,13 @@
 // The Text Editor (SPACE_TEXT): Blender's own (editors/screen/blender-area.js) over Main's Texts, which are the
-// project's text files (blenkernel/text-files.js). Blender's text operators edit and draw them; the page runs what
-// reaches outside Blender: opening and saving files, and Blender's Run Script running the Text in CPython.
+// project's text files (blenkernel/text-files.js). Blender's text operators edit, draw and run them (Run Script is
+// BPY_run_text in the module's CPython); the page runs what reaches outside Blender (opening and saving files) and starts
+// Python before a script runs.
 import { mountBlenderArea } from '../screen/blender-area.js';
+import { blenderMain } from '../../bmesh/bmesh-wasm.js';
+import { startPython, pythonRan } from '../../python/python.js';
 import { registerOperators, contextArea } from '../../windowmanager/wm-operators.js';
 import { report } from '../../windowmanager/wm-reports.js';
-import { blendData, idStruct, pointerStruct, structFind } from '../../python/bpy_rna.js';
-import { provided } from '../../port/wasm.js';
-import { runText } from '../../python/pyodide.js';
+import { blendData, pointerStruct, structFind } from '../../python/bpy_rna.js';
 
 const SPACE_TEXT = 9;
 // The project's entry point, which the Text Editor shows first and cannot unlink.
@@ -25,7 +26,6 @@ export function mountTextEditor(section, { header, files, context, beforeRun = (
   const texts = blendData().texts;
   editor.space().text = texts.get(ENTRY) ?? texts[0] ?? null;
   area.refresh();
-  lastEditor = editor;
   return editor;
 }
 
@@ -45,23 +45,18 @@ const chooseFile = () => new Promise((resolve) => {
   input.click();
 });
 
-// Run Script (text_run_script, BPY_run_text): the text as Python in CPython, in the Text Editor's context; an error
-// is reported with its traceback and the cursor goes to its line.
-async function runScript(t, e, jump) {
+// Run Script: Blender's own (text_run_script, BPY_run_text) once Python has started, in the Text Editor's context.
+async function runScript(e) {
+  await startPython();
   e.beforeRun();
-  const result = await runText(t.name, t.as_string(), e);
+  e.inContext(() => blenderMain().invoke('text.run_script', {}, {}));
+  pythonRan();
   e.afterRun();
-  if (result.error) {
-    report('ERROR', result.error);
-    if (jump && result.line > 0) { t.cursor_set(result.line - 1); e.refresh(); }
-  }
-  return result;
+  e.refresh();
 }
-// Blender's TEXT_OT_run_script (BPY_run_text, tools/blender-port/wasm/python.cc), in the last Text Editor mounted.
-let lastEditor = null;
-provided.bpy_run_text = (C, text, jump) => { runScript(idStruct(text), lastEditor, !!jump); };
 
 registerOperators({
+  'text.run_script': { poll: () => !!text(), run: () => { runScript(editor()); } },
   'text.open': { run: () => { chooseFile().then(({ name, content }) => { const t = blendData().texts.new(name); t.from_string(content); show(t); }); } },
   // Internal texts have no file of their own (text_save_poll): Save is Save As, which downloads the text.
   'text.save': { poll: () => !!text()?.filepath, run: () => download(text().name, text().as_string()) },

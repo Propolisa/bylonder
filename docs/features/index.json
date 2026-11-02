@@ -462,7 +462,7 @@
   "id": "import-export",
   "title": "Import and Export",
   "summary": "Bring meshes in and write them out with Blender's own Wavefront OBJ, Stanford PLY, STL and FBX importers and exporters, through the browser's file dialogs with each format's options.",
-  "status": "partial",
+  "expect": "OBJ, PLY, STL and FBX import and export with Blender's own code and options; glTF, BVH, SVG and FBX export wait for the Python add-ons, Alembic and USD are greyed out, and an export's extra files download.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/files/import_export/index.html",
@@ -877,6 +877,84 @@
     "supported": 16,
     "partial": 164,
     "total": 188
+   }
+  }
+ },
+ {
+  "id": "python",
+  "title": "Python Scripts, Console and Add-ons",
+  "summary": "Run Python scripts, type in the Python Console and install add-ons, with Blender's own bpy and numpy in CPython 3.13.",
+  "expect": "Scripts, the Python Console and add-ons and extensions run on Blender's own bpy and numpy as in Blender once Python has loaded (a few seconds the first time); no threads, network or gpu module, and the interface itself stays on the app's own drawing.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/text_editor.html",
+   "https://docs.blender.org/manual/en/5.2/editors/python_console.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/addons.html",
+   "https://docs.blender.org/manual/en/5.2/advanced/scripting/index.html"
+  ],
+  "example": "python",
+  "thumbnail": "python/thumbnail.png",
+  "media": [
+   "python/run-script.gif",
+   "python/console.gif",
+   "python/install-addon.gif",
+   "python/use-addon.gif"
+  ],
+  "ui": [
+   "TEXT_EDITOR",
+   "CONSOLE",
+   "PREFERENCES",
+   "TEXT_MT_text",
+   "CONSOLE_MT_console",
+   "USERPREF_PT_addons",
+   "VIEW3D_MT_add",
+   "VIEW3D_MT_object"
+  ],
+  "operators": [
+   "text.run_script",
+   "console.execute",
+   "console.autocomplete",
+   "extensions.package_install_files",
+   "preferences.addon_install",
+   "preferences.addon_enable",
+   "preferences.addon_disable",
+   "preferences.addon_remove"
+  ],
+  "code": [
+   "src/python/python.js",
+   "tools/blender-port/wasm/python.cc",
+   "tools/blender-port/python/startup/bylonder_cpython.py",
+   "tools/blender-port/wasm/fileselect.cc",
+   "src/windowmanager/wm-fileselect.js",
+   "tools/blender-port/deps/cpython.sh",
+   "tools/blender-port/deps/numpy.sh",
+   "src/editors/space_console/console.js",
+   "src/editors/space_text/text-editor.js"
+  ],
+  "tests": [
+   "tests/python-wasm.test.js",
+   "tests/text-wasm.test.js",
+   "tests/scripting.test.js"
+  ],
+  "limits": [
+   "One thread: threading starts no thread and multiprocessing does not run.",
+   "No network from Python (urllib, pip, the online extension repositories), and no ctypes.",
+   "The gpu module is not built, so draw handlers that draw with GPU shaders draw nothing.",
+   "The shipped interface stays on the transpiled tree; a function added to one of its menus or panels draws before or after its own items."
+  ],
+  "page": "docs/features/python.md",
+  "open": "https://propolisa.github.io/bylonder/#example=python",
+  "example_title": "Python Scripts and Add-ons",
+  "coverage": {
+   "operators": {
+    "supported": 197,
+    "partial": 16,
+    "total": 292
+   },
+   "ui": {
+    "supported": 41,
+    "partial": 5,
+    "total": 54
    }
   }
  },

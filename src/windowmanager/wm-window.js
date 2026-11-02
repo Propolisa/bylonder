@@ -7,9 +7,12 @@ import { contextStruct, inPythonContext, registerClass } from '../python/bpy_rna
 import { provided } from '../port/wasm.js';
 import '../python/bpy_interface.js';
 import { setKeyconfigSource, setModalKeymaps, keymapsChanged } from './keyconfig.js';
-import { blenderOperatorIds } from './wm-operators.js';
+import { blenderOperatorIds, takesOperator } from './wm-operators.js';
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
+// Whether the page runs an operator Blender's window does not, and can now (a button's, when one is hovered): its keymap
+// items give the page their events (wm-api.cc).
+provided.wm_page_operator = (idname) => takesOperator(cString(idname));
 
 // Blender's space and region types (eSpace_Type, eRegion_Type).
 export const SPACE_VIEW3D = 1;

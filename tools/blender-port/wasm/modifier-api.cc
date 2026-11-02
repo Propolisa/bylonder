@@ -66,12 +66,13 @@ void operators_register();
 void ui_init();
 void movie_init();
 
-/* The Preferences' add-ons as Blender has them without a userpref.blend (BKE_blendfile_userdef_from_defaults, which
- * WM_init reads), for addon_utils to enable as the scripts load. */
+/* The Preferences' add-ons and extension repositories as Blender has them without a userpref.blend
+ * (BKE_blendfile_userdef_from_defaults, which WM_init reads), for addon_utils to enable as the scripts load. */
 static void addons_init()
 {
   UserDef *defaults = BKE_blendfile_userdef_from_defaults();
   BLI_movelisttolist(&U.addons, &defaults->addons);
+  BLI_movelisttolist(&U.extension_repos, &defaults->extension_repos);
   BKE_blender_userdef_data_free(defaults, false);
   MEM_delete(defaults);
 }

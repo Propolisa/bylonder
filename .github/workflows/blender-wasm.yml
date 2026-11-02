@@ -2,8 +2,9 @@ name: Blender WebAssembly build
 
 # Blender built as Blender builds itself, for wasm32 (tools/blender-port/blender_build.py): its libraries compiled in
 # parallel jobs, each keeping its objects in the Actions cache (an unchanged source is never compiled twice), then
-# linked and reported (seam-report.json: what does not compile and what nothing defines). The module is published as
-# the release module-<tools/blender-port tree hash> (scripts/module.mjs), which the Pages deploy calls this for when missing.
+# linked and reported (seam-report.json: what does not compile and what nothing defines). The module and the files its
+# CPython reads (python313.zip, scripts.zip) are published as the release module-<tools/blender-port tree hash>
+# (scripts/module.mjs), which the Pages deploy calls this for when missing.
 on:
   workflow_dispatch:
   workflow_call:
@@ -26,6 +27,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Tools
         run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
       - uses: actions/cache@v4
@@ -51,6 +55,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Tools
         run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
       - name: Configure Blender
@@ -73,7 +80,8 @@ jobs:
           key=$(node scripts/module.mjs key)
           cp work/wasm-build/bylonder.wasm bmesh.wasm
           cp work/wasm-build/bylonder-names.wasm bmesh-names.wasm
-          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm --latest=false \
+          cp work/wasm-build/python/python313.zip work/wasm-build/python/scripts.zip .
+          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm python313.zip scripts.zip --latest=false \
             --title "$key" --notes "Blender's module built from tools/blender-port at ${{ github.sha }}." --target "${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         if: always()

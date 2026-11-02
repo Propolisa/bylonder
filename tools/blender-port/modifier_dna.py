@@ -273,7 +273,7 @@ def main():
     manifest = json.load(open(os.path.join(wasm_module.HERE, 'manifest.json')))
     spec = manifest['modules']['bmesh/bmesh.wasm']
     tree, _ = wasm_module.patched_tree(root)
-    _, includes, _ = wasm_module.dependencies(tree + '-build', spec.get('dependencies', {}))
+    _, includes, _ = wasm_module.dependencies(tree + '-build', spec.get('dependencies', {}), build_all=False)
     args = [a for a in includes + wasm_module.flags(tree, spec) if a != '-O2'] + driver_includes() + ['-x', 'c++']
     for output, output_spec in OUTPUTS.items():
         if len(sys.argv) < 3 or sys.argv[2] == output:

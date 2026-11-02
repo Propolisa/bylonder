@@ -21,19 +21,25 @@ if [ ! -d "$DIR/blender/.git" ]; then
   git -C "$DIR/blender" config lfs.url "$LFS"
   git -C "$DIR/blender" config "lfs.$LFS.access" none
   (cd "$DIR/blender" && GIT_TERMINAL_PROMPT=0 git lfs pull --include="release/datafiles/**")
-  for p in "$(dirname "$0")"/wasm/patches/*.patch; do git -C "$DIR/blender" apply "$(realpath "$p")"; done
 fi
+# The reviewed patches, each applied once: one already in the tree is left as it is.
+for p in "$(dirname "$0")"/wasm/patches/*.patch; do
+  p=$(realpath "$p")
+  git -C "$DIR/blender" apply --reverse --check "$p" 2>/dev/null || git -C "$DIR/blender" apply "$p"
+done
 
-OFF="PYTHON CYCLES OPENGL_BACKEND VULKAN_BACKEND METAL_BACKEND GHOST_X11 GHOST_WAYLAND GHOST_SDL AUDASPACE CODEC_FFMPEG CODEC_SNDFILE
+OFF="PYTHON_INSTALL FREESTYLE CYCLES OPENGL_BACKEND VULKAN_BACKEND METAL_BACKEND GHOST_X11 GHOST_WAYLAND GHOST_SDL AUDASPACE CODEC_FFMPEG CODEC_SNDFILE
 OPENAL JACK PULSEAUDIO SDL OPENIMAGEIO OPENCOLORIO OPENEXR IMAGE_OPENJPEG IMAGE_WEBP MOD_FLUID MOD_OCEANSIM
 FFTW3 ALEMBIC USD HYDRA MATERIALX OPENIMAGEDENOISE GMP MANIFOLD QUADRIFLOW POTRACE HARU LIBMV XR_OPENXR INPUT_NDOF INTERNATIONAL
 HARFBUZZ FRIBIDI DRACO MESHOPTIMIZER TESTS GTESTS NANOVDB CPU_CHECK MEM_JEMALLOC BLENDER_THUMBNAILER LIBS_PRECOMPILED STRICT_BUILD_OPTIONS"
 args=()
 # What the shipped module builds with (manifest defines); TBB only so that CMake keeps OpenVDB, as blender_build.py drops
-# WITH_TBB and the module's serial tbb headers stand in.
-ON="BULLET OPENSUBDIV OPENVDB TBB MOD_REMESH"
+# WITH_TBB and the module's serial tbb headers stand in. Python is found at the host's python3.13, whose headers
+# blender_build.py replaces with the module's CPython's (manifest cpython).
+ON="PYTHON BULLET OPENSUBDIV OPENVDB TBB MOD_REMESH"
 for o in $OFF; do args+=("-DWITH_$o=OFF"); done
 for o in $ON; do args+=("-DWITH_$o=ON"); done
+args+=("-DPYTHON_ROOT_DIR=$(python3.13 -c 'import sys; print(sys.base_prefix)')")
 mkdir -p "$DIR/build-host"
 cmake -S "$DIR/blender" -B "$DIR/build-host" -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DWITH_HEADLESS=ON -DWITH_COMPOSITOR_CPU=ON -DWITH_IO_WAVEFRONT_OBJ=ON \

@@ -1,7 +1,8 @@
 """Blender built as Blender builds itself, for wasm32: the compile commands of Blender's own CMake configure (a host
 build directory configured with CMAKE_EXPORT_COMPILE_COMMANDS), each retargeted to wasm32-wasi with the module's
 compatibility headers, grouped by the CMake library they belong to. Libraries on the far side of Bylonder's seams
-(docs/blender-boundary.md: window system, GPU and drawing, Python's C API, Cycles, audio) are left out.
+(docs/blender-boundary.md: window system, GPU and drawing, Python's gpu module, Cycles, audio) are left out. Python is
+the manifest's CPython and numpy, built for wasm32 (deps/), and its files ship beside the module (python_files).
 
 Usage: tools/blender-port/blender_build.py HOST_BUILD [--report FILE]   (HOST_BUILD: tools/blender-port/configure_host.sh)
   Compiles every other library, links them, and reports per library what does not compile and which symbols nothing
@@ -17,6 +18,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import zipfile
 import zlib
 
 import wasm_module
@@ -25,7 +27,7 @@ import wasm_weaken
 from wasm_module import WASM, demangle
 
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
-SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace'
+SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python_gpu|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Host flags that have no meaning for wasm32 or name host paths.
@@ -34,9 +36,6 @@ DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_TBB$|-DWITH_TBB=|-DEIGEN_HAS_TBB|-DWIT
 # Sources built as a Blender with a window draws them, though the configure is headless: the interface, whose drawing
 # the API records (its icons are registered only then, icons_init).
 HEADED = re.compile(r'source/blender/editors/interface/')
-# Sources whose Python path is kept: typed values are evaluated as expressions (BPY_run_string_as_number, which the
-# module answers with Blender's Python-like expression evaluator, wasm/platform.cc), so their units apply.
-PYTHON_EXPRESSIONS = re.compile(r'source/blender/editors/(util/numinput|space_text/text_ops)\.cc$')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
          '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
          '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
@@ -54,7 +53,7 @@ def module_inputs(host, out):
 
 def module_archives(host, out):
     """The manifest's libraries the module build makes that Blender's build does not: those from outside Blender's tree
-    (FreeType, OpenSubdiv, OpenVDB, zstd) and Blender's renamed copies (blenfont as vfont_BLF_ for text objects, as the
+    (FreeType, OpenSubdiv, OpenVDB, zstd, and the built ones: CPython, numpy) and Blender's renamed copies (blenfont as vfont_BLF_ for text objects, as the
     interface's BLF_ functions are region-draw.cc's), compiled as the module build compiles them."""
     tree, spec, _ = module_inputs(host, out)
     deps, includes, versions = wasm_module.dependencies(out, spec['dependencies'])
@@ -70,7 +69,7 @@ def module_archives(host, out):
         subprocess.run([ar, 'rcs', archive, *built], check=True)
         archives.append(archive)
         print(f'{entry.get("dependency", "renamed")}/{entry["path"]}: {len(built)} sources', file=sys.stderr)
-    return archives
+    return archives + wasm_module.dependency_archives(deps, spec['dependencies'])[0]
 
 
 def target_flags(tree, spec, out):
@@ -98,17 +97,17 @@ def wasm_command(entry, extra):
         if arg in ('-o', '-c', '-MF', '-MT', '-MQ'):
             skip = arg != '-c'
             continue
-        # A host include directory given as two arguments (-isystem /usr/include/OpenImageIO).
-        if arg in ('-I', '-isystem') and i + 2 < len(args) and args[i + 2].startswith('/usr/'):
+        # A host include directory given as two arguments (-isystem /usr/include/OpenImageIO), or a dependency's in its
+        # place (the host's Python headers, the module's CPython's).
+        if arg in ('-I', '-isystem') and i + 2 < len(args) and args[i + 2].startswith(('/usr/', *HOST_INCLUDES)):
             skip = True
+            keep += [f'-I{include}' for host, include in HOST_INCLUDES.items() if args[i + 2].startswith(host)]
             continue
         if arg == '-DWITH_HEADLESS' and HEADED.search(entry['file']):
             continue
         if arg == entry['file'] or arg.endswith(os.path.basename(entry['file'])) and os.path.isabs(arg) or DROP.match(arg) or arg == '-MD':
             continue
         keep.append(arg)
-    if PYTHON_EXPRESSIONS.search(entry['file']):
-        keep += ['-DWITH_PYTHON', '-I' + entry['file'].split('source/blender/')[0] + 'source/blender/python']
     compiler = 'clang' if args[0].endswith(('clang', 'cc', 'gcc')) and entry['file'].endswith('.c') else 'clang++'
     return [compiler, *extra, *keep, *FLAGS]
 
@@ -118,6 +117,9 @@ REPO = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 # Blender's tree the build reads (main sets it).
 BLENDER_TREE = None
 WORK = {}
+# Host include directories a dependency's headers stand in for (its `host_include`, where the configure found them), set
+# by main.
+HOST_INCLUDES = {}
 SHIMS = wasm_module.own_headers()[:8]
 FSTREAM = [os.path.join(WASM, name, 'fstream') for name in ('fstream', 'fstream-read')]
 
@@ -293,8 +295,15 @@ def main():
     # Every source sees the fetched dependencies and the wasm32 DNA tables (wasm_module.sdna, made in generate()).
     tree, spec, includes = module_inputs(host, out)
     extra = [f'-I{os.path.join(out, "generated", "sdna")}', *includes]
+    deps, _, _ = wasm_module.dependencies(out, spec['dependencies'])
+    cache = open(os.path.join(host, 'CMakeCache.txt')).read()
+    for name, dep in spec['dependencies'].items():
+        if 'host_include' in dep:
+            HOST_INCLUDES[re.search(rf'^{dep["host_include"]}:PATH=(.*)$', cache, re.M)[1]] = os.path.join(deps[name], dep['include'])
     own = target_flags(tree, spec, out)
-    entries = [e for e in json.load(open(os.path.join(host, 'compile_commands.json'))) if target_of(e['output'] if 'output' in e else e['command'])]
+    # A precompiled header's entry (cmake_pch) makes no object.
+    entries = [e for e in json.load(open(os.path.join(host, 'compile_commands.json')))
+               if target_of(e['output'] if 'output' in e else e['command']) and 'cmake_pch' not in e['file']]
     by_any = {}
     for entry in entries:
         by_any.setdefault(target_of(entry.get('output') or entry['command']), []).append(entry)
@@ -359,10 +368,12 @@ def main():
     link_module(host, out, entries, extra, archives, module_libraries)
 
 
-# Blender's functions the module's API wraps: the UI layout's resolve (ui-tree.cc), the File Browser's opening
-# (fileselect.cc), and platform.cc's.
-WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender2ui15search_item_addEPNS0_11SearchItemsENS_9StringRefEPviih',
-           '_ZN7blender23WM_event_add_fileselectEPNS_8bContextEPNS_10wmOperatorE', *wasm_module.PLATFORM_WRAPPED]
+def wrapped(objects):
+    """Blender's functions the module's API wraps: each one an API file defines as __wrap_<symbol> (ui-tree.cc's layout
+    resolve, platform.cc's thread pool, python.cc's calls into Python before it starts)."""
+    nm = shutil.which('llvm-nm') or shutil.which('llvm-nm-18')
+    names = subprocess.run([nm, '--defined-only', '--just-symbol-name', *objects], capture_output=True, text=True, check=True).stdout
+    return sorted({name.removeprefix('__wrap_') for name in names.split() if name.startswith('__wrap_')})
 
 
 NULL_DATA = os.path.join(WASM, 'null-data.txt')
@@ -376,6 +387,9 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     Where both define a symbol, the loser's definition is made weak (wasm_weaken.py): the module build's own libraries
     (module_archives) win, the API wins in SEAM_LIBRARIES, Blender everywhere else. Each one is listed (wasm-build/replaced.json), so the API's stand-ins can go one by one."""
     built = glue(host, out, entries, extra)
+    tree, spec, _ = module_inputs(host, out)
+    deps, _, _ = wasm_module.dependencies(out, spec['dependencies'])
+    dependency_archives, dependency_flags = wasm_module.dependency_archives(deps, spec['dependencies'])
     failed = [(s, e) for s, o, e in built if not o]
     if failed:
         sys.exit('\n'.join(f'{os.path.basename(s)} does not build: {first_error(e)}' for s, e in failed))
@@ -385,7 +399,10 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     shutil.rmtree(linked, ignore_errors=True)
     os.makedirs(linked)
     api = [shutil.copy(o, os.path.join(linked, f'api-{i}-{os.path.basename(o)}')) for i, (_, o, _) in enumerate(built)]
-    copies = [shutil.copy(a, linked) for a in archives]
+    # The built dependencies' archives are read once, after Blender's (which are read twice, for their cycles): a
+    # partially linked object read twice would be loaded twice.
+    dependencies = [shutil.copy(a, linked) for a in dependency_archives]
+    copies = [shutil.copy(a, linked) for a in archives if a not in dependency_archives]
     # Renamed copies replace Blender's definitions, so they are linked whole: an archive member is not pulled in for a
     # symbol something already defines.
     renamed = [c for c in copies if os.path.basename(c).startswith('renamed_')]
@@ -393,7 +410,8 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     while True:
         link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
-                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-lwasi-emulated-signal',
+                *(f'-Wl,--wrap={w}' for w in wrapped(api)), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, *dependencies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
+                '-lwasi-emulated-signal', '-lwasi-emulated-getpid', *dependency_flags,
                 # Undefined functions are imports, which throw when called; undefined data fails the link, as it would read
                 # as null, unless null-data.txt names it.
                 '-Wl,--import-undefined', '-Wl,--unresolved-symbols=report-all', f'-Wl,--allow-undefined-file={NULL_DATA}', '-o', module]
@@ -403,6 +421,9 @@ def link_module(host, out, entries, extra, archives, module_libraries):
             break
         changed = False
         for (path, member), names in losers.items():
+            # Weakening settles Blender against the API's seams; a built dependency's definitions are its own.
+            if os.path.basename(path) in map(os.path.basename, dependency_archives):
+                sys.exit(f'module link: {os.path.basename(path)}({member}) defines what something else defines: {sorted(names)[:5]}')
             done = wasm_weaken.weaken_member(ar, path, member, names) if member else wasm_weaken.weaken_object(path, names)
             changed |= bool(done)
             side, where = ('blender', f'{os.path.basename(path)}({member})') if member else ('api', os.path.basename(path))
@@ -412,19 +433,63 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     json.dump({side: dict(sorted(v.items())) for side, v in replaced.items()}, open(os.path.join(out, 'replaced.json'), 'w'), indent=1)
     if result.returncode:
         sys.exit(f'module link failed:\n{result.stderr[-3000:]}')
+    invalid = subprocess.run(['node', '-e', 'new WebAssembly.Module(require("fs").readFileSync(process.argv[1]))', module], capture_output=True, text=True)
+    if invalid.returncode:
+        sys.exit(f'module link made an invalid module: {next(l for l in invalid.stderr.splitlines() if "Error" in l)}')
     missing = wasm_module.live_imports(module)
     print(f'{module}: {os.path.getsize(module)} bytes; API wins {sum(map(len, replaced["blender"].values()))} symbols, '
           f'Blender {sum(map(len, replaced["api"].values()))} (replaced.json); {len(missing)} imports, which throw when called',
           file=sys.stderr)
     # The module the app loads starts initialized (wasm_snapshot.py): Blender's RNA and node types are in its data.
     wasm_snapshot.snapshot(module, os.path.join(out, 'bylonder.wasm'), named=os.path.join(out, 'bylonder-names.wasm'))
-    install(os.path.join(out, 'bylonder.wasm'))
+    install(os.path.join(out, 'bylonder.wasm'), python_files(out, tree, deps))
 
 
-def install(module):
-    """The checkout's module becomes this build; without scripts/module.mjs's key it is a local build, which a fetch keeps."""
+# What Python's library ships without: tests, and the GUI toolkits and tools a browser has no use for.
+PYTHON_EXCLUDED = re.compile(r'^(test|idlelib|tkinter|turtledemo|ensurepip|lib2to3|pydoc_data|venv|__phello__)/|/tests?/')
+# Blender's scripts in CPython: its modules, its startup packages as modules (the interface they define is the
+# transpiled tree's), its core add-ons and presets; and Bylonder's startup script (python/startup).
+BLENDER_SCRIPTS = {'modules': 'modules', 'startup': 'modules', 'addons_core': 'addons_core', 'presets': 'presets'}
+
+
+def python_files(out, tree, deps):
+    """The files Python reads at its start (src/python/python.js puts them in the module's file system): python313.zip,
+    CPython's library and numpy, which zipimport reads in place (compiled, with their sources for tracebacks), and
+    scripts.zip, Blender's scripts and Bylonder's startup script, unpacked at Blender's system scripts directory."""
+    python, library = os.path.join(out, 'python'), os.path.join(out, 'python', 'lib')
+    shutil.rmtree(library, ignore_errors=True)
+    for root in (os.path.join(deps['cpython'].removesuffix('-build'), 'Lib'), os.path.join(deps['numpy'], 'site')):
+        for directory, _, names in os.walk(root):
+            for name in (n for n in names if n.endswith('.py')):
+                relative = os.path.relpath(os.path.join(directory, name), root)
+                if not PYTHON_EXCLUDED.search(relative):
+                    os.makedirs(os.path.dirname(os.path.join(library, relative)), exist_ok=True)
+                    shutil.copy(os.path.join(directory, name), os.path.join(library, relative))
+    # Compiled by the build's Python (deps/cpython.sh's), next to their sources, which name them by their path in the zip.
+    subprocess.run(['python3.13', '-m', 'compileall', '-q', '-b', '-s', library, library], check=True)
+    with zipfile.ZipFile(os.path.join(python, 'python313.zip'), 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for directory, _, names in os.walk(library):
+            for name in sorted(names):
+                archive.write(os.path.join(directory, name), os.path.relpath(os.path.join(directory, name), library))
+    own = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'python')
+    folders = [(os.path.join(tree, 'scripts', folder), target) for folder, target in BLENDER_SCRIPTS.items()] + [(own, '')]
+    with zipfile.ZipFile(os.path.join(python, 'scripts.zip'), 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for folder, target in folders:
+            for directory, _, names in os.walk(folder):
+                for name in sorted(names):
+                    if '__pycache__' not in directory:
+                        path = os.path.join(directory, name)
+                        archive.write(path, os.path.join(target, os.path.relpath(path, folder)))
+    return [os.path.join(python, name) for name in ('python313.zip', 'scripts.zip')]
+
+
+def install(module, files):
+    """The checkout's module and the files it reads become this build; without scripts/module.mjs's key it is a local
+    build, which a fetch keeps."""
     target = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'bmesh', 'bmesh.wasm')
     shutil.copy(module, target)
+    for path in files:
+        shutil.copy(path, os.path.dirname(target))
     if os.path.exists(target + '.key'):
         os.remove(target + '.key')
 

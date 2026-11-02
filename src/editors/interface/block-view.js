@@ -139,7 +139,7 @@ function widgetNode(b, env) {
   const style = { ...corners(b.aligned), ...((b.h > 1 || (b.type === 'LABEL' && b.h < 1)) && { height: `calc(var(--bl-row) * ${b.h})` }) };
   const common = { disabled: b.disabled || !env.enabled, inactive: b.inactive || !env.active, title: b.tip };
   const flat = b.emboss === 'NONE' || b.emboss === 'NONE_OR_STATUS' || env.emboss === 'NONE';
-  const withStyle = (vnode) => { if (vnode) vnode.props = { ...vnode.props, style: { ...vnode.props?.style, ...style }, 'data-blender': b.operator ?? b.rna?.prop }; return vnode; };
+  const withStyle = (vnode) => { if (vnode) vnode.props = { ...vnode.props, style: { ...vnode.props?.style, ...style }, 'data-blender': b.operator ?? b.rna?.prop ?? b.menu ?? b.popover }; return vnode; };
   switch (b.type) {
     case 'LABEL': return withStyle(label(shown, { iconName, align: b.text_right ? 'right' : 'left', className: common.inactive ? 'opacity-50' : '' }));
     case 'SEPR': return h('div', { class: 'bl-separator shrink-0' });

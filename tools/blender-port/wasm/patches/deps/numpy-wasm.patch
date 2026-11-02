@@ -1,0 +1,11 @@
+--- a/numpy/_core/include/numpy/npy_cpu.h
++++ b/numpy/_core/include/numpy/npy_cpu.h
+@@ -111,7 +111,7 @@
+     #endif
+ #elif defined(__loongarch_lp64)
+     #define NPY_CPU_LOONGARCH64
+-#elif defined(__EMSCRIPTEN__)
++#elif defined(__EMSCRIPTEN__) || defined(__wasm__)
+     /* __EMSCRIPTEN__ is defined by emscripten: an LLVM-to-Web compiler */
+     #define NPY_CPU_WASM
+ #else

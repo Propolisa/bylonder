@@ -35,7 +35,7 @@ expect. The operators behind them are Blender's own code, not lookalikes.
 - Model in Edit Mode and Sculpt Mode; stack modifiers, including geometry nodes.
 - Rig with armatures in Edit and Pose Mode, then animate in the Timeline, Dope Sheet and Graph Editor.
 - Curves, text, particle hair and simulated hair.
-- Run Python in the Scripting workspace.
+- Run Python scripts, use the Python Console and install add-ons, with Blender's own `bpy` and numpy.
 - Render stills and video in the browser, and edit them in the Video Sequencer.
 
 What runs in real time is Babylon.js, not EEVEE or Cycles, so the picture differs from Blender's render engines. Every

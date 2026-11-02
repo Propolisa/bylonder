@@ -1,0 +1,2 @@
+#!/bin/sh
+exec clang-18 --target=wasm32-wasi "$@"

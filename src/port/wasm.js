@@ -5,16 +5,18 @@
 // Files Blender's code writes and reads (a .blend Blender's writer saves), by absolute path: the module's file system,
 // in memory. JS puts files in and takes them out.
 export const files = new Map();
+// Directories made (path_create_directory) that may hold no file yet; any other directory is one that holds files.
+const directories = new Set();
 
 // WASI errno values and file types (wasi_snapshot_preview1).
-const ESUCCESS = 0, EBADF = 8, EEXIST = 20, EINVAL = 28, ENOENT = 44, ENOSYS = 52, ENOTDIR = 54;
+const ESUCCESS = 0, EBADF = 8, EEXIST = 20, EINVAL = 28, ENOENT = 44, ENOSYS = 52, ENOTDIR = 54, ENOTEMPTY = 55;
 const FILETYPE_DIRECTORY = 3, FILETYPE_REGULAR = 4;
 const O_CREAT = 1, O_DIRECTORY = 2, O_EXCL = 4, O_TRUNC = 8;
 // The one preopened directory, the root, as fd 3 (after stdin, stdout and stderr).
 const ROOT = 3;
 
 // WASI calls the module may import. Output on stdout and stderr (Blender's messages and logs) goes to stderr or the
-// console; paths are files in `files` under the root directory, and every directory exists.
+// console; paths are files in `files` under the root directory, and a directory is one that holds files or was made.
 function wasiFor(memory) {
   const decoder = new TextDecoder(), encoder = new TextEncoder();
   const write = (text) => (globalThis.process?.stderr ? process.stderr.write(text) : console.warn(text));
@@ -26,7 +28,9 @@ function wasiFor(memory) {
     const base = dir === ROOT || name.startsWith('/') ? '/' : open.get(dir)?.directory?.replace(/\/?$/, '/') ?? '/';
     return base + name.replace(/^\/+/, '');
   };
-  const isDirectory = (name) => name === '/' || [...files.keys()].some((file) => file.startsWith(name.replace(/\/?$/, '/')));
+  const paths = function* () { yield* files.keys(); yield* directories; };
+  const holds = (name) => paths().some((file) => file.startsWith(name.replace(/\/?$/, '/')));
+  const isDirectory = (name) => name === '/' || directories.has(name.replace(/\/$/, '')) || holds(name);
   // Open files and directories by fd: { path, position } or { directory }.
   const open = new Map([[ROOT, { directory: '/' }]]);
   let next = ROOT + 1;
@@ -55,9 +59,14 @@ function wasiFor(memory) {
     view().setUint32(out, total, true);
     return total;
   }
+  // A file's or directory's inode, distinct per path, so a path compares with another as the same file only when it is
+  // (os.path.samefile).
+  const inodes = new Map();
+  const inode = (name) => inodes.get(name) ?? inodes.set(name, BigInt(inodes.size + 1)).get(name);
   function filestat(at, name) {
     const v = view(), file = files.get(name);
     for (let i = 0; i < 64; i += 8) v.setBigUint64(at + i, 0n, true);
+    v.setBigUint64(at + 8, inode(name.replace(/\/$/, '') || '/'), true);
     v.setUint8(at + 16, file ? FILETYPE_REGULAR : FILETYPE_DIRECTORY);
     v.setBigUint64(at + 24, 1n, true);
     v.setBigUint64(at + 32, BigInt(file?.length ?? 0), true);
@@ -95,9 +104,9 @@ function wasiFor(memory) {
       const directory = open.get(fd)?.directory;
       if (directory === undefined) return EBADF;
       const prefix = directory.replace(/\/?$/, '/');
-      const entries = [...new Map([...files.keys()].filter((file) => file.startsWith(prefix)).map((file) => {
+      const entries = [...new Map(paths().filter((file) => file.startsWith(prefix)).map((file) => {
         const [name, ...rest] = file.slice(prefix.length).split('/');
-        return [name, rest.length ? FILETYPE_DIRECTORY : FILETYPE_REGULAR];
+        return [name, rest.length || directories.has(file) ? FILETYPE_DIRECTORY : FILETYPE_REGULAR];
       }))];
       let used = 0;
       for (let i = Number(cookie); i < entries.length && used < length; i++) {
@@ -181,18 +190,43 @@ function wasiFor(memory) {
       return ESUCCESS;
     },
     path_rename(dir, from, fromLength, toDir, to, toLength) {
-      const source = path(from, fromLength, dir), target = path(to, toLength, toDir);
-      if (!files.has(source)) return ENOENT;
-      files.set(target, files.get(source));
-      files.delete(source);
+      const source = path(from, fromLength, dir).replace(/\/$/, ''), target = path(to, toLength, toDir).replace(/\/$/, '');
+      if (files.has(source)) return files.set(target, files.get(source)), files.delete(source), ESUCCESS;
+      if (!isDirectory(source)) return ENOENT;
+      // A directory: everything under it moves.
+      const moved = (name) => target + name.slice(source.length);
+      for (const name of [...files.keys()].filter((name) => name.startsWith(source + '/'))) files.set(moved(name), files.get(name)), files.delete(name);
+      for (const name of [...directories].filter((name) => name === source || name.startsWith(source + '/'))) directories.add(moved(name)), directories.delete(name);
       return ESUCCESS;
     },
     path_unlink_file: (dir, at, length) => (files.delete(path(at, length, dir)) ? ESUCCESS : ENOENT),
-    path_remove_directory: (dir, at, length) => (isDirectory(path(at, length, dir)) ? ENOTDIR : ESUCCESS),
-    // Every directory exists, and no file is a link.
-    path_create_directory: () => ESUCCESS,
+    path_create_directory(dir, at, length) {
+      const name = path(at, length, dir).replace(/\/$/, '');
+      if (files.has(name) || isDirectory(name)) return EEXIST;
+      directories.add(name);
+      return ESUCCESS;
+    },
+    path_remove_directory(dir, at, length) {
+      const name = path(at, length, dir).replace(/\/$/, '');
+      if (!isDirectory(name)) return files.has(name) ? ENOTDIR : ENOENT;
+      if (holds(name)) return ENOTEMPTY;
+      directories.delete(name);
+      return ESUCCESS;
+    },
+    // No file is a link.
     path_readlink: () => EINVAL,
-    // No environment variables.
+    fd_filestat_set_size(fd, size) {
+      const file = open.get(fd);
+      if (!file?.path) return EBADF;
+      const sized = new Uint8Array(Number(size));
+      sized.set(files.get(file.path).subarray(0, sized.length));
+      files.set(file.path, sized);
+      return ESUCCESS;
+    },
+    clock_res_get: (_id, out) => { view().setBigUint64(out, 1000n, true); return ESUCCESS; },
+    // No arguments and no environment variables.
+    args_sizes_get(count, size) { view().setUint32(count, 0, true); view().setUint32(size, 0, true); return ESUCCESS; },
+    args_get: () => ESUCCESS,
     environ_sizes_get(count, size) { view().setUint32(count, 0, true); view().setUint32(size, 0, true); return ESUCCESS; },
     environ_get: () => ESUCCESS,
     fd_fdstat_set_flags: (fd) => (open.has(fd) || fd < ROOT ? ESUCCESS : EBADF),

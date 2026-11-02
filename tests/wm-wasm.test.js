@@ -10,6 +10,7 @@ import { Window, Area, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../s
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { AnimArea, SPACE_GRAPH } from '../src/editors/animation/anim-area.js';
 import { regionPanels, panelClosedSet } from '../src/editors/interface/ui-tree.js';
+import { registerOperators } from '../src/windowmanager/wm-operators.js';
 
 const TOP = { viewmat: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -10, 1], winmat: [0.2, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, -0.02, 0, 0, 0, 0, 1], persp: false };
 const round = (values) => Array.from(values, (v) => Math.round(v * 1e4) / 1e4 + 0);
@@ -23,6 +24,8 @@ const window = new Window(main);
 window.size = { width: 1200, height: 1000 };
 loadKeyconfig(main.C);
 window.allow(['transform.translate']);
+// Operators the page runs itself, as the app registers them: their keymap items give the page their events.
+registerOperators({ 'object.select_all': { run() {} }, 'view3d.select': { run() {} }, 'text.save': { run() {} } });
 const view = window.area(SPACE_VIEW3D);
 // The area 200 pixels from the page's left, its window region filling it.
 const rect = { x: 200, y: 0, width: 1000, height: 1000 };
@@ -80,6 +83,8 @@ const released = window.event('keyup', [0], { code: 'KeyP', key: 'p' });
 window.event('keyup', [0], { code: 'ControlLeft', key: 'Control' });
 assert.ok(released.unhandled.some(({ type, value }) => type === 'P' && value === 'CLICK'), 'the release of Ctrl P is handled');
 window.allow(['transform.translate']);
+// Operators the page runs itself, as the app registers them: their keymap items give the page their events.
+registerOperators({ 'object.select_all': { run() {} }, 'view3d.select': { run() {} }, 'text.save': { run() {} } });
 
 // The Graph Editor below the 3D View, 10 pixels a frame: G moves the selected keys 10 frames for 100 pixels.
 const anim = new BlenderAnimation(main);

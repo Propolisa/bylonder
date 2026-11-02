@@ -2,7 +2,7 @@
 id: import-export
 title: Import and Export
 summary: Bring meshes in and write them out with Blender's own Wavefront OBJ, Stanford PLY, STL and FBX importers and exporters, through the browser's file dialogs with each format's options.
-status: partial
+expect: OBJ, PLY, STL and FBX import and export with Blender's own code and options; glTF, BVH, SVG and FBX export wait for the Python add-ons, Alembic and USD are greyed out, and an export's extra files download.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/files/import_export/index.html

@@ -41,3 +41,5 @@ examples/**/*.blend1
 # Blender's module: built by CI and fetched by npm run module (scripts/module.mjs), or built locally.
 src/bmesh/bmesh.wasm
 src/bmesh/bmesh.wasm.key
+src/bmesh/python313.zip
+src/bmesh/scripts.zip

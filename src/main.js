@@ -100,7 +100,7 @@ import { mountImageEditor } from "./editors/space_image/image-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { setFileselectHost } from "./windowmanager/wm-fileselect.js";
 import "./editors/io/io-ops.js";
-import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
+import { whenPythonStarts } from "./python/python.js";
 import { mountInfo } from "./editors/space_info/info.js";
 import { mountSpreadsheet } from "./editors/space_spreadsheet/spreadsheet.js";
 // Boot phases, as performance marks (the workspace marks its own).
@@ -490,6 +490,8 @@ world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
 }
 // A frame change evaluates Main with Blender's animation system and draws it (main-sync.js frameChanged).
 animation.evaluateMain = (frame) => world.mainSync.frameChanged(frame);
+// Python drivers waiting for Python evaluate once it has started.
+whenPythonStarts(() => world.mainSync.frameChanged(animation.time.frame));
 for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
 world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
 history.start();
@@ -570,11 +572,10 @@ const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, docu
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!world.wm?.modal) {editor.selection.sync();refreshUI();} });
 // The Scripting workspace's editors: Text Editor, Python Console and Info.
-registerConsoleOperators();
 const scriptingEditors = [
   // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
   mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), files: world.texts, context: () => createContext(blenderRNA, { area: "TEXT_EDITOR" }), beforeRun: () => creator.finish(), afterRun: () => world.mainSync.view() }),
-  mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
+  mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), finished: () => world.mainSync.view() }),
   mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info") }),
 ];
 // The Geometry Nodes workspace's Spreadsheet, and any area made one by splitting.

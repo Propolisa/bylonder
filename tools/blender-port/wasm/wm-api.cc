@@ -21,6 +21,7 @@
 #include "BLI_string.h"
 #include "BLI_function_ref.hh"
 #include "BLI_time.h"
+#include "BLI_vector.hh"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
 #include "DNA_userdef_types.h"
@@ -37,6 +38,7 @@
 #include "RNA_prototypes.hh"
 #include "WM_api.hh"
 #include "WM_keymap.hh"
+#include "WM_message.hh"
 #include "WM_types.hh"
 #include "wm.hh"
 #include "wm_event_system.hh"
@@ -130,6 +132,10 @@ void wm_init(bContext *C)
   wm->runtime->defaultconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT, false);
   wm->runtime->addonconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT " addon", false);
   wm->runtime->userconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT " user", false);
+  /* As WM_init and WM_check: the message bus Python's bpy.msgbus subscribes to (an add-on's, the pose library's). */
+  static const bool msgbus_types = (WM_msgbus_types_init(), true);
+  (void)msgbus_types;
+  wm->runtime->message_bus = WM_msgbus_create();
   BKE_library_callback_remap_editor_id_reference_set(editor_id_remap);
   BKE_library_callback_free_notifier_reference_set(WM_main_remove_notifier_reference);
   CTX_wm_window(C)->runtime->ghostwin = ghost_window_new(1, 1);
@@ -425,21 +431,38 @@ static void unhandled_handler_ensure(wmWindow *win)
 }
 
 /* port-override: until Bylonder's own operators are Blender's operator types, an event runs only the operators the page
- * allows (wm_operators_allow, those whose Bylonder registration runs Blender's). A keymap item of another operator
- * handles its event as Blender's would, but by passing it on to the page, whose keymaps run that operator
- * (unhandled_events): while the window handles an event, the types' invoke (or exec) are wrapped to do so. The wrapping
- * lasts only that long, so types registered or copied at any other time see their own functions. */
+ * allows (wm_operators_allow, those whose Bylonder registration runs Blender's). A keymap item of an operator the page
+ * runs itself handles its event as Blender's would, by passing it on to the page, whose keymaps run that operator
+ * (unhandled_events). One of an operator neither runs passes its event on, as an operator with nothing to do passes it
+ * through: the next of Blender's handlers may take it (a console's typed text after the User Interface keymap's E and
+ * I). While the window handles an event, the types' invoke (or exec) are wrapped to do so. The wrapping lasts only that
+ * long, so types registered or copied at any other time see their own functions. */
+#define IMPORT(name) extern "C" __attribute__((import_module("env"), import_name(#name)))
+IMPORT(wm_page_operator) bool wm_page_operator(const char *idname);
+static wmOperatorStatus page_gated(bContext *C, const wmOperator *op, const wmEvent *event)
+{
+  char idname[OP_MAX_TYPENAME];
+  WM_operator_py_idname(idname, op->type->idname);
+  if (!wm_page_operator(idname)) {
+    return OPERATOR_CANCELLED | OPERATOR_PASS_THROUGH;
+  }
+  unhandled_event(C, event, nullptr);
+  return OPERATOR_CANCELLED;
+}
 static Set<const wmOperatorType *> &allowed_operators()
 {
   static Set<const wmOperatorType *> allowed;
   return allowed;
 }
 
-/* An operator is allowed, or a step of a macro that is (its steps are the macro's). */
+bool js_extension(const ExtensionRNA &ext);
+
+/* An operator is allowed (or CPython's: an add-on's, the console's), or a step of a macro that is (its steps are the
+ * macro's). */
 static bool operator_allowed(const wmOperator *op)
 {
   for (; op; op = op->opm) {
-    if (allowed_operators().contains(op->type)) {
+    if (allowed_operators().contains(op->type) || (op->type->rna_ext.srna && !js_extension(op->type->rna_ext))) {
       return true;
     }
   }
@@ -449,27 +472,54 @@ static bool operator_allowed(const wmOperator *op)
 struct OperatorCalls {
   decltype(wmOperatorType::invoke) invoke;
   decltype(wmOperatorType::exec) exec;
+  decltype(wmOperatorType::modal) modal;
 };
 static Map<wmOperatorType *, OperatorCalls> &operator_calls()
 {
   static Map<wmOperatorType *, OperatorCalls> calls;
   return calls;
 }
+/* The operators the window finished that are not registered for redo but are undo steps, Blender's mark of an edit of
+ * the data (console.execute, an add-on's): the page learns of them as of the registered ones (event_result). Steps
+ * that edit no data (console.insert, a typed character) are left out. */
+static Vector<std::pair<std::string, bool>> &finished_unregistered()
+{
+  static Vector<std::pair<std::string, bool>> finished;
+  return finished;
+}
+/* The allowed operators running: what one runs (a script's bpy.ops in console.execute or text.run_script) is its own,
+ * as in Blender. Raised only around a call, so it is back to zero after every return, whatever the status. */
+static int allowed_running = 0;
+template<typename Call> static wmOperatorStatus allowed_call(const wmOperator *op, Call call)
+{
+  allowed_running++;
+  const wmOperatorStatus status = call();
+  allowed_running--;
+  if (!allowed_running && (status & OPERATOR_FINISHED) && !(op->type->flag & OPTYPE_REGISTER) &&
+      (op->type->flag & (OPTYPE_UNDO | OPTYPE_UNDO_GROUPED)))
+  {
+    finished_unregistered().append({op->type->idname, true});
+  }
+  return status;
+}
 static wmOperatorStatus page_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 {
-  if (!operator_allowed(op)) {
-    unhandled_event(C, event, nullptr);
-    return OPERATOR_CANCELLED;
+  if (!allowed_running && !operator_allowed(op)) {
+    return page_gated(C, op, event);
   }
-  return operator_calls().lookup(op->type).invoke(C, op, event);
+  return allowed_call(op, [&]() { return operator_calls().lookup(op->type).invoke(C, op, event); });
 }
 static wmOperatorStatus page_exec(bContext *C, wmOperator *op)
 {
-  if (!operator_allowed(op)) {
-    unhandled_event(C, CTX_wm_window(C)->runtime->eventstate, nullptr);
-    return OPERATOR_CANCELLED;
+  if (!allowed_running && !operator_allowed(op)) {
+    return page_gated(C, op, CTX_wm_window(C)->runtime->eventstate);
   }
-  return operator_calls().lookup(op->type).exec(C, op);
+  return allowed_call(op, [&]() { return operator_calls().lookup(op->type).exec(C, op); });
+}
+/* A modal operator runs on only once allowed: what its modal step runs is its own too. */
+static wmOperatorStatus page_modal(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return allowed_call(op, [&]() { return operator_calls().lookup(op->type).modal(C, op, event); });
 }
 static void operator_calls_unwrap();
 static bool handling = false;
@@ -481,12 +531,15 @@ static void operator_calls_wrap()
   operator_calls_unwrap();
   handling = true;
   for (wmOperatorType *ot : WM_operatortypes_registered_get()) {
-    operator_calls().add_new(ot, {ot->invoke, ot->exec});
+    operator_calls().add_new(ot, {ot->invoke, ot->exec, ot->modal});
     if (ot->invoke) {
       ot->invoke = page_invoke;
     }
     else if (ot->exec) {
       ot->exec = page_exec;
+    }
+    if (ot->modal) {
+      ot->modal = page_modal;
     }
   }
 }
@@ -496,6 +549,7 @@ static void operator_calls_unwrap()
   for (auto [ot, calls] : operator_calls().items()) {
     ot->invoke = calls.invoke;
     ot->exec = calls.exec;
+    ot->modal = calls.modal;
   }
   operator_calls().clear();
 }
@@ -526,7 +580,7 @@ EXPORT(wm_event_press_handled) void wm_event_press_handled(bContext *C)
 
 /* What an event left to the page as JSON: the regions Blender tagged for redrawing ([area, regiontype] pairs, their
  * tags cleared as drawing clears them), whether an operator runs modally (the page then keeps the pointer), the
- * operators that finished (registered for redo: idname and whether a run is an undo step), the popup or menu an
+ * operators that finished (idname and whether a run is an undo step), the popup or menu an
  * operator opened, and the unhandled events. */
 static const char *event_result(wmWindow *win, const Set<wmOperator *> &registered)
 {
@@ -548,11 +602,16 @@ static const char *event_result(wmWindow *win, const Set<wmOperator *> &register
   }
   json += "],\"modal\":" + std::string(modal ? "true" : "false") + ",\"finished\":[";
   wmWindowManager *wm = static_cast<wmWindowManager *>(G_MAIN->wm.first);
+  const auto finished = [&](const char *idname, bool undo) {
+    json += std::string(json.back() == '[' ? "" : ",") + "{\"idname\":\"" + idname + "\",\"undo\":" + (undo ? "true" : "false") + "}";
+  };
   for (wmOperator &op : wm->runtime->operators) {
     if (!registered.contains(&op)) {
-      json += std::string(json.back() == '[' ? "" : ",") + "{\"idname\":\"" + op.type->idname + "\",\"undo\":" +
-              ((op.type->flag & OPTYPE_UNDO) ? "true" : "false") + "}";
+      finished(op.type->idname, op.type->flag & (OPTYPE_UNDO | OPTYPE_UNDO_GROUPED));
     }
+  }
+  for (const auto &[idname, undo] : finished_unregistered()) {
+    finished(idname.c_str(), undo);
   }
   json += "],\"popup\":" + operator_popup_json() + ",\"unhandled\":[" + unhandled_events + "]}";
   return json.c_str();
@@ -644,6 +703,7 @@ static const char *wm_window_handle(bContext *C, FunctionRef<void(wmWindowManage
   }
   unhandled_handler_ensure(win);
   unhandled_events.clear();
+  finished_unregistered().clear();
   wm_jobs_handle_finished(C);
   wm_window_timers_process(wm);
   add_events(wm, win);

@@ -1,0 +1,6 @@
+# What configure cannot test on wasi-libc without threads (pthread types, no pthread.h): CPython's pthread stubs take
+# libc's pthread_t, an unsigned long.
+ac_cv_have_pthread_t=yes
+ac_cv_sizeof_pthread_t=4
+# No libffi for WebAssembly: ctypes cannot call foreign functions there.
+py_cv_module__ctypes=n/a
