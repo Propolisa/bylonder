@@ -15,9 +15,9 @@ const rendered = () => app.until((b, selector) => /^(Finished|Render failed)/.te
 let app;
 // The mean color difference (of 255) each Shader Node Gallery sphere may have from EEVEE's, row by row: the textures
 // and converters through an Emission (their edges and fine detail differ by anti-aliasing: Brick's thin mortar most),
-// then the shaders lit by Babylon (a sun without EEVEE's angle makes sharp highlights hotter; Glass refracts no world
-// in Render Image; Metal is a Principled BSDF Babylon's PBR material draws).
-const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 12, 65, 15, 8, 12, 15, 55, 60, 35, 65];
+// then the shaders lit by Babylon (a sun without EEVEE's angle makes sharp highlights wider; Glass is untinted; two
+// Glossy lobes light as one).
+const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 12, 16, 15, 8, 12, 15, 55, 18, 30, 20];
 
 const checks = {
   // The new project's scene (sphere and ground), as a first visit shows it.

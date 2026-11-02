@@ -1,4 +1,4 @@
-import { Color3, Color4, CubeTexture, EXRCubeTexture, HDRCubeTexture, HemisphericLight, Scene, Vector3 } from '@babylonjs/core';
+import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, RenderTargetTexture, Scene } from '@babylonjs/core';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
 // scene.clearColor, environmentTexture/environmentIntensity, a skybox and fog. Nothing else touches these.
@@ -25,9 +25,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   const authoredSkyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
   let skybox = null, skyboxKey = '', rendered = false, useAuthored = false;
-  // A world color lights everything evenly in Blender: a hemispheric light with equal sky and ground gives each
-  // surface its albedo times it. Switched by intensity, not enabled state, which would recompile materials per view.
-  const worldLight = Object.assign(new HemisphericLight('__worldLight', Vector3.Up(), scene), { specular: Color3.Black(), intensity: 0, doNotSerialize: true, metadata: { editable: false } });
+  const probe = worldProbe(scene);
   const texture = key => {
     if (!key) return null;
     if (!textures.has(key)) {
@@ -46,7 +44,6 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   const gate = () => {
     authoredSkyboxes.forEach(mesh => mesh.setEnabled(useAuthored && rendered));
     skybox?.setEnabled(rendered);
-    worldLight.intensity = rendered ? 1 : 0;
     scene.fogEnabled = rendered;
   };
   // The scene's own sky meshes show for its own world: lit by its environment, or without one (a shader sky).
@@ -94,12 +91,12 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       const background = world?.background, volume = world?.volume;
       const env = background?.input === 'ENVIRONMENT' ? texture(background.image) : null;
       if (env) env.rotationY = background.rotation;
-      scene.environmentTexture = env;
-      scene.environmentIntensity = env ? background.strength : 1;
       const color = Color3.FromArray(background ? background.color.map(v => v * (env ? 1 : background.strength)) : [0, 0, 0]);
+      const lights = world?.home === 'BLENDER' && !env;
+      if (lights) probe.set(color);
+      scene.environmentTexture = env ?? (lights ? probe.texture : null);
+      scene.environmentIntensity = env ? background.strength : 1;
       scene.clearColor = Color4.FromColor3(color.toGammaSpace().clampToRef(0, 1, new Color3()));
-      worldLight.diffuse = world?.home === 'BLENDER' && !env ? color : Color3.Black();
-      worldLight.groundColor = worldLight.diffuse.clone();
       setSkybox(background?.image, env && world.visibility.camera ? env : null, background, world?.home === 'BABYLON' && world.visibility.camera);
       if (preview) {
         Object.assign(preview, { env: scene.environmentTexture, intensity: scene.environmentIntensity });
@@ -113,8 +110,31 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
     setRendered(value) { if (rendered !== value) { rendered = value; gate(); } },
     dispose() {
       skybox?.dispose(false, true);
-      worldLight.dispose();
+      if (scene.environmentTexture === probe.texture) scene.environmentTexture = null;
+      probe.dispose();
       for (const [key, tex] of textures) if (key !== 'scene') tex.dispose();
+    },
+  };
+}
+
+// A world color as EEVEE's world probe (eevee_lightprobe_sphere.cc): the world drawn into a cubemap, which surfaces
+// reflect at every roughness and whose spherical harmonics light them diffusely.
+function worldProbe(scene) {
+  const texture = new RenderTargetTexture('__worldProbe', 1, scene, { isCube: true, type: Constants.TEXTURETYPE_FLOAT, generateMipMaps: false, doNotChangeAspectRatio: true });
+  Object.assign(texture, { gammaSpace: false, renderList: [], refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
+  scene.customRenderTargets.push(texture);
+  return {
+    texture,
+    set(color) {
+      texture.clearColor = Color4.FromColor3(color);
+      texture.resetRefreshCounter();
+      const face = Float32Array.of(color.r, color.g, color.b, 1);
+      texture.sphericalPolynomial = CubeMapToSphericalPolynomialTools.ConvertCubeMapToSphericalPolynomial({
+        size: 1, right: face, left: face, up: face, down: face, front: face, back: face, format: Constants.TEXTUREFORMAT_RGBA, type: Constants.TEXTURETYPE_FLOAT, gammaSpace: false });
+    },
+    dispose() {
+      scene.customRenderTargets.splice(scene.customRenderTargets.indexOf(texture), 1);
+      texture.dispose();
     },
   };
 }
