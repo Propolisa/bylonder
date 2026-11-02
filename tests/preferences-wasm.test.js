@@ -9,7 +9,7 @@ import '../src/python/bpy_interface.js';
 import { setContextPointer, contextStruct } from '../src/python/bpy_rna.js';
 import { loadKeyconfig, keyconfigUpdated } from '../src/windowmanager/wm-window.js';
 import { keyconfig, blenderKeys } from '../src/windowmanager/keyconfig.js';
-import { readPreferences, preferences, inputPreferences, preferencesChanged } from '../src/windowmanager/wm-userdef.js';
+import { restorePreferences, readPreferences, preferences, inputPreferences, preferencesChanged } from '../src/windowmanager/wm-userdef.js';
 import { registerBylonderPreferences, bylonderPreferences } from '../src/workspace/preferences.js';
 
 const blender = blenderMain();
@@ -69,4 +69,17 @@ for (const [module, name] of [['bylonder', 'Bylonder'], ['pose_library', 'Pose L
   assert.equal(listed[module], name, module);
 }
 assert.equal(contextStruct(blender.C).window_manager.addon_filter, 'All');
+
+// Startup never waits on the browser's storage: a blocked open or an aborted transaction gives factory settings.
+const storage = (opened) => ({ open() { const request = {}; setTimeout(() => opened(request)); return request; } });
+const aborting = (request) => {
+  request.result = { close() {}, transaction() { const tx = { objectStore: () => ({ getAllKeys: () => ({}) }) }; setTimeout(() => tx.onabort?.()); return tx; } };
+  request.onsuccess();
+};
+for (const [name, opened] of [['blocked', (request) => request.onblocked?.()], ['aborted', aborting]]) {
+  globalThis.indexedDB = storage(opened);
+  const hung = new Promise((resolve) => setTimeout(resolve, 1000, 'hung'));
+  assert.equal(await Promise.race([restorePreferences().then(() => 'restored'), hung]), 'restored', `${name} storage`);
+}
+delete globalThis.indexedDB;
 console.log('preferences ok');

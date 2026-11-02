@@ -11,18 +11,26 @@ const USER_DIR = '/user/', DB = 'bylonder-userdef', STORE = 'files';
 const stored = new Map();
 const listeners = new Set();
 
+// A blocked open (a deleteDatabase or another tab's upgrade waiting) and an aborted transaction (quota, a closed db)
+// reject, so startup falls back to factory settings instead of waiting; a newer version elsewhere closes this one.
 const database = () => new Promise((resolve, reject) => {
   const request = indexedDB.open(DB, 1);
   request.onupgradeneeded = () => request.result.createObjectStore(STORE);
-  request.onsuccess = () => resolve(request.result);
+  request.onsuccess = () => {
+    request.result.onversionchange = () => request.result.close();
+    resolve(request.result);
+  };
   request.onerror = () => reject(request.error);
+  request.onblocked = () => reject(Error(`${DB} is blocked`));
 });
 const transaction = async (mode, fn) => {
   const db = await database();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, mode), result = fn(tx.objectStore(STORE));
+    const failed = () => { db.close(); reject(tx.error ?? Error(`${DB} transaction aborted`)); };
     tx.oncomplete = () => { db.close(); resolve(result?.result); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.onerror = failed;
+    tx.onabort = failed;
   });
 };
 
