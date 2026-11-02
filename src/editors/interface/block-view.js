@@ -21,6 +21,7 @@ import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu, regionPanels, categorySet } from './ui-tree.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
+import { keyType } from '../../windowmanager/input/keymap.js';
 import { treeMenu, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
@@ -54,6 +55,25 @@ function setRna(b, value, ui, finish = true) {
   } catch (error) {
     ui.report?.(error);
   }
+}
+
+// A key event button (a keymap item's key, ui_do_but_HOTKEYEVT): a click waits for the next key, which becomes the
+// property's event type, with the modifiers held for a full event (HOTKEY_EVENT: its item's shift, ctrl, alt and
+// oskey); Escape cancels.
+const MODIFIER_KEYS = new Set(['Shift', 'Control', 'Alt', 'Meta']);
+function captureKey(b, ui, target) {
+  target.setAttribute('aria-pressed', 'true');
+  target.title = 'Press a key';
+  const keydown = (e) => {
+    if (MODIFIER_KEYS.has(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    removeEventListener('keydown', keydown, true);
+    if (e.key === 'Escape') return ui.refresh();
+    if (b.type === 'HOTKEY_EVENT') Object.assign(struct(b.rna), { shift: +e.shiftKey, ctrl: +e.ctrlKey, alt: +e.altKey, oskey: +e.metaKey });
+    setRna(b, keyType(e).toUpperCase().replace(/^SPACEBAR$/, 'SPACE'), ui);
+  };
+  addEventListener('keydown', keydown, true);
 }
 
 // What a button opens, laid out by the module: a popover's panel below the button, else a menu.
@@ -141,6 +161,8 @@ function widgetNode(b, env) {
       const items = () => [...struct(b.search)[b.search.prop]].map((item) => ({ label: item.name, run: () => setRna(b, item, ui) }));
       return withStyle(menuButton({ text: shown, iconName, ...common, items }));
     }
+    case 'HOTKEY_EVENT': case 'KEYEVENT':
+      return withStyle(button({ text: shown, ...common, className: 'flex-1', onClick: (e) => captureKey(b, ui, e.currentTarget) }));
     case 'DECORATOR':
       return h('button', { type: 'button', class: 'bl-decorator flex h-unit w-unit shrink-0 items-center justify-center', 'aria-label': b.tip || 'Decorator', title: b.tip,
         disabled: common.disabled, onClick: () => press(b, ui) }, icon(iconName));

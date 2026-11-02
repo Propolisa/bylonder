@@ -662,6 +662,9 @@ int BLF_load_mono_default(bool /*unique*/) { return 1; }
 int BLF_load(const char * /*filepath*/) { return 0; }
 int BLF_load_unique(const char * /*filepath*/) { return 1; }
 void BLF_unload_all() {}
+/* port-override: the page draws text in the browser's fonts, so there are no font files to unload or glyph caches to clear. */
+bool BLF_unload_id(int /*fontid*/) { return true; }
+void BLF_cache_clear() {}
 void BLF_load_font_stack() {}
 void BLF_default_set(int /*fontid*/) {}
 void BLF_default_size(float size) { fonts[0].size = size; }

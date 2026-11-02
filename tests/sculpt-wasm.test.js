@@ -6,7 +6,6 @@ import { readFile } from 'node:fs/promises';
 import { BlenderMain, datafiles, meshFromFaces } from '../src/bmesh/bmesh-wasm.js';
 import { contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 
 const fixture = JSON.parse(await readFile(new URL('./fixtures/sculpt/suzanne-draw.json', import.meta.url), 'utf8'));
@@ -24,7 +23,7 @@ main.undoInit();
 const window = new Window(main);
 const { winx, winy } = fixture.view;
 window.size = { width: winx, height: winy };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(['sculpt.brush_stroke']);
 const view = window.area(SPACE_VIEW3D);
 const rect = { x: 0, y: 0, width: winx, height: winy };

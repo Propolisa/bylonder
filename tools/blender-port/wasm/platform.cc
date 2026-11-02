@@ -49,6 +49,8 @@ extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0;
 /* port-override: WASI has no users: one user, without a passwd entry (Blender then uses $HOME or its defaults). */
 extern "C" __attribute__((weak)) unsigned getuid() { return 0; }
 extern "C" __attribute__((weak)) struct passwd *getpwuid(unsigned) { return nullptr; }
+/* port-override: WASI cannot create a unique directory; Blender then keeps its temporary files in its temp directory. */
+extern "C" __attribute__((weak)) char *mkdtemp(char *) { return nullptr; }
 
 /* Weak: where Blender's own threads.cc builds (over wasm/include/pthread.h) it gives the same one-thread answers. */
 #define WEAK __attribute__((weak))

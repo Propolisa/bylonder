@@ -1,28 +1,55 @@
-// Blender's default key configuration (presets/keyconfig/keymap_data/blender_default.py, in Blender's Python tree): the
-// keymaps events run through and the shortcuts Blender's menus show (WM_key_event_operator_string).
+// Blender's key configuration in the module: the keymaps events run through and the shortcuts Blender's menus show
+// (WM_key_event_operator_string), read from the user key configuration Blender makes of the active preset's keymaps
+// and the Preferences' edits (WM_keyconfig_update), so Keymap preferences and edits apply to the page's keymaps too.
 import { keysLabel, setProperties } from './input/keymap.js';
-import { invokeOperator, kw } from './wm-operators.js';
+import { invokeOperator } from './wm-operators.js';
 
-// The key configuration Blender loads (presets/keyconfig/Blender.py's load) with its preferences' defaults: left click
-// select, Space plays, fallback tools.
-const PREFERENCES = {
-  select_mouse: 'LEFT', use_mouse_emulate_3_button: false, spacebar_action: 'PLAY', use_key_activate_tools: false,
-  use_region_toggle_pie: false, v3d_tilde_action: 'VIEW', use_v3d_mmb_pan: false, v3d_alt_mmb_drag_action: 'RELATIVE',
-  use_select_all_toggle: false, use_v3d_tab_menu: false, use_v3d_shade_ex_pie: false, use_gizmo_drag: true, use_fallback_tool: true,
-  use_fallback_tool_select_handled: false, use_alt_tool_or_cursor: false, use_alt_click_leader: false, use_pie_click_drag: false,
-  use_file_single_click: false, use_alt_navigation: true,
-};
-// From the tree's module registry when first needed (python/bpy_interface.js loads the tree; it imports the operator
-// registry, which imports this module).
-export const defaultKeymaps = () => {
-  const { generate_keymaps, Params } = globalThis.__py_modules['keyconfig.keymap_data.blender_default'];
-  return generate_keymaps(Params(kw(PREFERENCES)));
-};
-let keymaps;
-const keyconfig = () => (keymaps ??= new Map(defaultKeymaps().map(([name, , { items }]) => [name, items])));
+
+// Each keymap's items by its name, as [idname (or a modal item), event, { properties }], as Blender's keyconfig data
+// lists them (bl_keymap_utils.io), read from `source()` (the user KeyConfig, set by loadKeyconfig in wm-window.js) when
+// first needed after a change.
+let source = null, keymaps;
+export function setKeyconfigSource(fn) {
+  source = fn;
+  keymaps = undefined;
+}
+export const keymapsChanged = () => { keymaps = undefined; };
+
+const EVENT = ['type', 'value', 'any', 'shift', 'ctrl', 'alt', 'oskey', 'key_modifier', 'direction', 'repeat'];
+// An item's operator properties set away from their defaults, a nested pointer's as a list of its own
+// (_kmi_properties_to_lines_recursive).
+function itemProperties(props) {
+  if (!props) return null;
+  const set = [];
+  for (const prop of props.bl_rna.properties) {
+    const name = prop.identifier;
+    if (name === 'rna_type' || !props.is_property_set(name)) continue;
+    const value = prop.type === 'POINTER' ? itemProperties(props[name]) : props[name];
+    if (prop.type === 'POINTER' && !value?.length) continue;
+    set.push([name, value?.[Symbol.iterator] && typeof value !== 'string' && !(value instanceof Set) ? Array.from(value) : value]);
+  }
+  return set;
+}
+function keymapItems(km) {
+  const items = [];
+  for (const kmi of km.keymap_items) {
+    if (!kmi.active) continue;
+    const event = Object.fromEntries(EVENT.map((key) => [key, kmi[key]]));
+    items.push(km.is_modal ? [kmi.propvalue, event, null] : [kmi.idname, event, { properties: itemProperties(kmi.properties) }]);
+  }
+  return items;
+}
+const readKeymaps = (kc) => new Map([...kc.keymaps].map((km) => [km.name, keymapItems(km)]));
+export const keyconfig = () => (keymaps ??= source ? readKeymaps(source()) : new Map());
+// The modal keymaps' items, as the active preset's keymap data gives them (setModalKeymaps): the window manager keeps
+// modal keymaps apart from the configuration's list (editor-context.cc), where RNA does not reach their items' values.
+let modalKeymaps = new Map();
+export function setModalKeymaps(keyconfigData) {
+  modalKeymaps = new Map(keyconfigData.filter(([, args]) => args.modal).map(([name, , { items }]) => [name, items]));
+}
 
 const MODIFIERS = [['shift', 'Shift'], ['ctrl', 'Ctrl'], ['alt', 'Alt'], ['oskey', 'Cmd']];
-const eventText = (event) => [...MODIFIERS.filter(([key]) => event[key] === true).map(([, text]) => text), keysLabel(event.type)].join(' ');
+const eventText = (event) => [...MODIFIERS.filter(([key]) => event[key] === true || event[key] === 1).map(([, text]) => text), keysLabel(event.type)].join(' ');
 
 // A menu is opened by wm.call_menu (or its pie and panel kin) with its name.
 const callers = (idname) => (/_(MT|PT)_/.test(idname)
@@ -58,7 +85,7 @@ const KM_ANY = -1;
 // wm_eventmatch for what Bylonder's events carry: no key modifiers yet, and Cmd counted as Ctrl.
 // A repeated key matches only items that take repeats; text input is any key press that types a character (`text`).
 function matches(kmi, event) {
-  if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY' && kmi.direction !== event.direction)) return false;
+  if ((kmi.key_modifier && kmi.key_modifier !== 'NONE') || (kmi.direction && kmi.direction !== 'ANY' && kmi.direction !== event.direction)) return false;
   if (event.repeat && !kmi.repeat) return false;
   if (kmi.type === 'TEXTINPUT') return event.value === 'PRESS' && !!event.text;
   const type = event.type.toUpperCase();
@@ -70,7 +97,7 @@ function matches(kmi, event) {
 // The item of a modal keymap ("Transform Modal Map") an event maps to, as wm_event_modalkeymap maps it: the first whose
 // event matches and that `allowed(item)` lets through now (the operator's poll_modal_item), or null.
 export function modalItem(name, event, allowed = () => true) {
-  for (const [item, kmi] of keyconfig().get(name) ?? []) if (matches(kmi, event) && allowed(item)) return item;
+  for (const [item, kmi] of modalKeymaps.get(name) ?? []) if (matches(kmi, event) && allowed(item)) return item;
   return null;
 }
 

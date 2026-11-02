@@ -1,10 +1,16 @@
 # Working on this repo
 
-Setup: `npm ci`, `npm test`, `npm run dev`. Commit and push to `main` when done.
+Setup: `npm ci`, `npm run module` (fetches Blender's WASM module built by CI for this checkout; a local module build installs
+itself instead), `npm test`, `npm run dev`. Commit and push to `main` when done. The module is not kept in git.
 
 Commit subjects are the app's changelog (Splash Screen > Changelog): one commit per user-visible change, its subject
 saying what a user gets. No WIP commits reach `main`; branches merge with `git merge --squash`. Before pushing to
 `main`: `npm test`, `npm run build` and `npm run test:prod` pass (the Pages deploy runs the same).
+
+## Roadmap
+
+`docs/roadmap.md` changes only with the project owner's approval: propose an entry or an edit and wait for a yes; never
+add, edit, reorder or remove entries on your own.
 
 ## Writing style for docs
 

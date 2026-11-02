@@ -9,6 +9,11 @@ import { bindGraph } from '../src/nodes/bindings.js';
 import '../src/python/bpy_interface.js';
 import { channelButton, hoverButton, leaveButton } from '../src/editors/animation/keyframing-button.js';
 import { invokeOperator } from '../src/windowmanager/wm-operators.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
+
+// Blender's key configuration, as the app loads it at startup.
+loadKeyconfig(blenderMain().C);
 
 const close = (a, b, label) => assert.ok(Math.abs(a - b) < 1e-4, `${label}: ${a} != ${b}`);
 const scene = new Scene(new NullEngine());

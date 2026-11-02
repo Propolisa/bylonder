@@ -2,12 +2,14 @@ name: Blender WebAssembly build
 
 # Blender built as Blender builds itself, for wasm32 (tools/blender-port/blender_build.py): its libraries compiled in
 # parallel jobs, each keeping its objects in the Actions cache (an unchanged source is never compiled twice), then
-# linked and reported (seam-report.json: what does not compile and what nothing defines).
+# linked and reported (seam-report.json: what does not compile and what nothing defines). The module is published as
+# the release module-<tools/blender-port tree hash> (scripts/module.mjs), which the Pages deploy calls this for when missing.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ['tools/blender-port/**']
+  workflow_call:
+
+permissions:
+  contents: write
 
 env:
   SHARDS: 8
@@ -64,6 +66,14 @@ jobs:
       - name: Host headers
         continue-on-error: true
         run: cd tools/blender-port && python3 host_headers.py ../../work/build-host
+      - name: Publish the module
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          key=$(node scripts/module.mjs key)
+          cp work/wasm-build/bylonder.wasm bmesh.wasm
+          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm --latest=false \
+            --title "$key" --notes "Blender's module built from tools/blender-port at ${{ github.sha }}." --target "${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

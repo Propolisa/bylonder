@@ -15,6 +15,11 @@ import { drawMenu } from '../src/editors/interface/ui-layout.js';
 import { menuUI } from '../src/windowmanager/wm-operators.js';
 import { menus, headers, panels, module } from '../src/python/bpy_interface.js';
 import { api } from '../src/python/pyodide.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
+
+// Blender's key configuration, as the app loads it at startup.
+loadKeyconfig(blenderMain().C);
 
 // ---- The Python Console's keymap and the operators bpy.ops reaches.
 const engine = new NullEngine(), scene = new Scene(engine);

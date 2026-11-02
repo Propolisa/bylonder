@@ -9,7 +9,6 @@ import { readFile } from 'node:fs/promises';
 import { BlenderMain, datafiles } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, setContextPointer } from '../src/python/bpy_rna.js';
 import { registered } from '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 
 const fixture = JSON.parse(await readFile(new URL('./fixtures/weight-paint/grid.json', import.meta.url), 'utf8'));
@@ -49,7 +48,7 @@ assert.equal(main.run('paint.weight_paint_toggle').status, 4);
 const window = new Window(main);
 const { winx, winy } = fixture.view;
 window.size = { width: winx, height: winy };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(['paint.weight_paint', 'view3d.select']);
 const view = window.area(SPACE_VIEW3D);
 const rect = { x: 0, y: 0, width: winx, height: winy };

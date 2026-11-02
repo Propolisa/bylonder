@@ -17,10 +17,12 @@ import { createToolOverlay } from '../../draw/overlay-tool.js';
 // Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
 // aligns to (the opposite view for its negative ball).
 const axes = [
-  { id: 'x', dir: new Vector3(1, 0, 0), color: user_interface.axis_x, view: ['right', false] },
-  { id: 'y', dir: new Vector3(0, 0, 1), color: user_interface.axis_y, view: ['front', true] },
-  { id: 'z', dir: new Vector3(0, 1, 0), color: user_interface.axis_z, view: ['top', false] },
+  { id: 'x', dir: new Vector3(1, 0, 0), color: user_interface.axis_x },
+  { id: 'y', dir: new Vector3(0, 0, 1), color: user_interface.axis_y },
+  { id: 'z', dir: new Vector3(0, 1, 0), color: user_interface.axis_z },
 ];
+// The view each of the gizmo's axis handles aligns to (view3d_gizmo_navigate.cc), by handle ('-' for the negative).
+const AXIS_TYPES = { x: 'RIGHT', 'x-': 'LEFT', y: 'BACK', 'y-': 'FRONT', z: 'TOP', 'z-': 'BOTTOM' };
 // The navigation gizmo (view3d_gizmo_navigate_type.cc) at its default size, in pixels.
 const WIDGET_RADIUS = 40, AXIS_HANDLE_SIZE = 0.2, AXIS_LINE_WIDTH = 2, AXIS_RING_WIDTH = 80 / 60;
 const mixColor = (a, b, t) => cssColor([0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * t).concat(1));
@@ -61,7 +63,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   canvas.setAttribute('aria-label', 'Interactive 3D viewport');
   const editorCamera = new ArcRotateCamera(cameraName, STARTUP_VIEW.alpha, STARTUP_VIEW.beta, STARTUP_VIEW.radius, STARTUP_VIEW.target.clone(), scene);
   Object.assign(editorCamera, { minZ: 0.01, maxZ: 1000, lowerRadiusLimit: 0.1, upperRadiusLimit: 10000, inertia: 0 });
-  if (from) { editorCamera.alpha = from.alpha; editorCamera.beta = from.beta; editorCamera.radius = from.radius; editorCamera.target.copyFrom(from.target); editorCamera.mode = from.mode; }
+  if (from) { editorCamera.upVector = from.upVector.clone(); editorCamera.setTarget(from.target.clone()); editorCamera.setPosition(from.position.clone()); editorCamera.mode = from.mode; }
   // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar), and the
   // overlay's Weight Paint settings (View3DOverlay's defaults).
   const state = { shading: 'solid', color_type: 'MATERIAL', overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
@@ -87,7 +89,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   section.append(label, gizmo, navButtons);
 
   const toolOverlay = createToolOverlay(view);
-  const nav = createNavigation({ camera: editorCamera, engine: world.engine, canvas, capture: ctx.capture, enabled: () => !state.cameraView, onSync: () => sync() });
+  const nav = createNavigation({ camera: editorCamera, engine: world.engine, onSync: () => sync() });
   view.nav = nav;
 
   const toggleCameraView = () => {
@@ -142,35 +144,34 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   header.replaceChildren(regions.header);
   section.append(regions.toolHeader, regions.sidebar, regions.shelf);
   view.regions = regions;
-  // Navigation gizmo and buttons, drawn from this view's camera.
-  const drag = (el, fn) => {
-    el.addEventListener('pointerdown', e => {
-      if (e.button !== 0) return;
-      e.preventDefault();
-      views.setInput(view);
-      let x = e.clientX, y = e.clientY, moved = false;
-      el.setPointerCapture(e.pointerId);
-      el.onpointermove = ev => { const dx = ev.clientX - x, dy = ev.clientY - y; if (Math.abs(dx) + Math.abs(dy) > 2) moved = true; x = ev.clientX; y = ev.clientY; if (moved) { fn(dx, dy, ev); views.wake(); } };
-      el.onpointerup = ev => { el.onpointermove = null; el.releasePointerCapture(ev.pointerId); el.dataset.moved = moved ? '1' : ''; };
-    });
-  };
-  const projection = iconButton('view_perspective', 'Switch the current view from perspective/orthographic projection (Numpad 5)', () => nav.toggle());
+  // The navigation gizmo and buttons (VIEW3D_GGT_navigate), drawn from this view's camera: a left press invokes
+  // Blender's operator as the gizmo does, a drag running it modally (view3d.zoom, move, rotate) and a click on an axis
+  // aligning the view (view3d.view_axis, the opposite side once aligned).
+  const operate = (idname, props = {}, native = null) => { views.setInput(view); world.view3dInvoke(view, idname, props, native); views.wake(); };
+  const dragOperator = (el, idname) => el.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    operate(idname, {}, e);
+  });
+  const projection = iconButton('view_perspective', 'Switch the current view from perspective/orthographic projection (Numpad 5)', () => operate('view3d.view_persportho'));
   const zoom = iconButton('viewzoom', 'Zoom in/out in the view (drag)', () => {});
   const pan = iconButton('view_pan', 'Move the view (drag)', () => {});
   navButtons.append(zoom, pan, iconButton('view_camera', 'Toggle the camera view (Numpad 0)', toggleCameraView), projection);
-  drag(zoom, (dx, dy) => nav.zoom(Math.exp(dy * 0.01)));
-  drag(pan, (dx, dy) => nav.pan(dx, dy));
-  drag(gizmo, (dx, dy) => nav.orbit(dx, dy));
-  gizmo.addEventListener('click', e => {
-    if (gizmo.dataset.moved) return;
+  dragOperator(zoom, 'view3d.zoom');
+  dragOperator(pan, 'view3d.move');
+  gizmo.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
     const target = e.target.closest('[data-axis]');
-    if (!target) return;
-    const axis = axes.find(a => a.id === target.dataset.axis[0]), negative = target.dataset.axis.length > 1;
-    nav.view(axis.view[0], axis.view[1] !== negative);
+    if (!target) return operate('view3d.rotate', {}, e);
+    const axis = target.dataset.axis;
+    operate('view3d.view_axis', { type: AXIS_TYPES[axis], align_active: false, relative: false }, e);
   });
   let drawn = '';
   const drawGizmo = () => {
-    const key = [editorCamera.alpha, editorCamera.beta, editorCamera.mode].join();
+    const key = [...editorCamera.getViewMatrix().m, editorCamera.mode].join();
     if (key === drawn) return;
     drawn = key;
     const m = editorCamera.getViewMatrix(), r = WIDGET_RADIUS * (1 - AXIS_HANDLE_SIZE), view = view_3d.background;
@@ -229,7 +230,6 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.dispose = () => {
     views.remove(view);
     if (state.cameraView) ctx.sceneCamera()?.detachControl();
-    nav.dispose();
     world.workbench.setShading(editorCamera, null);
     editorCamera.dispose();
     toolbar.dispose();

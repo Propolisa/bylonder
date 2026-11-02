@@ -4,7 +4,9 @@
  * event system handles (wm_event_add_ghostevent, wm_event_do_handlers, wm_event_do_notifiers): the keymaps of the
  * window, areas and regions, modal operators, macros and gestures run as in Blender. Each event returns what Blender
  * tagged for redrawing. */
+#include "BKE_addon.h"
 #include "BKE_context.hh"
+#include "BKE_keyconfig.h"
 #include "BKE_global.hh"
 #include "BKE_lib_remap.hh"
 #include "BKE_main.hh"
@@ -13,6 +15,7 @@
 #include "BLI_map.hh"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_set.hh"
 #include "BLI_string.h"
@@ -31,6 +34,7 @@
 #include "RNA_access.hh"
 #include "UI_resources.hh"
 #include "RNA_enum_types.hh"
+#include "RNA_prototypes.hh"
 #include "WM_api.hh"
 #include "WM_keymap.hh"
 #include "WM_types.hh"
@@ -42,6 +46,7 @@
 
 #include "area.hh"
 #include "rna-runtime.hh"
+#include "rna_internal_types.hh"
 
 #include <algorithm>
 #include <string>
@@ -52,8 +57,10 @@ GHOST_IWindow *ghost_window_new(uint32_t width, uint32_t height);
 extern "C" void region_draw_begin(int winx, int winy);
 extern "C" const char *region_draw_end();
 GHOST_TKey ghost_key_from_browser(const char *code, const char *key);
-void view3d_matrices_set(blender::RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp);
+/* The page loads Blender's key configuration again (bpy.utils.keyconfig_init, through its preset's load). */
+extern "C" __attribute__((import_module("env"), import_name("wm_keyconfig_reload"))) void wm_keyconfig_reload(blender::bContext *C);
 void view3d_navigation_set(blender::View3D &v3d, blender::RegionView3D &rv3d, blender::Scene *scene, const float *ofs, float dist, bool camera_view);
+void view3d_matrices_set(blender::RegionView3D &rv3d, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp);
 
 namespace blender {
 
@@ -82,9 +89,44 @@ static void editor_id_remap(const bke::id::IDRemapper &mappings)
 
 /* The window manager as WM_init sets it up for its window: its key configurations, empty until Python's keyconfig
  * (wm_keyconfig_init), and the window's GHOST window. */
+/* port-override: rna_userdef_keyconfig_reload_update takes (C, bmain, scene, ptr) but RNA calls a context update as
+ * (C, ptr), which WebAssembly's typed indirect calls trap on; this one has the context update's type. WM_keyconfig_reload
+ * runs Python's keyconfig_init, which the page's Python does. */
+void rna_userdef_is_dirty_update_impl();
+static void keyconfig_reload_update(bContext *C, PointerRNA * /*ptr*/)
+{
+  wm_keyconfig_reload(C);
+  rna_userdef_is_dirty_update_impl();
+}
+
+static void keyconfig_reload_updates_set()
+{
+  for (const char *name : {"use_mouse_emulate_3_button", "mouse_emulate_3_button_modifier"}) {
+    PropertyRNA *prop = RNA_struct_type_find_property(RNA_PreferencesInput, name);
+    prop->update = reinterpret_cast<UpdateFunc>(reinterpret_cast<void *>(keyconfig_reload_update));
+  }
+}
+
+/* port-override: the page draws the window, so it is never made drawable again, which is where Blender sets the
+ * window's resolution from the Preferences (WM_window_dpi_set_userdef); reading the Preferences clears the drawable to
+ * ask for that, so it is set here. */
+void wm_window_clear_drawable(wmWindowManager *wm)
+{
+  wm->runtime->windrawable = nullptr;
+  for (wmWindow &win : wm->windows) {
+    if (win.runtime->ghostwin) {
+      WM_window_dpi_set_userdef(&win);
+    }
+  }
+}
+
 void wm_init(bContext *C)
 {
   wmWindowManager *wm = CTX_wm_manager(C);
+  /* As WM_init: the registries of add-ons' and key configurations' preferences types. */
+  BKE_addon_pref_type_init();
+  BKE_keyconfig_pref_type_init();
+  keyconfig_reload_updates_set();
   wm->runtime->defaultconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT, false);
   wm->runtime->addonconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT " addon", false);
   wm->runtime->userconf = WM_keyconfig_new(wm, WM_KEYCONFIG_STR_DEFAULT " user", false);
@@ -118,6 +160,8 @@ EXPORT(wm_keyconfig_init) void wm_keyconfig_init(bContext *C)
 /* Keyconfig data is loaded by Blender's Python (bl_keymap_utils.io, through rna-bridge.cc). */
 /* After loading: the user key configuration is made from the default one before the next event (WM_keyconfig_update). */
 EXPORT(wm_keyconfig_loaded) void wm_keyconfig_loaded() { WM_keyconfig_update_tag(nullptr, nullptr); }
+/* The user key configuration made now (as before the next event), for the page's keymaps to read. */
+EXPORT(wm_keyconfig_update) void wm_keyconfig_update(bContext *C) { WM_keyconfig_update(CTX_wm_manager(C)); }
 
 /* The window's size in pixels (the page's), which flips the browser's y down into Blender's y up. */
 EXPORT(wm_window_size_set) void wm_window_size_set(bContext *C, int width, int height)
@@ -263,18 +307,24 @@ void wm_view3d_set(bContext *C, ScrArea *area, const float *viewmat, const float
   ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_WINDOW);
   RegionView3D &rv3d = *static_cast<RegionView3D *>(region->regiondata);
   view3d_matrices_set(rv3d, viewmat, winmat, region->winx, region->winy, is_persp);
-  view3d_navigation_set(*static_cast<View3D *>(area->spacedata.first), rv3d, CTX_data_scene(C), ofs, dist, camera_view);
+  view3d_navigation_set(*static_cast<View3D *>(area->spacedata.first), rv3d, WM_window_get_active_scene(CTX_wm_window(C)), ofs, dist, camera_view);
 }
-/* The 3D View's projection after an operator (RV3D_ORTHO, RV3D_PERSP, RV3D_CAMOB): Align Active Camera to View leaves
- * it looking through the camera, which the page follows. */
-EXPORT(wm_view3d_persp) int wm_view3d_persp(ScrArea *area)
+/* The 3D View as Blender's navigation left it, for the page's camera to follow: its offset (3), view rotation (4) and
+ * distance, its projection (RV3D_ORTHO, RV3D_PERSP or RV3D_CAMOB) and its axis view (RV3D_VIEW_*). */
+EXPORT(wm_view3d_get) void wm_view3d_get(ScrArea *area, float *out)
 {
   ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_WINDOW);
-  return static_cast<RegionView3D *>(region->regiondata)->persp;
+  const RegionView3D &rv3d = *static_cast<const RegionView3D *>(region->regiondata);
+  copy_v3_v3(out, rv3d.ofs);
+  copy_v4_v4(out + 3, rv3d.viewquat);
+  out[7] = rv3d.dist;
+  out[8] = rv3d.persp;
+  out[9] = rv3d.view;
 }
 
 /* The browser's input as GHOST's events: the pointer's place (page pixels), a button pressed or released (the DOM's
- * button number, which is GHOST's), the wheel, a trackpad's scroll or zoom, a key pressed (with its text) or released
+ * button number, which is GHOST's), each with a pen's pressure and tilt, the wheel, a trackpad's scroll or zoom, a key
+ * pressed (with its text) or released
  * (by the DOM's code and key). */
 enum BrowserEvent {
   BROWSER_POINTER_MOVE,
@@ -286,18 +336,28 @@ enum BrowserEvent {
   BROWSER_KEY_UP,
 };
 
+/* A pen's state as GHOST gives it with a pointer event, from the page's: its mode (GHOST_TTabletMode: none, stylus or
+ * eraser), pressure in thousandths (0 to 1000) and tilt in thousandths of the full lean (-1000 to 1000). */
+static GHOST_TabletData tablet_data(const int *data)
+{
+  if (data[0] == GHOST_kTabletModeNone) {
+    return GHOST_TABLET_DATA_NONE;
+  }
+  return {GHOST_TTabletMode(data[0]), data[1] / 1000.0f, data[2] / 1000.0f, data[3] / 1000.0f};
+}
+
 static void ghost_event_add(wmWindowManager *wm, wmWindow *win, int kind, const int *data, const char *code, const char *key,
                             const char *text, uint64_t time)
 {
   switch (kind) {
     case BROWSER_POINTER_MOVE: {
-      GHOST_TEventCursorData cursor = {data[0], data[1], GHOST_TABLET_DATA_NONE};
+      GHOST_TEventCursorData cursor = {data[0], data[1], tablet_data(data + 2)};
       wm_event_add_ghostevent(wm, win, GHOST_kEventCursorMove, &cursor, time);
       break;
     }
     case BROWSER_BUTTON_DOWN:
     case BROWSER_BUTTON_UP: {
-      GHOST_TEventButtonData button = {GHOST_TButton(data[0]), GHOST_TABLET_DATA_NONE};
+      GHOST_TEventButtonData button = {GHOST_TButton(data[0]), tablet_data(data + 2)};
       wm_event_add_ghostevent(wm, win, kind == BROWSER_BUTTON_DOWN ? GHOST_kEventButtonDown : GHOST_kEventButtonUp, &button, time);
       break;
     }
@@ -597,6 +657,24 @@ const char *wm_event(bContext *C, int kind, const int *data, const char *code, c
 {
   return wm_window_handle(C, [&](wmWindowManager *wm, wmWindow *win) {
     ghost_event_add(wm, win, kind, data, code, key, text, uint64_t(time));
+  });
+}
+
+/* An operator invoked in an area's window region as a gizmo invokes its operator on a left press (the navigation
+ * gizmo's buttons and axes: view3d.zoom, view3d.move, view3d.rotate, view3d.view_axis), at the pointer's last place: a
+ * modal one runs in the window until the button's release. `op` holds the operator's type and properties (newOperator).
+ * Returns event_result's JSON. */
+EXPORT(wm_area_operator_invoke) const char *wm_area_operator_invoke(bContext *C, ScrArea *area, wmOperator *op)
+{
+  return wm_window_handle(C, [&](wmWindowManager * /*wm*/, wmWindow *win) {
+    CTX_wm_area_set(C, area);
+    CTX_wm_region_set(C, BKE_area_find_region_type(area, RGN_TYPE_WINDOW));
+    wmEvent event = *win->runtime->eventstate;
+    event.type = LEFTMOUSE;
+    event.val = KM_PRESS;
+    WM_operator_name_call_ptr(C, op->type, wm::OpCallContext::InvokeRegionWin, op->ptr, &event);
+    CTX_wm_area_set(C, nullptr);
+    CTX_wm_region_set(C, nullptr);
   });
 }
 

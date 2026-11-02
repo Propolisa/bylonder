@@ -1,7 +1,6 @@
 import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
-import { openPreferences } from './preferences.js';
 import { fullDate, timeAgo } from './relative-time.js';
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
@@ -54,7 +53,7 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     'bylonder.project_fork': { run: click('fork-project') },
     'ed.undo': { keys: () => 'Ctrl Z', run: () => send('invoke', 'ed.undo') },
     'ed.redo': { keys: () => 'Shift Ctrl Z', run: () => send('invoke', 'ed.redo') },
-    'screen.userpref_show': { run: openPreferences },
+    'screen.userpref_show': { run: () => send('invoke', 'screen.userpref_show') },
     'render.render': { keys: ({ animation }) => (animation ? 'Ctrl F12' : 'F12'), run: ({ animation }) => send('render', animation ? 'animation' : 'image') },
     'render.view_show': { keys: () => 'F11', run: () => send('render', 'view') },
     'screen.workspace_cycle': { run: ({ direction }) => setWorkspace(ids[(ids.indexOf(current()) + (direction === 'PREV' ? ids.length - 1 : 1)) % ids.length]) },

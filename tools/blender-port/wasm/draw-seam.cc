@@ -4,6 +4,8 @@
 #include "BLI_string.h"
 #include "BLT_translation.hh"
 #include "DRW_engine.hh"
+#include "GPU_context.hh"
+#include "GPU_platform.hh"
 #include "RE_engine.h"
 
 namespace blender {
@@ -33,5 +35,12 @@ void DRW_module_init() {}
 void DRW_module_exit() {}
 void DRW_engines_free() {}
 bool DRW_gpu_context_try_enable() { return false; }
+
+/* port-override: the GPU module is past the seam; the browser chooses the graphics backend and device for Babylon, so
+ * none is overridden or listed in the Preferences. */
+bool GPU_backend_type_selection_is_overridden() { return false; }
+void GPU_backend_type_selection_set_override(GPUBackendType /*backend_type*/) {}
+bool GPU_backend_type_selection_detect() { return true; }
+Span<GPUDevice> GPU_platform_devices_list() { return {}; }
 
 }  // namespace blender

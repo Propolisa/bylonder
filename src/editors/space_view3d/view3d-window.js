@@ -7,6 +7,7 @@ import { Window, configureWindow, allowOperators, SPACE_VIEW3D, RGN_TYPE_WINDOW,
 import { hasOperator } from '../../windowmanager/wm-operators.js';
 import { operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { regionView3D } from './view3d-project.js';
+import { RV3D_CAMOB } from './navigation.js';
 import { openModulePopup, runBlenderOperator } from '../object/object-operators.js';
 import { tagRedraw } from '../../draw/overlay-tool.js';
 import { ticking, watchRedraws } from '../../windowmanager/wm-areas.js';
@@ -22,21 +23,24 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   const window = new Window(sync.blender);
   const areas = new Map();
   let running = false;
-  // A view's asset shelf draws again when Blender tags it (its asset list read, a hover).
+  // A view's asset shelf draws again when Blender tags it (its asset list read, a hover), and its camera follows the
+  // view Blender's navigation left (smooth view's steps come with the window's timers).
+  const follow = (view, a) => {
+    const rv3d = a.view3d;
+    if (rv3d.persp === RV3D_CAMOB) view.enterCameraView();
+    else view.nav.follow(rv3d);
+  };
   const redrawn = (redraw) => {
-    for (const [view, a] of areas) if (redraw.some(([p, type]) => p === a.pointer && (type === RGN_TYPE_ASSET_SHELF || type === RGN_TYPE_ASSET_SHELF_HEADER))) view.regions?.draw();
+    for (const [view, a] of areas) {
+      if (redraw.some(([p, type]) => p === a.pointer && (type === RGN_TYPE_ASSET_SHELF || type === RGN_TYPE_ASSET_SHELF_HEADER))) view.regions?.draw();
+      if (redraw.some(([p, type]) => p === a.pointer && type === RGN_TYPE_WINDOW)) follow(view, a);
+    }
   };
   watchRedraws(redrawn);
 
   // A view's area, laid out from the page (unless `layout` is false: as it last was).
-  let configured = false;
   function area(view, layout = true) {
-    if (!configured) {
-      configured = true;
-      configureWindow(window);
-      // Mesh Edit Mode is Blender's on Main: its operators the page has no code of its own for are Blender's (the Knife).
-      allowOperators(window, operatorNames().filter((idname) => idname.startsWith('mesh.') && !hasOperator(idname)));
-    }
+    configureWindow(window);
     if (!areas.has(view)) areas.set(view, window.area(SPACE_VIEW3D));
     else if (!layout) return areas.get(view);
     window.size = { width: innerWidth, height: innerHeight };
@@ -55,7 +59,18 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     openModulePopup(sync, { type: POPUPS[type], title, text }, event, { idname, finish });
   }
 
+  // Mesh Edit Mode is Blender's on Main, and so is the 3D View's navigation (view3d.rotate, view_axis, ...): their
+  // operators the page has no code of its own for are Blender's (the Knife, the view's). Decided at the first input,
+  // once the page has registered its own (view3d.select and the other picks), which areas are laid out before.
+  let inputTaken = false;
+  function takeInput() {
+    if (inputTaken) return;
+    inputTaken = true;
+    allowOperators(window, operatorNames().filter((idname) => /^(mesh|view3d)\./.test(idname) && !hasOperator(idname)));
+  }
+
   function send(kind, data, strings, view) {
+    takeInput();
     for (const v of views()) area(v);
     const acting = kind !== 'pointermove' || running;
     // An operator may start: Main gets the scene, and the selected meshes' geometry while it runs.
@@ -73,7 +88,6 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     else sync.end();
     if (running) host.notify(areas.get(view)?.status ?? '');
     else if (result.finished.length) host.notify('');
-    if (result.finished.length && areas.get(view)?.cameraView) view.enterCameraView();
     // Operators that push their own undo steps (sculpt and paint strokes) are not flagged OPTYPE_UNDO.
     if (result.finished.some(({ undo }) => undo) || sync.blender.undoStep !== step) host.commit();
     if (result.popup) popup(result.popup, host.pointer());
@@ -82,9 +96,33 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     return result;
   }
 
+  // An operator of the view's navigation gizmo, invoked as a gizmo invokes it on a left press at the pointer (modal
+  // ones run in the window until the release): view3d.rotate, move, zoom, view_axis, view_persportho.
+  function invoke(view, idname, props = {}, native = null) {
+    takeInput();
+    if (native) send('pointermove', [native.clientX, native.clientY], {}, view);
+    const result = window.invoke(area(view), idname, props);
+    redrawn(result.redraw);
+    running = result.modal;
+    tagRedraw();
+    ticking();
+    return result;
+  }
+
+  // A touch gesture as a trackpad's (GHOST's trackpad events: a drag orbits, with Shift it pans, a pinch magnifies),
+  // which Blender's 3D View keymap navigates by: { dx, dy, magnify, shift } at the pointer { x, y }.
+  const SHIFT = { code: 'ShiftLeft', key: 'Shift' };
+  function trackpad(view, { x, y, dx, dy = 0, magnify = false, shift = false }) {
+    if (shift) send('keydown', [0], SHIFT, view);
+    send('trackpad', [magnify ? 4 : 1, x, y, dx, dy, 0], {}, view);
+    if (shift) send('keyup', [0], SHIFT, view);
+  }
+
   return {
     takes: (native, view) => running || (takes() && !!view && native.pointerType !== 'touch'),
     send,
+    invoke,
+    trackpad,
     // A view's area, laid out from its elements (its header, tool header and sidebar are view.regions').
     area,
     pressHandled: () => window.pressHandled(),

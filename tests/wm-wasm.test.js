@@ -6,7 +6,6 @@ import assert from 'node:assert/strict';
 import { BlenderMain, operatorNames } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, pointerStruct, setContextPointer, structFind } from '../src/python/bpy_rna.js';
 import '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, Area, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { AnimArea, SPACE_GRAPH } from '../src/editors/animation/anim-area.js';
@@ -22,7 +21,7 @@ main.evaluate();
 
 const window = new Window(main);
 window.size = { width: 1200, height: 1000 };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(['transform.translate']);
 const view = window.area(SPACE_VIEW3D);
 // The area 200 pixels from the page's left, its window region filling it.

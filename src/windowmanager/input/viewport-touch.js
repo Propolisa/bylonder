@@ -12,13 +12,13 @@ export function createViewportTouch(world, editor, creator, views){
   const press=type=>world.wm.dispatch({type,value:'PRESS',...editor.pointer,native:{}});
   world.onEditorState=value=>Object.assign(state,value);
   const attach=view=>{
-  const nav=view.nav,picked=point=>editor.pick(point.x,point.y,view);
+  const picked=point=>editor.pick(point.x,point.y,view);
   let operation=null;
   return bindTouch(view.canvas,{
     tap(point,double){
       if(state.modal){press('ret');return;}
       const node=picked(point);
-      if(double&&node){world.beforeSelection?.();editor.selection.replace([node]);editor.reconcile();nav.frame(editor.selection.nodes);}
+      if(double&&node){world.beforeSelection?.();editor.selection.replace([node]);editor.reconcile();world.view3dInvoke(view,'view3d.view_selected');}
       else editor.select(node,state.multi);
     },
     hold(point){views.setInput(view);world.callMenu(contextMenu(),point);},
@@ -34,10 +34,15 @@ export function createViewportTouch(world, editor, creator, views){
         for(const [on,key] of [[state.axis,state.axis],[state.snap,'left_ctrl'],[state.fine,'left_shift']])if(on)press(key);
       }else operation='orbit';
     },
+    // Blender navigates by the gesture as by a trackpad's: one finger orbits, two pan and pinch.
     move(sample){
       if(operation==='transform')return;
-      if(sample.count>1){nav.pan(sample.dx,sample.dy);nav.zoom(1/Math.max(0.1,sample.scale));}
-      else nav.orbit(sample.dx,sample.dy);
+      const at={x:sample.x??0,y:sample.y??0};
+      if(sample.count>1){
+        world.view3dTrackpad(view,{...at,dx:sample.dx,dy:-sample.dy,shift:true});
+        if(sample.scale!==1)world.view3dTrackpad(view,{...at,dx:Math.round((sample.scale-1)*100),magnify:true});
+      }
+      else world.view3dTrackpad(view,{...at,dx:sample.dx,dy:-sample.dy});
     },
     end(cancel){if(operation==='transform'&&state.modal)press(cancel?'esc':'ret');state.modal=false;operation=null;}
   },{enabled:()=>!view.state.cameraView});

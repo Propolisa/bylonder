@@ -16,7 +16,12 @@ import { menuUI } from '../src/windowmanager/wm-operators.js';
 import { menus } from '../src/python/bpy_interface.js';
 import { registerObjectOperators } from '../src/editors/object/object-operators.js';
 import { registerOperator } from '../src/windowmanager/wm-operators.js';
-import { keymapHandler, defaultKeymaps } from '../src/windowmanager/keyconfig.js';
+import { keymapHandler, keyconfig } from '../src/windowmanager/keyconfig.js';
+import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
+
+// Blender's key configuration, loaded by Blender's own preset with the default Preferences.
+loadKeyconfig(blenderMain().C);
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene), empty = new TransformNode('Empty', scene);
@@ -158,9 +163,20 @@ entry(entry(objectMenu, 'Show/Hide').items(), 'Hide Selected').run();
 entry(objectMenu, 'group').run();
 assert.deepEqual(ran, ['hide', 'group']);
 
-// Blender's keymaps, transpiled, equal Blender's own, and events run the operator the first matching item names, with
-// its properties.
-assert.deepEqual(JSON.parse(JSON.stringify(defaultKeymaps())), JSON.parse(await readFile('tests/fixtures/keymaps.json', 'utf8')));
+// Blender's keymaps, loaded by Blender's own preset with the default Preferences, equal Blender's own, and events run the
+// operator the first matching item names, with its properties.
+const MODIFIERS = ['shift', 'ctrl', 'alt', 'oskey'];
+// An item compared as its RNA holds it: float values in single precision, modifiers left out where any key is.
+const single = (value) => (typeof value === 'number' ? Math.fround(value) : value);
+const nested = (value) => Array.isArray(value) && value.length && value.every((entry) => Array.isArray(entry) && typeof entry[0] === 'string');
+const normalized = (props) => props.map(([name, value]) => [name, nested(value) ? normalized(value) : single(value)]).sort();
+const itemKey = ([idname, event, data]) => JSON.stringify([idname, event.type, event.value, !!event.any,
+  ...(event.any ? [] : MODIFIERS.map((key) => (event[key] === -1 ? 'any' : !!event[key]))), normalized(data?.properties ?? [])]);
+const loaded = keyconfig();
+for (const [name, , { items }] of JSON.parse(await readFile('tests/fixtures/keymaps.json', 'utf8'))) {
+  if (!loaded.has(name)) continue;
+  assert.deepEqual(loaded.get(name).filter(([, , data]) => data).map(itemKey), items.filter(([, , data]) => data !== undefined).map(([i, e, d]) => itemKey([i, e, d ?? { properties: [] }])), name);
+}
 const viewed = [];
 registerOperator('view3d.view_axis', { supports: ({ align_active }) => !align_active, run: ({ type }) => viewed.push(type) });
 const keys = keymapHandler(['3D View']);

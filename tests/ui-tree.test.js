@@ -6,7 +6,6 @@ import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/editors/anima
 import { createTopbarArea } from '../src/editors/space_topbar/topbar-area.js';
 import { kw } from '../src/windowmanager/wm-operators.js';
 import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, buttonOperator, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 // Blender's Properties editor laid out by Blender's uiLayout in the module, its panels Blender's Python registered as
@@ -16,7 +15,7 @@ const blender = new BlenderMain();
 const cube = blender.add('MESH', 'Cube');
 blender.setBase(cube, { select: true, active: true });
 setContextPointer(blender.C);
-loadKeyconfig(blender.C, defaultKeymaps());
+loadKeyconfig(blender.C);
 const ob = blendData().objects.get('Cube');
 
 const area = new AnimArea(blender, SPACE_PROPERTIES);
