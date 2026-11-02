@@ -173,7 +173,13 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     const recent = column('Recent Files', []);
     recentProjects().then((projects) => recent.append(...projects.slice(0, 5).map((p) => item(p.name, 'file_blend', () => openProject(p.id))), item('More…', 'viewzoom', openProjects)));
     const files = Object.assign(document.createElement('div'), { className: 'bl-splash-columns' });
-    files.append(column('New File', [item('General', 'file_new', newProject), ...examples.map(example => item(example.title, 'file_new', () => openExample(example)))]), recent);
+    // As Blender's: General and the application templates; the examples open in their place.
+    const newFile = column('New File', []);
+    const exampleItem = (example) => item(example.title, 'file_new', () => openExample(example));
+    const showExamples = () => newFile.replaceChildren(newFile.firstChild, ...examples.filter((e) => !e.workspaces).map(exampleItem));
+    newFile.append(item('General', 'file_new', newProject), ...examples.filter((e) => e.workspaces).map(exampleItem),
+      Object.assign(item('Examples…', 'file_folder', showExamples), { onclick: showExamples }));
+    files.append(newFile, recent);
     const links = Object.assign(document.createElement('div'), { className: 'bl-splash-columns bl-splash-links' });
     links.append(
       column('', [item('Open…', 'file_folder', () => document.getElementById('import').click())]),
