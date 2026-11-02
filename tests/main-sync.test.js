@@ -282,9 +282,14 @@ world.modifiers.add(cube, 'BEVEL');
 assert.deepEqual(blender.modifiers(ob(cube)).map((m) => m.name), ['Subdivision', 'Bevel'], "the page's add is Main's");
 sync.run(() => blender.run('object.modifier_move_down', { modifier: blender.modifiers(ob(cube))[0].name }));
 assert.deepEqual(stackOf(cube), ['BEVEL', 'SUBSURF'], "Blender's reorder reaches the page");
-const deform = world.modifiers.add(other, 'ARMATURE', { object: nodeId(cube) });
+sync.run(() => blender.run('object.armature_add'));
+const rig = objects.find((node) => node.name === 'Armature');
+// RNA's poll keeps an Armature's target an armature, as Blender's does.
+assert.equal(world.modifiers.add(other, 'ARMATURE', { object: nodeId(cube) }).values.object, null, "an Armature's target is an armature");
+const deform = world.modifiers.add(other, 'ARMATURE', { object: nodeId(rig) });
+selection.replace([cube]);
 sync.run(() => blender.run('object.location_clear'));
-assert.equal(world.modifiers.stack(other).find((m) => m.id === deform.id).values.object, nodeId(cube), 'a scene modifier keeps its target');
+assert.equal(world.modifiers.stack(other).find((m) => m.id === deform.id).values.object, nodeId(rig), 'a scene modifier keeps its target');
 assert.deepEqual(sync.check(), []);
 
 // Hooks keep a transform drag cheap: one changed object among many reaches Main without the others being read.

@@ -180,12 +180,25 @@ const MAIN_NAMES = new Map([['.uv_seam', 'uv_seam']]), OWN_NAMES = new Map([...M
 // selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and
 // reach an object's data by `data(ob)`. An object is named by the address
 // add() gives; transforms are in Blender's axes, matrices column-major, as an object's RNA names them.
+let current = null;
+const makeCurrent = (main) => { current = main; x.rna_context_set(main.C); };
 export class BlenderMain {
   #context = x.main_new();
   #C = x.main_C(this.#context);
   #undo = false;
 
-  constructor() { x.rna_context_set(this.#C); }
+  constructor() { makeCurrent(this); }
+
+  // Runs fn with this Main as Blender's current one (G_MAIN, RNA's context), which RNA's updates tag IDs in.
+  current(fn) {
+    const previous = current;
+    makeCurrent(this);
+    try {
+      return fn(this);
+    } finally {
+      makeCurrent(previous);
+    }
+  }
 
   // An object of a type (EMPTY, MESH, CURVE, FONT, LIGHT, CAMERA) with new data of its type.
   add(type, name) { return withString(name, (p) => x.main_object_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
@@ -602,15 +615,7 @@ export const blenderMain = () => (shared ??= new BlenderMain());
 // Runs fn on a Main apart from the scene's, for geometry Blender's operators make, its context the one operator
 // properties are set in meanwhile.
 let scratch;
-export function inScratchMain(fn) {
-  scratch ??= new BlenderMain();
-  x.rna_context_set(scratch.C);
-  try {
-    return fn(scratch);
-  } finally {
-    x.rna_context_set(blenderMain().C);
-  }
-}
+export const inScratchMain = (fn) => (scratch ??= blenderMain().current(() => new BlenderMain())).current(fn);
 
 // What subsystems with exports of their own (blenkernel/curve) reach the module through.
 export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems, operatorMenuProperty };
