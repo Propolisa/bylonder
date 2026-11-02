@@ -254,14 +254,14 @@ const checks = {
     await app.locator('[role="tab"][aria-label="Particles"]').click();
     await properties.getByRole("button", { name: "Add a particle system" }).click();
     for (const frame of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) await app.bylonder((b, f) => b.world.animation.time.configure({ frameCurrent: f }), frame);
-    await app.until((b) => b.world.scene.meshes.some((m) => m.name.startsWith("__particles") && m.subMeshes[0]?.verticesCount > 10));
+    await app.until((b) => b.world.scene.meshes.some((m) => m.name.startsWith("__instances") && m.thinInstanceCount > 10));
     const cache = properties.locator('[data-blender="PARTICLE_PT_cache"]');
     await cache.locator("header").click();
     await cache.getByRole("button", { name: "Bake", exact: true }).click();
     await cache.getByRole("button", { name: "Delete Bake" }).waitFor();
     await cache.getByRole("button", { name: "Delete Bake" }).click();
     await properties.getByRole("button", { name: "Remove the selected particle system" }).click();
-    await app.until((b) => !b.world.scene.meshes.some((m) => m.name.startsWith("__particles")));
+    await app.until((b) => !b.world.scene.meshes.some((m) => m.name.startsWith("__instances")));
     await typeInto('[role="spinbutton"][aria-label="Current Frame"]', "1");
   },
 
@@ -647,14 +647,15 @@ const checks = {
   },
 
   async "Annotate tool draws a stroke, Measure tool a ruler"() {
-    await app.locator('[data-tool="builtin.annotate"]').click();
+    const tools = app.locator("#viewport-section .bl-toolbar");
+    await tools.locator('[data-tool="builtin.annotate"]').click();
     const [x, y] = await app.point(0.3, 0.3);
     await app.page.mouse.move(x, y);
     await app.page.mouse.down();
     await app.page.mouse.move(x + 120, y + 40, { steps: 12 });
     await app.page.mouse.up();
     await app.until((b) => b.world.annotations.layers.some((l) => !l.ruler && l.frames?.some((f) => f.strokes.length)));
-    await app.locator('[data-tool="builtin.measure"]').click();
+    await tools.locator('[data-tool="builtin.measure"]').click();
     await app.page.mouse.move(x, y + 200);
     await app.page.mouse.down();
     await app.page.mouse.move(x + 150, y + 220, { steps: 10 });
@@ -944,7 +945,7 @@ const checks = {
     await app.until(() => /has no Geometry Nodes modifier/.test(document.querySelector("#nodes-section .node-editor-empty").textContent));
   },
 
-  // Opening the Video Sequencer on an empty edit offers to set it up; Remember keeps the choice for next time.
+  // Opening the Video Sequencer on an empty edit offers to set it up; Remember keeps the choice in Bylonder's Preferences.
   "opening the Video Sequencer offers to set it up for video": { open: { example: "Volcanic Island", node: "Island" }, async run() {
     await app.bylonder((b) => b.world.animation.time.configure({ frameEnd: 48 }));
     // The Timeline's header is Blender's: its Editor Type is the area's ui_type.
@@ -957,12 +958,12 @@ const checks = {
     const out = await app.bylonder((b) => {
       const { items, tracks } = b.world.sequenceEditor.state.edit.timeline, { image_settings, ffmpeg } = b.mainScene.render;
       return { strips: items.map((i) => [i.type, i.from, i.durationInFrames, tracks.find((t) => t.id === i.trackId).kind]),
-        output: [image_settings.file_format, ffmpeg.format, ffmpeg.codec, ffmpeg.audio_codec], remembered: JSON.parse(localStorage.getItem("bylonder:preferences:v1")),
+        output: [image_settings.file_format, ffmpeg.format, ffmpeg.codec, ffmpeg.audio_codec], remembered: ["ask_sequencer_setup", "sequencer_setup_video", "sequencer_setup_scene", "sequencer_setup_audio"].map((name) => b.bylonderPreferences()[name]),
         live: b.sceneAudio.live(b.scenes[0].id) };
     });
     assert.deepEqual(out.strips, [["scene", 1, 48, "video"], ["audio", 1, 48, "audio"]]);
     assert.deepEqual(out.output, ["FFMPEG", "MPEG4", "H264", "AAC"]);
-    assert.deepEqual([out.remembered.askSequencerSetup, out.remembered.sequencerSetup], [false, { video: true, scene: true, audio: true }]);
+    assert.deepEqual(out.remembered, [false, true, true, true]);
     assert.ok(out.live, "the scene plays its sound live, so its strip is silent in the preview");
   } },
 
