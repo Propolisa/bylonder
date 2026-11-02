@@ -255,7 +255,8 @@ function layoutNode(node, env) {
   }, children);
 }
 
-// A layout panel's header (UILayout.panel): a click opens or closes it through the property Blender keeps its state in.
+// A layout panel's header (UILayout.panel), its disclosure arrow Blender's own: a click opens or closes it through the
+// property Blender keeps its state in.
 function layoutPanelHeader(node, env) {
   const state = env.layoutPanels[env.layoutPanelIndex.value++];
   const toggle = (e) => {
@@ -263,10 +264,7 @@ function layoutPanelHeader(node, env) {
     pointerStruct(...state.pointer)[state.prop] = !state.open;
     env.ui.refresh();
   };
-  return h('div', { class: 'bl-subpanel-header flex h-unit min-w-0 items-center gap-1', onClick: toggle }, [
-    icon(state?.open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
-    ...node.children.map((child) => layoutNode(child, env)).filter(Boolean),
-  ]);
+  return h('div', { class: 'bl-subpanel-header flex h-unit min-w-0 items-center', onClick: toggle }, node.children.map((child) => layoutNode(child, env)).filter(Boolean));
 }
 
 const rootEnv = (ui, extra = {}) => ({ ui, active: true, enabled: true, root: true, ...extra });
