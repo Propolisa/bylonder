@@ -30,3 +30,10 @@ The proposed safeguards, to be proven before this is done:
 - All parts load in the background right after startup.
 - A test mode that holds back the background load and fails on any call into a part that is not loaded, run over the
   whole unit and browser test suites.
+
+## Optimizations
+
+| User story | Change | Possible gain |
+| --- | --- | --- |
+| Faster environment map and other float image loads | Upload a float image's buffer as Blender keeps it (premultiplied) and unpremultiply in the shader, instead of copying it in JavaScript first (`src/imbuf/image-textures.js` `straight`) | One full-image copy and one pass over every pixel less per upload: for a 4K HDR (128 MB of floats) roughly 100 to 300 ms and 128 MB of peak memory |
+| Smoother texture painting on large images | Upload a stroke's changed regions straight from the image buffer with WebGL2's `UNPACK_ROW_LENGTH` and `UNPACK_SKIP_PIXELS`/`UNPACK_SKIP_ROWS`, instead of packing each region into a new array (`region`) | No per-region copy or allocation: less frame time and garbage collection per stroke, growing with brush size |
