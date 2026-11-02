@@ -21,7 +21,8 @@ const surface = JSON.parse(read("src/coverage/blender-surface.json"));
 const blenderIds = new Set(surface.ids);
 const walk = (nodes) => nodes.forEach((node) => { blenderIds.add(node.id.split(":")[0]); walk(node.c ?? []); });
 walk(surface.tree);
-const MODES = ["OBJECT", "EDIT", "POSE", "SCULPT", "VERTEX_PAINT", "WEIGHT_PAINT", "TEXTURE_PAINT", "PARTICLE_EDIT", "SCULPT_CURVES"];
+const MODES = ["OBJECT", "EDIT", "POSE", "SCULPT", "VERTEX_PAINT", "WEIGHT_PAINT", "TEXTURE_PAINT", "PARTICLE_EDIT", "SCULPT_CURVES",
+  "PAINT_GREASE_PENCIL", "SCULPT_GREASE_PENCIL", "WEIGHT_GREASE_PENCIL", "VERTEX_GREASE_PENCIL"];
 const isUi = (id) => blenderIds.has(id) || MODES.includes(id) || /^builtin(_brush)?\.\w+$/.test(id);
 
 function check(file) {

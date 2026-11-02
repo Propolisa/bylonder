@@ -511,6 +511,7 @@ async function load(id, autoRun = true) {
   models.clear();
   syncModels();
   openFile("index.js");
+  topbar.setWorkspaces(project.settings.workspaces);
   $("remember").checked = !!project.settings.remember;
   $("toggle-remember").textContent = "Remember scene edits: " + (project.settings.remember ? "on" : "off");
   localStorage.setItem("babylon-active-project", id);
@@ -841,7 +842,7 @@ const openBlend = action(async (file) => {
   const created = await repo.create(file.name.replace(/\.blend$/i, ""), files);
   await load(created.id);
 });
-const createExample = async (example) => repo.create(example.title, await example.files());
+const createExample = async (example) => repo.create(example.title, await example.files(), example.workspaces && { settings: { remember: false, workspaces: example.workspaces } });
 const openExample = action(async (example) => {
   await save();
   await load((await createExample(example)).id);

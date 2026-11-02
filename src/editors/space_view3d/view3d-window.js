@@ -18,13 +18,15 @@ const pageRect = (rect) => ({ x: rect.left, y: rect.top, width: rect.width, heig
 
 //   sync: the scene's (createMainSync); views(): the 3D Views; takes(): whether Blender's window takes input now (Object
 //   Mode); host: runBlenderOperator's options (transaction, notify, keying, commit, wm, pointer, view), menu(name, event)
-//   opening a menu of the page; before(): what the page finishes before an operator runs (a pending Add).
-export function createView3DWindow({ sync, views, takes, host, menu, before = () => {} }) {
+//   opening a menu of the page; before(): what the page finishes before an operator runs (a pending Add); wake(): the
+//   views draw again.
+export function createView3DWindow({ sync, views, takes, host, menu, before = () => {}, wake }) {
   const window = new Window(sync.blender);
   const areas = new Map();
   let running = false;
-  // A view's asset shelf draws again when Blender tags it (its asset list read, a hover), and its camera follows the
-  // view Blender's navigation left (smooth view's steps come with the window's timers).
+  // A view's asset shelf draws again when Blender tags it (its asset list read, a hover); a view Blender tagged (its
+  // operators' notifiers, a stroke's end) draws again, its camera following the view Blender's navigation left (smooth
+  // view's steps come with the window's timers).
   const follow = (view, a) => {
     const rv3d = a.view3d;
     if (rv3d.persp === RV3D_CAMOB) view.enterCameraView();
@@ -33,7 +35,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
   const redrawn = (redraw) => {
     for (const [view, a] of areas) {
       if (redraw.some(([p, type]) => p === a.pointer && (type === RGN_TYPE_ASSET_SHELF || type === RGN_TYPE_ASSET_SHELF_HEADER))) view.regions?.draw();
-      if (redraw.some(([p, type]) => p === a.pointer && type === RGN_TYPE_WINDOW)) follow(view, a);
+      if (redraw.some(([p, type]) => p === a.pointer && type === RGN_TYPE_WINDOW)) { follow(view, a); wake(); }
     }
   };
   watchRedraws(redrawn);
@@ -59,14 +61,15 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     openModulePopup(sync, { type: POPUPS[type], title, text }, event, { idname, finish });
   }
 
-  // Mesh Edit Mode is Blender's on Main, and so is the 3D View's navigation (view3d.rotate, view_axis, ...): their
-  // operators the page has no code of its own for are Blender's (the Knife, the view's). Decided at the first input,
-  // once the page has registered its own (view3d.select and the other picks), which areas are laid out before.
+  // Mesh Edit Mode, the Grease Pencil modes and the 3D View's navigation (view3d.rotate, view_axis, ...) are Blender's on
+  // Main: their operators the page has no code of its own for are Blender's (the Knife, brush strokes, the view's).
+  // Decided at the first input, once the page has registered its own (view3d.select and the other picks), which areas
+  // are laid out before.
   let inputTaken = false;
   function takeInput() {
     if (inputTaken) return;
     inputTaken = true;
-    allowOperators(window, operatorNames().filter((idname) => /^(mesh|view3d)\./.test(idname) && !hasOperator(idname)));
+    allowOperators(window, operatorNames().filter((idname) => /^(mesh|grease_pencil|view3d)\./.test(idname) && !hasOperator(idname)));
   }
 
   function send(kind, data, strings, view) {
