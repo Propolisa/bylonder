@@ -1,5 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { asObject } from "./object-transform.js";
+import "../draw/draw-view.js";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
 import { geometryNodesDefinition } from "../nodes/geometry-nodes.js";
 import { createCompositor } from "../compositor/compositor.js";
