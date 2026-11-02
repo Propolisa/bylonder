@@ -10,7 +10,6 @@ import { NullEngine, Scene, Texture } from '@babylonjs/core';
 import { BlenderMain, datafiles } from '../src/bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, setContextPointer, pointerStruct, structFind, inPythonContext } from '../src/python/bpy_rna.js';
 import { module } from '../src/python/bpy_interface.js';
-import { defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import { Window, loadKeyconfig, SPACE_VIEW3D, RGN_TYPE_WINDOW } from '../src/windowmanager/wm-window.js';
 
 const SPACE_IMAGE = 6, RGN_TYPE_UI = 4;
@@ -64,7 +63,7 @@ const window = new Window(main);
 const { winx, winy } = fixture.view;
 // The 3D View on the left, the Image Editor on the right.
 window.size = { width: winx * 2, height: winy };
-loadKeyconfig(main.C, defaultKeymaps());
+loadKeyconfig(main.C);
 window.allow(['paint.image_paint', 'paint.vertex_paint']);
 const view = window.area(SPACE_VIEW3D);
 const rect = { x: 0, y: 0, width: winx, height: winy };
