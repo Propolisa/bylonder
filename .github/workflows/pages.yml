@@ -10,33 +10,41 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
   # Blender's module for this tree: published by an earlier build, or built now (blender-wasm.yml).
   module:
     runs-on: ubuntu-latest
     outputs:
+      key: ${{ steps.check.outputs.key }}
       published: ${{ steps.check.outputs.published }}
     steps:
       - uses: actions/checkout@v4
       - id: check
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release view "$(node scripts/module.mjs key)" >/dev/null 2>&1 && echo published=true >> "$GITHUB_OUTPUT" || echo published=false >> "$GITHUB_OUTPUT"
+        run: |
+          key=$(node scripts/module.mjs key)
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+          gh release view "$key" >/dev/null 2>&1 && echo published=true >> "$GITHUB_OUTPUT" || echo published=false >> "$GITHUB_OUTPUT"
 
+  # A module build is never cancelled by a newer push: the newer run waits for it, as both need the same release.
   build-module:
     needs: module
     if: needs.module.outputs.published != 'true'
+    concurrency:
+      group: module-${{ needs.module.outputs.key }}
+      cancel-in-progress: false
     permissions:
       contents: write
     uses: ./.github/workflows/blender-wasm.yml
 
+  # A newer push supersedes an older run's site build and deploy.
   build:
     needs: [module, build-module]
     if: ${{ !failure() && !cancelled() }}
+    concurrency:
+      group: pages-build
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +78,9 @@ jobs:
 
   deploy:
     needs: build
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     environment:
       name: github-pages
