@@ -100,11 +100,74 @@
   ],
   "limits": [
    "Bylonder's own Geometry Nodes modifier keeps its Babylon graph and opens in Babylon's Node Geometry Editor, not here.",
-   "The Geometry Nodes workspace has no Spreadsheet yet; its 3D Viewport takes the Spreadsheet's place."
+   "The sidebar's Group tab (interface panels) is not shown yet; inputs are added from Group Input's empty socket."
   ],
   "page": "docs/features/geometry-node-editor.md",
   "open": "https://propolisa.github.io/bylonder/#example=hair-dynamics",
   "example_title": "Hair Dynamics"
+ },
+ {
+  "id": "geometry-nodes",
+  "title": "Geometry Nodes",
+  "summary": "Build a Geometry Nodes modifier from an empty node group, expose its inputs, make node groups, and see the evaluated mesh, points and instances drawn.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/generate/geometry_nodes.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/geometry_nodes/instances.html",
+   "https://docs.blender.org/manual/en/5.2/interface/controls/nodes/groups.html"
+  ],
+  "example": "geometry-nodes",
+  "thumbnail": "geometry-nodes/thumbnail.png",
+  "media": [
+   "geometry-nodes/grid.gif",
+   "geometry-nodes/modifier.gif",
+   "geometry-nodes/workspace.gif",
+   "geometry-nodes/points.gif",
+   "geometry-nodes/instances.gif",
+   "geometry-nodes/input.gif",
+   "geometry-nodes/group.gif"
+  ],
+  "ui": [
+   "GeometryNodeTree",
+   "NODE_EDITOR",
+   "NODE_MT_add",
+   "OBJECT_MT_modifier_add",
+   "PROPERTIES",
+   "VIEW_3D"
+  ],
+  "operators": [
+   "object.modifier_add",
+   "node.new_geometry_node_group_assign",
+   "node.add_node",
+   "node.link",
+   "node.group_make",
+   "node.group_edit",
+   "node.group_ungroup"
+  ],
+  "code": [
+   "src/editors/space_node/main-node-tree.js",
+   "src/editors/space_node/node-editor-controller.js",
+   "src/blenkernel/main-view.js",
+   "src/draw/pointcloud.js",
+   "tools/blender-port/wasm/main-api.cc"
+  ],
+  "tests": [
+   "tests/geometry-node-editor.test.js",
+   "tests/instances-wasm.test.js"
+  ],
+  "limits": [
+   "Volumes are evaluated but not drawn; curves draw as the hair curves do.",
+   "Instances draw where their geometry is a mesh, an object or a point cloud; instanced curves and volumes do not.",
+   "Instance attributes (a color per instance) do not reach the material yet: an instance draws in its mesh's first material.",
+   "Points are spheres in their material in every shading mode; Solid does not give them Workbench's studio light yet.",
+   "The Node Editor's header has View only; its Select, Add and Node menus are reached by their keys (Shift A adds).",
+   "The sidebar's Group tab (the interface panels and their sockets' settings) is not shown yet."
+  ],
+  "page": "docs/features/geometry-nodes.md",
+  "open": "https://propolisa.github.io/bylonder/#example=geometry-nodes",
+  "example_title": "Geometry Nodes Meadow"
  },
  {
   "id": "grease-pencil",
