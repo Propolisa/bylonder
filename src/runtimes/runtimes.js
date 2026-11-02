@@ -135,3 +135,6 @@ export function registerRuntimeTypes(icon) {
   for (const feature of features) registerClass(runtimePanel(feature, icon));
   registerClass(scenePanel(icon));
 }
+
+// How Babylon draws a struct a feature lives on, where its runtime is not Blender (a feature's `look`), else null.
+export const look = (struct) => (runtimeOf(struct) === 'BLENDER' ? null : featureOf(struct)?.look?.(struct) ?? null);

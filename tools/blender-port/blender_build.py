@@ -357,8 +357,8 @@ WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender2ui1
 
 NULL_DATA = os.path.join(WASM, 'null-data.txt')
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
-# fonts, video); everywhere else Blender's definition wins over the API's stand-in.
-SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie'}
+# fonts, video, Grease Pencil's offscreen rendering); everywhere else Blender's definition wins over the API's stand-in.
+SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager', 'bf_imbuf_movie', 'bf_editor_grease_pencil'}
 
 
 def link_module(host, out, entries, extra, archives, module_libraries):

@@ -262,6 +262,23 @@ export class BlenderMain {
         time: new Float32Array(memory, time + firstPoint * 4, points), length: new Float32Array(memory, length + firstCurve * 4, curves) };
     });
   }
+  // The visible drawings of Main's Grease Pencil objects (grease-pencil-api.cc main_grease_pencil), onion skins where
+  // `onion`: { ob, layer (its index), onion (0, or the onion skin's distance before or after the frame), changed (packed
+  // anew; else curves, points and triangles are empty and the last ones stand; all of them with `repack`), blend (the
+  // layer's blend mode), pointsShown (Edit Mode's points are drawn), layerToWorld (Blender's matrix), curves (CURVE_INTS per curve: first point, points, flags,
+  // material index, hash), points (POINT_FLOATS per point: position in Babylon's axes, radius, stroke color, fill color,
+  // selection, weight), triangles (the fills', by point) }, views into the module's memory valid until the next call.
+  greasePencil({ onion = true, repack = false } = {}) {
+    const count = x.main_grease_pencil(this.#C, onion, repack), words = 28, memory = x.memory.buffer, at = x.main_grease_pencil_draws() >>> 0;
+    const [curves, points, triangles] = [x.main_grease_pencil_curves(), x.main_grease_pencil_points(), x.main_grease_pencil_triangles()].map((p) => p >>> 0);
+    const ints = new Int32Array(memory, at, count * words), floats = new Float32Array(memory, at, count * words);
+    return Array.from({ length: count }, (_, i) => {
+      const [ob, layer, onionId, changed, blend, pointsShown, firstCurve, curveCount, firstPoint, pointCount, firstTriangle, triangleCount] = ints.subarray(i * words, i * words + 12);
+      return { ob: ob >>> 0, layer, onion: onionId, changed: !!changed, blend, pointsShown: !!pointsShown, layerToWorld: floats.subarray(i * words + 12, i * words + 28),
+        curves: new Int32Array(memory, curves + firstCurve * 20, curveCount * 5), points: new Float32Array(memory, points + firstPoint * 56, pointCount * 14),
+        triangles: new Uint32Array(memory, triangles + firstTriangle * 12, triangleCount * 3) };
+    });
+  }
   // The active object's Particle Edit Mode as Blender's overlay draws it (main-api.cc main_particle_edit), or null:
   // { useWeight, showInner, showTips, strands, inner, tips (points of 4 floats: world position in Blender's axes,
   // selection), indices (the strands' line strips, 0xFFFFFFFF between) }, views into the module's memory valid until

@@ -774,6 +774,19 @@ EXPORT(anim_channel_keys) int anim_channel_keys(int index, float xmin, float xma
     case ALE_FCURVE:
       fcurve_to_keylist(ale->adt, static_cast<FCurve *>(ale->key_data), keylist, saction_flag, range, ANIM_nla_mapping_allowed(ale));
       break;
+    /* As keyframes_draw.cc ED_keylist_draw_list_build_keylists builds a Grease Pencil channel's. */
+    case ALE_GREASE_PENCIL_CEL:
+      grease_pencil_cels_to_keylist(ale->adt, static_cast<const GreasePencilLayer *>(ale->data), keylist, saction_flag);
+      break;
+    case ALE_GREASE_PENCIL_GROUP:
+      grease_pencil_layer_group_to_keylist(ale->adt, static_cast<const GreasePencilLayerTreeGroup *>(ale->data), keylist, saction_flag);
+      break;
+    case ALE_GREASE_PENCIL_DATA:
+      if (ac->datatype != ANIMCONT_GPENCIL && ale->adt) {
+        action_to_keylist(ale->adt, ale->adt->action, keylist, saction_flag, range);
+      }
+      grease_pencil_data_block_to_keylist(ale->adt, static_cast<const GreasePencil *>(ale->data), keylist, saction_flag, false);
+      break;
     default:
       break;
   }
