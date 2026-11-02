@@ -9,7 +9,7 @@ const { exports: x, withArrays, withString, cString } = blenderModule;
 const view = () => new DataView(x.memory.buffer);
 
 // Blender's space and region types (eSpace_Type, eRegion_Type).
-export const SPACE_GRAPH = 2, SPACE_ACTION = 12;
+export const SPACE_GRAPH = 2, SPACE_ACTION = 12, SPACE_NLA = 13;
 export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_CHANNELS = 2, RGN_TYPE_UI = 4;
 const RGN_FLAG_HIDDEN = 1 << 0;
 // Area.ui_type within a SpaceAction (its mode, eAnimEdit_Context).

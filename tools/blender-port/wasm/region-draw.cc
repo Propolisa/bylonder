@@ -259,6 +259,7 @@ void GPU_matrix_rotate_2d(float deg)
 }
 void GPU_matrix_ortho_set(float left, float right, float bottom, float top, float /*near*/, float /*far*/) { wmOrtho2(left, right, bottom, top); }
 void GPU_point_size(float /*size*/) {}
+void GPU_program_point_size(bool /*enable*/) {}
 float GPU_line_width_get() { return rec.line_width; }
 /* The projection is the ortho rectangle (wmOrtho2): pushed and popped as a stack. */
 static Vector<rctf> &projections()
@@ -316,7 +317,16 @@ void GPU_clear_color(float red, float green, float blue, float alpha)
   rec.draw += '}';
 }
 
-/* Immediate mode: a primitive's vertices (2D positions) with one uniform color. */
+/* Immediate mode: a primitive's vertices (2D positions) with one uniform color; keyframe shapes (points) with their
+ * attributes per vertex. */
+
+/* A keyframe shape's attributes, as gpu_shader_keyframe_shape_vert.glsl reads them. */
+struct KeyframePoint {
+  float size = 0.0f;
+  uchar color[4] = {}, outline[4] = {};
+  uint flags = 0;
+};
+enum KeyframeAttr { KEY_ATTR_NONE, KEY_ATTR_SIZE, KEY_ATTR_COLOR, KEY_ATTR_OUTLINE, KEY_ATTR_FLAGS };
 
 static struct {
   GPUVertFormat format;
@@ -325,14 +335,32 @@ static struct {
   Vector<float2> verts;
   float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
   float dash_factor = 1.0f, dash_width = 8.0f;
+  /* Which keyframe attribute each attribute id of the immediate format is. */
+  KeyframeAttr attrs[GPU_VERT_ATTR_MAX_LEN] = {};
+  KeyframePoint point;
+  Vector<KeyframePoint> points;
 } imm;
 
 GPUVertFormat *immVertexFormat()
 {
   imm.format = {};
+  std::fill_n(imm.attrs, GPU_VERT_ATTR_MAX_LEN, KEY_ATTR_NONE);
   return &imm.format;
 }
-uint GPU_vertformat_attr_add(GPUVertFormat * /*format*/, StringRef /*name*/, gpu::VertAttrType /*type*/) { return 0; }
+uint GPU_vertformat_attr_add(GPUVertFormat *format, StringRef name, gpu::VertAttrType /*type*/)
+{
+  const uint id = std::min<uint>(format->attr_len, GPU_VERT_ATTR_MAX_LEN - 1);
+  format->attr_len = id + 1;
+  if (format == &imm.format) {
+    imm.attrs[id] = name == "size"         ? KEY_ATTR_SIZE :
+                    name == "color"        ? KEY_ATTR_COLOR :
+                    name == "outlineColor" ? KEY_ATTR_OUTLINE :
+                    name == "flags"        ? KEY_ATTR_FLAGS :
+                                             KEY_ATTR_NONE;
+  }
+  return id;
+}
+static bool keyframe_shapes() { return imm.shader == GPU_SHADER_KEYFRAME_SHAPE; }
 void immBindBuiltinProgram(GPUBuiltinShader shader_id)
 {
   imm.shader = shader_id;
@@ -439,9 +467,16 @@ void immBegin(GPUPrimType prim, uint vertex_len)
   imm.prim = prim;
   imm.verts.clear();
   imm.verts.reserve(vertex_len);
+  imm.points.clear();
 }
 void immBeginAtMost(GPUPrimType prim, uint vertex_len) { immBegin(prim, vertex_len); }
-void immVertex2f(uint /*attr_id*/, float x, float y) { imm.verts.append({x, y}); }
+void immVertex2f(uint /*attr_id*/, float x, float y)
+{
+  imm.verts.append({x, y});
+  if (keyframe_shapes()) {
+    imm.points.append(imm.point);
+  }
+}
 void immVertex2fv(uint attr_id, const float data[2]) { immVertex2f(attr_id, data[0], data[1]); }
 void immVertex3f(uint attr_id, float x, float y, float /*z*/) { immVertex2f(attr_id, x, y); }
 void immVertex3fv(uint attr_id, const float data[3]) { immVertex2f(attr_id, data[0], data[1]); }
@@ -449,10 +484,31 @@ void immVertex3fv(uint attr_id, const float data[3]) { immVertex2f(attr_id, data
 void immAttr4f(uint /*attr_id*/, float r, float g, float b, float a) { immUniformColor4f(r, g, b, a); }
 void immAttr4fv(uint attr_id, const float data[4]) { immAttr4f(attr_id, data[0], data[1], data[2], data[3]); }
 void immAttr3fv(uint attr_id, const float data[3]) { immAttr4f(attr_id, data[0], data[1], data[2], 1.0f); }
-void immAttr4ub(uint /*attr_id*/, uchar r, uchar g, uchar b, uchar a) { immUniformColor4ub(r, g, b, a); }
+void immAttr4ub(uint attr_id, uchar r, uchar g, uchar b, uchar a)
+{
+  if (!keyframe_shapes()) {
+    immUniformColor4ub(r, g, b, a);
+    return;
+  }
+  uchar *color = imm.attrs[attr_id] == KEY_ATTR_OUTLINE ? imm.point.outline : imm.point.color;
+  color[0] = r;
+  color[1] = g;
+  color[2] = b;
+  color[3] = a;
+}
 void immAttr4ubv(uint attr_id, const uchar data[4]) { immAttr4ub(attr_id, data[0], data[1], data[2], data[3]); }
-void immAttr1f(uint /*attr_id*/, float /*x*/) {}
-void immAttr1u(uint /*attr_id*/, uint /*x*/) {}
+void immAttr1f(uint attr_id, float x)
+{
+  if (imm.attrs[attr_id] == KEY_ATTR_SIZE) {
+    imm.point.size = x;
+  }
+}
+void immAttr1u(uint attr_id, uint x)
+{
+  if (imm.attrs[attr_id] == KEY_ATTR_FLAGS) {
+    imm.point.flags = x;
+  }
+}
 void immAttrSkip(uint /*attr_id*/) {}
 
 /* Triangles of a strip or fan, as the GPU assembles them. */
@@ -504,7 +560,22 @@ void immEnd()
     }
     s += '}';
   }
+  else if (imm.prim == GPU_PRIM_POINTS && keyframe_shapes()) {
+    /* Each key's size, fill and outline (RGBA, 0 to 255) and shape flags (GPU_KEYFRAME_SHAPE_*). */
+    std::string &s = command("keys");
+    points_json(s, "points", v);
+    s += ",\"keys\":[";
+    for (const int i : imm.points.index_range()) {
+      const KeyframePoint &p = imm.points[i];
+      char buf[96];
+      SNPRINTF(buf, "%s%.6g,%u,%u,%u,%u,%u,%u,%u,%u,%u", i ? "," : "", p.size, p.color[0], p.color[1], p.color[2], p.color[3],
+               p.outline[0], p.outline[1], p.outline[2], p.outline[3], p.flags);
+      s += buf;
+    }
+    s += "]}";
+  }
   imm.verts.clear();
+  imm.points.clear();
 }
 
 /* As gpu_immediate_util.cc defines it. */
@@ -997,6 +1068,11 @@ EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
   rec.winx = winx;
   rec.winy = winy;
   rec.ortho = {0.0f, float(winx), 0.0f, float(winy)};
+  /* A region draws from the interface's text size, as Blender's regions find the fonts after its widgets' text: a
+   * view's text cache (the NLA's strip names) draws in the default font's last size. */
+  for (Font &f : fonts) {
+    f.size = ui::style_get()->widget.points * UI_SCALE_FAC;
+  }
 }
 
 /* The recording since region_draw_begin, as JSON: what was drawn, the buttons, and the colors of multicolor icons. */

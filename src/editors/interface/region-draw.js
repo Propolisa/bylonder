@@ -45,6 +45,55 @@ function editSource(svg, colors) {
     colors[id] ? group.replace(/fill="[^"]*"/g, `fill="#${colors[id]}"`).replace(/fill:[^;"]*/g, `fill:#${colors[id]}`) : group);
 }
 
+// GPU_KEYFRAME_SHAPE_* (GPU_shader_shared.hh).
+const SHAPE_DIAMOND = 1, SHAPE_CIRCLE = 2, SHAPE_CLIPPED_VERTICAL = 4, SHAPE_CLIPPED_HORIZONTAL = 8, SHAPE_INNER_DOT = 16;
+const rgba = (c) => css(c.map((v) => v / 255));
+// A convex polygon cut to |x| <= h (vertical: |y| <= h), around its center.
+const clipPolygon = (points, h, axis) => {
+  const out = [];
+  for (const sign of [1, -1]) {
+    const inside = (p) => sign * p[axis] <= h, kept = [];
+    (out.length ? out.splice(0) : points).forEach((p, i, all) => {
+      const q = all[(i + 1) % all.length];
+      if (inside(p)) kept.push(p);
+      if (inside(p) !== inside(q)) {
+        const t = (sign * h - p[axis]) / (q[axis] - p[axis]);
+        kept.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]);
+      }
+    });
+    out.push(...kept);
+  }
+  return out;
+};
+// A keyframe shape as gpu_shader_keyframe_shape_vert.glsl and _frag.glsl draw it: a diamond, circle or square (clipped
+// diamond) of the key's size on the pixel grid, filled and outlined, with an inner dot.
+function drawKeyShape(ctx, px, py, size, fill, outline, flags) {
+  if (!(flags & (SHAPE_DIAMOND | SHAPE_CIRCLE | SHAPE_CLIPPED_VERTICAL | SHAPE_CLIPPED_HORIZONTAL))) flags |= SHAPE_DIAMOND;
+  const x = Math.round(px - 0.5) + 0.5, y = Math.round(py - 0.5) + 0.5;
+  const halfWidth = 0.06 + (size - 10) * 0.04, lineWidth = halfWidth + 1, radius = Math.round(0.5 * size) + halfWidth;
+  const square = Math.round(radius * Math.SQRT1_2);
+  ctx.beginPath();
+  if (flags & SHAPE_CIRCLE) ctx.arc(x, y, radius * Math.sqrt(2 / Math.PI));
+  else {
+    let polygon = flags & SHAPE_DIAMOND ? [[radius, 0], [0, radius], [-radius, 0], [0, -radius]] : [[square, square], [-square, square], [-square, -square], [square, -square]];
+    if (flags & SHAPE_CLIPPED_HORIZONTAL) polygon = clipPolygon(polygon, square, 0);
+    if (flags & SHAPE_CLIPPED_VERTICAL) polygon = clipPolygon(polygon, square, 1);
+    polygon.forEach(([dx, dy], i) => (i ? ctx.lineTo(x + dx, y + dy) : ctx.moveTo(x + dx, y + dy)));
+    ctx.closePath();
+  }
+  ctx.fillStyle = rgba(fill);
+  ctx.fill();
+  ctx.lineWidth = 2 * lineWidth - 1;
+  ctx.strokeStyle = rgba(outline);
+  ctx.stroke();
+  if (flags & SHAPE_INNER_DOT) {
+    ctx.beginPath();
+    ctx.arc(x, y, lineWidth * 1.6 - 0.5);
+    ctx.fillStyle = rgba(outline);
+    ctx.fill();
+  }
+}
+
 // Draws a recording ({ draw: [...] }) on a context (svg-context.js) for a region `height` pixels high, in Blender's
 // order. An icon is drawn as blf_glyph_cache_add_svg places it: `size / 1600` of its document, in its size-square.
 export function drawRecording(ctx, { draw, iconColors = {} }, { height }) {
@@ -95,6 +144,11 @@ export function drawRecording(ctx, { draw, iconColors = {} }, { height }) {
         roundRect(ctx, x0 + w, y(y1) + w, x1 - w, y(y0) - w, op.radius - w, op.corners);
         ctx.fillStyle = css(op.inner);
         ctx.fill();
+      }
+    } else if (op.op === 'keys') {
+      // Each key: size, fill (RGBA 0 to 255), outline, flags.
+      for (let i = 0, k = 0; i < op.points.length; i += 2, k += 10) {
+        drawKeyShape(ctx, op.points[i], y(op.points[i + 1]), op.keys[k], op.keys.slice(k + 1, k + 5), op.keys.slice(k + 5, k + 9), op.keys[k + 9]);
       }
     } else if (op.op === 'text') {
       if (op.textClip) {
