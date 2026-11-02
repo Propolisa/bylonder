@@ -987,6 +987,23 @@ const checks = {
     await app.until((b, p) => b.views.input.editorCamera.position.x !== p[0], before);
   },
 
+  // Closing an editor frees its area in Blender's window; the other areas keep theirs.
+  async "Preferences opened and closed three times leave the app working"() {
+    for (let i = 0; i < 3; i++) {
+      const prefs = await openPreferences();
+      await section(prefs, i % 2 ? "Keymap" : "Input");
+      await prefs.getByRole("button", { name: "Close" }).click();
+    }
+    await app.click(0.9, 0.9);
+    await expectStats(({ Objects }) => Objects[0] === 0);
+    await app.click();
+    await expectStats(({ Objects }) => Objects[0] === 1);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => !b.world.editMode.active);
+  },
+
   async "a rebound key runs its operator, and the Preferences are kept over a reload"() {
     await setInput(EMULATE_NUMPAD);
     // Keymap: Object Mode's Delete on X rebound to Y in its key field.
