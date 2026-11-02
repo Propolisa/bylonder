@@ -95,7 +95,8 @@ import { blenderMain } from "./bmesh/bmesh-wasm.js";
 import { createTopbarArea } from "./editors/space_topbar/topbar-area.js";
 import * as blenderAreas from "./windowmanager/wm-areas.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
-import { updateImageTextures, onImageTexturesChanged, imageTexture } from "./imbuf/image-textures.js";
+import * as imageTextures from "./imbuf/image-textures.js";
+const { updateImageTextures, onImageTexturesChanged, imageTexture } = imageTextures;
 import { mountImageEditor } from "./editors/space_image/image-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { setFileselectHost } from "./windowmanager/wm-fileselect.js";
@@ -301,7 +302,7 @@ window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreference
     variants: variants.filter(([area, id]) => variantRuns(area, id)).map((item) => item.join(" ")) }), get editor() { return editor; }, get rna() { return blenderRNA; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; }, get sceneAudio() { return sceneAudio; }, get scenes() { return hostScenes(); },
   get mainScene() { return mainScene(); },
   // Modules of this window for tests (an import of the page's own would be a second instance).
-  modules: { bpyRna, shaderNodes } };
+  modules: { bpyRna, shaderNodes, imageTextures } };
 let remember = input.remember,
   lastOverride = "";
 const withStores = (scene) => ({ ...scene, stores: sdk.values(), ...documentState.capture({ save: true }) });
@@ -503,6 +504,7 @@ const tools = createView3DTools({
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
 world.mainSync.onEvaluated(saveOverrides);
+engine.onContextRestoredObservable.add(() => world.mainSync.redrawAll());
 // The video edit is kept with the action, the scene data saved whatever Remember Scene Edits says, and in Main's scene
 // as a custom property, so a .blend carries it too.
 {

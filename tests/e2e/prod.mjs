@@ -157,6 +157,32 @@ try {
     });
   }
 
+  // A lost WebGL context, once the module's memory has grown: its restore draws the scene as before, and Blender's
+  // images' textures (a byte and a float buffer) hold their pixels again, uploaded anew from Blender.
+  await step("a lost WebGL context is restored from Blender", async () => {
+    const texturePixels = () => app.bylonder(async (b) => {
+      const read = async (name) => Array.from(await b.modules.imageTextures.imageTexture(b.modules.bpyRna.blendData().images.get(name), b.world.scene).readPixels());
+      return [await read("Byte"), await read("Float")];
+    });
+    await app.bylonder((b) => {
+      for (const [name, float] of [["Byte", false], ["Float", true]]) b.modules.bpyRna.blendData().images.new(name, 16, 16, true, float).generated_type = "UV_GRID";
+    });
+    const canvas = frame.locator(".viewport-canvas").first(), pixels = await texturePixels();
+    await app.bylonder((b) => { b.runOperator("mesh.primitive_grid_add", { x_subdivisions: 500, y_subdivisions: 500 }); b.runOperator("object.delete", {}); });
+    await app.settled();
+    const shot = await canvas.screenshot();
+    await app.bylonder((b) => new Promise((restored) => {
+      const engine = b.world.scene.getEngine(), lose = engine._gl.getExtension("WEBGL_lose_context");
+      engine.onContextRestoredObservable.addOnce(() => restored());
+      engine.onContextLostObservable.addOnce(() => setTimeout(() => lose.restoreContext(), 0));
+      lose.loseContext();
+    }));
+    await app.settled();
+    assert.deepEqual(await texturePixels(), pixels, "the images' textures hold Blender's pixels");
+    assert.ok((await canvas.screenshot()).equals(shot), "the 3D View draws as before");
+    noErrors("restoring the WebGL context");
+  });
+
   // Examples made in Blender open with every object of Main in the scene sync, once (an armature left out of it was
   // invisible to every tool), and without a page error.
   for (const example of ["Rigged Character", "Hair Dynamics"]) {

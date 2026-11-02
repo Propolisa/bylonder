@@ -47,16 +47,21 @@ function upload(engine, image, pointer) {
   if (!buffer) return false;
   // The texture has every change so far: the next collect gives only those after it (a new user's first is all of it).
   x.image_partial_update_collect(pointer, image.user, 0, 0);
-  const { width, height, float, srgb } = buffer, internal = image.internal;
-  if (internal && internal.width === width && internal.height === height && internal.type === (float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE) && internal._useSRGBBuffer === srgb) {
-    engine.updateRawTexture(internal, buffer.pixels, Constants.TEXTUREFORMAT_RGBA, false, null, internal.type, srgb);
-    engine.generateMipmaps?.(internal);
-    return true;
+  const { width, height, float, srgb } = buffer, internal = image.internal, type = float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE;
+  if (!(internal && internal.width === width && internal.height === height && internal.type === type && internal._useSRGBBuffer === srgb)) {
+    // Made empty, then filled by a call that keeps no view of the module's memory: a lost context's restore makes it
+    // empty again, and the scene's redrawAll fills it.
+    const created = engine.createRawTexture(null, width, height, Constants.TEXTUREFORMAT_RGBA, true, false, Texture.TRILINEAR_SAMPLINGMODE, null, type, 0, srgb);
+    if (internal) internal._swapAndDie(created);
+    else image.internal = created;
   }
-  const created = engine.createRawTexture(buffer.pixels, width, height, Constants.TEXTUREFORMAT_RGBA, true, false,
-    Texture.TRILINEAR_SAMPLINGMODE, null, float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE, 0, srgb);
-  if (internal) { internal._swapAndDie(created); } else image.internal = created;
+  engine.updateTextureData(image.internal, buffer.pixels, 0, 0, width, height, 0, 0, true);
   return true;
+}
+
+// Every image's texture filled again from Blender's buffer (after a lost context).
+export function uploadImageTextures(engine) {
+  for (const image of images.values()) upload(engine, image, image.pointer);
 }
 
 // Blender's changes to an image since its texture last followed them: all of it, or its changed regions.
