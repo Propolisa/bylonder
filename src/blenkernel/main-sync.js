@@ -31,7 +31,7 @@ import { MultiMaterial, VertexData } from '@babylonjs/core';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
-import { ID_RECALC_TRANSFORM, ID_RECALC_GEOMETRY, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
+import { ID_RECALC_TRANSFORM, ID_RECALC_SHADING, ID_RECALC_SYNC_TO_EVAL } from '../bmesh/bmesh-wasm.js';
 import { differencesPBR } from './material/principled-gltf.js';
 
 const TRANSFORM = new Set(['location', 'rotation_mode', 'rotation_euler', 'rotation_quaternion', 'scale']);
@@ -350,19 +350,17 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (entry.type !== 'MESH' || !given?.length) return;
     node.metadata.wbModifiers = node.metadata.wbModifiers.filter((m) => !mainDefinition(m.type));
     ownMesh(entry);
-    for (const { type, values, showViewport, showRender } of given) writeModifier(blender.addModifier(entry.ob, mainDefinition(type).mesh.type), type, { values, showViewport, showRender }, modifierLinks);
-    blender.relationsChanged();
+    for (const { type, values, showViewport, showRender } of given) writeModifier(blender, entry.ob, blender.addModifier(entry.ob, mainDefinition(type).mesh.type), { values, showViewport, showRender }, modifierLinks);
   }
   // Blender's code changing an object (its modifiers, its Mesh data, which becomes Main's), then evaluated and drawn: fn(ob).
-  // What it points at (a texture, an object) is a relation of the depsgraph's.
+  // Blender's code tags what it changes in its Main, and the relations only where they change (a pointer set, a modifier
+  // added).
   function edit(node, fn) {
     flush(false);
     const entry = objects.get(node);
     if (!entry) return undefined;
     ownMesh(entry);
-    const result = fn(entry.ob);
-    blender.tag(entry.ob, ID_RECALC_GEOMETRY);
-    blender.relationsChanged();
+    const result = blender.current(() => fn(entry.ob));
     evaluate();
     return result;
   }

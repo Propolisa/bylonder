@@ -2,8 +2,9 @@
 // showViewport, showRender, values }), read from its ModifierData and written into it. A textured modifier's texture is
 // its texture record's id, a scene modifier's object its node's id; `links` maps them both ways: { textureId(tex),
 // texture(id), nodeId(ob), object(id) }.
-import { blenderModifierDefinitions, sceneModifierDefinitions, MODE, MODIFIER_REALTIME, MODIFIER_RENDER } from './blender.js';
+import { blenderModifierDefinitions, sceneModifierDefinitions, MODIFIER_REALTIME, MODIFIER_RENDER } from './blender.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
+import { pointerStruct, structFind, idStruct, inPythonContext } from '../python/bpy_rna.js';
 
 const { exports: x } = blenderModule;
 const DEFINITIONS = [...blenderModifierDefinitions, ...sceneModifierDefinitions];
@@ -24,18 +25,21 @@ export function readModifier({ type, name, mode, md }, links) {
   return { id: name, type: definition.id, name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER), values };
 }
 
-// Writes what a change gives of a modifier's settings and modes into its ModifierData.
-export function writeModifier(md, type, { values = {}, showViewport, showRender }, links) {
-  const { mesh } = mainDefinition(type), dv = view();
-  const settings = Object.fromEntries(Object.entries(values).filter(([path]) => path !== 'texture' && path !== 'object'));
-  mesh.write(settings)(dv, md);
-  if (mesh.textured && 'texture' in values) x.modifier_texture_set(md, links.texture(values.texture));
-  if (mesh.scene && 'object' in values) view().setUint32(md + mesh.object, links.object(values.object), true);
-  const bits = [[showViewport, MODIFIER_REALTIME], [showRender, MODIFIER_RENDER]].filter(([shown]) => shown !== undefined);
-  for (const [shown, bit] of bits) {
-    const mode = view().getInt32(md + MODE, true);
-    view().setInt32(md + MODE, shown ? mode | bit : mode & ~bit, true);
-  }
+// Writes what a change gives of a modifier's settings and modes through RNA in its Main (a BlenderMain), as Blender's
+// Properties editor does: each property's update tags what it changes (the object's geometry; a pointer's, the
+// relations too).
+export function writeModifier(main, ob, md, { values = {}, showViewport, showRender }, links) {
+  const modifier = pointerStruct(structFind('Modifier'), ob, md);
+  const id = (pointer) => (pointer ? idStruct(pointer) : null);
+  const pointers = { texture: (value) => id(links.texture(value)), object: (value) => id(links.object(value)) };
+  const settings = { ...values, ...(showViewport !== undefined && { show_viewport: showViewport }), ...(showRender !== undefined && { show_render: showRender }) };
+  main.current(() => inPythonContext(main.C, () => {
+    for (const [path, value] of Object.entries(settings)) {
+      const [, name, index] = path.match(/^(\w+)(?:\[(\d+)\])?$/), rnaValue = name in pointers ? pointers[name](value) : value;
+      if (index === undefined) modifier[name] = rnaValue;
+      else modifier[name][Number(index)] = rnaValue;
+    }
+  }));
 }
 
 // An object's Blender modifiers in Main (sync: main-sync.js), and their edits by Blender's own editor functions, each
@@ -54,13 +58,13 @@ export function createMainModifiers(sync) {
     },
     add: (node, type, change = {}) => sync.edit(node, (ob) => {
       const md = blender.addModifier(ob, mainDefinition(type).mesh.type);
-      writeModifier(md, type, change, links);
+      writeModifier(blender, ob, md, change, links);
       return nameOf(ob, md);
     }),
     set: (node, name, { name: rename, ...change }) => sync.edit(node, (ob) => {
       const modifier = mdOf(ob, name);
       if (!modifier) return null;
-      writeModifier(modifier.md, definitionOfCode(modifier.type).id, change, links);
+      writeModifier(blender, ob, modifier.md, change, links);
       if (rename) blender.renameModifier(ob, modifier.md, rename);
       return nameOf(ob, modifier.md);
     }),
