@@ -54,15 +54,19 @@ export const SHADER_NODES = {
     return [[name, args.map((a) => (a === 'Vector' && !connected('Vector') ? '$orco' : a)), outs]];
   },
   // node_shader_tex_image.cc, node_shader_gpu_tex_image: an unlinked vector is the default UV map; the Color output's
-  // alpha as the Alpha output's use asks (the texture holds straight alpha, see imbuf/image-textures.js).
+  // alpha as the Alpha output's use asks, from what the texture holds: a float buffer premultiplied, a byte buffer
+  // straight (imbuf/image-textures.js imagePremultiplied), where Blender's holds a straight float image straight.
   ShaderNodeTexImage: (p, decl, { connected, linked, image }) => {
     const ima = image();
     if (!ima) return [['node_tex_image_empty', [], ['@Color', '@Alpha']]];
     const sample = ['Cubic', 'Smart'].includes(p.interpolation) ? 'node_tex_image_cubic' : 'node_tex_image_linear';
-    const clear = ['CHANNEL_PACKED', 'NONE'].includes(ima.alpha_mode) || ima.colorspace_settings.is_data || linked('Alpha');
+    const premul = ima.alpha_mode === 'PREMUL', alpha = linked('Alpha');
+    const steps = ['CHANNEL_PACKED', 'NONE'].includes(ima.alpha_mode) || ima.colorspace_settings.is_data ? ['color_alpha_clear']
+      : !ima.is_float ? [alpha ? 'color_alpha_clear' : 'color_alpha_premultiply']
+      : alpha ? ['color_alpha_unpremultiply', !premul && 'color_alpha_clear'] : [premul && 'color_alpha_clear'];
     return [
       [sample, [connected('Vector') ? 'Vector' : '$uv', { image: ima }], ['@Color', '@Alpha']],
-      linked('Color') && [clear ? 'color_alpha_clear' : 'color_alpha_premultiply', ['@Color'], ['@Color']],
+      ...(linked('Color') ? steps.filter(Boolean).map((name) => [name, ['@Color'], ['@Color']]) : []),
     ];
   },
   // node_shader_color_ramp.cc, gpu_shader_valtorgb

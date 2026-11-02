@@ -13,7 +13,7 @@ const SRGB = 0, DATA = 2;
 const MAX_REGIONS = 64;
 
 // The image's buffer as it is drawn: its float buffer when it has one (scene linear, premultiplied as Blender keeps
-// it), else its byte buffer (sRGB unless its color space is data or linear); null while it has none.
+// it, which its samplers handle: imagePremultiplied), else its byte buffer (sRGB unless its color space is data or linear); null while it has none.
 function imageBuffer(image) {
   const p = x.image_buffer(image, 0) >>> 0;
   if (!p) return null;
@@ -23,23 +23,19 @@ function imageBuffer(image) {
     pixels: float ? new Float32Array(x.memory.buffer, floats >>> 0, width * height * 4) : new Uint8Array(x.memory.buffer, bytes >>> 0, width * height * 4) };
 }
 
-// A float buffer's pixels straight, as Babylon's materials read alpha: Blender keeps float buffers premultiplied.
-function straight(pixels) {
-  const out = new Float32Array(pixels);
-  for (let i = 0; i < out.length; i += 4) {
-    const a = out[i + 3];
-    if (a > 0 && a < 1) { out[i] /= a; out[i + 1] /= a; out[i + 2] /= a; }
+// A region of the buffer uploaded from it in place: WebGL2's unpack row length and skips pick its rows and columns.
+function uploadRegion(engine, texture, buffer, [xmin, ymin, xmax, ymax]) {
+  const gl = engine._gl, unpack = (rowLength, skipPixels, skipRows) => {
+    gl?.pixelStorei(gl.UNPACK_ROW_LENGTH, rowLength);
+    gl?.pixelStorei(gl.UNPACK_SKIP_PIXELS, skipPixels);
+    gl?.pixelStorei(gl.UNPACK_SKIP_ROWS, skipRows);
+  };
+  unpack(buffer.width, xmin, ymin);
+  try {
+    engine.updateTextureData(texture, buffer.pixels, xmin, ymin, xmax - xmin, ymax - ymin);
+  } finally {
+    unpack(0, 0, 0);
   }
-  return out;
-}
-// The rows and columns of a region of the buffer, tightly packed (texSubImage2D's source).
-function region(buffer, [xmin, ymin, xmax, ymax]) {
-  const w = xmax - xmin, h = ymax - ymin, out = new buffer.pixels.constructor(w * h * 4);
-  for (let row = 0; row < h; row++) {
-    const from = ((ymin + row) * buffer.width + xmin) * 4;
-    out.set(buffer.pixels.subarray(from, from + w * 4), row * w * 4);
-  }
-  return buffer.float ? straight(out) : out;
 }
 
 // image: { session_uid, user (its PartialUpdateUser), internal (Babylon's GPU texture), stale (mipmaps behind) }.
@@ -53,11 +49,11 @@ function upload(engine, image, pointer) {
   x.image_partial_update_collect(pointer, image.user, 0, 0);
   const { width, height, float, srgb } = buffer, internal = image.internal;
   if (internal && internal.width === width && internal.height === height && internal.type === (float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE) && internal._useSRGBBuffer === srgb) {
-    engine.updateRawTexture(internal, float ? straight(buffer.pixels) : buffer.pixels, Constants.TEXTUREFORMAT_RGBA, false, null, internal.type, srgb);
+    engine.updateRawTexture(internal, buffer.pixels, Constants.TEXTUREFORMAT_RGBA, false, null, internal.type, srgb);
     engine.generateMipmaps?.(internal);
     return true;
   }
-  const created = engine.createRawTexture(float ? straight(buffer.pixels) : buffer.pixels, width, height, Constants.TEXTUREFORMAT_RGBA, true, false,
+  const created = engine.createRawTexture(buffer.pixels, width, height, Constants.TEXTUREFORMAT_RGBA, true, false,
     Texture.TRILINEAR_SAMPLINGMODE, null, float ? Constants.TEXTURETYPE_FLOAT : Constants.TEXTURETYPE_UNSIGNED_BYTE, 0, srgb);
   if (internal) { internal._swapAndDie(created); } else image.internal = created;
   return true;
@@ -80,7 +76,7 @@ function follow(engine, image, pointer) {
   if (!buffer || buffer.width !== image.internal.width || buffer.height !== image.internal.height) return upload(engine, image, pointer);
   for (const r of image.regions) {
     const clipped = [Math.max(0, r[0]), Math.max(0, r[1]), Math.min(buffer.width, r[2]), Math.min(buffer.height, r[3])];
-    if (clipped[2] > clipped[0] && clipped[3] > clipped[1]) engine.updateTextureData(image.internal, region(buffer, clipped), clipped[0], clipped[1], clipped[2] - clipped[0], clipped[3] - clipped[1]);
+    if (clipped[2] > clipped[0] && clipped[3] > clipped[1]) uploadRegion(engine, image.internal, buffer, clipped);
   }
   image.stale = true;
   return true;
@@ -158,6 +154,10 @@ export function sample(texture, anisotropy, mode) {
   texture.anisotropicFilteringLevel = anisotropy;
   if (texture.samplingMode !== mode) texture.updateSamplingMode(mode);
 }
+
+// Whether an image's texture holds premultiplied alpha (BKE_image_has_gpu_texture_premultiplied_alpha): a float buffer's,
+// uploaded as Blender keeps it.
+export const imagePremultiplied = (texture) => texture?.getInternalTexture()?.type === Constants.TEXTURETYPE_FLOAT;
 
 // What redraws the views when an image's texture changed.
 export function onImageTexturesChanged(fn) { woken = fn; }
