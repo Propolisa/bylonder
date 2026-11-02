@@ -108,6 +108,9 @@ const notify = (text) => {
   toastTimer = setTimeout(() => (el.style.display = "none"), 2800);
 };
 const channel = new URLSearchParams(location.search).get("channel");
+// viewport.html's startup reporter hands over to this window's own reporting.
+removeEventListener("error", globalThis.startupError, true);
+removeEventListener("unhandledrejection", globalThis.startupError);
 const send = (type, payload) =>
   parent.postMessage({ channel, type, payload }, location.origin);
 for (const level of ["log", "warn", "error"]) {

@@ -528,7 +528,10 @@ async function run({ keepParked = false } = {}) {
   await save();
   $("run-status").textContent = "Preparing modules…";
   performance.mark("bl:run");
-  const next = await publishRun(structuredClone(project));
+  const next = await publishRun(structuredClone(project)).catch((error) => {
+    $("run-status").textContent = "Run failed";
+    throw error;
+  });
   performance.mark("bl:published");
   if (generation !== runGeneration) {
     await removeRun(next.base);

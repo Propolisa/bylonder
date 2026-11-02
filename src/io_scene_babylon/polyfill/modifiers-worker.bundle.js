@@ -184,7 +184,12 @@ var gap = (name) => {
 };
 var missing = new Proxy({}, { get: (_, name) => (...args) => provided[name] ? provided[name](...args) : gap(name) });
 var compiled = /* @__PURE__ */ new Map();
-var read = async (url) => url.protocol === "file:" ? process.getBuiltinModule("fs/promises").readFile(url) : (await fetch(url)).arrayBuffer();
+async function read(url) {
+  if (url.protocol === "file:") return process.getBuiltinModule("fs/promises").readFile(url);
+  const response = await fetch(url);
+  if (!response.ok) throw Error(`${url}: ${response.status} ${response.statusText}`);
+  return response.arrayBuffer();
+}
 var compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then((bytes) => WebAssembly.compile(bytes))).get(url.href);
 async function instantiate(url) {
   let memory;

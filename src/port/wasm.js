@@ -184,7 +184,12 @@ const missing = new Proxy({}, { get: (_, name) => (...args) => (provided[name] ?
 // Compiled modules by URL, compiled once per realm; a worker is given its creator's (provideModule) instead of
 // compiling the bytes again.
 const compiled = new Map();
-export const read = async (url) => (url.protocol === 'file:' ? process.getBuiltinModule('fs/promises').readFile(url) : (await fetch(url)).arrayBuffer());
+export async function read(url) {
+  if (url.protocol === 'file:') return process.getBuiltinModule('fs/promises').readFile(url);
+  const response = await fetch(url);
+  if (!response.ok) throw Error(`${url}: ${response.status} ${response.statusText}`);
+  return response.arrayBuffer();
+}
 export const compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then((bytes) => WebAssembly.compile(bytes))).get(url.href);
 export const provideModule = (url, module) => compiled.set(url.href, Promise.resolve(module));
 
