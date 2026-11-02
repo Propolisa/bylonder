@@ -694,6 +694,23 @@ const checks = {
     assert.deepEqual(view, { rendered: false, shading: "solid", overlaysOff: false });
   } },
 
+  // An orthographic scene camera frames the scene through Numpad 0 by its Orthographic Scale, as in Blender.
+  "an orthographic camera shows the scene through Numpad 0": { open: {}, async run() {
+    await app.bylonder((b) => b.runOperator("wm.context_set_enum", { data_path: "scene.camera.data.type", value: "ORTHO" }));
+    await app.settled();
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("Numpad0");
+    await app.until((b) => b.views.input.state.cameraView);
+    const cube = await app.bylonder((b) => {
+      const { camera } = b.views.input, engine = b.world.engine, w = engine.getRenderWidth(), h = engine.getRenderHeight();
+      const p = BABYLON.Vector3.Project(b.world.scene.getMeshByName("Cube").getAbsolutePosition(), BABYLON.Matrix.Identity(), camera.getTransformationMatrix(), { x: 0, y: 0, width: w, height: h });
+      return { ortho: camera.mode === BABYLON.Camera.ORTHOGRAPHIC_CAMERA, x: p.x / w, y: p.y / h, width: camera.orthoRight - camera.orthoLeft };
+    });
+    assert.ok(cube.ortho, "the camera is orthographic");
+    assert.ok(cube.width > 1 && cube.width < 100, `ortho bounds from the scale, not pixels: ${cube.width}`);
+    assert.ok(cube.x > 0.1 && cube.x < 0.9 && cube.y > 0.1 && cube.y < 0.9, `the cube is in view: ${cube.x}, ${cube.y}`);
+  } },
+
   // Align Active Camera to View (Ctrl Alt Numpad 0) moves the scene camera to the view's eye and looks through it.
   "Align Active Camera to View moves the camera to the view": { open: { example: "Rigged Character", node: "Rig" }, async run() {
     await app.hover(0.5, 0.5);
