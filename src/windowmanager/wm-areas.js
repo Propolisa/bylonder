@@ -43,6 +43,9 @@ function deliver(result) {
   return result;
 }
 
+// The window's queued events, timers and notifiers handled now (an event added outside the page's input: a file
+// dialog's choice, wm-fileselect.js).
+export const tick = () => deliver(blenderWindow().tick());
 // The window's timers (panel animations, operators' timers, jobs) and notifiers run each animation frame while it has any.
 let frame = 0;
 export function ticking() {

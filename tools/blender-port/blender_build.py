@@ -359,8 +359,10 @@ def main():
     link_module(host, out, entries, extra, archives, module_libraries)
 
 
-# Blender's functions the module's API wraps: the UI layout's resolve (ui-tree.cc), and platform.cc's.
-WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender2ui15search_item_addEPNS0_11SearchItemsENS_9StringRefEPviih', *wasm_module.PLATFORM_WRAPPED]
+# Blender's functions the module's API wraps: the UI layout's resolve (ui-tree.cc), the File Browser's opening
+# (fileselect.cc), and platform.cc's.
+WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender2ui15search_item_addEPNS0_11SearchItemsENS_9StringRefEPviih',
+           '_ZN7blender23WM_event_add_fileselectEPNS_8bContextEPNS_10wmOperatorE', *wasm_module.PLATFORM_WRAPPED]
 
 
 NULL_DATA = os.path.join(WASM, 'null-data.txt')

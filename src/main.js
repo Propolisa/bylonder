@@ -95,6 +95,7 @@ import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { updateImageTextures, onImageTexturesChanged, imageTexture } from "./imbuf/image-textures.js";
 import { mountImageEditor } from "./editors/space_image/image-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
+import "./windowmanager/wm-fileselect.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
 // Boot phases, as performance marks (the workspace marks its own).
