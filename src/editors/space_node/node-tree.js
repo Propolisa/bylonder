@@ -4,7 +4,7 @@
 // here and ends in `changed(rebuild)`.
 import { blendData } from '../../python/bpy_rna.js';
 import { InputBlock, NodeMaterial, NodeMaterialBlockConnectionPointTypes as M, NodeRenderGraphBlockConnectionPointTypes as R } from '@babylonjs/core';
-import { isBlenderShader, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
+import { isBlenderShader, OUTPUT_VALUES, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
 import { BlenderCompositorBlock, compositorNodeClasses } from '../../nodes/blender/compositor-nodes.js';
 import { availability } from '../../nodes/blender/declarations.js';
 import { categoryOf } from './block-categories.js';
@@ -123,10 +123,12 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     let inputs, outs, buttons, tag, label, ramp = null;
     if (blender) {
       const shown = availability(blender, block.properties, block.values);
-      outs = blender.outputs.filter((s) => shown.outputs.has(s.identifier)).map((s) => ({ ...socket(block.getOutputByName(s.identifier) ?? { name: s.identifier }, s) }));
+      const valueOf = (id, s) => ({ socket: s, get: () => block.values[id], set: (v) => { block.values[id] = v; changed(s.type === 'MENU'); } });
+      outs = blender.outputs.filter((s) => shown.outputs.has(s.identifier)).map((s) => ({ ...socket(block.getOutputByName(s.identifier) ?? { name: s.identifier }, s),
+        value: OUTPUT_VALUES[block.idname]?.includes(s.identifier) ? valueOf('=' + s.identifier, s) : undefined }));
       inputs = blender.inputs.filter((s) => shown.inputs.has(s.identifier)).map((s) => {
         const point = block.getInputByName(s.identifier) ?? { name: s.identifier, isConnected: false };
-        return { ...socket(point, s), label: shown.labels[s.identifier] ?? s.name, value: s.hide_value ? null : { socket: s, get: () => block.values[s.identifier], set: (v) => { block.values[s.identifier] = v; changed(s.type === 'MENU'); } } };
+        return { ...socket(point, s), label: shown.labels[s.identifier] ?? s.name, value: s.hide_value ? null : valueOf(s.identifier, s) };
       });
       // An ID pointer (an Image Texture's image, template_ID) chooses among Main's IDs of its type by name.
       buttons = Object.entries(blender.properties).filter(([key, p]) => (['ENUM', 'BOOLEAN'].includes(p.type) || (p.type === 'POINTER' && key in ID_COLLECTIONS)) && drawn(block.idname, key, block.properties)).map(([key, p]) => ({
@@ -280,6 +282,8 @@ const itemName = (decl, key, value) => decl.properties[key].items.find(([id]) =>
 const LABELS = {
   ShaderNodeMath: (p, decl) => itemName(decl, 'operation', p.operation),
   ShaderNodeMix: (p, decl) => (p.data_type === 'RGBA' ? itemName(decl, 'blend_type', p.blend_type) : undefined),
+  ShaderNodeVectorMath: (p, decl) => itemName(decl, 'operation', p.operation),
+  ShaderNodeMixRGB: (p, decl) => itemName(decl, 'blend_type', p.blend_type),
 };
 
 // The enum and boolean properties a node draws in its body, as its draw_buttons does; the rest are in the sidebar.

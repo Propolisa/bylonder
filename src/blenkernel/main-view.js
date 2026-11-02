@@ -22,7 +22,7 @@ import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw
 import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
-import { nodeMaterialFromTree, nodeProperties } from '../nodes/blender/shader-nodes.js';
+import { attributesWanted, nodeMaterialFromTree, nodeProperties, outputValues } from '../nodes/blender/shader-nodes.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
@@ -251,7 +251,10 @@ export function createMainView(state) {
   function nodeTreeOf(ma) {
     const { nodes, links } = blender.nodeTree(ma), rnaNodes = idStruct(ma).node_tree?.nodes;
     if (!rnaNodes || !nodes.length) return null;
-    return { links, nodes: nodes.map((node) => ({ ...node, values: node.inputs, properties: nodeProperties(rnaNodes.get(node.name)) })) };
+    return { links, nodes: nodes.map((node) => {
+      const rnaNode = rnaNodes.get(node.name);
+      return { ...node, values: { ...node.inputs, ...outputValues(rnaNode) }, properties: nodeProperties(rnaNode) };
+    }) };
   }
   // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
   function adoptWorld(wo, scene, warnings) {
@@ -538,6 +541,11 @@ export function createMainView(state) {
     if (world.modifiers) world.modifiers.draw(node, mesh, errors);
     else mesh_batch_cache_apply(mesh, node);
   }
+  // A mesh whose materials read attributes its draw buffers lack is drawn again with them.
+  attributesWanted.add((node) => {
+    const entry = objects.get(node);
+    if (entry && drawsGeometry(entry)) drawGeometry(entry);
+  });
   // What a runtime other than Blender's evaluates from (runtimes.js): Main, the objects' entries and how they draw.
   const runtimeView = { world, scene: world.scene, blender, entries: () => objects.values(), drawGeometry, drawMesh, drawsGeometry };
 

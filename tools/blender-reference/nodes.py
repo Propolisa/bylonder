@@ -1,6 +1,6 @@
 # Writes Blender's shader and compositor node types as Blender declares them: per node its label, description, color
 # tag, width, sockets (identifier, name, type, default, range, subtype, shape, color) and properties (enums with their
-# items, and the sockets and color tag each item gives); and the Node Editor theme. The nodes are the types bpy.types
+# items, their values where not their order, and the sockets and color tag each item gives); and the Node Editor theme. The nodes are the types bpy.types
 # has and the idnames Blender's Add menus name (some are aliases, as ShaderNodeBsdfGlossy is of
 # ShaderNodeBsdfAnisotropic).
 # usage: blender -b --factory-startup --python tools/blender-reference/nodes.py -- OUT.json
@@ -52,6 +52,9 @@ def prop(node, p):
     d = {"name": p.name, "type": p.type}
     if p.type == "ENUM":
         d["items"] = [[i.identifier, i.name, i.description] for i in p.enum_items]
+        # The DNA values GPU code passes, where they are not the items' order.
+        if any(i.value != k for k, i in enumerate(p.enum_items)):
+            d["values"] = {i.identifier: i.value for i in p.enum_items}
         d["default"] = getattr(node, p.identifier)
         variants = {}
         for identifier, _, _ in d["items"]:

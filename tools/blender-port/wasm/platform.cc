@@ -1,7 +1,9 @@
-/* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, and
- * the thread count of one thread. */
+/* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, memory
+ * that grows in large steps, and the thread count of one thread. */
 #include "BLI_mmap.h"
+#include <cerrno>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <sys/stat.h>
@@ -49,6 +51,31 @@ extern "C" __attribute__((weak)) unsigned getuid() { return 0; }
 extern "C" __attribute__((weak)) struct passwd *getpwuid(unsigned) { return nullptr; }
 /* port-override: WASI cannot create a unique directory; Blender then keeps its temporary files in its temp directory. */
 extern "C" __attribute__((weak)) char *mkdtemp(char *) { return nullptr; }
+/* port-override: wasi-libc's sbrk grows the memory by the pages malloc asks for, and V8 answers every growth with a
+ * full garbage collection of the page's heap (its new buffer counts as that much external memory): the memory grows
+ * by at least 16 MiB at a time, which malloc's later requests take from. */
+extern "C" void *sbrk(intptr_t increment)
+{
+  constexpr uintptr_t page = 65536, step = 256;
+  static uintptr_t brk = 0;
+  const uintptr_t size = __builtin_wasm_memory_size(0) * page;
+  if (!brk) {
+    brk = size;
+  }
+  const uintptr_t end = brk + uintptr_t(increment);
+  if (end > size) {
+    const uintptr_t pages = (end - size + page - 1) / page;
+    if (__builtin_wasm_memory_grow(0, pages < step ? step : pages) == SIZE_MAX &&
+        __builtin_wasm_memory_grow(0, pages) == SIZE_MAX)
+    {
+      errno = ENOMEM;
+      return reinterpret_cast<void *>(-1);
+    }
+  }
+  void *old = reinterpret_cast<void *>(brk);
+  brk = end;
+  return old;
+}
 
 /* Weak: where Blender's own threads.cc builds (over wasm/include/pthread.h) it gives the same one-thread answers. */
 #define WEAK __attribute__((weak))

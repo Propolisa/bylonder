@@ -11,7 +11,8 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh.js';
 import { mesh_batch_cache_vertex_buffers } from './mesh-batch-buffers.js';
-import { DRAW_LINES } from '../bmesh/bmesh-wasm.js';
+import { DRAW_LINES, DRAW_TANGENTS } from '../bmesh/bmesh-wasm.js';
+import { attributeKind, meshAttributes, TANGENT_KIND } from '../nodes/blender/attributes.js';
 
 // VertexData's field of each vertex buffer kind it can hold.
 const BUFFERS = { [VertexBuffer.PositionKind]: 'positions', [VertexBuffer.NormalKind]: 'normals', [VertexBuffer.UVKind]: 'uvs', [VertexBuffer.ColorKind]: 'colors', [VertexBuffer.TangentKind]: 'tangents' };
@@ -110,8 +111,9 @@ export function mesh_batch_cache_edge_detection(babylonMesh) {
 // extracted in the module), else built here; loose edges a line child that picks as its owner.
 export function mesh_batch_cache_apply(mesh, babylonMesh) {
   babylonMesh.makeGeometryUnique?.();
-  const buffers = mesh.drawBuffers?.(DRAW_LINES);
-  setSubMeshes(babylonMesh, buffers ? drawn(babylonMesh, buffers) : built(babylonMesh, mesh));
+  const read = meshAttributes(babylonMesh);
+  const buffers = mesh.drawBuffers?.(DRAW_LINES | (read.tangents ? DRAW_TANGENTS : 0), read.names);
+  setSubMeshes(babylonMesh, buffers ? drawn(babylonMesh, buffers, read.names) : built(babylonMesh, mesh));
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
   if (loose.length) {
@@ -134,15 +136,19 @@ function built(babylonMesh, mesh) {
   return data.groups;
 }
 
-// The geometry of Blender's draw buffers (bmesh-wasm.js drawBuffers), copied out of the module's memory; its material
-// groups, by the triangles of each slot.
-function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tris_by_material: counts, free }) {
+// The geometry of Blender's draw buffers (bmesh-wasm.js drawBuffers), copied out of the module's memory, with the
+// attributes its materials read by `names`; its material groups, by the triangles of each slot.
+function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, attributes, tris_by_material: counts, free }, names) {
   const kinds = [VertexBuffer.PositionKind, VertexBuffer.NormalKind, ...(uvs ? [VertexBuffer.UVKind] : [])];
   removeOthers(babylonMesh, (kind) => kinds.includes(kind));
   babylonMesh.setVerticesData(VertexBuffer.PositionKind, positions.slice(), false);
   babylonMesh.setVerticesBuffer(new VertexBuffer(babylonMesh.getEngine(), normals.slice(), VertexBuffer.NormalKind,
     { size: 3, stride: 4, type: VertexBuffer.SHORT, normalized: true }));
   if (uvs) babylonMesh.setVerticesData(VertexBuffer.UVKind, uvs.slice(), false);
+  const engine = babylonMesh.getEngine(), attribute = (kind, { data, size, normalized }) => babylonMesh.setVerticesBuffer(new VertexBuffer(engine, data.slice(), kind,
+    { size, type: data instanceof Uint16Array ? VertexBuffer.UNSIGNED_SHORT : data instanceof Int16Array ? VertexBuffer.SHORT : VertexBuffer.FLOAT, normalized }));
+  if (tangents) attribute(TANGENT_KIND, { data: tangents, size: 4, normalized: true });
+  attributes.forEach((read, i) => read && attribute(attributeKind(names[i]), read));
   babylonMesh.setIndices(tris.slice(), positions.length / 3);
   faceEdges.set(babylonMesh, lines.slice());
   free();

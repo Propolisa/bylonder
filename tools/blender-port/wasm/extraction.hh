@@ -2,6 +2,9 @@
  * into buffers its context owns; JS reads the header and views the buffers in place. */
 #pragma once
 
+#include <string>
+
+#include "BLI_span.hh"
 #include "BLI_vector.hh"
 #include "bmesh.hh"
 #include "DNA_mesh_types.h"
@@ -59,18 +62,22 @@ struct DrawBuffer {
   const void *data;
   int bytes, type, stride, count;
 };
-/* Read by JS as 32-bit words: a mesh's draw buffers (draw-mesh.cc), absent ones empty, and its triangles by material. */
+/* Read by JS as 32-bit words: a mesh's draw buffers (draw-mesh.cc), absent ones empty, its triangles by material, and
+ * the generic attributes asked for, in the order asked (an attribute's type is its component count, plus 16 for
+ * unsigned and 32 for signed normalized 16-bit components). */
 struct DrawBuffers {
-  DrawBuffer positions, normals, uvs, tris, lines, lines_adjacency;
+  DrawBuffer positions, normals, uvs, tris, lines, lines_adjacency, tangents;
   int materials_num;
   const int *tris_by_material;
+  int attributes_num;
+  const DrawBuffer *attributes;
 };
 /* The index buffers drawn on demand besides the triangles: the face edges (Wireframe) and the edges with their
  * adjacent corners (the outline). */
-enum DrawRequest { DRAW_LINES = 1, DRAW_LINES_ADJACENCY = 2 };
+enum DrawRequest { DRAW_LINES = 1, DRAW_LINES_ADJACENCY = 2, DRAW_TANGENTS = 4 };
 
 /* A mesh object's draw buffers as Blender's draw cache extracts them, valid until the next call or draw_buffers_free. */
-const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &mesh, int what);
+const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &mesh, int what, Span<std::string> attributes = {});
 void draw_buffers_free();
 
 }  // namespace blender

@@ -3,12 +3,14 @@
  * its position, normal and UV, the triangles sorted by material, the face edges and the edges with their adjacent
  * corners. They fill Blender's own dummy GPU backend, whose buffers keep their data in module memory, where JS uploads
  * each from (src/draw/mesh-batch-cache.js) before freeing them. */
+#include "BKE_attribute.hh"
 #include "BKE_mesh_wrapper.hh"
 #include "BKE_object.hh"
 #include "BKE_subdiv_modifier.hh"
 #include "BLI_task.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
+#include "draw_attributes.hh"
 #include "draw_cache_extract.hh"
 #include "dummy/dummy_vertex_buffer.hh"
 #include "gpu_backend.hh"
@@ -87,6 +89,7 @@ using draw::VBOType;
 
 static draw::MeshBatchCache cache;
 static DrawBuffers buffers;
+static Vector<DrawBuffer> attribute_buffers;
 
 /* Blender's axes as Babylon's, (x, y, z) as (x, z, y), in one pass over the positions and the normals; goes when
  * the swap becomes the object's transform (roadmap Optimizations: no CPU copy of vertex data). */
@@ -119,6 +122,17 @@ static DrawBuffer vertex_buffer(VBOType type)
   return {data.data(), int(data.size()), int(vbo->format.attrs[0].type.format), int(vbo->format.stride), int(vbo->vertex_len)};
 }
 
+/* A tangent or generic attribute's buffer, its type as DrawBuffers describes it. */
+static DrawBuffer attribute_buffer(VBOType type)
+{
+  DrawBuffer buffer = vertex_buffer(type);
+  if (buffer.data) {
+    const GPUVertAttr::Type attr = cache.final.buff.vbos.lookup(type)->format.attrs[0].type;
+    buffer.type = attr.comp_len() + (attr.comp_type() == GPU_COMP_U16 ? 16 : attr.comp_type() == GPU_COMP_I16 ? 32 : 0);
+  }
+  return buffer;
+}
+
 static DrawBuffer index_buffer(IBOType type)
 {
   const auto *found = cache.final.buff.ibos.lookup_ptr(type);
@@ -138,7 +152,13 @@ void draw_buffers_free()
   cache.final.loose_geom = {};
 }
 
-const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &mesh, const int what)
+/* An attribute asked for by name, ":color" for the default color attribute (GPU_attribute_default_color). */
+static StringRef attribute_name(const Mesh &mesh, const StringRef name)
+{
+  return name == ":color" ? StringRef(mesh.default_color_attribute ? mesh.default_color_attribute : "") : name;
+}
+
+const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &mesh, const int what, const Span<std::string> attributes)
 {
   draw_buffers_free();
   /* port-override: normals as 16-bit snorm, as Blender's HQ normals give them: Babylon has no 10_10_10_2 vertex type. */
@@ -148,6 +168,23 @@ const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &m
     cache.cd_used.uv.add(uv);
   }
   Vector<VBOType> vbos = {VBOType::Position, VBOType::CornerNormal, VBOType::UVs};
+  /* The attributes the mesh has of those asked for, as a material's GPU attributes request them (mesh_cd_calc_used_gpu_layers). */
+  cache.attr_used.clear();
+  const bke::AttributeAccessor accessor = mesh.attributes();
+  for (const std::string &name : attributes) {
+    if (accessor.contains(attribute_name(mesh, name))) {
+      draw::drw_attributes_add_request(&cache.attr_used, attribute_name(mesh, name));
+    }
+  }
+  for (const int i : cache.attr_used.index_range()) {
+    vbos.append(VBOType(int8_t(VBOType::Attr0) + i));
+  }
+  if (what & DRAW_TANGENTS) {
+    if (const StringRef uv = mesh.active_or_default_uv_map_name(); !uv.is_empty()) {
+      cache.cd_used.tan.add(uv);
+      vbos.append(VBOType::Tangents);
+    }
+  }
   Vector<IBOType> ibos = {IBOType::Tris};
   if (what & DRAW_LINES) {
     ibos.append(IBOType::Lines);
@@ -164,8 +201,16 @@ const DrawBuffers *mesh_draw_buffers(const Scene &scene, Object &object, Mesh &m
   const draw::SortedFaceData &sorted = cache.final.face_sorted;
   buffers = {vertex_buffer(VBOType::Position), vertex_buffer(VBOType::CornerNormal),
              cache.cd_used.uv.is_empty() ? DrawBuffer{} : vertex_buffer(VBOType::UVs), index_buffer(IBOType::Tris),
-             index_buffer(IBOType::Lines), index_buffer(IBOType::LinesAdjacency), int(sorted.tris_num_by_material.size()),
+             index_buffer(IBOType::Lines), index_buffer(IBOType::LinesAdjacency),
+             cache.cd_used.tan.is_empty() ? DrawBuffer{} : attribute_buffer(VBOType::Tangents), int(sorted.tris_num_by_material.size()),
              sorted.tris_num_by_material.data()};
+  attribute_buffers.clear();
+  for (const std::string &name : attributes) {
+    const int i = cache.attr_used.index_of_try(attribute_name(mesh, name));
+    attribute_buffers.append(i == -1 ? DrawBuffer{} : attribute_buffer(VBOType(int8_t(VBOType::Attr0) + i)));
+  }
+  buffers.attributes_num = int(attribute_buffers.size());
+  buffers.attributes = attribute_buffers.data();
   return &buffers;
 }
 

@@ -615,6 +615,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "RGBA",
      "variants": {
       "FLOAT": {
@@ -1370,6 +1396,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "RGBA",
      "variants": {
       "FLOAT": {
@@ -2475,6 +2527,12 @@
        "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness"
       ]
      ],
+     "values": {
+      "BECKMANN": 0,
+      "GGX": 2,
+      "ASHIKHMIN_SHIRLEY": 3,
+      "MULTI_GGX": 4
+     },
      "default": "MULTI_GGX",
      "variants": {
       "BECKMANN": {
@@ -2852,6 +2910,11 @@
        "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness"
       ]
      ],
+     "values": {
+      "BECKMANN": 0,
+      "GGX": 2,
+      "MULTI_GGX": 4
+     },
      "default": "MULTI_GGX",
      "variants": {
       "BECKMANN": {
@@ -3111,6 +3174,12 @@
        "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness"
       ]
      ],
+     "values": {
+      "BECKMANN": 0,
+      "GGX": 2,
+      "ASHIKHMIN_SHIRLEY": 3,
+      "MULTI_GGX": 4
+     },
      "default": "MULTI_GGX",
      "variants": {
       "BECKMANN": {
@@ -3871,6 +3940,11 @@
        "Choose the color of your preference, and the shader will approximate the absorption coefficient to render lookalike hair"
       ]
      ],
+     "values": {
+      "ABSORPTION": 2,
+      "MELANIN": 1,
+      "COLOR": 0
+     },
      "default": "COLOR",
      "variants": {
       "ABSORPTION": {
@@ -4246,6 +4320,11 @@
        "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness"
       ]
      ],
+     "values": {
+      "BECKMANN": 0,
+      "GGX": 2,
+      "MULTI_GGX": 4
+     },
      "default": "MULTI_GGX",
      "variants": {
       "BECKMANN": {
@@ -5060,6 +5139,10 @@
        "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness"
       ]
      ],
+     "values": {
+      "GGX": 2,
+      "MULTI_GGX": 4
+     },
      "default": "MULTI_GGX",
      "variants": {
       "GGX": {
@@ -5229,6 +5312,12 @@
        "Volumetric approximation to physically based volume scattering, using the scattering radius as specified"
       ]
      ],
+     "values": {
+      "BURLEY": 3,
+      "RANDOM_WALK": 6,
+      "RANDOM_WALK_SKIN": 5,
+      "RANDOM_WALK_LEGACY": 4
+     },
      "default": "RANDOM_WALK",
      "variants": {
       "BURLEY": {
@@ -5764,6 +5853,10 @@
        ""
       ]
      ],
+     "values": {
+      "BECKMANN": 0,
+      "GGX": 2
+     },
      "default": "BECKMANN",
      "variants": {
       "BECKMANN": {
@@ -6988,6 +7081,10 @@
        "Displacement is in world space, not affected by object scale"
       ]
      ],
+     "values": {
+      "OBJECT": 1,
+      "WORLD": 2
+     },
      "default": "OBJECT",
      "variants": {
       "OBJECT": {
@@ -8781,6 +8878,10 @@
        "3D vector with floating-point values"
       ]
      ],
+     "values": {
+      "FLOAT": 10,
+      "FLOAT_VECTOR": 48
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -9333,6 +9434,49 @@
        "Convert from radians to degrees"
       ]
      ],
+     "values": {
+      "ADD": 0,
+      "SUBTRACT": 1,
+      "MULTIPLY": 2,
+      "DIVIDE": 3,
+      "MULTIPLY_ADD": 36,
+      "POWER": 10,
+      "LOGARITHM": 11,
+      "SQRT": 23,
+      "INVERSE_SQRT": 24,
+      "ABSOLUTE": 18,
+      "EXPONENT": 26,
+      "MINIMUM": 12,
+      "MAXIMUM": 13,
+      "LESS_THAN": 15,
+      "GREATER_THAN": 16,
+      "SIGN": 25,
+      "COMPARE": 35,
+      "SMOOTH_MIN": 38,
+      "SMOOTH_MAX": 39,
+      "ROUND": 14,
+      "FLOOR": 20,
+      "CEIL": 21,
+      "TRUNC": 32,
+      "FRACT": 22,
+      "MODULO": 17,
+      "FLOORED_MODULO": 40,
+      "WRAP": 34,
+      "SNAP": 33,
+      "PINGPONG": 37,
+      "SINE": 4,
+      "COSINE": 5,
+      "TANGENT": 6,
+      "ARCSINE": 7,
+      "ARCCOSINE": 8,
+      "ARCTANGENT": 9,
+      "ARCTAN2": 19,
+      "SINH": 29,
+      "COSH": 30,
+      "TANH": 31,
+      "RADIANS": 27,
+      "DEGREES": 28
+     },
      "default": "ADD",
      "variants": {
       "ADD": {
@@ -10220,6 +10364,12 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -10423,6 +10573,27 @@
        ""
       ]
      ],
+     "values": {
+      "MIX": 0,
+      "DARKEN": 7,
+      "MULTIPLY": 2,
+      "BURN": 11,
+      "LIGHTEN": 8,
+      "SCREEN": 4,
+      "DODGE": 10,
+      "ADD": 1,
+      "OVERLAY": 9,
+      "SOFT_LIGHT": 16,
+      "LINEAR_LIGHT": 17,
+      "DIFFERENCE": 6,
+      "EXCLUSION": 18,
+      "SUBTRACT": 3,
+      "DIVIDE": 5,
+      "HUE": 12,
+      "SATURATION": 13,
+      "COLOR": 15,
+      "VALUE": 14
+     },
      "default": "MIX",
      "variants": {
       "MIX": {
@@ -10940,6 +11111,27 @@
        ""
       ]
      ],
+     "values": {
+      "MIX": 0,
+      "DARKEN": 7,
+      "MULTIPLY": 2,
+      "BURN": 11,
+      "LIGHTEN": 8,
+      "SCREEN": 4,
+      "DODGE": 10,
+      "ADD": 1,
+      "OVERLAY": 9,
+      "SOFT_LIGHT": 16,
+      "LINEAR_LIGHT": 17,
+      "DIFFERENCE": 6,
+      "EXCLUSION": 18,
+      "SUBTRACT": 3,
+      "DIVIDE": 5,
+      "HUE": 12,
+      "SATURATION": 13,
+      "COLOR": 15,
+      "VALUE": 14
+     },
      "default": "MIX",
      "variants": {
       "MIX": {
@@ -12391,6 +12583,27 @@
        ""
       ]
      ],
+     "values": {
+      "MIX": 0,
+      "DARKEN": 7,
+      "MULTIPLY": 2,
+      "BURN": 11,
+      "LIGHTEN": 8,
+      "SCREEN": 4,
+      "DODGE": 10,
+      "ADD": 1,
+      "OVERLAY": 9,
+      "SOFT_LIGHT": 16,
+      "LINEAR_LIGHT": 17,
+      "DIFFERENCE": 6,
+      "EXCLUSION": 18,
+      "SUBTRACT": 3,
+      "DIVIDE": 5,
+      "HUE": 12,
+      "SATURATION": 13,
+      "COLOR": 15,
+      "VALUE": 14
+     },
      "default": "MIX",
      "variants": {
       "MIX": {
@@ -14351,6 +14564,12 @@
        "Volumetric approximation to physically based volume scattering, using the scattering radius as specified"
       ]
      ],
+     "values": {
+      "BURLEY": 3,
+      "RANDOM_WALK": 6,
+      "RANDOM_WALK_SKIN": 5,
+      "RANDOM_WALK_LEGACY": 4
+     },
      "default": "RANDOM_WALK",
      "variants": {
       "BURLEY": {
@@ -15667,6 +15886,15 @@
        "Create a radial progression"
       ]
      ],
+     "values": {
+      "LINEAR": 0,
+      "QUADRATIC": 1,
+      "EASING": 2,
+      "DIAGONAL": 3,
+      "SPHERICAL": 6,
+      "QUADRATIC_SPHERE": 5,
+      "RADIAL": 4
+     },
      "default": "LINEAR",
      "variants": {
       "LINEAR": {
@@ -16564,6 +16792,12 @@
        "Use the 4D vector (X, Y, Z, W) as input"
       ]
      ],
+     "values": {
+      "1D": 1,
+      "2D": 2,
+      "3D": 3,
+      "4D": 4
+     },
      "default": "3D",
      "variants": {
       "1D": {
@@ -16692,6 +16926,13 @@
        "Similar to Hybrid Multifractal creates a heterogeneous terrain, but with the likeness of river channels"
       ]
      ],
+     "values": {
+      "MULTIFRACTAL": 0,
+      "RIDGED_MULTIFRACTAL": 3,
+      "HYBRID_MULTIFRACTAL": 2,
+      "FBM": 1,
+      "HETERO_TERRAIN": 4
+     },
      "default": "FBM",
      "variants": {
       "MULTIFRACTAL": {
@@ -16909,6 +17150,12 @@
        "Hosek / Wilkie 2012 (Legacy)"
       ]
      ],
+     "values": {
+      "SINGLE_SCATTERING": 2,
+      "MULTIPLE_SCATTERING": 3,
+      "PREETHAM": 0,
+      "HOSEK_WILKIE": 1
+     },
      "default": "MULTIPLE_SCATTERING",
      "variants": {
       "SINGLE_SCATTERING": {
@@ -17315,6 +17562,12 @@
        "Use the 4D vector (X, Y, Z, W) as input"
       ]
      ],
+     "values": {
+      "1D": 1,
+      "2D": 2,
+      "3D": 3,
+      "4D": 4
+     },
      "default": "3D",
      "variants": {
       "1D": {
@@ -18416,6 +18669,12 @@
        "Use the 4D vector (X, Y, Z, W) as input"
       ]
      ],
+     "values": {
+      "1D": 1,
+      "2D": 2,
+      "3D": 3,
+      "4D": 4
+     },
      "default": "3D",
      "variants": {
       "1D": {
@@ -19171,6 +19430,38 @@
        "Entry-wise tan(A)"
       ]
      ],
+     "values": {
+      "ADD": 0,
+      "SUBTRACT": 1,
+      "MULTIPLY": 2,
+      "DIVIDE": 3,
+      "MULTIPLY_ADD": 26,
+      "CROSS_PRODUCT": 4,
+      "PROJECT": 5,
+      "REFLECT": 6,
+      "REFRACT": 24,
+      "FACEFORWARD": 25,
+      "DOT_PRODUCT": 7,
+      "DISTANCE": 8,
+      "LENGTH": 9,
+      "SCALE": 10,
+      "NORMALIZE": 11,
+      "ABSOLUTE": 17,
+      "POWER": 27,
+      "SIGN": 28,
+      "MINIMUM": 18,
+      "MAXIMUM": 19,
+      "ROUND": 29,
+      "FLOOR": 13,
+      "CEIL": 14,
+      "FRACTION": 16,
+      "MODULO": 15,
+      "WRAP": 20,
+      "SNAP": 12,
+      "SINE": 21,
+      "COSINE": 22,
+      "TANGENT": 23
+     },
      "default": "ADD",
      "variants": {
       "ADD": {
@@ -19914,6 +20205,11 @@
        "Transform a normal vector with unit length"
       ]
      ],
+     "values": {
+      "POINT": 1,
+      "VECTOR": 0,
+      "NORMAL": 2
+     },
      "default": "VECTOR",
      "variants": {
       "POINT": {
@@ -24718,6 +25014,71 @@
        "Working color space of the current file"
       ]
      ],
+     "values": {
+      "ACES 1.3 sRGB": 9,
+      "ACES 2.0 sRGB": 10,
+      "ACES2065-1": 17,
+      "ACEScc": 60,
+      "ACEScct": 61,
+      "ACEScg": 18,
+      "ADX10": 48,
+      "ADX16": 49,
+      "ARRI LogC3 (EI800)": 23,
+      "ARRI LogC4": 25,
+      "AgX Base sRGB": 8,
+      "AgX Log": 59,
+      "Apple Log": 20,
+      "Apple Log 2": 21,
+      "BMDFilm WideGamut Gen5": 27,
+      "CanonLog2 CinemaGamut D55": 31,
+      "CanonLog3 CinemaGamut D55": 32,
+      "D-Log D-Gamut": 34,
+      "DaVinci Intermediate WideGamut": 29,
+      "Display P3": 2,
+      "Filmic Log": 51,
+      "Filmic sRGB": 7,
+      "Gamma 1.8 Encoded Rec.709": 52,
+      "Gamma 2.2 Encoded AP1": 58,
+      "Gamma 2.2 Encoded AdobeRGB": 56,
+      "Gamma 2.2 Encoded Rec.709": 53,
+      "Gamma 2.4 Encoded Rec.709": 54,
+      "Khronos PBR Neutral sRGB": 11,
+      "Linear ARRI Wide Gamut 3": 24,
+      "Linear ARRI Wide Gamut 4": 26,
+      "Linear Adobe RGB": 16,
+      "Linear Apple Wide Gamut": 22,
+      "Linear BMD WideGamut Gen5": 28,
+      "Linear CIE-XYZ D65": 0,
+      "Linear CIE-XYZ E": 12,
+      "Linear CinemaGamut D55": 33,
+      "Linear D-Gamut": 35,
+      "Linear DCI-P3 D65": 14,
+      "Linear DaVinci WideGamut": 30,
+      "Linear FilmLight E-Gamut": 19,
+      "Linear REDWideGamutRGB": 39,
+      "Linear Rec.2020": 15,
+      "Linear Rec.709": 13,
+      "Linear S-Gamut3": 44,
+      "Linear S-Gamut3.Cine": 45,
+      "Linear V-Gamut": 37,
+      "Linear Venice S-Gamut3": 46,
+      "Linear Venice S-Gamut3.Cine": 47,
+      "Log3G10 REDWideGamutRGB": 38,
+      "Non-Color": 50,
+      "Rec.1886": 3,
+      "Rec.2020": 4,
+      "Rec.2100-HLG": 6,
+      "Rec.2100-PQ": 5,
+      "S-Log3 S-Gamut3": 40,
+      "S-Log3 S-Gamut3.Cine": 41,
+      "S-Log3 Venice S-Gamut3": 42,
+      "S-Log3 Venice S-Gamut3.Cine": 43,
+      "V-Log V-Gamut": 36,
+      "sRGB": 1,
+      "sRGB Encoded AP1": 57,
+      "sRGB Encoded P3-D65": 55,
+      "scene_linear": 62
+     },
      "default": "scene_linear",
      "variants": {
       "ACES 1.3 sRGB": {
@@ -25798,6 +26159,71 @@
        "Working color space of the current file"
       ]
      ],
+     "values": {
+      "ACES 1.3 sRGB": 9,
+      "ACES 2.0 sRGB": 10,
+      "ACES2065-1": 17,
+      "ACEScc": 60,
+      "ACEScct": 61,
+      "ACEScg": 18,
+      "ADX10": 48,
+      "ADX16": 49,
+      "ARRI LogC3 (EI800)": 23,
+      "ARRI LogC4": 25,
+      "AgX Base sRGB": 8,
+      "AgX Log": 59,
+      "Apple Log": 20,
+      "Apple Log 2": 21,
+      "BMDFilm WideGamut Gen5": 27,
+      "CanonLog2 CinemaGamut D55": 31,
+      "CanonLog3 CinemaGamut D55": 32,
+      "D-Log D-Gamut": 34,
+      "DaVinci Intermediate WideGamut": 29,
+      "Display P3": 2,
+      "Filmic Log": 51,
+      "Filmic sRGB": 7,
+      "Gamma 1.8 Encoded Rec.709": 52,
+      "Gamma 2.2 Encoded AP1": 58,
+      "Gamma 2.2 Encoded AdobeRGB": 56,
+      "Gamma 2.2 Encoded Rec.709": 53,
+      "Gamma 2.4 Encoded Rec.709": 54,
+      "Khronos PBR Neutral sRGB": 11,
+      "Linear ARRI Wide Gamut 3": 24,
+      "Linear ARRI Wide Gamut 4": 26,
+      "Linear Adobe RGB": 16,
+      "Linear Apple Wide Gamut": 22,
+      "Linear BMD WideGamut Gen5": 28,
+      "Linear CIE-XYZ D65": 0,
+      "Linear CIE-XYZ E": 12,
+      "Linear CinemaGamut D55": 33,
+      "Linear D-Gamut": 35,
+      "Linear DCI-P3 D65": 14,
+      "Linear DaVinci WideGamut": 30,
+      "Linear FilmLight E-Gamut": 19,
+      "Linear REDWideGamutRGB": 39,
+      "Linear Rec.2020": 15,
+      "Linear Rec.709": 13,
+      "Linear S-Gamut3": 44,
+      "Linear S-Gamut3.Cine": 45,
+      "Linear V-Gamut": 37,
+      "Linear Venice S-Gamut3": 46,
+      "Linear Venice S-Gamut3.Cine": 47,
+      "Log3G10 REDWideGamutRGB": 38,
+      "Non-Color": 50,
+      "Rec.1886": 3,
+      "Rec.2020": 4,
+      "Rec.2100-HLG": 6,
+      "Rec.2100-PQ": 5,
+      "S-Log3 S-Gamut3": 40,
+      "S-Log3 S-Gamut3.Cine": 41,
+      "S-Log3 Venice S-Gamut3": 42,
+      "S-Log3 Venice S-Gamut3.Cine": 43,
+      "V-Log V-Gamut": 36,
+      "sRGB": 1,
+      "sRGB Encoded AP1": 57,
+      "sRGB Encoded P3-D65": 55,
+      "scene_linear": 62
+     },
      "default": "scene_linear",
      "variants": {
       "ACES 1.3 sRGB": {
@@ -27958,6 +28384,15 @@
        ""
       ]
      ],
+     "values": {
+      "OCTAGON": 8,
+      "HEPTAGON": 7,
+      "HEXAGON": 6,
+      "PENTAGON": 5,
+      "SQUARE": 4,
+      "TRIANGLE": 3,
+      "CIRCLE": 0
+     },
      "default": "CIRCLE",
      "variants": {
       "OCTAGON": {
@@ -38386,6 +38821,10 @@
        "32-bit integer"
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -38808,6 +39247,10 @@
        "32-bit integer"
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -39257,6 +39700,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "RGBA",
      "variants": {
       "FLOAT": {
@@ -39821,6 +40290,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "RGBA",
      "variants": {
       "FLOAT": {
@@ -40440,6 +40935,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -40947,6 +41468,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -41383,6 +41930,32 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "INT": 6,
+      "BOOLEAN": 4,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14,
+      "MATRIX": 16,
+      "STRING": 7,
+      "MENU": 15,
+      "SHADER": 3,
+      "OBJECT": 8,
+      "IMAGE": 9,
+      "GEOMETRY": 10,
+      "COLLECTION": 11,
+      "TEXTURE": 12,
+      "MATERIAL": 13,
+      "BUNDLE": 17,
+      "CLOSURE": 18,
+      "FONT": 19,
+      "SCENE": 20,
+      "TEXT": 21,
+      "MASK": 22,
+      "SOUND": 23,
+      "INT_VECTOR": 24
+     },
      "default": "RGBA",
      "variants": {
       "FLOAT": {
@@ -42416,6 +42989,10 @@
        "3D vector with floating-point values"
       ]
      ],
+     "values": {
+      "FLOAT": 10,
+      "FLOAT_VECTOR": 48
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -42751,6 +43328,49 @@
        "Convert from radians to degrees"
       ]
      ],
+     "values": {
+      "ADD": 0,
+      "SUBTRACT": 1,
+      "MULTIPLY": 2,
+      "DIVIDE": 3,
+      "MULTIPLY_ADD": 36,
+      "POWER": 10,
+      "LOGARITHM": 11,
+      "SQRT": 23,
+      "INVERSE_SQRT": 24,
+      "ABSOLUTE": 18,
+      "EXPONENT": 26,
+      "MINIMUM": 12,
+      "MAXIMUM": 13,
+      "LESS_THAN": 15,
+      "GREATER_THAN": 16,
+      "SIGN": 25,
+      "COMPARE": 35,
+      "SMOOTH_MIN": 38,
+      "SMOOTH_MAX": 39,
+      "ROUND": 14,
+      "FLOOR": 20,
+      "CEIL": 21,
+      "TRUNC": 32,
+      "FRACT": 22,
+      "MODULO": 17,
+      "FLOORED_MODULO": 40,
+      "WRAP": 34,
+      "SNAP": 33,
+      "PINGPONG": 37,
+      "SINE": 4,
+      "COSINE": 5,
+      "TANGENT": 6,
+      "ARCSINE": 7,
+      "ARCCOSINE": 8,
+      "ARCTANGENT": 9,
+      "ARCTAN2": 19,
+      "SINH": 29,
+      "COSH": 30,
+      "TANH": 31,
+      "RADIANS": 27,
+      "DEGREES": 28
+     },
      "default": "ADD",
      "variants": {
       "ADD": {
@@ -43638,6 +44258,12 @@
        ""
       ]
      ],
+     "values": {
+      "FLOAT": 0,
+      "VECTOR": 1,
+      "RGBA": 2,
+      "ROTATION": 14
+     },
      "default": "FLOAT",
      "variants": {
       "FLOAT": {
@@ -43857,6 +44483,27 @@
        ""
       ]
      ],
+     "values": {
+      "MIX": 0,
+      "DARKEN": 7,
+      "MULTIPLY": 2,
+      "BURN": 11,
+      "LIGHTEN": 8,
+      "SCREEN": 4,
+      "DODGE": 10,
+      "ADD": 1,
+      "OVERLAY": 9,
+      "SOFT_LIGHT": 16,
+      "LINEAR_LIGHT": 17,
+      "DIFFERENCE": 6,
+      "EXCLUSION": 18,
+      "SUBTRACT": 3,
+      "DIVIDE": 5,
+      "HUE": 12,
+      "SATURATION": 13,
+      "COLOR": 15,
+      "VALUE": 14
+     },
      "default": "MIX",
      "variants": {
       "MIX": {
@@ -44374,6 +45021,27 @@
        ""
       ]
      ],
+     "values": {
+      "MIX": 0,
+      "DARKEN": 7,
+      "MULTIPLY": 2,
+      "BURN": 11,
+      "LIGHTEN": 8,
+      "SCREEN": 4,
+      "DODGE": 10,
+      "ADD": 1,
+      "OVERLAY": 9,
+      "SOFT_LIGHT": 16,
+      "LINEAR_LIGHT": 17,
+      "DIFFERENCE": 6,
+      "EXCLUSION": 18,
+      "SUBTRACT": 3,
+      "DIVIDE": 5,
+      "HUE": 12,
+      "SATURATION": 13,
+      "COLOR": 15,
+      "VALUE": 14
+     },
      "default": "MIX",
      "variants": {
       "MIX": {
@@ -45750,6 +46418,15 @@
        "Create a radial progression"
       ]
      ],
+     "values": {
+      "LINEAR": 0,
+      "QUADRATIC": 1,
+      "EASING": 2,
+      "DIAGONAL": 3,
+      "SPHERICAL": 6,
+      "QUADRATIC_SPHERE": 5,
+      "RADIAL": 4
+     },
      "default": "LINEAR",
      "variants": {
       "LINEAR": {
@@ -46197,6 +46874,12 @@
        "Use the 4D vector (X, Y, Z, W) as input"
       ]
      ],
+     "values": {
+      "1D": 1,
+      "2D": 2,
+      "3D": 3,
+      "4D": 4
+     },
      "default": "2D",
      "variants": {
       "1D": {
@@ -46325,6 +47008,13 @@
        "Similar to Hybrid Multifractal creates a heterogeneous terrain, but with the likeness of river channels"
       ]
      ],
+     "values": {
+      "MULTIFRACTAL": 0,
+      "RIDGED_MULTIFRACTAL": 3,
+      "HYBRID_MULTIFRACTAL": 2,
+      "FBM": 1,
+      "HETERO_TERRAIN": 4
+     },
      "default": "FBM",
      "variants": {
       "MULTIFRACTAL": {
@@ -46757,6 +47447,12 @@
        "Use the 4D vector (X, Y, Z, W) as input"
       ]
      ],
+     "values": {
+      "1D": 1,
+      "2D": 2,
+      "3D": 3,
+      "4D": 4
+     },
      "default": "2D",
      "variants": {
       "1D": {
@@ -47858,6 +48554,12 @@
        "Use the 4D vector (X, Y, Z, W) as input"
       ]
      ],
+     "values": {
+      "1D": 1,
+      "2D": 2,
+      "3D": 3,
+      "4D": 4
+     },
      "default": "2D",
      "variants": {
       "1D": {
@@ -48371,6 +49073,38 @@
        "Entry-wise tan(A)"
       ]
      ],
+     "values": {
+      "ADD": 0,
+      "SUBTRACT": 1,
+      "MULTIPLY": 2,
+      "DIVIDE": 3,
+      "MULTIPLY_ADD": 26,
+      "CROSS_PRODUCT": 4,
+      "PROJECT": 5,
+      "REFLECT": 6,
+      "REFRACT": 24,
+      "FACEFORWARD": 25,
+      "DOT_PRODUCT": 7,
+      "DISTANCE": 8,
+      "LENGTH": 9,
+      "SCALE": 10,
+      "NORMALIZE": 11,
+      "ABSOLUTE": 17,
+      "POWER": 27,
+      "SIGN": 28,
+      "MINIMUM": 18,
+      "MAXIMUM": 19,
+      "ROUND": 29,
+      "FLOOR": 13,
+      "CEIL": 14,
+      "FRACTION": 16,
+      "MODULO": 15,
+      "WRAP": 20,
+      "SNAP": 12,
+      "SINE": 21,
+      "COSINE": 22,
+      "TANGENT": 23
+     },
      "default": "ADD",
      "variants": {
       "ADD": {

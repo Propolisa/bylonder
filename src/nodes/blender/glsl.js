@@ -5,15 +5,22 @@
 // the f suffix GLSL ES lacks. Library symbols get a bl_ prefix so they cannot meet Babylon's (square, wrap).
 import { glsl as libraries } from './gpu-library.js';
 
-// Where GLSL ES differs from the desktop GLSL Blender targets: (function, text or pattern, replacement, reason), applied
-// to each of the function's overloads it is found in.
+// Where GLSL ES differs from the desktop GLSL Blender targets: (function, or null for any it is found in, text or
+// pattern, replacement, reason), applied to each of the function's overloads it is found in.
+const INT_TO_FLOAT = 'GLSL ES has no implicit int to float conversion';
 const FIXES = [
+  [null, /\bfloat (\w+) = ([ijk])\b/g, 'float $1 = float($2)', INT_TO_FLOAT],
+  [null, /\bi <= (ceil\()?params\.detail/g, 'float(i) <= $1params.detail', INT_TO_FLOAT],
+  ['calc_gradient', /(\d\.\d+) \* 2\)/, '$1 * 2.0)', INT_TO_FLOAT],
+  ['node_tex_magic', /depth > (\d+)\)/g, 'depth > $1.0)', INT_TO_FLOAT],
+  [/^compute_[23]d_gabor_standard_deviation$/, 'sqrt(8 * ', 'sqrt(8.0 * ', INT_TO_FLOAT],
+  ['calc_brick_texture', /(brick_width|row_height) \* (bricknum|rownum)/g, '$1 * float($2)', INT_TO_FLOAT],
+  ['node_tex_checker', /mod\((\w+), 2\)/g, '($1 % 2)', 'GLSL ES has no integer mod()'],
+  ['node_normal_map', 'OBJECT_NEGATIVE_SCALE) != 0 ?', 'OBJECT_NEGATIVE_SCALE) != 0u ?', 'GLSL ES has no implicit int to uint conversion'],
   ['compatible_mod', 'a - N * b', 'a - float(N) * b', 'GLSL ES has no implicit int to float conversion'],
   ['noise_grad', 'float g = 1u + (h & 7u);', 'float g = float(1u + (h & 7u));', 'GLSL ES has no implicit uint to float conversion'],
   ['noise_perlin', /\b(f[xyzw]) - 1(?![.\d])/g, '$1 - 1.0', 'GLSL ES has no implicit int to float conversion'],
   ['valtorgb_nearest', 'fac * (textureSize(colormap, 0).x - 1)', 'fac * float(textureSize(colormap, 0).x - 1)', 'GLSL ES has no implicit int to float conversion'],
-  ['valtorgb', 'sampler1DArray', 'sampler2D', 'WebGL 2 has no 1D textures: a color map is a 2D texture one texel high'],
-  ['valtorgb_nearest', 'sampler1DArray', 'sampler2D', 'WebGL 2 has no 1D textures: a color map is a 2D texture one texel high'],
   ['curves_segment_get', 'drw_curves.vertex_per_segment - 1)', 'drw_curves.vertex_per_segment - 1u)', 'GLSL ES has no implicit int to uint conversion'],
 ];
 
@@ -101,19 +108,69 @@ function declarations(code) {
     else if (c === '}' && --depth === 0) { chunks.push(code.slice(start, i + 1)); start = i + 1; }
     else if (c === ';' && depth === 0) { chunks.push(code.slice(start, i + 1)); start = i + 1; }
   }
-  const found = [];
+  const found = [], templates = new Map();
   for (let chunk of chunks) {
     chunk = chunk.replace(/\[\[\w+\]\]/g, '').trim();
-    if (!chunk || chunk === ';' || chunk.startsWith('template')) continue;
-    const fn = /^[\w\s]*?\b(\w+)\s*\(([^)]*)\)\s*\{/.exec(chunk);
+    if (!chunk || chunk === ';') continue;
+    // A template is GLSL once instantiated (template float3 f<float3>(float3);): its parameters replaced by the
+    // instantiation's types; a specialization (template<> float3 f<float3>(...) {...}) is a function of its own.
+    const template = /^template\s*<([^>]*)>\s*([\s\S]*)$/.exec(chunk);
+    if (template && template[1].trim()) {
+      const name = /\b(\w+)\s*\(/.exec(template[2])?.[1], params = template[1].split(',').map((p) => p.trim().split(/\s+/));
+      templates.set(name, { params: params.map((p) => p.at(-1)), values: params.some((p) => p[0] !== 'typename'), text: template[2] });
+      if (templates.get(name).values) valueTemplates.add(name);
+      continue;
+    }
+    if (template) chunk = template[2].replace(/^([\w\s]*?\b\w+)\s*<[^>(]*>\s*\(/, '$1(');
+    const instance = /^template\s+[\w\s]*?\b(\w+)\s*<([^>]*)>\s*\([^)]*\)\s*;$/.exec(chunk);
+    if (instance) {
+      const { params, values, text } = templates.get(instance[1]) ?? {};
+      if (!text) continue;
+      const types = instance[2].split(',').map((t) => t.trim());
+      chunk = params.reduce((t, p, i) => t.replace(new RegExp(`\\b${p}\\b`, 'g'), types[i]), text);
+      // One with values among its parameters (to_scale<float3x3, true>) is a function of its own, as its calls name it.
+      if (values) chunk = chunk.replace(new RegExp(`\\b${instance[1]}\\s*\\(`), `${instanceName(instance[1], types)}(`);
+    }
     const struct = /^struct\s+(\w+)/.exec(chunk);
+    if (struct) {
+      const [definition, methods] = structMethods(struct[1], chunk);
+      found.push([struct[1], definition], ...methods);
+      continue;
+    }
+    const fn = /^[\w\s]*?\b(\w+)\s*\(([^)]*)\)\s*\{/.exec(chunk);
     const constant = /^const\s+\w+\s+(\w+)\s*(\[\d*\])?\s*=/.exec(chunk);
     const name = struct?.[1] ?? (fn && !/^(if|for|while|switch|return)$/.test(fn[1]) ? fn[1] : null) ?? constant?.[1];
-    if (name) found.push([name, fn && !struct ? glslFunctionText(chunk) : struct ? chunk + ';' : chunk]);
+    if (name) found.push([name, fn ? glslFunctionText(chunk) : chunk]);
   }
   return found;
 }
 
+// Blender's shader preprocessor lowers a struct's methods to functions: a static one (EulerXYZ::identity()) to
+// EulerXYZ_identity(), one of a value (v.as_float3()) to as_float3(v), its `this` the first parameter (the compatibility
+// macros leave no `static` to tell them apart: each method is both, and a caller links the one it calls). The struct's
+// member types make its brace initializers constructors.
+const structs = new Map(), methods = new Set();
+function structMethods(name, chunk) {
+  const open = chunk.indexOf('{'), found = [];
+  let body = chunk.slice(open + 1, chunk.lastIndexOf('}'));
+  for (let match; (match = /(\w+)\s+(\w+)\s*\(([^)]*)\)\s*(?:const\s*)?\{/.exec(body));) {
+    let depth = 0, end = match.index + match[0].length - 1;
+    for (; end < body.length; end++) if ((depth += { '{': 1, '}': -1 }[body[end]] ?? 0) === 0) break;
+    const [, type, method, params] = match, code = body.slice(match.index + match[0].length - 1, end + 1);
+    methods.add(method);
+    found.push([`${name}_${method}`, `${type} ${name}_${method}(${params}) ${code}`],
+      [method, `${type} ${method}(${name} this_${params.trim() ? ', ' + params : ''}) ${code.replace(/\bthis->/g, 'this_.')}`]);
+    body = body.slice(0, match.index) + body.slice(end + 1);
+  }
+  structs.set(name, [...body.matchAll(/(\w+)\s+([\w\s,]+);/g)].flatMap(([, type, names]) => names.split(',').map(() => type)));
+  return [`struct ${name} {${body}};`, found.map(([symbol, text]) => [symbol, glslFunctionText(text)])];
+}
+// A brace initializer of a struct (return {0, 1};) as its constructor, integer literals made floats where its
+// members are.
+const braceInitializers = (type, body) => (!structs.has(type) ? body : body.replace(/\breturn\s*\{([^;]*)\}\s*;/g, (_, list) => {
+  const args = callArguments(list + ')', 0)[0];
+  return `return ${type}(${args.map((a, i) => (structs.get(type)[i] === 'float' && /^-?\d+$/.test(a) ? a + '.0' : a)).join(', ')});`;
+}));
 // A function with its parameters passed by reference (float &x, const float4 &x) as GLSL's inout, and its local
 // constants as variables: GLSL ES wants a constant expression where desktop GLSL takes any value.
 // Parameters passed by reference (float &x, const float4 &x) as GLSL's inout.
@@ -121,8 +178,13 @@ const references = (params) => params.replace(/(?:\bconst\s+)?(\w+)\s*&\s*(\w+)/
 const glslFunctionText = (chunk) => {
   const at = chunk.indexOf('{');
   const head = chunk.slice(0, at).replace(/\(([^)]*)\)/, (_, params) => `(${references(params)})`);
-  return head + chunk.slice(at).replace(/([;{}]\s*)const\s+/g, '$1');
+  return head + braceInitializers(/^\s*(\w+)/.exec(head)?.[1], chunk.slice(at).replace(/([;{}]\s*)const\s+/g, '$1'));
 };
+const instanceName = (name, types) => `${name}_${types.join('_')}`, valueTemplates = new Set();
+// Calls of struct methods as the lowered functions' (structMethods), and of templates with values as their instances'.
+const methodCalls = (text) => text.replace(/\b(\w+)::(\w+)\s*\(/g, '$1_$2(')
+  .replace(/\b(\w+)<([\w\s,]+)>\s*\(/g, (all, name, types) => (valueTemplates.has(name) ? `${instanceName(name, types.split(',').map((t) => t.trim()))}(` : all))
+  .replace(/(\b[A-Za-z_][\w.]*)\.(\w+)\s*\(\s*(\)?)/g, (all, value, method, empty) => (methods.has(method) ? `${method}(${value}${empty ? ')' : ', '}` : all));
 
 // A call's arguments from the text after its opening parenthesis: [arguments, the index after its closing one].
 function callArguments(text, at) {
@@ -148,7 +210,9 @@ function bufferReads(text) {
   return out + text.slice(i);
 }
 
+// WebGL 2 has no 1D textures: a color band (GPU_color_band) is a 2D texture one texel high.
 const dialect = (text) => bufferReads(text)
+  .replace(/\bsampler1DArray\b/g, 'sampler2D')
   .replace(/\.([xyzwrgba]{1,4})\(\)/g, '.$1')
   .replace(/\b(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?[fF]\b/g, '$1$2');
 
@@ -189,20 +253,29 @@ function parse() {
   const symbols = new Map();
   for (const [, code] of codes) for (const [name, text] of declarations(code)) {
     if (!symbols.has(name)) symbols.set(name, []);
-    symbols.get(name).push(dialect(text));
+    symbols.get(name).push(methodCalls(dialect(text)));
   }
   for (const [name, text, replacement, reason] of FIXES) {
-    const list = symbols.get(name) ?? [], matches = (t) => (typeof text === 'string' ? t.includes(text) : t.match(text));
-    if (!list.some(matches)) throw Error(`glsl.js: the fix for ${name} (${reason}) no longer applies`);
-    for (let i = 0; i < list.length; i++) if (matches(list[i])) list[i] = list[i].replace(text, replacement);
+    const matches = (t) => (typeof text === 'string' ? t.includes(text) : t.match(text));
+    const lists = [...symbols].filter(([symbol]) => (name === null ? true : typeof name === 'string' ? symbol === name : name.test(symbol))).map(([, list]) => list);
+    if (!lists.some((list) => list.some(matches))) throw Error(`glsl.js: the fix for ${name} (${reason}) no longer applies`);
+    for (const list of lists) for (let i = 0; i < list.length; i++) if (matches(list[i])) list[i] = list[i].replace(text, replacement);
   }
   return symbols;
 }
 
 let symbols;
 const library = () => (symbols ??= parse());
-const used = (text, self) => [...new Set(text.match(/(?<![.\w])[A-Za-z_]\w*/g))].filter((n) => n !== self && library().has(n));
-const prefixed = (text) => text.replace(/(?<![.\w])[A-Za-z_]\w*/g, (n) => (library().has(n) ? glslName(n) : n));
+// A function's own names (its parameters and locals), which may be a library symbol's (a parameter named invert).
+const locals = (text) => new Set([...text.matchAll(/\b(?:inout\s+|out\s+)?(?:float|int|uint|bool|[iu]?vec[234]|mat[234](?:x[234])?|sampler2D)\s+(\w+)\s*(?=[=;,)\[])/g)].map((m) => m[1]));
+// A library symbol at a name: always where it is called (or declared), else unless the function names a local so.
+const symbolAt = (text) => {
+  const own = locals(text);
+  return (name, at) => library().has(name) && (!own.has(name) || /^\s*\(/.test(text.slice(at + name.length)));
+};
+const NAMES = /(?<![.\w])[A-Za-z_]\w*/g;
+const used = (text, self) => { const isSymbol = symbolAt(text); return [...new Set([...text.matchAll(NAMES)].filter((m) => m[0] !== self && isSymbol(m[0], m.index)).map((m) => m[0]))]; };
+const prefixed = (text) => { const isSymbol = symbolAt(text); return text.replace(NAMES, (n, at) => (isSymbol(n, at) ? glslName(n) : n)); };
 
 // A whole shader of Blender's (a draw engine's, gpu-library.js `draw`) as GLSL ES for its stage: its includes and
 // create info left to `macros`, which stand in for what they declare (as name to body, or to [params, body]), after

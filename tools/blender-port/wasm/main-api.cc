@@ -102,6 +102,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cstring>
 #include <string>
 
 using namespace blender;
@@ -662,10 +663,17 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
 
 /* The draw buffers of the mesh object_mesh_eval last gave (draw-mesh.cc), with the index buffers `what` asks for
  * (DrawRequest), valid until the next call or draw_buffers_free. */
-EXPORT(object_draw_buffers) const DrawBuffers *object_draw_buffers(BlenderMain *ctx, Object *ob, int what)
+/* `attributes`: the generic attributes its materials read, one name per line. */
+EXPORT(object_draw_buffers) const DrawBuffers *object_draw_buffers(BlenderMain *ctx, Object *ob, int what, const char *attributes)
 {
   Object *evaluated = DEG_get_evaluated(depsgraph_of(ctx), ob);
-  return extracted_mesh ? mesh_draw_buffers(*ctx->scene, *evaluated, *const_cast<Mesh *>(extracted_mesh), what) : nullptr;
+  Vector<std::string> names;
+  for (const char *line = attributes; *line;) {
+    const char *end = std::strchr(line, '\n');
+    names.append(end ? std::string(line, end) : std::string(line));
+    line = end ? end + 1 : line + names.last().size();
+  }
+  return extracted_mesh ? mesh_draw_buffers(*ctx->scene, *evaluated, *const_cast<Mesh *>(extracted_mesh), what, names) : nullptr;
 }
 EXPORT(draw_buffers_free) void draw_buffers_free_export() { draw_buffers_free(); }
 
