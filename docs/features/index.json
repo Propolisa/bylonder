@@ -1233,6 +1233,7 @@
    "Glass and Refraction BSDF refract Babylon's environment only, not the objects behind them nor a flat world color, and keep a reflection (Glass, sphere 18, mean dE 24.2).",
    "Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).",
    "Blender's view transforms other than Standard are approximated by Babylon's tone mapping.",
+   "A blended surface is laid over what is behind it in display space, not in linear light as EEVEE does, so a half transparent surface shows brighter (Half Transparent, sphere 19, mean dE 9.1, max 10).",
    "A Transparent BSDF's color lets through its average, not each channel; Holdout draws black, not a hole in the film.",
    "Light Path takes every ray as a camera ray; Ambient Occlusion finds no occlusion; Shader to RGB does not run.",
    "Normal Map and Tangent read Blender's tangents of the active UV map; for another UV map, or a mesh Blender does not draw, they take the tangent from the UV map's screen derivatives.",

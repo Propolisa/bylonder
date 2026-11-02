@@ -216,9 +216,11 @@ for i, build in enumerate(GALLERY):
     sphere.name = build.__name__.replace('_', ' ').title()
     bpy.ops.object.shade_smooth()
     sphere.data.materials.append(material(sphere.name, build))
-    # Blended: a transparent closure shows without dither noise.
+    # Blended: a transparent closure shows without dither noise. Its back faces culled: EEVEE's headless render
+    # draws them over memory it never clears, a different pattern each time.
     if build is half_transparent:
         sphere.data.materials[0].surface_render_method = 'BLENDED'
+        sphere.data.materials[0].use_backface_culling = True
 
 here = os.path.dirname(os.path.abspath(__file__))
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(here, 'shader_gallery.blend'))
