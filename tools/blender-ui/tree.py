@@ -33,6 +33,8 @@ ROOTS = ['scripts/startup', 'scripts/modules', 'scripts/presets/keyconfig', 'scr
 # Blender's presets other than keymaps: scripts of assignments (bpy.context.scene.render.fps = 60) that
 # script.execute_preset runs by file each time it is chosen, so they ship as sources the boundary interprets.
 PRESETS = 'scripts/presets'
+# Blender's bundled add-ons (scripts/addons_core).
+ADDONS = 'scripts/addons_core'
 # Modules that reach the operating system or the network (downloads, extensions, translations' tooling, the
 # interactive console's completion), which the browser has no use for.
 EXCLUDED = ['_bpy_internal.http*', '_bpy_internal.extensions*', '_bpy_internal.assets.remote_library*', '_bl_i18n_utils*',
@@ -77,8 +79,13 @@ def assemble(build):
         open(target, 'w').write(source)
         FILES[relative] = '/blender/' + path
     presets = [f for f in transpile.listing(PRESETS) if not f.startswith(ROOTS[2])]
+    # The add-ons Blender ships whose code the tree does not hold: their __init__.py up to the end of its bl_info, all
+    # addon_utils reads of an add-on it does not import (the Add-ons list), and Bylonder's own add-on.
+    addons = [f for f in transpile.listing(ADDONS) if f.count('/') == 3 and f.endswith('/__init__.py')]
     with concurrent.futures.ThreadPoolExecutor(16) as pool:
         scripts = {'/blender/' + path: source for path, source in zip(presets, pool.map(transpile.fetch, presets))}
+        scripts |= {'/blender/' + path: bl_info_head(source) for path, source in zip(addons, pool.map(transpile.fetch, addons))}
+    scripts['/blender/scripts/addons_core/bylonder/__init__.py'] = open(os.path.join(HERE, 'bylonder_addon.py')).read()
     for root, _, names in os.walk(build):
         if root != build and '__init__.py' not in names:
             open(os.path.join(root, '__init__.py'), 'w').close()
@@ -91,6 +98,14 @@ def assemble(build):
         f'files = {sorted([*FILES.values(), *scripts])!r}\n'
         f'scripts = {dict(sorted(scripts.items()))!r}\n'
         f'modules = {dict(sorted((path, rel[:-3].replace("/", ".").removesuffix(".__init__")) for rel, path in FILES.items()))!r}\n')
+
+
+def bl_info_head(source):
+    """A module's source up to the line after its bl_info assignment (addon_utils' speedy read stops there)."""
+    lines = source.splitlines(keepends=True)
+    start = next(i for i, line in enumerate(lines) if line.startswith('bl_info'))
+    end = next(i for i in range(start, len(lines)) if not lines[i].rstrip())
+    return ''.join(lines[:end + 1])
 
 
 def bpy_types(build):
@@ -175,7 +190,8 @@ class Imports(ast.NodeTransformer):
 
     def visit_Call(self, node):
         """__import__ and globals(), which Transcrypt lacks, from the module registry; eval and exec of a snippet by
-        the boundary's interpreter (_py_eval), over the function's names and the module's."""
+        the boundary's interpreter (_py_eval), over the function's names and the module's; open() of the boundary's io,
+        over the read-only file system of Blender's scripts."""
         self.generic_visit(node)
         if isinstance(node.func, ast.Name) and node.func.id in ('eval', 'exec') and node.args:
             names = node.args[-1] if len(node.args) > 1 else ast.Dict([ast.Constant(n) for n in self.locals], [ast.Name(n, ast.Load()) for n in self.locals])
@@ -183,6 +199,8 @@ class Imports(ast.NodeTransformer):
             return ast.copy_location(ast.Call(ast.Name('_py_' + node.func.id, ast.Load()), [node.args[0], names, module], []), node)
         if isinstance(node.func, ast.Name) and node.func.id == '__import__':
             node.func.id = '_import'
+        elif isinstance(node.func, ast.Name) and node.func.id == 'open' and 'open' not in self.locals:
+            node.func.id = '_open'
         elif isinstance(node.func, ast.Name) and node.func.id == 'globals' and not node.args:
             node.args = [ast.Constant(self.name)]
             node.func.id = '_globals'
@@ -388,6 +406,8 @@ def prepare(build):
             source = 'from _modules import _module, _member, _lazy, _import, _globals\n' + source
         if name != '_py_eval' and re.search(r'\b_py_(eval|exec)\(', source):
             source = 'from _py_eval import _py_eval, _py_exec\n' + source
+        if name != 'io' and re.search(r'\b_open\(', source):
+            source = 'from io import _open\n' + source
         source = (transpile.HELPERS if transpile.uses_helpers(source) else '') + source
         # Operator overloading for the tree's modules (a + b of lists), not for Transcrypt's, which assume JS operators;
         # with it, loops index their iterable, so iterators become lists (iconv, __i__).

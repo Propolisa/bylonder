@@ -352,7 +352,7 @@ def main():
 
 
 # Blender's functions the module's API wraps: the UI layout's resolve (ui-tree.cc), and platform.cc's.
-WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', *wasm_module.PLATFORM_WRAPPED]
+WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender2ui15search_item_addEPNS0_11SearchItemsENS_9StringRefEPviih', *wasm_module.PLATFORM_WRAPPED]
 
 
 NULL_DATA = os.path.join(WASM, 'null-data.txt')

@@ -694,6 +694,23 @@ const checks = {
     assert.deepEqual(view, { rendered: false, shading: "solid", overlaysOff: false });
   } },
 
+  // An orthographic scene camera frames the scene through Numpad 0 by its Orthographic Scale, as in Blender.
+  "an orthographic camera shows the scene through Numpad 0": { open: {}, async run() {
+    await app.bylonder((b) => b.runOperator("wm.context_set_enum", { data_path: "scene.camera.data.type", value: "ORTHO" }));
+    await app.settled();
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("Numpad0");
+    await app.until((b) => b.views.input.state.cameraView);
+    const cube = await app.bylonder((b) => {
+      const { camera } = b.views.input, engine = b.world.engine, w = engine.getRenderWidth(), h = engine.getRenderHeight();
+      const p = BABYLON.Vector3.Project(b.world.scene.getMeshByName("Cube").getAbsolutePosition(), BABYLON.Matrix.Identity(), camera.getTransformationMatrix(), { x: 0, y: 0, width: w, height: h });
+      return { ortho: camera.mode === BABYLON.Camera.ORTHOGRAPHIC_CAMERA, x: p.x / w, y: p.y / h, width: camera.orthoRight - camera.orthoLeft };
+    });
+    assert.ok(cube.ortho, "the camera is orthographic");
+    assert.ok(cube.width > 1 && cube.width < 100, `ortho bounds from the scale, not pixels: ${cube.width}`);
+    assert.ok(cube.x > 0.1 && cube.x < 0.9 && cube.y > 0.1 && cube.y < 0.9, `the cube is in view: ${cube.x}, ${cube.y}`);
+  } },
+
   // Align Active Camera to View (Ctrl Alt Numpad 0) moves the scene camera to the view's eye and looks through it.
   "Align Active Camera to View moves the camera to the view": { open: { example: "Rigged Character", node: "Rig" }, async run() {
     await app.hover(0.5, 0.5);
@@ -956,6 +973,16 @@ const checks = {
     assert.ok(disabled > 0, "greyed settings");
   },
 
+  // Add-ons lists the add-ons Blender ships: Bylonder's own and the pose library enabled, the others greyed out.
+  async "Add-ons lists Blender's add-ons, those not included greyed out"() {
+    const prefs = await openPreferences();
+    await section(prefs, "Add-ons");
+    const region = prefs.locator(".bl-preferences-region");
+    for (const name of ["Bylonder", "Pose Library", "FBX format", "glTF 2.0 format", "Node Wrangler"]) await region.getByText(name).first().waitFor();
+    const enable = region.locator('button[data-blender="preferences.addon_enable"]');
+    assert.ok(await enable.count() > 0 && await enable.first().isDisabled(), "add-ons not included are greyed out");
+  },
+
   // Laptops: the number row as the numpad, the left button with Alt as the middle one, two-finger trackpad scrolling.
   async "Emulate Numpad: 1, 3 and 7 on the number row view front, right and top"() {
     await setInput(EMULATE_NUMPAD);
@@ -985,6 +1012,23 @@ const checks = {
     await app.hover(0.5, 0.5);
     for (let i = 0; i < 6; i++) await app.page.mouse.wheel(12, 7);
     await app.until((b, p) => b.views.input.editorCamera.position.x !== p[0], before);
+  },
+
+  // Closing an editor frees its area in Blender's window; the other areas keep theirs.
+  async "Preferences opened and closed three times leave the app working"() {
+    for (let i = 0; i < 3; i++) {
+      const prefs = await openPreferences();
+      await section(prefs, i % 2 ? "Keymap" : "Input");
+      await prefs.getByRole("button", { name: "Close" }).click();
+    }
+    await app.click(0.9, 0.9);
+    await expectStats(({ Objects }) => Objects[0] === 0);
+    await app.click();
+    await expectStats(({ Objects }) => Objects[0] === 1);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => !b.world.editMode.active);
   },
 
   async "a rebound key runs its operator, and the Preferences are kept over a reload"() {

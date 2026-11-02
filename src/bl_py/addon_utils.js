@@ -4,6 +4,7 @@ import * as __self__ from './addon_utils.js';
 import * as __cycle0__ from './bpy.js';
 import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_open} from './io.js';
 var __name__ = 'addon_utils';
 export var _merged = function () {
 	if (arguments.length) {
@@ -332,7 +333,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	var ast = __call__ (_module, null, 'ast');
 	var ModuleType = py_typeof (ast);
 	try {
-		var file_mod = __call__ (open, null, mod_path, 'r', __kwargtrans__ ({encoding: 'UTF-8'}));
+		var file_mod = __call__ (_open, null, mod_path, 'r', __kwargtrans__ ({encoding: 'UTF-8'}));
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, OSError)) {
@@ -1480,7 +1481,7 @@ export var _stale_pending_stage = function (debug) {
 			var __accu0__ = os;
 			return __call__ (__accu0__.makedirs, __accu0__, dirpath, __kwargtrans__ ({exist_ok: true}));
 		}) ();
-		var _ = __call__ (open, null, stale_pending_filepath, 'wb');
+		var _ = __call__ (_open, null, stale_pending_filepath, 'wb');
 		try {
 			_.__enter__ ();
 			// pass;
@@ -2353,7 +2354,7 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 		}) (), _ext_manifest_filename_toml);
 	}) ();
 	try {
-		var fh = __call__ (open, null, filepath_toml, 'rb');
+		var fh = __call__ (_open, null, filepath_toml, 'rb');
 		try {
 			fh.__enter__ ();
 			var data = (function () {
@@ -3803,7 +3804,7 @@ export var _is_first_reset = function () {
 };
 
 //# sourceMappingURL=addon_utils.map
-export {_globals, _import, _lazy, _member, _module};
+export {_globals, _import, _lazy, _member, _module, _open};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

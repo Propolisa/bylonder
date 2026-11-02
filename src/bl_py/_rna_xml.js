@@ -6,6 +6,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_open} from './io.js';
 var __name__ = '_rna_xml';
 export var _merged = function () {
 	if (arguments.length) {
@@ -1049,7 +1050,7 @@ export var xml_file_write = function (context, filepath, rna_map) {
 	}
 	else {
 	}
-	var file = __call__ (open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+	var file = __call__ (_open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
 	try {
 		file.__enter__ ();
 		var fw = file.write;
@@ -1074,7 +1075,7 @@ export var xml_file_write = function (context, filepath, rna_map) {
 };
 
 //# sourceMappingURL=_rna_xml.map
-export {_globals, _import, _lazy, _member, _module};
+export {_globals, _import, _lazy, _member, _module, _open};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

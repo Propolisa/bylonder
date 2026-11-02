@@ -8,6 +8,7 @@ import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
+import {_open} from './io.js';
 var __name__ = '_graphviz_export';
 export var _merged = function () {
 	if (arguments.length) {
@@ -249,7 +250,7 @@ export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, D
 	var __left0__ = true;
 	var CONSTRAINTS = __left0__;
 	var DRIVERS = __left0__;
-	var fileobject = __call__ (open, null, filepath, 'w');
+	var fileobject = __call__ (_open, null, filepath, 'w');
 	var fw = fileobject.write;
 	__call__ (fw, null, header);
 	__call__ (fw, null, (function () {
@@ -573,6 +574,8 @@ if (__eq__ (__name__, '__main__')) {
 }
 
 //# sourceMappingURL=_graphviz_export.map
+export {_open};
+
 export function __py_setattr__ (key, value) {
 	switch (key) {
 		case '_merged': _merged = value; break;

@@ -9,8 +9,19 @@ const VIEW_NAMES = ["User", "Front", "Back", "Left", "Right", "Top", "Bottom"];
 // An orthographic camera's bounds for a view of the given aspect, halfHeight up from its center.
 export const fitOrtho = (camera, halfHeight, aspect) =>
   Object.assign(camera, { orthoTop: halfHeight, orthoBottom: -halfHeight, orthoLeft: -halfHeight * aspect, orthoRight: halfHeight * aspect });
-// A scene camera's orthographic bounds from Blender's Orthographic Scale, which spans the longer side (sensor fit Auto).
-export const fitOrthoScale = (camera, aspect) => fitOrtho(camera, camera.metadata.orthoScale / 2 / Math.max(aspect, 1), aspect);
+// A scene camera, while orthographic, takes its bounds from Blender's Orthographic Scale (6 unless set), which spans the
+// longer side of each view it renders (sensor fit Auto).
+const fitted = new WeakSet();
+export function fitsOrthoScale(camera) {
+  if (fitted.has(camera)) return camera;
+  fitted.add(camera);
+  camera.getScene().onBeforeCameraRenderObservable.add((rendered) => {
+    if (rendered !== camera || camera.mode !== Camera.ORTHOGRAPHIC_CAMERA) return;
+    const aspect = camera.getEngine().getAspectRatio(camera);
+    fitOrtho(camera, (camera.metadata?.orthoScale ?? 6) / 2 / Math.max(aspect, 1), aspect);
+  });
+  return camera;
+}
 
 // The editor camera of one 3D Viewport, placed where the view's RegionView3D says. Blender's navigation operators
 // (view3d.rotate, move, zoom, dolly, view_axis, view_all, view_selected, view_persportho, and the trackpad's) change

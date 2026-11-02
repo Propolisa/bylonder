@@ -58,3 +58,7 @@ function __settable__ (attrib, descrip) {
     if (descrip.get && !descrip.set) descrip.set = function (value) { Object.defineProperty (this, attrib, { value, writable: true, configurable: true, enumerable: true }); };
     return descrip;
 }
+// Python's OSError (and its alias IOError), which Transcrypt's runtime lacks: the boundary's file system raises it and
+// Blender's scripts catch it by name, which Transcrypt leaves global.
+globalThis.OSError ??= __class__ ('OSError', [Exception], { __module__: 'builtins' });
+globalThis.IOError ??= globalThis.OSError;
