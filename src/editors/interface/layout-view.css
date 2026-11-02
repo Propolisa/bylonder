@@ -8,6 +8,9 @@
 .bl-tool:hover:not(:disabled),.bl-toggle:hover:not(:disabled),.bl-radio:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-tool),white 9%)}
 .bl-toggle.is-pressed,.bl-radio.is-pressed,.bl-tool.is-pressed{background:var(--bl-wcol-tool-sel);color:var(--bl-text-sel)}
 .bl-flat{background:none!important;box-shadow:none!important}
+.bl-list-row{background:var(--bl-wcol-list);box-shadow:none}
+.bl-list-row:hover:not(.is-pressed){background:var(--bl-wcol-hover)}
+.bl-list-row.is-pressed{background:var(--bl-wcol-list-sel);color:var(--bl-text-sel)}
 .bl-flat:hover:not(:disabled){color:var(--bl-text-sel)}
 .bl-menu-button{position:relative;background:var(--bl-wcol-menu)}
 .bl-popover{background:var(--bl-wcol-menu)}

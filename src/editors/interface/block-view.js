@@ -173,7 +173,7 @@ function widgetNode(b, env) {
     case 'PREVIEW_TILE': return previewTile(b, shown || (b.icon === 'NONE' ? env.tileLabel : ''), style);
     case 'ROW': case 'LISTROW': case 'VIEW_ITEM': case 'TAB': {
       const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
-      const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
+      const vnode = withStyle(button({ text: shown, iconName, kind: b.type === 'LISTROW' ? 'list-row' : 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
         value: item?.identifier, onClick: () => press(b, ui) }));
       if (b.type === 'VIEW_ITEM' && b.h > 1) return gridTile(b, ui);
       if (b.type === 'VIEW_ITEM') return cloneVNode(vnode, { onDblclick: () => ui.inContext((C) => buttonRename(C, b)) && ui.refresh() });
@@ -228,6 +228,8 @@ const HORIZONTAL = new Set(['row', 'split', 'header', 'row_flow']);
 // keeps it (a header, an aligned row, an icon).
 function childStyle(child, node, env) {
   const w = child.w ?? 0;
+  // An overlap's items lie over each other from its left, each as wide as Blender laid it out.
+  if (node.kind === 'overlap') return w && node.w ? { width: `${(100 * w) / node.w}%` } : {};
   if (!HORIZONTAL.has(node.kind) || !w) return {};
   const fixed = env.header || (node.alignment && node.alignment !== 'EXPAND') || (child.kind === 'button' && !child.text && !child.display && w <= 1.01);
   return fixed ? { flex: `0 0 calc(var(--bl-row) * ${w})`, width: `calc(var(--bl-row) * ${w})` } : { flex: `${w} ${w} 0`, minWidth: 0 };
