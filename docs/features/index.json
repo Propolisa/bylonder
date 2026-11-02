@@ -154,6 +154,70 @@
   "example_title": "Hair Dynamics"
  },
  {
+  "id": "image-textures",
+  "title": "Images and Image Textures",
+  "summary": "Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/image/index.html",
+   "https://docs.blender.org/manual/en/5.2/editors/image/image_settings.html",
+   "https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/image.html",
+   "https://docs.blender.org/manual/en/5.2/files/media/image_formats.html"
+  ],
+  "example": "texture-paint",
+  "thumbnail": "image-textures/thumbnail.png",
+  "media": [
+   "image-textures/image-editor.png",
+   "image-textures/new-image.gif",
+   "image-textures/image-node.png",
+   "image-textures/runtime.png"
+  ],
+  "ui": [
+   "IMAGE_EDITOR",
+   "IMAGE_HT_header",
+   "IMAGE_MT_image",
+   "IMAGE_MT_view",
+   "NODE_EDITOR",
+   "IMAGE_PT_image_properties"
+  ],
+  "operators": [
+   "image.open",
+   "image.new",
+   "image.save_as",
+   "image.pack",
+   "image.unpack",
+   "image.reload"
+  ],
+  "code": [
+   "src/imbuf/image-textures.js",
+   "src/editors/space_image/image-editor.js",
+   "src/editors/space_image/image-view.js",
+   "src/nodes/blender/shader-nodes.js",
+   "src/blenkernel/material/principled-gltf.js",
+   "src/runtimes/image.js",
+   "tools/blender-port/wasm/image-api.cc"
+  ],
+  "tests": [
+   "tests/images-wasm.test.js",
+   "tests/texture-paint-wasm.test.js",
+   "tests/nodes-gpu.test.js"
+  ],
+  "limits": [
+   "The color management files (OpenColorIO config and LUTs) are fetched on first use, not at startup, until the module is built with exceptions.",
+   "The view transform (AgX, Filmic) is not applied to what Babylon draws; images display with the Standard view.",
+   "An Image Texture node's Clip extension clamps to the edge pixels, as Babylon's samplers have no border color.",
+   "Interpolation belongs to the image's GPU texture, so two nodes sampling one image with different interpolation share the last one.",
+   "Cubic and Smart interpolation sample linearly.",
+   "Box, Sphere and Tube projection of the Image Texture node are drawn as Flat.",
+   "UDIM images draw their first tile only.",
+   "Compressed GPU texture formats are not offered."
+  ],
+  "page": "docs/features/image-textures.md",
+  "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
+  "example_title": "Texture Paint"
+ },
+ {
   "id": "keyframe-animation",
   "title": "Keyframe Animation",
   "summary": "Key an object's transform with I at two frames on the Timeline and play the animation with Space.",
@@ -448,5 +512,124 @@
   "page": "docs/features/shader-nodes.md",
   "open": "https://propolisa.github.io/bylonder/#example=lava",
   "example_title": "Lava Sphere"
+ },
+ {
+  "id": "texture-paint",
+  "title": "Texture Paint and Vertex Paint",
+  "summary": "Paint an object's image texture in the 3D Viewport or the Image Editor with Blender's brushes and projection painting, and paint its color attribute in Vertex Paint Mode, one undo step per stroke.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/texture_paint/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/texture_paint/tool_settings/texture_slots.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/vertex_paint/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/brush/index.html"
+  ],
+  "example": "texture-paint",
+  "thumbnail": "texture-paint/thumbnail.png",
+  "media": [
+   "texture-paint/workspace.png",
+   "texture-paint/paint-3d.gif",
+   "texture-paint/paint-2d.gif",
+   "texture-paint/vertex-paint.gif"
+  ],
+  "ui": [
+   "TEXTURE_PAINT",
+   "VERTEX_PAINT",
+   "VIEW_3D",
+   "IMAGE_EDITOR",
+   "VIEW3D_PT_slots_projectpaint",
+   "VIEW3D_PT_slots_color_attributes",
+   "IMAGE_PT_tools_active",
+   "builtin.brush"
+  ],
+  "operators": [
+   "paint.texture_paint_toggle",
+   "paint.vertex_paint_toggle",
+   "paint.image_paint",
+   "paint.vertex_paint",
+   "paint.sample_color",
+   "paint.add_texture_paint_slot",
+   "paint.brush_colors_flip",
+   "ed.undo"
+  ],
+  "code": [
+   "src/imbuf/image-textures.js",
+   "src/draw/workbench.js",
+   "src/editors/space_image/image-editor.js",
+   "src/editors/space_image/image-view.js",
+   "src/editors/screen/blender-area.js",
+   "src/editors/object/main-modes.js",
+   "tools/blender-port/wasm/image-api.cc"
+  ],
+  "tests": [
+   "tests/texture-paint-wasm.test.js"
+  ],
+  "limits": [
+   "The color management's view transform (AgX, Filmic) is not applied to what Babylon draws; images display with the Standard view.",
+   "Brush textures and masks (Texture and Texture Mask panels) are not drawn in the brush cursor.",
+   "Clone and Smear brushes paint only within one image; Clone from another image's UV map is not checked."
+  ],
+  "page": "docs/features/texture-paint.md",
+  "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
+  "example_title": "Texture Paint"
+ },
+ {
+  "id": "uv-editing",
+  "title": "UV Editing",
+  "summary": "Unwrap a mesh with UV > Unwrap, Smart UV Project or Project from View, mark seams, and select, move, pin, stitch and pack its UVs in the UV Editor over the image they map.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/uv/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/uv.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/uv/workflows/layout.html",
+   "https://docs.blender.org/manual/en/5.2/editors/uv/index.html"
+  ],
+  "example": "texture-paint",
+  "thumbnail": "uv-editing/thumbnail.png",
+  "media": [
+   "uv-editing/workspace.png",
+   "uv-editing/unwrap.gif",
+   "uv-editing/select-move.gif"
+  ],
+  "ui": [
+   "IMAGE_EDITOR",
+   "EDIT",
+   "IMAGE_HT_header",
+   "IMAGE_MT_uvs",
+   "IMAGE_MT_select",
+   "VIEW3D_MT_uv_map",
+   "IMAGE_PT_tools_active"
+  ],
+  "operators": [
+   "uv.unwrap",
+   "uv.smart_project",
+   "uv.project_from_view",
+   "uv.select",
+   "uv.select_box",
+   "uv.select_all",
+   "uv.pin",
+   "uv.stitch",
+   "uv.pack_islands",
+   "mesh.mark_seam",
+   "transform.translate"
+  ],
+  "code": [
+   "src/editors/space_image/image-editor.js",
+   "src/editors/space_image/image-view.js",
+   "src/editors/screen/blender-area.js",
+   "tools/blender-port/wasm/image-api.cc"
+  ],
+  "tests": [
+   "tests/texture-paint-wasm.test.js"
+  ],
+  "limits": [
+   "UV Sculpt tools are not drawn with a brush cursor.",
+   "The UV Editor's stretch display (Overlays, Display Stretch) is not drawn."
+  ],
+  "page": "docs/features/uv-editing.md",
+  "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
+  "example_title": "Texture Paint"
  }
 ]

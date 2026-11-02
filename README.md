@@ -92,8 +92,7 @@ Some features can run either way, chosen per object. They are marked with the By
 
 [docs/runtimes.md](docs/runtimes.md) describes the model.
 
-**Not there yet.** EEVEE and Cycles, the Image and UV editors, Texture Paint and Blender's Compositor nodes are not
-available. Large scenes are slower than desktop Blender. The
+**Not there yet.** EEVEE and Cycles and Blender's Compositor nodes are not available. Large scenes are slower than desktop Blender. The
 [Blender coverage](docs/blender-coverage.md) notes and the Blender Coverage view (Splash Screen) track what is in.
 
 ## Develop

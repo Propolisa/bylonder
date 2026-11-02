@@ -19,6 +19,8 @@ import { availability, declaration, defaults } from './declarations.js';
 import { compileSteps, glslIdentifier, kindOfSocket, menuValue, muteLinks, setUniforms, stack } from './node-code.js';
 import { colorRampTable, defaultColorRamp, halfFloats, TABLE_SIZE } from '../../blenkernel/colorband.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
+import { imageTexture } from '../../imbuf/image-textures.js';
+import { blendData } from '../../python/bpy_rna.js';
 import '../graph-roots.js';
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
@@ -50,6 +52,18 @@ export const SHADER_NODES = {
   ShaderNodeTexNoise: (p, decl, { connected, linked }) => {
     const [name, args, outs] = stack(functions.noise[p.noise_type][DIMENSIONS.indexOf(p.noise_dimensions)], decl, [p.normalize ? 1 : 0, linked('Color') ? 1 : 0]);
     return [[name, args.map((a) => (a === 'Vector' && !connected('Vector') ? '$orco' : a)), outs]];
+  },
+  // node_shader_tex_image.cc, node_shader_gpu_tex_image: an unlinked vector is the default UV map; the Color output's
+  // alpha as the Alpha output's use asks (the texture holds straight alpha, see imbuf/image-textures.js).
+  ShaderNodeTexImage: (p, decl, { connected, linked, image }) => {
+    const ima = image();
+    if (!ima) return [['node_tex_image_empty', [], ['@Color', '@Alpha']]];
+    const sample = ['Cubic', 'Smart'].includes(p.interpolation) ? 'node_tex_image_cubic' : 'node_tex_image_linear';
+    const clear = ['CHANNEL_PACKED', 'NONE'].includes(ima.alpha_mode) || ima.colorspace_settings.is_data || linked('Alpha');
+    return [
+      [sample, [connected('Vector') ? 'Vector' : '$uv', { image: ima }], ['@Color', '@Alpha']],
+      linked('Color') && [clear ? 'color_alpha_clear' : 'color_alpha_premultiply', ['@Color'], ['@Color']],
+    ];
   },
   // node_shader_color_ramp.cc, gpu_shader_valtorgb
   ShaderNodeValToRGB: (p, decl) => {
@@ -90,6 +104,8 @@ void bl_g_data(vec3 P, vec3 N, float is_strand, float hair_radius, vec3 curve_N,
   g_data = GlobalData(P, N, is_strand > 0.5, hair_radius * 2.0, curve_N, int(hair_strand_id));
 }`,
   bl_vector_copy: 'void bl_vector_copy(vec3 v, inout vec3 result) { result = v; }',
+  // EEVEE's texture LOD bias (the film's, 1 at full resolution).
+  texture_lod_bias_get: 'float texture_lod_bias_get() { return 1.0; }',
   bl_tex_coord: `void bl_tex_coord(vec3 orco, vec3 normal_in, vec3 uv_in, vec3 object_in, vec3 camera_in, vec3 window_in, vec3 reflection_in,
   inout vec3 generated, inout vec3 normal, inout vec3 uv, inout vec3 object, inout vec3 camera, inout vec3 window, inout vec3 reflection) {
   generated = orco; normal = normal_in; uv = uv_in; object = object_in; camera = camera_in; window = window_in; reflection = reflection_in;
@@ -118,7 +134,7 @@ const POINT = {
 };
 const G_DATA_POINTS = ['$P', '$N', '$is_strand', '$hair_radius', '$hair_curve_N', '$hair_strand_id'];
 const NEEDS = {
-  ShaderNodeTexNoise: ['$orco'], ShaderNodeBump: G_DATA_POINTS, ShaderNodeHairInfo: [...G_DATA_POINTS, '$hair_intercept', '$hair_length'],
+  ShaderNodeTexNoise: ['$orco'], ShaderNodeTexImage: ['$uv'], ShaderNodeBump: G_DATA_POINTS, ShaderNodeHairInfo: [...G_DATA_POINTS, '$hair_intercept', '$hair_length'],
   ShaderNodeTexCoord: ['$orco', '$object_normal', '$uv', '$object', '$camera', '$window', '$reflection'],
 };
 const geometryOf = (idname) => [...new Set((NEEDS[idname] ?? []).flatMap((value) => POINT[value]))];
@@ -202,6 +218,13 @@ function rampTexture(table, scene) {
   texture.wrapU = texture.wrapV = Texture.CLAMP_ADDRESSMODE;
   rampTextures.set(key, texture);
   return texture;
+}
+
+// What an Image without pixels yet samples (GPU_texture_create_error's pink, as Blender draws a missing image).
+const empties = new WeakMap();
+function emptyTexture(scene) {
+  if (!empties.has(scene)) empties.set(scene, new RawTexture(new Uint8Array([255, 0, 255, 255]), 1, 1, Constants.TEXTUREFORMAT_RGBA, scene));
+  return empties.get(scene);
 }
 
 const BLENDER = Symbol('blender');
@@ -314,6 +337,7 @@ const blenderShader = (Base) => class extends Base {
       const steps = SHADER_NODES[this.idname](this.properties, this.declaration, {
         connected: (id) => !!this.getInputByName(id)?.isConnected,
         linked: (id) => !!this.getOutputByName(id)?.hasEndpoints,
+        image: () => (this.properties.image ? blendData().images.get(this.properties.image) ?? null : null),
       });
       // Blender's hashes take 32 bit integers, which a fragment shader's default (mediump) need not be.
       state._emitFunction('bl_precision', 'precision highp int;\n', '');
@@ -321,10 +345,11 @@ const blenderShader = (Base) => class extends Base {
       const code = compileSteps(this.declaration, steps, links, {
         emit: (key, code) => state._emitFunction(key, code, ''),
         free: (prefix) => state._getFreeVariableName(prefix),
-        sampler: (table) => {
-          const name = state._getFreeVariableName('bl_table');
+        sampler: ({ texture: table, image }) => {
+          const name = state._getFreeVariableName(table ? 'bl_table' : 'bl_image');
           state._emit2DSampler(name, '', false, undefined, false, 'highp');
-          this._textures.push([name, rampTexture(table, state.sharedData.scene)]);
+          const scene = state.sharedData.scene;
+          this._textures.push([name, table ? rampTexture(table, scene) : imageTexture(image, scene, this.properties) ?? emptyTexture(scene)]);
           return name;
         },
         functions: STAND_INS,
@@ -568,7 +593,8 @@ export function blenderDefaultTree(material) {
 export function nodeProperties(node) {
   const decl = declaration('shader', node.bl_idname), ramp = node.color_ramp;
   return {
-    ...Object.fromEntries(Object.keys(decl?.properties ?? {}).map((key) => [key, node[key]])),
+    // An ID pointer (an Image Texture's image) by its name.
+    ...Object.fromEntries(Object.entries(decl?.properties ?? {}).map(([key, { type }]) => [key, type === 'POINTER' ? node[key]?.name ?? null : node[key]])),
     ...(ramp && { color_ramp: { color_mode: ramp.color_mode, interpolation: ramp.interpolation, hue_interpolation: ramp.hue_interpolation,
       elements: [...ramp.elements].map((e) => ({ position: e.position, color: [...e.color] })) } }),
   };
