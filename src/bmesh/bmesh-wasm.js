@@ -133,6 +133,10 @@ export function meshData(mesh) {
   return { vert_positions: vert_positions.slice(), edges: edges.slice(), face_offsets: face_offsets.slice(), corner_verts: corner_verts.slice(), corner_edges: corner_edges.slice(), attributes };
 }
 // A copy of an extracted Mesh that is its own.
+// A Float32Array of the module's memory as a property read anew each time: a view made before a call that grows the
+// memory is detached by it.
+const floatsView = (record, name, pointer, length) =>
+  Object.defineProperty(record, name, { enumerable: true, get: () => new Float32Array(x.memory.buffer, pointer, length) });
 const ownedMesh = (mesh) => createMesh(meshData(mesh));
 
 // A Mesh of positions and faces (offsets into corner vertices) whose edges Blender derives, as a script's
@@ -309,15 +313,15 @@ export class BlenderMain {
   // object instanced, or 0), shape (INSTANCE_SHAPES), overlay (drawn in the viewport only), drawSize, color, geometry
   // (a MESH group's Mesh, for instanceMesh), material (the geometry's first Material, or 0), data (16 floats per
   // instance: a world matrix in Babylon's layout, else a particle's point data in Blender's axes: position, value,
-  // rotation) }, the data a view into the module's memory valid until the next call.
+  // rotation) }, the data a view into the module's memory made on each read (other calls can grow the memory, which
+  // detaches older views), valid until the next instances().
   instances() {
     const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, data = x.main_instance_matrices() >>> 0, size = 12;
     const ints = new Int32Array(x.memory.buffer, at, count * size), floats = new Float32Array(x.memory.buffer, at, count * size);
     return Array.from({ length: count }, (_, i) => {
       const [instancer, ob, shape, overlay, first, n] = ints.subarray(i * size, i * size + 6), [geometry, material] = ints.subarray(i * size + 10, i * size + 12);
-      return { instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, drawSize: floats[i * size + 6],
-        color: Array.from(floats.subarray(i * size + 7, i * size + 10)), geometry: geometry >>> 0, material: material >>> 0,
-        data: new Float32Array(x.memory.buffer, data + first * 64, n * 16) };
+      return floatsView({ instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, drawSize: floats[i * size + 6],
+        color: Array.from(floats.subarray(i * size + 7, i * size + 10)), geometry: geometry >>> 0, material: material >>> 0 }, 'data', data + first * 64, n * 16);
     });
   }
   // The Mesh of an instances() MESH group, valid until the next call.
@@ -332,14 +336,14 @@ export class BlenderMain {
   }
   // The point clouds the last instances() found (main-api.cc main_pointclouds): { instancer, pointcloud, material,
   // matrix (16 floats, Babylon's layout), points (4 floats each: position in Blender's axes, radius) }, the arrays views
-  // into the module's memory valid until the next instances().
+  // into the module's memory made on each read, valid until the next instances().
   pointClouds() {
     const count = x.main_pointclouds(), size = 21, at = x.main_pointcloud_draws() >>> 0, points = x.main_pointcloud_points() >>> 0;
     const ints = new Int32Array(x.memory.buffer, at, count * size);
     return Array.from({ length: count }, (_, i) => {
       const [instancer, pointcloud, material] = ints.subarray(i * size, i * size + 3), [first, n] = ints.subarray(i * size + 19, i * size + 21);
-      return { instancer: instancer >>> 0, pointcloud: pointcloud >>> 0, material: material >>> 0, matrix: new Float32Array(x.memory.buffer, at + (i * size + 3) * 4, 16),
-        points: new Float32Array(x.memory.buffer, points + first * 16, n * 4) };
+      const record = floatsView({ instancer: instancer >>> 0, pointcloud: pointcloud >>> 0, material: material >>> 0 }, 'matrix', at + (i * size + 3) * 4, 16);
+      return floatsView(record, 'points', points + first * 16, n * 4);
     });
   }
   // The IDs the depsgraph updated since the last call, each with its recalc flags (ID_RECALC_*): { id, recalc }.

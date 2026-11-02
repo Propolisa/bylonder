@@ -417,7 +417,8 @@ export function createMainView(state) {
     const byOb = new Map([...objects.values()].map((e) => [e.ob, e.node])), drawn = new Set(), rendering = !!world.collections?.rendering, { scene } = world;
     // A mesh group's Mesh, and a point cloud, are new at each evaluation: each is kept as its instancer's nth.
     const nth = new Map(), nthOf = (place) => nth.set(place, (nth.get(place) ?? -1) + 1).get(place);
-    for (const { instancer, ob, shape, overlay, drawSize, color, geometry, material, data } of blender.instances()) {
+    for (const group of blender.instances()) {
+      const { instancer, ob, shape, overlay, drawSize, color, geometry, material } = group;
       const geometric = shape === 'MESH';
       const key = geometric ? `${instancer}:MESH:${nthOf(instancer + ':MESH')}` : `${instancer}:${ob || shape}:${color}:${drawSize}`;
       const source = shape === 'OBJECT' ? byOb.get(ob) : geometric ? null : particleShapeMesh(scene, shape);
@@ -433,6 +434,8 @@ export function createMainView(state) {
       else if (carrier.geometry !== source.geometry) source.geometry.applyToMesh(carrier);
       if (shape === 'OBJECT') carrier.material = source.material;
       if (geometric) carrier.material = materialFor(material);
+      // Read after instanceMesh and materialFor, which can grow the module's memory.
+      const { data } = group;
       let buffer = carrier.metadata.instances;
       if (!(buffer?.length >= data.length)) {
         buffer = carrier.metadata.instances = new Float32Array(Math.max(16, 2 ** Math.ceil(Math.log2(data.length))));
@@ -443,7 +446,7 @@ export function createMainView(state) {
       carrier.thinInstanceCount = data.length / 16;
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
-    const clouds = blender.pointClouds().map((record) => ({ ...record, key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
+    const clouds = blender.pointClouds().map((record) => Object.assign(record, { key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
     const shown = drawPointClouds(scene, clouds, pointClouds, materialFor);
     for (const [key, mesh] of pointClouds) if (!shown.has(key)) { mesh.dispose(); pointClouds.delete(key); }
   }
