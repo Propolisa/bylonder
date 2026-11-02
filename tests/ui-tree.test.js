@@ -6,6 +6,7 @@ import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/editors/anima
 import { createTopbarArea } from '../src/editors/space_topbar/topbar-area.js';
 import { kw } from '../src/windowmanager/wm-operators.js';
 import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
+import { propSearchItems } from '../src/editors/interface/tree-menu.js';
 import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, buttonOperator, buttonSearch, buttonSearchApply, inButtonContext, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 // Blender's Properties editor laid out by Blender's uiLayout in the module, its panels Blender's Python registered as
@@ -132,5 +133,21 @@ panels();
 const cone = buttons(meshMenu).find((b) => b.text === 'Cone');
 assert.equal(area.inContext(RGN_TYPE_WINDOW, (C) => inButtonContext(C, cone, () => 'ran')), 'ran');
 spaceOf(area).context = 'MODIFIER';
+
+// A prop_search on a string property (Explode's Particle UV over the mesh's UV maps, its Vertex Group over the
+// object's): the item picked is the property's text, set as Blender's search box sets it.
+ob.data.uv_layers.new(kw({ name: 'UVMap' }));
+ob.vertex_groups.new(kw({ name: 'Group' }));
+ob.modifiers.new('ParticleSystem', 'PARTICLE_SYSTEM');
+const explode = ob.modifiers.new('Explode', 'EXPLODE');
+const regionUI = { inContext: (fn) => area.inContext(RGN_TYPE_WINDOW, fn), undoPush() {}, refresh() {} };
+const pick = (prop, name) => {
+  const search = panels().filter((panel) => /explode/i.test(panel.id)).flatMap(panelButtons).find((b) => b.type === 'SEARCH_MENU' && b.rna?.prop === prop);
+  propSearchItems(search, regionUI).find((item) => item.label === name).run();
+};
+pick('particle_uv', 'UVMap');
+assert.equal(explode.particle_uv, 'UVMap');
+pick('vertex_group', 'Group');
+assert.equal(explode.vertex_group, 'Group');
 
 console.log(`Blender's uiLayout: ${drawn.length} panels, the header and menus as trees`);
