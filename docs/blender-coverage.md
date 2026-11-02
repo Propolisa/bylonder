@@ -35,6 +35,14 @@ Save Version stores a version in the project history. There is no .blend file; p
 Status: partial
 New Project creates a project from code. Blender's templates map to File > New from Example.
 
+## TOPBAR_MT_file_import > *
+Status: partial
+Blender's importers in the module (OBJ, PLY, STL, FBX) through the browser's file dialog, their options drawn from the operator's ui (`wm-fileselect.js`). Alembic and USD are greyed out with the reason; the default add-ons' entries (glTF 2.0, FBX (Legacy), Motion Capture, SVG as Curves) wait for Blender's Python.
+
+## TOPBAR_MT_file_export > *
+Status: partial
+Blender's exporters in the module (OBJ, PLY, STL): options, then the browser's save dialog; files written beside the chosen one (an OBJ's .mtl) download. Bylonder adds Babylon, JavaScript and Project ZIP. Alembic, USD and the add-ons' glTF 2.0, FBX and Motion Capture are greyed out with the reason.
+
 ## PREFERENCES > *
 Status: partial
 The Preferences editor is Blender's own `space_userpref` in the module (`editors/space_userpref`), over Blender's `U`:

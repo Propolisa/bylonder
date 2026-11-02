@@ -357,7 +357,9 @@ function moduleMesh(x, createMesh) {
       tri_faces: [Int32Array, at(8), tris],
       UVMap: [Float32Array, at(9), corners * 2],
       ...Object.fromEntries(FLAGS.map(([name, domain], i) => [name, [Uint8Array, at(10 + i), sizes[domain]]])),
-      ...Object.fromEntries(["POINT", "EDGE", "FACE"].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]]))
+      ...Object.fromEntries(["POINT", "EDGE", "FACE"].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]])),
+      // The polyfill's modifiers.wasm, built before extraction_corner_normals, has none.
+      corner_normals: [Float32Array, (x.extraction_corner_normals?.(header) ?? 0) >>> 0, corners * 3]
     };
     let buffer = null, views = {};
     const view = (name) => {
@@ -388,6 +390,8 @@ function moduleMesh(x, createMesh) {
       corner_tri_faces: () => buffer("tri_faces"),
       face_normals: () => buffer("face_normals"),
       vert_normals: () => buffer("vert_normals"),
+      // Normals per face corner where Blender draws them so (custom normals, sharp edges), or null.
+      corner_normals: () => has("corner_normals") ? buffer("corner_normals") : null,
       // An evaluated mesh's original element of each of its own in a domain (CD_ORIGINDEX, -1 for none), or null.
       orig_index: (domain) => has(`orig_index_${domain}`) ? buffer(`orig_index_${domain}`) : null
     });
@@ -442,10 +446,11 @@ function mesh_batch_cache_vertex_buffers(mesh) {
   const positions = new Float32Array(corners * 3), normals = new Float32Array(corners * 3);
   const sharp_face = mesh.attribute("sharp_face");
   const face_normals = mesh.face_normals(), vert_normals = sharp_face?.every(Boolean) ? null : mesh.vert_normals();
+  const corner_normals = mesh.corner_normals?.();
   for (let f = 0; f < mesh.faces_num; f++) {
     const flat = !vert_normals || sharp_face?.[f];
     for (let c = face_offsets[f]; c < face_offsets[f + 1]; c++) {
-      const v = corner_verts[c] * 3, n = flat ? face_normals : vert_normals, i = flat ? f * 3 : v;
+      const v = corner_verts[c] * 3, n = corner_normals ?? (flat ? face_normals : vert_normals), i = corner_normals ? c * 3 : flat ? f * 3 : v;
       positions[c * 3] = p[v];
       positions[c * 3 + 1] = p[v + 2];
       positions[c * 3 + 2] = p[v + 1];

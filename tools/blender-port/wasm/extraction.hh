@@ -41,6 +41,8 @@ void extraction_update(BMesh *bm, Extraction &extraction, int what);
 
 /* Points the header at an evaluated Mesh's own arrays (the flags stay null: they exist in Edit Mode only). */
 void mesh_extraction(const Mesh &mesh, ExtractionHeader &header);
+/* What mesh_extraction keeps beside a header, freed with it. */
+void extraction_free(const ExtractionHeader &header);
 /* The Mesh the last mesh_extraction read (an evaluated Mesh, or the one its subdivision made). */
 extern const Mesh *extracted_mesh;
 

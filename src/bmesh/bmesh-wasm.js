@@ -522,6 +522,8 @@ export class BlenderMain {
       if (type) result.popup = { type, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()) };
       if (type === 'PROPS') result.dialog = op, kept = true;
       if (status & OPERATOR_RUNNING_MODAL && x.operator_modal_added(this.#C) >>> 0) Object.assign(result, { op, keymap: cString(x.operator_modal_keymap(op)) }), kept = true;
+      // Blender's file browser handler holds it until the page's file dialog answers (wm-fileselect.js).
+      if (status & OPERATOR_RUNNING_MODAL && !kept && x.fileselect_held(this.#C, op)) kept = true;
       const menu = cString(x.operator_menu_called());
       if (menu) {
         const popup = this.menu(menu);

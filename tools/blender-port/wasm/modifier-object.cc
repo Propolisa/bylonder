@@ -49,6 +49,7 @@ EXPORT(modifier_object_new) ModifierObject *modifier_object_new()
 
 EXPORT(modifier_object_free) void modifier_object_free(ModifierObject *mo)
 {
+  extraction_free(mo->header);
   result_free(*mo);
   modifiers_free(mo->object);
   if (object_mesh(*mo)) {

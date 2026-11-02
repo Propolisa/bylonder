@@ -44,6 +44,8 @@ export function moduleMesh(x, createMesh) {
       UVMap: [Float32Array, at(9), corners * 2],
       ...Object.fromEntries(FLAGS.map(([name, domain], i) => [name, [Uint8Array, at(10 + i), sizes[domain]]])),
       ...Object.fromEntries(['POINT', 'EDGE', 'FACE'].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]])),
+      // The polyfill's modifiers.wasm, built before extraction_corner_normals, has none.
+      corner_normals: [Float32Array, (x.extraction_corner_normals?.(header) ?? 0) >>> 0, corners * 3],
     };
     let buffer = null, views = {};
     const view = (name) => {
@@ -75,6 +77,8 @@ export function moduleMesh(x, createMesh) {
       corner_tri_faces: () => buffer('tri_faces'),
       face_normals: () => buffer('face_normals'),
       vert_normals: () => buffer('vert_normals'),
+      // Normals per face corner where Blender draws them so (custom normals, sharp edges), or null.
+      corner_normals: () => (has('corner_normals') ? buffer('corner_normals') : null),
       // An evaluated mesh's original element of each of its own in a domain (CD_ORIGINDEX, -1 for none), or null.
       orig_index: (domain) => (has(`orig_index_${domain}`) ? buffer(`orig_index_${domain}`) : null),
     });

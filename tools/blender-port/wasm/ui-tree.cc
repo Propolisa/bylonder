@@ -1245,6 +1245,8 @@ std::string operator_props_layout(bContext *C, wmOperator *op)
 {
   operator_popup_free(C);
   Block *block = popup_block_new(C, op->type->idname, EmbossType::Emboss, false, "");
+  /* An operator's ui may use layout panels (the importers' and exporters'), which need a panel, as wm_operators.cc's dialogs give. */
+  popup_dummy_panel_set(popup_of(block)->region, block, op->idname);
   Layout &layout = block_layout(block, LayoutDirection::Vertical, LayoutType::Panel, 0, 0, 15 * UI_UNIT_X, 0, 0, style_get_dpi());
   layout.use_property_split_set(true);
   layout.use_property_decorate_set(false);

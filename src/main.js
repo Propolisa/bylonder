@@ -95,7 +95,8 @@ import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { updateImageTextures, onImageTexturesChanged, imageTexture } from "./imbuf/image-textures.js";
 import { mountImageEditor } from "./editors/space_image/image-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
-import "./windowmanager/wm-fileselect.js";
+import { setFileselectHost } from "./windowmanager/wm-fileselect.js";
+import "./editors/io/io-ops.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
 // Boot phases, as performance marks (the workspace marks its own).
@@ -509,6 +510,15 @@ viewportDock.setFactory("preferences", preferencesEditor);
 registerUserprefOperators({ showArea: () => viewportDock.show("preferences", true) });
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost, wake: () => views.wake(),
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
+// File > Import and Export: Main made current (an export's meshes filled) for the operator the file dialog runs, then
+// what it changed drawn, and Blender's undo step, if it pushed one, taken.
+setFileselectHost((run, { save }) => {
+  const sync = world.mainSync, step = sync.blender.undoStep;
+  if (save) sync.withMeshes(run);
+  else { sync.flush(); run(); }
+  sync.view();
+  if (sync.blender.undoStep !== step) commit();
+});
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
 // The navigation gizmo's and touch's ways into Blender's navigation operators (view3d-window.js).
 world.view3dInvoke = (view, idname, props, native) => view3dWindow.invoke(view, idname, props, native);

@@ -12,7 +12,8 @@ export const onRegister = (fn) => { registrations.add(fn); for (const idname of 
 
 // An operator: run(props, event), optionally poll(props, event) (the event when a key or click ran it), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
 // with some properties only and enumItems(prop) for its enum properties' items where they differ from Blender's
-// (src/makesrna/rna-operators.json), as [identifier, name, description, icon]. One registered for a space type
+// (src/makesrna/rna-operators.json), as [identifier, name, description, icon]. One with `unavailable` (the reason) never
+// polls: Blender's menus show it greyed out. One registered for a space type
 // ('GRAPH_EDITOR') runs when the context area is of that space, as Blender's operators act on the context area's space
 // (transform in a Graph Editor moves keys); elsewhere the operator registered without one runs.
 export function registerOperator(idname, operator, space = null) {
@@ -42,6 +43,8 @@ export function registerOperators(table, space = null) {
 }
 
 const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.get(idname)) ?? operators.get(idname);
+// Why an operator Bylonder lists in Blender's menus cannot run here (`unavailable`), shown with it greyed out, or undefined.
+export const unavailableReason = (idname) => operatorFor(idname)?.unavailable;
 // Whether Bylonder's registry runs an operator (its own way, or Blender's with the scene made current around it).
 export const runsOperator = (idname) => !!operatorFor(idname);
 // Whether Bylonder runs an operator its own way, not Blender's behind it (`blender: true`).
@@ -61,7 +64,7 @@ export const operatorIds = () => [...operators.keys()];
 export const blenderOperatorIds = () => [...operators].filter(([, operator]) => operator.blender).map(([idname]) => idname);
 export const spaceOperatorIds = () => Object.fromEntries([...spaceOperators].map(([space, table]) => [space, [...table.keys()]]));
 // Whether an operator is registered and can run now with those properties (WM_operator_poll).
-export const pollOperator = (idname, props = {}) => { const operator = operatorFor(idname); return !!operator && (operator.supports?.(props) ?? true) && (operator.poll?.(props) ?? true); };
+export const pollOperator = (idname, props = {}) => { const operator = operatorFor(idname); return !!operator && !operator.unavailable && (operator.supports?.(props) ?? true) && (operator.poll?.(props) ?? true); };
 
 // Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls. Returns
 // false when it did not run, else what run returned, as Blender's operators do: 'FINISHED' (or nothing),

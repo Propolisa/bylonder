@@ -286,6 +286,66 @@
   "example_title": "Texture Paint"
  },
  {
+  "id": "import-export",
+  "title": "Import and Export",
+  "summary": "Bring meshes in and write them out with Blender's own Wavefront OBJ, Stanford PLY, STL and FBX importers and exporters, through the browser's file dialogs with each format's options.",
+  "status": "partial",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/files/import_export/index.html",
+   "https://docs.blender.org/manual/en/5.2/files/import_export/obj.html",
+   "https://docs.blender.org/manual/en/5.2/files/import_export/ply.html",
+   "https://docs.blender.org/manual/en/5.2/files/import_export/stl.html",
+   "https://docs.blender.org/manual/en/5.2/files/import_export/fbx.html"
+  ],
+  "example": "import-export",
+  "thumbnail": "import-export/thumbnail.png",
+  "media": [
+   "import-export/import-menu.png",
+   "import-export/import-options.png",
+   "import-export/imported.png",
+   "import-export/export-menu.png",
+   "import-export/export-options.png"
+  ],
+  "ui": [
+   "TOPBAR_MT_file",
+   "TOPBAR_MT_file_import",
+   "TOPBAR_MT_file_export",
+   "VIEW_3D",
+   "OBJECT"
+  ],
+  "operators": [
+   "wm.obj_import",
+   "wm.obj_export",
+   "wm.ply_import",
+   "wm.ply_export",
+   "wm.stl_import",
+   "wm.stl_export",
+   "wm.fbx_import",
+   "object.delete"
+  ],
+  "code": [
+   "src/windowmanager/wm-fileselect.js",
+   "tools/blender-port/wasm/fileselect.cc",
+   "src/editors/io/io-ops.js",
+   "src/draw/mesh-batch-buffers.js"
+  ],
+  "tests": [
+   "tests/io-wasm.test.js",
+   "tests/e2e/smoke.mjs"
+  ],
+  "limits": [
+   "Alembic is greyed out until the module is built with C++ exceptions, which its reader relies on.",
+   "Universal Scene Description is greyed out; OpenUSD needs threads and run-time plugins the module does not have.",
+   "glTF 2.0, FBX export, Motion Capture (.bvh) and SVG as Curves are Blender's Python add-ons, greyed out until Blender's Python runs in Bylonder.",
+   "The file dialogs are the browser's; an export with several files (an OBJ's .mtl) saves the first where you choose and downloads the others.",
+   "Imported color attributes are kept in Main; Solid shading's Attribute color and the Color Attribute node do not draw them yet."
+  ],
+  "page": "docs/features/import-export.md",
+  "open": "https://propolisa.github.io/bylonder/#example=import-export",
+  "example_title": "Import and Export"
+ },
+ {
   "id": "keyframe-animation",
   "title": "Keyframe Animation",
   "summary": "Key an object's transform with I at two frames on the Timeline and play the animation with Space.",

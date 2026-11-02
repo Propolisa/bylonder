@@ -136,6 +136,31 @@ what).
 - **Bylonder's own modifiers** (Array (Nodes), Babylon Node Geometry) are Babylon-native: a saved file has Blender's
   modifiers only, which are Main's own.
 
+### Import and export
+
+Decided 2026-11-02. File > Import and File > Export are Blender's importers and exporters in the module (`editors/io`,
+`io/wavefront_obj`, `io/ply`, `io/stl`, `io/fbx` with ufbx), registered by `ED_operatortypes_io` as Blender registers
+them, in Blender's menus (`TOPBAR_MT_file_import`, `TOPBAR_MT_file_export`). A menu entry whose operator the page does not
+register is called as Blender's menus call it, through `WM_operator_call_py` in its call context (`tree-menu.js`), so its
+invoke runs.
+
+- **The File Browser is the browser's dialog.** `WM_event_add_fileselect` is wrapped (`fileselect.cc`): Blender's
+  fileselect handler keeps the operator, and the page (`windowmanager/wm-fileselect.js`) asks the browser for files
+  from the app page, which has the click's user activation. An import's files go into the module's file system, the
+  operator's options (`fileselect_options`: its `ui`, as the File Browser's sidebar draws it, in the properties dialog)
+  are confirmed, and `EVT_FILESELECT_EXEC` runs it. An export's options come first, then the save picker; the file goes
+  there, or downloads, and files written beside it download. The scene window makes Main current first (an export
+  fills the stand-ins of meshes Babylon built), views what the operator changed after and pushes its undo step.
+- **Drawing what an import makes.** The view adopts the new objects. Their normals are Blender's: where Blender draws
+  them per face corner (custom normals, sharp edges: `Mesh::normals_domain`), the extraction gives them
+  (`extraction_corner_normals`, kept beside the extraction's header).
+- **Not built.** Alembic (its reader relies on caught C++ exceptions; the module is built with `-fignore-exceptions`)
+  and USD (OpenUSD's threads and run-time plugins). The default add-ons (io_scene_gltf2, io_scene_fbx, io_anim_bvh,
+  io_curve_svg) are Python; `editors/io/io-ops.js` lists their entries greyed out until Blender's Python runs them.
+- **Checked.** `tests/io-wasm.test.js` imports files Blender 5.2.3 wrote and compares with Blender's own import
+  (`tools/blender-reference/io-fixtures.py`), exports Blender's scene and imports it again, and draws an import;
+  `tests/e2e/smoke.mjs` runs File > Import > Wavefront (.obj) and File > Export > Wavefront (.obj) in the browser.
+
 ### Assets and geometry nodes
 
 Blender's Essentials asset libraries are its datafiles (`tools/blender-port/datafiles.py` copies them from a Blender

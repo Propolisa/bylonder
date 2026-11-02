@@ -411,12 +411,12 @@ wmEvent *wm_event_set(bContext *C, int type, int val, int x, int y, int modifier
 }
 
 /* The operator the last invoke added a modal handler for (WM_event_add_modal_handler), or null: its handler leaves the
- * window, as JS gives it its events (operator_modal). */
+ * window, as JS gives it its events (operator_modal). A file browser's handler stays (fileselect.cc). */
 EXPORT(operator_modal_added) wmOperator *operator_modal_added(bContext *C)
 {
   wmWindow *win = CTX_wm_window(C);
   for (wmEventHandler &handler : win->runtime->modalhandlers) {
-    if (handler.type == WM_HANDLER_TYPE_OP) {
+    if (handler.type == WM_HANDLER_TYPE_OP && !reinterpret_cast<wmEventHandler_Op *>(&handler)->is_fileselect) {
       wmOperator *op = reinterpret_cast<wmEventHandler_Op *>(&handler)->op;
       WM_event_remove_modal_handler(&win->runtime->modalhandlers, op, false);
       return op;

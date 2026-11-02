@@ -33,6 +33,7 @@ export const examples = [
   { id: "lava", title: "Lava Sphere" },
   { id: "texture-paint", title: "Texture Paint" },
   { id: "grease-pencil", title: "Bouncing Ball" },
+  { id: "import-export", title: "Import and Export" },
   // An application template: its startup file and workspaces (File > New > 2D Animation).
   { id: "2d-animation", title: "2D Animation", workspaces: [["2D Animation", "PAINT_GREASE_PENCIL"], ["2D Full Canvas", "PAINT_GREASE_PENCIL"]] },
 ].map((example) => ({ ...example, files: () => files(example.id) }));

@@ -86,6 +86,36 @@ const checks = {
     assert.deepEqual(Array.from(zip["bylonder-modifiers/modifiers.wasm"].subarray(0, 4)), [0, 0x61, 0x73, 0x6d], "a WebAssembly module");
   },
 
+  // Blender's own importer and exporter through the browser's file dialogs: the chosen files, the operator's options in
+  // a dialog drawn from its ui, then the import in Main and in the view; the export downloads with its .mtl beside it.
+  async "File > Import > Wavefront (.obj) and File > Export > Wavefront (.obj) run Blender's importer and exporter"() {
+    const fileMenu = async (submenu, item) => {
+      await app.page.click('[data-blender="TOPBAR_MT_file"]');
+      await app.page.getByRole("menuitem", { name: new RegExp(`^${submenu}`) }).first().hover();
+      await app.page.getByRole("menuitem", { name: item }).click();
+    };
+    const confirm = (title) => app.frame().getByRole("dialog", { name: title }).getByRole("button", { name: title }).click();
+    const chooser = app.page.waitForEvent("filechooser");
+    await fileMenu("Import", "Wavefront (.obj)");
+    await (await chooser).setFiles(["suzanne.obj", "suzanne.mtl"].map((name) => new URL(`../fixtures/io/${name}`, import.meta.url).pathname));
+    await confirm("Import Wavefront OBJ");
+    await app.until((b) => b.world.objects.some((node) => node.name === "Suzanne" && node.getTotalVertices() === 1968));
+    // Without the save picker the export downloads, as in browsers that lack it.
+    await app.page.evaluate(() => { window.showSaveFilePicker = undefined; });
+    const downloads = [];
+    app.page.on("download", (download) => downloads.push(download));
+    await fileMenu("Export", "Wavefront (.obj)");
+    await confirm("Export Wavefront OBJ");
+    for (let i = 0; i < 100 && downloads.length < 2; i++) await app.page.waitForTimeout(100);
+    const names = downloads.map((download) => download.suggestedFilename()).sort();
+    assert.deepEqual(names.map((name) => name.split(".").pop()), ["mtl", "obj"], `the .obj and its .mtl (${names})`);
+    const chunks = [];
+    for await (const chunk of await downloads.find((download) => download.suggestedFilename().endsWith(".obj")).createReadStream()) chunks.push(chunk);
+    const obj = Buffer.concat(chunks).toString();
+    assert.match(obj, /^o Suzanne$/m);
+    assert.ok(obj.match(/^f /gm).length >= 500, "with Suzanne's faces");
+  },
+
   async "topbar File menu and 3D View Object menu open"() {
     await app.page.click('[data-blender="TOPBAR_MT_file"]');
     await app.page.getByRole("menuitem", { name: /^Open/ }).first().waitFor();

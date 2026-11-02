@@ -9,6 +9,7 @@
 #include "BKE_wm_runtime.hh"
 #include "BLI_listbase.h"
 #include "BLI_path_utils.hh"
+#include "BLI_rect.h"
 #include "RNA_access.hh"
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -30,6 +31,12 @@ static std::string string_property(PointerRNA *ptr, const char *name)
   PropertyRNA *prop = RNA_struct_find_property(ptr, name);
   return prop && RNA_property_type(prop) == PROP_STRING ? RNA_property_string_get(ptr, prop) : std::string();
 }
+/* A saving operator checks for an existing file, as Blender's exporters and ExportHelper's do (FILE_SAVE). */
+static bool saves(PointerRNA *ptr)
+{
+  PropertyRNA *prop = RNA_struct_find_property(ptr, "check_existing");
+  return prop && RNA_property_boolean_get(ptr, prop);
+}
 static std::string json_string(const std::string &text)
 {
   std::string out = "\"";
@@ -42,7 +49,7 @@ static std::string json_string(const std::string &text)
 #define WM_EVENT_ADD_FILESELECT _ZN7blender23WM_event_add_fileselectEPNS_8bContextEPNS_10wmOperatorE
 extern "C" void WRAP(__real_, WM_EVENT_ADD_FILESELECT)(bContext *C, wmOperator *op);
 /* port-override: the File Browser opens as the browser's dialog: Blender's handler is added, its event to open the File
- * Browser taken back, and the page asked instead. A saving operator is one with check_existing, as ExportHelper's. */
+ * Browser taken back, and the page asked instead. */
 extern "C" void WRAP(__wrap_, WM_EVENT_ADD_FILESELECT)(bContext *C, wmOperator *op)
 {
   WRAP(__real_, WM_EVENT_ADD_FILESELECT)(C, op);
@@ -58,10 +65,39 @@ extern "C" void WRAP(__wrap_, WM_EVENT_ADD_FILESELECT)(bContext *C, wmOperator *
   const std::string settings = "{\"title\":" + json_string(WM_operatortype_name(op->type, op->ptr)) +
                                ",\"filter_glob\":" + json_string(string_property(op->ptr, "filter_glob")) +
                                ",\"filepath\":" + json_string(string_property(op->ptr, "filepath")) +
-                               ",\"save\":" + (RNA_struct_find_property(op->ptr, "check_existing") ? "true" : "false") +
+                               ",\"save\":" + (saves(op->ptr) ? "true" : "false") +
                                ",\"files\":" + (RNA_struct_find_property(op->ptr, "files") ? "true" : "false") +
                                ",\"directory\":" + (RNA_struct_find_property(op->ptr, "filepath") ? "false" : "true") + "}";
   js_fileselect_open(op, settings.c_str());
+}
+
+/* The file browser's handler that holds the operator, or null. */
+static wmEventHandler_Op *fileselect_handler(bContext *C, const wmOperator *op)
+{
+  for (wmWindow &win : CTX_wm_manager(C)->windows) {
+    for (wmEventHandler &handler : win.runtime->modalhandlers) {
+      auto &op_handler = reinterpret_cast<wmEventHandler_Op &>(handler);
+      if (handler.type == WM_HANDLER_TYPE_OP && op_handler.is_fileselect && op_handler.op == op) {
+        return &op_handler;
+      }
+    }
+  }
+  return nullptr;
+}
+
+/* What the File Browser sends when it executes or cancels, from the operator's area, as from the File Browser's own,
+ * where the pointer then is: the window handles an event in the area under it, which the handling reads. */
+static void fileselect_event(bContext *C, wmOperator *op, int value)
+{
+  const wmEventHandler_Op *handler = fileselect_handler(C, op);
+  if (handler && handler->context.area) {
+    const rcti &rect = handler->context.area->totrct;
+    for (wmWindow &win : CTX_wm_manager(C)->windows) {
+      win.runtime->eventstate->xy[0] = BLI_rcti_cent_x(&rect);
+      win.runtime->eventstate->xy[1] = BLI_rcti_cent_y(&rect);
+    }
+  }
+  WM_event_fileselect_event(CTX_wm_manager(C), op, value);
 }
 
 /* The files chosen, in `directory` (names newline separated), as the File Browser sets them on the operator
@@ -89,10 +125,25 @@ EXPORT(fileselect_exec) void fileselect_exec(bContext *C, wmOperator *op, const 
       RNA_string_set(&item, "name", all.substr(start, end - start).c_str());
     }
   }
-  WM_event_fileselect_event(CTX_wm_manager(C), op, EVT_FILESELECT_EXEC);
+  fileselect_event(C, op, EVT_FILESELECT_EXEC);
 }
 
 EXPORT(fileselect_cancel) void fileselect_cancel(bContext *C, wmOperator *op)
 {
-  WM_event_fileselect_event(CTX_wm_manager(C), op, EVT_FILESELECT_CANCEL);
+  fileselect_event(C, op, EVT_FILESELECT_CANCEL);
 }
+
+namespace blender::ui {
+std::string operator_props_layout(bContext *C, wmOperator *op);
+}
+/* The operator's options as the File Browser's sidebar shows them (its ui, else its properties), as a layout tree for
+ * the page's dialog. */
+EXPORT(fileselect_options) const char *fileselect_options(bContext *C, wmOperator *op)
+{
+  static std::string layout;
+  layout = ui::operator_props_layout(C, op);
+  return layout.c_str();
+}
+
+/* Whether Blender's fileselect handler holds `op`, which then outlives the invoke that added the handler. */
+EXPORT(fileselect_held) bool fileselect_held(bContext *C, wmOperator *op) { return fileselect_handler(C, op); }
