@@ -28,7 +28,8 @@ template<class C, class T> class basic_ofstream : public basic_ostream<C, T> {
  public:
   basic_ofstream() : basic_ostream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
   explicit basic_ofstream(const char *path, ios_base::openmode mode = ios_base::out) : basic_ostream<C, T>(&buf_) { open(path, mode); }
-  explicit basic_ofstream(const string &path, ios_base::openmode mode = ios_base::out) : basic_ofstream(path.c_str(), mode) {}
+  template<class Path, class = decltype(declval<const Path &>().c_str())>
+  explicit basic_ofstream(const Path &path, ios_base::openmode mode = ios_base::out) : basic_ofstream(path.c_str(), mode) {}
   ~basic_ofstream() { close(); }
   void open(const char *path, ios_base::openmode /*mode*/ = ios_base::out)
   {
@@ -63,7 +64,8 @@ template<class C, class T> class basic_fstream : public basic_iostream<C, T> {
  public:
   basic_fstream() : basic_iostream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
   explicit basic_fstream(const char *path, ios_base::openmode mode = ios_base::in | ios_base::out) : basic_iostream<C, T>(&buf_) { open(path, mode); }
-  explicit basic_fstream(const string &path, ios_base::openmode mode = ios_base::in | ios_base::out) : basic_fstream(path.c_str(), mode) {}
+  template<class Path, class = decltype(declval<const Path &>().c_str())>
+  explicit basic_fstream(const Path &path, ios_base::openmode mode = ios_base::in | ios_base::out) : basic_fstream(path.c_str(), mode) {}
   ~basic_fstream() { close(); }
   void open(const char *path, ios_base::openmode mode = ios_base::in | ios_base::out)
   {

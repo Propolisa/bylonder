@@ -1,9 +1,11 @@
 /* The wasm32-wasi libc++ this build uses is configured without <filesystem> (_LIBCPP_HAS_NO_FILESYSTEM). This is the
- * part of std::filesystem OpenImageIO's Filesystem utilities use (libutil/filesystem.cpp), over WASI's POSIX calls:
- * paths with '/' separators, status, directory listing, and creating, copying, renaming and removing files. */
+ * part of std::filesystem OpenImageIO's Filesystem utilities (libutil/filesystem.cpp) and Blender's asset indexer use,
+ * over WASI's POSIX calls: paths with '/' separators, status, file times, directory listing, and creating, copying,
+ * renaming and removing files. */
 #pragma once
 
 #include <__config>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <dirent.h>
@@ -117,6 +119,17 @@ inline uintmax_t file_size(const path &p, error_code &ec) noexcept
   }
   ec.clear();
   return uintmax_t(st.st_size);
+}
+using file_time_type = chrono::time_point<chrono::system_clock, chrono::nanoseconds>;
+inline file_time_type last_write_time(const path &p, error_code &ec) noexcept
+{
+  struct stat st;
+  if (::stat(p.c_str(), &st) != 0) {
+    ec.assign(errno, generic_category());
+    return file_time_type::min();
+  }
+  ec.clear();
+  return file_time_type(chrono::seconds(st.st_mtim.tv_sec) + chrono::nanoseconds(st.st_mtim.tv_nsec));
 }
 
 class directory_entry {

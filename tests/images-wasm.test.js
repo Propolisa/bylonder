@@ -26,4 +26,23 @@ for (const [name, want] of Object.entries(expected)) {
   // OpenColorIO's CPU processor rounds differently without SIMD (16 bit files become scene linear through it).
   assert.ok(error < 5e-5, `${name}: its pixels are Blender's within ${error}`);
 }
-console.log(`images: ${Object.keys(expected).join(', ')} open with Blender's readers and give Blender's pixels`);
+
+// Blender's writers: a generated image saved in each lossless format (with its resolution and the format's settings as
+// metadata, the PNG text chunks among them) opens again with the same pixels; OpenEXR from a float image, whose
+// scene linear values it keeps.
+const WRITTEN = { PNG: ['png', false], TARGA: ['tga', false], BMP: ['bmp', false], TIFF: ['tif', false], OPEN_EXR: ['exr', true] };
+for (const [format, [extension, float_buffer]] of Object.entries(WRITTEN)) {
+  main.run('image.new', { name: format, width: 16, height: 8, color: [0.25, 0.5, 0.75, 1], float: float_buffer });
+  const written = blendData().images.get(format), source = [...written.pixels];
+  const filepath = `/images/written.${extension}`;
+  written.file_format = format;
+  written.filepath_raw = filepath;
+  written.save();
+  assert.ok(files.get(filepath)?.length, `${format} is written`);
+  files.set(`/images/reread.${extension}`, files.get(filepath));
+  assert.equal(main.run('image.open', { filepath: `/images/reread.${extension}` }).status, 4, `${format} opens again`);
+  const reread = blendData().images.get(`reread.${extension}`);
+  const error = Math.max(...[...reread.pixels].map((v, i) => Math.abs(v - source[i])));
+  assert.ok(error < 0.01, `${format}: its pixels survive within ${error}`);
+}
+console.log(`images: ${Object.keys(expected).join(', ')} open with Blender's readers and give Blender's pixels; ${Object.keys(WRITTEN).join(', ')} written and read back`);

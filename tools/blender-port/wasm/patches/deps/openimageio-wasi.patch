@@ -135,3 +135,16 @@ diff -ru a/src/libutil/thread.cpp b/src/libutil/thread.cpp
          if (!this->isStop && !this->isDone) {
              int oldNThreads = size();
              if (oldNThreads
+diff -ru a/src/libutil/ustring.cpp b/src/libutil/ustring.cpp
+--- a/src/libutil/ustring.cpp	2026-11-02 02:05:47.434648704 +0000
++++ b/src/libutil/ustring.cpp	2026-11-02 02:05:47.470694781 +0000
+@@ -404,7 +404,8 @@
+     OIIO_DASSERT(str.c_str() == c_str() && str.size() == length);
+     return;
+ 
+-#elif defined(_LIBCPP_VERSION) && !defined(__aarch64__)
++#elif defined(_LIBCPP_VERSION) && !defined(__aarch64__) && !defined(__wasi__)
++    // (Not for WASI: its libc++ lays a long string out as these structs do not, so the string would read empty.)
+     // FIXME -- we seem to do the wrong thing with libcpp on Mac M1. Disable
+     // when on aarch64 for now. Come back and fix then when I have easier
+     // access to an M1 Mac.
