@@ -131,7 +131,7 @@ try {
   // mode, else leaves it in its mode, as ED_workspace_change does when a mode cannot be entered. A switch is checked
   // once the app has settled: leaving a mode and compiling a view's shaders take a while on a runner without a GPU.
   const MODES = { modeling: "EDIT", sculpting: "SCULPT", "uv-editing": "EDIT", "texture-paint": "TEXTURE_PAINT", animation: "POSE" };
-  const meshModes = ["OBJECT", "EDIT", "SCULPT"];
+  const meshModes = ["OBJECT", "EDIT", "SCULPT", "TEXTURE_PAINT"];
   let expected = "OBJECT";
   const tabs = await page.locator("#workspace-tabs [data-workspace]").evaluateAll((els) => els.map((el) => el.dataset.workspace));
   assert.ok(tabs.length >= 11, `workspace tabs: ${tabs}`);
