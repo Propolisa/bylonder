@@ -392,8 +392,14 @@ export function bool (any) {
 };
 bool.__name__ = 'bool';
 bool.__bases__ = [int];
+var __module_type__ = function (name) {
+    return new Proxy ({__name__: name}, {get: (module, key) => key in module || typeof key != 'string' || !('__getattr__' in module) ? module [key] : module.__getattr__ (key)});
+};
 export function py_typeof (anObject) {
     var aType = typeof anObject;
+    if (aType == 'object' && Object.prototype.toString.call (anObject) == '[object Module]') {
+        return __module_type__;
+    }
     if (aType == 'object') {
         try {
             return '__class__' in anObject ? anObject.__class__ : object;
@@ -1412,6 +1418,10 @@ function __popitem__ () {
     return result;
 }
 function __update__ (aDict) {
+    if (Array.isArray (aDict) || (aDict && typeof aDict [Symbol.iterator] == 'function' && py_typeof (aDict) != dict)) {
+        for (const [aKey, aValue] of Array.from (aDict)) this [aKey] = aValue;
+        return;
+    }
     for (var aKey in aDict) {
         this [aKey] = aDict [aKey];
     }
@@ -2371,6 +2381,10 @@ function __settable__ (attrib, descrip) {
     if (descrip.get && !descrip.set) descrip.set = function (value) { globalThis.Object.defineProperty (this, attrib, { value, writable: true, configurable: true, enumerable: true }); };
     return descrip;
 }
+// Python's OSError (and its alias IOError), which Transcrypt's runtime lacks: the boundary's file system raises it and
+// Blender's scripts catch it by name, which Transcrypt leaves global.
+globalThis.OSError ??= __class__ ('OSError', [Exception], { __module__: 'builtins' });
+globalThis.IOError ??= globalThis.OSError;
 
 export {_copy};
 

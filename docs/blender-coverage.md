@@ -47,6 +47,14 @@ page keeps in IndexedDB (`wm-userdef.js`); auto-save runs as WM_exit's when the 
 are the AddonPreferences of a built-in add-on, `bylonder`, in System > Bylonder. Themes reach the interface through
 the design tokens (`theme-tokens.js`); theme colors no token stands for are greyed out.
 
+## PREFERENCES > Add-ons
+Status: partial
+Blender's own addon_utils lists the add-ons: the tree ships each bundled add-on's `__init__.py` up to its `bl_info`
+(what addon_utils reads of an add-on it does not import) and Bylonder's own (`tools/blender-ui/bylonder_addon.py`),
+read through the boundary's `open`, `ast` and `_py_eval`. Only the add-ons whose code the tree holds (the Pose
+Library, Bylonder) can be enabled; the others are greyed out as not included, and installing from disk or online as
+not supported yet (`support.js`).
+
 ## PREFERENCES > Keymap
 Status: partial
 Blender's key configuration is loaded as `bpy.utils.keyconfig_init` loads it: the Blender preset (`Blender.py`, its

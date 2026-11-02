@@ -83,6 +83,22 @@ PATCHES = [
      "str.title, which Transcrypt's str lacks"),
     ('math.js', "export var expm1 = function (x) {", "export var fmod = function (x, y) {\n\treturn x % y;\n};\nexport var expm1 = function (x) {",
      "math.fmod, which Transcrypt's math lacks"),
+    ('org.transcrypt.__runtime__.js', "export function py_typeof (anObject) {\n    var aType = typeof anObject;\n    if (aType == 'object') {\n",
+     "var __module_type__ = function (name) {\n"
+     "    return new Proxy ({__name__: name}, {get: (module, key) => key in module || typeof key != 'string' || !('__getattr__' in module) ? module [key] : module.__getattr__ (key)});\n"
+     "};\n"
+     "export function py_typeof (anObject) {\n    var aType = typeof anObject;\n"
+     "    if (aType == 'object' && Object.prototype.toString.call (anObject) == '[object Module]') {\n        return __module_type__;\n    }\n"
+     "    if (aType == 'object') {\n",
+     "type(module), types.ModuleType: a module's type, which makes an empty module of a name (addon_utils' fake modules, bpy.ops' submodules, whose __getattr__ it calls)"),
+    ('org.transcrypt.__runtime__.js', "function __update__ (aDict) {\n    for (var aKey in aDict) {\n",
+     "function __update__ (aDict) {\n"
+     "    if (Array.isArray (aDict) || (aDict && typeof aDict [Symbol.iterator] == 'function' && py_typeof (aDict) != dict)) {\n"
+     "        for (const [aKey, aValue] of Array.from (aDict)) this [aKey] = aValue;\n"
+     "        return;\n"
+     "    }\n"
+     "    for (var aKey in aDict) {\n",
+     "dict.update of an iterable of key, value pairs, which Transcrypt's takes as a dict"),
 ]
 
 

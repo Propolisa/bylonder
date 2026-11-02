@@ -716,14 +716,28 @@ function defineNumber(prop, kind, kw) {
   x.bpy_def_range(prop, min, max, kw.soft_min ?? min, kw.soft_max ?? max, kw.step ?? (kind === INT ? 1 : 3), kw.precision ?? 3);
 }
 
+// An EnumProperty's items as bpy_def_enum_items' lines: identifier, name, description, icon and value.
+const enumValues = (items, flag) => items.map((item, i) => (item.length >= 5 ? item[4] : item.length === 4 && typeof item[3] === 'number' ? item[3] : flag ? 1 << i : i));
+const enumLines = (items, values) => items.map((item, i) => [item[0], item[1] ?? item[0], item[2] ?? '', item.length >= 5 || typeof item[3] === 'string' ? item[3] : 'NONE', values[i]].join('\t')).join('\n');
+// Items functions by number (bpy_def_enum_itemf), called as bpy_prop_enum_itemf_fn calls them: on the struct and the
+// context; None items are separators, which the lines leave out.
+const itemFunctions = [];
+provided.bpy_enum_itemf = (fn, CPointer, type, id, data) => inPythonContext(CPointer || C, () => {
+  const { items, flag } = itemFunctions[fn];
+  const list = Array.from(items(struct(type >>> 0, id >>> 0, data >>> 0), contextStruct(C)) ?? []).filter(Boolean);
+  withText([enumLines(list, enumValues(list, flag))], (p) => x.bpy_enum_items_result(p));
+});
 function defineEnum(prop, kw, options) {
   const flag = options.has('ENUM_FLAG');
-  const items = typeof kw.items === 'function' ? [] : Array.from(kw.items ?? []).filter(Boolean);
-  const values = items.map((item, i) => (item.length >= 5 ? item[4] : item.length === 4 && typeof item[3] === 'number' ? item[3] : flag ? 1 << i : i));
-  const lines = items.map((item, i) => [item[0], item[1] ?? item[0], item[2] ?? '', item.length >= 5 || typeof item[3] === 'string' ? item[3] : 'NONE', values[i]].join('\t')).join('\n');
+  if (typeof kw.items === 'function') {
+    itemFunctions.push({ items: kw.items, flag });
+    x.bpy_def_enum_itemf(prop, itemFunctions.length - 1);
+    return;
+  }
+  const items = Array.from(kw.items ?? []).filter(Boolean), values = enumValues(items, flag);
   const defaults = kw.default == null ? [] : typeof kw.default === 'string' ? [kw.default] : Array.from(kw.default);
   const value = typeof kw.default === 'number' ? kw.default : defaults.reduce((bits, id) => bits | (values[items.findIndex((item) => item[0] === id)] ?? 0), 0);
-  withText([lines], (p) => x.bpy_def_enum_items(prop, p, flag, flag || defaults.length ? value : values[0] ?? 0));
+  withText([enumLines(items, values)], (p) => x.bpy_def_enum_items(prop, p, flag, flag || defaults.length ? value : values[0] ?? 0));
 }
 
 // ---- Entry points: bpy.data and bpy.context over a context.

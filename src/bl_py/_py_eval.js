@@ -159,7 +159,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
-export var _PUNCTUATION = ['**', '//', '==', '!=', '<=', '>=', '+=', '-=', '*=', '/=', '(', ')', '[', ']', ',', '.', ':', '+', '-', '*', '/', '%', '<', '>', '='];
+export var _PUNCTUATION = ['**', '//', '==', '!=', '<=', '>=', '+=', '-=', '*=', '/=', '(', ')', '[', ']', '{', '}', ',', '.', ':', '+', '-', '*', '/', '%', '<', '>', '='];
 export var _KEYWORDS = dict ({'True': true, 'False': false, 'None': null});
 export var _tokens = function (source) {
 	if (arguments.length) {
@@ -180,8 +180,13 @@ export var _tokens = function (source) {
 	var i = __left0__ [1];
 	while (__lt__ (i, __call__ (len, null, source))) {
 		var c = __getitem__ (source, i);
-		if (__in__ (c, ' \t\n')) {
+		if (__in__ (c, ' \t\n\r')) {
 			var i = __call__ (__iadd__, null, i, 1);
+		}
+		else if (__eq__ (c, '#')) {
+			while (__lt__ (i, __call__ (len, null, source)) && __ne__ (__getitem__ (source, i), '\n')) {
+				var i = __call__ (__iadd__, null, i, 1);
+			}
 		}
 		else if (__call__ (_truth, null, (function () {
 			var __accu0__ = c;
@@ -965,7 +970,16 @@ export var _Parser =  __class__ ('_Parser', [object], {
 		}) ();
 		var kind = __left0__ [0];
 		var value = __left0__ [1];
-		if (__in__ (kind, tuple (['number', 'string']))) {
+		if (__eq__ (kind, 'string')) {
+			while (__eq__ (__getitem__ ((function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.peek, __accu0__);
+			}) (), 0), 'string')) {
+				var value = __call__ (__iadd__, null, value, __getitem__ ((function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.take, __accu0__);
+				}) (), 1));
+			}
 			return tuple ([(function __lambda__ () {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -978,6 +992,75 @@ export var _Parser =  __class__ ('_Parser', [object], {
 				else {
 				}
 				return value;
+			}), null]);
+		}
+		if (__eq__ (kind, 'number')) {
+			return tuple ([(function __lambda__ () {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+						}
+					}
+				}
+				else {
+				}
+				return value;
+			}), null]);
+		}
+		if (__eq__ (value, '{')) {
+			var pairs = [];
+			while (!(__call__ (_truth, null, (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.accept, __accu0__, '}');
+			}) ()))) {
+				var key = (function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.disjunction, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.take, __accu0__, ':');
+				}) ();
+				(function () {
+					var __accu0__ = pairs;
+					return __call__ (__accu0__.append, __accu0__, tuple ([key, (function () {
+						var __accu1__ = self;
+						return __call__ (__accu1__.disjunction, __accu1__);
+					}) ()]));
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.accept, __accu0__, ',');
+				}) ();
+			}
+			return tuple ([(function __lambda__ () {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+						}
+					}
+				}
+				else {
+				}
+				return (function () {
+					var __accu0__ = [];
+					var __iterable0__ = pairs;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var __left0__ = __getitem__ (__iterable0__, __index0__);
+						var k = __left0__ [0];
+						var v = __left0__ [1];
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, [__call__ (__getitem__ (k, 0), null), __call__ (__getitem__ (v, 0), null)]);
+						}) ();
+					}
+					return dict (__accu0__);
+				}) ();
 			}), null]);
 		}
 		if (__eq__ (kind, 'name')) {

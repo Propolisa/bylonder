@@ -9,6 +9,7 @@
 //           update(struct, name, owner), undoPush(name) }
 import { blendData } from '../python/bpy_rna.js';
 import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
+import { fitsOrthoScale } from '../editors/space_view3d/navigation.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { mesh_deserialize, mesh_serialize } from '../blenkernel/mesh/mesh.js';
@@ -507,7 +508,7 @@ const STRUCTS = {
   Light: (light) => (isBlenderLight(light) ? blenderLight(light) : babylonLight),
   Camera: {
     name: settable('name'),
-    type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; }, sync: true },
+    type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; if (type === 'ORTHO') fitsOrthoScale(camera); }, sync: true },
     // A horizontally fixed field of view is Blender's Auto fit for landscape output.
     sensor_fit: { get: (camera) => (horizontal(camera) ? 'AUTO' : 'VERTICAL'), set: (camera, fit) => {
       const lens = sensor(camera) / 2 / Math.tan(camera.fov / 2);
@@ -516,6 +517,7 @@ const STRUCTS = {
     }, sync: true },
     lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); }, sync: true },
     angle: settable('fov'),
+    ortho_scale: { get: (camera) => camera.metadata?.orthoScale ?? 6, set: (camera, scale) => { camera.metadata = { ...camera.metadata, orthoScale: scale }; }, sync: true },
     // How the lens is shown (millimeters or field of view), kept with the camera.
     lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; }, sync: true },
     clip_start: synced(settable('minZ')),

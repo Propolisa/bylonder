@@ -35,6 +35,9 @@ extern "C" const char *ui_icon_name(int icon);
 IMPORT(bpy_class_validate) int js_class_validate(int cls, StructRNA *type, ID *id, void *data, bool *have_function);
 IMPORT(bpy_class_call) int js_class_call(bContext *C, StructRNA *type, ID *id, void *data, FunctionRNA *func, ParameterList *parms);
 IMPORT(bpy_class_free) void js_class_free(int cls);
+/* An EnumProperty's items function (bpy_props.cc bpy_prop_enum_itemf_fn): the page calls it on the struct and the
+ * context and gives its items back through bpy_enum_items_result. */
+IMPORT(bpy_enum_itemf) void js_enum_itemf(int fn, bContext *C, StructRNA *type, ID *id, void *data);
 
 /* Struct results: type, owner ID, data, then a property and an index for a context member that is one. */
 static uintptr_t out[5];
@@ -811,14 +814,11 @@ PropertyRNA *bpy_def_pointer(StructRNA *srna, const char *identifier, bool colle
                       RNA_def_pointer_runtime(srna, identifier, type, name, description);
 }
 /* An enum's items, from lines of identifier, name, description, icon name and value, tab separated; then its default. */
-EXPORT(bpy_def_enum_items) void bpy_def_enum_items(PropertyRNA *prop, const char *lines, bool flag, int default_value)
+/* Enum items from lines of identifier, name, description, icon and value, tab separated; `fields` holds their text. */
+static Vector<EnumPropertyItem> enum_items_parse(const std::string &all, std::vector<std::string> &fields)
 {
-  /* Kept until bpy_def_property_done copies them (RNA_def_property_duplicate_pointers). */
-  static Vector<EnumPropertyItem> items;
-  static std::vector<std::string> fields;
-  items.clear();
+  Vector<EnumPropertyItem> items;
   fields.clear();
-  const std::string all = lines;
   for (size_t start = 0, end; start < all.size(); start = end + 1) {
     end = std::min(all.find('\n', start), all.size());
     const std::string line = all.substr(start, end - start);
@@ -833,12 +833,61 @@ EXPORT(bpy_def_enum_items) void bpy_def_enum_items(PropertyRNA *prop, const char
     items.append({std::atoi(fields[i + 4].c_str()), fields[i].c_str(), icon, fields[i + 1].c_str(), fields[i + 2].c_str()});
   }
   items.append({0, nullptr, 0, nullptr, nullptr});
+  return items;
+}
+
+EXPORT(bpy_def_enum_items) void bpy_def_enum_items(PropertyRNA *prop, const char *lines, bool flag, int default_value)
+{
+  /* Kept until bpy_def_property_done copies them (RNA_def_property_duplicate_pointers). */
+  static Vector<EnumPropertyItem> items;
+  static std::vector<std::string> fields;
+  items = enum_items_parse(lines, fields);
   if (flag) {
     RNA_def_property_flag(prop, PROP_ENUM_FLAG);
   }
   RNA_def_property_enum_items(prop, items.data());
   RNA_def_property_enum_default(prop, default_value);
 }
+/* The items an items function gave, as lines (bpy_def_enum_items' format), until enum_itemf reads them. */
+static std::string enum_itemf_lines;
+EXPORT(bpy_enum_items_result) void bpy_enum_items_result(const char *lines) { enum_itemf_lines = lines; }
+
+/* As bpy_prop_enum_itemf_fn: the property's function called on the struct and the context, its items copied into
+ * memory the caller frees, their strings into one block after them. */
+static const EnumPropertyItem *enum_itemf(bContext *C, PointerRNA *ptr, PropertyRNA *prop, bool *r_free)
+{
+  enum_itemf_lines.clear();
+  js_enum_itemf(int(intptr_t(RNA_property_py_data_get(prop))), C, ptr->type, ptr->owner_id, ptr->data);
+  std::vector<std::string> fields;
+  const Vector<EnumPropertyItem> items = enum_items_parse(enum_itemf_lines, fields);
+  size_t text = 0;
+  for (const std::string &field : fields) {
+    text += field.size() + 1;
+  }
+  EnumPropertyItem *result = static_cast<EnumPropertyItem *>(MEM_new_uninitialized(items.size() * sizeof(EnumPropertyItem) + text, __func__));
+  char *strings = reinterpret_cast<char *>(result + items.size());
+  const auto copy = [&](const char *from) {
+    if (!from) {
+      return static_cast<const char *>(nullptr);
+    }
+    char *to = strings;
+    strings += BLI_strncpy_rlen(to, from, strlen(from) + 1) + 1;
+    return static_cast<const char *>(to);
+  };
+  for (const int64_t i : items.index_range()) {
+    result[i] = {items[i].value, copy(items[i].identifier), items[i].icon, copy(items[i].name), copy(items[i].description)};
+  }
+  *r_free = true;
+  return result;
+}
+
+/* An EnumProperty whose items are a function of the page's (`fn`, its number there). */
+EXPORT(bpy_def_enum_itemf) void bpy_def_enum_itemf(PropertyRNA *prop, int fn)
+{
+  RNA_def_py_data(prop, reinterpret_cast<void *>(intptr_t(fn)));
+  RNA_def_enum_funcs(prop, enum_itemf);
+}
+
 EXPORT(bpy_def_defaults) void bpy_def_defaults(PropertyRNA *prop, const double *values, int len)
 {
   const PropertyType kind = RNA_property_type(prop);

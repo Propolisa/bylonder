@@ -360,7 +360,7 @@ def main():
 
 
 # Blender's functions the module's API wraps: the UI layout's resolve (ui-tree.cc), and platform.cc's.
-WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', *wasm_module.PLATFORM_WRAPPED]
+WRAPPED = ['_ZN7blender2ui20block_layout_resolveEPNS0_5BlockE', '_ZN7blender2ui15search_item_addEPNS0_11SearchItemsENS_9StringRefEPviih', *wasm_module.PLATFORM_WRAPPED]
 
 
 NULL_DATA = os.path.join(WASM, 'null-data.txt')
@@ -387,10 +387,9 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     # Renamed copies replace Blender's definitions, so they are linked whole: an archive member is not pulled in for a
     # symbol something already defines.
     renamed = [c for c in copies if os.path.basename(c).startswith('renamed_')]
-    strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
     replaced = {'blender': {}, 'api': {}}
     while True:
-        link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
+        link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
                 *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-lwasi-emulated-signal',
                 # Undefined functions are imports, which throw when called; undefined data fails the link, as it would read
@@ -416,7 +415,7 @@ def link_module(host, out, entries, extra, archives, module_libraries):
           f'Blender {sum(map(len, replaced["api"].values()))} (replaced.json); {len(missing)} imports, which throw when called',
           file=sys.stderr)
     # The module the app loads starts initialized (wasm_snapshot.py): Blender's RNA and node types are in its data.
-    wasm_snapshot.snapshot(module, os.path.join(out, 'bylonder.wasm'))
+    wasm_snapshot.snapshot(module, os.path.join(out, 'bylonder.wasm'), named=os.path.join(out, 'bylonder-names.wasm'))
     install(os.path.join(out, 'bylonder.wasm'))
 
 

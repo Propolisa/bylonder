@@ -204,8 +204,12 @@ EXPORT(wm_area_free) void wm_area_free(bContext *C, ScrArea *area)
   ED_area_exit(C, area);
   BLI_remlink(&screen->areabase, area);
   BKE_screen_area_free(area);
+  /* Its own vertices only: the page's areas have no edges, so BKE_screen_remove_unused_scrverts would free all theirs. */
+  for (ScrVert *vertex : {area->v1, area->v2, area->v3, area->v4}) {
+    BLI_remlink(&screen->vertbase, vertex);
+    MEM_delete(vertex);
+  }
   MEM_delete(reinterpret_cast<BylonderArea *>(area));
-  BKE_screen_remove_unused_scrverts(screen);
 }
 
 /* A rectangle of the page (pixels from its top left) in Blender's window coordinates (from its bottom left). */

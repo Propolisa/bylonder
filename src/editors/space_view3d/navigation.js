@@ -6,6 +6,22 @@ export const LENS_HALF_TAN = (36 / 2 / 50) * 2;
 // RegionView3D.persp and RegionView3D.view (DNA_view3d_types.h, RV3D_VIEW_*).
 export const RV3D_ORTHO = 0, RV3D_PERSP = 1, RV3D_CAMOB = 2;
 const VIEW_NAMES = ["User", "Front", "Back", "Left", "Right", "Top", "Bottom"];
+// An orthographic camera's bounds for a view of the given aspect, halfHeight up from its center.
+export const fitOrtho = (camera, halfHeight, aspect) =>
+  Object.assign(camera, { orthoTop: halfHeight, orthoBottom: -halfHeight, orthoLeft: -halfHeight * aspect, orthoRight: halfHeight * aspect });
+// A scene camera, while orthographic, takes its bounds from Blender's Orthographic Scale (6 unless set), which spans the
+// longer side of each view it renders (sensor fit Auto).
+const fitted = new WeakSet();
+export function fitsOrthoScale(camera) {
+  if (fitted.has(camera)) return camera;
+  fitted.add(camera);
+  camera.getScene().onBeforeCameraRenderObservable.add((rendered) => {
+    if (rendered !== camera || camera.mode !== Camera.ORTHOGRAPHIC_CAMERA) return;
+    const aspect = camera.getEngine().getAspectRatio(camera);
+    fitOrtho(camera, (camera.metadata?.orthoScale ?? 6) / 2 / Math.max(aspect, 1), aspect);
+  });
+  return camera;
+}
 
 // The editor camera of one 3D Viewport, placed where the view's RegionView3D says. Blender's navigation operators
 // (view3d.rotate, move, zoom, dolly, view_axis, view_all, view_selected, view_persportho, and the trackpad's) change
@@ -14,9 +30,7 @@ const VIEW_NAMES = ["User", "Front", "Back", "Left", "Right", "Top", "Bottom"];
 export function createNavigation({ camera, engine, onSync = () => {} }) {
   let viewName = "User", last = null;
   const updateBounds = () => {
-    if (camera.mode !== Camera.ORTHOGRAPHIC_CAMERA) return;
-    const h = camera.radius * Math.tan(camera.fov / 2), a = engine.getAspectRatio(camera);
-    Object.assign(camera, { orthoTop: h, orthoBottom: -h, orthoLeft: -h * a, orthoRight: h * a });
+    if (camera.mode === Camera.ORTHOGRAPHIC_CAMERA) fitOrtho(camera, camera.radius * Math.tan(camera.fov / 2), engine.getAspectRatio(camera));
   };
   const sync = () => {
     updateBounds();

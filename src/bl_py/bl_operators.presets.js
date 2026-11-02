@@ -11,6 +11,7 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 import {_py_eval, _py_exec} from './_py_eval.js';
+import {_open} from './io.js';
 var __name__ = 'bl_operators.presets';
 export var _merged = function () {
 	if (arguments.length) {
@@ -491,7 +492,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 							}) ();
 						}
 					};
-					var file_preset = __call__ (open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+					var file_preset = __call__ (_open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
 					try {
 						file_preset.__enter__ ();
 						(function () {
@@ -1505,7 +1506,7 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 		}) (), '.py'))) {
 			return ;
 		}
-		var fh = __call__ (open, null, filepath, 'r', __kwargtrans__ ({encoding: 'utf-8'}));
+		var fh = __call__ (_open, null, filepath, 'r', __kwargtrans__ ({encoding: 'utf-8'}));
 		try {
 			fh.__enter__ ();
 			var lines_prev = (function () {
@@ -1580,7 +1581,7 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 				}
 			}
 		}
-		var fh = __call__ (open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+		var fh = __call__ (_open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
 		try {
 			fh.__enter__ ();
 			(function () {
@@ -1722,7 +1723,7 @@ export var AddPresetGpencilMaterial =  __class__ ('AddPresetGpencilMaterial', [A
 export var classes = tuple ([AddPresetCamera, AddPresetCloth, AddPresetFluid, AddPresetHairDynamics, AddPresetInterfaceTheme, RemovePresetInterfaceTheme, SavePresetInterfaceTheme, AddPresetKeyconfig, RemovePresetKeyconfig, AddPresetNodeColor, AddPresetOperator, AddPresetTextStripStyle, AddPresetRender, AddPresetCameraSafeAreas, AddPresetTextEditor, AddPresetTrackingCamera, AddPresetTrackingSettings, AddPresetTrackingTrackColor, AddPresetGpencilBrush, AddPresetGpencilMaterial, AddPresetEEVEERaytracing, AddPresetColorManagementWhiteBalance, ExecutePreset, WM_MT_operator_presets, WM_PT_operator_presets, WM_OT_operator_presets_cleanup]);
 
 //# sourceMappingURL=bl_operators.presets.map
-export {BoolProperty, CollectionProperty, Menu, Operator, OperatorFileListElement, Panel, PresetPanel, StringProperty, WindowManager, _globals, _import, _lazy, _member, _module, _py_eval, _py_exec, data_, rpt_};
+export {BoolProperty, CollectionProperty, Menu, Operator, OperatorFileListElement, Panel, PresetPanel, StringProperty, WindowManager, _globals, _import, _lazy, _member, _module, _open, _py_eval, _py_exec, data_, rpt_};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

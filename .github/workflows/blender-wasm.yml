@@ -72,7 +72,8 @@ jobs:
         run: |
           key=$(node scripts/module.mjs key)
           cp work/wasm-build/bylonder.wasm bmesh.wasm
-          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm --latest=false \
+          cp work/wasm-build/bylonder-names.wasm bmesh-names.wasm
+          gh release view "$key" >/dev/null 2>&1 || gh release create "$key" bmesh.wasm bmesh-names.wasm --latest=false \
             --title "$key" --notes "Blender's module built from tools/blender-port at ${{ github.sha }}." --target "${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         if: always()
