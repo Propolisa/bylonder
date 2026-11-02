@@ -8,11 +8,17 @@
 .bl-tool:hover:not(:disabled),.bl-toggle:hover:not(:disabled),.bl-radio:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-tool),white 9%)}
 .bl-toggle.is-pressed,.bl-radio.is-pressed,.bl-tool.is-pressed{background:var(--bl-wcol-tool-sel);color:var(--bl-text-sel)}
 .bl-flat{background:none!important;box-shadow:none!important}
+.bl-list-row{background:var(--bl-wcol-list);box-shadow:none}
+.bl-list-row:hover:not(.is-pressed){background:var(--bl-wcol-hover)}
+.bl-list-row.is-pressed{background:var(--bl-wcol-list-sel);color:var(--bl-text-sel)}
 .bl-flat:hover:not(:disabled){color:var(--bl-text-sel)}
 .bl-menu-button{position:relative;background:var(--bl-wcol-menu)}
 .bl-popover{background:var(--bl-wcol-menu)}
 .bl-popover:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .bl-root{gap:calc(var(--bl-row)*.25)}
+.bl-node-link{padding:0 var(--bl-text-margin) 0 0}
+.bl-node-link::after{display:none}
+.bl-socket{width:var(--bl-row);height:calc(var(--bl-row)*.45);background:radial-gradient(circle closest-side,var(--bl-socket) 75%,var(--bl-socket-outline) 80%,transparent 100%)}
 .bl-menu-button:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .bl-menu-button::after{content:'';position:absolute;right:calc(var(--bl-row)*.12);top:calc(50% - var(--bl-row)*.12);width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);background:currentColor;mask:var(--bl-chevron) center/contain no-repeat;background:var(--bl-wcol-menu-item)}
 /* ui_item_menu in a header: a popover's arrow alone is a unit wide, with an icon 1.6 units; a narrow button centers its
@@ -24,6 +30,7 @@
 .bl-text{background:var(--bl-wcol-text)}
 .bl-text:focus-within{background:var(--bl-wcol-text-sel);box-shadow:inset 0 0 0 1px var(--bl-select)}
 .bl-text input::selection{background:var(--bl-select)}
+.bl-text input{text-overflow:ellipsis}
 .bl-color{box-shadow:inset 0 0 0 1px var(--bl-wcol-outline)}
 .bl-check{appearance:none;flex-shrink:0;width:calc(var(--bl-row)*.7);height:calc(var(--bl-row)*.7);margin:0;border-radius:calc(var(--bl-row)*.14);background:var(--bl-wcol-option);cursor:pointer;position:relative}
 .bl-check:hover{background:color-mix(in srgb,var(--bl-wcol-option),white 9%)}

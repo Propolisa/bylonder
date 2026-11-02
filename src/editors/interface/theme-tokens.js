@@ -22,7 +22,7 @@ export const TOKENS = {
   '--bl-wcol-menu': WIDGET('wcol_menu', 'inner'),
   '--bl-wcol-text': WIDGET('wcol_text', 'inner'), '--bl-wcol-text-sel': WIDGET('wcol_text', 'inner_sel'), '--bl-wcol-text-item': WIDGET('wcol_text', 'item'),
   '--bl-wcol-box': WIDGET('wcol_box', 'inner'),
-  '--bl-wcol-list-sel': WIDGET('wcol_list_item', 'inner_sel'), '--bl-wcol-list-item': WIDGET('wcol_list_item', 'item'),
+  '--bl-wcol-list': WIDGET('wcol_list_item', 'inner'), '--bl-wcol-list-sel': WIDGET('wcol_list_item', 'inner_sel'), '--bl-wcol-list-item': WIDGET('wcol_list_item', 'item'),
   '--bl-wcol-tab': WIDGET('wcol_tab', 'inner'), '--bl-wcol-tab-sel': WIDGET('wcol_tab', 'inner_sel'), '--bl-wcol-tab-text': WIDGET('wcol_tab', 'text'),
   '--bl-menu-back': WIDGET('wcol_menu_back', 'inner'), '--bl-menu-back-line': WIDGET('wcol_menu_back', 'outline'), '--bl-menu-back-text': WIDGET('wcol_menu_back', 'text'),
   '--bl-menu-item-text': WIDGET('wcol_menu_item', 'text'), '--bl-menu-item-text-sel': WIDGET('wcol_menu_item', 'text_sel'),

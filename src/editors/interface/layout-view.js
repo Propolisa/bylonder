@@ -97,13 +97,16 @@ export const label = (text, { iconName, iconValue, className = '', align = 'left
   class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', !text && iconName && 'bl-icon-only', className],
 }, [icon(toolIconName(iconValue)), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
-export function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value }) {
+// As widget_draw_text_icon draws a button: its icon at its left, its text centered in the rest, or after the icon
+// where it is aligned left (`textLeft`, BUT_TEXT_LEFT).
+export function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value, textLeft = false }) {
+  const shown = text && !iconOnly;
   return h('button', {
     type: 'button', title, disabled, 'aria-pressed': pressed, 'aria-label': text || title, 'data-value': value,
-    class: [W, `bl-${kind} flex h-unit min-w-0 items-center justify-center gap-1 rounded-md px-1.5 text-xs`, emboss ? '' : 'bl-flat',
-      pressed && 'is-pressed', inactive && 'opacity-50', iconOnly && 'bl-icon-only px-0', className],
+    class: [W, `bl-${kind} flex h-unit min-w-0 items-center gap-1 rounded-md px-1.5 text-xs`, textLeft || (shown && iconName) ? 'justify-start' : 'justify-center',
+      emboss ? '' : 'bl-flat', pressed && 'is-pressed', inactive && 'opacity-50', iconOnly && 'bl-icon-only px-0', className],
     onClick,
-  }, [icon(iconName), text && !iconOnly ? h('span', { class: 'truncate' }, text) : null]);
+  }, [icon(iconName), shown ? h('span', { class: ['truncate', iconName && !textLeft && 'flex-1 text-center'] }, text) : null]);
 }
 
 export const checkbox = ({ checked, text, disabled, inactive, onChange, title }) => h('label', {
@@ -124,11 +127,14 @@ export function textField({ value, iconName, disabled, inactive, onChange, title
   ]);
 }
 
-export const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, arrowOnly, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
+// `socket`: a node socket's link menu (BUT_NODE_LINK), the socket in its color at its left and no arrow.
+export const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, arrowOnly, socket, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
   type: 'button', title, disabled, 'aria-label': text || title, 'aria-haspopup': 'menu',
-  class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'bl-menu-icon pr-4', arrowOnly && 'bl-arrow-only'],
+  class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'bl-menu-icon pr-4', arrowOnly && 'bl-arrow-only',
+    socket && 'bl-node-link'],
   onClick,
-}, [icon(iconName), text && !iconOnly ? h('span', { class: 'min-w-0 flex-1 truncate text-left' }, text) : null]);
+}, [socket ? h('span', { class: 'bl-socket shrink-0', style: { '--bl-socket': socket } }) : null, icon(iconName),
+  text && !iconOnly ? h('span', { class: 'min-w-0 flex-1 truncate text-left' }, text) : null]);
 
 // operator_menu_enum: the operator with each item of its enum property, greyed where Bylonder does not run it.
 const operatorEnumMenu = (node, ui) => (ui.enumItems?.(node.operator, node.property) ?? []).map(([id, name, , iconName]) => {

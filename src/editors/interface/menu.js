@@ -282,15 +282,17 @@ function step(menu, dir) {
 // At an element, a pull-down below it, or with `side` beside it (a toolbar button's, UI_DIR_RIGHT); at a point, a popup.
 // `scale` is the layout's scale_y; `hold` lets the press that opened it run the entry it is released over
 // (BLOCK_POPUP_HOLD). `search` makes the menu one Blender opens with SEARCH_ON_KEY_PRESS: typing searches what
-// search() gives, every entry of the menu and its sub-menus as { path: [sub-menu labels], item }.
-export function openMenu(items, at, title, { side = false, scale = 1, hold = false, search } = {}) {
+// search() gives, every entry of the menu and its sub-menus as { path: [sub-menu labels], item }. `find` makes it a
+// search button's box (ui_searchbox): the entries find(query) gives for what is typed, the `active` one highlighted.
+export function openMenu(items, at, title, { side = false, scale = 1, hold = false, search, find } = {}) {
   const anchor = at instanceof Element
     ? side ? { kind: 'submenu', rect: at.getBoundingClientRect() } : { kind: 'pulldown', rect: pulldownRect(at) }
     : { kind: 'popup', x: at.x, y: at.y, title: title ?? '' };
   closeMenus();
   dragOpened = hold;
-  const menu = render(items, { ...anchor, scale }, 0, title, search);
-  menu.search = search;
+  const menu = render(items, { ...anchor, scale }, 0, title, search ?? find);
+  Object.assign(menu, { search, find });
+  if (find) searchMenu('', menu);
   return menu.el;
 }
 
@@ -298,13 +300,10 @@ export function openMenu(items, at, title, { side = false, scale = 1, hold = fal
 // path and label hold every word typed, those whose label starts with the query first, each as its path, grey, then
 // its label.
 export function searchMenu(query, menu = levels[0]) {
-  if (!menu?.search) return;
+  if (!menu?.search && !menu?.find) return;
   closeFrom(menu.level + 1);
   menu.query = query;
-  menu.entries ??= menu.search();
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean), text = (e) => [...e.path, e.item.label].join(' ').toLowerCase();
-  const score = (e) => (e.item.label.toLowerCase().startsWith(words[0] ?? '') ? 0 : 1) + (e.item.enabled?.() === false ? 4 : 0) + (e.item.weight ?? 0);
-  const hits = menu.entries.filter((e) => words.every((w) => text(e).includes(w))).sort((a, b) => score(a) - score(b)).slice(0, 40);
+  const hits = menu.find ? menu.find(query).map((item) => ({ path: [], item })) : menuHits(menu, query);
   const field = make('div', 'bl-menu-search');
   field.append(iconEl('viewzoom'), make('span', '', query), make('span', 'bl-menu-caret'));
   menu.rows = [];
@@ -315,7 +314,14 @@ export function searchMenu(query, menu = levels[0]) {
   }));
   menu.el.classList.add('searching');
   Object.assign(menu.el.style, { width: '', height: '' });
-  setActive(menu, hits.length ? 0 : -1);
+  setActive(menu, Math.max(0, hits.findIndex((hit) => hit.item.active)) - !hits.length);
+}
+
+function menuHits(menu, query) {
+  menu.entries ??= menu.search();
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean), text = (e) => [...e.path, e.item.label].join(' ').toLowerCase();
+  const score = (e) => (e.item.label.toLowerCase().startsWith(words[0] ?? '') ? 0 : 1) + (e.item.enabled?.() === false ? 4 : 0) + (e.item.weight ?? 0);
+  return menu.entries.filter((e) => words.every((w) => text(e).includes(w))).sort((a, b) => score(a) - score(b)).slice(0, 40);
 }
 
 // A header pull-down's menu attaches one pixel out at its sides and at its bottom edge (measured on Blender 5.2.3).
@@ -376,7 +382,7 @@ function menuKey(e, menu) {
       return true;
     }
   }
-  if (menu.search && level === 0 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+  if ((menu.search || menu.find) && level === 0 && !e.ctrlKey && !e.metaKey && !e.altKey) {
     if (e.key === 'Backspace' && menu.query !== undefined) { searchMenu(menu.query.slice(0, -1)); return true; }
     if (e.key.length === 1 && (menu.query !== undefined || e.key !== ' ')) { searchMenu((menu.query ?? '') + e.key); return true; }
   }

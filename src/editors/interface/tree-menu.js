@@ -2,7 +2,7 @@
 // Blender's menus; without components, so that scripts and tests can lay menus out too.
 //   ui: block-view.js's region contract; `runs(idname)` may say which operators ui.run runs itself (else Bylonder's
 //   registry's do), `adjust(tree)` may change a tree before its entries are made.
-import { buttonMenu, buttonPress, buttonOperator, inButtonContext } from './ui-tree.js';
+import { buttonMenu, buttonPress, buttonOperator, buttonSearch, buttonSearchApply, inButtonContext } from './ui-tree.js';
 import { takeOperatorPopup } from '../../bmesh/bmesh-wasm.js';
 import { runsOperator } from '../../windowmanager/wm-operators.js';
 
@@ -75,4 +75,21 @@ export function treeMenu(tree, ui, editorTypeOwner) {
   };
   visit(tree);
   return items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && i < all.length - 1));
+}
+
+// A search popup's tree (an ID selector's, template_common_search_menu: its search button over the space for its items)
+// as menu.js's `find`: the items Blender's search gives for what is typed, the one chosen applied; else null.
+export function treeSearch(tree, ui) {
+  const buttons = (node) => (node.kind === 'button' ? [node] : (node.children ?? []).flatMap(buttons));
+  const search = buttons(tree).find((b) => b.type === 'SEARCH_MENU' && !b.search);
+  if (!search) return null;
+  return (query) => ui.inContext((C) => buttonSearch(C, search, query)).map((item, index) => ({
+    label: item.name.split('|')[0], icon: item.icon && item.icon !== 'NONE' ? item.icon : undefined, active: item.active,
+    enabled: () => !item.disabled,
+    run: () => {
+      ui.inContext((C) => buttonSearchApply(C, search, query, index));
+      ui.undoPush(search.tip || item.name);
+      ui.refresh();
+    },
+  }));
 }

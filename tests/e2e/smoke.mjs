@@ -118,6 +118,57 @@ const checks = {
     for (const item of ["Delete Hierarchy", "Select Hierarchy"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
   },
 
+  // Menus Blender's code builds in their own popup regions: the material slot's ID selector opens Blender's search of
+  // the materials, its choice assigned; sub-menus opened after the editors drew again run their entries, in the 3D View,
+  // the Shader Editor and a Properties context menu.
+  async "ID selectors search their data-blocks, and nested sub-menus run their entries in every editor"() {
+    await app.click();
+    const properties = app.locator("#properties-section"), tabs = properties.locator('[data-blender="context"]');
+    const browse = properties.getByTitle(/Browse Material/).first();
+    for (let i = (await tabs.count()) - 1; i >= 0 && !(await browse.count()); i--) await tabs.nth(i).click();
+    await app.bylonder((b) => b.world.materials.newMaterial(b.world.scene.getMeshByName("Cube")));
+    await browse.click();
+    await app.frame().locator(".bl-menu.searching").getByRole("menuitem", { name: "Material", exact: true }).click();
+    await app.until((b) => b.world.scene.getMeshByName("Cube").material.name === "Material");
+    await properties.locator('[role="tab"][aria-label="Object"]').click();
+    await app.hover();
+    await app.locator('[data-blender="VIEW3D_MT_add"]').first().click();
+    await app.frame().getByRole("menuitem", { name: "Mesh" }).first().hover();
+    await app.frame().getByRole("menuitem", { name: "Cone" }).click();
+    await expectStats((s) => s.Objects[1] === 4);
+    await rightClick(...(await center(app.locator('#properties-section [role="spinbutton"]').first())));
+    await app.frame().getByRole("menuitem", { name: "Reset All to Default Values" }).first().click();
+    await app.page.click('[data-workspace="shading"]');
+    await app.frame().getByRole("button", { name: "New Material" }).click();
+    const editor = app.frame().locator(".bl-node-editor");
+    await editor.waitFor();
+    const box = await editor.boundingBox();
+    await app.page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
+    await app.page.keyboard.press("Shift+A");
+    await app.frame().getByRole("menuitem", { name: "Input" }).first().hover();
+    const count = await app.frame().locator("[data-node]").count();
+    await app.frame().getByRole("menuitem", { name: "Texture Coordinate" }).click();
+    await app.frame().locator("[data-node]").nth(count).waitFor();
+  },
+
+  // A knife cut across the cube in Edit Mode, then back to Object Mode: the mesh Blender wrote back is drawn.
+  async "a Knife cut in Edit Mode reaches Object Mode"() {
+    await app.click();
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    const [x0, y0] = await app.point(0.3, 0.45), [x1, y1] = await app.point(0.7, 0.55);
+    await app.page.mouse.move(x0, y0);
+    await app.page.keyboard.press("k");
+    await app.page.mouse.down();
+    for (let i = 1; i <= 10; i++) await app.page.mouse.move(x0 + ((x1 - x0) * i) / 10, y0 + ((y1 - y0) * i) / 10);
+    await app.page.mouse.up();
+    await app.page.keyboard.press("Enter");
+    await expectStats((s) => s.Verts[1] > 8);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => !b.world.editMode.active);
+    await expectStats((s) => s.Verts > 8);
+  },
+
   async "right click on a property opens Blender's button context menu"() {
     await app.click();
     await rightClick(...(await center(app.locator('#properties-section [role="spinbutton"]').first())));

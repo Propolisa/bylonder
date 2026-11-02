@@ -13,6 +13,13 @@
       <div id="toast" role="status"></div>
       <div id="redo-panel" hidden></div>
     </main>
+    <!-- Until main.js reports for itself: a failure while its modules load (Blender's module, a chunk) is the run's error. -->
+    <script>
+      window.startupError = (e) => parent.postMessage({ channel: new URLSearchParams(location.search).get("channel"), type: "run-error",
+        payload: { message: String(e.error?.stack ?? e.reason?.stack ?? e.reason ?? e.message ?? `Could not load ${e.target?.src ?? "a module of the scene"}`) } }, location.origin);
+      addEventListener("error", window.startupError, true);
+      addEventListener("unhandledrejection", window.startupError);
+    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

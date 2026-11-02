@@ -22,7 +22,7 @@ import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu } from './ui-tree.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { treeMenu, press, runOperator } from './tree-menu.js';
+import { treeMenu, treeSearch, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
@@ -81,6 +81,8 @@ function open(b, ui, event) {
   const tree = ui.inContext((C) => buttonMenu(C, b));
   if (!tree) return;
   if (b.popover || b.type === 'POPOVER') return openPopover(tree, ui, event.currentTarget);
+  const find = treeSearch(tree, ui);
+  if (find) return openMenu([], event.currentTarget, undefined, { find });
   const editorType = b.rna?.owner === 'Area' && b.rna.prop === 'ui_type';
   openMenu(treeMenu(tree, ui, editorType ? event.currentTarget : undefined), event.currentTarget, b.type === 'MENU' ? b.text : undefined);
 }
@@ -152,7 +154,7 @@ function widgetNode(b, env) {
     case 'COLOR':
       return withStyle(colorSwatch({ value: b.rna ? [...struct(b.rna)[b.rna.prop]] : [0, 0, 0], ...common, onChange: (v, finish) => setRna({ ...b, rna: { ...b.rna, index: -1 } }, v, ui, finish) }));
     case 'MENU': case 'POPOVER': case 'BLOCK': case 'COLOR_BAND':
-      return withStyle(menuButton({ text: shown, iconName, ...common, iconOnly: !shown && !!iconName, onClick: (e) => open(b, ui, e) }));
+      return withStyle(menuButton({ text: shown, iconName, ...common, iconOnly: !shown && !!iconName, socket: b.node_link, onClick: (e) => open(b, ui, e) }));
     case 'PULLDOWN':
       return env.header ? pulldown({ text: shown, iconName, disabled: common.disabled, menu: b.menu, items: () => treeMenu(ui.inContext((C) => buttonMenu(C, b)) ?? { children: [] }, ui) })
         : withStyle(menuButton({ text: shown, iconName, ...common, onClick: (e) => open(b, ui, e) }));
@@ -171,7 +173,7 @@ function widgetNode(b, env) {
     case 'PREVIEW_TILE': return previewTile(b, shown || (b.icon === 'NONE' ? env.tileLabel : ''), style);
     case 'ROW': case 'LISTROW': case 'VIEW_ITEM': case 'TAB': {
       const item = b.type === 'ROW' || b.type === 'TAB' ? enumItem(b) : undefined;
-      const vnode = withStyle(button({ text: shown, iconName, kind: 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1',
+      const vnode = withStyle(button({ text: shown, iconName, kind: b.type === 'LISTROW' ? 'list-row' : 'radio', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: b.type === 'VIEW_ITEM' ? !!b.selected : !flat, className: 'flex-1', textLeft: b.text_left,
         value: item?.identifier, onClick: () => press(b, ui) }));
       if (b.type === 'VIEW_ITEM' && b.h > 1) return gridTile(b, ui);
       if (b.type === 'VIEW_ITEM') return cloneVNode(vnode, { onDblclick: () => ui.inContext((C) => buttonRename(C, b)) && ui.refresh() });
@@ -179,9 +181,9 @@ function widgetNode(b, env) {
     }
     default:
       if (TOGGLES.has(b.type)) {
-        return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, onClick: () => press(b, ui) }));
+        return withStyle(button({ text: shown, iconName, kind: 'toggle', pressed: !!b.selected, ...common, iconOnly: !shown, emboss: !flat, textLeft: b.text_left, onClick: () => press(b, ui) }));
       }
-      return withStyle(button({ text: shown, iconName, kind: 'tool', ...common, iconOnly: !shown && !!iconName, emboss: !flat, pressed: !!b.selected, className: 'flex-1',
+      return withStyle(button({ text: shown, iconName, kind: 'tool', ...common, iconOnly: !shown && !!iconName, emboss: !flat, pressed: !!b.selected, className: 'flex-1', textLeft: b.text_left,
         onClick: (event) => (b.operator ? runOperator(b, ui, event) : b.opens ? open(b, ui, event) : press(b, ui)) }));
   }
 }
@@ -226,9 +228,21 @@ const HORIZONTAL = new Set(['row', 'split', 'header', 'row_flow']);
 // keeps it (a header, an aligned row, an icon).
 function childStyle(child, node, env) {
   const w = child.w ?? 0;
+  // An overlap's items lie over each other from its left, each as wide as Blender laid it out.
+  if (node.kind === 'overlap') return w && node.w ? { width: `${(100 * w) / node.w}%` } : {};
   if (!HORIZONTAL.has(node.kind) || !w) return {};
   const fixed = env.header || (node.alignment && node.alignment !== 'EXPAND') || (child.kind === 'button' && !child.text && !child.display && w <= 1.01);
   return fixed ? { flex: `0 0 calc(var(--bl-row) * ${w})`, width: `calc(var(--bl-row) * ${w})` } : { flex: `${w} ${w} 0`, minWidth: 0 };
+}
+
+// Blender's space before an item along its layout and its indent across it, from where Blender placed them (null for
+// an item without buttons, or a tree without positions).
+const STACKED = new Set(['column', 'menu', 'root', 'box', 'radial', 'header', 'row', 'split']);
+function spacing(child, before, node, horizontal) {
+  if (child.x === undefined || node.x === undefined || !STACKED.has(node.kind)) return null;
+  const units = (n) => (n > 0.01 ? `calc(var(--bl-row) * ${n})` : undefined);
+  const along = horizontal ? child.x - (before ? before.x + before.w : node.x) : child.y - (before ? before.y + before.h : node.y);
+  return { [horizontal ? 'marginLeft' : 'marginTop']: units(along), ...(!horizontal && { marginLeft: units(child.x - node.x) }) };
 }
 
 function layoutNode(node, env) {
@@ -238,13 +252,18 @@ function layoutNode(node, env) {
   delete inner.root;
   if (node.kind === 'overlap' && node.children[0]?.type === 'VIEW_ITEM') inner.tileLabel = node.children[0].label;
   if (node.kind === 'header' && env.layoutPanels) return layoutPanelHeader(node, inner);
+  const horizontal = HORIZONTAL.has(node.kind);
+  let before = null, placed = false;
   const children = node.children.map((child) => {
-    const drawn = layoutNode(child, inner);
-    if (drawn) drawn.props = { ...drawn.props, style: { ...drawn.props?.style, ...childStyle(child, node, inner) } };
+    const drawn = layoutNode(child, inner), space = spacing(child, before, node, horizontal);
+    if (space) { before = child; placed = true; }
+    if (drawn) drawn.props = { ...drawn.props, style: { ...drawn.props?.style, ...childStyle(child, node, inner), ...space } };
     return drawn;
   }).filter(Boolean);
-  const horizontal = HORIZONTAL.has(node.kind);
-  const align = node.align ? (horizontal ? 'bl-align-row' : 'bl-align-col') : (horizontal ? 'gap-[var(--bl-row-gap)]' : 'gap-[var(--bl-button-gap)]');
+  // Without Blender's positions, the spaces its style gives: a split's column space (aligned or not), a row's and a
+  // column's button space.
+  const gap = placed ? '' : node.kind === 'split' ? 'gap-[var(--bl-column-space)]' : horizontal ? 'gap-[var(--bl-row-gap)]' : 'gap-[var(--bl-button-gap)]';
+  const align = node.align && node.kind !== 'split' ? (horizontal ? 'bl-align-row' : 'bl-align-col') : gap;
   const justify = { LEFT: 'justify-start', RIGHT: 'justify-end', CENTER: 'justify-center' }[node.alignment] ?? '';
   return h('div', {
     class: [LAYOUT_CLASS[node.kind] ?? 'bl-col flex min-w-0 flex-col', align, justify, node.alert && 'bl-alert', !inner.active && 'bl-inactive',
@@ -253,7 +272,8 @@ function layoutNode(node, env) {
   }, children);
 }
 
-// A layout panel's header (UILayout.panel): a click opens or closes it through the property Blender keeps its state in.
+// A layout panel's header (UILayout.panel), its disclosure arrow Blender's own: a click opens or closes it through the
+// property Blender keeps its state in.
 function layoutPanelHeader(node, env) {
   const state = env.layoutPanels[env.layoutPanelIndex.value++];
   const toggle = (e) => {
@@ -261,10 +281,7 @@ function layoutPanelHeader(node, env) {
     pointerStruct(...state.pointer)[state.prop] = !state.open;
     env.ui.refresh();
   };
-  return h('div', { class: 'bl-subpanel-header flex h-unit min-w-0 items-center gap-1', onClick: toggle }, [
-    icon(state?.open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
-    ...node.children.map((child) => layoutNode(child, env)).filter(Boolean),
-  ]);
+  return h('div', { class: 'bl-subpanel-header flex h-unit min-w-0 items-center', onClick: toggle }, node.children.map((child) => layoutNode(child, env)).filter(Boolean));
 }
 
 const rootEnv = (ui, extra = {}) => ({ ui, active: true, enabled: true, root: true, ...extra });
