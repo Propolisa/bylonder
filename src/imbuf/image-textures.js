@@ -3,6 +3,7 @@
 // changed regions only), with its mipmaps made again once it stops changing. Each user samples it through a Texture of
 // its own wrapping (an Image Texture node's extension), all sharing the one GPU texture.
 import { Constants, Texture } from '@babylonjs/core';
+import { GenerateBase64StringFromPixelData } from '@babylonjs/core/Misc/copyTools.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { blendData, contextStruct, pointerOf } from '../python/bpy_rna.js';
 
@@ -57,6 +58,17 @@ function upload(engine, image, pointer) {
   }
   engine.updateTextureData(image.internal, buffer.pixels, 0, 0, width, height, 0, 0, true);
   return true;
+}
+
+// A float image's texture as an export writes it, straight as Babylon's own materials sample it: Blender's pixels
+// (Image.pixels, straight) as the PNG data URL Babylon's read-back would encode (GenerateBase64StringFromPixelData);
+// null for any other texture, whose read-back is what it holds.
+export function straightImageData(texture) {
+  const internal = texture.getInternalTexture();
+  if (!premultiplied(internal)) return null;
+  const uid = [...images].find(([, image]) => image.internal === internal)?.[0];
+  const image = uid !== undefined && [...blendData().images].find((candidate) => candidate.session_uid === uid);
+  return image ? GenerateBase64StringFromPixelData(Float32Array.from(image.pixels), texture.getSize(), internal.invertY) : null;
 }
 
 // Every image's texture filled again from Blender's buffer (after a lost context).
@@ -162,7 +174,8 @@ export function sample(texture, anisotropy, mode) {
 
 // Whether an image's texture holds premultiplied alpha (BKE_image_has_gpu_texture_premultiplied_alpha): a float buffer's,
 // uploaded as Blender keeps it.
-export const imagePremultiplied = (texture) => texture?.getInternalTexture()?.type === Constants.TEXTURETYPE_FLOAT;
+const premultiplied = (internal) => internal?.type === Constants.TEXTURETYPE_FLOAT;
+export const imagePremultiplied = (texture) => premultiplied(texture?.getInternalTexture());
 
 // What redraws the views when an image's texture changed.
 export function onImageTexturesChanged(fn) { woken = fn; }

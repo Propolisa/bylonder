@@ -183,6 +183,26 @@ try {
     noErrors("restoring the WebGL context");
   });
 
+  // An export writes a float image's texture with straight alpha, Blender's pixels, though it is drawn premultiplied.
+  await step("an export writes float images straight", async () => {
+    const { written, straight, serialized } = await app.bylonder(async (b) => {
+      const { blendData } = b.modules.bpyRna, { imageTexture, straightImageData } = b.modules.imageTextures;
+      const image = blendData().images.new("Half", 4, 4, true, true);
+      image.generated_color = [1, 0.5, 0.25, 0.5];
+      const texture = imageTexture(image, b.world.scene), data = straightImageData(texture);
+      const png = Object.assign(new Image(), { src: data }), canvas = Object.assign(document.createElement("canvas"), { width: 4, height: 4 });
+      await png.decode();
+      canvas.getContext("2d").drawImage(png, 0, 0);
+      const buffer = texture._buffer;
+      texture._buffer = data;
+      const serialized = texture.serialize().base64String === data;
+      texture._buffer = buffer;
+      return { written: Array.from(canvas.getContext("2d").getImageData(0, 0, 1, 1).data), straight: Array.from(image.pixels).slice(0, 4), serialized };
+    });
+    assert.ok(serialized, "Texture.serialize writes the data");
+    assert.ok(written.every((v, i) => Math.abs(v - straight[i] * 255) <= 2), `Blender's straight pixel ${straight}, written ${written}`);
+  });
+
   // Examples made in Blender open with every object of Main in the scene sync, once (an armature left out of it was
   // invisible to every tool), and without a page error.
   for (const example of ["Rigged Character", "Hair Dynamics"]) {
