@@ -6,7 +6,7 @@ import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../src/editors/anima
 import { createTopbarArea } from '../src/editors/space_topbar/topbar-area.js';
 import { kw } from '../src/windowmanager/wm-operators.js';
 import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
-import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, buttonOperator, panelClosedSet } from '../src/editors/interface/ui-tree.js';
+import { regionPanels, regionHeader, menuTree, buttonMenu, buttonPress, buttonApplied, buttonOperator, buttonSearch, buttonSearchApply, inButtonContext, panelClosedSet } from '../src/editors/interface/ui-tree.js';
 
 // Blender's Properties editor laid out by Blender's uiLayout in the module, its panels Blender's Python registered as
 // Blender's panel types, drawing Main's data; the trees the browser draws (ui-tree.cc).
@@ -110,4 +110,27 @@ topbarArea.ui.run(entry.operator, entry.properties ?? {});
 assert.equal(opened, 1, 'and runs the app operator');
 const templates = topbarArea.ui.inContext((C) => buttonMenu(C, fileMenu.find((b) => b.menu === 'TOPBAR_MT_file_new')));
 assert.ok(buttons(templates).some((b) => b.text === 'General'), 'File > New lists the templates');
+
+// The Material tab's ID selector opens Blender's search popup (template_ID's browse button), its own block: the region
+// drawn again keeps it, so its search lists the materials, the slot's marked, and the one chosen is the slot's.
+const red = blendData().materials.new('Red');
+ob.data.materials.append(blendData().materials.new('Blue'));
+spaceOf(area).context = 'MATERIAL';
+const browse = panels().flatMap(panelButtons).find((b) => b.type === 'BLOCK' && /Browse Material/.test(b.tip));
+const search = buttons(area.inContext(RGN_TYPE_WINDOW, (C) => buttonMenu(C, browse))).find((b) => b.type === 'SEARCH_MENU');
+panels();
+panels();
+const found = area.inContext(RGN_TYPE_WINDOW, (C) => buttonSearch(C, search, ''));
+assert.ok(['Red', 'Blue'].every((name) => found.some((item) => item.name === name)), 'the search lists the materials');
+assert.equal(found.find((item) => item.active)?.name, 'Blue', 'the slot\'s material is the active item');
+area.inContext(RGN_TYPE_WINDOW, (C) => buttonSearchApply(C, search, 'Red', area.inContext(RGN_TYPE_WINDOW, (C2) => buttonSearch(C2, search, 'Red')).findIndex((item) => item.name === 'Red')));
+assert.equal(ob.active_material?.name, red.name, 'the item chosen is the slot\'s');
+// Nested sub-menus opened after the region drew again, and their entries' context, stay valid.
+const addMenu = area.inContext(RGN_TYPE_WINDOW, (C) => menuTree(C, 'VIEW3D_MT_add'));
+const meshMenu = area.inContext(RGN_TYPE_WINDOW, (C) => buttonMenu(C, buttons(addMenu).find((b) => b.menu === 'VIEW3D_MT_mesh_add')));
+panels();
+const cone = buttons(meshMenu).find((b) => b.text === 'Cone');
+assert.equal(area.inContext(RGN_TYPE_WINDOW, (C) => inButtonContext(C, cone, () => 'ran')), 'ran');
+spaceOf(area).context = 'MODIFIER';
+
 console.log(`Blender's uiLayout: ${drawn.length} panels, the header and menus as trees`);

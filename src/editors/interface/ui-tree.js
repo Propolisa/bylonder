@@ -1,8 +1,9 @@
 // Layout trees from Blender's uiLayout in the module (tools/blender-port/wasm/ui-tree.cc): a region's panels or header,
 // a menu, what a button opens; and pressing their buttons, by address, as Blender applies them. A tree's layouts are
-// { kind, align, active, enabled, alert, alignment, emboss, scale_x, scale_y, w, h, children } and its buttons
-// { kind: 'button', type (BUT, NUM, TOGGLE, ROW, MENU, PULLDOWN, ...), id, text, display, icon, tip, w, h, flags,
-//   rna: { pointer, owner, prop, index }, value, operator, properties, menu, popover, opens }, sizes in UI units.
+// { kind, align, active, enabled, alert, alignment, emboss, scale_x, scale_y, x, y, w, h, children } and its buttons
+// { kind: 'button', type (BUT, NUM, TOGGLE, ROW, MENU, PULLDOWN, ...), id, text, display, icon, tip, x, y, w, h, flags,
+//   rna: { pointer, owner, prop, index }, value, operator, properties, menu, popover, opens }, placed (x, y from the
+//   block's top left) and sized in UI units.
 // A region's panels are { category, categories, panels: [{ kind: 'panel', id, text, closed, hide_header, category,
 // parts: [{ part, layout }], layout_panels, children }] }. Trees stay valid until the next draw of what holds them.
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
@@ -52,6 +53,10 @@ export function inButtonContext(C, button, fn) {
     x.ui_context_store_restore(C, previous);
   }
 }
+// A search button's items for `text`, as its search box lists them ([{ name, icon, disabled, active }]), and the one at
+// `index` chosen.
+export const buttonSearch = (C, button, text) => withString(text, (p) => json(x.ui_button_search(C, button.id, p))) ?? [];
+export const buttonSearchApply = (C, button, text, index) => withString(text, (p) => x.ui_button_search_apply(C, button.id, p, index));
 export const buttonValueSet = (C, button, value) => x.ui_button_value_set(C, button.id, value);
 export const buttonTextSet = (C, button, text) => withString(text, (p) => x.ui_button_text_set(C, button.id, p));
 // A view's item dragged: the operator call its drag starts, for the page to invoke from the drag ({ operator,

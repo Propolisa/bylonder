@@ -22,7 +22,7 @@ import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu } from './ui-tree.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { treeMenu, press, runOperator } from './tree-menu.js';
+import { treeMenu, treeSearch, press, runOperator } from './tree-menu.js';
 import { parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import { hoverButton, leaveButton } from '../animation/keyframing-button.js';
 
@@ -81,6 +81,8 @@ function open(b, ui, event) {
   const tree = ui.inContext((C) => buttonMenu(C, b));
   if (!tree) return;
   if (b.popover || b.type === 'POPOVER') return openPopover(tree, ui, event.currentTarget);
+  const find = treeSearch(tree, ui);
+  if (find) return openMenu([], event.currentTarget, undefined, { find });
   const editorType = b.rna?.owner === 'Area' && b.rna.prop === 'ui_type';
   openMenu(treeMenu(tree, ui, editorType ? event.currentTarget : undefined), event.currentTarget, b.type === 'MENU' ? b.text : undefined);
 }
