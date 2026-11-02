@@ -61,4 +61,12 @@ assert.equal(prefs.inputs.use_mouse_emulate_3_button, true);
 assert.equal(bylonderPreferences().keep_scenes_loaded, false);
 loadKeyconfig(blender.C);
 assert.equal(blenderKeys(['Object Mode'], 'object.delete', { use_global: false }), 'Y');
+// Add-ons: Blender's addon_utils lists every add-on Blender ships and Bylonder's own, from their bl_info; the category
+// filter is a dynamic EnumProperty (its items a function), which starts at All.
+const addonUtils = globalThis.__py_modules.addon_utils;
+const listed = Object.fromEntries([...addonUtils.modules()].map((mod) => [mod.__name__, mod.bl_info.py_get('name')]));
+for (const [module, name] of [['bylonder', 'Bylonder'], ['pose_library', 'Pose Library'], ['io_scene_fbx', 'FBX format'], ['io_scene_gltf2', 'glTF 2.0 format'], ['node_wrangler', 'Node Wrangler'], ['rigify', 'Rigify']]) {
+  assert.equal(listed[module], name, module);
+}
+assert.equal(contextStruct(blender.C).window_manager.addon_filter, 'All');
 console.log('preferences ok');

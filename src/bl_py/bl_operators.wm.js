@@ -10,6 +10,7 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 import {_py_eval, _py_exec} from './_py_eval.js';
+import {_open} from './io.js';
 var __name__ = 'bl_operators.wm';
 export var _merged = function () {
 	if (arguments.length) {
@@ -4246,7 +4247,7 @@ export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 		else {
 		}
 		var write = __call__ (_member, null, '_bpy_internal.system_info.text_generate_runtime', 'write');
-		var _with_manager6_0 = __call__ (open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+		var _with_manager6_0 = __call__ (_open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
 		var output = (function () {
 			var __accu0__ = _with_manager6_0;
 			return __call__ (__accu0__.__enter__, __accu0__);
@@ -7105,7 +7106,7 @@ WM_OT_drop_blend_file.__annotations__ = dict ({'filepath': __call__ (StringPrope
 export var classes = tuple ([WM_OT_context_collection_boolean_set, WM_OT_context_cycle_array, WM_OT_context_cycle_enum, WM_OT_context_cycle_int, WM_OT_context_menu_enum, WM_OT_context_modal_mouse, WM_OT_context_pie_enum, WM_OT_context_scale_float, WM_OT_context_scale_int, WM_OT_context_set_boolean, WM_OT_context_set_enum, WM_OT_context_set_float, WM_OT_context_set_id, WM_OT_context_set_int, WM_OT_context_set_string, WM_OT_context_set_value, WM_OT_context_toggle, WM_OT_context_toggle_enum, WM_OT_doc_view, WM_OT_doc_view_manual, WM_OT_drop_blend_file, WM_OT_operator_cheat_sheet, WM_OT_operator_pie_enum, WM_OT_path_open, WM_OT_properties_add, WM_OT_properties_context_change, WM_OT_properties_edit, WM_OT_properties_edit_value, WM_OT_properties_remove, WM_OT_sysinfo, WM_OT_owner_disable, WM_OT_owner_enable, WM_OT_url_open, WM_OT_url_open_preset, WM_OT_tool_set_by_id, WM_OT_tool_set_by_index, WM_OT_tool_set_by_brush_type, WM_OT_toolbar, WM_OT_toolbar_fallback_pie, WM_OT_toolbar_prompt, BatchRenameAction, WM_OT_batch_rename, WM_MT_splash_quick_setup, WM_MT_splash, WM_MT_splash_about, WM_MT_region_toggle_pie]);
 
 //# sourceMappingURL=bl_operators.wm.map
-export {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, Menu, Operator, StringProperty, _globals, _import, _lazy, _member, _module, _py_eval, _py_exec, i18n_contexts, iface_, n_, rpt_, tip_};
+export {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, Menu, Operator, StringProperty, _globals, _import, _lazy, _member, _module, _open, _py_eval, _py_exec, i18n_contexts, iface_, n_, rpt_, tip_};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

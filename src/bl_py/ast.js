@@ -2,13 +2,426 @@
 import * as __self__ from './ast.js';
 (globalThis.__py_modules ??= {})['ast'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = 'ast';
-export var __stubbed__ = true;
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _truth = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return value instanceof Array ? value.length > 0 : value?.__class__ === dict ? len (value) > 0 : typeof value?.__bool__ === "function" ? !!value.__bool__ () : !!value
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
+};
+export var AST =  __class__ ('AST', [object], {
+	__module__: __name__,
+});
+export var Module =  __class__ ('Module', [AST], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, body) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'body': var body = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.body = body;
+	});}
+});
+export var Name =  __class__ ('Name', [AST], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, id) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.id = id;
+	});}
+});
+export var Expression =  __class__ ('Expression', [AST], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, source) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.source = source;
+	});}
+});
+export var Assign =  __class__ ('Assign', [AST], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, targets, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'targets': var targets = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.targets = targets;
+		self.value = value;
+	});}
+});
+export var _statements = function (source) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var __left0__ = tuple ([[], 0, null, 0, 0]);
+	var statements = __left0__ [0];
+	var depth = __left0__ [1];
+	var quote = __left0__ [2];
+	var start = __left0__ [3];
+	var i = __left0__ [4];
+	while (__lt__ (i, __call__ (len, null, source))) {
+		var c = __getitem__ (source, i);
+		if (__call__ (_truth, null, quote)) {
+			if (__eq__ (c, '\\')) {
+				var i = __call__ (__iadd__, null, i, 1);
+			}
+			else if (__eq__ (__getslice__ (source, i, __add__ (i, __call__ (len, null, quote)), 1), quote)) {
+				var i = __call__ (__iadd__, null, i, __sub__ (__call__ (len, null, quote), 1));
+				var quote = null;
+			}
+		}
+		else if (__eq__ (c, '#')) {
+			while (__lt__ (i, __call__ (len, null, source)) && __ne__ (__getitem__ (source, i), '\n')) {
+				var i = __call__ (__iadd__, null, i, 1);
+			}
+			continue;
+		}
+		else if (__in__ (c, '\'"')) {
+			var quote = (__in__ (__getslice__ (source, i, __add__ (i, 3), 1), tuple (['"""', "'''"])) ? __getslice__ (source, i, __add__ (i, 3), 1) : c);
+			var i = __call__ (__iadd__, null, i, __sub__ (__call__ (len, null, quote), 1));
+		}
+		else if (__in__ (c, '([{')) {
+			var depth = __call__ (__iadd__, null, depth, 1);
+		}
+		else if (__in__ (c, ')]}')) {
+			var depth = __call__ (__isub__, null, depth, 1);
+		}
+		else if (__eq__ (c, '\n') && __eq__ (depth, 0)) {
+			(function () {
+				var __accu0__ = statements;
+				return __call__ (__accu0__.append, __accu0__, __getslice__ (source, start, i, 1));
+			}) ();
+			var start = __add__ (i, 1);
+		}
+		var i = __call__ (__iadd__, null, i, 1);
+	}
+	(function () {
+		var __accu0__ = statements;
+		return __call__ (__accu0__.append, __accu0__, __getslice__ (source, start, null, 1));
+	}) ();
+	return (function () {
+		var __accu0__ = [];
+		var __iterable0__ = statements;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var s = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (_truth, null, (function () {
+				var __accu1__ = s;
+				return __call__ (__accu1__.strip, __accu1__);
+			}) ())) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, s);
+				}) ();
+			}
+		}
+		return __accu0__;
+	}) ();
+};
+export var parse = function (source, filename, mode) {
+	if (typeof filename == 'undefined' || (filename != null && globalThis.Object.hasOwn (filename, "__kwargtrans__"))) {;
+		var filename = '<unknown>';
+	};
+	if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
+		var mode = 'exec';
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+					case 'filename': var filename = __allkwargs0__ [__attrib0__]; break;
+					case 'mode': var mode = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var body = [];
+	var __iterable0__ = __call__ (_statements, null, source);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var statement = __getitem__ (__iterable0__, __index0__);
+		if (__in__ (__getitem__ (statement, 0), ' \t')) {
+			continue;
+		}
+		var __left0__ = (function () {
+			var __accu0__ = statement;
+			return __call__ (__accu0__.partition, __accu0__, '=');
+		}) ();
+		var py_name = __left0__ [0];
+		var sep = __left0__ [1];
+		var value = __left0__ [2];
+		var py_name = (function () {
+			var __accu0__ = py_name;
+			return __call__ (__accu0__.strip, __accu0__);
+		}) ();
+		if (__call__ (_truth, null, sep) && __call__ (_truth, null, (function () {
+			var __accu0__ = py_name;
+			return __call__ (__accu0__.isidentifier, __accu0__);
+		}) ()) && !(__call__ (_truth, null, (function () {
+			var __accu0__ = value;
+			return __call__ (__accu0__.startswith, __accu0__, '=');
+		}) ()))) {
+			(function () {
+				var __accu0__ = body;
+				return __call__ (__accu0__.append, __accu0__, __call__ (Assign, null, [__call__ (Name, null, py_name)], __call__ (Expression, null, (function () {
+					var __accu1__ = value;
+					return __call__ (__accu1__.strip, __accu1__);
+				}) ())));
+			}) ();
+		}
+	}
+	return __call__ (Module, null, body);
+};
+export var literal_eval = function (node_or_string) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'node_or_string': var node_or_string = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var source = (__call__ (isinstance, null, node_or_string, Expression) ? node_or_string.source : node_or_string);
+	return __call__ (_py_eval, null, source, dict ({}), null);
+};
 
 //# sourceMappingURL=ast.map
+export {_py_eval, _py_exec};
+
 export function __py_setattr__ (key, value) {
 	switch (key) {
-		case '__stubbed__': __stubbed__ = value; break;
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_truth': _truth = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case 'AST': AST = value; break;
+		case 'Module': Module = value; break;
+		case 'Name': Name = value; break;
+		case 'Expression': Expression = value; break;
+		case 'Assign': Assign = value; break;
+		case '_statements': _statements = value; break;
+		case 'parse': parse = value; break;
+		case 'literal_eval': literal_eval = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);
 	}
 }

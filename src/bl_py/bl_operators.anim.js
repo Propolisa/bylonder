@@ -9,6 +9,7 @@ import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_open} from './io.js';
 var __name__ = 'bl_operators.anim';
 export var _merged = function () {
 	if (arguments.length) {
@@ -191,7 +192,7 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var f = __call__ (open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf8'}));
+		var f = __call__ (_open, null, self.filepath, 'w', __kwargtrans__ ({encoding: 'utf8'}));
 		if (!(__call__ (_truth, null, f))) {
 			var __except0__ = __call__ (Exception, null, 'Could not open file');
 			__except0__.__cause__ = null;
@@ -1581,7 +1582,7 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 export var classes = tuple ([ANIM_OT_keying_set_export, NLA_OT_bake, ClearUselessActions, ARMATURE_OT_copy_bone_color_to_selected, ARMATURE_OT_collection_show_all, ARMATURE_OT_collection_unsolo_all, ARMATURE_OT_collection_remove_unused, ANIM_OT_slot_new_for_id, ANIM_OT_slot_unassign_from_id, ANIM_OT_slot_unassign_from_nla_strip, ANIM_OT_slot_unassign_from_constraint, ANIM_OT_version_bone_hide_property]);
 
 //# sourceMappingURL=bl_operators.anim.map
-export {BoolProperty, EnumProperty, IntProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts, rpt_};
+export {BoolProperty, EnumProperty, IntProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, _open, i18n_contexts, rpt_};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

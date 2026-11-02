@@ -956,6 +956,16 @@ const checks = {
     assert.ok(disabled > 0, "greyed settings");
   },
 
+  // Add-ons lists the add-ons Blender ships: Bylonder's own and the pose library enabled, the others greyed out.
+  async "Add-ons lists Blender's add-ons, those not included greyed out"() {
+    const prefs = await openPreferences();
+    await section(prefs, "Add-ons");
+    const region = prefs.locator(".bl-preferences-region");
+    for (const name of ["Bylonder", "Pose Library", "FBX format", "glTF 2.0 format", "Node Wrangler"]) await region.getByText(name).first().waitFor();
+    const enable = region.locator('button[data-blender="preferences.addon_enable"]');
+    assert.ok(await enable.count() > 0 && await enable.first().isDisabled(), "add-ons not included are greyed out");
+  },
+
   // Laptops: the number row as the numpad, the left button with Alt as the middle one, two-finger trackpad scrolling.
   async "Emulate Numpad: 1, 3 and 7 on the number row view front, right and top"() {
     await setInput(EMULATE_NUMPAD);

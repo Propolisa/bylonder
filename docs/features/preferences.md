@@ -69,7 +69,7 @@ limits:
   - Interface settings the page draws itself (Resolution Scale, Line Width, fonts, pie menu timing, tooltips' Python) are greyed out until the page's interface follows them.
   - Viewport quality settings (Anti-Aliasing, Texture Limit, Anisotropic Filtering, Clip Alpha) and Studio Lights are shown greyed out; Babylon's drawing does not take them yet.
   - Theme colors that no design token stands for are greyed out. Reset to Default Theme gives Blender Dark; the theme presets menu (Blender Light) does not load its XML yet.
-  - The Add-ons list does not draw yet (Blender's addon_utils reads add-ons' sources, which the app's Python cannot open yet); nothing can be installed from disk or online.
+  - Add-ons lists every add-on Blender 5.2 ships; only Bylonder's own and the Pose Library run in the app, the others are greyed out as not included. Installing add-ons from disk or online is greyed out.
   - The Keymap lists operators Bylonder runs its own way as unavailable, as Blender lists an operator it lacks; their keys still work.
   - The Mouse panel's labels are cut short at the window's default width.
   - File Paths are greyed out: projects and their files live in the browser.

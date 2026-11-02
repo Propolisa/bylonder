@@ -1,7 +1,7 @@
 # Python's eval and exec for the snippets Blender's scripts build at run time ("context.space_data.show_region_ui",
 # "context.scene.frame_current += self.value"): an interpreter of Python's expressions and assignments over the names
 # the caller gives (tree.py passes a function's names and its module's globals).
-_PUNCTUATION = ['**', '//', '==', '!=', '<=', '>=', '+=', '-=', '*=', '/=', '(', ')', '[', ']', ',', '.', ':', '+', '-', '*', '/', '%', '<', '>', '=']
+_PUNCTUATION = ['**', '//', '==', '!=', '<=', '>=', '+=', '-=', '*=', '/=', '(', ')', '[', ']', '{', '}', ',', '.', ':', '+', '-', '*', '/', '%', '<', '>', '=']
 _KEYWORDS = {'True': True, 'False': False, 'None': None}
 
 
@@ -9,8 +9,11 @@ def _tokens(source):
     tokens, i = [], 0
     while i < len(source):
         c = source[i]
-        if c in ' \t\n':
+        if c in ' \t\n\r':
             i += 1
+        elif c == '#':
+            while i < len(source) and source[i] != '\n':
+                i += 1
         elif c.isdigit() or (c == '.' and i + 1 < len(source) and source[i + 1].isdigit()):
             j = i
             while j < len(source) and (source[j].isdigit() or source[j] in '.eE' or (source[j] in '+-' and source[j - 1] in 'eE')):
@@ -133,8 +136,20 @@ class _Parser:
 
     def atom(self):
         kind, value = self.take()
-        if kind in ('number', 'string'):
+        if kind == 'string':
+            while self.peek()[0] == 'string':
+                value += self.take()[1]
             return (lambda: value, None)
+        if kind == 'number':
+            return (lambda: value, None)
+        if value == '{':
+            pairs = []
+            while not self.accept('}'):
+                key = self.disjunction()
+                self.take(':')
+                pairs.append((key, self.disjunction()))
+                self.accept(',')
+            return (lambda: {k[0](): v[0]() for k, v in pairs}, None)
         if kind == 'name':
             if value in _KEYWORDS:
                 return (lambda: _KEYWORDS[value], None)
