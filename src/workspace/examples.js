@@ -29,6 +29,7 @@ export const examples = [
   { id: "text", title: "3D Text" },
   { id: "hair", title: "Combed Hair" },
   { id: "hair-dynamics", title: "Hair Dynamics" },
+  { id: "geometry-nodes", title: "Geometry Nodes Meadow" },
   { id: "rigged-character", title: "Rigged Character" },
   { id: "lava", title: "Lava Sphere" },
   { id: "texture-paint", title: "Texture Paint" },

@@ -99,6 +99,7 @@ import { setFileselectHost } from "./windowmanager/wm-fileselect.js";
 import "./editors/io/io-ops.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
+import { mountSpreadsheet } from "./editors/space_spreadsheet/spreadsheet.js";
 // Boot phases, as performance marks (the workspace marks its own).
 performance.mark("bl:viewport-imported");
 await Promise.all([preloadIcons(), restorePreferences()]);
@@ -571,6 +572,10 @@ const scriptingEditors = [
   mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
   mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info") }),
 ];
+// The Geometry Nodes workspace's Spreadsheet, and any area made one by splitting.
+const mountSpreadsheetArea = (host, id) => mountSpreadsheet(host, { header: viewportDock.header(id), sync: world.mainSync });
+scriptingEditors.push(mountSpreadsheetArea(document.querySelector("#spreadsheet-section"), "spreadsheet"));
+viewportDock.setFactory("spreadsheet", mountSpreadsheetArea);
 // The Image Editor and UV Editor: Blender's SpaceImage, its image and UVs drawn by Babylon on the app's engine.
 const editObject = () => {
   const node = editor.selection.nodes.at(-1), ob = node?.metadata?.wbMode === "EDIT" ? world.mainSync.objectOf(node) : null;

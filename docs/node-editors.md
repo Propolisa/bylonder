@@ -30,7 +30,7 @@ How the node editors work: the Shader Editor's and the Compositor's trees are on
 | M mute, H collapse, Ctrl H hide unused sockets, X and Ctrl X delete, J link, Shift D duplicate, Home view all, Ctrl J join Group Inputs, Join in New Frame | Same, by Blender's keymap; on a node group of Main's each runs Blender's own operator |
 | Frames shrink to their nodes | Same; frames are Babylon's editor frames |
 | Muting a node passes its input through, drawn red | Blender nodes and compositor blocks; Babylon's material blocks cannot mute |
-| Node groups, Tab | Not yet: Babylon graphs have no groups; a Geometry Nodes group's group nodes show, Tab does not enter them yet |
+| Node groups, Tab | Geometry Nodes: Ctrl G, Ctrl Alt G, Tab and Ctrl Tab are Blender's operators, and the editor shows the group entered; Babylon graphs have no groups |
 | Geometry Node Editor | The active modifier's node group, edited and evaluated by Blender |
 
 ## Files
@@ -47,4 +47,4 @@ How the node editors work: the Shader Editor's and the Compositor's trees are on
 4. Link drag search (dropping a link on empty space), node insertion on links with auto-offset, Shift S swap menu from Blender's swap menus.
 5. Node groups and Tab, as Babylon custom blocks over a subgraph.
 6. The sidebar (N): Node and Properties panels from Blender's `space_node.py` panels.
-7. Geometry Nodes: Tab into group nodes, values of Menu, Object, Material and String sockets, zones from the Add menu (`node.add_zone`), and cutting links and adding reroutes through `node.links_cut` and `node.add_reroute` (they need the socket locations Blender's node drawing computes).
+7. Geometry Nodes: the sidebar's Group tab (interface panels), values of Menu, Object, Material and String sockets, zones from the Add menu (`node.add_zone`), and cutting links and adding reroutes through `node.links_cut` and `node.add_reroute` (they need the socket locations Blender's node drawing computes).

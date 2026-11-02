@@ -867,11 +867,11 @@ bool button_active_only(const bContext * /*C*/, ARegion * /*region*/, Block * /*
 }
 
 /* port-override: interface_widgets.cc's draw_button for the icon buttons a region's code defines (WidgetStyle::Icon,
- * IconLabel and Label: icon toggles without embossing, icon labels), with its widget_state, widget_state_label,
- * widget_color_disabled and widget_draw_icon; text buttons being edited are JS's own field. */
+ * IconLabel: icon toggles without embossing, text buttons' icons), with its widget_state, widget_state_label,
+ * widget_color_disabled and widget_draw_icon; text buttons being edited are JS's own field. Labels are label_draw's. */
 static void button_draw(const Button *but)
 {
-  const bool is_label = ELEM(but->type, ButtonType::Label, ButtonType::Text);
+  const bool is_label = but->type == ButtonType::Text;
   if (!(but->flag & UI_HAS_ICON) || !(is_label || ELEM(but->emboss, EmbossType::None, EmbossType::NoneOrStatus))) {
     return;
   }
@@ -887,9 +887,6 @@ static void button_draw(const Button *but)
     theme::get_color_3ubv((but->flag & UI_SELECT) ? TH_TEXT_HI : TH_TEXT, wcol.text);
   }
   float alpha = wcol.text[3] / 255.0f;
-  if (but->type == ButtonType::Label) {
-    alpha *= static_cast<const ButtonLabel *>(but)->alpha_factor;
-  }
   const float aspect = UI_INV_SCALE_FAC;
   const float height = ICON_DEFAULT_HEIGHT / aspect;
   const float xs = roundf((but->rect.xmin + but->rect.xmax - height) / 2.0f);
@@ -904,7 +901,28 @@ static void button_draw(const Button *but)
   icon_draw_ex(xs, ys, icon, aspect, alpha, 0.0f, color, outline, nullptr);
 }
 
-/* port-override: a block's draw is recorded: its icon buttons, every button with its rectangle, and its layout's tree. */
+/* A label (a Spreadsheet cell, a row number) drawn by Blender's draw_button as block_draw draws it, in region pixels
+ * with the block's font scale: its widget has no background, so its text and icon are BLF and icon draws. */
+static void label_draw(const bContext *C, ARegion *region, Block *block, Button *but)
+{
+  uiStyle style = *style_get_dpi();
+  fontscale(&style.widget.points, block->aspect);
+  rcti rect;
+  button_to_pixelrect(&rect, region, block, but);
+  if (rect.xmin >= rect.xmax || rect.ymin >= rect.ymax) {
+    return;
+  }
+  GPU_matrix_push_projection();
+  GPU_matrix_push();
+  GPU_matrix_identity_set();
+  wmOrtho2_region_pixelspace(region);
+  draw_button(C, region, &style, but, &rect);
+  GPU_matrix_pop();
+  GPU_matrix_pop_projection();
+}
+
+/* port-override: a block's draw is recorded: its labels and icon buttons, every button with its rectangle, and its
+ * layout's tree; the layout renderer draws the labels of a laid out block. */
 void block_draw(const bContext *C, Block *block)
 {
   drawn = {C, CTX_wm_region(C)};
@@ -916,7 +934,12 @@ void block_draw(const bContext *C, Block *block)
     s += ",\"layout\":" + layout + '}';
   }
   for (Button &but : block->buttons()) {
-    button_draw(&but);
+    if (layout.empty() && but.type == ButtonType::Label && !(but.flag & (UI_HIDDEN | UI_SCROLLED))) {
+      label_draw(C, drawn.region, block, &but);
+    }
+    else {
+      button_draw(&but);
+    }
     std::string &s = rec.buttons;
     if (!s.empty()) {
       s += ',';

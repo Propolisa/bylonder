@@ -8,7 +8,8 @@ import './wm-clipboard.js';
 const hosts = new Set(), watchers = new Set();
 let window = null, active = null;
 
-// host: { element, area, layout(), redraw(regions), finished(operators), keys(event) }.
+// host: { element, area, layout(), redraw(regions), finished(operators), keys(event), takes?(native): whether Blender's
+// window takes an event over the element (by default every one) }.
 export function registerArea(host) {
   hosts.add(host);
   return () => { hosts.delete(host); if (active === host) active = null; };
@@ -21,7 +22,7 @@ export function watchRedraws(fn) {
 }
 export const blenderWindow = () => (window ??= new Window(blenderMain()));
 
-const hostOf = (native) => [...hosts].find((host) => host.element.contains(native.target));
+const hostOf = (native) => [...hosts].find((host) => host.element.contains(native.target) && (host.takes?.(native) ?? true));
 export const takes = (native) => !!hostOf(native);
 
 export function send(native, kind, data, strings) {

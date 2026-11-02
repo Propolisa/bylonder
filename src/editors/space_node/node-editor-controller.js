@@ -24,6 +24,9 @@ registerOperators({
   'node.view_all': on('node.view_all'),
   'node.view_selected': on('node.view_selected'),
   'node.translate_attach': on('node.translate_attach'),
+  'node.group_make': on('node.group_make'),
+  'node.group_ungroup': on('node.group_ungroup'),
+  'node.group_edit': on('node.group_edit'),
 });
 
 const DRAG_THRESHOLD = 3;
@@ -284,6 +287,11 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
       'node.view_all': () => editor.viewAll(),
       'node.view_selected': () => editor.viewAll(true),
       'node.translate_attach': () => editor.startMove(state.pointer, false),
+      // Node groups (node_group.cc): Ctrl G makes one of the selection, Ctrl Alt G ungroups, Tab enters the active group
+      // node or leaves the group, where Blender holds the tree.
+      'node.group_make': () => editor.blender('node.group_make') && editor.viewAll(),
+      'node.group_ungroup': () => editor.blender('node.group_ungroup'),
+      'node.group_edit': (props) => editor.blender('node.group_edit', props) && editor.viewAll(),
       'wm.call_menu': ({ name }) => name === 'NODE_MT_add' && openAddMenu(state.pointer),
     },
     run(idname, props = {}) {
