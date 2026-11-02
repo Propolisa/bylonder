@@ -533,7 +533,7 @@
   "example_title": "Import and Export",
   "coverage": {
    "operators": {
-    "supported": 9,
+    "supported": 18,
     "partial": 22,
     "total": 50
    },
@@ -606,6 +606,75 @@
     "supported": 13,
     "partial": 0,
     "total": 14
+   }
+  }
+ },
+ {
+  "id": "link-append",
+  "title": "Link and Append",
+  "summary": "Bring collections, objects, materials and any other data-block in from another .blend with File > Link and File > Append, browsing inside the file in Blender's own File Browser, and make linked data editable with library overrides.",
+  "expect": "Link and Append run Blender's own code with all their options and browse the .blend in Blender's File Browser; the .blend comes from the browser's file dialog, the project keeps it in its libraries folder, and a .blend saved with File > Save As refers to it at /libraries/.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/files/linked_libraries/link_append.html",
+   "https://docs.blender.org/manual/en/5.2/files/linked_libraries/library_overrides.html",
+   "https://docs.blender.org/manual/en/5.2/editors/file_browser.html"
+  ],
+  "example": "link-append",
+  "thumbnail": "link-append/thumbnail.png",
+  "media": [
+   "link-append/file-browser.png",
+   "link-append/linked.png",
+   "link-append/override.png",
+   "link-append/appended.png",
+   "link-append/blender-file.png"
+  ],
+  "ui": [
+   "TOPBAR_MT_file",
+   "FILEBROWSER_MT_context_menu",
+   "FILEBROWSER_PT*",
+   "VIEW3D_MT_object_liboverride",
+   "OUTLINER_HT_header",
+   "OBJECT"
+  ],
+  "operators": [
+   "wm.link",
+   "wm.append",
+   "file.select",
+   "file.mouse_execute",
+   "file.execute",
+   "file.cancel",
+   "file.parent",
+   "object.make_override_library"
+  ],
+  "code": [
+   "src/editors/space_file/file-browser.js",
+   "src/editors/space_file/FileBrowserWindow.vue",
+   "src/windowmanager/wm-fileselect.js",
+   "tools/blender-port/wasm/fileselect.cc",
+   "src/blenkernel/libraries.js"
+  ],
+  "tests": [
+   "tests/link-append-wasm.test.js"
+  ],
+  "limits": [
+   "The .blend to link from is chosen in the browser's file dialog first; Blender's File Browser then opens inside it, so its bookmarks and parent folders do not reach your computer's other files.",
+   "A library's path is /libraries/<name>.blend in Bylonder's file system, where the project keeps it; a .blend saved with File > Save As refers to it there, so Blender on your computer asks to relocate it.",
+   "The File Browser shows no previews of data-blocks: the module draws without a GPU, so files carry none it makes."
+  ],
+  "page": "docs/features/link-append.md",
+  "open": "https://propolisa.github.io/bylonder/#example=link-append",
+  "example_title": "Link and Append",
+  "coverage": {
+   "operators": {
+    "supported": 25,
+    "partial": 22,
+    "total": 57
+   },
+   "ui": {
+    "supported": 15,
+    "partial": 2,
+    "total": 21
    }
   }
  },

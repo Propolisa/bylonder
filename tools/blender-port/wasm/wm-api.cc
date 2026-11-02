@@ -58,6 +58,7 @@
 GHOST_IWindow *ghost_window_new(uint32_t width, uint32_t height);
 extern "C" void region_draw_begin(int winx, int winy);
 extern "C" const char *region_draw_end();
+extern "C" void region_draw_free(const blender::bContext *C, blender::ARegion *region);
 GHOST_TKey ghost_key_from_browser(const char *code, const char *key);
 /* The page loads Blender's key configuration again (bpy.utils.keyconfig_init, through its preset's load). */
 extern "C" __attribute__((import_module("env"), import_name("wm_keyconfig_reload"))) void wm_keyconfig_reload(blender::bContext *C);
@@ -207,6 +208,9 @@ EXPORT(wm_area_free) void wm_area_free(bContext *C, ScrArea *area)
 {
   wmWindow *win = CTX_wm_window(C);
   bScreen *screen = WM_window_get_active_screen(win);
+  for (ARegion &region : area->regionbase) {
+    region_draw_free(C, &region);
+  }
   ED_area_exit(C, area);
   BLI_remlink(&screen->areabase, area);
   BKE_screen_area_free(area);

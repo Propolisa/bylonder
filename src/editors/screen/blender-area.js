@@ -9,7 +9,7 @@ import { RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_FOOTER, allowOperators } fro
 const RGN_TYPE_UI = 4, RGN_TYPE_TOOLS = 5, RGN_TYPE_TOOL_HEADER = 12;
 // The regions over the main region (region overlap) and the space's flags that show them.
 const OVERLAPS = { [RGN_TYPE_TOOLS]: 'show_region_toolbar', [RGN_TYPE_UI]: 'show_region_ui', [RGN_TYPE_TOOL_HEADER]: 'show_region_tool_header' };
-import { blenderWindow, registerArea } from '../../windowmanager/wm-areas.js';
+import { blenderWindow, registerArea, tick } from '../../windowmanager/wm-areas.js';
 import { hasOperator, inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
 import { regionHeader, regionPanels, panelClosedSet } from '../interface/ui-tree.js';
@@ -35,10 +35,13 @@ const pageRect = (element) => {
 //   drawn by its region type ('draw': the Spreadsheet's row count); context: the page's context area while its own
 //   operators run (wm-operators.js); drawn(main): after its main region drew, for what Babylon draws under it (main: the
 //   region's element); tools: the toolbar's panel (IMAGE_PT_tools_active), with which the area shows its toolbar, tool
-//   settings and sidebar as its space's flags say; left: a panel region at its left ({ type: its eRegion_Type, units:
-//   its width in widget units }, the Spreadsheet's data set).
-export function mountBlenderArea(section, { spacetype, name, operators, keymaps, header: headerHost, finished = () => {}, report = () => {}, context = {}, footer = false, drawn = () => {}, tools, left = null }) {
+//   settings and sidebar as its space's flags say; sides: panel regions around the main region ({ type: its
+//   eRegion_Type, edge: 'left', 'right', 'top' or 'bottom', units: a left or right one's width in widget units }, the
+//   Spreadsheet's data set); header: false for none; init(area): before Blender first lays the area out; window: whether
+//   it is in a window of its own (wm-areas.js keeps).
+export function mountBlenderArea(section, { spacetype, name, operators, keymaps, header: headerHost, finished = () => {}, report = () => {}, context = {}, footer = false, drawn = () => {}, tools, sides = [], init = () => {}, window = false }) {
   const area = markRaw(blenderWindow().area(spacetype));
+  init(area);
   const prefixes = [operators].flat();
   allowOperators(blenderWindow(), operatorNames().filter((idname) => prefixes.some((prefix) => idname.startsWith(prefix)) && !hasOperator(idname)));
   const state = reactive({ revision: 0 });
@@ -71,6 +74,8 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
   const run = (idname, props = {}, event) => {
     if (hasOperator(idname)) return inArea(context, () => invokeOperator(idname, props, event));
     area.inContext(RGN_TYPE_WINDOW, () => blenderMain().invoke(idname, props, event ?? {}));
+    // The events it queued (the File Browser's execute) are handled now, as after the window's own input.
+    tick();
     refresh();
   };
   const ui = (type) => markRaw({
@@ -82,7 +87,7 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
     panelClosed: (id, closed) => area.inContext(type, (C) => panelClosedSet(C, id, closed)),
     report,
   });
-  const barUI = Object.fromEntries([RGN_TYPE_HEADER, RGN_TYPE_FOOTER, RGN_TYPE_TOOL_HEADER, RGN_TYPE_UI, left?.type].filter((type) => type !== undefined).map((type) => [type, ui(type)]));
+  const barUI = Object.fromEntries([RGN_TYPE_HEADER, RGN_TYPE_FOOTER, RGN_TYPE_TOOL_HEADER, RGN_TYPE_UI, ...sides.map((side) => side.type)].map((type) => [type, ui(type)]));
   const shown = (type) => !!tools && !!pointerStruct(structFind('Area'), 0, area.pointer).spaces.active[OVERLAPS[type]];
   // Blender's scripts in a region's context: fn(context).
   const python = (fn, type = RGN_TYPE_WINDOW) => area.inContext(type, (C) => inPythonContext(C, () => fn(contextStruct())));
@@ -114,27 +119,35 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
     ];
   });
   // A region of panels (ED_region_panels).
-  const panels = ({ type, units }) => h('div', { class: 'bl-area-side flex shrink-0', style: { width: `calc(var(--bl-row) * ${units})` } },
+  const panels = ({ type, units }) => h('div', { class: 'bl-area-side flex shrink-0', style: units && { width: `calc(var(--bl-row) * ${units})` } },
     [region(type, 'bl-ui min-w-0 flex-1 overflow-y-auto bg-region', () => [h(PanelsView, { panels: area.inContext(type, (C) => regionPanels(C)).panels, ui: barUI[type] })])]);
+
+  // The side regions Blender shows, by their polls and flags (the File Browser's execute region, its options toggled).
+  let shownSides = {};
+  const along = (edge) => sides.filter((side) => side.edge === edge && side.type in shownSides).map(panels);
 
   const app = createApp({
     render() {
       void state.revision;
       if (toolbar) toolbar.el.hidden = !shown(RGN_TYPE_TOOLS);
+      if (sides.length) shownSides = area.regionsShown(sides.map((side) => side.type));
       layout();
       const headerView = bar(RGN_TYPE_HEADER);
       return h('div', { class: 'bl-ui flex h-full min-h-0 flex-col', 'data-blender': name }, [
-        headerHost ? h(Teleport, { to: headerHost }, [headerView]) : headerView,
+        headerHost === false ? null : headerHost ? h(Teleport, { to: headerHost }, [headerView]) : headerView,
         h('div', { class: 'flex min-h-0 flex-1' }, [
-          left ? panels(left) : null,
+          ...along('left'),
           h('div', { class: 'flex min-w-0 flex-1 flex-col' }, [
+            ...along('top'),
             h('div', { class: ['bl-area-view relative min-h-0 flex-1 overflow-hidden', shown(RGN_TYPE_TOOL_HEADER) && 'tool-header-shown'], ref: (el) => { if (toolbar && el) el.append(toolbar.el); } }, [
               h('div', { class: 'bl-area-main absolute inset-0', ref: (el) => { if (el && el !== main) { main = el; el.append(svg); } } }),
               shown(RGN_TYPE_TOOL_HEADER) ? region(RGN_TYPE_TOOL_HEADER, 'bl-ui bl-tool-header', () => headerTrees(RGN_TYPE_TOOL_HEADER)) : null,
               shown(RGN_TYPE_UI) ? region(RGN_TYPE_UI, 'bl-ui bl-sidebar', () => sidebarView(barUI[RGN_TYPE_UI])) : null,
             ]),
+            ...along('bottom'),
             footer === 'draw' ? h('div', { class: 'bl-area-footer flex h-(--bl-header-h) shrink-0' }, [drawnRegion(RGN_TYPE_FOOTER)]) : null,
           ]),
+          ...along('right'),
         ]),
         footer && footer !== 'draw' ? h('div', { class: 'bl-area-footer flex h-(--bl-header-h) shrink-0 bg-header px-[calc(var(--bl-row)*.4)]' }, [bar(RGN_TYPE_FOOTER)]) : null,
       ]);
@@ -153,10 +166,11 @@ export function mountBlenderArea(section, { spacetype, name, operators, keymaps,
 
   const pageKeys = keymapHandler(keymaps), keys = (event) => inArea(context, () => pageKeys(event));
   // The regions the page lays out itself (the data set's panels, a drawn footer's blocks) take their own pointer input.
-  const pageRegions = () => [left && bars[left.type], footer === 'draw' && bars[RGN_TYPE_FOOTER]].filter(Boolean);
+  const pageRegions = () => [...sides.map((side) => bars[side.type]), footer === 'draw' && bars[RGN_TYPE_FOOTER]].filter(Boolean);
   const unregister = registerArea({
     element: section,
     area,
+    window,
     layout,
     takes: (native) => !(native instanceof MouseEvent) || !pageRegions().some((region) => region.contains(native.target)),
     redraw: (regions) => (regions.some((type) => type in bars) ? refresh() : drawMain()),

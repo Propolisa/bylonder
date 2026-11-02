@@ -1,8 +1,9 @@
 /* Blender's file browser for an operator (WM_event_add_fileselect: Install from Disk, an ImportHelper or ExportHelper,
  * Open Image, the importers and exporters) as the browser's own file dialogs (src/windowmanager/wm-fileselect.js).
  * Blender's fileselect handler keeps the operator; the page chooses files where the File Browser area would open, puts
- * them in the module's file system and sends what the File Browser sends when it executes or cancels. A File Browser
- * area (SPACE_FILE, to browse inside a .blend for Link and Append) can take over from fileselect_open later. */
+ * them in the module's file system and sends what the File Browser sends when it executes or cancels. An operator that
+ * browses inside a .blend (Link and Append) gets Blender's File Browser over the chosen file: an area of the page
+ * (src/editors/space_file/file-browser.js) that fileselect_area_set gives the operator. */
 #include <string>
 
 #include "BKE_context.hh"
@@ -10,6 +11,8 @@
 #include "BLI_listbase.h"
 #include "BLI_path_utils.hh"
 #include "BLI_rect.h"
+#include "DNA_space_types.h"
+#include "ED_fileselect.hh"
 #include "RNA_access.hh"
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -23,7 +26,7 @@
 using namespace blender;
 
 /* The page's dialog for `op`: its settings as JSON (title, filter_glob, filepath, whether it saves, whether it takes
- * several files or a directory). */
+ * several files or a directory, whether it browses inside a .blend). */
 IMPORT(fileselect_open) void js_fileselect_open(wmOperator *op, const char *settings);
 
 static std::string string_property(PointerRNA *ptr, const char *name)
@@ -36,6 +39,11 @@ static bool saves(PointerRNA *ptr)
 {
   PropertyRNA *prop = RNA_struct_find_property(ptr, "check_existing");
   return prop && RNA_property_boolean_get(ptr, prop);
+}
+static bool browses_library(PointerRNA *ptr)
+{
+  PropertyRNA *prop = RNA_struct_find_property(ptr, "filemode");
+  return prop && RNA_property_int_get(ptr, prop) == FILE_LOADLIB;
 }
 static std::string json_string(const std::string &text)
 {
@@ -67,8 +75,18 @@ extern "C" void WRAP(__wrap_, WM_EVENT_ADD_FILESELECT)(bContext *C, wmOperator *
                                ",\"filepath\":" + json_string(string_property(op->ptr, "filepath")) +
                                ",\"save\":" + (saves(op->ptr) ? "true" : "false") +
                                ",\"files\":" + (RNA_struct_find_property(op->ptr, "files") ? "true" : "false") +
-                               ",\"directory\":" + (RNA_struct_find_property(op->ptr, "filepath") ? "false" : "true") + "}";
+                               ",\"directory\":" + (RNA_struct_find_property(op->ptr, "filepath") ? "false" : "true") +
+                               ",\"library\":" + (browses_library(op->ptr) ? "true" : "false") + "}";
   js_fileselect_open(op, settings.c_str());
+}
+
+/* A File Browser area of the page browsing for `op`, set up as the one EVT_FILESELECT_FULL_OPEN opens
+ * (wm_handler_fileselect_do): it sends the operator's execute or cancel event, and freeing the area cancels it. */
+EXPORT(fileselect_area_set) void fileselect_area_set(ScrArea *area, wmOperator *op)
+{
+  SpaceFile *sfile = static_cast<SpaceFile *>(area->spacedata.first);
+  sfile->op = op;
+  ED_fileselect_set_params_from_userdef(sfile);
 }
 
 /* The file browser's handler that holds the operator, or null. */

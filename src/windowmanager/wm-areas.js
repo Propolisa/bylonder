@@ -9,7 +9,7 @@ const hosts = new Set(), watchers = new Set();
 let window = null, active = null;
 
 // host: { element, area, layout(), redraw(regions), finished(operators), keys(event), takes?(native): whether Blender's
-// window takes an event over the element (by default every one) }.
+// window takes an event over the element (by default every one), window: whether it is in a window of its own }.
 export function registerArea(host) {
   hosts.add(host);
   return () => { hosts.delete(host); if (active === host) active = null; };
@@ -24,6 +24,8 @@ export const blenderWindow = () => (window ??= new Window(blenderMain()));
 
 const hostOf = (native) => [...hosts].find((host) => host.element.contains(native.target) && (host.takes?.(native) ?? true));
 export const takes = (native) => !!hostOf(native);
+// Whether an event is over an area in a window of its own (the File Browser's), whose events the page never gets.
+export const keeps = (native) => !!hostOf(native)?.window;
 
 export function send(native, kind, data, strings) {
   const w = blenderWindow();
@@ -31,7 +33,8 @@ export function send(native, kind, data, strings) {
   active = hostOf(native);
   w.size = { width: innerWidth, height: innerHeight };
   for (const host of hosts) host.layout();
-  return deliver(w.event(kind, data, strings));
+  // At the time the browser took the event, as GHOST's events carry the system's: a double click is timed by them.
+  return deliver(w.event(kind, data, strings, native.timeStamp));
 }
 function deliver(result) {
   for (const host of hosts) {

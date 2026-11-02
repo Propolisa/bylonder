@@ -1,0 +1,454 @@
+{
+ "link_collection": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [
+   {
+    "name": "Props",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
+  "objects": [
+   {
+    "name": "Ball",
+    "library": "library.blend",
+    "override": null,
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     -1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": false,
+    "selected": false,
+    "materials": [
+     "Rubber"
+    ]
+   },
+   {
+    "name": "Crate",
+    "library": "library.blend",
+    "override": null,
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": false,
+    "selected": false,
+    "materials": [
+     "Wood"
+    ]
+   },
+   {
+    "name": "Props",
+    "library": null,
+    "override": null,
+    "users": 1,
+    "type": "EMPTY",
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "instance_collection": "Props",
+    "in_scene": true,
+    "selected": true,
+    "materials": []
+   }
+  ],
+  "materials": [
+   {
+    "name": "Rubber",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Wood",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
+  "meshes": [
+   {
+    "name": "Cube",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Sphere",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [
+    "Props"
+   ],
+   "children": []
+  }
+ },
+ "append_collection": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [
+   {
+    "name": "Props",
+    "library": null,
+    "override": null,
+    "users": 1
+   }
+  ],
+  "objects": [
+   {
+    "name": "Ball",
+    "library": null,
+    "override": null,
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     -1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": true,
+    "materials": [
+     "Rubber"
+    ]
+   },
+   {
+    "name": "Crate",
+    "library": null,
+    "override": null,
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": true,
+    "materials": [
+     "Wood"
+    ]
+   }
+  ],
+  "materials": [
+   {
+    "name": "Rubber",
+    "library": null,
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Wood",
+    "library": null,
+    "override": null,
+    "users": 1
+   }
+  ],
+  "meshes": [
+   {
+    "name": "Cube",
+    "library": null,
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Sphere",
+    "library": null,
+    "override": null,
+    "users": 1
+   }
+  ],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [],
+   "children": [
+    {
+     "name": "Props",
+     "objects": [
+      "Ball",
+      "Crate"
+     ],
+     "children": []
+    }
+   ]
+  }
+ },
+ "link_object": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [],
+  "objects": [
+   {
+    "name": "Lamp Post",
+    "library": "library.blend",
+    "override": null,
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     0.0,
+     3.0,
+     1.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": true,
+    "materials": []
+   }
+  ],
+  "materials": [],
+  "meshes": [
+   {
+    "name": "Cylinder",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [
+    "Lamp Post"
+   ],
+   "children": []
+  }
+ },
+ "append_object": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [],
+  "objects": [
+   {
+    "name": "Lamp Post",
+    "library": null,
+    "override": null,
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     0.0,
+     3.0,
+     1.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": true,
+    "materials": []
+   }
+  ],
+  "materials": [],
+  "meshes": [
+   {
+    "name": "Cylinder",
+    "library": null,
+    "override": null,
+    "users": 1
+   }
+  ],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [
+    "Lamp Post"
+   ],
+   "children": []
+  }
+ },
+ "link_material": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [],
+  "objects": [],
+  "materials": [
+   {
+    "name": "Gold",
+    "library": "library.blend",
+    "override": null,
+    "users": 0
+   }
+  ],
+  "meshes": [],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [],
+   "children": []
+  }
+ },
+ "append_material": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [],
+  "objects": [],
+  "materials": [
+   {
+    "name": "Gold",
+    "library": null,
+    "override": null,
+    "users": 0
+   }
+  ],
+  "meshes": [],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [],
+   "children": []
+  }
+ },
+ "override_collection": {
+  "libraries": [
+   "library.blend"
+  ],
+  "collections": [
+   {
+    "name": "Props",
+    "library": null,
+    "override": "SYSTEM",
+    "users": 1
+   },
+   {
+    "name": "Props",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
+  "objects": [
+   {
+    "name": "Ball",
+    "library": null,
+    "override": "SYSTEM",
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     -1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": false,
+    "materials": [
+     "Rubber"
+    ]
+   },
+   {
+    "name": "Ball",
+    "library": "library.blend",
+    "override": null,
+    "users": 2,
+    "type": "MESH",
+    "location": [
+     -1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": false,
+    "materials": [
+     "Rubber"
+    ]
+   },
+   {
+    "name": "Crate",
+    "library": null,
+    "override": "SYSTEM",
+    "users": 1,
+    "type": "MESH",
+    "location": [
+     1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": false,
+    "materials": [
+     "Wood"
+    ]
+   },
+   {
+    "name": "Crate",
+    "library": "library.blend",
+    "override": null,
+    "users": 2,
+    "type": "MESH",
+    "location": [
+     1.0,
+     0.0,
+     0.5
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": false,
+    "materials": [
+     "Wood"
+    ]
+   }
+  ],
+  "materials": [
+   {
+    "name": "Rubber",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Wood",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
+  "meshes": [
+   {
+    "name": "Cube",
+    "library": "library.blend",
+    "override": null,
+    "users": 2
+   },
+   {
+    "name": "Sphere",
+    "library": "library.blend",
+    "override": null,
+    "users": 2
+   }
+  ],
+  "scene": {
+   "name": "Scene Collection",
+   "objects": [],
+   "children": [
+    {
+     "name": "Props",
+     "objects": [
+      "Ball",
+      "Crate"
+     ],
+     "children": []
+    }
+   ]
+  }
+ }
+}

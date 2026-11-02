@@ -100,6 +100,7 @@ const { updateImageTextures, onImageTexturesChanged, imageTexture } = imageTextu
 import { mountImageEditor } from "./editors/space_image/image-editor.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { setFileselectHost } from "./windowmanager/wm-fileselect.js";
+import { unkeptLibraries } from "./blenkernel/libraries.js";
 import "./editors/io/io-ops.js";
 import { whenPythonStarts } from "./python/python.js";
 import { mountInfo } from "./editors/space_info/info.js";
@@ -430,6 +431,7 @@ const blenderWindow = {
   takes: (native, view) => blenderAreas.takes(native) || !!view3dWindow?.takes(native, view),
   send: (kind, data, strings, view, native) => (blenderAreas.takes(native) ? blenderAreas.send(native, kind, data, strings) : view3dWindow.send(kind, data, strings, view)),
   pressHandled: () => blenderAreas.blenderWindow().pressHandled(),
+  keeps: (native) => blenderAreas.keeps(native),
 };
 world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow, input: inputPreferences });
 const editor = createEditor(
@@ -546,14 +548,17 @@ viewportDock.setFactory("preferences", preferencesEditor);
 registerUserprefOperators({ showArea: () => viewportDock.show("preferences", true) });
 view3dWindow = createView3DWindow({ sync: world.mainSync, views: viewports, takes: () => !editCurve.active, host: objectOperatorHost, wake: () => views.wake(),
   menu: (name, at) => world.callMenu(name, at), before: () => creator.finish() });
-// File > Import and Export: Main made current (an export's meshes filled) for the operator the file dialog runs, then
-// what it changed drawn, and Blender's undo step, if it pushed one, taken.
-setFileselectHost((run, { save }) => {
+// File > Import, Export, Link and Append: Main made current (an export's meshes filled) for the operator the file dialog
+// or File Browser runs, then what it changed drawn, Blender's undo step, if it pushed one, taken, and the libraries Main
+// links from kept with the project.
+const keptLibraries = new Set(input.files ?? []);
+setFileselectHost(async (run, { save }) => {
   const sync = world.mainSync, step = sync.blender.undoStep;
   if (save) sync.withMeshes(run);
-  else { sync.flush(); run(); }
+  else { sync.flush(); await run(); }
   sync.view();
   if (sync.blender.undoStep !== step) commit();
+  for (const [path, bytes] of unkeptLibraries(keptLibraries)) { keptLibraries.add(path); send("library", { path, bytes }); }
 });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
 // The navigation gizmo's and touch's ways into Blender's navigation operators (view3d-window.js).

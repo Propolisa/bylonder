@@ -193,6 +193,7 @@ const quoted = (key) => `["${String(key).replace(/["\\]/g, '\\$&')}"]`;
 const STRUCT_METHODS = {
   path_resolve: (ptr) => (path) => resolvePath(ptr, path),
   is_property_set: (ptr) => (name) => { const prop = findProperty(ptr, name); return !!prop && x.bpy_property_is_set(...ptr, prop); },
+  is_property_readonly: (ptr) => (name) => { const prop = findProperty(ptr, name); return !prop || !(propertyInfo(ptr, prop).flags & INFO_EDITABLE); },
   property_unset: (ptr) => (name) => { const prop = findProperty(ptr, name); if (prop) x.bpy_property_unset(...ptr, prop); },
   path_from_id: (ptr) => (name) => cString(x.bpy_path_from_id(...ptr, name ? findProperty(ptr, name) : 0)),
   as_pointer: (ptr) => () => ptr[2],
