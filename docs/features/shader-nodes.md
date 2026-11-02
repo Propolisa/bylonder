@@ -66,10 +66,10 @@ limits:
   - Sheen draws as a diffuse closure of its color, as EEVEE does; Subsurface Scattering and Translucent draw as diffuse, without scattering or light from behind.
   - Lights have no angle or soft radius: a sun's highlight is wider and dimmer at its core than EEVEE's (Glossy, sphere 12, mean dE 5.4, max 35; Metal, sphere 20, mean dE 6.4, max 49).
   - A world color lights as EEVEE's world probe; an environment image lights as Babylon's environment, filtered as Babylon filters it, not as EEVEE's sphere probe.
-  - Glass and Refraction BSDF refract the world only, not the objects behind them, untinted by their color (Glass, sphere 18, mean dE 6.6).
+  - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.4, max 3).
   - Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).
   - Blender's view transforms other than Standard are approximated by Babylon's tone mapping.
-  - A blended surface is laid over what is behind it in display space, not in linear light as EEVEE does, so a half transparent surface shows brighter (Half Transparent, sphere 19, mean dE 9.1, max 10).
+  - Material Preview lays blended surfaces over what is behind them in display space; Rendered shading and Render Image blend in scene linear, as EEVEE does.
   - A Transparent BSDF's color lets through its average, not each channel; Holdout draws black, not a hole in the film.
   - Light Path takes every ray as a camera ray; Ambient Occlusion finds no occlusion; Shader to RGB does not run.
   - Normal Map and Tangent read Blender's tangents of the active UV map; for another UV map, or a mesh Blender does not draw, they take the tangent from the UV map's screen derivatives.
@@ -115,21 +115,20 @@ The [Shader Node Gallery](https://propolisa.github.io/bylonder/#example=shader-g
 Blender's common nodes; the smoke test renders it and compares each sphere with EEVEE's render of the same file
 (`tests/fixtures/shader-gallery-eevee.png`, Standard view transform), and
 `tools/blender-reference/shader-gallery-diff.py` measures each sphere's error in display space (CIE76 dE, mean and 99th
-percentile inside the sphere). Measured with Render Image of the production build at 256 by 320 (not yet under the aim of mean dE 3 and max 10 for
-the textures, 8 for the shaders):
+percentile inside the sphere). Measured with Render Image at 256 by 320 (the aim: mean dE under 3 and 99th percentile under 10):
 
-| Sphere | dE mean | dE max | Sphere | dE mean | dE max |
+| Sphere | dE mean | dE 99% | Sphere | dE mean | dE 99% |
 |---|---|---|---|---|---|
-| 1 Checker | 6.1 | 16.4 | 11 Principled | 6.4 | 32.4 |
-| 2 Voronoi | 4.2 | 14.8 | 12 Glossy | 27.6 | 91.0 |
-| 3 Wave | 4.9 | 15.6 | 13 Diffuse and Glossy mix | 6.0 | 21.0 |
-| 4 Brick | 10.0 | 33.8 | 14 Diffuse plus Emission | 3.0 | 3.9 |
-| 5 Magic | 4.1 | 6.3 | 15 Sheen | 8.5 | 14.4 |
-| 6 Gradient | 4.2 | 4.8 | 16 Normal Map | 4.3 | 13.6 |
-| 7 Geometry normal | 3.7 | 5.3 | 17 Two Glossy lobes | 17.2 | 50.8 |
-| 8 Fresnel | 2.8 | 3.1 | 18 Glass | 22.8 | 23.5 |
-| 9 Layer Weight | 2.3 | 3.0 | 19 Half transparent | 10.5 | 20.0 |
-| 10 White Noise | 4.0 | 9.8 | 20 Metallic Principled | 27.8 | 93.0 |
+| 1 Checker | 4.8 | 18.8 | 11 Principled | 2.5 | 5.1 |
+| 2 Voronoi | 1.9 | 16.0 | 12 Glossy | 5.4 | 35.0 |
+| 3 Wave | 2.8 | 15.5 | 13 Diffuse and Glossy mix | 4.7 | 19.9 |
+| 4 Brick | 8.9 | 33.9 | 14 Diffuse plus Emission | 0.7 | 1.3 |
+| 5 Magic | 1.6 | 5.9 | 15 Sheen | 1.9 | 3.6 |
+| 6 Gradient | 0.8 | 1.3 | 16 Normal Map | 4.2 | 14.5 |
+| 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 18.4 | 25.3 |
+| 8 Fresnel | 0.8 | 1.4 | 18 Glass | 2.4 | 3.2 |
+| 9 Layer Weight | 2.8 | 4.2 | 19 Half transparent | 2.8 | 3.7 |
+| 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 6.4 | 49.0 |
 
 > **Note** The header's Babylon Editor toggle opens the same graph in Babylon's Node Material Editor; both editors
 > keep one layout.

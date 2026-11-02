@@ -143,8 +143,12 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     world.compositor?.bindCamera(compositorCamera);
   };
   world.beforeViewRender = ({ rendered, compositor }) => {
-    world.worlds.setViewportActive(rendered);
     world.compositor?.setViewportActive(compositor);
+    // A rendered view draws in scene linear and displays through its camera's final post-process; the compositor's
+    // graph displays what its own nodes draw.
+    const sceneLinear = rendered && !scene.frameGraph;
+    world.renderSettings.setSceneLinear(sceneLinear);
+    world.worlds.setViewportActive(rendered, sceneLinear);
   };
   world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));
   world.logic = documentState.register("logic", createLogic(world, { commit, notify }));

@@ -41,6 +41,8 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     // Cameras of the views in Rendered shading; render effects attach to these only.
     get renderedCameras() { return [...cameras]; },
+    // Whether the view about to render draws in scene linear, its display transform a post-process. Cheap; per view.
+    setSceneLinear: (value) => engine.setSceneLinear(value),
     setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
     set(path, value, finish = true) {
       const { owner, key } = resolve(state, path);

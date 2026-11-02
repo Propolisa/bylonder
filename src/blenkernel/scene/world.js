@@ -71,7 +71,7 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     images: files => [...(renderer.hasAuthoredTexture ? [['scene', 'Scene (code)']] : []), [STUDIO, 'Studio'], ...files.filter(f => environmentFile.test(f)).map(f => [f, f])],
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     // Per view: rendered shading shows the world background and volume. Cheap.
-    setViewportActive(value) { renderer.setRendered(value); },
+    setViewportActive(value, sceneLinear = false) { renderer.setRendered(value, sceneLinear); },
     // Material Preview's studio lighting while a view shows it.
     setPreview(value) { renderer.setPreview(value); },
     link(entry) { state.active = entry?.id ?? null; changed(); },
