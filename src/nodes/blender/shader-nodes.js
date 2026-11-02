@@ -816,7 +816,7 @@ const SURFACE = {
   indexOfRefraction: (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
 };
 const REFRACTION = {
-  'subsurface.thickness': () => '0.0', 'subsurface.tintColor': (c) => `bl_closure_transmission_tint(${c})`,
+  'subsurface.tintColor': (c) => `bl_closure_transmission_tint(${c})`,
   'refraction.intensity': (c) => `bl_closure_transmission(${c})`, 'refraction.volumeIndexOfRefraction': (c) => `bl_closure_parameter(${c}, ${c}.ior, 1.5)`,
 };
 export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
@@ -873,7 +873,11 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     const refraction = this._helpers.refraction = helper(material, '__refraction', (name) => new RefractionBlock(name));
     refraction._getTexture = environmentOf(material);
     // Given at this block's build, after theirs.
-    subsurface.thickness.isOptional = refraction.intensity.isOptional = true;
+    refraction.intensity.isOptional = true;
+    // blender-port: eevee_deferred_eval.bsl.hh: light through a surface of some thickness is tinted by the color squared,
+    // in and out. Babylon tints by the tint to the power of thickness over its distance (1), so a thickness of 2.
+    const thickness = helper(material, '__thickness', (name) => Object.assign(new InputBlock(name, Targets.Fragment, T.Float), { value: 2, isConstant: true }));
+    wire(thickness.output, subsurface.thickness);
     wire(refraction.refraction, subsurface.refraction);
     wire(subsurface.subsurface, this.subsurface);
   }

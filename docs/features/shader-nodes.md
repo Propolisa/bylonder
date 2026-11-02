@@ -66,7 +66,7 @@ limits:
   - Sheen draws as a diffuse closure of its color, as EEVEE does; Subsurface Scattering and Translucent draw as diffuse, without scattering or light from behind.
   - Lights have no angle or soft radius: a sun's highlight is wider and dimmer at its core than EEVEE's (Glossy, sphere 12, mean dE 5.4, max 35; Metal, sphere 20, mean dE 6.4, max 49).
   - A world color lights as EEVEE's world probe; an environment image lights as Babylon's environment, filtered as Babylon filters it, not as EEVEE's sphere probe.
-  - Glass and Refraction BSDF refract the world only, not the objects behind them, untinted by their color (Glass, sphere 18, mean dE 6.6).
+  - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.4, max 3).
   - Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).
   - Blender's view transforms other than Standard are approximated by Babylon's tone mapping.
   - Material Preview lays blended surfaces over what is behind them in display space; Rendered shading and Render Image blend in scene linear, as EEVEE does.
@@ -126,7 +126,7 @@ percentile inside the sphere). Measured with Render Image at 256 by 320 (the aim
 | 5 Magic | 1.6 | 5.9 | 15 Sheen | 1.9 | 3.6 |
 | 6 Gradient | 0.8 | 1.3 | 16 Normal Map | 4.2 | 14.5 |
 | 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 18.4 | 25.3 |
-| 8 Fresnel | 0.8 | 1.4 | 18 Glass | 6.6 | 7.0 |
+| 8 Fresnel | 0.8 | 1.4 | 18 Glass | 2.4 | 3.2 |
 | 9 Layer Weight | 2.8 | 4.2 | 19 Half transparent | 2.8 | 3.7 |
 | 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 6.4 | 49.0 |
 
