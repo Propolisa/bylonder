@@ -51,7 +51,7 @@ export function deriveBabylonLight(light) {
   light.intensity = intensityOf(record.type, record.energy * 2 ** (record.exposure ?? 0), lightingMode(light.getScene()));
   if (record.type !== 'SUN') light.falloffType = Light.FALLOFF_GLTF;
   // An area light's extent is its size; a radius would zero its photometric scale, which Babylon has no case for.
-  if (record.type !== 'AREA') light.radius = record.shadow_soft_size;
+  if (record.type !== 'AREA') light.radius = shapeRadius(record);
   light.shadowEnabled = record.use_shadow;
   light.range = record.use_custom_distance ? record.cutoff_distance : Number.MAX_VALUE;
   if (record.type === 'SPOT') {
@@ -63,6 +63,12 @@ export function deriveBabylonLight(light) {
     light.height = ['RECTANGLE', 'ELLIPSE'].includes(record.shape) ? record.size_y : record.size;
   }
 }
+
+// blender-port: eevee_light.cc Light::shape_parameters_set: a sun's radius at unit distance from its angle, a point's or
+// spot's its soft size, neither below 0.001.
+const SUN_MAX_ANGLE = (179.9 * Math.PI) / 180;
+const shapeRadius = (record) => (record.type === 'SUN' ? Math.min(Math.max(Math.tan(Math.min(record.angle, SUN_MAX_ANGLE) / 2), 0.001), 20)
+  : Math.max(0.001, record.shadow_soft_size));
 
 // What the other world does not show of a light, for Info when it is exported or saved: a Blender light as Babylon's,
 // a Babylon light as Blender's.
