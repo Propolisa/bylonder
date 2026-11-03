@@ -14,6 +14,8 @@ import { menuTree, menuLabel } from '../interface/ui-tree.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 import { createToolOverlay } from '../../draw/overlay-tool.js';
+import { fitCamera } from '../../blenkernel/scene/camera-fit.js';
+import { outputSize } from '../../blenkernel/scene/render.js';
 // Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
 // aligns to (the opposite view for its negative ball).
 const axes = [
@@ -220,6 +222,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const rendered = view.rendered;
     authored = null;
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
+    // Camera view frames the scene's output, as Blender fits the camera to it.
+    if (state.cameraView && world.renderSettings) fitCamera(view.camera, outputSize(world.renderSettings.state.render));
     ctx.overlays.setEnabled(state.overlays && !rendered, state);
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };

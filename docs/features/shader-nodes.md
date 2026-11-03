@@ -2,7 +2,7 @@
 id: shader-nodes
 title: Shader Nodes
 summary: Build a material from Blender's shader nodes in the Shader Editor, here a glowing lava on a sphere displaced by a Clouds texture.
-expect: 76 of Blender's shader nodes run; textures, converters and inputs run Blender's GLSL and match EEVEE pixel for pixel, while shaders are Babylon's PBR lighting, close to EEVEE but not equal; Material Preview uses Babylon's studio light.
+expect: 76 of Blender's shader nodes run; textures, converters and inputs run Blender's GLSL and match EEVEE pixel for pixel, while shaders are Babylon's PBR lighting, close to EEVEE but not equal; lights cast hard-edged shadows (area lights none); Material Preview uses Babylon's studio light.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/shader_editor.html
@@ -44,6 +44,7 @@ code:
   - src/nodes/blender/node-code.js
   - src/nodes/blender/glsl.js
   - src/draw/draw-view.js
+  - src/blenkernel/light/light-shadows.js
   - src/blenkernel/colortools.js
   - tools/blender-nodes/gpu.py
   - tools/blender-port/wasm/shader-node-api.cc
@@ -52,6 +53,7 @@ tests:
   - tests/nodes-gpu.test.js
   - tests/nodes.test.js
   - tests/draw-view.test.js
+  - tests/light-shadows.test.js
   - tests/textures-wasm.test.js
   - tests/e2e/lava.mjs
   - tests/e2e/smoke.mjs
@@ -71,6 +73,7 @@ limits:
   - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.1, max 3).
   - Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).
   - Blender's view transforms other than Standard are approximated by Babylon's tone mapping.
+  - Shadows have hard edges: a sun's angle and a light's soft size do not soften them yet (Shader Node Gallery floor tiles 21 to 24, mean dE 2.4 to 5.9, 99th percentile 18 to 48 at the edges). A light's shadow map (2048 texels a side, percentage closer filtered) covers every object that casts into it at once, so over a large scene shadows are coarser than EEVEE's virtual shadow maps. Area lights cast no shadows: Babylon's rectangular area light takes no shadow generator. A shadow map costs about 9 ms a frame at 2048 on a software renderer.
   - Material Preview lays blended surfaces over what is behind them in display space; Rendered shading and Render Image blend in scene linear, as EEVEE does.
   - A Transparent BSDF's color lets through its average, not each channel; Holdout draws black, not a hole in the film.
   - Light Path takes every ray as a camera ray; Ambient Occlusion finds no occlusion; Shader to RGB does not run.
@@ -114,23 +117,28 @@ The demo, Lava Sphere, is the result made in Blender by `lava.py`. The steps bel
    ![The finished tree](../media/features/shader-nodes/node-tree.png)
 
 The [Shader Node Gallery](https://propolisa.github.io/bylonder/#example=shader-gallery) example shows twenty materials of
-Blender's common nodes; the smoke test renders it and compares each sphere with EEVEE's render of the same file
+Blender's common nodes, and a floor four objects cast the sun's shadows on; the smoke test renders it and compares each sphere and floor tile with EEVEE's render of the same file
 (`tests/fixtures/shader-gallery-eevee.png`, Standard view transform), and
 `tools/blender-reference/shader-gallery-diff.py` measures each sphere's error in display space (CIE76 dE, mean and 99th
-percentile inside the sphere). Measured with Render Image at 256 by 320 (the aim: mean dE under 3 and 99th percentile under 10):
+percentile inside the sphere or over the tile). Measured with Render Image at 256 by 384 (the aim: mean dE under 3 and 99th percentile under 10):
 
-| Sphere | dE mean | dE 99% | Sphere | dE mean | dE 99% |
+| Tile | dE mean | dE 99% | Tile | dE mean | dE 99% |
 |---|---|---|---|---|---|
-| 1 Checker | 4.8 | 18.8 | 11 Principled | 2.3 | 4.4 |
-| 2 Voronoi | 1.9 | 16.0 | 12 Glossy | 2.7 | 4.1 |
-| 3 Wave | 2.8 | 15.5 | 13 Diffuse and Glossy mix | 1.7 | 2.9 |
-| 4 Brick | 8.9 | 33.9 | 14 Diffuse plus Emission | 0.7 | 1.3 |
-| 5 Magic | 1.6 | 5.9 | 15 Sheen | 1.9 | 3.6 |
-| 6 Gradient | 0.8 | 1.3 | 16 Normal Map | 4.2 | 14.5 |
-| 7 Geometry normal | 0.6 | 1.3 | 17 Two Glossy lobes | 3.4 | 14.4 |
-| 8 Fresnel | 0.8 | 1.4 | 18 Glass | 2.1 | 2.7 |
-| 9 Layer Weight | 2.8 | 4.2 | 19 Half transparent | 2.8 | 3.5 |
-| 10 White Noise | 1.7 | 10.6 | 20 Metallic Principled | 2.5 | 3.3 |
+| 1 Checker | 4.8 | 18.8 | 13 Diffuse and Glossy mix | 1.7 | 2.9 |
+| 2 Voronoi | 1.9 | 16.0 | 14 Diffuse plus Emission | 0.7 | 1.3 |
+| 3 Wave | 2.8 | 15.8 | 15 Sheen | 1.9 | 3.6 |
+| 4 Brick | 8.9 | 34.0 | 16 Normal Map | 4.1 | 14.5 |
+| 5 Magic | 1.6 | 6.0 | 17 Two Glossy lobes | 3.4 | 14.3 |
+| 6 Gradient | 0.8 | 1.3 | 18 Glass | 2.1 | 2.7 |
+| 7 Geometry normal | 0.6 | 1.3 | 19 Half transparent | 2.8 | 3.5 |
+| 8 Fresnel | 0.8 | 1.5 | 20 Metallic Principled | 2.5 | 3.3 |
+| 9 Layer Weight | 2.8 | 4.2 | 21 Cube shadow | 2.7 | 18.0 |
+| 10 White Noise | 1.6 | 10.6 | 22 Ball shadow | 3.8 | 36.8 |
+| 11 Principled | 2.3 | 4.4 | 23 Pole shadow | 2.4 | 20.3 |
+| 12 Glossy | 2.7 | 4.1 | 24 Ring shadow | 5.9 | 48.3 |
+
+Through the gallery's Perspective camera (`tests/fixtures/shader-gallery-perspective-eevee.png`), the band of the frame the
+floor fills measures mean dE 2.1, 99th percentile 23 (shadow edges).
 
 > **Note** The header's Babylon Editor toggle opens the same graph in Babylon's Node Material Editor; both editors
 > keep one layout.

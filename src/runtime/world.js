@@ -1,6 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { asObject } from "./object-transform.js";
 import "../draw/draw-view.js";
+import { createLightShadows } from "../blenkernel/light/light-shadows.js";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
 import { geometryNodesDefinition } from "../nodes/geometry-nodes.js";
 import { createCompositor } from "../compositor/compositor.js";
@@ -143,7 +144,9 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
     world.renderSettings.setRenderedCameras(renderedCameras);
     world.compositor?.bindCamera(compositorCamera);
   };
+  world.shadows = createLightShadows(scene);
   world.beforeViewRender = ({ rendered, compositor }) => {
+    world.shadows.setActive(rendered);
     world.compositor?.setViewportActive(compositor);
     // A rendered view draws in scene linear and displays through its camera's final post-process; the compositor's
     // graph displays what its own nodes draw.

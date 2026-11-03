@@ -19,6 +19,8 @@ import { modifierStack } from '../modifiers/stack.js';
 import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
+import { outputSize } from '../blenkernel/scene/render.js';
+import { cameraLens, sensorSize, setCameraLens } from '../blenkernel/scene/camera-fit.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
@@ -125,9 +127,9 @@ const objectChannel = (property) => (ob, index) => address('object:' + nodeId(ob
 const transformLocks = (property) => array((ob) => [...'xzy'].map((axis) => !!ob.metadata?.wbTransformLocks?.[property + '.' + axis]), (ob, value) => {
   ob.metadata = { ...ob.metadata, wbTransformLocks: { ...ob.metadata?.wbTransformLocks, ...Object.fromEntries(value.map((locked, i) => [property + '.' + 'xzy'[i], !!locked])) } };
 });
-// A camera's sensor along the fitted axis: Babylon fixes the horizontal or the vertical field of view.
-const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
-const sensor = (camera) => (horizontal(camera) ? 36 : 24);
+// A camera's lens setting (camera-fit.js), refitted to the scene's output size.
+const outputOf = (r) => (r.world.renderSettings ? outputSize(r.world.renderSettings.state.render) : { width: 1920, height: 1080 });
+const lensValue = (key) => ({ get: (camera) => cameraLens(camera)[key], set: (camera, value, r) => setCameraLens(camera, { [key]: value }, outputOf(r)), sync: true });
 const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
 const subframe = (world) => world.animation.time.frame - Math.floor(world.animation.time.frame);
 const notPBR = (material) => material.getClassName() !== 'PBRMaterial';
@@ -324,6 +326,8 @@ const STRUCTS = {
       if ('isPickable' in ob) ob.isPickable = !value;
     }, sync: true },
     hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; }, sync: true },
+    // Object > Visibility > Shadow: whether it casts shadows (light-shadows.js).
+    visible_shadow: { get: (ob) => ob.metadata?.wbVisibleShadow !== false, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbVisibleShadow: !!value }; }, sync: true },
     hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; }, sync: true },
     hide_get: (ob) => () => !ob.isEnabled(false),
     hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
@@ -509,14 +513,13 @@ const STRUCTS = {
   Camera: {
     name: settable('name'),
     type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; if (type === 'ORTHO') fitsOrthoScale(camera); }, sync: true },
-    // A horizontally fixed field of view is Blender's Auto fit for landscape output.
-    sensor_fit: { get: (camera) => (horizontal(camera) ? 'AUTO' : 'VERTICAL'), set: (camera, fit) => {
-      const lens = sensor(camera) / 2 / Math.tan(camera.fov / 2);
-      camera.fovMode = fit === 'VERTICAL' ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED;
-      camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens);
-    }, sync: true },
-    lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); }, sync: true },
-    angle: settable('fov'),
+    sensor_fit: lensValue('sensor_fit'),
+    sensor_width: lensValue('sensor_width'),
+    sensor_height: lensValue('sensor_height'),
+    lens: lensValue('lens'),
+    // rna_camera.cc rna_Camera_angle_get: the field of view along the fit's sensor side.
+    angle: { get: (camera) => { const l = cameraLens(camera); return 2 * Math.atan(sensorSize(l.sensor_fit, l.sensor_width, l.sensor_height) / 2 / l.lens); },
+      set: (camera, angle, r) => { const l = cameraLens(camera); setCameraLens(camera, { lens: sensorSize(l.sensor_fit, l.sensor_width, l.sensor_height) / 2 / Math.tan(angle / 2) }, outputOf(r)); } },
     ortho_scale: { get: (camera) => camera.metadata?.orthoScale ?? 6, set: (camera, scale) => { camera.metadata = { ...camera.metadata, orthoScale: scale }; }, sync: true },
     // How the lens is shown (millimeters or field of view), kept with the camera.
     lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; }, sync: true },
