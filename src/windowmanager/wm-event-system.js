@@ -11,7 +11,7 @@
 // past the drag threshold, where the mouse then is; `press` holds where the button went down and a CLICK_DRAG's
 // `direction` which way it left.
 import { keyType } from './input/keymap.js';
-import { isTouchGesture } from './input/wm-touch.js';
+import { isTouchGesture, isTouchControl } from './input/wm-touch.js';
 
 // U.drag_threshold_mouse, in pixels.
 export const WM_DRAG_THRESHOLD_MOUSE = 3;
@@ -137,6 +137,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   const keydown = (e) => accepts(e) && keyPress(e);
   const keyup = (e) => accepts(e) && keyRelease(e);
   const pointerdown = (e) => {
+    if (isTouchControl(e)) return;
     if (toBlender(e, 'buttondown', [ghostButton(e), 0, ...pen(e)])) { buttons++; return; }
     const view = viewAt(e);
     if (!view && !modal.length) return;
@@ -148,6 +149,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     if (handled) e.preventDefault();
   };
   const pointermove = (e) => {
+    if (isTouchControl(e)) return;
     mouse = { x: e.clientX, y: e.clientY };
     // A pen's moves between frames reach Blender each, for smooth strokes.
     if (e.pointerType === 'pen') for (const c of e.getCoalescedEvents?.().slice(0, -1) ?? []) toBlender(e, 'pointermove', [c.clientX, c.clientY, ...pen(c)]);
@@ -161,6 +163,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     dispatch(wmEvent(press.native, press.type, 'CLICK_DRAG', { view: press.view, press, x: e.clientX, y: e.clientY, direction }));
   };
   const pointerup = (e) => {
+    if (isTouchControl(e)) return;
     if (toBlender(e, 'buttonup', [ghostButton(e), 0, ...pen(e)])) { buttons = Math.max(0, buttons - 1); return; }
     buttons = 0;
     const type = BUTTONS[e.button], down = press?.type === type ? press : null;

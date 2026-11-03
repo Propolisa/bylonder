@@ -3,6 +3,8 @@
  *  being dragged) only once the pointer nears the edge of its area (the viewport itself, the window for a field), as
  *  Blender wraps the cursor there. Chromium's first move under a new lock jumps from the lock's origin (and synthetic
  *  input keeps doing so), so it is dropped. */
+import { isTouchControl } from "./input/wm-touch.js";
+
 const EDGE_PX = 16;
 
 // The window as an area: a number field's drag wraps at the window's edge.
@@ -51,7 +53,7 @@ export function createMouseCapture(notify) {
     }
   };
   const move = (event) => {
-    if (!session) return;
+    if (!session || isTouchControl(event)) return;
     const locked = document.pointerLockElement === session.element;
     if (locked && session.skip) { session.skip = false; return; }
     const dx = locked ? event.movementX : event.clientX - session.x;

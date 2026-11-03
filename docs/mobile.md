@@ -279,8 +279,8 @@ A one finger drag on a number field or slider would hide the value under the fin
 - **A readout** shows the property's name and live value, with its unit, outside the touch point: above the field, or
   below it when the field is near the top of the window, never under a finger. It mirrors the field's own text, so it
   shows exactly what the field shows.
-- **Soft modifier buttons** appear beside the control, Shift (fine) above it and Ctrl (snap) below it, held with a
-  second finger. Pressing one sends a real `left_shift` or `left_ctrl` press to the window and releasing it the
+- **Soft modifier buttons** appear on either side of the readout, Shift (fine) and Ctrl (snap), held with a second
+  finger; the row stays where the drag started, so a held button does not move. Pressing one sends a real `left_shift` or `left_ctrl` press to the window and releasing it the
   release, and the drag's pointer events carry the modifier, so the field's drag reads them as Blender's number button
   handling does (`ui_numedit_but_NUM`: Shift for precision, Ctrl for snapped increments). Releasing one mid drag goes
   back to normal speed from where the value is, as releasing the key does in Blender.

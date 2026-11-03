@@ -17,6 +17,9 @@ const clones = new WeakSet();
 const gestureWheels = new WeakSet();
 // Whether a wheel event is a touch gesture's, which the event system takes as the trackpad's whatever the Preferences.
 export const isTouchGesture = (event) => gestureWheels.has(event);
+// Whether a pointer event is a finger on the touch layer's own controls (the touch bar, a value drag's soft keys), which
+// are keys and buttons, not the mouse: every other touch reaches the page only as the adapter's mouse.
+export const isTouchControl = (event) => event.pointerType === 'touch' && !clones.has(event);
 
 const POINTER_FIELDS = ['pointerId', 'pointerType', 'isPrimary', 'clientX', 'clientY', 'screenX', 'screenY', 'width', 'height', 'pressure', 'tiltX', 'tiltY',
   'shiftKey', 'ctrlKey', 'altKey', 'metaKey', 'button', 'buttons'];

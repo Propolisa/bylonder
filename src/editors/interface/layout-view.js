@@ -52,7 +52,7 @@ const parseValue = (meta) => (text) => parseUnit(String(text).replace(/\s*(mm|W|
 const editValue = (meta) => (value) => (unitOf(meta) ? unitText(value, unitOf(meta)) : meta.type === 'I' ? String(value) : String(Number(value.toFixed(6))));
 
 // RNA_property_array_item_char: the letter of an array element.
-function itemChar(meta, i) {
+export function itemChar(meta, i) {
   if (['QUATERNION', 'AXISANGLE'].includes(meta.subtype)) return 'WXYZ'[i];
   if (['COLOR', 'COLOR_GAMMA'].includes(meta.subtype)) return 'RGBA'[i];
   if (['TRANSLATION', 'DIRECTION', 'XYZ', 'XYZ_LENGTH', 'EULER', 'VELOCITY', 'ACCELERATION', 'COORDINATES'].includes(meta.subtype)) return 'XYZW'[i];
@@ -292,7 +292,7 @@ function widgetOf(prop, node, { text, index = -1, disabled, inactive, ui }) {
         return colorSwatch({ value: value ?? [], disabled, inactive, title: meta.description || meta.name, onChange: (v, finish) => prop.set(v, finish) });
       }
       return h(NumberField, {
-        modelValue: element ?? 0, label: text ?? '', meta, disabled, inactive, class: W,
+        modelValue: element ?? 0, label: text ?? '', item: index >= 0 ? itemChar(meta, index) : '', meta, disabled, inactive, class: W,
         slider: !!node.slider || ['FACTOR', 'PERCENTAGE'].includes(meta.subtype),
         display: (v) => displayValue(meta, v), editText: editValue(meta), parse: parseValue(meta),
         'onUpdate:modelValue': (v) => setElement(v, false), onCommit: () => ui.undoPush(meta.name),
