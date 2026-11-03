@@ -74,6 +74,82 @@
   }
  },
  {
+  "id": "drivers-and-graph-editor",
+  "title": "Drivers and the Graph Editor",
+  "summary": "Shape animation as F-curves in the Graph Editor, repeat or shake them with F-curve modifiers, and drive one property from others with drivers, here a steam engine whose flywheel moves everything else.",
+  "expect": "F-curves, their modifiers and drivers are Blender's and evaluate as in Blender, simple expressions without Python; a driver's Python expression starts Python on first use, which takes a few seconds.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/fcurves/modifiers.html",
+   "https://docs.blender.org/manual/en/5.2/animation/drivers/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/animation/drivers/drivers_panel.html",
+   "https://docs.blender.org/manual/en/5.2/editors/drivers.html"
+  ],
+  "example": "drivers-and-graph-editor",
+  "thumbnail": "drivers-and-graph-editor/thumbnail.png",
+  "media": [
+   "drivers-and-graph-editor/play.gif",
+   "drivers-and-graph-editor/graph-editor.png",
+   "drivers-and-graph-editor/speed.gif",
+   "drivers-and-graph-editor/drivers.png",
+   "drivers-and-graph-editor/noise.png"
+  ],
+  "ui": [
+   "FCURVES",
+   "DRIVERS",
+   "VIEW_3D",
+   "GRAPH_HT_header",
+   "GRAPH_MT_key*",
+   "GRAPH_MT_select",
+   "GRAPH_MT_view",
+   "GRAPH_PT_properties",
+   "GRAPH_PT_key_properties",
+   "GRAPH_PT_modifiers",
+   "GRAPH_PT_drivers",
+   "GRAPH_PT_driven_property"
+  ],
+  "operators": [
+   "graph.view_all",
+   "graph.select_all",
+   "graph.select_box",
+   "graph.fmodifier_add",
+   "transform.translate",
+   "anim.driver_button_add",
+   "anim.driver_button_remove",
+   "screen.animation_play",
+   "ed.undo"
+  ],
+  "code": [
+   "src/editors/animation/anim-area.js",
+   "src/blenkernel/animation/anim-blender.js",
+   "src/blenkernel/main-sync.js"
+  ],
+  "tests": [
+   "tests/anim-wasm.test.js",
+   "tests/animation.test.js"
+  ],
+  "limits": [
+   "A driver whose expression needs Python (anything Blender's simple expression evaluator does not take) waits until Python has started, a few seconds after its first use.",
+   "The example's drivers and modifiers are made by its script; the steps show them and change a key rather than build them from nothing."
+  ],
+  "page": "docs/features/drivers-and-graph-editor.md",
+  "open": "https://propolisa.github.io/bylonder/#example=drivers-and-graph-editor",
+  "example_title": "Steam Engine",
+  "coverage": {
+   "operators": {
+    "supported": 70,
+    "partial": 1,
+    "total": 106
+   },
+   "ui": {
+    "supported": 10,
+    "partial": 0,
+    "total": 21
+   }
+  }
+ },
+ {
   "id": "geometry-node-editor",
   "title": "Geometry Node Editor",
   "summary": "Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.",
@@ -680,6 +756,89 @@
   }
  },
  {
+  "id": "mesh-modeling",
+  "title": "Mesh Modeling",
+  "summary": "Model a mesh in Edit Mode with Blender's own tools, Loop Cut, Inset, Extrude, Bevel, Knife, Bisect and Spin, here shaping a rangefinder camera.",
+  "expect": "Edit Mode's tools, their keys, modal options and gizmos are Blender's code and give Blender's result; picking elements under the pointer works as in X-ray, so hidden faces can be picked.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/edge/loopcut_slide.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/face/inset_faces.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/face/extrude_faces.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/edge/bevel.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/tools/knife.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/mesh/bisect.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/tools/spin.html"
+  ],
+  "example": "mesh-modeling",
+  "thumbnail": "mesh-modeling/thumbnail.png",
+  "media": [
+   "mesh-modeling/scale.gif",
+   "mesh-modeling/loop-cut.gif",
+   "mesh-modeling/inset-extrude.gif",
+   "mesh-modeling/bevel.gif",
+   "mesh-modeling/knife.gif",
+   "mesh-modeling/bisect.gif",
+   "mesh-modeling/lens.png",
+   "mesh-modeling/render.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "EDIT",
+   "VIEW3D_MT_edit_mesh*",
+   "builtin.loop_cut",
+   "builtin.inset_faces",
+   "builtin.extrude_region",
+   "builtin.bevel",
+   "builtin.knife",
+   "builtin.bisect",
+   "builtin.spin"
+  ],
+  "operators": [
+   "object.editmode_toggle",
+   "mesh.select_mode",
+   "mesh.select_all",
+   "transform.resize",
+   "mesh.loopcut_slide",
+   "mesh.inset",
+   "mesh.extrude_region_move",
+   "mesh.bevel",
+   "mesh.knife_tool",
+   "mesh.bisect",
+   "mesh.spin"
+  ],
+  "code": [
+   "src/editors/mesh/editmesh-mode.js",
+   "src/editors/mesh/editmesh-preselect-edgering.js",
+   "src/editors/object/edit-modes.js"
+  ],
+  "tests": [
+   "tests/editmesh-wasm.test.js",
+   "tests/editmode-main.test.js",
+   "tests/tools-wasm.test.js"
+  ],
+  "limits": [
+   "Clicking selects as in X-ray, the element nearest the pointer whether or not a face in front hides it.",
+   "The example's model is built by its script with the bmesh operators these tools run (bmesh.ops.inset_region, bevel, spin, bisect_plane), not by recorded tool use."
+  ],
+  "page": "docs/features/mesh-modeling.md",
+  "open": "https://propolisa.github.io/bylonder/#example=mesh-modeling",
+  "example_title": "Rangefinder Camera",
+  "coverage": {
+   "operators": {
+    "supported": 172,
+    "partial": 0,
+    "total": 199
+   },
+   "ui": {
+    "supported": 29,
+    "partial": 0,
+    "total": 32
+   }
+  }
+ },
+ {
   "id": "modifiers",
   "title": "Modifiers",
   "summary": "Add, edit and stack modifiers in Properties > Modifiers, here two Array modifiers that turn a cube into a floor of tiles.",
@@ -1043,6 +1202,86 @@
   }
  },
  {
+  "id": "rendering",
+  "title": "Rendering",
+  "summary": "Light a scene with Blender's lights and world and render it as EEVEE does, in Rendered shading and with Render Image, through Blender's camera.",
+  "expect": "Lights, shadows, the world's color, glass and anti-aliasing render close to EEVEE from Blender's own settings; reflections and refraction see only the world, not the room around them.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/render/eevee/index.html",
+   "https://docs.blender.org/manual/en/5.2/render/lights/light_object.html",
+   "https://docs.blender.org/manual/en/5.2/render/eevee/world_settings.html",
+   "https://docs.blender.org/manual/en/5.2/render/eevee/render_settings/sampling.html",
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/display/shading.html",
+   "https://docs.blender.org/manual/en/5.2/render/output/properties/format.html"
+  ],
+  "example": "rendering",
+  "thumbnail": "rendering/thumbnail.png",
+  "media": [
+   "rendering/shading.gif",
+   "rendering/sun-rotate.gif",
+   "rendering/cast-shadow.gif",
+   "rendering/fill-power.gif",
+   "rendering/world.png",
+   "rendering/glass.png",
+   "rendering/samples.png",
+   "rendering/render-image.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PROPERTIES",
+   "VIEW3D_PT_shading",
+   "DATA_PT_EEVEE_light*",
+   "DATA_PT_camera",
+   "EEVEE_MATERIAL_PT_surface",
+   "RENDER_PT_eevee_sampling*",
+   "RENDER_PT_format",
+   "RENDER_PT_color_management",
+   "TOPBAR_MT_render"
+  ],
+  "operators": [
+   "view3d.toggle_shading",
+   "view3d.view_camera",
+   "render.render",
+   "render.view_show"
+  ],
+  "code": [
+   "src/blenkernel/light/light-shadows.js",
+   "src/blenkernel/scene/world-babylon.js",
+   "src/blenkernel/scene/render-babylon.js",
+   "src/render/live.js",
+   "src/editors/render/host.js"
+  ],
+  "tests": [
+   "tests/light-shadows.test.js",
+   "tests/render.test.js",
+   "tests/view-transform.test.js"
+  ],
+  "limits": [
+   "Shadows are filtered by a fixed amount, as EEVEE's filter radius; a light's Angle or Radius widens its highlights but does not soften its shadows' edges.",
+   "Reflections and refraction show the world's color only; EEVEE's light probes (sphere, plane, volume) and screen space reflections are not drawn, so glass and metal do not reflect the room.",
+   "The world lights by its color or an environment image; a node tree on the world beyond the Background shader is not evaluated.",
+   "Glass refracts the world behind it, not the objects; a Transparent BSDF mixed in lets the objects through.",
+   "AgX and Filmic map to Babylon's filmic tone mapping, not Blender's curves, so colors differ from Blender under those view transforms; Standard matches.",
+   "The 3D Viewport's camera view frames tighter than the camera when the viewport's aspect differs from the render's; Render Image frames as Blender does."
+  ],
+  "page": "docs/features/rendering.md",
+  "open": "https://propolisa.github.io/bylonder/#example=rendering",
+  "example_title": "Window Light",
+  "coverage": {
+   "operators": {
+    "supported": 5,
+    "partial": 0,
+    "total": 6
+   },
+   "ui": {
+    "supported": 26,
+    "partial": 0,
+    "total": 26
+   }
+  }
+ },
+ {
   "id": "rigging",
   "title": "Rigging and Posing",
   "summary": "Pose an armature's bones in Pose Mode, select them with clicks, boxes, circles, lassos and L, key the pose with I, organize bones with bone collections and constraints, keep poses in the pose library's asset shelf, and paint a mesh's weights.",
@@ -1154,6 +1393,69 @@
     "supported": 92,
     "partial": 1,
     "total": 99
+   }
+  }
+ },
+ {
+  "id": "sculpting",
+  "title": "Sculpting",
+  "summary": "Sculpt a mesh in Sculpt Mode with Blender's brushes, Grab, Draw, Crease, Inflate and Smooth, each stroke one undo step, here on a ceramic owl.",
+  "expect": "Sculpt Mode, its brushes, their keys and strokes are Blender's code and move the mesh as Blender's do; dynamic topology and multiresolution sculpting are not set up in the steps.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/sculpting/introduction/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/sculpting/brushes/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/brush/index.html",
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/modes.html"
+  ],
+  "example": "sculpting",
+  "thumbnail": "sculpting/thumbnail.png",
+  "media": [
+   "sculpting/sculpt-mode.gif",
+   "sculpting/grab.gif",
+   "sculpting/draw.gif",
+   "sculpting/crease.gif",
+   "sculpting/inflate.gif",
+   "sculpting/smooth-undo.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "SCULPT",
+   "VIEW3D_MT_sculpt",
+   "VIEW3D_PT_tools_brush_settings",
+   "VIEW3D_PT_tools_brush_falloff",
+   "VIEW3D_PT_tools_brush_stroke"
+  ],
+  "operators": [
+   "object.mode_set",
+   "sculpt.brush_stroke",
+   "brush.asset_activate",
+   "ed.undo"
+  ],
+  "code": [
+   "src/editors/object/main-modes.js",
+   "src/editors/space_view3d/view3d-window.js"
+  ],
+  "tests": [
+   "tests/sculpt-wasm.test.js"
+  ],
+  "limits": [
+   "The owl's starting form is made by its script with brush-like falloffs (grab, draw, inflate and crease around points and along lines), not by recorded strokes.",
+   "Brushes are picked by their keys (V, G, C, Shift C, I, S); the brush asset shelf is not shown."
+  ],
+  "page": "docs/features/sculpting.md",
+  "open": "https://propolisa.github.io/bylonder/#example=sculpting",
+  "example_title": "Ceramic Owl",
+  "coverage": {
+   "operators": {
+    "supported": 52,
+    "partial": 1,
+    "total": 54
+   },
+   "ui": {
+    "supported": 19,
+    "partial": 0,
+    "total": 19
    }
   }
  },
@@ -1649,6 +1951,75 @@
     "supported": 23,
     "partial": 0,
     "total": 23
+   }
+  }
+ },
+ {
+  "id": "vertex-and-weight-paint",
+  "title": "Vertex and Weight Paint",
+  "summary": "Paint a mesh's color attribute in Vertex Paint and a vertex group's weights in Weight Paint, here the markings of two koi and the part of them a modifier swings.",
+  "expect": "Vertex Paint and Weight Paint, their brushes, strokes and overlays are Blender's code and paint as Blender does, one undo step per stroke; a material shows a color attribute through the Color Attribute node.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/vertex_paint/index.html",
+   "https://docs.blender.org/manual/en/5.2/sculpt_paint/weight_paint/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/properties/vertex_groups/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/modifiers/deform/simple_deform.html"
+  ],
+  "example": "vertex-and-weight-paint",
+  "thumbnail": "vertex-and-weight-paint/thumbnail.png",
+  "media": [
+   "vertex-and-weight-paint/vertex-paint.gif",
+   "vertex-and-weight-paint/attributes.png",
+   "vertex-and-weight-paint/weight-paint.gif",
+   "vertex-and-weight-paint/swim.gif",
+   "vertex-and-weight-paint/modifier.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PROPERTIES",
+   "VERTEX_PAINT",
+   "WEIGHT_PAINT",
+   "VIEW3D_MT_paint_vertex",
+   "VIEW3D_MT_paint_weight",
+   "DATA_PT_vertex_groups",
+   "DATA_PT_vertex_colors",
+   "VIEW3D_PT_tools_weightpaint_options"
+  ],
+  "operators": [
+   "object.mode_set",
+   "paint.vertex_paint",
+   "paint.weight_paint",
+   "paint.sample_color",
+   "object.vertex_group_add",
+   "geometry.color_attribute_add",
+   "object.modifier_add",
+   "screen.animation_play"
+  ],
+  "code": [
+   "src/editors/object/main-modes.js",
+   "src/editors/space_view3d/view3d-window.js"
+  ],
+  "tests": [
+   "tests/weight-paint-wasm.test.js",
+   "tests/texture-paint-wasm.test.js"
+  ],
+  "limits": [
+   "The example's markings and weights are written by its script from noise and the length of the fish, not painted by recorded strokes."
+  ],
+  "page": "docs/features/vertex-and-weight-paint.md",
+  "open": "https://propolisa.github.io/bylonder/#example=vertex-and-weight-paint",
+  "example_title": "Koi Pond",
+  "coverage": {
+   "operators": {
+    "supported": 15,
+    "partial": 0,
+    "total": 16
+   },
+   "ui": {
+    "supported": 5,
+    "partial": 0,
+    "total": 5
    }
   }
  }
