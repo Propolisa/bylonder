@@ -7,6 +7,7 @@
 import { Matrix, Camera } from '@babylonjs/core';
 import { jitter, jitterProjection, sampleTimes, createAccumulator } from './sampling.js';
 import { frameRate } from '../blenkernel/scene/time.js';
+import { filmJitter } from './film.js';
 
 export const frameMs = (frame, start, fps) => (frame - start + 1) * 1000 / fps;
 
@@ -59,6 +60,25 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
       resize(width, height);
     }
     const times = sampleTimes(frame, q.samples, q);
+    // A rendered camera's film (film.js) accumulates the samples in scene linear, filtered as EEVEE's; without one
+    // (a scene that renders through its own frame graph), they average as displayed.
+    const film = built().world.renderSettings.film?.(built().scene.activeCamera);
+    if (film) {
+      film.manual = true;
+      film.reset();
+      try {
+        for (let s = 0; s < q.samples; s++) {
+          const offset = filmJitter(s);
+          film.sample(offset);
+          await renderSample(times[s], offset, job);
+        }
+      } finally {
+        film.manual = false;
+      }
+      ctx.drawImage(canvas, 0, 0);
+      simulated = frame;
+      return out;
+    }
     accumulator?.reset();
     for (let s = 0; s < q.samples; s++) {
       await renderSample(times[s], jitter(s, q.samples), job);

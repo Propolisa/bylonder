@@ -11,7 +11,7 @@ export const renderDefaults = {
     // Post Processing > Sequencer: with strips in the edit, renders output the edit instead of the camera.
     useSequencer: true,
   },
-  eevee: { taaSamples: 1, taaRenderSamples: 16, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2 },
+  eevee: { taaSamples: 16, taaRenderSamples: 16, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2 },
   viewSettings: { viewTransform: 'STANDARD', look: 'NONE', exposure: 0 },
   displaySettings: { displayDevice: 'sRGB' },
 };
@@ -43,6 +43,8 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
     get renderedCameras() { return [...cameras]; },
     // Whether the view about to render draws in scene linear, its display transform a post-process. Cheap; per view.
     setSceneLinear: (value) => engine.setSceneLinear(value),
+    film: (camera) => engine.film(camera),
+    resetFilms: () => engine.resetFilms(),
     setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
     set(path, value, finish = true) {
       const { owner, key } = resolve(state, path);
