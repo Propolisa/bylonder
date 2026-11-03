@@ -7,6 +7,7 @@ const { exports: x } = blenderModule;
 
 export function createBlenderIDs(blender = blenderMain()) {
   const objects = new Map(); // key -> { ob, type }
+  const clearListeners = new Set();
   return {
     blender,
     get scene() { return blender.scene; },
@@ -42,8 +43,12 @@ export function createBlenderIDs(blender = blenderMain()) {
     },
     // Drops the object for a key that Blender's code freed (an Outliner delete).
     forget: (key) => objects.delete(key),
-    // Forgets every object, as Main was replaced (a project's .blend read).
-    clear: () => objects.clear(),
+    // Forgets every object, as Main was replaced (a .blend read freed them); onClear's listeners drop what they held of Main.
+    clear() {
+      objects.clear();
+      clearListeners.forEach((fn) => fn());
+    },
+    onClear: (fn) => clearListeners.add(fn),
     entries: () => [...objects].map(([key, { ob, type }]) => ({ key, ob, type })),
   };
 }

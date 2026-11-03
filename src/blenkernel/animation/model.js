@@ -43,6 +43,7 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
   const strings = new Map();
   let name = 'Action', evaluating = false, quiet = false, commit = () => {}, revision = 0, curves = null;
   const notify = () => { revision++; listeners.forEach(fn => fn()); };
+  ids.onClear(() => { curves = null; });
 
   // The channels with F-Curves or that may get them: registered, keyed or loaded.
   const known = new Set();
