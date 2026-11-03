@@ -595,6 +595,7 @@ const STRUCTS = {
     view_transform: { ...sliceValue('renderSettings', 'viewSettings.viewTransform'), items: choices(viewTransforms) },
     look: { ...sliceValue('renderSettings', 'viewSettings.look'), items: choices(looks, ([label]) => label) },
     exposure: synced(sliceValue('renderSettings', 'viewSettings.exposure')),
+    gamma: synced(sliceValue('renderSettings', 'viewSettings.gamma')),
   },
   ColorManagedDisplaySettings: {
     display_device: { get: () => 'sRGB', items: () => [['sRGB', 'sRGB', '', 'NONE']], sync: true },

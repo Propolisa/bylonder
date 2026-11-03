@@ -25,7 +25,7 @@ const { useCamera, renderFrame } = createFrameRenderer({ world: () => built, eng
 let sound = null;
 async function open(input, { width, height }, { camera: cameraName, audio } = {}) {
   resize(width, height);
-  engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false });
+  engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false, useExactSrgbConversions: true });
   engine.setHardwareScalingLevel(1);
   if (audio) sound = { ...audio, context: new OfflineAudioContext(2, Math.ceil(((audio.frameEnd - audio.frameStart + 1) / audio.fps) * audio.sampleRate), audio.sampleRate) };
   built = await createWorld({ input, engine, canvas, audioContext: sound?.context, hooks: { notify: text => warnings.push(String(text)) } });

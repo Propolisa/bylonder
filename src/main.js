@@ -181,7 +181,8 @@ viewportDock.setScreen(input.screen);
 const workCanvas = Object.assign(document.createElement("canvas"), { className: "engine-working-canvas" });
 workCanvas.setAttribute("aria-hidden", "true");
 document.body.append(workCanvas);
-const engine = new BABYLON.Engine(workCanvas, true, { stencil: true });
+// Exact sRGB, as Blender's display transform encodes it (Babylon approximates it with a 2.2 power by default).
+const engine = new BABYLON.Engine(workCanvas, true, { stencil: true, useExactSrgbConversions: true });
 applyRenderSettings(engine);
 let saveOverrides = () => {};
 let history;

@@ -1,6 +1,7 @@
 import { DefaultRenderingPipeline, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
 import { createFilm } from '../../render/film.js';
+import { createViewTransform, DISPLAY_PASS_VIEWS } from '../../render/view-transform.js';
 
 // Babylon adapter for render settings. The only code that writes scene.imageProcessingConfiguration
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
@@ -13,6 +14,9 @@ import { createFilm } from '../../render/film.js';
 // output transform, its Standard tone map a filmic curve.
 export const viewTransforms = {
   STANDARD: { label: 'Standard', ocioView: 'Standard', apply: ip => { ip.toneMappingEnabled = false; } },
+  // Blender's own, through its OCIO processor in Rendered views (render/view-transform.js); elsewhere Babylon's nearest.
+  AGX: { label: 'AgX', ocioView: 'AgX', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_STANDARD; } },
+  FILMIC: { label: 'Filmic', ocioView: 'Filmic', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_STANDARD; } },
   KHR_PBR_NEUTRAL: { label: 'Khronos PBR Neutral', ocioView: 'Khronos PBR Neutral', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_KHR_PBR_NEUTRAL; } },
   ACES: { label: 'ACES', ocioView: 'ACES 1.3', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES; } },
   BABYLON_STANDARD: { label: 'Babylon Standard', ocioView: 'Filmic', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_STANDARD; } },
@@ -47,11 +51,11 @@ export function createRenderEngine(scene) {
   });
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
-    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.film.dispose();
+    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.film.dispose(); e.view?.dispose();
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
-  let viewportSamples = 1;
+  let viewportSamples = 1, viewSettings = null;
   const build = (camera, settings) => {
     const e = settings.eevee, r = settings.render, effects = {};
     // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
@@ -65,6 +69,11 @@ export function createRenderEngine(scene) {
     if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true)), { useViewportInCombineStage: false });
     if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
     if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
+    // Blender's display pass last, in place of Babylon's image processing, for the views it draws.
+    if (DISPLAY_PASS_VIEWS.includes(settings.viewSettings.viewTransform)) {
+      effects.pipeline.imageProcessingEnabled = false;
+      effects.view = createViewTransform(scene, camera, () => viewSettings);
+    }
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
     return effects;
   };
@@ -72,6 +81,7 @@ export function createRenderEngine(scene) {
     // cameras: the cameras of rendered views (iterable). Called when settings or view shading change, not per frame.
     render(settings, { cameras = [] } = {}) {
       const ip = scene.imageProcessingConfiguration, view = settings.viewSettings;
+      viewSettings = view;
       viewTransforms[view.viewTransform].apply(ip);
       ip.exposure = 2 ** view.exposure;
       ip.contrast = looks[view.look][1];
@@ -79,7 +89,7 @@ export function createRenderEngine(scene) {
       viewportSamples = Math.max(1, Math.round(e.taaSamples));
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
       for (const camera of [...attached.keys()]) if (!wanted.has(camera)) drop(camera);
-      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
+      const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur, DISPLAY_PASS_VIEWS.includes(view.viewTransform)].join();
       for (const camera of wanted) {
         if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings) }); }
         const effects = attached.get(camera).effects;
