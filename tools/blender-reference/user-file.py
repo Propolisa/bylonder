@@ -1,6 +1,7 @@
 # Saves a typical user's .blend from Blender's startup scene: the Default Cube with a Bevel and a Subdivision Surface
 # modifier and a red Principled material, a second object in a collection of its own with an Array modifier, a sun,
-# a text object, the camera moved, and location keys on the cube.
+# a text object, the camera moved, location keys on the cube, and a light parented to a bone with Ctrl P (which keeps
+# a parent inverse).
 # usage: blender -b --factory-startup --python tools/blender-reference/user-file.py -- OUT.blend
 import bpy, sys
 
@@ -34,6 +35,21 @@ bpy.context.object.data.energy = 3
 bpy.ops.object.text_add(location=(-3, 0, 0))
 bpy.context.object.data.body = "Hello"
 bpy.data.objects["Camera"].location = (8, -7, 5)
+
+bpy.ops.object.armature_add(location=(4, 0, 0))
+rig = bpy.context.object
+rig.name = "Rig"
+bpy.ops.object.light_add(type="POINT", location=(4.5, -1, 1.5))
+lamp = bpy.context.object
+lamp.name = "Lamp"
+bpy.ops.object.select_all(action="DESELECT")
+lamp.select_set(True)
+rig.select_set(True)
+bpy.context.view_layer.objects.active = rig
+bpy.ops.object.mode_set(mode="POSE")
+rig.data.bones.active = rig.data.bones["Bone"]
+bpy.ops.object.parent_set(type="BONE")
+bpy.ops.object.mode_set(mode="OBJECT")
 
 cube.location = (0, 0, 0)
 cube.keyframe_insert("location", frame=1)

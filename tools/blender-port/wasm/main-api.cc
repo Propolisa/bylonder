@@ -509,12 +509,16 @@ EXPORT(object_mode_set) void object_mode_set(Object *ob, int mode)
   }
 }
 
-/* port-override: Bylonder's objects have no parent inverse, so it folds into the object's own transform, keeping its
- * world matrix (evaluated). */
+/* port-override: Bylonder's objects have no parent inverse, so it folds into the object's own transform: parent
+ * inverse times local, which keeps the world matrix whatever the parent (a bone too) and needs no evaluated matrix,
+ * which a file just read does not have. */
 EXPORT(object_parent_inverse_fold) void object_parent_inverse_fold(Object *ob)
 {
+  float local[4][4], folded[4][4];
+  BKE_object_to_mat4(ob, local);
+  mul_m4_m4m4(folded, ob->parentinv, local);
   unit_m4(ob->parentinv);
-  BKE_object_apply_mat4(ob, ob->object_to_world().ptr(), true, true);
+  BKE_object_apply_mat4(ob, folded, true, false);
   DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
 }
 

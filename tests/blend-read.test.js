@@ -130,9 +130,13 @@ else {
     const report = [];
     const user = await makeWorld(opening(readFileSync(file), report));
     assert.deepEqual(user.world.objects.map((n) => n.name).sort(), Object.keys(expected.objects).sort());
+    user.sync.flush();
     for (const [name, ob] of Object.entries(expected.objects)) {
       const node = user.world.objects.find((n) => n.name === name), r = rna(user.world).pointer('Object', node);
-      assert(close([...r.location], ob.location) && close([...r.scale], ob.scale), `${name} opens where Blender has it`);
+      // Where it draws and lights from: Main's evaluated matrix (a light's transformed position).
+      const world = node.computeTransformedInformation ? (node.computeTransformedInformation(), node.transformedPosition) : node.computeWorldMatrix(true).getTranslation();
+      assert(close([world.x, world.z, world.y], ob.world), `${name} opens where Blender has it: ${world} in Babylon's axes, ${ob.world} in Blender's`);
+      if (!ob.parent) assert(close([...r.location], ob.location) && close([...r.scale], ob.scale), `${name}'s location and scale`);
       // The same rotation in Bylonder's rotation order.
       const matrix = (n) => n.computeWorldMatrix(true).getRotationMatrix().asArray();
       assert(node.computeWorldMatrix(true) && matrix(node).every(Number.isFinite));
