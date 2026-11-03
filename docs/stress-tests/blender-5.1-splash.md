@@ -57,3 +57,24 @@ Nothing after reading could be seen yet. From the inventory, these are expected 
    module (`MEMORY64`, Chromium allows up to 16 GiB) and loading less (images decoded on first use, no undo copy of a
    read file).
 4. Then evaluate, draw and render it, fixing what fails in the order of the list above.
+
+## Smaller demo files
+
+Nineteen files from Blender's demo page (https://www.blender.org/download/demo-files/, direct links on
+`mirror.blender.org/demo/`), 0.1 to 69 MB, opened through File > Open. Seventeen open and draw. What broke and is
+fixed:
+
+- A scene without a camera left the 3D Viewport empty (Gizmo Array, Pizza Delivery, Radial Tiling).
+- A color or value linked straight into a shader input failed the material; it is an Emission of it, as in Blender
+  (Pasta Planet, Raycast Lines, the raymarch fractal).
+- Files compressed with gzip (Blender before 3.0) did not open (Bike Ride, Race Spaceship, Wasp Bot, Mr. Elephant).
+- Past 2 GiB of module memory, addresses read as negative numbers broke headers and menus (Cozy Kitchen, 3.5 splash).
+- Materials with several Material Outputs failed; the one EEVEE uses is drawn (Gaku, 4.0 splash; Race Spaceship; Bike
+  Ride).
+- A draw function missing from the module failed Pizza Delivery and Pasta Planet.
+
+Still open:
+
+- Wasp Bot and Mr. Elephant: the tab runs out of JavaScript memory after opening; the project store keeps binary data
+  as base64 text (the same cause as this file's File > Open failure).
+- Every file opens at a default view: the file's saved screens (view, shading, workspace) are not loaded.
