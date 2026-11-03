@@ -37,8 +37,14 @@ jobs:
           path: work/wasm-build
           key: blender-wasm-${{ matrix.shard }}-${{ github.sha }}
           restore-keys: blender-wasm-${{ matrix.shard }}-
+      # Blender's source at the manifest's tag with its LFS datafiles, kept between runs: its LFS server times out at times.
+      - uses: actions/cache@v4
+        with:
+          path: work/blender
+          key: blender-source-${{ hashFiles('tools/blender-port/manifest.json', 'tools/blender-port/wasm/patches/*.patch') }}
+      # A failed LFS pull leaves a clone the script would not pull again, so a retry starts from no clone.
       - name: Configure Blender
-        run: bash tools/blender-port/configure_host.sh work
+        run: for i in 1 2 3; do bash tools/blender-port/configure_host.sh work && exit 0; rm -rf work/blender; sleep 60; done; exit 1
       - name: Compile shard ${{ matrix.shard }}
         run: SHARD=${{ matrix.shard }}/$SHARDS python3 tools/blender-port/blender_build.py work/build-host
       - uses: actions/upload-artifact@v4
@@ -60,8 +66,14 @@ jobs:
           python-version: '3.13'
       - name: Tools
         run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
+      # Blender's source at the manifest's tag with its LFS datafiles, kept between runs: its LFS server times out at times.
+      - uses: actions/cache@v4
+        with:
+          path: work/blender
+          key: blender-source-${{ hashFiles('tools/blender-port/manifest.json', 'tools/blender-port/wasm/patches/*.patch') }}
+      # A failed LFS pull leaves a clone the script would not pull again, so a retry starts from no clone.
       - name: Configure Blender
-        run: bash tools/blender-port/configure_host.sh work
+        run: for i in 1 2 3; do bash tools/blender-port/configure_host.sh work && exit 0; rm -rf work/blender; sleep 60; done; exit 1
       - uses: actions/download-artifact@v4
         with:
           pattern: objects-*
