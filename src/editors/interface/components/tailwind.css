@@ -17,9 +17,9 @@
 /* shadcn-vue's semantic tokens, defined by Bylonder's theme tokens (src/theme.css). */
 @theme inline {
   --font-sans: var(--bl-font-family);
-  --text-xs: 11px;
+  --text-xs: calc(11px * var(--bl-ui-scale));
   --text-sm: var(--bl-font-size);
-  --text-base: 13px;
+  --text-base: calc(13px * var(--bl-ui-scale));
   --color-background: var(--bl-region);
   --color-header: var(--bl-header);
   --color-navigation-bar: var(--bl-navigation-bar);

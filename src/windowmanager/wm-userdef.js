@@ -45,6 +45,8 @@ export async function restorePreferences() {
     keys.forEach((path, i) => { files.set(path, values[i]); stored.set(path, values[i]); });
   } catch { /* Storage blocked: factory settings. */ }
 }
+// Whether this browser has saved Preferences, or Blender started from factory settings.
+export const savedPreferences = () => [...stored.keys()].some((path) => path.endsWith('/userpref.blend'));
 // The input settings the page's own event handling reads (wm-event-system.js), kept from the Preferences.
 let input = {};
 const readInput = ({ inputs }) => {
@@ -66,7 +68,7 @@ export function storePreferences() {
   if (!globalThis.indexedDB || (!changed.length && !removed.length)) return;
   changed.forEach(([path, bytes]) => stored.set(path, bytes));
   removed.forEach((path) => stored.delete(path));
-  transaction('readwrite', (store) => {
+  return transaction('readwrite', (store) => {
     changed.forEach(([path, bytes]) => store.put(bytes, path));
     removed.forEach((path) => store.delete(path));
   }).catch(() => {});
@@ -85,10 +87,16 @@ export function preferencesChanged() {
   listeners.forEach((fn) => fn(preferences()));
 }
 
+// Save Preferences: Blender's userpref.blend written, then kept in the browser.
+// Resolves once the browser keeps them.
+export function savePreferences() {
+  blenderMain().run('wm.save_userpref');
+  return storePreferences();
+}
 // As WM_exit: unsaved changes are saved when the preferences auto-save.
 function autoSave() {
   const prefs = preferences();
-  if (prefs.is_dirty && prefs.use_preferences_save) blenderMain().run('wm.save_userpref');
-  storePreferences();
+  if (prefs.is_dirty && prefs.use_preferences_save) savePreferences();
+  else storePreferences();
 }
 if (globalThis.addEventListener) addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') autoSave(); });

@@ -84,7 +84,7 @@ Status: partial
 The 3D View's navigation is Blender's operators (view3d.rotate, move, zoom, dolly, view_axis, view_persportho,
 view_selected, view_all, smooth view) on the area's RegionView3D; the editor camera follows it (`navigation.js`
 `follow`), so the Navigation preferences apply. The navigation gizmo invokes them as Blender's gizmo does
-(`wm_area_operator_invoke`) and touch gestures map onto trackpad events. Auto Depth has no depth buffer.
+(`wm_area_operator_invoke`) and touch gestures map onto trackpad events (docs/mobile.md). Auto Depth has no depth buffer.
 
 ## SEQUENCE_EDITOR > *
 The Video Sequencer and File Browser are KubeezCut islands. Their Blender identifiers live in the KubeezCut fork, which this scan does not read yet.

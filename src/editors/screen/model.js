@@ -1,8 +1,4 @@
-export const RUNTIME_LAYOUT_KEY = 'workbench:layout:viewport:v2';
-export function profile(width, height, coarse) {
-  if (!coarse && width >= 900) return 'desktop';
-  return width > height ? 'landscape' : 'portrait';
-}
+export const RUNTIME_LAYOUT_KEY = 'workbench:layout:viewport:v3';
 export function validateLayout(value, defaults, ids) {
   if (!value || !Array.isArray(value.order) || value.order.length > ids.length || !value.order.length || new Set(value.order).size !== value.order.length || value.order.some(id=>!ids.includes(id))) return structuredClone(defaults);
   const state = structuredClone(defaults);

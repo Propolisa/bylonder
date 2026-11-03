@@ -2,7 +2,6 @@
 .dock-root,.dock-shell,.dock-split-tree,.dock-focus-space{width:100%;height:100%;min-height:0}
 .dock-shell{display:flex;flex-direction:column}
 .dock-splits{flex:1;min-height:0;padding:2px}
-.dock-tabs{display:none}
 .dock-leaf{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;border-radius:var(--bl-radius);overflow:hidden}
 /* UI_HEADER_OFFSET at a header's ends; its first button is the editor type menu (ED_area_header_switchbutton, 1.6 units). */
 .dock-heading{position:relative;display:flex;align-items:center;gap:2px;height:var(--bl-header-h);flex-shrink:0;padding:0 calc(var(--bl-row)*.4);background:var(--bl-header);overflow:hidden}
@@ -10,9 +9,9 @@
 .dock-editor-type::after{content:'';position:absolute;right:calc(var(--bl-row)*.12);top:calc(50% - var(--bl-row)*.12);width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);background:currentColor;mask:var(--bl-chevron) center/contain no-repeat;color:var(--bl-wcol-menu-item)}
 .dock-editor-type:hover{background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .dock-header-host{flex:1;min-width:0;height:100%;display:flex}
-.dock-header-content{flex:1;min-width:0;display:flex;align-items:center;gap:2px;overflow:hidden}
+.dock-header-content{flex:1;min-width:0;display:flex;align-items:center;gap:2px}
 .dock-header-content>.spacer{flex:1}
-.dock-corner{position:absolute;right:0;top:0;width:12px;height:12px;cursor:crosshair;touch-action:none;background:linear-gradient(225deg,#ffffff18 0 30%,transparent 30%)}
+.dock-corner{position:absolute;right:0;top:0;width:12px;height:12px;cursor:crosshair;background:linear-gradient(225deg,#ffffff18 0 30%,transparent 30%)}
 .dock-corner:hover{background:linear-gradient(225deg,#ffffff50 0 40%,transparent 40%)}
 .dock-slot{flex:1;min-height:0;min-width:0;pointer-events:none}
 .dock-content{position:absolute;z-index:2;overflow:hidden;min-width:0;min-height:0;background:var(--bl-region);border-radius:0 0 var(--bl-radius) var(--bl-radius)}
@@ -21,7 +20,7 @@
 .dock-leaf.overlap>.dock-heading{z-index:3;padding-bottom:2px;background:var(--bl-view3d-header)}
 .dock-content>*{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;position:relative!important;inset:auto!important}
 .dock .splitpanes__pane{background:transparent;transition:none!important;overflow:hidden}
-.dock .splitpanes__splitter{background:var(--bl-gap);position:relative;z-index:8;touch-action:none}
+.dock .splitpanes__splitter{background:var(--bl-gap);position:relative;z-index:8}
 .dock .splitpanes--vertical>.splitpanes__splitter{width:3px;min-width:3px;cursor:ew-resize}
 .dock .splitpanes--horizontal>.splitpanes__splitter{height:3px;min-height:3px;cursor:ns-resize}
 .dock .splitpanes__splitter::before{content:'';position:absolute;inset:-3px;z-index:1}
@@ -41,22 +40,17 @@
 .dock-dialog select{margin-left:auto;max-width:65%;padding:3px;background:var(--bl-menu);color:inherit;border:1px solid var(--bl-widget-line);border-radius:var(--bl-radius)}
 .dock-dialog summary{padding:8px 0;cursor:pointer}
 .dock-dialog details{border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff14;margin:10px 0}
-@media(pointer:coarse){
-  .dock-splits{padding:0}
-  .dock-editor-type,.dock-corner{display:none}
-  .dock-leaf,.dock-content{border-radius:0}
-  .dock-tabs{display:flex;height:40px;min-height:40px;gap:0;align-items:center;padding:0;overflow-x:auto;background:var(--bl-topbar);border-bottom:1px solid var(--bl-gap)}
-  .dock-tabs>button{display:flex;align-items:center;gap:5px;flex-shrink:0;min-height:40px;padding:4px 10px;border:0;border-radius:0;background:transparent;color:var(--bl-text-dim);font:var(--bl-font);font-size:13px;white-space:nowrap}
-  .dock-tabs>button.active{background:var(--bl-header);color:var(--bl-text)}
-  .dock-tabs svg{flex-shrink:0}
-  .dock-tabs>.dock-layout-button{margin-left:auto}
-  .runtime-dock .dock-tabs>button:has(svg){min-width:36px;justify-content:center;padding:4px 7px}
-  .runtime-dock .dock-tabs>button:not(.active):has(svg) .dock-tab-label{display:none}
-  .runtime-dock .dock-tabs svg{width:18px;height:18px}
-  .dock .splitpanes--vertical>.splitpanes__splitter{width:8px;min-width:8px}
-  .dock .splitpanes--horizontal>.splitpanes__splitter{height:8px;min-height:8px}
-  .dock-dialog{position:fixed;inset:auto 0 0;width:100%;max-width:100%;max-height:80dvh;margin:0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:12px 12px 0 0}
-  .dock-dialog label{font-size:14px}.dock-dialog button,.dock-dialog select{min-height:40px;font-size:14px}
-}
 .dock-leaf.bare>.dock-heading{display:none}
+/* A folded area: a strip a header thick with its editors' icons, and its drawer over the neighbour (dock.js). */
+.dock-folded{position:relative;display:flex;width:100%;height:100%;min-width:0;min-height:0}
+.dock-folded.horizontal{flex-direction:column}
+.dock-fold-rest{flex:1;min-width:0;min-height:0}
+.dock-fold{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:calc(var(--bl-row)*.4);flex:0 0 var(--bl-header-h);padding:calc(var(--bl-row)*.3) 0;border:0;border-radius:var(--bl-radius);background:var(--bl-header);color:var(--bl-text);cursor:pointer}
+.dock-folded.horizontal>.dock-fold{flex-direction:row;padding:0 calc(var(--bl-row)*.3)}
+.dock-fold[aria-expanded=true]{background:var(--bl-wcol-tab-sel)}
+.dock-drawer-backdrop{position:absolute;inset:0;z-index:7}
+.dock-drawer{position:absolute;z-index:8;display:flex;background:var(--bl-gap);box-shadow:var(--bl-shadow-popup)}
+.dock-drawer.right{top:0;bottom:0;right:var(--bl-header-h)}.dock-drawer.left{top:0;bottom:0;left:var(--bl-header-h)}
+.dock-drawer.bottom{left:0;right:0;bottom:var(--bl-header-h)}.dock-drawer.top{left:0;right:0;top:var(--bl-header-h)}
+.dock-content.dock-in-drawer{z-index:9}
 .dock-leaf.no-header>.dock-heading{display:none}

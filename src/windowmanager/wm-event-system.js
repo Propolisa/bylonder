@@ -11,6 +11,7 @@
 // past the drag threshold, where the mouse then is; `press` holds where the button went down and a CLICK_DRAG's
 // `direction` which way it left.
 import { keyType } from './input/keymap.js';
+import { isTouchGesture } from './input/wm-touch.js';
 
 // U.drag_threshold_mouse, in pixels.
 export const WM_DRAG_THRESHOLD_MOUSE = 3;
@@ -125,18 +126,17 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
   }
   const keyEvent = (e) => ({ code: e.code, key: e.key, text: e.key?.length === 1 ? e.key : '' });
 
-  const keydown = (e) => {
-    if (!accepts(e)) return;
+  const keyPress = (e) => {
     if (toBlender(e, 'keydown', [e.repeat ? 1 : 0], keyEvent(e))) return;
     dispatch(wmEvent(e, keyType(e), 'PRESS', { repeat: e.repeat, view: viewAt(null) }));
   };
-  const keyup = (e) => {
-    if (!accepts(e)) return;
+  const keyRelease = (e) => {
     if (toBlender(e, 'keyup', [0], keyEvent(e))) return;
     if (modal.length) dispatch(wmEvent(e, keyType(e), 'RELEASE', { view: viewAt(null) }));
   };
+  const keydown = (e) => accepts(e) && keyPress(e);
+  const keyup = (e) => accepts(e) && keyRelease(e);
   const pointerdown = (e) => {
-    if (e.pointerType === 'touch') return;
     if (toBlender(e, 'buttondown', [ghostButton(e), 0, ...pen(e)])) { buttons++; return; }
     const view = viewAt(e);
     if (!view && !modal.length) return;
@@ -161,7 +161,6 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     dispatch(wmEvent(press.native, press.type, 'CLICK_DRAG', { view: press.view, press, x: e.clientX, y: e.clientY, direction }));
   };
   const pointerup = (e) => {
-    if (e.pointerType === 'touch') return;
     if (toBlender(e, 'buttonup', [ghostButton(e), 0, ...pen(e)])) { buttons = Math.max(0, buttons - 1); return; }
     buttons = 0;
     const type = BUTTONS[e.button], down = press?.type === type ? press : null;
@@ -170,7 +169,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     if (down) press = null;
   };
   const wheel = (e) => {
-    const pad = input().trackpad && trackpadGesture(e);
+    const pad = (input().trackpad || isTouchGesture(e)) && trackpadGesture(e);
     if (pad ? toBlender(e, 'trackpad', [pad.subtype, e.clientX, e.clientY, pad.dx, pad.dy, 0]) : toBlender(e, 'wheel', [0, e.deltaY < 0 ? 1 : -1])) {
       e.preventDefault();
       return;
@@ -193,6 +192,12 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     // The running modal handler: the page's, else Blender's window's operator.
     get modal() { return modal[0] ?? (blenderModal ? { blender: true } : null); },
     dispatch,
+    // A key the touch layer presses (its sticky modifiers, a shortcut tapped): { code, key, shiftKey, ctrlKey, altKey,
+    // metaKey } as a keyboard's, PRESS or RELEASE.
+    key(native, value) {
+      const e = { repeat: false, preventDefault() {}, ...native };
+      (value === 'PRESS' ? keyPress : keyRelease)(e);
+    },
     dispose() { for (const [name, fn, options] of listeners) removeEventListener(name, fn, { capture: true, ...options }); },
   };
 }

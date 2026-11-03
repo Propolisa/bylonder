@@ -58,7 +58,8 @@ export function createMouseCapture(notify) {
     const dy = locked ? event.movementY : event.clientY - session.y;
     session.x = event.clientX;
     session.y = event.clientY;
-    if (!locked && nearEdge(event, session.area)) lock();
+    // A finger has no pointer to keep at the edge.
+    if (!locked && event.pointerType !== "touch" && nearEdge(event, session.area)) lock();
     session.onMove(dx, dy, event);
   };
   const blur = () => {

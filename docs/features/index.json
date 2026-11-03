@@ -67,7 +67,7 @@
     "total": 140
    },
    "ui": {
-    "supported": 39,
+    "supported": 37,
     "partial": 0,
     "total": 43
    }
@@ -939,7 +939,7 @@
   "limits": [
    "NDOF devices are greyed out: Bylonder is built without NDOF input, so the Gamepad API is not read.",
    "Auto Depth has no depth buffer to read in the module; navigation centers as without it.",
-   "Interface settings the page draws itself (Resolution Scale, Line Width, fonts, pie menu timing, tooltips' Python) are greyed out until the page's interface follows them.",
+   "Interface settings the page draws itself (Line Width, fonts, pie menu timing, tooltips' Python) are greyed out until the page's interface follows them.",
    "Viewport quality settings (Anti-Aliasing, Texture Limit, Anisotropic Filtering, Clip Alpha) and Studio Lights are shown greyed out; Babylon's drawing does not take them yet.",
    "Theme colors that no design token stands for are greyed out. Reset to Default Theme gives Blender Dark; the theme presets menu (Blender Light) does not load its XML yet.",
    "Add-ons lists every add-on Blender 5.2 ships; only Bylonder's own and the Pose Library run in the app, the others are greyed out as not included. Installing add-ons from disk or online is greyed out.",
@@ -1479,6 +1479,76 @@
     "supported": 38,
     "partial": 0,
     "total": 40
+   }
+  }
+ },
+ {
+  "id": "mobile",
+  "title": "Touch and Pen",
+  "summary": "Blender's own screens, keymaps and operators on large phones and tablets, with gestures for navigation, press and hold for tooltips and right clicks, pinch to scale the interface and drawers for areas that do not fit.",
+  "expect": "Blender's screens, menus, tools and context menus work by touch on a large phone or a tablet; the UI stays dense (pinch over it to scale it), keys without a keyboard come later (the touch bar), and hover needs a pen.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/3dview/navigate/navigation.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/interface.html",
+   "https://docs.blender.org/manual/en/5.2/editors/preferences/keymap.html",
+   "https://docs.blender.org/manual/en/5.2/interface/window_system/areas.html"
+  ],
+  "example": "cube",
+  "thumbnail": "mobile/thumbnail.png",
+  "media": [
+   "mobile/layout.png",
+   "mobile/drawer.gif",
+   "mobile/navigate.gif",
+   "mobile/header.gif",
+   "mobile/hold.gif"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "PROPERTIES",
+   "OUTLINER",
+   "VIEW3D_HT_header",
+   "VIEW3D_MT_object_context_menu"
+  ],
+  "operators": [
+   "view3d.move",
+   "view3d.zoom",
+   "view3d.rotate",
+   "wm.call_menu",
+   "ed.undo",
+   "ed.redo"
+  ],
+  "code": [
+   "src/windowmanager/input/wm-touch.js",
+   "src/editors/interface/touch.js",
+   "src/editors/interface/components/ui/touch-hold/TouchHold.vue",
+   "src/editors/screen/dock.js",
+   "src/theme.css"
+  ],
+  "tests": [
+   "tests/touch.test.js",
+   "tests/e2e/touch.mjs"
+  ],
+  "limits": [
+   "Keys need a keyboard; a touch bar with sticky modifiers, shortcut bubbles and a keyboard sheet is not here yet.",
+   "Hover without a press (tool previews, Knife and Poly Build preselection) needs a pen; a finger has no hover.",
+   "Twisting two fingers does nothing; three fingers orbit.",
+   "A value dragged by a finger is under the finger; its readout above the finger is not here yet.",
+   "Areas swap and dock by mouse only (Ctrl drag from a corner); the long press on headers and edges is not here yet."
+  ],
+  "page": "docs/features/mobile.md",
+  "open": "https://propolisa.github.io/bylonder/#example=cube",
+  "example_title": "Default Cube",
+  "coverage": {
+   "operators": {
+    "supported": 6,
+    "partial": 0,
+    "total": 6
+   },
+   "ui": {
+    "supported": 1,
+    "partial": 0,
+    "total": 2
    }
   }
  },

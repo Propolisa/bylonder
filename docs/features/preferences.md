@@ -57,7 +57,7 @@ tests:
 limits:
   - NDOF devices are greyed out: Bylonder is built without NDOF input, so the Gamepad API is not read.
   - Auto Depth has no depth buffer to read in the module; navigation centers as without it.
-  - Interface settings the page draws itself (Resolution Scale, Line Width, fonts, pie menu timing, tooltips' Python) are greyed out until the page's interface follows them.
+  - Interface settings the page draws itself (Line Width, fonts, pie menu timing, tooltips' Python) are greyed out until the page's interface follows them.
   - Viewport quality settings (Anti-Aliasing, Texture Limit, Anisotropic Filtering, Clip Alpha) and Studio Lights are shown greyed out; Babylon's drawing does not take them yet.
   - Theme colors that no design token stands for are greyed out. Reset to Default Theme gives Blender Dark; the theme presets menu (Blender Light) does not load its XML yet.
   - Add-ons lists every add-on Blender 5.2 ships; only Bylonder's own and the Pose Library run in the app, the others are greyed out as not included. Installing add-ons from disk or online is greyed out.
@@ -106,7 +106,8 @@ The demo is the Default Cube; the steps below change Preferences over it.
    | Camera view | Numpad 0 | 0 (Emulate Numpad), or the camera button |
    | Frame selected | Numpad . | View > Frame Selected |
 
-   Touch screens map their gestures onto the same trackpad events: one finger orbits, two fingers pan and pinch.
+   Touch screens map their gestures onto the same trackpad events: two fingers pan and pinch, three fingers orbit
+   (see Touch and Pen).
 
 3. **Navigate as you prefer.** Navigation's Orbit Method (Turntable or Trackball), Orbit Around Selection, Auto
    Perspective, Zoom to Mouse Position and Invert Zoom Wheel apply to the 3D Viewport at once: its navigation is

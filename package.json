@@ -9,6 +9,7 @@
     "build": "node scripts/type-bundle.mjs && node scripts/mesh-schema.mjs && node scripts/graph-editor-classes.mjs && node scripts/source-archive.mjs && node --max-old-space-size=6144 node_modules/vite/bin/vite.js build",
     "test:e2e": "node tests/e2e/smoke.mjs",
     "test:prod": "node tests/e2e/prod.mjs",
+    "test:touch": "node tests/e2e/touch.mjs",
     "test:workflows": "node tests/e2e/workflows.mjs",
     "test": "node scripts/run-tests.mjs",
     "module": "node scripts/module.mjs",
