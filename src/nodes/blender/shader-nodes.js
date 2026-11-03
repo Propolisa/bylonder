@@ -1208,10 +1208,23 @@ export function nodeMaterialFromTree(name, scene, tree) {
   }
   for (const [from, output, to, input] of tree.links) {
     const source = blocks.get(from)?.getOutputByName(output), target = blocks.get(to)?.getInputByName(input);
-    if (source && target) source.connectTo(target);
+    if (!source || !target) continue;
+    const fromShader = isShaderSocket(blocks.get(from), output, 'outputs'), toShader = isShaderSocket(blocks.get(to), input, 'inputs');
+    if (fromShader === toShader) source.connectTo(target);
+    else if (toShader) implicitEmission(material, `${from} ${output} Emission`, source).connectTo(target);
   }
   buildMaterial(material);
   return { material, missing: [...missing] };
+}
+
+const isShaderSocket = (block, id, side) => block.declaration?.[side].find((s) => s.identifier === id)?.type === 'SHADER';
+// blender-port: nodes/shader/node_shader_tree.cc ntree_shader_implicit_closure_cast: data linked to a shader input is
+// an Emission of that color; a shader linked to a data input is no link.
+function implicitEmission(material, name, source) {
+  const emission = new shaderNodeClasses.ShaderNodeEmission(name);
+  material.attachedBlocks.push(emission);
+  source.connectTo(emission.getInputByName('Color'));
+  return emission.getOutputByName('Emission');
 }
 
 // Babylon drops a build asked for while one waits for its blocks' code, so the latest asks again once that one ends
