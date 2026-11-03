@@ -1,9 +1,9 @@
 // Records docs/features/mesh-modeling.md's media: on the Default Cube, Edit Mode's Scale, Loop Cut, Inset, Extrude,
 // Bevel and Bisect shaping a camera body; on the Rangefinder Camera example, the finished model's edges, its
-// lens spun from a profile, and its render.
+// lens spun from a profile, and its render (also the thumbnail).
 // usage: node tools/docs/record-mesh-modeling.mjs
 import { execFileSync } from "node:child_process";
-import { rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, rmSync, writeFileSync } from "node:fs";
 import { recorder } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]';
@@ -112,14 +112,12 @@ await session({ example: "mesh-modeling", node: "Camera Body" }, async (r) => {
   await isolate("Lens");
   await r.shot("lens", VIEW, CENTER);
   await leave();
-  await isolate("Camera Body");
-  await r.shot("thumbnail", VIEW, CENTER);
-  await leave();
   await r.page.click('[data-blender="TOPBAR_MT_render"]');
   await r.page.getByRole("menuitem", { name: "Render Image" }).click();
   await app.until(() => /^(Finished|Render failed)/.test(document.querySelector(".render-result [data-status]")?.textContent ?? ""), null, 600000);
   const png = await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"));
   writeFileSync(`${r.out}full.png`, Buffer.from(png.split(",")[1], "base64"));
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${r.out}full.png`, "-vf", "scale=800:-2:flags=lanczos", `${r.out}render.png`]);
+  copyFileSync(`${r.out}render.png`, `${r.out}thumbnail.png`);
   rmSync(`${r.out}full.png`);
 });

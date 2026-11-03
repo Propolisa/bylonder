@@ -16,7 +16,7 @@ scene = bpy.context.scene
 scene.render.resolution_x, scene.render.resolution_y = 1600, 1000
 scene.view_settings.view_transform = 'Standard'
 world = bpy.data.worlds.new('World')
-world.color = (0.18, 0.19, 0.21)
+world.color = (0.3, 0.31, 0.33)
 world.node_tree.nodes['Background'].inputs['Color'].default_value = (*world.color, 1)
 scene.world = world
 
@@ -44,7 +44,7 @@ CHROME = material('Chrome', (0.85, 0.85, 0.83), 0.18, Metallic=1.0)
 BLACK = material('Black Metal', (0.03, 0.03, 0.03), 0.35, Metallic=1.0)
 LEATHER = material('Leatherette', (0.03, 0.028, 0.026), 0.65)
 LENS = material('Lens Glass', (0.02, 0.03, 0.05), 0.02, Coat_Weight=1.0, Coat_Tint=(0.6, 0.75, 1.0, 1))
-DESK = material('Desk', (0.36, 0.2, 0.1), 0.4)
+DESK = material('Desk', (0.42, 0.4, 0.37), 0.5)
 FELT = material('Felt', (0.12, 0.22, 0.2), 0.95)
 
 
