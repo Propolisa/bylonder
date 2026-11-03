@@ -128,4 +128,13 @@ assert.equal(emission?.getInputByName('Color').connectedPoint?.ownerBlock.name, 
 assert.equal(implicit.attachedBlocks.find((b) => b.name === 'Material Output').getInputByName('Surface').connectedPoint?.ownerBlock, emission);
 assert.ok(!implicit.attachedBlocks.find((b) => b.name === 'Math').getInputByName('Value').isConnected);
 
+// Of several Material Outputs, the one EEVEE uses drives the material (ntreeShaderOutputNode): one for EEVEE before
+// one for all renderers, the active one among equals; one for Cycles never.
+const outputs = (specs) => nodeMaterialFromTree('Outputs', scene, { nodes: [{ idname: 'ShaderNodeEmission', name: 'Emission' },
+  ...specs.map(([name, target, active]) => ({ idname: 'ShaderNodeOutputMaterial', name, properties: { target, is_active_output: active } }))],
+  links: specs.map(([name]) => ['Emission', 'Emission', name, 'Surface']) }).material._fragmentOutputNodes.filter((b) => b.idname === 'ShaderNodeOutputMaterial').map((b) => b.name);
+assert.deepEqual(outputs([['Cycles', 'CYCLES', true], ['EEVEE', 'EEVEE', false]]), ['EEVEE']);
+assert.deepEqual(outputs([['All', 'ALL', true], ['EEVEE', 'EEVEE', false]]), ['EEVEE']);
+assert.deepEqual(outputs([['First', 'ALL', false], ['Active', 'ALL', true]]), ['Active']);
+
 console.log('nodes: ok');

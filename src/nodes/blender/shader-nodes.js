@@ -1231,7 +1231,7 @@ export const outputValues = (node) => Object.fromEntries((OUTPUT_VALUES[node.bl_
 // input]] }, as a read .blend's Main holds it) as a node material of the blocks for Blender's nodes, linked as in the
 // tree. Returns the material and the node types it has no block for, which it leaves out.
 export function nodeMaterialFromTree(name, scene, tree) {
-  const material = new NodeMaterial(name, scene), blocks = new Map(), missing = new Set();
+  const material = new NodeMaterial(name, scene), blocks = new Map(), missing = new Set(), output = eeveeOutput(tree.nodes);
   material.clear();
   for (const node of tree.nodes) {
     const Block = shaderNodeClasses[node.idname];
@@ -1240,7 +1240,7 @@ export function nodeMaterialFromTree(name, scene, tree) {
     Object.assign(block.properties, structuredClone(node.properties ?? {}));
     for (const [id, value] of Object.entries(node.values ?? {})) if (value !== null && id in block.values) block.values[id] = value;
     blocks.set(node.name, block);
-    if (block instanceof ShaderNodeOutputMaterial) block.attach(material);
+    if (node === output) block.attach(material);
     else material.attachedBlocks.push(block);
   }
   for (const [from, output, to, input] of tree.links) {
@@ -1254,6 +1254,17 @@ export function nodeMaterialFromTree(name, scene, tree) {
   return { material, missing: [...missing] };
 }
 
+// blender-port: nodes/shader/node_shader_tree.cc ntreeShaderOutputNode for SHD_OUTPUT_EEVEE: of the Material
+// Outputs, one for EEVEE before one for all renderers, the active one among equals, else the first.
+function eeveeOutput(nodes) {
+  let output = null;
+  for (const node of nodes.filter((n) => n.idname === 'ShaderNodeOutputMaterial')) {
+    const { target = 'ALL', is_active_output: active } = node.properties ?? {}, current = output?.properties?.target ?? 'ALL';
+    if (target !== 'ALL' && target !== 'EEVEE') continue;
+    if (!output || (target === 'EEVEE' && current === 'ALL') || (target === current && active && !output.properties?.is_active_output)) output = node;
+  }
+  return output;
+}
 const isShaderSocket = (block, id, side) => block.declaration?.[side].find((s) => s.identifier === id)?.type === 'SHADER';
 // blender-port: nodes/shader/node_shader_tree.cc ntree_shader_implicit_closure_cast: data linked to a shader input is
 // an Emission of that color; a shader linked to a data input is no link.
