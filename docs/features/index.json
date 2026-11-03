@@ -898,7 +898,7 @@
   "id": "nla",
   "title": "Nonlinear Animation",
   "summary": "Layer and mix actions as strips on tracks in Blender's Nonlinear Animation editor, with push down, tweak mode, strip blending, influence and repeats, evaluated by Blender's animation system.",
-  "expect": "Tracks, strips, push down, tweak mode and strip blending run Blender's code and evaluate as in Blender; sound strips and control curves are listed but not checked against Blender's drawing.",
+  "expect": "Tracks, strips, tweak mode and strip blending run Blender's code and evaluate as in Blender; the action line has no Push Down button, and sound strips and control curves are listed but not checked against Blender's drawing.",
   "blender_version": "5.2.3",
   "blender_manual": [
    "https://docs.blender.org/manual/en/5.2/editors/nla/index.html",
@@ -908,13 +908,12 @@
    "https://docs.blender.org/manual/en/5.2/editors/nla/sidebar.html",
    "https://docs.blender.org/manual/en/5.2/editors/nla/tweaking.html"
   ],
-  "example": "nla",
+  "example": "carousel",
   "thumbnail": "nla/thumbnail.png",
   "media": [
-   "nla/open.gif",
-   "nla/select.gif",
-   "nla/tweak.gif",
-   "nla/play.gif"
+   "nla/hop.gif",
+   "nla/carousel.gif",
+   "nla/strips.png"
   ],
   "ui": [
    "NLA_EDITOR",
@@ -940,6 +939,9 @@
    "nla.move_down",
    "nla.fmodifier_add",
    "transform.translate",
+   "object.location_clear",
+   "nla.view_all",
+   "anim.keyframe_insert",
    "screen.animation_play"
   ],
   "code": [
@@ -953,17 +955,18 @@
    "tests/nla-wasm.test.js"
   ],
   "limits": [
+   "The action line has no Push Down button; an action becomes a strip from Python (`nla_tracks.new`, `strips.new`).",
    "Strips of sound clips and NLA control curves are listed but their sounds and curves are not checked against Blender's drawing.",
    "Keyframe shapes on the action line are drawn without their extreme markers (the Dope Sheet's up and down arrows)."
   ],
   "page": "docs/features/nla.md",
-  "open": "https://propolisa.github.io/bylonder/#example=nla",
-  "example_title": "Nonlinear Animation",
+  "open": "https://propolisa.github.io/bylonder/#example=carousel",
+  "example_title": "Carousel",
   "coverage": {
    "operators": {
-    "supported": 59,
+    "supported": 61,
     "partial": 1,
-    "total": 70
+    "total": 72
    },
    "ui": {
     "supported": 15,
@@ -975,7 +978,7 @@
  {
   "id": "particle-hair",
   "title": "Particle Hair",
-  "summary": "A hair particle system on a mesh, shaped with the Comb brush in Particle Edit Mode and set up in Properties > Particles.",
+  "summary": "A hair particle system on a mesh, set up in Properties > Particles and shaped with the Comb brush in Particle Edit Mode, here the grass of a hill combed by the wind.",
   "expect": "Hair systems, children and Particle Edit Mode's brushes run Blender's code; hair UV and color attributes are not drawn.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -983,12 +986,13 @@
    "https://docs.blender.org/manual/en/5.2/physics/particles/mode.html",
    "https://docs.blender.org/manual/en/5.2/physics/particles/hair/children.html"
   ],
-  "example": "hair",
+  "example": "particle-hair",
   "thumbnail": "particle-hair/thumbnail.png",
   "media": [
    "particle-hair/particles.png",
    "particle-hair/particle-edit.gif",
-   "particle-hair/comb.gif"
+   "particle-hair/comb.gif",
+   "particle-hair/result.gif"
   ],
   "ui": [
    "VIEW_3D",
@@ -1016,8 +1020,8 @@
    "Overlays of hair have no selection ids, clipping or Blender's line anti-aliasing."
   ],
   "page": "docs/features/particle-hair.md",
-  "open": "https://propolisa.github.io/bylonder/#example=hair",
-  "example_title": "Combed Hair",
+  "open": "https://propolisa.github.io/bylonder/#example=particle-hair",
+  "example_title": "Grass Hill",
   "coverage": {
    "operators": {
     "supported": 9,

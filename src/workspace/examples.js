@@ -27,7 +27,7 @@ export const examples = [
   { id: "city", title: "Procedural City" },
   { id: "shader", title: "Shader Waves" },
   { id: "text", title: "3D Text" },
-  { id: "hair", title: "Combed Hair" },
+  { id: "particle-hair", title: "Grass Hill" },
   { id: "hair-dynamics", title: "Hair Dynamics" },
   { id: "geometry-nodes", title: "Geometry Nodes Meadow" },
   { id: "rigged-character", title: "Rigged Character" },
