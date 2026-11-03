@@ -18,7 +18,7 @@ scene.frame_start, scene.frame_end, scene.render.fps = 1, 96, 24
 scene.render.resolution_x, scene.render.resolution_y = 1600, 1000
 scene.view_settings.view_transform = 'Standard'
 world = bpy.data.worlds.new('World')
-world.color = (0.035, 0.032, 0.03)
+world.color = (0.09, 0.085, 0.08)
 world.node_tree.nodes['Background'].inputs['Color'].default_value = (*world.color, 1)
 scene.world = world
 
@@ -40,7 +40,7 @@ STEEL = material('Steel', (0.7, 0.72, 0.74), 0.22, 1.0)
 RED = material('Engine Red', (0.32, 0.03, 0.02), 0.35)
 WOOD = material('Plinth', (0.2, 0.09, 0.04), 0.45)
 DIAL = material('Dial', (0.85, 0.8, 0.68), 0.6)
-WALL = material('Wall', (0.09, 0.075, 0.06), 0.9)
+WALL = material('Wall', (0.3, 0.26, 0.22), 0.9)
 
 
 def add(op, name, ma, parent=None, smooth=True, **kwargs):
@@ -174,13 +174,13 @@ noise.scale, noise.strength = 6, 0.35
 # A back wall and the lights: a warm key from the front left, a cool rim from behind.
 box('Wall', WALL, (1.0, 2.2, 2.5), (12, 0.2, 5)).modifiers.clear()
 box('Floor', WALL, (1.0, 0, -0.05), (12, 8, 0.1)).modifiers.clear()
-key = bpy.data.objects.new('Key Light', bpy.data.lights.new('Key Light', 'SPOT'))
-key.data.energy, key.data.color, key.data.shadow_soft_size, key.data.spot_size = 1000, (1.0, 0.85, 0.65), 0.4, math.radians(60)
-key.location = (-1.5, -4.0, 4.0)
+key = bpy.data.objects.new('Key Light', bpy.data.lights.new('Key Light', 'AREA'))
+key.data.energy, key.data.color, key.data.size = 160, (1.0, 0.88, 0.72), 3.0
+key.location = (-0.5, -4.0, 3.5)
 key.rotation_euler = (Vector((1.6, 0, 1.0)) - key.location).to_track_quat('-Z', 'Y').to_euler()
 scene.collection.objects.link(key)
 rim = bpy.data.objects.new('Rim Light', bpy.data.lights.new('Rim Light', 'POINT'))
-rim.data.energy, rim.data.color, rim.data.shadow_soft_size = 400, (0.55, 0.7, 1.0), 0.5
+rim.data.energy, rim.data.color, rim.data.shadow_soft_size = 120, (0.6, 0.75, 1.0), 1.0
 rim.location = (3.5, 1.4, 3.0)
 scene.collection.objects.link(rim)
 
