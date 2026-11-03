@@ -46,6 +46,7 @@ code:
   - src/draw/draw-view.js
   - src/draw/eevee-parity.js
   - src/io_scene_babylon/node-material-export.js
+  - src/render/film.js
   - src/blenkernel/light/light-shadows.js
   - src/blenkernel/colortools.js
   - tools/blender-nodes/gpu.py
@@ -57,6 +58,7 @@ tests:
   - tests/draw-view.test.js
   - tests/eevee-parity-wasm.test.js
   - tests/export-node-material.test.js
+  - tests/render.test.js
   - tests/light-shadows.test.js
   - tests/node-material-base.test.js
   - tests/textures-wasm.test.js
@@ -76,7 +78,7 @@ limits:
   - A sun's angle and a light's soft size widen its highlights as Babylon widens them (the surface's roughness plus the radius over the distance), not by EEVEE's integration over the light's disk, and cast no soft shadows.
   - A world color lights as EEVEE's world probe; an environment image lights as Babylon's environment, filtered as Babylon filters it, not as EEVEE's sphere probe.
   - Glass and Refraction BSDF refract the world only, not the objects behind them (Glass, sphere 18, mean dE 2.1, max 3).
-  - Render Image anti-aliases with fewer samples than EEVEE's 64; texture edges and fine detail differ (Brick, sphere 4, mean dE 8.9, max 34).
+  - Render Image takes 16 samples by default where EEVEE's render takes 64, filtered as EEVEE's film filters them (Blackman-Harris, 1.5 pixels); the film costs about 19 ms a frame on a software renderer (gallery viewport, 101 to 120 ms). The film keeps no transparency: a render's background is opaque.
   - Blender's view transforms other than Standard are approximated by Babylon's tone mapping.
   - Shadows have hard edges: a sun's angle and a light's soft size do not soften them yet (Shader Node Gallery floor tiles 21 to 24, mean dE 2.4 to 5.9, 99th percentile 18 to 48 at the edges). A light's shadow map (2048 texels a side, percentage closer filtered) covers every object that casts into it at once, so over a large scene shadows are coarser than EEVEE's virtual shadow maps. Area lights cast no shadows: Babylon's rectangular area light takes no shadow generator. A shadow map costs about 9 ms a frame at 2048 on a software renderer.
   - Material Preview lays blended surfaces over what is behind them in display space; Rendered shading and Render Image blend in scene linear, as EEVEE does.
@@ -132,21 +134,21 @@ percentile inside the sphere or over the tile). Measured with Render Image at 25
 
 | Tile | dE mean | dE 99% | Tile | dE mean | dE 99% |
 |---|---|---|---|---|---|
-| 1 Checker | 4.8 | 18.8 | 13 Diffuse and Glossy mix | 1.7 | 2.9 |
-| 2 Voronoi | 1.9 | 16.0 | 14 Diffuse plus Emission | 0.7 | 1.3 |
-| 3 Wave | 2.8 | 15.8 | 15 Sheen | 1.9 | 3.6 |
-| 4 Brick | 8.9 | 34.0 | 16 Normal Map | 4.1 | 14.5 |
-| 5 Magic | 1.6 | 6.0 | 17 Two Glossy lobes | 3.4 | 14.3 |
-| 6 Gradient | 0.8 | 1.3 | 18 Glass | 2.1 | 2.7 |
-| 7 Geometry normal | 0.6 | 1.3 | 19 Half transparent | 2.8 | 3.5 |
-| 8 Fresnel | 0.8 | 1.5 | 20 Metallic Principled | 2.5 | 3.3 |
-| 9 Layer Weight | 2.8 | 4.2 | 21 Cube shadow | 2.7 | 18.0 |
-| 10 White Noise | 1.6 | 10.6 | 22 Ball shadow | 3.8 | 36.8 |
-| 11 Principled | 2.3 | 4.4 | 23 Pole shadow | 2.4 | 20.3 |
-| 12 Glossy | 2.7 | 4.1 | 24 Ring shadow | 5.9 | 48.3 |
+| 1 Checker | 1.3 | 5.6 | 13 Diffuse and Glossy mix | 1.7 | 2.8 |
+| 2 Voronoi | 0.9 | 3.6 | 14 Diffuse plus Emission | 0.8 | 1.4 |
+| 3 Wave | 1.1 | 3.2 | 15 Sheen | 1.9 | 3.5 |
+| 4 Brick | 0.9 | 4.5 | 16 Normal Map | 0.8 | 1.6 |
+| 5 Magic | 0.7 | 1.9 | 17 Two Glossy lobes | 3.2 | 14.3 |
+| 6 Gradient | 0.7 | 1.3 | 18 Glass | 2.0 | 2.3 |
+| 7 Geometry normal | 0.7 | 1.5 | 19 Half transparent | 2.8 | 3.4 |
+| 8 Fresnel | 0.8 | 1.3 | 20 Metallic Principled | 2.3 | 3.1 |
+| 9 Layer Weight | 2.5 | 4.0 | 21 Cube shadow | 2.0 | 18.4 |
+| 10 White Noise | 0.8 | 3.2 | 22 Ball shadow | 3.0 | 36.6 |
+| 11 Principled | 2.3 | 4.1 | 23 Pole shadow | 2.2 | 19.7 |
+| 12 Glossy | 2.4 | 4.0 | 24 Ring shadow | 5.1 | 47.2 |
 
 Through the gallery's Perspective camera (`tests/fixtures/shader-gallery-perspective-eevee.png`), the band of the frame the
-floor fills measures mean dE 2.1, 99th percentile 23 (shadow edges).
+floor fills measures mean dE 1.7, 99th percentile 26 (shadow edges).
 
 **EEVEE Parity.** Properties > Render > EEVEE Parity (on by default, marked with the Bylonder icon) turns on Bylonder's
 extensions of Babylon's materials that draw as EEVEE does: each reflection lobe lit on its own and an orthographic

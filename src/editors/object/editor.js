@@ -40,7 +40,6 @@ export function createEditor(world, views, history, changed, capture) {
     while (node?.parent?.metadata?.group && !node.parent.metadata.wbDeleted) node = node.parent;
     return node;
   };
-  const emitState = () => world.onEditorState?.({ mode, count: selection.size });
   const setMode = (value) => {
     mode = value;
     // The Transform tool shows all three.
@@ -67,7 +66,6 @@ export function createEditor(world, views, history, changed, capture) {
       });
       bound.add(g);
     }
-    emitState();
   };
   const select = (m, add = false) => {
     world.beforeSelection?.();

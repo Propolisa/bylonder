@@ -5,6 +5,7 @@ import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render
 import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
 import { installVirtualClock, seededRandom } from '../src/render/clock.js';
 import { halton, jitter, sampleTimes, jitterProjection, createAccumulator } from '../src/render/sampling.js';
+import { filmJitter } from '../src/render/film.js';
 
 // Output settings live in the render slice, shaped like Blender's scene.render.
 const engine = new NullEngine(), scene = new Scene(engine);
@@ -87,6 +88,8 @@ const ortho = Matrix.OrthoLH(4, 2, 0.1, 100);
 const jo = Matrix.FromArray(jitterProjection(Array.from(ortho.m), [1, 0], 100, 50, true));
 assert.ok(Math.abs(Vector3.TransformCoordinates(Vector3.Zero(), jo).x - 0.02) < 1e-6);
 
+// EEVEE's film jitters each sample within its pixel.
+assert.ok(Array.from({ length: 64 }, (_, i) => filmJitter(i)).every(([x, y]) => Math.abs(x) <= 0.5 && Math.abs(y) <= 0.5));
 // Accumulator averages in floating point.
 const acc = createAccumulator(1, 1);
 acc.add([0, 10, 255, 255]); acc.add([1, 11, 0, 255]);
@@ -111,6 +114,8 @@ acc.reset(); assert.equal(acc.count, 0);
   assert.equal(pipelinesOf(b).length, 2, 'the other view keeps its pipelines');
   assert.deepEqual(effectsOf(b), kept, 'and its post processes');
   assert.ok(!scene.prePassRenderer?.enabled, 'no scene-wide prepass');
+  assert.deepEqual(effectsOf(b).slice(0, 2).map((p) => p.name), ['__film', '__filmResolve'], "EEVEE's film first, in scene linear");
+  assert.ok(settings.film(b) && !settings.film(a), 'a rendered view has a film');
   settings.dispose();
   assert.deepEqual(effectsOf(b), []);
   scene.dispose(); engine.dispose();

@@ -1,12 +1,11 @@
 import { mapArea, removeArea, validAreaTree } from './area-tree.js';
-import { paneIcon } from './icons.js';
 import { icon } from '../interface/icons.js';
 import { openMenu as openPopup } from '../interface/menu.js';
 import { createApp, h, reactive, nextTick, watch, Teleport } from 'vue';
 import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
 import './dock.css';
-import { profile, validateLayout, swapSections, focusedSection } from './model.js';
+import { validateLayout, swapSections, focusedSection } from './model.js';
 
 // Pane sizes (percent of the panes, and pixels) of a split `size` px long whose first pane takes `share` of it, as
 // Blender places areas: the edge between them is a screen vertex at that share of the vertex range, rounded from the
@@ -30,28 +29,21 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const header=id=>{if(!headers.has(id))headers.set(id,Object.assign(document.createElement('div'),{className:'dock-header-content'}));return headers.get(id);};
   const baseCount=items.length,factories=new Map(),instances=new Map();
   const ids=items.map(item=>item.id), panels=new Map(), slots=new Map();
-  const coarse=matchMedia('(pointer:coarse)');
-  const currentProfile=()=>{
-    let width=innerWidth,height=innerHeight;
-    try{width=parent.innerWidth;height=parent.innerHeight;}catch{}
-    if(coarse.matches) return (screen.orientation?.type||'').startsWith('landscape')||(!screen.orientation&&screen.width>screen.height)?'landscape':'portrait';
-    return profile(width,height,false);
-  };
   let saved={}, menuElement, hovered=null, frameId, disposed=false;
   // The header's context menu (screen.region_context_menu), which the app gives (onHeaderMenu).
   let headerMenu=()=>{};
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({profile:currentProfile(),screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
+  const state=reactive({drawer:null,screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
   const screenOf=()=>screens[state.screen]??{tree:firstTree,defaults:firstDefaults};
-  const tree=()=>screenOf().tree,defaults=profile=>screenOf().defaults(profile);
-  // Each screen keeps its own layout per profile; the first screen's under the profile's name.
-  const key=()=>state.screen?state.screen+':'+state.profile:state.profile;
+  const tree=()=>screenOf().tree,defaults=()=>screenOf().defaults();
+  // Each screen keeps its own layout; the first screen's under 'main'.
+  const key=()=>state.screen??'main';
   const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
   for(const extra of extras)if(typeof extra.id==='string'&&extra.id.startsWith('area:')&&items.slice(0,baseCount).some(item=>item.id===extra.type)){
     const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,overlap:original.overlap,blenderHeader:original.blenderHeader,element});ids.push(extra.id);
   }
   const load=()=>{
-    const initial=defaults(state.profile);initial.order=[...initial.order,...ids.slice(baseCount)];initial.hidden=[...initial.hidden,...ids.slice(baseCount)];
+    const initial=defaults();initial.order=[...initial.order,...ids.slice(baseCount)];initial.hidden=[...initial.hidden,...ids.slice(baseCount)];
     const stored=saved[key()];
     state.layout=validateLayout(stored,initial,ids);
     state.tree=validAreaTree(stored?.tree,ids.length)?stored.tree:structuredClone(tree());
@@ -82,6 +74,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
       if(panel.hidden)continue;
       const overlap=!focused&&items.find(item=>item.id===id)?.overlap;
       panel.classList.toggle('dock-overlap',!!overlap);
+      panel.classList.toggle('dock-in-drawer',!!element.closest('.dock-drawer'));
       const rect=(overlap?element.parentElement:element).getBoundingClientRect();
       Object.assign(panel.style,{left:rect.left-base.left+'px',top:rect.top-base.top+'px',width:Math.max(0,rect.width)+'px',height:Math.max(0,rect.height)+'px'});
     }
@@ -114,7 +107,7 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const closeMenu=()=>menuElement?.close();
   const openMenu=()=>{if(!menuElement.open)menuElement.showModal();};
   const reset=()=>{
-    saved={remember:state.remember};state.layout=structuredClone(defaults(state.profile));state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree());state.focus=defaultFocus;
+    saved={remember:state.remember};state.layout=structuredClone(defaults());state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree());state.focus=defaultFocus;
     persist();closeMenu();host.dispatchEvent(new CustomEvent('dock-reset',{bubbles:true}));
   };
   const button=(label,fn,title,attrs={})=>h('button',{type:'button',onClick:fn,title,...attrs},label);
@@ -139,9 +132,47 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     const live=node.children.map(hasVisible),available=live.some(Boolean)?live:[true,true],horizontal=state.layout.horizontal[node.id];
     const areas=extent&&live.every(Boolean)?areaSizes(state.layout.sizes[node.id],horizontal?extent.height:extent.width,horizontal,extent.top):null;
     const childExtent=i=>areas&&(horizontal?{...extent,height:areas.pixels[i],top:extent.top&&i===0}:{...extent,width:areas.pixels[i]});
+    const fold=areas&&folded(node,areas.pixels,horizontal);
+    if(fold!==null&&fold!==undefined)return renderFolded(node,fold,horizontal,extent);
     return h(Splitpanes,{horizontal,maximizePanes:false,pushOtherPanes:false,onResize:schedule,onResized:event=>{
       if(live.every(Boolean)){state.layout.sizes[node.id]=event.panes.map(p=>Math.max(1,p.size));persist();}
     }},{default:()=>node.children.map((child,i)=>h(Pane,{key:i,size:available[i]?(available[1-i]?(areas?.percent??state.layout.sizes[node.id])[i]:100):0,minSize:available[i]&&available[1-i]?minSize(horizontal):0,maxSize:available[i]?100:0,class:{'dock-collapsed':!live[i]}},{default:()=>renderNode(child,childExtent(i))}))});
+  }
+  // Folding (docs/mobile.md Layout): a split's area smaller than Blender's minimum for it, which scales with Resolution
+  // Scale, shows as a strip on the split's edge, and opens from there as a drawer over its neighbour. An area's minimum
+  // width is the width Blender gives panels (UI_SIDEBAR_PANEL_WIDTH, 11 widget units), its height its header and one
+  // more; a split's adds or takes the most of its areas'.
+  const token=name=>parseFloat(getComputedStyle(host).getPropertyValue(name));
+  const minimum=(node,horizontal)=>{
+    if(typeof node==='number')return horizontal?2*token('--bl-header-h'):11*token('--bl-row');
+    const shown=node.children.filter(hasVisible).map(child=>minimum(child,horizontal));
+    return state.layout.horizontal[node.id]===horizontal?shown.reduce((a,b)=>a+b,0):Math.max(0,...shown);
+  };
+  // The child of a split that folds: the smaller one under its minimum, while the other fits.
+  const folded=(node,pixels,horizontal)=>{
+    const short=pixels.map((size,i)=>size<minimum(node.children[i],horizontal));
+    if(!short.some(Boolean))return null;
+    const i=short.every(Boolean)?(pixels[0]<pixels[1]?0:1):short.indexOf(true);
+    return i;
+  };
+  const leaves=node=>typeof node==='number'?(visible(node)?[node]:[]):node.children.flatMap(leaves);
+  const itemOf=slot=>items.find(item=>item.id===state.layout.order[slot]);
+  // The drawer's size: the area's share of startup.blend's 1920 x 1080 window at Resolution Scale, within the split.
+  const drawerSize=(node,i,horizontal,total)=>{
+    const [a,b]=state.layout.sizes[node.id],share=(i?b:a)/(a+b),reference=(horizontal?1080:1920)*token('--bl-row')/20;
+    return Math.min(0.9*total,Math.max(minimum(node.children[i],horizontal),share*reference));
+  };
+  function renderFolded(node,i,horizontal,extent){
+    const child=node.children[i],other=node.children[1-i],open=state.drawer===node.id,strip=token('--bl-header-h');
+    const total=horizontal?extent.height:extent.width,size=drawerSize(node,i,horizontal,total);
+    const titles=leaves(child).map(slot=>itemOf(slot)?.title).join(', ');
+    const handle=h('button',{type:'button',class:'dock-fold','aria-label':titles,'aria-expanded':open,title:titles,onClick:()=>{state.drawer=open?null:node.id;}},
+      leaves(child).map(slot=>icon(itemOf(slot)?.icon||'properties')));
+    const rest=h('div',{class:'dock-fold-rest'},[renderNode(other,horizontal?{...extent,height:total-strip}:{...extent,width:total-strip})]);
+    const side=horizontal?(i?'bottom':'top'):(i?'right':'left');
+    const drawer=open?[h('div',{class:'dock-drawer-backdrop',onPointerdown:()=>{state.drawer=null;}}),
+      h('div',{class:['dock-drawer',side],style:{[horizontal?'height':'width']:size+'px'}},[renderNode(child,horizontal?{...extent,height:size}:{...extent,width:size})])]:[];
+    return h('div',{class:['dock-folded',horizontal?'horizontal':'vertical']},i?[rest,handle,...drawer]:[handle,rest,...drawer]);
   }
   const setFactory=(type,factory)=>{factories.set(type,factory);state.factoryCount=factories.size;for(const item of items)if(item.type===type&&!instances.has(item.id))instances.set(item.id,factory(item.element,item.id));};
   const split=(slot,horizontal)=>{
@@ -176,10 +207,6 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const app=createApp({setup(){
     watch(()=>JSON.stringify([state.layout,state.focus]),()=>nextTick(position),{flush:'post'});
     return ()=>h('div',{class:'dock-shell'},[
-      h('nav',{class:'dock-tabs','aria-label':'Workspace sections'},[
-        ...items.map(item=>button([paneIcon(item.id),h('span',{class:'dock-tab-label'},item.title)],()=>show(item.id,true),item.title+' · Focus pane; use Layout for split view',{'aria-label':item.title,class:{active:focus()?focus()===item.id:!state.layout.hidden.includes(item.id)},'aria-pressed':focus()?focus()===item.id:!state.layout.hidden.includes(item.id)})),
-        button('Layout',openMenu,'Arrange panels',{class:'dock-layout-button'})
-      ]),
       h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'},bareFocus?[]:[renderNode(state.layout.order.indexOf(focus()))]):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree',ref:el=>el&&observer.observe(el)},[renderNode(state.tree)])),
       h(Teleport,{to:document.body},[h('dialog',{class:'dock-dialog',ref:el=>menuElement=el,onClick:e=>{if(e.target===menuElement)closeMenu();}},[
         h('div',{class:'dock-dialog-title'},[h('strong','Workspace Layout'),button('×',closeMenu,'Close layout')]),
@@ -195,8 +222,6 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     ]);
   }});
   app.mount(root);nextTick(position);
-  const resize=()=>{const next=currentProfile();if(next!==state.profile){persist();state.profile=next;load();}nextTick(position);};
-  window.addEventListener('resize',resize);coarse.addEventListener('change',resize);
   const keyboard=event=>{if((event.ctrlKey||event.metaKey)&&event.code==='Space'&&hovered!==null){event.preventDefault();event.stopPropagation();const id=state.layout.order[hovered];state.focus=state.focus===id?null:id;persist();}};
   host.addEventListener('keydown',keyboard,true);
   host.addEventListener('pointerover',event=>{const panel=event.target.closest('.dock-content');if(panel)hovered=state.layout.order.indexOf(panel.dataset.section);});
@@ -205,5 +230,5 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
   // Blender's workspace switch: another screen over the same areas.
   const setScreen=name=>{const next=name in screens?name:null;if(next===state.screen)return;persist();state.screen=next;load();persist();};
-  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get profile(){return state.profile;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('resize',resize);coarse.removeEventListener('change',resize);window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
 }

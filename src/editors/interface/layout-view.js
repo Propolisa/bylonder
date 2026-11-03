@@ -404,7 +404,7 @@ function propEnum(node, env) {
   if (!prop) return null;
   const item = enumItem(prop.items(), node.value);
   return button({ text: node.text ?? item?.[1] ?? node.value, iconName: node.icon ?? item?.[3], kind: 'radio', pressed: prop.get() === node.value,
-    disabled: !env.enabled, inactive: !env.active || !prop.bound, onClick: () => prop.set(node.value), className: 'flex-1' });
+    title: item?.[2] || item?.[1], disabled: !env.enabled, inactive: !env.active || !prop.bound, onClick: () => prop.set(node.value), className: 'flex-1' });
 }
 
 // The Properties editor's tabs (prop_tabs_enum): icons in a column, gaps between groups.

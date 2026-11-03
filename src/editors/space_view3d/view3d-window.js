@@ -113,20 +113,10 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
     return result;
   }
 
-  // A touch gesture as a trackpad's (GHOST's trackpad events: a drag orbits, with Shift it pans, a pinch magnifies),
-  // which Blender's 3D View keymap navigates by: { dx, dy, magnify, shift } at the pointer { x, y }.
-  const SHIFT = { code: 'ShiftLeft', key: 'Shift' };
-  function trackpad(view, { x, y, dx, dy = 0, magnify = false, shift = false }) {
-    if (shift) send('keydown', [0], SHIFT, view);
-    send('trackpad', [magnify ? 4 : 1, x, y, dx, dy, 0], {}, view);
-    if (shift) send('keyup', [0], SHIFT, view);
-  }
-
   return {
-    takes: (native, view) => running || (takes() && !!view && native.pointerType !== 'touch'),
+    takes: (native, view) => running || (takes() && !!view),
     send,
     invoke,
-    trackpad,
     // A view's area, laid out from its elements (its header, tool header and sidebar are view.regions').
     area,
     pressHandled: () => window.pressHandled(),

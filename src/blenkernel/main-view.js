@@ -416,7 +416,11 @@ export function createMainView(state) {
     } finally {
       state.applying = was;
     }
-    if (updates.size) state.evaluated();
+    if (updates.size) {
+      // Rendered views accumulate their samples again (render/film.js), as EEVEE's viewport does after an update.
+      world.renderSettings?.resetFilms?.();
+      state.evaluated();
+    }
   }
   // What objects draw as instances (main-api.cc main_instances), as Blender's draw engines draw them, each group as
   // thin instances on a mesh of the view's own sharing its shape's geometry: an instanced object's at their world

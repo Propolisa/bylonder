@@ -23,6 +23,7 @@ import { publishRun, removeRun, APP_BASE } from "./module-host";
 import { sceneList, activeSceneId, setSceneData, switchScene, addScene, renameScene, removeScene, storedScenes } from "./scenes.js";
 import { menuButton } from "../editors/interface/menu.js";
 import { iconButton } from "../editors/interface/icon.js";
+import { mountTouch, showScale } from "../editors/interface/touch.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 performance.mark("bl:workspace-imported");
 await preloadIcons();
@@ -30,6 +31,12 @@ await preloadIcons();
 const reveal = () => document.body.classList.remove("bl-loading");
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
+// Touch in the topbar (docs/mobile.md): a pinch scales the UI as over the scene's, whose window keeps the Preferences.
+mountTouch(window, { scale: {
+  get: () => Number(getComputedStyle(document.documentElement).getPropertyValue("--bl-ui-scale")) || 1,
+  preview: (value) => showScale([document, frame?.contentDocument], value),
+  commit: (value) => frame?.contentWindow.postMessage({ channel, type: "ui-scale", payload: value }, location.origin),
+} });
 const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), resetApp: () => resetApp(() => { dirty = false; clearTimeout(saveTimer); document.querySelectorAll("iframe").forEach((f) => f.remove()); }), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin), sceneTopbar: () => frame?.contentWindow?.__bylonder?.topbar });
 let repo,
   project,
@@ -327,7 +334,7 @@ function renderTree() {
     button.title =
       path + (path === "index.js" ? " (required entry point)" : "");
     button.onclick = () => {
-      if (!folder) { openFile(path); dock.show("code", dock.profile === "portrait"); }
+      if (!folder) { openFile(path); dock.show("code"); }
     };
     row.append(button);
     for (const [text, title, fn] of [
@@ -825,7 +832,7 @@ const sharing = setupSharing({
     await save();
     const created = await repo.create(payload.name + ' shared', payload.files, {folders:payload.folders,settings:payload.settings,animation:payload.animation,overrides:payload.overrides,...(payload.scenes&&{scenes:payload.scenes,scene:payload.scene})});
     await load(created.id, false);
-    dock.show('code', dock.profile === 'portrait');
+    dock.show('code');
     log('Shared project imported. Review index.js, then press Run.');
   }
 });

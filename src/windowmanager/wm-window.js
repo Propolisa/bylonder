@@ -73,6 +73,15 @@ export function keyconfigUpdated(C) {
   x.wm_keyconfig_update(C);
   keymapsChanged();
 }
+// The active key configuration's preferences (Preferences > Keymap, its Prefs), its keymaps made again with them.
+export function setKeyconfigPreferences(C, values) {
+  const name = inContext(C, (context) => {
+    const keyconfig = context.window_manager.keyconfigs.active;
+    Object.assign(keyconfig.preferences, values);
+    return keyconfig.name;
+  });
+  keyconfigSet(C, name);
+}
 // Blender's keymaps and the operators Bylonder runs as Blender's, once, when Blender's window first takes an event
 // (Blender's Python, the keyconfig, is loaded by then).
 let configured = null;

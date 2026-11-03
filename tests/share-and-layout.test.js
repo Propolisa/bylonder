@@ -1,15 +1,7 @@
 import assert from 'node:assert/strict';
 import { gzipSync } from 'fflate';
-import { createTouchSession } from '../src/windowmanager/input/touch-session.js';
 import { encodeProject, decodeProject } from '../src/workspace/share-codec.js';
 import { validateLayout, swapSections, focusedSection } from '../src/editors/screen/model.js';
-let taps=0,starts=[],moves=[],ends=[];
-const touch=createTouchSession({tap:()=>taps++,start:p=>starts.push(p.count),move:p=>moves.push(p),end:cancel=>ends.push(cancel)});
-touch.down(1,{x:10,y:10});touch.move(1,{x:12,y:10});touch.up(1,{x:12,y:10});assert.equal(taps,1);
-touch.down(1,{x:10,y:10});touch.move(1,{x:30,y:10});touch.up(1,{x:30,y:10});assert.equal(taps,1);assert.deepEqual(starts,[1]);assert.equal(ends.at(-1),false);
-touch.down(1,{x:10,y:10});touch.down(2,{x:30,y:10});touch.move(2,{x:50,y:10});assert.equal(starts.at(-1),2);assert.equal(moves.at(-1).scale,2);touch.up(2,{x:50,y:10});touch.up(1,{x:10,y:10});assert.equal(taps,1);
-touch.down(1,{x:0,y:0});touch.move(1,{x:20,y:0});touch.cancel();assert.equal(ends.at(-1),true);
-let held=0;const hold=createTouchSession({hold:()=>held++,tap:()=>taps++},{holdDelay:1});hold.down(1,{x:0,y:0});await new Promise(resolve=>setTimeout(resolve,5));hold.up(1,{x:0,y:0});assert.equal(held,1);assert.equal(taps,1);
 const project={name:'Unicode é 水',files:{'index.js':{kind:'text',content:'export const createScene = () => {};'},'asset.bin':{kind:'binary',content:'AAEC/w=='}},folders:[],settings:{remember:false},overrides:{transforms:[{id:'a',p:[1,2,3]}],stores:{light:{intensity:0.4}}}};
 const before=JSON.stringify(project),included=decodeProject(encodeProject(project)),excluded=decodeProject(encodeProject(project,{includeOverrides:false}));
 assert.deepEqual(included.files,project.files);assert.deepEqual(included.overrides,project.overrides);assert(included.settings.remember);assert.deepEqual(excluded.overrides,{});assert(!excluded.settings.remember);assert.equal(JSON.stringify(project),before);
@@ -21,4 +13,4 @@ const state=validateLayout(defaults,defaults,defaults.order);swapSections(state,
 assert.equal(focusedSection({order:['files','code','scene','output'],hidden:['files','code','output']},null),'scene');
 for(const id of ['files','code','scene','output']) assert.equal(focusedSection({order:['files','code','scene','output'],hidden:['files','code','output']},id),id);
 assert.equal(focusedSection(defaults,null),null);
-console.log('Mobile: tap/drag/hold/pinch/cancel routing, share snapshot round-trip/limits, layout validation passed');
+console.log('Share snapshot round-trip and limits, layout validation passed');

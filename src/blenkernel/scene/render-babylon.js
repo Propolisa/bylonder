@@ -1,5 +1,6 @@
 import { DefaultRenderingPipeline, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
 import { seededRandom } from '../../render/clock.js';
+import { createFilm } from '../../render/film.js';
 
 // Babylon adapter for render settings. The only code that writes scene.imageProcessingConfiguration
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
@@ -46,12 +47,15 @@ export function createRenderEngine(scene) {
   });
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
-    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose();
+    const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose(); e.film.dispose();
     attached.delete(camera);
     if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
-  const build = (camera, settings, samples) => {
+  let viewportSamples = 1;
+  const build = (camera, settings) => {
     const e = settings.eevee, r = settings.render, effects = {};
+    // EEVEE's film first: the samples a view accumulates (its viewport samples) in scene linear.
+    effects.film = Object.assign(createFilm(scene, camera), { samples: () => viewportSamples });
     // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
     const name = id => `__${id}:${camera.uniqueId}`;
     // Drawn in half float, displayed by its image processing: the view transform, after blending, as Blender's.
@@ -72,19 +76,22 @@ export function createRenderEngine(scene) {
       ip.exposure = 2 ** view.exposure;
       ip.contrast = looks[view.look][1];
       const e = settings.eevee, r = settings.render;
-      const samples = Math.min(e.taaSamples, scene.getEngine().getCaps().maxMSAASamples || 1);
+      viewportSamples = Math.max(1, Math.round(e.taaSamples));
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
       for (const camera of [...attached.keys()]) if (!wanted.has(camera)) drop(camera);
       const key = [e.useRaytracing && e.rayTracingMethod === 'SCREEN', e.useRaytracing, r.useMotionBlur].join();
       for (const camera of wanted) {
-        if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings, samples) }); }
+        if (attached.get(camera)?.key !== key) { drop(camera); attached.set(camera, { key, effects: build(camera, settings) }); }
         const effects = attached.get(camera).effects;
-        effects.pipeline.samples = samples;
+        effects.film.reset();
         if (effects.ssao) effects.ssao.radius = e.fastGiDistance;
         if (effects.ssr) Object.assign(effects.ssr, { thickness: e.screenTraceThickness, step: Math.max(1, Math.round(1 + (1 - e.screenTraceQuality) * 7)) });
         if (effects.motion) effects.motion.motionStrength = r.motionBlurShutter * 2;
       }
     },
+    // A rendered camera's film (film.js), and every film started again (Main evaluated something new).
+    film: (camera) => attached.get(camera)?.effects.film ?? null,
+    resetFilms() { for (const { effects } of attached.values()) effects.film.reset(); },
     setSceneLinear(value) { scene.imageProcessingConfiguration.applyByPostProcess = value; },
     dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
   };
