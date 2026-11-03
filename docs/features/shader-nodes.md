@@ -54,6 +54,7 @@ tests:
   - tests/nodes.test.js
   - tests/draw-view.test.js
   - tests/light-shadows.test.js
+  - tests/node-material-base.test.js
   - tests/textures-wasm.test.js
   - tests/e2e/lava.mjs
   - tests/e2e/smoke.mjs

@@ -9,7 +9,8 @@
 // it (STAND_INS bl_closure); Material Output lights it once with Babylon's PBR block (BlenderSurfaceBlock) and writes
 // it through the scene's image processing (BlenderDisplayBlock).
 import {
-  Color4, Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, Matrix, NodeMaterial, NodeMaterialBlock,
+  BonesBlock, ClipPlanesBlock, Color4, ColorMergerBlock, ColorSplitterBlock, Constants, FogBlock, FragmentOutputBlock, ImageProcessingBlock, InputBlock,
+  InstancesBlock, Matrix, MorphTargetsBlock, NodeMaterial, NodeMaterialBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
   RawTexture, ReflectionBlock, RefractionBlock, RegisterClass, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
@@ -530,11 +531,30 @@ function attributeBlock(material, value, type) {
   material.attachedBlocks.push(block);
   return block;
 }
-// The material's geometry block, its mesh's position and normal into it, and the normal it shades with.
+// Babylon's own vertex chain, as its PBR material has it: the mesh's position and normal through its morph targets, and
+// the world matrix through its instances and bones. Babylon's blocks take the attributes they read themselves.
+function morphTargets(material) {
+  const morph = helper(material, '__morphTargets', (name) => new MorphTargetsBlock(name));
+  wire(attributeBlock(material, 'position', T.Vector3).output, morph.position);
+  wire(attributeBlock(material, 'normal', T.Vector3).output, morph.normal);
+  morph.autoConfigure(material);
+  return morph;
+}
+function finalWorld(material) {
+  const world = helper(material, '__worldMatrix', (name) => Object.assign(new InputBlock(name, undefined, T.Matrix), { systemValue: System.World }));
+  const instances = helper(material, '__instances', (name) => new InstancesBlock(name));
+  wire(world.output, instances.world);
+  instances.autoConfigure(material);
+  const bones = helper(material, '__bones', (name) => new BonesBlock(name));
+  wire(instances.output, bones.world);
+  bones.autoConfigure(material);
+  return bones;
+}
+// The material's geometry block, its mesh's morphed position and normal into it, and the normal it shades with.
 function curvesGeometry(material) {
-  const geometry = helper(material, '__geometry', (name) => new CurvesGeometryBlock(name));
-  wire(attributeBlock(material, 'position', T.Vector3).output, geometry.getInputByName('meshPosition'));
-  wire(attributeBlock(material, 'normal', T.Vector3).output, geometry.getInputByName('meshNormal'));
+  const geometry = helper(material, '__geometry', (name) => new CurvesGeometryBlock(name)), morph = morphTargets(material);
+  wire(morph.positionOutput, geometry.getInputByName('meshPosition'));
+  wire(morph.normalOutput, geometry.getInputByName('meshNormal'));
   return geometry;
 }
 function shadingNormal(material) {
@@ -549,6 +569,7 @@ function geometryBlock(material, name) {
   if (kind === 'attribute') return attributeBlock(material, value, type);
   if (name === '__normal') return shadingNormal(material);
   if (kind === 'geometry') return { output: curvesGeometry(material).getOutputByName(value) };
+  if (name === '__world') return finalWorld(material);
   return helper(material, name, (full) => Object.assign(new InputBlock(full, undefined, type), { systemValue: value }));
 }
 // Links `from` into `to` unless it already is.
@@ -1087,7 +1108,10 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
 
   attach(material) {
     material.addOutputNode(this);
-    if (material._vertexOutputNodes.length) return;
+    const clipPlanes = helper(material, '__clipPlanes', (name) => new ClipPlanesBlock(name));
+    wire(worldPosition(material).output, clipPlanes.worldPosition);
+    if (!material._vertexOutputNodes.includes(clipPlanes)) material.addOutputNode(clipPlanes);
+    if (material._vertexOutputNodes.some((block) => block instanceof VertexOutputBlock)) return;
     const projection = helper(material, '__projection', (name) => new TransformBlock(name));
     wire(worldPosition(material).output, projection.vector);
     wire(geometryBlock(material, '__viewProjection').output, projection.transform);
@@ -1114,7 +1138,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
         wire(closure, surface.closure);
         wire(under.radiance, surface.under);
       }
-      wire(surface.radiance, processing.color);
+      wire(fogged(material, surface.radiance), processing.color);
     } else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
     // Its coverage where the closure lets light through (blended), else its color alone (opaque, unless its Blend Mode
     // blends it).
@@ -1127,6 +1151,19 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
   _buildBlock(state) {
     return FragmentOutputBlock.prototype._buildBlock.call(this, state);
   }
+}
+
+// A radiance through the scene's fog, its coverage kept, as Babylon's PBR material fogs its color.
+function fogged(material, radiance) {
+  const fog = helper(material, '__fog', (name) => new FogBlock(name)), split = helper(material, '__coverage', (name) => new ColorSplitterBlock(name));
+  const merge = helper(material, '__fogged', (name) => new ColorMergerBlock(name));
+  wire(worldPosition(material).output, fog.worldPosition);
+  wire(radiance, fog.input);
+  fog.autoConfigure(material);
+  wire(radiance, split.rgba);
+  wire(fog.output, merge.getInputByName('rgb '));
+  wire(split.a, merge.a);
+  return merge.rgba;
 }
 
 // A Blender output takes the type of the Babylon inputs it links to, when Blender converts to it, as Blender's code
