@@ -25,6 +25,7 @@ import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import { imageTexture } from '../../imbuf/image-textures.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
+import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import '../graph-roots.js';
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
@@ -376,6 +377,13 @@ BlClosure bl_closure_reflection(vec3 color, float roughness, vec3 N, float lobe)
   if (lobe < 1.5) c.lobe1 = l; else c.lobe2 = l;
   return c;
 }
+// The lobes merged into the base's metal, as one bin lights them (EEVEE Parity off: plain Babylon PBR).
+BlClosure bl_closure_merge_lobes(BlClosure c) {
+  BlLobe l = bl_lobe_add(c.lobe1, c.lobe2);
+  c.metal += l.color; c.metal_weight += l.weight; c.roughness += l.roughness; c.ior += 1.5 * l.weight; c.normal += l.normal;
+  c.lobe1 = bl_lobe_empty; c.lobe2 = bl_lobe_empty;
+  return c;
+}
 BlLobe bl_closure_lobe(BlClosure c, int lobe) { if (lobe == 1) return c.lobe1; return c.lobe2; }
 vec3 bl_lobe_color(BlLobe l) { return l.weight > 0.0 ? l.color / l.weight : vec3(0.0); }
 float bl_lobe_roughness(BlLobe l) { return l.weight > 0.0 ? l.roughness / l.weight : 0.5; }
@@ -507,7 +515,7 @@ const MESH_VALUES = {
   $texspace_location: [T.Vector3, (mesh) => texspace(mesh)[0]],
   $texspace_size: [T.Vector3, (mesh) => texspace(mesh)[1]],
 };
-const meshValue = (id) => MESH_VALUES[id] ?? (id.startsWith('$uniform_attribute:') && [T.Vector4, (mesh) => {
+export const meshValue = (id) => MESH_VALUES[id] ?? (id.startsWith('$uniform_attribute:') && [T.Vector4, (mesh) => {
   const [, type, ...name] = id.split(':');
   return objectInfo(mesh).attribute(type, name.join(':'));
 }]);
@@ -611,6 +619,7 @@ function rampTexture(table, scene) {
   if (!rampTextures.get(key)?.getScene?.()?.isDisposed && rampTextures.get(key)?.getScene() === scene) return rampTextures.get(key);
   const texture = new RawTexture(halfFloats(table), TABLE_SIZE, 1, Constants.TEXTUREFORMAT_RGBA, scene, false, false, Texture.BILINEAR_SAMPLINGMODE, Constants.TEXTURETYPE_HALF_FLOAT);
   texture.wrapU = texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+  texture.metadata = { table };
   rampTextures.set(key, texture);
   return texture;
 }
@@ -792,7 +801,7 @@ const blenderShader = (Base) => class extends Base {
     super._buildBlock(state);
     if (state.shaderLanguage !== 0) throw Error(`${this.name}: Blender nodes build GLSL only`);
     if (state.target !== Targets.Fragment) return this;
-    this._writeOutputs(state, this._compile(state));
+    recordBuild(state, this, () => this._writeOutputs(state, this._compile(state)));
     if (!state.sharedData.bindableBlocks.includes(this)) state.sharedData.forcedBindableBlocks.push(this);
     return this;
   }
@@ -822,6 +831,18 @@ const blenderShader = (Base) => class extends Base {
     this.mute = !!mute;
   }
 };
+
+// What a Blender node's build wrote into the fragment shader, kept for an export that writes the material's Blender
+// nodes as one of Babylon's CustomBlocks (io_scene_babylon/node-material-export.js): its code, in build order, the
+// functions it emitted, and the variable it read each of its inputs from.
+let builds = 0;
+function recordBuild(state, block, build) {
+  const emit = state._emitFunction, functions = [], start = state.compilationString.length;
+  state._emitFunction = (key, code, comments) => { functions.push([key, code]); return emit.call(state, key, code, comments); };
+  try { build(); } finally { delete state._emitFunction; }
+  block.built = { shared: state.sharedData, order: builds++, code: state.compilationString.slice(start), functions,
+    inputs: block.inputs.filter((input) => input.isConnected).map((input) => [input, input.associatedVariableName]) };
+}
 
 export class BlenderShaderBlock extends blenderShader(NodeMaterialBlock) {
   constructor(name, idname) {
@@ -910,17 +931,22 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     wire(world.output, normal.transform);
     wire(normal.output, this.worldNormal);
     wire(geometryBlock(material, '__view').output, this.view);
-    const eye = helper(material, '__viewEye', (name) => new BlenderViewEyeBlock(name));
-    wire(worldPosition(material).output, eye.position);
-    wire(geometryBlock(material, '__cameraPosition').output, eye.eye);
-    wire(eye.output, this.cameraPosition);
+    // The lobes are lit on their own with EEVEE Parity (eevee-parity.js), else merged into the base, as Babylon's PBR.
+    this._merged = !this.lobe && !eeveeParity(material.getScene());
+    if (this._merged) wire(geometryBlock(material, '__cameraPosition').output, this.cameraPosition);
+    else {
+      const eye = helper(material, '__viewEye', (name) => new BlenderViewEyeBlock(name));
+      wire(worldPosition(material).output, eye.position);
+      wire(geometryBlock(material, '__cameraPosition').output, eye.eye);
+      wire(eye.output, this.cameraPosition);
+    }
     // A reflection block of its own: Babylon's names the uniforms it binds anew for each PBR block that reads it.
     const reflection = helper(material, this.lobe ? `__reflection lobe ${this.lobe}` : '__reflection', (name) => new ReflectionBlock(name));
     reflection._getTexture = environmentOf(material);
     wire(position.output, reflection.position);
     wire(world.output, reflection.world);
     wire(reflection.reflection, this.reflection);
-    const shading = Object.assign(helper(material, `__shadingNormal ${this.uniqueId}`, (name) => new BlenderClosureNormalBlock(name)), { lobe: this.lobe });
+    const shading = Object.assign(helper(material, `__shadingNormal ${this.uniqueId}`, (name) => new BlenderClosureNormalBlock(name)), { lobe: this.lobe, merged: this._merged });
     wire(this.closure.connectedPoint, shading.closure);
     wire(shading.output, this.perturbedNormal);
   }
@@ -943,7 +969,11 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   _buildBlock(state) {
     if (state.target !== Targets.Fragment) return this.lobe ? this._scoped(state, () => super._buildBlock(state)) : super._buildBlock(state);
     state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
-    const closure = this.closure.associatedVariableName;
+    let closure = this.closure.associatedVariableName;
+    if (this._merged) {
+      closure = state._getFreeVariableName('merged');
+      state.compilationString += `BlClosure ${closure} = bl_closure_merge_lobes(${this.closure.associatedVariableName});\n`;
+    }
     for (const [path, value] of Object.entries(this._values)) Object.assign(this._point(path), { _blenderValue: value(closure), associatedVariableName: value(closure) });
     if (!this.lobe) {
       super._buildBlock(state);
@@ -999,6 +1029,7 @@ export class BlenderClosureNormalBlock extends NodeMaterialBlock {
   constructor(name) {
     super(name, Targets.Fragment);
     this.lobe = 0;
+    this.merged = false;
     this.registerInput('closure', T.Color4);
     this.registerOutput('output', T.Vector4);
   }
@@ -1008,7 +1039,8 @@ export class BlenderClosureNormalBlock extends NodeMaterialBlock {
   _buildBlock(state) {
     super._buildBlock(state);
     state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
-    const closure = this.closure.associatedVariableName, normal = this.lobe ? `bl_lobe_normal(bl_closure_lobe(${closure}, ${this.lobe}))` : `bl_closure_normal(${closure})`;
+    const closure = this.merged ? `bl_closure_merge_lobes(${this.closure.associatedVariableName})` : this.closure.associatedVariableName;
+    const normal = this.lobe ? `bl_lobe_normal(bl_closure_lobe(${closure}, ${this.lobe}))` : `bl_closure_normal(${closure})`;
     state.compilationString += `${state._declareOutput(this.output)} = vec4(${normal}.xzy, 0.0);\n`;
     return this;
   }
@@ -1132,7 +1164,8 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
       const lit = closureHas(closure.ownerBlock, reflects), Surface = lit ? BlenderSurfaceBlock : BlenderUnlitSurfaceBlock;
       let surface = helper(material, `__${lit ? 'surface' : 'unlit'} ${this.uniqueId}`, (name) => new Surface(name));
       wire(closure, surface.closure);
-      for (const lobe of lit ? assignLobes(closure.ownerBlock) : []) {
+      const lobes = lit ? assignLobes(closure.ownerBlock) : [];
+      for (const lobe of eeveeParity(material.getScene()) ? lobes : []) {
         const under = surface;
         surface = helper(material, `__surface ${this.uniqueId} lobe ${lobe}`, (name) => new BlenderSurfaceBlock(name, lobe));
         wire(closure, surface.closure);
@@ -1152,6 +1185,11 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     return FragmentOutputBlock.prototype._buildBlock.call(this, state);
   }
 }
+
+// A scene's node materials build again when its EEVEE Parity changes.
+eeveeParityChanged.add((scene) => {
+  for (const material of scene.materials) if (material.attachedBlocks?.some((block) => block instanceof ShaderNodeOutputMaterial)) buildMaterial(material);
+});
 
 // A radiance through the scene's fog, its coverage kept, as Babylon's PBR material fogs its color.
 function fogged(material, radiance) {

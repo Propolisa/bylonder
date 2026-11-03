@@ -4,6 +4,7 @@
 // Computed once per view render and reused, without allocations.
 import { Camera, MaterialPluginBase, PBRBaseMaterial, RegisterMaterialPlugin, ShaderStore, Vector3, Vector4 } from '@babylonjs/core';
 import '@babylonjs/core/Shaders/ShadersInclude/reflectionFunction.js';
+import { eeveeParity } from './eevee-parity.js';
 
 const view = { right: [0, 0, 0], up: [0, 0, 0], forward: [0, 0, 0], position: [0, 0, 0], persp: true, pixelFac: 1, size: [1, 1], winmat: [1, 1], camera: null, renderId: -1 };
 
@@ -41,21 +42,26 @@ vec4 drw_point_world_to_homogenous(vec3 p) { return viewProjection * vec4(babylo
 export const VIEW_FORWARD = 'blViewForward';
 export const viewEye = (P, eye = 'vEyePosition.xyz', forward = VIEW_FORWARD) => `(${forward}.w > 0.5 ? ${P} - ${forward}.xyz : ${eye})`;
 const direction = new Vector3(), forward = new Vector4();
-// The view's forward axis in Babylon's world, w 1 where it is orthographic.
-export function viewForward(camera) {
+// The view's forward axis in Babylon's world, w 1 where it is orthographic (and `orthographic` is taken).
+export function viewForward(camera, orthographic = true) {
   camera.getDirectionToRef(camera.getScene().useRightHandedSystem ? Vector3.RightHandedForwardReadOnly : Vector3.LeftHandedForwardReadOnly, direction);
-  return forward.set(direction.x, direction.y, direction.z, camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 1 : 0);
+  return forward.set(direction.x, direction.y, direction.z, orthographic && camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 1 : 0);
 }
 
 // Babylon's PBR materials through viewEye: the view direction before lighting, and reflectionFunction's eye, which no
-// injection point reaches, matched against Babylon's source here so that an upgrade changing it fails at once.
+// injection point reaches, matched against Babylon's source here so that an upgrade changing it fails at once. Without
+// the scene's EEVEE Parity (eevee-parity.js) the view is bound as a perspective one, so the eye is Babylon's.
 export const REFLECTION_EYE = /worldNormal,vEyePosition\.xyz/;
 if (!REFLECTION_EYE.test(ShaderStore.IncludesShadersStore.reflectionFunction)) throw Error("Babylon's reflectionFunction changed: BlenderViewPlugin cannot set its eye");
 class BlenderViewPlugin extends MaterialPluginBase {
-  constructor(material) { super(material, 'BlenderView', 300, {}, true, true); }
+  constructor(material) {
+    super(material, 'BlenderView', 300, {}, true, true);
+    // Bylonder adds it to every PBR material; an export loads without it.
+    this.doNotSerialize = true;
+  }
   getClassName() { return 'BlenderViewPlugin'; }
   getUniforms() { return { ubo: [{ name: VIEW_FORWARD, size: 4, type: 'vec4' }], fragment: `uniform vec4 ${VIEW_FORWARD};` }; }
-  bindForSubMesh(ubo, scene) { ubo.updateVector4(VIEW_FORWARD, viewForward(scene.activeCamera)); }
+  bindForSubMesh(ubo, scene) { ubo.updateVector4(VIEW_FORWARD, viewForward(scene.activeCamera, eeveeParity(scene))); }
   getCustomCode(shaderType) {
     return shaderType === 'fragment' ? {
       CUSTOM_FRAGMENT_BEFORE_LIGHTS: `viewDirectionW = normalize(${viewEye('vPositionW')} - vPositionW);`,

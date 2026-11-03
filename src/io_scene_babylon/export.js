@@ -13,18 +13,19 @@ async function polyfill() {
 }
 
 const FORMATS = {
-  babylon: { extension: 'babylon', type: 'application/json', build: async (world) => JSON.stringify(await serializeScene(world)) },
-  js: { extension: 'js', type: 'text/javascript', build: exportModule },
+  babylon: { extension: 'babylon', type: 'application/json', build: async (world, name, { parity }) => JSON.stringify(await serializeScene(world, { parity })) },
+  js: { extension: 'js', type: 'text/javascript', build: (world, name, { parity }) => exportModule(world, { parity }) },
   'js-live': {
     extension: 'zip', type: 'application/zip',
-    build: async (world, name) => zipSync({ [name + '.js']: strToU8(await exportModule(world, { live: true })), 'bylonder-modifiers': await polyfill() }),
+    build: async (world, name, { parity }) => zipSync({ [name + '.js']: strToU8(await exportModule(world, { live: true, parity })), 'bylonder-modifiers': await polyfill() }),
   },
 };
 
-export async function exportScene(world, format) {
+// `options`: { eeveeParity } (topbar.js asks for it): materials with Bylonder's EEVEE extensions, as Babylon's blocks.
+export async function exportScene(world, { format, eeveeParity = false }) {
   const { extension, type, build } = FORMATS[format];
   const name = world.sceneSettings.state.name || 'scene';
-  const blob = new Blob([await build(world, name)], { type });
+  const blob = new Blob([await build(world, name, { parity: eeveeParity })], { type });
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${name}.${extension}` });
   document.body.append(a);
   a.click();

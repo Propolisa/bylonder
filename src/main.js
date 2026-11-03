@@ -61,6 +61,7 @@ import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { registerRuntimeTypes } from "./runtimes/runtimes.js";
+import { registerEeveeParityTypes } from "./draw/eevee-parity.js";
 import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences } from "./windowmanager/wm-userdef.js";
 import { applyTheme } from "./editors/interface/theme-tokens.js";
 import { registerBylonderPreferences, bylonderPreferences } from "./workspace/preferences.js";
@@ -533,6 +534,7 @@ registerCurveAddOperators({ sync: world.mainSync, host: objectOperatorHost, edit
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
 // The runtimes' properties and panels (docs/runtimes.md), as an add-on registers its classes.
 registerRuntimeTypes(bylonderIcon());
+registerEeveeParityTypes(bylonderIcon());
 // The theme on the design tokens of this window and the app's.
 const themed = () => applyTheme(preferences().themes[0], [document, parent.document]);
 themed();

@@ -83,20 +83,20 @@ const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
 // The module's source. With `live`, objects whose modifiers are all Blender's keep them live through the modifier
 // kernels polyfill, which createScene loads from `bylonder-modifiers/` next to the module (or its `modifiers` option).
-export async function exportModule(world, { live: keepLive = false } = {}) {
+export async function exportModule(world, { live: keepLive = false, parity = false } = {}) {
   const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
   await world.modifiers.settled();
   // The mapped meshes' geometry is read below: their mapping holds until the module is written.
   const mapped = exportRuntimes(world);
   try {
-    return await moduleSource(world, live, mapped);
+    return await moduleSource(world, live, mapped, parity);
   } finally {
     mapped.restore();
   }
 }
 
-async function moduleSource(world, live, mapped) {
-  const data = await serializeScene(world, { geometry: false, live, mapped });
+async function moduleSource(world, live, mapped, parity) {
+  const data = await serializeScene(world, { geometry: false, live, mapped, parity });
   const { scene } = world;
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];

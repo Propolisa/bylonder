@@ -2,6 +2,9 @@ import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { fullDate, timeAgo } from './relative-time.js';
+import { propsDialog } from '../editors/interface/props-dialog.js';
+
+const EXPORT_PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
 
 export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, newProject, recentProjects, openProject, openBlend, resetApp }) {
   const $ = id => document.getElementById(id);
@@ -45,6 +48,11 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
   const blenderDocs = 'https://docs.blender.org/';
   const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
   const ids = () => workspaces.map((w) => w.id);
+  // File > Export's options, asked before it writes; EEVEE Parity is off unless chosen for this export.
+  const exportAs = async (format, title) => {
+    const options = await propsDialog({ title, confirm: 'Export', fields: [{ name: 'eeveeParity', label: 'EEVEE Parity', value: false, note: EXPORT_PARITY_NOTE }] });
+    if (options) send('export', { format, eeveeParity: options.eeveeParity });
+  };
   const operators = {
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
     'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : chooseBlend()) },
@@ -67,9 +75,9 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     'bylonder.project_share': { run: click('share-project') },
     'bylonder.project_import': { run: click('import') },
     'bylonder.project_export': { run: click('export') },
-    'bylonder.export_babylon': { run: () => send('export', 'babylon') },
-    'bylonder.export_js': { run: () => send('export', 'js') },
-    'bylonder.export_js_live': { run: () => send('export', 'js-live') },
+    'bylonder.export_babylon': { run: () => exportAs('babylon', 'Export Babylon') },
+    'bylonder.export_js': { run: () => exportAs('js', 'Export JavaScript') },
+    'bylonder.export_js_live': { run: () => exportAs('js-live', 'Export JavaScript, Live Modifiers') },
     'bylonder.app_source': { run: click('app-source') },
     'bylonder.scene_edits_clear': { run: click('clear-scene-edits') },
     'bylonder.run': { keys: () => 'Ctrl Enter', run: click('run') },

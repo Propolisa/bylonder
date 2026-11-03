@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { Camera, FreeCamera, MeshBuilder, NullEngine, PBRMaterial, Scene, ShaderStore, Vector3 } from '@babylonjs/core';
 import { REFLECTION_EYE, VIEW_FORWARD, viewForward } from '../src/draw/draw-view.js';
 import { nodeMaterialFromTree } from '../src/nodes/blender/shader-nodes.js';
+import { setEeveeParity } from '../src/draw/eevee-parity.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const camera = Object.assign(new FreeCamera('Camera', new Vector3(0, 0, -5), scene), { mode: Camera.ORTHOGRAPHIC_CAMERA });
@@ -14,13 +15,27 @@ const pbr = Object.assign(MeshBuilder.CreateSphere('PBR', {}, scene), { material
 const tree = { nodes: [{ idname: 'ShaderNodeBsdfGlossy', name: 'Glossy' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
   links: [['Glossy', 'BSDF', 'Material Output', 'Surface']] };
 const glossy = Object.assign(MeshBuilder.CreateSphere('Glossy', {}, scene), { material: nodeMaterialFromTree('Glossy', scene, tree).material });
-for (let i = 0; i < 50 && ![pbr, glossy].every((mesh) => mesh.subMeshes[0].effect?.isReady()); i++) {
-  scene.render();
-  await new Promise((resolve) => setTimeout(resolve, 100));
-}
+const ready = async () => {
+  for (let i = 0; i < 50 && ![pbr, glossy].every((mesh) => mesh.subMeshes[0].effect?.isReady()); i++) {
+    scene.render();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+};
+await ready();
 const fragment = (mesh) => mesh.subMeshes[0].effect._fragmentSourceCode;
 assert.ok(fragment(pbr).includes(`viewDirectionW = normalize((${VIEW_FORWARD}.w > 0.5`), "the PBR material's view direction is the view's");
 assert.match(ShaderStore.IncludesShadersStore.reflectionFunction, REFLECTION_EYE, "Babylon's reflection reads the eye where the plugin sets it");
 assert.ok(fragment(glossy).includes(`${VIEW_FORWARD}`) && /viewDirectionW = normalize\(\w+ - /.test(fragment(glossy)), 'the node material shades from its own eye');
 assert.ok(glossy.material._sharedData.bindableBlocks.some((block) => block.getClassName() === 'BlenderViewEyeBlock'), "the node material's eye is bound each frame");
+
+// EEVEE Parity off: both take Babylon's own eye.
+const bound = (parity) => { let value; setEeveeParity(scene, parity); pbr.material.pluginManager.getPlugin('BlenderView').bindForSubMesh({ updateVector4: (name, v) => { value = v.w; } }, scene); return value; };
+assert.deepEqual([bound(true), bound(false)], [1, 0], "without EEVEE Parity the PBR material's eye is Babylon's");
+const before = glossy.subMeshes[0].effect;
+for (let i = 0; i < 50 && (glossy.subMeshes[0].effect === before || !glossy.subMeshes[0].effect?.isReady()); i++) {
+  scene.render();
+  await new Promise((resolve) => setTimeout(resolve, 100));
+}
+assert.ok(!fragment(glossy).includes(VIEW_FORWARD), "without EEVEE Parity the node material shades from Babylon's eye");
+assert.match(fragment(glossy), /BlClosure \w+ = bl_closure_merge_lobes\(/, 'and lights its lobes as one');
 console.log('Draw view: an orthographic view lights along its axis passed');

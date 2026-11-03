@@ -4,7 +4,8 @@
 // usage: npm run test:e2e [-- name filter]
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
@@ -80,8 +81,8 @@ const checks = {
       });
     }, reference);
     console.log(`      mean difference per sphere (of 255): ${differences.join(", ")}`);
-    // For tools/blender-reference/shader-gallery-diff.py.
-    const render = `${tmpdir()}/shader-gallery-bylonder.png`;
+    // For tools/blender-reference/shader-gallery-diff.py, a file of this run's own.
+    const render = join(mkdtempSync(join(tmpdir(), "shader-gallery-")), "bylonder.png");
     writeFileSync(render, Buffer.from((await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"))).split(",")[1], "base64"));
     console.log(`      render: ${render}`);
     const over = differences.map((d, i) => d > SHADER_GALLERY_LIMITS[i] && `tile ${i + 1}: ${d}`).filter(Boolean);
@@ -137,6 +138,9 @@ const checks = {
       await app.page.click('[data-blender="TOPBAR_MT_file"]');
       await app.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
       await app.page.getByRole("menuitem", { name: item }).click();
+      const dialog = app.page.locator(`[role="dialog"][aria-label^="Export"]`);
+      assert.equal(await dialog.getByRole("checkbox", { name: "EEVEE Parity" }).getAttribute("data-state"), "unchecked", "EEVEE Parity is off by default");
+      await dialog.getByRole("button", { name: "Export" }).click();
       const chunks = [];
       for await (const chunk of await (await download).createReadStream()) chunks.push(chunk);
       return Buffer.concat(chunks);
