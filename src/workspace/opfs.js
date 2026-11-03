@@ -18,9 +18,12 @@ export async function openOPFS() {
   }
   return {
     async read(path) {
+      return (await this.readBlob(path))?.text() ?? null;
+    },
+    async readBlob(path) {
       try {
         const { dir, name } = await parent(path);
-        return await (await (await dir.getFileHandle(name)).getFile()).text();
+        return await (await dir.getFileHandle(name)).getFile();
       } catch (e) {
         if (e.name === "NotFoundError") return null;
         throw e;

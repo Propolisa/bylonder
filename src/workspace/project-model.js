@@ -1,3 +1,4 @@
+import { binaryValue } from "./binary.js";
 export function normalizePath(value) {
   if (value === ".workbench.json")
     throw Error(".workbench.json is reserved for export metadata.");
@@ -34,7 +35,7 @@ export function validateFiles(files) {
     if (
       !file ||
       !["text", "binary"].includes(file.kind) ||
-      typeof file.content !== "string"
+      !(typeof file.content === "string" || (file.kind === "binary" && file.content instanceof Blob))
     )
       throw Error("Invalid file: " + path);
   }
@@ -75,9 +76,4 @@ export function validateProject(project) {
   return project;
 }
 export const textFile = (content) => ({ kind: "text", content });
-// A binary file, its bytes as base64.
-export function binaryFile(bytes, mime) {
-  let result = "";
-  for (let i = 0; i < bytes.length; i += 32768) result += String.fromCharCode(...bytes.subarray(i, i + 32768));
-  return { kind: "binary", content: btoa(result), ...(mime ? { mime } : {}) };
-}
+export const binaryFile = (bytes, mime) => ({ kind: "binary", ...binaryValue(bytes), ...(mime ? { mime } : {}) });

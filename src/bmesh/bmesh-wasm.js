@@ -557,7 +557,7 @@ export class BlenderMain {
   readBlend(bytes) {
     // A gzip-compressed file (Blender before 3.0) unzipped here: the module has no zlib (main-api.cc BLI_filereader_new_gzip).
     if (bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = gunzipSync(bytes);
-    const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
+    const report = withArrays([bytes], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
     if (this.#undo) this.undoInit();
     if (!report) throw new Error('Not a .blend file Blender can read');
     // A file without a screen is opened without its UI, which Bylonder never opens.

@@ -8,6 +8,7 @@ import "./workspace.css";
 import { mountTopbar } from "./topbar.js";
 import { examples } from "./examples.js";
 import { openOPFS } from "./opfs";
+import { bytesOf, splitBinary, joinBinary, textBinary } from "./binary.js";
 import { createRepository } from "./repository";
 import { defaultFiles, blendProjectSource } from "./default-project";
 import { resetApp } from "./reset.js";
@@ -247,7 +248,7 @@ function openFile(path) {
     log(
       path +
         " · binary asset · " +
-        Math.round(project.files[path].content.length * 0.75) +
+        project.files[path].content.size +
         " bytes",
     );
     return;
@@ -725,27 +726,21 @@ function download(bytes, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
+// The project's files, and in .workbench.json its settings and scene data, whose binary values are files in .workbench/.
 async function exportZip() {
   const files = {};
   for (const [path, file] of Object.entries(project.files))
-    files[path] =
-      file.kind === "text"
-        ? strToU8(file.content)
-        : Uint8Array.from(atob(file.content), (c) => c.charCodeAt(0));
-  files[".workbench.json"] = strToU8(
-    JSON.stringify(
-      {
-        name: project.name,
-        folders: project.folders,
-        settings: project.settings,
-        animation: project.animation || null,
-        overrides: project.overrides,
-        ...storedScenes(project),
-      },
-      null,
-      2,
-    ),
-  );
+    files[path] = file.kind === "text" ? strToU8(file.content) : await bytesOf(file);
+  const { json, blobs } = splitBinary({
+    name: project.name,
+    folders: project.folders,
+    settings: project.settings,
+    animation: project.animation || null,
+    overrides: project.overrides,
+    ...storedScenes(project),
+  }, 2);
+  files[".workbench.json"] = strToU8(json);
+  for (const [id, blob] of blobs) files[`.workbench/${id}`] = await bytesOf(blob);
   download(zipSync(files), project.name.replace(/[^a-z0-9_-]/gi, "-") + ".zip");
 }
 function importedFile(path, bytes, mime) {
@@ -763,7 +758,7 @@ async function importZip(file) {
   const files = {};
   let settings = {};
   for (const [path, bytes] of Object.entries(archive)) {
-    if (path.endsWith("/")) continue;
+    if (path.endsWith("/") || path.startsWith(".workbench/")) continue;
     if (path === ".workbench.json") {
       settings = JSON.parse(strFromU8(bytes));
       continue;
@@ -772,6 +767,10 @@ async function importZip(file) {
     files[path] = importedFile(path, bytes);
   }
   validateFiles(files);
+  await joinBinary(settings, async (id) => {
+    if (!archive[`.workbench/${id}`]) throw Error("Missing file data: .workbench/" + id);
+    return new Blob([archive[`.workbench/${id}`]]);
+  });
   const created = await repo.create(
     settings.name || file.name.replace(/\.zip$/, ""),
     files,
@@ -819,7 +818,7 @@ const sharing = setupSharing({
     });
     if(project.id !== projectId) throw Error('Project changed. Reopen Share.');
     await save();
-    return {project:structuredClone(project),overrides};
+    return textBinary({project,overrides});
   },
   async importProject(payload) {
     await save();
@@ -843,7 +842,7 @@ $("new-project").onclick = action(async () => {
 const openBlend = action(async (file) => {
   await save();
   const path = normalizePath(file.name.replace(/[^\w. -]/g, "_"));
-  const files = { "index.js": textFile(blendProjectSource(path)), [path]: importedFile(path, new Uint8Array(await file.arrayBuffer())) };
+  const files = { "index.js": textFile(blendProjectSource(path)), [path]: binaryFile(file) };
   const created = await repo.create(file.name.replace(/\.blend$/i, ""), files);
   await load(created.id);
 });

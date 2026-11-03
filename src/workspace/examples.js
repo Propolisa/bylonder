@@ -10,7 +10,7 @@ const files = async (id) => ({
   "importmap.json": json({ imports: {} }),
   "types.json": json({ imports: {} }),
   ...Object.fromEntries(inExample(id, sources).map(([path, source]) => [path, textFile(source)])),
-  ...Object.fromEntries(await Promise.all(inExample(id, blends).map(async ([path, url]) => [path, binaryFile(new Uint8Array(await (await fetch(url)).arrayBuffer()))]))),
+  ...Object.fromEntries(await Promise.all(inExample(id, blends).map(async ([path, url]) => [path, binaryFile(await (await fetch(url)).blob())]))),
 });
 
 export const examples = [

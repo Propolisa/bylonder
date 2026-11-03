@@ -114,7 +114,7 @@ export async function createWorld({ input, engine, canvas, hooks = {}, audioCont
   const world = { engine, scene, objects, animation, notify };
   // Saved scene edits: Main's .blend with what Babylon owns (project-state.js); a project saved before keeps its
   // objects' rows, which are applied once and saved in the new form.
-  if (input.remember && input.overrides?.blend) openProject(world, animation.ids, input.overrides);
+  if (input.remember && input.overrides?.blend) await openProject(world, animation.ids, input.overrides);
   else if (input.remember && input.overrides?.transforms) apply(objects, input.overrides.transforms, { partial: true });
   registerObjects(animation, objects);
   const documentState = createDocument();

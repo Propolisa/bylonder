@@ -1,6 +1,6 @@
 // A project's saved scene state (runtime/project-state.js): its .blend and what Babylon owns. The project's code builds
 // the scene again; objects whose id the .blend holds take Blender's state from it, a deleted one stays deleted, one
-// Blender's code added comes back, and a mesh Babylon built keeps its geometry.
+// Blender's code added comes back, and a mesh Babylon built keeps its geometry. The .blend is kept as bytes.
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, MeshBuilder, Vector3 } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -12,6 +12,9 @@ import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { createHistory } from '../src/editors/undo/storage.js';
 import { projectState, openProject } from '../src/runtime/project-state.js';
 import { addModifier } from '../src/modifiers/stack.js';
+import { createRepository } from '../src/workspace/repository.js';
+import { defaultFiles } from '../src/workspace/default-project.js';
+import { toBase64, bytesOf } from '../src/workspace/binary.js';
 
 // The project's code: a Blender primitive, a mesh Babylon builds and an empty.
 function build() {
@@ -54,22 +57,31 @@ first.mainSync.run(() => first.mainSync.blender.run('object.transform_apply', { 
 first.mainSync.run(() => first.mainSync.blender.run('object.empty_add', { location: [0, 0, 4] }));
 cube.name = 'Box';
 history.commit();
-const saved = JSON.parse(JSON.stringify(projectState(first)));
-assert(saved.blend.length < 200000, `the .blend is ${saved.blend.length} characters`);
+// Saved through the project store, the .blend stays bytes; a project saved before kept it as base64 text.
+const disk = new Map();
+const repo = createRepository({ read: async (p) => disk.get(p) ?? null, readBlob: async (p) => disk.get(p) ?? null, write: async (p, v) => disk.set(p, v), lock: (_, fn) => fn() });
+const project = await repo.create('State', defaultFiles(), { settings: { remember: true }, overrides: projectState(first) });
+const saved = (await repo.load(project.id)).overrides;
+assert(saved.blend.content instanceof Blob && saved.blend.content.size < 200000, `the .blend is ${saved.blend.content.size} bytes`);
+const version = [...disk].find(([path]) => path.includes('/versions/'))[1];
+assert.deepEqual(JSON.parse(version).overrides.blend, { blobId: saved.blend.blobId }, 'the version names the .blend, whose bytes are stored apart');
+const legacy = { ...saved, blend: toBase64(await bytesOf(saved.blend)) };
 
-const second = build();
-openProject(second, second.animation.ids, saved);
-start(second);
-const named = (name) => second.objects.find((node) => node.name === name && !node.metadata?.wbDeleted);
-const box = named('Box');
-assert(box, 'the renamed cube');
-assert.deepEqual(box.position.asArray(), [1, 2, 3]);
-assert.equal(Math.max(...box.getVerticesData('position').map(Math.abs)), 2, 'the cube has the scale applied to its Mesh');
-assert.equal(named('Knot').position.x, 5);
-assert.equal(named('Knot').getTotalVertices(), knotDrawn, 'the knot keeps its geometry, subdivided');
-assert.deepEqual(second.mainSync.modifiers.of(named('Knot')).map((m) => m.type), ['SUBSURF'], 'its modifier stack');
-assert(!named('Ball'), 'the deleted ball stays deleted');
-assert(named('Empty'), "the object Blender's code added");
-assert.deepEqual(second.mainSync.check(), []);
-assert.equal(second.mainSync.blender.ids(0x424f).length, 3, 'Main holds the objects once');
-console.log('Project state: a saved .blend over the code-built scene keeps names, transforms, geometry, deletions and added objects');
+for (const state of [saved, legacy]) {
+  const second = build();
+  await openProject(second, second.animation.ids, state);
+  start(second);
+  const named = (name) => second.objects.find((node) => node.name === name && !node.metadata?.wbDeleted);
+  const box = named('Box');
+  assert(box, 'the renamed cube');
+  assert.deepEqual(box.position.asArray(), [1, 2, 3]);
+  assert.equal(Math.max(...box.getVerticesData('position').map(Math.abs)), 2, 'the cube has the scale applied to its Mesh');
+  assert.equal(named('Knot').position.x, 5);
+  assert.equal(named('Knot').getTotalVertices(), knotDrawn, 'the knot keeps its geometry, subdivided');
+  assert.deepEqual(second.mainSync.modifiers.of(named('Knot')).map((m) => m.type), ['SUBSURF'], 'its modifier stack');
+  assert(!named('Ball'), 'the deleted ball stays deleted');
+  assert(named('Empty'), "the object Blender's code added");
+  assert.deepEqual(second.mainSync.check(), []);
+  assert.equal(second.mainSync.blender.ids(0x424f).length, 3, 'Main holds the objects once');
+}
+console.log('Project state: a saved .blend over the code-built scene keeps names, transforms, geometry, deletions and added objects, as bytes and from base64 text');

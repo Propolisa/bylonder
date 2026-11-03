@@ -4,12 +4,26 @@
 // usage: npm run test:e2e [-- name filter]
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
 import { displacedSphere, lavaMaterial } from "./lava.mjs";
+
+// A .blend Bylonder wrote (32-bit block heads) with `size` bytes of data no ID uses before its DNA1 block, which
+// Blender reads and frees: a large file made at run time.
+function paddedBlend(source, size) {
+  const head = 20, view = new DataView(source.buffer, source.byteOffset, source.byteLength);
+  let at = 12;
+  while (source.subarray(at, at + 4).toString() !== "DNA1") at += head + view.getInt32(at + 4, true);
+  const block = new Uint8Array(head), fields = new DataView(block.buffer);
+  block.set(Buffer.from("DATA"));
+  fields.setInt32(4, size, true);
+  fields.setUint32(8, 0x7fff0000, true);
+  fields.setInt32(16, 1, true);
+  return Buffer.concat([source.subarray(0, at), block, new Uint8Array(size), source.subarray(at)]);
+}
 
 const renderStatus = ".render-result [data-status]";
 const rendered = () => app.until((b, selector) => /^(Finished|Render failed)/.test(document.querySelector(selector).textContent), renderStatus, 60000);
@@ -1104,6 +1118,21 @@ const checks = {
     await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
     await app.settled();
     assert.equal(await app.bylonder((b) => b.world.scene.getNodeByName("Camera")), null);
+  } },
+
+  // A .blend of hundreds of MB opens: its bytes stay bytes from the file to Blender's memory.
+  "File > Open of a 400 MB .blend shows its scene": { open: { example: null, node: "sphere" }, async run() {
+    const file = join(mkdtempSync(join(tmpdir(), "bylonder-large-")), "large.blend");
+    writeFileSync(file, paddedBlend(readFileSync(new URL("../../examples/geometry-nodes/geometry-nodes.blend", import.meta.url)), 400 * 1048576));
+    try {
+      const chooser = app.page.waitForEvent("filechooser");
+      await menu("TOPBAR_MT_file", "Open...");
+      await (await chooser).setFiles(file);
+      await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Meadow"), null, { timeout: 180000 });
+      await app.settled();
+    } finally {
+      rmSync(file);
+    }
   } },
 
   async "The Video Sequencer's edit survives a reload, a project ZIP and a .blend"() {

@@ -1,6 +1,7 @@
 import { hash } from "./opfs.js";
 import { validateProject } from "./project-model.js";
 import { storedScenes } from "./scenes.js";
+import { splitBinary, joinBinary } from "./binary.js";
 export function createRepository(io) {
   const read = async (path) => {
     const raw = await io.read(path);
@@ -8,6 +9,18 @@ export function createRepository(io) {
   };
   const version = async (id, rev) =>
     read(`projects/${id}/versions/${rev}.json`);
+  const readBlob = async (id) => {
+    const blob = await io.readBlob(`blobs/${id}`);
+    if (!blob) throw Error("Missing file data: " + id);
+    return blob;
+  };
+  // A value's JSON, its binary contents written once by id.
+  const store = async (value) => {
+    const { json, blobs } = splitBinary(value);
+    for (const [id, blob] of blobs)
+      if (!(await io.readBlob(`blobs/${id}`))) await io.write(`blobs/${id}`, blob);
+    return json;
+  };
   const api = {
     async list() {
       let entries;
@@ -36,10 +49,10 @@ export function createRepository(io) {
         if (!file) throw Error("Missing file data: " + path);
         files[path] = file;
       }
-      return { id, head: meta.head, name: meta.name, ...snapshot, files };
+      return joinBinary({ id, head: meta.head, name: meta.name, ...snapshot, files }, readBlob);
     },
     async commit(project, expectedHead, label = "Autosave") {
-      validateProject(project);
+      validateProject(await joinBinary(project));
       return io.lock(project.id, async () => {
         const headPath = `projects/${project.id}/HEAD.json`;
         const previous = await read(headPath);
@@ -49,7 +62,7 @@ export function createRepository(io) {
           );
         const files = {};
         for (const [path, file] of Object.entries(project.files)) {
-          const content = JSON.stringify(file);
+          const content = await store(file);
           const digest = await hash(content);
           files[path] = digest;
           if (!(await io.read(`objects/${digest}.json`)))
@@ -73,7 +86,7 @@ export function createRepository(io) {
         if (
           label === "Autosave" &&
           old &&
-          JSON.stringify(state) ===
+          (await store(state)) ===
             JSON.stringify({
               files: old.files,
               folders: old.folders,
@@ -95,7 +108,7 @@ export function createRepository(io) {
         };
         await io.write(
           `projects/${project.id}/versions/${rev}.json`,
-          JSON.stringify(snapshot),
+          await store(snapshot),
         );
         await io.write(
           headPath,

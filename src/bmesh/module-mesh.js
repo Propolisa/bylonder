@@ -8,13 +8,14 @@ export const FLAGS = [['.select_vert', 'POINT'], ['.hide_vert', 'POINT'], ['.sel
 export function moduleMesh(x, createMesh) {
   // Copies arrays into module memory (null stays a null pointer), runs fn with their pointers, and frees them.
   function withArrays(arrays, fn) {
-    const pointers = arrays.map((a) => {
-      if (!a) return 0;
-      const p = x.malloc(a.byteLength) >>> 0;
-      new a.constructor(x.memory.buffer, p >>> 0, a.length).set(a);
-      return p;
-    });
+    const pointers = [];
     try {
+      for (const a of arrays) {
+        const p = a ? x.malloc(a.byteLength) >>> 0 : 0;
+        if (a && !p) throw new RangeError(`Out of memory: ${Math.ceil(a.byteLength / 1048576)} MB do not fit in Blender's memory`);
+        if (a) new Uint8Array(x.memory.buffer, p, a.byteLength).set(new Uint8Array(a.buffer, a.byteOffset, a.byteLength));
+        pointers.push(p);
+      }
       return fn(pointers);
     } finally {
       pointers.forEach((p) => p && x.free(p));

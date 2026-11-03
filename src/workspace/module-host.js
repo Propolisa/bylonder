@@ -85,10 +85,7 @@ export async function publishRun(project) {
     base = APP_BASE + "__workspace_run/" + run + "/";
   const cache = await caches.open(RUN_CACHE);
   for (const [path, file] of Object.entries(project.files)) {
-    const body =
-      file.kind === "binary"
-        ? Uint8Array.from(atob(file.content), (c) => c.charCodeAt(0))
-        : await transform(file.content, path);
+    const body = file.kind === "binary" ? file.content : await transform(file.content, path);
     await cache.put(
       new URL(base + path, location.origin),
       new Response(body, {
