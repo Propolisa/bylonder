@@ -74,6 +74,82 @@
   }
  },
  {
+  "id": "drivers-and-graph-editor",
+  "title": "Drivers and the Graph Editor",
+  "summary": "Shape animation as F-curves in the Graph Editor, repeat or shake them with F-curve modifiers, and drive one property from others with drivers, here a steam engine whose flywheel moves everything else.",
+  "expect": "F-curves, their modifiers and drivers are Blender's and evaluate as in Blender, simple expressions without Python; a driver's Python expression starts Python on first use, which takes a few seconds.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/editors/graph_editor/fcurves/modifiers.html",
+   "https://docs.blender.org/manual/en/5.2/animation/drivers/introduction.html",
+   "https://docs.blender.org/manual/en/5.2/animation/drivers/drivers_panel.html",
+   "https://docs.blender.org/manual/en/5.2/editors/drivers.html"
+  ],
+  "example": "drivers-and-graph-editor",
+  "thumbnail": "drivers-and-graph-editor/thumbnail.png",
+  "media": [
+   "drivers-and-graph-editor/play.gif",
+   "drivers-and-graph-editor/graph-editor.png",
+   "drivers-and-graph-editor/speed.gif",
+   "drivers-and-graph-editor/drivers.png",
+   "drivers-and-graph-editor/noise.png"
+  ],
+  "ui": [
+   "FCURVES",
+   "DRIVERS",
+   "VIEW_3D",
+   "GRAPH_HT_header",
+   "GRAPH_MT_key*",
+   "GRAPH_MT_select",
+   "GRAPH_MT_view",
+   "GRAPH_PT_properties",
+   "GRAPH_PT_key_properties",
+   "GRAPH_PT_modifiers",
+   "GRAPH_PT_drivers",
+   "GRAPH_PT_driven_property"
+  ],
+  "operators": [
+   "graph.view_all",
+   "graph.select_all",
+   "transform.resize",
+   "graph.fmodifier_add",
+   "anim.driver_button_add",
+   "anim.driver_button_remove",
+   "screen.animation_play",
+   "ed.undo"
+  ],
+  "code": [
+   "src/editors/animation/anim-area.js",
+   "src/blenkernel/animation/anim-blender.js",
+   "src/blenkernel/main-sync.js"
+  ],
+  "tests": [
+   "tests/anim-wasm.test.js",
+   "tests/animation.test.js"
+  ],
+  "limits": [
+   "Bylonder keeps an object's rotation in Euler YXZ; keys on an XYZ rotation of an object turned on more than one axis play in the wrong order (the file's warning says so), so the flywheel's mesh is stood up and only its Y rotation is keyed.",
+   "A driver whose expression needs Python (anything Blender's simple expression evaluator does not take) waits until Python has started, a few seconds after its first use.",
+   "The example's drivers and modifiers are made by its script; the steps show them and change a key rather than build them from nothing."
+  ],
+  "page": "docs/features/drivers-and-graph-editor.md",
+  "open": "https://propolisa.github.io/bylonder/#example=drivers-and-graph-editor",
+  "example_title": "Steam Engine",
+  "coverage": {
+   "operators": {
+    "supported": 70,
+    "partial": 1,
+    "total": 106
+   },
+   "ui": {
+    "supported": 10,
+    "partial": 0,
+    "total": 21
+   }
+  }
+ },
+ {
   "id": "geometry-node-editor",
   "title": "Geometry Node Editor",
   "summary": "Show and edit the node group of the active Geometry Nodes modifier, here the Hair Dynamics example's Generate Hair Curves.",
