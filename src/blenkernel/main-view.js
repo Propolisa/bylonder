@@ -6,7 +6,7 @@
 import { dnaGet, dnaProperty } from '../makesrna/dna-struct.js';
 import { syncBindings, LIGHT_STRUCTS } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
-import { createLight } from './light/light-home.js';
+import { BLENDER, createLight } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
 import { createMesh, mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
@@ -53,7 +53,8 @@ export const same = (a, b) => (Array.isArray(a) ? Array.isArray(b) && a.length =
 // The Babylon objects an Object of Main's becomes, by its type.
 const MAKERS = {
   EMPTY: (scene, name) => new TransformNode(name, scene),
-  CAMERA: (scene, name) => asObject(new FreeCamera(name, Vector3.Zero(), scene)),
+  // A camera Blender's code made is Blender's: its lens is Main's, which frames its field of view (main-sync fitCamera).
+  CAMERA: (scene, name) => Object.assign(asObject(new FreeCamera(name, Vector3.Zero(), scene)), { metadata: { wbHome: BLENDER } }),
   // A light Blender's code made is Blender's (docs/blender-boundary.md point 4a); the view fills its settings from Main.
   LIGHT: (scene, name, ob, blender) => createLight(name, dnaGet('Light', blender.data(ob), 'type'), {}, scene),
   MESH: (scene, name) => new Mesh(name, scene),

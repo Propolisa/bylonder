@@ -1456,6 +1456,9 @@ async function expectStats(test, timeout = 10000) {
   assert.fail(`status bar never matched ${test}: ${JSON.stringify(stats)}`);
 }
 
+// A check's pending wait (a file chooser, a download) that rejects after the check failed is that check's failure, not
+// the run's: it is logged and the next check runs.
+process.on("unhandledRejection", (error) => console.log(`late rejection: ${error?.message?.split("\n")[0]}`));
 const filter = process.argv[2];
 // SHARD=i/n runs every n-th check from the i-th (scripts/gates.mjs runs shards in parallel).
 const [shard, shards] = (process.env.SHARD ?? "0/1").split("/").map(Number);

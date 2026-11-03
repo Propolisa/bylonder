@@ -285,6 +285,12 @@ export class BlenderMain {
   set pivotPoint(pivot) { x.main_pivot_point_set(this.#context, pivot); }
   // The scene's active camera object (or null).
   set camera(ob) { x.main_scene_camera_set(this.#context, ob ?? 0); }
+  // The field of view a camera object frames a width by height image with, along the side its sensor fits, and whether
+  // that side is the height (main-api.cc camera_view_fov).
+  cameraViewFov(ob, width, height) {
+    const [fov, vertical] = new Float32Array(x.memory.buffer, x.camera_view_fov(ob, width, height) >>> 0, 2);
+    return { fov, vertical: vertical > 0 };
+  }
 
   // Main evaluated by Blender's depsgraph for what was tagged; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }

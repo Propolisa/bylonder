@@ -20,7 +20,6 @@ import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { outputSize } from '../blenkernel/scene/render.js';
-import { cameraLens, sensorSize, setCameraLens } from '../blenkernel/scene/camera-fit.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
@@ -127,9 +126,31 @@ const objectChannel = (property) => (ob, index) => address('object:' + nodeId(ob
 const transformLocks = (property) => array((ob) => [...'xzy'].map((axis) => !!ob.metadata?.wbTransformLocks?.[property + '.' + axis]), (ob, value) => {
   ob.metadata = { ...ob.metadata, wbTransformLocks: { ...ob.metadata?.wbTransformLocks, ...Object.fromEntries(value.map((locked, i) => [property + '.' + 'xzy'[i], !!locked])) } };
 });
-// A camera's lens setting (camera-fit.js), refitted to the scene's output size.
+// A camera's lens settings are Main's (read and written there), and its field of view is refitted to the scene's output
+// as Blender frames it (main-sync.js fitCamera). A camera Main does not hold has Babylon's field of view on a 36 by 24 mm
+// sensor fitted to the side Babylon fixes.
 const outputOf = (r) => (r.world.renderSettings ? outputSize(r.world.renderSettings.state.render) : { width: 1920, height: 1080 });
-const lensValue = (key) => ({ get: (camera) => cameraLens(camera)[key], set: (camera, value, r) => setCameraLens(camera, { [key]: value }, outputOf(r)), sync: true });
+const vertical = (camera) => camera.fovMode === Camera.FOVMODE_VERTICAL_FIXED;
+const sensor = (camera) => (vertical(camera) ? 24 : 36);
+const LENS = {
+  sensor_fit: [(camera) => (vertical(camera) ? 'VERTICAL' : 'HORIZONTAL'), (camera, fit) => {
+    const lens = sensor(camera) / 2 / Math.tan(camera.fov / 2);
+    camera.fovMode = fit === 'VERTICAL' ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED;
+    camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens);
+  }],
+  sensor_width: [() => 36, () => {}],
+  sensor_height: [() => 24, () => {}],
+  lens: [(camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); }],
+};
+const blenderCamera = (camera) => camera.metadata?.wbHome === 'BLENDER';
+const lensValue = (key) => ({
+  get: (camera, r) => {
+    const sync = r.world.mainSync, record = blenderCamera(camera) && sync?.held('Camera', camera, key);
+    return record ? sync.read(record, key) : LENS[key][0](camera);
+  },
+  set: (camera, value, r) => (blenderCamera(camera) && r.world.mainSync ? r.world.mainSync.fitCamera(camera, outputOf(r)) : LENS[key][1](camera, value)),
+  sync: true,
+});
 const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
 const subframe = (world) => world.animation.time.frame - Math.floor(world.animation.time.frame);
 const notPBR = (material) => material.getClassName() !== 'PBRMaterial';
@@ -517,9 +538,7 @@ const STRUCTS = {
     sensor_width: lensValue('sensor_width'),
     sensor_height: lensValue('sensor_height'),
     lens: lensValue('lens'),
-    // rna_camera.cc rna_Camera_angle_get: the field of view along the fit's sensor side.
-    angle: { get: (camera) => { const l = cameraLens(camera); return 2 * Math.atan(sensorSize(l.sensor_fit, l.sensor_width, l.sensor_height) / 2 / l.lens); },
-      set: (camera, angle, r) => { const l = cameraLens(camera); setCameraLens(camera, { lens: sensorSize(l.sensor_fit, l.sensor_width, l.sensor_height) / 2 / Math.tan(angle / 2) }, outputOf(r)); } },
+    angle: settable('fov'),
     ortho_scale: { get: (camera) => camera.metadata?.orthoScale ?? 6, set: (camera, scale) => { camera.metadata = { ...camera.metadata, orthoScale: scale }; }, sync: true },
     // How the lens is shown (millimeters or field of view), kept with the camera.
     lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; }, sync: true },
