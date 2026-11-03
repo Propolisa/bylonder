@@ -1,6 +1,6 @@
 // Drives Bylonder's production build in Chromium, for the smoke tests and the visual parity harness.
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { variantItems } from "../../src/coverage/coverage.js";
 import { tmpdir } from "node:os";
 import { createRequire } from "node:module";
@@ -17,7 +17,12 @@ const gl = ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist"];
 export const chromium = { launch: (options) => playwright.chromium.launch({ ...proxy, args: gl, ...options }) };
 // Chromium's incognito contexts crash on file handles read back from IndexedDB (the Sequencer's media library): checks
 // that reload with media open the app in a profile of its own.
-const persistentContext = (options) => playwright.chromium.launchPersistentContext(mkdtempSync(`${tmpdir()}/bylonder-profile-`), { ...proxy, args: gl, ...options });
+async function persistentContext(options) {
+  const profile = mkdtempSync(`${tmpdir()}/bylonder-profile-`);
+  const context = await playwright.chromium.launchPersistentContext(profile, { ...proxy, args: gl, ...options });
+  context.on("close", () => rmSync(profile, { recursive: true, force: true }));
+  return context;
+}
 
 const mtime = (file) => statSync(root + file, { throwIfNoEntry: false })?.mtimeMs ?? 0;
 const stale = () => {
