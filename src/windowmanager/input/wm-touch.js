@@ -5,13 +5,16 @@
 // and orbit; over UI a pinch sets Resolution Scale. Two and three finger taps press Ctrl Z and Shift Ctrl Z.
 // An element's computed `--bl-touch` (theme.css) says what two fingers do there: `view`, navigate it; `list`, scroll
 // it; `ui` (the default), the browser scrolls it. A pinch outside a view always scales the UI.
+// Held still past the tooltip's time over an element that carries (`data-touch-hold-drag`, an area's header), a drag
+// carries it: the element gets `bl-hold-drag` events ({ phase: arm, start, move, end or cancel, x, y }) instead of the
+// mouse's, armed at the hold so it can keep the browser from scrolling (its touchmove's preventDefault).
 
 export const RIGHT_CLICK_DELAY = 800;
 const TOOLTIP_DELAY = 400, TAP_TIME = 300, SCALE_RANGE = [0.5, 2];
 // Blender's drag threshold for a tablet (U.drag_threshold_tablet): the nearest of its inputs to a finger.
 const THRESHOLD = 10;
 // Elements whose touches are their own: the touch layer's own controls.
-const OWN = '.bl-touch-own';
+const OWN = '.bl-touch-own', CARRIES = '[data-touch-hold-drag]';
 
 const clones = new WeakSet();
 const gestureWheels = new WeakSet();
@@ -102,11 +105,16 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
     target.dispatchEvent(menu);
     swallowClick(at.pointerId);
   }
+  const carry = (phase, at) => first.carry?.dispatchEvent(new win.CustomEvent('bl-hold-drag', { detail: { phase, x: at.clientX, y: at.clientY } }));
+  const drop = (phase, at) => { carry(phase, at); first.carry = null; };
   function startHold() {
     const point = { x: first.down.clientX, y: first.down.clientY }, tip = tooltipOf(first.down.target);
     ui.hold(point);
     timers.push(setTimeout(() => {
-      if (mode !== 'pending' || !tip) return;
+      if (mode !== 'pending') return;
+      first.carry = first.down.target.closest?.(CARRIES) ?? null;
+      carry('arm', first.down);
+      if (!tip) return;
       mode = 'tooltip';
       ui.tooltip(tip, point);
     }, TOOLTIP_DELAY));
@@ -115,6 +123,7 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
 
   // Two or more fingers: the trackpad over a view, Resolution Scale over UI.
   function startGesture() {
+    if (first?.carry) drop('cancel', first.down);
     clearTimers();
     ui.close();
     tooltipOpen = false;
@@ -185,13 +194,14 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
     contacts.get(event.pointerId).point = { x: event.clientX, y: event.clientY };
     input.point?.(contacts.get(event.pointerId).point);
     if (mode === 'mouse' && event.pointerId === first.down.pointerId) dispatchClone('pointermove', event);
+    else if (mode === 'carry' && event.pointerId === first.down.pointerId) carry('move', event);
     else if (mode === 'gesture') moveGesture();
     else if (mode === 'pending' || mode === 'tooltip') {
       first.moves.push(event);
       const dx = event.clientX - first.down.clientX, dy = event.clientY - first.down.clientY;
       if (Math.hypot(dx, dy) < THRESHOLD) return;
       clearTimers();
-      if (mode === 'tooltip') { ui.close(); mode = 'done'; } else if (browserPans(first.down.target, dx, dy)) mode = 'done';
+      if (first.carry) { ui.close(); mode = 'carry'; carry('start', event); carry('move', event); } else if (mode === 'tooltip') { ui.close(); mode = 'done'; } else if (browserPans(first.down.target, dx, dy)) mode = 'done';
       else commit();
     }
   }
@@ -200,6 +210,9 @@ export function installTouch(win, { ui, scale, keys, input = {} }) {
     event.stopImmediatePropagation();
     contacts.delete(event.pointerId);
     const cancelled = event.type === 'pointercancel';
+    if (event.pointerId === first?.down.pointerId && first.carry) {
+      if (mode === 'carry') { drop(cancelled ? 'cancel' : 'end', event); mode = 'done'; swallowClick(event.pointerId); } else drop('cancel', event);
+    }
     if (mode === 'pending' && !cancelled) { commit(); dispatchClone('pointerup', event); focusField(event.target); input.pressed?.(); }
     // A press the browser took back (a system gesture) is released, so no button stays down.
     else if (mode === 'mouse' && event.pointerId === first.down.pointerId) { dispatchClone('pointerup', event); input.pressed?.(); }

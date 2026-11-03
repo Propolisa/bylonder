@@ -2,7 +2,7 @@
 id: mobile
 title: Touch and Pen
 summary: Blender's own screens, keymaps and operators on large phones and tablets, with gestures for navigation, press and hold for tooltips and right clicks, pinch to scale the interface and drawers for areas that do not fit.
-expect: Blender's screens, menus, tools and context menus work by touch on a large phone or a tablet; the UI stays dense (pinch over it to scale it); a dragged value shows above the finger with soft Shift and Ctrl; keys without a keyboard come later (the touch bar), and hover needs a pen.
+expect: Blender's screens, menus, tools and context menus work by touch on a large phone or a tablet; the UI stays dense (pinch over it to scale it); a dragged value shows above the finger with soft Shift and Ctrl; area edges and headers take a long press; keys without a keyboard come later (the touch bar), and hover needs a pen.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/3dview/navigate/navigation.html
@@ -18,6 +18,8 @@ media:
   - mobile/header.gif
   - mobile/hold.gif
   - mobile/value.gif
+  - mobile/edge.gif
+  - mobile/carry.gif
 ui:
   - VIEW_3D
   - PROPERTIES
@@ -33,6 +35,10 @@ operators:
   - wm.call_menu
   - ed.undo
   - ed.redo
+  - screen.area_options
+  - screen.area_split
+  - screen.area_join
+  - screen.area_swap
 code:
   - src/windowmanager/input/wm-touch.js
   - src/editors/interface/touch.js
@@ -48,7 +54,8 @@ limits:
   - Keys need a keyboard; a touch bar with sticky modifiers, shortcut bubbles and a keyboard sheet is not here yet.
   - Hover without a press (tool previews, Knife and Poly Build preselection) needs a pen; a finger has no hover.
   - Twisting two fingers does nothing; three fingers orbit.
-  - Areas swap and dock by mouse only (Ctrl drag from a corner); the long press on headers and edges is not here yet.
+  - An area carried by its header swaps with the area it is dropped on; docking it at another area's edge is not here yet.
+  - Panels do not reorder by a hold and drag on their header.
 ---
 # Touch and Pen
 
@@ -93,6 +100,16 @@ The demo is the Default Cube, opened on a phone or a tablet (or with a desktop b
    or Ctrl (Snap) for Blender's snapped increments; let go to drag at normal speed again.
 
    ![Location X dragged, with its readout and Shift held](../media/features/mobile/value.gif)
+
+7. **Use an area edge.** Press and hold on the edge between the 3D Viewport and the Timeline: Blender's Area Edge
+   Options menu opens, with Vertical Split, Horizontal Split, Join Up, Join Down and Swap Areas. Tap Swap Areas.
+
+   ![The area edge menu by a long press, then Swap Areas](../media/features/mobile/edge.gif)
+
+8. **Carry an area.** Hold the Timeline's header until the ring fills halfway, then drag it over the 3D Viewport:
+   the area under the finger is highlighted, and lifting swaps the two.
+
+   ![The Timeline carried by its header onto the 3D Viewport](../media/features/mobile/carry.gif)
 
 ## Project files
 

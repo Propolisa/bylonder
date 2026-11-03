@@ -74,4 +74,25 @@ await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true
   });
   await r.page.keyboard.press("Escape");
   await r.pause(400);
+
+  const edge = await app.locator(".dock-split-tree .splitpanes--horizontal > .splitpanes__splitter:visible").first().boundingBox();
+  const swap = async () => { await fingers.tap(await center(app.frame().getByRole("menuitem", { name: "Swap Areas" }))); await r.pause(1000); };
+  await r.gif("edge", undefined, async () => {
+    await fingers.hold([edge.x + edge.width / 2, edge.y + edge.height / 2 + 8], 1000);
+    await r.pause(1200);
+    await swap();
+  });
+  await app.bylonder((b) => b.dock.reset());
+  await r.pause(1000);
+
+  await r.gif("carry", undefined, async () => {
+    const from = await center(app.locator('.dock-leaf[data-section="timeline"] > .dock-heading')), to = await app.point(0.5, 0.4);
+    await fingers.send("touchStart", [from]);
+    await r.pause(600);
+    for (let i = 1; i <= 15; i++) await step([[from[0] + (to[0] - from[0]) * i / 15, from[1] + (to[1] - from[1]) * i / 15]]);
+    await r.pause(600);
+    await fingers.send("touchEnd", []);
+    await r.pause(1000);
+  });
+  await app.bylonder((b) => b.dock.reset());
 });

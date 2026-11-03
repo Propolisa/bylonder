@@ -81,8 +81,9 @@
 html,body{background:var(--bl-gap);color:var(--bl-text);font:var(--bl-font)}
 /* Touch (docs/mobile.md): UI scrolls natively and the page never zooms; in a list two fingers scroll it, in a view
    every gesture is Blender's trackpad navigation; what is dragged takes every touch. --bl-finger: how far a finger
-   hides around its point. */
-:root{--bl-finger:44px;--bl-touch:ui;touch-action:pan-x pan-y}
+   hides around its point; --bl-edge-margin: an area edge's hit area on each side, wider for a finger. */
+:root{--bl-finger:44px;--bl-edge-margin:3px;--bl-touch:ui;touch-action:pan-x pan-y}
+@media (pointer:coarse){:root{--bl-edge-margin:12px}}
 canvas,.bl-area-main,.bl-outliner{--bl-touch:list;touch-action:none}
 .viewport-canvas,.anim-editor,.bl-node-editor,.logic-editor,[data-blender=IMAGE_EDITOR] .bl-area-main{--bl-touch:view}
 .nav-gizmo,.dock-corner,.splitpanes__splitter,.viewport-canvas,.anim-editor,.bl-node-editor,.logic-editor{touch-action:none}

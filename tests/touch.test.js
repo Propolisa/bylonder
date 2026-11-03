@@ -165,4 +165,25 @@ function setup(input) {
   assert.deepEqual(moves, [[140, true], [150, false]]);
   assert.ok(!win.view.seen.some((e) => e.type === 'wheel'), 'no gesture');
 }
-console.log('Touch: taps, drags, press and hold, view gestures, UI pinch, undo taps and value drag modifiers passed');
+// An area's header held, then dragged: it is carried (arm at the hold, start, moves, end) and no mouse button is pressed;
+// a drag without the hold scrolls as over any UI.
+{
+  const { win, types } = setup();
+  const header = new FakeElement(win, win.ui.parentElement, { '--bl-touch': 'ui' });
+  header.carries = true;
+  win.target = header;
+  const phases = () => header.seen.filter((e) => e.type === 'bl-hold-drag').map((e) => e.detail.phase);
+  touchEvent(win, 'pointerdown', 1, 100, 100, header);
+  touchEvent(win, 'pointermove', 1, 160, 100, header);
+  touchEvent(win, 'pointercancel', 1, 160, 100, header);
+  assert.deepEqual(phases(), [], 'a quick drag scrolls');
+  touchEvent(win, 'pointerdown', 1, 100, 100, header);
+  await wait(450);
+  touchEvent(win, 'pointermove', 1, 160, 100, header);
+  touchEvent(win, 'pointermove', 1, 200, 300, header);
+  touchEvent(win, 'pointerup', 1, 200, 300, header);
+  assert.deepEqual(phases(), ['arm', 'start', 'move', 'move', 'end']);
+  assert.deepEqual(header.seen.at(-1).detail, { phase: 'end', x: 200, y: 300 });
+  assert.deepEqual(types(header).filter((t) => t.startsWith('pointer')), []);
+}
+console.log('Touch: taps, drags, press and hold, view gestures, UI pinch, undo taps, value drag modifiers and header carry passed');

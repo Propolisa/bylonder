@@ -30,10 +30,11 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   const baseCount=items.length,factories=new Map(),instances=new Map();
   const ids=items.map(item=>item.id), panels=new Map(), slots=new Map();
   let saved={}, menuElement, hovered=null, frameId, disposed=false;
-  // The header's context menu (screen.region_context_menu), which the app gives (onHeaderMenu).
-  let headerMenu=()=>{};
+  // The header's context menu (screen.region_context_menu), which the app gives (onHeaderMenu); an area edge's
+  // (screen.area_options, onEdgeMenu); an area dropped on another by its header (screen.area_swap, onSwap).
+  let headerMenu=()=>{},edgeMenu=()=>{},swapAreas=(a,b)=>swap(a,b);
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({drawer:null,screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
+  const state=reactive({drop:null,drawer:null,screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),factoryCount:0,width:0,height:0,content:null});
   const screenOf=()=>screens[state.screen]??{tree:firstTree,defaults:firstDefaults};
   const tree=()=>screenOf().tree,defaults=()=>screenOf().defaults();
   // Each screen keeps its own layout; the first screen's under 'main'.
@@ -115,8 +116,9 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   function renderNode(node,extent=state.content){
     if(typeof node==='number'){
       const id=state.layout.order[node];
-      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)}],onPointerenter:()=>hovered=node,onEditorType:e=>editorType(e.detail,node)},[
-        h('div',{class:'dock-heading',onContextmenu:e=>{e.preventDefault();e.stopPropagation();headerMenu(id,e);}},[
+      return h('div',{'data-section':id,class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)}],onPointerenter:()=>hovered=node,onEditorType:e=>editorType(e.detail,node)},[
+        h('div',{class:'dock-heading','data-touch-hold-drag':'',onContextmenu:e=>{e.preventDefault();e.stopPropagation();headerMenu(id,e);},
+          'onBl-hold-drag':e=>carry(id,e.detail),onTouchmove:e=>{if(carried)e.preventDefault();}},[
           // An editor whose header is not Blender's yet has the screen's editor type button in place of Blender's.
           items.find(item=>item.id===id)?.blenderHeader?null:h('button',{type:'button',class:'dock-editor-type',title:'Editor Type · '+(items.find(item=>item.id===id)?.title||''),'aria-label':'Editor Type',onClick:e=>openPopup(editorChoices(node),e.currentTarget,'Editor Type')},[icon((items.find(item=>item.id===(items.find(i=>i.id===id)?.type||id))||{}).icon||'properties')]),
           h('div',{class:'dock-header-host',ref:el=>{const content=header(id);if(el&&content.parentElement!==el)el.replaceChildren(content);}}),
@@ -202,11 +204,37 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
     detail.available=!!choice;
     if(choice&&detail.choose)choice.run();
   };
+  const swap=(a,b)=>{const order=state.layout.order,i=order.indexOf(a),j=order.indexOf(b);if(i<0||j<0||i===j)return;[order[i],order[j]]=[order[j],order[i]];persist();};
+  // The two areas of a split, when that is all it holds: they join as Blender joins two areas sharing a whole edge.
+  const siblings=(a,b)=>{const pair=[a,b].map(id=>state.layout.order.indexOf(id)).sort().join();const find=node=>typeof node!=='number'&&([...node.children].sort().join()===pair||node.children.some(find));return find(state.tree);};
+  // An area carried by its header (docs/mobile.md Area management): a finger's hold and drag (wm-touch.js), dropped
+  // on another area to swap them; its drop highlight is Blender's for screen.area_swap.
+  let carried=null;
+  const areaAt=(x,y)=>document.elementsFromPoint(x,y).map(el=>el.closest('[data-section]')?.dataset.section).find(Boolean)??null;
+  function carry(id,{phase,x,y}){
+    if(phase==='arm'){carried=id;return;}
+    const target=phase==='move'||phase==='end'?areaAt(x,y):null,other=target&&target!==id?target:null;
+    if(phase==='end'&&other)swapAreas(id,other);
+    if(phase==='end'||phase==='cancel'){carried=null;state.drop=null;return;}
+    const leaf=other&&root.querySelector(`.dock-leaf[data-section="${CSS.escape(other)}"]`)?.getBoundingClientRect();
+    state.drop=leaf?{left:leaf.left+'px',top:leaf.top+'px',width:leaf.width+'px',height:leaf.height+'px'}:null;
+  }
+  // A long press or right click on an area edge: the areas on its two sides (left or top first), found as Blender
+  // finds them (screen_area_edge_from_cursor), past the edge's touch margin.
+  root.addEventListener('contextmenu',event=>{
+    const splitter=event.target.closest?.('.splitpanes__splitter');
+    if(!splitter)return;
+    event.preventDefault();event.stopPropagation();
+    const vertical=splitter.parentElement.classList.contains('splitpanes--vertical'),r=splitter.getBoundingClientRect(),margin=token('--bl-edge-margin')+2;
+    const areas=vertical?[areaAt(r.left-margin,event.clientY),areaAt(r.right+margin,event.clientY)]:[areaAt(event.clientX,r.top-margin),areaAt(event.clientX,r.bottom+margin)];
+    if(areas.every(Boolean))edgeMenu({areas,vertical,joinable:siblings(...areas)},event);
+  });
   const closeArea=slot=>{if(typeof state.tree==='number')return;const next=removeArea(state.tree,slot);if(next===null)return;state.tree=next;const id=state.layout.order[slot];if(!state.layout.hidden.includes(id))state.layout.hidden.push(id);state.focus=null;persist();};
   const labels={animation:'Timeline split',root:'Main split',main:'Output split',editors:'Editor split',inspector:'Inspector split'};
   const app=createApp({setup(){
     watch(()=>JSON.stringify([state.layout,state.focus]),()=>nextTick(position),{flush:'post'});
     return ()=>h('div',{class:'dock-shell'},[
+      state.drop&&h('div',{class:'dock-drop',style:state.drop},icon('area_swap')),
       h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'},bareFocus?[]:[renderNode(state.layout.order.indexOf(focus()))]):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree',ref:el=>el&&observer.observe(el)},[renderNode(state.tree)])),
       h(Teleport,{to:document.body},[h('dialog',{class:'dock-dialog',ref:el=>menuElement=el,onClick:e=>{if(e.target===menuElement)closeMenu();}},[
         h('div',{class:'dock-dialog-title'},[h('strong','Workspace Layout'),button('×',closeMenu,'Close layout')]),
@@ -230,5 +258,5 @@ export function mountDock({host, items, tree: firstTree, defaults: firstDefaults
   window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
   // Blender's workspace switch: another screen over the same areas.
   const setScreen=name=>{const next=name in screens?name:null;if(next===state.screen)return;persist();state.screen=next;load();persist();};
-  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+  return {show,toggle,reset,openMenu,setFactory,header,setScreen,onHeaderMenu(fn){headerMenu=fn;},onEdgeMenu(fn){edgeMenu=fn;},onSwap(fn){swapAreas=fn;},swap,join(keep,remove){if(siblings(keep,remove))closeArea(state.layout.order.indexOf(remove));},get hovered(){return hovered===null?null:state.layout.order[hovered];},get screen(){return state.screen;},get areas(){return leaves(state.tree).map(slot=>state.layout.order[slot]);},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
 }

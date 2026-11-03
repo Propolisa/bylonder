@@ -71,6 +71,9 @@ async function closeDrawer() {
   await drawer.waitFor({ state: "detached" });
   await pause();
 }
+// The areas, top to bottom and left to right, by their editors.
+const areas = () => app.frame().evaluate(() => [...document.querySelectorAll(".dock-split-tree .dock-leaf")].map((leaf) => [leaf.dataset.section, Math.round(leaf.getBoundingClientRect().top), Math.round(leaf.getBoundingClientRect().left)])
+  .sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(([id]) => id));
 const selected = () => app.bylonder((b) => b.editor.selection.nodes[0].position.asArray());
 
 const checks = {
@@ -218,6 +221,59 @@ const checks = {
     // Each drag is an undo step: two finger taps undo them.
     for (let i = 0; i < 3 && Math.abs((await selected())[0] - start) > 1e-6; i++) { await touch.tap(await app.point(0.5, 0.92), 2); await pause(); }
     assert.ok(Math.abs((await selected())[0] - start) < 1e-6, "undone");
+  },
+
+  // docs/mobile.md Area management: Blender's edge menu (screen.area_options) by a long press inside the edge's
+  // touch margin, and an area carried by its header.
+  async "a long press on an area edge opens Blender's edge menu: Swap Areas swaps, Join joins, a split splits"() {
+    await closeDrawer();
+    const edge = app.locator(".dock-split-tree .splitpanes__splitter:visible").first();
+    const box = await edge.boundingBox(), vertical = box.height > box.width;
+    const at = vertical ? [box.x + box.width / 2 + 9, box.y + box.height / 2] : [box.x + box.width / 2, box.y + box.height / 2 + 9];
+    const menu = app.locator(".bl-menu").filter({ hasText: "Swap Areas" });
+    const edgeMenu = async () => { await touch.hold(at, 1000); await menu.waitFor(); await pause(); };
+    const choose = async (label) => { await touch.tap(await center(menu.locator(".bl-menu-item", { hasText: label }))); await menu.waitFor({ state: "detached" }); await pause(); };
+    const before = await areas(), count = () => app.bylonder((b) => b.dock.areas.length), all = await count();
+    await edgeMenu();
+    for (const label of ["Vertical Split", "Horizontal Split", vertical ? "Join Right" : "Join Up", vertical ? "Join Left" : "Join Down"])
+      assert.equal(await menu.locator(".bl-menu-item", { hasText: label }).count(), 1, label);
+    await choose("Swap Areas");
+    const swapped = await areas();
+    assert.notDeepEqual(swapped, before, "the areas swapped");
+    await edgeMenu();
+    await choose("Swap Areas");
+    assert.deepEqual(await areas(), before, "swapped back");
+    await edgeMenu();
+    await choose(vertical ? "Join Left" : "Join Down");
+    assert.equal((await areas()).length, before.length - 1, "joined");
+    await app.bylonder((b) => b.dock.reset());
+    await app.page.waitForTimeout(300);
+    assert.deepEqual(await areas(), before);
+    await edgeMenu();
+    await choose("Vertical Split");
+    assert.equal(await count(), all + 1, "split");
+    await app.bylonder((b) => b.dock.reset());
+    await app.page.waitForTimeout(300);
+  },
+
+  async "an area held and dragged by its header swaps with the area it is dropped on, which is highlighted"() {
+    await closeDrawer();
+    const before = await areas(), viewport = before.indexOf("viewport"), other = before.find((id, i) => i !== viewport);
+    const heading = app.locator(`.dock-leaf[data-section="${other}"] > .dock-heading`);
+    const from = await center(heading), to = await app.point(0.5, 0.5);
+    await touch.send("touchStart", [from]);
+    await app.page.waitForTimeout(550);
+    for (let i = 1; i <= 10; i++) { await touch.send("touchMove", [[from[0] + (to[0] - from[0]) * i / 10, from[1] + (to[1] - from[1]) * i / 10]]); await app.page.waitForTimeout(20); }
+    await app.locator(".dock-drop").waitFor();
+    const drop = await app.locator(".dock-drop").boundingBox(), area = await app.locator('.dock-leaf[data-section="viewport"]').boundingBox();
+    assert.ok(Math.abs(drop.x - area.x) < 2 && Math.abs(drop.width - area.width) < 2, "the 3D Viewport is highlighted");
+    await touch.send("touchEnd", []);
+    await app.locator(".dock-drop").waitFor({ state: "detached" });
+    const after = await areas();
+    assert.equal(after.indexOf(other), viewport, "the carried area took the 3D Viewport's place");
+    assert.equal(await app.locator(".bl-menu").count(), 0, "no menu");
+    await app.bylonder((b) => b.dock.reset());
+    await app.page.waitForTimeout(300);
   },
 
   // Kept as Blender keeps the Preferences: saved by Save Preferences, or on leaving with Auto-Save Preferences.

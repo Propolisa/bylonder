@@ -57,7 +57,7 @@ import { createMainModes } from "./editors/object/main-modes.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
-import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
+import { registerOperators, runOperator, invokeOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { registerRuntimeTypes } from "./runtimes/runtimes.js";
 import { registerEeveeParityTypes } from "./draw/eevee-parity.js";
@@ -294,7 +294,7 @@ const settled = async () => {
   await new Promise((done) => requestAnimationFrame(() => done()));
   await world.modifiers.settled();
 };
-window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreferences,
+window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreferences, dock: viewportDock,
   // The Preferences and the key configurations, for tests.
   userdef: { preferences, changed: preferencesChanged, save: savePreferences, keyconfigs: () => bpyRna.contextStruct(blenderMain().C).window_manager.keyconfigs },
   // The Top Bar's menus, laid out here for the app page's topbar.
@@ -792,6 +792,9 @@ registerOperators({
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(screenArea()) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(screenArea()) },
+  "screen.area_options": { poll: () => !!areaEdge, run: (props, event) => openEdgeMenu(areaEdge, event) },
+  "screen.area_swap": { poll: () => !!areaEdge, run: () => viewportDock.swap(...areaEdge.areas) },
+  "screen.area_join": { poll: () => !!areaEdge?.keep, run: () => viewportDock.join(areaEdge.keep, areaEdge.remove) },
   // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
   "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : world.mainModes.mode() ? world.mainModes : editor).selectOperator(event, props) },
   "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : world.mainModes.mode() ? world.mainModes : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
@@ -865,6 +868,24 @@ viewportDock.onHeaderMenu((id, event) => {
     operator("Close Area", "screen.area_close", {}, "x"),
   ], event, "Header");
 });
+// An area edge's menu (screen_area_options_invoke), its entries acting on the areas on the edge's two sides (left or
+// top first): Join Right and Join Up keep the left and the lower area, Join Left and Join Down the others.
+let areaEdge = null;
+const onEdge = (edge, idname, props = {}) => () => { areaEdge = edge; headerArea = edge.areas[0]; try { runOperator(idname, props); } finally { areaEdge = null; headerArea = null; } };
+function openEdgeMenu({ areas: [first, second], vertical, joinable }, event) {
+  const edge = { areas: [first, second] }, join = (label, keep, remove, icon) => ({ label, icon, blender: "screen.area_join", run: onEdge({ ...edge, keep, remove }, "screen.area_join") });
+  openMenu([
+    { label: "Vertical Split", icon: "split_vertical", blender: "screen.area_split", run: onEdge(edge, "screen.area_split", { direction: "VERTICAL" }) },
+    { label: "Horizontal Split", icon: "split_horizontal", blender: "screen.area_split", run: onEdge(edge, "screen.area_split", { direction: "HORIZONTAL" }) },
+    "-",
+    ...(joinable ? vertical
+      ? [join("Join Right", first, second, "area_join"), join("Join Left", second, first, "area_join_left"), "-"]
+      : [join("Join Up", second, first, "area_join_up"), join("Join Down", first, second, "area_join_down"), "-"] : []),
+    { label: "Swap Areas", icon: "area_swap", blender: "screen.area_swap", run: onEdge(edge, "screen.area_swap") },
+  ], event, "Area Edge Options");
+}
+viewportDock.onEdgeMenu((edge, event) => { areaEdge = edge; try { invokeOperator("screen.area_options", {}, event); } finally { areaEdge = null; } });
+viewportDock.onSwap((a, b) => onEdge({ areas: [a, b] }, "screen.area_swap")());
 // Bylonder's own keys, below Blender's keymaps.
 const bylonderKeys = createKeymap([
   { keys: "ESC", poll: () => !world.wm.modal, run: () => renderHost.escape() },
