@@ -55,9 +55,10 @@ function cameraEffects(world, scene, camera) {
   try {
     const pipelines = scene.postProcessRenderPipelineManager.supportedPipelines.filter((p) => p.cameras?.includes(camera) && p.serialize);
     const owned = new Set(pipelines.flatMap((p) => Object.values(p._renderEffects ?? {}).flatMap((e) => e.getPostProcesses(camera) ?? [])));
+    // Bylonder's film (render/film.js) stays out.
     return {
       renderingPipelines: pipelines.map((p) => p.serialize()),
-      postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp)).map((pp) => pp.serialize()),
+      postProcesses: (camera._postProcesses ?? []).filter((pp) => pp && !owned.has(pp) && !pp.name.startsWith('__')).map((pp) => pp.serialize()),
     };
   } finally {
     world.renderSettings.setRenderedCameras(rendered);
