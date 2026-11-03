@@ -59,6 +59,12 @@ jobs:
         env:
           BASE_PATH: ./
           NODE_OPTIONS: --max-old-space-size=6144
+      # Blender's demo files served by the site itself, as blender.org sends no CORS headers (src/workspace/demo-files.js).
+      - uses: actions/cache@v4
+        with:
+          path: dist/blender-demo-files
+          key: blender-demo-files-${{ hashFiles('src/workspace/blender-demo-files.json') }}
+      - run: node scripts/demo-files.mjs
       # Some failures only happen in the production build: boot it in headless Chromium, open the menus and every
       # workspace, and fail before deploying on any page or console error (tests/e2e/prod.mjs).
       - uses: actions/cache@v4
