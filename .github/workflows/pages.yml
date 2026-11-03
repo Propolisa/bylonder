@@ -82,8 +82,10 @@ jobs:
         with:
           path: dist
 
+  # As the build: a skipped module build (the module is already released) must not skip the deploy.
   deploy:
     needs: build
+    if: ${{ !failure() && !cancelled() }}
     concurrency:
       group: pages-deploy
       cancel-in-progress: true
