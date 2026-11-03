@@ -137,6 +137,9 @@ percentile inside the sphere or over the tile). Measured with Render Image at 25
 | 11 Principled | 2.3 | 4.4 | 23 Pole shadow | 2.4 | 20.3 |
 | 12 Glossy | 2.7 | 4.1 | 24 Ring shadow | 5.9 | 48.3 |
 
+Through the gallery's Perspective camera (`tests/fixtures/shader-gallery-perspective-eevee.png`), the band of the frame the
+floor fills measures mean dE 2.1, 99th percentile 23 (shadow edges).
+
 > **Note** The header's Babylon Editor toggle opens the same graph in Babylon's Node Material Editor; both editors
 > keep one layout.
 
