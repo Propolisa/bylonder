@@ -3,7 +3,7 @@
 // its input becomes GHOST's events, which Blender's own event system handles with Blender's keymaps, modal handlers,
 // macros and gestures. Each event returns the regions Blender tagged for redrawing.
 import { blenderModule, newOperator } from '../bmesh/bmesh-wasm.js';
-import { contextStruct, inPythonContext, registerClass } from '../python/bpy_rna.js';
+import { contextStruct, inPythonContext, pointerOf, registerClass } from '../python/bpy_rna.js';
 import { provided } from '../port/wasm.js';
 import '../python/bpy_interface.js';
 import { setKeyconfigSource, setModalKeymaps, keymapsChanged } from './keyconfig.js';
@@ -187,5 +187,12 @@ export class Window {
   get pending() { return !!x.wm_pending(this.C); }
   tick() { return JSON.parse(cString(x.wm_tick(this.C))); }
   // The gestures running (box, circle, lasso) as wm-gesture.cc's wm_gestures gives them, to draw, in page pixels.
+  // What the operator the window runs modally takes now (Window.modal_operators, by its modal keymap), which the touch
+  // bar shows as shortcut bubbles: { name, takes(identifier) }, or null.
+  modalKeymap() {
+    const [op] = contextStruct(this.C).window?.modal_operators ?? [];
+    const pointer = op ? pointerOf(op)[2] >>> 0 : 0, name = pointer ? cString(x.operator_modal_keymap(pointer)) : '';
+    return name ? { name, takes: (id) => withString(id, (p) => x.operator_modal_item(pointer, p)) >= 0 } : null;
+  }
   get gestures() { return JSON.parse(cString(x.wm_gestures(this.C))); }
 }

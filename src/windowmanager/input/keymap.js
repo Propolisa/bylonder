@@ -49,7 +49,18 @@ const CODES = {
   NumpadEnter: 'numpad_enter', Space: 'spacebar', Enter: 'ret', Escape: 'esc', Delete: 'del', Backspace: 'back_space', PageUp: 'page_up', PageDown: 'page_down',
   ArrowLeft: 'left_arrow', ArrowRight: 'right_arrow', ArrowUp: 'up_arrow', ArrowDown: 'down_arrow',
   ControlLeft: 'left_ctrl', ControlRight: 'right_ctrl', ShiftLeft: 'left_shift', ShiftRight: 'right_shift', AltLeft: 'left_alt', AltRight: 'right_alt', MetaLeft: 'oskey', MetaRight: 'oskey',
+  Backquote: 'accent_grave', Semicolon: 'semi_colon', BracketLeft: 'left_bracket', BracketRight: 'right_bracket', Backslash: 'back_slash',
 };
+
+const TYPE_CODES = { ...Object.fromEntries(Object.entries(CODES).reverse().map(([code, type]) => [type.toUpperCase(), code])), SPACE: 'Space' };
+const KEY_TEXT = { Minus: '-', Equal: '=', Period: '.', Comma: ',', Slash: '/', Backquote: '`', Semicolon: ';', Quote: "'", BracketLeft: '[', BracketRight: ']', Backslash: '\\', Space: ' ' };
+// The keyboard event a Blender event type comes from ({ code, key }), as keyType reads it back.
+export function keyOf(type) {
+  const digit = DIGITS.indexOf(type.toLowerCase());
+  const code = TYPE_CODES[type] ?? (/^[A-Z]$/.test(type) ? 'Key' + type : digit >= 0 ? 'Digit' + digit : /^NUMPAD_\d$/.test(type) ? 'Numpad' + type.at(-1)
+    : type[0] + type.slice(1).toLowerCase());
+  return { code, key: code.startsWith('Key') ? code.slice(3).toLowerCase() : /^(Digit|Numpad)\d$/.test(code) ? code.at(-1) : KEY_TEXT[code] ?? code };
+}
 
 // The Blender event type of a keyboard event's physical key; empty for a pointer event.
 export function keyType(e) {

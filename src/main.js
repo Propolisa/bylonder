@@ -438,7 +438,8 @@ const blenderWindow = {
 };
 // Touch first: a finger's events reach the event system only as the mouse's (docs/mobile.md Input model).
 const disposeTouch = mountTouch(window, { scale: { get: () => preferences().view.ui_scale, preview: (value) => showScale([document, parent.document], value), commit: (value) => setUiScale(value) },
-  hint: notify, keys: (native, value) => world.wm.key(native, value) });
+  hint: notify, keys: (native, value) => world.wm.key(native, value), modal: () => world.wm?.modal?.modalKeymap ?? (world.wm?.modal?.blender && view3dWindow?.modalKeymap()) ?? null,
+  mode: () => ({ EDIT_MESH: "EDIT", SCULPT: "SCULPT", POSE: "POSE" })[contextMode()] ?? "OBJECT" });
 world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow, input: inputPreferences });
 const editor = createEditor(
   world,

@@ -49,7 +49,9 @@ export function runModal({ wm, view, pointer, target, idname, props, event, noti
     return !(result & OPERATOR_PASS_THROUGH);
   };
   const cancel = () => handle({ ...pointer, type: 'esc', value: 'PRESS' });
-  remove = wm.addModal({ keymap: handle, mousemove: handle, passthrough: (e) => e.type === 'middlemouse' || e.type.startsWith('wheel'), cancel });
+  // `modalKeymap`: what its modal keymap takes now, which the touch bar shows as shortcut bubbles (touch-keys.js).
+  remove = wm.addModal({ keymap: handle, mousemove: handle, passthrough: (e) => e.type === 'middlemouse' || e.type.startsWith('wheel'), cancel,
+    modalKeymap: keymap && { name: keymap, takes: (id) => running && target.modalItem(op, id) >= 0 } });
   // The window manager gives a modal operator the pointer's place at once (WM_event_add_mousemove).
   handle({ ...(event ?? pointer), type: 'mousemove', value: 'NOTHING' });
   return { status, cancel };

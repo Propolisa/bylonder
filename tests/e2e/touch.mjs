@@ -276,6 +276,47 @@ const checks = {
     await app.page.waitForTimeout(300);
   },
 
+  // docs/mobile.md Shortcuts made tappable.
+  async "the touch bar's Keys pie presses G; the X bubble, the numbers pad's 2 and Confirm move the object 2 on X; Cancel restores"() {
+    const bar = app.locator(".bl-touch-bar");
+    await bar.waitFor();
+    const barBox = await bar.boundingBox(), size = app.page.viewportSize();
+    assert.ok(barBox.height <= 1.7 * (await unit()) + 1 && barBox.y + barBox.height <= size.height, "one row at the window's bottom");
+    // The Default Cube, selected since the checks before.
+    const start = await selected();
+    const pie = async (label) => {
+      await touch.tap(await center(bar.locator('button[aria-label="Keys"]')));
+      await touch.tap(await center(app.locator(`[role="menuitem"][aria-label="${label}"]`)));
+      await bar.locator(".bl-bubble").first().waitFor();
+    };
+    // A bubble scrolled into the bar's view first, as a finger would.
+    const tap = async (locator) => { await locator.scrollIntoViewIfNeeded(); await touch.tap(await center(locator)); };
+    const bubble = (id) => tap(bar.locator(`.bl-bubble[data-item="${id}"]`));
+    await pie("Move");
+    await bubble("AXIS_X");
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await tap(bar.locator('button[aria-label="2"]'));
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await bubble("CONFIRM");
+    await app.until((b, x) => Math.abs(b.editor.selection.nodes[0].position.x - x - 2) < 1e-4, start[0]).catch(async () => assert.fail(`moved to ${await selected()} from ${start}`));
+    await bar.locator(".bl-bubble").first().waitFor({ state: "detached" });
+    const moved = await selected();
+    await pie("Move");
+    await bubble("CANCEL");
+    await bar.locator(".bl-bubble").first().waitFor({ state: "detached" });
+    assert.deepEqual(await selected(), moved, "Cancel restores");
+  },
+
+  async "the touch bar's sticky Ctrl latches for one press"() {
+    const ctrl = app.locator('.bl-touch-bar button[aria-label="Ctrl"]');
+    await touch.tap(await center(ctrl));
+    assert.equal(await ctrl.getAttribute("data-state"), "once");
+    await touch.tap(await center(ctrl));
+    assert.equal(await ctrl.getAttribute("data-state"), "locked");
+    await touch.tap(await center(ctrl));
+    assert.equal(await ctrl.getAttribute("data-state"), "off");
+  },
+
   // Kept as Blender keeps the Preferences: saved by Save Preferences, or on leaving with Auto-Save Preferences.
   async "a pinch over the Properties editor sets Resolution Scale, kept after a reload"() {
     const before = await uiScale();

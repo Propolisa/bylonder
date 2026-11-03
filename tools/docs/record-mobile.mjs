@@ -44,6 +44,20 @@ await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true
   await fingers.tap([drawer.x / 2, drawer.y + drawer.height / 2]);
   await r.pause(600);
 
+  const bar = app.locator(".bl-touch-bar");
+  const tap = async (locator, wait = 500) => { await locator.scrollIntoViewIfNeeded(); await fingers.tap(await center(locator)); await r.pause(wait); };
+  await r.gif("bubbles", { x: 0, y: PHONE.height - 520, width: PHONE.width, height: 520 }, async () => {
+    await tap(bar.locator('button[aria-label="Keys"]'), 900);
+    await tap(app.locator('[role="menuitem"][aria-label="Move"]'));
+    await tap(bar.locator('.bl-bubble[data-item="AXIS_X"]'));
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await tap(bar.locator('button[aria-label="2"]'));
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await tap(bar.locator('.bl-bubble[data-item="CONFIRM"]'), 1000);
+  });
+  await fingers.tap(await app.point(0.5, 0.92), 2);
+  await r.pause(600);
+
   await r.gif("navigate", undefined, async () => {
     const at = await app.point(0.5, 0.55);
     await fingers.pan(at, [60, 60]);

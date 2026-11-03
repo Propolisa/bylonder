@@ -115,6 +115,7 @@ export function createView3DWindow({ sync, views, takes, host, menu, before = ()
 
   return {
     takes: (native, view) => running || (takes() && !!view),
+    modalKeymap: () => (running ? window.modalKeymap() : null),
     send,
     invoke,
     // A view's area, laid out from its elements (its header, tool header and sidebar are view.regions').

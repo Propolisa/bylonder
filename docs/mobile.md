@@ -1,9 +1,9 @@
 # Touch and pen
 
 How Bylonder runs on large phones and tablets. Decided 2026-11-02. Built: the input model and gestures, press and
-hold, Resolution Scale, folding, overflow and the first test plan rows (`tests/e2e/touch.mjs`). Not built yet: the
-touch bar and its keyboard, shortcut bubbles, the quick keys pie, dragging a value, area edges and headers by long
-press, panel order by hold and drag, and pen palm rejection.
+hold, Resolution Scale, folding, overflow, dragging a value, area edges by long press, area swap by a header's hold
+and drag, the touch bar with its keyboard, shortcut bubbles for the modal operators the page runs, the quick keys pie,
+and their test plan rows (`tests/e2e/touch.mjs`). Not built yet: see What is left.
 
 The rule: everything Blender can do with a mouse and keyboard can be done with fingers or a pen, in Blender's own
 layouts, keymaps, menus and operators. The touch layer adds only what the hardware lacks. It never adds a second way
@@ -139,8 +139,8 @@ navigate, never paint: palm rejection without a setting.
 
 Blender's status bar already shows what the active modal operator accepts (`template_input_status`, from the running
 handler's modal keymap) and what the mouse buttons do with the active tool. Bubbles are those same items, drawn as tap
-targets in a strip along the bottom of the area that runs the operator, and in the status bar itself. A bubble sends
-its key event to the window, so the modal keymap handles it:
+targets in the touch bar's middle while the operator runs, so they cover no more of the window than the bar does. A
+bubble sends its key event to the window, so the modal keymap handles it:
 
 - G, then the X bubble constrains to X, a second tap of X switches to local X, the Shift bubble held while dragging is
   precision, the Ctrl bubble toggles snapping, R and S bubbles switch to rotate and scale.
@@ -301,6 +301,16 @@ The readout and the buttons are one shadcn-vue component (`ValueDragOverlay.vue`
 - **First touch** shows a one time hint, dismissable, kept dismissed per device: two fingers pan, pinch zooms, three
   fingers orbit, press and hold for tooltips and right click, pinch over UI changes its scale. It links the feature
   page.
+
+## What is left
+
+- Bubbles for the modal operators of the 2D editors that run them in their own areas (`anim-area.js`,
+  `outliner-area.js`); the 3D Viewport's come from Blender's window (`Window.modal_operators`) and the page's modal
+  handlers (`view3d-modal.js`).
+- Docking an area at another area's edge by its header, and Duplicate Area into New Window by a drop outside.
+- Panel order by a hold and drag on a panel's header.
+- The quick keys pie's Replace with Key and Reset Slot, kept as a Bylonder preference; Blender's pies drawn as pies.
+- The touch bar's pointer mode (finger hover), and pen palm rejection.
 
 ## Dropped from the old code
 
