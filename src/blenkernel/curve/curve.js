@@ -53,7 +53,7 @@ function splineArrays(splines) {
 
 // The splines of curve_nurbs_get's header.
 function readSplines(header) {
-  const [nurbs_num, ints_num, floats_num, intsAt, floatsAt, actnu, actvert] = new Int32Array(x.memory.buffer, header, 7);
+  const [nurbs_num, ints_num, floats_num, intsAt, floatsAt, actnu, actvert] = new Int32Array(x.memory.buffer, header >>> 0, 7);
   const ints = new Int32Array(x.memory.buffer, intsAt >>> 0, ints_num), floats = new Float32Array(x.memory.buffer, floatsAt >>> 0, floats_num);
   let i = 0, f = 0;
   const round = (n) => Array.from(floats.subarray(f, (f += n)));
@@ -303,7 +303,7 @@ export class CurveObject {
   selectRegion(region, inside, { sel_op = 3, circle = false } = {}) {
     return this.#inRegion(region, (C) => {
       const count = x.curve_screen_verts(C, 0, 0);
-      const co = withArrays([new Float32Array(2 * count)], ([p]) => { x.curve_screen_verts(C, p, count); return new Float32Array(x.memory.buffer, p, 2 * count).slice(); });
+      const co = withArrays([new Float32Array(2 * count)], ([p]) => { x.curve_screen_verts(C, p, count); return new Float32Array(x.memory.buffer, p >>> 0, 2 * count).slice(); });
       const flags = Uint8Array.from({ length: count }, (_, i) => inside(co[2 * i], co[2 * i + 1]));
       return withArrays([flags], ([f]) => !!x.curve_select_region(C, sel_op, circle, f));
     });

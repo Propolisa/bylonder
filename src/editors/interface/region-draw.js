@@ -22,7 +22,7 @@ const metrics = (text, size, mono = false) => {
   const m = ctx.measureText(text);
   return { width: m.width, ascent: m.fontBoundingBoxAscent ?? size * 0.73, descent: m.fontBoundingBoxDescent ?? size * 0.21 };
 };
-provided.region_text_width = (pointer, length, size) => metrics(decoder.decode(new Uint8Array(x.memory.buffer, pointer, length)), size).width;
+provided.region_text_width = (pointer, length, size) => metrics(decoder.decode(new Uint8Array(x.memory.buffer, pointer >>> 0, length)), size).width;
 provided.region_font_ascender = (size) => metrics('', size).ascent;
 // BLF_fixed_width: a monospace cell, whole pixels as Blender truncates it.
 provided.region_mono_width = (size) => Math.floor(metrics('0', size, true).width);

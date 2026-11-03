@@ -92,5 +92,5 @@ export function texturePreview(values, size = 128) {
 // The texture at a point as a modifier samples it (BKE_texture_get_value): intensity, then RGBA.
 export const textureValue = (tex, co) => withArrays([Float32Array.from(co), new Float32Array(5)], ([p, r]) => {
   x.texture_value(tex, p, r);
-  return Array.from(new Float32Array(x.memory.buffer, r, 5));
+  return Array.from(new Float32Array(x.memory.buffer, r >>> 0, 5));
 });

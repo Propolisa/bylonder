@@ -83,7 +83,7 @@ export class AnimArea {
   get filterText() { return cString(x.anim_dopesheet_search(this.pointer)); }
   set filterText(text) {
     const bytes = new TextEncoder().encode(text).slice(0, 63), p = x.anim_dopesheet_search(this.pointer) >>> 0;
-    new Uint8Array(x.memory.buffer, p, 64).fill(0).set(bytes);
+    new Uint8Array(x.memory.buffer, p >>> 0, 64).fill(0).set(bytes);
   }
   get dopesheetFlag() { return x.anim_dopesheet_flag(this.pointer); }
   set dopesheetFlag(flag) { x.anim_dopesheet_flag_set(this.pointer, flag); }
@@ -133,7 +133,7 @@ export class AnimArea {
   activeFCurve() {
     return this.inContext(RGN_TYPE_UI, (C) => withArrays([new Uint8Array(256), new Int32Array(1)], ([name, icon]) => {
       const fcurve = x.anim_active_fcurve(C, name, icon) >>> 0;
-      return fcurve ? { fcurve: new FCurve(fcurve), name: cString(name), icon: cString(x.anim_icon_name(new Int32Array(x.memory.buffer, icon, 1)[0])) } : null;
+      return fcurve ? { fcurve: new FCurve(fcurve), name: cString(name), icon: cString(x.anim_icon_name(new Int32Array(x.memory.buffer, icon >>> 0, 1)[0])) } : null;
     }));
   }
   // A property of the space set as Blender's RNA sets it (rna_space.cc: its update runs in this area), by number: the
@@ -162,14 +162,14 @@ export class AnimArea {
   // A listed channel's key columns in a frame range (valid after channels()).
   keys(index, xmin, xmax, max = 4096) {
     return withArrays([new Float32Array(max * 8)], ([p]) => {
-      const count = x.anim_channel_keys(index, xmin, xmax, p, max), values = new Float32Array(x.memory.buffer, p, count * 8);
+      const count = x.anim_channel_keys(index, xmin, xmax, p, max), values = new Float32Array(x.memory.buffer, p >>> 0, count * 8);
       return Array.from({ length: count }, (_, i) => Object.fromEntries(COLUMN_FIELDS.map((name, j) => [name, values[i * 8 + j]])));
     });
   }
   // The F-Curves the Graph Editor draws, with the unit mapping their values are drawn with.
   curves(max = 1024) {
     return this.inContext(RGN_TYPE_WINDOW, (C) => withArrays([new Float32Array(max * 3)], ([p]) => {
-      const count = x.anim_graph_curves(C, p, max), words = new Uint32Array(x.memory.buffer, p, count * 3), floats = new Float32Array(x.memory.buffer, p, count * 3);
+      const count = x.anim_graph_curves(C, p, max), words = new Uint32Array(x.memory.buffer, p >>> 0, count * 3), floats = new Float32Array(x.memory.buffer, p >>> 0, count * 3);
       return Array.from({ length: count }, (_, i) => ({ fcurve: new FCurve(words[i * 3]), factor: floats[i * 3 + 1], offset: floats[i * 3 + 2] }));
     }));
   }

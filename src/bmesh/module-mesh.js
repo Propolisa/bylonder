@@ -11,7 +11,7 @@ export function moduleMesh(x, createMesh) {
     const pointers = arrays.map((a) => {
       if (!a) return 0;
       const p = x.malloc(a.byteLength) >>> 0;
-      new a.constructor(x.memory.buffer, p, a.length).set(a);
+      new a.constructor(x.memory.buffer, p >>> 0, a.length).set(a);
       return p;
     });
     try {
@@ -34,7 +34,7 @@ export function moduleMesh(x, createMesh) {
   // The Mesh of an extraction (ExtractionHeader): counts, then buffer pointers. Its arrays are views made again when the
   // module's memory grows, which detaches the old ones. detach() copies them out, for attachedMesh in another realm.
   function extractedMesh(header) {
-    const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length + 3));
+    const words = Array.from(new Uint32Array(x.memory.buffer, header >>> 0, 5 + 10 + FLAGS.length + 3));
     const counts = words.slice(0, 5), [verts, edges, faces, corners, tris] = counts, at = (i) => words[5 + i];
     const sizes = { POINT: verts, EDGE: edges, FACE: faces };
     const layout = {

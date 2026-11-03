@@ -27,7 +27,7 @@ export function mountImageEditor(section, { header, engine, views, sync, editObj
     finished: () => sync.view(), report: (error) => report('ERROR', error.message ?? String(error)), context: { imageEditor: editor },
     drawn: (main) => {
       view ??= createImageView(main, engine, views);
-      const view2d = area.inContext((C) => withArrays([new Float32Array(8)], ([p]) => { x.region_view2d(C, p); return Array.from(new Float32Array(x.memory.buffer, p, 8)); }));
+      const view2d = area.inContext((C) => withArrays([new Float32Array(8)], ([p]) => { x.region_view2d(C, p); return Array.from(new Float32Array(x.memory.buffer, p >>> 0, 8)); }));
       view.draw({ space: editor.space(), view2d, edit: editObject() });
     } });
   editor.space = () => pointerStruct(structFind('Area'), 0, area.area.pointer).spaces.active;

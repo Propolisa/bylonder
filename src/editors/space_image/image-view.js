@@ -73,9 +73,9 @@ export function createImageView(main, engine, views) {
     const scenePointer = pointerOf(contextStruct().scene)[2];
     const header = edit ? x.view_edit_uv_extract(scenePointer, edit.ob) >>> 0 : 0;
     if (!header) { [faces, edges, verts].forEach((m) => m.setEnabled(false)); return; }
-    const [corners, faceCount, uvPointer, flagPointer, visiblePointer] = new Uint32Array(x.memory.buffer, header, 5);
-    const uvs = new Float32Array(x.memory.buffer, uvPointer, corners * 2).slice();
-    const flags = new Uint8Array(x.memory.buffer, flagPointer, corners).slice(), visible = new Uint8Array(x.memory.buffer, visiblePointer, faceCount).slice();
+    const [corners, faceCount, uvPointer, flagPointer, visiblePointer] = new Uint32Array(x.memory.buffer, header >>> 0, 5);
+    const uvs = new Float32Array(x.memory.buffer, uvPointer >>> 0, corners * 2).slice();
+    const flags = new Uint8Array(x.memory.buffer, flagPointer >>> 0, corners).slice(), visible = new Uint8Array(x.memory.buffer, visiblePointer >>> 0, faceCount).slice();
     const offs = edit.mesh.face_offsets, triangles = edit.mesh.corner_tris(), owners = edit.mesh.corner_tri_faces();
     const at = (c) => [uvs[c * 2], uvs[c * 2 + 1], 0];
     const facePositions = [], faceColors = [], faceIndices = [];

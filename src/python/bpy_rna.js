@@ -32,7 +32,7 @@ function withText(texts, fn) {
       p = arena + arenaTop;
       arenaTop += (bytes.length + 7) & ~7;
     } else own.push((p = x.malloc(bytes.length) >>> 0));
-    new Uint8Array(x.memory.buffer, p, bytes.length).set(bytes);
+    new Uint8Array(x.memory.buffer, p >>> 0, bytes.length).set(bytes);
     return p;
   });
   try {
@@ -48,7 +48,7 @@ const cString = (pointer) => {
   return decoder.decode(bytes.subarray(0, bytes.indexOf(0)));
 };
 let numbersCapacity = 64, numbersPointer = x.malloc(8 * numbersCapacity) >>> 0;
-const numbers = () => new Float64Array(x.memory.buffer, numbersPointer, numbersCapacity);
+const numbers = () => new Float64Array(x.memory.buffer, numbersPointer >>> 0, numbersCapacity);
 function ensureNumbers(length) {
   if (length <= numbersCapacity) return;
   x.free(numbersPointer);
@@ -56,7 +56,7 @@ function ensureNumbers(length) {
   numbersPointer = x.malloc(8 * numbersCapacity) >>> 0;
 }
 const outPointer = x.bpy_out() >>> 0;
-const out = () => new Uint32Array(x.memory.buffer, outPointer, 5);
+const out = () => new Uint32Array(x.memory.buffer, outPointer >>> 0, 5);
 const outStruct = () => { const o = out(); return [o[0], o[1], o[2]]; };
 
 // The context RNA calls and updates run in (BPY_context_get), set by whoever draws or runs Python. With nothing else

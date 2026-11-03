@@ -12,9 +12,9 @@ export const setClipboardText = (text) => { bytes = encoder.encode(text); };
 const refresh = () => globalThis.navigator?.clipboard?.readText?.().then(setClipboardText, () => {});
 
 provided.clipboard_text_length = () => bytes.length;
-provided.clipboard_text_read = (pointer) => new Uint8Array(x.memory.buffer, pointer, bytes.length).set(bytes);
+provided.clipboard_text_read = (pointer) => new Uint8Array(x.memory.buffer, pointer >>> 0, bytes.length).set(bytes);
 provided.clipboard_text_write = (pointer, length) => {
-  setClipboardText(decoder.decode(new Uint8Array(x.memory.buffer, pointer, length)));
+  setClipboardText(decoder.decode(new Uint8Array(x.memory.buffer, pointer >>> 0, length)));
   globalThis.navigator?.clipboard?.writeText?.(clipboardText()).catch(() => {});
 };
 globalThis.addEventListener?.('focus', refresh);

@@ -143,7 +143,7 @@ const attributeView = ([data, , type, , count]) => {
 // their memory go.
 function drawBuffers(header) {
   if (!header) return null;
-  const words = new Int32Array(x.memory.buffer, header, DRAW_BUFFERS.length * 5 + 4);
+  const words = new Int32Array(x.memory.buffer, header >>> 0, DRAW_BUFFERS.length * 5 + 4);
   const view = ([, Type, size], i) => {
     const [data, , type, , count] = words.subarray(i * 5, i * 5 + 5);
     return data ? new (Type ?? (type === 32 ? Uint32Array : Uint16Array))(x.memory.buffer, data >>> 0, count * (size ?? 1)) : null;
@@ -164,7 +164,7 @@ export function meshData(mesh) {
 // A Float32Array of the module's memory as a property read anew each time: a view made before a call that grows the
 // memory is detached by it.
 const floatsView = (record, name, pointer, length) =>
-  Object.defineProperty(record, name, { enumerable: true, get: () => new Float32Array(x.memory.buffer, pointer, length) });
+  Object.defineProperty(record, name, { enumerable: true, get: () => new Float32Array(x.memory.buffer, pointer >>> 0, length) });
 const ownedMesh = (mesh) => createMesh(meshData(mesh));
 
 // A Mesh of positions and faces (offsets into corner vertices) whose edges Blender derives, as a script's
@@ -194,7 +194,7 @@ const BASE_SELECTED = 1 << 0, BASE_HIDDEN = 1 << 8, BASE_ACTIVE = 1 << 30;
 // The addresses an export writes when given an array, after it counted them without one.
 const addresses = (fn) => {
   const count = fn(0);
-  return withArrays([new Uint32Array(count)], ([p]) => { fn(p); return Array.from(new Uint32Array(x.memory.buffer, p, count)); });
+  return withArrays([new Uint32Array(count)], ([p]) => { fn(p); return Array.from(new Uint32Array(x.memory.buffer, p >>> 0, count)); });
 };
 
 const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
@@ -248,10 +248,10 @@ export class BlenderMain {
   // The object's DNA (ObjectFields in main-api.cc), read and written in place.
   #fields(ob) {
     const [location, euler, quaternion, scale, mode, parentinv, world, recalc, dataRecalc] = new Uint32Array(x.memory.buffer, x.object_fields(ob) >>> 0, 9);
-    const floats = (p, n) => new Float32Array(x.memory.buffer, p, n);
+    const floats = (p, n) => new Float32Array(x.memory.buffer, p >>> 0, n);
     return { location: floats(location, 3), rotation_euler: floats(euler, 3), rotation_quaternion: floats(quaternion, 4), scale: floats(scale, 3),
-      rotation_mode: new Int16Array(x.memory.buffer, mode, 1), matrix_parent_inverse: floats(parentinv, 16), matrix_world: floats(world, 16),
-      recalc: new Uint32Array(x.memory.buffer, recalc, 1), dataRecalc: dataRecalc && new Uint32Array(x.memory.buffer, dataRecalc, 1) };
+      rotation_mode: new Int16Array(x.memory.buffer, mode >>> 0, 1), matrix_parent_inverse: floats(parentinv, 16), matrix_world: floats(world, 16),
+      recalc: new Uint32Array(x.memory.buffer, recalc >>> 0, 1), dataRecalc: dataRecalc && new Uint32Array(x.memory.buffer, dataRecalc >>> 0, 1) };
   }
   // location, rotation_mode, rotation_euler, rotation_quaternion, scale, matrix_parent_inverse and matrix_world.
   transform(ob) {
@@ -301,12 +301,12 @@ export class BlenderMain {
   curves() {
     const count = x.main_curves(this.#context), at = x.main_curves_draws() >>> 0, words = 29, memory = x.memory.buffer;
     const [posRad, indirection, time, length] = [x.main_curves_pos_rad(), x.main_curves_indirection(), x.main_curves_time(), x.main_curves_length()].map((p) => p >>> 0);
-    const ints = new Int32Array(memory, at, count * words), floats = new Float32Array(memory, at, count * words);
+    const ints = new Int32Array(memory, at >>> 0, count * words), floats = new Float32Array(memory, at >>> 0, count * words);
     return Array.from({ length: count }, (_, i) => {
       const [ob, system, render, viewport, overlay, material, faces, firstPoint, points, firstIndirection, indirections, firstCurve, curves] = ints.subarray(i * words, i * words + 13);
       return { ob: ob >>> 0, system, render: !!render, viewport: !!viewport, overlay: !!overlay, material: material >>> 0, faces, objectToWorld: floats.subarray(i * words + 13, i * words + 29),
-        posRad: new Float32Array(memory, posRad + firstPoint * 16, points * 4), indirection: new Int32Array(memory, indirection + firstIndirection * 4, indirections),
-        time: new Float32Array(memory, time + firstPoint * 4, points), length: new Float32Array(memory, length + firstCurve * 4, curves) };
+        posRad: new Float32Array(memory, (posRad >>> 0) + firstPoint * 16, points * 4), indirection: new Int32Array(memory, (indirection >>> 0) + firstIndirection * 4, indirections),
+        time: new Float32Array(memory, (time >>> 0) + firstPoint * 4, points), length: new Float32Array(memory, (length >>> 0) + firstCurve * 4, curves) };
     });
   }
   // The visible drawings of Main's Grease Pencil objects (grease-pencil-api.cc main_grease_pencil), onion skins where
@@ -318,12 +318,12 @@ export class BlenderMain {
   greasePencil({ onion = true, repack = false } = {}) {
     const count = x.main_grease_pencil(this.#C, onion, repack), words = 28, memory = x.memory.buffer, at = x.main_grease_pencil_draws() >>> 0;
     const [curves, points, triangles] = [x.main_grease_pencil_curves(), x.main_grease_pencil_points(), x.main_grease_pencil_triangles()].map((p) => p >>> 0);
-    const ints = new Int32Array(memory, at, count * words), floats = new Float32Array(memory, at, count * words);
+    const ints = new Int32Array(memory, at >>> 0, count * words), floats = new Float32Array(memory, at >>> 0, count * words);
     return Array.from({ length: count }, (_, i) => {
       const [ob, layer, onionId, changed, blend, pointsShown, firstCurve, curveCount, firstPoint, pointCount, firstTriangle, triangleCount] = ints.subarray(i * words, i * words + 12);
       return { ob: ob >>> 0, layer, onion: onionId, changed: !!changed, blend, pointsShown: !!pointsShown, layerToWorld: floats.subarray(i * words + 12, i * words + 28),
-        curves: new Int32Array(memory, curves + firstCurve * 20, curveCount * 5), points: new Float32Array(memory, points + firstPoint * 56, pointCount * 14),
-        triangles: new Uint32Array(memory, triangles + firstTriangle * 12, triangleCount * 3) };
+        curves: new Int32Array(memory, (curves >>> 0) + firstCurve * 20, curveCount * 5), points: new Float32Array(memory, (points >>> 0) + firstPoint * 56, pointCount * 14),
+        triangles: new Uint32Array(memory, (triangles >>> 0) + firstTriangle * 12, triangleCount * 3) };
     });
   }
   // The active object's Particle Edit Mode as Blender's overlay draws it (main-api.cc main_particle_edit), or null:
@@ -333,7 +333,7 @@ export class BlenderMain {
   particleEdit() {
     if (!x.main_particle_edit(this.#context)) return null;
     const [strands, indices, inner, tips, flags] = new Int32Array(x.memory.buffer, x.main_particle_edit_record() >>> 0, 5), points = x.main_particle_edit_points() >>> 0;
-    const part = (first, count) => new Float32Array(x.memory.buffer, points + first * 16, count * 4);
+    const part = (first, count) => new Float32Array(x.memory.buffer, (points >>> 0) + first * 16, count * 4);
     return { useWeight: !!(flags & 1), showInner: !!(flags & 2), showTips: !!(flags & 4), strands: part(0, strands), inner: part(strands, inner), tips: part(strands + inner, tips),
       indices: new Uint32Array(x.memory.buffer, x.main_particle_edit_indices() >>> 0, indices) };
   }
@@ -345,7 +345,7 @@ export class BlenderMain {
   // detaches older views), valid until the next instances().
   instances() {
     const count = x.main_instances(this.#context), at = x.main_instance_groups() >>> 0, data = x.main_instance_matrices() >>> 0, size = 12;
-    const ints = new Int32Array(x.memory.buffer, at, count * size), floats = new Float32Array(x.memory.buffer, at, count * size);
+    const ints = new Int32Array(x.memory.buffer, at >>> 0, count * size), floats = new Float32Array(x.memory.buffer, at >>> 0, count * size);
     return Array.from({ length: count }, (_, i) => {
       const [instancer, ob, shape, overlay, first, n] = ints.subarray(i * size, i * size + 6), [geometry, material] = ints.subarray(i * size + 10, i * size + 12);
       return floatsView({ instancer: instancer >>> 0, ob: ob >>> 0, shape: INSTANCE_SHAPES[shape], overlay: !!overlay, drawSize: floats[i * size + 6],
@@ -358,16 +358,16 @@ export class BlenderMain {
   // { ob (an object instanced), data (a mesh instanced), matrix (16 floats, Babylon's layout) }, a copy.
   duplis(ob) {
     const count = x.main_duplis(this.#context, ob), at = x.main_dupli_records() >>> 0, size = 18;
-    const ints = new Int32Array(x.memory.buffer, at, count * size);
+    const ints = new Int32Array(x.memory.buffer, at >>> 0, count * size);
     return Array.from({ length: count }, (_, i) => ({ ob: ints[i * size] >>> 0, data: ints[i * size + 1] >>> 0,
-      matrix: Array.from(new Float32Array(x.memory.buffer, at + (i * size + 2) * 4, 16)) }));
+      matrix: Array.from(new Float32Array(x.memory.buffer, (at >>> 0) + (i * size + 2) * 4, 16)) }));
   }
   // The point clouds the last instances() found (main-api.cc main_pointclouds): { instancer, pointcloud, material,
   // matrix (16 floats, Babylon's layout), points (4 floats each: position in Blender's axes, radius) }, the arrays views
   // into the module's memory made on each read, valid until the next instances().
   pointClouds() {
     const count = x.main_pointclouds(), size = 21, at = x.main_pointcloud_draws() >>> 0, points = x.main_pointcloud_points() >>> 0;
-    const ints = new Int32Array(x.memory.buffer, at, count * size);
+    const ints = new Int32Array(x.memory.buffer, at >>> 0, count * size);
     return Array.from({ length: count }, (_, i) => {
       const [instancer, pointcloud, material] = ints.subarray(i * size, i * size + 3), [first, n] = ints.subarray(i * size + 19, i * size + 21);
       const record = floatsView({ instancer: instancer >>> 0, pointcloud: pointcloud >>> 0, material: material >>> 0 }, 'matrix', at + (i * size + 3) * 4, 16);
@@ -394,7 +394,7 @@ export class BlenderMain {
     mesh.attributes = new Map(listed.map(([name, { domain, type }]) => {
       const [, Type, size] = ATTRIBUTE_TYPES[type], pointer = withString(name, (p) => x.object_mesh_attribute(ob, p)) >>> 0;
       // A view made when read: reading the next attribute's name allocates, which can grow the memory.
-      return [OWN_NAMES.get(name) ?? name, { domain, type, get data() { return new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size); } }];
+      return [OWN_NAMES.get(name) ?? name, { domain, type, get data() { return new Type(x.memory.buffer, pointer >>> 0, mesh[DOMAIN_SIZES[domain]] * size); } }];
     }));
     return ownedMesh(mesh);
   }
@@ -412,7 +412,7 @@ export class BlenderMain {
     const header = x.object_mesh_eval(this.#context, ob) >>> 0;
     if (!header) return null;
     const mesh = extractedMesh(header), slots = x.extracted_material_index() >>> 0;
-    if (slots) mesh.attributes.set('material_index', { domain: 'FACE', type: 'INT', get data() { return new Int32Array(x.memory.buffer, slots, mesh.faces_num); } });
+    if (slots) mesh.attributes.set('material_index', { domain: 'FACE', type: 'INT', get data() { return new Int32Array(x.memory.buffer, slots >>> 0, mesh.faces_num); } });
     mesh.drawBuffers = (what = 0, attributes = []) => withString(attributes.join('\n'), (names) => drawBuffers(x.object_draw_buffers(this.#context, ob, what, names) >>> 0));
     return mesh;
   }
@@ -423,7 +423,7 @@ export class BlenderMain {
   paintWeights(ob, count) { return new Float32Array(x.memory.buffer, x.mesh_paint_weights(this.#context, ob) >>> 0, count).slice(); }
   // The active color attribute of the mesh evaluatedMesh last gave, per face corner in scene linear RGBA (main-api.cc
   // extracted_color), a copy; null without one.
-  paintColors(count) { const p = x.extracted_color(0) >>> 0; return p ? new Float32Array(x.memory.buffer, p, count * 4).slice() : null; }
+  paintColors(count) { const p = x.extracted_color(0) >>> 0; return p ? new Float32Array(x.memory.buffer, p >>> 0, count * 4).slice() : null; }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
   setModifiers(ob, modifiers) {
     const { errors } = setModifiers(ob, modifiers);

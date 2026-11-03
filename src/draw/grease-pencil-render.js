@@ -70,21 +70,21 @@ export function provideGreasePencilRender(engine) {
     return mesh;
   };
   provided.grease_pencil_render = (width, height, winmatPointer, linesPointer, lineCount, pointsPointer, pixelsPointer) => {
-    const memory = x.memory.buffer, lineData = new Int32Array(memory, linesPointer, lineCount * 3);
+    const memory = x.memory.buffer, lineData = new Int32Array(memory, linesPointer >>> 0, lineCount * 3);
     let pointCount = 0;
     for (let l = 0; l < lineCount; l++) pointCount = Math.max(pointCount, lineData[l * 3] + lineData[l * 3 + 1]);
-    const projection = Matrix.FromArray(new Float32Array(memory, winmatPointer, 16));
+    const projection = Matrix.FromArray(new Float32Array(memory, winmatPointer >>> 0, 16));
     camera.getProjectionMatrix = () => projection;
     // Orthographic or perspective (Blender's winmat, column-major: its [11] is -1 in perspective).
     const viewPerPixel = (z) => (2 / (projection.m[0] * width)) * (projection.m[11] ? -z : 1);
-    const { world, pixels } = readLines(lineData, new Float32Array(memory, pointsPointer, pointCount * POINT_FLOATS), viewPerPixel);
+    const { world, pixels } = readLines(lineData, new Float32Array(memory, pointsPointer >>> 0, pointCount * POINT_FLOATS), viewPerPixel);
     const resolution = new Vector2(width, height);
     const meshes = [linesMesh(world, materials[0], resolution), linesMesh(pixels, materials[1], resolution)].filter(Boolean);
     const target = new RenderTargetTexture('__grease_pencil_render', { width, height }, scene, { generateMipMaps: false, generateDepthBuffer: false });
     Object.assign(target, { activeCamera: camera, renderList: meshes, clearColor: new Color4(0, 0, 0, 0) });
     try {
       target.render();
-      engine._readTexturePixelsSync(target.getInternalTexture(), width, height, -1, 0, new Uint8Array(x.memory.buffer, pixelsPointer, width * height * 4));
+      engine._readTexturePixelsSync(target.getInternalTexture(), width, height, -1, 0, new Uint8Array(x.memory.buffer, pixelsPointer >>> 0, width * height * 4));
     } finally {
       target.dispose();
       for (const mesh of meshes) { mesh.material.pluginManager.getPlugin('GreasedLinePluginMaterial').colorsTexture?.dispose(); mesh.dispose(); }
