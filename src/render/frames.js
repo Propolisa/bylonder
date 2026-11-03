@@ -7,7 +7,6 @@
 import { Matrix, Camera } from '@babylonjs/core';
 import { jitter, jitterProjection, sampleTimes, createAccumulator } from './sampling.js';
 import { frameRate } from '../blenkernel/scene/time.js';
-import { fitCamera } from '../blenkernel/scene/camera-fit.js';
 
 export const frameMs = (frame, start, fps) => (frame - start + 1) * 1000 / fps;
 
@@ -75,7 +74,7 @@ export function createFrameRenderer({ world: built, engine, canvas, resize, cloc
   // progress(done, total) hears of a final frame's pre-roll.
   async function renderFrame({ frame, width, height, camera, quality: kind = 'preview', progress }) {
     resize(width, height);
-    fitCamera(await useCamera(camera), { width, height });
+    built().world.mainSync?.fitCamera(await useCamera(camera), { width, height });
     if (kind === 'final') return createImageBitmap(await drawFinalFrame(frame, width, height, progress));
     simulated = null;
     const { start, fps } = quality();

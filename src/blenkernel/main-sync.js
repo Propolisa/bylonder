@@ -27,7 +27,7 @@ import { watchObject } from './main-sync-hooks.js';
 import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
-import { MultiMaterial, VertexData } from '@babylonjs/core';
+import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
@@ -841,6 +841,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // The selected objects, whose geometry operators on the selection are given.
     selected: () => selection.nodes.filter((node) => objects.has(node)),
     objectOf: (node) => objects.get(node)?.ob ?? null,
+    // A Blender camera's field of view as Blender frames an image of the size with it (its sensor fit, lens and sensor in
+    // Main); a Babylon camera's is its own.
+    fitCamera(camera, { width, height }) {
+      const ob = camera.metadata?.wbHome === 'BLENDER' && objects.get(camera)?.ob;
+      if (!ob) return;
+      const { fov, vertical } = blender.cameraViewFov(ob, width, height);
+      Object.assign(camera, { fov, fovMode: vertical ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED });
+    },
     nodeOf,
     materialOf: (material) => materials.get(material)?.ma ?? null,
     entryOf,

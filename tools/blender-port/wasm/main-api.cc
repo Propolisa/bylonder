@@ -5,6 +5,9 @@
  * (src/blenkernel/main-view.js). Operators run by their own exec (operator_exec, on main_C).
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_armature.hh"
+#include "BKE_camera.h"
+#include "DNA_camera_types.h"
+#include "BLI_rect.h"
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
 #include "BKE_duplilist.hh"
@@ -222,6 +225,22 @@ EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Objec
 {
   ctx->scene->camera = camera;
   DEG_relations_tag_update(ctx->bmain);
+}
+
+/* The field of view a camera frames a winx by winy image with, along the side its sensor fits, as Blender's render
+ * computes the view plane (BKE_camera_params_compute_viewplane), and whether that side is the height. */
+EXPORT(camera_view_fov) const float *camera_view_fov(Object *camera, int winx, int winy)
+{
+  static float result[2];
+  CameraParams params;
+  BKE_camera_params_init(&params);
+  BKE_camera_params_from_object(&params, camera);
+  BKE_camera_params_compute_viewplane(&params, winx, winy, 1.0f, 1.0f);
+  const bool vertical = BKE_camera_sensor_fit(params.sensor_fit, winx, winy) == CAMERA_SENSOR_FIT_VERT;
+  const rctf &plane = params.viewplane;
+  result[0] = 2.0f * atanf((vertical ? BLI_rctf_size_y(&plane) : BLI_rctf_size_x(&plane)) / 2.0f / params.clip_start);
+  result[1] = vertical;
+  return result;
 }
 
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(ctx->view_layer, ob); }
