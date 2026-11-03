@@ -5,7 +5,7 @@ export function createCompositorBackdrop({ world, overlays, camera, output, shad
   canvas.setAttribute('aria-hidden', 'true');
   let shown = false;
   const view = {
-    canvas, rendered: true, wantsCompositor: false, state: { cameraView: false },
+    canvas, input: false, rendered: true, wantsCompositor: false, state: { cameraView: false },
     get active() { return shown && !!camera(); },
     get camera() { return camera(); },
     beforeRender() {
