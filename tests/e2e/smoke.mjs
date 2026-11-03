@@ -1092,6 +1092,16 @@ const checks = {
 
   // The video edit is saved with the action, whatever Remember Scene Edits says: it survives a reload, a project ZIP's
   // export and import, and a .blend's save and open.
+  // A .blend whose scene has no camera (Blender's demo files often have none) opens into a working 3D Viewport.
+  "File > Open of a .blend without a camera shows its scene": { open: { example: null, node: "sphere" }, async run() {
+    const chooser = app.page.waitForEvent("filechooser");
+    await menu("TOPBAR_MT_file", "Open...");
+    await (await chooser).setFiles(new URL("../fixtures/io/no-camera.blend", import.meta.url).pathname);
+    await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
+    await app.settled();
+    assert.equal(await app.bylonder((b) => b.world.scene.getNodeByName("Camera")), null);
+  } },
+
   async "The Video Sequencer's edit survives a reload, a project ZIP and a .blend"() {
     const strips = () => app.bylonder((b) => b.world.sequenceEditor.state?.edit?.timeline?.items?.length ?? 0);
     const ready = () => app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.editor, null, { timeout: 120000 });
