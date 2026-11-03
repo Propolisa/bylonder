@@ -1,5 +1,6 @@
 // Blender's own code (tools/blender-port/wasm, built by wasm_module.py): Main (BlenderMain) and its operators, and
 // Mesh arrays extracted as Blender's draw cache extracts its buffers.
+import { gunzipSync } from 'fflate';
 import { instantiate, files, read } from '../port/wasm.js';
 import { DATAFILES } from './datafiles.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
@@ -548,6 +549,8 @@ export class BlenderMain {
   // A .blend opened as the Main, as Blender opens one (main_open): returns its warnings; throws when it cannot be read.
   // The undo stack starts again from the file, as reading one starts it (wm_file_read_post).
   readBlend(bytes) {
+    // A gzip-compressed file (Blender before 3.0) unzipped here: the module has no zlib (main-api.cc BLI_filereader_new_gzip).
+    if (bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = gunzipSync(bytes);
     const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
     if (this.#undo) this.undoInit();
     if (!report) throw new Error('Not a .blend file Blender can read');
