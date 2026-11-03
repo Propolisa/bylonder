@@ -756,6 +756,86 @@
   }
  },
  {
+  "id": "mesh-modeling",
+  "title": "Mesh Modeling",
+  "summary": "Model a mesh in Edit Mode with Blender's own tools, Loop Cut, Inset, Extrude, Bevel, Bisect and Spin, here shaping a rangefinder camera.",
+  "expect": "Edit Mode's tools, their keys, modal options and gizmos are Blender's code and give Blender's result; picking elements under the pointer works as in X-ray, so hidden faces can be picked.",
+  "blender_version": "5.2.3",
+  "blender_manual": [
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/index.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/edge/loopcut_slide.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/face/inset_faces.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/face/extrude_faces.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/edge/bevel.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/mesh/bisect.html",
+   "https://docs.blender.org/manual/en/5.2/modeling/meshes/tools/spin.html"
+  ],
+  "example": "mesh-modeling",
+  "thumbnail": "mesh-modeling/thumbnail.png",
+  "media": [
+   "mesh-modeling/scale.gif",
+   "mesh-modeling/loop-cut.gif",
+   "mesh-modeling/inset-extrude.gif",
+   "mesh-modeling/bevel.gif",
+   "mesh-modeling/bisect.gif",
+   "mesh-modeling/lens.png",
+   "mesh-modeling/render.png"
+  ],
+  "ui": [
+   "VIEW_3D",
+   "EDIT",
+   "VIEW3D_MT_edit_mesh*",
+   "builtin.loop_cut",
+   "builtin.inset_faces",
+   "builtin.extrude_region",
+   "builtin.bevel",
+   "builtin.bisect",
+   "builtin.spin"
+  ],
+  "operators": [
+   "object.editmode_toggle",
+   "mesh.select_mode",
+   "mesh.select_all",
+   "transform.resize",
+   "mesh.loopcut_slide",
+   "mesh.inset",
+   "mesh.extrude_region_move",
+   "mesh.bevel",
+   "mesh.bisect",
+   "mesh.spin"
+  ],
+  "code": [
+   "src/editors/mesh/editmesh-mode.js",
+   "src/editors/mesh/editmesh-preselect-edgering.js",
+   "src/editors/object/edit-modes.js"
+  ],
+  "tests": [
+   "tests/editmesh-wasm.test.js",
+   "tests/editmode-main.test.js",
+   "tests/tools-wasm.test.js",
+   "tests/feature-examples-wasm.test.js"
+  ],
+  "limits": [
+   "Clicking selects as in X-ray, the element nearest the pointer whether or not a face in front hides it.",
+   "The example's model is built by its script with the bmesh operators these tools run (bmesh.ops.inset_region, bevel, spin, bisect_plane), not by recorded tool use."
+  ],
+  "page": "docs/features/mesh-modeling.md",
+  "open": "https://propolisa.github.io/bylonder/#example=mesh-modeling",
+  "example_title": "Rangefinder Camera",
+  "coverage": {
+   "operators": {
+    "supported": 172,
+    "partial": 0,
+    "total": 199
+   },
+   "ui": {
+    "supported": 29,
+    "partial": 0,
+    "total": 32
+   }
+  }
+ },
+ {
   "id": "modifiers",
   "title": "Modifiers",
   "summary": "Add, edit and stack modifiers in Properties > Modifiers, here two Array modifiers that turn a cube into a floor of tiles.",
