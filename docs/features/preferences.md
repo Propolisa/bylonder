@@ -11,7 +11,7 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/preferences/keymap.html
   - https://docs.blender.org/manual/en/5.2/editors/preferences/themes.html
   - https://docs.blender.org/manual/en/5.2/editors/3dview/navigate/navigation.html
-example: cube
+example: chess
 thumbnail: preferences/thumbnail.png
 media:
   - preferences/open.png
@@ -77,9 +77,11 @@ The Preferences belong to the user, not to a project: Save Preferences writes Bl
 browser keeps, and startup reads it as Blender does. Auto-Save Preferences saves changed preferences when the page is
 hidden or closed, and Load Factory Preferences and Revert to Saved Preferences are Blender's.
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=cube)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=chess)
 
-The demo is the Default Cube; the steps below change Preferences over it.
+The demo, Chess Endgame, is a board of turned ivory and ebony pieces lit by one low lamp: small objects close
+together, where how the view orbits and zooms (Navigation), which keys do what (Input, Keymap) and how the interface
+looks (Themes) shape the work. The steps below change Preferences over it.
 
 ## Steps
 
@@ -134,5 +136,9 @@ The demo is the Default Cube; the steps below change Preferences over it.
 
 ## Project files
 
-- [index.js](../../examples/cube/index.js): the Default Cube. Preferences belong to the browser, not to a project.
+- [chess.py](../../examples/chess/chess.py): builds the board, the pieces as lathes of their profiles, the lights and
+  the camera in Blender 5.2.
+- [chess.blend](../../examples/chess/chess.blend): the file the script saves.
+- [index.js](../../examples/chess/index.js): opens the .blend with Blender's reader. Preferences belong to the browser,
+  not to a project.
 - Recorded by [record-preferences.mjs](../../tools/docs/record-preferences.mjs).

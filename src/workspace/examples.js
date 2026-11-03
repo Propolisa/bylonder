@@ -46,6 +46,7 @@ export const examples = [
   { id: "mesh-modeling", title: "Rangefinder Camera" },
   { id: "drivers-and-graph-editor", title: "Steam Engine" },
   { id: "vertex-and-weight-paint", title: "Koi Pond" },
+  { id: "chess", title: "Chess Endgame" },
   // An application template: its startup file and workspaces (File > New > 2D Animation).
   { id: "2d-animation", title: "2D Animation", workspaces: [["2D Animation", "PAINT_GREASE_PENCIL"], ["2D Full Canvas", "PAINT_GREASE_PENCIL"]] },
 ].map((example) => ({ ...example, files: () => files(example.id) }));

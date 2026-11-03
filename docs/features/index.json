@@ -1049,7 +1049,7 @@
    "https://docs.blender.org/manual/en/5.2/editors/preferences/themes.html",
    "https://docs.blender.org/manual/en/5.2/editors/3dview/navigate/navigation.html"
   ],
-  "example": "cube",
+  "example": "chess",
   "thumbnail": "preferences/thumbnail.png",
   "media": [
    "preferences/open.png",
@@ -1109,8 +1109,8 @@
    "File Paths are greyed out: projects and their files live in the browser."
   ],
   "page": "docs/features/preferences.md",
-  "open": "https://propolisa.github.io/bylonder/#example=cube",
-  "example_title": "Default Cube",
+  "open": "https://propolisa.github.io/bylonder/#example=chess",
+  "example_title": "Chess Endgame",
   "coverage": {
    "operators": {
     "supported": 15,
@@ -1527,14 +1527,16 @@
    "https://docs.blender.org/manual/en/5.2/animation/shape_keys/workflow.html",
    "https://docs.blender.org/manual/en/5.2/modeling/meshes/editing/vertex/blend_from_shape.html"
   ],
-  "example": "shape-keys",
+  "example": "lotus",
   "thumbnail": "shape-keys/thumbnail.png",
   "media": [
-   "shape-keys/panel.png",
+   "shape-keys/petal.gif",
+   "shape-keys/add-keys.gif",
+   "shape-keys/edit-key.gif",
    "shape-keys/value.gif",
-   "shape-keys/edit.gif",
-   "shape-keys/play.gif",
-   "shape-keys/runtime.png"
+   "shape-keys/key-value.gif",
+   "shape-keys/runtime.png",
+   "shape-keys/lotus.gif"
   ],
   "ui": [
    "PROPERTIES",
@@ -1575,8 +1577,8 @@
    "On Babylon (mapped) Blender's animation system still evaluates the keys into the mesh each frame (about 4 ms on 32k vertices), though nothing reads that mesh; the depsgraph has no hook to evaluate it only when read."
   ],
   "page": "docs/features/shape-keys.md",
-  "open": "https://propolisa.github.io/bylonder/#example=shape-keys",
-  "example_title": "Shape Keys",
+  "open": "https://propolisa.github.io/bylonder/#example=lotus",
+  "example_title": "Lotus",
   "coverage": {
    "operators": {
     "supported": 26,
