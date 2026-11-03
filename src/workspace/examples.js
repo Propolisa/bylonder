@@ -39,6 +39,7 @@ export const examples = [
   { id: "shape-keys", title: "Shape Keys" },
   { id: "nla", title: "Nonlinear Animation" },
   { id: "carousel", title: "Carousel" },
+  { id: "lotus", title: "Lotus" },
   { id: "import-export", title: "Import and Export" },
   { id: "link-append", title: "Link and Append" },
   // An application template: its startup file and workspaces (File > New > 2D Animation).
