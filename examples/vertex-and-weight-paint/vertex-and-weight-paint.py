@@ -49,23 +49,65 @@ def koi_skin():
 
 
 def pond_floor():
-    """Silt and moss: a Noise Texture through a Color Ramp."""
+    """Deep water over silt: a spherical Gradient Texture darkens it toward the edges, Noise mottles it, and a Voronoi
+    Texture's cell edges add the caustic light of the ripples."""
     ma = material('Pond Floor', (0.05, 0.08, 0.06), 0.9)
     nodes, link = ma.node_tree.nodes, ma.node_tree.links.new
-    tex = nodes.new('ShaderNodeTexNoise')
-    tex.inputs['Scale'].default_value, tex.inputs['Detail'].default_value = 6.0, 8.0
+    coord = nodes.new('ShaderNodeTexCoord')
+    mapping = nodes.new('ShaderNodeMapping')
+    mapping.inputs['Scale'].default_value = (0.25, 0.25, 0.25)
+    link(coord.outputs['Object'], mapping.inputs['Vector'])
+    depth = nodes.new('ShaderNodeTexGradient')
+    depth.gradient_type = 'SPHERICAL'
+    link(mapping.outputs['Vector'], depth.inputs['Vector'])
+    silt = nodes.new('ShaderNodeTexNoise')
+    silt.inputs['Scale'].default_value, silt.inputs['Detail'].default_value = 1.5, 6.0
+    link(coord.outputs['Object'], silt.inputs['Vector'])
+    shade = nodes.new('ShaderNodeMix')
+    shade.data_type, shade.blend_type = 'RGBA', 'MULTIPLY'
+    shade.inputs['Factor'].default_value = 1.0
     ramp = nodes.new('ShaderNodeValToRGB')
-    ramp.color_ramp.elements[0].color = (0.004, 0.012, 0.014, 1)
-    ramp.color_ramp.elements[1].color = (0.06, 0.09, 0.05, 1)
+    ramp.color_ramp.elements[0].color = (0.002, 0.008, 0.012, 1)
+    ramp.color_ramp.elements[1].color = (0.05, 0.12, 0.11, 1)
+    link(depth.outputs['Fac'], ramp.inputs['Fac'])
+    link(ramp.outputs['Color'], shade.inputs['A'])
+    link(silt.outputs['Color'], shade.inputs['B'])
+    ripples = nodes.new('ShaderNodeTexVoronoi')
+    ripples.feature = 'DISTANCE_TO_EDGE'
+    ripples.inputs['Scale'].default_value = 4.0
+    link(coord.outputs['Object'], ripples.inputs['Vector'])
+    caustic = nodes.new('ShaderNodeValToRGB')
+    caustic.color_ramp.elements[0].color = (0.05, 0.08, 0.06, 1)
+    caustic.color_ramp.elements[1].position = 0.035
+    caustic.color_ramp.elements[1].color = (0, 0, 0, 1)
+    link(ripples.outputs['Distance'], caustic.inputs['Fac'])
+    light = nodes.new('ShaderNodeMix')
+    light.data_type, light.blend_type = 'RGBA', 'ADD'
+    light.inputs['Factor'].default_value = 1.0
+    link(shade.outputs['Result'], light.inputs['A'])
+    link(caustic.outputs['Color'], light.inputs['B'])
+    link(light.outputs['Result'], nodes['Principled BSDF'].inputs['Base Color'])
+    return ma
+
+
+def lily_pad():
+    """A waxy pad: two greens mixed by a Noise Texture, glossy."""
+    ma = material('Lily Pad', (0.05, 0.2, 0.04), 0.2)
+    nodes, link = ma.node_tree.nodes, ma.node_tree.links.new
+    tex = nodes.new('ShaderNodeTexNoise')
+    tex.inputs['Scale'].default_value = 8.0
+    ramp = nodes.new('ShaderNodeValToRGB')
+    ramp.color_ramp.elements[0].color = (0.03, 0.12, 0.025, 1)
+    ramp.color_ramp.elements[1].color = (0.12, 0.3, 0.06, 1)
     link(tex.outputs['Fac'], ramp.inputs['Fac'])
     link(ramp.outputs['Color'], nodes['Principled BSDF'].inputs['Base Color'])
     return ma
 
 
 SKIN, FLOOR = koi_skin(), pond_floor()
-PAD = material('Lily Pad', (0.05, 0.2, 0.04), 0.25)
+PAD = lily_pad()
 FLOWER = material('Lotus', (0.95, 0.62, 0.72), 0.5)
-STONE = material('Pebble', (0.13, 0.12, 0.1), 0.6)
+STONE = material('Pebble', (0.05, 0.05, 0.045), 0.5)
 
 
 def width(u):
@@ -120,7 +162,9 @@ def mix(a, b, t):
 
 def kohaku(p, u):
     """White, red patches over the back, fins pale."""
-    if u < 0.05 or abs(p.y) > 0.17 and u > 0.6:
+    if u < 0.05:
+        return mix(WHITE, RED, 0.35)
+    if abs(p.y) > 0.17 and u > 0.6:
         return mix(WHITE, (1, 0.9, 0.85, 1), 0.3)
     red = noise.noise(p * Vector((3.2, 5, 5)) + Vector((1.3, 0, 2))) + 0.25 * (p.z > 0)
     return RED if red > 0.2 and u < 0.93 else WHITE
@@ -129,7 +173,7 @@ def kohaku(p, u):
 def showa(p, u):
     """Black over the back with red and white, fins edged black."""
     if u < 0.05:
-        return mix(BLACK, WHITE, 0.6)
+        return mix(mix(BLACK, WHITE, 0.6), RED, 0.25)
     black = noise.noise(p * 4 + Vector((5, 1, 0))) + 0.35 * (p.z > 0)
     red = noise.noise(p * 3 + Vector((0, 7, 3)))
     return BLACK if black > 0.25 else RED if red > 0.0 else WHITE
@@ -141,6 +185,7 @@ def swim(obj, location, heading, phase, amount):
     obj.location, obj.rotation_euler = location, (0, 0, heading)
     bend = obj.modifiers.new('Tail Swing', 'SIMPLE_DEFORM')
     bend.deform_method, bend.deform_axis, bend.vertex_group = 'BEND', 'Z', 'Tail'
+    obj.modifiers.new('Subdivision', 'SUBSURF').levels = 1
     for i, frame in enumerate((1, 13, 25, 37, 49)):
         bend.angle = amount * math.cos(math.pi * i / 2 + phase) * (1 if i % 2 == 0 else 0.15)
         obj.keyframe_insert('modifiers["Tail Swing"].angle', frame=frame)
@@ -155,7 +200,7 @@ bpy.ops.mesh.primitive_plane_add(size=12)
 floor = bpy.context.object
 floor.name = 'Pond Floor'
 floor.data.materials.append(FLOOR)
-for i in range(26):
+for i in range(14):
     a, r = random.uniform(0, 2 * math.pi), random.uniform(0.6, 3.0)
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=random.uniform(0.05, 0.12), location=(r * math.cos(a), r * math.sin(a), 0.02))
     pebble = bpy.context.object
