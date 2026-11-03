@@ -1,47 +1,58 @@
-// Records docs/features/nla.md's media: the Nonlinear Animation editor on the NLA example, its strips, a strip's
-// properties, tweak mode and playback.
+// Records docs/features/nla.md's media: a hop keyed on the Default Cube, then the Carousel example playing and its
+// staggered strips in the Nonlinear Animation editor.
 // usage: node tools/docs/record-nla.mjs
 import { record } from "./record.mjs";
+import { rendered } from "./scene-view.mjs";
 
-const NLA = "#nla-section", HEADER = 26;
-// The editor's channel list and sidebar widths, and where its first track row starts under the scrubbing area.
-const CHANNELS = 200, SIDEBAR = 280, ROWS = 24, ROW = 26;
+const NLA = "#nla-section", HEADER = 26, VIEW = '[data-section="viewport"]';
+const SCENE = { part: [0.08, 0.06, 0.92, 0.94] };
 
-await record("nla", { example: "nla", node: "Box" }, async (r) => {
+const openNla = async (r) => {
   const { app, page } = r;
-  const section = () => app.locator(NLA).boundingBox();
-  const area = async () => { const b = await section(); return { x: b.x, y: b.y - HEADER, width: b.width, height: b.height + HEADER }; };
-  // A point of the main region: a frame of the example's range (1 to 96) on a channel row (0 is the object's).
-  const at = async (frame, row) => {
-    const b = await section(), width = b.width - CHANNELS - SIDEBAR;
-    return [b.x + CHANNELS + 51 + ((frame - 1) / 95) * (width - 100), b.y + ROWS + ROW / 2 + row * ROW];
-  };
-
   const timeline = await app.locator("#timeline-section").boundingBox();
-  await r.gif("open", undefined, async () => {
-    await page.mouse.click(timeline.x + 25, timeline.y - HEADER / 2);
-    await r.pause(400);
-    await app.frame().getByRole("menuitem", { name: "Nonlinear Animation", exact: true }).last().click();
-    await app.settled();
-    await r.drag([timeline.x + 500, timeline.y - HEADER], [timeline.x + 500, 400]);
-    await r.pause(600);
-  });
+  await page.mouse.click(timeline.x + 25, timeline.y - HEADER / 2);
+  await r.pause(400);
+  await app.frame().getByRole("menuitem", { name: "Nonlinear Animation", exact: true }).last().click();
+  await app.settled();
+  await r.drag([timeline.x + 500, timeline.y - HEADER], [timeline.x + 500, 430]);
+};
 
-  await r.gif("select", await area(), async () => {
-    await page.mouse.click(...(await at(10, 3)));
-    await app.settled();
-    await r.pause(600);
+await record("nla", { example: "cube", node: "Cube" }, async (r) => {
+  const { app } = r;
+  const type = async (...keys) => { for (const key of keys) await r.keys(key, key.toLowerCase()); };
+
+  await r.gif("hop", undefined, async () => {
+    await app.hover();
+    await r.keys("I");
+    await r.frame(7);
+    await app.hover();
+    await type("G", "Z", "1");
+    await r.keys("Enter");
+    await r.keys("I");
+    await r.frame(13);
+    await app.hover();
+    await r.keys("Alt G", "Alt+g");
+    await r.keys("I");
   });
-  await r.shot("thumbnail", await area());
-  await r.gif("tweak", await area(), async () => {
-    await page.mouse.move(...(await at(60, 5)));
-    await r.keys("Tab");
-    await r.pause(1000);
-    await r.keys("Tab");
-  });
-  await r.gif("play", undefined, async () => {
+});
+
+await record("nla", { example: "carousel", node: "Platform" }, async (r) => {
+  const { app, page } = r;
+  await rendered(r);
+  await r.frame(30);
+  await r.shot("thumbnail", VIEW, SCENE);
+  await r.gif("carousel", VIEW, async () => {
+    await r.frame(1);
+    await app.hover();
     await r.keys("Space", " ");
-    await r.pause(3000);
+    await r.pause(5000);
     await r.keys("Space", " ");
-  });
+  }, SCENE);
+  await openNla(r);
+  await app.hover();
+  await r.keys("A", "a");
+  const nla = await app.locator(NLA).boundingBox();
+  await page.mouse.move(nla.x + nla.width / 2, nla.y + nla.height / 2);
+  await r.keys("Home");
+  await r.shot("strips", { x: nla.x, y: nla.y - HEADER, width: nla.width, height: nla.height + HEADER });
 });
