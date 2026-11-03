@@ -129,13 +129,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       apply: (node, parent) => { node.parent = nodeOf(parent); },
     },
     material_slots: {
-      applies: (entry) => entry.type === 'MESH',
+      applies: (entry) => drawsSlots(entry),
       babylon: (node) => slotsOf(node).map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)),
       main: (ob) => blender.materials(ob),
       set: (ob, slots) => blender.setMaterials(ob, slots),
       apply: (node, slots) => setSlots(node, slots.map(materialFor)),
     },
   };
+  // A mesh, curve or text object draws its slots on its Babylon mesh.
+  const drawsSlots = (entry) => entry.type === 'MESH' || CURVE_TYPES.includes(entry.type);
   // blender-port: DNA_object_types.h OB_TYPE_SUPPORT_MATERIAL
   const MATERIAL_TYPES = ['MESH', 'CURVE', 'SURFACE', 'FONT', 'META', 'GREASEPENCIL', 'CURVES', 'POINTCLOUD', 'VOLUME'];
   const hasMaterials = (entry) => MATERIAL_TYPES.includes(entry?.type);
@@ -792,7 +794,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       flush();
       blender.setMaterials(entry.ob, list.map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)));
       evaluate();
-      if (entry.type === 'MESH') RELATIONS.material_slots.apply(node, blender.materials(entry.ob));
+      if (drawsSlots(entry)) RELATIONS.material_slots.apply(node, blender.materials(entry.ob));
       return true;
     },
     // An object's material slots in Main, as Babylon's materials; null for an object Main does not hold or whose type

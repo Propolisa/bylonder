@@ -2,7 +2,7 @@
 id: nla
 title: Nonlinear Animation
 summary: Layer and mix actions as strips on tracks in Blender's Nonlinear Animation editor, with push down, tweak mode, strip blending, influence and repeats, evaluated by Blender's animation system.
-expect: Tracks, strips, push down, tweak mode and strip blending run Blender's code and evaluate as in Blender; sound strips and control curves are listed but not checked against Blender's drawing.
+expect: Tracks, strips, tweak mode and strip blending run Blender's code and evaluate as in Blender; the action line has no Push Down button, and sound strips and control curves are listed but not checked against Blender's drawing.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/nla/index.html
@@ -11,13 +11,12 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/nla/strips.html
   - https://docs.blender.org/manual/en/5.2/editors/nla/sidebar.html
   - https://docs.blender.org/manual/en/5.2/editors/nla/tweaking.html
-example: nla
+example: carousel
 thumbnail: nla/thumbnail.png
 media:
-  - nla/open.gif
-  - nla/select.gif
-  - nla/tweak.gif
-  - nla/play.gif
+  - nla/hop.gif
+  - nla/carousel.gif
+  - nla/strips.png
 ui:
   - NLA_EDITOR
   - NLA_*
@@ -41,6 +40,9 @@ operators:
   - nla.move_down
   - nla.fmodifier_add
   - transform.translate
+  - object.location_clear
+  - nla.view_all
+  - anim.keyframe_insert
   - screen.animation_play
 code:
   - src/editors/animation/anim-editor.js
@@ -51,6 +53,7 @@ code:
 tests:
   - tests/nla-wasm.test.js
 limits:
+  - The action line has no Push Down button; an action becomes a strip from Python (`nla_tracks.new`, `strips.new`).
   - Strips of sound clips and NLA control curves are listed but their sounds and curves are not checked against Blender's drawing.
   - Keyframe shapes on the action line are drawn without their extreme markers (the Dope Sheet's up and down arrows).
 ---
@@ -58,44 +61,45 @@ limits:
 
 The Nonlinear Animation editor (NLA) is Blender's editor for layering actions. Each animated data-block has tracks of
 strips; a strip plays an action over a frame range, repeated, scaled, blended in or out, and mixed with the tracks
-below it by its blending mode and influence. The editor is Blender's own, run in the module: its space and regions,
-its keymaps and operators (selection, push down, tweak mode, transform, split, duplicate, meta strips, transitions),
-the channel list and the main region's strips drawn by Blender's draw code, and the sidebar's strip panels. Blender's
-animation system evaluates the strips each frame (the action under the tracks, then each track's strips), so the scene
-plays exactly as in Blender.
+below it by its blending mode and influence. One action can be placed as strips on many objects, each starting at its
+own frame, so a single cycle animates a crowd out of step. The editor is Blender's own, run in the module: its space
+and regions, its keymaps and operators (selection, push down, tweak mode, transform, split, duplicate, meta strips,
+transitions), the channel list and the main region's strips drawn by Blender's draw code, and the sidebar's strip
+panels. Blender's animation system evaluates the strips each frame (the action under the tracks, then each track's
+strips), so the scene plays exactly as in Blender.
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=nla)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=carousel)
 
-The demo is a box animated by three actions made in Blender by a script (`nla.py`): Slide moves it across the ground,
-Hop repeats a hop three times added on top, and Turn combines a quarter turn at half influence from frame 49.
+The demo is a carousel at dusk. Its six swans share two actions of one 24 frame cycle each: Gallop moves a swan up its
+pole and back, Rock pitches it. Each swan has a Gallop track and a Rock track (blended with Add), both repeated six
+times, and each swan's strips start a quarter cycle after the previous swan's, so the riders rise and fall as a wave.
+The platform turns by an action of its own with linear extrapolation. Warm point and spot lights under the canopy and
+from the front, a cool moon and emissive bulbs light the scene.
 
 ## Steps
 
-1. **Open the editor.** Click the Timeline's Editor Type menu and pick Nonlinear Animation, then drag the border above
-   it up. Box lists its action line (`<No Action>`) and the tracks Turn, Hop and Slide with their strips.
+1. **Key a cycle.** In a new file, hover the 3D Viewport and press I to key the cube at frame 1. At frame 7 press G Z 1
+   Enter and I; at frame 13 press Alt G and I. The keys make an action, CubeAction: one hop, the kind of cycle the
+   example's Gallop and Rock are.
 
-   ![The Timeline switched to the Nonlinear Animation editor](../media/features/nla/open.gif)
+   ![Keys at frames 1, 7 and 13](../media/features/nla/hop.gif)
 
-2. **A strip's properties.** Click the Hop strip: the sidebar (N shows or hides it) has its Strip tab, with its frames,
-   extrapolation, blending (Add), blend in and out, influence, and its action clip's repeat and playback scale.
+2. **Strips of one cycle.** The example's script places Gallop and Rock as strips on six swans (`nla_tracks.new`,
+   `strips.new`), each repeated six times and each swan's a quarter cycle later. Play it in Rendered shading.
 
-   ![Selecting a strip and its sidebar](../media/features/nla/select.gif)
+   ![The Carousel example playing](../media/features/nla/carousel.gif)
 
-3. **Tweak mode.** Press Tab to edit the strip's action in place: the other tracks dim and the Dope Sheet and Graph
-   Editor show Hop's keys. Tab again leaves tweak mode.
+3. **Read the strips.** Switch the Timeline to Nonlinear Animation with its Editor Type menu and drag its top edge up.
+   With every object selected (A over the 3D Viewport), Home over the editor shows each swan's Rock and Gallop tracks,
+   each pair starting later than the one above. Spin, the platform's action, is on its action line. Click a strip and
+   press G to move it in time, or Tab to edit its action in place.
 
-   ![Tab into tweak mode and out](../media/features/nla/tweak.gif)
-
-4. **Play it.** Press Space: Blender evaluates the stack each frame, so the box slides, hops three times and turns.
-
-   ![Playing the layered animation](../media/features/nla/play.gif)
-
-5. **Push down.** Key any property (I over the 3D Viewport): the keys make an action on the action line, its keys
-   drawn as keyframe shapes. The button beside it (Push Down) moves the action into a new strip, ready to be layered.
+   ![The swans' staggered strips](../media/features/nla/strips.png)
 
 ## Project files
 
-- [nla.py](../../examples/nla/nla.py): builds the box, its three actions and their tracks and strips, in Blender 5.2.
-- [nla.blend](../../examples/nla/nla.blend): the file the script saves.
-- [index.js](../../examples/nla/index.js): opens the .blend with Blender's reader.
+- [carousel.py](../../examples/carousel/carousel.py): builds the carousel, its materials and lights, the Gallop, Rock
+  and Spin actions and every swan's tracks and strips, in Blender 5.2.
+- [carousel.blend](../../examples/carousel/carousel.blend): the file the script saves.
+- [index.js](../../examples/carousel/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-nla.mjs](../../tools/docs/record-nla.mjs).

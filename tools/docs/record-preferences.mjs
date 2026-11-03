@@ -1,11 +1,14 @@
-// Records docs/features/preferences.md's media: Edit > Preferences over the Default Cube and its sections.
+// Records docs/features/preferences.md's media: the Chess Endgame through its camera in Rendered shading, then Edit >
+// Preferences over it and its sections.
 // usage: node tools/docs/record-preferences.mjs
 import { record } from "./record.mjs";
 
 const WINDOW = "[data-blender=PREFERENCES_WINDOW]";
 
-await record("preferences", {}, async (r) => {
+await record("preferences", { example: "chess", node: null }, async (r) => {
   const { app } = r;
+  await r.pause(3000);
+  await r.render("thumbnail", { part: [0.05, 0, 0.95, 1] });
   const prefs = app.locator(WINDOW);
   const section = async (name) => {
     await prefs.locator("[data-blender=USERPREF_PT_navigation_bar]").getByText(name, { exact: true }).click();
@@ -27,5 +30,4 @@ await record("preferences", {}, async (r) => {
   await section("System");
   await prefs.getByText("Keep Scenes Loaded").scrollIntoViewIfNeeded();
   await r.shot("bylonder", WINDOW);
-  await r.shot("thumbnail", WINDOW, { part: [0, 0, 0.6, 0.6] });
 });
