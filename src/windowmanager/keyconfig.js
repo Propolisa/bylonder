@@ -101,6 +101,15 @@ export function modalItem(name, event, allowed = () => true) {
   return null;
 }
 
+// A modal keymap's items, [identifier, event], in its order.
+export const modalKeymapItems = (name) => modalKeymaps.get(name) ?? [];
+
+// The first binding of an event in the named keymaps, in order: [idname, { properties }], or null.
+export function binding(names, event) {
+  for (const name of names) for (const [idname, kmi, data] of keyconfig().get(name) ?? []) if (matches(kmi, event)) return [idname, Object.fromEntries(data?.properties ?? [])];
+  return null;
+}
+
 // A handler running the named keymaps in order (or those `names(event)` gives), as the editor's handlers run
 // them, those `active(name)` allows: the first item whose event matches and whose operator Bylonder runs with its
 // properties, and polls, is invoked; one that cancels or passes through lets the event go on. `defaults(name, idname)`
