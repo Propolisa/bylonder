@@ -1,13 +1,16 @@
 <script setup>
 // Blender's operator properties dialog (WM_operator_props_dialog_popup): the title, a row per property, and the
-// confirm button, at the pointer. Enter confirms, Escape or a click outside cancels.
+// confirm button, at the pointer. Enter confirms, Escape or a click outside cancels. A field whose value is a boolean is
+// a checkbox; a field's note is a line under it.
 import { onMounted, reactive, ref } from "vue";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 
 const props = defineProps({ title: String, fields: Array, confirm: { type: String, default: "OK" }, at: Object });
 const emit = defineEmits(["done"]);
 const values = reactive(Object.fromEntries(props.fields.map((f) => [f.name, f.value ?? ""])));
+const isBoolean = (field) => typeof field.value === "boolean";
 const root = ref(null);
 const first = ref(null);
 const done = (ok) => emit("done", ok ? { ...values } : null);
@@ -26,10 +29,17 @@ const outside = (e) => { if (!root.value.contains(e.target)) done(false); };
     <div ref="root" role="dialog" :aria-label="title" class="absolute flex w-[280px] flex-col gap-2 rounded-md border border-border bg-background p-2 text-sm text-foreground shadow-[var(--bl-shadow-popup)]"
       :style="position" @keydown.enter.prevent="done(true)" @keydown.esc.prevent="done(false)">
       <div v-if="title" class="px-1 font-semibold">{{ title }}</div>
-      <label v-for="field in fields" :key="field.name" class="flex items-center gap-2">
-        <span class="w-1/3 shrink-0 truncate text-right text-muted-foreground">{{ field.label }}</span>
-        <Input ref="first" v-model="values[field.name]" :aria-label="field.label" />
-      </label>
+      <template v-for="field in fields" :key="field.name">
+        <label v-if="isBoolean(field)" class="flex items-center gap-2 px-1">
+          <Checkbox v-model="values[field.name]" :aria-label="field.label" />
+          <span>{{ field.label }}</span>
+        </label>
+        <label v-else class="flex items-center gap-2">
+          <span class="w-1/3 shrink-0 truncate text-right text-muted-foreground">{{ field.label }}</span>
+          <Input ref="first" v-model="values[field.name]" :aria-label="field.label" />
+        </label>
+        <p v-if="field.note" class="px-1 text-muted-foreground">{{ field.note }}</p>
+      </template>
       <Button @click="done(true)">{{ confirm }}</Button>
     </div>
   </div>

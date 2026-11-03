@@ -23,6 +23,7 @@ import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { principledPBR, applyPBR } from './material/principled-gltf.js';
 import { attributesWanted, nodeMaterialFromTree, nodeProperties, outputValues } from '../nodes/blender/shader-nodes.js';
+import { pullEeveeParity } from '../draw/eevee-parity.js';
 import { idStruct, pointerStruct, structFind } from '../python/bpy_rna.js';
 import { createEditMeshOverlay } from '../draw/overlay-edit-mesh.js';
 import { createGreasePencilDraw, BLENDER_LOOK } from '../draw/grease-pencil.js';
@@ -407,7 +408,10 @@ export function createMainView(state) {
       const nodeTrees = [...updates.keys()].some((id) => !drawn.has(id) && id !== blender.scene && !shading.includes(id));
       for (const [material, record] of materials) if (nodeTrees || updates.has(record.ma)) drawShading(record, material, 'Material');
       for (const [id, record] of worlds) if (world.worlds.byId(id) && (nodeTrees || updates.has(record.wo))) drawShading(record, world.worlds.byId(id), 'World');
-      if (scene ?? updates.has(blender.scene)) for (const record of state.sceneRecords()) pull(record, world);
+      if (scene ?? updates.has(blender.scene)) {
+        for (const record of state.sceneRecords()) pull(record, world);
+        pullEeveeParity(world.scene, blender.scene);
+      }
       if (updates.size) { drawInstances(); drawCurves(); drawGreasePencil(); particleEdit = particleEditOverlay(world.scene, blender.particleEdit(), particleEdit); }
     } finally {
       state.applying = was;

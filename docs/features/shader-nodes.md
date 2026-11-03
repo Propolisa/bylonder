@@ -44,6 +44,8 @@ code:
   - src/nodes/blender/node-code.js
   - src/nodes/blender/glsl.js
   - src/draw/draw-view.js
+  - src/draw/eevee-parity.js
+  - src/io_scene_babylon/node-material-export.js
   - src/blenkernel/light/light-shadows.js
   - src/blenkernel/colortools.js
   - tools/blender-nodes/gpu.py
@@ -53,6 +55,8 @@ tests:
   - tests/nodes-gpu.test.js
   - tests/nodes.test.js
   - tests/draw-view.test.js
+  - tests/eevee-parity-wasm.test.js
+  - tests/export-node-material.test.js
   - tests/light-shadows.test.js
   - tests/node-material-base.test.js
   - tests/textures-wasm.test.js
@@ -83,6 +87,9 @@ limits:
   - Object Info's Material Index is 0; Geometry's Parametric and Random Per Island are 0.
   - Curves nodes draw the curves a file holds; the node has no curve widget to edit them.
   - Material Output's Displacement is not applied; a texture node's legacy texture mapping is ignored.
+  - With EEVEE Parity off (Properties > Render), lobes are lit as one and the view direction is Babylon's eye, as plain Babylon PBR does.
+  - File > Export writes a material of Blender's nodes as Babylon's own blocks, its Blender nodes one CustomBlock of their code: their values, the drawn object's color, index and texture space are fixed at export, and a color ramp's table is 8 bits.
+  - The export's EEVEE Parity lights a second reflection lobe as Babylon's clearcoat, a dielectric whose strength follows the lobe's color, not as EEVEE's lobe; exported Principled-only materials (PBRMaterial) keep Babylon's view direction through an orthographic camera.
   - Not run yet: Wireframe, Point Info, Particle Info, the volume nodes, Script, Sky, Environment and IES textures, Toon BSDF, Specular BSDF, Ray Portal, Raycast, AOV Output and node groups.
 ---
 # Shader Nodes
@@ -140,6 +147,13 @@ percentile inside the sphere or over the tile). Measured with Render Image at 25
 
 Through the gallery's Perspective camera (`tests/fixtures/shader-gallery-perspective-eevee.png`), the band of the frame the
 floor fills measures mean dE 2.1, 99th percentile 23 (shadow edges).
+
+**EEVEE Parity.** Properties > Render > EEVEE Parity (on by default, marked with the Bylonder icon) turns on Bylonder's
+extensions of Babylon's materials that draw as EEVEE does: each reflection lobe lit on its own and an orthographic
+view's direction. Off, materials draw as plain Babylon PBR. File > Export asks for its own EEVEE
+Parity option, off by default: on, an export adds the view's direction as EEVEE's and a second lobe as Babylon's
+clearcoat; off, it lights with Babylon's own blocks. Either way the scene loads in Babylon.js alone
+(`tests/export-node-material.test.js`).
 
 > **Note** The header's Babylon Editor toggle opens the same graph in Babylon's Node Material Editor; both editors
 > keep one layout.

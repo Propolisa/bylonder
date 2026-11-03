@@ -4,6 +4,7 @@ import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Text
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { exportRuntimes } from '../runtimes/runtimes.js';
 import { straightImageData } from '../imbuf/image-textures.js';
+import { exportNodeMaterial } from './node-material-export.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -181,18 +182,19 @@ const authoredMetadata = (node) => {
 // The serialized scene. `geometry: false` leaves vertex data out, for the JS export, which reads it from the meshes;
 // `live` (object to its modifier stack, as modifiers.live gives it) animates those stacks' settings. Features with a
 // runtime (runtimes.js) are written through their mapping to Babylon: `mapped`, an exportRuntimes result the caller
-// restores, else one made and restored here.
-export async function serializeScene(world, { geometry = true, live = null, mapped = null } = {}) {
+// restores, else one made and restored here. Materials of Blender's shader nodes are written as Babylon's own blocks
+// (node-material-export.js), with Bylonder's EEVEE extensions when `parity`.
+export async function serializeScene(world, { geometry = true, live = null, mapped = null, parity = false } = {}) {
   await world.modifiers.settled();
   const runtimes = mapped ?? exportRuntimes(world);
   try {
-    return await serializeMapped(world, { geometry, live, mapped: runtimes.animations });
+    return await serializeMapped(world, { geometry, live, mapped: runtimes.animations, parity });
   } finally {
     if (!mapped) runtimes.restore();
   }
 }
 
-async function serializeMapped(world, { geometry, live, mapped }) {
+async function serializeMapped(world, { geometry, live, mapped, parity }) {
   const { scene } = world;
   const camera = world.sceneSettings.camera() ?? scene.activeCamera;
   const content = exportedContent(scene);
@@ -222,6 +224,10 @@ async function serializeMapped(world, { geometry, live, mapped }) {
     restores.forEach((restore) => restore());
   }
   const json = await pending;
+  json.materials = await Promise.all(json.materials.map(async (entry) => {
+    const material = scene.materials.find((m) => m.uniqueId === entry.uniqueId);
+    return (material && await exportNodeMaterial(material, { parity })) ?? entry;
+  }));
   const kept = (list, items, keep) => list.filter((_, i) => keep(items[i]));
   json.multiMaterials = kept(json.multiMaterials, scene.multiMaterials, (m) => content.materials.has(m) || content.meshes.some((mesh) => mesh.material === m));
   json.particleSystems = kept(json.particleSystems, scene.particleSystems, (p) => !p.emitter?.getClassName || content.nodes.has(p.emitter));
