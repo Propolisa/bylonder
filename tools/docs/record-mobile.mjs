@@ -1,5 +1,6 @@
 // Records docs/features/mobile.md's media under touch emulation: the Layout workspace on a large phone, a folded area's
-// drawer, navigation by gestures, the header scrolled to Rendered shading, and press and hold.
+// drawer, navigation by gestures, the header scrolled to Rendered shading, press and hold, a value dragged with its
+// readout and soft Shift, the area edge menu, an area carried by its header, and the touch bar's pie and bubbles.
 // usage: node tools/docs/record-mobile.mjs
 import { record } from "./record.mjs";
 
@@ -20,6 +21,42 @@ await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true
     await fingers.tap(await app.point(0.25, 0.5));
     await r.pause(400);
   });
+
+  const step = async (points) => { await fingers.send("touchMove", points); await r.pause(40); };
+  await fingers.tap(await center(app.locator('.dock-fold[aria-label*="Properties"]')));
+  await app.locator(".dock-drawer").waitFor();
+  await r.pause(800);
+  const field = app.locator('[role="spinbutton"][aria-label="Location"]:visible').first();
+  await field.waitFor();
+  await r.pause(1000);
+  await r.gif("value", { x: 0, y: 0, width: PHONE.width, height: 600 }, async () => {
+    const [x, y] = await center(field);
+    await fingers.send("touchStart", [[x, y]]);
+    for (let dx = 5; dx <= 60; dx += 5) await step([[x + dx, y]]);
+    const shift = await center(app.locator('.bl-value-drag button[aria-label="Shift"]'));
+    await fingers.send("touchStart", [[x + 60, y], shift]);
+    for (let dx = 65; dx <= 120; dx += 5) await step([[x + dx, y], shift]);
+    await r.pause(300);
+    await fingers.send("touchEnd", []);
+    await r.pause(600);
+  });
+  const drawer = await app.locator(".dock-drawer").boundingBox();
+  await fingers.tap([drawer.x / 2, drawer.y + drawer.height / 2]);
+  await r.pause(600);
+
+  const bar = app.locator(".bl-touch-bar");
+  const tap = async (locator, wait = 500) => { await locator.scrollIntoViewIfNeeded(); await fingers.tap(await center(locator)); await r.pause(wait); };
+  await r.gif("bubbles", { x: 0, y: PHONE.height - 520, width: PHONE.width, height: 520 }, async () => {
+    await tap(bar.locator('button[aria-label="Keys"]'), 900);
+    await tap(app.locator('[role="menuitem"][aria-label="Move"]'));
+    await tap(bar.locator('.bl-bubble[data-item="AXIS_X"]'));
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await tap(bar.locator('button[aria-label="2"]'));
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await tap(bar.locator('.bl-bubble[data-item="CONFIRM"]'), 1000);
+  });
+  await fingers.tap(await app.point(0.5, 0.92), 2);
+  await r.pause(600);
 
   await r.gif("navigate", undefined, async () => {
     const at = await app.point(0.5, 0.55);
@@ -50,4 +87,26 @@ await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true
     await r.pause(800);
   });
   await r.page.keyboard.press("Escape");
+  await r.pause(400);
+
+  const edge = await app.locator(".dock-split-tree .splitpanes--horizontal > .splitpanes__splitter:visible").first().boundingBox();
+  const swap = async () => { await fingers.tap(await center(app.frame().getByRole("menuitem", { name: "Swap Areas" }))); await r.pause(1000); };
+  await r.gif("edge", undefined, async () => {
+    await fingers.hold([edge.x + edge.width / 2, edge.y + edge.height / 2 + 8], 1000);
+    await r.pause(1200);
+    await swap();
+  });
+  await app.bylonder((b) => b.dock.reset());
+  await r.pause(1000);
+
+  await r.gif("carry", undefined, async () => {
+    const from = await center(app.locator('.dock-leaf[data-section="timeline"] > .dock-heading')), to = await app.point(0.5, 0.4);
+    await fingers.send("touchStart", [from]);
+    await r.pause(600);
+    for (let i = 1; i <= 15; i++) await step([[from[0] + (to[0] - from[0]) * i / 15, from[1] + (to[1] - from[1]) * i / 15]]);
+    await r.pause(600);
+    await fingers.send("touchEnd", []);
+    await r.pause(1000);
+  });
+  await app.bylonder((b) => b.dock.reset());
 });

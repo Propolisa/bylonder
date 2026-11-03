@@ -11,7 +11,7 @@ class FakePointerEvent extends Event {
 }
 class FakeElement extends EventTarget {
   constructor(win, parent, style = {}) { super(); Object.assign(this, { nodeType: 1, parentElement: parent, ownerDocument: win.document, style: { touchAction: 'auto', '--bl-touch': '', ...style } }); }
-  closest(selector) { return selector.includes('title') && this.title ? this : null; }
+  closest(selector) { return (selector.includes('title') && this.title) || (selector.includes('bl-touch-own') && this.own) || (selector.includes('hold-drag') && this.carries) ? this : null; }
   getAttribute(name) { return this[name] ?? null; }
   releasePointerCapture() {}
   dispatchEvent(event) { this.seen.push(event); return super.dispatchEvent(event); }
@@ -19,7 +19,7 @@ class FakeElement extends EventTarget {
 }
 function fakeWindow() {
   const win = new EventTarget();
-  Object.assign(win, { PointerEvent: FakePointerEvent, MouseEvent: FakePointerEvent, WheelEvent: FakePointerEvent });
+  Object.assign(win, { PointerEvent: FakePointerEvent, MouseEvent: FakePointerEvent, WheelEvent: FakePointerEvent, CustomEvent });
   win.document = { elementFromPoint: () => win.target, defaultView: win };
   win.getComputedStyle = (el) => ({ touchAction: el.style.touchAction, getPropertyValue: (name) => el.style[name] ?? '' });
   const root = new FakeElement(win, null, { touchAction: 'pan-x pan-y', '--bl-touch': 'ui' });
@@ -34,11 +34,11 @@ const touchEvent = (win, type, id, x, y, target) => {
   win.dispatchEvent(event);
 };
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
-function setup() {
+function setup(input) {
   const win = fakeWindow(), log = { keys: [], scale: [], ui: [] };
   const ui = { hold: () => {}, tooltip: (tip) => log.ui.push(['tooltip', tip.text]), close: () => log.ui.push(['close']) };
   const scale = { value: 1, get: () => scale.value, preview: (v) => log.scale.push(['preview', v]), commit: (v) => { scale.value = v; log.scale.push(['commit', v]); } };
-  installTouch(win, { ui, scale, keys: (native, value) => log.keys.push(`${value} ${native.code}`) });
+  installTouch(win, { ui, scale, keys: (native, value) => log.keys.push(`${value} ${native.code}`), input });
   return { win, log, types: (el) => el.seen.map((e) => `${e.type}${e.button > 0 ? ':' + e.button : ''}`) };
 }
 
@@ -144,4 +144,46 @@ function setup() {
   assert.deepEqual(log.keys, ['PRESS ControlLeft', 'PRESS KeyZ', 'RELEASE KeyZ', 'RELEASE ControlLeft',
     'PRESS ShiftLeft', 'PRESS ControlLeft', 'PRESS KeyZ', 'RELEASE KeyZ', 'RELEASE ControlLeft', 'RELEASE ShiftLeft']);
 }
-console.log('Touch: taps, drags, press and hold, view gestures, UI pinch and undo taps passed');
+// A value drag with a soft modifier (docs/mobile.md Dragging a value): a second finger on the touch layer's own button
+// is no gesture, and the drag's moves carry the modifier while it is held, and not after.
+{
+  const modifiers = { shiftKey: false };
+  const { win } = setup({ modifiers: () => ({ ...modifiers }) });
+  const button = new FakeElement(win, null);
+  button.own = true;
+  win.target = win.view;
+  touchEvent(win, 'pointerdown', 1, 100, 100, win.view);
+  touchEvent(win, 'pointermove', 1, 130, 100, win.view);
+  touchEvent(win, 'pointerdown', 2, 300, 50, button);
+  modifiers.shiftKey = true;
+  touchEvent(win, 'pointermove', 1, 140, 100, win.view);
+  touchEvent(win, 'pointerup', 2, 300, 50, button);
+  modifiers.shiftKey = false;
+  touchEvent(win, 'pointermove', 1, 150, 100, win.view);
+  touchEvent(win, 'pointerup', 1, 150, 100, win.view);
+  const moves = win.view.seen.filter((e) => e.type === 'pointermove').slice(2).map((e) => [e.clientX, e.shiftKey]);
+  assert.deepEqual(moves, [[140, true], [150, false]]);
+  assert.ok(!win.view.seen.some((e) => e.type === 'wheel'), 'no gesture');
+}
+// An area's header held, then dragged: it is carried (arm at the hold, start, moves, end) and no mouse button is pressed;
+// a drag without the hold scrolls as over any UI.
+{
+  const { win, types } = setup();
+  const header = new FakeElement(win, win.ui.parentElement, { '--bl-touch': 'ui' });
+  header.carries = true;
+  win.target = header;
+  const phases = () => header.seen.filter((e) => e.type === 'bl-hold-drag').map((e) => e.detail.phase);
+  touchEvent(win, 'pointerdown', 1, 100, 100, header);
+  touchEvent(win, 'pointermove', 1, 160, 100, header);
+  touchEvent(win, 'pointercancel', 1, 160, 100, header);
+  assert.deepEqual(phases(), [], 'a quick drag scrolls');
+  touchEvent(win, 'pointerdown', 1, 100, 100, header);
+  await wait(450);
+  touchEvent(win, 'pointermove', 1, 160, 100, header);
+  touchEvent(win, 'pointermove', 1, 200, 300, header);
+  touchEvent(win, 'pointerup', 1, 200, 300, header);
+  assert.deepEqual(phases(), ['arm', 'start', 'move', 'move', 'end']);
+  assert.deepEqual(header.seen.at(-1).detail, { phase: 'end', x: 200, y: 300 });
+  assert.deepEqual(types(header).filter((t) => t.startsWith('pointer')), []);
+}
+console.log('Touch: taps, drags, press and hold, view gestures, UI pinch, undo taps, value drag modifiers and header carry passed');

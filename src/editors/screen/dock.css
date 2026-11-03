@@ -23,7 +23,12 @@
 .dock .splitpanes__splitter{background:var(--bl-gap);position:relative;z-index:8}
 .dock .splitpanes--vertical>.splitpanes__splitter{width:3px;min-width:3px;cursor:ew-resize}
 .dock .splitpanes--horizontal>.splitpanes__splitter{height:3px;min-height:3px;cursor:ns-resize}
-.dock .splitpanes__splitter::before{content:'';position:absolute;inset:-3px;z-index:1}
+.dock .splitpanes__splitter::before{content:'';position:absolute;z-index:1}
+.dock .splitpanes--vertical>.splitpanes__splitter::before{inset:-3px calc(-1*var(--bl-edge-margin))}
+.dock .splitpanes--horizontal>.splitpanes__splitter::before{inset:calc(-1*var(--bl-edge-margin)) -3px}
+/* An area carried by its header over another: the swap's drop highlight (screen.area_swap). */
+.dock-drop{position:fixed;z-index:2100;display:flex;align-items:center;justify-content:center;pointer-events:none;border-radius:var(--bl-radius);background:color-mix(in srgb,var(--bl-select) 25%,transparent);box-shadow:inset 0 0 0 2px var(--bl-select);color:var(--bl-text)}
+.dock-drop>.bl-icon{width:calc(var(--bl-row)*2.4);height:calc(var(--bl-row)*2.4)}
 .dock .dock-collapsed{visibility:hidden}
 .dock .dock-collapsed+.splitpanes__splitter,.dock .splitpanes__splitter:has(+.dock-collapsed){display:none}
 .dock-resizing .dock-content{pointer-events:none}

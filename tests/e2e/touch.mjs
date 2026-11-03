@@ -8,12 +8,13 @@ import { chromium, openApp, startServer } from "./app.mjs";
 export const DEVICES = { phone: { width: 412, height: 915 }, "large phone": { width: 430, height: 930 }, "tablet portrait": { width: 1024, height: 1366 }, "tablet landscape": { width: 1366, height: 1024 } };
 
 // Fingers through CDP's touch events, at page coordinates: each step moves every finger, as a hand does. `show(points)`
-// sees where the fingers are down at each step (none when they lift).
+// sees where the fingers are down at each step (none when they lift). A point is [x, y], or [x, y, id] to name its
+// finger (by default its index).
 export function fingers(page, show) {
   let cdp;
   const send = async (type, points) => {
     cdp ??= await page.context().newCDPSession(page);
-    await cdp.send("Input.dispatchTouchEvent", { type, touchPoints: points.map(([x, y], id) => ({ x, y, id, radiusX: 4, radiusY: 4, force: 1 })) });
+    await cdp.send("Input.dispatchTouchEvent", { type, touchPoints: points.map((point, i) => ({ x: point[0], y: point[1], id: point[2] ?? i, radiusX: 4, radiusY: 4, force: 1 })) });
     await show?.(points);
   };
   const wait = (ms) => page.waitForTimeout(ms);
@@ -29,6 +30,7 @@ export function fingers(page, show) {
     await send("touchEnd", []);
   }
   return {
+    send,
     gesture,
     tap: async ([x, y], count = 1) => { await send("touchStart", Array(count).fill(0).map((_, i) => [x + i * 30, y])); await wait(40); await send("touchEnd", []); },
     hold: async ([x, y], ms) => { await send("touchStart", [[x, y]]); await wait(ms); await send("touchEnd", []); },
@@ -45,12 +47,34 @@ let app, touch;
 const pause = () => app.page.waitForTimeout(400);
 const center = async (locator) => {
   const box = await locator.boundingBox();
+  assert.ok(box, `${locator} is shown`);
   return [box.x + box.width / 2, box.y + box.height / 2];
 };
 const camera = () => app.bylonder((b) => { const c = b.views.input.editorCamera; return { position: c.position.asArray(), target: c.target.asArray() }; });
 const moved = (a, b) => a.some((v, i) => Math.abs(v - b[i]) > 1e-3);
 const distance = ({ position, target }) => Math.hypot(...position.map((v, i) => v - target[i]));
 const uiScale = () => app.bylonder((b) => b.userdef.preferences().view.ui_scale);
+const unit = () => app.frame().evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bl-row")));
+// The Properties editor, on its Object tab (the Default Cube's), opened from its strip where it is folded.
+async function objectProperties() {
+  const fold = app.locator('.dock-fold[aria-label*="Properties"]');
+  if (await fold.count() && (await fold.getAttribute("aria-expanded")) !== "true") await touch.tap(await center(fold));
+  await app.settled();
+  await app.page.waitForTimeout(1000);
+}
+// A tap beside the open drawer closes it.
+async function closeDrawer() {
+  const drawer = app.locator(".dock-drawer");
+  if (!(await drawer.count())) return;
+  const box = await drawer.boundingBox();
+  await touch.tap([box.x / 2, box.y + box.height / 2]);
+  await drawer.waitFor({ state: "detached" });
+  await pause();
+}
+// The areas, top to bottom and left to right, by their editors.
+const areas = () => app.frame().evaluate(() => [...document.querySelectorAll(".dock-split-tree .dock-leaf")].map((leaf) => [leaf.dataset.section, Math.round(leaf.getBoundingClientRect().top), Math.round(leaf.getBoundingClientRect().left)])
+  .sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(([id]) => id));
+const selected = () => app.bylonder((b) => b.editor.selection.nodes[0].position.asArray());
 
 const checks = {
   async "the 3D Viewport header scrolls to its shading buttons, and a tap sets Rendered"() {
@@ -154,6 +178,145 @@ const checks = {
     await objects(all, "undone again for the next checks");
   },
 
+  // docs/mobile.md Dragging a value: one finger drags, a second holds a soft modifier beside the readout.
+  async "dragging Location X shows its readout clear of the finger; held Shift is ten times finer, held Ctrl snaps"() {
+    await objectProperties();
+    const field = app.locator('#properties-section [role="spinbutton"][aria-label="Location"]:visible').first();
+    await field.scrollIntoViewIfNeeded();
+    const value = () => field.evaluate((el) => Number(el.getAttribute("aria-valuenow")));
+    const [x, y] = await center(field), start = (await selected())[0];
+    const step = async (points) => { await touch.send("touchMove", points); await app.page.waitForTimeout(30); };
+    // A finger's drag from 0 to 20 pixels right, then over `distance` more, with a second finger on `soft` from there.
+    const readout = app.locator(".bl-value-readout");
+    async function drag(distance, soft) {
+      await touch.send("touchStart", [[x, y]]);
+      for (let dx = 5; dx <= 20; dx += 5) await step([[x + dx, y]]);
+      await readout.waitFor();
+      const second = soft ? [await center(app.locator(`.bl-value-drag button[aria-label="${soft}"]`))] : [];
+      if (soft) await touch.send("touchStart", [[x + 20, y], ...second]);
+      const before = await value();
+      for (let dx = 25; dx <= 20 + distance; dx += 5) await step([[x + dx, y], ...second]);
+      return (await value()) - before;
+    }
+    // Once the region has drawn the value again, so the next drag presses the field it shows.
+    const end = async () => { await touch.send("touchEnd", []); await readout.waitFor({ state: "detached" }); await app.settled(); await app.page.waitForTimeout(1000); };
+    const normal = await drag(40);
+    assert.match(await readout.textContent(), /Location X/);
+    const shown = await field.textContent(), read = await readout.textContent();
+    assert.ok(read.includes(shown.trim()), `the readout (${read}) shows the field's text (${shown})`);
+    const box = await readout.boundingBox(), finger = 44;
+    assert.ok(box.y + box.height <= y - finger / 2 || box.y >= y + finger / 2, `the readout (${box.y}..${box.y + box.height}) is clear of the finger at ${y}`);
+    assert.ok(normal > 0, "a drag right raises the value");
+    await end();
+    const fine = await drag(40, "Shift");
+    assert.ok(Math.abs(fine * 10 - normal) < normal * 0.3, `Shift: ${fine} over the distance ${normal} takes without it`);
+    await end();
+    assert.equal(await app.locator('.bl-touch-bar button[aria-label="Shift"]').getAttribute("data-state"), "off", "the drag's end lets Shift go");
+    await drag(20, "Ctrl");
+    const snapped = await value();
+    assert.ok(Math.abs(snapped - Math.round(snapped)) < 1e-6, `Ctrl snaps to whole units: ${snapped}`);
+    await end();
+    assert.equal(await app.bylonder((b) => b.world.wm.modal), null);
+    await closeDrawer();
+    // Each drag is an undo step: two finger taps undo them.
+    for (let i = 0; i < 3 && Math.abs((await selected())[0] - start) > 1e-6; i++) { await touch.tap(await app.point(0.5, 0.92), 2); await pause(); }
+    assert.ok(Math.abs((await selected())[0] - start) < 1e-6, "undone");
+  },
+
+  // docs/mobile.md Area management: Blender's edge menu (screen.area_options) by a long press inside the edge's
+  // touch margin, and an area carried by its header.
+  async "a long press on an area edge opens Blender's edge menu: Swap Areas swaps, Join joins, a split splits"() {
+    await closeDrawer();
+    const edge = app.locator(".dock-split-tree .splitpanes__splitter:visible").first();
+    const box = await edge.boundingBox(), vertical = box.height > box.width;
+    const at = vertical ? [box.x + box.width / 2 + 9, box.y + box.height / 2] : [box.x + box.width / 2, box.y + box.height / 2 + 9];
+    const menu = app.locator(".bl-menu").filter({ hasText: "Swap Areas" });
+    const edgeMenu = async () => { await touch.hold(at, 1000); await menu.waitFor(); await pause(); };
+    const choose = async (label) => { await touch.tap(await center(menu.locator(".bl-menu-item", { hasText: label }))); await menu.waitFor({ state: "detached" }); await pause(); };
+    const before = await areas(), count = () => app.bylonder((b) => b.dock.areas.length), all = await count();
+    await edgeMenu();
+    for (const label of ["Vertical Split", "Horizontal Split", vertical ? "Join Right" : "Join Up", vertical ? "Join Left" : "Join Down"])
+      assert.equal(await menu.locator(".bl-menu-item", { hasText: label }).count(), 1, label);
+    await choose("Swap Areas");
+    const swapped = await areas();
+    assert.notDeepEqual(swapped, before, "the areas swapped");
+    await edgeMenu();
+    await choose("Swap Areas");
+    assert.deepEqual(await areas(), before, "swapped back");
+    await edgeMenu();
+    await choose(vertical ? "Join Left" : "Join Down");
+    assert.equal((await areas()).length, before.length - 1, "joined");
+    await app.bylonder((b) => b.dock.reset());
+    await app.page.waitForTimeout(300);
+    assert.deepEqual(await areas(), before);
+    await edgeMenu();
+    await choose("Vertical Split");
+    assert.equal(await count(), all + 1, "split");
+    await app.bylonder((b) => b.dock.reset());
+    await app.page.waitForTimeout(300);
+  },
+
+  async "an area held and dragged by its header swaps with the area it is dropped on, which is highlighted"() {
+    await closeDrawer();
+    const before = await areas(), viewport = before.indexOf("viewport"), other = before.find((id, i) => i !== viewport);
+    const heading = app.locator(`.dock-leaf[data-section="${other}"] > .dock-heading`);
+    const from = await center(heading), to = await app.point(0.5, 0.5);
+    await touch.send("touchStart", [from]);
+    await app.page.waitForTimeout(550);
+    for (let i = 1; i <= 10; i++) { await touch.send("touchMove", [[from[0] + (to[0] - from[0]) * i / 10, from[1] + (to[1] - from[1]) * i / 10]]); await app.page.waitForTimeout(20); }
+    await app.locator(".dock-drop").waitFor();
+    const drop = await app.locator(".dock-drop").boundingBox(), area = await app.locator('.dock-leaf[data-section="viewport"]').boundingBox();
+    assert.ok(Math.abs(drop.x - area.x) < 2 && Math.abs(drop.width - area.width) < 2, "the 3D Viewport is highlighted");
+    await touch.send("touchEnd", []);
+    await app.locator(".dock-drop").waitFor({ state: "detached" });
+    const after = await areas();
+    assert.equal(after.indexOf(other), viewport, "the carried area took the 3D Viewport's place");
+    assert.equal(await app.locator(".bl-menu").count(), 0, "no menu");
+    await app.bylonder((b) => b.dock.reset());
+    await app.page.waitForTimeout(300);
+  },
+
+  // docs/mobile.md Shortcuts made tappable.
+  async "the touch bar's Keys pie presses G; the X bubble, the numbers pad's 2 and Confirm move the object 2 on X; Cancel restores"() {
+    const bar = app.locator(".bl-touch-bar");
+    await bar.waitFor();
+    const barBox = await bar.boundingBox(), size = app.page.viewportSize();
+    assert.ok(barBox.height <= 1.7 * (await unit()) + 1 && barBox.y + barBox.height <= size.height, "one row at the window's bottom");
+    // The Default Cube, selected since the checks before.
+    const start = await selected();
+    const pie = async (label) => {
+      await touch.tap(await center(bar.locator('button[aria-label="Keys"]')));
+      await touch.tap(await center(app.locator(`[role="menuitem"][aria-label="${label}"]`)));
+      await bar.locator(".bl-bubble").first().waitFor();
+    };
+    // A bubble scrolled into the bar's view first, as a finger would.
+    const tap = async (locator) => { await locator.scrollIntoViewIfNeeded(); await touch.tap(await center(locator)); };
+    const bubble = (id) => tap(bar.locator(`.bl-bubble[data-item="${id}"]`));
+    await pie("Move");
+    await bubble("AXIS_X");
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await tap(bar.locator('button[aria-label="2"]'));
+    await tap(bar.locator('button[aria-label="Numbers"]'));
+    await bubble("CONFIRM");
+    await app.until((b, x) => Math.abs(b.editor.selection.nodes[0].position.x - x - 2) < 1e-4, start[0]).catch(async () => assert.fail(`moved to ${await selected()} from ${start}`));
+    await bar.locator(".bl-bubble").first().waitFor({ state: "detached" });
+    const moved = await selected();
+    await pie("Move");
+    await bubble("CANCEL");
+    await bar.locator(".bl-bubble").first().waitFor({ state: "detached" });
+    assert.deepEqual(await selected(), moved, "Cancel restores");
+  },
+
+  async "the touch bar's sticky Ctrl latches for one press"() {
+    const ctrl = app.locator('.bl-touch-bar button[aria-label="Ctrl"]');
+    await touch.tap(await center(ctrl));
+    assert.equal(await ctrl.getAttribute("data-state"), "once");
+    await touch.tap(await center(ctrl));
+    assert.equal(await ctrl.getAttribute("data-state"), "locked");
+    await touch.tap(await center(ctrl));
+    assert.equal(await ctrl.getAttribute("data-state"), "off");
+  },
+
   // Kept as Blender keeps the Preferences: saved by Save Preferences, or on leaving with Auto-Save Preferences.
   async "a pinch over the Properties editor sets Resolution Scale, kept after a reload"() {
     const before = await uiScale();
@@ -190,6 +353,8 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
           console.log(`ok    ${device}: ${name} (${Date.now() - started} ms)`);
         } catch (error) {
           failed++;
+          // No finger stays down for the next check.
+          await touch.send("touchEnd", []).catch(() => {});
           const shot = `${tmpdir()}/${`touch-${device}-${name}`.replace(/\W+/g, "-")}.png`;
           await app.page.screenshot({ path: shot }).catch(() => {});
           console.log(`FAIL  ${device}: ${name}\n${error.stack}\nScreenshot: ${shot}`);

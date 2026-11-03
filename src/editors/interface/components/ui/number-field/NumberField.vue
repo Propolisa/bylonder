@@ -5,15 +5,20 @@
 // right click cancels. A click without a drag edits the text, which takes expressions and units; the arrows at a
 // number button's ends step it. Over the button: Ctrl wheel steps, Backspace clears to zero, Minus negates, Ctrl C and
 // Ctrl V copy and paste, Enter edits. Every edit ends in one `commit` (one undo step), as Blender pushes undo on release.
+// A finger's drag announces itself to the touch layer (`bl-value-drag` on the document: { rect, x, label, text }, then
+// null), which shows the value clear of the finger (docs/mobile.md Dragging a value); a vertical drag scrolls.
 //   meta: the RNA property (makesrna/rna.js rnaProperty): type I or F, min, max, soft_min, soft_max, step, precision
 //   display(value), editText(value), parse(text): the value as text, as edited text, and back (units, expressions)
 import { computed, onBeforeUnmount, ref } from "vue";
 import { cn } from "../../utils.js";
 import { windowCapture, WINDOW_AREA } from "../../../../../windowmanager/mouse-capture.js";
+import { isTouchControl } from "../../../../../windowmanager/input/wm-touch.js";
 
 const props = defineProps({
   modelValue: { type: Number, default: 0 },
   label: { type: String, default: "" },
+  // An array element's letter (X of Location), which the touch readout names.
+  item: { type: String, default: "" },
   meta: { type: Object, default: () => ({}) },
   slider: Boolean,
   disabled: Boolean,
@@ -33,6 +38,8 @@ let press = null;
 const isInt = computed(() => props.meta.type === "I");
 // The field's name: its label without the colon Blender's layout adds to a number's label (item_name_add_colon).
 const name = computed(() => props.label.replace(/:\s*$/, "") || props.meta.name);
+// The readout's name: an array element's with its property's (Location X).
+const fullName = computed(() => [props.meta.name && props.meta.name !== name.value ? props.meta.name : "", name.value, props.item && !name.value.endsWith(props.item) ? props.item : ""].filter(Boolean).join(" "));
 const hard = computed(() => [props.meta.min ?? -Infinity, props.meta.max ?? Infinity]);
 const soft = computed(() => [Math.max(hard.value[0], props.meta.soft_min ?? -Infinity), Math.min(hard.value[1], props.meta.soft_max ?? Infinity)]);
 const clamp = (value) => Math.min(hard.value[1], Math.max(hard.value[0], isInt.value ? Math.round(value) : value));
@@ -51,17 +58,22 @@ function snap(value, event) {
   return Math.round(value * scale) / scale;
 }
 
-const set = (value) => emit("update:modelValue", clamp(value));
+const announce = (drag) => root.value?.ownerDocument.dispatchEvent(new CustomEvent("bl-value-drag", { detail: drag }));
+const set = (value) => {
+  emit("update:modelValue", clamp(value));
+  if (press?.touch && mode.value === "drag") announce({ rect: root.value.getBoundingClientRect(), x: press.x, label: fullName.value, text: props.display(clamp(value)) });
+};
 const finish = (value) => { set(value); emit("commit"); };
 
+// Shift scales each motion, not the whole drag, so pressing or releasing it mid drag goes on from the value.
+const precise = (dx, event) => dx * (event.shiftKey ? 0.1 : 1);
 function dragValue(event) {
-  const precise = event.shiftKey ? 0.1 : 1;
   if (props.slider) {
     const [min, max] = soft.value, width = root.value.getBoundingClientRect().width || 1;
-    return snap(press.value + (press.dx / width) * (max - min) * precise, event);
+    return snap(press.value + (press.dx / width) * (max - min), event);
   }
-  if (isInt.value) return press.value + Math.round((press.dx / PIXELS_PER_INT) * precise) * step.value;
-  return snap(press.value + press.dx * step.value * precise, event);
+  if (isInt.value) return press.value + Math.round(press.dx / PIXELS_PER_INT) * step.value;
+  return snap(press.value + press.dx * step.value, event);
 }
 
 function onPointerDown(event) {
@@ -69,7 +81,7 @@ function onPointerDown(event) {
   if (event.button === 2 && mode.value === "drag") return cancel();
   if (event.button !== 0) return;
   event.preventDefault();
-  press = { x: event.clientX, value: props.modelValue, dx: 0, offset: event.clientX - root.value.getBoundingClientRect().left };
+  press = { x: event.clientX, value: props.modelValue, dx: 0, offset: event.clientX - root.value.getBoundingClientRect().left, touch: event.pointerType === "touch" };
   mode.value = "press";
   addEventListener("pointermove", onPointerMove);
   addEventListener("pointerup", onPointerUp);
@@ -77,18 +89,19 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
-  if (!press || mode.value !== "press" || Math.abs(event.clientX - press.x) < DRAG_THRESHOLD) return;
+  if (isTouchControl(event) || !press || mode.value !== "press" || Math.abs(event.clientX - press.x) < DRAG_THRESHOLD) return;
   removeEventListener("pointermove", onPointerMove);
   mode.value = "drag";
-  press.dx = event.clientX - press.x;
+  press.dx = precise(event.clientX - press.x, event);
   set(dragValue(event));
   windowCapture().begin({ x: event.clientX, y: event.clientY }, (dx, dy, moved) => {
-    press.dx += dx;
+    press.dx += precise(dx, moved);
     set(dragValue(moved));
   }, cancel, root.value, WINDOW_AREA);
 }
 
-function onPointerUp() {
+function onPointerUp(event) {
+  if (isTouchControl(event)) return;
   const dragged = mode.value === "drag";
   release();
   if (dragged) return emit("commit");
@@ -116,6 +129,7 @@ function release() {
   removeEventListener("pointerup", onPointerUp);
   removeEventListener("keydown", onDragKey, true);
   if (mode.value === "drag") windowCapture().release();
+  if (press?.touch) announce(null);
   mode.value = "idle";
 }
 
@@ -174,7 +188,7 @@ const arrows = computed(() => !props.slider && hovered.value && mode.value === "
   <div
     ref="root"
     :class="cn(
-      'bl-ui relative flex h-unit min-w-0 flex-1 cursor-ew-resize select-none items-center overflow-hidden rounded-md text-xs text-foreground shadow-[inset_0_0_0_1px_var(--bl-wcol-outline),0_1px_0_var(--bl-wcol-emboss)]',
+      'bl-ui relative flex h-unit min-w-0 flex-1 cursor-ew-resize touch-pan-y select-none items-center overflow-hidden rounded-md text-xs text-foreground shadow-[inset_0_0_0_1px_var(--bl-wcol-outline),0_1px_0_var(--bl-wcol-emboss)]',
       mode === 'edit' ? 'cursor-text bg-wcol-text-sel' : mode === 'drag' || mode === 'press' ? 'bg-wcol-num-sel text-text-sel' : 'bg-wcol-num',
       hovered && mode === 'idle' && !disabled && 'bg-[color-mix(in_srgb,var(--bl-wcol-num),white_9%)]',
       (inactive || disabled) && 'opacity-50',

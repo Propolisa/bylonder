@@ -22,6 +22,7 @@ import { createModifierSystem, addModifier } from '../src/modifiers/stack.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { createMainSync } from '../src/blenkernel/main-sync.js';
+import { ID_OB } from '../src/blenkernel/main-view.js';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { mesh_serialize } from '../src/blenkernel/mesh/mesh.js';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
@@ -101,6 +102,19 @@ assert(close(cube.material.albedoColor.asArray(), [0.8, 0.1, 0.1]) && Math.abs(c
 assert.equal(opened.scene.activeCamera?.name, 'Camera');
 opened.sync.flush();
 assert.deepEqual(opened.sync.check(), [], 'Babylon and Main agree after opening');
+
+// A file opened over a Main that held a keyed object (an example run after another): the read freed it, so no id or
+// track stands for it any more (issue #130).
+{
+  const animation = createAnimationModel(() => {}, { ids: createBlenderIDs(new BlenderMain()) }), { ids } = animation;
+  animation.load({ version: 3, action: { name: 'Action', tracks: [{ id: 'object:old', path: 'position.x', keys: [{ frame: 1, value: 2 }] }] } });
+  assert.equal(animation.action.tracks.length, 1, 'the object is keyed before the file opens');
+  await opening(bytes)(new Scene(new NullEngine()), animation);
+  const held = new Set(ids.blender.ids(ID_OB));
+  assert.equal(ids.find('object:old'), null, 'the freed object has no id');
+  assert(ids.entries().every(({ ob }) => held.has(ob)), 'every id is an object Main holds');
+  assert.deepEqual(animation.action.tracks, [], 'no track reads the freed object\'s F-Curves');
+}
 
 // A file the reference Blender made.
 const reference = referenceBlender();

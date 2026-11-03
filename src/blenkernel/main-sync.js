@@ -832,7 +832,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // made and Blender's and Bylonder's warnings. Its scene settings and collections follow when the scene sync of the
     // world starts (ids.read).
     readBlend(bytes, scene = world.scene) {
-      const read = blender.readBlend(bytes), { nodes, warnings } = mainView.adopt(scene);
+      const read = blender.readBlend(bytes);
+      // The read freed every object Main held.
+      for (const [node, entry] of objects) forget(node, entry);
+      ids.clear();
+      const { nodes, warnings } = mainView.adopt(scene);
       if (world.collections) mainView.adoptScene();
       else ids.read = true;
       return { nodes, warnings: [...read, ...warnings] };

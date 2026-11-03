@@ -16,7 +16,7 @@
 import { cloneVNode, defineComponent, h } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
-import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue } from './layout-view.js';
+import { icon, label, button, checkbox, textField, menuButton, pulldown, colorSwatch, displayValue, itemChar } from './layout-view.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { pointerStruct } from '../../python/bpy_rna.js';
 import { buttonMenu, buttonApplied, buttonValueSet, buttonTextSet, buttonRename, viewItemContextMenu, regionPanels, categorySet } from './ui-tree.js';
@@ -113,7 +113,7 @@ function number(b, env) {
   const value = b.rna ? Number(rnaValue(b)) : b.value ?? 0;
   const set = (v, finish) => (b.rna ? setRna(b, v, ui, finish) : (ui.inContext((C) => buttonValueSet(C, b, v)), ui.refresh()));
   return h(NumberField, {
-    modelValue: value, label: b.text ?? '', meta: m, disabled: b.disabled, inactive: b.inactive, class: W, style: corners(b.aligned),
+    modelValue: value, label: b.text ?? '', item: b.rna?.index >= 0 ? itemChar(m, b.rna.index) : '', meta: m, disabled: b.disabled, inactive: b.inactive, class: W, style: corners(b.aligned),
     slider: b.type === 'NUMSLIDER', display: (v) => displayValue(m, v), editText: (v) => (unitOf(m) ? unitText(v, unitOf(m)) : String(Number(v.toFixed(6)))),
     parse: (text) => parseUnit(String(text).replace(/\s*(mm|W|kg|s|K|nm|Hz|px|%)\s*$/, ''), unitOf(m)),
     'onUpdate:modelValue': (v) => set(v, false), onCommit: () => ui.undoPush(b.tip || b.rna?.prop || 'Value'),
