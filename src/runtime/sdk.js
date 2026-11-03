@@ -79,9 +79,14 @@ export function createSDK(base, overrides, onChange, onAnimationChange = () => {
     async openBlend(path, scene) {
       const bytes = new Uint8Array(await (await fetch(this.asset(path))).arrayBuffer());
       const sync = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
-      const { nodes, warnings } = sync.readBlend(bytes, scene);
-      for (const warning of warnings) report("WARNING", warning);
-      return nodes;
+      try {
+        const { nodes, warnings } = sync.readBlend(bytes, scene);
+        for (const warning of warnings) report("WARNING", warning);
+        return nodes;
+      } catch (error) {
+        report("ERROR", `Cannot read file "${path}": ${error.message}`);
+        return [];
+      }
     },
     onDispose(fn) {
       cleanups.push(fn);
