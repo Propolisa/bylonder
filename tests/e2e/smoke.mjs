@@ -1097,6 +1097,22 @@ const checks = {
 
   // The video edit is saved with the action, whatever Remember Scene Edits says: it survives a reload, a project ZIP's
   // export and import, and a .blend's save and open.
+  // The splash lists Blender's demo files (src/workspace/blender-demo-files.json); one downloads from the site's copy
+  // only once confirmed, and opens as File > Open does.
+  "the splash lists Blender's demo files and opens one once its download is confirmed": { open: { example: null, node: "sphere" }, async run() {
+    await app.page.route("**/blender-demo-files/gizmo_array.blend", (route) => route.fulfill({ body: readFileSync(new URL("../fixtures/io/no-camera.blend", import.meta.url)) }));
+    await menu("TOPBAR_MT_help", "Splash Screen");
+    const splash = app.page.locator("dialog.bl-splash");
+    await splash.getByRole("button", { name: "Blender Demo Files…" }).click();
+    const { files } = JSON.parse(readFileSync(new URL("../../src/workspace/blender-demo-files.json", import.meta.url), "utf8"));
+    for (const { title } of files) assert.equal(await splash.getByRole("button", { name: title, exact: true }).count(), 1, title);
+    await splash.getByRole("button", { name: "Gizmo Array", exact: true }).click();
+    const confirm = app.page.locator("dialog.workbench-dialog[open]");
+    await confirm.getByText("MB from https://mirror.blender.org/demo/geometry-nodes/gizmo_array.blend").waitFor();
+    await confirm.getByRole("button", { name: "Download and Open" }).click();
+    await app.page.waitForFunction(() => !!document.querySelector('iframe[src*="viewport.html"]')?.contentWindow?.__bylonder?.world?.scene.getNodeByName("Cube"), null, { timeout: 120000 });
+  } },
+
   // A .blend whose scene has no camera (Blender's demo files often have none) opens into a working 3D Viewport.
   "File > Open of a .blend without a camera shows its scene": { open: { example: null, node: "sphere" }, async run() {
     const chooser = app.page.waitForEvent("filechooser");

@@ -3,6 +3,7 @@ import { registerOperators, kw } from '../windowmanager/wm-operators.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { fullDate, timeAgo } from './relative-time.js';
 import { propsDialog } from '../editors/interface/props-dialog.js';
+import { listedDemoFiles, openDemoFile, openFromUrl } from './demo-files.js';
 
 const EXPORT_PARITY_NOTE = "Lights materials as Blender's EEVEE does (view vector, second reflection as clearcoat). Off: Babylon's own lighting; Blender's texture nodes still export as one custom block.";
 
@@ -185,12 +186,16 @@ export function mountTopbar({ dock, send, sceneTopbar, examples, openExample, ne
     const newFile = column('New File', []);
     const exampleItem = (example) => item(example.title, 'file_new', () => openExample(example));
     const showExamples = () => newFile.replaceChildren(newFile.firstChild, ...examples.filter((e) => !e.workspaces).map(exampleItem));
+    // Blender's demo files, each downloaded only once the user confirms it (demo-files.js).
+    const showDemoFiles = () => newFile.replaceChildren(newFile.firstChild,
+      ...listedDemoFiles.map((file) => item(file.title, 'url', () => openDemoFile(file, openBlend))));
     newFile.append(item('General', 'file_new', newProject), ...examples.filter((e) => e.workspaces).map(exampleItem),
-      Object.assign(item('Examples…', 'file_folder', showExamples), { onclick: showExamples }));
+      Object.assign(item('Examples…', 'file_folder', showExamples), { onclick: showExamples }),
+      Object.assign(item('Blender Demo Files…', 'url', showDemoFiles), { onclick: showDemoFiles }));
     files.append(newFile, recent);
     const links = Object.assign(document.createElement('div'), { className: 'bl-splash-columns bl-splash-links' });
     links.append(
-      column('', [item('Open…', 'file_folder', () => document.getElementById('import').click())]),
+      column('', [item('Open…', 'file_folder', () => document.getElementById('import').click()), item('Open from URL…', 'url', () => openFromUrl(openBlend))]),
       column('', [item('Blender Coverage', 'blender', () => import('../coverage/open.js').then((m) => m.openCoverage())), item('Documentation', 'help', () => open(import.meta.env.BASE_URL + 'docs.html', '_blank', 'noopener')), item('Changelog', 'time', () => import('./changelog/open.js').then((m) => m.openChangelog()))]),
     );
     dialog.append(banner, files, links);

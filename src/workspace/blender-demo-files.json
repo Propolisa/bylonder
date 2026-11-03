@@ -1,0 +1,24 @@
+{
+  "page": "https://www.blender.org/download/demo-files/",
+  "files": [
+    { "id": "gizmo_array", "title": "Gizmo Array", "artist": "Simon Thommes", "license": "CC0", "size": 119926, "url": "https://mirror.blender.org/demo/geometry-nodes/gizmo_array.blend" },
+    { "id": "repeat_zone_fractal_raymarch", "title": "Repeat Zone Raymarch Fractal", "artist": "Cartesian Caramel", "license": "CC0", "size": 128705, "url": "https://mirror.blender.org/demo/rendering/repeat_zone_fractal_raymarch.blend" },
+    { "id": "mandelbrot_grow", "title": "Mandelbrot Grow", "artist": "Shahzod Boyhonov", "license": "CC0", "size": 112589, "url": "https://mirror.blender.org/demo/eevee/mandelbrot_grow.blend" },
+    { "id": "chocolate_donut", "title": "Chocolate Donut", "artist": "Zijun Eary Zhou", "license": "CC-BY", "size": 171779, "url": "https://mirror.blender.org/demo/geometry-nodes/fields/chocolate_donut.blend" },
+    { "id": "ball_in_grass", "title": "Ball in Grass Interaction", "artist": "Jesse Miettinen", "license": "CC-BY", "size": 218169, "url": "https://mirror.blender.org/demo/geometry-nodes/fields/ball-in-grass.blend" },
+    { "id": "pasta_planet", "title": "Pasta Planet", "artist": "Eric Schubert", "license": "CC-BY", "size": 327096, "url": "https://mirror.blender.org/demo/geometry-nodes/fields/pasta_planet.blend" },
+    { "id": "radial_tiling", "title": "Radial Tiling", "artist": "Johannes Kollmer", "license": "CC0", "size": 445915, "url": "https://mirror.blender.org/demo/rendering/radial_tiling_texture.blend" },
+    { "id": "skeleton_arm_xray", "title": "X-Ray Skeleton Arm", "artist": "Cartesian Caramel", "license": "CC0", "size": 789514, "url": "https://mirror.blender.org/demo/eevee/skeleton-arm-xray.blend" },
+    { "id": "pizza_delivery", "title": "Pizza Delivery", "artist": "Simon Thommes", "license": "CC0", "size": 1194609, "url": "https://mirror.blender.org/demo/geometry-nodes/transform_socket-pizza_delivery.blend" },
+    { "id": "impact_fracture", "title": "Impact Fracture", "artist": "Simon Thommes", "license": "CC0", "size": 1156334, "url": "https://mirror.blender.org/demo/geometry-nodes/click_tools-impact_fracture.blend" },
+    { "id": "sdf_mixer", "title": "SDF Boolean Mixer", "artist": "Nikita Bukoros", "license": "CC-BY", "size": 1264484, "url": "https://mirror.blender.org/demo/geometry-nodes/SDF_mixer_kitbukoros.blend" },
+    { "id": "raycast_lines", "title": "Raycast Lines", "artist": "Andy Goralczyk, Miguel Pozo", "license": "CC0", "size": 3375962, "url": "https://download.blender.org/demo/rendering/raycast-line.blend" },
+    { "id": "cloth_tear", "title": "Space Fabric Cloth Tear", "artist": "Cartesian Caramel", "license": "CC-BY", "size": 8794549, "url": "https://mirror.blender.org/demo/geometry-nodes/simulation/cloth_tear_space_fabric.blend" },
+    { "id": "cozy_kitchen", "title": "Cozy Kitchen (3.5 splash)", "artist": "Nicole Morena", "license": "CC-BY-SA", "size": 7685702, "url": "https://mirror.blender.org/demo/splash/blender-3.5-splash.blend" },
+    { "id": "bike_ride", "title": "Bike Ride", "artist": "Dedouze", "license": "CC-BY-SA", "size": 13411874, "url": "https://mirror.blender.org/demo/greasepencil-bike.blend" },
+    { "id": "race_spaceship", "title": "Race Spaceship", "size": 18406591, "url": "https://mirror.blender.org/demo/eevee/race_spaceship/race_spaceship.blend" },
+    { "id": "gaku", "title": "Gaku (4.0 splash)", "artist": "Gaku Tada", "license": "CC-BY-SA", "size": 33844223, "url": "https://mirror.blender.org/demo/splash/blender-4.0-splash.blend" },
+    { "id": "wasp_bot", "title": "Wasp Bot", "size": 60709480, "url": "https://mirror.blender.org/demo/eevee/wasp_bot/wasp_bot.blend", "limit": "The tab runs out of memory a few seconds after opening." },
+    { "id": "mr_elephant", "title": "Mr. Elephant", "size": 69246075, "url": "https://mirror.blender.org/demo/eevee/mr_elephant/mr_elephant.blend", "limit": "The tab runs out of memory a few seconds after opening." }
+  ]
+}

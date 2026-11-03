@@ -61,6 +61,7 @@ limits:
   - glTF's Draco and meshoptimizer compression are not available; their libraries are native ones Bylonder does not build.
   - The file dialogs are the browser's; an export with several files (an OBJ's .mtl, a .gltf's .bin and textures) saves the first where you choose and downloads the others.
   - Imported color attributes are kept in Main; Solid shading's Attribute color and the Color Attribute node do not draw them yet.
+  - The splash's Open from URL downloads only from servers that allow downloads from a web page (CORS); Blender's demo files are served from Bylonder's own copy for that reason.
 ---
 # Import and Export
 
