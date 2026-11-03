@@ -41,6 +41,7 @@ export const examples = [
   { id: "import-export", title: "Import and Export" },
   { id: "link-append", title: "Link and Append" },
   { id: "rendering", title: "Window Light" },
+  { id: "mesh-modeling", title: "Rangefinder Camera" },
   { id: "drivers-and-graph-editor", title: "Steam Engine" },
   { id: "vertex-and-weight-paint", title: "Koi Pond" },
   // An application template: its startup file and workspaces (File > New > 2D Animation).
