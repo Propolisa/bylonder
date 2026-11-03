@@ -42,9 +42,10 @@ export async function startServer({ build = true } = {}) {
 // Opens Bylonder in a fresh browser context (fresh project storage), opens `example` from the splash (none: the new
 // project's scene) and waits until the 3D Viewport shows the node `node`. Page errors of every frame land in `errors`.
 // `link`: an example's id, opened by its #example= link instead of the splash. `video`: a directory to record the
-// session to. `persistent`: a browser profile of its own instead of an incognito context.
-export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent } = {}) {
-  const options = { viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(video && { recordVideo: { dir: video, size } }) };
+// session to. `persistent`: a browser profile of its own instead of an incognito context. `touch`: a touch device
+// (touch events, a coarse pointer, no hover).
+export async function openApp(browser, url, { example = "Default Cube", node = "Cube", link, size = { width: 1600, height: 950 }, scale = 1, video, persistent, touch } = {}) {
+  const options = { viewport: size, deviceScaleFactor: scale, acceptDownloads: true, ...(touch && { hasTouch: true, isMobile: true }), ...(video && { recordVideo: { dir: video, size } }) };
   const context = await (persistent ? persistentContext(options) : browser.newContext(options));
   const page = await context.newPage();
   const errors = [];
@@ -67,7 +68,7 @@ export async function openApp(browser, url, { example = "Default Cube", node = "
     const w = document.querySelector('iframe[src*="viewport.html"]')?.contentWindow;
     return !!(w?.__bylonder?.editor && (!node || w.__bylonder.world.scene.getNodeByName(node)));
   }, node, { timeout: 180000 });
-  await page.click('[data-workspace="layout"]');
+  await page.locator('[data-workspace="layout"]').evaluate((tab) => tab.click());
   const app = {
     page, context, errors, frame,
     // Evaluates fn(window.__bylonder, arg) in the 3D Viewport frame.

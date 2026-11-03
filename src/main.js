@@ -9,7 +9,6 @@ import { createNodeContexts } from './editors/space_node/contexts.js';
 import { registerObjects } from './blenkernel/animation/bindings.js';
 import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim-editor.js';
 import { mountRuntimeLayout, IMAGE_MODES } from "./editors/screen/runtime.js";
-import { createViewportTouch } from "./windowmanager/input/viewport-touch.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
 import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
@@ -61,10 +60,12 @@ import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea, operatorIds, spaceOperatorIds } from "./windowmanager/wm-operators.js";
 import { registered, registerPythonOperators } from "./python/bpy_interface.js";
 import { registerRuntimeTypes } from "./runtimes/runtimes.js";
-import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences } from "./windowmanager/wm-userdef.js";
+import { restorePreferences, readPreferences, onPreferencesChanged, preferencesChanged, preferences, inputPreferences, savedPreferences, savePreferences } from "./windowmanager/wm-userdef.js";
+import { touchKeyconfig } from "./windowmanager/input/wm-touch.js";
+import { mountTouch, showScale } from "./editors/interface/touch.js";
 import { applyTheme } from "./editors/interface/theme-tokens.js";
 import { registerBylonderPreferences, bylonderPreferences } from "./workspace/preferences.js";
-import { loadKeyconfig } from "./windowmanager/wm-window.js";
+import { loadKeyconfig, setKeyconfigPreferences } from "./windowmanager/wm-window.js";
 import { mountPreferences } from "./editors/space_userpref/editor.js";
 import { registerUserprefOperators } from "./editors/space_userpref/userpref-operators.js";
 import "./runtimes/armature.js";
@@ -294,7 +295,7 @@ const settled = async () => {
 };
 window.__bylonder ={ world, renderHost, runOperator, settled, bylonderPreferences,
   // The Preferences and the key configurations, for tests.
-  userdef: { preferences, changed: preferencesChanged, keyconfigs: () => bpyRna.contextStruct(blenderMain().C).window_manager.keyconfigs },
+  userdef: { preferences, changed: preferencesChanged, save: savePreferences, keyconfigs: () => bpyRna.contextStruct(blenderMain().C).window_manager.keyconfigs },
   // The Top Bar's menus, laid out here for the app page's topbar.
   get topbar() { return (topbarArea ??= createTopbarArea(blenderMain(), world.mainSync)); },
   // What this window runs of Blender (the Blender Coverage view): its operators and Blender's own it runs in the 3D View, those for a space type by
@@ -365,6 +366,7 @@ window.addEventListener("message", (e) => {
   )
     return;
   if (e.data.type === "reset-layout") viewportDock.reset();
+  if (e.data.type === "ui-scale") setUiScale(e.data.payload);
   if (e.data.type === "invoke") runOperator(e.data.payload);
   if (e.data.type === "view-layer") {
     const cols = world.collections, { op, id } = e.data.payload;
@@ -433,6 +435,9 @@ const blenderWindow = {
   pressHandled: () => blenderAreas.blenderWindow().pressHandled(),
   keeps: (native) => blenderAreas.keeps(native),
 };
+// Touch first: a finger's events reach the event system only as the mouse's (docs/mobile.md Input model).
+const disposeTouch = mountTouch(window, { scale: { get: () => preferences().view.ui_scale, preview: (value) => showScale([document, parent.document], value), commit: (value) => setUiScale(value) },
+  hint: notify, keys: (native, value) => world.wm.key(native, value) });
 world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e), blender: blenderWindow, input: inputPreferences });
 const editor = createEditor(
   world,
@@ -476,6 +481,9 @@ setContextPointer(blenderMain().C);
 readPreferences();
 registerBylonderPreferences(bylonderIcon());
 loadKeyconfig(blenderMain().C);
+// A touch device's own factory settings, where this browser has no saved Preferences (docs/mobile.md Density).
+const touchSettings = !savedPreferences() && touchKeyconfig(window);
+if (touchSettings) setKeyconfigPreferences(blenderMain().C, touchSettings);
 world.texts = createTextFiles({ files: input.texts, save: (name, content) => send("text", { name, content }) });
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit, notify });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
@@ -533,9 +541,13 @@ registerCurveAddOperators({ sync: world.mainSync, host: objectOperatorHost, edit
 registerPythonOperators((idname, props, event) => runBlenderOperator(world.mainSync, idname, props, { ...objectOperatorHost, event }), () => world.mainSync.flush());
 // The runtimes' properties and panels (docs/runtimes.md), as an add-on registers its classes.
 registerRuntimeTypes(bylonderIcon());
-// The theme on the design tokens of this window and the app's.
-const themed = () => applyTheme(preferences().themes[0], [document, parent.document]);
+// The theme and Resolution Scale on the design tokens of this window and the app's.
+const themed = () => {
+  applyTheme(preferences().themes[0], [document, parent.document]);
+  showScale([document, parent.document], preferences().view.ui_scale);
+};
 themed();
+const setUiScale = (value) => { preferences().view.ui_scale = value; preferencesChanged(); };
 onPreferencesChanged(() => { themed(); send("preferences", { keep_scenes_loaded: bylonderPreferences().keep_scenes_loaded }); });
 // The Preferences editor: an area's editor (Editor Type), mounted once it is first shown, and Edit > Preferences.
 const mountWhenShown = (host, mount) => {
@@ -561,15 +573,13 @@ setFileselectHost(async (run, { save }) => {
   for (const [path, bytes] of unkeptLibraries(keptLibraries)) { keptLibraries.add(path); send("library", { path, bytes }); }
 });
 world.view3dArea = (view, layout) => view3dWindow.area(view, layout);
-// The navigation gizmo's and touch's ways into Blender's navigation operators (view3d-window.js).
+// The navigation gizmo's way into Blender's navigation operators (view3d-window.js).
 world.view3dInvoke = (view, idname, props, native) => view3dWindow.invoke(view, idname, props, native);
-world.view3dTrackpad = (view, gesture) => view3dWindow.trackpad(view, gesture);
 // The modes Blender runs on Main: an armature's Edit and Pose Modes, Particle Edit Mode.
 world.mainModes = createMainModes({ sync: world.mainSync, selection: editor.selection, options: objectOperatorHost });
 registerAddOperators(creator);
 world.dock = viewportDock;
 world.outliner = createOutliner({ world, editor, commands, sync: world.mainSync, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
-const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
   const keep = editor.selection.nodes.filter((n) => world.collections.status(n).visible);
@@ -660,9 +670,6 @@ const viewportCtx = {
 };
 const mountView = (options) => {
   const view = createView3D(viewportCtx, options);
-  const detachTouch = touch.attach(view);
-  const dispose = view.dispose;
-  view.dispose = () => { detachTouch(); dispose(); };
   views.add(view);
   viewportCtx.shadingChanged();
   return view;
@@ -881,7 +888,7 @@ const view3dArea = {
   },
 };
 const blenderKeymaps = (event) => inArea(view3dArea, () => view3dKeys(event));
-// A menu of the 3D View opened as wm.call_menu opens it (the touch controls' long press), at a point of the page.
+// A menu of the 3D View opened as wm.call_menu opens it, at a point of the page.
 world.callMenu = (name, at) => inArea(view3dArea, () => view3dArea.menu(name)?.(at));
 // The handler stack below modal handlers: the gizmo map, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
@@ -948,7 +955,7 @@ function dispose() {
   documentState.dispose();
   world.particles.dispose();
   ui.dispose();
-  touch.dispose();
+  disposeTouch();
   viewportDock.dispose();
   editor.dispose();
   capture.dispose();

@@ -7,6 +7,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { chromium, openApp } from "../../tests/e2e/app.mjs";
+import { fingers } from "../../tests/e2e/touch.mjs";
 
 const root = new URL("../..", import.meta.url).pathname;
 const PORT = process.env.DOCS_PORT ?? "5205", URL_ = `http://localhost:${PORT}/`;
@@ -33,6 +34,15 @@ const overlay = () => {
     addEventListener("mousedown", () => { pointer.style.background = "#ffbe33"; }, true);
     addEventListener("mouseup", () => { pointer.style.background = "#fffc"; }, true);
   };
+  // Fingers down, a dot each (none: all lifted).
+  window.__showFingers = (points) => {
+    document.querySelectorAll("[data-finger]").forEach((dot) => dot.remove());
+    for (const [x, y] of points) {
+      const dot = Object.assign(document.createElement("div"), { style: style + `left:${x}px;top:${y}px;width:30px;height:30px;margin:-15px;border-radius:50%;background:#ffbe3399;box-shadow:0 0 0 2px #000a` });
+      dot.dataset.finger = "";
+      document.body.append(dot);
+    }
+  };
   if (document.body) install();
   else addEventListener("DOMContentLoaded", install);
   window.__showKey = (text, [x, y]) => {
@@ -47,13 +57,14 @@ const overlay = () => {
 const ffmpeg = (...args) => execFileSync("ffmpeg", ["-y", "-loglevel", "error", ...args]);
 
 // Opens the app on `example` (its #example= link; none: the Default Cube from the splash) and returns the recorder.
-// `media` is the folder under docs/media/ the files go to (default: the feature's).
-export async function recorder(feature, { example, node, size = SIZE, scale = 1, media: folder = `features/${feature}` } = {}) {
+// `media` is the folder under docs/media/ the files go to (default: the feature's); `touch`, a touch device, driven by
+// `r.fingers` (tests/e2e/touch.mjs).
+export async function recorder(feature, { example, node, size = SIZE, scale = 1, media: folder = `features/${feature}`, touch } = {}) {
   // Media are written to a temporary folder and moved in at the end: the dev server reloads the app on a change in docs/.
   const media = `${root}docs/media/${folder}/`, out = mkdtempSync(`${tmpdir()}/bylonder-${feature}-`) + "/";
   const stopServer = await devServer();
   const browser = await chromium.launch();
-  const app = await openApp(browser, URL_, { ...(example ? { link: example } : {}), node, size, scale });
+  const app = await openApp(browser, URL_, { ...(example ? { link: example } : {}), node, size, scale, touch });
   await app.context.addInitScript(overlay);
   for (const frame of app.page.frames()) await frame.evaluate(overlay).catch(() => {});
   await app.settled();
@@ -68,7 +79,7 @@ export async function recorder(feature, { example, node, size = SIZE, scale = 1,
   let keyAt = [size.width / 2, size.height - 40];
 
   const r = {
-    app, page: app.page, out,
+    app, page: app.page, out, fingers: fingers(app.page, (points) => app.page.evaluate((points) => window.__showFingers(points), points)),
     // Shows `label` (or the key) as a key cap, then presses each key.
     async keys(label, ...keys) {
       await app.page.evaluate(([text, at]) => window.__showKey(text, at), [label, keyAt]);

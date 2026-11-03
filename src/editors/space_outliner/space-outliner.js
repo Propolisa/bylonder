@@ -135,7 +135,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   const handled = (e) => { e.preventDefault(); e.stopPropagation(); };
 
   view.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'touch' || world.wm.modal) return;
+    if (world.wm.modal) return;
     handled(e);
     view.focus({ preventScroll: true });
     view.setPointerCapture(e.pointerId);

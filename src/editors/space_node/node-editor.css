@@ -9,7 +9,7 @@
 .node-editor-actions{display:flex;gap:4px;align-items:center}
 .bl-toggle{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 6px;color:var(--bl-text);font:var(--bl-font);white-space:nowrap;cursor:pointer}
 .bl-toggle input{width:14px;height:14px;margin:0;accent-color:var(--bl-select)}
-.logic-editor{position:absolute;inset:0;overflow:hidden;outline:none;background:#1d1d1d radial-gradient(#ffffff14 1px,transparent 1.2px) 0 0/24px 24px;cursor:default;touch-action:none}
+.logic-editor{position:absolute;inset:0;overflow:hidden;outline:none;background:#1d1d1d radial-gradient(#ffffff14 1px,transparent 1.2px) 0 0/24px 24px;cursor:default}
 .logic-stage{position:absolute;left:0;top:0;transform-origin:0 0}
 .logic-links{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
 .logic-link{fill:none;stroke-width:2.2;opacity:.9}.logic-link.signal{stroke-width:2.6}.logic-link.pending{stroke-dasharray:5 4}

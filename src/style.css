@@ -51,7 +51,6 @@ main.runtime-dock {
 canvas {
   display: block;
   outline: none;
-  touch-action: none;
 }
 .view-label {
   position: absolute;
@@ -78,7 +77,3 @@ dialog::backdrop {
   display: none !important;
 }
 #viewport-section{position:relative;overflow:hidden}#panel{display:flex;flex-direction:column;overflow:auto}#properties-section{overflow:auto;background:#292929}.runtime-dock .dock-content{background:#292929}.runtime-dock .dock-tabs{justify-content:flex-start}.runtime-dock .dock-tabs button{font-size:11px}
-#touch-controls{display:none;padding-bottom:env(safe-area-inset-bottom)}.scene-mode #touch-controls{display:none}
-.touch-primary select{min-width:0;max-width:125px;background:#292c32;color:#eee;border:0;border-radius:4px;font-size:13px;padding:4px 6px}.touch-primary{background:#24262be8;border:1px solid #45484f;border-radius:7px;padding:3px;box-shadow:0 3px 12px #0004}.touch-primary button{border:0;background:transparent}.touch-transform-options{background:#24262be8;border:1px solid #45484f;border-radius:6px;padding:3px}.touch-transform-options button{border:0}.touch-row select{min-height:40px}.touch-row button{border-radius:4px}
-@media(pointer:coarse){.view-label{display:none}#touch-controls{position:absolute;bottom:8px;left:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}.touch-row{display:flex;justify-content:center;gap:2px;pointer-events:auto}.touch-row button{min-height:40px;min-width:38px;padding:4px 7px;background:#292c32ed;font-size:12px}.touch-row button.active{background:#654827}.touch-primary select{width:112px}.runtime-dock #toast{bottom:64px}#pane input{font-size:16px}#redo-panel{bottom:64px}.scene-mode #touch-controls{display:none}}
-@media(pointer:coarse) and (orientation:landscape){.touch-row{justify-content:flex-start}.runtime-dock #toast{bottom:56px}#redo-panel{bottom:54px}}
