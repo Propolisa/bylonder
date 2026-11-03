@@ -118,4 +118,14 @@ const two = await lobes(['ShaderNodeBsdfAnisotropic', 'ShaderNodeBsdfAnisotropic
 assert.deepEqual(two.surfaces, [0, 1], 'two Glossy BSDFs take the base and a lobe');
 assert.deepEqual((await lobes(['ShaderNodeBsdfDiffuse', 'ShaderNodeBsdfDiffuse'])).surfaces, [0], 'diffuse closures share the base');
 
+// Data linked to a shader input is an Emission of it, and a shader linked to a data input is dropped, as Blender's
+// shader tree makes them (ntree_shader_implicit_closure_cast).
+const implicit = nodeMaterialFromTree('Implicit', scene, { nodes: [{ idname: 'ShaderNodeRGB', name: 'RGB' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' },
+  { idname: 'ShaderNodeMath', name: 'Math' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+  links: [['RGB', 'Color', 'Material Output', 'Surface'], ['Diffuse', 'BSDF', 'Math', 'Value']] }).material;
+const emission = implicit.attachedBlocks.find((b) => b.idname === 'ShaderNodeEmission');
+assert.equal(emission?.getInputByName('Color').connectedPoint?.ownerBlock.name, 'RGB');
+assert.equal(implicit.attachedBlocks.find((b) => b.name === 'Material Output').getInputByName('Surface').connectedPoint?.ownerBlock, emission);
+assert.ok(!implicit.attachedBlocks.find((b) => b.name === 'Math').getInputByName('Value').isConnected);
+
 console.log('nodes: ok');
