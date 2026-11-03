@@ -18,7 +18,7 @@ const MAX_REGIONS = 64;
 function imageBuffer(image) {
   const p = x.image_buffer(image, 0) >>> 0;
   if (!p) return null;
-  const [width, height, bytes, floats, byteKind, floatKind] = new Int32Array(x.memory.buffer, p, 6);
+  const [width, height, bytes, floats, byteKind, floatKind] = new Int32Array(x.memory.buffer, p >>> 0, 6);
   const float = floats !== 0;
   return { width, height, float, srgb: !float && byteKind === SRGB, data: (float ? floatKind : byteKind) === DATA,
     pixels: float ? new Float32Array(x.memory.buffer, floats >>> 0, width * height * 4) : new Uint8Array(x.memory.buffer, bytes >>> 0, width * height * 4) };
@@ -81,7 +81,7 @@ function follow(engine, image, pointer) {
   if (!image.internal) return upload(engine, image, pointer);
   const count = withArrays([new Int32Array(MAX_REGIONS * 4)], ([p]) => {
     const n = x.image_partial_update_collect(pointer, image.user, p, MAX_REGIONS);
-    image.regions = n > 0 ? Array.from({ length: n }, (_, i) => Array.from(new Int32Array(x.memory.buffer, p + i * 16, 4))) : [];
+    image.regions = n > 0 ? Array.from({ length: n }, (_, i) => Array.from(new Int32Array(x.memory.buffer, (p >>> 0) + i * 16, 4))) : [];
     return n;
   });
   if (count < 0) return upload(engine, image, pointer);

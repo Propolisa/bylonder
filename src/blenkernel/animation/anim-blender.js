@@ -32,7 +32,7 @@ export function customProperty(id, name, capacity = 16) {
   return withArrays([new Float64Array(capacity)], ([p]) => {
     const count = withString(name, (n) => x.anim_id_property_get(id, n, p, capacity));
     if (count < 0) return undefined;
-    const values = Array.from(new Float64Array(x.memory.buffer, p, Math.max(count, 1)));
+    const values = Array.from(new Float64Array(x.memory.buffer, p >>> 0, Math.max(count, 1)));
     return count ? values : values[0];
   });
 }
@@ -55,7 +55,7 @@ export const FCURVE = { VISIBLE: 1 << 0, SELECTED: 1 << 1, ACTIVE: 1 << 2, PROTE
 const view = () => new DataView(x.memory.buffer);
 const pointerList = (count, fill) => {
   if (!count) return [];
-  return withArrays([new Uint32Array(count)], ([p]) => { fill(p); return Array.from(new Uint32Array(x.memory.buffer, p, count)); });
+  return withArrays([new Uint32Array(count)], ([p]) => { fill(p); return Array.from(new Uint32Array(x.memory.buffer, p >>> 0, count)); });
 };
 
 // A BezTriple's fields as Blender's RNA names them (Keyframe), values in the F-Curve's own units.
@@ -124,7 +124,7 @@ export class FCurve {
   evaluate(frame) { return x.anim_fcurve_evaluate(this.pointer, frame); }
   // Values at count frames from start, step apart.
   sample(start, step, count) {
-    return withArrays([new Float32Array(count)], ([p]) => { x.anim_fcurve_sample(this.pointer, start, step, count, p); return Float32Array.from(new Float32Array(x.memory.buffer, p, count)); });
+    return withArrays([new Float32Array(count)], ([p]) => { x.anim_fcurve_sample(this.pointer, start, step, count, p); return Float32Array.from(new Float32Array(x.memory.buffer, p >>> 0, count)); });
   }
 }
 
@@ -156,7 +156,7 @@ export class Action {
   get activeSlot() {
     return withArrays([new Int32Array(1)], ([icon]) => {
       const name = x.anim_action_slot(this.pointer, icon) >>> 0;
-      return name ? { name_display: cString(name), icon: new Int32Array(x.memory.buffer, icon, 1)[0] } : null;
+      return name ? { name_display: cString(name), icon: new Int32Array(x.memory.buffer, icon >>> 0, 1)[0] } : null;
     });
   }
 }
@@ -206,7 +206,7 @@ export class BlenderAnimation {
   // The scene's markers (Scene.timeline_markers): { name, frame, select } in list order; set replaces them.
   get markers() {
     return Array.from({ length: x.anim_markers(this.main.scene) }, (_, i) => withArrays([new Int32Array(2)], ([p]) => {
-      const name = cString(x.anim_marker(this.main.scene, i, p)), [frame, flag] = new Int32Array(x.memory.buffer, p, 2);
+      const name = cString(x.anim_marker(this.main.scene, i, p)), [frame, flag] = new Int32Array(x.memory.buffer, p >>> 0, 2);
       return { name, frame, select: !!(flag & SELECT) };
     }));
   }

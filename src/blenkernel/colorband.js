@@ -34,7 +34,7 @@ export function colorRampTable(ramp) {
   return withArrays([stops, new Float32Array(TABLE_SIZE * 4)], ([p, table]) => {
     x.colorband_table(ramp.elements.length, p, INTERPOLATIONS.indexOf(ramp.interpolation), HUE_INTERPOLATIONS.indexOf(ramp.hue_interpolation),
       COLOR_MODES.indexOf(ramp.color_mode), table);
-    return new Float32Array(x.memory.buffer, table, TABLE_SIZE * 4).slice();
+    return new Float32Array(x.memory.buffer, table >>> 0, TABLE_SIZE * 4).slice();
   });
 }
 

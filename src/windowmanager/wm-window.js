@@ -121,7 +121,7 @@ export class Area {
   // The 3D View as Blender's navigation left it: { ofs, viewquat, dist, persp (RV3D_ORTHO, RV3D_PERSP, RV3D_CAMOB),
   // view (RV3D_VIEW_*) } in Blender's axes.
   get view3d() {
-    const out = withArrays([new Float32Array(10)], ([p]) => { x.wm_view3d_get(this.pointer, p); return Array.from(new Float32Array(x.memory.buffer, p, 10)); });
+    const out = withArrays([new Float32Array(10)], ([p]) => { x.wm_view3d_get(this.pointer, p); return Array.from(new Float32Array(x.memory.buffer, p >>> 0, 10)); });
     return { ofs: out.slice(0, 3), viewquat: out.slice(3, 7), dist: out[7], persp: out[8], view: out[9] };
   }
   // A region drawn by its type (or its overlay), as region-draw.cc records it.

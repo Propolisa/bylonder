@@ -261,11 +261,12 @@ function wasiFor(memory) {
       v.setUint32(nevents, count, true);
       return ESUCCESS;
     }
-  }, { get: (calls, name) => calls[name] ?? ((...args) => {
+  }, { get: (calls, name) => calls[name] ? unsigned(calls[name]) : (...args) => {
     console.error(`WASI ${name} is not implemented`, args);
     return ENOSYS;
-  }) });
+  } });
 }
+var unsigned = (call) => (...args) => call(...args.map((a) => typeof a === "number" ? a >>> 0 : a));
 var provided = {};
 var logMissing = globalThis.process?.env?.BLENDER_WASM_MISSING === "log";
 var logged = /* @__PURE__ */ new Set();
@@ -359,7 +360,7 @@ function moduleMesh(x, createMesh) {
     const pointers = arrays.map((a) => {
       if (!a) return 0;
       const p = x.malloc(a.byteLength) >>> 0;
-      new a.constructor(x.memory.buffer, p, a.length).set(a);
+      new a.constructor(x.memory.buffer, p >>> 0, a.length).set(a);
       return p;
     });
     try {
@@ -383,7 +384,7 @@ function moduleMesh(x, createMesh) {
     mesh.attribute("UVMap") && Float32Array.from(mesh.attribute("UVMap"))
   ];
   function extractedMesh(header) {
-    const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length + 3));
+    const words = Array.from(new Uint32Array(x.memory.buffer, header >>> 0, 5 + 10 + FLAGS.length + 3));
     const counts = words.slice(0, 5), [verts, edges, faces, corners, tris] = counts, at = (i) => words[5 + i];
     const sizes = { POINT: verts, EDGE: edges, FACE: faces };
     const layout = {

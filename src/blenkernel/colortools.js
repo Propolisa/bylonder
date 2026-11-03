@@ -30,7 +30,7 @@ export function curveMappingGPU(mapping) {
   const flag = (mapping.use_clip ? CUMA_DO_CLIP : 0) | (mapping.extend === 'EXTRAPOLATED' ? CUMA_EXTEND_EXTRAPOLATE : 0);
   return withArrays([points, counts, Float32Array.from(mapping.clip), new Float32Array(TABLE_TEXELS * 4), new Float32Array(20)], ([p, c, clip, table, params]) => {
     const size = x.curvemapping_gpu(p, c, flag, clip, table, params);
-    const read = (pointer, length) => new Float32Array(x.memory.buffer, pointer, length).slice();
+    const read = (pointer, length) => new Float32Array(x.memory.buffer, pointer >>> 0, length).slice();
     const values = read(params, 20), at = (i) => Array.from(values.subarray(i * 4, i * 4 + 4));
     return { table: read(table, size * 4), minimums: at(0), dividers: at(1), startSlopes: at(2), endSlopes: at(3), identity: at(4).map(Boolean) };
   });
@@ -39,7 +39,7 @@ export function curveMappingGPU(mapping) {
 // CM_TABLE + 1 RGBA texels, as node_shader_gpu_blackbody and node_shader_gpu_wavelength sample them.
 const spectrum = (fill) => withArrays([new Float32Array(257 * 4)], ([table]) => {
   fill(table);
-  return new Float32Array(x.memory.buffer, table, 257 * 4).slice();
+  return new Float32Array(x.memory.buffer, table >>> 0, 257 * 4).slice();
 });
 let blackbody, wavelength;
 export const blackbodyTable = () => (blackbody ??= spectrum(x.blackbody_table));

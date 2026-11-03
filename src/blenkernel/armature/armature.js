@@ -24,7 +24,7 @@ const rotationMode = (id) => Number(Object.keys(ROTATION_MODES).find((value) => 
 // An armature object's data (in Edit Mode its edit bones).
 export function armatureData(ob) {
   const header = x.armature_bones_get(ob) >>> 0;
-  const [count, intsAt, floatsAt, namesAt, active] = new Int32Array(x.memory.buffer, header, 5);
+  const [count, intsAt, floatsAt, namesAt, active] = new Int32Array(x.memory.buffer, header >>> 0, 5);
   const ints = new Int32Array(x.memory.buffer, intsAt >>> 0, count * BONE_INTS), floats = new Float32Array(x.memory.buffer, floatsAt >>> 0, count * BONE_FLOATS);
   const names = cString(namesAt >>> 0).split('\n');
   const bones = Array.from({ length: count }, (_, i) => {
@@ -83,7 +83,7 @@ export const SHAPE_GEOMETRY = ['surface', 'edge_detection', 'loose_edges', 'all_
 // (custom shapes: { pass, mesh, geometry, data, ids }), texts (bone names: { co, color (sRGB bytes), name }) }.
 export function armatureDraw(C, ob, flags) {
   const at = x.armature_draw(C, ob, flags) >>> 0, memory = x.memory.buffer;
-  const header = new Int32Array(memory, at, 2 + Object.keys(DRAW_BUFFERS).length * 3 + 4);
+  const header = new Int32Array(memory, at >>> 0, 2 + Object.keys(DRAW_BUFFERS).length * 3 + 4);
   const copy = (count, data, ids, stride) => ({ data: new Float32Array(memory, data >>> 0, count * stride).slice(), ids: new Uint32Array(memory, ids >>> 0, count).slice() });
   const buffers = Object.fromEntries(Object.entries(DRAW_BUFFERS).map(([name, stride], i) => [name, copy(...header.subarray(2 + i * 3, 5 + i * 3), stride)]));
   const [customsNum, customsAt, textsNum, textsAt] = header.subarray(header.length - 4);
@@ -93,7 +93,7 @@ export function armatureDraw(C, ob, flags) {
   });
   const texts = Array.from({ length: textsNum }, (_, i) => {
     const text = (textsAt >>> 0) + i * 20;
-    return { co: Array.from(new Float32Array(memory, text, 3)), color: Array.from(new Uint8Array(memory, text + 12, 4)), name: cString(new Uint32Array(memory, text + 16, 1)[0]) };
+    return { co: Array.from(new Float32Array(memory, text >>> 0, 3)), color: Array.from(new Uint8Array(memory, (text >>> 0) + 12, 4)), name: cString(new Uint32Array(memory, (text >>> 0) + 16, 1)[0]) };
   });
   return { transparent: !!header[0], inFront: !!header[1], buffers, customs, texts };
 }
@@ -102,7 +102,7 @@ export function armatureDraw(C, ob, flags) {
 // normals (the surface's, per corner), indices }.
 export function armatureShapeMesh(mesh, geometry) {
   const at = x.armature_shape_mesh(mesh, SHAPE_GEOMETRY.indexOf(geometry)) >>> 0, memory = x.memory.buffer;
-  const [points, positions, normals, count, indices] = new Int32Array(memory, at, 5);
+  const [points, positions, normals, count, indices] = new Int32Array(memory, at >>> 0, 5);
   return { positions: new Float32Array(memory, positions >>> 0, points * 3).slice(),
     normals: geometry === 'surface' ? new Float32Array(memory, normals >>> 0, points * 3).slice() : null, indices: new Uint32Array(memory, indices >>> 0, count).slice() };
 }

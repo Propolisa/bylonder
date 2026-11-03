@@ -58,7 +58,7 @@ function writeValue(dv, at, prop, value) {
 export function dnaGet(struct, pointer, name) {
   const prop = dnaProperty(struct, name), dv = view(), at = pointer + prop.offset;
   if (dnaIsText(prop)) {
-    const bytes = new Uint8Array(x.memory.buffer, at, prop.length ?? prop.size);
+    const bytes = new Uint8Array(x.memory.buffer, at >>> 0, prop.length ?? prop.size);
     return decoder.decode(bytes.subarray(0, Math.max(0, bytes.indexOf(0))));
   }
   if (prop.length) return Array.from({ length: prop.length }, (_, i) => readValue(dv, at + i * prop.size, prop));
@@ -68,7 +68,7 @@ export function dnaGet(struct, pointer, name) {
 export function dnaSet(struct, pointer, name, value) {
   const prop = dnaProperty(struct, name), dv = view(), at = pointer + prop.offset;
   if (dnaIsText(prop)) {
-    const bytes = new Uint8Array(x.memory.buffer, at, prop.length ?? prop.size);
+    const bytes = new Uint8Array(x.memory.buffer, at >>> 0, prop.length ?? prop.size);
     bytes.fill(0);
     bytes.set(encoder.encode(String(value)).subarray(0, bytes.length - 1));
   } else if (prop.length) Array.from(value).slice(0, prop.length).forEach((v, i) => writeValue(dv, at + i * prop.size, prop, v));

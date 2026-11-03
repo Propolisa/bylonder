@@ -246,8 +246,10 @@ function wasiFor(memory) {
       v.setUint32(nevents, count, true);
       return ESUCCESS;
     },
-  }, { get: (calls, name) => calls[name] ?? ((...args) => { console.error(`WASI ${name} is not implemented`, args); return ENOSYS; }) });
+  }, { get: (calls, name) => (calls[name] ? unsigned(calls[name]) : (...args) => { console.error(`WASI ${name} is not implemented`, args); return ENOSYS; }) });
 }
+// WASI's 32-bit arguments are unsigned, while WebAssembly passes them to JS signed: an address above 2 GiB is negative.
+const unsigned = (call) => (...args) => call(...args.map((a) => (typeof a === 'number' ? a >>> 0 : a)));
 
 // What a module's own API files import from JS (IMPORT in region-draw.cc), by name. Any other import is a Blender
 // symbol the module still lacks (tools/blender-port/wasm_module.py lists them): reaching one is a gap to port. With
