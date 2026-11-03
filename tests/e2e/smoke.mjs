@@ -15,8 +15,8 @@ const rendered = () => app.until((b, selector) => /^(Finished|Render failed)/.te
 let app;
 // The mean color difference (of 255) each Shader Node Gallery sphere may have from EEVEE's, row by row: the textures
 // and converters through an Emission (their edges and fine detail differ by anti-aliasing: Brick's thin mortar most),
-// then the shaders lit by Babylon.
-const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 8, 10, 8, 8, 12, 15, 14, 10, 8, 10];
+// then the shaders lit by Babylon, then the floor's tiles of the sun's shadows (sharper than EEVEE's).
+const SHADER_GALLERY_LIMITS = [12, 12, 10, 30, 12, 10, 12, 8, 8, 12, 8, 10, 8, 8, 12, 15, 14, 10, 8, 10, 15, 15, 15, 15];
 
 const checks = {
   // The new project's scene (sphere and ground), as a first visit shows it.
@@ -59,19 +59,19 @@ const checks = {
     const reference = `data:image/png;base64,${readFileSync(new URL("../fixtures/shader-gallery-eevee.png", import.meta.url)).toString("base64")}`;
     const differences = await app.frame().evaluate(async (reference) => {
       const pixels = (source) => {
-        const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 320 }), context = canvas.getContext("2d");
-        context.drawImage(source, 0, 0, 256, 320);
-        return context.getImageData(0, 0, 256, 320).data;
+        const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 384 }), context = canvas.getContext("2d");
+        context.drawImage(source, 0, 0, 256, 384);
+        return context.getImageData(0, 0, 256, 384).data;
       };
       const image = new Image();
       image.src = reference;
       await image.decode();
       const [eevee, bylonder] = [pixels(image), pixels(document.querySelector(".render-result canvas"))];
-      // Inside each sphere's disk (radius 0.45 of a 64 pixel tile, less its edge).
-      return Array.from({ length: 20 }, (_, tile) => {
+      // Inside each sphere's disk (radius 0.45 of a 64 pixel tile, less its edge), and each tile of the shadow floor.
+      return Array.from({ length: 24 }, (_, tile) => {
         let sum = 0, count = 0;
         for (let y = -24; y <= 24; y++) for (let x = -24; x <= 24; x++) {
-          if (x * x + y * y > 24 * 24) continue;
+          if (tile < 20 && x * x + y * y > 24 * 24) continue;
           const i = ((32 + (tile >> 2) * 64 + y) * 256 + 32 + (tile & 3) * 64 + x) * 4;
           for (let k = 0; k < 3; k++) sum += Math.abs(eevee[i + k] - bylonder[i + k]);
           count += 3;
@@ -84,7 +84,7 @@ const checks = {
     const render = `${tmpdir()}/shader-gallery-bylonder.png`;
     writeFileSync(render, Buffer.from((await app.frame().evaluate(() => document.querySelector(".render-result canvas").toDataURL("image/png"))).split(",")[1], "base64"));
     console.log(`      render: ${render}`);
-    const over = differences.map((d, i) => d > SHADER_GALLERY_LIMITS[i] && `sphere ${i + 1}: ${d}`).filter(Boolean);
+    const over = differences.map((d, i) => d > SHADER_GALLERY_LIMITS[i] && `tile ${i + 1}: ${d}`).filter(Boolean);
     assert.deepEqual(over, [], "spheres that differ from EEVEE");
   } },
 
@@ -99,10 +99,10 @@ const checks = {
     await rendered();
     const { spheres, background } = await app.frame().evaluate(() => {
       const source = document.querySelector(".render-result canvas");
-      const pixels = source.getContext("2d")?.getImageData(0, 0, 256, 320).data ?? (() => {
-        const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 320 }), context = canvas.getContext("2d");
+      const pixels = source.getContext("2d")?.getImageData(0, 0, 256, 384).data ?? (() => {
+        const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 384 }), context = canvas.getContext("2d");
         context.drawImage(source, 0, 0);
-        return context.getImageData(0, 0, 256, 320).data;
+        return context.getImageData(0, 0, 256, 384).data;
       })();
       const at = (x, y) => Array.from(pixels.subarray((y * 256 + x) * 4, (y * 256 + x) * 4 + 3));
       const clear = at(0, 0), off = (x, y) => Math.max(...at(x, y).map((v, k) => Math.abs(v - clear[k])));

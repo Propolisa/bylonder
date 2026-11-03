@@ -1,24 +1,29 @@
-"""Builds shader_gallery.blend: twenty spheres, each with a material made of Blender's common shader nodes, seen from
-above by an orthographic camera, in Blender 5.2.3. With an output path, also renders it in EEVEE there (the reference
+"""Builds shader_gallery.blend: twenty spheres, each with a material made of Blender's common shader nodes, and below
+them a floor the sun casts four objects' shadows on, seen from above by an orthographic camera, in Blender 5.2.3. With an output path, also renders it in EEVEE there (the reference
 tests/e2e/shader-gallery.mjs compares Bylonder's render with).
 
-usage: blender -b --factory-startup -P shader_gallery.py [-- RENDER.png]
+usage: blender -b --factory-startup -P shader_gallery.py [-- RENDER.png [PERSPECTIVE.png]]
+
+PERSPECTIVE.png: the floor seen at an angle by the Perspective camera (default lens), the reference for its shadows as
+most scenes see them.
 """
 import os
 import sys
 
 import bpy
+from mathutils import Vector
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.render.engine = 'BLENDER_EEVEE'
-scene.render.resolution_x, scene.render.resolution_y = 256, 320
+scene.render.resolution_x, scene.render.resolution_y = 256, 384
 scene.view_settings.view_transform = 'Standard'
 scene.world = bpy.data.worlds.new('World')
 scene.world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.05, 0.05, 0.05, 1)
 
 camera = bpy.data.objects.new('Camera', bpy.data.cameras.new('Camera'))
-camera.data.type, camera.data.ortho_scale, camera.location = 'ORTHO', 5.0, (0, 0, 10)
+# 64 pixels a unit, a row of 64 pixels for each row of the gallery.
+camera.data.type, camera.data.ortho_scale, camera.location = 'ORTHO', 6.0, (0, -0.5, 10)
 scene.collection.objects.link(camera)
 scene.camera = camera
 sun = bpy.data.objects.new('Sun', bpy.data.lights.new('Sun', 'SUN'))
@@ -222,8 +227,32 @@ for i, build in enumerate(GALLERY):
         sphere.data.materials[0].surface_render_method = 'BLENDED'
         sphere.data.materials[0].use_backface_culling = True
 
+# The last row: a floor and four objects casting the sun's shadows on it (the sun lights from +y, so each shadow falls
+# toward the row above).
+diffuse = material('Shadow Floor', lambda nodes, link, surface: link(node(nodes, 'ShaderNodeBsdfDiffuse', {'Color': (0.8, 0.8, 0.8, 1)}).outputs['BSDF'], surface))
+bpy.ops.mesh.primitive_plane_add(size=1, location=(0, -3.0, -0.6))
+bpy.context.object.name, bpy.context.object.scale = 'Shadow Floor', (4.0, 0.9, 1.0)
+bpy.context.object.data.materials.append(diffuse)
+casters = material('Shadow Caster', lambda nodes, link, surface: link(node(nodes, 'ShaderNodeBsdfDiffuse', {'Color': (0.8, 0.3, 0.2, 1)}).outputs['BSDF'], surface))
+for name, add, location, options in [
+    ('Shadow Cube', bpy.ops.mesh.primitive_cube_add, (-1.5, -3.2, -0.35), {'size': 0.3}),
+    ('Shadow Ball', bpy.ops.mesh.primitive_uv_sphere_add, (-0.5, -3.2, -0.1), {'radius': 0.2}),
+    ('Shadow Pole', bpy.ops.mesh.primitive_cylinder_add, (0.5, -3.2, -0.25), {'radius': 0.05, 'depth': 0.7}),
+    ('Shadow Ring', bpy.ops.mesh.primitive_torus_add, (1.5, -3.2, -0.3), {'major_radius': 0.22, 'minor_radius': 0.06}),
+]:
+    add(location=location, **options)
+    bpy.context.object.name = name
+    bpy.ops.object.shade_smooth()
+    bpy.context.object.data.materials.append(casters)
+
+perspective = bpy.data.objects.new('Perspective', bpy.data.cameras.new('Perspective'))
+perspective.location = (0, -11, 4)
+perspective.rotation_euler = (Vector((0, -3, -0.6)) - perspective.location).to_track_quat('-Z', 'Y').to_euler()
+scene.collection.objects.link(perspective)
+
 here = os.path.dirname(os.path.abspath(__file__))
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(here, 'shader_gallery.blend'))
-if '--' in sys.argv:
-    scene.render.filepath = os.path.abspath(sys.argv[sys.argv.index('--') + 1])
+outputs = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
+for view, path in zip([camera, perspective], outputs):
+    scene.camera, scene.render.filepath = view, os.path.abspath(path)
     bpy.ops.render.render(write_still=True)

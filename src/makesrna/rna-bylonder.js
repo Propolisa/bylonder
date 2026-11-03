@@ -324,6 +324,8 @@ const STRUCTS = {
       if ('isPickable' in ob) ob.isPickable = !value;
     }, sync: true },
     hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; }, sync: true },
+    // Object > Visibility > Shadow: whether it casts shadows (light-shadows.js).
+    visible_shadow: { get: (ob) => ob.metadata?.wbVisibleShadow !== false, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbVisibleShadow: !!value }; }, sync: true },
     hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; }, sync: true },
     hide_get: (ob) => () => !ob.isEnabled(false),
     hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
