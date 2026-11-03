@@ -56,8 +56,20 @@ function upload(engine, image, pointer) {
     if (internal) internal._swapAndDie(created);
     else image.internal = created;
   }
+  if (float && image.half) halfFloatStorage(engine, image.internal);
   engine.updateTextureData(image.internal, buffer.pixels, 0, 0, width, height, 0, 0, true);
   return true;
+}
+
+// blender-port: imbuf/intern/util_gpu.cc imb_gpu_get_format: a float buffer is drawn from a half float texture unless
+// the image asks for high bit depth (Half Float Precision off). Its float pixels still upload as they are: WebGL 2
+// converts floats into half float storage.
+function halfFloatStorage(engine, internal) {
+  const gl = engine._gl;
+  if (!gl) return;
+  engine._bindTextureDirectly(gl.TEXTURE_2D, internal, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, internal.width, internal.height, 0, gl.RGBA, gl.FLOAT, null);
+  engine._bindTextureDirectly(gl.TEXTURE_2D, null);
 }
 
 // A float image's texture as an export writes it, straight as Babylon's own materials sample it: Blender's pixels
@@ -142,7 +154,7 @@ export function imageTexture(imageStruct, scene, { interpolation = 'Linear', ext
   const uid = imageStruct.session_uid, pointer = pointerOf(imageStruct)[2];
   let image = images.get(uid);
   if (!image) {
-    image = { pointer, user: x.image_partial_update_create(pointer) >>> 0, internal: null, stale: false, textures: new Map() };
+    image = { pointer, user: x.image_partial_update_create(pointer) >>> 0, internal: null, stale: false, textures: new Map(), half: imageStruct.use_half_precision };
     images.set(uid, image);
     upload(scene.getEngine(), image, pointer);
   }
