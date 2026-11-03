@@ -103,7 +103,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
   const viewNames = () => {
     const settings = rna.pointer('Scene', world).view_settings;
-    return { view_transform: viewTransforms[settings.view_transform]?.ocioView ?? 'Standard', look: looks[settings.look]?.[0] ?? 'None' };
+    return { view_transform: viewTransforms[settings.view_transform]?.ocioView ?? settings.view_transform ?? 'Standard', look: looks[settings.look]?.[0] ?? settings.look ?? 'None' };
   };
   let scheduled = false, sceneChanged = true, listed = -1;
   // The objects hooks saw change since the last flush.

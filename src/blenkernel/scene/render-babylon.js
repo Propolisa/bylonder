@@ -19,6 +19,11 @@ export const viewTransforms = {
 };
 // Blender's contrast looks, as Babylon image processing contrast.
 export const looks = { NONE: ['None', 1], VERY_LOW_CONTRAST: ['Very Low Contrast', 0.6], LOW_CONTRAST: ['Low Contrast', 0.8], MEDIUM_LOW_CONTRAST: ['Medium Low Contrast', 0.9], MEDIUM_HIGH_CONTRAST: ['Medium High Contrast', 1.1], HIGH_CONTRAST: ['High Contrast', 1.2], VERY_HIGH_CONTRAST: ['Very High Contrast', 1.4] };
+// A view transform or look as a .blend names it (Blender's OCIO names, AgX among them) or as Bylonder keys it; AgX,
+// which Babylon lacks, takes the filmic curve nearest to it.
+const OCIO_VIEWS = { AgX: 'BABYLON_STANDARD', 'Filmic Log': 'BABYLON_STANDARD', 'False Color': 'STANDARD', Raw: 'STANDARD' };
+export const viewTransformOf = (name) => viewTransforms[name] ?? viewTransforms[OCIO_VIEWS[name] ?? Object.keys(viewTransforms).find((k) => viewTransforms[k].ocioView === name)] ?? viewTransforms.STANDARD;
+const contrastOf = (look) => looks[look]?.[1] ?? Object.values(looks).find(([label]) => look?.endsWith(label))?.[1] ?? 1;
 
 export function readAuthoredRender(scene) {
   const ip = scene.imageProcessingConfiguration;
@@ -72,9 +77,9 @@ export function createRenderEngine(scene) {
     // cameras: the cameras of rendered views (iterable). Called when settings or view shading change, not per frame.
     render(settings, { cameras = [] } = {}) {
       const ip = scene.imageProcessingConfiguration, view = settings.viewSettings;
-      viewTransforms[view.viewTransform].apply(ip);
+      viewTransformOf(view.viewTransform).apply(ip);
       ip.exposure = 2 ** view.exposure;
-      ip.contrast = looks[view.look][1];
+      ip.contrast = contrastOf(view.look);
       const e = settings.eevee, r = settings.render;
       viewportSamples = Math.max(1, Math.round(e.taaSamples));
       const wanted = new Set([...cameras].filter(c => c && !c.isDisposed?.()));
