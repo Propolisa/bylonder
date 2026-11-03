@@ -889,7 +889,7 @@
    "https://docs.blender.org/manual/en/5.2/editors/preferences/themes.html",
    "https://docs.blender.org/manual/en/5.2/editors/3dview/navigate/navigation.html"
   ],
-  "example": "cube",
+  "example": "chess",
   "thumbnail": "preferences/thumbnail.png",
   "media": [
    "preferences/open.png",
@@ -949,8 +949,8 @@
    "File Paths are greyed out: projects and their files live in the browser."
   ],
   "page": "docs/features/preferences.md",
-  "open": "https://propolisa.github.io/bylonder/#example=cube",
-  "example_title": "Default Cube",
+  "open": "https://propolisa.github.io/bylonder/#example=chess",
+  "example_title": "Chess Endgame",
   "coverage": {
    "operators": {
     "supported": 15,
