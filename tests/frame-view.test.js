@@ -130,4 +130,16 @@ const bulbs = scene.lights.filter((light) => light.name === '__instance Bulb');
 assert.equal(bulbs.length, 1, 'a light at the instance');
 bulbs[0].computeTransformedInformation();
 assert(Vector3.Distance(bulbs[0].transformedPosition, new Vector3(5, 2, 0)) < 1e-3, `where the instance puts it: ${bulbs[0].transformedPosition}`);
+// Display As > Bounds: the dice and its instance draw as their bounds' edges in the viewport, their surfaces in renders.
+blendData().objects.get('Dice').display_type = 'BOUNDS';
+sync.view();
+scene.onBeforeRenderObservable.notifyObservers(scene);
+const boxes = scene.meshes.filter((mesh) => mesh.name.startsWith('__bounds'));
+assert.deepEqual(boxes.map((mesh) => mesh.getTotalVertices()).sort(), [24, 24], 'a box of 12 edges for the dice and one for its instance');
+const diceNode = objects.find((node) => node.name === 'Dice'), diceCarrier = scene.meshes.find((mesh) => mesh.name.startsWith('__instances'));
+assert(!diceNode.isVisible && !diceCarrier.isVisible && boxes.every((box) => box.isVisible), 'shown as bounds only');
+world.collections = { rendering: true };
+scene.onBeforeRenderObservable.notifyObservers(scene);
+assert(diceNode.isVisible && diceCarrier.isVisible && boxes.every((box) => !box.isVisible), 'a render draws the surfaces');
+delete world.collections;
 console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type; a metaball, a NURBS surface and a lattice; instancing on vertices and collection instances, their lights too");

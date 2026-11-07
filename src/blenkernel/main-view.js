@@ -18,6 +18,7 @@ import { Color3, FreeCamera, Material, Matrix, Mesh, PBRMaterial, StandardMateri
 import { particleShapeMesh, particleShapeMaterial, hairOverlay, particleEditOverlay } from '../draw/overlay-particle.js';
 import { drawPointClouds } from '../draw/pointcloud.js';
 import { paintWeightOverlay } from '../draw/overlay-paint-weight.js';
+import { boundsLines } from '../draw/overlay-bounds.js';
 import { curvesData, curvesMesh, disposeCurvesData, CurvesPlugin } from '../draw/curves.js';
 import { armatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
@@ -123,6 +124,7 @@ export function createMainView(state) {
     if (type === 'MESH') {
       if (blender.property(entry.ob, PROPERTIES.standin) === '1') entry.owned = false;
       else keepMesh(entry, blender);
+      displayBounds(node, idStruct(entry.ob).display_type === 'BOUNDS');
     }
     else if (CURVE_TYPES.includes(type)) {
       // Its recipe; the depsgraph's evaluation draws it.
@@ -130,6 +132,33 @@ export function createMainView(state) {
       entry.drawn = false;
     } else if (type === 'ARMATURE') pullArmature(entry, true);
   }
+  // Meshes shown as their bounds in the viewport (Display As > Bounds), an instanced one's carrier too: the edges of their
+  // local bounds, at each instance, drawn while the scene is not rendering, in place of their surfaces.
+  const bounded = new Map(); // mesh -> { lines, key }
+  function displayBounds(mesh, on) {
+    if (on) return bounded.has(mesh) || bounded.set(mesh, {});
+    const entry = bounded.get(mesh);
+    if (!entry) return;
+    entry.lines?.dispose();
+    bounded.delete(mesh);
+    mesh.isVisible = true;
+  }
+  world.scene.onBeforeRenderObservable.add(() => {
+    const rendering = !!world.collections?.rendering;
+    for (const [mesh, entry] of bounded) {
+      if (mesh.isDisposed()) { displayBounds(mesh, false); continue; }
+      const instanced = mesh.hasThinInstances, box = (instanced ? mesh.rawBoundingInfo : mesh.getBoundingInfo())?.boundingBox;
+      if (!box) continue;
+      const key = [box.minimum, box.maximum].map((v) => v.asArray().join()).join() + (mesh.metadata?.instancesVersion ?? '');
+      if (key !== entry.key) {
+        entry.key = key;
+        entry.lines = boundsLines(world.scene, '__bounds ' + mesh.name, box, instanced ? mesh.thinInstanceGetWorldMatrices() : undefined, entry.lines);
+        if (!instanced) entry.lines.parent = mesh;
+      }
+      mesh.isVisible = rendering;
+      entry.lines.isVisible = !rendering;
+    }
+  });
   // What Blender's code changed of an armature (bones, pose, its mode), after Main is evaluated; its overlay draws
   // what Main evaluated anew.
   function pullArmature(entry, always = false) {
@@ -334,6 +363,7 @@ export function createMainView(state) {
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
+        if (entry.type === 'MESH') displayBounds(node, idStruct(ob).display_type === 'BOUNDS');
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL) || sculpted(entry, tags.object);
         if (entry.type === 'MESH' && drawEditMode(entry)) continue;
@@ -467,6 +497,8 @@ export function createMainView(state) {
       groups.reduce((offset, group) => { buffer.set(group.data, offset); return offset + group.data.length; }, 0);
       carrier.thinInstanceBufferUpdated('matrix');
       carrier.thinInstanceCount = length / 16;
+      carrier.metadata.instancesVersion = (carrier.metadata.instancesVersion ?? 0) + 1;
+      if (shape === 'OBJECT') displayBounds(carrier, bounded.has(source));
       // Its bounds over the instances drawn, not the buffer's unused zero matrices (NaN bounds cull a carrier of several
       // materials, whose submeshes are tested against them).
       carrier.thinInstanceRefreshBoundingInfo(true);
