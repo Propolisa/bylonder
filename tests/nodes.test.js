@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { Constants, NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
 import { nodeMaterialFromTree, shaderNodeClasses, SHADER_NODES } from '../src/nodes/blender/shader-nodes.js';
+import { skyTexture } from '../src/blenkernel/sky.js';
 import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js';
 import { availability, declaration } from '../src/nodes/blender/declarations.js';
 import { glslFunction } from '../src/nodes/blender/glsl.js';
@@ -158,5 +159,15 @@ assert.match(skyCode, /bl_tex_coord\(bl_P, /, 'its Generated coordinates are tha
 assert.match(skyCode, /bl_set_ray_type\(\w+\);[\s\S]*bl_node_light_path\(/, 'its Light Path reads the ray type it is drawn for');
 assert.match(skyCode, /bl_node_emission\(/, 'a Background is an emission');
 assert.match(sky._vertexCompilationState._builtCompilationString, /\.w \* 0\.99999, /, 'at the far plane');
+
+// A Sky Texture's Multiple Scattering sky is the one Blender precomputes (the module's SKY_multiple_scattering_precompute_texture),
+// sampled by node_tex_sky_nishita as one layer of a texture array.
+const skyNode = { idname: 'ShaderNodeTexSky', name: 'Sky', properties: { sky_type: 'MULTIPLE_SCATTERING', sun_elevation: 0.3, sun_rotation: 1, altitude: 100, air_density: 1, aerosol_density: 1, ozone_density: 1 } };
+const skyWorld = nodeMaterialFromTree('__world Sky Texture', scene, { nodes: [skyNode, { idname: 'ShaderNodeBackground', name: 'Background' }, { idname: 'ShaderNodeOutputWorld', name: 'World Output' }],
+  links: [['Sky', 'Color', 'Background', 'Color'], ['Background', 'Background', 'World Output', 'Surface']] }).material;
+if (skyWorld._buildIsInProgress) await new Promise((resolve) => skyWorld.onBuildObservable.addOnce(resolve));
+assert.match(skyWorld._fragmentCompilationState._builtCompilationString, /uniform \w* ?sampler2DArray bl_sky\w*;[\s\S]*node_tex_sky_nishita\(bl_P, 1\.0, /, 'the sky texture, sampled at the view direction');
+const precomputed = skyTexture(skyNode.properties);
+assert.ok(precomputed.width > 1 && precomputed.height > 1 && precomputed.pixels.some((v) => v > 0), 'a sky of light');
 
 console.log('nodes: ok');

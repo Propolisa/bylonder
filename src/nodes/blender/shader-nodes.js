@@ -12,7 +12,7 @@ import {
   BonesBlock, ClipPlanesBlock, Color4, ColorMergerBlock, ColorSplitterBlock, Constants, FogBlock, FragmentOutputBlock, ImageProcessingBlock, InputBlock,
   InstancesBlock, Matrix, MorphTargetsBlock, NodeMaterial, NodeMaterialBlock,
   NodeMaterialBlockConnectionPointTypes as T, NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, Observable, PBRMetallicRoughnessBlock,
-  RawTexture, ReflectionBlock, RefractionBlock, RegisterClass, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
+  RawTexture, RawTexture2DArray, ReflectionBlock, RefractionBlock, RegisterClass, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
 import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
@@ -24,6 +24,7 @@ import { colorRampTable, defaultColorRamp, halfFloats, TABLE_SIZE } from '../../
 import { blackbodyTable, curveMappingGPU, defaultCurveMapping, plainCurveMapping, wavelengthTable } from '../../blenkernel/colortools.js';
 import { CurvesGeometryBlock, CurvesNormalBlock } from '../../draw/curves.js';
 import { imageTexture } from '../../imbuf/image-textures.js';
+import { skyTexture } from '../../blenkernel/sky.js';
 import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
@@ -107,6 +108,14 @@ export const SHADER_NODES = {
       [sample, ['#uv', { image: ima, extension: p.projection, interpolation: equirectangular && !closest ? 'Environment' : p.interpolation }], ['@Color', ['#alpha', 'float']]],
       linked('Color') && [clear ? 'color_alpha_clear' : 'color_alpha_premultiply', ['@Color'], ['@Color']],
     ];
+  },
+  // node_shader_tex_sky.cc, node_shader_gpu_tex_sky: Single and Multiple Scattering sample the sky Blender precomputes
+  // (GPU_image_sky, one layer); an unlinked vector is Generated.
+  ShaderNodeTexSky: (p, decl, { connected }) => {
+    const sky = NISHITA.includes(p.sky_type) ? skyTexture(p) : null;
+    if (!sky) return [];
+    const [type, rotation, ...rows] = sky.params;
+    return [['node_tex_sky_nishita', [connected('Vector') ? 'Vector' : '$orco', type, rotation, rows.slice(0, 3), rows.slice(3, 6), rows.slice(6, 9), { sky }, 0], ['@Color']]];
   },
   // node_shader_color_ramp.cc, gpu_shader_valtorgb
   ShaderNodeValToRGB: (p, decl) => {
@@ -284,6 +293,7 @@ export const SHADER_NODES = {
 };
 
 const outputs = (decl) => decl.outputs.map((s) => '@' + s.identifier);
+const NISHITA = ['SINGLE_SCATTERING', 'MULTIPLE_SCATTERING'];
 // A BSDF's Normal socket, the shaded point's normal when unlinked.
 const normal = (connected) => (connected('Normal') ? 'Normal' : WORLD_NORMAL);
 // A curve mapping's range minimums, dividers, start and end slopes, each as `pick` takes its curves' values.
@@ -664,6 +674,19 @@ function rampTexture(table, scene) {
   return texture;
 }
 
+// A precomputed sky as the texture GPU_image_sky makes of it: one layer, filtered linearly, repeating around and
+// extending at the poles.
+const skyTextures = new Map();
+function skyArrayTexture(sky, scene) {
+  const key = `${scene.uid} ${sky.key}`;
+  if (!skyTextures.has(key) || skyTextures.get(key).getScene() !== scene) {
+    const texture = new RawTexture2DArray(sky.pixels, sky.width, sky.height, 1, Constants.TEXTUREFORMAT_RGBA, scene, false, false, Texture.BILINEAR_SAMPLINGMODE, Constants.TEXTURETYPE_FLOAT);
+    Object.assign(texture, { wrapU: Texture.WRAP_ADDRESSMODE, wrapV: Texture.CLAMP_ADDRESSMODE });
+    skyTextures.set(key, texture);
+  }
+  return skyTextures.get(key);
+}
+
 // What an Image without pixels yet samples (GPU_texture_create_error's pink, as Blender draws a missing image).
 const empties = new WeakMap();
 function emptyTexture(scene) {
@@ -824,7 +847,15 @@ const blenderShader = (Base) => class extends Base {
       const code = compileSteps(this.declaration, steps, links, {
         emit: (key, code) => state._emitFunction(key, code, ''),
         free: (prefix) => state._getFreeVariableName(prefix),
-        sampler: ({ texture: table, image, ...sampling }) => {
+        sampler: ({ texture: table, image, sky, ...sampling }) => {
+          if (sky) {
+            const name = state._getFreeVariableName('bl_sky');
+            state._emit2DArraySampler(name);
+            // Made as it is first bound: a texture array needs WebGL 2.
+            const scene = state.sharedData.scene;
+            this._textures.push([name, () => skyArrayTexture(sky, scene)]);
+            return name;
+          }
           const name = state._getFreeVariableName(table ? 'bl_table' : 'bl_image');
           state._emit2DSampler(name, '', false, undefined, false, 'highp');
           const scene = state.sharedData.scene;
@@ -861,7 +892,7 @@ const blenderShader = (Base) => class extends Base {
   bind(effect, nodeMaterial, mesh) {
     super.bind?.(effect, nodeMaterial, mesh);
     setUniforms(effect, this._uniforms ?? [], this.values);
-    for (const [name, texture] of this._textures ?? []) effect.setTexture(name, texture);
+    for (const [name, texture] of this._textures ?? []) effect.setTexture(name, typeof texture === 'function' ? texture() : texture);
     if (!mesh) return;
     for (const [name, id] of this._meshUniforms ?? []) {
       const [type, value] = meshValue(id), v = value(mesh, nodeMaterial.getScene());
@@ -1352,13 +1383,15 @@ export function blenderDefaultTree(material) {
   material.editorData = { locations: [{ blockId: principled.uniqueId, x: 10, y: -300 }, { blockId: output.uniqueId, x: 300, y: -300 }], frames: [] };
 }
 
+// An RNA value as plain data: an array property (a Sky Texture's sun direction) as an array.
+const plainValue = (value) => (value && typeof value === 'object' && Symbol.iterator in value ? [...value] : value);
 // A node's properties as its block keeps them, from Blender's node (RNA): those its declaration has, its color ramp and its
 // curve mapping.
 export function nodeProperties(node) {
   const decl = declaration('shader', node.bl_idname), ramp = node.color_ramp, mapping = CURVE_MAPPINGS[node.bl_idname] && node.mapping;
   return {
     // An ID pointer (an Image Texture's image) by its name.
-    ...Object.fromEntries(Object.entries(decl?.properties ?? {}).map(([key, { type }]) => [key, type === 'POINTER' ? node[key]?.name ?? null : node[key]])),
+    ...Object.fromEntries(Object.entries(decl?.properties ?? {}).map(([key, { type }]) => [key, type === 'POINTER' ? node[key]?.name ?? null : plainValue(node[key])])),
     ...(ramp && { color_ramp: { color_mode: ramp.color_mode, interpolation: ramp.interpolation, hue_interpolation: ramp.hue_interpolation,
       elements: [...ramp.elements].map((e) => ({ position: e.position, color: [...e.color] })) } }),
     ...(mapping && { mapping: plainCurveMapping(mapping) }),

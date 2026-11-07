@@ -22,7 +22,7 @@ export const kindOfSocket = (decl, id) => socketType(socketOf(decl, id).type)?.k
 const constant = (arg, sampler) => {
   if (typeof arg === 'number') return glslValue(arg, 'float');
   if (Array.isArray(arg)) return glslValue(arg, arg.length === 4 ? 'vec4' : arg.length === 2 ? 'vec2' : 'vec3');
-  if (arg?.texture || arg?.image) return sampler(arg);
+  if (arg?.texture || arg?.image || arg?.sky) return sampler(arg);
   return arg?.glsl;
 };
 

@@ -1,7 +1,9 @@
 /* What Blender's GPU material code asks of Blender's data for shader nodes (node_shader_*.cc, draw_resource.hh), for
  * the Babylon blocks that run them (src/nodes/blender/shader-nodes.js): curve mapping tables and their parameters, the
- * blackbody and wavelength tables, an object's random value, and the uniform attributes of an object or view layer. */
+ * blackbody and wavelength tables, the Sky Texture's precomputed sky, an object's random value, and the uniform
+ * attributes of an object or view layer. */
 #include <algorithm>
+#include <cmath>
 
 #include "BKE_colortools.hh"
 #include "BKE_duplilist.hh"
@@ -9,7 +11,9 @@
 #include "DNA_color_types.h"
 #include "DNA_object_types.h"
 #include "IMB_colormanagement.hh"
+#include "GPU_material.hh"
 #include "MEM_guardedalloc.h"
+#include "sky_nishita.h"
 
 using namespace blender;
 
@@ -52,6 +56,62 @@ int curvemapping_gpu(const float *points, const int counts[4], int flag, const f
   }
   BKE_curvemapping_free(cumap);
   return std::min(size, 1024);
+}
+
+/* blender-port: node_shader_tex_sky.cc sky_simplify_multiscatter_elevation_rotation (static there): the sun's
+ * elevation in [-PI/2, PI/2] and its rotation in [0, 2PI], as the shader reads them. */
+static void sky_simplify_multiscatter_elevation_rotation(float &sun_elevation, float &sun_rotation)
+{
+  float new_sun_elevation = fmodf(sun_elevation, 2.0f * float(M_PI));
+  float new_sun_rotation = sun_rotation;
+  if (fabsf(new_sun_elevation) >= float(M_PI)) {
+    new_sun_elevation -= copysignf(2.0f, new_sun_elevation) * float(M_PI);
+  }
+  if (new_sun_elevation >= float(M_PI) / 2.0f || new_sun_elevation <= -float(M_PI) / 2.0f) {
+    new_sun_elevation = copysignf(float(M_PI), new_sun_elevation) - new_sun_elevation;
+    new_sun_rotation += float(M_PI);
+  }
+  new_sun_rotation = fmodf(new_sun_rotation, 2.0f * float(M_PI));
+  if (new_sun_rotation < 0.0f) {
+    new_sun_rotation += 2.0f * float(M_PI);
+  }
+  sun_elevation = new_sun_elevation;
+  sun_rotation = 2.0f * float(M_PI) - new_sun_rotation;
+}
+
+/* node_shader_gpu_tex_sky's Single and Multiple Scattering skies: the texture GPU_image_sky holds
+ * (GPU_SKY_WIDTH x GPU_SKY_HEIGHT RGBA texels of XYZ) and node_tex_sky_nishita's parameters: its sky type, sun
+ * rotation and XYZ to scene linear rows (get_XYZ_to_RGB_for_gpu), 11 floats. Returns the texture's width times 65536
+ * plus its height; null pixels compute only that. */
+EXPORT(sky_texture_gpu)
+int sky_texture_gpu(int multiple_scattering, float sun_elevation, float sun_rotation, float altitude, float air_density,
+                    float aerosol_density, float ozone_density, float *r_pixels, float *r_params)
+{
+  if (r_pixels) {
+    if (multiple_scattering) {
+      sky_simplify_multiscatter_elevation_rotation(sun_elevation, sun_rotation);
+      SKY_multiple_scattering_precompute_texture(r_pixels, 4, GPU_SKY_WIDTH, GPU_SKY_HEIGHT, sun_elevation, altitude,
+                                                 air_density, aerosol_density, ozone_density);
+    }
+    else {
+      SKY_single_scattering_precompute_texture(r_pixels, 4, GPU_SKY_WIDTH, GPU_SKY_HEIGHT, sun_elevation, altitude,
+                                               air_density, aerosol_density, ozone_density);
+      sun_rotation = fmodf(sun_rotation, 2.0f * float(M_PI));
+      if (sun_rotation < 0.0f) {
+        sun_rotation += 2.0f * float(M_PI);
+      }
+      sun_rotation = 2.0f * float(M_PI) - sun_rotation;
+    }
+    const float3x3 xyz_to_rgb = IMB_colormanagement_get_xyz_to_scene_linear();
+    r_params[0] = multiple_scattering ? 1.0f : 0.0f;
+    r_params[1] = sun_rotation;
+    for (int row = 0; row < 3; row++) {
+      for (int k = 0; k < 3; k++) {
+        r_params[2 + row * 3 + k] = xyz_to_rgb[k][row];
+      }
+    }
+  }
+  return GPU_SKY_WIDTH * 65536 + GPU_SKY_HEIGHT;
 }
 
 /* node_shader_gpu_blackbody's and node_shader_gpu_wavelength's tables: CM_TABLE + 1 RGBA texels. */
