@@ -329,10 +329,12 @@ export function searchMenu(query, menu = levels[0]) {
   setActive(menu, Math.max(0, hits.findIndex((hit) => hit.item.active)) - !hits.length);
 }
 
-function menuHits(menu, query) {
+// An entry named as typed comes first, then those starting with the first word.
+export function menuHits(menu, query) {
   menu.entries ??= menu.search();
   const words = query.toLowerCase().split(/\s+/).filter(Boolean), text = (e) => [...e.path, e.item.label].join(' ').toLowerCase();
-  const score = (e) => (e.item.label.toLowerCase().startsWith(words[0] ?? '') ? 0 : 1) + (e.item.enabled?.() === false ? 4 : 0) + (e.item.weight ?? 0);
+  const match = (label) => (label === words.join(' ') ? -1 : label.startsWith(words[0] ?? '') ? 0 : 1);
+  const score = (e) => match(e.item.label.toLowerCase()) + (e.item.enabled?.() === false ? 4 : 0) + (e.item.weight ?? 0);
   return menu.entries.filter((e) => words.every((w) => text(e).includes(w))).sort((a, b) => score(a) - score(b)).slice(0, 40);
 }
 

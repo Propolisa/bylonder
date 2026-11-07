@@ -11,6 +11,7 @@ import { loadKeyconfig } from '../src/windowmanager/wm-window.js';
 import { blenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { inArea } from '../src/windowmanager/wm-operators.js';
 import { blenderDefaultTree, buildMaterial } from '../src/nodes/blender/shader-nodes.js';
+import { menuHits } from '../src/editors/interface/menu.js';
 
 // Blender's keyconfig, as the app loads it when its window first takes an event.
 loadKeyconfig(blenderMain().C);
@@ -166,5 +167,9 @@ await new Promise((resolve) => lava.onBuildObservable.addOnce(resolve));
 const code = lava._fragmentCompilationState._builtCompilationString;
 for (const name of ['node_noise_tex_fbm_4d', 'valtorgb_opti_linear', 'node_bump', 'bl_tex_coord']) assert.match(code, new RegExp(name), name);
 assert.ok(built > 0);
+
+// Shift A's search puts the node named as typed first: Points before Points of Curve.
+const pointEntries = [{ path: ['Curve', 'Read'], item: { label: 'Points of Curve' } }, { path: ['Point'], item: { label: 'Points' } }];
+assert.deepEqual(menuHits({ search: () => pointEntries }, 'points').map((e) => e.item.label), ['Points', 'Points of Curve']);
 
 console.log('node editor: ok');
