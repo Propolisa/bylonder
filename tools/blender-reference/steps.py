@@ -39,6 +39,9 @@ def run():
         bpy.ops.wm.open_mainfile(filepath=os.environ["SIDE_BY_SIDE_FILE"], load_ui=False)
         yield 3.0
     for i, step in enumerate(steps):
+        for a in window().screen.areas:
+            if step.get("shading") and a.type == "VIEW_3D":
+                a.spaces.active.shading.type = step["shading"]
         for event in step["events"]:
             send(event)
             yield 0.15

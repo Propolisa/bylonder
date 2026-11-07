@@ -4,8 +4,9 @@
 // both get the same input. Writes NN-side-by-side.png (Blender left, Bylonder right) and NN-diff.png per step.
 // usage: node tools/blender-reference/side-by-side.mjs STEPS.json [--out DIR]
 //   STEPS.json: [{ "click": "VIEW3D_MT_object" | [x, y] | { "view": [fx, fy] } }, { "key": "Shift+A", "at": ... },
-//   { "move": ... }, { "settle": seconds }], window pixels from the top left of a 1600 x 950 window; "view" is a point of
-//   the 3D Viewport as fractions of its size.
+//   { "move": ... }, { "shading": "SOLID" | "MATERIAL" | "RENDERED" | "WIREFRAME" }, { "settle": seconds }], window
+//   pixels from the top left of a 1600 x 950 window; "view" is a point of the 3D Viewport as fractions of its size;
+//   "shading" sets the 3D Viewports' shading in both.
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -17,7 +18,7 @@ import { compare } from "./compare.mjs";
 
 const here = fileURLToPath(new URL(".", import.meta.url)), root = fileURLToPath(new URL("../..", import.meta.url));
 const args = process.argv.slice(2);
-const out = args.includes("--out") ? args.splice(args.indexOf("--out"), 2)[1] : join(root, ".shots", "side-by-side");
+const out = resolve(args.includes("--out") ? args.splice(args.indexOf("--out"), 2)[1] : join(root, ".shots", "side-by-side"));
 // --file: a .blend both open first (Blender from its command line, Bylonder by File > Open), instead of the startup file.
 const file = args.includes("--file") ? resolve(args.splice(args.indexOf("--file"), 2)[1]) : null;
 const steps = JSON.parse(readFileSync(args[0], "utf8"));
@@ -72,10 +73,11 @@ async function runBylonder() {
         await app.page.keyboard.press(step.key);
         sent.push({ ...blenderKey(step.key), x: Math.round(x), y: Math.round(y) });
       }
+      if (step.shading) await app.bylonder((b, type) => b.views.input.setShading(type), step.shading === "WIREFRAME" ? "wire" : step.shading.toLowerCase());
       await app.page.waitForTimeout((step.settle ?? 1) * 1000);
       await app.until((b) => b.views.idle).catch(() => {});
       shots.push(await app.page.screenshot());
-      events.push({ events: sent, settle: step.settle ?? 1 });
+      events.push({ events: sent, settle: step.settle ?? 1, ...(step.shading && { shading: step.shading }) });
     }
   } finally {
     await app.close();
