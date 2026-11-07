@@ -276,6 +276,14 @@ const checks = {
     await expectStats((s) => s.Verts > 8);
   },
 
+  // The region's focus on pointer enter must not take the keyboard back from the text field a click opens.
+  async "a click on a Properties number field edits its text"() {
+    await app.click();
+    await app.locator('#properties-section [role="spinbutton"]').first().click();
+    await app.locator("#properties-section input:focus").waitFor({ timeout: 3000 });
+    await app.page.keyboard.press("Escape");
+  },
+
   async "right click on a property opens Blender's button context menu"() {
     await app.click();
     await rightClick(...(await center(app.locator('#properties-section [role="spinbutton"]').first())));

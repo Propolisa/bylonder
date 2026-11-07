@@ -7,7 +7,7 @@ import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { blenderMain } from '../../bmesh/bmesh-wasm.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER } from '../animation/anim-area.js';
 import { regionPanels, regionHeader, menuTree, panelClosedSet } from '../interface/ui-tree.js';
-import { BlockView, PanelsView, treeMenu } from '../interface/block-view.js';
+import { BlockView, PanelsView, treeMenu, focusUnlessInside } from '../interface/block-view.js';
 import { panelState } from '../interface/layout-view.js';
 import { openMenu } from '../interface/menu.js';
 import { pointerStruct, structFind } from '../../python/bpy_rna.js';
@@ -117,7 +117,7 @@ export function mountProperties(host, { world, editor, history, systems, propert
       const headerView = h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, header.map((tree) => h(BlockView, { tree, ui: ui[RGN_TYPE_HEADER], header: true })));
       const tab = space().context;
       return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES', tabindex: -1, onKeydown,
-        onPointerenter: (e) => e.currentTarget.focus({ preventScroll: true }) }, [
+        onPointerenter: focusUnlessInside }, [
         headerHost ? h(Teleport, { to: headerHost }, [headerView]) : headerView,
         h('div', { class: 'flex min-h-0 flex-1' }, [
           h('div', { class: 'bl-navigation-bar flex shrink-0 flex-col items-center', 'data-blender': 'PROPERTIES_PT_navigation_bar' },

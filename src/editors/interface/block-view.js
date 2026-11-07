@@ -287,6 +287,13 @@ const rootEnv = (ui, extra = {}) => ({ ui, active: true, enabled: true, root: tr
 
 export { treeMenu };
 
+// A region takes the keyboard when the pointer enters it, but not from a field being edited inside it: Chromium sends
+// the region another pointerenter when a number field turns into its text field under the pointer.
+export const focusUnlessInside = (event) => {
+  const region = event.currentTarget;
+  if (!region.contains(region.ownerDocument.activeElement)) region.focus({ preventScroll: true });
+};
+
 export const BlockView = defineComponent({
   name: 'BlockView',
   // header: a header region's block, whose menus are pulldowns and whose buttons keep their widths.

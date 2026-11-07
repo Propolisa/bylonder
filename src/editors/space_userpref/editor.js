@@ -6,7 +6,7 @@ import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { blenderMain } from '../../bmesh/bmesh-wasm.js';
 import { AnimArea, RGN_TYPE_WINDOW, RGN_TYPE_HEADER, RGN_TYPE_UI } from '../animation/anim-area.js';
 import { regionPanels, regionHeader, menuTree, panelClosedSet } from '../interface/ui-tree.js';
-import { BlockView, PanelsView, treeMenu } from '../interface/block-view.js';
+import { BlockView, PanelsView, treeMenu, focusUnlessInside } from '../interface/block-view.js';
 import { openMenu } from '../interface/menu.js';
 import { inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
 import { keymapHandler, blenderKeys } from '../../windowmanager/keyconfig.js';
@@ -65,7 +65,7 @@ export function mountPreferences(host, { headerHost } = {}) {
       const header = area.inContext(RGN_TYPE_HEADER, (C) => regionHeader(C)) ?? [];
       const headerView = h('div', { class: 'bl-ui bl-area-header flex min-w-0 flex-1 items-center' }, header.map((tree) => h(BlockView, { tree, ui: ui[RGN_TYPE_HEADER], header: true })));
       return h('section', { class: 'bl-ui bl-preferences flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PREFERENCES', tabindex: -1, onKeydown,
-        onPointerenter: (e) => e.currentTarget.focus({ preventScroll: true }) }, [
+        onPointerenter: focusUnlessInside }, [
         h('div', { class: 'flex min-h-0 flex-1' }, [
           h('div', { class: 'bl-preferences-nav flex shrink-0 flex-col bg-navigation-bar', 'data-blender': 'USERPREF_PT_navigation_bar' }, [
             h('div', { class: 'min-h-0 flex-1 overflow-y-auto' }, h(PanelsView, { panels: panels(RGN_TYPE_UI), ui: ui[RGN_TYPE_UI] })),
