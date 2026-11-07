@@ -30,6 +30,7 @@ export const examples = [
   { id: "particle-hair", title: "Grass Hill" },
   { id: "hair-dynamics", title: "Hair Dynamics" },
   { id: "geometry-nodes", title: "Geometry Nodes Planet" },
+  { id: "geometry-node-editor", title: "Sunflowers" },
   { id: "rigged-character", title: "Rigged Character" },
   { id: "lava", title: "Lava Sphere" },
   { id: "shader-gallery", title: "Shader Node Gallery" },
