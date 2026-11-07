@@ -52,7 +52,9 @@ export function createViewportStatus({ world, editor, views, send }) {
     const visible = world.objects.filter(n => n.isEnabled() && n.isVisible !== false && !n.isDisposed() && n.getTotalVertices);
     const verts = visible.reduce((s, n) => s + n.getTotalVertices(), 0);
     const tris = visible.reduce((s, n) => s + (n.getTotalIndices() || n.getTotalVertices()) / 3, 0);
-    const detail = `(${Math.round(world.animation.time.frame)}) ${collection}${active ? ' | ' + active.name : ''}`;
+    // In a mode other than Object Mode it names the object and its data instead (draw_selected_name).
+    const mode = active?.metadata?.wbMode, dataName = mode && mode !== 'OBJECT' ? world.mainSync?.dataName(active) : null;
+    const detail = `(${Math.round(world.animation.time.frame)}) ${dataName ? `${active.name} | ${dataName}` : `${collection}${active ? ' | ' + active.name : ''}`}`;
     for (const view of views.all) view.setDetail?.(detail);
     const hints = world.wm?.modal
       ? [[['mouse_lmb'], 'Confirm'], [['mouse_rmb'], 'Cancel'], [['X', 'Y', 'Z'], 'Axis'], [['Shift'], 'Precision'], [['Ctrl'], 'Snap']]

@@ -14,4 +14,9 @@ const views = { idle: true, all: [{ setDetail: (text) => { detail = text; } }] }
 const editor = { selection: { nodes: [stack], active: stack, size: 1 } };
 createViewportStatus({ world, editor, views, send: () => {} }).tick();
 assert.equal(detail, '(0) pavement.01 | Pizza Stack', 'the active collection, then the active object');
-console.log('Viewport status: the 3D Viewport names the active collection before the active object, as Blender does');
+// Outside Object Mode it names the object and its data instead.
+stack.metadata.wbMode = 'EDIT';
+world.mainSync = { dataName: () => 'Stack Mesh' };
+createViewportStatus({ world, editor, views, send: () => {} }).tick();
+assert.equal(detail, '(0) Pizza Stack | Stack Mesh', 'in Edit Mode, the object and its data');
+console.log('Viewport status: the 3D Viewport names the active collection and object, or in Edit Mode the object and its data, as Blender does');
