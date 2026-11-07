@@ -87,7 +87,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   gizmo.setAttribute('viewBox', '-48 -48 96 96');
   gizmo.classList.add('nav-gizmo');
   const navButtons = Object.assign(document.createElement('div'), { className: 'nav-buttons' });
-  section.append(label, gizmo, navButtons);
+  // The camera view's border (drawviewborder in view3d_draw.cc).
+  const cameraBorder = Object.assign(document.createElement('div'), { className: 'camera-border', hidden: true });
+  section.append(cameraBorder, label, gizmo, navButtons);
 
   const toolOverlay = createToolOverlay(view);
   const nav = createNavigation({ camera: editorCamera, engine: world.engine, onSync: () => sync() });
@@ -224,8 +226,11 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const rendered = view.rendered;
     authored = null;
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
-    // Camera view frames the scene's output, as Blender fits the camera to it.
-    if (state.cameraView && world.renderSettings) world.mainSync?.fitCamera(view.camera, outputSize(world.renderSettings.state.render));
+    // Camera view shows the scene's output framed in the region, the passepartout darkening around it.
+    const frame = state.cameraView && world.renderSettings
+      ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), { width: canvas.width, height: canvas.height }) : null;
+    cameraBorder.hidden = !frame || !state.overlays;
+    if (frame) cameraBorder.style.cssText = `--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
     ctx.overlays.setEnabled(state.overlays && !rendered, state);
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };

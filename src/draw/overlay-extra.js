@@ -16,7 +16,7 @@ import { Viewport } from '@babylonjs/core/Maths/math.viewport.js';
 import { view_3d as theme } from '../editors/interface/userdef-default-theme.js';
 import { SHAPES, VCLASS } from './overlay-shape.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
-import { objectMatrix } from '../runtime/object-transform.js';
+import { objectMatrix, outputFrame } from '../runtime/object-transform.js';
 
 const VIEW_UNIFORMS = `uniform mat4 viewProjection;
 uniform vec3 viewRight;
@@ -270,10 +270,10 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       right.normalize(); up.normalize(); forward.normalize();
       setMatrix(m, right, up, forward, position);
       // BKE_camera_view_frame_ex at draw size 1: the frame projected to depth 1.
-      const ratio = aspect(), drawsize = 0.5, vertical = node.fovMode === Camera.FOVMODE_VERTICAL_FIXED;
+      const ratio = aspect(), drawsize = 0.5, { fov, vertical } = outputFrame(node);
       const ortho = node.mode === Camera.ORTHOGRAPHIC_CAMERA;
       const fac = ortho ? 0.5 * Math.abs((node.orthoRight ?? 1) - (node.orthoLeft ?? -1)) : drawsize;
-      const depth = ortho ? -1 : -drawsize / Math.tan(node.fov / 2);
+      const depth = ortho ? -1 : -drawsize / Math.tan(fov / 2);
       const facx = fac * (vertical ? ratio : 1), facy = fac * (vertical ? 1 : 1 / ratio);
       const cx = facx / Math.abs(depth), cy = facy / Math.abs(depth);
       // Looked through (camera view), only its frame is drawn, without the wires behind it (overlay_camera.hh).

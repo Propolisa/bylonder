@@ -65,4 +65,16 @@ assert.ok(Math.abs(shifted[8] - (centered[8] - x * centered[11])) < 1e-5 && Math
 Object.assign(data, { shift_x: 0, shift_y: 0 });
 sync.fitCamera(camera, LANDSCAPE);
 assert.deepEqual([...camera.getProjectionMatrix(true).m], centered, 'and back');
-console.log('Camera fit: Auto, Horizontal and Vertical frame landscape and portrait output as Blender computes them, and Shift moves the view, passed');
+
+// Camera view in a 1600 by 900 region at the default camera zoom: the view plane twice the camera's, fitted to the
+// region, and the output's frame inside it as Blender's ED_view3d_calc_camera_border places it.
+const REGION = { width: 1600, height: 900 };
+for (const [size, width, height] of [[LANDSCAPE, 0.5, 0.5], [PORTRAIT, 1 / 3, 8 / 9]]) {
+  data.sensor_fit = 'AUTO';
+  const frame = sync.viewCamera(camera, size, REGION), label = `Auto at ${size.width}x${size.height}`;
+  assert.ok(Math.abs(frame.width - width) < 1e-5 && Math.abs(frame.height - height) < 1e-5, `${label}: the frame ${frame.width} by ${frame.height}`);
+  assert.equal(camera.fovMode, Camera.FOVMODE_HORIZONTAL_FIXED, `${label}: the region fits horizontally`);
+  assert.ok(Math.abs(Math.tan(camera.fov / 2) - 2 * Math.tan(fov(36) / 2)) < 1e-5, `${label}: the view twice the camera's`);
+  assert.equal(frame.passepartout, data.show_passepartout ? data.passepartout_alpha : 0, "the camera's passepartout");
+}
+console.log('Camera fit: Auto, Horizontal and Vertical frame landscape and portrait output as Blender computes them, Shift moves the view, and camera view frames it in the region passed');

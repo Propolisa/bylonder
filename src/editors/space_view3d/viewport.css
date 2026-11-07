@@ -20,7 +20,12 @@
 .nav-buttons .bl-icon-button:hover{background:#ffffff26}
 .overlays-off .nav-gizmo,.overlays-off .nav-buttons,.overlays-off .view-label{display:none}
 .gizmos-off .nav-gizmo,.gizmos-off .nav-buttons{display:none}
-.camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .view-label .view-detail{display:none}
+/* The camera view's border, centered on the canvas (which spans under the header), the passepartout around it. */
+/* The camera view's border, centered on the canvas (which spans under the header): a black line dashed in the
+   viewport's color, the passepartout (TH_CAMERA_PASSEPARTOUT at the camera's alpha) around it. */
+.camera-border{position:absolute;left:50%;top:calc(50% - var(--bl-header-h)/2);width:calc(100% * var(--width));height:calc((100% + var(--bl-header-h)) * var(--height));transform:translate(-50%,-50%);border:1px solid var(--bl-camera-border);box-shadow:0 0 0 100vmax rgb(var(--bl-camera-passepartout) / var(--passepartout));pointer-events:none}
+.camera-border::after{content:"";position:absolute;inset:-1px;border:1px dashed var(--bl-viewport)}
+.camera-border[hidden]{display:none}
 #toast{left:50%;transform:translateX(-50%);bottom:10px;background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;color:var(--bl-text);font:var(--bl-font)}
 dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;font:var(--bl-font);box-shadow:0 6px 20px #0008}
 /* The HUD region (ED_area_type_hud): Adjust Last Operation over the main region's bottom left corner. */

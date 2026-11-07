@@ -13,7 +13,7 @@
   --bl-ui-scale:1;
   --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:calc(11px*var(--bl-ui-scale));
   --bl-font:var(--bl-font-size) var(--bl-font-family);
-  --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-view3d-header:#303030b3;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;
+  --bl-gap:#161616;--bl-topbar:#181818;--bl-header:#303030;--bl-view3d-header:#303030b3;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;--bl-camera-passepartout:0 0 0;--bl-camera-border:#000;
   --bl-panel:#3d3d3d;--bl-navigation-bar:#181818;--bl-panel-header:#3d3d3d;--bl-tabs:#1d1d1d;
   --bl-text:#e6e6e6;--bl-text-dim:#a6a6a6;--bl-text-off:#7a7a7a;--bl-link:#71a8ff;
   --bl-widget:#545454;--bl-widget-hi:#656565;--bl-widget-line:#3d3d3d;--bl-field:#1d1d1d;--bl-menu:#282828;--bl-tool:#282828;

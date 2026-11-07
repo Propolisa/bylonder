@@ -95,3 +95,9 @@ export function setEvaluatedMatrix(node, matrix) {
 }
 // A light's or camera's world matrix in Babylon's axes: the one Blender evaluated, else its own transform's.
 export const objectMatrix = (node) => evaluatedMatrices.get(node) ?? node.computeWorldMatrix();
+
+// The field of view a camera frames the scene's output with ({ fov, vertical }), which its own may differ from while a
+// view looks through it (main-sync.js viewCamera).
+const outputFrames = new WeakMap();
+export const setOutputFrame = (camera, frame) => outputFrames.set(camera, frame);
+export const outputFrame = (camera) => outputFrames.get(camera) ?? { fov: camera.fov, vertical: camera.fovMode === 1 };

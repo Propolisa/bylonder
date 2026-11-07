@@ -28,6 +28,7 @@ import { CurveObject, CURVE_TARGETS } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { Camera, MultiMaterial, VertexData } from '@babylonjs/core';
+import { setOutputFrame } from '../runtime/object-transform.js';
 import { armatureData, setArmatureData } from './armature/armature.js';
 import { armatureChanged } from '../draw/overlay-armature.js';
 import { createMainView, babylonMatrix, blenderMatrix, mainPBR, ID_GR, ID_MA, ID_WO, CURVE_TYPES, PROPERTIES, plain, same } from './main-view.js';
@@ -93,6 +94,16 @@ function shiftLens(camera) {
   }
   projection.markAsUpdated();
 }
+// A camera's field of view along the side it fits and its Shift (clip space).
+function setLens(camera, { fov, vertical }, shift) {
+  Object.assign(camera, { fov, fovMode: vertical ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED });
+  camera.metadata = { ...camera.metadata, wbLensShift: shift };
+  if (!shifted.has(camera)) {
+    shifted.add(camera);
+    camera.onProjectionMatrixChangedObservable.add(shiftLens);
+  }
+  camera.getProjectionMatrix(true);
+}
 
 //   rna: createRNA(host), whose host has the world and selection; ids: the world's IDs in the module (blender-ids.js),
 //   shared with its animation.
@@ -102,6 +113,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const key = (node) => 'object:' + nodeId(node);
   // Each synced owner's record: its RNA struct, its Main address and what was last synced, by RNA name.
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map();
+  const blenderCameraOf = (camera) => camera.metadata?.wbHome === 'BLENDER' && objects.get(camera)?.ob;
   // The scene's records follow Main's scene, which a read file or an undo step replaces.
   const scene = { struct: 'Scene', get ptr() { return blender.scene; }, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings', View3DCursor: 'cursor' };
@@ -862,16 +874,28 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // A Blender camera's field of view as Blender frames an image of the size with it (its sensor fit, lens and sensor in
     // Main); a Babylon camera's is its own.
     fitCamera(camera, { width, height }) {
-      const ob = camera.metadata?.wbHome === 'BLENDER' && objects.get(camera)?.ob;
+      const ob = blenderCameraOf(camera);
       if (!ob) return;
-      const { fov, vertical, shift } = blender.cameraViewFov(ob, width, height);
-      Object.assign(camera, { fov, fovMode: vertical ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED });
-      camera.metadata = { ...camera.metadata, wbLensShift: shift };
-      if (!shifted.has(camera)) {
-        shifted.add(camera);
-        camera.onProjectionMatrixChangedObservable.add(shiftLens);
-      }
-      camera.getProjectionMatrix(true);
+      const frame = blender.cameraViewFov(ob, width, height);
+      setOutputFrame(camera, frame);
+      setLens(camera, frame, frame.shift);
+    },
+    // Camera view as Blender draws it at the default camera zoom (BKE_screen_view3d_zoom_to_fac(0), half size): the
+    // camera's view plane fitted to the region at twice its extent and shifted as the camera's, and the output's frame
+    // centered in it, its size as fractions of the region's (ED_view3d_calc_camera_border), with the camera's
+    // passepartout; null for a Babylon camera.
+    viewCamera(camera, output, region) {
+      const ob = blenderCameraOf(camera);
+      if (!ob) return null;
+      const plane = ({ width, height }, zoom) => {
+        const { fov, vertical, shift } = blender.cameraViewFov(ob, width, height), half = Math.tan(fov / 2) * zoom;
+        return { fov: 2 * Math.atan(half), vertical, shift, x: vertical ? half * width / height : half, y: vertical ? half : half * height / width };
+      };
+      const frame = plane(output, 1), view = plane(region, 2), data = blender.data(ob);
+      setOutputFrame(camera, frame);
+      setLens(camera, view, [frame.shift[0] * frame.x / view.x, frame.shift[1] * frame.y / view.y]);
+      return { width: frame.x / view.x, height: frame.y / view.y,
+        passepartout: dnaGet('Camera', data, 'show_passepartout') ? dnaGet('Camera', data, 'passepartout_alpha') : 0 };
     },
     nodeOf,
     materialOf: (material) => materials.get(material)?.ma ?? null,
