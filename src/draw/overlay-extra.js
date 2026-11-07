@@ -17,6 +17,7 @@ import { view_3d as theme } from '../editors/interface/userdef-default-theme.js'
 import { SHAPES, VCLASS } from './overlay-shape.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
 import { objectMatrix, outputFrame } from '../runtime/object-transform.js';
+import { lightRecord } from '../blenkernel/light/light-home.js';
 
 const VIEW_UNIFORMS = `uniform mat4 viewProjection;
 uniform vec3 viewRight;
@@ -132,7 +133,8 @@ varying vec4 finalColor;
 void main() { gl_FragColor = finalColor; }`;
 
 // Blender light settings Babylon's lights do not have, at Blender's defaults.
-const LIGHT_DEFAULTS = { clip_start: 0.05, cutoff_distance: 40, spot_blend: 0.15 };
+// Blender's Light defaults, for a light of Babylon's (a Blender light has its own, light-home.js lightRecord).
+const LIGHT_DEFAULTS = { shadow_buffer_clip_start: 0.05, cutoff_distance: 40, spot_blend: 0.15 };
 const EMPTY_SHAPES = { PLAIN_AXES: 'plain_axes', ARROWS: 'arrows', SINGLE_ARROW: 'single_arrow', CIRCLE: 'circle', CUBE: 'cube', SPHERE: 'empty_sphere', CONE: 'empty_cone', IMAGE: 'quad_wire' };
 const SOLID = new Set(['camera_tria']);
 // Babylon (x, y, z) is Blender (x, z, y).
@@ -306,12 +308,13 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       const spot = type === 'SPOT' ? 10 : 1;
       setMatrix(m, right, up, forward, position, spot, spot, spot);
       if (shape === 'ground_line') { color.set(theme.light); return; }
-      m[11] = LIGHT_DEFAULTS.clip_start;
-      m[15] = LIGHT_DEFAULTS.cutoff_distance;
+      const la = lightRecord(light) ?? LIGHT_DEFAULTS;
+      m[11] = la.shadow_buffer_clip_start;
+      m[15] = la.cutoff_distance;
       if (type === 'POINT') m[3] = m[7] = light.radius;
       else if (type === 'AREA') { m[3] = light.width; m[7] = light.height; }
       else if (type === 'SPOT') {
-        const a = Math.cos(light.angle / 2), b = LIGHT_DEFAULTS.spot_blend, c = a * b - a - b, a2 = a * a, c2 = c * c;
+        const a = Math.cos(light.angle / 2), b = la.spot_blend, c = a * b - a - b, a2 = a * a, c2 = c * c;
         m[3] = a;
         m[7] = Math.sqrt((a2 - a2 * c2) / (c2 - a2 * c2));
         color[3] = -Math.max(light.radius, 1e-30);
