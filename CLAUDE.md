@@ -76,6 +76,13 @@ or Babylon (native), chosen per instance; `docs/runtimes.md` is the model (setti
 with `src/runtimes/runtimes.js`, never by changing other code; Bylonder's own panels, settings, operators and modifiers
 carry the Bylonder icon (`BYLONDER`), Blender's own UI none.
 
+Where Babylon lacks a feature or quality Blender's realtime views have, extend Babylon to match, through its own
+extension points (subclasses, plugins, observables, post-processes), never by patching it. Each extension is a module of
+its own with a Bylonder setting (Bylonder icon) that turns it on or off; it can be on by default when it is clean,
+stable and realtime. Adopt this as code is touched, not by refactoring. Aim for the same look and feel as Blender, not
+identical pixels: the same algorithm and settings matter (a noise's kind and its parameters), exact matches of details
+such as a random seed's sequence do not.
+
 ## UI components
 
 New UI is Vue single-file components built from shadcn-vue (reka-ui primitives), in
