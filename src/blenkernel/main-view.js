@@ -196,6 +196,13 @@ export function createMainView(state) {
     return true;
   }
 
+  // An empty's Display As and Size, which the extras overlay draws it by (overlay-extra.js).
+  function emptyDisplay({ node, ob }) {
+    const { empty_display_type, empty_display_size } = idStruct(ob);
+    if (node.metadata?.empty_display_type === empty_display_type && node.metadata?.empty_display_size === empty_display_size) return;
+    node.metadata = { ...node.metadata, empty_display_type, empty_display_size };
+  }
+
   // An object's entry, as the sync makes one, for an Object Main holds.
   function link(node, ob, type) {
     node.name = blender.name(ob);
@@ -244,6 +251,7 @@ export function createMainView(state) {
       for (const entry of [...made, ...revived]) {
         pullRelations(entry);
         if (entry.type === 'MESH' || CURVE_TYPES.includes(entry.type) || entry.type === 'ARMATURE') drawData(entry);
+        if (entry.type === 'EMPTY') emptyDisplay(entry);
         // One read in Edit Mode draws its edit mesh too.
         if (entry.type === 'MESH') drawEditMode(entry);
       }
@@ -397,6 +405,7 @@ export function createMainView(state) {
         if (base?.active) active = node;
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         if (entry.type === 'MESH') displayBounds(node, idStruct(ob).display_type === 'BOUNDS');
+        if (entry.type === 'EMPTY') emptyDisplay(entry);
         // A stand-in Blender's code changed becomes Main's; one an undo step read again stays Babylon's.
         const changed = ((tags.object | tags.data) & ID_RECALC_GEOMETRY) || (entry.owned && tags.data & ID_RECALC_SYNC_TO_EVAL) || sculpted(entry, tags.object);
         if (entry.type === 'MESH' && drawEditMode(entry)) continue;
