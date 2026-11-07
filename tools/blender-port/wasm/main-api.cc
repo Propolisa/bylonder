@@ -670,12 +670,18 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   Depsgraph *depsgraph = depsgraph_of(ctx);
   BKE_scene_graph_evaluated_ensure(depsgraph, ctx->bmain);
   Object *evaluated = DEG_get_evaluated(depsgraph, ob);
-  /* A curve without a surface draws as the wire of its evaluated curves (curve_to_wire_mesh, as Convert makes it). */
-  bke::GeometrySet *geometry = ELEM(ob->type, OB_CURVES_LEGACY, OB_FONT) ? evaluated->runtime->geometry_set_eval : nullptr;
-  if (geometry && !geometry->has_mesh() && geometry->has_curves()) {
-    geometry->replace_mesh(bke::curve_to_wire_mesh(geometry->get_curves()->geometry.wrap()));
+  /* A curve without a surface draws as the wire of its evaluated curves (curve_to_wire_mesh, as Convert makes it), kept
+   * out of its geometry, which other objects read (Object Info). */
+  static Mesh *wire = nullptr;
+  if (wire) {
+    BKE_id_free(nullptr, wire);
+    wire = nullptr;
   }
-  const Mesh *mesh = geometry ? geometry->get_mesh() : BKE_object_get_evaluated_mesh(evaluated);
+  const bke::GeometrySet *geometry = ELEM(ob->type, OB_CURVES_LEGACY, OB_FONT) ? evaluated->runtime->geometry_set_eval : nullptr;
+  if (geometry && !geometry->has_mesh() && geometry->has_curves()) {
+    wire = bke::curve_to_wire_mesh(geometry->get_curves()->geometry.wrap());
+  }
+  const Mesh *mesh = wire ? wire : geometry ? geometry->get_mesh() : BKE_object_get_evaluated_mesh(evaluated);
   /* In Sculpt Mode Blender's engines draw the object's pbvh::Tree, its Mesh's own positions with the normals the draw
    * updates (draw_sculpt.cc sculpt_batches_get_ex), which a stroke changes without evaluating the object. */
   if (BKE_sculptsession_use_pbvh_draw(ob, nullptr)) {
