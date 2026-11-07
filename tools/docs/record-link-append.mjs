@@ -1,9 +1,15 @@
-// Records docs/features/link-append.md's media: the Default Cube deleted, File > Link with the example's library.blend
-// browsed in Blender's File Browser (Collection, then Props), Object > Library Override > Make, File > Append of the
-// Lamp Post, and the Outliner's Blender File view.
+// Records docs/features/link-append.md's media: the Link and Append example through its camera in Rendered shading,
+// then on the Default Cube: the cube deleted, File > Link with the example's library.blend browsed in Blender's File
+// Browser (Collection, then Street Lamp), Object > Library Override > Make, File > Append of the Bench, and the
+// Outliner's Blender File view.
 //   usage: node tools/docs/record-link-append.mjs
 import { fileURLToPath } from "node:url";
 import { record } from "./record.mjs";
+
+await record("link-append", { example: "link-append", node: null }, async (r) => {
+  await r.pause(3000);
+  await r.render("thumbnail", { part: [0.05, 0, 0.95, 1] });
+});
 
 const VIEW = '[data-section="viewport"]';
 const BROWSER = '[data-blender="FILE_BROWSER"]';
@@ -11,6 +17,11 @@ const LIBRARY = fileURLToPath(new URL("../../examples/link-append/libraries/libr
 
 await record("link-append", { node: "Cube" }, async (r) => {
   const { app } = r;
+  // The pointer out of the picture: its dot hidden in every frame.
+  const park = async () => {
+    await app.page.mouse.move(1, 1);
+    for (const where of [app.page, app.frame()]) await where.evaluate(() => document.querySelectorAll("div[style*='border-radius: 50%']").forEach((d) => (d.style.display = "none")));
+  };
   // File > Link... or Append..., library.blend chosen, the File Browser opened inside it.
   const browse = async (label) => {
     const chooser = app.page.waitForEvent("filechooser");
@@ -36,25 +47,29 @@ await record("link-append", { node: "Cube" }, async (r) => {
   await r.keys("Delete");
   await browse("Link...");
   await open("Collection");
+  await park();
   await r.shot("file-browser", app.locator('[role="dialog"]'));
-  await open("Props");
-  await app.until((b) => b.world.objects.some((node) => node.name === "Props"));
+  await open("Street Lamp");
+  await app.until((b) => b.world.objects.some((node) => node.name === "Street Lamp"));
+  await park();
   await r.shot("linked", VIEW);
   await r.menu("VIEW3D_MT_object", "Library Override", "Make");
-  await app.until((b) => b.world.objects.some((node) => node.name === "Crate"));
+  await app.until((b) => b.world.objects.some((node) => node.name === "Post"));
+  await park();
   await r.shot("override", VIEW);
   await browse("Append...");
   await open("Object");
-  await open("Lamp Post");
-  await app.until((b) => b.world.objects.some((node) => node.name === "Lamp Post"));
+  await open("Bench");
+  await app.until((b) => b.world.objects.some((node) => node.name === "Bench"));
+  await park();
   await r.shot("appended", VIEW);
-  await r.shot("thumbnail", VIEW, { part: [0.2, 0.1, 0.8, 0.9] });
   // The Outliner maximized (Ctrl Space), in its Blender File view, one level more shown (Numpad +).
-  const outliner = '[data-section="objects"]';
+  const outliner = '.dock-content[data-section="objects"]';
   await app.locator(outliner).hover();
   await r.keys("Ctrl Space", "Control+Space");
   await r.menu(app.locator('[data-blender="display_mode"]'), "Blender File");
   await app.locator(outliner).hover();
   await r.keys("Numpad +", "NumpadAdd");
+  await park();
   await r.shot("blender-file", outliner, { part: [0, 0, 0.5, 0.6] });
 });

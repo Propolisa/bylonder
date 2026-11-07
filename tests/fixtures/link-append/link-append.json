@@ -5,7 +5,7 @@
   ],
   "collections": [
    {
-    "name": "Props",
+    "name": "Street Lamp",
     "library": "library.blend",
     "override": null,
     "users": 1
@@ -13,43 +13,60 @@
   ],
   "objects": [
    {
-    "name": "Ball",
+    "name": "Lamp Light",
+    "library": "library.blend",
+    "override": null,
+    "users": 1,
+    "type": "LIGHT",
+    "location": [
+     0.0,
+     0.0,
+     3.95
+    ],
+    "instance_collection": null,
+    "in_scene": false,
+    "selected": false,
+    "materials": []
+   },
+   {
+    "name": "Lantern",
     "library": "library.blend",
     "override": null,
     "users": 1,
     "type": "MESH",
     "location": [
-     -1.0,
      0.0,
-     0.5
+     0.0,
+     3.95
     ],
     "instance_collection": null,
     "in_scene": false,
     "selected": false,
     "materials": [
-     "Rubber"
+     "Lantern Glass"
     ]
    },
    {
-    "name": "Crate",
+    "name": "Post",
     "library": "library.blend",
     "override": null,
     "users": 1,
     "type": "MESH",
     "location": [
-     1.0,
      0.0,
-     0.5
+     0.0,
+     0.25
     ],
     "instance_collection": null,
     "in_scene": false,
     "selected": false,
     "materials": [
-     "Wood"
+     "Iron",
+     null
     ]
    },
    {
-    "name": "Props",
+    "name": "Street Lamp",
     "library": null,
     "override": null,
     "users": 1,
@@ -59,7 +76,7 @@
      0.0,
      0.0
     ],
-    "instance_collection": "Props",
+    "instance_collection": "Street Lamp",
     "in_scene": true,
     "selected": true,
     "materials": []
@@ -67,13 +84,13 @@
   ],
   "materials": [
    {
-    "name": "Rubber",
+    "name": "Iron",
     "library": "library.blend",
     "override": null,
     "users": 1
    },
    {
-    "name": "Wood",
+    "name": "Lantern Glass",
     "library": "library.blend",
     "override": null,
     "users": 1
@@ -81,13 +98,13 @@
   ],
   "meshes": [
    {
-    "name": "Cube",
+    "name": "Lantern",
     "library": "library.blend",
     "override": null,
     "users": 1
    },
    {
-    "name": "Sphere",
+    "name": "Post",
     "library": "library.blend",
     "override": null,
     "users": 1
@@ -96,7 +113,7 @@
   "scene": {
    "name": "Scene Collection",
    "objects": [
-    "Props"
+    "Street Lamp"
    ],
    "children": []
   }
@@ -107,7 +124,7 @@
   ],
   "collections": [
    {
-    "name": "Props",
+    "name": "Street Lamp",
     "library": null,
     "override": null,
     "users": 1
@@ -115,51 +132,68 @@
   ],
   "objects": [
    {
-    "name": "Ball",
+    "name": "Lamp Light",
+    "library": null,
+    "override": null,
+    "users": 1,
+    "type": "LIGHT",
+    "location": [
+     0.0,
+     0.0,
+     3.95
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": true,
+    "materials": []
+   },
+   {
+    "name": "Lantern",
     "library": null,
     "override": null,
     "users": 1,
     "type": "MESH",
     "location": [
-     -1.0,
      0.0,
-     0.5
+     0.0,
+     3.95
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": true,
     "materials": [
-     "Rubber"
+     "Lantern Glass"
     ]
    },
    {
-    "name": "Crate",
+    "name": "Post",
     "library": null,
     "override": null,
     "users": 1,
     "type": "MESH",
     "location": [
-     1.0,
      0.0,
-     0.5
+     0.0,
+     0.25
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": true,
     "materials": [
-     "Wood"
+     "Iron",
+     null
     ]
    }
   ],
   "materials": [
    {
-    "name": "Rubber",
+    "name": "Iron",
     "library": null,
     "override": null,
     "users": 1
    },
    {
-    "name": "Wood",
+    "name": "Lantern Glass",
     "library": null,
     "override": null,
     "users": 1
@@ -167,13 +201,13 @@
   ],
   "meshes": [
    {
-    "name": "Cube",
+    "name": "Lantern",
     "library": null,
     "override": null,
     "users": 1
    },
    {
-    "name": "Sphere",
+    "name": "Post",
     "library": null,
     "override": null,
     "users": 1
@@ -184,10 +218,11 @@
    "objects": [],
    "children": [
     {
-     "name": "Props",
+     "name": "Street Lamp",
      "objects": [
-      "Ball",
-      "Crate"
+      "Lamp Light",
+      "Lantern",
+      "Post"
      ],
      "children": []
     }
@@ -201,26 +236,43 @@
   "collections": [],
   "objects": [
    {
-    "name": "Lamp Post",
+    "name": "Bench",
     "library": "library.blend",
     "override": null,
     "users": 1,
     "type": "MESH",
     "location": [
      0.0,
-     3.0,
-     1.5
+     -0.2,
+     0.45
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": true,
-    "materials": []
+    "materials": [
+     "Weathered Wood",
+     null,
+     "Iron"
+    ]
    }
   ],
-  "materials": [],
+  "materials": [
+   {
+    "name": "Iron",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Weathered Wood",
+    "library": "library.blend",
+    "override": null,
+    "users": 1
+   }
+  ],
   "meshes": [
    {
-    "name": "Cylinder",
+    "name": "Bench",
     "library": "library.blend",
     "override": null,
     "users": 1
@@ -229,7 +281,7 @@
   "scene": {
    "name": "Scene Collection",
    "objects": [
-    "Lamp Post"
+    "Bench"
    ],
    "children": []
   }
@@ -241,26 +293,43 @@
   "collections": [],
   "objects": [
    {
-    "name": "Lamp Post",
+    "name": "Bench",
     "library": null,
     "override": null,
     "users": 1,
     "type": "MESH",
     "location": [
      0.0,
-     3.0,
-     1.5
+     -0.2,
+     0.45
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": true,
-    "materials": []
+    "materials": [
+     "Weathered Wood",
+     null,
+     "Iron"
+    ]
    }
   ],
-  "materials": [],
+  "materials": [
+   {
+    "name": "Iron",
+    "library": null,
+    "override": null,
+    "users": 1
+   },
+   {
+    "name": "Weathered Wood",
+    "library": null,
+    "override": null,
+    "users": 1
+   }
+  ],
   "meshes": [
    {
-    "name": "Cylinder",
+    "name": "Bench",
     "library": null,
     "override": null,
     "users": 1
@@ -269,7 +338,7 @@
   "scene": {
    "name": "Scene Collection",
    "objects": [
-    "Lamp Post"
+    "Bench"
    ],
    "children": []
   }
@@ -282,7 +351,7 @@
   "objects": [],
   "materials": [
    {
-    "name": "Gold",
+    "name": "Cobblestone",
     "library": "library.blend",
     "override": null,
     "users": 0
@@ -303,7 +372,7 @@
   "objects": [],
   "materials": [
    {
-    "name": "Gold",
+    "name": "Cobblestone",
     "library": null,
     "override": null,
     "users": 0
@@ -322,13 +391,13 @@
   ],
   "collections": [
    {
-    "name": "Props",
+    "name": "Street Lamp",
     "library": null,
     "override": "SYSTEM",
     "users": 1
    },
    {
-    "name": "Props",
+    "name": "Street Lamp",
     "library": "library.blend",
     "override": null,
     "users": 1
@@ -336,87 +405,121 @@
   ],
   "objects": [
    {
-    "name": "Ball",
+    "name": "Lamp Light",
+    "library": null,
+    "override": "SYSTEM",
+    "users": 1,
+    "type": "LIGHT",
+    "location": [
+     0.0,
+     0.0,
+     3.95
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": false,
+    "materials": []
+   },
+   {
+    "name": "Lamp Light",
+    "library": "library.blend",
+    "override": null,
+    "users": 2,
+    "type": "LIGHT",
+    "location": [
+     0.0,
+     0.0,
+     3.95
+    ],
+    "instance_collection": null,
+    "in_scene": true,
+    "selected": false,
+    "materials": []
+   },
+   {
+    "name": "Lantern",
     "library": null,
     "override": "SYSTEM",
     "users": 1,
     "type": "MESH",
     "location": [
-     -1.0,
      0.0,
-     0.5
+     0.0,
+     3.95
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": false,
     "materials": [
-     "Rubber"
+     "Lantern Glass"
     ]
    },
    {
-    "name": "Ball",
+    "name": "Lantern",
     "library": "library.blend",
     "override": null,
     "users": 2,
     "type": "MESH",
     "location": [
-     -1.0,
      0.0,
-     0.5
+     0.0,
+     3.95
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": false,
     "materials": [
-     "Rubber"
+     "Lantern Glass"
     ]
    },
    {
-    "name": "Crate",
+    "name": "Post",
     "library": null,
     "override": "SYSTEM",
     "users": 1,
     "type": "MESH",
     "location": [
-     1.0,
      0.0,
-     0.5
+     0.0,
+     0.25
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": false,
     "materials": [
-     "Wood"
+     "Iron",
+     null
     ]
    },
    {
-    "name": "Crate",
+    "name": "Post",
     "library": "library.blend",
     "override": null,
     "users": 2,
     "type": "MESH",
     "location": [
-     1.0,
      0.0,
-     0.5
+     0.0,
+     0.25
     ],
     "instance_collection": null,
     "in_scene": true,
     "selected": false,
     "materials": [
-     "Wood"
+     "Iron",
+     null
     ]
    }
   ],
   "materials": [
    {
-    "name": "Rubber",
+    "name": "Iron",
     "library": "library.blend",
     "override": null,
     "users": 1
    },
    {
-    "name": "Wood",
+    "name": "Lantern Glass",
     "library": "library.blend",
     "override": null,
     "users": 1
@@ -424,13 +527,13 @@
   ],
   "meshes": [
    {
-    "name": "Cube",
+    "name": "Lantern",
     "library": "library.blend",
     "override": null,
     "users": 2
    },
    {
-    "name": "Sphere",
+    "name": "Post",
     "library": "library.blend",
     "override": null,
     "users": 2
@@ -441,10 +544,11 @@
    "objects": [],
    "children": [
     {
-     "name": "Props",
+     "name": "Street Lamp",
      "objects": [
-      "Ball",
-      "Crate"
+      "Lamp Light",
+      "Lantern",
+      "Post"
      ],
      "children": []
     }

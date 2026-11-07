@@ -754,7 +754,8 @@
   "limits": [
    "The .blend to link from is chosen in the browser's file dialog first; Blender's File Browser then opens inside it, so its bookmarks and parent folders do not reach your computer's other files.",
    "A library's path is /libraries/<name>.blend in Bylonder's file system, where the project keeps it; a .blend saved with File > Save As refers to it there, so Blender on your computer asks to relocate it.",
-   "The File Browser shows no previews of data-blocks: the module draws without a GPU, so files carry none it makes."
+   "The File Browser shows no previews of data-blocks: the module draws without a GPU, so files carry none it makes.",
+   "A light in an instanced collection lights the scene once, not once per instance: the eight lamps glow, but only one of their lights shines."
   ],
   "page": "docs/features/link-append.md",
   "open": "https://propolisa.github.io/bylonder/#example=link-append",
