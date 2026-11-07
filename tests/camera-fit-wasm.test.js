@@ -53,4 +53,16 @@ for (const [fit, size, vertical, sensor] of [
   assert.ok(Math.abs(camera.fov - fov(sensor)) < 1e-5, `${label}: ${camera.fov}`);
   assert.equal(data.sensor_fit, fit, "the fit stays Main's");
 }
-console.log('Camera fit: Auto, Horizontal and Vertical frame landscape and portrait output as Blender computes them passed');
+// Shift moves the view plane: by twice the shift along the fitted width, and along the height in the width's units.
+data.sensor_fit = 'AUTO';
+sync.fitCamera(camera, LANDSCAPE);
+const centered = [...camera.getProjectionMatrix(true).m];
+Object.assign(data, { shift_x: 0.25, shift_y: 0.1 });
+sync.fitCamera(camera, LANDSCAPE);
+const shifted = camera.getProjectionMatrix().m, [x, y] = [0.5, (0.2 * LANDSCAPE.width) / LANDSCAPE.height];
+assert.ok(Math.abs(shifted[8] - (centered[8] - x * centered[11])) < 1e-5 && Math.abs(shifted[9] - (centered[9] - y * centered[11])) < 1e-5,
+  `the projection moves by the shift: ${shifted[8]}, ${shifted[9]}`);
+Object.assign(data, { shift_x: 0, shift_y: 0 });
+sync.fitCamera(camera, LANDSCAPE);
+assert.deepEqual([...camera.getProjectionMatrix(true).m], centered, 'and back');
+console.log('Camera fit: Auto, Horizontal and Vertical frame landscape and portrait output as Blender computes them, and Shift moves the view, passed');

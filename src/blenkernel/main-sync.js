@@ -82,6 +82,18 @@ export function shaderTree(tree) {
   return { nodes, links };
 }
 
+// A camera's Shift moves its view plane off center: clip x and y less the plane's center times w.
+const shifted = new WeakSet();
+function shiftLens(camera) {
+  const [x, y] = camera.metadata?.wbLensShift ?? [0, 0], projection = camera.getProjectionMatrix(), m = projection.m;
+  if (!x && !y) return;
+  for (let row = 0; row < 4; row++) {
+    m[row * 4] -= x * m[row * 4 + 3];
+    m[row * 4 + 1] -= y * m[row * 4 + 3];
+  }
+  projection.markAsUpdated();
+}
+
 //   rna: createRNA(host), whose host has the world and selection; ids: the world's IDs in the module (blender-ids.js),
 //   shared with its animation.
 export function createMainSync({ rna, ids = createBlenderIDs() }) {
@@ -852,8 +864,14 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     fitCamera(camera, { width, height }) {
       const ob = camera.metadata?.wbHome === 'BLENDER' && objects.get(camera)?.ob;
       if (!ob) return;
-      const { fov, vertical } = blender.cameraViewFov(ob, width, height);
+      const { fov, vertical, shift } = blender.cameraViewFov(ob, width, height);
       Object.assign(camera, { fov, fovMode: vertical ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED });
+      camera.metadata = { ...camera.metadata, wbLensShift: shift };
+      if (!shifted.has(camera)) {
+        shifted.add(camera);
+        camera.onProjectionMatrixChangedObservable.add(shiftLens);
+      }
+      camera.getProjectionMatrix(true);
     },
     nodeOf,
     materialOf: (material) => materials.get(material)?.ma ?? null,

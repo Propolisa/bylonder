@@ -155,6 +155,8 @@ const LENS = {
   sensor_width: [() => 36, () => {}],
   sensor_height: [() => 24, () => {}],
   lens: [(camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); }],
+  shift_x: [() => 0, () => {}],
+  shift_y: [() => 0, () => {}],
 };
 const blenderCamera = (camera) => camera.metadata?.wbHome === 'BLENDER';
 const lensValue = (key) => ({
@@ -560,6 +562,8 @@ const STRUCTS = {
     sensor_width: lensValue('sensor_width'),
     sensor_height: lensValue('sensor_height'),
     lens: lensValue('lens'),
+    shift_x: lensValue('shift_x'),
+    shift_y: lensValue('shift_y'),
     angle: settable('fov'),
     ortho_scale: { get: (camera) => camera.metadata?.orthoScale ?? 6, set: (camera, scale) => { camera.metadata = { ...camera.metadata, orthoScale: scale }; }, sync: true },
     // How the lens is shown (millimeters or field of view), kept with the camera.

@@ -228,10 +228,11 @@ EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Objec
 }
 
 /* The field of view a camera frames a winx by winy image with, along the side its sensor fits, as Blender's render
- * computes the view plane (BKE_camera_params_compute_viewplane), and whether that side is the height. */
+ * computes the view plane (BKE_camera_params_compute_viewplane), whether that side is the height, and the plane's
+ * center. */
 EXPORT(camera_view_fov) const float *camera_view_fov(Object *camera, int winx, int winy)
 {
-  static float result[2];
+  static float result[4];
   CameraParams params;
   BKE_camera_params_init(&params);
   BKE_camera_params_from_object(&params, camera);
@@ -240,6 +241,9 @@ EXPORT(camera_view_fov) const float *camera_view_fov(Object *camera, int winx, i
   const rctf &plane = params.viewplane;
   result[0] = 2.0f * atanf((vertical ? BLI_rctf_size_y(&plane) : BLI_rctf_size_x(&plane)) / 2.0f / params.clip_start);
   result[1] = vertical;
+  /* The view plane's center (its Shift) as a part of its half width and height. */
+  result[2] = (plane.xmin + plane.xmax) / BLI_rctf_size_x(&plane);
+  result[3] = (plane.ymin + plane.ymax) / BLI_rctf_size_y(&plane);
   return result;
 }
 
