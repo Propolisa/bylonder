@@ -178,4 +178,12 @@ const uvs = nodeMaterialFromTree('UVs', scene, { nodes: [{ idname: 'ShaderNodeTe
 if (uvs._buildIsInProgress) await new Promise((resolve) => uvs.onBuildObservable.addOnce(resolve));
 assert.doesNotMatch(uvs._fragmentCompilationState._builtCompilationString, /\bvec\d UV\d* = /, "no output variable takes a name Babylon defines");
 
+// A Principled BSDF's Specular IOR Level scales its specular F0, as the IOR that has it (gpu_shader_material_principled.glsl).
+const specular = nodeMaterialFromTree('Specular', scene, { nodes: [{ idname: 'ShaderNodeBsdfPrincipled', name: 'Principled', values: { 'Specular IOR Level': 0.1 } },
+  { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }], links: [['Principled', 'BSDF', 'Material Output', 'Surface']] }).material;
+if (specular._buildIsInProgress) await new Promise((resolve) => specular.onBuildObservable.addOnce(resolve));
+assert.match(specular._fragmentCompilationState._builtCompilationString, /bl_node_bsdf_principled\([^;]*bl_Specular_IOR_Level\w*, \w+\);/, 'the level reaches the closure');
+assert.match(specular._fragmentCompilationState._builtCompilationString, /vReflectivityColor = vec4\([^;]*, (bl_f\w*) \* \1 \/ max\((bl_f\w*), 1e-6\)\);[\s\S]*vec4\(vMetallicReflectanceFactors\.rgb, \2\)/,
+  "a dielectric's F0 and F90 follow its closure's IOR per pixel (bsdf_lut)");
+
 console.log('nodes: ok');

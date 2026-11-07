@@ -146,7 +146,7 @@ export const SHADER_NODES = {
   // node_shader_background.cc: a world's emission.
   ShaderNodeBackground: () => [['bl_node_emission', ['Color', 'Strength'], ['@Background']]],
   ShaderNodeBsdfPrincipled: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_principled', ['Base Color', 'Metallic', 'Roughness', 'IOR', 'Alpha',
-    normal(connected), 'Transmission Weight', 'Emission Color', 'Emission Strength'], ['@BSDF']]],
+    normal(connected), 'Transmission Weight', 'Emission Color', 'Emission Strength', 'Specular IOR Level'], ['@BSDF']]],
   ShaderNodeBsdfDiffuse: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
   ShaderNodeBsdfSheen: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
   ShaderNodeBsdfTranslucent: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
@@ -464,13 +464,22 @@ vec4 bl_closure_radiance(BlClosure c, vec3 lit) {
   // node_bsdf_glass, node_bsdf_refraction: light through the surface, tinted by the color.
   bl_node_bsdf_glass: 'void bl_node_bsdf_glass(vec4 color, float roughness, float ior, vec3 N, inout BlClosure result) { result = bl_closure_bsdf(color.rgb, 0.0, 0.0, 1.0, roughness, ior, N); }',
   // node_bsdf_principled: its base color as metal, transmission and dielectric by their weights, its emission, all
-  // weighed by its alpha, the rest transparent.
+  // weighed by its alpha, the rest transparent. blender-port: gpu_shader_material_principled.glsl node_bsdf_principled:
+  // Specular IOR Level scales the specular F0, reflected as the IOR that has it (transmission keeps the IOR).
   bl_node_bsdf_principled: `void bl_node_bsdf_principled(vec4 base_color, float metallic, float roughness, float ior, float alpha, vec3 N, float transmission,
-  vec4 emission, float emission_strength, inout BlClosure result) {
+  vec4 emission, float emission_strength, float specular_ior_level, inout BlClosure result) {
   metallic = clamp(metallic, 0.0, 1.0);
   transmission = clamp(transmission, 0.0, 1.0);
   alpha = clamp(alpha, 0.0, 1.0);
-  result = bl_closure_bsdf(base_color.rgb, (1.0 - metallic) * (1.0 - transmission), metallic, (1.0 - metallic) * transmission, roughness, ior, N);
+  specular_ior_level = max(specular_ior_level, 0.0);
+  float eta = ior;
+  if (specular_ior_level != 0.5) {
+    float f0 = (1.0 - ior) / (1.0 + ior), f = sqrt(clamp(f0 * f0 * 2.0 * specular_ior_level, 0.0, 0.99));
+    eta = (-f - 1.0) / (f - 1.0);
+    if (ior < 1.0) eta = 1.0 / eta;
+  }
+  result = bl_closure_bsdf(base_color.rgb, (1.0 - metallic) * (1.0 - transmission), metallic, (1.0 - metallic) * transmission, roughness,
+    transmission > 0.0 ? ior : eta, N);
   result.emission = max(emission.rgb, vec3(0.0)) * max(emission_strength, 0.0);
   result = bl_closure_weigh(result, alpha);
   result.transparency = 1.0 - alpha;
@@ -1070,7 +1079,9 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     }
     for (const [path, value] of Object.entries(this._values)) Object.assign(this._point(path), { _blenderValue: value(closure), associatedVariableName: value(closure) });
     if (!this.lobe) {
+      const start = state.compilationString.length;
       super._buildBlock(state);
+      this._dielectricReflectance(state, start, closure);
       state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, finalColor.rgb);\n`;
       return this;
     }
@@ -1079,6 +1090,19 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     this._scoped(state, () => super._buildBlock(state), `${lit} = finalColor.rgb;\n`);
     state.compilationString += `${state._declareOutput(this.radiance)} = ${this.under.associatedVariableName} + vec4(${lit} * bl_closure_lobe(${closure}, ${this.lobe}).weight, 0.0);\n`;
     return this;
+  }
+
+  // blender-port: eevee_nodetree_lib.bsl.hh bsdf_lut: a dielectric reflects F0 from its IOR at normal incidence and F90
+  // rising with it (full from IOR 1.33). Babylon's block takes F0 from a constant IOR and F90 from a material-wide
+  // factor, so the closure's IOR sets both per pixel: F0 over F90 as the reflectivity, F90 as the specular weight.
+  _dielectricReflectance(state, start, closure) {
+    const f = state._getFreeVariableName('bl_f'), f90 = state._getFreeVariableName('bl_f90'), factors = this._vMetallicReflectanceFactorsName;
+    const code = state.compilationString.slice(start)
+      .replace(/(vReflectivityColor\s*=\s*vec4\([^;]*,)\s*[-0-9.e]+\);/, `$1 ${f} * ${f} / max(${f90}, 1e-6));`)
+      .replaceAll(factors, `vec4(${factors}.rgb, ${f90})`);
+    const ior = `bl_closure_parameter(${closure}, ${closure}.ior, 1.5)`;
+    state.compilationString = `${state.compilationString.slice(0, start)}float ${f} = (${ior} - 1.0) / (${ior} + 1.0);\n`
+      + `float ${f90} = clamp(2.33 / 0.33 * ${f}, 0.0, 1.0);\n${code}`;
   }
 
   // Babylon's PBR code declares fixed names: a second one runs in a scope of its own.
