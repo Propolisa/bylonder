@@ -132,6 +132,26 @@ const FRAGMENT = `precision highp float;
 varying vec4 finalColor;
 void main() { gl_FragColor = finalColor; }`;
 
+// blender-port: draw_cache_impl_lattice.cc lattice_batch_cache_get_edges: a lattice's lines between neighboring points
+// in its object's space, only those on its outside with Outside on.
+export function latticeLines({ dims: [uLen, vLen, wLen], outside, points }) {
+  const lines = [], index = (u, v, w) => (w * vLen + v) * uLen + u;
+  const line = (a, b) => lines.push(...points.slice(a * 3, a * 3 + 3), ...points.slice(b * 3, b * 3 + 3));
+  for (let w = 0; w < wLen; w++) {
+    const wxt = w === 0 || w === wLen - 1;
+    for (let v = 0; v < vLen; v++) {
+      const vxt = v === 0 || v === vLen - 1;
+      for (let u = 0; u < uLen; u++) {
+        const uxt = u === 0 || u === uLen - 1;
+        if (w && (uxt || vxt || !outside)) line(index(u, v, w - 1), index(u, v, w));
+        if (v && (uxt || wxt || !outside)) line(index(u, v - 1, w), index(u, v, w));
+        if (u && (vxt || wxt || !outside)) line(index(u - 1, v, w), index(u, v, w));
+      }
+    }
+  }
+  return Float32Array.from(lines);
+}
+
 // Blender light settings Babylon's lights do not have, at Blender's defaults.
 // Blender's Light defaults, for a light of Babylon's (a Blender light has its own, light-home.js lightRecord).
 const LIGHT_DEFAULTS = { shadow_buffer_clip_start: 0.05, cutoff_distance: 40, spot_blend: 0.15 };
@@ -195,6 +215,18 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     return mesh;
   };
 
+  // A lattice's wire: its own lines in its object's space, drawn as an extra (vertex class 0).
+  const latticeMesh = (node) => {
+    const positions = latticeLines(node.metadata.lattice), mesh = new Mesh('__extra lattice', scene);
+    mesh.setVerticesData('position', positions, false, 3);
+    mesh.setVerticesData('vclass', new Float32Array(positions.length / 3), false, 1);
+    mesh._getRenderingFillMode = () => Material.LineListDrawMode;
+    mesh.isUnIndexed = true;
+    mesh.material = material('Extra', EXTRA_VERTEX);
+    Object.assign(mesh, { isPickable: false, alwaysSelectAsActiveMesh: true, doNotSerialize: true });
+    return mesh;
+  };
+
   const entries = new Map(); // node -> { meshes, kind }
   let dirty = true;
   const markDirty = () => { dirty = true; };
@@ -206,21 +238,25 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
 
   // Empties only: the objects Blender draws otherwise (a lattice, a Grease Pencil object) carry their type.
   const isEmpty = (node) => !node.getTotalVertices && !node.name.startsWith('__') && !node.metadata?.wbType;
-  const kindOf = (node) => (node instanceof Camera ? 'camera' : node.getClassName?.().endsWith('Light') ? 'light' : 'empty');
+  const isLattice = (node) => node.metadata?.wbType === 'LATTICE' && !!node.metadata.lattice;
+  const kindOf = (node) => (node instanceof Camera ? 'camera' : node.getClassName?.().endsWith('Light') ? 'light' : isLattice(node) ? 'lattice' : 'empty');
   const shapesOf = (node, kind) => {
     if (kind === 'camera') return ['camera_frame', node === sceneCamera() ? 'camera_tria' : 'camera_tria_wire'];
     if (kind === 'light') return lightShapes(node).shapes;
+    if (kind === 'lattice') return ['lattice'];
     return [EMPTY_SHAPES[node.metadata?.empty_display_type] ?? 'plain_axes'];
   };
+  // What an entry is drawn by: its shapes, and a lattice's own lines.
+  const signatureOf = (node, kind) => shapesOf(node, kind).join() + (kind === 'lattice' ? JSON.stringify(node.metadata.lattice) : '');
   const extraNodes = () => [
     ...[...scene.cameras, ...scene.lights].filter((n) => !n.name.startsWith('__')),
-    ...objects().filter(isEmpty),
+    ...objects().filter((node) => isEmpty(node) || isLattice(node)),
   ];
   function rebuild() {
     dirty = false;
     const nodes = new Set(extraNodes());
     for (const [node, entry] of entries) {
-      const signature = shapesOf(node, entry.kind).join();
+      const signature = signatureOf(node, entry.kind);
       if (nodes.has(node) && !node.isDisposed?.() && entry.signature === signature) continue;
       entry.meshes.forEach((mesh) => mesh.dispose());
       entries.delete(node);
@@ -228,9 +264,9 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     for (const node of nodes) {
       if (entries.has(node)) continue;
       const kind = kindOf(node), shapes = shapesOf(node, kind);
-      const entry = { node, kind, lightType: kind === 'light' ? lightType(node) : null, signature: shapes.join(), matrix: new Float32Array(16), color: new Float32Array(4), meshes: [] };
+      const entry = { node, kind, lightType: kind === 'light' ? lightType(node) : null, signature: signatureOf(node, kind), metadata: node.metadata, matrix: new Float32Array(16), color: new Float32Array(4), meshes: [] };
       entry.meshes = shapes.map((shape) => {
-        const mesh = shapeMesh(shape);
+        const mesh = kind === 'lattice' ? latticeMesh(node) : shapeMesh(shape);
         mesh.metadata = { editable: false, overlay: true, extra: { entry, shape, matrix: new Float32Array(16), color: new Float32Array(4) } };
         return mesh;
       });
@@ -259,7 +295,7 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     Vector3.CrossToRef(z, up, right); right.normalize();
   };
   const wireColor = (node, kind, out) => {
-    const c = themeColor(node, kind);
+    const c = themeColor(node, kind === 'lattice' ? 'wire' : kind);
     out[0] = c[0]; out[1] = c[1]; out[2] = c[2]; out[3] = 1;
   };
 
@@ -332,6 +368,8 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     get meshes() { if (dirty) rebuild(); return [...entries.values()].flatMap((e) => e.meshes); },
     // Called per view right before it renders.
     setEnabled(value) {
+      // Main gives an object new metadata when what it is drawn by changes (main-view.js extraDisplay).
+      for (const entry of entries.values()) if (entry.node.metadata !== entry.metadata) { entry.metadata = entry.node.metadata; dirty = true; }
       if (dirty) rebuild();
       for (const entry of entries.values()) {
         const shown = value && visible(entry.node);
@@ -372,6 +410,10 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     const m = data.matrix, point = (x, y, z) => new Vector3(
       m[0] * x + m[4] * y + m[8] * z + m[12], m[2] * x + m[6] * y + m[10] * z + m[14], m[1] * x + m[5] * y + m[9] * z + m[13]);
     if (entry.kind === 'light') return [point(0, 0, 0), null];
+    if (entry.kind === 'lattice') {
+      const lines = latticeLines(entry.node.metadata.lattice);
+      return Array.from({ length: lines.length / 3 }, (_, i) => point(lines[i * 3], lines[i * 3 + 1], lines[i * 3 + 2]));
+    }
     if (entry.kind === 'camera') {
       const depth = Math.abs(data.color[3]), cx = m[3] * depth, cy = m[7] * depth;
       const corners = [[-cx, -cy], [-cx, cy], [cx, cy], [cx, -cy]].map(([x, y]) => point(x, y, -depth));

@@ -207,14 +207,19 @@ export function createMainView(state) {
     return true;
   }
 
-  // What the extras overlay draws an object by (overlay-extra.js): an empty's Display As and Size, a camera's Display Size.
+  // What the extras overlay draws an object by (overlay-extra.js): an empty's Display As and Size, a camera's Display Size,
+  // a lattice's points (its deformed coordinates, Blender's BPoint vec) and dimensions.
   const EXTRA_DISPLAY = {
     EMPTY: (ob) => { const { empty_display_type, empty_display_size } = idStruct(ob); return { empty_display_type, empty_display_size }; },
     CAMERA: (ob) => ({ display_size: idStruct(ob).data.display_size }),
+    LATTICE: (ob) => {
+      const { points_u, points_v, points_w, use_outside, points } = idStruct(ob).data;
+      return { lattice: { dims: [points_u, points_v, points_w], outside: use_outside, points: [...points].flatMap((point) => [...point.co_deform]) } };
+    },
   };
   function extraDisplay({ node, ob, type }) {
     const values = EXTRA_DISPLAY[type]?.(ob);
-    if (!values || Object.entries(values).every(([key, value]) => node.metadata?.[key] === value)) return;
+    if (!values || Object.entries(values).every(([key, value]) => JSON.stringify(node.metadata?.[key]) === JSON.stringify(value))) return;
     node.metadata = { ...node.metadata, ...values };
   }
 
