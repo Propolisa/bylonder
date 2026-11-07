@@ -47,7 +47,7 @@ assert.ok(!factor.getOutputByName('Value').canConnectTo(matrix.output) && !matri
 material.build();
 const fragment = material._fragmentCompilationState._builtCompilationString;
 assert.match(fragment, /bl_node_mix_mult\(bl_Factor_Float\w*, u_color, bl_B_Color\w*, bl_Result_Color\w*\);/);
-assert.match(fragment, /vec3 Result_Color\w* = bl_Result_Color\w*\.rgb;/);
+assert.match(fragment, /vec3 bl_out_Result_Color\w* = bl_Result_Color\w*\.rgb;/);
 assert.match(fragment, /uniform vec4 bl_B_Color/, 'an unlinked input is a uniform');
 assert.doesNotMatch(fragment, /bl_A_Float|bl_Factor_Vector/, 'only the sockets the node links get uniforms');
 
@@ -61,7 +61,7 @@ assert.deepEqual(set[0].slice(1), [0.25, 0.5, 0.75, 1]);
 mix.mute = true;
 material.build();
 assert.doesNotMatch(material._fragmentCompilationState._builtCompilationString, /bl_node_mix_mult\(/);
-assert.match(material._fragmentCompilationState._builtCompilationString, /vec3 Result_Color\w* = u_color\.rgb;/);
+assert.match(material._fragmentCompilationState._builtCompilationString, /vec3 bl_out_Result_Color\w* = u_color\.rgb;/);
 
 // Saved and loaded, as Babylon serializes blocks, with Blender's properties, values and mute.
 const loaded = new NodeMaterial('Loaded', scene);
@@ -169,5 +169,12 @@ if (skyWorld._buildIsInProgress) await new Promise((resolve) => skyWorld.onBuild
 assert.match(skyWorld._fragmentCompilationState._builtCompilationString, /uniform \w* ?sampler2DArray bl_sky\w*;[\s\S]*node_tex_sky_nishita\(bl_P, 1\.0, /, 'the sky texture, sampled at the view direction');
 const precomputed = skyTexture(skyNode.properties);
 assert.ok(precomputed.width > 1 && precomputed.height > 1 && precomputed.pixels.some((v) => v > 0), 'a sky of light');
+
+// Node outputs are variables of names of their own: two UV outputs never make a UV1, which Babylon defines.
+const uvs = nodeMaterialFromTree('UVs', scene, { nodes: [{ idname: 'ShaderNodeTexCoord', name: 'A' }, { idname: 'ShaderNodeTexCoord', name: 'B' },
+  { idname: 'ShaderNodeVectorMath', name: 'Add' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+  links: [['A', 'UV', 'Add', 'Vector'], ['B', 'UV', 'Add', 'Vector_001'], ['Add', 'Vector', 'Diffuse', 'Color'], ['Diffuse', 'BSDF', 'Material Output', 'Surface']] }).material;
+if (uvs._buildIsInProgress) await new Promise((resolve) => uvs.onBuildObservable.addOnce(resolve));
+assert.doesNotMatch(uvs._fragmentCompilationState._builtCompilationString, /\bvec\d UV\d* = /, "no output variable takes a name Babylon defines");
 
 console.log('nodes: ok');

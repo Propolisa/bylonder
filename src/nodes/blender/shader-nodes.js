@@ -724,6 +724,11 @@ const blenderShader = (Base) => class extends Base {
   }
 
   getClassName() { return this.idname; }
+  // Babylon names an output's variable after the output, which can be one of its defines (UV1, a second UV output's).
+  build(state, activeBlocks) {
+    if (this._buildId !== state.sharedData.buildId) for (const output of this._outputs) output.associatedVariableName ||= state._getFreeVariableName(`bl_out_${output.name}`);
+    return super.build(state, activeBlocks);
+  }
   get availability() { return availability(this.declaration, this.properties, this.values); }
   // Whether a socket is the node's own, not one Bylonder links its geometry or Babylon's code through.
   declared(name) { return this.declaration.inputs.some((s) => s.identifier === name) || this.declaration.outputs.some((s) => s.identifier === name); }
