@@ -336,6 +336,8 @@ EXPORT(curve_edit_make) void curve_edit_make(Object *ob)
   else {
     ED_curve_editnurb_make(ob);
   }
+  /* The evaluated copy takes the edit data's pointers (update_edit_mode_pointers), which View Selected reads. */
+  data_changed(ob);
 }
 
 static ListBaseT<Nurb> snapshot = {nullptr, nullptr};

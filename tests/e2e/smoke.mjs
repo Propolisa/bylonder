@@ -952,6 +952,38 @@ const checks = {
     assert.deepEqual(await state(), before);
   } },
 
+  // Frame Selected (Numpad .) in curve Edit Mode frames the selected points with Blender's view3d.view_selected.
+  "Curve Edit Mode: Numpad . frames the selected points": { open: { link: "neon-sign", node: "Swoosh" }, async run() {
+    await app.bylonder((b) => b.editor.selection.replace([b.world.scene.getNodeByName("Swoosh")]));
+    await app.hover(0.5, 0.5);
+    await app.page.keyboard.press("Tab");
+    await app.settled();
+    await app.page.keyboard.press("a");
+    await app.settled();
+    const eye = () => app.bylonder((b) => b.views.input.camera.position.asArray());
+    const before = await eye();
+    await app.page.keyboard.press("NumpadDecimal");
+    await app.until((b, p) => b.views.input.camera.position.asArray().some((v, i) => Math.abs(v - p[i]) > 0.1), before);
+  } },
+
+  // The UV Editor shows its toolbar and tool settings, not its Sidebar, as Blender's UV Editing does, and N shows and
+  // hides the Sidebar (wm.context_toggle and Blender's region animation, screen.region_blend).
+  async "UV Editor: N shows and hides the Sidebar"() {
+    await app.page.click('[data-workspace="uv-editing"]');
+    await app.settled();
+    const regions = () => app.bylonder(() => {
+      const editor = document.querySelector('[data-blender="IMAGE_EDITOR"]');
+      return { sidebar: !!editor.querySelector(".bl-sidebar"), toolHeader: !!editor.querySelector(".bl-tool-header") };
+    });
+    assert.deepEqual(await regions(), { sidebar: false, toolHeader: true });
+    const box = await app.frame().locator("#image-section").boundingBox();
+    await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    for (const sidebar of [true, false]) {
+      await app.page.keyboard.press("n");
+      await app.until((b, shown) => !!document.querySelector('[data-blender="IMAGE_EDITOR"] .bl-sidebar') === shown, sidebar);
+    }
+  },
+
   // Texture Paint: a stroke on Suzanne in the 3D Viewport and one in the Image Editor paint her image, Ctrl Z takes a
   // stroke back, and the UV Editing workspace shows her UVs over it.
   "Texture Paint paints in the 3D Viewport and the Image Editor": { open: { link: "texture-paint", node: "Vase" }, async run() {
