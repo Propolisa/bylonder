@@ -15,6 +15,7 @@ import {
   RawTexture, ReflectionBlock, RefractionBlock, RegisterClass, SubSurfaceBlock, Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
 import { attributeKind, requestedAttributes, TANGENT_KIND } from './attributes.js';
+import { BlenderRepeatWriteBlock, repeatZoneBlocks } from './repeat-zone.js';
 import { functions } from './gpu-library.js';
 import { BABYLON_TYPES, convert, converts, glslType, glslValue, kindOf, LUMINANCE, socketType } from './sockets.js';
 import { availability, declaration, defaults } from './declarations.js';
@@ -27,6 +28,22 @@ import { blendData } from '../../python/bpy_rna.js';
 import { VIEW_FORWARD, viewEye, viewForward } from '../../draw/draw-view.js';
 import { eeveeParity, eeveeParityChanged } from '../../draw/eevee-parity.js';
 import '../graph-roots.js';
+
+// A NodeMaterial of Blender's nodes. Babylon's walks a block's inputs again for each path that reaches the block as it
+// prepares a build, which is exponential in a chain of shared values (an unrolled repeat zone's): this one prepares each
+// block once per pass.
+export class BlenderNodeMaterial extends NodeMaterial {
+  #initialized = new WeakMap();
+  #reset = new WeakMap();
+  // Whether `node` is new to a pass (keyed by its compilation state) of a walk.
+  static #first(walk, pass, node) {
+    if (!walk.has(pass)) walk.set(pass, new WeakSet());
+    const seen = walk.get(pass);
+    return !seen.has(node) && !!seen.add(node);
+  }
+  _initializeBlock(node, state, ...rest) { if (BlenderNodeMaterial.#first(this.#initialized, state, node)) super._initializeBlock(node, state, ...rest); }
+  _resetDualBlocks(node, id) { if (BlenderNodeMaterial.#first(this.#reset, this._fragmentCompilationState, node)) super._resetDualBlocks(node, id); }
+}
 
 const DIMENSIONS = ['1D', '2D', '3D', '4D'];
 // The outputs whose socket holds the node's value ('=identifier' in its values), drawn on the node (custom_draw).
@@ -1256,6 +1273,9 @@ export function nodeProperties(node) {
     ...(ramp && { color_ramp: { color_mode: ramp.color_mode, interpolation: ramp.interpolation, hue_interpolation: ramp.hue_interpolation,
       elements: [...ramp.elements].map((e) => ({ position: e.position, color: [...e.color] })) } }),
     ...(mapping && { mapping: plainCurveMapping(mapping) }),
+    // A repeat zone's pairing and items.
+    ...(node.bl_idname === 'GeometryNodeRepeatInput' && { paired_output: node.paired_output?.name ?? null }),
+    ...(node.bl_idname === 'GeometryNodeRepeatOutput' && { repeat_items: [...node.repeat_items].map((item) => ({ name: item.name, socket_type: item.socket_type })) }),
   };
 }
 
@@ -1269,9 +1289,18 @@ export const outputValues = (node) => Object.fromEntries((OUTPUT_VALUES[node.bl_
 // input]] }, as a read .blend's Main holds it) as a node material of the blocks for Blender's nodes, linked as in the
 // tree. Returns the material and the node types it has no block for, which it leaves out.
 export function nodeMaterialFromTree(name, scene, tree) {
-  const material = new NodeMaterial(name, scene), blocks = new Map(), missing = new Set(), output = eeveeOutput(tree.nodes);
+  const material = new BlenderNodeMaterial(name, scene), blocks = new Map(), missing = new Set(), output = eeveeOutput(tree.nodes);
   material.clear();
   for (const node of tree.nodes) {
+    if (node.idname === 'GeometryNodeRepeatInput') {
+      const paired = tree.nodes.find((n) => n.name === node.properties?.paired_output);
+      if (!paired) { missing.add(node.idname); continue; }
+      const { zone, write } = repeatZoneBlocks(node, paired);
+      blocks.set(node.name, zone).set(paired.name, write);
+      material.attachedBlocks.push(zone, write);
+      continue;
+    }
+    if (node.idname === 'GeometryNodeRepeatOutput') continue;
     const Block = shaderNodeClasses[node.idname];
     if (!Block) { if (!['NodeFrame', 'NodeReroute'].includes(node.idname)) missing.add(node.idname); continue; }
     const block = new Block(node.name);
@@ -1282,7 +1311,8 @@ export function nodeMaterialFromTree(name, scene, tree) {
     else material.attachedBlocks.push(block);
   }
   for (const [from, output, to, input] of tree.links) {
-    const source = blocks.get(from)?.getOutputByName(output), target = blocks.get(to)?.getInputByName(input);
+    const fromBlock = blocks.get(from), source = fromBlock instanceof BlenderRepeatWriteBlock ? fromBlock.zone.result(output) : fromBlock?.getOutputByName(output);
+    const target = blocks.get(to)?.getInputByName(input);
     if (!source || !target) continue;
     const fromShader = isShaderSocket(blocks.get(from), output, 'outputs'), toShader = isShaderSocket(blocks.get(to), input, 'inputs');
     if (fromShader === toShader) source.connectTo(target);

@@ -1,5 +1,5 @@
 import { Color3, Material, MultiMaterial, NodeMaterial, PBRMaterial, StandardMaterial, Texture } from '@babylonjs/core';
-import { blenderDefaultTree, buildMaterial } from '../../nodes/blender/shader-nodes.js';
+import { BlenderNodeMaterial, blenderDefaultTree, buildMaterial } from '../../nodes/blender/shader-nodes.js';
 import { nodeId, deleted } from '../../editors/object/identity.js';
 import { fields, materialType, materialTypes, resolve, textureSlots } from './schema.js';
 import { bindGraph } from '../../nodes/bindings.js';
@@ -78,7 +78,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   const create = (type = 'pbr', name) => {
     let material;
     const label = unique(name || 'Material');
-    if (type === 'node') { material = new NodeMaterial(label, scene); blenderDefaultTree(material); buildMaterial(material); }
+    if (type === 'node') { material = new BlenderNodeMaterial(label, scene); blenderDefaultTree(material); buildMaterial(material); }
     else if (type === 'standard') material = new StandardMaterial(label, scene);
     else { material = new PBRMaterial(label, scene); material.metallic = 0; material.roughness = 0.5; material.albedoColor = new Color3(0.8, 0.8, 0.8); }
     return tag(material);

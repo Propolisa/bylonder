@@ -267,7 +267,7 @@ export function createMainView(state) {
       drawShading(record, own, 'Material');
       return;
     }
-    const tree = !graph && !kind ? nodeTreeOf(ma) : null;
+    const tree = !graph && !kind ? nodeTreeOf(ma, warnings) : null;
     const nodes = tree && !tree.nodes.every((node) => PRINCIPLED_TREE.includes(node.idname)) ? nodeMaterialFromTree(name, scene, tree) : null;
     if (nodes?.missing.length) warnings.push(`Material "${name}": its ${nodes.missing.join(', ')} nodes are not opened`);
     const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : nodes ? nodes.material : kind === 'standard' ? new StandardMaterial(name, scene)
@@ -279,15 +279,26 @@ export function createMainView(state) {
     ids.adopted.set(material, ma);
     drawShading(record, material, 'Material', warnings);
   }
-  // A material's node tree in Main as plain data (nodeMaterialFromTree), its nodes' properties as RNA reads them.
+  // A material's node tree in Main as plain data (nodeMaterialFromTree), its nodes' properties as RNA reads them. One with
+  // node groups or zones is the tree EEVEE compiles, inlined.
   const PRINCIPLED_TREE = ['ShaderNodeBsdfPrincipled', 'ShaderNodeOutputMaterial'];
-  function nodeTreeOf(ma) {
-    const { nodes, links } = blender.nodeTree(ma), rnaNodes = idStruct(ma).node_tree?.nodes;
-    if (!rnaNodes || !nodes.length) return null;
-    return { links, nodes: nodes.map((node) => {
-      const rnaNode = rnaNodes.get(node.name);
-      return { ...node, values: { ...node.inputs, ...outputValues(rnaNode) }, properties: nodeProperties(rnaNode) };
-    }) };
+  const INLINED = ['ShaderNodeGroup', 'GeometryNodeRepeatInput', 'NodeClosureOutput', 'NodeEvaluateClosure', 'NodeCombineBundle', 'NodeSeparateBundle'];
+  // The integer and boolean inputs Main's description leaves out (a repeat zone's iterations), as RNA reads them.
+  const wholeValues = (inputs, rnaNode) => Object.fromEntries(Object.entries(inputs).filter(([, value]) => value === null)
+    .map(([id]) => [id, [...rnaNode.inputs].find((s) => s.identifier === id)?.default_value])
+    .filter(([, value]) => typeof value === 'number' || typeof value === 'boolean').map(([id, value]) => [id, Number(value)]));
+  const plainTree = ({ nodes, links }, rnaNodes) => ({ links, nodes: nodes.map((node) => {
+    const rnaNode = rnaNodes.get(node.name);
+    return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode), ...outputValues(rnaNode) }, properties: nodeProperties(rnaNode) };
+  }) });
+  function nodeTreeOf(ma, warnings = []) {
+    const tree = blender.nodeTree(ma), rnaNodes = idStruct(ma).node_tree?.nodes;
+    if (!rnaNodes || !tree.nodes.length) return null;
+    if (!tree.nodes.some((node) => INLINED.includes(node.idname))) return plainTree(tree, rnaNodes);
+    return blender.withInlinedNodeTree(ma, (inlined) => {
+      warnings.push(...inlined.errors.map((error) => `Material "${blender.name(ma)}": ${error}`));
+      return plainTree(inlined, idStruct(inlined.id).nodes);
+    });
   }
   // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
   function adoptWorld(wo, scene, warnings) {

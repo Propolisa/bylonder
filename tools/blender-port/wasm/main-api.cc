@@ -37,6 +37,7 @@
 #include "BKE_node_runtime.hh"
 #include "BKE_main_invariants.hh"
 #include "BKE_node_tree_update.hh"
+#include "NOD_shader_nodes_inline.hh"
 #include "DNA_light_types.h"
 #include "DNA_material_types.h"
 #include "DNA_world_types.h"
@@ -1661,13 +1662,12 @@ EXPORT(node_tree_updated) void node_tree_updated(BlenderMain *ctx, ID *owner)
   BKE_main_ensure_invariants(*ctx->bmain, tree_of(owner).id);
 }
 
-/* An ID's node tree as JSON: each node's idname and name with its inputs' identifiers and values (numbers, or null),
- * and the links (from node, from socket, to node, to socket), until the next call. */
-EXPORT(node_tree_describe) const char *node_tree_describe(ID *owner)
+/* A node tree as JSON: each node's idname and name with its inputs' identifiers and values (numbers, or null), and the
+ * links (from node, from socket, to node, to socket), until the next call. */
+static const char *describe(const bNodeTree &ntree)
 {
   static std::string text;
   text = "{\"nodes\":[";
-  const bNodeTree &ntree = tree_of(owner);
   auto quoted = [](const char *s) { return std::string("\"") + s + "\""; };
   bool first = true;
   for (const bNode &node : ntree.nodes) {
@@ -1704,6 +1704,33 @@ EXPORT(node_tree_describe) const char *node_tree_describe(ID *owner)
   text += "]}";
   return text.c_str();
 }
+
+/* An ID's node tree as JSON (describe). */
+EXPORT(node_tree_describe) const char *node_tree_describe(ID *owner) { return describe(tree_of(owner)); }
+
+/* An ID's shader node tree as EEVEE compiles it (GPU_material_from_nodetree): a new tree outside Main with its node
+ * groups, closures and bundles inlined and its repeat zones kept (unrolled only where they hold closures or bundles),
+ * for the EEVEE output; the caller frees it (node_tree_inlined_free). What inlining reported, a line per node, stays
+ * until the next call (node_tree_inlined_errors). */
+static std::string inline_errors;
+EXPORT(node_tree_inlined) bNodeTree *node_tree_inlined(ID *owner)
+{
+  const bNodeTree &ntree = tree_of(owner);
+  bNodeTree *inlined = bke::node_tree_add_tree(nullptr, (StringRef(ntree.id.name + 2) + " Inlined").c_str(), ntree.idname);
+  inlined->flag |= NTREE_IS_GPU_SHADER_INTERNAL;
+  nodes::InlineShaderNodeTreeParams params;
+  params.allow_preserving_repeat_zones = true;
+  params.target_engine_ = SHD_OUTPUT_EEVEE;
+  nodes::inline_shader_node_tree(ntree, *inlined, params);
+  inline_errors.clear();
+  for (const nodes::InlineShaderNodeTreeParams::ErrorMessage &error : params.r_error_messages) {
+    inline_errors += std::string(error.node ? error.node->name : "") + ": " + error.message + "\n";
+  }
+  return inlined;
+}
+EXPORT(node_tree_inlined_errors) const char *node_tree_inlined_errors() { return inline_errors.c_str(); }
+EXPORT(node_tree_inlined_describe) const char *node_tree_inlined_describe(const bNodeTree *tree) { return describe(*tree); }
+EXPORT(node_tree_inlined_free) void node_tree_inlined_free(bNodeTree *tree) { BKE_id_free(nullptr, &tree->id); }
 
 /* port-override: the bundled startup file wm_files.cc reads a factory startup from; the module saves files and reads
  * none (Bylonder's scene is its own startup). */

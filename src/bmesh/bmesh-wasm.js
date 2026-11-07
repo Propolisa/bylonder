@@ -502,6 +502,17 @@ export class BlenderMain {
     this.relationsChanged();
   }
   nodeTree(owner) { return JSON.parse(cString(x.node_tree_describe(owner))); }
+  // fn(tree) with an ID's shader node tree as EEVEE compiles it (main-api.cc node_tree_inlined): its node groups and
+  // closures inlined, its repeat zones kept, as nodeTree gives a tree, with `id` (the inlined tree, an ID outside
+  // Main, for its nodes' RNA) and `errors` (what inlining reported), freed after.
+  withInlinedNodeTree(owner, fn) {
+    const id = x.node_tree_inlined(owner) >>> 0, errors = cString(x.node_tree_inlined_errors()).split('\n').filter(Boolean);
+    try {
+      return fn({ ...JSON.parse(cString(x.node_tree_inlined_describe(id))), id, errors });
+    } finally {
+      x.node_tree_inlined_free(id);
+    }
+  }
 
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
