@@ -82,6 +82,18 @@ const lookingRotation = {
   get: (ob) => eulerXYZ(lookingFrame(quaternionMatrix(aimed(ob) ? viewQuaternion(ob) : babylonQuaternion(ob)))),
   set: (ob, value) => setRotation(ob, matrixQuaternion(lookingFrame(matrixXYZ(value)))),
 };
+// A camera's or light's Blender Euler rotation one axis at a time, as an animation's channels set it: the values last set
+// while the node keeps that rotation, so an axis's value is not re-read from its matrix (an equivalent other triple).
+const lookingEulers = new WeakMap();
+export const looksAlongZOf = (node) => looksAlongZ(node) && !aimed(node);
+export function lookingEulerAxis(node, index, value) {
+  const q = babylonQuaternion(node), kept = lookingEulers.get(node);
+  const euler = kept && kept.q.equalsWithEpsilon(q, 1e-9) ? [...kept.euler] : lookingRotation.get(node);
+  if (value === undefined) return euler[index];
+  euler[index] = value;
+  lookingRotation.set(node, euler);
+  lookingEulers.set(node, { euler, q: babylonQuaternion(node).clone() });
+}
 
 // A number or boolean array (bpy_prop_array), its elements named x, y, z (or w, x, y, z): bind gives a copy whose elements
 // write through.
