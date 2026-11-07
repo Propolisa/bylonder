@@ -454,8 +454,6 @@ export class BlenderMain {
   copyModifier(ob, md) { return x.object_modifier_copy(this.#context, ob, md); }
   renameModifier(ob, md, name) { withString(name, (p) => x.object_modifier_rename(ob, md, p)); }
   applyModifier(ob, md) { return x.object_modifier_apply(this.#context, ob, md); }
-  // Changes an object's rotation mode (eRotationModes), keeping its rotation.
-  setRotationMode(ob, mode) { x.object_rotation_mode_set(ob, mode); }
 
   // Materials and worlds, by address: their users are those that use them.
   addMaterial(name) { return withString(name, (p) => x.main_material_add(this.#context, p)) >>> 0; }

@@ -8,7 +8,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { NullEngine, Scene, Vector3, PointLight, FreeCamera, PBRMaterial, Color3 } from '@babylonjs/core';
+import { NullEngine, Scene, Vector3, PointLight, FreeCamera, PBRMaterial, Color3, Quaternion } from '@babylonjs/core';
 import { BlenderMain } from '../src/bmesh/bmesh-wasm.js';
 import { createBlenderIDs } from '../src/blenkernel/blender-ids.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -137,6 +137,14 @@ else {
       const world = node.computeTransformedInformation ? (node.computeTransformedInformation(), node.transformedPosition) : node.computeWorldMatrix(true).getTranslation();
       assert(close([world.x, world.z, world.y], ob.world), `${name} opens where Blender has it: ${world} in Babylon's axes, ${ob.world} in Blender's`);
       if (!ob.parent) assert(close([...r.location], ob.location) && close([...r.scale], ob.scale), `${name}'s location and scale`);
+      // Blender's rotation mode and values, and the orientation they give.
+      if (!ob.parent && ob.type !== 'CAMERA' && ob.type !== 'LIGHT') {
+        assert.equal(r.rotation_mode, ob.rotation_mode, `${name}'s rotation mode`);
+        assert(close([...(ob.rotation_mode === 'QUATERNION' ? r.rotation_quaternion : r.rotation_euler)], ob.rotation), `${name}'s rotation: ${[...r.rotation_euler]}`);
+        const turned = Quaternion.FromRotationMatrix(node.computeWorldMatrix(true).getRotationMatrix());
+        const [w, x, y, z] = ob.world_rotation, same = Math.abs(turned.w * w - turned.x * x - turned.z * y - turned.y * z);
+        assert(same > 1 - 1e-4, `${name} turns as in Blender: ${turned}, ${ob.world_rotation}`);
+      }
       // The same rotation in Bylonder's rotation order.
       const matrix = (n) => n.computeWorldMatrix(true).getRotationMatrix().asArray();
       assert(node.computeWorldMatrix(true) && matrix(node).every(Number.isFinite));

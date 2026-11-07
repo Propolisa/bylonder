@@ -43,7 +43,6 @@ const DRAWN = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA', ...CURVE_TYPES, ...EVALUATED,
 // `bylonder_standin`: a Mesh that stands in for geometry Babylon built (a MeshBuilder's), which Babylon draws itself.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material', standin: 'bylonder_standin' };
 // eRotationModes.
-export const ROTATION_MODES = { QUATERNION: 0, XYZ: 1, XZY: 2, YXZ: 3, YZX: 4, ZXY: 5, ZYX: 6, AXIS_ANGLE: -1 };
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 export const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 // A value as both models compare it: arrays plain, Main's floats being 32-bit.
@@ -208,12 +207,8 @@ export function createMainView(state) {
         if (entry.type === 'MESH' || CURVE_TYPES.includes(entry.type) || entry.type === 'ARMATURE') drawData(entry);
       }
       for (const entry of made) {
-        const { node, ob } = entry, wanted = rna.pointer('Object', node).rotation_mode;
+        const { node, ob } = entry;
         if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
-        if (dnaGet('Object', ob, 'rotation_mode') !== wanted) {
-          if (fcurvePaths(ob).includes('rotation_euler')) warnings.push(`"${node.name}": its rotation keys are in another rotation order than Bylonder's`);
-          blender.setRotationMode(ob, ROTATION_MODES[wanted]);
-        }
         if (blender.camera === ob) scene.activeCamera = node;
       }
       for (const entry of [...made, ...revived]) {
@@ -227,7 +222,6 @@ export function createMainView(state) {
       state.applying = was;
     }
   }
-  const fcurvePaths = (id) => state.animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
   const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
   // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
   // Bylonder wrote keeps), its values and its Principled BSDF inputs.

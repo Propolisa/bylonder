@@ -20,6 +20,7 @@ import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { outputSize } from '../blenkernel/scene/render.js';
+import { cursorRotationMatrix, cursorRotationSet } from '../blenkernel/scene/cursor.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
@@ -36,6 +37,19 @@ const babylonEuler = (node) => (node.rotationQuaternion ? node.rotationQuaternio
 function setRotation(node, quaternion) {
   if (node.rotationQuaternion) node.rotationQuaternion.copyFrom(quaternion);
   else node.rotation.copyFrom(quaternion.toEulerAngles());
+}
+// Blender's quaternion (w, x, y, z in Blender's axes) of a Babylon one, and back.
+const blenderQuaternion = (q) => [q.w, -q.x, -q.z, -q.y];
+const fromBlenderQuaternion = ([w, x, y, z]) => new Quaternion(-x, -z, -y, w);
+// An Euler order Babylon lacks (all but YXZ, its own): the object keeps Blender's values (metadata.wbEuler, so turns past
+// 180 degrees stay) while they give its orientation, and its node turns by their quaternion.
+const ownOrder = (ob) => ob.metadata?.wbRotationMode;
+const orderQuaternion = (mode, euler) => fromBlenderQuaternion(cursorRotationSet({ rotation_mode: 'QUATERNION' }, cursorRotationMatrix({ rotation_mode: mode, rotation_euler: euler })).rotation_quaternion);
+function orderEuler(ob) {
+  const mode = ownOrder(ob), kept = ob.metadata.wbEuler, current = babylonQuaternion(ob);
+  if (kept && Math.abs(Quaternion.Dot(orderQuaternion(mode, kept), current)) > 1 - 1e-7) return kept;
+  const matrix = cursorRotationMatrix({ rotation_mode: 'QUATERNION', rotation_quaternion: blenderQuaternion(current) });
+  return cursorRotationSet({ rotation_mode: mode, rotation_euler: kept ?? [0, 0, 0] }, matrix).rotation_euler;
 }
 
 // Cameras and lights look along Babylon's local +Z and Blender's -Z: their rotation in Blender's axes is S·M·C, where
@@ -297,20 +311,28 @@ const STRUCTS = {
     mode: (ob, r) => (editing(ob, r) ? 'EDIT' : ob.metadata?.wbMode ?? 'OBJECT'),
     data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)]?.(ob), ob),
     location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position'), sync: true },
-    // Babylon has a quaternion or its own Euler order (Blender's YXZ), so setting it switches between the two only.
-    rotation_mode: synced({ get: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ'), set: (ob, mode) => {
+    // Babylon has a quaternion or its own Euler order (Blender's YXZ); Blender's other orders are kept on the object.
+    rotation_mode: synced({ get: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : ownOrder(ob) ?? 'YXZ'), set: (ob, mode) => {
+      if (!looksAlongZ(ob) && mode !== 'QUATERNION') {
+        const { wbRotationMode, wbEuler, ...rest } = ob.metadata ?? {};
+        ob.metadata = mode === 'YXZ' ? rest : { ...rest, wbRotationMode: mode };
+      }
       if ((mode === 'QUATERNION') === !!ob.rotationQuaternion) return;
       const rotation = babylonQuaternion(ob);
       ob.rotationQuaternion = mode === 'QUATERNION' ? rotation : null;
       if (!ob.rotationQuaternion) ob.rotation.copyFrom(rotation.toEulerAngles());
     } }),
-    rotation_euler: { ...array((ob) => (looksAlongZ(ob) ? lookingRotation.get(ob) : eulerFromBabylon(babylonEuler(ob))), (ob, value) => {
+    rotation_euler: { ...array((ob) => (looksAlongZ(ob) ? lookingRotation.get(ob) : ownOrder(ob) ? orderEuler(ob) : eulerFromBabylon(babylonEuler(ob))), (ob, value) => {
       if (looksAlongZ(ob)) return lookingRotation.set(ob, value);
+      if (ownOrder(ob)) {
+        ob.metadata = { ...ob.metadata, wbEuler: [...value] };
+        return setRotation(ob, orderQuaternion(ownOrder(ob), value));
+      }
       const { x, y, z } = eulerToBabylon(value);
       setRotation(ob, Quaternion.FromEulerAngles(x, y, z));
     }), channel: objectChannel('rotation'), sync: (ob) => !quaternion(ob) },
-    rotation_quaternion: synced(array((ob) => { const q = babylonQuaternion(ob); return [q.w, -q.x, -q.z, -q.y]; },
-      (ob, [w, x, y, z]) => setRotation(ob, new Quaternion(-x, -z, -y, w)), 'wxyz'), quaternion),
+    rotation_quaternion: synced(array((ob) => blenderQuaternion(babylonQuaternion(ob)),
+      (ob, value) => setRotation(ob, fromBlenderQuaternion(value)), 'wxyz'), quaternion),
     scale: { ...array((ob) => axes(ob.scaling.asArray()), (ob, value) => ob.scaling.copyFromFloats(...axes(value))), channel: objectChannel('scaling'), sync: true },
     lock_location: transformLocks('position'),
     lock_rotation: transformLocks('rotation'),

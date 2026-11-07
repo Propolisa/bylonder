@@ -1,6 +1,6 @@
 # Saves a typical user's .blend from Blender's startup scene: the Default Cube with a Bevel and a Subdivision Surface
 # modifier and a red Principled material, a second object in a collection of its own with an Array modifier, a sun,
-# a text object, a dim blue world, the camera moved, location keys on the cube, and a light parented to a bone with Ctrl P (which keeps
+# a text object, a dim blue world, the ball turned and keyed on two axes in XYZ Euler, the camera moved, location keys on the cube, and a light parented to a bone with Ctrl P (which keeps
 # a parent inverse).
 # usage: blender -b --factory-startup --python tools/blender-reference/user-file.py -- OUT.blend
 import bpy, sys
@@ -26,6 +26,11 @@ sphere.name = "Ball"
 for c in sphere.users_collection:
     c.objects.unlink(sphere)
 props.objects.link(sphere)
+sphere.rotation_euler = (0.4, 0.9, 1.2)
+sphere.keyframe_insert("rotation_euler", frame=1)
+sphere.rotation_euler = (1.4, 2.9, 1.2)
+sphere.keyframe_insert("rotation_euler", frame=40)
+sphere.rotation_euler = (0.4, 0.9, 1.2)
 array = sphere.modifiers.new("Array", "ARRAY")
 array.count = 3
 array.relative_offset_displace = (0, 1.5, 0)
