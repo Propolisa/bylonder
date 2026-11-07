@@ -20,6 +20,8 @@ export function createEditCurveOverlay(owner) {
     mesh.alwaysSelectAsActiveMesh = true;
     mesh._getRenderingFillMode = (fillMode) => fillMode;
     mesh.material = overlayMaterial(scene, `${owner.name} ${name}`, options);
+    // An overlay draws itself: Solid's Workbench leaves it its own material (workbench.js).
+    mesh.metadata = { overlay: true };
     return mesh;
   };
   const lines = part('edit curve lines', { fillMode: Material.LineListDrawMode, depthUnits: 4e-5, slopeScale: 4 });

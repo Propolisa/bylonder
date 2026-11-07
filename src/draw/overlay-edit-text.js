@@ -11,7 +11,7 @@ const CURSOR = [1, 1, 1, 1], SELECTION = [0.33, 0.47, 0.84, 0.5];
 export function createEditTextOverlay(owner) {
   const scene = owner.getScene();
   const quads = new Mesh(`${owner.name} edit text`, scene);
-  Object.assign(quads, { parent: owner, isPickable: false, alwaysSelectAsActiveMesh: true });
+  Object.assign(quads, { parent: owner, isPickable: false, alwaysSelectAsActiveMesh: true, metadata: { overlay: true } });
   quads.material = overlayMaterial(scene, `${owner.name} edit text`, { fillMode: Material.TriangleFillMode, depthUnits: 6e-5, slopeScale: 4, alpha: true });
   return {
     // Redraws from the text's cursor (four corners) and selection boxes ({x, y, w, h, rotate}).
