@@ -46,6 +46,8 @@ jobs:
       group: pages-build
       cancel-in-progress: true
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/playwright
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -53,6 +55,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: .tools/playwright
+          key: playwright-chromium-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
       - run: npm run module
       - run: npm test
       - run: npm run build
@@ -67,16 +74,9 @@ jobs:
       - run: node scripts/demo-files.mjs
       # Some failures only happen in the production build: boot it in headless Chromium, open the menus and every
       # workspace, and fail before deploying on any page or console error (tests/e2e/prod.mjs).
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-1.63.0
       - name: Check the production build
         timeout-minutes: 10
-        run: |
-          npm install --no-save playwright@1.63.0
-          npx playwright install --with-deps chromium
-          npm run test:prod
+        run: npm run test:prod
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
