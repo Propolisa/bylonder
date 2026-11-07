@@ -1,7 +1,7 @@
 // Blender's nodes inline with Babylon's blocks: one NodeMaterial and one NodeRenderGraph holding both, linked by
 // Blender's socket conversions, built, saved and loaded.
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
+import { Constants, NullEngine, Scene, NodeMaterial, ArcRotateCamera, Vector3, InputBlock, NodeMaterialBlockConnectionPointTypes as T, NodeRenderGraph } from '@babylonjs/core';
 import { nodeMaterialFromTree, shaderNodeClasses, SHADER_NODES } from '../src/nodes/blender/shader-nodes.js';
 import { compositorNodeClasses } from '../src/nodes/blender/compositor-nodes.js';
 import { availability, declaration } from '../src/nodes/blender/declarations.js';
@@ -142,5 +142,21 @@ const rerouted = nodeMaterialFromTree('Rerouted', scene, { nodes: [{ idname: 'Sh
   { idname: 'NodeReroute', name: 'Reroute.001' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
   links: [['RGB', 'Color', 'Reroute', 'Input'], ['Reroute', 'Output', 'Reroute.001', 'Input'], ['Reroute.001', 'Output', 'Diffuse', 'Color'], ['Diffuse', 'BSDF', 'Material Output', 'Surface']] }).material;
 assert.equal(rerouted.attachedBlocks.find((b) => b.name === 'Diffuse').getInputByName('Color').connectedPoint?.ownerBlock.name, 'RGB', 'a reroute passes its link on');
+
+// A world's tree as EEVEE draws it (eevee_surf_world.bsl.hh): its Background's emission, opaque, at the far plane; its
+// coordinates the direction it is seen in; its Light Path telling the view's rays from the world probe's.
+const sky = nodeMaterialFromTree('__world Sky', scene, { nodes: [{ idname: 'ShaderNodeTexCoord', name: 'Coordinates' }, { idname: 'ShaderNodeTexGradient', name: 'Gradient' },
+  { idname: 'ShaderNodeLightPath', name: 'Light Path' }, { idname: 'ShaderNodeMath', name: 'Math', properties: { operation: 'MULTIPLY' } },
+  { idname: 'ShaderNodeBackground', name: 'Background' }, { idname: 'ShaderNodeOutputWorld', name: 'World Output' }],
+  links: [['Coordinates', 'Generated', 'Gradient', 'Vector'], ['Gradient', 'Fac', 'Math', 'Value'], ['Light Path', 'Is Camera Ray', 'Math', 'Value_001'],
+    ['Gradient', 'Color', 'Background', 'Color'], ['Math', 'Value', 'Background', 'Strength'], ['Background', 'Background', 'World Output', 'Surface']] }).material;
+if (sky._buildIsInProgress) await new Promise((resolve) => sky.onBuildObservable.addOnce(resolve));
+assert.ok(sky.blenderWorld && sky.disableDepthWrite && sky.alphaMode === Constants.ALPHA_DISABLE, 'a world draws opaque, behind all');
+const skyCode = sky._fragmentCompilationState._builtCompilationString;
+assert.match(skyCode, /vec3 bl_P = normalize\(\w+\.xzy\);/, "a world's point is its direction from the eye");
+assert.match(skyCode, /bl_tex_coord\(bl_P, /, 'its Generated coordinates are that direction');
+assert.match(skyCode, /bl_set_ray_type\(\w+\);[\s\S]*bl_node_light_path\(/, 'its Light Path reads the ray type it is drawn for');
+assert.match(skyCode, /bl_node_emission\(/, 'a Background is an emission');
+assert.match(sky._vertexCompilationState._builtCompilationString, /\.w \* 0\.99999, /, 'at the far plane');
 
 console.log('nodes: ok');

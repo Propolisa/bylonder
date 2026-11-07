@@ -1,10 +1,13 @@
-import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, Constants, CubeMapToSphericalPolynomialTools, CubeTexture, EXRCubeTexture, HDRCubeTexture, MeshBuilder, ReflectionProbe, RenderTargetTexture, Scene } from '@babylonjs/core';
+import { RAY_TYPE, setRayType } from '../../nodes/blender/shader-nodes.js';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
 // scene.clearColor, environmentTexture/environmentIntensity, a skybox and fog. Nothing else touches these.
 export const fogModes = { NONE: Scene.FOGMODE_NONE, SCATTER: Scene.FOGMODE_EXP, EXP2: Scene.FOGMODE_EXP2, LINEAR: Scene.FOGMODE_LINEAR };
 const rgb = color => [color.r, color.g, color.b].map(v => +v.toFixed(6));
 const linear = color => rgb(new Color3(color.r, color.g, color.b).toLinearSpace());
+// A scene's world node tree as a node material (main-view.js adoptWorld), which its authored world draws.
+export const worldNodes = new WeakMap();
 
 // Reads what the code-built scene set up, as World fields: a world Blender's (createWorld), or Babylon's clear color.
 export function readAuthoredWorld(scene, defaults) {
@@ -26,6 +29,7 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
   let skybox = null, skyboxKey = '', rendered = false, sceneLinear = false, useAuthored = false, backgroundColor = new Color3();
   const probe = worldProbe(scene);
+  const nodes = worldNodesView(scene);
   const texture = key => {
     if (!key) return null;
     if (!textures.has(key)) {
@@ -98,8 +102,10 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       if (env) env.rotationY = background.rotation;
       const color = Color3.FromArray(background ? background.color.map(v => v * (env ? 1 : background.strength)) : [0, 0, 0]);
       const lights = world?.home === 'BLENDER' && !env;
-      if (lights) probe.set(color);
-      scene.environmentTexture = env ?? (lights ? probe.texture : null);
+      const material = lights && world.id === 'world' ? worldNodes.get(scene) ?? null : null;
+      nodes.set(material);
+      if (lights && !material) probe.set(color);
+      scene.environmentTexture = env ?? (material ? nodes.texture : lights ? probe.texture : null);
       scene.environmentIntensity = env ? background.strength : 1;
       backgroundColor = color;
       showBackground();
@@ -113,10 +119,14 @@ export function createWorldRenderer(scene, { asset = path => path, studioLight }
       gate();
     },
     // Rendered shading for the view about to render. Cheap; called per view.
-    setRendered(value, linear = false) { if (rendered !== value || sceneLinear !== linear) { rendered = value; sceneLinear = linear; gate(); } },
+    setRendered(value, linear = false) {
+      nodes.show(value, linear);
+      if (rendered !== value || sceneLinear !== linear) { rendered = value; sceneLinear = linear; gate(); }
+    },
     dispose() {
       skybox?.dispose(false, true);
-      if (scene.environmentTexture === probe.texture) scene.environmentTexture = null;
+      if (scene.environmentTexture === probe.texture || scene.environmentTexture === nodes.texture) scene.environmentTexture = null;
+      nodes.dispose();
       probe.dispose();
       for (const [key, tex] of textures) if (key !== 'scene') tex.dispose();
     },
@@ -142,5 +152,53 @@ function worldProbe(scene) {
       scene.customRenderTargets.splice(scene.customRenderTargets.indexOf(texture), 1);
       texture.dispose();
     },
+  };
+}
+
+// A world's node tree as EEVEE draws it: its material on a box around the eye, behind all the view draws, shown where a
+// view is rendered; and its world probe (eevee_view.cc CaptureView): the box drawn into a cubemap that surfaces reflect,
+// with the spherical harmonics of the diffuse rays' drawing lighting them. A tree with a Light Path node draws the
+// two kinds of rays apart; others draw both alike, as glossy rays. The probe is drawn while a view draws scene linear
+// colors (the material's display encoding left to the view), once the material is ready for it.
+const SHOWN = 0x0fffffff;
+function worldNodesView(scene) {
+  let box = null, baking = null, bakes = 0;
+  const probe = new ReflectionProbe('__worldNodesProbe', 256, scene, true, true, true);
+  const texture = probe.cubeTexture;
+  Object.assign(texture, { gammaSpace: false, refreshRate: RenderTargetTexture.REFRESHRATE_RENDER_ONCE });
+  const render = (type) => { setRayType(scene, type); try { texture.render(); } finally { setRayType(scene, RAY_TYPE.CAMERA); } };
+  const bake = async () => {
+    baking = null;
+    const { material } = box, id = ++bakes;
+    if (!scene.imageProcessingConfiguration.applyByPostProcess || !box.subMeshes.every((subMesh) => material.isReadyForSubMesh(box, subMesh))) return;
+    probe.position.copyFrom(scene.activeCamera?.globalPosition ?? probe.position);
+    const lightPath = material.attachedBlocks.some((block) => block.idname === 'ShaderNodeLightPath');
+    render(lightPath ? RAY_TYPE.DIFFUSE : RAY_TYPE.GLOSSY);
+    const sh = CubeMapToSphericalPolynomialTools.ConvertCubeMapTextureToSphericalPolynomial(texture);
+    if (lightPath) render(RAY_TYPE.GLOSSY);
+    box.metadata.baked = true;
+    const polynomial = await sh;
+    if (id === bakes && polynomial) texture.sphericalPolynomial = polynomial;
+  };
+  return {
+    texture,
+    set(material) {
+      if (box?.material === material) return;
+      box?.dispose(false, false);
+      box = null;
+      probe.renderList.length = 0;
+      if (!material) return;
+      box = MeshBuilder.CreateBox('__worldNodes', { size: 2 }, scene);
+      Object.assign(box, { material, infiniteDistance: true, isPickable: false, applyFog: false, doNotSerialize: true, alwaysSelectAsActiveMesh: true, layerMask: 0,
+        metadata: { editable: false, baked: false } });
+      probe.renderList.push(box);
+    },
+    // Per view: shown where it is rendered; the probe drawn before the next frame of one in scene linear colors.
+    show(rendered, linear) {
+      if (!box) return;
+      box.layerMask = rendered ? SHOWN : 0;
+      if (rendered && linear && !box.metadata.baked && !baking) baking = scene.onBeforeRenderObservable.addOnce(() => { if (box) bake(); else baking = null; });
+    },
+    dispose() { box?.dispose(false, false); probe.dispose(); if (baking) scene.onBeforeRenderObservable.remove(baking); },
   };
 }

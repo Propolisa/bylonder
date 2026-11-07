@@ -291,20 +291,26 @@ export function createMainView(state) {
     const rnaNode = rnaNodes.get(node.name);
     return { ...node, values: { ...node.inputs, ...wholeValues(node.inputs, rnaNode), ...outputValues(rnaNode) }, properties: nodeProperties(rnaNode) };
   }) });
-  function nodeTreeOf(ma, warnings = []) {
+  function nodeTreeOf(ma, warnings = [], label = 'Material') {
     const tree = blender.nodeTree(ma), rnaNodes = idStruct(ma).node_tree?.nodes;
     if (!rnaNodes || !tree.nodes.length) return null;
     if (!tree.nodes.some((node) => INLINED.includes(node.idname))) return plainTree(tree, rnaNodes);
     return blender.withInlinedNodeTree(ma, (inlined) => {
-      warnings.push(...inlined.errors.map((error) => `Material "${blender.name(ma)}": ${error}`));
+      warnings.push(...inlined.errors.map((error) => `${label} "${blender.name(ma)}": ${error}`));
       return plainTree(inlined, idStruct(inlined.id).nodes);
     });
   }
-  // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
+  // A read World: the scene's world as Blender's, which Bylonder's authored world reads; a tree of more than a
+  // Background is drawn as EEVEE draws it (world-babylon.js), its nodes as a material's.
+  const BACKGROUND_TREE = ['ShaderNodeBackground', 'ShaderNodeOutputWorld'];
   function adoptWorld(wo, scene, warnings) {
-    const background = blender.nodeTree(wo).nodes.find((node) => node.idname === 'ShaderNodeBackground');
-    const color = background?.inputs.Color ?? dnaGet('World', wo, 'color');
-    createWorld(scene, color && { color: [...color].slice(0, 3), strength: background?.inputs.Strength });
+    const name = blender.name(wo), tree = nodeTreeOf(wo, warnings, 'World');
+    const background = tree?.nodes.find((node) => node.idname === 'ShaderNodeBackground');
+    const color = background?.values.Color ?? dnaGet('World', wo, 'color');
+    const nodes = tree && !(tree.nodes.every((node) => BACKGROUND_TREE.includes(node.idname)) && tree.links.length <= 1)
+      ? nodeMaterialFromTree(`__world ${name}`, scene, tree) : null;
+    if (nodes?.missing.length) warnings.push(`World "${name}": its ${nodes.missing.join(', ')} nodes are not opened`);
+    createWorld(scene, color && { color: [...color].slice(0, 3), strength: background?.values.Strength, nodes: nodes?.material });
     ids.adopted.set('world', wo);
   }
   // A material's or world's values and node tree from Main. A PBR material is its Principled BSDF as Blender's glTF

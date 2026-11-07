@@ -94,6 +94,20 @@ export const SHADER_NODES = {
       ...(linked('Color') ? steps.filter(Boolean).map((name) => [name, ['@Color'], ['@Color']]) : []),
     ];
   },
+  // node_shader_tex_environment.cc, node_shader_gpu_tex_environment: an unlinked vector is the shaded point's position
+  // (node_tex_coord_position), the Color output premultiplied unless the image's alpha says otherwise.
+  ShaderNodeTexEnvironment: (p, decl, { connected, linked, image }) => {
+    const ima = image(), vector = connected('Vector') ? 'Vector' : '$P';
+    if (!ima) return [['node_tex_environment_empty', [vector], ['@Color']]];
+    const equirectangular = p.projection === 'EQUIRECTANGULAR', closest = p.interpolation === 'Closest';
+    const sample = closest || p.interpolation === 'Linear' ? 'node_tex_image_linear' : 'node_tex_image_cubic';
+    const clear = ['CHANNEL_PACKED', 'NONE', 'PREMUL'].includes(ima.alpha_mode) || ima.colorspace_settings.is_data;
+    return [
+      [equirectangular ? 'node_tex_environment_equirectangular' : 'node_tex_environment_mirror_ball', [vector], [['#uv', 'vec3']]],
+      [sample, ['#uv', { image: ima, extension: p.projection, interpolation: equirectangular && !closest ? 'Environment' : p.interpolation }], ['@Color', ['#alpha', 'float']]],
+      linked('Color') && [clear ? 'color_alpha_clear' : 'color_alpha_premultiply', ['@Color'], ['@Color']],
+    ];
+  },
   // node_shader_color_ramp.cc, gpu_shader_valtorgb
   ShaderNodeValToRGB: (p, decl) => {
     const ramp = p.color_ramp, stops = sortedStops(ramp), outs = ['@Color', '@Alpha'];
@@ -120,6 +134,8 @@ export const SHADER_NODES = {
   // node_shader_emission.cc, node_shader_bsdf_*.cc, node_shader_mix_shader.cc, node_shader_add_shader.cc,
   // node_shader_holdout.cc: closures (STAND_INS bl_closure); an unlinked normal is the shaded point's.
   ShaderNodeEmission: () => [['bl_node_emission', ['Color', 'Strength'], ['@Emission']]],
+  // node_shader_background.cc: a world's emission.
+  ShaderNodeBackground: () => [['bl_node_emission', ['Color', 'Strength'], ['@Background']]],
   ShaderNodeBsdfPrincipled: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_principled', ['Base Color', 'Metallic', 'Roughness', 'IOR', 'Alpha',
     normal(connected), 'Transmission Weight', 'Emission Color', 'Emission Strength'], ['@BSDF']]],
   ShaderNodeBsdfDiffuse: (p, decl, { connected }) => [G_DATA, ['bl_node_bsdf_diffuse', ['Color', normal(connected)], ['@BSDF']]],
@@ -236,7 +252,8 @@ export const SHADER_NODES = {
   ShaderNodeObjectInfo: (p, decl) => [...ENGINE_STEPS, ['node_object_info', [0], outputs(decl)]],
   // node_shader_camera.cc, node_shader_light_path.cc: every ray is a camera ray, as in EEVEE's main view.
   ShaderNodeCameraData: (p, decl) => [...ENGINE_STEPS, stack('camera', decl)],
-  ShaderNodeLightPath: (p, decl) => [G_DATA, stack('node_light_path', decl)],
+  // A world's rays are the view's, or the world probe's (eevee_view.cc CaptureView: diffuse, then glossy).
+  ShaderNodeLightPath: (p, decl, { world }) => [G_DATA, world() && ['bl_set_ray_type', ['$ray_type'], []], stack('node_light_path', decl)],
   // node_shader_fresnel.cc, node_shader_layer_weight.cc: an unlinked normal is the shaded point's (world_normals_get).
   ShaderNodeFresnel: (p, decl, { connected }) => [...ENGINE_STEPS, ['node_fresnel', ['IOR', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Fac']]],
   ShaderNodeLayerWeight: (p, decl, { connected }) => [...ENGINE_STEPS, ['node_layer_weight', ['Blend', connected('Normal') ? 'Normal' : WORLD_NORMAL], ['@Fresnel', '@Facing']]],
@@ -353,6 +370,7 @@ void bl_engine(mat4 model, mat4 model_inverse, mat4 viewmat, mat4 viewinv, mat4 
   return dot(T, T) > 0.0 ? vec4(normalize(T), dot(cross(N, T), B) < 0.0 ? -1.0 : 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
 }`,
   bl_vector_copy: 'void bl_vector_copy(vec3 v, inout vec3 result) { result = v; }',
+  bl_set_ray_type: 'void bl_set_ray_type(float type) { g_data.ray_type = int(type); }',
   // EEVEE's texture LOD bias (the film's, 1 at full resolution).
   texture_lod_bias_get: 'float texture_lod_bias_get() { return 1.0; }',
   bl_tex_coord: `void bl_tex_coord(vec3 orco, vec3 normal_in, vec3 uv_in, vec3 object_in, vec3 camera_in, vec3 window_in, vec3 reflection_in,
@@ -519,6 +537,10 @@ const IDENTITY_ROWS = [0, 1, 2, 3];
 const model = (mesh) => blenderAxes(mesh.getWorldMatrix());
 const viewmat = (scene) => blenderAxes(scene.getViewMatrix(), { rows: IDENTITY_ROWS, flipRow: 2 });
 const winmat = (scene) => Matrix.FromArray(Array.from(scene.getProjectionMatrix().m, (v, i) => ((i >> 2) === 2 ? -v : v)));
+// The rays a scene's world is drawn for (eevee_defines.hh RAY_TYPE_*): its view's, else its probe's while it renders.
+export const RAY_TYPE = { CAMERA: 0, DIFFUSE: 2, GLOSSY: 3 };
+const rayTypes = new WeakMap();
+export const setRayType = (scene, type) => rayTypes.set(scene, type);
 // Per drawn mesh values ('$name' read as uniforms): [Babylon type, value from the mesh and scene].
 const MESH_VALUES = {
   $model: [T.Matrix, (mesh) => model(mesh)],
@@ -531,6 +553,7 @@ const MESH_VALUES = {
   $object_info: [T.Vector3, (mesh) => [objectInfo(mesh).index, objectInfo(mesh).random, mesh.getWorldMatrix().determinant() < 0 ? 16 : 0]],
   $texspace_location: [T.Vector3, (mesh) => texspace(mesh)[0]],
   $texspace_size: [T.Vector3, (mesh) => texspace(mesh)[1]],
+  $ray_type: [T.Float, (mesh) => rayTypes.get(mesh.getScene()) ?? RAY_TYPE.CAMERA],
 };
 export const meshValue = (id) => MESH_VALUES[id] ?? (id.startsWith('$uniform_attribute:') && [T.Vector4, (mesh) => {
   const [, type, ...name] = id.split(':');
@@ -685,6 +708,7 @@ const blenderShader = (Base) => class extends Base {
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
+    this._world = !!material.blenderWorld;
     for (const name of geometryOf(this._steps())) wire(geometryBlock(material, name).output, this._geometryInput(name));
   }
 
@@ -699,6 +723,7 @@ const blenderShader = (Base) => class extends Base {
       linked: (id) => !!this.getOutputByName(id)?.hasEndpoints,
       image: () => (this.properties.image ? blendData().images.get(this.properties.image) ?? null : null),
       lobe: () => this.lobe ?? 0,
+      world: () => !!this._world,
     }) ?? [];
   }
 
@@ -730,7 +755,17 @@ const blenderShader = (Base) => class extends Base {
       this._meshUniforms.push([name, id]);
       return name;
     };
+    // blender-port: eevee_surf_world.bsl.hh surf_world, eevee_attributes_world_lib.glsl attr_load_orco,
+    // eevee_nodetree_lib.bsl.hh coordinate_camera, coordinate_reflect (MAT_GEOM_WORLD): a world's point is the direction
+    // it is seen in, which the world's box gives as its position from its centre, the eye; its normal faces the eye.
+    const worldPoint = {
+      $P: () => declare('bl_P', 'vec3', `normalize(${geometry('__position')}.xzy)`),
+      $N: () => declare('bl_N', 'vec3', `-${link('$P')}`),
+      $orco: () => link('$P'), $object: () => link('$P'), $object_normal: () => link('$N'), $reflection: () => link('$N'), $uv: () => 'vec3(0.0)',
+      $camera: () => declare('bl_camera', 'vec3', `normalize((${geometry('__view')} * vec4(${link('$P')}.xzy, 0.0)).xyz)`),
+    };
     const point = (id) => {
+      if (this._world && worldPoint[id]) return worldPoint[id]();
       if (meshValue(id)) return meshUniform(id);
       const position = () => geometry('__position'), world = () => geometry('__world');
       const worldPosition = () => `(${world()} * vec4(${position()}, 1.0))`;
@@ -789,11 +824,11 @@ const blenderShader = (Base) => class extends Base {
       const code = compileSteps(this.declaration, steps, links, {
         emit: (key, code) => state._emitFunction(key, code, ''),
         free: (prefix) => state._getFreeVariableName(prefix),
-        sampler: ({ texture: table, image }) => {
+        sampler: ({ texture: table, image, ...sampling }) => {
           const name = state._getFreeVariableName(table ? 'bl_table' : 'bl_image');
           state._emit2DSampler(name, '', false, undefined, false, 'highp');
           const scene = state.sharedData.scene;
-          this._textures.push([name, table ? rampTexture(table, scene) : imageTexture(image, scene, this.properties) ?? emptyTexture(scene)]);
+          this._textures.push([name, table ? rampTexture(table, scene) : imageTexture(image, scene, { ...this.properties, ...sampling }) ?? emptyTexture(scene)]);
           return name;
         },
         functions: STAND_INS,
@@ -832,6 +867,7 @@ const blenderShader = (Base) => class extends Base {
       const [type, value] = meshValue(id), v = value(mesh, nodeMaterial.getScene());
       if (type === T.Matrix) effect.setMatrix(name, v);
       else if (type === T.Vector3) effect.setFloat3(name, ...v);
+      else if (type === T.Float) effect.setFloat(name, v);
       else effect.setFloat4(name, ...v);
     }
   }
@@ -1151,8 +1187,8 @@ RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
 // Babylon's image processing, as the material's color. A material it is added to gets the vertex output Babylon needs.
 export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock) {
-  constructor(name) {
-    super(name || 'Material Output', 'ShaderNodeOutputMaterial');
+  constructor(name, idname = 'ShaderNodeOutputMaterial') {
+    super(name || 'Material Output', idname);
   }
 
   attach(material) {
@@ -1203,6 +1239,59 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
   }
 }
 
+// A world's box at the far plane: behind all the view draws, whatever its clip end.
+export class BlenderFarPlaneBlock extends NodeMaterialBlock {
+  constructor(name) {
+    super(name, Targets.Vertex);
+    this.registerInput('vector', T.Vector4);
+    this.registerOutput('output', T.Vector4);
+  }
+  getClassName() { return 'BlenderFarPlaneBlock'; }
+  get vector() { return this._inputs[0]; }
+  get output() { return this._outputs[0]; }
+  _buildBlock(state) {
+    super._buildBlock(state);
+    const v = this.vector.associatedVariableName;
+    state.compilationString += `${state._declareOutput(this.output)} = vec4(${v}.xy, ${v}.w * 0.99999, ${v}.w);
+`;
+    return this;
+  }
+}
+RegisterClass('BABYLON.BlenderFarPlaneBlock', BlenderFarPlaneBlock);
+
+// World Output (node_shader_output_world.cc) as Babylon's fragment output: the Surface closure's emission, opaque, as
+// EEVEE draws a world (eevee_surf_world.bsl.hh), through Babylon's image processing. Its material draws the world's box
+// (world-babylon.js), behind everything.
+export class ShaderNodeOutputWorld extends ShaderNodeOutputMaterial {
+  constructor(name) {
+    super(name || 'World Output', 'ShaderNodeOutputWorld');
+  }
+
+  attach(material) {
+    material.addOutputNode(this);
+    if (material._vertexOutputNodes.some((block) => block instanceof VertexOutputBlock)) return;
+    const projection = helper(material, '__projection', (name) => new TransformBlock(name)), far = helper(material, '__farPlane', (name) => new BlenderFarPlaneBlock(name));
+    wire(worldPosition(material).output, projection.vector);
+    wire(geometryBlock(material, '__viewProjection').output, projection.transform);
+    wire(projection.output, far.vector);
+    const output = helper(material, '__vertexOutput', (name) => new VertexOutputBlock(name));
+    wire(far.output, output.vector);
+    material.addOutputNode(output);
+  }
+
+  initialize(state) {
+    FragmentOutputBlock.prototype.initialize.call(this, state);
+    const material = state.sharedData.nodeMaterial, closure = this.getInputByName('Surface').connectedPoint;
+    Object.assign(material, { alphaMode: Constants.ALPHA_DISABLE, backFaceCulling: false, disableDepthWrite: true });
+    const processing = helper(material, `__display ${this.uniqueId}`, (name) => new BlenderDisplayBlock(name));
+    const radiance = closure ? helper(material, `__unlit ${this.uniqueId}`, (name) => new BlenderUnlitSurfaceBlock(name)) : null;
+    if (radiance) wire(closure, radiance.closure);
+    wire(radiance?.radiance ?? helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
+    this.rgba.connectedPoint?.disconnectFrom(this.rgba);
+    wire(processing.getOutputByName('displayRgb'), this.rgb);
+  }
+}
+
 // A scene's node materials build again when its EEVEE Parity changes.
 eeveeParityChanged.add((scene) => {
   for (const material of scene.materials) if (material.attachedBlocks?.some((block) => block instanceof ShaderNodeOutputMaterial)) buildMaterial(material);
@@ -1244,7 +1333,7 @@ function adaptOutput(point, own, socket) {
 }
 
 // The block classes, one per Blender node Bylonder links, registered for Babylon's serialization.
-const OWN_CLASSES = { ShaderNodeOutputMaterial };
+const OWN_CLASSES = { ShaderNodeOutputMaterial, ShaderNodeOutputWorld };
 export const shaderNodeClasses = Object.fromEntries([...Object.keys(SHADER_NODES), ...Object.keys(OWN_CLASSES)].map((idname) => {
   const label = declaration('shader', idname).name;
   const Block = OWN_CLASSES[idname] ?? { [idname]: class extends BlenderShaderBlock { constructor(name) { super(name || label, idname); } } }[idname];
@@ -1291,6 +1380,7 @@ export const outputValues = (node) => Object.fromEntries((OUTPUT_VALUES[node.bl_
 export function nodeMaterialFromTree(name, scene, tree) {
   const material = new BlenderNodeMaterial(name, scene), blocks = new Map(), missing = new Set(), output = eeveeOutput(tree.nodes);
   material.clear();
+  material.blenderWorld = output?.idname === 'ShaderNodeOutputWorld';
   for (const node of tree.nodes) {
     if (node.idname === 'GeometryNodeRepeatInput') {
       const paired = tree.nodes.find((n) => n.name === node.properties?.paired_output);
@@ -1333,11 +1423,13 @@ function rerouted({ nodes, links }) {
   return links.filter(([, , to]) => !reroutes.has(to)).map(([from, output, to, input]) => [...source(from, output), to, input]);
 }
 
-// blender-port: nodes/shader/node_shader_tree.cc ntreeShaderOutputNode for SHD_OUTPUT_EEVEE: of the Material
-// Outputs, one for EEVEE before one for all renderers, the active one among equals, else the first.
+// blender-port: nodes/shader/node_shader_tree.cc ntreeShaderOutputNode for SHD_OUTPUT_EEVEE: of the Material (or
+// World) Outputs, one for EEVEE before one for all renderers, the active one among equals, else the first.
+const OUTPUTS = ['ShaderNodeOutputMaterial', 'ShaderNodeOutputWorld'];
 function eeveeOutput(nodes) {
   let output = null;
-  for (const node of nodes.filter((n) => n.idname === 'ShaderNodeOutputMaterial')) {
+  const idname = OUTPUTS.find((id) => nodes.some((n) => n.idname === id));
+  for (const node of nodes.filter((n) => n.idname === idname)) {
     const { target = 'ALL', is_active_output: active } = node.properties ?? {}, current = output?.properties?.target ?? 'ALL';
     if (target !== 'ALL' && target !== 'EEVEE') continue;
     if (!output || (target === 'EEVEE' && current === 'ALL') || (target === current && active && !output.properties?.is_active_output)) output = node;

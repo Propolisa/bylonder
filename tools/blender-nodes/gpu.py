@@ -79,6 +79,10 @@ ROOTS = [
     'gpu_shader_material_vector_displacement.glsl',
     'gpu_shader_material_transform_utils.glsl',
     'gpu_shader_common_math_utils.glsl',
+    # A world's shader: its Background and the sky and environment textures it reads.
+    'gpu_shader_material_background.glsl',
+    'gpu_shader_material_tex_sky.glsl',
+    'gpu_shader_material_tex_environment.glsl',
     # Curves drawing (particle hair, Curves objects): the curve shape library and the hash its strands vary by.
     'draw_curves_lib.glsl',
     'gpu_shader_common_hash.glsl',

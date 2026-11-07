@@ -1,5 +1,5 @@
 import { BLENDER } from '../light/light-home.js';
-import { createWorldRenderer, readAuthoredWorld } from './world-babylon.js';
+import { createWorldRenderer, readAuthoredWorld, worldNodes } from './world-babylon.js';
 import { STUDIO_LIGHT } from '../../bmesh/datafiles.js';
 
 // World datablocks (Blender's bpy.data.worlds plus scene.world). Shaped like Blender's World:
@@ -26,9 +26,11 @@ export const worldChannels = [
 const resolve = (entry, path) => { const keys = path.split('.'), key = keys.pop(); return { owner: keys.reduce((o, k) => o?.[k], entry), key }; };
 export const getPath = (entry, path) => { const { owner, key } = resolve(entry, path); return owner?.[key]; };
 
-// A scene's world as Blender's (bpy.data.worlds.new as scene.world): its color, linear, times its strength lights the scene.
-export function createWorld(scene, { color = worldDefaults.background.color, strength = worldDefaults.background.strength } = {}) {
+// A scene's world as Blender's (bpy.data.worlds.new as scene.world): its color, linear, times its strength lights the
+// scene; or its node tree's material (`nodes`), drawn as its background and lighting.
+export function createWorld(scene, { color = worldDefaults.background.color, strength = worldDefaults.background.strength, nodes = null } = {}) {
   scene.metadata = { ...scene.metadata, wbWorld: { color, strength } };
+  if (nodes) worldNodes.set(scene, nodes); else worldNodes.delete(scene);
 }
 
 export function createWorlds(world, { commit = () => {}, asset } = {}) {

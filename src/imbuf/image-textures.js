@@ -129,9 +129,14 @@ function forget(uid, image) {
 // Image Texture's extension (node_shader_tex_image.cc) as Babylon's addressing; CLIP is clamp to a border Babylon's
 // samplers lack, so it clamps to the edge (listed in the feature's limits).
 const ADDRESS = { REPEAT: Texture.WRAP_ADDRESSMODE, EXTEND: Texture.CLAMP_ADDRESSMODE, CLIP: Texture.CLAMP_ADDRESSMODE, MIRROR: Texture.MIRROR_ADDRESSMODE };
+// An Environment Texture's projection (node_shader_tex_environment.cc): an equirectangular image repeats around and
+// extends at the poles, a mirror ball's extends.
+const ADDRESS_UV = { EQUIRECTANGULAR: [ADDRESS.REPEAT, ADDRESS.EXTEND], MIRROR_BALL: [ADDRESS.EXTEND, ADDRESS.EXTEND] };
 // Interpolation as Babylon's sampling of the one texture (filtering belongs to the GPU texture, so its last user's
 // interpolation applies to all of them); Cubic and Smart sample linearly, as EEVEE's Smart does when not magnifying.
-const SAMPLING = { Linear: Texture.TRILINEAR_SAMPLINGMODE, Closest: Texture.NEAREST_NEAREST_MIPLINEAR, Cubic: Texture.TRILINEAR_SAMPLINGMODE, Smart: Texture.TRILINEAR_SAMPLINGMODE };
+// An equirectangular environment samples its top mipmap only, as Blender's, whose derivatives jump where it wraps.
+const SAMPLING = { Linear: Texture.TRILINEAR_SAMPLINGMODE, Closest: Texture.NEAREST_NEAREST_MIPLINEAR, Cubic: Texture.TRILINEAR_SAMPLINGMODE, Smart: Texture.TRILINEAR_SAMPLINGMODE,
+  Environment: Texture.LINEAR_LINEAR };
 
 // Preferences > Viewport > Textures > Anisotropic Filtering, which Blender's samplers use (GPU_samplers_update).
 const preferredAnisotropy = () => Math.max(1, Number(contextStruct().preferences.system.anisotropic_filter.replace('FILTER_', '')));
@@ -152,7 +157,7 @@ export function imageTexture(imageStruct, scene, { interpolation = 'Linear', ext
   const texture = new Texture(null, scene, { noMipmap: false, invertY: false, samplingMode: SAMPLING[interpolation] ?? SAMPLING.Linear });
   texture._texture = image.internal;
   image.internal.incrementReferences();
-  texture.wrapU = texture.wrapV = ADDRESS[extension] ?? ADDRESS.REPEAT;
+  [texture.wrapU, texture.wrapV] = ADDRESS_UV[extension] ?? [ADDRESS[extension] ?? ADDRESS.REPEAT, ADDRESS[extension] ?? ADDRESS.REPEAT];
   texture.name = imageStruct.name;
   texture.metadata = { interpolation };
   sampleAsBlender(texture);
