@@ -231,12 +231,15 @@ export function createMainView(state) {
         if (!blender.base(ob)) node.setEnabled(false);
         // A copy Blender's code made (object.duplicate) carries its original's id: it gets one of its own.
         const taken = world.objects.some((other) => !deleted(other) && nodeId(other) === id) || [...objects.keys()].some((other) => nodeId(other) === id);
-        node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id };
+        // Its mode is Main's: a file read enters the modes objects were saved in (ED_editors_init).
+        node.metadata = { ...node.metadata, editable: true, wbId: taken ? crypto.randomUUID() : id, ...(type !== 'ARMATURE' && { wbMode: blender.mode(ob) }) };
         made.push(link(node, ob, type));
       }
       for (const entry of [...made, ...revived]) {
         pullRelations(entry);
         if (entry.type === 'MESH' || CURVE_TYPES.includes(entry.type) || entry.type === 'ARMATURE') drawData(entry);
+        // One read in Edit Mode draws its edit mesh too.
+        if (entry.type === 'MESH') drawEditMode(entry);
       }
       for (const entry of made) {
         const { node, ob } = entry;

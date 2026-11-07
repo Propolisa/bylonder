@@ -89,6 +89,7 @@
 #include "DNA_workspace_types.h"
 #include "ED_object.hh"
 #include "ED_screen.hh"
+#include "ED_util.hh"
 #include "DNA_genfile.h"
 #include "DNA_sequence_types.h"
 #include "DNA_view3d_enums.h"
@@ -1565,6 +1566,8 @@ EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int 
     BlendFileReadWMSetupData wm_setup_data = {ctx->wm};
     BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, &wm_setup_data, &read_report, false, nullptr);
     main_context_refresh(ctx);
+    /* Objects saved in a mode enter it again (Edit Mode's edit mesh made anew), as wm_file_read_post does. */
+    ED_editors_init(ctx->C);
     /* The file's drivers and registered texts in Python (python.cc starts it first where scripts may run). */
     BPY_python_reset(ctx->C);
     file_read_notify(ctx);
