@@ -1310,7 +1310,7 @@ export function nodeMaterialFromTree(name, scene, tree) {
     if (node === output) block.attach(material);
     else material.attachedBlocks.push(block);
   }
-  for (const [from, output, to, input] of tree.links) {
+  for (const [from, output, to, input] of rerouted(tree)) {
     const fromBlock = blocks.get(from), source = fromBlock instanceof BlenderRepeatWriteBlock ? fromBlock.zone.result(output) : fromBlock?.getOutputByName(output);
     const target = blocks.get(to)?.getInputByName(input);
     if (!source || !target) continue;
@@ -1320,6 +1320,17 @@ export function nodeMaterialFromTree(name, scene, tree) {
   }
   buildMaterial(material);
   return { material, missing: [...missing] };
+}
+
+// A tree's links with its reroutes passed through (node_tree_reroute_link: a reroute links what links into it).
+function rerouted({ nodes, links }) {
+  const reroutes = new Set(nodes.filter((n) => n.idname === 'NodeReroute').map((n) => n.name));
+  const source = (node, output, seen = new Set()) => {
+    if (!reroutes.has(node) || seen.has(node)) return [node, output];
+    const into = links.find(([, , to]) => to === node);
+    return into ? source(into[0], into[1], seen.add(node)) : [node, output];
+  };
+  return links.filter(([, , to]) => !reroutes.has(to)).map(([from, output, to, input]) => [...source(from, output), to, input]);
 }
 
 // blender-port: nodes/shader/node_shader_tree.cc ntreeShaderOutputNode for SHD_OUTPUT_EEVEE: of the Material

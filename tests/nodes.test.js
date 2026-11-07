@@ -137,4 +137,10 @@ assert.deepEqual(outputs([['Cycles', 'CYCLES', true], ['EEVEE', 'EEVEE', false]]
 assert.deepEqual(outputs([['All', 'ALL', true], ['EEVEE', 'EEVEE', false]]), ['EEVEE']);
 assert.deepEqual(outputs([['First', 'ALL', false], ['Active', 'ALL', true]]), ['Active']);
 
+// Links through a reroute link what links into it (node_tree_reroute_link).
+const rerouted = nodeMaterialFromTree('Rerouted', scene, { nodes: [{ idname: 'ShaderNodeRGB', name: 'RGB' }, { idname: 'NodeReroute', name: 'Reroute' },
+  { idname: 'NodeReroute', name: 'Reroute.001' }, { idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+  links: [['RGB', 'Color', 'Reroute', 'Input'], ['Reroute', 'Output', 'Reroute.001', 'Input'], ['Reroute.001', 'Output', 'Diffuse', 'Color'], ['Diffuse', 'BSDF', 'Material Output', 'Surface']] }).material;
+assert.equal(rerouted.attachedBlocks.find((b) => b.name === 'Diffuse').getInputByName('Color').connectedPoint?.ownerBlock.name, 'RGB', 'a reroute passes its link on');
+
 console.log('nodes: ok');
