@@ -29,6 +29,7 @@ for (const name of ['MorphTargetsBlock', 'BonesBlock', 'InstancesBlock', 'ClipPl
 const { _vertexSourceCode: vertex, _fragmentSourceCode: fragment } = mesh.subMeshes[0].effect;
 for (const define of ['MORPHTARGETS', 'NUM_BONE_INFLUENCERS', 'INSTANCES', 'CLIPPLANE']) assert.match(vertex, new RegExp(`#if(def|) ?\\(?(defined\\()?${define}`), `the vertex shader keeps Babylon's ${define} path`);
 assert.match(fragment, /#ifdef FOG/, "the fragment shader keeps Babylon's fog");
+assert.match(mesh.subMeshes[0].effect.defines, /#define BASE_DIFFUSE_MODEL 2\n/, "diffuse is Lambert's, as EEVEE's");
 assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragment shader keeps Babylon's shadows");
 // Blender's FrontFacing holds in Babylon's separate culling pass, which draws the back faces first with the front
 // winding reversed: the material tells its shader which pass draws (a glass's inner walls take the back face's IOR).

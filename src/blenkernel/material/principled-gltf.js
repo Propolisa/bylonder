@@ -7,7 +7,7 @@
 //   loadMaterialAlphaProperties, the KHR_materials_* loaders, through pbrMaterialLoadingAdapter.ts).
 // Each is a table; principledPBR composes them into every PBRMaterial property the loader sets, so a material is drawn
 // whole each time: what an absent extension would leave is a new PBRMaterial's value.
-import { Color3, PBRMaterial } from '@babylonjs/core';
+import { Color3, Constants, PBRMaterial } from '@babylonjs/core';
 
 // io/com/constants.py
 const GLTF_IOR = 1.5, BLENDER_COAT_ROUGHNESS = 0.03;
@@ -104,8 +104,9 @@ const STORED = { 'subSurface.volumeIndexOfRefraction': 'subSurface._volumeIndexO
 
 // The PBRMaterial properties Babylon's loader sets for a glTF material, as [path, value] pairs.
 export const gltfPBR = (gltf) => LOADER.map(([path, load]) => [path, load(gltf)]);
-// Both composed: a Principled BSDF's inputs and its Material's settings as PBRMaterial properties.
-export const principledPBR = (inputs, settings) => gltfPBR(principledGltf(inputs, settings));
+// Both composed: a Principled BSDF's inputs and its Material's settings as PBRMaterial properties, with EEVEE's diffuse,
+// Lambert's (Babylon defaults to Oren-Nayar).
+export const principledPBR = (inputs, settings) => [...gltfPBR(principledGltf(inputs, settings)), ['brdf.baseDiffuseModel', Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT]];
 
 const owner = (material, path) => { const keys = path.split('.'), key = keys.pop(); return [keys.reduce((o, k) => o[k], material), key]; };
 const read = (material, path) => { const [o, key] = owner(material, STORED[path] ?? path); const value = o[key]; return value?.asArray ? value.asArray() : value; };

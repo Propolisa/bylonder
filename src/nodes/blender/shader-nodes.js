@@ -1000,6 +1000,8 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     this.metallic.isOptional = this.roughness.isOptional = true;
     // Blender's coverage scales the whole closure; Babylon's would keep reflections opaque.
     this.useRadianceOverAlpha = this.useSpecularOverAlpha = false;
+    // EEVEE's diffuse is Lambert's, where Babylon's block defaults to Oren-Nayar.
+    this.baseDiffuseModel = Constants.MATERIAL_DIFFUSE_MODEL_LAMBERT;
     this._helpers = {};
   }
 
