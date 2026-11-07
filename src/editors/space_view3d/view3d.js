@@ -82,7 +82,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const label = Object.assign(document.createElement('div'), { className: 'view-label' });
   const name = Object.assign(document.createElement('span'), { className: 'view-name' });
   const detail = Object.assign(document.createElement('span'), { className: 'view-detail' });
-  label.append(name, detail);
+  // The render engine's info (EEVEE's info_append: shaders left to compile).
+  const info = Object.assign(document.createElement('span'), { className: 'view-info', hidden: true });
+  label.append(name, detail, info);
   const gizmo = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   gizmo.setAttribute('viewBox', '-48 -48 96 96');
   gizmo.classList.add('nav-gizmo');
@@ -220,7 +222,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
 
   // Per-view render state, applied by the view manager right before and after this view renders.
-  let authored = null, overlaysDrawn = null;
+  let authored = null, overlaysDrawn = null, materialsDrawn = null;
   view.beforeRender = () => {
     const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
     editorCamera.fov = 2 * Math.atan(LENS_HALF_TAN / Math.max(1, aspect));
@@ -238,9 +240,20 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const film = rendered && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;
     ctx.overlays.setEnabled(state.overlays && (!rendered || !!film), state);
     overlaysDrawn = ctx.overlays.use(view.camera, film);
+    if (rendered || view.preview) materialsDrawn = ctx.shaderCompile.use(view.camera);
   };
-  view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; overlaysDrawn?.(); overlaysDrawn = null; };
-  view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); toolOverlay.tick(); };
+  view.afterRender = () => {
+    if (authored) scene.clearColor = authored;
+    authored = null;
+    overlaysDrawn?.(); materialsDrawn?.();
+    overlaysDrawn = materialsDrawn = null;
+  };
+  view.tick = () => {
+    if (!state.cameraView && state.overlays) drawGizmo();
+    toolOverlay.tick();
+    const queued = view.rendered || view.preview ? ctx.shaderCompile.queued : 0, text = queued ? `Compiling shaders (${queued} remaining)` : '';
+    if (info.textContent !== text) Object.assign(info, { textContent: text, hidden: !text });
+  };
   view.setDetail = text => { if (detail.textContent !== text) detail.textContent = text; };
   view.sync = sync;
   view.dispose = () => {

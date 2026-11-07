@@ -41,6 +41,7 @@ import { timeDefaults, frameRate } from "./blenkernel/scene/time.js";
 import { createSceneFrames } from "./sequencer/scene-frames.js";
 import { createSceneAudio, renderSceneAudio } from "./sequencer/scene-audio.js";
 import { createLiveRender } from "./render/live.js";
+import { createShaderCompile } from "./draw/shader-compile.js";
 import { strips } from "./sequencer/sequence-editor.js";
 import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
@@ -664,7 +665,7 @@ async function inspector() {
 }
 // 3D Viewports: the primary area and any added by splitting it (dock factory 'viewport').
 const viewportCtx = {
-  world, views, editor, rna: blenderRNA, creator, dock: viewportDock, capture, overlays,
+  world, views, editor, rna: blenderRNA, creator, dock: viewportDock, capture, overlays, shaderCompile: createShaderCompile(scene),
   sceneCamera: authored,
   // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
   // (the last one clicked, else the first) shows the compositor.
