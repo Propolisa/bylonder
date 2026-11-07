@@ -10,8 +10,9 @@ const strip = (svg) => svg
   .replace(/>\s+</g, "><")
   .trim();
 
+// Keys use / on every platform: tools' icons are named `tools/<name>`.
 export async function blenderIcons(dir) {
   const files = await readdir(dir, { recursive: true });
   const svgs = files.filter((file) => file.endsWith(".svg"));
-  return Object.fromEntries(await Promise.all(svgs.map(async (file) => [file.slice(0, -4), strip(await readFile(`${dir}/${file}`, "utf8"))])));
+  return Object.fromEntries(await Promise.all(svgs.map(async (file) => [file.slice(0, -4).replaceAll("\\", "/"), strip(await readFile(`${dir}/${file}`, "utf8"))])));
 }
