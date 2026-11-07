@@ -1,7 +1,7 @@
 # Writes Blender's own Link and Append results as fixtures (tests/fixtures/link-append/): host.blend, an empty scene, and
 # what File > Link and File > Append make in it with their default options from the Link and Append example's library
-# (examples/link-append/libraries/library.blend, written by link-append.py: a collection of two objects and their
-# materials, an object outside it and a material no object uses), then a library override of the linked collection
+# (examples/link-append/libraries/library.blend, written by link-append.py: a collection of a lamp post, its lantern and
+# light, a bench outside it and a material no object uses), then a library override of the linked collection
 # (link-append.json).
 # usage: blender -b --factory-startup --python tools/blender-reference/link-append-fixtures.py -- OUT_DIR
 import bpy, json, os, sys
@@ -12,12 +12,12 @@ LIBRARY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../exampl
 HOST = os.path.join(out, "host.blend")
 # (operator, ID type folder, name) as the File Browser sets them inside the library.
 CASES = {
-    "link_collection": ("link", "Collection", "Props"),
-    "append_collection": ("append", "Collection", "Props"),
-    "link_object": ("link", "Object", "Lamp Post"),
-    "append_object": ("append", "Object", "Lamp Post"),
-    "link_material": ("link", "Material", "Gold"),
-    "append_material": ("append", "Material", "Gold"),
+    "link_collection": ("link", "Collection", "Street Lamp"),
+    "append_collection": ("append", "Collection", "Street Lamp"),
+    "link_object": ("link", "Object", "Bench"),
+    "append_object": ("append", "Object", "Bench"),
+    "link_material": ("link", "Material", "Cobblestone"),
+    "append_material": ("append", "Material", "Cobblestone"),
 }
 
 
@@ -65,8 +65,8 @@ for case, (op, folder, name) in CASES.items():
     reference[case] = summary()
 # Object > Library Override > Make on the instance the linked collection made, as the 3D View runs it.
 bpy.ops.wm.open_mainfile(filepath=HOST)
-bpy.ops.wm.link(directory=os.path.join(LIBRARY, "Collection") + "/", filename="Props", files=[{"name": "Props"}])
-bpy.context.view_layer.objects.active = bpy.data.objects["Props"]
+bpy.ops.wm.link(directory=os.path.join(LIBRARY, "Collection") + "/", filename="Street Lamp", files=[{"name": "Street Lamp"}])
+bpy.context.view_layer.objects.active = bpy.data.objects["Street Lamp"]
 bpy.ops.object.make_override_library()
 reference["override_collection"] = summary()
 json.dump(reference, open(os.path.join(out, "link-append.json"), "w"), indent=1)

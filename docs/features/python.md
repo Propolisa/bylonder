@@ -64,18 +64,22 @@ down opening the app.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=python)
 
-The demo, Python Scripts and Add-ons, is Blender's startup scene with two texts: `wave.py`, a script, and
-`scatter_cubes.py`, an add-on. The steps below run the script, use the console and install the add-on.
+The demo, Python Scripts and Add-ons, is a seashell on a beach at golden hour. The shell is built by a script kept in
+the file, `seashell.py`: a tube swept along a logarithmic spiral, every vertex and its banded color computed at once
+with numpy and written in one `foreach_set`. The file also holds `scatter_cubes.py`, an add-on. The steps below change
+the script and run it, use the console and install the add-on.
 
 ## Steps
 
-1. **Run a script.** Open the Scripting workspace. In the Text Editor, pick `wave.py` from the text menu and press
-   Alt P (Text > Run Script). The script adds a grid and lifts its vertices into a wave with numpy.
+1. **Run a script.** Open the Scripting workspace. In the Text Editor, pick `seashell.py` from the text menu. Change
+   `TURNS` from 5.5 to 3.5 and press Alt P (Text > Run Script): the script removes the old shell and builds one with
+   fewer whorls.
 
-   ![Alt P runs wave.py](../media/features/python/run-script.gif)
+   ![TURNS changed, then Alt P runs seashell.py](../media/features/python/run-script.gif)
 
-2. **Type in the console.** Hover the Python Console and type `C.object.name`, then Enter. `C` is `bpy.context` and
-   `D` is `bpy.data`; Tab completes names and Up recalls history.
+2. **Type in the console.** Hover the Python Console and type `C.object.name`, then Enter, and
+   `len(C.object.data.vertices)`. `C` is `bpy.context` and `D` is `bpy.data`; Tab completes names and Up recalls
+   history.
 
    ![The console prints the active object's name](../media/features/python/console.gif)
 
@@ -92,6 +96,10 @@ The demo, Python Scripts and Add-ons, is Blender's startup scene with two texts:
 
 ## Project files
 
-- `index.js`: the startup scene.
-- `wave.py`: the script of step 1.
-- `scatter_cubes.py`: the add-on of steps 3 and 4.
+- [python.py](../../examples/python/python.py): builds the beach, the light and the camera, keeps the two texts and runs
+  `seashell.py`, in Blender 5.2.
+- [python.blend](../../examples/python/python.blend): the file the script saves.
+- [seashell.py](../../examples/python/seashell.py): the script of step 1.
+- [scatter_cubes.py](../../examples/python/scatter_cubes.py): the add-on of steps 3 and 4.
+- [index.js](../../examples/python/index.js): opens the .blend with Blender's reader.
+- Recorded by [record-python.mjs](../../tools/docs/record-python.mjs).

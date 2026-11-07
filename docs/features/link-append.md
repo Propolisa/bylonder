@@ -58,31 +58,34 @@ with Ctrl Z.
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=link-append)
 
-The demo, Link and Append, links the Props collection from the example's
-[library.blend](../../examples/link-append/libraries/library.blend), makes it a library override and appends the Lamp
-Post. The steps below make it from the Default Cube.
+The demo, Link and Append, is a street at dusk set dressed from the example's
+[library.blend](../../examples/link-append/libraries/library.blend): the Street Lamp collection (an iron post, a glass
+lantern and its light) is linked once and instanced eight times along the pavements, the Bench is appended and the
+Cobblestone material, which no object in the library uses, is appended onto the road. The steps below link, override and append from the same library in the Default Cube.
 
 ## Steps
 
 1. **Link a collection.** In the Default Cube example, click the cube and press Delete. Open File > Link... and pick
    library.blend in the file dialog. Blender's File Browser lists the file's data-block types; double click Collection,
-   then Props.
+   then Street Lamp.
 
    ![Blender's File Browser inside library.blend](../media/features/link-append/file-browser.png)
 
-2. **The linked collection.** An empty instances the linked collection at the 3D cursor, with the crate and the ball.
+2. **The linked collection.** An empty instances the linked collection at the 3D cursor: the post, the lantern and
+   its light. Duplicate the empty (Shift D) to place more lamps; each is the same linked data.
 
-   ![Props linked](../media/features/link-append/linked.png)
+   ![Street Lamp linked](../media/features/link-append/linked.png)
 
-3. **Make it editable.** With the empty selected, choose Object > Library Override > Make. The crate and the ball are
-   now local overrides in the Props collection, kept in sync with the library.
+3. **Make it editable.** With the empty selected, choose Object > Library Override > Make. The post, the lantern and
+   the light are now local overrides in the Street Lamp collection, kept in sync with the library, and can be moved
+   or rotated on their own.
 
-   ![Props as a library override](../media/features/link-append/override.png)
+   ![Street Lamp as a library override](../media/features/link-append/override.png)
 
-4. **Append an object.** Open File > Append..., pick library.blend, double click Object, then Lamp Post. The lamp post
-   is a local copy with its own mesh.
+4. **Append an object.** Open File > Append..., pick library.blend, double click Object, then Bench. The bench is a
+   local copy with its own mesh.
 
-   ![The lamp post appended](../media/features/link-append/appended.png)
+   ![The bench appended](../media/features/link-append/appended.png)
 
 5. **The library.** Set the Outliner's Display Mode to Blender File: library.blend lists what the scene links from it.
 
@@ -91,7 +94,7 @@ Post. The steps below make it from the Default Cube.
 ## Project files
 
 - [link-append.py](../../examples/link-append/link-append.py): writes libraries/library.blend with Blender 5.2, then
-  links, overrides and appends from it in the Default Cube's scene and saves link-append.blend.
+  builds the street, links, instances, overrides and appends from it and saves link-append.blend.
 - [link-append.blend](../../examples/link-append/link-append.blend): the file the script saves.
 - [library.blend](../../examples/link-append/libraries/library.blend): the library.
 - [index.js](../../examples/link-append/index.js): opens the .blend with Blender's reader.

@@ -123,8 +123,8 @@ function summary() {
 const asBlender = (got, expected, what) => assert.deepEqual(JSON.parse(JSON.stringify(got)), expected, `${what} as Blender 5.2.3 makes it`);
 
 const LABELS = { link: 'Link...', append: 'Append...' };
-for (const [kind, [op, folder, name]] of Object.entries({ link_collection: ['link', 'Collection', 'Props'], append_collection: ['append', 'Collection', 'Props'],
-  link_object: ['link', 'Object', 'Lamp Post'], append_object: ['append', 'Object', 'Lamp Post'], link_material: ['link', 'Material', 'Gold'], append_material: ['append', 'Material', 'Gold'] })) {
+for (const [kind, [op, folder, name]] of Object.entries({ link_collection: ['link', 'Collection', 'Street Lamp'], append_collection: ['append', 'Collection', 'Street Lamp'],
+  link_object: ['link', 'Object', 'Bench'], append_object: ['append', 'Object', 'Bench'], link_material: ['link', 'Material', 'Cobblestone'], append_material: ['append', 'Material', 'Cobblestone'] })) {
   main.readBlend(fixture('host.blend'));
   assert.ok(await linkAppend(LABELS[op], folder, name), `${kind} pushed an undo step`);
   asBlender(summary(), reference[kind], kind);
@@ -147,16 +147,16 @@ world.curves = createCurveObjects(world);
 registerObjects(animation, world.objects);
 const sync = createMainSync({ rna: createRNA({ world, selection: createSelection(scene, world.objects) }), ids: animation.ids });
 const drawn = () => world.objects.filter((node) => !deleted(node) && node.isEnabled()).map((node) => node.name).sort();
-await linkAppend(LABELS.link, 'Collection', 'Props');
+await linkAppend(LABELS.link, 'Collection', 'Street Lamp');
 sync.view();
-assert.deepEqual(drawn(), ['Props'], 'the linked objects are drawn by the instancing empty, not as scene objects');
+assert.deepEqual(drawn(), ['Street Lamp'], 'the linked objects are drawn by the instancing empty, not as scene objects');
 const instances = () => scene.meshes.filter((mesh) => mesh.name.startsWith('__instances')).reduce((n, mesh) => n + mesh.thinInstanceCount, 0);
-assert.equal(instances(), 2, 'the empty draws the crate and the ball as instances');
+assert.equal(instances(), 2, 'the empty draws the post and the lantern as instances');
 const result = sync.run(() => main.run('object.make_override_library', {}));
 assert.ok(result.status & 4, `object.make_override_library: ${result.report}`);
 sync.view();
 sync.flush();
-assert.deepEqual(drawn(), ['Ball', 'Crate'], 'the overrides are the scene objects');
+assert.deepEqual(drawn(), ['Lamp Light', 'Lantern', 'Post'], 'the overrides are the scene objects');
 asBlender(summary(), reference.override_collection, 'the override');
 
 // The project keeps the library (libraries/library.blend), and its .blend, read again with the library loaded from the
@@ -165,7 +165,7 @@ const kept = unkeptLibraries(new Set());
 assert.deepEqual(kept.map(([path]) => path), ['libraries/library.blend'], 'the project keeps the library Main links from');
 assert.equal(unkeptLibraries(new Set(['libraries/library.blend'])).length, 0, 'once');
 main.readBlend(fixture('host.blend'));
-await linkAppend(LABELS.link, 'Collection', 'Props');
+await linkAppend(LABELS.link, 'Collection', 'Street Lamp');
 const saved = main.writeBlend('/project.blend');
 for (const path of [...files.keys()].filter((path) => path.startsWith('/libraries/'))) files.delete(path);
 await loadLibraries(['index.js', ...kept.map(([path]) => path)], async (path) => kept.find(([p]) => p === path)[1]);

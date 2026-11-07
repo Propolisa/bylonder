@@ -1,5 +1,5 @@
 // Records docs/features/mobile.md's media under touch emulation: the Layout workspace on a large phone, a folded area's
-// drawer, navigation by gestures, the header scrolled to Rendered shading, press and hold, a value dragged with its
+// drawer, navigation by gestures, on the Robot Arm in Pose Mode, the header scrolled to Rendered shading, press and hold, a value dragged with its
 // readout and soft Shift, the area edge menu, an area carried by its header, and the touch bar's pie and bubbles.
 // usage: node tools/docs/record-mobile.mjs
 import { record } from "./record.mjs";
@@ -10,10 +10,15 @@ const center = async (locator) => {
   return [box.x + box.width / 2, box.y + box.height / 2];
 };
 
-await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true }, async (r) => {
+await record("mobile", { example: "robot-arm", node: null, size: PHONE, touch: true }, async (r) => {
   const { app, fingers } = r;
+  await r.pause(3000);
+  await app.settled();
+  await app.bylonder((b) => b.views.input.setShading("rendered"));
+  await r.pause(8000);
   await r.shot("layout");
   await r.shot("thumbnail", undefined, { width: 412 });
+  await app.bylonder((b) => b.views.input.setShading("solid"));
 
   await r.gif("drawer", undefined, async () => {
     await fingers.tap(await center(app.locator(".dock-fold").first()));
@@ -48,10 +53,11 @@ await record("mobile", { example: "cube", node: "Cube", size: PHONE, touch: true
   const tap = async (locator, wait = 500) => { await locator.scrollIntoViewIfNeeded(); await fingers.tap(await center(locator)); await r.pause(wait); };
   await r.gif("bubbles", { x: 0, y: PHONE.height - 520, width: PHONE.width, height: 520 }, async () => {
     await tap(bar.locator('button[aria-label="Keys"]'), 900);
-    await tap(app.locator('[role="menuitem"][aria-label="Move"]'));
+    await tap(app.locator('[role="menuitem"][aria-label="Rotate"]'));
     await tap(bar.locator('.bl-bubble[data-item="AXIS_X"]'));
     await tap(bar.locator('button[aria-label="Numbers"]'));
     await tap(bar.locator('button[aria-label="2"]'));
+    await tap(bar.locator('button[aria-label="0"]'));
     await tap(bar.locator('button[aria-label="Numbers"]'));
     await tap(bar.locator('.bl-bubble[data-item="CONFIRM"]'), 1000);
   });

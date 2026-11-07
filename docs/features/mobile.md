@@ -9,7 +9,7 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/preferences/interface.html
   - https://docs.blender.org/manual/en/5.2/editors/preferences/keymap.html
   - https://docs.blender.org/manual/en/5.2/interface/window_system/areas.html
-example: cube
+example: robot-arm
 thumbnail: mobile/thumbnail.png
 media:
   - mobile/layout.png
@@ -79,9 +79,11 @@ and then right clicks, and a pinch over the interface sets Preferences > Interfa
 device's first run sets Preferences > Keymap > Middle Mouse Action to Pan, so two
 fingers pan. The design is in `docs/mobile.md`.
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=cube)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=robot-arm)
 
-The demo is the Default Cube, opened on a phone or a tablet (or with a desktop browser's device emulation).
+The demo, Robot Arm, is a workshop robot arm over a brass gear at night, opened on a phone or a tablet (or with a
+desktop browser's device emulation). The arm is skinned to an armature and opens in Pose Mode with its Upper Arm bone
+active, so it can be posed by touch; its work light follows the Head bone.
 
 ## Steps
 
@@ -125,11 +127,16 @@ The demo is the Default Cube, opened on a phone or a tablet (or with a desktop b
 
    ![The Timeline carried by its header onto the 3D Viewport](../media/features/mobile/carry.gif)
 
-9. **Tap shortcuts.** Tap the cube, then Keys on the touch bar and Move in the pie. While the move runs, the touch
-   bar shows its keys as bubbles: tap X, then the numbers button and 2, then Confirm. The cube moves 2 along X.
+9. **Pose by shortcuts.** With the Upper Arm bone active, tap Keys on the touch bar and Rotate in the pie. While the
+   rotation runs, the touch bar shows its keys as bubbles: tap X, then the numbers button, 2 and 0, then Confirm. The
+   upper arm turns 20 degrees about X and the light on the bench moves with it.
 
-   ![Move by the keys pie, then X, 2 and Confirm by bubbles](../media/features/mobile/bubbles.gif)
+   ![Rotate by the keys pie, then X, 20 and Confirm by bubbles](../media/features/mobile/bubbles.gif)
 
 ## Project files
 
-The demo is the Default Cube example (`examples/cube`); nothing in its files is specific to touch.
+- [robot-arm.py](../../examples/robot-arm/robot-arm.py): builds the arm, its armature and pose, the bench and the
+  lights in Blender 5.2; nothing in it is specific to touch.
+- [robot-arm.blend](../../examples/robot-arm/robot-arm.blend): the file the script saves.
+- [index.js](../../examples/robot-arm/index.js): opens the .blend with Blender's reader.
+- Recorded by [record-mobile.mjs](../../tools/docs/record-mobile.mjs).
