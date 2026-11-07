@@ -1,31 +1,40 @@
 ---
 id: keyframe-animation
 title: Keyframe Animation
-summary: Key an object's transform with I at two frames on the Timeline and play the animation with Space.
-expect: Keying with I, the Timeline and playback work as in Blender; the demo itself is keyed from code, so the steps animate the Default Cube instead.
+summary: Key an object's rotation with I at two frames, shape the motion between them with an F-curve's interpolation and easing in the Graph Editor, and play it.
+expect: Keying with I, the Timeline, the Graph Editor's interpolation and easing modes and playback work as in Blender, evaluated by Blender's animation code.
 blender_version: 5.2.3
 blender_manual:
   - https://docs.blender.org/manual/en/5.2/animation/keyframes/introduction.html
   - https://docs.blender.org/manual/en/5.2/animation/keyframes/editing.html
+  - https://docs.blender.org/manual/en/5.2/editors/graph_editor/fcurves/properties.html
   - https://docs.blender.org/manual/en/5.2/editors/timeline.html
-example: animation
+example: newtons-cradle
 thumbnail: keyframe-animation/thumbnail.png
 media:
-  - keyframe-animation/insert.gif
-  - keyframe-animation/second-key.gif
+  - keyframe-animation/pendulum.gif
+  - keyframe-animation/key-swing.gif
+  - keyframe-animation/ease.gif
   - keyframe-animation/play.gif
-  - keyframe-animation/timeline.png
+  - keyframe-animation/cradle.gif
 ui:
   - VIEW_3D
   - TIMELINE
+  - FCURVES
   - TIME_*
   - DOPESHEET_MT_marker
   - ANIM_MT_keyframe*
   - VIEW3D_MT_object_animation
+  - GRAPH_MT_key
 operators:
   - anim.keyframe_insert
-  - transform.translate
   - transform.rotate
+  - object.rotation_clear
+  - object.editmode_toggle
+  - transform.translate
+  - graph.interpolation_type
+  - graph.easing_type
+  - graph.view_all
   - screen.animation_play
   - screen.frame_jump
   - screen.keyframe_jump
@@ -39,44 +48,56 @@ tests:
   - tests/anim-wasm.test.js
   - tests/animatable.test.js
 limits:
-  - The Keyframe Animation example keys a Babylon scene from code with the project SDK; the steps here key Blender's objects with I.
+  - The Keyframe Animation example (a Babylon scene keyed from code with the project SDK) is kept for the SDK; the Newton's Cradle example is the one this page recreates.
 ---
 # Keyframe Animation
 
-A keyframe stores a property's value at a frame; between keys Blender interpolates along F-curves. Hovering the 3D
-Viewport and pressing I keys the selected objects' location, rotation and scale at the current frame. The Timeline
-shows the keys as diamonds, plays the range and jumps between keys. Keys are Blender's actions in the module
-(`anim-api.cc`), evaluated by Blender's code.
+A keyframe stores a property's value at a frame; between keys Blender interpolates along an F-curve. Hovering the 3D
+Viewport and pressing I keys the selected objects' location, rotation and scale at the current frame. How the value
+travels between two keys is the F-curve's interpolation (Constant, Linear, Bezier or an easing curve such as Sine) and
+its easing (In, Out or both), set in the Graph Editor. Keys are Blender's actions in the module (`anim-api.cc`),
+evaluated by Blender's code.
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=animation)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=newtons-cradle)
 
-The demo, Keyframe Animation, is a bouncing ball whose position, squash and color are keyed from code. The steps
-below animate the Default Cube by hand.
+The demo is a Newton's cradle. Each pendulum is an empty with a ball and two threads parented to it, so one keyed
+rotation swings the whole pendulum. The outer pendulums are keyed with Sine interpolation: Ease In on the way down, so
+a ball falls faster and faster into the row, and Ease Out on the way up, so it slows to a stop at the top of its swing.
+Between the two the right ball holds still at 0 degrees.
 
 ## Steps
 
-1. **Insert a key.** Select the cube, hover the 3D Viewport and press I. A diamond appears on the Timeline at frame 1
-   and the keyed fields in Properties show a key in their decorator.
+1. **A pendulum.** In a new file, hover the 3D Viewport and press Delete to remove the cube. Shift A > Mesh > UV Sphere
+   adds the ball and G Z 2.5 Enter raises it. Tab, G Z -2 Enter and Tab again move the ball's mesh down in Edit Mode,
+   so its origin, the point it turns about, stays 2 m above it.
 
-   ![I keys the cube at frame 1](../media/features/keyframe-animation/insert.gif)
+   ![A ball hanging 2 m below its origin](../media/features/keyframe-animation/pendulum.gif)
 
-2. **Key a second pose.** Type 40 in the Timeline's current frame field. Press G, X, 4, Enter to move the cube, then
-   R, Z, 90, Enter to turn it, and press I again.
+2. **Key the swing.** Press R Y 40 Enter to raise the ball, then I to key the rotation at
+   frame 1. Type 16 in the Timeline's current frame field, press Alt R to bring the ball back down and I again.
 
-   ![Frame 40: move, rotate, I](../media/features/keyframe-animation/second-key.gif)
+   ![R Y 40 and I at frame 1, Alt R and I at frame 16](../media/features/keyframe-animation/key-swing.gif)
 
-3. **Play.** Go back to frame 1 and press Space; Space again stops. The cube moves and turns between the keys with
-   Blender's default Bezier easing.
+3. **Ease the fall.** Switch the Timeline to the Graph Editor with its Editor Type menu and drag its top edge up. Over
+   the curves, Home frames them and A selects every key. Key > Interpolation Mode (T) > Sinusoidal, then Key > Easing Mode
+   (Ctrl E) > Ease In: the curve starts flat and ends steep, so the ball gains speed as it falls.
 
-   ![Space plays frames 1 to 40](../media/features/keyframe-animation/play.gif)
+   ![T > Sinusoidal and Ctrl E > Ease In in the Graph Editor](../media/features/keyframe-animation/ease.gif)
 
-4. **Edit the keys.** On the Timeline, drag a diamond to retime it; Up and Down arrows jump between keys. View > Show
-   Channels lists every F-curve.
+4. **Play.** Go back to frame 1 and press Space; Space again stops. The playhead runs along the curve.
 
-   ![The keys at frames 1 and 40 on the Timeline](../media/features/keyframe-animation/timeline.png)
+   ![Space plays the fall](../media/features/keyframe-animation/play.gif)
+
+5. **The cradle.** The example keys two pendulums this way over a 60 frame cycle. Its brass balls mix two Glossy BSDFs
+   (a sharp and a rough lobe), a warm spot light and a cool rim light cast soft shadows on the walnut base, and the
+   scene camera frames it in Rendered shading.
+
+   ![The Newton's Cradle example playing in Rendered shading](../media/features/keyframe-animation/cradle.gif)
 
 ## Project files
 
-- [index.js](../../examples/animation/index.js): the ball, its tracks and the keys made with `animation.insert` the
-  first time the project runs.
+- [newtons-cradle.py](../../examples/newtons-cradle/newtons-cradle.py): builds the cradle, its materials, lights and
+  camera, and keys the two outer pendulums with Sine easing, in Blender 5.2.
+- [newtons-cradle.blend](../../examples/newtons-cradle/newtons-cradle.blend): the file the script saves.
+- [index.js](../../examples/newtons-cradle/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-keyframe-animation.mjs](../../tools/docs/record-keyframe-animation.mjs).
