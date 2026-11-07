@@ -1913,7 +1913,7 @@
  {
   "id": "uv-editing",
   "title": "UV Editing",
-  "summary": "Unwrap a mesh with UV > Unwrap, Smart UV Project or Project from View, mark seams, and select, move, pin, stitch and pack its UVs in the UV Editor over the image they map.",
+  "summary": "Unwrap a mesh with UV > Unwrap, Smart UV Project or Project from View, mark seams, and select, move, pin, stitch and pack its UVs in the UV Editor over the image they map, here four food cans whose labels and lids come from one image.",
   "expect": "Unwrapping and UV editing run Blender's operators; UV Sculpt has no brush cursor and Display Stretch is not drawn.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -1922,12 +1922,13 @@
    "https://docs.blender.org/manual/en/5.2/modeling/meshes/uv/workflows/layout.html",
    "https://docs.blender.org/manual/en/5.2/editors/uv/index.html"
   ],
-  "example": "texture-paint",
+  "example": "tin-cans",
   "thumbnail": "uv-editing/thumbnail.png",
   "media": [
    "uv-editing/workspace.png",
    "uv-editing/unwrap.gif",
-   "uv-editing/select-move.gif"
+   "uv-editing/select-move.gif",
+   "uv-editing/render.png"
   ],
   "ui": [
    "IMAGE_EDITOR",
@@ -1966,11 +1967,12 @@
   ],
   "limits": [
    "UV Sculpt tools are not drawn with a brush cursor.",
-   "The UV Editor's stretch display (Overlays, Display Stretch) is not drawn."
+   "The UV Editor's stretch display (Overlays, Display Stretch) is not drawn.",
+   "The UV Editor's sidebar does not hide with N or View > Sidebar."
   ],
   "page": "docs/features/uv-editing.md",
-  "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
-  "example_title": "Texture Paint",
+  "open": "https://propolisa.github.io/bylonder/#example=tin-cans",
+  "example_title": "Tin Cans",
   "coverage": {
    "operators": {
     "supported": 17,

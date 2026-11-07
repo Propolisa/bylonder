@@ -37,6 +37,7 @@ export const examples = [
   { id: "texture-paint", title: "Texture Paint" },
   { id: "blue-planet", title: "Blue Planet" },
   { id: "neon-sign", title: "Neon Sign" },
+  { id: "tin-cans", title: "Tin Cans" },
   { id: "grease-pencil", title: "Bouncing Ball" },
   { id: "shape-keys", title: "Shape Keys" },
   { id: "nla", title: "Nonlinear Animation" },
