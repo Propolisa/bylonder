@@ -4,6 +4,9 @@
  * Blender placed them, in UI units. A block's layouts are recorded when Blender resolves them (block_layout_resolve, linked with
  * --wrap), as it frees them then; its buttons are written once the block ends. Buttons stay valid until the next
  * draw of what holds them, and JS presses them by their address. */
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
 #include <map>
 #include <set>
 #include <vector>
@@ -236,6 +239,9 @@ static void rect_json(std::ostringstream &out, const rctf &rect)
 
 /* A button: its kind, address, text (its label, and what it shows when that differs: a number's value with its unit,
  * an enum's item), icon, size, state, and what it edits or runs. */
+/* A number JSON can hold: an infinite range (a property without bounds) as the largest double, NaN as 0. */
+static double json_number(const double value) { return std::isnan(value) ? 0.0 : std::clamp(value, -DBL_MAX, DBL_MAX); }
+
 static void button_json(std::ostringstream &out, Button *but)
 {
   if (!but->block->endblock) {
@@ -303,11 +309,12 @@ static void button_json(std::ostringstream &out, Button *but)
     quote(out, but->poin);
   }
   else if (but->poin && !but->menu_create_func && !but->block_create_func) {
-    out << ",\"value\":" << button_value_get(but);
+    out << ",\"value\":" << json_number(button_value_get(but));
   }
   if (ELEM(but->type, ButtonType::Num, ButtonType::NumSlider)) {
     char range[160];
-    SNPRINTF(range, ",\"min\":%.9g,\"max\":%.9g,\"soft_min\":%.9g,\"soft_max\":%.9g", but->hardmin, but->hardmax, but->softmin, but->softmax);
+    SNPRINTF(range, ",\"min\":%.9g,\"max\":%.9g,\"soft_min\":%.9g,\"soft_max\":%.9g", json_number(but->hardmin), json_number(but->hardmax),
+             json_number(but->softmin), json_number(but->softmax));
     out << range;
   }
   if (but->type == ButtonType::SearchMenu) {

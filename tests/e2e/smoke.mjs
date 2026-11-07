@@ -994,6 +994,13 @@ const checks = {
     assert.deepEqual(await view(), looking, "the camera did not turn");
   } },
 
+  // Properties > Data of a Grease Pencil object: its layers panel, whose buttons include unbounded ranges.
+  "Grease Pencil's Data properties open": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
+    await app.bylonder((b) => b.editor.selection.replace([b.world.objects.find((o) => o.name === "Bouncing Ball")]));
+    await app.locator('#properties-section [role="tab"][aria-label="Data"]').click();
+    await app.locator('#properties-section').getByText("Layers").first().waitFor();
+  } },
+
   // A pen in Draw Mode: one move event carrying coalesced moves draws them all, and the pen's eraser end erases. The
   // events are the page's own PointerEvents, as a tablet gives them (pressure, tilt, coalesced moves, button 5).
   "Grease Pencil takes a pen's coalesced moves and its eraser end": { open: { link: "grease-pencil", node: "Bouncing Ball" }, async run() {
