@@ -32,6 +32,7 @@ const FRAGMENT_MAIN_BEGIN = `#ifdef POINTCLOUD
 float pointR2 = dot(vPointCorner, vPointCorner);
 if (pointR2 > 1.0) discard;
 vec3 pointToEye = normalize(cross(vPointRight, vPointUp));
+pointToEye *= sign(dot(pointToEye, vEyePosition.xyz - vPointCenter));
 vec3 pointN = normalize(vPointRight * vPointCorner.x + vPointUp * vPointCorner.y + pointToEye * sqrt(1.0 - pointR2));
 vec4 pointClip = viewProjection * vec4(vPointCenter + pointN * vPointRadius, 1.0);
 gl_FragDepth = pointClip.z / pointClip.w * 0.5 + 0.5;
