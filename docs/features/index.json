@@ -1600,7 +1600,7 @@
   "example_title": "Blue Planet",
   "coverage": {
    "operators": {
-    "supported": 143,
+    "supported": 144,
     "partial": 2,
     "total": 173
    },

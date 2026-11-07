@@ -6497,6 +6497,7 @@
   "ShaderNodeTree node.add_node:ShaderNodeRadialTiling",
   "ShaderNodeTree node.add_node:ShaderNodeSeparateColor",
   "ShaderNodeTree node.add_node:ShaderNodeSeparateXYZ",
+  "ShaderNodeTree node.add_node:ShaderNodeShaderToRGB",
   "ShaderNodeTree node.add_node:ShaderNodeSubsurfaceScattering",
   "ShaderNodeTree node.add_node:ShaderNodeTangent",
   "ShaderNodeTree node.add_node:ShaderNodeTexBrick",

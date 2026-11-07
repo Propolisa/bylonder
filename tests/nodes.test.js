@@ -186,4 +186,14 @@ assert.match(specular._fragmentCompilationState._builtCompilationString, /bl_nod
 assert.match(specular._fragmentCompilationState._builtCompilationString, /vReflectivityColor = vec4\([^;]*, (bl_f\w*) \* \1 \/ max\((bl_f\w*), 1e-6\)\);[\s\S]*vec4\(vMetallicReflectanceFactors\.rgb, \2\)/,
   "a dielectric's F0 and F90 follow its closure's IOR per pixel (bsdf_lut)");
 
+// Shader to RGB lights its closure where it is (EEVEE's closure_to_rgba), by a surface block in a scope of its own, beside
+// a Material Output's own lit surface.
+const toon = nodeMaterialFromTree('Toon', scene, { nodes: [{ idname: 'ShaderNodeBsdfDiffuse', name: 'Diffuse' }, { idname: 'ShaderNodeShaderToRGB', name: 'Shader to RGB' },
+  { idname: 'ShaderNodeValToRGB', name: 'Ramp' }, { idname: 'ShaderNodeBsdfPrincipled', name: 'Principled' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+  links: [['Diffuse', 'BSDF', 'Shader to RGB', 'Shader'], ['Shader to RGB', 'Color', 'Ramp', 'Fac'], ['Ramp', 'Color', 'Principled', 'Base Color'], ['Principled', 'BSDF', 'Material Output', 'Surface']] }).material;
+if (toon._buildIsInProgress) await new Promise((resolve) => toon.onBuildObservable.addOnce(resolve));
+const toonCode = toon._fragmentCompilationState._builtCompilationString;
+assert.match(toonCode, /vec3 (closureLit\w*);\n\{[\s\S]*\1 = finalColor\.rgb;\n\}\nvec4 \w+ = bl_closure_radiance\(\w+, \1\);/, "the diffuse lit in a scope of its own");
+assert.equal(toon.attachedBlocks.filter((b) => b.getClassName() === 'BlenderSurfaceBlock').length, 2, "and the Principled lit by the Material Output's surface");
+
 console.log('nodes: ok');

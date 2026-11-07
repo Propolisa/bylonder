@@ -1038,7 +1038,7 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   initialize(state) {
     super.initialize(state);
     const material = state.sharedData.nodeMaterial;
-    if (!this.lobe && closureHas(this.closure.connectedPoint?.ownerBlock, transmits)) this._refraction(material);
+    if (!this.lobe && !this.scoped && closureHas(this.closure.connectedPoint?.ownerBlock, transmits)) this._refraction(material);
     for (const path of Object.keys(this._values)) this._point(path)._blenderValue = null;
     const position = geometryBlock(material, '__position'), world = geometryBlock(material, '__world');
     wire(worldPosition(material).output, this.worldPosition);
@@ -1049,7 +1049,7 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     wire(normal.output, this.worldNormal);
     wire(geometryBlock(material, '__view').output, this.view);
     // The lobes are lit on their own with EEVEE Parity (eevee-parity.js), else merged into the base, as Babylon's PBR.
-    this._merged = !this.lobe && !eeveeParity(material.getScene());
+    this._merged = !this.lobe && (this.scoped || !eeveeParity(material.getScene()));
     if (this._merged) wire(geometryBlock(material, '__cameraPosition').output, this.cameraPosition);
     else {
       const eye = helper(material, '__viewEye', (name) => new BlenderViewEyeBlock(name));
@@ -1058,7 +1058,7 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
       wire(eye.output, this.cameraPosition);
     }
     // A reflection block of its own: Babylon's names the uniforms it binds anew for each PBR block that reads it.
-    const reflection = helper(material, this.lobe ? `__reflection lobe ${this.lobe}` : '__reflection', (name) => new ReflectionBlock(name));
+    const reflection = helper(material, this.lobe ? `__reflection lobe ${this.lobe}` : this.scoped ? `__reflection ${this.uniqueId}` : '__reflection', (name) => new ReflectionBlock(name));
     reflection._getTexture = environmentOf(material);
     wire(position.output, reflection.position);
     wire(world.output, reflection.world);
@@ -1084,7 +1084,7 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
   }
 
   _buildBlock(state) {
-    if (state.target !== Targets.Fragment) return this.lobe ? this._scoped(state, () => super._buildBlock(state)) : super._buildBlock(state);
+    if (state.target !== Targets.Fragment) return this.lobe || this.scoped ? this._scoped(state, () => super._buildBlock(state)) : super._buildBlock(state);
     state._emitFunction('bl_closure', STAND_INS.bl_closure, '');
     let closure = this.closure.associatedVariableName;
     if (this._merged) {
@@ -1093,10 +1093,14 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
     }
     for (const [path, value] of Object.entries(this._values)) Object.assign(this._point(path), { _blenderValue: value(closure), associatedVariableName: value(closure) });
     if (!this.lobe) {
-      const start = state.compilationString.length;
-      super._buildBlock(state);
-      this._dielectricReflectance(state, start, closure);
-      state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, finalColor.rgb);\n`;
+      const build = () => { const start = state.compilationString.length; super._buildBlock(state); this._dielectricReflectance(state, start, closure); };
+      let lit = 'finalColor.rgb';
+      if (this.scoped) {
+        lit = state._getFreeVariableName('closureLit');
+        state.compilationString += `vec3 ${lit};\n`;
+        this._scoped(state, build, `${lit} = finalColor.rgb;\n`);
+      } else build();
+      state.compilationString += `${state._declareOutput(this.radiance)} = bl_closure_radiance(${closure}, ${lit});\n`;
       return this;
     }
     const lit = state._getFreeVariableName('lobeLit');
@@ -1121,8 +1125,10 @@ export class BlenderSurfaceBlock extends PBRMetallicRoughnessBlock {
 
   // Babylon's PBR code declares fixed names: a second one runs in a scope of its own.
   _scoped(state, build, end = '') {
-    const start = state.compilationString.length;
+    const start = state.compilationString.length, temps = state.sharedData.temps.length;
     build();
+    // What the scope declared is not declared after it.
+    state.sharedData.temps.length = temps;
     state.compilationString = `${state.compilationString.slice(0, start)}{\n${state.compilationString.slice(start)}${end}}\n`;
     return this;
   }
@@ -1180,8 +1186,10 @@ export class BlenderClosureNormalBlock extends NodeMaterialBlock {
 RegisterClass('BABYLON.BlenderClosureNormalBlock', BlenderClosureNormalBlock);
 // Whether a closure's nodes are one that `is` tells: one that reflects light (a BSDF), one that transmits it (a Glass or
 // Refraction BSDF, a Principled BSDF's transmission).
+// Shader to RGB's closure is lit where it is: its output is a color, not the closure's.
+const closureEnds = (block) => block.idname === 'ShaderNodeShaderToRGB';
 function closureHas(block, is, seen = new Set()) {
-  if (!block || seen.has(block)) return false;
+  if (!block || seen.has(block) || closureEnds(block)) return false;
   seen.add(block);
   return is(block) || block.inputs.some((input) => closureHas(input.connectedPoint?.ownerBlock, is, seen));
 }
@@ -1191,7 +1199,7 @@ const reflects = (block) => /^ShaderNodeBsdf(?!Transparent)|^ShaderNodeSubsurfac
 const REFLECTION_ONLY = ['ShaderNodeBsdfGlossy', 'ShaderNodeBsdfAnisotropic', 'ShaderNodeBsdfMetallic'];
 // The blocks of a closure's nodes, each once, from the output up.
 function closureBlocks(block, seen = new Set()) {
-  if (!block || seen.has(block)) return [];
+  if (!block || seen.has(block) || closureEnds(block)) return [];
   seen.add(block);
   return [block, ...block.inputs.flatMap((input) => closureBlocks(input.connectedPoint?.ownerBlock, seen))];
 }
@@ -1206,6 +1214,34 @@ function assignLobes(closure) {
 }
 const transmits = (block) => ['ShaderNodeBsdfGlass', 'ShaderNodeBsdfRefraction'].includes(block.idname) || (block.idname === 'ShaderNodeBsdfPrincipled'
   && (block.getInputByName('Transmission Weight').isConnected || block.values['Transmission Weight'] > 0));
+
+// Shader to RGB (node_shader_shader_to_rgb.cc, EEVEE's closure_to_rgba): the closure lit where the node is, by a
+// surface block of its own (Babylon's PBR lighting, in a scope of its own), its radiance the Color and its coverage the
+// Alpha.
+export class ShaderNodeShaderToRGB extends blenderShader(NodeMaterialBlock) {
+  constructor(name) {
+    super(name || 'Shader to RGB', 'ShaderNodeShaderToRGB', Targets.Neutral);
+    this.registerInput('__lit', T.Color4, true, Targets.Fragment);
+  }
+
+  initialize(state) {
+    super.initialize(state);
+    const closure = this.getInputByName('Shader').connectedPoint, lit = this.getInputByName('__lit');
+    if (!closure) return lit.connectedPoint?.disconnectFrom(lit);
+    const material = state.sharedData.nodeMaterial;
+    const surface = helper(material, `__shaderToRGB ${this.uniqueId}`, (name) => Object.assign(new BlenderSurfaceBlock(name), { scoped: true }));
+    wire(closure, surface.closure);
+    wire(surface.radiance, lit);
+  }
+
+  _compile(state) {
+    const links = this._links(state), lit = this.getInputByName('__lit');
+    const radiance = lit.isConnected ? lit.associatedVariableName : 'vec4(0.0)';
+    links.set('@Color', radiance);
+    links.set('@Alpha', `${radiance}.a`);
+    return links;
+  }
+}
 
 // A closure that reflects nothing (emission, transparency) as its radiance, without lighting.
 export class BlenderUnlitSurfaceBlock extends NodeMaterialBlock {
@@ -1467,7 +1503,7 @@ function adaptOutput(point, own, socket) {
 }
 
 // The block classes, one per Blender node Bylonder links, registered for Babylon's serialization.
-const OWN_CLASSES = { ShaderNodeOutputMaterial, ShaderNodeOutputWorld };
+const OWN_CLASSES = { ShaderNodeOutputMaterial, ShaderNodeOutputWorld, ShaderNodeShaderToRGB };
 export const shaderNodeClasses = Object.fromEntries([...Object.keys(SHADER_NODES), ...Object.keys(OWN_CLASSES)].map((idname) => {
   const label = declaration('shader', idname).name;
   const Block = OWN_CLASSES[idname] ?? { [idname]: class extends BlenderShaderBlock { constructor(name) { super(name || label, idname); } } }[idname];
