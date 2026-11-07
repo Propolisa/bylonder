@@ -1,7 +1,7 @@
 ---
 id: texture-paint
 title: Texture Paint and Vertex Paint
-summary: Paint an object's image texture in the 3D Viewport or the Image Editor with Blender's brushes and projection painting, and paint its color attribute in Vertex Paint Mode, one undo step per stroke.
+summary: Paint an object's image texture in the 3D Viewport or the Image Editor with Blender's brushes and projection painting, and paint its color attribute in Vertex Paint Mode, here a vase hand painted in cobalt and a dish with a blue rim.
 expect: Painting in the 3D Viewport, the Image Editor and Vertex Paint runs Blender's brushes; colors show with the Standard view, and brush textures are not drawn in the cursor.
 blender_version: 5.2.3
 blender_manual:
@@ -16,6 +16,7 @@ media:
   - texture-paint/paint-3d.gif
   - texture-paint/paint-2d.gif
   - texture-paint/vertex-paint.gif
+  - texture-paint/render.png
 ui:
   - TEXTURE_PAINT
   - VERTEX_PAINT
@@ -56,6 +57,7 @@ limits:
   - The color management's view transform (AgX, Filmic) is not applied to what Babylon draws; images display with the Standard view.
   - Brush textures and masks (Texture and Texture Mask panels) are not drawn in the brush cursor.
   - Clone and Smear brushes paint only within one image; Clone from another image's UV map is not checked.
+  - In Texture Paint Mode, Numpad 0 and Numpad . do not move the view.
 ---
 # Texture Paint and Vertex Paint
 
@@ -66,33 +68,38 @@ changed, and the image's mipmaps are made again once painting pauses. Ctrl Z und
 
 [Open in Bylonder](https://propolisa.github.io/bylonder/#example=texture-paint)
 
-The demo, Texture Paint, has Suzanne unwrapped with Smart UV Project and a packed image in its material's Base Color,
-and a sphere with a color attribute. It is built by a Blender script (`texture-paint.py`), so the steps below start
-from the example.
+The demo, Texture Paint, is a glazed vase hand painted in cobalt and a small dish, on a wooden table in low window
+light. The vase's paint is a packed 2048 by 1024 image over a cylindrical unwrap; the dish's blue rim is a color
+attribute. It is built by a Blender script (`texture-paint.py`), which also sets the brushes to cobalt, so the steps
+below start from the example.
+
+![The vase and the dish rendered through the camera](../media/features/texture-paint/render.png)
 
 ## Steps
 
-1. **Open the Texture Paint workspace.** Pick Texture Paint in the topbar's workspace tabs. Suzanne enters Texture
-   Paint Mode; the Image Editor on the left shows the image it paints, the 3D Viewport shows the image on Suzanne
+1. **Open the Texture Paint workspace.** Pick Texture Paint in the topbar's workspace tabs. The vase enters Texture
+   Paint Mode; the Image Editor on the left shows the image it paints, the 3D Viewport shows the image on the vase
    (Solid shading draws the paint slot's texture, as Blender's Workbench does in this mode).
 
-   ![The Texture Paint workspace with Suzanne's image](../media/features/texture-paint/workspace.png)
+   ![The Texture Paint workspace with the vase's image](../media/features/texture-paint/workspace.png)
 
-2. **Paint on the object.** Drag over Suzanne in the 3D Viewport. The Draw brush paints its color from the tool
-   settings; [ and ] change its size. Shift X over a pixel samples its color, and X swaps the two colors. A model
-   without an image has none to paint: Texture Slots (the tool settings' popover) adds one with its + button.
+2. **Paint on the object.** Drag over the vase in the 3D Viewport: the Draw brush paints its color from the tool
+   settings onto the image through the UV map, here a wave around the shoulder. [ and ] change the brush size, Shift X over
+   a pixel samples its color, and X swaps the two colors. A model without an image has none to paint: Texture Slots
+   (the tool settings' popover) adds one with its + button.
 
-   ![A stroke across Suzanne's face](../media/features/texture-paint/paint-3d.gif)
+   ![A wave painted around the vase](../media/features/texture-paint/paint-3d.gif)
 
 3. **Paint in the Image Editor.** Drag in the Image Editor: in Paint mode it paints the image directly, and the 3D
    Viewport follows the stroke. Its toolbar and sidebar hold the same brushes and brush settings.
 
-   ![A stroke in the Image Editor shows on Suzanne](../media/features/texture-paint/paint-2d.gif)
+   ![A stroke in the Image Editor shows on the vase](../media/features/texture-paint/paint-2d.gif)
 
-4. **Vertex Paint.** Click the sphere in the Outliner, switch the mode menu to Vertex Paint and drag over it. Strokes
-   change its active color attribute (Object Data tab, Color Attributes), which Solid shading draws.
+4. **Vertex Paint.** In the Layout workspace click the dish in the Outliner, switch the mode menu from Object Mode to
+   Vertex Paint and drag over it. Strokes change its active color attribute (Object Data tab, Color Attributes),
+   which Solid shading draws and its material reads through a Color Attribute node.
 
-   ![A stroke on the sphere in Vertex Paint Mode](../media/features/texture-paint/vertex-paint.gif)
+   ![A stroke on the dish in Vertex Paint Mode](../media/features/texture-paint/vertex-paint.gif)
 
 ## Project files
 
