@@ -13,6 +13,7 @@ import { regionPanels } from '../src/editors/interface/ui-tree.js';
 import { createMainNodeTree } from '../src/editors/space_node/main-node-tree.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { sceneMain } from './scene-main.js';
+import { ID_MA } from '../src/blenkernel/main-view.js';
 
 const engine = new NullEngine(), scene = new Scene(engine), box = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
 box.metadata = { wbId: 'cube', wbCreation: { operator: 'mesh.primitive_cube_add', options: {} } };
@@ -60,6 +61,21 @@ const pointMesh = scene.meshes.find((m) => m.name.startsWith('__pointcloud '));
 assert.equal(pointMesh?.forcedInstanceCount, 8, 'a quad per point');
 assert(pointMesh.material.pluginManager.getPlugin('BlenderPointCloud'), "the point cloud's material draws spheres");
 assert.equal(box.getTotalVertices(), 0, 'the evaluated geometry has no mesh');
+{
+  // Set Material on the instanced Ico Sphere: Blender gives its mesh an empty slot, then the material; the instances
+  // draw in Main's material.
+  const red = python((C) => C.blend_data.materials.new('Red')), setMaterial = nodes.new('GeometryNodeSetMaterial');
+  links.new(sphere.outputs.get('Mesh'), setMaterial.inputs.get('Geometry'));
+  links.new(setMaterial.outputs[0], instance.inputs.get('Instance'));
+  setMaterial.inputs.get('Material').default_value = red;
+  sync.redraw();
+  const { material } = blender.instances().find((g) => g.shape === 'MESH');
+  assert.equal(material && blender.name(material), 'Red', "the instances' material");
+  assert.equal(material, blender.ids(ID_MA).find((ma) => blender.name(ma) === 'Red'), "Main's, not its evaluated copy");
+  links.new(sphere.outputs.get('Mesh'), instance.inputs.get('Instance'));
+  nodes.remove(setMaterial);
+  sync.redraw();
+}
 
 // A link from the Group Input's empty socket to Radius makes Radius a group input, which the modifier shows as its
 // input in Properties > Modifiers; its value there sizes the points.

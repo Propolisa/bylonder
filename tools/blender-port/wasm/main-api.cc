@@ -832,10 +832,18 @@ static void instance_group_add(InstanceGroup group)
   }
 }
 /* The first material of geometry an instance draws (its own slots, as the draw engines take a dupli's data's). */
+/* A data-block's first material, as Main holds it: a geometry nodes mesh's slots may start empty (Set Material appends
+ * to an Ico Sphere's empty slot) and an evaluated mesh's point to evaluated copies. */
 static const Material *data_material(const ID *data)
 {
   const short *len = BKE_id_material_len_p(const_cast<ID *>(data));
-  return len && *len ? (*BKE_id_material_array_p(const_cast<ID *>(data)))[0] : nullptr;
+  Material **materials = len ? *BKE_id_material_array_p(const_cast<ID *>(data)) : nullptr;
+  for (int i = 0; materials && i < *len; i++) {
+    if (materials[i]) {
+      return DEG_get_original(materials[i]);
+    }
+  }
+  return nullptr;
 }
 
 /* The point clouds Main's objects draw (an evaluated geometry's, its instances' too), as Workbench and EEVEE draw
