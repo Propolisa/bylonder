@@ -10,7 +10,7 @@ import { connect } from "node:net";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { networkInterfaces } from "node:os";
-import { dirname, join, relative } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { TOOLS } from "../tests/e2e/tools.mjs";
@@ -78,27 +78,37 @@ async function servers() {
   const ports = (await Promise.all(DEV_PORTS.map(async (p) => ((await alive(p)) ? p : null)))).filter(Boolean);
   return ports.map((port) => ({ port, name: worktreeOf(port), url: `https://${lan}:${port + OFFSET}/` }));
 }
-// The newest pictures in the worktrees' docs media and .shots.
-function pictures(limit = 60) {
+// Where pictures come from, by kind: the worktrees' docs media, their .shots (side-by-side and parity comparisons, and
+// the agents' bug and test pictures in .shots/agents/), and the session scratchpads and test failure screenshots in
+// the temporary folder (GALLERY_TEMP: another folder to look in).
+const TEMP = process.env.GALLERY_TEMP ?? process.env.TEMP ?? "/tmp";
+const worktrees = () => readdirSync(parent).filter((n) => n.startsWith("bylonder")).map((n) => join(parent, n));
+const SOURCES = {
+  docs: () => worktrees().map((t) => join(t, "docs", "media")),
+  comparisons: () => worktrees().map((t) => join(t, ".shots")),
+  testing: () => [join(TEMP, "claude"), TEMP],
+};
+const KINDS = { docs: "Docs media", comparisons: "Side by side", testing: "Testing and bug fixes" };
+const roots = () => Object.values(SOURCES).flatMap((s) => s());
+// The newest pictures of each kind; the temporary folder's own files only as test screenshots (e2e-*, prod-check).
+function pictures(limit = 80) {
   const found = [];
-  const walk = (d, depth) => {
-    if (depth > 6 || !existsSync(d)) return;
+  const walk = (d, depth, kind, top) => {
+    if (depth > 8 || !existsSync(d)) return;
     for (const entry of readdirSync(d, { withFileTypes: true })) {
       const path = join(d, entry.name);
-      if (entry.isDirectory()) walk(path, depth + 1);
-      else if (/\.(png|gif|jpg)$/i.test(entry.name)) found.push({ path, mtime: statSync(path).mtimeMs });
+      if (entry.isDirectory()) { if (!top && entry.name !== "node_modules") walk(path, depth + 1, kind, false); }
+      else if (/\.(png|gif|jpg)$/i.test(entry.name) && (!top || /^(e2e-|prod-check)/.test(entry.name))) found.push({ path, kind, mtime: statSync(path).mtimeMs });
     }
   };
-  for (const tree of readdirSync(parent).filter((n) => n.startsWith("bylonder")).map((n) => join(parent, n))) {
-    walk(join(tree, "docs", "media"), 0);
-    walk(join(tree, ".shots"), 0);
-  }
-  return found.sort((a, b) => b.mtime - a.mtime).slice(0, limit);
+  for (const [kind, source] of Object.entries(SOURCES)) for (const d of source()) walk(d, 0, kind, d === TEMP);
+  const newest = (kind) => found.filter((p) => p.kind === kind).sort((a, b) => b.mtime - a.mtime).slice(0, limit);
+  return Object.keys(SOURCES).flatMap(newest).sort((a, b) => b.mtime - a.mtime);
 }
 
 const STYLE = `body{margin:0;font:15px system-ui;background:#1d1d1d;color:#ddd}h2{padding:12px 16px 0;font-size:16px}a{color:#8cf}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:12px 16px}
-.card{background:#2a2a2a;border-radius:8px;overflow:hidden}.card img{width:100%;display:block}.card p{margin:6px 8px;font-size:12px;word-break:break-all}
+.card{background:#2a2a2a;border-radius:8px;overflow:hidden}.card img{width:100%;display:block}.card p{margin:6px 8px;font-size:12px;word-break:break-all}.kinds{padding:0 16px}.kinds label{margin-right:14px;white-space:nowrap}
 form{padding:24px 16px}input,button{font:16px system-ui;padding:10px;border-radius:6px;border:0}input{width:16em}`;
 const page = (body) => `<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><meta name=theme-color content="#1d1d1d">
 <link rel=manifest href="/manifest.json"><link rel=icon href="/icon.svg"><title>Bylonder dev</title><style>${STYLE}</style>
@@ -113,12 +123,24 @@ async function gallery(res) {
   const list = await servers(), shots = pictures();
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
   res.end(page(`<h2>Dev servers</h2><div class=grid>${list.map((s) => `<div class=card><p><a href="${s.url}">${s.name || "localhost"}:${s.port}</a></p></div>`).join("") || "<p>none running</p>"}</div>
-<h2>Latest pictures</h2><div class=grid>${shots.map((s) => { const rel = relative(parent, s.path).replaceAll("\\", "/"); return `<div class=card><a href="/file/${encodeURI(rel)}"><img loading=lazy src="/file/${encodeURI(rel)}"></a><p>${rel} · ${new Date(s.mtime).toLocaleTimeString()}</p></div>`; }).join("")}</div>`));
+<h2>Latest pictures</h2><p class=kinds>${Object.entries(KINDS).map(([kind, label]) => `<label><input type=checkbox data-kind=${kind} checked> ${label}</label>`).join(" ")}</p>
+<div class=grid>${shots.map((s) => { const url = `/file?path=${encodeURIComponent(s.path)}`, name = s.path.split(/[\\/]/).slice(-3).join("/"); return `<div class=card data-kind=${s.kind}><a href="${url}"><img loading=lazy src="${url}"></a><p>${name} · ${new Date(s.mtime).toLocaleString()}</p></div>`; }).join("")}</div>
+<script>
+const shown = JSON.parse(localStorage.getItem("kinds") || "{}");
+const apply = () => document.querySelectorAll(".card[data-kind]").forEach((c) => { c.hidden = shown[c.dataset.kind] === false; });
+document.querySelectorAll("input[data-kind]").forEach((box) => {
+  box.checked = shown[box.dataset.kind] !== false;
+  box.onchange = () => { shown[box.dataset.kind] = box.checked; localStorage.setItem("kinds", JSON.stringify(shown)); apply(); };
+});
+apply();
+</script>`));
 }
 
+// A picture under one of the sources' folders, by its full path.
 function serveFile(req, res) {
-  const path = join(parent, decodeURIComponent(req.url.slice("/file/".length).split("?")[0]));
-  if (!path.startsWith(parent) || !/\.(png|gif|jpg)$/i.test(path) || !existsSync(path)) { res.writeHead(404); return res.end(); }
+  const path = new URL(req.url, "https://x").searchParams.get("path") ?? "";
+  const allowed = roots().some((r) => path.toLowerCase().startsWith(r.toLowerCase())) && !path.includes("..");
+  if (!allowed || !/\.(png|gif|jpg)$/i.test(path) || !existsSync(path)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { "Content-Type": path.endsWith(".gif") ? "image/gif" : path.endsWith(".png") ? "image/png" : "image/jpeg" });
   res.end(readFileSync(path));
 }
@@ -148,7 +170,7 @@ createServer(server, (req, res) => {
     });
   }
   if (!signedIn(req)) return signInPage(res, false);
-  if (path.startsWith("/file/")) return serveFile(req, res);
+  if (path === "/file") return serveFile(req, res);
   gallery(res);
 }).listen(PORT, "0.0.0.0");
 
