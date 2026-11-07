@@ -28,8 +28,11 @@ filler or flourishes. Keep prose short, plain and factual.
 When work is split across background agents, the coordinating session owns release quality:
 
 - Each agent gets one feature area, a brief that names its files, constraints and checks, and its own worktree.
-- Agents send a one-line update about every 5 minutes (finished, next, blocker or doubt). The coordinator reads
-  code only when an update looks off, and steers by message.
+- Agents send a one-line update about every 5 minutes (finished, next, blocker or doubt), naming the paths of any
+  pictures they made (renders, screenshots, GIFs). The coordinator reads code only when an update looks off, and
+  steers by message.
+- The owner follows along by pictures: the coordinator shows each new picture to the owner as soon as it exists
+  (thumbnails, recorded media, side-by-side comparisons, bug screenshots), not only at the end.
 - One build at a time on the machine (`npm run build` and module builds share memory): an agent asks for the build
   slot and says when it is done. One agent at a time holds the right to rebuild the WASM module; others write seam
   source and hand it over.

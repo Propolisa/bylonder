@@ -23,7 +23,8 @@ export const chromium = {
 async function persistentContext(options) {
   const profile = mkdtempSync(`${tmpdir()}/bylonder-profile-`);
   const context = await playwright.chromium.launchPersistentContext(profile, { ...proxy, args: gl, ...options });
-  context.on("close", () => rmSync(profile, { recursive: true, force: true }));
+  // Windows keeps the profile's files busy for a moment after the browser exits.
+  context.on("close", () => { try { rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch {} });
   return context;
 }
 
