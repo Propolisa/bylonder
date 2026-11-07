@@ -7,13 +7,15 @@
 import { createServer } from "node:https";
 import { request } from "node:http";
 import { connect } from "node:net";
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { networkInterfaces } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { TOOLS } from "../tests/e2e/tools.mjs";
+import { ffmpeg } from "./media.mjs";
 
 const forge = createRequire(import.meta.url)("node-forge");
 const root = fileURLToPath(new URL("..", import.meta.url)), parent = dirname(root.replace(/[\\/]$/, ""));
@@ -90,26 +92,39 @@ const SOURCES = {
 };
 const KINDS = { docs: "Docs media", comparisons: "Side by side", testing: "Testing and bug fixes" };
 const roots = () => Object.values(SOURCES).flatMap((s) => s());
-// The newest pictures of each kind; the temporary folder's own files only as test screenshots (e2e-*, prod-check).
-function pictures(limit = 80) {
-  const found = [];
+// The pictures of each kind, newest first; the temporary folder's own files only as test screenshots (e2e-*,
+// prod-check). The folders are walked at most every few seconds, however often the pages ask.
+let found = [], walked = 0;
+function pictures() {
+  if (Date.now() - walked < 3000) return found;
+  const all = [];
   const walk = (d, depth, kind, top) => {
     if (depth > 8 || !existsSync(d)) return;
     for (const entry of readdirSync(d, { withFileTypes: true })) {
       const path = join(d, entry.name);
       if (entry.isDirectory()) { if (!top && entry.name !== "node_modules") walk(path, depth + 1, kind, false); }
-      else if (/\.(png|gif|jpg)$/i.test(entry.name) && (!top || /^(e2e-|prod-check)/.test(entry.name))) found.push({ path, kind, mtime: statSync(path).mtimeMs });
+      else if (/\.(png|gif|jpg)$/i.test(entry.name) && (!top || /^(e2e-|prod-check)/.test(entry.name))) all.push({ path, kind, mtime: statSync(path).mtimeMs });
     }
   };
   for (const [kind, source] of Object.entries(SOURCES)) for (const d of source()) walk(d, 0, kind, d === TEMP);
-  const newest = (kind) => found.filter((p) => p.kind === kind).sort((a, b) => b.mtime - a.mtime).slice(0, limit);
-  return Object.keys(SOURCES).flatMap(newest).sort((a, b) => b.mtime - a.mtime);
+  found = all.sort((a, b) => b.mtime - a.mtime);
+  walked = Date.now();
+  return found;
+}
+// A page of pictures as JSON: the kinds asked for, older than `before` (the next page) or newer than `after` (new ones).
+function picturesPage(req, res) {
+  const q = new URL(req.url, "https://x").searchParams, kinds = (q.get("kinds") ?? "").split(",");
+  const before = Number(q.get("before") ?? Infinity), after = Number(q.get("after") ?? -Infinity);
+  const page = pictures().filter((p) => kinds.includes(p.kind) && p.mtime < before && p.mtime > after).slice(0, 30);
+  res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+  res.end(JSON.stringify(page.map((p) => ({ ...p, name: p.path.split(/[\\/]/).slice(-3).join("/") }))));
 }
 
 const STYLE = `body{margin:0;font:15px system-ui;background:#1d1d1d;color:#ddd}h2{padding:12px 16px 0;font-size:16px}a{color:#8cf}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:12px 16px}
-.card{background:#2a2a2a;border-radius:8px;overflow:hidden}.card img{width:100%;display:block}.card p{margin:6px 8px;font-size:12px;word-break:break-all}.kinds{padding:0 16px}.kinds label{margin-right:14px;white-space:nowrap}
-form{padding:24px 16px}input,button{font:16px system-ui;padding:10px;border-radius:6px;border:0}input{width:16em}`;
+.card{background:#2a2a2a;border-radius:8px;overflow:hidden}.card img{width:100%;aspect-ratio:16/9;object-fit:contain;display:block;background:#333}
+.card p{margin:6px 8px;font-size:12px;word-break:break-all}.kinds{padding:0 16px}.kinds label{margin-right:14px;white-space:nowrap}
+#more{padding:16px;text-align:center;color:#888}form{padding:24px 16px}input,button{font:16px system-ui;padding:10px;border-radius:6px;border:0}input[name=key]{width:16em}`;
 const page = (body) => `<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><meta name=theme-color content="#1d1d1d">
 <link rel=manifest href="/manifest.json"><link rel=icon href="/icon.svg"><title>Bylonder dev</title><style>${STYLE}</style>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js")</script>${body}`;
@@ -119,37 +134,78 @@ const MANIFEST = JSON.stringify({ name: "Bylonder dev", short_name: "Bylonder", 
 // Network first: the gallery is always fresh when the machine is reachable.
 const WORKER = `self.addEventListener("fetch", (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));`;
 
-async function gallery(res) {
-  const list = await servers(), shots = pictures();
-  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-  res.end(page(`<h2>Dev servers</h2><div class=grid>${list.map((s) => `<div class=card><p><a href="${s.url}">${s.name || "localhost"}:${s.port}</a></p></div>`).join("") || "<p>none running</p>"}</div>
-<h2>Latest pictures</h2><p class=kinds>${Object.entries(KINDS).map(([kind, label]) => `<label><input type=checkbox data-kind=${kind} checked> ${label}</label>`).join(" ")}</p>
-<div class=grid>${shots.map((s) => { const url = `/file?path=${encodeURIComponent(s.path)}`, name = s.path.split(/[\\/]/).slice(-3).join("/"); return `<div class=card data-kind=${s.kind}><a href="${url}"><img loading=lazy src="${url}"></a><p>${name} · ${new Date(s.mtime).toLocaleString()}</p></div>`; }).join("")}</div>
-<script>
-const shown = JSON.parse(localStorage.getItem("kinds") || "{}");
-const apply = () => document.querySelectorAll(".card[data-kind]").forEach((c) => { c.hidden = shown[c.dataset.kind] === false; });
+// The page loads pictures a page at a time as it scrolls, as small thumbnails (the full picture on a tap), and follows
+// new ones: they come in at the top, and with Follow on the page scrolls up to them.
+const CLIENT = `
+const shown = JSON.parse(localStorage.getItem("kinds") || "{}"), grid = document.getElementById("pictures"), more = document.getElementById("more");
+const follow = document.getElementById("follow");
+follow.checked = localStorage.getItem("follow") !== "off";
+follow.onchange = () => { localStorage.setItem("follow", follow.checked ? "on" : "off"); if (follow.checked) scrollTo({ top: 0, behavior: "smooth" }); };
+let newest = -Infinity, oldest = Infinity, done = false, loading = false;
+const kinds = () => [...document.querySelectorAll("input[data-kind]")].filter((b) => b.checked).map((b) => b.dataset.kind).join(",");
+const card = (p) => { const d = document.createElement("div"), url = "/file?path=" + encodeURIComponent(p.path);
+  d.className = "card"; d.innerHTML = '<a href="' + url + '"><img loading=lazy decoding=async src="/thumb?path=' + encodeURIComponent(p.path) + '&t=' + p.mtime + '"></a><p></p>';
+  d.querySelector("p").textContent = p.name + " · " + new Date(p.mtime).toLocaleString(); return d; };
+const get = async (q) => (await fetch("/pictures?kinds=" + kinds() + "&" + q, { cache: "no-store" })).json();
+async function older() {
+  if (loading || done) return;
+  loading = true;
+  const page = await get(oldest < Infinity ? "before=" + oldest : "");
+  page.forEach((p) => { grid.append(card(p)); newest = Math.max(newest, p.mtime); oldest = Math.min(oldest, p.mtime); });
+  done = page.length === 0; more.textContent = done ? "No more pictures" : "Loading...";
+  loading = false;
+  if (!done && more.getBoundingClientRect().top < innerHeight * 2) older();
+}
+async function newer() {
+  if (newest === -Infinity) return older();
+  const page = await get("after=" + newest);
+  page.reverse().forEach((p) => { grid.prepend(card(p)); newest = Math.max(newest, p.mtime); });
+  if (page.length && follow.checked) scrollTo({ top: 0, behavior: "smooth" });
+}
+function restart() { grid.replaceChildren(); newest = -Infinity; oldest = Infinity; done = false; older(); }
 document.querySelectorAll("input[data-kind]").forEach((box) => {
   box.checked = shown[box.dataset.kind] !== false;
-  box.onchange = () => { shown[box.dataset.kind] = box.checked; localStorage.setItem("kinds", JSON.stringify(shown)); apply(); };
+  box.onchange = () => { shown[box.dataset.kind] = box.checked; localStorage.setItem("kinds", JSON.stringify(shown)); restart(); };
 });
-apply();
-// Live: the servers and pictures again every 10 seconds, keeping the toggles and the scroll position.
+new IntersectionObserver((e) => { if (e[0].isIntersecting) older(); }, { rootMargin: "1000px" }).observe(more);
 setInterval(async () => {
-  const fresh = new DOMParser().parseFromString(await (await fetch("/", { cache: "no-store" })).text(), "text/html");
-  const grids = document.querySelectorAll(".grid"), next = fresh.querySelectorAll(".grid");
-  grids.forEach((grid, i) => { if (next[i] && grid.innerHTML !== next[i].innerHTML) grid.innerHTML = next[i].innerHTML; });
-  apply();
-}, 10000);
-</script>`));
+  newer();
+  const servers = document.getElementById("servers"), fresh = await (await fetch("/servers", { cache: "no-store" })).text();
+  if (servers.innerHTML !== fresh) servers.innerHTML = fresh;
+}, 5000);
+older();`;
+
+const serverCards = async () => (await servers()).map((s) => `<div class=card><p><a href="${s.url}">${s.name || "localhost"}:${s.port}</a></p></div>`).join("") || "<p>none running</p>";
+async function gallery(res) {
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+  res.end(page(`<h2>Dev servers</h2><div class=grid id=servers>${await serverCards()}</div>
+<h2>Latest pictures</h2><p class=kinds>${Object.entries(KINDS).map(([kind, label]) => `<label><input type=checkbox data-kind=${kind} checked> ${label}</label>`).join(" ")}
+<label><input type=checkbox id=follow checked> Follow new pictures</label></p>
+<div class=grid id=pictures></div><p id=more>Loading...</p><script>${CLIENT}</script>`));
 }
 
 // A picture under one of the sources' folders, by its full path.
+const allowed = (path) => roots().some((r) => path.toLowerCase().startsWith(r.toLowerCase())) && !path.includes("..") && /\.(png|gif|jpg)$/i.test(path) && existsSync(path);
+const pathOf = (req) => new URL(req.url, "https://x").searchParams.get("path") ?? "";
 function serveFile(req, res) {
-  const path = new URL(req.url, "https://x").searchParams.get("path") ?? "";
-  const allowed = roots().some((r) => path.toLowerCase().startsWith(r.toLowerCase())) && !path.includes("..");
-  if (!allowed || !/\.(png|gif|jpg)$/i.test(path) || !existsSync(path)) { res.writeHead(404); return res.end(); }
+  const path = pathOf(req);
+  if (!allowed(path)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { "Content-Type": path.endsWith(".gif") ? "image/gif" : path.endsWith(".png") ? "image/png" : "image/jpeg" });
   res.end(readFileSync(path));
+}
+// A small JPEG of a picture (a GIF's first frame), made once by ffmpeg and kept in .tools/dev-gallery/thumbs.
+const thumbs = join(dir, "thumbs");
+function serveThumb(req, res) {
+  const path = pathOf(req);
+  if (!allowed(path)) { res.writeHead(404); return res.end(); }
+  const thumb = join(thumbs, createHash("sha1").update(path + statSync(path).mtimeMs).digest("hex") + ".jpg");
+  const send = () => { res.writeHead(200, { "Content-Type": "image/jpeg", "Cache-Control": "max-age=31536000, immutable" }); res.end(readFileSync(thumb)); };
+  if (existsSync(thumb)) return send();
+  mkdirSync(thumbs, { recursive: true });
+  execFile(ffmpeg, ["-v", "error", "-i", path, "-frames:v", "1", "-vf", "scale=480:-2", "-q:v", "5", "-y", thumb], (error) => {
+    if (error || !existsSync(thumb)) { res.writeHead(500); return res.end(); }
+    send();
+  });
 }
 
 const send = (res, type, body) => { res.writeHead(200, { "Content-Type": type }); res.end(body); };
@@ -178,6 +234,9 @@ createServer(server, (req, res) => {
   }
   if (!signedIn(req)) return signInPage(res, false);
   if (path === "/file") return serveFile(req, res);
+  if (path === "/thumb") return serveThumb(req, res);
+  if (path === "/pictures") return picturesPage(req, res);
+  if (path === "/servers") return serverCards().then((html) => send(res, "text/html; charset=utf-8", html));
   gallery(res);
 }).listen(PORT, "0.0.0.0");
 
