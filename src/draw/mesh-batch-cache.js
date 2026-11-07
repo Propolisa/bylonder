@@ -114,6 +114,7 @@ export function mesh_batch_cache_apply(mesh, babylonMesh) {
   const read = meshAttributes(babylonMesh);
   const buffers = mesh.drawBuffers?.(DRAW_LINES | (read.tangents ? DRAW_TANGENTS : 0), read.names);
   setSubMeshes(babylonMesh, buffers ? drawn(babylonMesh, buffers, read.names) : built(babylonMesh, mesh));
+  fillMissingAttributes(babylonMesh, read.names);
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
   if (loose.length) {
@@ -155,6 +156,19 @@ function drawn(babylonMesh, { positions, normals, uvs, tris, lines, tangents, at
   if (counts.length < 2) return null;
   let start = 0;
   return counts.flatMap((tris, slot) => (tris ? [{ slot, start: (start += tris * 3) - tris * 3, count: tris * 3 }] : []));
+}
+
+// An attribute a material reads that the mesh does not have reads as Blender's draw leaves it, an unbound vertex
+// attribute: (0, 0, 0, 1). Without a buffer, Babylon's draw of the mesh fails; a buffer of one value that every vertex
+// reads (an instanced divisor, as a draw of one instance reads it) costs no memory per vertex.
+const UNBOUND = new Float32Array([0, 0, 0, 1]);
+// A divisor no draw's instance count reaches, so instanced draws read the one value too.
+const EVERY_INSTANCE = 2 ** 30;
+export function fillMissingAttributes(babylonMesh, names) {
+  for (const kind of names.map(attributeKind)) {
+    if (babylonMesh.isVerticesDataPresent(kind)) continue;
+    babylonMesh.setVerticesBuffer(new VertexBuffer(babylonMesh.getEngine(), UNBOUND, kind, { size: 4, instanced: true, divisor: EVERY_INSTANCE }));
+  }
 }
 
 // A buffer the new geometry does not have goes (a UV map an evaluation left out), so every buffer has its vertex count.
