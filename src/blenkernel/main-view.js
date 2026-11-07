@@ -132,6 +132,9 @@ export function createMainView(state) {
       entry.drawn = false;
     } else if (type === 'ARMATURE') pullArmature(entry, true);
   }
+  // An object keeps Blender's parent inverse where the view draws it at Main's evaluated matrix (DRAWN); one Babylon
+  // places by its parent alone (an armature) has it folded into its own transform, which Babylon has no place for.
+  const foldUndrawn = ({ type, ob }) => !DRAWN.includes(type) && !isIdentity(blender.transform(ob).matrix_parent_inverse) && blender.foldParentInverse(ob);
   // Meshes shown as their bounds in the viewport (Display As > Bounds), an instanced one's carrier too: the edges of their
   // local bounds, at each instance, drawn while the scene is not rendering, in place of their surfaces.
   const bounded = new Map(); // mesh -> { lines, key }
@@ -237,7 +240,7 @@ export function createMainView(state) {
       }
       for (const entry of made) {
         const { node, ob } = entry;
-        if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
+        foldUndrawn(entry);
         if (blender.camera === ob) scene.activeCamera = node;
       }
       for (const entry of [...made, ...revived]) {
@@ -349,7 +352,7 @@ export function createMainView(state) {
       for (const [node, entry] of kept) {
         const { ob } = entry, tags = blender.tags(ob);
         entry.data.ptr = blender.data(ob);
-        if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
+        foldUndrawn(entry);
         pull(entry, node);
         if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
         const name = blender.name(ob);

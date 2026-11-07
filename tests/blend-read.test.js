@@ -4,7 +4,7 @@
 // modifiers, keys and collections Blender reads in it (tools/blender-reference/blend-check.py).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -136,7 +136,8 @@ else {
       // Where it draws and lights from: Main's evaluated matrix (a light's transformed position).
       const world = node.computeTransformedInformation ? (node.computeTransformedInformation(), node.transformedPosition) : node.computeWorldMatrix(true).getTranslation();
       assert(close([world.x, world.z, world.y], ob.world), `${name} opens where Blender has it: ${world} in Babylon's axes, ${ob.world} in Blender's`);
-      if (!ob.parent) assert(close([...r.location], ob.location) && close([...r.scale], ob.scale), `${name}'s location and scale`);
+      // Blender's own values, a Ctrl P child's too (its parent inverse stays Main's).
+      assert(close([...r.location], ob.location) && close([...r.scale], ob.scale), `${name}'s location and scale: ${[...r.location]}, ${ob.location}`);
       // Blender's rotation mode and values, and the orientation they give.
       if (!ob.parent && ob.type !== 'CAMERA' && ob.type !== 'LIGHT') {
         assert.equal(r.rotation_mode, ob.rotation_mode, `${name}'s rotation mode`);
@@ -163,6 +164,14 @@ else {
     assert.deepEqual(keys?.keys.map((k) => [k.frame, k.value]), [[1, 0], [40, 2]], 'the location keys, in Babylon\'s axes');
     user.sync.flush();
     assert.deepEqual(user.sync.check(), [], 'Babylon and Main agree after opening');
+    // Saved again, it reads back with the same values and places (a Ctrl P child keeps its parent inverse).
+    const again = join(dir, 'again.blend');
+    writeFileSync(again, user.sync.blender.writeBlend('/again.blend'));
+    const line2 = run([again, '--python', join(root, 'tools/blender-reference/blend-check.py')]).split('\n').find((l) => l.startsWith('BLEND-CHECK '));
+    const reread = JSON.parse(line2.slice('BLEND-CHECK '.length)).objects;
+    for (const [name, ob] of Object.entries(expected.objects)) {
+      assert(close(reread[name].location, ob.location) && close(reread[name].world, ob.world), `${name} saved again: ${JSON.stringify([reread[name].location, reread[name].world])}`);
+    }
     console.log(`.blend: a file Bylonder wrote opens again; a user's file from Blender 5.2 opens with ${user.world.objects.length} objects` +
       (report.length ? `; reported: ${report.join('; ')}` : ''));
   } finally {
