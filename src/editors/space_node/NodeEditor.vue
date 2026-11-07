@@ -4,6 +4,7 @@
 // being dragged, the knife of links_cut and add_reroute). Input goes to the controller (node-editor-controller.js).
 import { computed, ref } from "vue";
 import NodeView from "./NodeView.vue";
+import { focusUnlessInside } from "@/editors/interface/block-view.js";
 import { HEADER, ROW, U, linkPath, socketColor } from "./node-layout.js";
 
 const props = defineProps({ editor: { type: Object, required: true }, onKey: { type: Function, required: true } });
@@ -56,7 +57,7 @@ function wheel(e) {
   <div ref="root" tabindex="-1"
     class="bl-ui bl-node-editor absolute inset-0 select-none overflow-hidden bg-[var(--bl-node-editor-back)] outline-none"
     :style="{ ...grid, '--node-row': ROW + 'px', '--node-radius': U * 0.2 + 'px', '--node-font': U * 0.55 + 'px' }"
-    @pointerenter="root.focus({ preventScroll: true })" @pointerdown="down" @pointermove="editor.pointerMove(at($event))"
+    @pointerenter="focusUnlessInside" @pointerdown="down" @pointermove="editor.pointerMove(at($event))"
     @pointerup="editor.pointerUp(at($event), $event)" @wheel.prevent="wheel" @contextmenu.prevent @keydown="onKey">
     <div class="absolute left-0 top-0 origin-top-left" :style="{ transform: world }">
       <div v-for="f in frames" :key="f.frame.blocks.join() + f.frame.name"
