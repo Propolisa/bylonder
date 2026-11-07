@@ -85,6 +85,9 @@ export const blenderMatrix = (matrix) => swapped(matrix.m);
 const emptyMesh = () => createMesh({ vert_positions: new Float32Array(), edges: new Int32Array(), face_offsets: new Int32Array(1), corner_verts: new Int32Array(),
   corner_edges: new Int32Array() });
 
+// One edit overlay per object, whichever sync drew it first: a file a project's code read is adopted again by the
+// scene's sync.
+const editOverlays = new WeakMap();
 export function createMainView(state) {
   const { rna, world, selection, blender, ids, objects, materials, worlds } = state;
 
@@ -181,12 +184,15 @@ export function createMainView(state) {
     node.metadata = { ...node.metadata, wbMode: blender.mode(entry.ob) };
     if (!edit) {
       entry.overlay.dispose();
+      editOverlays.delete(node);
       entry.overlay = null;
       keepMesh(entry, blender);
       entry.drawn = false;
       return false;
     }
-    (entry.overlay ??= createEditMeshOverlay(node)).update(edit.mesh, { selectmode: edit.selectmode });
+    entry.overlay ??= editOverlays.get(node) ?? createEditMeshOverlay(node);
+    editOverlays.set(node, entry.overlay);
+    entry.overlay.update(edit.mesh, { selectmode: edit.selectmode });
     return true;
   }
 
