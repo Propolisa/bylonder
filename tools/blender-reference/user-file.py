@@ -1,5 +1,5 @@
 # Saves a typical user's .blend from Blender's startup scene: the Default Cube with a Bevel and a Subdivision Surface
-# modifier and a red Principled material, a second object in a collection of its own with an Array modifier, a sun,
+# modifier and a red Principled material (its Viewport Display a green apart from it), a second object in a collection of its own with an Array modifier, a sun,
 # a text object, a dim blue world, the ball turned and keyed on two axes in XYZ Euler, the camera moved, location keys on the cube, and a light parented to a bone with Ctrl P (which keeps
 # a parent inverse).
 # usage: blender -b --factory-startup --python tools/blender-reference/user-file.py -- OUT.blend
@@ -16,6 +16,7 @@ principled = material.node_tree.nodes["Principled BSDF"]
 principled.inputs["Base Color"].default_value = (0.8, 0.05, 0.05, 1)
 principled.inputs["Roughness"].default_value = 0.3
 principled.inputs["Metallic"].default_value = 0.2
+material.diffuse_color, material.roughness, material.metallic = (0.1, 0.6, 0.2, 1), 0.25, 0.5
 cube.data.materials[0] = material
 
 props = bpy.data.collections.new("Props")

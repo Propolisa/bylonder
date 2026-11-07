@@ -301,6 +301,7 @@ export function createMainView(state) {
   // stand-in of it).
   function drawShading(record, owner, struct, warnings = []) {
     pull(record, owner);
+    if (struct === 'Material') owner.metadata = { ...owner.metadata, wbViewportDisplay: viewportDisplay(record.ptr) };
     const type = struct === 'Material' ? world.materials?.type(owner) : null;
     if (type === 'node') return;
     const pbr = type === 'pbr' && mainPBR(blender, record.ptr);
@@ -643,6 +644,10 @@ export function createMainView(state) {
     keepMesh: (entry) => { keepMesh(entry, blender); return true; },
   };
 }
+
+// A Material's Viewport Display settings, which Solid shading draws it with.
+const viewportDisplay = (ma) => ({ color: dnaGet('Material', ma, 'diffuse_color').slice(0, 3), metallic: dnaGet('Material', ma, 'metallic'),
+  roughness: dnaGet('Material', ma, 'roughness') });
 
 // A Material's Principled BSDF in Main as PBRMaterial properties, null without one.
 export function mainPBR(blender, ma) {

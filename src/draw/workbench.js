@@ -268,9 +268,17 @@ void main() { gl_FragColor = vec4(0.0); }`;
 const UNIFORMS = ['world', 'view', 'viewProjection', 'projection', 'mBones', 'morphTargetInfluences', 'morphTargetCount', 'morphTargetTextureInfo', 'morphTargetTextureIndices', 'bakedVertexAnimationSettings', 'bakedVertexAnimationTextureSizeInverted', 'bakedVertexAnimationTime'];
 const SAMPLERS = ['boneSampler', 'morphTargets', 'bakedVertexAnimationTexture'];
 
-// A material's Solid color (its viewport display color): Babylon's base color, or Blender's default surface.
+// A material's Solid color: a Blender material's Viewport Display, a Babylon one's base color, or Blender's default surface.
 // Babylon's colors are display (sRGB) values; Workbench lights in linear.
-function surface(material, out) {
+export function solidSurface(material, out) {
+  // A Blender material shows its Viewport Display settings (workbench_material.cc), its color scene linear.
+  const display = material?.metadata?.wbViewportDisplay;
+  if (display) {
+    for (let i = 0; i < 3; i++) out.color[i] = display.color[i];
+    out.roughness = Math.sqrt(display.roughness);
+    out.metallic = display.metallic;
+    return out;
+  }
   const color = material?.albedoColor ?? material?.diffuseColor;
   const source = color ? [color.r, color.g, color.b] : DEFAULT_SURFACE.color;
   for (let i = 0; i < 3; i++) out.color[i] = color ? (source[i] <= 0.04045 ? source[i] / 12.92 : ((source[i] + 0.055) / 1.055) ** 2.4) : source[i];
@@ -308,7 +316,7 @@ export function createWorkbench(scene, { wireColor = () => theme.wire, paintText
     material.setArray4('lightDiffuseWrap', STUDIO_LIGHT_DEFAULT.flatMap(([, c]) => c));
     material.setArray4('lightSpecular', STUDIO_LIGHT_DEFAULT.flatMap(([, , s]) => [...s, 0]));
     material.onBindObservable.add((mesh) => {
-      const { color, roughness, metallic } = surface(mesh.material, current);
+      const { color, roughness, metallic } = solidSurface(mesh.material, current);
       const effect = material.getEffect();
       effect.setFloat3('baseColor', color[0], color[1], color[2]);
       effect.setFloat('roughness', roughness);

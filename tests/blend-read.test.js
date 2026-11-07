@@ -30,6 +30,7 @@ import { asObject } from '../src/runtime/object-transform.js';
 import { objectMesh } from '../src/editors/object/object-mesh.js';
 import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
 import { referenceBlender } from './blender-reference.js';
+import { solidSurface } from '../src/draw/workbench.js';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const close = (a, b, tolerance = 1e-4) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < tolerance);
@@ -156,6 +157,8 @@ else {
     }
     const red = user.world.objects.find((n) => n.name === 'Cube').material;
     assert(close(red.albedoColor.asArray(), [0.8, 0.05, 0.05]) && Math.abs(red.roughness - 0.3) < 1e-5, 'the Principled BSDF inputs');
+    const solid = solidSurface(red, { color: [], roughness: 0, metallic: 0 });
+    assert(close(solid.color, [0.1, 0.6, 0.2]) && close([solid.roughness, solid.metallic], [0.5, 0.5]), `Solid shading draws its Viewport Display: ${JSON.stringify(solid)}`);
     const { color, strength } = user.world.worlds.active().background;
     assert(close(color, [0.2, 0.3, 0.6]) && Math.abs(strength - 0.35) < 1e-6, `the world's Background color and strength: ${color}, ${strength}`);
     assert.deepEqual(user.world.collections.state.collections.map((c) => c.name).sort(), Object.keys(expected.collections).sort());
