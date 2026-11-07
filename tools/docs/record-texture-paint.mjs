@@ -1,6 +1,6 @@
 // Records the media of docs/features/texture-paint.md (the Texture Paint vase), uv-editing.md (the Tin Cans) and
 // image-textures.md (the Framed Print): workspaces, strokes in the 3D Viewport and the Image Editor, Vertex Paint, a
-// cylinder's unwrap, a UV island moved onto another label, Image > New, the Image Texture nodes, the image's Runtime
+// cylinder's unwrap, a UV island moved onto another label, the Image Texture nodes, the image's Runtime
 // panel, and each example rendered through its camera.
 // usage: node tools/docs/record-texture-paint.mjs [texture-paint] [vertex-paint] [uv-editing] [image-textures]
 import { tmpdir } from "node:os";
@@ -101,48 +101,42 @@ await session("uv-editing", {}, async (r) => {
 });
 
 await session("uv-editing", { example: "tin-cans", node: "Tomato" }, async (r) => {
+  await r.render("render", { wait: 30000 });
+  await r.render("thumbnail", { width: 960, wait: 15000 });
   await workspace(r, "uv-editing");
   await frameSelected(r);
-  await pickImage(r, "Can Labels").catch(() => {});
-  await r.app.page.mouse.move(...(await at(r, IMAGE, 0.5, 0.5)));
+  // The image framed (Home): the Tomato can's UVs over the label atlas.
+  await r.app.page.mouse.move(...(await at(r, IMAGE, 0.3, 0.5)));
   await r.keys("Home");
+  await r.page.mouse.move(5, 60);
   await r.shot("workspace", undefined);
-  await r.shot("thumbnail", IMAGE, { part: [0.04, 0.06, 0.96, 0.96] });
-  // The side's island picked with L and moved a label down the atlas: the can wears the next label.
+  // The side's island picked with L and moved a label down the atlas: in Material Preview the can wears the next label.
+  await r.app.bylonder((b) => b.views.input.setShading("material"));
+  await r.pause(3000);
   await r.gif("select-move", undefined, async () => {
-    const [x, y] = await at(r, IMAGE, 0.5, 0.2);
+    const [x, y] = await at(r, IMAGE, 0.15, 0.33);
     await r.app.page.mouse.move(x, y, { steps: 8 });
     await r.keys("Alt A", "Alt+a");
     await r.keys("L", "l");
     await r.keys("G Y -0.25 Enter", "g", "y", "-", "0", ".", "2", "5", "Enter");
     await r.app.settled();
   }, { hold: 2000 });
-  await workspace(r, "layout");
-  await r.render("render", { wait: 30000 });
 });
 
 await session("image-textures", { example: "framed-print", node: "Print" }, async (r) => {
   await workspace(r, "texture-paint");
-  await r.app.page.mouse.move(...(await at(r, IMAGE, 0.5, 0.5)));
+  await r.app.page.mouse.move(...(await at(r, IMAGE, 0.3, 0.5)));
   await r.keys("Home");
+  await r.page.mouse.move(1450, 120);
   await r.shot("image-editor", IMAGE);
-  await r.gif("new-image", IMAGE, async () => {
-    await r.menu("IMAGE_MT_image");
-    await r.app.frame().getByRole("menuitem", { name: /^New/ }).last().click();
-    await r.app.settled();
-    await r.app.frame().getByRole("button", { name: "OK" }).last().click();
-    await r.app.settled();
-  });
-  await r.keys("Ctrl Z", "Control+z");
   await workspace(r, "uv-editing");
   await r.app.locator(`${IMAGE} .bl-region-tab`).filter({ hasText: /^Image$/ }).click();
   await r.app.settled();
   await r.shot("runtime", IMAGE, { part: [0.55, 0, 1, 0.5] });
   await workspace(r, "shading");
-  await r.outliner("Print");
-  await r.pause(1500);
   await r.page.mouse.move(...(await at(r, NODES, 0.5, 0.5)));
   await r.keys("Home");
+  await r.page.mouse.move(1450, 120);
   await r.shot("image-node", NODES);
   await workspace(r, "layout");
   await r.render("render", { wait: 30000 });

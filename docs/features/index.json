@@ -462,7 +462,7 @@
  {
   "id": "image-textures",
   "title": "Images and Image Textures",
-  "summary": "Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling.",
+  "summary": "Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling, here a framed screen print, its paper grain and an oak floor, each an image.",
   "expect": "Images open, save, pack and draw on materials with Blender's readers; colors show with the Standard view, and Clip, Cubic, Box projection and UDIM sampling are simplified.",
   "blender_version": "5.2.3",
   "blender_manual": [
@@ -471,13 +471,13 @@
    "https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/image.html",
    "https://docs.blender.org/manual/en/5.2/files/media/image_formats.html"
   ],
-  "example": "texture-paint",
+  "example": "framed-print",
   "thumbnail": "image-textures/thumbnail.png",
   "media": [
    "image-textures/image-editor.png",
-   "image-textures/new-image.gif",
    "image-textures/image-node.png",
-   "image-textures/runtime.png"
+   "image-textures/runtime.png",
+   "image-textures/render.png"
   ],
   "ui": [
    "IMAGE_EDITOR",
@@ -524,8 +524,8 @@
    "A file libpng cannot read or write stops the module: libpng reports errors by longjmp, which the module cannot catch yet."
   ],
   "page": "docs/features/image-textures.md",
-  "open": "https://propolisa.github.io/bylonder/#example=texture-paint",
-  "example_title": "Texture Paint",
+  "open": "https://propolisa.github.io/bylonder/#example=framed-print",
+  "example_title": "Framed Print",
   "coverage": {
    "operators": {
     "supported": 18,

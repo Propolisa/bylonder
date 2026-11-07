@@ -1,7 +1,7 @@
 ---
 id: image-textures
 title: Images and Image Textures
-summary: Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling.
+summary: Open, create, pack and save images with Blender's own readers and writers, view them in the Image Editor, and draw them on materials through the Image Texture node with Babylon's texture sampling, here a framed screen print, its paper grain and an oak floor, each an image.
 expect: Images open, save, pack and draw on materials with Blender's readers; colors show with the Standard view, and Clip, Cubic, Box projection and UDIM sampling are simplified.
 blender_version: 5.2.3
 blender_manual:
@@ -9,13 +9,13 @@ blender_manual:
   - https://docs.blender.org/manual/en/5.2/editors/image/image_settings.html
   - https://docs.blender.org/manual/en/5.2/render/shader_nodes/textures/image.html
   - https://docs.blender.org/manual/en/5.2/files/media/image_formats.html
-example: texture-paint
+example: framed-print
 thumbnail: image-textures/thumbnail.png
 media:
   - image-textures/image-editor.png
-  - image-textures/new-image.gif
   - image-textures/image-node.png
   - image-textures/runtime.png
+  - image-textures/render.png
 ui:
   - IMAGE_EDITOR
   - NODE_EDITOR
@@ -64,42 +64,45 @@ OpenColorIO color management. Each image is drawn by one Babylon texture, which 
 Image Editor, the Image Texture node of a material, Material Preview's Principled BSDF base color and Solid shading's
 Texture color. When Blender changes the image (a paint stroke, a reload), only the changed regions reach the GPU.
 
-[Open in Bylonder](https://propolisa.github.io/bylonder/#example=texture-paint)
+[Open in Bylonder](https://propolisa.github.io/bylonder/#example=framed-print)
 
-The demo, Texture Paint, has a packed image, Suzanne Paint, in the Base Color of Suzanne's material.
+The demo, Framed Print, is a screen print of mountains at dusk framed on a gallery wall under a spotlight. Three
+packed images make it: the print's colors (Dusk Print), its paper's grain as height (Paper Grain, Non-Color), and the
+oak boards of the floor and the bench (Oak Boards). It is built by a Blender script (`framed-print.py`).
+
+![The Framed Print rendered through the camera](../media/features/image-textures/render.png)
 
 ## Steps
 
-1. **View an image.** The Texture Paint workspace's Image Editor shows Suzanne Paint; any other Image Editor (Editor
-   Type menu) shows an image picked in its header. Scroll zooms, middle drag pans and Home fits the image (View > Frame
-   All). The sidebar (N) shows the image's settings in its Image tab.
+1. **View an image.** Open the example and pick the Texture Paint workspace: its Image Editor shows Dusk Print. Any
+   other Image Editor (Editor Type menu) shows an image picked in its header. Scroll zooms, middle drag pans and Home
+   fits the image (View > Frame All). Image > Open reads a file from your computer with Blender's reader for its
+   format; Image > New makes a generated image (Blank, UV Grid or Color Grid); Image > Save As writes a PNG copy to
+   download. Saving the project or a .blend packs every image into it, since image files live only in the page's
+   memory.
 
-   ![The Image Editor showing Suzanne Paint](../media/features/image-textures/image-editor.png)
+   ![The Image Editor showing Dusk Print](../media/features/image-textures/image-editor.png)
 
-2. **Open or create an image.** Image > Open reads a file from your computer with Blender's reader for its format.
-   Image > New makes a generated image: Blank, UV Grid or Color Grid, at the size and color given. Image > Save As
-   writes a PNG copy to download. Saving the project or a .blend packs every image into it (painted and generated ones
-   as they are), since image files live only in the page's memory.
+2. **Use it in a material.** Pick the Shading workspace: the Print's material has two Image Texture nodes. Dusk
+   Print's Color feeds the Principled BSDF's Base Color; Paper Grain, read through Texture Coordinate's UV and a
+   Mapping node that repeats it, feeds Bump's Height. In your own material, Shift A > Texture > Image Texture adds the
+   node and its image menu picks the image. Material Preview and Rendered show it, and so does Solid shading with its
+   Color set to Texture (the Viewport Shading popover).
 
-   ![Image > New, Color Grid](../media/features/image-textures/new-image.gif)
+   ![The Print material's Image Texture nodes](../media/features/image-textures/image-node.png)
 
-3. **Use it in a material.** In the Shader Editor add Texture > Image Texture, pick the image and link Color to the
-   Principled BSDF's Base Color. Material Preview and Rendered show it, and so does Solid shading with its Color set
-   to Texture (the Viewport Shading popover). An Image texture (Texture tab) shows an image to modifiers such as
-   Displace.
+3. **Choose its sampling.** In the UV Editing workspace, the UV Editor's sidebar Image tab has the image's Runtime
+   panel (Bylonder icon). It keeps Blender's sampling (the node's interpolation and Preferences > Viewport > Textures >
+   Anisotropic Filtering) or switches to Babylon (native) with Babylon's anisotropic filtering and mipmaps. The pixels
+   stay Blender's either way.
 
-   ![An Image Texture node feeding Base Color](../media/features/image-textures/image-node.png)
-
-4. **Choose its sampling.** The image's Runtime panel (Image Editor sidebar, Image tab, Bylonder icon) keeps Blender's
-   sampling (the node's interpolation and Preferences > Viewport > Textures > Anisotropic Filtering) or switches to
-   Babylon (native) with Babylon's anisotropic filtering and mipmaps. The pixels stay Blender's either way.
-
-   ![The Runtime panel set to Babylon (native)](../media/features/image-textures/runtime.png)
+   ![The image's Runtime panel](../media/features/image-textures/runtime.png)
 
 ## Project files
 
-- [texture-paint.py](../../examples/texture-paint/texture-paint.py): the Blender script that builds the demo.
-- [texture-paint.blend](../../examples/texture-paint/texture-paint.blend): the file the script saves, with its image
+- [framed-print.py](../../examples/framed-print/framed-print.py): the Blender script that builds the demo and paints
+  its three images.
+- [framed-print.blend](../../examples/framed-print/framed-print.blend): the file the script saves, with its images
   packed.
-- [index.js](../../examples/texture-paint/index.js): opens the .blend with Blender's reader.
+- [index.js](../../examples/framed-print/index.js): opens the .blend with Blender's reader.
 - Recorded by [record-texture-paint.mjs](../../tools/docs/record-texture-paint.mjs).
