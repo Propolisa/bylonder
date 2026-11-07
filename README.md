@@ -2,7 +2,9 @@
 
 # Bylonder
 
-Blender's interface and Blender's own code, running in the browser, drawn by Babylon.js.
+Blender, but with a (lovingly) hammered together web-native UI based on Babylon.JS for render pipeline and careful handling of each subsystem to make sure it works well on the web but doesn't have a learning curve for regular Blender users. You can load .blend files, save .blend files, or save Babylon / JS versions of the same scene(s), with as many features as possible bridged between the two. 
+
+Try it out and check out the manual below for some tutorials!
 
 [Open Bylonder](https://propolisa.github.io/bylonder/) | [Manual](docs/features/README.md) |
 [Babylon.js docs](https://doc.babylonjs.com/) | [Blender manual](https://docs.blender.org/manual/en/5.2/)
