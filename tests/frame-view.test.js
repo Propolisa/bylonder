@@ -121,4 +121,13 @@ const instances = scene.meshes.filter((mesh) => mesh.name.startsWith('__instance
 assert.deepEqual(instances.map((mesh) => mesh.thinInstanceCount), [1], 'one instance of the dice');
 const at = instances[0].thinInstanceGetWorldMatrices()[0].getTranslation();
 assert(Math.abs(at.x - 5) < 1e-3, `where the empty is: ${at}`);
-console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type; a metaball, a NURBS surface and a lattice; instancing on vertices and collection instances");
+// A light in the collection lights at each instance, as Blender's do.
+const bulb = blendData().objects.new('Bulb', blendData().lights.new('Bulb', 'POINT'));
+bulb.location = [0, 0, 2];
+set.objects.link(bulb);
+sync.view();
+const bulbs = scene.lights.filter((light) => light.name === '__instance Bulb');
+assert.equal(bulbs.length, 1, 'a light at the instance');
+bulbs[0].computeTransformedInformation();
+assert(Vector3.Distance(bulbs[0].transformedPosition, new Vector3(5, 2, 0)) < 1e-3, `where the instance puts it: ${bulbs[0].transformedPosition}`);
+console.log("Frame change: Main evaluated by Blender's animation system, its values drawn by kind; a material derived from Main; a light and a camera where their constraints put them; faces drawn with their slots' materials; a light's new type; a metaball, a NURBS surface and a lattice; instancing on vertices and collection instances, their lights too");

@@ -1,7 +1,7 @@
 // Blender's lights cast shadows as Babylon's shadow generators: one for each light whose Cast Shadow is on (an area
 // light none), objects casting as their Visibility > Shadow says, drawn only for views that show the scene's lights.
 import assert from 'node:assert/strict';
-import { MeshBuilder, NullEngine, Scene, Vector3, FreeCamera } from '@babylonjs/core';
+import { MeshBuilder, NullEngine, PBRMaterial, Scene, Vector3, FreeCamera } from '@babylonjs/core';
 import { createLight } from '../src/blenkernel/light/light-home.js';
 import { createLightShadows } from '../src/blenkernel/light/light-shadows.js';
 
@@ -28,4 +28,9 @@ assert.deepEqual(casters(), [], 'a view without the scene lights draws no shadow
 sun.metadata.wbLight.use_shadow = false;
 shadows.setActive(true);
 assert.equal(shadows.generators.length, 0, 'turning Cast Shadow off removes the generator');
+// Every light lights every material, past Babylon's default of 4.
+floor.material = new PBRMaterial('Stone', scene);
+for (let i = 0; i < 4; i++) createLight(`Bulb ${i}`, 'POINT', {}, scene);
+shadows.setActive(true);
+assert.equal(floor.material.maxSimultaneousLights, scene.lights.length, 'a material takes all the lights');
 console.log('Light shadows: a generator for each light that casts, casters by their shadow visibility passed');

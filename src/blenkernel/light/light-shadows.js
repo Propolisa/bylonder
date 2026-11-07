@@ -25,8 +25,16 @@ function createGenerator(light, type, drawn) {
 
 export function createLightShadows(scene) {
   const generators = new Map(); // light -> { generator, type }
-  let drawn = false;
+  let drawn = false, counted = '';
+  // Every light lights every material, as in Blender (Babylon's materials take 4 unless told more).
+  const lightAll = () => {
+    const count = scene.lights.length, key = `${count}:${scene.materials.length}`;
+    if (key === counted) return;
+    counted = key;
+    for (const material of scene.materials) if (material.maxSimultaneousLights < count) material.maxSimultaneousLights = count;
+  };
   const sync = () => {
+    lightAll();
     for (const [light, entry] of generators) {
       const record = lightRecord(light);
       if (light.isDisposed() || !record?.use_shadow || record.type !== entry.type) { entry.generator.dispose(); generators.delete(light); }

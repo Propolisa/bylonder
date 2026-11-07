@@ -6,7 +6,7 @@
 import { dnaGet, dnaProperty } from '../makesrna/dna-struct.js';
 import { syncBindings, LIGHT_STRUCTS } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
-import { BLENDER, createLight } from './light/light-home.js';
+import { BLENDER, createLight, deriveBabylonLight, isBlenderLight, lightRecord } from './light/light-home.js';
 import { createWorld } from './scene/world.js';
 import { createMesh, mesh_serialize } from './mesh/mesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
@@ -430,12 +430,16 @@ export function createMainView(state) {
     const nth = new Map(), nthOf = (place) => nth.set(place, (nth.get(place) ?? -1) + 1).get(place);
     // An object instanced by several instancers is one carrier: carriers sharing its geometry would share their
     // instance buffers too (Babylon keeps them on the geometry), so all would draw the last one's instances.
-    const carriers = new Map();
+    const carriers = new Map(), lights = new Map();
     for (const group of blender.instances()) {
       const { instancer, ob, shape, overlay, drawSize, color } = group;
       const geometric = shape === 'MESH';
       const key = geometric ? `${instancer}:MESH:${nthOf(instancer + ':MESH')}` : shape === 'OBJECT' ? `OBJECT:${ob}` : `${instancer}:${shape}:${color}:${drawSize}`;
       const source = shape === 'OBJECT' ? byOb.get(ob) : geometric ? null : particleShapeMesh(scene, shape);
+      if (source && isBlenderLight(source)) {
+        lights.set(source, [...(lights.get(source) ?? []), group]);
+        continue;
+      }
       if ((!source?.geometry && !geometric) || (overlay && rendering)) continue;
       if (carriers.has(key)) carriers.get(key).groups.push(group);
       else carriers.set(key, { source, groups: [group] });
@@ -468,9 +472,30 @@ export function createMainView(state) {
       carrier.thinInstanceRefreshBoundingInfo(true);
     }
     for (const [key, carrier] of instanced) if (!drawn.has(key)) { carrier.dispose(); instanced.delete(key); }
+    drawLightInstances(scene, lights);
     const clouds = blender.pointClouds().map((record) => Object.assign(record, { key: `${record.instancer}:${nthOf(record.instancer + ':POINTCLOUD')}` }));
     const shown = drawPointClouds(scene, clouds, pointClouds, materialFor);
     for (const [key, mesh] of pointClouds) if (!shown.has(key)) { mesh.dispose(); pointClouds.delete(key); }
+  }
+  // An instanced light lights at each instance, as Blender's do: a light of its settings at each instance's matrix.
+  const instanceLights = new Map(); // source light -> its instances' lights
+  function drawLightInstances(scene, lights) {
+    for (const [source, made] of instanceLights) if (!lights.has(source)) { made.forEach((light) => light.dispose()); instanceLights.delete(source); }
+    for (const [source, groups] of lights) {
+      // Only its instances light where the light is in no view layer (a linked collection's).
+      if (!blender.base(objects.get(source).ob)) source.setEnabled(false);
+      const matrices = groups.flatMap(({ data }) => Array.from({ length: data.length / 16 }, (_, i) => Matrix.FromArray(data, i * 16)));
+      const record = lightRecord(source), made = instanceLights.get(source) ?? [];
+      while (made.length > matrices.length) made.pop().dispose();
+      while (made.length < matrices.length) made.push(createLight('__instance ' + source.name, record.type, record, scene));
+      made.forEach((light, i) => {
+        if (lightRecord(light).type !== record.type) made[i] = (light.dispose(), createLight('__instance ' + source.name, record.type, record, scene));
+        else Object.assign(lightRecord(made[i]), record);
+        deriveBabylonLight(made[i]);
+        setEvaluatedMatrix(made[i], matrices[i]);
+      });
+      instanceLights.set(source, made);
+    }
   }
   // The curves objects draw (Curves objects' evaluated curves, particle hair), as Blender's engines draw them (curves.js),
   // one data each for: the render engines' mesh in the object's slot material (Workbench's hair in Solid views, workbench.js), and the overlay's
