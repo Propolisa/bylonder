@@ -3,6 +3,7 @@ import { createExtrasOverlay } from '../../draw/overlay-extra.js';
 import { createCursorOverlay } from '../../draw/overlay-cursor.js';
 import { createOriginOverlay } from '../../draw/overlay-origin.js';
 import { createOutlineOverlay } from '../../draw/overlay-outline.js';
+import { createOverlayPass } from '../../draw/overlay-pass.js';
 import { createArmatureOverlay } from '../../draw/overlay-armature.js';
 import { paintWeightView } from '../../draw/overlay-paint-weight.js';
 
@@ -13,7 +14,7 @@ import { paintWeightView } from '../../draw/overlay-paint-weight.js';
 //   view3dCursor(): the scene's 3D cursor
 export function createViewportOverlays(scene, { extras, origins, outlines, armatures, view3dCursor }) {
   const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene, view3dCursor), origin = createOriginOverlay(scene, origins);
-  const outline = createOutlineOverlay(scene, outlines);
+  const pass = createOverlayPass(scene), outline = createOutlineOverlay(scene, outlines, pass);
   const extra = createExtrasOverlay(scene, extras), armature = createArmatureOverlay(scene, armatures), meshes = [...grid.meshes, ...cursor.meshes];
   let shown = true;
   return {
@@ -34,7 +35,9 @@ export function createViewportOverlays(scene, { extras, origins, outlines, armat
       outline.update(value && shading !== 'wire', { xray: !!xray });
       if (shown !== value) { shown = value; meshes.forEach((mesh) => mesh.setEnabled(value)); }
     },
-    dispose() { grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); armature.dispose(); },
+    // Per view, after setEnabled: where its overlays draw (draw/overlay-pass.js); returns what to call once it rendered.
+    use: (camera, film) => pass.use(camera, film),
+    dispose() { pass.dispose(); grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); armature.dispose(); },
   };
 }
 

@@ -542,8 +542,8 @@ void main()
 }`;
 
 //   outlined() -> the meshes to outline (selection.outlined), isActive(mesh) -> whether it is the active object,
-//   isTransform() -> whether objects are being transformed
-export function createOutlineOverlay(scene, { outlined, isActive, isTransform = () => false }) {
+//   isTransform() -> whether objects are being transformed; overlayPass: the views' overlay pass (overlay-pass.js)
+export function createOutlineOverlay(scene, { outlined, isActive, isTransform = () => false }, overlayPass) {
   const engine = scene.getEngine(), pass = createFullscreenPass(engine);
   const prepassTarget = new RenderTargetTexture('__outlinePrepass', pass.size, scene, {
     generateMipMaps: false, type: Constants.TEXTURETYPE_FLOAT, format: Constants.TEXTUREFORMAT_RG,
@@ -632,7 +632,7 @@ export function createOutlineOverlay(scene, { outlined, isActive, isTransform = 
   });
   // Over the scene's meshes and extras, under the origins and the 3D cursor: the lines, tested against the scene's depth.
   const drawn = scene.onAfterRenderingGroupObservable.add(({ renderingGroupId, camera }) => {
-    if (!active || renderingGroupId !== 0 || engine.currentRenderPassId !== camera.renderPassId || !ready()) return;
+    if (!active || renderingGroupId !== 0 || !overlayPass.drawsOverlays(camera) || !ready()) return;
     const depthFunction = engine.getDepthFunction(), depthWrite = engine.getDepthWrite();
     engine.setDepthWrite(false);
     engine.setAlphaMode(Constants.ALPHA_PREMULTIPLIED);

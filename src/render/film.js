@@ -58,6 +58,12 @@ export function createFilm(scene, camera) {
   film.alphaMode = Constants.ALPHA_ONEONE_ONEONE;
   // Its input is the scene's render, cleared to the world as the first post-process's is.
   film.forceAutoClearInAlphaMode = true;
+  // The scene's depth as a texture, which the overlays draw against (draw/overlay-pass.js).
+  const stencil = engine.isStencilEnable;
+  film.onSizeChangedObservable.add(() => {
+    const target = film.inputTexture;
+    if (!target.depthStencilTexture) target.createDepthStencilTexture(0, false, stencil, 1, stencil ? Constants.TEXTUREFORMAT_DEPTH24_STENCIL8 : Constants.TEXTUREFORMAT_DEPTH24);
+  });
   const state = { jitter: [0, 0], adding: true, clear: true, size: '' };
   // The resolve's input is the film's sum: cleared once per reset (and when its size changes), then each sample adds to it.
   resolve.autoClear = false;
@@ -101,6 +107,8 @@ export function createFilm(scene, camera) {
   });
   const controls = {
     manual: false,
+    // The render target the scene draws into, its depth a texture.
+    target: () => film.inputTexture ?? null,
     samples: () => 1,
     // Starts again: the next sample is the first.
     reset() { state.clear = true; count = 0; },

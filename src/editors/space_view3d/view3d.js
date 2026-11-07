@@ -220,7 +220,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
 
   // Per-view render state, applied by the view manager right before and after this view renders.
-  let authored = null;
+  let authored = null, overlaysDrawn = null;
   view.beforeRender = () => {
     const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
     editorCamera.fov = 2 * Math.atan(LENS_HALF_TAN / Math.max(1, aspect));
@@ -233,10 +233,13 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
       ? world.mainSync?.viewCamera(view.camera, outputSize(world.renderSettings.state.render), { width: canvas.width, height: canvas.height }) : null;
     cameraBorder.hidden = !frame || !state.overlays;
     if (frame) cameraBorder.style.cssText = `--width:${frame.width};--height:${frame.height};--passepartout:${frame.passepartout}`;
-    ctx.overlays.setEnabled(state.overlays && !rendered, state);
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
+    // Rendered draws the overlays after its film, as Blender does; the compositor's graph has no pass for them.
+    const film = rendered && !scene.frameGraph ? world.renderSettings.film(view.camera) : null;
+    ctx.overlays.setEnabled(state.overlays && (!rendered || !!film), state);
+    overlaysDrawn = ctx.overlays.use(view.camera, film);
   };
-  view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; };
+  view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; overlaysDrawn?.(); overlaysDrawn = null; };
   view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); toolOverlay.tick(); };
   view.setDetail = text => { if (detail.textContent !== text) detail.textContent = text; };
   view.sync = sync;

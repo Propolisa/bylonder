@@ -778,6 +778,32 @@ const checks = {
     assert.ok(Math.abs(scaled - unscaled) <= 0.5, `outline ${unscaled} px wide at scale 1, ${scaled} px at scale 3`);
   },
 
+  // Rendered keeps the overlays, drawn over the view transform's result as Blender's draw manager does: the selection
+  // outline shows in the colors it has in Solid.
+  async "Rendered shading keeps the overlays in their own colors"() {
+    await app.click();
+    const outline = async (shading) => {
+      await app.bylonder((b, type) => b.views.input.setShading(type), shading);
+      await app.until((b) => b.views.idle);
+      // Outline pixels (orange) on a row across the cube below its origin, and the brightest one's color.
+      return app.bylonder(async (b) => {
+        const { canvas } = b.views.input, { width, height } = canvas;
+        const context = new OffscreenCanvas(width, height).getContext("2d");
+        context.drawImage(await createImageBitmap(canvas), 0, 0);
+        const { data } = context.getImageData(0, Math.round(height * 0.55), width, 1), pixels = [];
+        for (let x = 0; x < width; x++) {
+          const [r, g, b] = data.subarray(x * 4, x * 4 + 3);
+          if (r - b > 90 && r > 140 && b < 0.6 * g) pixels.push([r, g, b]);
+        }
+        return { count: pixels.length, color: pixels.sort((p, q) => q[0] + q[1] - p[0] - p[1])[0] };
+      });
+    };
+    const solid = await outline("solid"), rendered = await outline("rendered");
+    await outline("solid");
+    assert.ok(rendered.count >= 2, `outline pixels in Rendered: ${rendered.count}`);
+    assert.ok(solid.color.every((c, i) => Math.abs(c - rendered.color[i]) <= 24), `outline ${rendered.color} in Rendered, ${solid.color} in Solid`);
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {
