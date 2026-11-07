@@ -1220,7 +1220,7 @@ export class BlenderDisplayBlock extends ImageProcessingBlock {
 }
 RegisterClass('BABYLON.BlenderDisplayBlock', BlenderDisplayBlock);
 
-const REVERSED_FACES = 'bl_reversed_faces', frontPass = new WeakSet();
+const REVERSED_FACES = 'bl_reversed_faces', DITHERED = 'BL_DITHERED', frontPass = new WeakSet();
 // Material Output (node_shader_output_material.cc) as Babylon's fragment output: the Surface closure's radiance through
 // Babylon's image processing, as the material's color. A material it is added to gets the vertex output Babylon needs.
 export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock) {
@@ -1281,9 +1281,21 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     wire(from, to);
   }
 
+  // A Dithered surface (EEVEE's default render method) keeps no depth where it is fully transparent: EEVEE's hashed
+  // transparency discards it there. A Blended one writes no depth at all (its material's disableDepthWrite).
+  prepareDefines(defines, nodeMaterial, ...rest) {
+    super.prepareDefines(defines, nodeMaterial, ...rest);
+    defines.setValue(DITHERED, nodeMaterial.transparencyMode == null, true);
+  }
+
   _buildBlock(state) {
     if (!state.sharedData.bindableBlocks.includes(this) && !state.sharedData.forcedBindableBlocks.includes(this)) state.sharedData.forcedBindableBlocks.push(this);
-    return FragmentOutputBlock.prototype._buildBlock.call(this, state);
+    FragmentOutputBlock.prototype._buildBlock.call(this, state);
+    if (this.rgba.isConnected) state.compilationString += `#ifdef ${DITHERED}
+if (${this.rgba.associatedVariableName}.a <= 0.0) discard;
+#endif
+`;
+    return this;
   }
 }
 

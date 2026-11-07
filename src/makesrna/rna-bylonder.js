@@ -405,7 +405,8 @@ const STRUCTS = {
     // A PBR material's transparency is its Principled BSDF's alpha, as glTF has it (principled-gltf.js).
     alpha_threshold: synced({ ...settable('alphaCutOff'), get: (material) => material.alphaCutOff ?? 0.5 }, notPBR),
     surface_render_method: synced({ get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
-      set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }, notPBR),
+      // EEVEE draws a Blended surface without writing its depth (no depth prepass), so what lies behind shows through.
+      set: (material, method) => { Object.assign(material, { transparencyMode: method === 'BLENDED' ? 2 : null, disableDepthWrite: method === 'BLENDED' }); } }, notPBR),
   },
   Modifier: (owner) => ({
     name: modifierFlag('name'),

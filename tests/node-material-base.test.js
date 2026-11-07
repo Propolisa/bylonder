@@ -52,4 +52,25 @@ assert.match(fragment, /#ifdef SHADOW\{?X?\}?|SHADOW0|computeShadow/, "the fragm
   scene.render();
   assert.deepEqual(set, [1, 0], 'the pass of back faces reverses FrontFacing, the pass of front faces does not');
 }
+// EEVEE's render methods: a Dithered surface (the default) keeps no depth where it is fully transparent, as its hashed
+// transparency discards it there; a Blended one keeps none at all.
+{
+  const tree = { nodes: [{ idname: 'ShaderNodeBsdfTransparent', name: 'Clear' }, { idname: 'ShaderNodeOutputMaterial', name: 'Material Output' }],
+    links: [['Clear', 'BSDF', 'Material Output', 'Surface']] };
+  const { material } = nodeMaterialFromTree('Clear', scene, tree);
+  const clear = Object.assign(MeshBuilder.CreateBox('Clear', {}, scene), { material });
+  const effect = async () => {
+    for (let i = 0; i < 50 && !clear.subMeshes[0].effect?.isReady(); i++) {
+      scene.render();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return clear.subMeshes[0].effect;
+  };
+  const dithered = await effect();
+  assert.match(dithered.defines, /#define BL_DITHERED/, 'Dithered discards what is fully transparent');
+  assert.match(dithered._fragmentSourceCode, /if \(\w+\.a <= 0\.0\) discard;/);
+  material.transparencyMode = 2;
+  scene.render();
+  assert.doesNotMatch((await effect()).defines, /#define BL_DITHERED/, 'Blended blends it');
+}
 console.log("Node material base: Babylon's morph targets, bones, instances, clip planes, lights with shadows, fog and image processing passed");
