@@ -1,4 +1,5 @@
-# Array modifiers
+# Array Modifiers
 
-Spiral stair (Transform array), colonnade (Circle array) and a floor made of two stacked Line arrays.
-Select an object and open **Properties > Modifiers** to edit, reorder, keyframe or Apply each array.
+A spiral stair in a stone tower. The step, the banister post and the handrail are one piece each; an Array modifier
+with the Turn empty as its Object Offset repeats each of them, raised and turned a little more every copy. Select the
+Turn empty and rotate or move it to wind the stair tighter or steeper. `arrays.py` makes `arrays.blend` in Blender.

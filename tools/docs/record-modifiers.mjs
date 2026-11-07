@@ -1,35 +1,37 @@
-// Records docs/features/modifiers.md's media: a floor of cubes made by two stacked Array modifiers on the Default Cube.
-// usage: node tools/docs/record-modifiers.mjs
+// Records docs/features/modifiers.md's media on the Spiral Stair example: the step's modifier stack (Bevel, then Array
+// with the Turn empty as Object Offset), the Turn empty rotated to wind the stair, the Array's Count, and the stair
+// through its camera in Rendered shading.
+//   usage: node tools/docs/record-modifiers.mjs
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]', PROPERTIES = '[data-section="properties"]';
 
-await record("modifiers", {}, async (r) => {
+await record("modifiers", { example: "arrays", node: null }, async (r) => {
   const { app } = r;
-  const properties = app.locator(PROPERTIES);
-  const addArray = () => r.menu(app.frame().getByRole("button", { name: "Add Modifier" }), "Generate", "Array");
-  await app.click();
+  const select = (name) => app.bylonder((b, name) => {
+    b.editor.selection.replace([b.world.scene.getNodeByName(name)]);
+    b.editor.reconcile();
+  }, name);
+  await r.pause(3000);
+  await r.render("thumbnail", { part: [0.15, 0, 0.85, 1] });
+  await select("Step");
   await r.tab("Modifiers");
-  await r.gif("add-array", undefined, addArray);
-  await r.gif("count", undefined, async () => {
-    await r.field(properties, "Count", 5);
-    await r.field(properties, "Offset X", 1.2);
-  });
-  await r.gif("second-array", undefined, async () => {
-    await addArray();
-    // The second panel's number fields (Count, Offset X, Y, Z, Rotation, Scale) follow the first panel's ten.
-    for (const [index, value] of [[10, 5], [11, 0], [12, 1.2]]) {
-      const field = properties.locator('[role="spinbutton"]').nth(index);
-      await field.evaluate((el) => el.scrollIntoView({ block: "center" }));
-      await field.click();
-      await app.page.keyboard.press("Control+A");
-      await app.page.keyboard.type(String(value));
-      await app.page.keyboard.press("Enter");
-      await app.settled();
+  await r.shot("stack", PROPERTIES, { part: [0, 0, 1, 0.75] });
+  await r.gif("count", VIEW, async () => {
+    for (const count of [8, 20, 44]) {
+      await r.field(app.locator(PROPERTIES), "Count", count);
+      await r.pause(500);
     }
-    await app.hover();
-    for (let i = 0; i < 3; i++) await app.page.mouse.wheel(0, 120);
-    await app.settled();
   });
-  await r.shot("thumbnail", VIEW, { part: [0.1, 0.1, 0.9, 0.9] });
+  await select("Turn");
+  await r.gif("turn", VIEW, async () => {
+    await app.hover();
+    await r.keys("R", "r");
+    await r.keys("Z", "z");
+    await app.page.keyboard.type("8", { delay: 300 });
+    await r.pause(800);
+    await r.keys("Enter");
+    await r.pause(800);
+    await r.keys("Ctrl Z", "Control+z");
+  });
 });

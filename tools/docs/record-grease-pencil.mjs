@@ -1,18 +1,18 @@
-// Records docs/features/grease-pencil.md's media: the Bouncing Ball example through its camera, Draw Mode and a
-// stroke, a fill, Edit Mode, playback with the Dope Sheet, and the 2D Animation template.
+// Records docs/features/grease-pencil.md's media: the Dusk Lake example through its camera in Rendered shading, played,
+// Draw Mode and a stroke, a fill, Edit Mode, and the layers.
 //   usage: node tools/docs/record-grease-pencil.mjs
 import { record } from "./record.mjs";
 
 const VIEW = '[data-section="viewport"]', PROPERTIES = '[data-section="properties"]';
 
-await record("grease-pencil", { example: "grease-pencil", node: "Bouncing Ball" }, async (r) => {
+await record("grease-pencil", { example: "grease-pencil", node: "Dusk Lake" }, async (r) => {
   const { app } = r;
-  await app.hover();
-  await r.keys("Numpad 0", "Numpad0");
-  await r.frame(7);
-  await r.shot("thumbnail", VIEW, { part: [0.15, 0.1, 0.85, 0.9] });
-  await r.gif("play", VIEW, async () => { await r.keys("Space", "Space"); await r.pause(2000); await r.keys("Space", "Space"); }, { part: [0.15, 0.1, 0.85, 0.9] });
+  await r.frame(60);
+  await r.render("thumbnail", { wait: 4000 });
+  await app.bylonder((b) => { b.views.input.state.overlays = false; b.views.input.setShading("rendered"); });
+  await r.gif("play", VIEW, async () => { await r.keys("Space", "Space"); await r.pause(5000); await r.keys("Space", "Space"); }, { part: [0.15, 0.1, 0.85, 0.9] });
   await r.frame(1);
+  await app.bylonder((b) => { b.views.input.state.overlays = true; });
   await r.gif("draw", VIEW, async () => {
     await r.menu(app.frame().locator("button", { hasText: "Object Mode" }), "Draw Mode");
     await r.drag(await app.point(0.3, 0.35), await app.point(0.7, 0.3), { steps: 30 });
