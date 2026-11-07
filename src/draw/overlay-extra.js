@@ -204,7 +204,8 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     [scene.onNewTransformNodeAddedObservable, markDirty], [scene.onTransformNodeRemovedObservable, markDirty],
   ].map(([observable, fn]) => [observable, observable.add(fn)]);
 
-  const isEmpty = (node) => !node.getTotalVertices && !node.name.startsWith('__');
+  // Empties only: the objects Blender draws otherwise (a lattice, a Grease Pencil object) carry their type.
+  const isEmpty = (node) => !node.getTotalVertices && !node.name.startsWith('__') && !node.metadata?.wbType;
   const kindOf = (node) => (node instanceof Camera ? 'camera' : node.getClassName?.().endsWith('Light') ? 'light' : 'empty');
   const shapesOf = (node, kind) => {
     if (kind === 'camera') return ['camera_frame', node === sceneCamera() ? 'camera_tria' : 'camera_tria_wire'];
