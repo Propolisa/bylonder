@@ -272,11 +272,11 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
       forward.scaleInPlace(-1);
       right.normalize(); up.normalize(); forward.normalize();
       setMatrix(m, right, up, forward, position);
-      // BKE_camera_view_frame_ex at draw size 1: the frame projected to depth 1.
-      const ratio = aspect(), drawsize = 0.5, { fov, vertical } = outputFrame(node);
+      // BKE_camera_view_frame_ex at its Display Size: the frame projected to depth 1.
+      const size = node.metadata?.display_size ?? 1, ratio = aspect(), drawsize = size / 2, { fov, vertical } = outputFrame(node);
       const ortho = node.mode === Camera.ORTHOGRAPHIC_CAMERA;
       const fac = ortho ? 0.5 * Math.abs((node.orthoRight ?? 1) - (node.orthoLeft ?? -1)) : drawsize;
-      const depth = ortho ? -1 : -drawsize / Math.tan(fov / 2);
+      const depth = ortho ? -size : -drawsize / Math.tan(fov / 2);
       const facx = fac * (vertical ? ratio : 1), facy = fac * (vertical ? 1 : 1 / ratio);
       const cx = facx / Math.abs(depth), cy = facy / Math.abs(depth);
       // Looked through (camera view), only its frame is drawn, without the wires behind it (overlay_camera.hh).
